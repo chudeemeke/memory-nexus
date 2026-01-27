@@ -1,0 +1,42 @@
+{
+  "name": "memory-nexus",
+  "version": "0.1.0",
+  "description": "Cross-project context persistence for Claude Code sessions",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "bin": {
+    "memory-nexus": "dist/presentation/cli/index.js"
+  },
+  "scripts": {
+    "build": "bun build src/presentation/cli/index.ts --outdir dist/presentation/cli --target node",
+    "test": "bun test",
+    "test:coverage": "bun test --coverage",
+    "typecheck": "tsc --noEmit",
+    "lint": "tsc --noEmit"
+  },
+  "author": "Chude <chude@emeke.org>",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/bun": "^1.1.0",
+    "typescript": "^5.5.0"
+  },
+  "engines": {
+    "bun": ">=1.0.0"
+  },
+  "keywords": [
+    "claude",
+    "claude-code",
+    "context",
+    "memory",
+    "session",
+    "search"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/user/memory-nexus"
+  },
+  "dependencies": {
+    "commander": "^14.0.2"
+  }
+}

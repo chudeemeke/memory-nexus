@@ -1,0 +1,10 @@
+[test]
+# Coverage configuration
+coverage = true
+coverageDir = "coverage"
+
+# Coverage thresholds - 95% at EACH metric
+coverageThreshold = { line = 0.95, function = 0.95, statement = 0.95, branch = 0.95 }
+
+# Test timeout
+timeout = 30000
