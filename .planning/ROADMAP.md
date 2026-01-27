@@ -60,6 +60,14 @@ Cross-project context persistence for Claude Code sessions. The roadmap follows 
 4. All port interfaces are defined with complete type signatures
 5. Schema supports incremental sync via extraction_state table
 
+**Plans:** 4 plans
+
+Plans:
+- [ ] 02-01-PLAN.md - Define port interfaces for hexagonal architecture
+- [ ] 02-02-PLAN.md - Define SQLite schema with FTS5 full-text search
+- [ ] 02-03-PLAN.md - Database initialization with WAL mode and pragmas
+- [ ] 02-04-PLAN.md - Integration tests for FTS5 search verification
+
 ---
 
 ### Phase 3: JSONL Parsing and Extraction
@@ -314,8 +322,8 @@ Cross-project context persistence for Claude Code sessions. The roadmap follows 
 
 | Phase | Name | Status | Progress |
 |-------|------|--------|----------|
-| 1 | Project Setup and Domain Entities | Not Started | 0% |
-| 2 | Database Schema and Ports | Not Started | 0% |
+| 1 | Project Setup and Domain Entities | Complete | 100% |
+| 2 | Database Schema and Ports | Planning | 0% |
 | 3 | JSONL Parsing and Extraction | Not Started | 0% |
 | 4 | Storage Adapters | Not Started | 0% |
 | 5 | Basic Sync Command | Not Started | 0% |
