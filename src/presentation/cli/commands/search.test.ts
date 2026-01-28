@@ -7,7 +7,7 @@
 
 import { describe, expect, it, beforeEach, afterEach, spyOn } from "bun:test";
 import { Command } from "commander";
-import { createSearchCommand, executeSearchCommand } from "./search.js";
+import { createSearchCommand, executeSearchCommand, filterCaseSensitive } from "./search.js";
 import {
   initializeDatabase,
   closeDatabase,
@@ -19,6 +19,7 @@ import { Session } from "../../../domain/entities/session.js";
 import { Message } from "../../../domain/entities/message.js";
 import { ProjectPath } from "../../../domain/value-objects/project-path.js";
 import { SearchQuery } from "../../../domain/value-objects/search-query.js";
+import type { SearchResult } from "../../../domain/value-objects/search-result.js";
 
 describe("Search Command", () => {
   let originalExitCode: number | undefined;
@@ -421,6 +422,219 @@ describe("Search Command", () => {
         expect(results.length).toBe(1);
         // FTS5 wraps matched terms in <mark> tags
         expect(results[0].snippet).toContain("<mark>database</mark>");
+      } finally {
+        closeDatabase(db);
+      }
+    });
+  });
+
+  describe("case sensitivity options", () => {
+    it("has --ignore-case option", () => {
+      const command = createSearchCommand();
+      const option = command.options.find(
+        (o) => o.short === "-i" || o.long === "--ignore-case"
+      );
+      expect(option).toBeDefined();
+    });
+
+    it("has --case-sensitive option", () => {
+      const command = createSearchCommand();
+      const option = command.options.find(
+        (o) => o.short === "-c" || o.long === "--case-sensitive"
+      );
+      expect(option).toBeDefined();
+    });
+
+    it("parses --case-sensitive flag", () => {
+      const command = createSearchCommand();
+      let capturedOptions: Record<string, unknown> | undefined;
+      command.action((_query, options) => {
+        capturedOptions = options;
+      });
+
+      command.parse(["test", "--case-sensitive"], { from: "user" });
+
+      expect(capturedOptions?.caseSensitive).toBe(true);
+    });
+
+    it("parses -c shorthand", () => {
+      const command = createSearchCommand();
+      let capturedOptions: Record<string, unknown> | undefined;
+      command.action((_query, options) => {
+        capturedOptions = options;
+      });
+
+      command.parse(["test", "-c"], { from: "user" });
+
+      expect(capturedOptions?.caseSensitive).toBe(true);
+    });
+
+    it("parses --ignore-case flag", () => {
+      const command = createSearchCommand();
+      let capturedOptions: Record<string, unknown> | undefined;
+      command.action((_query, options) => {
+        capturedOptions = options;
+      });
+
+      command.parse(["test", "--ignore-case"], { from: "user" });
+
+      expect(capturedOptions?.ignoreCase).toBe(true);
+    });
+
+    it("parses -i shorthand", () => {
+      const command = createSearchCommand();
+      let capturedOptions: Record<string, unknown> | undefined;
+      command.action((_query, options) => {
+        capturedOptions = options;
+      });
+
+      command.parse(["test", "-i"], { from: "user" });
+
+      expect(capturedOptions?.ignoreCase).toBe(true);
+    });
+
+    it("includes case sensitivity options in help", () => {
+      const command = createSearchCommand();
+      const helpInfo = command.helpInformation();
+
+      expect(helpInfo).toContain("-i, --ignore-case");
+      expect(helpInfo).toContain("-c, --case-sensitive");
+      expect(helpInfo).toContain("Case-insensitive search");
+      expect(helpInfo).toContain("Case-sensitive search");
+    });
+  });
+
+  describe("filterCaseSensitive", () => {
+    const createMockResult = (snippet: string, id = "test-id"): SearchResult => ({
+      sessionId: "session-123",
+      messageId: id,
+      score: 0.8,
+      timestamp: new Date("2026-01-28T10:00:00Z"),
+      snippet,
+    });
+
+    it("filters results that match exact case", () => {
+      const results = [
+        createMockResult("This is a <mark>Test</mark> message", "m1"),
+        createMockResult("Another <mark>test</mark> example", "m2"),
+        createMockResult("The <mark>TEST</mark> case", "m3"),
+      ];
+
+      const filtered = filterCaseSensitive(results, "Test", 10);
+
+      expect(filtered.length).toBe(1);
+      expect(filtered[0].messageId).toBe("m1");
+    });
+
+    it("returns empty array when no results match case", () => {
+      const results = [
+        createMockResult("all <mark>lowercase</mark> text", "m1"),
+        createMockResult("more <mark>lowercase</mark> content", "m2"),
+      ];
+
+      const filtered = filterCaseSensitive(results, "LOWERCASE", 10);
+
+      expect(filtered.length).toBe(0);
+    });
+
+    it("respects limit after filtering", () => {
+      const results = [
+        createMockResult("First <mark>Match</mark>", "m1"),
+        createMockResult("Second <mark>Match</mark>", "m2"),
+        createMockResult("Third <mark>Match</mark>", "m3"),
+      ];
+
+      const filtered = filterCaseSensitive(results, "Match", 2);
+
+      expect(filtered.length).toBe(2);
+      expect(filtered[0].messageId).toBe("m1");
+      expect(filtered[1].messageId).toBe("m2");
+    });
+
+    it("removes mark tags before matching", () => {
+      const results = [
+        createMockResult("<mark>AUTH</mark>entication", "m1"),
+        createMockResult("auth<mark>ENT</mark>ication", "m2"),
+      ];
+
+      // The actual text is "AUTHentication" and "authENTication"
+      const filtered = filterCaseSensitive(results, "AUTHentication", 10);
+
+      expect(filtered.length).toBe(1);
+      expect(filtered[0].messageId).toBe("m1");
+    });
+
+    it("handles empty results array", () => {
+      const filtered = filterCaseSensitive([], "query", 10);
+
+      expect(filtered.length).toBe(0);
+    });
+
+    it("handles query with special characters", () => {
+      const results = [
+        createMockResult("Using <mark>process.env</mark> variable", "m1"),
+        createMockResult("Using <mark>process.ENV</mark> variable", "m2"),
+      ];
+
+      const filtered = filterCaseSensitive(results, "process.env", 10);
+
+      expect(filtered.length).toBe(1);
+      expect(filtered[0].messageId).toBe("m1");
+    });
+  });
+
+  describe("performance test", () => {
+    it("searches 1000+ messages under 100ms", async () => {
+      const { db } = initializeDatabase({ path: ":memory:" });
+
+      try {
+        const projectPath = ProjectPath.fromDecoded("/home/test/project");
+        const session = Session.create({
+          id: "session-performance-test",
+          projectPath,
+          startTime: new Date("2026-01-28T10:00:00Z"),
+        });
+
+        const sessionRepo = new SqliteSessionRepository(db);
+        const messageRepo = new SqliteMessageRepository(db);
+
+        await sessionRepo.save(session);
+
+        // Insert 1000 messages with varied content
+        const messages = [];
+        for (let i = 0; i < 1000; i++) {
+          const content = i % 10 === 0
+            ? `Authentication JWT token implementation ${i}`
+            : `Generic content about coding and development ${i}`;
+          messages.push(Message.create({
+            id: `msg-${i}`,
+            role: i % 2 === 0 ? "user" : "assistant",
+            content,
+            timestamp: new Date(`2026-01-28T10:${String(i % 60).padStart(2, "0")}:00Z`),
+          }));
+        }
+
+        // Batch insert
+        for (const message of messages) {
+          await messageRepo.save(message, "session-performance-test");
+        }
+
+        // Time the search
+        const searchService = new Fts5SearchService(db);
+        const query = SearchQuery.from("authentication");
+
+        const startTime = performance.now();
+        const results = await searchService.search(query, { limit: 10 });
+        const endTime = performance.now();
+
+        const duration = endTime - startTime;
+
+        // Verify results were found
+        expect(results.length).toBeGreaterThan(0);
+        expect(results.length).toBeLessThanOrEqual(10);
+
+        // Verify performance (< 100ms)
+        expect(duration).toBeLessThan(100);
       } finally {
         closeDatabase(db);
       }
