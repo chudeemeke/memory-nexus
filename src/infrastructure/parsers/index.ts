@@ -11,3 +11,4 @@ export {
   extractToolUseEvents,
   extractToolResultEvents,
 } from "./event-classifier.js";
+export { normalizeTimestamp } from "./timestamp.js";
