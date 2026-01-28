@@ -63,10 +63,10 @@ Cross-project context persistence for Claude Code sessions. The roadmap follows 
 **Plans:** 4 plans
 
 Plans:
-- [ ] 02-01-PLAN.md - Define port interfaces for hexagonal architecture
-- [ ] 02-02-PLAN.md - Define SQLite schema with FTS5 full-text search
-- [ ] 02-03-PLAN.md - Database initialization with WAL mode and pragmas
-- [ ] 02-04-PLAN.md - Integration tests for FTS5 search verification
+- [x] 02-01-PLAN.md - Define port interfaces for hexagonal architecture
+- [x] 02-02-PLAN.md - Define SQLite schema with FTS5 full-text search
+- [x] 02-03-PLAN.md - Database initialization with WAL mode and pragmas
+- [x] 02-04-PLAN.md - Integration tests for FTS5 search verification
 
 ---
 
@@ -119,6 +119,14 @@ Plans:
 3. Interrupted extraction does not corrupt incremental state (transaction safety test)
 4. WAL checkpoint reduces WAL file size after bulk operations
 5. All repository implementations pass port interface contracts
+
+**Plans:** 4 plans
+
+Plans:
+- [ ] 04-01-PLAN.md - SqliteSessionRepository and SqliteExtractionStateRepository
+- [ ] 04-02-PLAN.md - SqliteMessageRepository with batch writes and FTS5 integration
+- [ ] 04-03-PLAN.md - SqliteToolUseRepository
+- [ ] 04-04-PLAN.md - Fts5SearchService with BM25 and integration tests
 
 ---
 
@@ -325,7 +333,7 @@ Plans:
 | 1 | Project Setup and Domain Entities | Complete | 100% |
 | 2 | Database Schema and Ports | Complete | 100% |
 | 3 | JSONL Parsing and Extraction | Complete | 100% |
-| 4 | Storage Adapters | Not Started | 0% |
+| 4 | Storage Adapters | Planned | 0% |
 | 5 | Basic Sync Command | Not Started | 0% |
 | 6 | Search Command with FTS5 | Not Started | 0% |
 | 7 | Filtering and Output Formatting | Not Started | 0% |
