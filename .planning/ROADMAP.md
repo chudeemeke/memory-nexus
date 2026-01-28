@@ -184,6 +184,12 @@ Plans:
 4. `--limit 5` returns exactly 5 results
 5. Query performance remains under 100ms with 1000+ sessions in database
 
+**Plans:** 2 plans
+
+Plans:
+- [ ] 06-01-PLAN.md - Search command implementation with result formatting
+- [ ] 06-02-PLAN.md - Case sensitivity control and integration tests
+
 ---
 
 ### Phase 7: Filtering and Output Formatting
@@ -343,7 +349,7 @@ Plans:
 | 3 | JSONL Parsing and Extraction | Complete | 100% |
 | 4 | Storage Adapters | Complete | 100% |
 | 5 | Basic Sync Command | Complete | 100% |
-| 6 | Search Command with FTS5 | Not Started | 0% |
+| 6 | Search Command with FTS5 | Planned | 0% |
 | 7 | Filtering and Output Formatting | Not Started | 0% |
 | 8 | Stats and List Commands | Not Started | 0% |
 | 9 | Context and Related Commands | Not Started | 0% |
@@ -407,4 +413,4 @@ Phase 1 (Domain Entities)
 
 ---
 
-*Last updated: 2026-01-28 (Phase 5 complete)*
+*Last updated: 2026-01-28 (Phase 6 planned)*
