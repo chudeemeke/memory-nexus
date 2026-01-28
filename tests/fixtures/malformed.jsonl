@@ -1,0 +1,5 @@
+{"type":"user","message":{"content":"Valid line 1"},"uuid":"1","timestamp":"2026-01-28T10:00:00.000Z"}
+{invalid json on line 2
+{"type":"user","message":{"content":"Valid line 3"},"uuid":"3","timestamp":"2026-01-28T10:00:01.000Z"}
+not even close to json
+{"type":"user","message":{"content":"Valid line 5"},"uuid":"5","timestamp":"2026-01-28T10:00:02.000Z"}
