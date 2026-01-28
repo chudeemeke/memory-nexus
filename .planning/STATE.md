@@ -4,20 +4,20 @@
 
 **Core Value:** Knowledge gained in one Claude Code project becomes accessible from any other project. No more context silos.
 
-**Current Focus:** Phase 3 - JSONL Parsing and Extraction
+**Current Focus:** Phase 3 Complete - Ready for Phase 4
 
 **Tech Stack:** Bun, TypeScript 5.5+, bun:sqlite with FTS5, Commander.js v14, Zod v4
 
 ## Current Position
 
 **Milestone:** v1 - Full Vision Implementation
-**Phase:** 3 - JSONL Parsing and Extraction
-**Plan:** 03-03 complete, 03-04 pending (Integration Tests)
-**Status:** In Progress
+**Phase:** 3 - JSONL Parsing and Extraction (Complete)
+**Plan:** 03-04 complete (all 4 plans done)
+**Status:** Phase 3 Complete
 
 ```
-[██████████                              ] 25%
-Phase 3 in progress (3/4 plans complete) | 403 tests passing
+[████████████                            ] 30%
+Phase 3 complete (4/4 plans) | 462 tests passing
 ```
 
 ## Accumulated Context
@@ -36,6 +36,7 @@ Phase 3 in progress (3/4 plans complete) | 403 tests passing
 | BM25 ranking default | Lower (more negative) scores indicate better relevance | 2026-01-27 |
 | readline.createInterface | Node's built-in streaming for JSONL parsing | 2026-01-28 |
 | Filter thinking blocks | Signature-protected content should not be extracted | 2026-01-28 |
+| 1e12 timestamp threshold | Distinguishes Unix seconds vs milliseconds automatically | 2026-01-28 |
 
 ### Blockers
 
@@ -56,7 +57,9 @@ None currently.
 - [x] Execute 03-01 - Session Discovery Implementation (14 tests)
 - [x] Execute 03-02 - Streaming JSONL Parser Implementation (17 tests)
 - [x] Execute 03-03 - Event Classification and Extraction (65 tests)
-- [ ] Execute 03-04 - Timestamp Normalization and Integration Tests
+- [x] Execute 03-04 - Timestamp Normalization and Integration Tests (59 tests)
+- [ ] Plan Phase 4 - Content Extraction Pipeline
+- [ ] Execute Phase 4 plans
 
 ### Learnings
 
@@ -77,46 +80,57 @@ None currently.
 - readline.createInterface with crlfDelay: Infinity handles cross-platform line endings
 - Thinking blocks are signature-protected; filter from assistant content
 - Tool result IDs generated as `result-${toolUseId}` for linking
+- Unix timestamp detection: values > 1e12 are milliseconds, <= 1e12 are seconds
+- Windows path encoding uses backslashes in decoded form (C:\Users\...)
+- Memory increase for 10K line file parsing: < 50MB with streaming
 
 ## Session Continuity
 
 ### Last Session
 
 **Date:** 2026-01-28
-**Completed:** 03-03 Event Classification and Extraction
-**Next:** Execute 03-04 Timestamp Normalization and Integration Tests
+**Completed:** 03-04 Timestamp Normalization and Integration Tests
+**Next:** Plan and execute Phase 4 (Content Extraction Pipeline)
 
 ### Context for Next Session
 
-1. Phase 3 has 1 remaining plan for execution:
-   - 03-04: Integration Tests (~35 tests)
-2. Full parsing pipeline now available:
+1. Phase 3 is complete. All JSONL parsing infrastructure is in place:
    - FileSystemSessionSource discovers sessions
    - JsonlEventParser streams JSONL lines
    - classifyEvent routes to ParsedEvent types
    - extractToolUseEvents/extractToolResultEvents for tool data
-3. All event types classified (user, assistant, summary, system, skipped)
+   - normalizeTimestamp ensures consistent ISO 8601 format
+2. Full parsing pipeline verified with 25 integration tests
+3. Memory-efficient: 10K line files processed with < 50MB memory increase
 4. JSONL schema documented in .planning/research/JSONL-EVENT-SCHEMA.md
+5. Ready for Phase 4: Transform ParsedEvent to domain Message entities
 
 ### Files Modified This Session
 
-- src/infrastructure/parsers/event-classifier.ts (created)
-- src/infrastructure/parsers/event-classifier.test.ts (created)
-- src/infrastructure/parsers/index.ts (added exports)
-- src/infrastructure/parsers/jsonl-parser.ts (integrated classifier)
-- src/infrastructure/parsers/jsonl-parser.test.ts (updated for classification)
-- .planning/phases/03-jsonl-parsing-and-extraction/03-03-SUMMARY.md (created)
+- src/infrastructure/parsers/timestamp.ts (created)
+- src/infrastructure/parsers/timestamp.test.ts (created)
+- src/infrastructure/parsers/event-classifier.ts (modified - added normalizeTimestamp)
+- src/infrastructure/parsers/event-classifier.test.ts (modified - added 7 tests)
+- src/infrastructure/parsers/index.ts (modified - added export)
+- src/infrastructure/parsers/integration.test.ts (created)
+- src/infrastructure/sources/integration.test.ts (created)
+- tests/fixtures/valid-session.jsonl (created)
+- tests/fixtures/with-tools.jsonl (created)
+- tests/fixtures/malformed.jsonl (created)
+- tests/fixtures/empty.jsonl (created)
+- tests/generators/large-session.ts (created)
+- .planning/phases/03-jsonl-parsing-and-extraction/03-04-SUMMARY.md (created)
 - .planning/STATE.md (updated)
 
 ## Performance Metrics
 
 | Metric | Value |
 |--------|-------|
-| Phases Completed | 2 / 12 |
-| Plans Completed | 8 / ? |
-| Requirements Completed | 28 / 85 |
-| Test Coverage | 97.72% functions, 99.33% lines |
-| Total Tests | 403 |
+| Phases Completed | 3 / 12 |
+| Plans Completed | 12 / ? |
+| Requirements Completed | 30 / 85 |
+| Test Coverage | 97.98% functions, 99.26% lines |
+| Total Tests | 462 |
 
 ## Phase 2 Summary
 
@@ -128,15 +142,15 @@ None currently.
 | 02-04 | FTS5 Integration | 21 |
 | **Total** | | **98** |
 
-## Phase 3 Progress
+## Phase 3 Summary
 
 | Plan | Description | Tests | Status |
 |------|-------------|-------|--------|
 | 03-01 | Session Discovery | 14 | Complete |
 | 03-02 | Streaming JSONL Parser | 17 | Complete |
 | 03-03 | Event Classification | 65 | Complete |
-| 03-04 | Integration Tests | ~35 | Pending |
-| **Total** | | **~131** | |
+| 03-04 | Integration Tests | 59 | Complete |
+| **Total** | | **155** | **Complete** |
 
 ---
 
