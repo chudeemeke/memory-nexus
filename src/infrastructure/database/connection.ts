@@ -154,3 +154,39 @@ export function closeDatabase(db: Database): void {
 export function checkpointDatabase(db: Database): void {
     db.exec("PRAGMA wal_checkpoint(PASSIVE);");
 }
+
+/**
+ * Result of a WAL checkpoint operation
+ */
+export interface CheckpointResult {
+    /** Number of WAL frames that could not be checkpointed (busy) */
+    busy: number;
+    /** Total number of frames in the WAL file */
+    log: number;
+    /** Number of frames successfully checkpointed */
+    checkpointed: number;
+}
+
+/**
+ * Perform a truncating WAL checkpoint after bulk operations
+ *
+ * Uses TRUNCATE mode which:
+ * 1. Checkpoints all frames from WAL to main database
+ * 2. Truncates the WAL file to zero size
+ * 3. May block briefly if other connections are active
+ *
+ * Call this after bulk insert operations to:
+ * - Reduce WAL file size
+ * - Ensure all changes are in main database file
+ * - Optimize subsequent read performance
+ *
+ * @param db - Database instance to checkpoint
+ * @returns Checkpoint result with frame counts
+ */
+export function bulkOperationCheckpoint(db: Database): CheckpointResult {
+    const result = db.query<{ busy: number; log: number; checkpointed: number }, []>(
+        "PRAGMA wal_checkpoint(TRUNCATE);"
+    ).get();
+
+    return result ?? { busy: 0, log: 0, checkpointed: 0 };
+}

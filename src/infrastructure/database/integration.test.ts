@@ -3,12 +3,15 @@
  *
  * Comprehensive tests for FTS5 full-text search functionality,
  * including MATCH queries, BM25 ranking, trigger synchronization,
- * and edge cases.
+ * WAL checkpoint operations, and transaction safety.
  */
 
 import { describe, it, expect, beforeEach, afterEach } from "bun:test";
 import { Database } from "bun:sqlite";
-import { initializeDatabase, closeDatabase } from "./connection.js";
+import { existsSync, statSync, unlinkSync, rmSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+import { initializeDatabase, closeDatabase, bulkOperationCheckpoint } from "./connection.js";
 
 // ============================================================================
 // Test Helpers
@@ -646,5 +649,322 @@ describe("FTS5 Integration", () => {
             expect(snippetResults[0]?.snippet).toContain(">>>");
             expect(snippetResults[0]?.snippet).toContain("<<<");
         });
+    });
+});
+
+// ============================================================================
+// WAL Checkpoint Tests (require file-based database)
+// ============================================================================
+
+describe("WAL Checkpoint Operations", () => {
+    let db: Database;
+    let dbPath: string;
+    let walPath: string;
+
+    beforeEach(() => {
+        // Create unique temp database path
+        dbPath = join(tmpdir(), `memory-nexus-test-${Date.now()}-${Math.random().toString(36).slice(2)}.db`);
+        walPath = `${dbPath}-wal`;
+
+        const result = initializeDatabase({ path: dbPath });
+        db = result.db;
+
+        // Verify WAL mode is enabled
+        expect(result.walEnabled).toBe(true);
+
+        // Insert a test session
+        insertTestSession(db, "session-1", "TestProject");
+    });
+
+    afterEach(() => {
+        closeDatabase(db);
+
+        // Clean up temp files
+        try {
+            if (existsSync(dbPath)) unlinkSync(dbPath);
+            if (existsSync(walPath)) unlinkSync(walPath);
+            if (existsSync(`${dbPath}-shm`)) unlinkSync(`${dbPath}-shm`);
+        } catch {
+            // Ignore cleanup errors
+        }
+    });
+
+    it("Test 22: WAL checkpoint reduces WAL file size after bulk insert", () => {
+        // Get initial WAL file size (may not exist yet or be small)
+        const initialWalSize = existsSync(walPath) ? statSync(walPath).size : 0;
+
+        // Insert 500+ messages to generate WAL entries
+        db.run("BEGIN TRANSACTION");
+        for (let i = 0; i < 500; i++) {
+            insertTestMessage(
+                db,
+                `msg-wal-${i}`,
+                "session-1",
+                i % 2 === 0 ? "user" : "assistant",
+                `Message ${i} with content for WAL testing including some keywords like authentication and database design patterns.`
+            );
+        }
+        db.run("COMMIT");
+
+        // WAL file should now be larger
+        const afterInsertWalSize = existsSync(walPath) ? statSync(walPath).size : 0;
+        expect(afterInsertWalSize).toBeGreaterThan(initialWalSize);
+
+        // Perform bulk operation checkpoint
+        const checkpointResult = bulkOperationCheckpoint(db);
+
+        // Checkpoint should have processed frames
+        expect(checkpointResult).toBeDefined();
+
+        // WAL file should be smaller or zero after TRUNCATE checkpoint
+        const afterCheckpointWalSize = existsSync(walPath) ? statSync(walPath).size : 0;
+        expect(afterCheckpointWalSize).toBeLessThan(afterInsertWalSize);
+    });
+
+    it("Test 23: bulkOperationCheckpoint returns checkpoint result", () => {
+        // Insert some data
+        for (let i = 0; i < 100; i++) {
+            insertTestMessage(
+                db,
+                `msg-cp-${i}`,
+                "session-1",
+                "user",
+                `Message ${i} for checkpoint result testing`
+            );
+        }
+
+        // Call checkpoint
+        const result = bulkOperationCheckpoint(db);
+
+        // Result should have expected properties
+        expect(typeof result.busy).toBe("number");
+        expect(typeof result.log).toBe("number");
+        expect(typeof result.checkpointed).toBe("number");
+
+        // Busy should be 0 (no other connections)
+        expect(result.busy).toBe(0);
+    });
+});
+
+// ============================================================================
+// Transaction Safety Tests
+// ============================================================================
+
+describe("Transaction Safety", () => {
+    let db: Database;
+
+    beforeEach(() => {
+        const result = initializeDatabase({ path: ":memory:" });
+        db = result.db;
+
+        // Insert a test session
+        insertTestSession(db, "session-1", "TestProject");
+    });
+
+    afterEach(() => {
+        closeDatabase(db);
+    });
+
+    it("Test 24: Transaction rollback leaves no partial state - messages", () => {
+        // Count messages before
+        const countBefore = db.query<{ cnt: number }, []>(
+            "SELECT COUNT(*) as cnt FROM messages_meta"
+        ).get()?.cnt ?? 0;
+
+        // Start transaction, insert some messages, then rollback
+        db.run("BEGIN TRANSACTION");
+        try {
+            for (let i = 0; i < 10; i++) {
+                insertTestMessage(
+                    db,
+                    `msg-rollback-${i}`,
+                    "session-1",
+                    "user",
+                    `Message ${i} that will be rolled back`
+                );
+            }
+            // Simulate error before commit
+            throw new Error("Simulated extraction error");
+        } catch {
+            db.run("ROLLBACK");
+        }
+
+        // Count messages after - should be same as before
+        const countAfter = db.query<{ cnt: number }, []>(
+            "SELECT COUNT(*) as cnt FROM messages_meta"
+        ).get()?.cnt ?? 0;
+
+        expect(countAfter).toBe(countBefore);
+
+        // Verify messages are not searchable in FTS
+        const ftsResults = db
+            .query<{ cnt: number }, [string]>(
+                "SELECT COUNT(*) as cnt FROM messages_fts WHERE messages_fts MATCH ?"
+            )
+            .get("rollback");
+
+        expect(ftsResults?.cnt ?? 0).toBe(0);
+    });
+
+    it("Test 25: Transaction rollback leaves no partial state - extraction state", () => {
+        // Insert initial extraction state as 'pending'
+        db.run(
+            `INSERT INTO extraction_state (id, session_path, started_at, status, messages_extracted)
+             VALUES (?, ?, datetime('now'), 'pending', 0)`,
+            ["ext-1", "/path/to/session.jsonl"]
+        );
+
+        // Verify initial state
+        const initialState = db.query<{ status: string }, [string]>(
+            "SELECT status FROM extraction_state WHERE id = ?"
+        ).get("ext-1");
+        expect(initialState?.status).toBe("pending");
+
+        // Start transaction, update to in_progress, insert messages, then rollback
+        db.run("BEGIN TRANSACTION");
+        try {
+            // Update to in_progress
+            db.run(
+                "UPDATE extraction_state SET status = 'in_progress' WHERE id = ?",
+                ["ext-1"]
+            );
+
+            // Insert some messages
+            for (let i = 0; i < 5; i++) {
+                insertTestMessage(
+                    db,
+                    `msg-ext-${i}`,
+                    "session-1",
+                    "user",
+                    `Extraction message ${i}`
+                );
+            }
+
+            // Simulate error before marking complete
+            throw new Error("Simulated extraction failure");
+        } catch {
+            db.run("ROLLBACK");
+        }
+
+        // Extraction state should still be 'pending' (not 'in_progress' or 'complete')
+        const finalState = db.query<{ status: string }, [string]>(
+            "SELECT status FROM extraction_state WHERE id = ?"
+        ).get("ext-1");
+        expect(finalState?.status).toBe("pending");
+
+        // No messages should exist
+        const messageCount = db.query<{ cnt: number }, []>(
+            "SELECT COUNT(*) as cnt FROM messages_meta"
+        ).get()?.cnt ?? 0;
+        expect(messageCount).toBe(0);
+    });
+
+    it("Test 26: Successful transaction commits all changes atomically", () => {
+        // Insert extraction state
+        db.run(
+            `INSERT INTO extraction_state (id, session_path, started_at, status, messages_extracted)
+             VALUES (?, ?, datetime('now'), 'pending', 0)`,
+            ["ext-2", "/path/to/session2.jsonl"]
+        );
+
+        // Execute full extraction in transaction
+        db.run("BEGIN TRANSACTION");
+        try {
+            // Update to in_progress
+            db.run(
+                "UPDATE extraction_state SET status = 'in_progress' WHERE id = ?",
+                ["ext-2"]
+            );
+
+            // Insert messages
+            for (let i = 0; i < 5; i++) {
+                insertTestMessage(
+                    db,
+                    `msg-success-${i}`,
+                    "session-1",
+                    "user",
+                    `Successful extraction message ${i}`
+                );
+            }
+
+            // Mark complete
+            db.run(
+                `UPDATE extraction_state
+                 SET status = 'complete', messages_extracted = 5, completed_at = datetime('now')
+                 WHERE id = ?`,
+                ["ext-2"]
+            );
+
+            db.run("COMMIT");
+        } catch (error) {
+            db.run("ROLLBACK");
+            throw error;
+        }
+
+        // Verify extraction state is complete
+        const finalState = db.query<{ status: string; messages_extracted: number }, [string]>(
+            "SELECT status, messages_extracted FROM extraction_state WHERE id = ?"
+        ).get("ext-2");
+        expect(finalState?.status).toBe("complete");
+        expect(finalState?.messages_extracted).toBe(5);
+
+        // Verify messages exist
+        const messageCount = db.query<{ cnt: number }, []>(
+            "SELECT COUNT(*) as cnt FROM messages_meta"
+        ).get()?.cnt ?? 0;
+        expect(messageCount).toBe(5);
+
+        // Verify messages are searchable
+        const ftsResults = db
+            .query<{ cnt: number }, [string]>(
+                "SELECT COUNT(*) as cnt FROM messages_fts WHERE messages_fts MATCH ?"
+            )
+            .get("extraction");
+        expect(ftsResults?.cnt).toBe(5);
+    });
+
+    it("Test 27: Nested operations within transaction maintain consistency", () => {
+        // Create a transaction with multiple related operations
+        const insertExtraction = db.transaction(() => {
+            // Insert extraction state
+            db.run(
+                `INSERT INTO extraction_state (id, session_path, started_at, status, messages_extracted)
+                 VALUES (?, ?, datetime('now'), 'in_progress', 0)`,
+                ["ext-nested", "/path/to/nested.jsonl"]
+            );
+
+            // Insert multiple messages
+            for (let i = 0; i < 3; i++) {
+                insertTestMessage(
+                    db,
+                    `msg-nested-${i}`,
+                    "session-1",
+                    "user",
+                    `Nested transaction message ${i} with content`
+                );
+            }
+
+            // Update extraction count
+            db.run(
+                "UPDATE extraction_state SET messages_extracted = 3, status = 'complete' WHERE id = ?",
+                ["ext-nested"]
+            );
+        });
+
+        // Execute with immediate mode
+        insertExtraction.immediate();
+
+        // Verify all operations committed
+        const state = db.query<{ status: string; messages_extracted: number }, [string]>(
+            "SELECT status, messages_extracted FROM extraction_state WHERE id = ?"
+        ).get("ext-nested");
+
+        expect(state?.status).toBe("complete");
+        expect(state?.messages_extracted).toBe(3);
+
+        const messageCount = db.query<{ cnt: number }, []>(
+            "SELECT COUNT(*) as cnt FROM messages_meta"
+        ).get()?.cnt ?? 0;
+        expect(messageCount).toBe(3);
     });
 });

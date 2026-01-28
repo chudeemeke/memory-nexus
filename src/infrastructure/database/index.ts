@@ -24,9 +24,11 @@ export {
     initializeDatabase,
     closeDatabase,
     checkpointDatabase,
+    bulkOperationCheckpoint,
     getDefaultDbPath,
     type DatabaseConfig,
     type DatabaseInitResult,
+    type CheckpointResult,
 } from "./connection.js";
 
 // Repositories
