@@ -4,20 +4,20 @@
 
 **Core Value:** Knowledge gained in one Claude Code project becomes accessible from any other project. No more context silos.
 
-**Current Focus:** Phase 5 Execution - Basic Sync Command
+**Current Focus:** Phase 5 Complete - Basic Sync Command
 
-**Tech Stack:** Bun, TypeScript 5.5+, bun:sqlite with FTS5, Commander.js v14, Zod v4
+**Tech Stack:** Bun, TypeScript 5.5+, bun:sqlite with FTS5, Commander.js v14, cli-progress@3.12.0
 
 ## Current Position
 
 **Milestone:** v1 - Full Vision Implementation
-**Phase:** 5 - Basic Sync Command
-**Plan:** 02 of 4 executed
-**Status:** In progress
+**Phase:** 5 - Basic Sync Command (COMPLETE)
+**Plan:** 04 of 4 executed
+**Status:** Phase complete
 
 ```
-[██████████████████████████              ] 65%
-Phase 5 in progress | 633 tests passing | 05-02 complete
+[██████████████████████████████          ] 75%
+Phase 5 complete | 710 tests passing | Ready for Phase 6
 ```
 
 ## Accumulated Context
@@ -45,6 +45,9 @@ Phase 5 in progress | 633 tests passing | 05-02 complete
 | File metadata in ExtractionState | fileMtime/fileSize enable incremental sync detection | 2026-01-28 |
 | Per-session transaction boundary | Atomic saves ensure consistency; error isolation across sessions | 2026-01-28 |
 | extractEntities inline | Entity extraction within SyncService for simplicity vs separate helper | 2026-01-28 |
+| TTY detection pattern | createProgressReporter() factory selects implementation based on stdout.isTTY | 2026-01-28 |
+| Progress start on first session | Start progress bar when current=1 rather than on discovering phase | 2026-01-28 |
+| Parser gracefully skips malformed lines | All sessions processed even with invalid JSONL content | 2026-01-28 |
 
 ### Blockers
 
@@ -74,8 +77,9 @@ None currently.
 - [x] Plan Phase 5 - Basic Sync Command (4 plans created)
 - [x] Execute 05-01 - ExtractionState file metadata extension (20 tests)
 - [x] Execute 05-02 - SyncService application layer (22 tests)
-- [ ] Execute 05-03 - CLI sync command with progress
-- [ ] Execute 05-04 - Integration tests and verification
+- [x] Execute 05-03 - CLI sync command with progress (49 tests)
+- [x] Execute 05-04 - Integration tests and verification (28 tests)
+- [ ] Plan Phase 6 - Search Command with FTS5
 
 ### Learnings
 
@@ -110,43 +114,45 @@ None currently.
 - Application service pattern: domain-agnostic orchestration with dependency injection
 - Per-session transaction with db.transaction().immediate() for atomicity
 - Error state saved separately when extraction fails (does not affect other sessions)
+- Commander.js parse() with { from: "user" } expects just user args, not node/script prefix
+- cli-progress SingleBar works well with custom format strings and UTF-8 bar characters
+- Smoke test discovered 870 sessions on dev machine (up from 831 earlier)
+- Integration tests should use temporary directories for isolation
+- CLI smoke tests can verify command structure without running actual operations
 
 ## Session Continuity
 
 ### Last Session
 
 **Date:** 2026-01-28
-**Completed:** 05-02 SyncService application layer
-**Next:** Execute 05-03 CLI sync command with progress
+**Completed:** 05-04 Integration tests and verification
+**Next:** Plan Phase 6 - Search Command with FTS5
 
 ### Context for Next Session
 
-1. 05-02 complete - SyncService orchestrates full sync workflow
-2. SyncService accepts 7 dependencies via constructor (sessionSource, eventParser, 4 repos, db)
-3. sync() method returns SyncResult with counts and errors
-4. onProgress callback available for CLI progress display
-5. Incremental sync compares file mtime/size against ExtractionState
-6. 633 tests passing across all phases
-7. Ready to continue with 05-03 CLI command
+1. Phase 5 complete - All 4 plans executed successfully
+2. 710 tests passing across all phases
+3. Full sync pipeline verified end-to-end with real file I/O
+4. CLI command structure verified via smoke tests
+5. All Phase 5 success criteria met
+6. Ready to proceed with Phase 6 (Search Command)
 
 ### Files Modified This Session
 
-- src/application/services/sync-service.ts (created)
-- src/application/services/sync-service.test.ts (created)
-- src/application/services/index.ts (created)
-- src/application/index.ts (modified)
-- .planning/phases/05-basic-sync-command/05-02-SUMMARY.md (created)
+- src/application/services/sync-service.integration.test.ts (created)
+- src/presentation/cli/commands/sync.integration.test.ts (created)
+- .planning/phases/05-basic-sync-command/05-04-SUMMARY.md (created)
 - .planning/STATE.md (updated)
 
 ## Performance Metrics
 
 | Metric | Value |
 |--------|-------|
-| Phases Completed | 4 / 12 |
-| Plans Completed | 18 / ? |
-| Requirements Completed | 39 / 85 |
-| Test Coverage | 100% functions, 99%+ lines |
-| Total Tests | 633 |
+| Phases Completed | 5 / 12 |
+| Plans Completed | 20 / ? |
+| Requirements Completed | 49 / 85 |
+| Test Coverage | 97%+ functions, 98%+ lines |
+| Total Tests | 710 |
 
 ## Phase 2 Summary
 
@@ -184,9 +190,9 @@ None currently.
 |------|-------------|-------|--------|
 | 05-01 | ExtractionState File Metadata | 20 | Complete |
 | 05-02 | SyncService Application Layer | 22 | Complete |
-| 05-03 | CLI Sync Command | - | Pending |
-| 05-04 | Integration Tests | - | Pending |
-| **Total** | | **42+** | **In Progress** |
+| 05-03 | CLI Sync Command | 49 | Complete |
+| 05-04 | Integration Tests | 28 | Complete |
+| **Total** | | **119** | **Complete** |
 
 ---
 
