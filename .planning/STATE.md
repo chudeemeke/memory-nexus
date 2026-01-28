@@ -12,12 +12,12 @@
 
 **Milestone:** v1 - Full Vision Implementation
 **Phase:** 3 - JSONL Parsing and Extraction
-**Plan:** 03-02 complete, 03-03 pending (Event Classification)
+**Plan:** 03-03 complete, 03-04 pending (Integration Tests)
 **Status:** In Progress
 
 ```
-[████████                                ] 20%
-Phase 3 in progress (2/4 plans complete) | 338 tests passing
+[██████████                              ] 25%
+Phase 3 in progress (3/4 plans complete) | 403 tests passing
 ```
 
 ## Accumulated Context
@@ -35,6 +35,7 @@ Phase 3 in progress (2/4 plans complete) | 338 tests passing
 | AsyncIterable parser | Memory-efficient streaming for large JSONL files (10K+ lines) | 2026-01-27 |
 | BM25 ranking default | Lower (more negative) scores indicate better relevance | 2026-01-27 |
 | readline.createInterface | Node's built-in streaming for JSONL parsing | 2026-01-28 |
+| Filter thinking blocks | Signature-protected content should not be extracted | 2026-01-28 |
 
 ### Blockers
 
@@ -54,7 +55,7 @@ None currently.
 - [x] Plan Phase 3 - JSONL Parsing and Extraction (4 plans created)
 - [x] Execute 03-01 - Session Discovery Implementation (14 tests)
 - [x] Execute 03-02 - Streaming JSONL Parser Implementation (17 tests)
-- [ ] Execute 03-03 - Event Classification and Extraction
+- [x] Execute 03-03 - Event Classification and Extraction (65 tests)
 - [ ] Execute 03-04 - Timestamp Normalization and Integration Tests
 
 ### Learnings
@@ -74,28 +75,37 @@ None currently.
 - Bulk insert of 1000 messages with triggers < 5 seconds
 - Real session discovery verified: 831 sessions found on dev machine
 - readline.createInterface with crlfDelay: Infinity handles cross-platform line endings
+- Thinking blocks are signature-protected; filter from assistant content
+- Tool result IDs generated as `result-${toolUseId}` for linking
 
 ## Session Continuity
 
 ### Last Session
 
 **Date:** 2026-01-28
-**Completed:** 03-02 Streaming JSONL Parser Implementation
-**Next:** Execute 03-03 Event Classification and Extraction
+**Completed:** 03-03 Event Classification and Extraction
+**Next:** Execute 03-04 Timestamp Normalization and Integration Tests
 
 ### Context for Next Session
 
-1. Phase 3 has 2 remaining plans for execution:
-   - 03-03: Event Classification (~30 tests)
+1. Phase 3 has 1 remaining plan for execution:
    - 03-04: Integration Tests (~35 tests)
-2. FileSystemSessionSource and JsonlEventParser now available
-3. Parser yields "skipped" for all events - 03-03 will implement full classification
+2. Full parsing pipeline now available:
+   - FileSystemSessionSource discovers sessions
+   - JsonlEventParser streams JSONL lines
+   - classifyEvent routes to ParsedEvent types
+   - extractToolUseEvents/extractToolResultEvents for tool data
+3. All event types classified (user, assistant, summary, system, skipped)
 4. JSONL schema documented in .planning/research/JSONL-EVENT-SCHEMA.md
 
 ### Files Modified This Session
 
-- src/infrastructure/index.ts (fixed missing sources export)
-- .planning/phases/03-jsonl-parsing-and-extraction/03-02-SUMMARY.md (created)
+- src/infrastructure/parsers/event-classifier.ts (created)
+- src/infrastructure/parsers/event-classifier.test.ts (created)
+- src/infrastructure/parsers/index.ts (added exports)
+- src/infrastructure/parsers/jsonl-parser.ts (integrated classifier)
+- src/infrastructure/parsers/jsonl-parser.test.ts (updated for classification)
+- .planning/phases/03-jsonl-parsing-and-extraction/03-03-SUMMARY.md (created)
 - .planning/STATE.md (updated)
 
 ## Performance Metrics
@@ -103,10 +113,10 @@ None currently.
 | Metric | Value |
 |--------|-------|
 | Phases Completed | 2 / 12 |
-| Plans Completed | 7 / ? |
-| Requirements Completed | 23 / 85 |
-| Test Coverage | 97.90% functions, 99.39% lines |
-| Total Tests | 338 |
+| Plans Completed | 8 / ? |
+| Requirements Completed | 28 / 85 |
+| Test Coverage | 97.72% functions, 99.33% lines |
+| Total Tests | 403 |
 
 ## Phase 2 Summary
 
@@ -124,9 +134,9 @@ None currently.
 |------|-------------|-------|--------|
 | 03-01 | Session Discovery | 14 | Complete |
 | 03-02 | Streaming JSONL Parser | 17 | Complete |
-| 03-03 | Event Classification | ~30 | Pending |
+| 03-03 | Event Classification | 65 | Complete |
 | 03-04 | Integration Tests | ~35 | Pending |
-| **Total** | | **~96** | |
+| **Total** | | **~131** | |
 
 ---
 
