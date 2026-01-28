@@ -7,7 +7,7 @@
  */
 
 import { Command } from "commander";
-import { createSyncCommand } from "./commands/index.js";
+import { createSyncCommand, createSearchCommand } from "./commands/index.js";
 
 const program = new Command();
 
@@ -19,20 +19,8 @@ program
 // Add sync command from module
 program.addCommand(createSyncCommand());
 
-program
-  .command("search <query>")
-  .description("Full-text search across all sessions")
-  .option("-p, --project <name>", "Filter by project name")
-  .option("-l, --limit <count>", "Maximum results to return", "10")
-  .action((query, options) => {
-    console.log(`Searching for: ${query}`);
-    if (options.project) {
-      console.log(`  Project filter: ${options.project}`);
-    }
-    console.log(`  Limit: ${options.limit}`);
-    // TODO: Implement search logic
-    console.log("(not yet implemented)");
-  });
+// Add search command from module
+program.addCommand(createSearchCommand());
 
 program
   .command("context <project>")

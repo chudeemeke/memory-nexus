@@ -5,3 +5,4 @@
  */
 
 export { createSyncCommand, executeSyncCommand } from "./sync.js";
+export { createSearchCommand, executeSearchCommand } from "./search.js";
