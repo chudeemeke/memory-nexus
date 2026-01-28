@@ -156,10 +156,10 @@ Plans:
 **Plans:** 4 plans
 
 Plans:
-- [ ] 05-01-PLAN.md - ExtractionState file metadata extension (fileMtime, fileSize)
-- [ ] 05-02-PLAN.md - SyncService application layer with incremental sync detection
-- [ ] 05-03-PLAN.md - CLI sync command with progress reporting
-- [ ] 05-04-PLAN.md - Integration tests and final verification
+- [x] 05-01-PLAN.md - ExtractionState file metadata extension (fileMtime, fileSize)
+- [x] 05-02-PLAN.md - SyncService application layer with incremental sync detection
+- [x] 05-03-PLAN.md - CLI sync command with progress reporting
+- [x] 05-04-PLAN.md - Integration tests and final verification
 
 ---
 
@@ -342,7 +342,7 @@ Plans:
 | 2 | Database Schema and Ports | Complete | 100% |
 | 3 | JSONL Parsing and Extraction | Complete | 100% |
 | 4 | Storage Adapters | Complete | 100% |
-| 5 | Basic Sync Command | Planning Complete | 0% |
+| 5 | Basic Sync Command | Complete | 100% |
 | 6 | Search Command with FTS5 | Not Started | 0% |
 | 7 | Filtering and Output Formatting | Not Started | 0% |
 | 8 | Stats and List Commands | Not Started | 0% |
@@ -407,4 +407,4 @@ Phase 1 (Domain Entities)
 
 ---
 
-*Last updated: 2026-01-28*
+*Last updated: 2026-01-28 (Phase 5 complete)*
