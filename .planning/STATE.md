@@ -11,13 +11,13 @@
 ## Current Position
 
 **Milestone:** v1 - Full Vision Implementation
-**Phase:** 4 - Storage Adapters (pending)
-**Plan:** Planning not started
-**Status:** Phase 3 Verified - Ready to Plan Phase 4
+**Phase:** 4 - Storage Adapters (in progress)
+**Plan:** 02 of 4 complete
+**Status:** Executing Phase 4 Plans
 
 ```
-[████████████                            ] 25%
-Phase 3 verified (10/10 must-haves) | 462 tests passing
+[██████████████████                      ] 42%
+Phase 4 plan 02 complete | 555 tests passing
 ```
 
 ## Accumulated Context
@@ -37,6 +37,8 @@ Phase 3 verified (10/10 must-haves) | 462 tests passing
 | readline.createInterface | Node's built-in streaming for JSONL parsing | 2026-01-28 |
 | Filter thinking blocks | Signature-protected content should not be extracted | 2026-01-28 |
 | 1e12 timestamp threshold | Distinguishes Unix seconds vs milliseconds automatically | 2026-01-28 |
+| Existence check for batch inserts | FTS5 triggers interfere with changes count; use SELECT before INSERT | 2026-01-28 |
+| Batch size 100 hardcoded | Per CONTEXT.md decision; YAGNI on configurability | 2026-01-28 |
 
 ### Blockers
 
@@ -58,8 +60,11 @@ None currently.
 - [x] Execute 03-02 - Streaming JSONL Parser Implementation (17 tests)
 - [x] Execute 03-03 - Event Classification and Extraction (65 tests)
 - [x] Execute 03-04 - Timestamp Normalization and Integration Tests (59 tests)
-- [ ] Plan Phase 4 - Content Extraction Pipeline
-- [ ] Execute Phase 4 plans
+- [x] Plan Phase 4 - Storage Adapters (4 plans created)
+- [x] Execute 04-01 - Session and Extraction State Repositories
+- [x] Execute 04-02 - Message Repository with Batch Support
+- [ ] Execute 04-03 - Tool Use Repository (in progress)
+- [ ] Execute 04-04 - Repository Integration Tests
 
 ### Learnings
 
@@ -83,43 +88,38 @@ None currently.
 - Unix timestamp detection: values > 1e12 are milliseconds, <= 1e12 are seconds
 - Windows path encoding uses backslashes in decoded form (C:\Users\...)
 - Memory increase for 10K line file parsing: < 50MB with streaming
+- FTS5 triggers cause cumulative changes count within transactions (bun:sqlite)
+- Existence check workaround: SELECT id before INSERT OR IGNORE for accurate counting
+- 1000 message batch insert: 163ms (well under 5s requirement)
 
 ## Session Continuity
 
 ### Last Session
 
 **Date:** 2026-01-28
-**Completed:** Phase 3 verified (10/10 must-haves passed)
-**Next:** Plan Phase 4 (Storage Adapters)
+**Completed:** Phase 4 Plan 02 (Message Repository with Batch Support)
+**Next:** Execute Phase 4 Plan 03 (Tool Use Repository)
 
 ### Context for Next Session
 
-1. Phase 3 is complete. All JSONL parsing infrastructure is in place:
-   - FileSystemSessionSource discovers sessions
-   - JsonlEventParser streams JSONL lines
-   - classifyEvent routes to ParsedEvent types
-   - extractToolUseEvents/extractToolResultEvents for tool data
-   - normalizeTimestamp ensures consistent ISO 8601 format
-2. Full parsing pipeline verified with 25 integration tests
-3. Memory-efficient: 10K line files processed with < 50MB memory increase
-4. JSONL schema documented in .planning/research/JSONL-EVENT-SCHEMA.md
-5. Ready for Phase 4: Transform ParsedEvent to domain Message entities
+1. Phase 4 execution in progress (2/4 plans complete)
+2. Repositories implemented:
+   - SqliteSessionRepository (04-01)
+   - SqliteExtractionStateRepository (04-01)
+   - SqliteMessageRepository (04-02) with batch support
+   - SqliteToolUseRepository (04-03) - partially committed
+3. Key finding: FTS5 triggers interfere with `changes` count in bun:sqlite
+   - Workaround: use existence check before insert
+4. Performance verified: 1000 messages in 163ms
+5. 555 tests passing across all phases
 
 ### Files Modified This Session
 
-- src/infrastructure/parsers/timestamp.ts (created)
-- src/infrastructure/parsers/timestamp.test.ts (created)
-- src/infrastructure/parsers/event-classifier.ts (modified - added normalizeTimestamp)
-- src/infrastructure/parsers/event-classifier.test.ts (modified - added 7 tests)
-- src/infrastructure/parsers/index.ts (modified - added export)
-- src/infrastructure/parsers/integration.test.ts (created)
-- src/infrastructure/sources/integration.test.ts (created)
-- tests/fixtures/valid-session.jsonl (created)
-- tests/fixtures/with-tools.jsonl (created)
-- tests/fixtures/malformed.jsonl (created)
-- tests/fixtures/empty.jsonl (created)
-- tests/generators/large-session.ts (created)
-- .planning/phases/03-jsonl-parsing-and-extraction/03-04-SUMMARY.md (created)
+- src/infrastructure/database/repositories/message-repository.ts (created)
+- src/infrastructure/database/repositories/message-repository.test.ts (created)
+- src/infrastructure/database/repositories/index.ts (modified)
+- src/infrastructure/database/index.ts (modified)
+- .planning/phases/04-storage-adapters/04-02-SUMMARY.md (created)
 - .planning/STATE.md (updated)
 
 ## Performance Metrics
@@ -127,10 +127,10 @@ None currently.
 | Metric | Value |
 |--------|-------|
 | Phases Completed | 3 / 12 |
-| Plans Completed | 12 / ? |
-| Requirements Completed | 30 / 85 |
-| Test Coverage | 97.98% functions, 99.26% lines |
-| Total Tests | 462 |
+| Plans Completed | 14 / ? |
+| Requirements Completed | 34 / 85 |
+| Test Coverage | 98.32% functions, 99.39% lines |
+| Total Tests | 555 |
 
 ## Phase 2 Summary
 
@@ -151,6 +151,16 @@ None currently.
 | 03-03 | Event Classification | 65 | Complete |
 | 03-04 | Integration Tests | 59 | Complete |
 | **Total** | | **155** | **Complete** |
+
+## Phase 4 Summary
+
+| Plan | Description | Tests | Status |
+|------|-------------|-------|--------|
+| 04-01 | Session & Extraction State Repos | 45 | Complete |
+| 04-02 | Message Repository | 24 | Complete |
+| 04-03 | Tool Use Repository | 24 | Complete |
+| 04-04 | Integration Tests | - | Pending |
+| **Total** | | **93** | **In Progress** |
 
 ---
 
