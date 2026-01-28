@@ -22,6 +22,8 @@ interface SearchCommandOptions {
   limit?: string;
   project?: string;
   json?: boolean;
+  ignoreCase?: boolean;
+  caseSensitive?: boolean;
 }
 
 /**
@@ -36,6 +38,8 @@ export function createSearchCommand(): Command {
     .option("-l, --limit <count>", "Maximum results to return", "10")
     .option("-p, --project <name>", "Filter by project name")
     .option("--json", "Output results as JSON")
+    .option("-i, --ignore-case", "Case-insensitive search (default)")
+    .option("-c, --case-sensitive", "Case-sensitive search")
     .action(async (query: string, options: SearchCommandOptions) => {
       await executeSearchCommand(query, options);
     });
@@ -79,14 +83,27 @@ export async function executeSearchCommand(
       return;
     }
 
-    // Execute search
-    const results = await searchService.search(searchQuery, { limit });
+    // Execute search with case-sensitive awareness
+    // If case-sensitive, fetch 2x results to account for filtering
+    const fetchLimit = options.caseSensitive ? limit * 2 : limit;
+    let results = await searchService.search(searchQuery, { limit: fetchLimit });
+
+    // Apply case-sensitive filter if requested
+    let caseSensitiveFiltered = false;
+    if (options.caseSensitive && results.length > 0) {
+      const originalCount = results.length;
+      results = filterCaseSensitive(results, query, limit);
+      caseSensitiveFiltered = originalCount > results.length || results.length < limit;
+    } else {
+      // Ensure we respect the original limit for non-case-sensitive search
+      results = results.slice(0, limit);
+    }
 
     // Output results
     if (options.json) {
       outputJson(results);
     } else {
-      outputFormatted(results, query);
+      outputFormatted(results, query, caseSensitiveFiltered);
     }
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
@@ -114,20 +131,47 @@ function outputJson(results: SearchResult[]): void {
 }
 
 /**
+ * Filter results to only include those with case-sensitive match in snippet.
+ *
+ * @param results Search results from FTS5
+ * @param query Original query string
+ * @param limit Maximum results to return after filtering
+ * @returns Filtered results matching exact case
+ */
+export function filterCaseSensitive(
+  results: SearchResult[],
+  query: string,
+  limit: number
+): SearchResult[] {
+  const filtered = results.filter((r) => {
+    // Remove <mark> tags to get clean snippet for matching
+    const cleanSnippet = r.snippet.replace(/<\/?mark>/g, "");
+    return cleanSnippet.includes(query);
+  });
+  return filtered.slice(0, limit);
+}
+
+/**
  * Output results with formatted display.
  *
  * Converts <mark> tags to ANSI bold and displays scores as percentages.
  *
  * @param results Search results to output
  * @param query Original query for "no results" message
+ * @param caseSensitiveFiltered Whether case-sensitive filter was applied
  */
-function outputFormatted(results: SearchResult[], query: string): void {
+function outputFormatted(
+  results: SearchResult[],
+  query: string,
+  caseSensitiveFiltered = false
+): void {
   if (results.length === 0) {
     console.log(`No results found for: ${query}`);
     return;
   }
 
-  console.log(`Found ${results.length} result(s):\n`);
+  const filterNote = caseSensitiveFiltered ? " (case-sensitive filter applied)" : "";
+  console.log(`Found ${results.length} result(s)${filterNote}:\n`);
 
   results.forEach((result, index) => {
     const scorePercent = (result.score * 100).toFixed(0);
