@@ -8,6 +8,7 @@
 import { createReadStream } from "fs";
 import { createInterface } from "readline";
 import type { IEventParser, ParsedEvent } from "../../domain/ports/index.js";
+import { classifyEvent } from "./event-classifier.js";
 
 /**
  * Streaming JSONL parser for Claude Code session files.
@@ -49,7 +50,7 @@ export class JsonlEventParser implements IEventParser {
 
       try {
         const event = JSON.parse(trimmed);
-        const parsedEvent = this.classifyEvent(event, lineNum);
+        const parsedEvent = classifyEvent(event);
         yield parsedEvent;
       } catch (err) {
         const message = err instanceof Error ? err.message : String(err);
@@ -59,38 +60,5 @@ export class JsonlEventParser implements IEventParser {
         };
       }
     }
-  }
-
-  /**
-   * Classify a parsed JSON object into a ParsedEvent.
-   *
-   * @param event The parsed JSON object
-   * @param lineNum The line number (for error context)
-   * @returns Classified ParsedEvent
-   */
-  private classifyEvent(event: unknown, lineNum: number): ParsedEvent {
-    const eventType = this.detectEventType(event);
-
-    // For now, return skipped for all events
-    // Event classification will be implemented in 03-03
-    return {
-      type: "skipped",
-      reason: `Event type "${eventType}" not yet classified (line ${lineNum})`,
-    };
-  }
-
-  /**
-   * Detect the event type from a parsed JSON object.
-   *
-   * @param event The parsed JSON object
-   * @returns The event type string, or "unknown" if not detectable
-   */
-  private detectEventType(event: unknown): string {
-    if (typeof event !== "object" || event === null) {
-      return "unknown";
-    }
-
-    const obj = event as Record<string, unknown>;
-    return typeof obj.type === "string" ? obj.type : "unknown";
   }
 }

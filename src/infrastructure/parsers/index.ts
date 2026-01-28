@@ -5,3 +5,9 @@
  */
 
 export { JsonlEventParser } from "./jsonl-parser.js";
+export {
+  classifyEvent,
+  isValidEvent,
+  extractToolUseEvents,
+  extractToolResultEvents,
+} from "./event-classifier.js";
