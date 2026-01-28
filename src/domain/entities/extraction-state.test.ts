@@ -75,6 +75,42 @@ describe("ExtractionState entity", () => {
         })
       ).toThrow("Messages extracted cannot be negative");
     });
+
+    it("throws on negative fileSize", () => {
+      expect(() =>
+        ExtractionState.create({
+          id: "extract-123",
+          sessionPath: "/path/to/session.jsonl",
+          startedAt: timestamp,
+          fileSize: -1,
+        })
+      ).toThrow("File size cannot be negative");
+    });
+
+    it("creates with file metadata", () => {
+      const fileMtime = new Date("2024-01-15T09:00:00Z");
+      const state = ExtractionState.create({
+        id: "extract-123",
+        sessionPath: "/path/to/session.jsonl",
+        startedAt: timestamp,
+        fileMtime,
+        fileSize: 1024,
+      });
+
+      expect(state.fileMtime).toEqual(fileMtime);
+      expect(state.fileSize).toBe(1024);
+    });
+
+    it("creates without file metadata (undefined)", () => {
+      const state = ExtractionState.create({
+        id: "extract-123",
+        sessionPath: "/path/to/session.jsonl",
+        startedAt: timestamp,
+      });
+
+      expect(state.fileMtime).toBeUndefined();
+      expect(state.fileSize).toBeUndefined();
+    });
   });
 
   describe("identity", () => {
@@ -133,6 +169,35 @@ describe("ExtractionState entity", () => {
       startedAt.setFullYear(2020);
 
       expect(state.startedAt.getFullYear()).toBe(2024);
+    });
+
+    it("fileMtime is a defensive copy on input", () => {
+      const originalMtime = new Date("2024-01-15T09:00:00Z");
+      const state = ExtractionState.create({
+        id: "extract-123",
+        sessionPath: "/path/to/session.jsonl",
+        startedAt: timestamp,
+        fileMtime: originalMtime,
+        fileSize: 1024,
+      });
+
+      originalMtime.setFullYear(2020);
+      expect(state.fileMtime!.getFullYear()).toBe(2024);
+    });
+
+    it("returned fileMtime is a copy", () => {
+      const state = ExtractionState.create({
+        id: "extract-123",
+        sessionPath: "/path/to/session.jsonl",
+        startedAt: timestamp,
+        fileMtime: new Date("2024-01-15T09:00:00Z"),
+        fileSize: 1024,
+      });
+
+      const fileMtime = state.fileMtime!;
+      fileMtime.setFullYear(2020);
+
+      expect(state.fileMtime!.getFullYear()).toBe(2024);
     });
   });
 
@@ -207,6 +272,56 @@ describe("ExtractionState entity", () => {
       expect(state.status).toBe("pending");
       expect(state).not.toBe(failed);
     });
+
+    it("startProcessing preserves file metadata", () => {
+      const fileMtime = new Date("2024-01-15T09:00:00Z");
+      const state = ExtractionState.create({
+        id: "extract-123",
+        sessionPath: "/path/to/session.jsonl",
+        startedAt: timestamp,
+        fileMtime,
+        fileSize: 2048,
+      });
+
+      const processing = state.startProcessing();
+
+      expect(processing.fileMtime).toEqual(fileMtime);
+      expect(processing.fileSize).toBe(2048);
+    });
+
+    it("complete preserves file metadata", () => {
+      const fileMtime = new Date("2024-01-15T09:00:00Z");
+      const state = ExtractionState.create({
+        id: "extract-123",
+        sessionPath: "/path/to/session.jsonl",
+        startedAt: timestamp,
+        status: "in_progress",
+        fileMtime,
+        fileSize: 4096,
+      });
+
+      const completed = state.complete(new Date("2024-01-15T11:00:00Z"));
+
+      expect(completed.fileMtime).toEqual(fileMtime);
+      expect(completed.fileSize).toBe(4096);
+    });
+
+    it("fail preserves file metadata", () => {
+      const fileMtime = new Date("2024-01-15T09:00:00Z");
+      const state = ExtractionState.create({
+        id: "extract-123",
+        sessionPath: "/path/to/session.jsonl",
+        startedAt: timestamp,
+        status: "in_progress",
+        fileMtime,
+        fileSize: 8192,
+      });
+
+      const failed = state.fail("Some error");
+
+      expect(failed.fileMtime).toEqual(fileMtime);
+      expect(failed.fileSize).toBe(8192);
+    });
   });
 
   describe("progress tracking", () => {
@@ -236,6 +351,81 @@ describe("ExtractionState entity", () => {
       const updated = state.incrementMessages();
 
       expect(updated.messagesExtracted).toBe(1);
+    });
+
+    it("incrementMessages preserves file metadata", () => {
+      const fileMtime = new Date("2024-01-15T09:00:00Z");
+      const state = ExtractionState.create({
+        id: "extract-123",
+        sessionPath: "/path/to/session.jsonl",
+        startedAt: timestamp,
+        status: "in_progress",
+        fileMtime,
+        fileSize: 1024,
+      });
+
+      const updated = state.incrementMessages(5);
+
+      expect(updated.fileMtime).toEqual(fileMtime);
+      expect(updated.fileSize).toBe(1024);
+    });
+  });
+
+  describe("withFileMetadata", () => {
+    it("returns new instance with file metadata", () => {
+      const state = ExtractionState.create({
+        id: "extract-123",
+        sessionPath: "/path/to/session.jsonl",
+        startedAt: timestamp,
+      });
+
+      const mtime = new Date("2024-01-15T09:00:00Z");
+      const withMeta = state.withFileMetadata(mtime, 2048);
+
+      expect(withMeta.fileMtime).toEqual(mtime);
+      expect(withMeta.fileSize).toBe(2048);
+      expect(state.fileMtime).toBeUndefined(); // Original unchanged
+      expect(state.fileSize).toBeUndefined();
+    });
+
+    it("preserves other properties", () => {
+      const state = ExtractionState.create({
+        id: "extract-123",
+        sessionPath: "/path/to/session.jsonl",
+        startedAt: timestamp,
+        status: "in_progress",
+        messagesExtracted: 10,
+      });
+
+      const withMeta = state.withFileMetadata(new Date(), 1024);
+
+      expect(withMeta.id).toBe("extract-123");
+      expect(withMeta.sessionPath).toBe("/path/to/session.jsonl");
+      expect(withMeta.status).toBe("in_progress");
+      expect(withMeta.messagesExtracted).toBe(10);
+    });
+
+    it("throws on negative file size", () => {
+      const state = ExtractionState.create({
+        id: "extract-123",
+        sessionPath: "/path/to/session.jsonl",
+        startedAt: timestamp,
+      });
+
+      expect(() => state.withFileMetadata(new Date(), -1)).toThrow(
+        "File size cannot be negative"
+      );
+    });
+
+    it("allows zero file size", () => {
+      const state = ExtractionState.create({
+        id: "extract-123",
+        sessionPath: "/path/to/session.jsonl",
+        startedAt: timestamp,
+      });
+
+      const withMeta = state.withFileMetadata(new Date(), 0);
+      expect(withMeta.fileSize).toBe(0);
     });
   });
 

@@ -27,6 +27,8 @@ interface ExtractionStateParams {
   completedAt?: Date | undefined;
   messagesExtracted?: number | undefined;
   errorMessage?: string | undefined;
+  fileMtime?: Date | undefined;
+  fileSize?: number | undefined;
 }
 
 export class ExtractionState {
@@ -37,6 +39,8 @@ export class ExtractionState {
   private readonly _completedAt?: Date | undefined;
   private readonly _messagesExtracted: number;
   private readonly _errorMessage?: string | undefined;
+  private readonly _fileMtime?: Date | undefined;
+  private readonly _fileSize?: number | undefined;
 
   private constructor(params: ExtractionStateParams) {
     this._id = params.id;
@@ -48,6 +52,10 @@ export class ExtractionState {
       : undefined;
     this._messagesExtracted = params.messagesExtracted ?? 0;
     this._errorMessage = params.errorMessage;
+    this._fileMtime = params.fileMtime
+      ? new Date(params.fileMtime.getTime())
+      : undefined;
+    this._fileSize = params.fileSize;
   }
 
   /**
@@ -69,6 +77,9 @@ export class ExtractionState {
       params.messagesExtracted < 0
     ) {
       throw new Error("Messages extracted cannot be negative");
+    }
+    if (params.fileSize !== undefined && params.fileSize < 0) {
+      throw new Error("File size cannot be negative");
     }
     return new ExtractionState(params);
   }
@@ -120,6 +131,22 @@ export class ExtractionState {
    */
   get errorMessage(): string | undefined {
     return this._errorMessage;
+  }
+
+  /**
+   * File modification time when extraction started.
+   * Used for incremental sync detection.
+   */
+  get fileMtime(): Date | undefined {
+    return this._fileMtime ? new Date(this._fileMtime.getTime()) : undefined;
+  }
+
+  /**
+   * File size in bytes when extraction started.
+   * Used for incremental sync detection.
+   */
+  get fileSize(): number | undefined {
+    return this._fileSize;
   }
 
   /**
@@ -178,6 +205,8 @@ export class ExtractionState {
       startedAt: this._startedAt,
       status: "in_progress",
       messagesExtracted: this._messagesExtracted,
+      fileMtime: this._fileMtime,
+      fileSize: this._fileSize,
     });
   }
 
@@ -193,6 +222,8 @@ export class ExtractionState {
       status: "complete",
       completedAt,
       messagesExtracted: this._messagesExtracted,
+      fileMtime: this._fileMtime,
+      fileSize: this._fileSize,
     });
   }
 
@@ -208,6 +239,8 @@ export class ExtractionState {
       status: "error",
       errorMessage,
       messagesExtracted: this._messagesExtracted,
+      fileMtime: this._fileMtime,
+      fileSize: this._fileSize,
     });
   }
 
@@ -224,6 +257,29 @@ export class ExtractionState {
       completedAt: this._completedAt,
       messagesExtracted: this._messagesExtracted + count,
       errorMessage: this._errorMessage,
+      fileMtime: this._fileMtime,
+      fileSize: this._fileSize,
+    });
+  }
+
+  /**
+   * Set file metadata for incremental sync detection.
+   * Returns a new ExtractionState instance (immutability).
+   */
+  withFileMetadata(mtime: Date, size: number): ExtractionState {
+    if (size < 0) {
+      throw new Error("File size cannot be negative");
+    }
+    return new ExtractionState({
+      id: this._id,
+      sessionPath: this._sessionPath,
+      startedAt: this._startedAt,
+      status: this._status,
+      completedAt: this._completedAt,
+      messagesExtracted: this._messagesExtracted,
+      errorMessage: this._errorMessage,
+      fileMtime: mtime,
+      fileSize: size,
     });
   }
 }
