@@ -4,20 +4,20 @@
 
 **Core Value:** Knowledge gained in one Claude Code project becomes accessible from any other project. No more context silos.
 
-**Current Focus:** Phase 4 - Storage Adapters
+**Current Focus:** Phase 4 Complete - Ready for Phase 5
 
 **Tech Stack:** Bun, TypeScript 5.5+, bun:sqlite with FTS5, Commander.js v14, Zod v4
 
 ## Current Position
 
 **Milestone:** v1 - Full Vision Implementation
-**Phase:** 4 - Storage Adapters (in progress)
-**Plan:** 03 of 4 complete
-**Status:** Executing Phase 4 Plans
+**Phase:** 4 - Storage Adapters (complete)
+**Plan:** 04 of 4 complete
+**Status:** Phase 4 Complete
 
 ```
-[████████████████████                    ] 50%
-Phase 4 plan 03 complete | 555 tests passing
+[████████████████████████                ] 60%
+Phase 4 complete | 591 tests passing
 ```
 
 ## Accumulated Context
@@ -39,6 +39,9 @@ Phase 4 plan 03 complete | 555 tests passing
 | 1e12 timestamp threshold | Distinguishes Unix seconds vs milliseconds automatically | 2026-01-28 |
 | Existence check for batch inserts | FTS5 triggers interfere with changes count; use SELECT before INSERT | 2026-01-28 |
 | Batch size 100 hardcoded | Per CONTEXT.md decision; YAGNI on configurability | 2026-01-28 |
+| BM25 score normalization | (maxScore - score) / range maps to 0-1; single result = 1.0 | 2026-01-28 |
+| Snippet highlighting | <mark> tags for HTML standard highlighting | 2026-01-28 |
+| WAL TRUNCATE for bulk ops | Complete WAL reset after bulk operations | 2026-01-28 |
 
 ### Blockers
 
@@ -64,7 +67,8 @@ None currently.
 - [x] Execute 04-01 - Session and Extraction State Repositories (45 tests)
 - [x] Execute 04-02 - Message Repository with Batch Support (24 tests)
 - [x] Execute 04-03 - Tool Use Repository (30 tests)
-- [ ] Execute 04-04 - Repository Integration Tests
+- [x] Execute 04-04 - Search Service and Integration Tests (36 tests)
+- [ ] Plan Phase 5 - Extraction Pipeline
 
 ### Learnings
 
@@ -91,48 +95,52 @@ None currently.
 - FTS5 triggers cause cumulative changes count within transactions (bun:sqlite)
 - Existence check workaround: SELECT id before INSERT OR IGNORE for accurate counting
 - 1000 message batch insert: 163ms (well under 5s requirement)
+- BM25 normalization handles single-result edge case (returns 1.0)
+- WAL TRUNCATE mode fully resets WAL file after bulk ops
+- Full pipeline integration validates repository+search interoperability
 
 ## Session Continuity
 
 ### Last Session
 
 **Date:** 2026-01-28
-**Completed:** Phase 4 Plan 03 (Tool Use Repository)
-**Next:** Execute Phase 4 Plan 04 (Repository Integration Tests)
+**Completed:** Phase 4 (all 4 plans complete)
+**Next:** Plan Phase 5 - Extraction Pipeline
 
 ### Context for Next Session
 
-1. Phase 4 execution in progress (3/4 plans complete)
-2. Repositories implemented:
+1. Phase 4 complete - all storage adapters implemented
+2. Repositories available:
    - SqliteSessionRepository (04-01)
    - SqliteExtractionStateRepository (04-01)
    - SqliteMessageRepository (04-02) with batch support
    - SqliteToolUseRepository (04-03) with batch support
-3. Key finding: FTS5 triggers interfere with `changes` count in bun:sqlite
-   - Workaround: use existence check before insert
-4. Performance verified: 1000 messages in 163ms
-5. 555 tests passing across all phases
-6. All repositories exported via barrel files
+   - Fts5SearchService (04-04) with BM25 ranking
+3. All exports consolidated in barrel files
+4. WAL checkpoint utility available for bulk operations
+5. 591 tests passing across all phases
+6. Ready for extraction pipeline implementation
 
 ### Files Modified This Session
 
-- src/infrastructure/database/repositories/tool-use-repository.ts (created)
-- src/infrastructure/database/repositories/tool-use-repository.test.ts (created)
-- src/infrastructure/database/repositories/index.ts (created)
-- src/infrastructure/database/index.ts (modified - added repository exports)
-- src/infrastructure/database/repositories/message-repository.ts (bug fix - existence check)
-- .planning/phases/04-storage-adapters/04-03-SUMMARY.md (created)
+- src/infrastructure/database/services/search-service.ts (created)
+- src/infrastructure/database/services/search-service.test.ts (created)
+- src/infrastructure/database/services/index.ts (created)
+- src/infrastructure/database/connection.ts (modified - bulkOperationCheckpoint)
+- src/infrastructure/database/index.ts (modified - export services)
+- src/infrastructure/database/integration.test.ts (modified - pipeline tests)
+- .planning/phases/04-storage-adapters/04-04-SUMMARY.md (created)
 - .planning/STATE.md (updated)
 
 ## Performance Metrics
 
 | Metric | Value |
 |--------|-------|
-| Phases Completed | 3 / 12 |
-| Plans Completed | 15 / ? |
-| Requirements Completed | 34 / 85 |
-| Test Coverage | 98.32% functions, 99.39% lines |
-| Total Tests | 555 |
+| Phases Completed | 4 / 12 |
+| Plans Completed | 16 / ? |
+| Requirements Completed | 38 / 85 |
+| Test Coverage | 100% functions, 99%+ lines |
+| Total Tests | 591 |
 
 ## Phase 2 Summary
 
@@ -161,8 +169,8 @@ None currently.
 | 04-01 | Session & Extraction State Repos | 45 | Complete |
 | 04-02 | Message Repository | 24 | Complete |
 | 04-03 | Tool Use Repository | 30 | Complete |
-| 04-04 | Integration Tests | - | Pending |
-| **Total** | | **99** | **In Progress** |
+| 04-04 | Search Service & Integration | 36 | Complete |
+| **Total** | | **135** | **Complete** |
 
 ---
 
