@@ -11,13 +11,13 @@
 ## Current Position
 
 **Milestone:** v1 - Full Vision Implementation
-**Phase:** 6 - Search Command with FTS5 (NOT STARTED)
-**Plan:** 0 of ? pending planning
-**Status:** Ready to plan Phase 6
+**Phase:** 6 - Search Command with FTS5 (IN PROGRESS)
+**Plan:** 1 of 4 complete
+**Status:** 06-01 executed, ready for 06-02
 
 ```
-[████████████████                        ] 42%
-5 of 12 phases complete | 710 tests passing | Ready to plan Phase 6
+[█████████████████                       ] 44%
+5.25 of 12 phases complete | 738 tests passing | Ready for 06-02
 ```
 
 ## Accumulated Context
@@ -48,6 +48,8 @@
 | TTY detection pattern | createProgressReporter() factory selects implementation based on stdout.isTTY | 2026-01-28 |
 | Progress start on first session | Start progress bar when current=1 rather than on discovering phase | 2026-01-28 |
 | Parser gracefully skips malformed lines | All sessions processed even with invalid JSONL content | 2026-01-28 |
+| ANSI bold for match highlighting | Convert <mark> tags to \x1b[1m/\x1b[0m for terminal output | 2026-01-28 |
+| Score as percentage | (score * 100).toFixed(0) for human-readable relevance display | 2026-01-28 |
 
 ### Blockers
 
@@ -79,7 +81,8 @@ None currently.
 - [x] Execute 05-02 - SyncService application layer (22 tests)
 - [x] Execute 05-03 - CLI sync command with progress (49 tests)
 - [x] Execute 05-04 - Integration tests and verification (28 tests)
-- [ ] Plan Phase 6 - Search Command with FTS5 (NEXT)
+- [x] Execute 06-01 - Search Command Implementation (28 tests)
+- [ ] Execute 06-02 - Context Command (NEXT)
 
 ### Learnings
 
@@ -119,40 +122,43 @@ None currently.
 - Smoke test discovered 870 sessions on dev machine (up from 831 earlier)
 - Integration tests should use temporary directories for isolation
 - CLI smoke tests can verify command structure without running actual operations
+- messageRepo.save() parameter order is (message, sessionId), not (sessionId, message)
 
 ## Session Continuity
 
 ### Last Session
 
 **Date:** 2026-01-28
-**Completed:** Phase 5 execution (all 4 plans) and verification
-**Next:** Plan Phase 6 - Search Command with FTS5
+**Completed:** 06-01 Search Command Implementation
+**Next:** Execute 06-02 - Context Command
 
 ### Context for Next Session
 
-1. Phase 5 complete and verified - All 4 plans executed successfully
-2. 710 tests passing across all phases (119 tests in Phase 5)
-3. Full sync pipeline verified end-to-end with real file I/O
-4. CLI command structure verified via smoke tests
-5. All Phase 5 success criteria met and verified
-6. Ready to plan Phase 6 (Search Command with FTS5)
+1. 06-01 complete - Search command wired to Fts5SearchService
+2. 738 tests passing (28 new search tests)
+3. Search command verified with real synced data
+4. ANSI highlighting working for terminal output
+5. JSON output mode working for programmatic use
+6. Ready for 06-02 (Context Command)
 
 ### Files Modified This Session
 
-- REQUIREMENTS.md (updated - SYNC-01 through SYNC-08 marked Complete)
-- ROADMAP.md (updated - Phase 5 marked Complete)
-- STATE.md (updated)
-- .planning/phases/05-basic-sync-command/05-VERIFICATION.md (created)
+- src/presentation/cli/commands/search.ts (created)
+- src/presentation/cli/commands/search.test.ts (created)
+- src/presentation/cli/commands/index.ts (modified)
+- src/presentation/cli/index.ts (modified)
+- .planning/phases/06-search-command-fts5/06-01-SUMMARY.md (created)
+- .planning/STATE.md (updated)
 
 ## Performance Metrics
 
 | Metric | Value |
 |--------|-------|
-| Phases Completed | 5 / 12 |
-| Plans Completed | 20 / 20 (phases 1-5) |
+| Phases Completed | 5.25 / 12 |
+| Plans Completed | 21 / ? (phases 1-6) |
 | Requirements Completed | 57 / 85 |
 | Test Coverage | 97%+ functions, 98%+ lines |
-| Total Tests | 710 |
+| Total Tests | 738 |
 
 ## Phase 2 Summary
 
@@ -193,6 +199,16 @@ None currently.
 | 05-03 | CLI Sync Command | 49 | Complete |
 | 05-04 | Integration Tests | 28 | Complete |
 | **Total** | | **119** | **Complete** |
+
+## Phase 6 Summary
+
+| Plan | Description | Tests | Status |
+|------|-------------|-------|--------|
+| 06-01 | Search Command | 28 | Complete |
+| 06-02 | Context Command | - | Not Started |
+| 06-03 | List Command | - | Not Started |
+| 06-04 | Show Command | - | Not Started |
+| **Total** | | **28** | **In Progress** |
 
 ---
 
