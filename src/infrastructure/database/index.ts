@@ -28,3 +28,13 @@ export {
     type DatabaseConfig,
     type DatabaseInitResult,
 } from "./connection.js";
+
+// Repositories
+export {
+    SqliteSessionRepository,
+    SqliteMessageRepository,
+    SqliteExtractionStateRepository,
+    SqliteToolUseRepository,
+    type BatchResult,
+    type BatchOptions,
+} from "./repositories/index.js";
