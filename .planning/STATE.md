@@ -12,12 +12,12 @@
 
 **Milestone:** v1 - Full Vision Implementation
 **Phase:** 5 - Basic Sync Command
-**Plan:** 01 of 4 executed
+**Plan:** 02 of 4 executed
 **Status:** In progress
 
 ```
-[█████████████████████████               ] 62.5%
-Phase 5 in progress | 611 tests passing | 05-01 complete
+[██████████████████████████              ] 65%
+Phase 5 in progress | 633 tests passing | 05-02 complete
 ```
 
 ## Accumulated Context
@@ -43,6 +43,8 @@ Phase 5 in progress | 611 tests passing | 05-01 complete
 | Snippet highlighting | <mark> tags for HTML standard highlighting | 2026-01-28 |
 | WAL TRUNCATE for bulk ops | Complete WAL reset after bulk operations | 2026-01-28 |
 | File metadata in ExtractionState | fileMtime/fileSize enable incremental sync detection | 2026-01-28 |
+| Per-session transaction boundary | Atomic saves ensure consistency; error isolation across sessions | 2026-01-28 |
+| extractEntities inline | Entity extraction within SyncService for simplicity vs separate helper | 2026-01-28 |
 
 ### Blockers
 
@@ -71,7 +73,7 @@ None currently.
 - [x] Execute 04-04 - Search Service and Integration Tests (36 tests)
 - [x] Plan Phase 5 - Basic Sync Command (4 plans created)
 - [x] Execute 05-01 - ExtractionState file metadata extension (20 tests)
-- [ ] Execute 05-02 - SyncService application layer
+- [x] Execute 05-02 - SyncService application layer (22 tests)
 - [ ] Execute 05-03 - CLI sync command with progress
 - [ ] Execute 05-04 - Integration tests and verification
 
@@ -104,31 +106,36 @@ None currently.
 - WAL TRUNCATE mode fully resets WAL file after bulk ops
 - Full pipeline integration validates repository+search interoperability
 - ExtractionState defensive copy pattern: fileMtime getter returns new Date to preserve immutability
+- SyncService orchestrates full workflow: discover -> filter -> extract -> persist
+- Application service pattern: domain-agnostic orchestration with dependency injection
+- Per-session transaction with db.transaction().immediate() for atomicity
+- Error state saved separately when extraction fails (does not affect other sessions)
 
 ## Session Continuity
 
 ### Last Session
 
 **Date:** 2026-01-28
-**Completed:** 05-01 ExtractionState file metadata extension
-**Next:** Execute 05-02 SyncService application layer
+**Completed:** 05-02 SyncService application layer
+**Next:** Execute 05-03 CLI sync command with progress
 
 ### Context for Next Session
 
-1. 05-01 complete - ExtractionState now has fileMtime/fileSize properties
-2. Repository persists file metadata as ISO 8601 string and integer
-3. withFileMetadata() method available for setting metadata
-4. All state transitions preserve file metadata
-5. 611 tests passing across all phases
-6. Ready to continue with 05-02 SyncService
+1. 05-02 complete - SyncService orchestrates full sync workflow
+2. SyncService accepts 7 dependencies via constructor (sessionSource, eventParser, 4 repos, db)
+3. sync() method returns SyncResult with counts and errors
+4. onProgress callback available for CLI progress display
+5. Incremental sync compares file mtime/size against ExtractionState
+6. 633 tests passing across all phases
+7. Ready to continue with 05-03 CLI command
 
 ### Files Modified This Session
 
-- src/domain/entities/extraction-state.ts (modified)
-- src/domain/entities/extraction-state.test.ts (modified)
-- src/infrastructure/database/repositories/extraction-state-repository.ts (modified)
-- src/infrastructure/database/repositories/extraction-state-repository.test.ts (modified)
-- .planning/phases/05-basic-sync-command/05-01-SUMMARY.md (created)
+- src/application/services/sync-service.ts (created)
+- src/application/services/sync-service.test.ts (created)
+- src/application/services/index.ts (created)
+- src/application/index.ts (modified)
+- .planning/phases/05-basic-sync-command/05-02-SUMMARY.md (created)
 - .planning/STATE.md (updated)
 
 ## Performance Metrics
@@ -136,10 +143,10 @@ None currently.
 | Metric | Value |
 |--------|-------|
 | Phases Completed | 4 / 12 |
-| Plans Completed | 17 / ? |
+| Plans Completed | 18 / ? |
 | Requirements Completed | 39 / 85 |
 | Test Coverage | 100% functions, 99%+ lines |
-| Total Tests | 611 |
+| Total Tests | 633 |
 
 ## Phase 2 Summary
 
@@ -176,10 +183,10 @@ None currently.
 | Plan | Description | Tests | Status |
 |------|-------------|-------|--------|
 | 05-01 | ExtractionState File Metadata | 20 | Complete |
-| 05-02 | SyncService Application Layer | - | Pending |
+| 05-02 | SyncService Application Layer | 22 | Complete |
 | 05-03 | CLI Sync Command | - | Pending |
 | 05-04 | Integration Tests | - | Pending |
-| **Total** | | **20+** | **In Progress** |
+| **Total** | | **42+** | **In Progress** |
 
 ---
 
