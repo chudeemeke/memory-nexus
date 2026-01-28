@@ -243,12 +243,12 @@
 | SYNC-06 | Phase 5 | Complete |
 | SYNC-07 | Phase 5 | Complete |
 | SYNC-08 | Phase 5 | Complete |
-| SRCH-01 | Phase 6 | Pending |
-| SRCH-02 | Phase 6 | Pending |
-| SRCH-03 | Phase 6 | Pending |
-| SRCH-04 | Phase 6 | Pending |
-| SRCH-05 | Phase 6 | Pending |
-| SRCH-06 | Phase 6 | Pending |
+| SRCH-01 | Phase 6 | Complete |
+| SRCH-02 | Phase 6 | Complete |
+| SRCH-03 | Phase 6 | Complete |
+| SRCH-04 | Phase 6 | Complete |
+| SRCH-05 | Phase 6 | Complete |
+| SRCH-06 | Phase 6 | Complete |
 | SRCH-07 | Phase 7 | Pending |
 | SRCH-08 | Phase 7 | Pending |
 | SRCH-09 | Phase 7 | Pending |
@@ -298,4 +298,4 @@
 
 ---
 
-*Last updated: 2026-01-28*
+*Last updated: 2026-01-29*
