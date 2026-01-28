@@ -123,10 +123,10 @@ Plans:
 **Plans:** 4 plans
 
 Plans:
-- [ ] 04-01-PLAN.md - SqliteSessionRepository and SqliteExtractionStateRepository
-- [ ] 04-02-PLAN.md - SqliteMessageRepository with batch writes and FTS5 integration
-- [ ] 04-03-PLAN.md - SqliteToolUseRepository
-- [ ] 04-04-PLAN.md - Fts5SearchService with BM25 and integration tests
+- [x] 04-01-PLAN.md - SqliteSessionRepository and SqliteExtractionStateRepository
+- [x] 04-02-PLAN.md - SqliteMessageRepository with batch writes and FTS5 integration
+- [x] 04-03-PLAN.md - SqliteToolUseRepository
+- [x] 04-04-PLAN.md - Fts5SearchService with BM25 and integration tests
 
 ---
 
@@ -333,7 +333,7 @@ Plans:
 | 1 | Project Setup and Domain Entities | Complete | 100% |
 | 2 | Database Schema and Ports | Complete | 100% |
 | 3 | JSONL Parsing and Extraction | Complete | 100% |
-| 4 | Storage Adapters | Planned | 0% |
+| 4 | Storage Adapters | Complete | 100% |
 | 5 | Basic Sync Command | Not Started | 0% |
 | 6 | Search Command with FTS5 | Not Started | 0% |
 | 7 | Filtering and Output Formatting | Not Started | 0% |
