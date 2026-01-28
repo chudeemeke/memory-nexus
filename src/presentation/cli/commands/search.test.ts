@@ -8,6 +8,17 @@
 import { describe, expect, it, beforeEach, afterEach, spyOn } from "bun:test";
 import { Command } from "commander";
 import { createSearchCommand, executeSearchCommand } from "./search.js";
+import {
+  initializeDatabase,
+  closeDatabase,
+  SqliteSessionRepository,
+  SqliteMessageRepository,
+  Fts5SearchService,
+} from "../../../infrastructure/database/index.js";
+import { Session } from "../../../domain/entities/session.js";
+import { Message } from "../../../domain/entities/message.js";
+import { ProjectPath } from "../../../domain/value-objects/project-path.js";
+import { SearchQuery } from "../../../domain/value-objects/search-query.js";
 
 describe("Search Command", () => {
   let originalExitCode: number | undefined;
@@ -258,6 +269,161 @@ describe("Search Command", () => {
 
       expect(process.exitCode).toBe(1);
       expect(consoleErrorSpy).toHaveBeenCalledWith("Error: Limit must be a positive number");
+    });
+  });
+
+  describe("integration smoke test", () => {
+    it("searches in-memory database with test data", async () => {
+      // Create in-memory database
+      const { db } = initializeDatabase({ path: ":memory:" });
+
+      try {
+        // Create test session
+        const projectPath = ProjectPath.fromDecoded("C:\\Users\\Test\\project");
+        const session = Session.create({
+          id: "test-session-123",
+          projectPath,
+          startTime: new Date("2026-01-28T10:00:00Z"),
+        });
+
+        // Create test message with searchable content
+        const message = Message.create({
+          id: "test-message-456",
+          role: "user",
+          content: "How do I implement authentication with JWT tokens?",
+          timestamp: new Date("2026-01-28T10:01:00Z"),
+        });
+
+        // Insert via repositories
+        const sessionRepo = new SqliteSessionRepository(db);
+        const messageRepo = new SqliteMessageRepository(db);
+
+        await sessionRepo.save(session);
+        await messageRepo.save(message, "test-session-123");
+
+        // Search using Fts5SearchService
+        const searchService = new Fts5SearchService(db);
+        const query = SearchQuery.from("authentication");
+        const results = await searchService.search(query, { limit: 10 });
+
+        // Verify results
+        expect(results.length).toBe(1);
+        expect(results[0].sessionId).toBe("test-session-123");
+        expect(results[0].snippet).toContain("authentication");
+      } finally {
+        closeDatabase(db);
+      }
+    });
+
+    it("returns empty array when no results match", async () => {
+      // Create in-memory database
+      const { db } = initializeDatabase({ path: ":memory:" });
+
+      try {
+        // Create test session and message
+        const projectPath = ProjectPath.fromDecoded("C:\\Users\\Test\\project");
+        const session = Session.create({
+          id: "test-session-789",
+          projectPath,
+          startTime: new Date("2026-01-28T10:00:00Z"),
+        });
+
+        const message = Message.create({
+          id: "test-message-abc",
+          role: "assistant",
+          content: "This is some unrelated content",
+          timestamp: new Date("2026-01-28T10:02:00Z"),
+        });
+
+        const sessionRepo = new SqliteSessionRepository(db);
+        const messageRepo = new SqliteMessageRepository(db);
+
+        await sessionRepo.save(session);
+        await messageRepo.save(message, "test-session-789");
+
+        // Search for non-existent term
+        const searchService = new Fts5SearchService(db);
+        const query = SearchQuery.from("nonexistent");
+        const results = await searchService.search(query, { limit: 10 });
+
+        expect(results.length).toBe(0);
+      } finally {
+        closeDatabase(db);
+      }
+    });
+
+    it("respects limit option", async () => {
+      const { db } = initializeDatabase({ path: ":memory:" });
+
+      try {
+        const projectPath = ProjectPath.fromDecoded("/home/test/project");
+        const session = Session.create({
+          id: "session-limit-test",
+          projectPath,
+          startTime: new Date("2026-01-28T10:00:00Z"),
+        });
+
+        const sessionRepo = new SqliteSessionRepository(db);
+        const messageRepo = new SqliteMessageRepository(db);
+
+        await sessionRepo.save(session);
+
+        // Insert multiple messages
+        for (let i = 0; i < 5; i++) {
+          const message = Message.create({
+            id: `message-${i}`,
+            role: "user",
+            content: `Testing authentication method ${i}`,
+            timestamp: new Date(`2026-01-28T10:0${i}:00Z`),
+          });
+          await messageRepo.save(message, "session-limit-test");
+        }
+
+        // Search with limit 2
+        const searchService = new Fts5SearchService(db);
+        const query = SearchQuery.from("authentication");
+        const results = await searchService.search(query, { limit: 2 });
+
+        expect(results.length).toBe(2);
+      } finally {
+        closeDatabase(db);
+      }
+    });
+
+    it("highlights matched terms in snippets", async () => {
+      const { db } = initializeDatabase({ path: ":memory:" });
+
+      try {
+        const projectPath = ProjectPath.fromDecoded("/home/test/project");
+        const session = Session.create({
+          id: "session-highlight-test",
+          projectPath,
+          startTime: new Date("2026-01-28T10:00:00Z"),
+        });
+
+        const message = Message.create({
+          id: "message-highlight",
+          role: "user",
+          content: "How do I configure database connection pooling?",
+          timestamp: new Date("2026-01-28T10:01:00Z"),
+        });
+
+        const sessionRepo = new SqliteSessionRepository(db);
+        const messageRepo = new SqliteMessageRepository(db);
+
+        await sessionRepo.save(session);
+        await messageRepo.save(message, "session-highlight-test");
+
+        const searchService = new Fts5SearchService(db);
+        const query = SearchQuery.from("database");
+        const results = await searchService.search(query, { limit: 10 });
+
+        expect(results.length).toBe(1);
+        // FTS5 wraps matched terms in <mark> tags
+        expect(results[0].snippet).toContain("<mark>database</mark>");
+      } finally {
+        closeDatabase(db);
+      }
     });
   });
 });
