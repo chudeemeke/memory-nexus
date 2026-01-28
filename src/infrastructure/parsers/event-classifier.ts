@@ -17,6 +17,7 @@ import type {
   SummaryEventData,
   SystemEventData,
 } from "../../domain/ports/types.js";
+import { normalizeTimestamp } from "./timestamp.js";
 
 /**
  * Event types that should be skipped (no semantic value for search).
@@ -186,7 +187,7 @@ function extractUserEvent(raw: RawUserEvent): ParsedEvent {
     message: {
       content: extractUserContent(raw.message.content),
     },
-    timestamp: raw.timestamp,
+    timestamp: normalizeTimestamp(raw.timestamp),
   };
 
   // Include optional fields if present
@@ -253,7 +254,7 @@ function extractAssistantEvent(raw: RawAssistantEvent): ParsedEvent {
     message: {
       content,
     },
-    timestamp: raw.timestamp,
+    timestamp: normalizeTimestamp(raw.timestamp),
   };
 
   // Include model if present
@@ -329,7 +330,7 @@ export function extractToolUseEvents(raw: RawAssistantEvent): ToolUseEventData[]
       uuid: block.id,
       name: block.name,
       input: block.input,
-      timestamp: raw.timestamp,
+      timestamp: normalizeTimestamp(raw.timestamp),
     }));
 }
 
@@ -356,7 +357,7 @@ export function extractToolResultEvents(raw: RawUserEvent): ToolResultEventData[
       toolUseId: block.tool_use_id,
       content: typeof block.content === "string" ? block.content : JSON.stringify(block.content),
       isError: block.is_error ?? false,
-      timestamp: raw.timestamp,
+      timestamp: normalizeTimestamp(raw.timestamp),
     }));
 }
 
@@ -374,7 +375,7 @@ function extractSummaryEvent(raw: RawSummaryEvent): ParsedEvent {
 
   const data: SummaryEventData = {
     content: raw.summary,
-    timestamp: raw.timestamp ?? new Date().toISOString(),
+    timestamp: normalizeTimestamp(raw.timestamp),
   };
 
   // Include leafUuid if present
@@ -400,7 +401,7 @@ function extractSystemEvent(raw: RawSystemEvent): ParsedEvent {
   const data: SystemEventData = {
     subtype: raw.subtype,
     data: raw.durationMs ?? raw.data ?? null,
-    timestamp: raw.timestamp ?? new Date().toISOString(),
+    timestamp: normalizeTimestamp(raw.timestamp),
   };
 
   return { type: "system", data };

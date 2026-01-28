@@ -776,4 +776,108 @@ describe("Event Classifier", () => {
       expect((result as { reason: string }).reason).toContain("missing subtype field");
     });
   });
+
+  describe("Timestamp Normalization", () => {
+    test("normalizes user event timestamp from Unix seconds", () => {
+      const result = classifyEvent({
+        type: "user",
+        uuid: "user-ts",
+        timestamp: 1769558400, // 2026-01-28T00:00:00.000Z in seconds
+        message: { role: "user", content: "test" },
+      });
+
+      expect(result.type).toBe("user");
+      if (result.type === "user") {
+        expect(result.data.timestamp).toBe("2026-01-28T00:00:00.000Z");
+      }
+    });
+
+    test("normalizes assistant event timestamp from Unix milliseconds", () => {
+      const result = classifyEvent({
+        type: "assistant",
+        uuid: "asst-ts",
+        timestamp: 1769558400000, // 2026-01-28T00:00:00.000Z in milliseconds
+        message: { content: [{ type: "text", text: "test" }] },
+      });
+
+      expect(result.type).toBe("assistant");
+      if (result.type === "assistant") {
+        expect(result.data.timestamp).toBe("2026-01-28T00:00:00.000Z");
+      }
+    });
+
+    test("normalizes tool use event timestamp", () => {
+      const raw = {
+        type: "assistant" as const,
+        uuid: "asst-tool-ts",
+        timestamp: 1769558400, // Unix seconds
+        message: {
+          content: [
+            { type: "tool_use" as const, id: "t1", name: "Read", input: {} },
+          ],
+        },
+      };
+
+      const toolUses = extractToolUseEvents(raw);
+      expect(toolUses[0].timestamp).toBe("2026-01-28T00:00:00.000Z");
+    });
+
+    test("normalizes tool result event timestamp", () => {
+      const raw = {
+        type: "user" as const,
+        uuid: "user-result-ts",
+        timestamp: 1769558400000, // Unix milliseconds
+        message: {
+          role: "user" as const,
+          content: [
+            { type: "tool_result" as const, tool_use_id: "t1", content: "result" },
+          ],
+        },
+      };
+
+      const results = extractToolResultEvents(raw);
+      expect(results[0].timestamp).toBe("2026-01-28T00:00:00.000Z");
+    });
+
+    test("normalizes summary event timestamp", () => {
+      const result = classifyEvent({
+        type: "summary",
+        summary: "Session summary",
+        timestamp: 1769558400, // Unix seconds
+      });
+
+      expect(result.type).toBe("summary");
+      if (result.type === "summary") {
+        expect(result.data.timestamp).toBe("2026-01-28T00:00:00.000Z");
+      }
+    });
+
+    test("normalizes system event timestamp", () => {
+      const result = classifyEvent({
+        type: "system",
+        subtype: "turn_duration",
+        durationMs: 1000,
+        timestamp: 1769558400000, // Unix milliseconds
+      });
+
+      expect(result.type).toBe("system");
+      if (result.type === "system") {
+        expect(result.data.timestamp).toBe("2026-01-28T00:00:00.000Z");
+      }
+    });
+
+    test("preserves valid ISO 8601 timestamps", () => {
+      const result = classifyEvent({
+        type: "user",
+        uuid: "user-iso",
+        timestamp: "2026-01-28T10:30:00.123Z",
+        message: { role: "user", content: "test" },
+      });
+
+      expect(result.type).toBe("user");
+      if (result.type === "user") {
+        expect(result.data.timestamp).toBe("2026-01-28T10:30:00.123Z");
+      }
+    });
+  });
 });
