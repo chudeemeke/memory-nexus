@@ -12,12 +12,12 @@
 
 **Milestone:** v1 - Full Vision Implementation
 **Phase:** 4 - Storage Adapters (in progress)
-**Plan:** 02 of 4 complete
+**Plan:** 03 of 4 complete
 **Status:** Executing Phase 4 Plans
 
 ```
-[██████████████████                      ] 42%
-Phase 4 plan 02 complete | 555 tests passing
+[████████████████████                    ] 50%
+Phase 4 plan 03 complete | 555 tests passing
 ```
 
 ## Accumulated Context
@@ -61,9 +61,9 @@ None currently.
 - [x] Execute 03-03 - Event Classification and Extraction (65 tests)
 - [x] Execute 03-04 - Timestamp Normalization and Integration Tests (59 tests)
 - [x] Plan Phase 4 - Storage Adapters (4 plans created)
-- [x] Execute 04-01 - Session and Extraction State Repositories
-- [x] Execute 04-02 - Message Repository with Batch Support
-- [ ] Execute 04-03 - Tool Use Repository (in progress)
+- [x] Execute 04-01 - Session and Extraction State Repositories (45 tests)
+- [x] Execute 04-02 - Message Repository with Batch Support (24 tests)
+- [x] Execute 04-03 - Tool Use Repository (30 tests)
 - [ ] Execute 04-04 - Repository Integration Tests
 
 ### Learnings
@@ -97,29 +97,31 @@ None currently.
 ### Last Session
 
 **Date:** 2026-01-28
-**Completed:** Phase 4 Plan 02 (Message Repository with Batch Support)
-**Next:** Execute Phase 4 Plan 03 (Tool Use Repository)
+**Completed:** Phase 4 Plan 03 (Tool Use Repository)
+**Next:** Execute Phase 4 Plan 04 (Repository Integration Tests)
 
 ### Context for Next Session
 
-1. Phase 4 execution in progress (2/4 plans complete)
+1. Phase 4 execution in progress (3/4 plans complete)
 2. Repositories implemented:
    - SqliteSessionRepository (04-01)
    - SqliteExtractionStateRepository (04-01)
    - SqliteMessageRepository (04-02) with batch support
-   - SqliteToolUseRepository (04-03) - partially committed
+   - SqliteToolUseRepository (04-03) with batch support
 3. Key finding: FTS5 triggers interfere with `changes` count in bun:sqlite
    - Workaround: use existence check before insert
 4. Performance verified: 1000 messages in 163ms
 5. 555 tests passing across all phases
+6. All repositories exported via barrel files
 
 ### Files Modified This Session
 
-- src/infrastructure/database/repositories/message-repository.ts (created)
-- src/infrastructure/database/repositories/message-repository.test.ts (created)
-- src/infrastructure/database/repositories/index.ts (modified)
-- src/infrastructure/database/index.ts (modified)
-- .planning/phases/04-storage-adapters/04-02-SUMMARY.md (created)
+- src/infrastructure/database/repositories/tool-use-repository.ts (created)
+- src/infrastructure/database/repositories/tool-use-repository.test.ts (created)
+- src/infrastructure/database/repositories/index.ts (created)
+- src/infrastructure/database/index.ts (modified - added repository exports)
+- src/infrastructure/database/repositories/message-repository.ts (bug fix - existence check)
+- .planning/phases/04-storage-adapters/04-03-SUMMARY.md (created)
 - .planning/STATE.md (updated)
 
 ## Performance Metrics
@@ -127,7 +129,7 @@ None currently.
 | Metric | Value |
 |--------|-------|
 | Phases Completed | 3 / 12 |
-| Plans Completed | 14 / ? |
+| Plans Completed | 15 / ? |
 | Requirements Completed | 34 / 85 |
 | Test Coverage | 98.32% functions, 99.39% lines |
 | Total Tests | 555 |
@@ -158,9 +160,9 @@ None currently.
 |------|-------------|-------|--------|
 | 04-01 | Session & Extraction State Repos | 45 | Complete |
 | 04-02 | Message Repository | 24 | Complete |
-| 04-03 | Tool Use Repository | 24 | Complete |
+| 04-03 | Tool Use Repository | 30 | Complete |
 | 04-04 | Integration Tests | - | Pending |
-| **Total** | | **93** | **In Progress** |
+| **Total** | | **99** | **In Progress** |
 
 ---
 
