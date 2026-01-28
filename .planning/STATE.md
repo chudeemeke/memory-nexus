@@ -4,20 +4,20 @@
 
 **Core Value:** Knowledge gained in one Claude Code project becomes accessible from any other project. No more context silos.
 
-**Current Focus:** Phase 4 Complete - Ready for Phase 5
+**Current Focus:** Phase 5 Planning Complete - Ready for Execution
 
 **Tech Stack:** Bun, TypeScript 5.5+, bun:sqlite with FTS5, Commander.js v14, Zod v4
 
 ## Current Position
 
 **Milestone:** v1 - Full Vision Implementation
-**Phase:** 4 - Storage Adapters (complete)
-**Plan:** 04 of 4 complete
-**Status:** Phase 4 Complete
+**Phase:** 5 - Basic Sync Command (planning complete)
+**Plan:** 00 of 4 executed
+**Status:** Phase 5 Planning Complete
 
 ```
 [████████████████████████                ] 60%
-Phase 4 complete | 591 tests passing
+Phase 5 planning complete | 591 tests passing | 4 plans ready
 ```
 
 ## Accumulated Context
@@ -68,7 +68,11 @@ None currently.
 - [x] Execute 04-02 - Message Repository with Batch Support (24 tests)
 - [x] Execute 04-03 - Tool Use Repository (30 tests)
 - [x] Execute 04-04 - Search Service and Integration Tests (36 tests)
-- [ ] Plan Phase 5 - Extraction Pipeline
+- [x] Plan Phase 5 - Basic Sync Command (4 plans created)
+- [ ] Execute 05-01 - ExtractionState file metadata extension
+- [ ] Execute 05-02 - SyncService application layer
+- [ ] Execute 05-03 - CLI sync command with progress
+- [ ] Execute 05-04 - Integration tests and verification
 
 ### Learnings
 
@@ -104,32 +108,29 @@ None currently.
 ### Last Session
 
 **Date:** 2026-01-28
-**Completed:** Phase 4 (all 4 plans complete)
-**Next:** Plan Phase 5 - Extraction Pipeline
+**Completed:** Phase 5 Planning (4 plans created)
+**Next:** Execute Phase 5 - Basic Sync Command
 
 ### Context for Next Session
 
-1. Phase 4 complete - all storage adapters implemented
-2. Repositories available:
-   - SqliteSessionRepository (04-01)
-   - SqliteExtractionStateRepository (04-01)
-   - SqliteMessageRepository (04-02) with batch support
-   - SqliteToolUseRepository (04-03) with batch support
-   - Fts5SearchService (04-04) with BM25 ranking
-3. All exports consolidated in barrel files
-4. WAL checkpoint utility available for bulk operations
+1. Phase 5 planning complete - 4 plans ready for execution
+2. Plan structure:
+   - 05-01: ExtractionState file metadata (fileMtime, fileSize) - Wave 1
+   - 05-02: SyncService application layer - Wave 2
+   - 05-03: CLI sync command with progress - Wave 3
+   - 05-04: Integration tests - Wave 4
+3. Key insight: ExtractionState entity needs fileMtime/fileSize for incremental sync
+4. Dependencies: cli-progress library needed for progress bars
 5. 591 tests passing across all phases
-6. Ready for extraction pipeline implementation
+6. Ready for execution via /gsd:execute-phase
 
 ### Files Modified This Session
 
-- src/infrastructure/database/services/search-service.ts (created)
-- src/infrastructure/database/services/search-service.test.ts (created)
-- src/infrastructure/database/services/index.ts (created)
-- src/infrastructure/database/connection.ts (modified - bulkOperationCheckpoint)
-- src/infrastructure/database/index.ts (modified - export services)
-- src/infrastructure/database/integration.test.ts (modified - pipeline tests)
-- .planning/phases/04-storage-adapters/04-04-SUMMARY.md (created)
+- .planning/phases/05-basic-sync-command/05-01-PLAN.md (created)
+- .planning/phases/05-basic-sync-command/05-02-PLAN.md (created)
+- .planning/phases/05-basic-sync-command/05-03-PLAN.md (created)
+- .planning/phases/05-basic-sync-command/05-04-PLAN.md (created)
+- .planning/ROADMAP.md (updated - Phase 5 plans)
 - .planning/STATE.md (updated)
 
 ## Performance Metrics
