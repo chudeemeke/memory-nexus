@@ -12,12 +12,12 @@
 
 **Milestone:** v1 - Full Vision Implementation
 **Phase:** 3 - JSONL Parsing and Extraction
-**Plan:** 03-01 complete, 03-02 pending (Streaming JSONL Parser)
+**Plan:** 03-02 complete, 03-03 pending (Event Classification)
 **Status:** In Progress
 
 ```
-[███████                                 ] 18%
-Phase 3 in progress (1/4 plans complete) | 338 tests passing
+[████████                                ] 20%
+Phase 3 in progress (2/4 plans complete) | 338 tests passing
 ```
 
 ## Accumulated Context
@@ -34,6 +34,7 @@ Phase 3 in progress (1/4 plans complete) | 338 tests passing
 | import type for ports | Domain purity - port files have no runtime dependencies | 2026-01-27 |
 | AsyncIterable parser | Memory-efficient streaming for large JSONL files (10K+ lines) | 2026-01-27 |
 | BM25 ranking default | Lower (more negative) scores indicate better relevance | 2026-01-27 |
+| readline.createInterface | Node's built-in streaming for JSONL parsing | 2026-01-28 |
 
 ### Blockers
 
@@ -52,7 +53,7 @@ None currently.
 - [x] Complete Phase 2 - All 4 plans complete
 - [x] Plan Phase 3 - JSONL Parsing and Extraction (4 plans created)
 - [x] Execute 03-01 - Session Discovery Implementation (14 tests)
-- [ ] Execute 03-02 - Streaming JSONL Parser Implementation
+- [x] Execute 03-02 - Streaming JSONL Parser Implementation (17 tests)
 - [ ] Execute 03-03 - Event Classification and Extraction
 - [ ] Execute 03-04 - Timestamp Normalization and Integration Tests
 
@@ -72,32 +73,29 @@ None currently.
 - Snippet extraction works on content up to 10KB+
 - Bulk insert of 1000 messages with triggers < 5 seconds
 - Real session discovery verified: 831 sessions found on dev machine
+- readline.createInterface with crlfDelay: Infinity handles cross-platform line endings
 
 ## Session Continuity
 
 ### Last Session
 
 **Date:** 2026-01-28
-**Completed:** 03-01 Session Discovery Implementation
-**Next:** Execute 03-02 Streaming JSONL Parser Implementation
+**Completed:** 03-02 Streaming JSONL Parser Implementation
+**Next:** Execute 03-03 Event Classification and Extraction
 
 ### Context for Next Session
 
-1. Phase 3 has 3 remaining plans for execution:
-   - 03-02: Streaming JSONL Parser (~15 tests)
+1. Phase 3 has 2 remaining plans for execution:
    - 03-03: Event Classification (~30 tests)
    - 03-04: Integration Tests (~35 tests)
-2. FileSystemSessionSource now available for testing parsers
-3. Port interfaces defined (ISessionSource complete, IEventParser pending)
+2. FileSystemSessionSource and JsonlEventParser now available
+3. Parser yields "skipped" for all events - 03-03 will implement full classification
 4. JSONL schema documented in .planning/research/JSONL-EVENT-SCHEMA.md
 
 ### Files Modified This Session
 
-- src/infrastructure/sources/session-source.ts (created)
-- src/infrastructure/sources/session-source.test.ts (created)
-- src/infrastructure/sources/index.ts (created)
-- src/infrastructure/index.ts (modified)
-- .planning/phases/03-jsonl-parsing-and-extraction/03-01-SUMMARY.md (created)
+- src/infrastructure/index.ts (fixed missing sources export)
+- .planning/phases/03-jsonl-parsing-and-extraction/03-02-SUMMARY.md (created)
 - .planning/STATE.md (updated)
 
 ## Performance Metrics
@@ -105,9 +103,9 @@ None currently.
 | Metric | Value |
 |--------|-------|
 | Phases Completed | 2 / 12 |
-| Plans Completed | 6 / ? |
-| Requirements Completed | 20 / 85 |
-| Test Coverage | 97.96% functions, 99.41% lines |
+| Plans Completed | 7 / ? |
+| Requirements Completed | 23 / 85 |
+| Test Coverage | 97.90% functions, 99.39% lines |
 | Total Tests | 338 |
 
 ## Phase 2 Summary
@@ -125,10 +123,10 @@ None currently.
 | Plan | Description | Tests | Status |
 |------|-------------|-------|--------|
 | 03-01 | Session Discovery | 14 | Complete |
-| 03-02 | Streaming JSONL Parser | ~15 | Pending |
+| 03-02 | Streaming JSONL Parser | 17 | Complete |
 | 03-03 | Event Classification | ~30 | Pending |
 | 03-04 | Integration Tests | ~35 | Pending |
-| **Total** | | **~94** | |
+| **Total** | | **~96** | |
 
 ---
 
