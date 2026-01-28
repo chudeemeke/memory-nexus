@@ -40,3 +40,6 @@ export {
     type BatchResult,
     type BatchOptions,
 } from "./repositories/index.js";
+
+// Services
+export { Fts5SearchService } from "./services/index.js";

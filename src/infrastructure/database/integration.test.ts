@@ -12,6 +12,15 @@ import { existsSync, statSync, unlinkSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { initializeDatabase, closeDatabase, bulkOperationCheckpoint } from "./connection.js";
+import { SqliteSessionRepository } from "./repositories/session-repository.js";
+import { SqliteMessageRepository } from "./repositories/message-repository.js";
+import { SqliteExtractionStateRepository } from "./repositories/extraction-state-repository.js";
+import { Fts5SearchService } from "./services/search-service.js";
+import { Session } from "../../domain/entities/session.js";
+import { Message } from "../../domain/entities/message.js";
+import { ExtractionState } from "../../domain/entities/extraction-state.js";
+import { ProjectPath } from "../../domain/value-objects/project-path.js";
+import { SearchQuery } from "../../domain/value-objects/search-query.js";
 
 // ============================================================================
 // Test Helpers
@@ -966,5 +975,230 @@ describe("Transaction Safety", () => {
             "SELECT COUNT(*) as cnt FROM messages_meta"
         ).get()?.cnt ?? 0;
         expect(messageCount).toBe(3);
+    });
+});
+
+// ============================================================================
+// Full Pipeline Integration Tests
+// ============================================================================
+
+describe("Full Extraction Pipeline", () => {
+    let db: Database;
+    let sessionRepo: SqliteSessionRepository;
+    let messageRepo: SqliteMessageRepository;
+    let extractionStateRepo: SqliteExtractionStateRepository;
+    let searchService: Fts5SearchService;
+
+    beforeEach(() => {
+        const result = initializeDatabase({ path: ":memory:" });
+        db = result.db;
+
+        // Initialize all repositories and services
+        sessionRepo = new SqliteSessionRepository(db);
+        messageRepo = new SqliteMessageRepository(db);
+        extractionStateRepo = new SqliteExtractionStateRepository(db);
+        searchService = new Fts5SearchService(db);
+    });
+
+    afterEach(() => {
+        closeDatabase(db);
+    });
+
+    it("Test 28: Full extraction pipeline with search verification", async () => {
+        // 1. Create session via SqliteSessionRepository
+        const projectPath = ProjectPath.fromDecoded("C:\\Users\\Test\\TestProject");
+        const session = Session.create({
+            id: "session-pipeline-1",
+            projectPath,
+            startTime: new Date("2024-06-15T10:00:00Z"),
+        });
+        await sessionRepo.save(session);
+
+        // 2. Insert 50 messages via SqliteMessageRepository
+        const messages: Array<{ message: Message; sessionId: string }> = [];
+        for (let i = 0; i < 50; i++) {
+            const role = i % 2 === 0 ? "user" : "assistant";
+            const content = i % 5 === 0
+                ? `Message ${i}: Discussion about authentication and security patterns.`
+                : `Message ${i}: General conversation about ${role === "user" ? "the project" : "implementation details"}.`;
+
+            const message = Message.create({
+                id: `msg-pipeline-${i}`,
+                role: role as "user" | "assistant",
+                content,
+                timestamp: new Date(Date.now() + i * 1000),
+            });
+            messages.push({ message, sessionId: session.id });
+        }
+
+        const batchResult = await messageRepo.saveMany(messages);
+        expect(batchResult.inserted).toBe(50);
+        expect(batchResult.skipped).toBe(0);
+
+        // 3. Update extraction state to 'complete' via SqliteExtractionStateRepository
+        const extractionState = ExtractionState.create({
+            id: "ext-pipeline-1",
+            sessionPath: "/path/to/session-pipeline.jsonl",
+            startedAt: new Date(),
+            status: "complete",
+            messagesExtracted: 50,
+            completedAt: new Date(),
+        });
+        await extractionStateRepo.save(extractionState);
+
+        // 4. Search for content via Fts5SearchService
+        const query = SearchQuery.from("authentication");
+        const searchResults = await searchService.search(query);
+
+        // 5. Verify: session findById returns session
+        const foundSession = await sessionRepo.findById(session.id);
+        expect(foundSession).not.toBeNull();
+        expect(foundSession?.id).toBe(session.id);
+        expect(foundSession?.projectPath.projectName).toBe("TestProject");
+
+        // 6. Verify: messages findBySession returns all 50
+        const foundMessages = await messageRepo.findBySession(session.id);
+        expect(foundMessages).toHaveLength(50);
+
+        // 7. Verify: search returns relevant results with snippets
+        // Every 5th message (0, 5, 10, 15, 20, 25, 30, 35, 40, 45) has "authentication"
+        expect(searchResults.length).toBeGreaterThan(0);
+        expect(searchResults.length).toBe(10); // 10 messages have authentication
+
+        for (const result of searchResults) {
+            expect(result.snippet).toContain("<mark>");
+            expect(result.snippet.toLowerCase()).toContain("authentication");
+            expect(result.sessionId).toBe(session.id);
+            expect(result.score).toBeGreaterThanOrEqual(0);
+            expect(result.score).toBeLessThanOrEqual(1);
+        }
+
+        // 8. Verify: extraction state shows 'complete'
+        const foundState = await extractionStateRepo.findById(extractionState.id);
+        expect(foundState).not.toBeNull();
+        expect(foundState?.status).toBe("complete");
+        expect(foundState?.messagesExtracted).toBe(50);
+    });
+
+    it("Test 29: Search with project filter in full pipeline", async () => {
+        // Create two projects
+        const project1Path = ProjectPath.fromDecoded("C:\\Users\\Test\\Project1");
+        const project2Path = ProjectPath.fromDecoded("C:\\Users\\Test\\Project2");
+
+        const session1 = Session.create({
+            id: "session-proj1",
+            projectPath: project1Path,
+            startTime: new Date(),
+        });
+        const session2 = Session.create({
+            id: "session-proj2",
+            projectPath: project2Path,
+            startTime: new Date(),
+        });
+
+        await sessionRepo.save(session1);
+        await sessionRepo.save(session2);
+
+        // Insert messages in both projects with same keyword
+        const msg1 = Message.create({
+            id: "msg-proj1-1",
+            role: "user",
+            content: "Authentication implementation for Project1",
+            timestamp: new Date(),
+        });
+        const msg2 = Message.create({
+            id: "msg-proj2-1",
+            role: "user",
+            content: "Authentication implementation for Project2",
+            timestamp: new Date(),
+        });
+
+        await messageRepo.save(msg1, session1.id);
+        await messageRepo.save(msg2, session2.id);
+
+        // Search with project filter
+        const query = SearchQuery.from("authentication");
+        const project1Results = await searchService.search(query, {
+            projectFilter: project1Path,
+        });
+
+        expect(project1Results).toHaveLength(1);
+        expect(project1Results[0].sessionId).toBe(session1.id);
+
+        // Search without filter should return both
+        const allResults = await searchService.search(query);
+        expect(allResults).toHaveLength(2);
+    });
+
+    it("Test 30: Repository operations are idempotent", async () => {
+        const projectPath = ProjectPath.fromDecoded("C:\\Users\\Test\\IdempotentProject");
+        const session = Session.create({
+            id: "session-idempotent",
+            projectPath,
+            startTime: new Date(),
+        });
+
+        // Save session twice
+        await sessionRepo.save(session);
+        await sessionRepo.save(session);
+
+        // Should only have one session
+        const sessions = await sessionRepo.findByProject(projectPath);
+        expect(sessions).toHaveLength(1);
+
+        // Save message twice
+        const message = Message.create({
+            id: "msg-idempotent",
+            role: "user",
+            content: "Idempotent test message",
+            timestamp: new Date(),
+        });
+        await messageRepo.save(message, session.id);
+        await messageRepo.save(message, session.id);
+
+        // Should only have one message
+        const messages = await messageRepo.findBySession(session.id);
+        expect(messages).toHaveLength(1);
+    });
+
+    it("Test 31: Batch insert with progress tracking", async () => {
+        const projectPath = ProjectPath.fromDecoded("C:\\Users\\Test\\BatchProject");
+        const session = Session.create({
+            id: "session-batch",
+            projectPath,
+            startTime: new Date(),
+        });
+        await sessionRepo.save(session);
+
+        const messages: Array<{ message: Message; sessionId: string }> = [];
+        for (let i = 0; i < 250; i++) {
+            const message = Message.create({
+                id: `msg-batch-${i}`,
+                role: i % 2 === 0 ? "user" : "assistant",
+                content: `Batch message ${i} with searchable content about testing`,
+                timestamp: new Date(Date.now() + i),
+            });
+            messages.push({ message, sessionId: session.id });
+        }
+
+        let progressCalls = 0;
+        let lastProgress = { inserted: 0, total: 0 };
+
+        const result = await messageRepo.saveMany(messages, {
+            onProgress: (progress) => {
+                progressCalls++;
+                lastProgress = progress;
+            },
+        });
+
+        // Should have progress calls (one per batch of 100)
+        expect(progressCalls).toBeGreaterThan(0);
+        expect(lastProgress.total).toBe(250);
+        expect(result.inserted).toBe(250);
+
+        // Verify all messages searchable
+        const query = SearchQuery.from("searchable");
+        const searchResults = await searchService.search(query, { limit: 300 });
+        expect(searchResults).toHaveLength(250);
     });
 });
