@@ -7,6 +7,7 @@
  */
 
 import { Command } from "commander";
+import { createSyncCommand } from "./commands/index.js";
 
 const program = new Command();
 
@@ -15,19 +16,8 @@ program
   .description("Cross-project context persistence for Claude Code sessions")
   .version("0.1.0");
 
-program
-  .command("sync")
-  .description("Sync all sessions from ~/.claude/projects/ to database")
-  .option("--session <id>", "Sync a specific session only")
-  .action((options) => {
-    if (options.session) {
-      console.log(`Syncing session: ${options.session}`);
-    } else {
-      console.log("Syncing all sessions...");
-    }
-    // TODO: Implement sync logic
-    console.log("(not yet implemented)");
-  });
+// Add sync command from module
+program.addCommand(createSyncCommand());
 
 program
   .command("search <query>")
