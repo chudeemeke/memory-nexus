@@ -94,6 +94,8 @@ export class SqliteExtractionStateRepository
       completedAt: row.completed_at ? new Date(row.completed_at) : undefined,
       messagesExtracted: row.messages_extracted,
       errorMessage: row.error_message ?? undefined,
+      fileMtime: row.file_mtime ? new Date(row.file_mtime) : undefined,
+      fileSize: row.file_size ?? undefined,
     });
   }
 
@@ -137,9 +139,8 @@ export class SqliteExtractionStateRepository
    * Save an extraction state to the repository.
    * Uses INSERT OR REPLACE for upsert semantics.
    *
-   * Note: file_mtime and file_size are optional and not part of the
-   * ExtractionState entity - they're set to NULL. Future phases may
-   * add these for incremental sync detection.
+   * File metadata (fileMtime, fileSize) is stored for incremental sync detection.
+   * fileMtime is stored as ISO 8601 string, fileSize as integer bytes.
    */
   async save(state: ExtractionState): Promise<void> {
     this.saveStmt.run({
@@ -150,8 +151,8 @@ export class SqliteExtractionStateRepository
       $completedAt: state.completedAt?.toISOString() ?? null,
       $messagesExtracted: state.messagesExtracted,
       $errorMessage: state.errorMessage ?? null,
-      $fileMtime: null,
-      $fileSize: null,
+      $fileMtime: state.fileMtime?.toISOString() ?? null,
+      $fileSize: state.fileSize ?? null,
     });
   }
 }

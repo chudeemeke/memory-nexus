@@ -38,6 +38,8 @@ describe("SqliteExtractionStateRepository", () => {
       completedAt: Date | undefined;
       messagesExtracted: number;
       errorMessage: string | undefined;
+      fileMtime: Date | undefined;
+      fileSize: number | undefined;
     }> = {}
   ): ExtractionState {
     return ExtractionState.create({
@@ -50,6 +52,8 @@ describe("SqliteExtractionStateRepository", () => {
       completedAt: overrides.completedAt,
       messagesExtracted: overrides.messagesExtracted ?? 0,
       errorMessage: overrides.errorMessage,
+      fileMtime: overrides.fileMtime,
+      fileSize: overrides.fileSize,
     });
   }
 
@@ -404,6 +408,134 @@ describe("SqliteExtractionStateRepository", () => {
       const found = await repository.findById("retry-test");
       expect(found!.status).toBe("pending");
       expect(found!.errorMessage).toBeUndefined();
+    });
+  });
+
+  describe("file metadata persistence", () => {
+    it("should save and retrieve file metadata", async () => {
+      const fileMtime = new Date("2026-01-28T09:00:00Z");
+      const state = createTestState({
+        id: "state-with-meta",
+        sessionPath: "/path/session.jsonl",
+        fileMtime,
+        fileSize: 2048,
+      });
+
+      await repository.save(state);
+      const found = await repository.findById("state-with-meta");
+
+      expect(found).not.toBeNull();
+      expect(found!.fileMtime).not.toBeUndefined();
+      expect(found!.fileMtime!.toISOString()).toBe("2026-01-28T09:00:00.000Z");
+      expect(found!.fileSize).toBe(2048);
+    });
+
+    it("should handle null file metadata correctly", async () => {
+      const state = createTestState({
+        id: "state-no-meta",
+        sessionPath: "/path/session.jsonl",
+      });
+
+      await repository.save(state);
+      const found = await repository.findById("state-no-meta");
+
+      expect(found).not.toBeNull();
+      expect(found!.fileMtime).toBeUndefined();
+      expect(found!.fileSize).toBeUndefined();
+    });
+
+    it("should persist file metadata through findBySessionPath", async () => {
+      const fileMtime = new Date("2026-01-28T08:30:00Z");
+      const state = createTestState({
+        id: "state-by-path",
+        sessionPath: "/unique/session.jsonl",
+        fileMtime,
+        fileSize: 4096,
+      });
+
+      await repository.save(state);
+      const found = await repository.findBySessionPath("/unique/session.jsonl");
+
+      expect(found).not.toBeNull();
+      expect(found!.fileMtime!.toISOString()).toBe("2026-01-28T08:30:00.000Z");
+      expect(found!.fileSize).toBe(4096);
+    });
+
+    it("should update file metadata on upsert", async () => {
+      const initialMtime = new Date("2026-01-28T08:00:00Z");
+      const initialState = createTestState({
+        id: "state-update-meta",
+        sessionPath: "/path/session.jsonl",
+        fileMtime: initialMtime,
+        fileSize: 1024,
+      });
+
+      await repository.save(initialState);
+
+      // Update with new file metadata
+      const newMtime = new Date("2026-01-28T12:00:00Z");
+      const updatedState = ExtractionState.create({
+        id: "state-update-meta",
+        sessionPath: "/path/session.jsonl",
+        startedAt: new Date("2026-01-28T10:00:00Z"),
+        status: "complete",
+        completedAt: new Date("2026-01-28T12:30:00Z"),
+        fileMtime: newMtime,
+        fileSize: 2048,
+      });
+
+      await repository.save(updatedState);
+      const found = await repository.findById("state-update-meta");
+
+      expect(found!.fileMtime!.toISOString()).toBe("2026-01-28T12:00:00.000Z");
+      expect(found!.fileSize).toBe(2048);
+    });
+
+    it("should return file metadata in findPending results", async () => {
+      const fileMtime = new Date("2026-01-28T07:00:00Z");
+      const state = createTestState({
+        id: "pending-with-meta",
+        sessionPath: "/path/pending.jsonl",
+        status: "pending",
+        fileMtime,
+        fileSize: 512,
+      });
+
+      await repository.save(state);
+      const pending = await repository.findPending();
+
+      expect(pending).toHaveLength(1);
+      expect(pending[0].fileMtime!.toISOString()).toBe("2026-01-28T07:00:00.000Z");
+      expect(pending[0].fileSize).toBe(512);
+    });
+
+    it("should handle zero file size", async () => {
+      const state = createTestState({
+        id: "state-zero-size",
+        sessionPath: "/path/empty.jsonl",
+        fileMtime: new Date("2026-01-28T10:00:00Z"),
+        fileSize: 0,
+      });
+
+      await repository.save(state);
+      const found = await repository.findById("state-zero-size");
+
+      expect(found!.fileSize).toBe(0);
+    });
+
+    it("should handle large file size", async () => {
+      const largeSize = 10_000_000_000; // 10GB
+      const state = createTestState({
+        id: "state-large-size",
+        sessionPath: "/path/large.jsonl",
+        fileMtime: new Date("2026-01-28T10:00:00Z"),
+        fileSize: largeSize,
+      });
+
+      await repository.save(state);
+      const found = await repository.findById("state-large-size");
+
+      expect(found!.fileSize).toBe(largeSize);
     });
   });
 
