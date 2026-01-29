@@ -25,14 +25,17 @@ export interface SearchOptions {
   /** Filter results to a specific project */
   projectFilter?: ProjectPath;
 
-  /** Filter by message role (user or assistant) */
-  roleFilter?: MessageRole;
+  /** Filter by message role (user or assistant). Can be single role or array of roles. */
+  roleFilter?: MessageRole | MessageRole[];
 
   /** Only include results after this date */
   sinceDate?: Date;
 
   /** Only include results before this date */
   beforeDate?: Date;
+
+  /** Filter results to a specific session ID */
+  sessionFilter?: string;
 }
 
 /**

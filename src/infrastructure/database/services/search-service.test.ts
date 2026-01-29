@@ -516,6 +516,109 @@ describe("Fts5SearchService", () => {
     });
   });
 
+  describe("Session Filter", () => {
+    it("Test 27: filters results by session ID", async () => {
+      // Create second session
+      insertTestSession(
+        db,
+        "session-2",
+        "C--Users-Test-TestProject",
+        "C:\\Users\\Test\\TestProject",
+        "TestProject"
+      );
+
+      insertTestMessage(
+        db,
+        "msg-1",
+        "session-1",
+        "user",
+        "authentication in session 1"
+      );
+      insertTestMessage(
+        db,
+        "msg-2",
+        "session-2",
+        "user",
+        "authentication in session 2"
+      );
+
+      const query = SearchQuery.from("authentication");
+      const results = await searchService.search(query, { sessionFilter: "session-1" });
+
+      expect(results).toHaveLength(1);
+      expect(results[0].sessionId).toBe("session-1");
+    });
+
+    it("Test 28: session filter returns empty when no matches", async () => {
+      insertTestMessage(
+        db,
+        "msg-1",
+        "session-1",
+        "user",
+        "authentication content"
+      );
+
+      const query = SearchQuery.from("authentication");
+      const results = await searchService.search(query, { sessionFilter: "nonexistent-session" });
+
+      expect(results).toHaveLength(0);
+    });
+  });
+
+  describe("Role Filter Array", () => {
+    it("Test 29: roleFilter with array includes multiple roles", async () => {
+      insertTestMessage(
+        db,
+        "msg-user",
+        "session-1",
+        "user",
+        "authentication from user"
+      );
+      insertTestMessage(
+        db,
+        "msg-assistant",
+        "session-1",
+        "assistant",
+        "authentication from assistant"
+      );
+
+      const query = SearchQuery.from("authentication");
+      const results = await searchService.search(query, {
+        roleFilter: ["user", "assistant"],
+      });
+
+      expect(results).toHaveLength(2);
+      const ids = results.map((r) => r.messageId);
+      expect(ids).toContain("msg-user");
+      expect(ids).toContain("msg-assistant");
+    });
+
+    it("Test 30: roleFilter with single-element array works same as string", async () => {
+      insertTestMessage(
+        db,
+        "msg-user",
+        "session-1",
+        "user",
+        "authentication from user"
+      );
+      insertTestMessage(
+        db,
+        "msg-assistant",
+        "session-1",
+        "assistant",
+        "authentication from assistant"
+      );
+
+      const query = SearchQuery.from("authentication");
+      const results = await searchService.search(query, {
+        roleFilter: ["user"],
+      });
+
+      expect(results).toHaveLength(1);
+      expect(results[0].messageId).toBe("msg-user");
+    });
+  });
+
   describe("Combined Filters", () => {
     it("Test 19: combines project and role filters", async () => {
       insertTestSession(
@@ -614,6 +717,60 @@ describe("Fts5SearchService", () => {
 
       expect(results).toHaveLength(1);
       expect(results[0].messageId).toBe("msg-2");
+    });
+
+    it("Test 31: combines session filter with role array filter", async () => {
+      // Create second session
+      insertTestSession(
+        db,
+        "session-2",
+        "C--Users-Test-TestProject",
+        "C:\\Users\\Test\\TestProject",
+        "TestProject"
+      );
+
+      insertTestMessage(
+        db,
+        "msg-1",
+        "session-1",
+        "user",
+        "authentication from user in s1"
+      );
+      insertTestMessage(
+        db,
+        "msg-2",
+        "session-1",
+        "assistant",
+        "authentication from assistant in s1"
+      );
+      insertTestMessage(
+        db,
+        "msg-3",
+        "session-2",
+        "user",
+        "authentication from user in s2"
+      );
+      insertTestMessage(
+        db,
+        "msg-4",
+        "session-2",
+        "assistant",
+        "authentication from assistant in s2"
+      );
+
+      const query = SearchQuery.from("authentication");
+      const results = await searchService.search(query, {
+        sessionFilter: "session-1",
+        roleFilter: ["user", "assistant"],
+      });
+
+      expect(results).toHaveLength(2);
+      const ids = results.map((r) => r.messageId);
+      expect(ids).toContain("msg-1");
+      expect(ids).toContain("msg-2");
+      // Session 2 messages should not be included
+      expect(ids).not.toContain("msg-3");
+      expect(ids).not.toContain("msg-4");
     });
   });
 

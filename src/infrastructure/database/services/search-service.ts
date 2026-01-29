@@ -130,10 +130,23 @@ export class Fts5SearchService implements ISearchService {
       params.push(options.projectFilter.encoded);
     }
 
-    // Role filter
+    // Role filter - supports single value or array
     if (options?.roleFilter) {
-      whereClauses.push("m.role = ?");
-      params.push(options.roleFilter);
+      if (Array.isArray(options.roleFilter)) {
+        // Use IN clause for array of roles
+        const placeholders = options.roleFilter.map(() => "?").join(", ");
+        whereClauses.push(`m.role IN (${placeholders})`);
+        params.push(...options.roleFilter);
+      } else {
+        whereClauses.push("m.role = ?");
+        params.push(options.roleFilter);
+      }
+    }
+
+    // Session filter
+    if (options?.sessionFilter) {
+      whereClauses.push("m.session_id = ?");
+      params.push(options.sessionFilter);
     }
 
     // Date filters
