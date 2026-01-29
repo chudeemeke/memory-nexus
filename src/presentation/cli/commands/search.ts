@@ -5,15 +5,25 @@
  * Wires to Fts5SearchService with result formatting.
  */
 
-import { Command } from "commander";
+import { Command, Option } from "commander";
 import { SearchQuery } from "../../../domain/value-objects/search-query.js";
 import type { SearchResult } from "../../../domain/value-objects/search-result.js";
+import type { SearchOptions } from "../../../domain/ports/services.js";
+import type { MessageRole } from "../../../domain/entities/message.js";
+import { ProjectPath } from "../../../domain/value-objects/project-path.js";
 import {
   initializeDatabase,
   closeDatabase,
   getDefaultDbPath,
   Fts5SearchService,
 } from "../../../infrastructure/database/index.js";
+import {
+  createOutputFormatter,
+  type OutputMode,
+  type FormatOptions,
+} from "../formatters/output-formatter.js";
+import { shouldUseColor } from "../formatters/color.js";
+import { parseDate, DateParseError } from "../parsers/date-parser.js";
 
 /**
  * Options parsed from CLI arguments.
@@ -21,9 +31,16 @@ import {
 interface SearchCommandOptions {
   limit?: string;
   project?: string;
+  session?: string;
+  role?: string;
+  since?: string;
+  before?: string;
+  days?: number;
   json?: boolean;
   ignoreCase?: boolean;
   caseSensitive?: boolean;
+  verbose?: boolean;
+  quiet?: boolean;
 }
 
 /**
@@ -37,9 +54,36 @@ export function createSearchCommand(): Command {
     .description("Full-text search across all sessions")
     .option("-l, --limit <count>", "Maximum results to return", "10")
     .option("-p, --project <name>", "Filter by project name")
+    .option("-s, --session <id>", "Filter by session ID")
+    .option("--role <roles>", "Filter by role: user, assistant, or both (comma-separated)")
+    .addOption(
+      new Option("--since <date>", "Results after date (e.g., 'yesterday', '2 weeks ago')")
+        .conflicts("days")
+    )
+    .addOption(
+      new Option("--before <date>", "Results before date")
+        .conflicts("days")
+    )
+    .addOption(
+      new Option("--days <n>", "Results from last N days (includes today)")
+        .argParser((val) => {
+          const n = parseInt(val, 10);
+          if (isNaN(n) || n < 1) throw new Error("Days must be a positive number");
+          return n;
+        })
+        .conflicts(["since", "before"])
+    )
     .option("--json", "Output results as JSON")
     .option("-i, --ignore-case", "Case-insensitive search (default)")
     .option("-c, --case-sensitive", "Case-sensitive search")
+    .addOption(
+      new Option("-v, --verbose", "Show detailed output with execution info")
+        .conflicts("quiet")
+    )
+    .addOption(
+      new Option("-q, --quiet", "Suppress headers and decorations")
+        .conflicts("verbose")
+    )
     .action(async (query: string, options: SearchCommandOptions) => {
       await executeSearchCommand(query, options);
     });
@@ -57,6 +101,8 @@ export async function executeSearchCommand(
   query: string,
   options: SearchCommandOptions
 ): Promise<void> {
+  const startTime = performance.now();
+
   // Validate query
   let searchQuery: SearchQuery;
   try {
@@ -83,10 +129,67 @@ export async function executeSearchCommand(
       return;
     }
 
+    // Parse role filter
+    let roleFilter: MessageRole | MessageRole[] | undefined;
+    if (options.role) {
+      const roles = options.role.split(",").map((r) => r.trim().toLowerCase());
+      if (roles.length === 1) {
+        roleFilter = roles[0] as MessageRole;
+      } else {
+        roleFilter = roles as MessageRole[];
+      }
+    }
+
+    // Parse date filters
+    let sinceDate: Date | undefined;
+    let beforeDate: Date | undefined;
+
+    if (options.days) {
+      // --days N = today + past N-1 days
+      const now = new Date();
+      const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      sinceDate = new Date(startOfToday.getTime() - (options.days - 1) * 24 * 60 * 60 * 1000);
+    } else {
+      if (options.since) {
+        try {
+          sinceDate = parseDate(options.since);
+        } catch (err) {
+          if (err instanceof DateParseError) {
+            console.error(`Error: ${err.message}`);
+            process.exitCode = 1;
+            return;
+          }
+          throw err;
+        }
+      }
+      if (options.before) {
+        try {
+          beforeDate = parseDate(options.before);
+        } catch (err) {
+          if (err instanceof DateParseError) {
+            console.error(`Error: ${err.message}`);
+            process.exitCode = 1;
+            return;
+          }
+          throw err;
+        }
+      }
+    }
+
+    // Build complete SearchOptions
+    const fetchLimit = options.caseSensitive ? limit * 2 : limit;
+    const searchOptions: SearchOptions = {
+      limit: fetchLimit,
+      projectFilter: options.project ? ProjectPath.fromDecoded(options.project) : undefined,
+      roleFilter,
+      sinceDate,
+      beforeDate,
+      sessionFilter: options.session,
+    };
+
     // Execute search with case-sensitive awareness
     // If case-sensitive, fetch 2x results to account for filtering
-    const fetchLimit = options.caseSensitive ? limit * 2 : limit;
-    let results = await searchService.search(searchQuery, { limit: fetchLimit });
+    let results = await searchService.search(searchQuery, searchOptions);
 
     // Apply case-sensitive filter if requested
     let caseSensitiveFiltered = false;
@@ -99,12 +202,29 @@ export async function executeSearchCommand(
       results = results.slice(0, limit);
     }
 
-    // Output results
-    if (options.json) {
-      outputJson(results);
-    } else {
-      outputFormatted(results, query, caseSensitiveFiltered);
-    }
+    // Determine output mode
+    let outputMode: OutputMode = "default";
+    if (options.json) outputMode = "json";
+    else if (options.verbose) outputMode = "verbose";
+    else if (options.quiet) outputMode = "quiet";
+
+    const useColor = shouldUseColor();
+    const formatter = createOutputFormatter(outputMode, useColor);
+
+    // Build format options
+    const endTime = performance.now();
+    const formatOptions: FormatOptions = {
+      query,
+      executionDetails: {
+        timeMs: Math.round(endTime - startTime),
+        ftsQuery: query,
+        filtersApplied: buildFiltersList(options, caseSensitiveFiltered),
+      },
+    };
+
+    // Output results using formatter
+    const output = formatter.formatResults(results, formatOptions);
+    console.log(output);
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     console.error(`Error: ${message}`);
@@ -115,20 +235,22 @@ export async function executeSearchCommand(
 }
 
 /**
- * Output results as JSON.
- *
- * @param results Search results to output
+ * Build a list of filters applied for verbose output.
  */
-function outputJson(results: SearchResult[]): void {
-  const output = results.map((r) => ({
-    sessionId: r.sessionId,
-    messageId: r.messageId,
-    score: r.score,
-    timestamp: r.timestamp.toISOString(),
-    snippet: r.snippet,
-  }));
-  console.log(JSON.stringify(output, null, 2));
+function buildFiltersList(options: SearchCommandOptions, caseSensitiveFiltered: boolean): string[] {
+  const filters: string[] = [];
+  if (options.limit) filters.push(`limit: ${options.limit}`);
+  if (options.project) filters.push(`project: ${options.project}`);
+  if (options.session) filters.push(`session: ${options.session}`);
+  if (options.role) filters.push(`role: ${options.role}`);
+  if (options.days) filters.push(`days: ${options.days}`);
+  if (options.since) filters.push(`since: ${options.since}`);
+  if (options.before) filters.push(`before: ${options.before}`);
+  if (options.caseSensitive) filters.push("case-sensitive");
+  if (caseSensitiveFiltered) filters.push("case-sensitive filter applied");
+  return filters;
 }
+
 
 /**
  * Filter results to only include those with case-sensitive match in snippet.
@@ -151,58 +273,3 @@ export function filterCaseSensitive(
   return filtered.slice(0, limit);
 }
 
-/**
- * Output results with formatted display.
- *
- * Converts <mark> tags to ANSI bold and displays scores as percentages.
- *
- * @param results Search results to output
- * @param query Original query for "no results" message
- * @param caseSensitiveFiltered Whether case-sensitive filter was applied
- */
-function outputFormatted(
-  results: SearchResult[],
-  query: string,
-  caseSensitiveFiltered = false
-): void {
-  if (results.length === 0) {
-    console.log(`No results found for: ${query}`);
-    return;
-  }
-
-  const filterNote = caseSensitiveFiltered ? " (case-sensitive filter applied)" : "";
-  console.log(`Found ${results.length} result(s)${filterNote}:\n`);
-
-  results.forEach((result, index) => {
-    const scorePercent = (result.score * 100).toFixed(0);
-    const formattedSnippet = formatSnippet(result.snippet);
-    const timestamp = formatTimestamp(result.timestamp);
-
-    console.log(`${index + 1}. [${scorePercent}%] ${result.sessionId.substring(0, 8)}...`);
-    console.log(`   ${timestamp}`);
-    console.log(`   ${formattedSnippet}`);
-    console.log("");
-  });
-}
-
-/**
- * Convert <mark> tags to ANSI bold for terminal highlighting.
- *
- * @param snippet Snippet with <mark> tags
- * @returns Snippet with ANSI bold codes
- */
-function formatSnippet(snippet: string): string {
-  return snippet
-    .replace(/<mark>/g, "\x1b[1m")
-    .replace(/<\/mark>/g, "\x1b[0m");
-}
-
-/**
- * Format timestamp for display.
- *
- * @param timestamp Date to format
- * @returns Formatted date string
- */
-function formatTimestamp(timestamp: Date): string {
-  return timestamp.toISOString().replace("T", " ").replace(/\.\d{3}Z$/, " UTC");
-}

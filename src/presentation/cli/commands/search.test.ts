@@ -6,7 +6,7 @@
  */
 
 import { describe, expect, it, beforeEach, afterEach, spyOn } from "bun:test";
-import { Command } from "commander";
+import { Command, CommanderError } from "commander";
 import { createSearchCommand, executeSearchCommand, filterCaseSensitive } from "./search.js";
 import {
   initializeDatabase,
@@ -91,6 +91,22 @@ describe("Search Command", () => {
         (o) => o.long === "--json"
       );
       expect(jsonOption).toBeDefined();
+    });
+
+    it("has --verbose option", () => {
+      const command = createSearchCommand();
+      const verboseOption = command.options.find(
+        (o) => o.short === "-v" || o.long === "--verbose"
+      );
+      expect(verboseOption).toBeDefined();
+    });
+
+    it("has --quiet option", () => {
+      const command = createSearchCommand();
+      const quietOption = command.options.find(
+        (o) => o.short === "-q" || o.long === "--quiet"
+      );
+      expect(quietOption).toBeDefined();
     });
   });
 
@@ -206,6 +222,74 @@ describe("Search Command", () => {
 
       expect(capturedOptions?.project).toBeUndefined();
       expect(capturedOptions?.json).toBeUndefined();
+    });
+
+    it("parses --verbose flag", () => {
+      const command = createSearchCommand();
+      let capturedOptions: Record<string, unknown> | undefined;
+      command.action((_query, options) => {
+        capturedOptions = options;
+      });
+
+      command.parse(["test", "--verbose"], { from: "user" });
+
+      expect(capturedOptions?.verbose).toBe(true);
+    });
+
+    it("parses -v shorthand", () => {
+      const command = createSearchCommand();
+      let capturedOptions: Record<string, unknown> | undefined;
+      command.action((_query, options) => {
+        capturedOptions = options;
+      });
+
+      command.parse(["test", "-v"], { from: "user" });
+
+      expect(capturedOptions?.verbose).toBe(true);
+    });
+
+    it("parses --quiet flag", () => {
+      const command = createSearchCommand();
+      let capturedOptions: Record<string, unknown> | undefined;
+      command.action((_query, options) => {
+        capturedOptions = options;
+      });
+
+      command.parse(["test", "--quiet"], { from: "user" });
+
+      expect(capturedOptions?.quiet).toBe(true);
+    });
+
+    it("parses -q shorthand", () => {
+      const command = createSearchCommand();
+      let capturedOptions: Record<string, unknown> | undefined;
+      command.action((_query, options) => {
+        capturedOptions = options;
+      });
+
+      command.parse(["test", "-q"], { from: "user" });
+
+      expect(capturedOptions?.quiet).toBe(true);
+    });
+  });
+
+  describe("verbose/quiet conflicts", () => {
+    it("throws error when --verbose and --quiet used together", () => {
+      const command = createSearchCommand();
+      command.exitOverride();
+
+      expect(() => {
+        command.parse(["test", "--verbose", "--quiet"], { from: "user" });
+      }).toThrow();
+    });
+
+    it("throws error when -v and -q used together", () => {
+      const command = createSearchCommand();
+      command.exitOverride();
+
+      expect(() => {
+        command.parse(["test", "-v", "-q"], { from: "user" });
+      }).toThrow();
     });
   });
 
@@ -425,6 +509,205 @@ describe("Search Command", () => {
       } finally {
         closeDatabase(db);
       }
+    });
+  });
+
+  describe("filter options", () => {
+    it("has --session option", () => {
+      const command = createSearchCommand();
+      const option = command.options.find(
+        (o) => o.short === "-s" || o.long === "--session"
+      );
+      expect(option).toBeDefined();
+    });
+
+    it("has --role option", () => {
+      const command = createSearchCommand();
+      const option = command.options.find(
+        (o) => o.long === "--role"
+      );
+      expect(option).toBeDefined();
+    });
+
+    it("has --since option", () => {
+      const command = createSearchCommand();
+      const option = command.options.find(
+        (o) => o.long === "--since"
+      );
+      expect(option).toBeDefined();
+    });
+
+    it("has --before option", () => {
+      const command = createSearchCommand();
+      const option = command.options.find(
+        (o) => o.long === "--before"
+      );
+      expect(option).toBeDefined();
+    });
+
+    it("has --days option", () => {
+      const command = createSearchCommand();
+      const option = command.options.find(
+        (o) => o.long === "--days"
+      );
+      expect(option).toBeDefined();
+    });
+
+    it("parses --session value", () => {
+      const command = createSearchCommand();
+      let capturedOptions: Record<string, unknown> | undefined;
+      command.action((_query, options) => {
+        capturedOptions = options;
+      });
+
+      command.parse(["test", "--session", "abc-123"], { from: "user" });
+
+      expect(capturedOptions?.session).toBe("abc-123");
+    });
+
+    it("parses -s shorthand", () => {
+      const command = createSearchCommand();
+      let capturedOptions: Record<string, unknown> | undefined;
+      command.action((_query, options) => {
+        capturedOptions = options;
+      });
+
+      command.parse(["test", "-s", "session-xyz"], { from: "user" });
+
+      expect(capturedOptions?.session).toBe("session-xyz");
+    });
+
+    it("parses --role single value", () => {
+      const command = createSearchCommand();
+      let capturedOptions: Record<string, unknown> | undefined;
+      command.action((_query, options) => {
+        capturedOptions = options;
+      });
+
+      command.parse(["test", "--role", "user"], { from: "user" });
+
+      expect(capturedOptions?.role).toBe("user");
+    });
+
+    it("parses --role comma-separated values", () => {
+      const command = createSearchCommand();
+      let capturedOptions: Record<string, unknown> | undefined;
+      command.action((_query, options) => {
+        capturedOptions = options;
+      });
+
+      command.parse(["test", "--role", "user,assistant"], { from: "user" });
+
+      expect(capturedOptions?.role).toBe("user,assistant");
+    });
+
+    it("parses --since value", () => {
+      const command = createSearchCommand();
+      let capturedOptions: Record<string, unknown> | undefined;
+      command.action((_query, options) => {
+        capturedOptions = options;
+      });
+
+      command.parse(["test", "--since", "yesterday"], { from: "user" });
+
+      expect(capturedOptions?.since).toBe("yesterday");
+    });
+
+    it("parses --before value", () => {
+      const command = createSearchCommand();
+      let capturedOptions: Record<string, unknown> | undefined;
+      command.action((_query, options) => {
+        capturedOptions = options;
+      });
+
+      command.parse(["test", "--before", "2 weeks ago"], { from: "user" });
+
+      expect(capturedOptions?.before).toBe("2 weeks ago");
+    });
+
+    it("parses --days value", () => {
+      const command = createSearchCommand();
+      let capturedOptions: Record<string, unknown> | undefined;
+      command.action((_query, options) => {
+        capturedOptions = options;
+      });
+
+      command.parse(["test", "--days", "7"], { from: "user" });
+
+      expect(capturedOptions?.days).toBe(7);
+    });
+
+    it("includes filter options in help", () => {
+      const command = createSearchCommand();
+      const helpInfo = command.helpInformation();
+
+      expect(helpInfo).toContain("-s, --session");
+      expect(helpInfo).toContain("--role");
+      expect(helpInfo).toContain("--since");
+      expect(helpInfo).toContain("--before");
+      expect(helpInfo).toContain("--days");
+    });
+  });
+
+  describe("days/since/before conflicts", () => {
+    it("throws error when --days and --since used together", () => {
+      const command = createSearchCommand();
+      command.exitOverride();
+
+      expect(() => {
+        command.parse(["test", "--days", "7", "--since", "yesterday"], { from: "user" });
+      }).toThrow();
+    });
+
+    it("throws error when --days and --before used together", () => {
+      const command = createSearchCommand();
+      command.exitOverride();
+
+      expect(() => {
+        command.parse(["test", "--days", "7", "--before", "2 weeks ago"], { from: "user" });
+      }).toThrow();
+    });
+
+    it("allows --since and --before together", () => {
+      const command = createSearchCommand();
+      let capturedOptions: Record<string, unknown> | undefined;
+      command.action((_query, options) => {
+        capturedOptions = options;
+      });
+
+      command.parse(["test", "--since", "2 weeks ago", "--before", "yesterday"], { from: "user" });
+
+      expect(capturedOptions?.since).toBe("2 weeks ago");
+      expect(capturedOptions?.before).toBe("yesterday");
+    });
+  });
+
+  describe("--days validation", () => {
+    it("throws error for invalid days value", () => {
+      const command = createSearchCommand();
+      command.exitOverride();
+
+      expect(() => {
+        command.parse(["test", "--days", "invalid"], { from: "user" });
+      }).toThrow();
+    });
+
+    it("throws error for negative days value", () => {
+      const command = createSearchCommand();
+      command.exitOverride();
+
+      expect(() => {
+        command.parse(["test", "--days", "-5"], { from: "user" });
+      }).toThrow();
+    });
+
+    it("throws error for zero days value", () => {
+      const command = createSearchCommand();
+      command.exitOverride();
+
+      expect(() => {
+        command.parse(["test", "--days", "0"], { from: "user" });
+      }).toThrow();
     });
   });
 
