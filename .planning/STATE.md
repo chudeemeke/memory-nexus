@@ -11,13 +11,13 @@
 ## Current Position
 
 **Milestone:** v1 - Full Vision Implementation
-**Phase:** 6 - Search Command with FTS5 (IN PROGRESS)
-**Plan:** 1 of 4 complete
-**Status:** 06-01 executed, ready for 06-02
+**Phase:** 6 - Search Command with FTS5 (COMPLETE)
+**Plan:** 2 of 2 complete
+**Status:** Phase 6 complete, ready for Phase 7
 
 ```
-[█████████████████                       ] 44%
-5.25 of 12 phases complete | 738 tests passing | Ready for 06-02
+[████████████████████                    ] 50%
+6 of 12 phases complete | 752 tests passing | Ready for Phase 7
 ```
 
 ## Accumulated Context
@@ -50,6 +50,7 @@
 | Parser gracefully skips malformed lines | All sessions processed even with invalid JSONL content | 2026-01-28 |
 | ANSI bold for match highlighting | Convert <mark> tags to \x1b[1m/\x1b[0m for terminal output | 2026-01-28 |
 | Score as percentage | (score * 100).toFixed(0) for human-readable relevance display | 2026-01-28 |
+| Post-filter for case sensitivity | FTS5 is inherently case-insensitive; post-filter with 2x fetch limit | 2026-01-29 |
 
 ### Blockers
 
@@ -82,7 +83,8 @@ None currently.
 - [x] Execute 05-03 - CLI sync command with progress (49 tests)
 - [x] Execute 05-04 - Integration tests and verification (28 tests)
 - [x] Execute 06-01 - Search Command Implementation (28 tests)
-- [ ] Execute 06-02 - Context Command (NEXT)
+- [x] Execute 06-02 - Case Sensitivity Options (14 tests)
+- [ ] Plan Phase 7 - Advanced Search Filters (NEXT)
 
 ### Learnings
 
@@ -123,42 +125,49 @@ None currently.
 - Integration tests should use temporary directories for isolation
 - CLI smoke tests can verify command structure without running actual operations
 - messageRepo.save() parameter order is (message, sessionId), not (sessionId, message)
+- FTS5 case sensitivity requires post-filter approach (unicode61 tokenizer is case-insensitive)
+- Fetch 2x limit when case-sensitive to account for filtering losses
+- Performance test: search 1000 messages under 100ms with FTS5
 
 ## Session Continuity
 
 ### Last Session
 
-**Date:** 2026-01-28
-**Completed:** 06-01 Search Command Implementation
-**Next:** Execute 06-02 - Context Command
+**Date:** 2026-01-29
+**Completed:** 06-02 Case Sensitivity Options
+**Next:** Plan Phase 7 - Advanced Search Filters
 
 ### Context for Next Session
 
-1. 06-01 complete - Search command wired to Fts5SearchService
-2. 738 tests passing (28 new search tests)
-3. Search command verified with real synced data
-4. ANSI highlighting working for terminal output
-5. JSON output mode working for programmatic use
-6. Ready for 06-02 (Context Command)
+1. Phase 6 complete - Search command with FTS5 fully functional
+2. 752 tests passing (14 new case sensitivity tests)
+3. All SRCH-01 through SRCH-06 requirements marked Complete
+4. Search command features:
+   - Full-text search with FTS5 MATCH
+   - BM25 relevance ranking
+   - Snippet highlighting (ANSI bold)
+   - --limit option (default 10)
+   - --case-sensitive / --ignore-case options
+   - --json output mode
+5. Ready for Phase 7 (advanced filters: --project, --since, --role)
 
 ### Files Modified This Session
 
-- src/presentation/cli/commands/search.ts (created)
-- src/presentation/cli/commands/search.test.ts (created)
-- src/presentation/cli/commands/index.ts (modified)
-- src/presentation/cli/index.ts (modified)
-- .planning/phases/06-search-command-fts5/06-01-SUMMARY.md (created)
+- src/presentation/cli/commands/search.ts (modified - case sensitivity)
+- src/presentation/cli/commands/search.test.ts (modified - 14 new tests)
+- .planning/REQUIREMENTS.md (updated - SRCH-01 through SRCH-06 Complete)
+- .planning/phases/06-search-command-fts5/06-02-SUMMARY.md (created)
 - .planning/STATE.md (updated)
 
 ## Performance Metrics
 
 | Metric | Value |
 |--------|-------|
-| Phases Completed | 5.25 / 12 |
-| Plans Completed | 21 / ? (phases 1-6) |
-| Requirements Completed | 57 / 85 |
+| Phases Completed | 6 / 12 |
+| Plans Completed | 22 (phases 1-6) |
+| Requirements Completed | 63 / 85 |
 | Test Coverage | 97%+ functions, 98%+ lines |
-| Total Tests | 738 |
+| Total Tests | 752 |
 
 ## Phase 2 Summary
 
@@ -204,12 +213,10 @@ None currently.
 
 | Plan | Description | Tests | Status |
 |------|-------------|-------|--------|
-| 06-01 | Search Command | 28 | Complete |
-| 06-02 | Context Command | - | Not Started |
-| 06-03 | List Command | - | Not Started |
-| 06-04 | Show Command | - | Not Started |
-| **Total** | | **28** | **In Progress** |
+| 06-01 | Search Command Implementation | 28 | Complete |
+| 06-02 | Case Sensitivity Options | 14 | Complete |
+| **Total** | | **42** | **Complete** |
 
 ---
 
-*Last updated: 2026-01-28*
+*Last updated: 2026-01-29*
