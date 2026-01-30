@@ -19,3 +19,9 @@ export {
     type BatchResult,
     type BatchOptions,
 } from "./tool-use-repository.js";
+
+// Link Repository
+export {
+    SqliteLinkRepository,
+    type RelatedLink,
+} from "./link-repository.js";

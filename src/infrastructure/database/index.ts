@@ -37,8 +37,10 @@ export {
     SqliteMessageRepository,
     SqliteExtractionStateRepository,
     SqliteToolUseRepository,
+    SqliteLinkRepository,
     type BatchResult,
     type BatchOptions,
+    type RelatedLink,
 } from "./repositories/index.js";
 
 // Services
