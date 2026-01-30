@@ -44,4 +44,11 @@ export {
 } from "./repositories/index.js";
 
 // Services
-export { Fts5SearchService, SqliteStatsService } from "./services/index.js";
+export {
+  Fts5SearchService,
+  SqliteStatsService,
+  SqliteContextService,
+  type ProjectContext,
+  type ContextOptions,
+  type ToolUsage,
+} from "./services/index.js";
