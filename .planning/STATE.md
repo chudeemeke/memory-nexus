@@ -4,20 +4,20 @@
 
 **Core Value:** Knowledge gained in one Claude Code project becomes accessible from any other project. No more context silos.
 
-**Current Focus:** Phase 8 - Context Command
+**Current Focus:** Phase 9 - Context and Related Commands
 
 **Tech Stack:** Bun, TypeScript 5.5+, bun:sqlite with FTS5, Commander.js v14, cli-progress@3.12.0, chrono-node
 
 ## Current Position
 
 **Milestone:** v1 - Full Vision Implementation
-**Phase:** 8 - Stats and List Commands (COMPLETE)
-**Plan:** 2 of 2 complete (08-02)
-**Status:** Phase 8 complete
+**Phase:** 8 - Stats and List Commands (VERIFIED)
+**Plan:** 2 of 2 complete + gap fix
+**Status:** Phase 8 verified, ready for Phase 9
 
 ```
-[████████████████████████████████        ] 75%
-8 of 12 phases complete | 988 tests passing | Phase 8 complete
+[████████████████████████████████        ] 67%
+8 of 12 phases complete | 988 tests passing | Phase 8 verified
 ```
 
 ## Accumulated Context
@@ -164,31 +164,22 @@ None currently.
 ### Last Session
 
 **Date:** 2026-01-30
-**Completed:** 08-02 List Command Implementation
-**Next:** Plan Phase 9 or continue remaining phases
+**Completed:** Phase 8 executed, verified, gap fixed
+**Next:** Plan Phase 9 (Context and Related Commands)
 
 ### Context for Next Session
 
-1. Phase 8 complete - Both 08-01 (stats) and 08-02 (list) done
-2. 988 tests passing (50 new tests from 08-02)
-3. List command working: `memory list` with --limit, --project, --since, --before, --days, --json, --verbose, --quiet options
-4. ListFormatter strategy pattern for output mode selection
-5. Dynamic WHERE clause for flexible filtering
-6. Ready for Phase 9 planning or remaining phases
+1. Phase 8 fully verified - stats and list commands both working
+2. 988 tests passing
+3. Gap fix: stats command wiring added (commit 6ad38ba)
+4. Both commands accessible via CLI
+5. Ready for Phase 9 planning
 
 ### Files Modified This Session
 
-- src/domain/ports/repositories.ts (added SessionListOptions, findFiltered)
-- src/infrastructure/database/repositories/session-repository.ts (implemented findFiltered)
-- src/infrastructure/database/repositories/session-repository.test.ts (8 new tests)
-- src/presentation/cli/formatters/list-formatter.ts (created)
-- src/presentation/cli/formatters/list-formatter.test.ts (created, 24 tests)
-- src/presentation/cli/formatters/index.ts (export list-formatter)
-- src/presentation/cli/commands/list.ts (created)
-- src/presentation/cli/commands/list.test.ts (created, 18 tests)
-- src/presentation/cli/commands/index.ts (export createListCommand)
-- src/presentation/cli/index.ts (replaced placeholder with module command)
-- .planning/phases/08-stats-and-list-commands/08-02-SUMMARY.md (created)
+- src/presentation/cli/index.ts (wired stats command - gap fix)
+- .planning/phases/08-stats-and-list-commands/08-VERIFICATION.md (updated to passed)
+- .planning/ROADMAP.md (Phase 8 marked complete)
 - .planning/STATE.md (updated)
 
 ## Performance Metrics

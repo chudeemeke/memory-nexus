@@ -251,8 +251,8 @@ Plans:
 **Plans:** 2 plans
 
 Plans:
-- [ ] 08-01-PLAN.md - Stats service and command with per-project breakdown
-- [ ] 08-02-PLAN.md - List command with project and date filtering
+- [x] 08-01-PLAN.md - Stats service and command with per-project breakdown
+- [x] 08-02-PLAN.md - List command with project and date filtering
 
 ---
 
@@ -365,7 +365,7 @@ Plans:
 | 5 | Basic Sync Command | Complete | 100% |
 | 6 | Search Command with FTS5 | Complete | 100% |
 | 7 | Filtering and Output Formatting | Complete | 100% |
-| 8 | Stats and List Commands | Planned | 0% |
+| 8 | Stats and List Commands | Complete | 100% |
 | 9 | Context and Related Commands | Not Started | 0% |
 | 10 | Hook Integration | Not Started | 0% |
 | 11 | Session Navigation | Not Started | 0% |
@@ -427,4 +427,4 @@ Phase 1 (Domain Entities)
 
 ---
 
-*Last updated: 2026-01-30 (Phase 8 planned)*
+*Last updated: 2026-01-30 (Phase 8 complete)*
