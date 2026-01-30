@@ -11,13 +11,13 @@
 ## Current Position
 
 **Milestone:** v1 - Full Vision Implementation
-**Phase:** 8 - Stats and List Commands (IN PROGRESS)
-**Plan:** 1 of 2 complete (08-01)
-**Status:** Phase 8 in progress, 08-01 complete
+**Phase:** 8 - Stats and List Commands (COMPLETE)
+**Plan:** 2 of 2 complete (08-02)
+**Status:** Phase 8 complete
 
 ```
-[███████████████████████████             ] 65%
-7.5 of 12 phases complete | 988 tests passing | Plan 08-01 complete
+[████████████████████████████████        ] 75%
+8 of 12 phases complete | 988 tests passing | Phase 8 complete
 ```
 
 ## Accumulated Context
@@ -63,6 +63,10 @@
 | Table-valued PRAGMA | pragma_page_count() * pragma_page_size() for database size | 2026-01-30 |
 | Intl.NumberFormat | en-US locale for consistent thousands separator formatting | 2026-01-30 |
 | Binary bytes thresholds | 1024 boundaries for B/KB/MB/GB formatting | 2026-01-30 |
+| Dynamic WHERE clause | Flexible filtering without N! prepared statements | 2026-01-30 |
+| ListFormatter strategy pattern | Consistent output modes across commands | 2026-01-30 |
+| Project filter LIKE | Substring match more useful than exact match | 2026-01-30 |
+| Default limit 20 | Reasonable for listing; YAGNI on pagination | 2026-01-30 |
 
 ### Blockers
 
@@ -103,7 +107,7 @@ None currently.
 - [x] Execute 07-04 - Apply formatting to search and sync commands (10 tests)
 - [x] Plan Phase 8 - Stats and List Commands (2 plans created)
 - [x] Execute 08-01 - Stats Command Implementation (75 tests)
-- [ ] Execute 08-02 - List Command Implementation
+- [x] Execute 08-02 - List Command Implementation (50 tests)
 
 ### Learnings
 
@@ -160,41 +164,40 @@ None currently.
 ### Last Session
 
 **Date:** 2026-01-30
-**Completed:** 08-01 Stats Command Implementation
-**Next:** Execute 08-02 - List Command Implementation
+**Completed:** 08-02 List Command Implementation
+**Next:** Plan Phase 9 or continue remaining phases
 
 ### Context for Next Session
 
-1. Phase 8 in progress - 08-01 complete, 08-02 pending
-2. 988 tests passing (75 new tests from 08-01)
-3. Stats command working: `memory stats` with --json, --verbose, --quiet, --projects options
-4. StatsFormatter strategy pattern for output mode selection
-5. SqliteStatsService uses efficient subquery pattern for totals
-6. Ready to execute 08-02 - List Command Implementation
+1. Phase 8 complete - Both 08-01 (stats) and 08-02 (list) done
+2. 988 tests passing (50 new tests from 08-02)
+3. List command working: `memory list` with --limit, --project, --since, --before, --days, --json, --verbose, --quiet options
+4. ListFormatter strategy pattern for output mode selection
+5. Dynamic WHERE clause for flexible filtering
+6. Ready for Phase 9 planning or remaining phases
 
 ### Files Modified This Session
 
-- src/domain/ports/services.ts (added IStatsService, StatsResult, ProjectStats)
-- src/infrastructure/database/services/stats-service.ts (created)
-- src/infrastructure/database/services/stats-service.test.ts (created, 16 tests)
-- src/infrastructure/database/services/index.ts (export SqliteStatsService)
-- src/infrastructure/database/index.ts (export SqliteStatsService)
-- src/presentation/cli/formatters/stats-formatter.ts (created)
-- src/presentation/cli/formatters/stats-formatter.test.ts (created, 34 tests)
-- src/presentation/cli/formatters/index.ts (export stats-formatter)
-- src/presentation/cli/commands/stats.ts (created)
-- src/presentation/cli/commands/stats.test.ts (created, 25 tests)
-- src/presentation/cli/commands/index.ts (export createStatsCommand)
-- .planning/phases/08-stats-and-list-commands/08-01-SUMMARY.md (created)
+- src/domain/ports/repositories.ts (added SessionListOptions, findFiltered)
+- src/infrastructure/database/repositories/session-repository.ts (implemented findFiltered)
+- src/infrastructure/database/repositories/session-repository.test.ts (8 new tests)
+- src/presentation/cli/formatters/list-formatter.ts (created)
+- src/presentation/cli/formatters/list-formatter.test.ts (created, 24 tests)
+- src/presentation/cli/formatters/index.ts (export list-formatter)
+- src/presentation/cli/commands/list.ts (created)
+- src/presentation/cli/commands/list.test.ts (created, 18 tests)
+- src/presentation/cli/commands/index.ts (export createListCommand)
+- src/presentation/cli/index.ts (replaced placeholder with module command)
+- .planning/phases/08-stats-and-list-commands/08-02-SUMMARY.md (created)
 - .planning/STATE.md (updated)
 
 ## Performance Metrics
 
 | Metric | Value |
 |--------|-------|
-| Phases Completed | 7.5 / 12 |
-| Plans Completed | 27 (phases 1-7, 08-01) |
-| Requirements Completed | 68 / 85 |
+| Phases Completed | 8 / 12 |
+| Plans Completed | 28 (phases 1-8) |
+| Requirements Completed | 72 / 85 |
 | Test Coverage | 95%+ functions, 96%+ lines |
 | Total Tests | 988 |
 
@@ -261,9 +264,9 @@ None currently.
 | Plan | Description | Tests | Status |
 |------|-------------|-------|--------|
 | 08-01 | Stats Command Implementation | 75 | Complete |
-| 08-02 | List Command Implementation | - | Pending |
-| **Total** | | **75+** | **In Progress** |
+| 08-02 | List Command Implementation | 50 | Complete |
+| **Total** | | **125** | **Complete** |
 
 ---
 
-*Last updated: 2026-01-30*
+*Last updated: 2026-01-30 (08-02 complete)*
