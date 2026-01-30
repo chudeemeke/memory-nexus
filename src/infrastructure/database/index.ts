@@ -42,4 +42,4 @@ export {
 } from "./repositories/index.js";
 
 // Services
-export { Fts5SearchService } from "./services/index.js";
+export { Fts5SearchService, SqliteStatsService } from "./services/index.js";

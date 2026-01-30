@@ -57,3 +57,36 @@ export interface ISearchService {
    */
   search(query: SearchQuery, options?: SearchOptions): Promise<SearchResult[]>;
 }
+
+/**
+ * Per-project statistics.
+ */
+export interface ProjectStats {
+  projectName: string;
+  sessionCount: number;
+  messageCount: number;
+}
+
+/**
+ * Database statistics result.
+ */
+export interface StatsResult {
+  totalSessions: number;
+  totalMessages: number;
+  totalToolUses: number;
+  databaseSizeBytes: number;
+  projectBreakdown: ProjectStats[];
+}
+
+/**
+ * Service for database statistics queries.
+ */
+export interface IStatsService {
+  /**
+   * Get database-wide statistics with per-project breakdown.
+   *
+   * @param projectLimit Maximum projects to include in breakdown (default 10)
+   * @returns Statistics including totals and per-project breakdown
+   */
+  getStats(projectLimit?: number): Promise<StatsResult>;
+}

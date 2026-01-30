@@ -5,3 +5,4 @@
  */
 
 export { Fts5SearchService } from "./search-service.js";
+export { SqliteStatsService } from "./stats-service.js";
