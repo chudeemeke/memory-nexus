@@ -1,8 +1,8 @@
 /**
  * Hooks Infrastructure Module
  *
- * Configuration management and logging for hook system.
- * Exports config-manager and log-writer utilities.
+ * Configuration management, logging, and hook runner for hook system.
+ * Exports config-manager, log-writer, and hook-runner utilities.
  */
 
 // Config exports
@@ -25,3 +25,15 @@ export {
     type LogEntry,
     type LogEntryInput,
 } from "./log-writer.js";
+
+// Hook runner exports
+export {
+    spawnBackgroundSync,
+    getLogPath as getHookLogPath,
+    ensureLogDirectory,
+    type SpawnOptions,
+    type SpawnResult,
+} from "./hook-runner.js";
+
+// Hook script exports
+export { type HookInput, readStdinJson } from "./sync-hook-script.js";
