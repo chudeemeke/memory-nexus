@@ -187,8 +187,8 @@ Plans:
 **Plans:** 2 plans
 
 Plans:
-- [ ] 06-01-PLAN.md - Search command implementation with result formatting
-- [ ] 06-02-PLAN.md - Case sensitivity control and integration tests
+- [x] 06-01-PLAN.md - Search command implementation with result formatting
+- [x] 06-02-PLAN.md - Case sensitivity control and integration tests
 
 ---
 
@@ -216,6 +216,14 @@ Plans:
 4. `--json` flag outputs valid JSON that can be piped to jq
 5. Output formatting is consistent: all commands use same structure
 
+**Plans:** 4 plans
+
+Plans:
+- [x] 07-01-PLAN.md - Date parser and timestamp formatter
+- [x] 07-02-PLAN.md - Search filter options
+- [x] 07-03-PLAN.md - Output formatter and color utilities
+- [x] 07-04-PLAN.md - Apply formatting to search and sync commands
+
 ---
 
 ### Phase 8: Stats and List Commands
@@ -239,6 +247,12 @@ Plans:
 3. User can run `aidev memory list` and see recent sessions
 4. `--project` filter limits listed sessions to specific project
 5. `--days` filter limits listed sessions to recent time window
+
+**Plans:** 2 plans
+
+Plans:
+- [ ] 08-01-PLAN.md - Stats service and command with per-project breakdown
+- [ ] 08-02-PLAN.md - List command with project and date filtering
 
 ---
 
@@ -349,9 +363,9 @@ Plans:
 | 3 | JSONL Parsing and Extraction | Complete | 100% |
 | 4 | Storage Adapters | Complete | 100% |
 | 5 | Basic Sync Command | Complete | 100% |
-| 6 | Search Command with FTS5 | Planned | 0% |
-| 7 | Filtering and Output Formatting | Not Started | 0% |
-| 8 | Stats and List Commands | Not Started | 0% |
+| 6 | Search Command with FTS5 | Complete | 100% |
+| 7 | Filtering and Output Formatting | Complete | 100% |
+| 8 | Stats and List Commands | Planned | 0% |
 | 9 | Context and Related Commands | Not Started | 0% |
 | 10 | Hook Integration | Not Started | 0% |
 | 11 | Session Navigation | Not Started | 0% |
@@ -413,4 +427,4 @@ Phase 1 (Domain Entities)
 
 ---
 
-*Last updated: 2026-01-28 (Phase 6 planned)*
+*Last updated: 2026-01-30 (Phase 8 planned)*
