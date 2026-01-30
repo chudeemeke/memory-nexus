@@ -1,0 +1,22 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "WebSearch",
+      "Bash(dir:*)",
+      "Bash(bun install)",
+      "Bash(bun test)",
+      "Bash(bun test:*)",
+      "Bash(bun add:*)",
+      "Bash(bun run:*)",
+      "Skill(gsd:research-phase)",
+      "Bash(sqlite3:*)",
+      "Bash(bun -e \"import { Database } from ''bun:sqlite''; const db = new Database\\(require\\(''os''\\).homedir\\(\\) + ''/.memory-nexus/memory.db''\\); console.log\\(db.query\\(''SELECT DISTINCT project FROM sessions''\\).all\\(\\)\\);\")",
+      "Bash(bun -e \"import { Database } from ''bun:sqlite''; const db = new Database\\(require\\(''os''\\).homedir\\(\\) + ''/.memory-nexus/memory.db''\\); console.log\\(db.query\\(\"\"SELECT sql FROM sqlite_master WHERE type=''table''\"\"\\).all\\(\\)\\);\")",
+      "Bash(bun -e \"import { Database } from ''bun:sqlite''; const db = new Database\\(require\\(''os''\\).homedir\\(\\) + ''/.memory-nexus/memory.db''\\); console.log\\(db.query\\(''SELECT DISTINCT project_name FROM sessions''\\).all\\(\\)\\);\")",
+      "Bash(bun -e \"import { Database } from ''bun:sqlite''; const db = new Database\\(require\\(''os''\\).homedir\\(\\) + ''/.memory-nexus/memory.db''\\); console.log\\(db.query\\(''SELECT DISTINCT project_path_encoded, project_path_decoded, project_name FROM sessions LIMIT 5''\\).all\\(\\)\\);\")",
+      "Bash(bun -e:*)"
+    ]
+  }
+}

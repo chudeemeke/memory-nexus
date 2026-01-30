@@ -5,7 +5,7 @@
  * Thin wrapper around SyncService with progress reporting.
  */
 
-import { Command } from "commander";
+import { Command, Option } from "commander";
 import {
   SyncService,
   type SyncOptions,
@@ -47,8 +47,14 @@ export function createSyncCommand(): Command {
     .option("-f, --force", "Re-extract all sessions regardless of state")
     .option("-p, --project <path>", "Sync only sessions from specific project")
     .option("-s, --session <id>", "Sync a specific session only")
-    .option("-q, --quiet", "Suppress progress output")
-    .option("-v, --verbose", "Show detailed progress")
+    .addOption(
+      new Option("-q, --quiet", "Suppress progress output")
+        .conflicts("verbose")
+    )
+    .addOption(
+      new Option("-v, --verbose", "Show detailed progress")
+        .conflicts("quiet")
+    )
     .action(async (options: SyncCommandOptions) => {
       await executeSyncCommand(options);
     });

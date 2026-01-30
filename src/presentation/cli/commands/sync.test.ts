@@ -6,7 +6,7 @@
  */
 
 import { describe, expect, it, beforeEach, afterEach, spyOn, mock } from "bun:test";
-import { Command } from "commander";
+import { Command, CommanderError } from "commander";
 import { createSyncCommand } from "./sync.js";
 
 describe("Sync Command", () => {
@@ -232,6 +232,26 @@ describe("Sync Command", () => {
       expect(capturedOptions?.session).toBeUndefined();
       expect(capturedOptions?.quiet).toBeUndefined();
       expect(capturedOptions?.verbose).toBeUndefined();
+    });
+  });
+
+  describe("verbose/quiet conflicts", () => {
+    it("throws error when --verbose and --quiet used together", () => {
+      const command = createSyncCommand();
+      command.exitOverride();
+
+      expect(() => {
+        command.parse(["--verbose", "--quiet"], { from: "user" });
+      }).toThrow();
+    });
+
+    it("throws error when -v and -q used together", () => {
+      const command = createSyncCommand();
+      command.exitOverride();
+
+      expect(() => {
+        command.parse(["-v", "-q"], { from: "user" });
+      }).toThrow();
     });
   });
 
