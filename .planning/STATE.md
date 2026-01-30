@@ -16,7 +16,7 @@
 **Status:** Phase 9 complete
 
 ```
-[████████████████████████████████████████] 75%
+[██████████████████████████████░░░░░░░░░░] 75%
 9 of 12 phases complete | 1162 tests passing | Ready for Phase 10
 ```
 
