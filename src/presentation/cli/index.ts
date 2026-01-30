@@ -7,7 +7,7 @@
  */
 
 import { Command } from "commander";
-import { createSyncCommand, createSearchCommand, createListCommand } from "./commands/index.js";
+import { createSyncCommand, createSearchCommand, createListCommand, createStatsCommand } from "./commands/index.js";
 
 const program = new Command();
 
@@ -24,6 +24,9 @@ program.addCommand(createSearchCommand());
 
 // Add list command from module
 program.addCommand(createListCommand());
+
+// Add stats command from module
+program.addCommand(createStatsCommand());
 
 program
   .command("context <project>")
