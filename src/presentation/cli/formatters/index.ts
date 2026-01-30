@@ -43,3 +43,18 @@ export {
   type StatsFormatOptions,
   type StatsFormatter,
 } from "./stats-formatter.js";
+
+export {
+  createContextFormatter,
+  type ContextOutputMode,
+  type ContextFormatOptions,
+  type ContextFormatter,
+} from "./context-formatter.js";
+
+export {
+  createRelatedFormatter,
+  type RelatedOutputMode,
+  type RelatedFormatOptions,
+  type RelatedFormatter,
+  type RelatedSession,
+} from "./related-formatter.js";
