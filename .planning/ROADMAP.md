@@ -280,6 +280,14 @@ Plans:
 4. Related sessions are ranked by relationship strength (weight)
 5. 2-hop relationships surface sessions sharing common topics
 
+**Plans:** 4 plans
+
+Plans:
+- [ ] 09-01-PLAN.md - SqliteLinkRepository with recursive CTE for graph traversal
+- [ ] 09-02-PLAN.md - Context command with service, formatter, and CLI handler
+- [ ] 09-03-PLAN.md - Related command with weight-based ranking
+- [ ] 09-04-PLAN.md - Integration and CLI wiring
+
 ---
 
 ### Phase 10: Hook Integration and Incremental Sync
@@ -366,7 +374,7 @@ Plans:
 | 6 | Search Command with FTS5 | Complete | 100% |
 | 7 | Filtering and Output Formatting | Complete | 100% |
 | 8 | Stats and List Commands | Complete | 100% |
-| 9 | Context and Related Commands | Not Started | 0% |
+| 9 | Context and Related Commands | Planned | 0% |
 | 10 | Hook Integration | Not Started | 0% |
 | 11 | Session Navigation | Not Started | 0% |
 | 12 | Polish and Error Handling | Not Started | 0% |
@@ -427,4 +435,4 @@ Phase 1 (Domain Entities)
 
 ---
 
-*Last updated: 2026-01-30 (Phase 8 complete)*
+*Last updated: 2026-01-30 (Phase 9 planned)*
