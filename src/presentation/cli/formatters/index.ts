@@ -36,3 +36,10 @@ export {
   type ListFormatOptions,
   type ListFormatter,
 } from "./list-formatter.js";
+
+export {
+  createStatsFormatter,
+  type StatsOutputMode,
+  type StatsFormatOptions,
+  type StatsFormatter,
+} from "./stats-formatter.js";

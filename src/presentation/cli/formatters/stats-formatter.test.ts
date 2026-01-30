@@ -1,0 +1,333 @@
+/**
+ * Stats Formatter Tests
+ *
+ * Tests for stats formatting with different output modes.
+ */
+
+import { describe, it, expect } from "bun:test";
+import {
+  createStatsFormatter,
+  type StatsOutputMode,
+  type StatsFormatOptions,
+} from "./stats-formatter.js";
+import type { StatsResult, ProjectStats } from "../../../domain/ports/services.js";
+
+describe("StatsFormatter", () => {
+  // Test stats data
+  const mockStats: StatsResult = {
+    totalSessions: 42,
+    totalMessages: 1234,
+    totalToolUses: 567,
+    databaseSizeBytes: 1536000, // 1.5 MB
+    projectBreakdown: [
+      { projectName: "ProjectAlpha", sessionCount: 25, messageCount: 800 },
+      { projectName: "ProjectBeta", sessionCount: 17, messageCount: 434 },
+    ],
+  };
+
+  const emptyStats: StatsResult = {
+    totalSessions: 0,
+    totalMessages: 0,
+    totalToolUses: 0,
+    databaseSizeBytes: 4096,
+    projectBreakdown: [],
+  };
+
+  describe("createStatsFormatter", () => {
+    it("creates a formatter with formatStats method", () => {
+      const formatter = createStatsFormatter("default", false);
+      expect(typeof formatter.formatStats).toBe("function");
+    });
+
+    it("creates a formatter with formatError method", () => {
+      const formatter = createStatsFormatter("default", false);
+      expect(typeof formatter.formatError).toBe("function");
+    });
+
+    it("creates a formatter with formatEmpty method", () => {
+      const formatter = createStatsFormatter("default", false);
+      expect(typeof formatter.formatEmpty).toBe("function");
+    });
+  });
+
+  describe("default mode", () => {
+    const formatter = createStatsFormatter("default", false);
+
+    it("includes header in output", () => {
+      const output = formatter.formatStats(mockStats);
+      expect(output).toContain("Database Statistics");
+    });
+
+    it("shows session count", () => {
+      const output = formatter.formatStats(mockStats);
+      expect(output).toContain("42");
+    });
+
+    it("shows message count with formatting", () => {
+      const output = formatter.formatStats(mockStats);
+      expect(output).toContain("1,234");
+    });
+
+    it("shows tool use count", () => {
+      const output = formatter.formatStats(mockStats);
+      expect(output).toContain("567");
+    });
+
+    it("shows database size in human-readable format", () => {
+      const output = formatter.formatStats(mockStats);
+      expect(output).toContain("1.5 MB");
+    });
+
+    it("shows project breakdown", () => {
+      const output = formatter.formatStats(mockStats);
+      expect(output).toContain("ProjectAlpha");
+      expect(output).toContain("ProjectBeta");
+    });
+
+    it("shows session and message counts per project", () => {
+      const output = formatter.formatStats(mockStats);
+      expect(output).toContain("25");
+      expect(output).toContain("800");
+    });
+  });
+
+  describe("json mode", () => {
+    const formatter = createStatsFormatter("json", false);
+
+    it("outputs valid JSON", () => {
+      const output = formatter.formatStats(mockStats);
+      expect(() => JSON.parse(output)).not.toThrow();
+    });
+
+    it("includes all totals in JSON", () => {
+      const output = formatter.formatStats(mockStats);
+      const parsed = JSON.parse(output);
+
+      expect(parsed.totalSessions).toBe(42);
+      expect(parsed.totalMessages).toBe(1234);
+      expect(parsed.totalToolUses).toBe(567);
+      expect(parsed.databaseSizeBytes).toBe(1536000);
+    });
+
+    it("includes project breakdown in JSON", () => {
+      const output = formatter.formatStats(mockStats);
+      const parsed = JSON.parse(output);
+
+      expect(parsed.projectBreakdown.length).toBe(2);
+      expect(parsed.projectBreakdown[0].projectName).toBe("ProjectAlpha");
+    });
+
+    it("includes execution time when provided", () => {
+      const output = formatter.formatStats(mockStats, { executionTimeMs: 50 });
+      const parsed = JSON.parse(output);
+
+      expect(parsed.executionTimeMs).toBe(50);
+    });
+
+    it("has no ANSI color codes", () => {
+      const output = formatter.formatStats(mockStats);
+      expect(output).not.toContain("\x1b[");
+    });
+  });
+
+  describe("quiet mode", () => {
+    const formatter = createStatsFormatter("quiet", false);
+
+    it("outputs just numbers on lines", () => {
+      const output = formatter.formatStats(mockStats);
+      const lines = output.split("\n");
+
+      expect(lines[0]).toBe("42"); // sessions
+      expect(lines[1]).toBe("1234"); // messages
+      expect(lines[2]).toBe("567"); // tool uses
+      expect(lines[3]).toBe("1536000"); // size in bytes
+    });
+
+    it("has no header", () => {
+      const output = formatter.formatStats(mockStats);
+      expect(output).not.toContain("Statistics");
+      expect(output).not.toContain("===");
+    });
+
+    it("has no project breakdown", () => {
+      const output = formatter.formatStats(mockStats);
+      expect(output).not.toContain("ProjectAlpha");
+    });
+  });
+
+  describe("verbose mode", () => {
+    const formatter = createStatsFormatter("verbose", false);
+
+    it("shows execution time when provided", () => {
+      const output = formatter.formatStats(mockStats, { executionTimeMs: 75 });
+      expect(output).toContain("75ms");
+      expect(output).toContain("Execution Details");
+    });
+
+    it("shows raw byte count in parentheses", () => {
+      const output = formatter.formatStats(mockStats);
+      expect(output).toContain("1.5 MB");
+      expect(output).toContain("1,536,000 bytes");
+    });
+
+    it("shows project count in header", () => {
+      const output = formatter.formatStats(mockStats);
+      expect(output).toContain("Projects (2)");
+    });
+
+    it("shows average messages per session", () => {
+      const output = formatter.formatStats(mockStats);
+      // 800 / 25 = 32.0
+      expect(output).toContain("32.0/session");
+    });
+  });
+
+  describe("formatEmpty", () => {
+    it("returns helpful message in default mode", () => {
+      const formatter = createStatsFormatter("default", false);
+      const output = formatter.formatEmpty();
+
+      expect(output).toContain("No sessions synced");
+      expect(output).toContain("memory sync");
+    });
+
+    it("returns JSON with empty flag in json mode", () => {
+      const formatter = createStatsFormatter("json", false);
+      const output = formatter.formatEmpty();
+      const parsed = JSON.parse(output);
+
+      expect(parsed.totalSessions).toBe(0);
+      expect(parsed.empty).toBe(true);
+      expect(parsed.message).toContain("No sessions synced");
+    });
+
+    it("returns zeros in quiet mode", () => {
+      const formatter = createStatsFormatter("quiet", false);
+      const output = formatter.formatEmpty();
+
+      expect(output).toBe("0\n0\n0\n0");
+    });
+  });
+
+  describe("formatError", () => {
+    it("includes Error prefix in default mode", () => {
+      const formatter = createStatsFormatter("default", false);
+      const error = new Error("Database connection failed");
+      const output = formatter.formatError(error);
+
+      expect(output).toContain("Error:");
+      expect(output).toContain("Database connection failed");
+    });
+
+    it("returns JSON error in json mode", () => {
+      const formatter = createStatsFormatter("json", false);
+      const error = new Error("Something went wrong");
+      const output = formatter.formatError(error);
+      const parsed = JSON.parse(output);
+
+      expect(parsed.error).toBe("Something went wrong");
+    });
+
+    it("includes stack trace in verbose mode", () => {
+      const formatter = createStatsFormatter("verbose", false);
+      const error = new Error("Test error");
+      const output = formatter.formatError(error);
+
+      expect(output).toContain("Test error");
+      expect(output).toContain("at "); // Stack trace
+    });
+  });
+
+  describe("number formatting", () => {
+    it("formats thousands with commas", () => {
+      const stats: StatsResult = {
+        totalSessions: 1234567,
+        totalMessages: 0,
+        totalToolUses: 0,
+        databaseSizeBytes: 0,
+        projectBreakdown: [],
+      };
+      const formatter = createStatsFormatter("default", false);
+      const output = formatter.formatStats(stats);
+
+      expect(output).toContain("1,234,567");
+    });
+  });
+
+  describe("bytes formatting", () => {
+    it("formats bytes as B for small values", () => {
+      const stats: StatsResult = {
+        totalSessions: 1,
+        totalMessages: 1,
+        totalToolUses: 0,
+        databaseSizeBytes: 500,
+        projectBreakdown: [],
+      };
+      const formatter = createStatsFormatter("default", false);
+      const output = formatter.formatStats(stats);
+
+      expect(output).toContain("500 B");
+    });
+
+    it("formats bytes as KB", () => {
+      const stats: StatsResult = {
+        totalSessions: 1,
+        totalMessages: 1,
+        totalToolUses: 0,
+        databaseSizeBytes: 2048,
+        projectBreakdown: [],
+      };
+      const formatter = createStatsFormatter("default", false);
+      const output = formatter.formatStats(stats);
+
+      expect(output).toContain("2.0 KB");
+    });
+
+    it("formats bytes as MB", () => {
+      const stats: StatsResult = {
+        totalSessions: 1,
+        totalMessages: 1,
+        totalToolUses: 0,
+        databaseSizeBytes: 5 * 1024 * 1024,
+        projectBreakdown: [],
+      };
+      const formatter = createStatsFormatter("default", false);
+      const output = formatter.formatStats(stats);
+
+      expect(output).toContain("5.0 MB");
+    });
+
+    it("formats bytes as GB for large values", () => {
+      const stats: StatsResult = {
+        totalSessions: 1,
+        totalMessages: 1,
+        totalToolUses: 0,
+        databaseSizeBytes: 2 * 1024 * 1024 * 1024,
+        projectBreakdown: [],
+      };
+      const formatter = createStatsFormatter("default", false);
+      const output = formatter.formatStats(stats);
+
+      expect(output).toContain("2.0 GB");
+    });
+  });
+
+  describe("empty project breakdown", () => {
+    const noProjectsStats: StatsResult = {
+      totalSessions: 10,
+      totalMessages: 50,
+      totalToolUses: 5,
+      databaseSizeBytes: 10240,
+      projectBreakdown: [],
+    };
+
+    it("does not show Projects section when empty", () => {
+      const formatter = createStatsFormatter("default", false);
+      const output = formatter.formatStats(noProjectsStats);
+
+      // Should have totals but not project section
+      expect(output).toContain("Sessions:");
+      expect(output).not.toContain("\nProjects:");
+    });
+  });
+});
