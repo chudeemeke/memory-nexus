@@ -12,12 +12,12 @@
 
 **Milestone:** v1 - Full Vision Implementation
 **Phase:** 9 - Context and Related Commands (In Progress)
-**Plan:** 2 of 4 complete
-**Status:** 09-02 Context Command complete
+**Plan:** 3 of 4 complete
+**Status:** 09-03 Related Command complete
 
 ```
-[█████████████████████████████████░░░░   ] 73%
-8.5 of 12 phases complete | 1096 tests passing | Phase 9 in progress
+[██████████████████████████████████░░░░  ] 75%
+8.75 of 12 phases complete | 1162 tests passing | Phase 9 in progress
 ```
 
 ## Accumulated Context
@@ -70,6 +70,10 @@
 | Path-based cycle prevention | Path string with NOT LIKE check for CTE cycle detection | 2026-01-30 |
 | RelatedLink type for hop info | Separate type preserves Link immutability and interface | 2026-01-30 |
 | Multiplicative weight decay | 0.8 * 0.9 = 0.72 for 2-hop path relevance | 2026-01-30 |
+| RelatedSession composite type | Groups Session with weight and hops for formatter consumption | 2026-01-30 |
+| Color thresholds 75%/50% | Green >75%, yellow 50-75%, no color <50% for weight visibility | 2026-01-30 |
+| Hop display 'direct'/'indirect' | Human-readable labels in detailed mode vs numeric in brief | 2026-01-30 |
+| Source session filtered from results | Avoid showing the queried session as related to itself | 2026-01-30 |
 
 ### Blockers
 
@@ -114,7 +118,7 @@ None currently.
 - [x] Plan Phase 9 - Context and Related Commands (4 plans created)
 - [x] Execute 09-01 - Link Repository Implementation (27 tests)
 - [x] Execute 09-02 - Context Command Implementation (81 tests)
-- [ ] Execute 09-03 - Related Command Implementation
+- [x] Execute 09-03 - Related Command Implementation (66 tests)
 - [ ] Execute 09-04 - Show Command Integration
 
 ### Learnings
@@ -175,41 +179,38 @@ None currently.
 ### Last Session
 
 **Date:** 2026-01-30
-**Completed:** 09-02 Context Command Implementation
-**Next:** Execute 09-03 (Related Command Implementation)
+**Completed:** 09-03 Related Command Implementation
+**Next:** Execute 09-04 (Show Command Integration)
 
 ### Context for Next Session
 
-1. 09-02 complete - SqliteContextService + ContextFormatter + context command
-2. 1096 tests passing (81 new context tests)
-3. Context service aggregates project data (sessions, messages, tools, topics)
-4. Formatter strategy pattern established with 5 modes
-5. Ready for 09-03 Related Command
+1. 09-03 complete - RelatedFormatter + related command with graph traversal
+2. 1162 tests passing (66 new related tests)
+3. Related command uses SqliteLinkRepository.findRelatedWithHops() for 2-hop traversal
+4. RelatedSession composite type groups Session with weight and hops
+5. Weight color coding: green >75%, yellow 50-75%
+6. Ready for 09-04 Show Command Integration
 
 ### Files Modified This Session
 
-- src/infrastructure/database/services/context-service.ts (created)
-- src/infrastructure/database/services/context-service.test.ts (created)
-- src/presentation/cli/formatters/context-formatter.ts (created)
-- src/presentation/cli/formatters/context-formatter.test.ts (created)
-- src/presentation/cli/commands/context.ts (created)
-- src/presentation/cli/commands/context.test.ts (created)
-- src/infrastructure/database/services/index.ts (updated)
-- src/infrastructure/database/index.ts (updated)
+- src/presentation/cli/formatters/related-formatter.ts (created)
+- src/presentation/cli/formatters/related-formatter.test.ts (created)
+- src/presentation/cli/commands/related.ts (created)
+- src/presentation/cli/commands/related.test.ts (created)
 - src/presentation/cli/commands/index.ts (updated)
 - src/presentation/cli/index.ts (updated)
-- .planning/phases/09-context-and-related-commands/09-02-SUMMARY.md (created)
+- .planning/phases/09-context-and-related-commands/09-03-SUMMARY.md (created)
 - .planning/STATE.md (updated)
 
 ## Performance Metrics
 
 | Metric | Value |
 |--------|-------|
-| Phases Completed | 8.5 / 12 |
-| Plans Completed | 30 (phases 1-8 + 09-01-02) |
-| Requirements Completed | 76 / 85 |
+| Phases Completed | 8.75 / 12 |
+| Plans Completed | 31 (phases 1-8 + 09-01-03) |
+| Requirements Completed | 78 / 85 |
 | Test Coverage | 95%+ functions, 96%+ lines |
-| Total Tests | 1096 |
+| Total Tests | 1162 |
 
 ## Phase 2 Summary
 
@@ -283,10 +284,10 @@ None currently.
 |------|-------------|-------|--------|
 | 09-01 | Link Repository Implementation | 27 | Complete |
 | 09-02 | Context Command Implementation | 81 | Complete |
-| 09-03 | Related Command Implementation | - | Pending |
+| 09-03 | Related Command Implementation | 66 | Complete |
 | 09-04 | Show Command Integration | - | Pending |
-| **Total** | | **108** | **In Progress** |
+| **Total** | | **174** | **In Progress** |
 
 ---
 
-*Last updated: 2026-01-30 (09-02 complete)*
+*Last updated: 2026-01-30 (09-03 complete)*
