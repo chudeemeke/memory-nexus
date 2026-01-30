@@ -4,20 +4,20 @@
 
 **Core Value:** Knowledge gained in one Claude Code project becomes accessible from any other project. No more context silos.
 
-**Current Focus:** Phase 6 - Search Command with FTS5
+**Current Focus:** Phase 8 - Context Command
 
-**Tech Stack:** Bun, TypeScript 5.5+, bun:sqlite with FTS5, Commander.js v14, cli-progress@3.12.0
+**Tech Stack:** Bun, TypeScript 5.5+, bun:sqlite with FTS5, Commander.js v14, cli-progress@3.12.0, chrono-node
 
 ## Current Position
 
 **Milestone:** v1 - Full Vision Implementation
-**Phase:** 6 - Search Command with FTS5 (COMPLETE)
-**Plan:** 2 of 2 complete
-**Status:** Phase 6 complete, ready for Phase 7
+**Phase:** 8 - Stats and List Commands (IN PROGRESS)
+**Plan:** 1 of 2 complete (08-01)
+**Status:** Phase 8 in progress, 08-01 complete
 
 ```
-[████████████████████                    ] 50%
-6 of 12 phases complete | 752 tests passing | Ready for Phase 7
+[███████████████████████████             ] 65%
+7.5 of 12 phases complete | 988 tests passing | Plan 08-01 complete
 ```
 
 ## Accumulated Context
@@ -51,6 +51,18 @@
 | ANSI bold for match highlighting | Convert <mark> tags to \x1b[1m/\x1b[0m for terminal output | 2026-01-28 |
 | Score as percentage | (score * 100).toFixed(0) for human-readable relevance display | 2026-01-28 |
 | Post-filter for case sensitivity | FTS5 is inherently case-insensitive; post-filter with 2x fetch limit | 2026-01-29 |
+| Option.conflicts() for mutual exclusivity | Commander.js v14 native support for verbose/quiet conflict | 2026-01-29 |
+| OutputFormatter strategy pattern | Centralized formatting with default/json/verbose/quiet modes | 2026-01-29 |
+| TTY detection for ANSI colors | shouldUseColor() checks stdout.isTTY and NO_COLOR/FORCE_COLOR env vars | 2026-01-29 |
+| performance.now() for timing | Higher precision than Date.now() for verbose execution details | 2026-01-29 |
+| roleFilter array support | Single role uses =, array uses IN clause for multi-role search | 2026-01-29 |
+| sessionFilter direct equality | m.session_id = ? for exact session matching | 2026-01-29 |
+| --days inclusive calculation | Today minus (N-1) days for a full N-day window | 2026-01-29 |
+| argParser for --days validation | Commander.js argParser validates at parse time | 2026-01-29 |
+| Subquery totals pattern | Single query with subqueries for session/message/tool counts | 2026-01-30 |
+| Table-valued PRAGMA | pragma_page_count() * pragma_page_size() for database size | 2026-01-30 |
+| Intl.NumberFormat | en-US locale for consistent thousands separator formatting | 2026-01-30 |
+| Binary bytes thresholds | 1024 boundaries for B/KB/MB/GB formatting | 2026-01-30 |
 
 ### Blockers
 
@@ -84,7 +96,14 @@ None currently.
 - [x] Execute 05-04 - Integration tests and verification (28 tests)
 - [x] Execute 06-01 - Search Command Implementation (28 tests)
 - [x] Execute 06-02 - Case Sensitivity Options (14 tests)
-- [ ] Plan Phase 7 - Advanced Search Filters (NEXT)
+- [x] Plan Phase 7 - Filtering and Output Formatting (4 plans created)
+- [x] Execute 07-01 - Date parser and timestamp formatter (34 tests)
+- [x] Execute 07-02 - Search filter options (27 tests)
+- [x] Execute 07-03 - Output formatter and color utilities (38 tests)
+- [x] Execute 07-04 - Apply formatting to search and sync commands (10 tests)
+- [x] Plan Phase 8 - Stats and List Commands (2 plans created)
+- [x] Execute 08-01 - Stats Command Implementation (75 tests)
+- [ ] Execute 08-02 - List Command Implementation
 
 ### Learnings
 
@@ -128,46 +147,56 @@ None currently.
 - FTS5 case sensitivity requires post-filter approach (unicode61 tokenizer is case-insensitive)
 - Fetch 2x limit when case-sensitive to account for filtering losses
 - Performance test: search 1000 messages under 100ms with FTS5
+- Commander.js Option.conflicts() provides clean mutual exclusivity for CLI flags
+- Strategy pattern for OutputFormatter enables clean output mode switching
+- FormatOptions with ExecutionDetails enables verbose timing/filter display
+- ANSI color detection respects NO_COLOR and FORCE_COLOR environment variables
+- roleFilter array uses SQL IN clause for efficient multi-role queries
+- parseDate from chrono-node handles natural language dates ("yesterday", "2 weeks ago")
+- Commander.js argParser enables validation at parse time with custom error messages
 
 ## Session Continuity
 
 ### Last Session
 
-**Date:** 2026-01-29
-**Completed:** 06-02 Case Sensitivity Options
-**Next:** Plan Phase 7 - Advanced Search Filters
+**Date:** 2026-01-30
+**Completed:** 08-01 Stats Command Implementation
+**Next:** Execute 08-02 - List Command Implementation
 
 ### Context for Next Session
 
-1. Phase 6 complete - Search command with FTS5 fully functional
-2. 752 tests passing (14 new case sensitivity tests)
-3. All SRCH-01 through SRCH-06 requirements marked Complete
-4. Search command features:
-   - Full-text search with FTS5 MATCH
-   - BM25 relevance ranking
-   - Snippet highlighting (ANSI bold)
-   - --limit option (default 10)
-   - --case-sensitive / --ignore-case options
-   - --json output mode
-5. Ready for Phase 7 (advanced filters: --project, --since, --role)
+1. Phase 8 in progress - 08-01 complete, 08-02 pending
+2. 988 tests passing (75 new tests from 08-01)
+3. Stats command working: `memory stats` with --json, --verbose, --quiet, --projects options
+4. StatsFormatter strategy pattern for output mode selection
+5. SqliteStatsService uses efficient subquery pattern for totals
+6. Ready to execute 08-02 - List Command Implementation
 
 ### Files Modified This Session
 
-- src/presentation/cli/commands/search.ts (modified - case sensitivity)
-- src/presentation/cli/commands/search.test.ts (modified - 14 new tests)
-- .planning/REQUIREMENTS.md (updated - SRCH-01 through SRCH-06 Complete)
-- .planning/phases/06-search-command-fts5/06-02-SUMMARY.md (created)
+- src/domain/ports/services.ts (added IStatsService, StatsResult, ProjectStats)
+- src/infrastructure/database/services/stats-service.ts (created)
+- src/infrastructure/database/services/stats-service.test.ts (created, 16 tests)
+- src/infrastructure/database/services/index.ts (export SqliteStatsService)
+- src/infrastructure/database/index.ts (export SqliteStatsService)
+- src/presentation/cli/formatters/stats-formatter.ts (created)
+- src/presentation/cli/formatters/stats-formatter.test.ts (created, 34 tests)
+- src/presentation/cli/formatters/index.ts (export stats-formatter)
+- src/presentation/cli/commands/stats.ts (created)
+- src/presentation/cli/commands/stats.test.ts (created, 25 tests)
+- src/presentation/cli/commands/index.ts (export createStatsCommand)
+- .planning/phases/08-stats-and-list-commands/08-01-SUMMARY.md (created)
 - .planning/STATE.md (updated)
 
 ## Performance Metrics
 
 | Metric | Value |
 |--------|-------|
-| Phases Completed | 6 / 12 |
-| Plans Completed | 22 (phases 1-6) |
-| Requirements Completed | 63 / 85 |
-| Test Coverage | 97%+ functions, 98%+ lines |
-| Total Tests | 752 |
+| Phases Completed | 7.5 / 12 |
+| Plans Completed | 27 (phases 1-7, 08-01) |
+| Requirements Completed | 68 / 85 |
+| Test Coverage | 95%+ functions, 96%+ lines |
+| Total Tests | 988 |
 
 ## Phase 2 Summary
 
@@ -217,6 +246,24 @@ None currently.
 | 06-02 | Case Sensitivity Options | 14 | Complete |
 | **Total** | | **42** | **Complete** |
 
+## Phase 7 Summary
+
+| Plan | Description | Tests | Status |
+|------|-------------|-------|--------|
+| 07-01 | Date Parser and Timestamp Formatter | 34 | Complete |
+| 07-02 | Search Filter Options | 27 | Complete |
+| 07-03 | Output Formatter and Color Utilities | 38 | Complete |
+| 07-04 | Apply Formatting to Commands | 10 | Complete |
+| **Total** | | **109** | **Complete** |
+
+## Phase 8 Summary
+
+| Plan | Description | Tests | Status |
+|------|-------------|-------|--------|
+| 08-01 | Stats Command Implementation | 75 | Complete |
+| 08-02 | List Command Implementation | - | Pending |
+| **Total** | | **75+** | **In Progress** |
+
 ---
 
-*Last updated: 2026-01-29*
+*Last updated: 2026-01-30*
