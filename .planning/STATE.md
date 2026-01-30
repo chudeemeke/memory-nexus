@@ -11,13 +11,13 @@
 ## Current Position
 
 **Milestone:** v1 - Full Vision Implementation
-**Phase:** 9 - Context and Related Commands (In Progress)
-**Plan:** 3 of 4 complete
-**Status:** 09-03 Related Command complete
+**Phase:** 9 - Context and Related Commands (Complete)
+**Plan:** 4 of 4 complete
+**Status:** Phase 9 complete
 
 ```
-[██████████████████████████████████░░░░  ] 75%
-8.75 of 12 phases complete | 1162 tests passing | Phase 9 in progress
+[█████████████████████████████████████░░░] 75%
+9 of 12 phases complete | 1162 tests passing | Phase 9 complete
 ```
 
 ## Accumulated Context
@@ -119,7 +119,7 @@ None currently.
 - [x] Execute 09-01 - Link Repository Implementation (27 tests)
 - [x] Execute 09-02 - Context Command Implementation (81 tests)
 - [x] Execute 09-03 - Related Command Implementation (66 tests)
-- [ ] Execute 09-04 - Show Command Integration
+- [x] Execute 09-04 - CLI Integration (formatter exports)
 
 ### Learnings
 
@@ -179,35 +179,29 @@ None currently.
 ### Last Session
 
 **Date:** 2026-01-30
-**Completed:** 09-03 Related Command Implementation
-**Next:** Execute 09-04 (Show Command Integration)
+**Completed:** 09-04 CLI Integration (Phase 9 complete)
+**Next:** Phase 10+ (Show Command or advanced features per roadmap)
 
 ### Context for Next Session
 
-1. 09-03 complete - RelatedFormatter + related command with graph traversal
-2. 1162 tests passing (66 new related tests)
-3. Related command uses SqliteLinkRepository.findRelatedWithHops() for 2-hop traversal
-4. RelatedSession composite type groups Session with weight and hops
-5. Weight color coding: green >75%, yellow 50-75%
-6. Ready for 09-04 Show Command Integration
+1. Phase 9 complete - All 4 plans executed
+2. 1162 tests passing
+3. CLI commands available: sync, search, list, stats, context, related
+4. All formatters exported from barrel index files
+5. Ready for Phase 10 or roadmap continuation
 
 ### Files Modified This Session
 
-- src/presentation/cli/formatters/related-formatter.ts (created)
-- src/presentation/cli/formatters/related-formatter.test.ts (created)
-- src/presentation/cli/commands/related.ts (created)
-- src/presentation/cli/commands/related.test.ts (created)
-- src/presentation/cli/commands/index.ts (updated)
-- src/presentation/cli/index.ts (updated)
-- .planning/phases/09-context-and-related-commands/09-03-SUMMARY.md (created)
+- src/presentation/cli/formatters/index.ts (updated - added context/related exports)
+- .planning/phases/09-context-and-related-commands/09-04-SUMMARY.md (created)
 - .planning/STATE.md (updated)
 
 ## Performance Metrics
 
 | Metric | Value |
 |--------|-------|
-| Phases Completed | 8.75 / 12 |
-| Plans Completed | 31 (phases 1-8 + 09-01-03) |
+| Phases Completed | 9 / 12 |
+| Plans Completed | 32 (phases 1-9) |
 | Requirements Completed | 78 / 85 |
 | Test Coverage | 95%+ functions, 96%+ lines |
 | Total Tests | 1162 |
@@ -285,9 +279,9 @@ None currently.
 | 09-01 | Link Repository Implementation | 27 | Complete |
 | 09-02 | Context Command Implementation | 81 | Complete |
 | 09-03 | Related Command Implementation | 66 | Complete |
-| 09-04 | Show Command Integration | - | Pending |
-| **Total** | | **174** | **In Progress** |
+| 09-04 | CLI Integration | 0 | Complete |
+| **Total** | | **174** | **Complete** |
 
 ---
 
-*Last updated: 2026-01-30 (09-03 complete)*
+*Last updated: 2026-01-30 (Phase 9 complete)*
