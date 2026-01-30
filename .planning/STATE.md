@@ -11,13 +11,13 @@
 ## Current Position
 
 **Milestone:** v1 - Full Vision Implementation
-**Phase:** 8 - Stats and List Commands (VERIFIED)
-**Plan:** 2 of 2 complete + gap fix
-**Status:** Phase 8 verified, ready for Phase 9
+**Phase:** 9 - Context and Related Commands (In Progress)
+**Plan:** 1 of 4 complete
+**Status:** 09-01 Link Repository complete
 
 ```
-[████████████████████████████████        ] 67%
-8 of 12 phases complete | 988 tests passing | Phase 8 verified
+[████████████████████████████████░░░░    ] 71%
+8.25 of 12 phases complete | 1037 tests passing | Phase 9 in progress
 ```
 
 ## Accumulated Context
@@ -67,6 +67,9 @@
 | ListFormatter strategy pattern | Consistent output modes across commands | 2026-01-30 |
 | Project filter LIKE | Substring match more useful than exact match | 2026-01-30 |
 | Default limit 20 | Reasonable for listing; YAGNI on pagination | 2026-01-30 |
+| Path-based cycle prevention | Path string with NOT LIKE check for CTE cycle detection | 2026-01-30 |
+| RelatedLink type for hop info | Separate type preserves Link immutability and interface | 2026-01-30 |
+| Multiplicative weight decay | 0.8 * 0.9 = 0.72 for 2-hop path relevance | 2026-01-30 |
 
 ### Blockers
 
@@ -108,6 +111,11 @@ None currently.
 - [x] Plan Phase 8 - Stats and List Commands (2 plans created)
 - [x] Execute 08-01 - Stats Command Implementation (75 tests)
 - [x] Execute 08-02 - List Command Implementation (50 tests)
+- [x] Plan Phase 9 - Context and Related Commands (4 plans created)
+- [x] Execute 09-01 - Link Repository Implementation (27 tests)
+- [ ] Execute 09-02 - Context Service Implementation
+- [ ] Execute 09-03 - Related Command Implementation
+- [ ] Execute 09-04 - Context Command Implementation
 
 ### Learnings
 
@@ -158,39 +166,44 @@ None currently.
 - roleFilter array uses SQL IN clause for efficient multi-role queries
 - parseDate from chrono-node handles natural language dates ("yesterday", "2 weeks ago")
 - Commander.js argParser enables validation at parse time with custom error messages
+- WITH RECURSIVE CTE enables multi-hop graph traversal in SQLite
+- Path tracking with NOT LIKE prevents cycles in recursive queries
+- Weight decay through multiplication provides natural relevance scoring
 
 ## Session Continuity
 
 ### Last Session
 
 **Date:** 2026-01-30
-**Completed:** Phase 8 executed, verified, gap fixed
-**Next:** Plan Phase 9 (Context and Related Commands)
+**Completed:** 09-01 Link Repository Implementation
+**Next:** Execute 09-02 (Context Service Implementation)
 
 ### Context for Next Session
 
-1. Phase 8 fully verified - stats and list commands both working
-2. 988 tests passing
-3. Gap fix: stats command wiring added (commit 6ad38ba)
-4. Both commands accessible via CLI
-5. Ready for Phase 9 planning
+1. 09-01 complete - SqliteLinkRepository with graph traversal
+2. 1037 tests passing
+3. WITH RECURSIVE CTE pattern established for multi-hop queries
+4. RelatedLink type available for hop information
+5. Ready for 09-02 Context Service
 
 ### Files Modified This Session
 
-- src/presentation/cli/index.ts (wired stats command - gap fix)
-- .planning/phases/08-stats-and-list-commands/08-VERIFICATION.md (updated to passed)
-- .planning/ROADMAP.md (Phase 8 marked complete)
+- src/infrastructure/database/repositories/link-repository.ts (created)
+- src/infrastructure/database/repositories/link-repository.test.ts (created)
+- src/infrastructure/database/repositories/index.ts (added export)
+- src/infrastructure/database/index.ts (added export)
+- .planning/phases/09-context-and-related-commands/09-01-SUMMARY.md (created)
 - .planning/STATE.md (updated)
 
 ## Performance Metrics
 
 | Metric | Value |
 |--------|-------|
-| Phases Completed | 8 / 12 |
-| Plans Completed | 28 (phases 1-8) |
-| Requirements Completed | 72 / 85 |
+| Phases Completed | 8.25 / 12 |
+| Plans Completed | 29 (phases 1-8 + 09-01) |
+| Requirements Completed | 73 / 85 |
 | Test Coverage | 95%+ functions, 96%+ lines |
-| Total Tests | 988 |
+| Total Tests | 1037 |
 
 ## Phase 2 Summary
 
@@ -258,6 +271,16 @@ None currently.
 | 08-02 | List Command Implementation | 50 | Complete |
 | **Total** | | **125** | **Complete** |
 
+## Phase 9 Summary
+
+| Plan | Description | Tests | Status |
+|------|-------------|-------|--------|
+| 09-01 | Link Repository Implementation | 27 | Complete |
+| 09-02 | Context Service Implementation | - | Pending |
+| 09-03 | Related Command Implementation | - | Pending |
+| 09-04 | Context Command Implementation | - | Pending |
+| **Total** | | **27** | **In Progress** |
+
 ---
 
-*Last updated: 2026-01-30 (08-02 complete)*
+*Last updated: 2026-01-30 (09-01 complete)*
