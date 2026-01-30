@@ -156,14 +156,16 @@ async function main(): Promise<void> {
     process.exit(0);
 }
 
-// Run
-main().catch((err) => {
-    const message = err instanceof Error ? err.message : String(err);
-    const stack = err instanceof Error ? err.stack : undefined;
-    logSync({
-        level: "error",
-        message: `Hook error: ${message}`,
-        error: stack,
+// Run only when executed directly
+if (import.meta.main) {
+    main().catch((err) => {
+        const message = err instanceof Error ? err.message : String(err);
+        const stack = err instanceof Error ? err.stack : undefined;
+        logSync({
+            level: "error",
+            message: `Hook error: ${message}`,
+            error: stack,
+        });
+        process.exit(0); // Never block user
     });
-    process.exit(0); // Never block user
-});
+}
