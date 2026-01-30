@@ -6,7 +6,10 @@
  */
 
 import type { Database, Statement } from "bun:sqlite";
-import type { ISessionRepository } from "../../../domain/ports/repositories.js";
+import type {
+  ISessionRepository,
+  SessionListOptions,
+} from "../../../domain/ports/repositories.js";
 import { Session } from "../../../domain/entities/session.js";
 import { ProjectPath } from "../../../domain/value-objects/project-path.js";
 
@@ -168,5 +171,45 @@ export class SqliteSessionRepository implements ISessionRepository {
    */
   async delete(id: string): Promise<void> {
     this.deleteStmt.run({ $id: id });
+  }
+
+  /**
+   * Find sessions with filtering options.
+   * Builds dynamic WHERE clause based on provided filters.
+   */
+  async findFiltered(options: SessionListOptions): Promise<Session[]> {
+    const conditions: string[] = [];
+    const params: Record<string, unknown> = {};
+
+    if (options.projectFilter) {
+      conditions.push("project_name LIKE $projectFilter");
+      params.$projectFilter = `%${options.projectFilter}%`;
+    }
+    if (options.sinceDate) {
+      conditions.push("start_time >= $sinceDate");
+      params.$sinceDate = options.sinceDate.toISOString();
+    }
+    if (options.beforeDate) {
+      conditions.push("start_time <= $beforeDate");
+      params.$beforeDate = options.beforeDate.toISOString();
+    }
+
+    const whereClause =
+      conditions.length > 0 ? `WHERE ${conditions.join(" AND ")}` : "";
+    const limit = options.limit ?? 20;
+    params.$limit = limit;
+
+    const sql = `
+      SELECT id, project_path_encoded, project_path_decoded, project_name,
+             start_time, end_time, message_count
+      FROM sessions
+      ${whereClause}
+      ORDER BY start_time DESC
+      LIMIT $limit
+    `;
+
+    const stmt = this.db.prepare(sql);
+    const rows = stmt.all(params) as SessionRow[];
+    return rows.map((row) => this.rowToSession(row));
   }
 }

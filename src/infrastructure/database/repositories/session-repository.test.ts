@@ -370,4 +370,181 @@ describe("SqliteSessionRepository", () => {
       expect(found!.projectPath.projectName).toBe("test-project");
     });
   });
+
+  describe("findFiltered", () => {
+    it("should return recent sessions with no options", async () => {
+      const sessions = [
+        createTestSession({
+          id: "session-1",
+          startTime: new Date("2026-01-25T10:00:00Z"),
+        }),
+        createTestSession({
+          id: "session-2",
+          startTime: new Date("2026-01-28T10:00:00Z"),
+        }),
+      ];
+
+      for (const session of sessions) {
+        await repository.save(session);
+      }
+
+      const results = await repository.findFiltered({});
+
+      expect(results).toHaveLength(2);
+      // Should be ordered by start_time DESC
+      expect(results[0].id).toBe("session-2");
+      expect(results[1].id).toBe("session-1");
+    });
+
+    it("should respect limit option", async () => {
+      for (let i = 0; i < 10; i++) {
+        const session = createTestSession({
+          id: `session-${i}`,
+          startTime: new Date(Date.now() - i * 1000),
+        });
+        await repository.save(session);
+      }
+
+      const results = await repository.findFiltered({ limit: 5 });
+
+      expect(results).toHaveLength(5);
+    });
+
+    it("should filter by project name (substring match)", async () => {
+      const projectA = ProjectPath.fromDecoded("C:\\Users\\Test\\Projects\\memory-nexus");
+      const projectB = ProjectPath.fromDecoded("C:\\Users\\Test\\Projects\\wow-system");
+      const projectC = ProjectPath.fromDecoded("C:\\Users\\Test\\Projects\\memory-tools");
+
+      await repository.save(createTestSession({ id: "s1", projectPath: projectA }));
+      await repository.save(createTestSession({ id: "s2", projectPath: projectB }));
+      await repository.save(createTestSession({ id: "s3", projectPath: projectC }));
+
+      const results = await repository.findFiltered({ projectFilter: "memory" });
+
+      expect(results).toHaveLength(2);
+      const ids = results.map(s => s.id).sort();
+      expect(ids).toEqual(["s1", "s3"]);
+    });
+
+    it("should filter by sinceDate", async () => {
+      const session1 = createTestSession({
+        id: "old-session",
+        startTime: new Date("2026-01-20T10:00:00Z"),
+      });
+      const session2 = createTestSession({
+        id: "new-session",
+        startTime: new Date("2026-01-28T10:00:00Z"),
+      });
+
+      await repository.save(session1);
+      await repository.save(session2);
+
+      const results = await repository.findFiltered({
+        sinceDate: new Date("2026-01-25T00:00:00Z"),
+      });
+
+      expect(results).toHaveLength(1);
+      expect(results[0].id).toBe("new-session");
+    });
+
+    it("should filter by beforeDate", async () => {
+      const session1 = createTestSession({
+        id: "old-session",
+        startTime: new Date("2026-01-20T10:00:00Z"),
+      });
+      const session2 = createTestSession({
+        id: "new-session",
+        startTime: new Date("2026-01-28T10:00:00Z"),
+      });
+
+      await repository.save(session1);
+      await repository.save(session2);
+
+      const results = await repository.findFiltered({
+        beforeDate: new Date("2026-01-25T00:00:00Z"),
+      });
+
+      expect(results).toHaveLength(1);
+      expect(results[0].id).toBe("old-session");
+    });
+
+    it("should filter by date range (sinceDate and beforeDate)", async () => {
+      const sessions = [
+        createTestSession({ id: "s1", startTime: new Date("2026-01-15T10:00:00Z") }),
+        createTestSession({ id: "s2", startTime: new Date("2026-01-20T10:00:00Z") }),
+        createTestSession({ id: "s3", startTime: new Date("2026-01-25T10:00:00Z") }),
+        createTestSession({ id: "s4", startTime: new Date("2026-01-30T10:00:00Z") }),
+      ];
+
+      for (const session of sessions) {
+        await repository.save(session);
+      }
+
+      const results = await repository.findFiltered({
+        sinceDate: new Date("2026-01-18T00:00:00Z"),
+        beforeDate: new Date("2026-01-27T00:00:00Z"),
+      });
+
+      expect(results).toHaveLength(2);
+      const ids = results.map(s => s.id).sort();
+      expect(ids).toEqual(["s2", "s3"]);
+    });
+
+    it("should combine project filter with date filters", async () => {
+      const projectA = ProjectPath.fromDecoded("C:\\Users\\Test\\Projects\\memory-nexus");
+      const projectB = ProjectPath.fromDecoded("C:\\Users\\Test\\Projects\\wow-system");
+
+      await repository.save(createTestSession({
+        id: "s1",
+        projectPath: projectA,
+        startTime: new Date("2026-01-20T10:00:00Z"),
+      }));
+      await repository.save(createTestSession({
+        id: "s2",
+        projectPath: projectB,
+        startTime: new Date("2026-01-25T10:00:00Z"),
+      }));
+      await repository.save(createTestSession({
+        id: "s3",
+        projectPath: projectA,
+        startTime: new Date("2026-01-28T10:00:00Z"),
+      }));
+
+      const results = await repository.findFiltered({
+        projectFilter: "memory",
+        sinceDate: new Date("2026-01-22T00:00:00Z"),
+      });
+
+      expect(results).toHaveLength(1);
+      expect(results[0].id).toBe("s3");
+    });
+
+    it("should return empty array when no matches", async () => {
+      await repository.save(createTestSession({
+        id: "session-1",
+        startTime: new Date("2026-01-20T10:00:00Z"),
+      }));
+
+      const results = await repository.findFiltered({
+        projectFilter: "nonexistent",
+      });
+
+      expect(results).toHaveLength(0);
+    });
+
+    it("should default to limit of 20", async () => {
+      // Create 25 sessions
+      for (let i = 0; i < 25; i++) {
+        const session = createTestSession({
+          id: `session-${i}`,
+          startTime: new Date(Date.now() - i * 1000),
+        });
+        await repository.save(session);
+      }
+
+      const results = await repository.findFiltered({});
+
+      expect(results).toHaveLength(20);
+    });
+  });
 });

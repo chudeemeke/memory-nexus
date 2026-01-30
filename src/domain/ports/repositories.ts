@@ -18,6 +18,20 @@ import type { ExtractionState } from "../entities/extraction-state.js";
 import type { ProjectPath } from "../value-objects/project-path.js";
 
 /**
+ * Options for filtering session list.
+ */
+export interface SessionListOptions {
+  /** Maximum sessions to return */
+  limit?: number;
+  /** Filter by project name (substring match) */
+  projectFilter?: string;
+  /** Only sessions after this date */
+  sinceDate?: Date;
+  /** Only sessions before this date */
+  beforeDate?: Date;
+}
+
+/**
  * Repository for Session entities.
  *
  * Handles persistence of Claude Code sessions and their metadata.
@@ -65,6 +79,14 @@ export interface ISessionRepository {
    * @param id The session UUID to delete
    */
   delete(id: string): Promise<void>;
+
+  /**
+   * Find sessions with filtering options.
+   * Builds dynamic WHERE clause based on provided filters.
+   * @param options Filtering options (limit, project, date range)
+   * @returns Array of sessions matching filters, ordered by start time descending
+   */
+  findFiltered(options: SessionListOptions): Promise<Session[]>;
 }
 
 /**
