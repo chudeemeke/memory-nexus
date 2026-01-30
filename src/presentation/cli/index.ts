@@ -7,7 +7,7 @@
  */
 
 import { Command } from "commander";
-import { createSyncCommand, createSearchCommand, createListCommand, createStatsCommand } from "./commands/index.js";
+import { createSyncCommand, createSearchCommand, createListCommand, createStatsCommand, createContextCommand } from "./commands/index.js";
 
 const program = new Command();
 
@@ -28,16 +28,8 @@ program.addCommand(createListCommand());
 // Add stats command from module
 program.addCommand(createStatsCommand());
 
-program
-  .command("context <project>")
-  .description("Get context for a specific project")
-  .option("-n, --recent <count>", "Number of recent sessions", "5")
-  .action((project, options) => {
-    console.log(`Getting context for: ${project}`);
-    console.log(`  Recent sessions: ${options.recent}`);
-    // TODO: Implement context retrieval
-    console.log("(not yet implemented)");
-  });
+// Add context command from module
+program.addCommand(createContextCommand());
 
 program
   .command("show <sessionId>")
