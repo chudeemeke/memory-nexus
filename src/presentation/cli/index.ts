@@ -7,7 +7,7 @@
  */
 
 import { Command } from "commander";
-import { createSyncCommand, createSearchCommand, createListCommand, createStatsCommand, createContextCommand } from "./commands/index.js";
+import { createSyncCommand, createSearchCommand, createListCommand, createStatsCommand, createContextCommand, createRelatedCommand } from "./commands/index.js";
 
 const program = new Command();
 
@@ -40,16 +40,8 @@ program
     console.log("(not yet implemented)");
   });
 
-program
-  .command("related <sessionId>")
-  .description("Find sessions related to a specific session")
-  .option("-n, --count <count>", "Number of related sessions", "5")
-  .action((sessionId, options) => {
-    console.log(`Finding sessions related to: ${sessionId}`);
-    console.log(`  Count: ${options.count}`);
-    // TODO: Implement related sessions logic
-    console.log("(not yet implemented)");
-  });
+// Add related command from module
+program.addCommand(createRelatedCommand());
 
 export { program };
 

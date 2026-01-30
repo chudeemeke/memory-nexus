@@ -9,3 +9,4 @@ export { createSearchCommand, executeSearchCommand } from "./search.js";
 export { createListCommand, executeListCommand } from "./list.js";
 export { createStatsCommand, executeStatsCommand } from "./stats.js";
 export { createContextCommand, executeContextCommand } from "./context.js";
+export { createRelatedCommand, executeRelatedCommand } from "./related.js";
