@@ -7,7 +7,7 @@
  */
 
 import { Command } from "commander";
-import { createSyncCommand, createSearchCommand } from "./commands/index.js";
+import { createSyncCommand, createSearchCommand, createListCommand } from "./commands/index.js";
 
 const program = new Command();
 
@@ -22,6 +22,9 @@ program.addCommand(createSyncCommand());
 // Add search command from module
 program.addCommand(createSearchCommand());
 
+// Add list command from module
+program.addCommand(createListCommand());
+
 program
   .command("context <project>")
   .description("Get context for a specific project")
@@ -30,21 +33,6 @@ program
     console.log(`Getting context for: ${project}`);
     console.log(`  Recent sessions: ${options.recent}`);
     // TODO: Implement context retrieval
-    console.log("(not yet implemented)");
-  });
-
-program
-  .command("list")
-  .description("List recent sessions")
-  .option("-n, --count <count>", "Number of sessions to list", "10")
-  .option("-p, --project <name>", "Filter by project name")
-  .action((options) => {
-    console.log("Listing sessions...");
-    if (options.project) {
-      console.log(`  Project filter: ${options.project}`);
-    }
-    console.log(`  Count: ${options.count}`);
-    // TODO: Implement list logic
     console.log("(not yet implemented)");
   });
 
