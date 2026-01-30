@@ -310,6 +310,14 @@ Plans:
 4. Documentation explains how to configure hook in Claude Code settings
 5. User can disable hook without breaking manual sync
 
+**Plans:** 4 plans
+
+Plans:
+- [ ] 10-01-PLAN.md - Configuration infrastructure (config-manager, log-writer)
+- [ ] 10-02-PLAN.md - Hook runner and entry point script
+- [ ] 10-03-PLAN.md - CLI commands (install, uninstall, status)
+- [ ] 10-04-PLAN.md - Recovery service, stats enhancement, documentation
+
 ---
 
 ### Phase 11: Session Navigation (Show, Search)
@@ -435,4 +443,4 @@ Phase 1 (Domain Entities)
 
 ---
 
-*Last updated: 2026-01-30 (Phase 9 complete)*
+*Last updated: 2026-01-30 (Phase 10 planned)*
