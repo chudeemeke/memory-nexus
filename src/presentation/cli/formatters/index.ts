@@ -58,3 +58,12 @@ export {
   type RelatedFormatter,
   type RelatedSession,
 } from "./related-formatter.js";
+
+export {
+  createShowFormatter,
+  summarizeToolResult,
+  type ShowOutputMode,
+  type SessionDetail,
+  type ShowFormatOptions,
+  type ShowFormatter,
+} from "./show-formatter.js";
