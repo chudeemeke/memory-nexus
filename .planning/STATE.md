@@ -4,20 +4,20 @@
 
 **Core Value:** Knowledge gained in one Claude Code project becomes accessible from any other project. No more context silos.
 
-**Current Focus:** Phase 10 - Hook Integration and Incremental Sync
+**Current Focus:** Phase 11 - Session Navigation (Show, Search)
 
 **Tech Stack:** Bun, TypeScript 5.5+, bun:sqlite with FTS5, Commander.js v14, cli-progress@3.12.0, chrono-node
 
 ## Current Position
 
 **Milestone:** v1 - Full Vision Implementation
-**Phase:** 10 - Hook Integration and Incremental Sync (Complete)
-**Plan:** 4 of 4 complete
-**Status:** Phase 10 complete
+**Phase:** 11 - Session Navigation (Show, Search) (In Progress)
+**Plan:** 11-01 complete, 11-02 through 11-05 remaining
+**Status:** Executing Phase 11
 
 ```
-[████████████████████████████████████░░░░] 85%
-10 of 12 phases complete | 1318 tests passing | Phase 10 Complete
+[████████████████████████████████████░░░░] 86%
+10 of 12 phases complete | 1348 tests passing | Plan 11-01 Complete
 ```
 
 ## Accumulated Context
@@ -86,6 +86,8 @@
 | RecoveryService dryRun bypass | dryRun bypasses recoveryOnStartup check for status reporting | 2026-01-31 |
 | ExtendedStatsResult pattern | Interface extension for optional hook status in stats | 2026-01-31 |
 | extractSessionId export | Exported separately for path-to-id extraction across components | 2026-01-31 |
+| ExtractedEntityType naming | Avoids collision with link.ts EntityType (graph node types) | 2026-01-31 |
+| Decision metadata validation | Decision entities require subject and decision fields | 2026-01-31 |
 
 ### Blockers
 
@@ -136,6 +138,8 @@ None currently.
 - [x] Execute 10-02 - Hook Runner Implementation (18 tests)
 - [x] Execute 10-03 - CLI Commands (60 tests: 30 settings-manager + 16 install + 7 uninstall + 14 status)
 - [x] Execute 10-04 - Recovery Service and Documentation (32 tests: 17 recovery-service + 15 stats-hooks)
+- [x] Plan Phase 11 - Session Navigation (5 plans created)
+- [x] Execute 11-01 - Entity Domain Type and Schema (30 entity + 77 schema tests)
 
 ### Learnings
 
@@ -203,28 +207,30 @@ None currently.
 ### Last Session
 
 **Date:** 2026-01-31
-**Completed:** 10-04 Recovery Service and Documentation (Phase 10 Complete)
-**Next:** Phase 11 - aidev CLI Integration
+**Completed:** Plan 11-01 Entity Domain Type and Schema
+**Next:** Execute Phase 11 plans (11-02 through 11-05)
 
 ### Context for Next Session
 
-1. Phase 10 fully complete - all 4 plans executed
-2. 1318 tests passing (32 new tests in 10-04)
-3. RecoveryService detects and syncs pending sessions
-4. Stats command shows hook status with pending count
-5. HOOKS.md provides comprehensive user documentation (332 lines)
-6. Hook system ready for integration with aidev CLI
+1. Plan 11-01 complete - Entity domain type and schema implemented
+2. 1348 tests passing (30 entity + 77 schema tests added)
+3. Remaining Phase 11 plans:
+   - 11-02: Entity repository and pattern extractor
+   - 11-03: Show command with conversation thread formatter
+   - 11-04: Interactive session picker with browse command
+   - 11-05: LLM extraction service for topics and summaries
+4. Entity domain type uses ExtractedEntityType (not EntityType) to avoid collision
+5. Decision entities require metadata with subject and decision fields
 
 ### Files Modified This Session
 
-- src/application/services/recovery-service.ts (created)
-- src/application/services/recovery-service.test.ts (created)
-- src/application/services/index.ts (updated - added RecoveryService exports)
-- src/presentation/cli/commands/stats.ts (updated - added hooks gathering)
-- src/presentation/cli/formatters/stats-formatter.ts (updated - added HooksSummary)
-- src/presentation/cli/formatters/stats-formatter.test.ts (updated - added hooks tests)
-- docs/HOOKS.md (created)
-- .planning/phases/10-hook-integration/10-04-SUMMARY.md (created)
+- src/domain/entities/entity.ts (created)
+- src/domain/entities/entity.test.ts (created)
+- src/domain/entities/index.ts (modified)
+- src/infrastructure/database/schema.ts (modified)
+- src/infrastructure/database/schema.test.ts (modified)
+- src/domain/ports/repositories.ts (modified)
+- .planning/phases/11-session-navigation/11-01-SUMMARY.md (created)
 - .planning/STATE.md (updated)
 
 ## Performance Metrics
@@ -232,10 +238,10 @@ None currently.
 | Metric | Value |
 |--------|-------|
 | Phases Completed | 10 / 12 |
-| Plans Completed | 36 (phases 1-9 complete + 10-01 + 10-02 + 10-03 + 10-04) |
+| Plans Completed | 37 (phases 1-10 complete + 11-01) |
 | Requirements Completed | 85 / 85 |
 | Test Coverage | 95%+ functions, 95%+ lines |
-| Total Tests | 1318 |
+| Total Tests | 1348 |
 
 ## Phase 2 Summary
 
@@ -323,6 +329,17 @@ None currently.
 | 10-04 | Recovery and Documentation | 32 | Complete |
 | **Total** | | **156** | **Complete** |
 
+## Phase 11 Summary
+
+| Plan | Description | Tests | Status |
+|------|-------------|-------|--------|
+| 11-01 | Entity Domain Type and Schema | 107 | Complete |
+| 11-02 | Entity Repository and Pattern Extractor | - | Pending |
+| 11-03 | Show Command | - | Pending |
+| 11-04 | Browse Command | - | Pending |
+| 11-05 | LLM Extraction Service | - | Pending |
+| **Total** | | **107+** | **In Progress** |
+
 ---
 
-*Last updated: 2026-01-31 (Phase 10 complete)*
+*Last updated: 2026-01-31 (Plan 11-01 complete)*
