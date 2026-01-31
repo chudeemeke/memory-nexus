@@ -16,3 +16,9 @@ export type {
   RecoveryResult,
   RecoveryOptions,
 } from "./recovery-service.js";
+
+export { PatternExtractor } from "./pattern-extractor.js";
+export type {
+  FileModification,
+  ToolStats,
+} from "./pattern-extractor.js";
