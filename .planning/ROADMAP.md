@@ -322,7 +322,7 @@ Plans:
 
 ### Phase 11: Session Navigation (Show, Search)
 
-**Goal:** Implement detailed session viewing and in-list search capabilities.
+**Goal:** Implement detailed session viewing, entity extraction, and interactive navigation.
 
 **Dependencies:** Phase 8 (list command)
 
@@ -340,6 +340,14 @@ Plans:
 3. User can query tool uses: "what files were edited in this session?"
 4. Topic extraction identifies key concepts discussed in sessions
 5. Session summaries are indexed and searchable
+
+**Plans:** 4 plans
+
+Plans:
+- [ ] 11-01-PLAN.md - Entity domain type and database schema
+- [ ] 11-02-PLAN.md - Entity repository and pattern extractor
+- [ ] 11-03-PLAN.md - Show command with conversation thread formatter
+- [ ] 11-04-PLAN.md - Interactive session picker with browse command
 
 ---
 
@@ -384,7 +392,7 @@ Plans:
 | 8 | Stats and List Commands | Complete | 100% |
 | 9 | Context and Related Commands | Complete | 100% |
 | 10 | Hook Integration | Complete | 100% |
-| 11 | Session Navigation | Not Started | 0% |
+| 11 | Session Navigation | Planned | 0% |
 | 12 | Polish and Error Handling | Not Started | 0% |
 
 ---
@@ -443,4 +451,4 @@ Phase 1 (Domain Entities)
 
 ---
 
-*Last updated: 2026-01-31 (Phase 10 complete)*
+*Last updated: 2026-01-31 (Phase 11 planned)*
