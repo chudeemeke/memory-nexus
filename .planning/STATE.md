@@ -12,12 +12,12 @@
 
 **Milestone:** v1 - Full Vision Implementation
 **Phase:** 11 - Session Navigation (Show, Search) (In Progress)
-**Plan:** 11-01 complete, 11-02 through 11-05 remaining
+**Plan:** 11-02 complete, 11-03 through 11-05 remaining
 **Status:** Executing Phase 11
 
 ```
-[████████████████████████████████████░░░░] 86%
-10 of 12 phases complete | 1348 tests passing | Plan 11-01 Complete
+[████████████████████████████████████░░░░] 88%
+10 of 12 phases complete | 1404 tests passing | Plan 11-02 Complete
 ```
 
 ## Accumulated Context
@@ -88,6 +88,10 @@
 | extractSessionId export | Exported separately for path-to-id extraction across components | 2026-01-31 |
 | ExtractedEntityType naming | Avoids collision with link.ts EntityType (graph node types) | 2026-01-31 |
 | Decision metadata validation | Decision entities require subject and decision fields | 2026-01-31 |
+| Max confidence preservation | SELECT then conditional UPDATE for entity upsert, not INSERT OR REPLACE | 2026-01-31 |
+| Case-insensitive entity search | LOWER() on both stored and search names for portable matching | 2026-01-31 |
+| Frequency increment on link | ON CONFLICT DO UPDATE SET frequency = frequency + excluded.frequency | 2026-01-31 |
+| Static pattern extractor | No instance state needed; static methods simplify usage and testing | 2026-01-31 |
 
 ### Blockers
 
@@ -140,6 +144,7 @@ None currently.
 - [x] Execute 10-04 - Recovery Service and Documentation (32 tests: 17 recovery-service + 15 stats-hooks)
 - [x] Plan Phase 11 - Session Navigation (5 plans created)
 - [x] Execute 11-01 - Entity Domain Type and Schema (30 entity + 77 schema tests)
+- [x] Execute 11-02 - Entity Repository and Pattern Extractor (30 repo + 26 extractor tests)
 
 ### Learnings
 
@@ -207,30 +212,30 @@ None currently.
 ### Last Session
 
 **Date:** 2026-01-31
-**Completed:** Plan 11-01 Entity Domain Type and Schema
-**Next:** Execute Phase 11 plans (11-02 through 11-05)
+**Completed:** Plan 11-02 Entity Repository and Pattern Extractor
+**Next:** Execute Phase 11 plans (11-03 through 11-05)
 
 ### Context for Next Session
 
-1. Plan 11-01 complete - Entity domain type and schema implemented
-2. 1348 tests passing (30 entity + 77 schema tests added)
+1. Plan 11-02 complete - SqliteEntityRepository and PatternExtractor implemented
+2. 1404 tests passing (56 tests added: 30 repository + 26 extractor)
 3. Remaining Phase 11 plans:
-   - 11-02: Entity repository and pattern extractor
    - 11-03: Show command with conversation thread formatter
    - 11-04: Interactive session picker with browse command
    - 11-05: LLM extraction service for topics and summaries
-4. Entity domain type uses ExtractedEntityType (not EntityType) to avoid collision
-5. Decision entities require metadata with subject and decision fields
+4. Entity repository uses max confidence preservation on upsert
+5. Pattern extractor provides static methods for file path extraction
+6. Session-entity linking tracks frequency for repeated mentions
 
 ### Files Modified This Session
 
-- src/domain/entities/entity.ts (created)
-- src/domain/entities/entity.test.ts (created)
-- src/domain/entities/index.ts (modified)
-- src/infrastructure/database/schema.ts (modified)
-- src/infrastructure/database/schema.test.ts (modified)
-- src/domain/ports/repositories.ts (modified)
-- .planning/phases/11-session-navigation/11-01-SUMMARY.md (created)
+- src/infrastructure/database/repositories/entity-repository.ts (created)
+- src/infrastructure/database/repositories/entity-repository.test.ts (created)
+- src/infrastructure/database/repositories/index.ts (modified)
+- src/application/services/pattern-extractor.ts (created)
+- src/application/services/pattern-extractor.test.ts (created)
+- src/application/services/index.ts (modified)
+- .planning/phases/11-session-navigation/11-02-SUMMARY.md (created)
 - .planning/STATE.md (updated)
 
 ## Performance Metrics
@@ -238,10 +243,10 @@ None currently.
 | Metric | Value |
 |--------|-------|
 | Phases Completed | 10 / 12 |
-| Plans Completed | 37 (phases 1-10 complete + 11-01) |
+| Plans Completed | 38 (phases 1-10 complete + 11-01, 11-02) |
 | Requirements Completed | 85 / 85 |
 | Test Coverage | 95%+ functions, 95%+ lines |
-| Total Tests | 1348 |
+| Total Tests | 1404 |
 
 ## Phase 2 Summary
 
@@ -334,12 +339,12 @@ None currently.
 | Plan | Description | Tests | Status |
 |------|-------------|-------|--------|
 | 11-01 | Entity Domain Type and Schema | 107 | Complete |
-| 11-02 | Entity Repository and Pattern Extractor | - | Pending |
+| 11-02 | Entity Repository and Pattern Extractor | 56 | Complete |
 | 11-03 | Show Command | - | Pending |
 | 11-04 | Browse Command | - | Pending |
 | 11-05 | LLM Extraction Service | - | Pending |
-| **Total** | | **107+** | **In Progress** |
+| **Total** | | **163+** | **In Progress** |
 
 ---
 
-*Last updated: 2026-01-31 (Plan 11-01 complete)*
+*Last updated: 2026-01-31 (Plan 11-02 complete)*
