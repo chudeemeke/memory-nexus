@@ -12,6 +12,7 @@ export {
     getConfigPath,
     getConfigDir,
     DEFAULT_CONFIG,
+    setTestConfigPath,
     type MemoryNexusConfig,
 } from "./config-manager.js";
 
@@ -22,6 +23,7 @@ export {
     readRecentLogs,
     getLogPath,
     getLogDir,
+    setTestLogPath,
     type LogEntry,
     type LogEntryInput,
 } from "./log-writer.js";

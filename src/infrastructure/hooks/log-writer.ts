@@ -20,7 +20,22 @@ import {
     statSync,
 } from "node:fs";
 import { homedir } from "node:os";
-import { join } from "node:path";
+import { dirname, join } from "node:path";
+
+/**
+ * Test path override for log file
+ * When set, all log operations use this path instead of the default
+ */
+let testLogPath: string | null = null;
+
+/**
+ * Set test log path override
+ *
+ * @param path Path to use, or null to reset to default behavior
+ */
+export function setTestLogPath(path: string | null): void {
+    testLogPath = path;
+}
 
 /**
  * Log entry structure for sync operations
@@ -59,18 +74,24 @@ export type LogEntryInput = Omit<LogEntry, "timestamp">;
 /**
  * Get the path to the log directory
  *
- * @returns Path to ~/.memory-nexus/logs/
+ * @returns Path to ~/.memory-nexus/logs/ (or test override directory)
  */
 export function getLogDir(): string {
+    if (testLogPath !== null) {
+        return dirname(testLogPath);
+    }
     return join(homedir(), ".memory-nexus", "logs");
 }
 
 /**
  * Get the path to the sync log file
  *
- * @returns Path to ~/.memory-nexus/logs/sync.log
+ * @returns Path to ~/.memory-nexus/logs/sync.log (or test override)
  */
 export function getLogPath(): string {
+    if (testLogPath !== null) {
+        return testLogPath;
+    }
     return join(getLogDir(), "sync.log");
 }
 

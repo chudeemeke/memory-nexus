@@ -12,6 +12,21 @@ import { homedir } from "node:os";
 import { dirname, join } from "node:path";
 
 /**
+ * Test path override for config file
+ * When set, all config operations use this path instead of the default
+ */
+let testConfigPath: string | null = null;
+
+/**
+ * Set test config path override
+ *
+ * @param path Path to use, or null to reset to default behavior
+ */
+export function setTestConfigPath(path: string | null): void {
+    testConfigPath = path;
+}
+
+/**
  * Memory-nexus configuration interface
  *
  * All options from CONTEXT.md:
@@ -63,18 +78,24 @@ export const DEFAULT_CONFIG: MemoryNexusConfig = {
 /**
  * Get the path to the config directory
  *
- * @returns Path to ~/.memory-nexus/
+ * @returns Path to ~/.memory-nexus/ (or test override directory)
  */
 export function getConfigDir(): string {
+    if (testConfigPath !== null) {
+        return dirname(testConfigPath);
+    }
     return join(homedir(), ".memory-nexus");
 }
 
 /**
  * Get the path to the config file
  *
- * @returns Path to ~/.memory-nexus/config.json
+ * @returns Path to ~/.memory-nexus/config.json (or test override)
  */
 export function getConfigPath(): string {
+    if (testConfigPath !== null) {
+        return testConfigPath;
+    }
     return join(getConfigDir(), "config.json");
 }
 

@@ -7,7 +7,17 @@
  */
 
 import { Command } from "commander";
-import { createSyncCommand, createSearchCommand, createListCommand, createStatsCommand, createContextCommand, createRelatedCommand } from "./commands/index.js";
+import {
+  createSyncCommand,
+  createSearchCommand,
+  createListCommand,
+  createStatsCommand,
+  createContextCommand,
+  createRelatedCommand,
+  createInstallCommand,
+  createUninstallCommand,
+  createStatusCommand,
+} from "./commands/index.js";
 
 const program = new Command();
 
@@ -42,6 +52,11 @@ program
 
 // Add related command from module
 program.addCommand(createRelatedCommand());
+
+// Hook management commands
+program.addCommand(createInstallCommand());
+program.addCommand(createUninstallCommand());
+program.addCommand(createStatusCommand());
 
 export { program };
 
