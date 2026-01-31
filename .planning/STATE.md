@@ -12,12 +12,12 @@
 
 **Milestone:** v1 - Full Vision Implementation
 **Phase:** 10 - Hook Integration and Incremental Sync (In Progress)
-**Plan:** 2 of 4 complete
-**Status:** Plan 10-02 complete
+**Plan:** 3 of 4 complete
+**Status:** Plan 10-03 complete
 
 ```
-[██████████████████████████████░░░░░░░░░░] 78%
-9+ of 12 phases complete | 1226 tests passing | Executing Phase 10
+[████████████████████████████████░░░░░░░░] 82%
+9+ of 12 phases complete | 1286 tests passing | Executing Phase 10
 ```
 
 ## Accumulated Context
@@ -80,6 +80,9 @@
 | spawn() over Bun.spawn() | Better portability across Node.js and Bun runtimes | 2026-01-30 |
 | MEMORY_NEXUS_HOOK env var | Sync command can detect when invoked via hook vs CLI | 2026-01-30 |
 | import.meta.main check | Prevents main() execution during test imports | 2026-01-30 |
+| Forward slashes in hook command | Windows paths converted for JSON compatibility | 2026-01-30 |
+| Status DB existence check | Don't create database just for status display | 2026-01-30 |
+| Path override test pattern | setTestPathOverrides for test isolation vs mocking homedir | 2026-01-30 |
 
 ### Blockers
 
@@ -128,6 +131,7 @@ None currently.
 - [x] Execute 09-04 - CLI Integration (formatter exports)
 - [x] Execute 10-01 - Configuration and Logging Infrastructure (46 tests)
 - [x] Execute 10-02 - Hook Runner Implementation (18 tests)
+- [x] Execute 10-03 - CLI Commands (60 tests: 30 settings-manager + 16 install + 7 uninstall + 14 status)
 
 ### Learnings
 
@@ -186,32 +190,44 @@ None currently.
 - Detached process pattern: spawn({detached: true, stdio: [ignore, fd, fd]}) + unref()
 - Hook script pattern: read stdin JSON -> check config -> spawn background -> exit 0
 - Never-block pattern: always exit 0, log errors but don't fail
+- MEMORY_NEXUS_MARKER constant enables consistent hook identification in settings.json
+- Settings backup pattern: backup before modify, restore on uninstall --restore
+- Test isolation: unique test directories per test file avoid Windows file locking conflicts
 
 ## Session Continuity
 
 ### Last Session
 
 **Date:** 2026-01-30
-**Completed:** 10-02 Hook Runner Implementation
-**Next:** 10-03 Install/Uninstall Commands
+**Completed:** 10-03 CLI Commands for Hook Management
+**Next:** 10-04 End-to-End Integration Testing
 
 ### Context for Next Session
 
-1. Phase 10 plan 02 complete - Hook runner and sync script ready
-2. 1226 tests passing (18 new tests added)
-3. spawnBackgroundSync() spawns detached processes
-4. sync-hook-script.ts reads stdin JSON and spawns background sync
-5. build:hook creates dist/sync-hook.js
-6. Ready for 10-03 (Install/Uninstall Commands)
+1. Phase 10 plan 03 complete - Install, uninstall, status commands ready
+2. 1286 tests passing (60 new tests added)
+3. settings-manager safely manipulates ~/.claude/settings.json with backup
+4. install command copies hook script and adds SessionEnd/PreCompact hooks
+5. uninstall command removes hooks, optionally restores from backup
+6. status command shows hooks, config, pending sessions (supports --json)
+7. Ready for 10-04 (End-to-End Integration Testing)
 
 ### Files Modified This Session
 
-- src/infrastructure/hooks/hook-runner.ts (created)
-- src/infrastructure/hooks/hook-runner.test.ts (created)
-- src/infrastructure/hooks/sync-hook-script.ts (created)
-- src/infrastructure/hooks/index.ts (updated - added hook-runner exports)
-- package.json (updated - added build:hook script)
-- .planning/phases/10-hook-integration/10-02-SUMMARY.md (created)
+- src/infrastructure/hooks/settings-manager.ts (created)
+- src/infrastructure/hooks/settings-manager.test.ts (created)
+- src/presentation/cli/commands/install.ts (created)
+- src/presentation/cli/commands/install.test.ts (created)
+- src/presentation/cli/commands/uninstall.ts (created)
+- src/presentation/cli/commands/uninstall.test.ts (created)
+- src/presentation/cli/commands/status.ts (created)
+- src/presentation/cli/commands/status.test.ts (created)
+- src/infrastructure/hooks/config-manager.ts (updated - added setTestConfigPath)
+- src/infrastructure/hooks/log-writer.ts (updated - added setTestLogPath)
+- src/infrastructure/hooks/index.ts (updated - added settings-manager and test exports)
+- src/presentation/cli/commands/index.ts (updated - added command exports)
+- src/presentation/cli/index.ts (updated - wired new commands)
+- .planning/phases/10-hook-integration/10-03-SUMMARY.md (created)
 - .planning/STATE.md (updated)
 
 ## Performance Metrics
@@ -219,10 +235,10 @@ None currently.
 | Metric | Value |
 |--------|-------|
 | Phases Completed | 9+ / 12 |
-| Plans Completed | 34 (phases 1-9 + 10-01 + 10-02) |
-| Requirements Completed | 79+ / 85 |
+| Plans Completed | 35 (phases 1-9 + 10-01 + 10-02 + 10-03) |
+| Requirements Completed | 82+ / 85 |
 | Test Coverage | 95%+ functions, 95%+ lines |
-| Total Tests | 1226 |
+| Total Tests | 1286 |
 
 ## Phase 2 Summary
 
@@ -306,10 +322,10 @@ None currently.
 |------|-------------|-------|--------|
 | 10-01 | Configuration and Logging | 46 | Complete |
 | 10-02 | Hook Runner | 18 | Complete |
-| 10-03 | Install/Uninstall Commands | - | Pending |
-| 10-04 | Status Command | - | Pending |
-| **Total** | | **64+** | **In Progress** |
+| 10-03 | CLI Commands | 60 | Complete |
+| 10-04 | End-to-End Integration | - | Pending |
+| **Total** | | **124+** | **In Progress** |
 
 ---
 
-*Last updated: 2026-01-30 (Phase 10 plan 02 complete)*
+*Last updated: 2026-01-30 (Phase 10 plan 03 complete)*
