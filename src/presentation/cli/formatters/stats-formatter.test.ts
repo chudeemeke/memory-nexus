@@ -9,6 +9,8 @@ import {
   createStatsFormatter,
   type StatsOutputMode,
   type StatsFormatOptions,
+  type ExtendedStatsResult,
+  type HooksSummary,
 } from "./stats-formatter.js";
 import type { StatsResult, ProjectStats } from "../../../domain/ports/services.js";
 
@@ -328,6 +330,162 @@ describe("StatsFormatter", () => {
       // Should have totals but not project section
       expect(output).toContain("Sessions:");
       expect(output).not.toContain("\nProjects:");
+    });
+  });
+
+  describe("hooks summary", () => {
+    const statsWithHooks: ExtendedStatsResult = {
+      totalSessions: 42,
+      totalMessages: 1234,
+      totalToolUses: 567,
+      databaseSizeBytes: 1536000,
+      projectBreakdown: [],
+      hooks: {
+        installed: true,
+        autoSync: true,
+        pendingSessions: 5,
+      },
+    };
+
+    const statsWithHooksNotInstalled: ExtendedStatsResult = {
+      totalSessions: 42,
+      totalMessages: 1234,
+      totalToolUses: 567,
+      databaseSizeBytes: 1536000,
+      projectBreakdown: [],
+      hooks: {
+        installed: false,
+        autoSync: false,
+        pendingSessions: 10,
+      },
+    };
+
+    describe("default mode", () => {
+      const formatter = createStatsFormatter("default", false);
+
+      it("shows hooks section when hooks summary provided", () => {
+        const output = formatter.formatStats(statsWithHooks);
+        expect(output).toContain("Hooks:");
+      });
+
+      it("shows installed status as yes when installed", () => {
+        const output = formatter.formatStats(statsWithHooks);
+        expect(output).toContain("Installed:");
+        expect(output).toContain("yes");
+      });
+
+      it("shows installed status as no when not installed", () => {
+        const output = formatter.formatStats(statsWithHooksNotInstalled);
+        expect(output).toContain("Installed:");
+        expect(output).toContain("no");
+      });
+
+      it("shows auto-sync as enabled when true", () => {
+        const output = formatter.formatStats(statsWithHooks);
+        expect(output).toContain("Auto-sync:");
+        expect(output).toContain("enabled");
+      });
+
+      it("shows auto-sync as disabled when false", () => {
+        const output = formatter.formatStats(statsWithHooksNotInstalled);
+        expect(output).toContain("Auto-sync:");
+        expect(output).toContain("disabled");
+      });
+
+      it("shows pending sessions count", () => {
+        const output = formatter.formatStats(statsWithHooks);
+        expect(output).toContain("Pending sessions:");
+        expect(output).toContain("5");
+      });
+
+      it("shows install hint when hooks not installed", () => {
+        const output = formatter.formatStats(statsWithHooksNotInstalled);
+        expect(output).toContain("aidev memory install");
+      });
+
+      it("does not show install hint when hooks installed", () => {
+        const output = formatter.formatStats(statsWithHooks);
+        expect(output).not.toContain("aidev memory install");
+      });
+
+      it("does not show hooks section when hooks not provided", () => {
+        const statsNoHooks: ExtendedStatsResult = {
+          totalSessions: 42,
+          totalMessages: 1234,
+          totalToolUses: 567,
+          databaseSizeBytes: 1536000,
+          projectBreakdown: [],
+        };
+        const output = formatter.formatStats(statsNoHooks);
+        expect(output).not.toContain("Hooks:");
+      });
+    });
+
+    describe("json mode", () => {
+      const formatter = createStatsFormatter("json", false);
+
+      it("includes hooks object in JSON output", () => {
+        const output = formatter.formatStats(statsWithHooks);
+        const parsed = JSON.parse(output);
+
+        expect(parsed.hooks).toBeDefined();
+        expect(parsed.hooks.installed).toBe(true);
+        expect(parsed.hooks.autoSync).toBe(true);
+        expect(parsed.hooks.pendingSessions).toBe(5);
+      });
+
+      it("includes hooks with false values correctly", () => {
+        const output = formatter.formatStats(statsWithHooksNotInstalled);
+        const parsed = JSON.parse(output);
+
+        expect(parsed.hooks.installed).toBe(false);
+        expect(parsed.hooks.autoSync).toBe(false);
+        expect(parsed.hooks.pendingSessions).toBe(10);
+      });
+
+      it("does not include hooks key when not provided", () => {
+        const statsNoHooks: ExtendedStatsResult = {
+          totalSessions: 42,
+          totalMessages: 1234,
+          totalToolUses: 567,
+          databaseSizeBytes: 1536000,
+          projectBreakdown: [],
+        };
+        const output = formatter.formatStats(statsNoHooks);
+        const parsed = JSON.parse(output);
+
+        expect(parsed.hooks).toBeUndefined();
+      });
+    });
+
+    describe("quiet mode", () => {
+      const formatter = createStatsFormatter("quiet", false);
+
+      it("does not include hooks info (minimal output)", () => {
+        const output = formatter.formatStats(statsWithHooks);
+        // Quiet mode only outputs 4 numbers on lines
+        const lines = output.split("\n");
+        expect(lines.length).toBe(4);
+        expect(output).not.toContain("Hooks");
+        expect(output).not.toContain("installed");
+      });
+    });
+
+    describe("verbose mode", () => {
+      const formatter = createStatsFormatter("verbose", false);
+
+      it("shows hooks section in verbose output", () => {
+        const output = formatter.formatStats(statsWithHooks);
+        expect(output).toContain("Hooks:");
+        expect(output).toContain("Installed:");
+        expect(output).toContain("Auto-sync:");
+        expect(output).toContain("Pending sessions:");
+      });
+
+      it("shows install hint when not installed in verbose mode", () => {
+        const output = formatter.formatStats(statsWithHooksNotInstalled);
+        expect(output).toContain("aidev memory install");
+      });
     });
   });
 });

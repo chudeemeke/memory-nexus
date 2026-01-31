@@ -13,6 +13,25 @@ import type { StatsResult, ProjectStats } from "../../../domain/ports/services.j
 export type StatsOutputMode = "default" | "json" | "quiet" | "verbose";
 
 /**
+ * Hook status summary for stats display.
+ */
+export interface HooksSummary {
+  /** Hooks are installed in Claude Code */
+  installed: boolean;
+  /** Auto-sync is enabled in config */
+  autoSync: boolean;
+  /** Number of sessions not yet synced */
+  pendingSessions: number;
+}
+
+/**
+ * Extended stats result with optional hook summary.
+ */
+export interface ExtendedStatsResult extends StatsResult {
+  hooks?: HooksSummary;
+}
+
+/**
  * Options for formatting stats.
  */
 export interface StatsFormatOptions {
@@ -23,7 +42,7 @@ export interface StatsFormatOptions {
  * Stats formatter interface.
  */
 export interface StatsFormatter {
-  formatStats(stats: StatsResult, options?: StatsFormatOptions): string;
+  formatStats(stats: ExtendedStatsResult, options?: StatsFormatOptions): string;
   formatError(error: Error): string;
   formatEmpty(): string;
 }
@@ -85,7 +104,7 @@ export function createStatsFormatter(
 class DefaultStatsFormatter implements StatsFormatter {
   constructor(private useColor: boolean) {}
 
-  formatStats(stats: StatsResult, _options?: StatsFormatOptions): string {
+  formatStats(stats: ExtendedStatsResult, _options?: StatsFormatOptions): string {
     let output = "";
 
     // Header
@@ -108,6 +127,18 @@ class DefaultStatsFormatter implements StatsFormatter {
       }
     }
 
+    // Hooks section
+    if (stats.hooks) {
+      output += "\nHooks:\n";
+      output += `  Installed:        ${stats.hooks.installed ? "yes" : "no"}\n`;
+      output += `  Auto-sync:        ${stats.hooks.autoSync ? "enabled" : "disabled"}\n`;
+      output += `  Pending sessions: ${stats.hooks.pendingSessions}\n`;
+
+      if (!stats.hooks.installed) {
+        output += "\n  Run 'aidev memory install' to enable automatic sync\n";
+      }
+    }
+
     return output;
   }
 
@@ -125,7 +156,7 @@ class DefaultStatsFormatter implements StatsFormatter {
  * JSON stats formatter.
  */
 class JsonStatsFormatter implements StatsFormatter {
-  formatStats(stats: StatsResult, options?: StatsFormatOptions): string {
+  formatStats(stats: ExtendedStatsResult, options?: StatsFormatOptions): string {
     const output: Record<string, unknown> = {
       totalSessions: stats.totalSessions,
       totalMessages: stats.totalMessages,
@@ -140,6 +171,14 @@ class JsonStatsFormatter implements StatsFormatter {
 
     if (options?.executionTimeMs !== undefined) {
       output.executionTimeMs = options.executionTimeMs;
+    }
+
+    if (stats.hooks) {
+      output.hooks = {
+        installed: stats.hooks.installed,
+        autoSync: stats.hooks.autoSync,
+        pendingSessions: stats.hooks.pendingSessions,
+      };
     }
 
     return JSON.stringify(output, null, 2);
@@ -167,7 +206,7 @@ class JsonStatsFormatter implements StatsFormatter {
  * Quiet stats formatter - minimal output.
  */
 class QuietStatsFormatter implements StatsFormatter {
-  formatStats(stats: StatsResult, _options?: StatsFormatOptions): string {
+  formatStats(stats: ExtendedStatsResult, _options?: StatsFormatOptions): string {
     // Just numbers on separate lines: sessions, messages, tools, size
     return [
       String(stats.totalSessions),
@@ -193,7 +232,7 @@ class QuietStatsFormatter implements StatsFormatter {
 class VerboseStatsFormatter implements StatsFormatter {
   constructor(private useColor: boolean) {}
 
-  formatStats(stats: StatsResult, options?: StatsFormatOptions): string {
+  formatStats(stats: ExtendedStatsResult, options?: StatsFormatOptions): string {
     let output = "";
 
     // Execution header
@@ -224,6 +263,18 @@ class VerboseStatsFormatter implements StatsFormatter {
         output += `    Sessions: ${formatNumber(project.sessionCount)}`;
         output += `, Messages: ${formatNumber(project.messageCount)}`;
         output += ` (avg ${avgMsgs}/session)\n`;
+      }
+    }
+
+    // Hooks section with detail
+    if (stats.hooks) {
+      output += "\nHooks:\n";
+      output += `  Installed:        ${stats.hooks.installed ? "yes" : "no"}\n`;
+      output += `  Auto-sync:        ${stats.hooks.autoSync ? "enabled" : "disabled"}\n`;
+      output += `  Pending sessions: ${stats.hooks.pendingSessions}\n`;
+
+      if (!stats.hooks.installed) {
+        output += "\n  Run 'aidev memory install' to enable automatic sync\n";
       }
     }
 

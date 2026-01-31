@@ -2,6 +2,7 @@
  * Stats Command Handler
  *
  * CLI command for database statistics overview.
+ * Includes hook status summary for visibility into auto-sync state.
  */
 
 import { Command, Option } from "commander";
@@ -10,12 +11,20 @@ import {
   closeDatabase,
   getDefaultDbPath,
   SqliteStatsService,
+  SqliteExtractionStateRepository,
 } from "../../../infrastructure/database/index.js";
 import {
   createStatsFormatter,
   type StatsOutputMode,
+  type ExtendedStatsResult,
+  type HooksSummary,
 } from "../formatters/stats-formatter.js";
 import { shouldUseColor } from "../formatters/color.js";
+import {
+  checkHooksInstalled,
+  loadConfig,
+} from "../../../infrastructure/hooks/index.js";
+import { FileSystemSessionSource } from "../../../infrastructure/sources/index.js";
 
 /**
  * Options parsed from CLI arguments.
@@ -83,7 +92,16 @@ export async function executeStatsCommand(
     }
 
     // Get stats
-    const stats = await statsService.getStats(projectLimit);
+    const baseStats = await statsService.getStats(projectLimit);
+
+    // Get hook status
+    const hooksSummary = await gatherHooksSummary(db);
+
+    // Build extended stats
+    const stats: ExtendedStatsResult = {
+      ...baseStats,
+      hooks: hooksSummary,
+    };
 
     // Determine output mode
     let outputMode: StatsOutputMode = "default";
@@ -113,4 +131,39 @@ export async function executeStatsCommand(
   } finally {
     closeDatabase(db);
   }
+}
+
+/**
+ * Gather hook status summary.
+ *
+ * @param db Database instance for extraction state queries
+ * @returns Hook summary with installation state and pending count
+ */
+async function gatherHooksSummary(db: ReturnType<typeof initializeDatabase>["db"]): Promise<HooksSummary> {
+  // Check hook installation status
+  const hookStatus = checkHooksInstalled();
+  const config = loadConfig();
+
+  // Count pending sessions
+  let pendingSessions = 0;
+  try {
+    const sessionSource = new FileSystemSessionSource();
+    const extractionStateRepo = new SqliteExtractionStateRepository(db);
+
+    const allSessions = await sessionSource.discoverSessions();
+    for (const session of allSessions) {
+      const state = await extractionStateRepo.findBySessionPath(session.path);
+      if (!state || state.status !== "complete") {
+        pendingSessions++;
+      }
+    }
+  } catch {
+    // Ignore errors - pending count is informational
+  }
+
+  return {
+    installed: hookStatus.sessionEnd && hookStatus.preCompact,
+    autoSync: config.autoSync,
+    pendingSessions,
+  };
 }
