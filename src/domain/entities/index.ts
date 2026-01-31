@@ -5,6 +5,15 @@
  */
 
 export {
+  Entity,
+  type ExtractedEntityType,
+  type ConceptMetadata,
+  type FileMetadata,
+  type DecisionMetadata,
+  type TermMetadata,
+  type EntityMetadata,
+} from "./entity.js";
+export {
   ExtractionState,
   type ExtractionStatus,
 } from "./extraction-state.js";
