@@ -25,3 +25,6 @@ export {
     SqliteLinkRepository,
     type RelatedLink,
 } from "./link-repository.js";
+
+// Entity Repository
+export { SqliteEntityRepository } from "./entity-repository.js";
