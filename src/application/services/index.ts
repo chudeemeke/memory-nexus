@@ -10,3 +10,9 @@ export type {
   SyncProgress,
   SyncResult,
 } from "./sync-service.js";
+
+export { RecoveryService, extractSessionId } from "./recovery-service.js";
+export type {
+  RecoveryResult,
+  RecoveryOptions,
+} from "./recovery-service.js";
