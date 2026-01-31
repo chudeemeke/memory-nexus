@@ -15,6 +15,7 @@ import type { Message } from "../entities/message.js";
 import type { ToolUse } from "../entities/tool-use.js";
 import type { Link, EntityType } from "../entities/link.js";
 import type { ExtractionState } from "../entities/extraction-state.js";
+import type { Entity, ExtractedEntityType } from "../entities/entity.js";
 import type { ProjectPath } from "../value-objects/project-path.js";
 
 /**
@@ -250,4 +251,99 @@ export interface IExtractionStateRepository {
    * @param state The extraction state to save
    */
   save(state: ExtractionState): Promise<void>;
+}
+
+/**
+ * Options for filtering entity list.
+ */
+export interface EntityListOptions {
+  /** Maximum entities to return */
+  limit?: number;
+  /** Minimum confidence threshold (0-1) */
+  minConfidence?: number;
+}
+
+/**
+ * Repository for Entity domain objects.
+ *
+ * Handles persistence of extracted concepts, files, decisions, and terms.
+ * Entities are linked to sessions and can have relationships with other entities.
+ */
+export interface IEntityRepository {
+  /**
+   * Find an entity by its unique database identifier.
+   * @param id The entity database ID
+   * @returns The entity if found, null otherwise
+   */
+  findById(id: number): Promise<Entity | null>;
+
+  /**
+   * Find an entity by its type and name (unique constraint).
+   * @param type The entity type (concept, file, decision, term)
+   * @param name The entity name
+   * @returns The entity if found, null otherwise
+   */
+  findByName(type: ExtractedEntityType, name: string): Promise<Entity | null>;
+
+  /**
+   * Find all entities linked to a specific session.
+   * @param sessionId The session UUID
+   * @returns Array of entities for the session
+   */
+  findBySession(sessionId: string): Promise<Entity[]>;
+
+  /**
+   * Find entities of a specific type with optional filtering.
+   * @param type The entity type to filter by
+   * @param options Optional filtering (limit, minConfidence)
+   * @returns Array of entities matching the criteria
+   */
+  findByType(
+    type: ExtractedEntityType,
+    options?: EntityListOptions
+  ): Promise<Entity[]>;
+
+  /**
+   * Save an entity to the repository.
+   * Creates or updates based on type+name uniqueness.
+   * @param entity The entity to save
+   * @returns The entity with id assigned
+   */
+  save(entity: Entity): Promise<Entity>;
+
+  /**
+   * Save multiple entities in a single transaction.
+   * More efficient than individual saves for bulk operations.
+   * @param entities Array of entities to save
+   * @returns Array of entities with ids assigned
+   */
+  saveMany(entities: Entity[]): Promise<Entity[]>;
+
+  /**
+   * Create a link between an entity and a session.
+   * Tracks how often an entity appears in a session.
+   * @param entityId The entity database ID
+   * @param sessionId The session UUID
+   * @param frequency Optional occurrence count (default: 1)
+   */
+  linkToSession(
+    entityId: number,
+    sessionId: string,
+    frequency?: number
+  ): Promise<void>;
+
+  /**
+   * Create a relationship link between two entities.
+   * Enables graph traversal for related concepts.
+   * @param sourceId The source entity database ID
+   * @param targetId The target entity database ID
+   * @param relationship The relationship type (related, implies, contradicts)
+   * @param weight Optional relationship strength (0-1, default: 1.0)
+   */
+  linkEntities(
+    sourceId: number,
+    targetId: number,
+    relationship: "related" | "implies" | "contradicts",
+    weight?: number
+  ): Promise<void>;
 }

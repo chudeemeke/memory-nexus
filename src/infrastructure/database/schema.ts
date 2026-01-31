@@ -145,6 +145,52 @@ CREATE INDEX IF NOT EXISTS idx_extraction_status ON extraction_state(status);
 `;
 
 /**
+ * Entities table - stores extracted metadata (concepts, files, decisions, terms)
+ */
+export const ENTITIES_TABLE = `
+CREATE TABLE IF NOT EXISTS entities (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    type TEXT NOT NULL CHECK (type IN ('concept', 'file', 'decision', 'term')),
+    name TEXT NOT NULL,
+    metadata TEXT,
+    confidence REAL DEFAULT 1.0 CHECK (confidence >= 0 AND confidence <= 1),
+    created_at TEXT DEFAULT (datetime('now')),
+    UNIQUE(type, name)
+);
+CREATE INDEX IF NOT EXISTS idx_entities_type ON entities(type);
+CREATE INDEX IF NOT EXISTS idx_entities_name ON entities(name);
+`;
+
+/**
+ * Session-Entity links - many-to-many relationship with frequency tracking
+ */
+export const SESSION_ENTITIES_TABLE = `
+CREATE TABLE IF NOT EXISTS session_entities (
+    session_id TEXT NOT NULL,
+    entity_id INTEGER NOT NULL,
+    frequency INTEGER DEFAULT 1,
+    FOREIGN KEY (session_id) REFERENCES sessions(id) ON DELETE CASCADE,
+    FOREIGN KEY (entity_id) REFERENCES entities(id) ON DELETE CASCADE,
+    PRIMARY KEY (session_id, entity_id)
+);
+`;
+
+/**
+ * Entity-Entity links - cross-project relationships between entities
+ */
+export const ENTITY_LINKS_TABLE = `
+CREATE TABLE IF NOT EXISTS entity_links (
+    source_id INTEGER NOT NULL,
+    target_id INTEGER NOT NULL,
+    relationship TEXT NOT NULL CHECK (relationship IN ('related', 'implies', 'contradicts')),
+    weight REAL DEFAULT 1.0 CHECK (weight >= 0 AND weight <= 1),
+    FOREIGN KEY (source_id) REFERENCES entities(id) ON DELETE CASCADE,
+    FOREIGN KEY (target_id) REFERENCES entities(id) ON DELETE CASCADE,
+    PRIMARY KEY (source_id, target_id, relationship)
+);
+`;
+
+/**
  * Complete schema SQL statements in dependency order
  *
  * Order matters:
@@ -156,6 +202,9 @@ CREATE INDEX IF NOT EXISTS idx_extraction_status ON extraction_state(status);
  * 6. links (no foreign keys)
  * 7. topics (no dependencies)
  * 8. extraction_state (no dependencies)
+ * 9. entities (no dependencies)
+ * 10. session_entities (depends on sessions, entities)
+ * 11. entity_links (depends on entities)
  */
 export const SCHEMA_SQL: readonly string[] = [
     SESSIONS_TABLE,
@@ -166,6 +215,9 @@ export const SCHEMA_SQL: readonly string[] = [
     LINKS_TABLE,
     TOPICS_TABLE,
     EXTRACTION_STATE_TABLE,
+    ENTITIES_TABLE,
+    SESSION_ENTITIES_TABLE,
+    ENTITY_LINKS_TABLE,
 ];
 
 /**

@@ -18,6 +18,9 @@ import {
     LINKS_TABLE,
     TOPICS_TABLE,
     EXTRACTION_STATE_TABLE,
+    ENTITIES_TABLE,
+    SESSION_ENTITIES_TABLE,
+    ENTITY_LINKS_TABLE,
 } from "./schema.js";
 
 describe("Database Schema", () => {
@@ -42,11 +45,14 @@ describe("Database Schema", () => {
             expect(LINKS_TABLE).toBeDefined();
             expect(TOPICS_TABLE).toBeDefined();
             expect(EXTRACTION_STATE_TABLE).toBeDefined();
+            expect(ENTITIES_TABLE).toBeDefined();
+            expect(SESSION_ENTITIES_TABLE).toBeDefined();
+            expect(ENTITY_LINKS_TABLE).toBeDefined();
         });
 
         it("should have SCHEMA_SQL as an array with correct order", () => {
             expect(Array.isArray(SCHEMA_SQL)).toBe(true);
-            expect(SCHEMA_SQL.length).toBe(8);
+            expect(SCHEMA_SQL.length).toBe(11);
             expect(SCHEMA_SQL[0]).toBe(SESSIONS_TABLE);
             expect(SCHEMA_SQL[1]).toBe(MESSAGES_META_TABLE);
             expect(SCHEMA_SQL[2]).toBe(MESSAGES_FTS_TABLE);
@@ -55,6 +61,9 @@ describe("Database Schema", () => {
             expect(SCHEMA_SQL[5]).toBe(LINKS_TABLE);
             expect(SCHEMA_SQL[6]).toBe(TOPICS_TABLE);
             expect(SCHEMA_SQL[7]).toBe(EXTRACTION_STATE_TABLE);
+            expect(SCHEMA_SQL[8]).toBe(ENTITIES_TABLE);
+            expect(SCHEMA_SQL[9]).toBe(SESSION_ENTITIES_TABLE);
+            expect(SCHEMA_SQL[10]).toBe(ENTITY_LINKS_TABLE);
         });
     });
 
@@ -104,6 +113,9 @@ describe("Database Schema", () => {
             expect(tableNames).toContain("links");
             expect(tableNames).toContain("topics");
             expect(tableNames).toContain("extraction_state");
+            expect(tableNames).toContain("entities");
+            expect(tableNames).toContain("session_entities");
+            expect(tableNames).toContain("entity_links");
         });
 
         it("should create FTS5 virtual table", () => {
@@ -148,6 +160,8 @@ describe("Database Schema", () => {
             expect(indexNames).toContain("idx_topics_name");
             expect(indexNames).toContain("idx_extraction_session_path");
             expect(indexNames).toContain("idx_extraction_status");
+            expect(indexNames).toContain("idx_entities_type");
+            expect(indexNames).toContain("idx_entities_name");
         });
 
         it("should create FTS synchronization triggers", () => {
@@ -732,6 +746,514 @@ describe("Database Schema", () => {
             // msg-rank-2 should have better rank (more occurrences)
             // bm25 returns negative scores, lower is better
             expect(results[0]?.id).toBe("msg-rank-2");
+        });
+    });
+
+    describe("Entity Tables", () => {
+        beforeEach(() => {
+            createSchema(db);
+            // Insert a session for foreign key tests
+            db.exec(`
+                INSERT INTO sessions (id, project_path_encoded, project_path_decoded, project_name, start_time)
+                VALUES ('session-entity', 'path', 'path', 'Test', '2026-01-31T10:00:00Z')
+            `);
+        });
+
+        describe("entities table", () => {
+            it("should create entities table", () => {
+                const tables = db
+                    .query<{ name: string }, []>(
+                        "SELECT name FROM sqlite_master WHERE type='table' AND name='entities'"
+                    )
+                    .all();
+
+                expect(tables.length).toBe(1);
+            });
+
+            it("should insert entity with valid type", () => {
+                expect(() => {
+                    db.exec(`
+                        INSERT INTO entities (type, name, confidence)
+                        VALUES ('concept', 'hexagonal architecture', 0.9)
+                    `);
+                }).not.toThrow();
+
+                const entity = db
+                    .query<{ type: string; name: string; confidence: number }, []>(
+                        "SELECT type, name, confidence FROM entities WHERE name = 'hexagonal architecture'"
+                    )
+                    .get();
+
+                expect(entity?.type).toBe("concept");
+                expect(entity?.confidence).toBe(0.9);
+            });
+
+            it("should reject entity with invalid type", () => {
+                expect(() => {
+                    db.exec(`
+                        INSERT INTO entities (type, name, confidence)
+                        VALUES ('invalid', 'test', 0.9)
+                    `);
+                }).toThrow();
+            });
+
+            it("should accept all valid entity types", () => {
+                const types = ["concept", "file", "decision", "term"];
+
+                for (const type of types) {
+                    expect(() => {
+                        db.exec(`
+                            INSERT INTO entities (type, name, confidence)
+                            VALUES ('${type}', 'entity-${type}', 0.9)
+                        `);
+                    }).not.toThrow();
+                }
+
+                const count = db
+                    .query<{ count: number }, []>("SELECT COUNT(*) as count FROM entities")
+                    .get();
+
+                expect(count?.count).toBe(4);
+            });
+
+            it("should reject confidence below 0", () => {
+                expect(() => {
+                    db.exec(`
+                        INSERT INTO entities (type, name, confidence)
+                        VALUES ('concept', 'test-below', -0.1)
+                    `);
+                }).toThrow();
+            });
+
+            it("should reject confidence above 1", () => {
+                expect(() => {
+                    db.exec(`
+                        INSERT INTO entities (type, name, confidence)
+                        VALUES ('concept', 'test-above', 1.1)
+                    `);
+                }).toThrow();
+            });
+
+            it("should accept confidence at boundaries", () => {
+                expect(() => {
+                    db.exec(`
+                        INSERT INTO entities (type, name, confidence)
+                        VALUES ('concept', 'low-conf', 0)
+                    `);
+                }).not.toThrow();
+
+                expect(() => {
+                    db.exec(`
+                        INSERT INTO entities (type, name, confidence)
+                        VALUES ('concept', 'high-conf', 1)
+                    `);
+                }).not.toThrow();
+            });
+
+            it("should enforce UNIQUE constraint on type+name", () => {
+                db.exec(`
+                    INSERT INTO entities (type, name, confidence)
+                    VALUES ('concept', 'unique-test', 0.9)
+                `);
+
+                expect(() => {
+                    db.exec(`
+                        INSERT INTO entities (type, name, confidence)
+                        VALUES ('concept', 'unique-test', 0.8)
+                    `);
+                }).toThrow();
+            });
+
+            it("should allow same name with different type", () => {
+                db.exec(`
+                    INSERT INTO entities (type, name, confidence)
+                    VALUES ('concept', 'shared-name', 0.9)
+                `);
+
+                expect(() => {
+                    db.exec(`
+                        INSERT INTO entities (type, name, confidence)
+                        VALUES ('term', 'shared-name', 0.9)
+                    `);
+                }).not.toThrow();
+            });
+
+            it("should store JSON metadata", () => {
+                const metadata = JSON.stringify({
+                    subject: "database",
+                    decision: "Use SQLite",
+                    rejected: ["PostgreSQL"],
+                    rationale: "Embedded"
+                });
+
+                db.exec(`
+                    INSERT INTO entities (type, name, metadata, confidence)
+                    VALUES ('decision', 'DB Choice', '${metadata}', 0.95)
+                `);
+
+                const entity = db
+                    .query<{ metadata: string }, []>(
+                        "SELECT metadata FROM entities WHERE name = 'DB Choice'"
+                    )
+                    .get();
+
+                expect(entity?.metadata).toBe(metadata);
+                const parsed = JSON.parse(entity?.metadata ?? "{}");
+                expect(parsed.subject).toBe("database");
+            });
+
+            it("should set default confidence to 1.0", () => {
+                db.exec(`
+                    INSERT INTO entities (type, name)
+                    VALUES ('file', '/src/index.ts')
+                `);
+
+                const entity = db
+                    .query<{ confidence: number }, []>(
+                        "SELECT confidence FROM entities WHERE name = '/src/index.ts'"
+                    )
+                    .get();
+
+                expect(entity?.confidence).toBe(1.0);
+            });
+
+            it("should auto-generate id", () => {
+                db.exec(`
+                    INSERT INTO entities (type, name, confidence)
+                    VALUES ('concept', 'auto-id-test', 0.9)
+                `);
+
+                const entity = db
+                    .query<{ id: number }, []>(
+                        "SELECT id FROM entities WHERE name = 'auto-id-test'"
+                    )
+                    .get();
+
+                expect(entity?.id).toBeGreaterThan(0);
+            });
+
+            it("should set created_at to current datetime", () => {
+                db.exec(`
+                    INSERT INTO entities (type, name, confidence)
+                    VALUES ('term', 'timestamp-test', 1.0)
+                `);
+
+                const entity = db
+                    .query<{ created_at: string }, []>(
+                        "SELECT created_at FROM entities WHERE name = 'timestamp-test'"
+                    )
+                    .get();
+
+                expect(entity?.created_at).toBeDefined();
+                expect(entity?.created_at.startsWith("20")).toBe(true);
+            });
+        });
+
+        describe("session_entities table", () => {
+            beforeEach(() => {
+                // Insert an entity for linking
+                db.exec(`
+                    INSERT INTO entities (id, type, name, confidence)
+                    VALUES (1, 'concept', 'test-concept', 0.9)
+                `);
+            });
+
+            it("should create session_entities table", () => {
+                const tables = db
+                    .query<{ name: string }, []>(
+                        "SELECT name FROM sqlite_master WHERE type='table' AND name='session_entities'"
+                    )
+                    .all();
+
+                expect(tables.length).toBe(1);
+            });
+
+            it("should link session to entity", () => {
+                expect(() => {
+                    db.exec(`
+                        INSERT INTO session_entities (session_id, entity_id)
+                        VALUES ('session-entity', 1)
+                    `);
+                }).not.toThrow();
+            });
+
+            it("should track frequency", () => {
+                db.exec(`
+                    INSERT INTO session_entities (session_id, entity_id, frequency)
+                    VALUES ('session-entity', 1, 5)
+                `);
+
+                const link = db
+                    .query<{ frequency: number }, []>(
+                        "SELECT frequency FROM session_entities WHERE session_id = 'session-entity'"
+                    )
+                    .get();
+
+                expect(link?.frequency).toBe(5);
+            });
+
+            it("should default frequency to 1", () => {
+                db.exec(`
+                    INSERT INTO session_entities (session_id, entity_id)
+                    VALUES ('session-entity', 1)
+                `);
+
+                const link = db
+                    .query<{ frequency: number }, []>(
+                        "SELECT frequency FROM session_entities WHERE session_id = 'session-entity'"
+                    )
+                    .get();
+
+                expect(link?.frequency).toBe(1);
+            });
+
+            it("should reject invalid session_id", () => {
+                expect(() => {
+                    db.exec(`
+                        INSERT INTO session_entities (session_id, entity_id)
+                        VALUES ('nonexistent-session', 1)
+                    `);
+                }).toThrow();
+            });
+
+            it("should reject invalid entity_id", () => {
+                expect(() => {
+                    db.exec(`
+                        INSERT INTO session_entities (session_id, entity_id)
+                        VALUES ('session-entity', 999)
+                    `);
+                }).toThrow();
+            });
+
+            it("should enforce unique session+entity combination", () => {
+                db.exec(`
+                    INSERT INTO session_entities (session_id, entity_id)
+                    VALUES ('session-entity', 1)
+                `);
+
+                expect(() => {
+                    db.exec(`
+                        INSERT INTO session_entities (session_id, entity_id)
+                        VALUES ('session-entity', 1)
+                    `);
+                }).toThrow();
+            });
+
+            it("should cascade delete when session is deleted", () => {
+                db.exec(`
+                    INSERT INTO session_entities (session_id, entity_id)
+                    VALUES ('session-entity', 1)
+                `);
+
+                // Verify link exists
+                let links = db
+                    .query<{ session_id: string }, []>(
+                        "SELECT session_id FROM session_entities WHERE session_id = 'session-entity'"
+                    )
+                    .all();
+                expect(links.length).toBe(1);
+
+                // Delete session
+                db.exec("DELETE FROM sessions WHERE id = 'session-entity'");
+
+                // Verify link is deleted
+                links = db
+                    .query<{ session_id: string }, []>(
+                        "SELECT session_id FROM session_entities WHERE session_id = 'session-entity'"
+                    )
+                    .all();
+                expect(links.length).toBe(0);
+            });
+
+            it("should cascade delete when entity is deleted", () => {
+                db.exec(`
+                    INSERT INTO session_entities (session_id, entity_id)
+                    VALUES ('session-entity', 1)
+                `);
+
+                // Delete entity
+                db.exec("DELETE FROM entities WHERE id = 1");
+
+                // Verify link is deleted
+                const links = db
+                    .query<{ entity_id: number }, []>(
+                        "SELECT entity_id FROM session_entities WHERE entity_id = 1"
+                    )
+                    .all();
+                expect(links.length).toBe(0);
+            });
+        });
+
+        describe("entity_links table", () => {
+            beforeEach(() => {
+                // Insert entities for linking
+                db.exec(`
+                    INSERT INTO entities (id, type, name, confidence)
+                    VALUES (1, 'concept', 'source-concept', 0.9)
+                `);
+                db.exec(`
+                    INSERT INTO entities (id, type, name, confidence)
+                    VALUES (2, 'concept', 'target-concept', 0.9)
+                `);
+            });
+
+            it("should create entity_links table", () => {
+                const tables = db
+                    .query<{ name: string }, []>(
+                        "SELECT name FROM sqlite_master WHERE type='table' AND name='entity_links'"
+                    )
+                    .all();
+
+                expect(tables.length).toBe(1);
+            });
+
+            it("should link entities", () => {
+                expect(() => {
+                    db.exec(`
+                        INSERT INTO entity_links (source_id, target_id, relationship)
+                        VALUES (1, 2, 'related')
+                    `);
+                }).not.toThrow();
+            });
+
+            it("should accept valid relationships", () => {
+                const relationships = ["related", "implies", "contradicts"];
+
+                for (let i = 0; i < relationships.length; i++) {
+                    // Insert new target entities for each relationship
+                    db.exec(`
+                        INSERT INTO entities (id, type, name, confidence)
+                        VALUES (${10 + i}, 'concept', 'target-${i}', 0.9)
+                    `);
+
+                    expect(() => {
+                        db.exec(`
+                            INSERT INTO entity_links (source_id, target_id, relationship)
+                            VALUES (1, ${10 + i}, '${relationships[i]}')
+                        `);
+                    }).not.toThrow();
+                }
+            });
+
+            it("should reject invalid relationship", () => {
+                expect(() => {
+                    db.exec(`
+                        INSERT INTO entity_links (source_id, target_id, relationship)
+                        VALUES (1, 2, 'invalid_rel')
+                    `);
+                }).toThrow();
+            });
+
+            it("should reject weight below 0", () => {
+                expect(() => {
+                    db.exec(`
+                        INSERT INTO entity_links (source_id, target_id, relationship, weight)
+                        VALUES (1, 2, 'related', -0.1)
+                    `);
+                }).toThrow();
+            });
+
+            it("should reject weight above 1", () => {
+                expect(() => {
+                    db.exec(`
+                        INSERT INTO entity_links (source_id, target_id, relationship, weight)
+                        VALUES (1, 2, 'related', 1.1)
+                    `);
+                }).toThrow();
+            });
+
+            it("should default weight to 1.0", () => {
+                db.exec(`
+                    INSERT INTO entity_links (source_id, target_id, relationship)
+                    VALUES (1, 2, 'related')
+                `);
+
+                const link = db
+                    .query<{ weight: number }, []>(
+                        "SELECT weight FROM entity_links WHERE source_id = 1"
+                    )
+                    .get();
+
+                expect(link?.weight).toBe(1.0);
+            });
+
+            it("should reject invalid source_id", () => {
+                expect(() => {
+                    db.exec(`
+                        INSERT INTO entity_links (source_id, target_id, relationship)
+                        VALUES (999, 2, 'related')
+                    `);
+                }).toThrow();
+            });
+
+            it("should reject invalid target_id", () => {
+                expect(() => {
+                    db.exec(`
+                        INSERT INTO entity_links (source_id, target_id, relationship)
+                        VALUES (1, 999, 'related')
+                    `);
+                }).toThrow();
+            });
+
+            it("should enforce unique source+target+relationship", () => {
+                db.exec(`
+                    INSERT INTO entity_links (source_id, target_id, relationship)
+                    VALUES (1, 2, 'related')
+                `);
+
+                expect(() => {
+                    db.exec(`
+                        INSERT INTO entity_links (source_id, target_id, relationship)
+                        VALUES (1, 2, 'related')
+                    `);
+                }).toThrow();
+            });
+
+            it("should allow same source+target with different relationship", () => {
+                db.exec(`
+                    INSERT INTO entity_links (source_id, target_id, relationship)
+                    VALUES (1, 2, 'related')
+                `);
+
+                expect(() => {
+                    db.exec(`
+                        INSERT INTO entity_links (source_id, target_id, relationship)
+                        VALUES (1, 2, 'implies')
+                    `);
+                }).not.toThrow();
+            });
+
+            it("should cascade delete when source entity is deleted", () => {
+                db.exec(`
+                    INSERT INTO entity_links (source_id, target_id, relationship)
+                    VALUES (1, 2, 'related')
+                `);
+
+                db.exec("DELETE FROM entities WHERE id = 1");
+
+                const links = db
+                    .query<{ source_id: number }, []>(
+                        "SELECT source_id FROM entity_links WHERE source_id = 1"
+                    )
+                    .all();
+                expect(links.length).toBe(0);
+            });
+
+            it("should cascade delete when target entity is deleted", () => {
+                db.exec(`
+                    INSERT INTO entity_links (source_id, target_id, relationship)
+                    VALUES (1, 2, 'related')
+                `);
+
+                db.exec("DELETE FROM entities WHERE id = 2");
+
+                const links = db
+                    .query<{ target_id: number }, []>(
+                        "SELECT target_id FROM entity_links WHERE target_id = 2"
+                    )
+                    .all();
+                expect(links.length).toBe(0);
+            });
         });
     });
 });
