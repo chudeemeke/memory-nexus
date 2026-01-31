@@ -37,3 +37,23 @@ export {
 
 // Hook script exports
 export { type HookInput, readStdinJson } from "./sync-hook-script.js";
+
+// Settings manager exports
+export {
+    getClaudeSettingsPath,
+    getBackupPath,
+    getHookScriptPath,
+    loadClaudeSettings,
+    backupSettings,
+    restoreFromBackup,
+    installHooks,
+    uninstallHooks,
+    checkHooksInstalled,
+    setTestPathOverrides,
+    type HookEntry,
+    type HookConfig,
+    type ClaudeSettings,
+    type HookStatus,
+    type OperationResult,
+    type PathOverrides,
+} from "./settings-manager.js";
