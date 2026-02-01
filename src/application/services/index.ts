@@ -22,3 +22,9 @@ export type {
   FileModification,
   ToolStats,
 } from "./pattern-extractor.js";
+
+export { LlmExtractor } from "./llm-extractor.js";
+export type {
+  ExtractionResult,
+  LlmExtractorOptions,
+} from "./llm-extractor.js";
