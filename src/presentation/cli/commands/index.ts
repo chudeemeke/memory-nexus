@@ -10,6 +10,7 @@ export { createListCommand, executeListCommand } from "./list.js";
 export { createStatsCommand, executeStatsCommand } from "./stats.js";
 export { createContextCommand, executeContextCommand } from "./context.js";
 export { createRelatedCommand, executeRelatedCommand } from "./related.js";
+export { createShowCommand, executeShowCommand } from "./show.js";
 
 // Hook management commands
 export { createInstallCommand, executeInstallCommand } from "./install.js";
