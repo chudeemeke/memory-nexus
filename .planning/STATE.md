@@ -12,12 +12,12 @@
 
 **Milestone:** v1 - Full Vision Implementation
 **Phase:** 11 - Session Navigation (Show, Search) (In Progress)
-**Plan:** 11-02 complete, 11-03 through 11-05 remaining
+**Plan:** 11-03 complete, 11-04 and 11-05 remaining
 **Status:** Executing Phase 11
 
 ```
-[████████████████████████████████████░░░░] 88%
-10 of 12 phases complete | 1404 tests passing | Plan 11-02 Complete
+[████████████████████████████████████░░░░] 90%
+10 of 12 phases complete | 1440 tests passing | Plan 11-03 Complete
 ```
 
 ## Accumulated Context
@@ -92,6 +92,10 @@
 | Case-insensitive entity search | LOWER() on both stored and search names for portable matching | 2026-01-31 |
 | Frequency increment on link | ON CONFLICT DO UPDATE SET frequency = frequency + excluded.frequency | 2026-01-31 |
 | Static pattern extractor | No instance state needed; static methods simplify usage and testing | 2026-01-31 |
+| ShowFormatter strategy pattern | Consistent with ListFormatter for output mode switching | 2026-01-31 |
+| summarizeToolResult inline markers | Brief tool summaries in conversation flow | 2026-01-31 |
+| Partial ID prefix matching | SQL LIKE enables 8-char ID shortcuts | 2026-01-31 |
+| setTestDbPath isolation pattern | Follows status.ts pattern for test database override | 2026-01-31 |
 
 ### Blockers
 
@@ -145,6 +149,7 @@ None currently.
 - [x] Plan Phase 11 - Session Navigation (5 plans created)
 - [x] Execute 11-01 - Entity Domain Type and Schema (30 entity + 77 schema tests)
 - [x] Execute 11-02 - Entity Repository and Pattern Extractor (30 repo + 26 extractor tests)
+- [x] Execute 11-03 - Show Command with Conversation Thread (24 formatter + 12 command tests)
 
 ### Learnings
 
@@ -212,30 +217,30 @@ None currently.
 ### Last Session
 
 **Date:** 2026-01-31
-**Completed:** Plan 11-02 Entity Repository and Pattern Extractor
-**Next:** Execute Phase 11 plans (11-03 through 11-05)
+**Completed:** Plan 11-03 Show Command with Conversation Thread
+**Next:** Execute Phase 11 plans (11-04 and 11-05)
 
 ### Context for Next Session
 
-1. Plan 11-02 complete - SqliteEntityRepository and PatternExtractor implemented
-2. 1404 tests passing (56 tests added: 30 repository + 26 extractor)
+1. Plan 11-03 complete - ShowFormatter and show command implemented
+2. 1440 tests passing (36 tests added: 24 formatter + 12 command)
 3. Remaining Phase 11 plans:
-   - 11-03: Show command with conversation thread formatter
    - 11-04: Interactive session picker with browse command
    - 11-05: LLM extraction service for topics and summaries
-4. Entity repository uses max confidence preservation on upsert
-5. Pattern extractor provides static methods for file path extraction
-6. Session-entity linking tracks frequency for repeated mentions
+4. ShowFormatter uses strategy pattern with five output modes
+5. summarizeToolResult() handles Read/Write/Edit/Bash/Glob/Grep tools
+6. Partial ID matching enables 8-character session ID shortcuts
+7. setTestDbPath pattern established for test database isolation
 
 ### Files Modified This Session
 
-- src/infrastructure/database/repositories/entity-repository.ts (created)
-- src/infrastructure/database/repositories/entity-repository.test.ts (created)
-- src/infrastructure/database/repositories/index.ts (modified)
-- src/application/services/pattern-extractor.ts (created)
-- src/application/services/pattern-extractor.test.ts (created)
-- src/application/services/index.ts (modified)
-- .planning/phases/11-session-navigation/11-02-SUMMARY.md (created)
+- src/presentation/cli/formatters/show-formatter.ts (created)
+- src/presentation/cli/formatters/show-formatter.test.ts (created)
+- src/presentation/cli/formatters/index.ts (modified)
+- src/presentation/cli/commands/show.ts (created)
+- src/presentation/cli/commands/show.test.ts (created)
+- src/presentation/cli/commands/index.ts (modified)
+- .planning/phases/11-session-navigation/11-03-SUMMARY.md (created)
 - .planning/STATE.md (updated)
 
 ## Performance Metrics
@@ -243,10 +248,10 @@ None currently.
 | Metric | Value |
 |--------|-------|
 | Phases Completed | 10 / 12 |
-| Plans Completed | 38 (phases 1-10 complete + 11-01, 11-02) |
+| Plans Completed | 39 (phases 1-10 complete + 11-01, 11-02, 11-03) |
 | Requirements Completed | 85 / 85 |
 | Test Coverage | 95%+ functions, 95%+ lines |
-| Total Tests | 1404 |
+| Total Tests | 1440 |
 
 ## Phase 2 Summary
 
@@ -340,11 +345,11 @@ None currently.
 |------|-------------|-------|--------|
 | 11-01 | Entity Domain Type and Schema | 107 | Complete |
 | 11-02 | Entity Repository and Pattern Extractor | 56 | Complete |
-| 11-03 | Show Command | - | Pending |
+| 11-03 | Show Command | 36 | Complete |
 | 11-04 | Browse Command | - | Pending |
 | 11-05 | LLM Extraction Service | - | Pending |
-| **Total** | | **163+** | **In Progress** |
+| **Total** | | **199+** | **In Progress** |
 
 ---
 
-*Last updated: 2026-01-31 (Plan 11-02 complete)*
+*Last updated: 2026-01-31 (Plan 11-03 complete)*
