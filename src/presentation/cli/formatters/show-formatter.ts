@@ -8,7 +8,7 @@
 import type { Session } from "../../../domain/entities/session.js";
 import type { Message } from "../../../domain/entities/message.js";
 import type { ToolUse } from "../../../domain/entities/tool-use.js";
-import { formatTimestamp, formatAbsoluteTime } from "./timestamp-formatter.js";
+import { formatAbsoluteTime } from "./timestamp-formatter.js";
 import { dim, bold } from "./color.js";
 
 /**
@@ -149,7 +149,7 @@ function formatDuration(ms: number): string {
  */
 function formatHeader(
   detail: SessionDetail,
-  useColor: boolean
+  _useColor: boolean
 ): string {
   const { session, messages, toolUses } = detail;
   const lines: string[] = [];
