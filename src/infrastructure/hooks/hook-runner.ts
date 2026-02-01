@@ -4,17 +4,26 @@
  * Background process spawner for sync operations.
  * Spawns detached processes that survive parent termination.
  *
+ * Also provides entity extraction for SessionStop hooks.
+ *
  * Design:
  * - Detached process runs in own process group
  * - Parent can exit without waiting (unref)
  * - Output redirected to sync.log for debugging
  * - MEMORY_NEXUS_HOOK env var allows sync to detect hook invocation
+ * - Entity extraction runs after session sync when hook is triggered
  */
 
 import { spawn, type ChildProcess } from "node:child_process";
 import { openSync, mkdirSync } from "node:fs";
 import { homedir } from "node:os";
 import { join } from "node:path";
+import type { Database } from "bun:sqlite";
+import type { Message } from "../../domain/entities/message.js";
+import { LlmExtractor, type ExtractionResult } from "../../application/services/llm-extractor.js";
+import { SqliteEntityRepository } from "../database/repositories/entity-repository.js";
+import { SqliteMessageRepository } from "../database/repositories/message-repository.js";
+import { LogWriter } from "../config/log-writer.js";
 
 /**
  * Options for spawnBackgroundSync
@@ -111,4 +120,128 @@ export function spawnBackgroundSync(
     subprocess.unref();
 
     return { pid: subprocess.pid };
+}
+
+/**
+ * Result of entity extraction operation
+ */
+export interface EntityExtractionResult {
+    /** Number of entities extracted and saved */
+    entitiesExtracted: number;
+    /** Whether extraction succeeded */
+    success: boolean;
+    /** Error message if extraction failed */
+    error?: string;
+    /** Session summary text (if extracted) */
+    summary?: string;
+}
+
+/**
+ * Options for entity extraction
+ */
+export interface EntityExtractionOptions {
+    /** Log writer for debug output (optional) */
+    logWriter?: LogWriter;
+}
+
+/**
+ * Extract entities from a session using LLM.
+ *
+ * This function is called during SessionStop hook processing after
+ * messages have been synced. It:
+ * 1. Retrieves messages for the session
+ * 2. Uses LlmExtractor to extract entities
+ * 3. Persists entities via EntityRepository
+ * 4. Links entities to the session
+ *
+ * LLM extraction failures are logged but don't fail the sync.
+ *
+ * @param sessionId Session identifier
+ * @param db Database instance
+ * @param options Optional configuration
+ * @returns Extraction result with entity count
+ */
+export async function extractEntitiesFromSession(
+    sessionId: string,
+    db: Database,
+    options: EntityExtractionOptions = {}
+): Promise<EntityExtractionResult> {
+    const { logWriter } = options;
+
+    try {
+        // Get messages for the session
+        const messageRepo = new SqliteMessageRepository(db);
+        const messages = await messageRepo.findBySession(sessionId);
+
+        // Skip extraction if no messages
+        if (messages.length === 0) {
+            logWriter?.debug(`Skipping LLM extraction for ${sessionId}: no messages`);
+            return {
+                entitiesExtracted: 0,
+                success: true,
+            };
+        }
+
+        // Run LLM extraction
+        const extractionResult = await LlmExtractor.extract({
+            sessionId,
+            messages,
+        });
+
+        // Collect all entities
+        const allEntities = [
+            ...extractionResult.topics,
+            ...extractionResult.terms,
+            ...extractionResult.decisions,
+        ];
+
+        // If no entities extracted (e.g., in unit test mode), return early
+        if (allEntities.length === 0 && !extractionResult.summary) {
+            logWriter?.debug(`LLM extraction returned no entities for ${sessionId}`);
+            return {
+                entitiesExtracted: 0,
+                success: true,
+                summary: extractionResult.summary || undefined,
+            };
+        }
+
+        // Persist extracted entities
+        const entityRepo = new SqliteEntityRepository(db);
+
+        for (const entity of allEntities) {
+            const saved = await entityRepo.save(entity);
+            await entityRepo.linkToSession(saved.id!, sessionId);
+        }
+
+        logWriter?.debug(`Extracted ${allEntities.length} entities from session ${sessionId}`);
+
+        return {
+            entitiesExtracted: allEntities.length,
+            success: true,
+            summary: extractionResult.summary || undefined,
+        };
+    } catch (error) {
+        // LLM extraction failure should not block sync
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        logWriter?.warn(`LLM extraction failed for ${sessionId}: ${errorMessage}`);
+
+        return {
+            entitiesExtracted: 0,
+            success: false,
+            error: errorMessage,
+        };
+    }
+}
+
+/**
+ * Check if the current process was invoked by a hook.
+ *
+ * The hook runner sets MEMORY_NEXUS_HOOK=1 when spawning sync processes.
+ * This allows the sync command to detect hook invocation and enable
+ * additional processing like LLM extraction.
+ *
+ * @returns true if invoked by hook, false otherwise
+ */
+export function isInvokedByHook(): boolean {
+    return process.env.MEMORY_NEXUS_HOOK === "1";
 }
