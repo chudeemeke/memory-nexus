@@ -12,12 +12,12 @@
 
 **Milestone:** v1 - Full Vision Implementation
 **Phase:** 11 - Session Navigation (Show, Search) (In Progress)
-**Plan:** 11-03 complete, 11-04 and 11-05 remaining
+**Plan:** 11-04 complete, 11-05 remaining
 **Status:** Executing Phase 11
 
 ```
-[████████████████████████████████████░░░░] 90%
-10 of 12 phases complete | 1440 tests passing | Plan 11-03 Complete
+[█████████████████████████████████████░░░] 93%
+10 of 12 phases complete | 1498 tests passing | Plan 11-04 Complete
 ```
 
 ## Accumulated Context
@@ -96,6 +96,9 @@
 | summarizeToolResult inline markers | Brief tool summaries in conversation flow | 2026-01-31 |
 | Partial ID prefix matching | SQL LIKE enables 8-char ID shortcuts | 2026-01-31 |
 | setTestDbPath isolation pattern | Follows status.ts pattern for test database override | 2026-01-31 |
+| setMocks injection pattern | Mock @inquirer modules by exporting setMocks(searchFn, selectFn) | 2026-02-01 |
+| setTtyOverride pattern | Allow tests to simulate TTY/non-TTY environments | 2026-02-01 |
+| Default import for @inquirer | Both search and select use default exports, not named | 2026-02-01 |
 
 ### Blockers
 
@@ -150,6 +153,7 @@ None currently.
 - [x] Execute 11-01 - Entity Domain Type and Schema (30 entity + 77 schema tests)
 - [x] Execute 11-02 - Entity Repository and Pattern Extractor (30 repo + 26 extractor tests)
 - [x] Execute 11-03 - Show Command with Conversation Thread (24 formatter + 12 command tests)
+- [x] Execute 11-04 - Interactive Session Picker and Browse Command (12 picker + 11 browse tests)
 
 ### Learnings
 
@@ -211,36 +215,40 @@ None currently.
 - MEMORY_NEXUS_MARKER constant enables consistent hook identification in settings.json
 - Settings backup pattern: backup before modify, restore on uninstall --restore
 - Test isolation: unique test directories per test file avoid Windows file locking conflicts
+- @inquirer/search and @inquirer/select use default exports, not named
+- setMocks pattern enables testing interactive picker components
+- Windows file locking requires try/catch around temp directory cleanup
 
 ## Session Continuity
 
 ### Last Session
 
-**Date:** 2026-01-31
-**Completed:** Plan 11-03 Show Command with Conversation Thread
-**Next:** Execute Phase 11 plans (11-04 and 11-05)
+**Date:** 2026-02-01
+**Completed:** Plan 11-04 Interactive Session Picker and Browse Command
+**Next:** Execute Phase 11 plan 11-05 (LLM extraction service)
 
 ### Context for Next Session
 
-1. Plan 11-03 complete - ShowFormatter and show command implemented
-2. 1440 tests passing (36 tests added: 24 formatter + 12 command)
+1. Plan 11-04 complete - Session picker and browse command implemented
+2. 1498 tests passing (23 tests added: 12 picker + 11 browse)
 3. Remaining Phase 11 plans:
-   - 11-04: Interactive session picker with browse command
    - 11-05: LLM extraction service for topics and summaries
-4. ShowFormatter uses strategy pattern with five output modes
-5. summarizeToolResult() handles Read/Write/Edit/Bash/Glob/Grep tools
-6. Partial ID matching enables 8-character session ID shortcuts
-7. setTestDbPath pattern established for test database isolation
+4. Session picker uses @inquirer/search with fuzzy library for filtering
+5. Browse command dispatches to show/search/context/related based on action
+6. setMocks and setTtyOverride patterns for testing interactive components
+7. Non-TTY mode shows helpful error with alternative commands
 
 ### Files Modified This Session
 
-- src/presentation/cli/formatters/show-formatter.ts (created)
-- src/presentation/cli/formatters/show-formatter.test.ts (created)
-- src/presentation/cli/formatters/index.ts (modified)
-- src/presentation/cli/commands/show.ts (created)
-- src/presentation/cli/commands/show.test.ts (created)
+- src/presentation/cli/pickers/session-picker.ts (created)
+- src/presentation/cli/pickers/session-picker.test.ts (created)
+- src/presentation/cli/pickers/index.ts (created)
+- src/presentation/cli/commands/browse.ts (created)
+- src/presentation/cli/commands/browse.test.ts (created)
 - src/presentation/cli/commands/index.ts (modified)
-- .planning/phases/11-session-navigation/11-03-SUMMARY.md (created)
+- src/presentation/cli/index.ts (modified)
+- package.json (modified)
+- .planning/phases/11-session-navigation/11-04-SUMMARY.md (created)
 - .planning/STATE.md (updated)
 
 ## Performance Metrics
@@ -248,10 +256,10 @@ None currently.
 | Metric | Value |
 |--------|-------|
 | Phases Completed | 10 / 12 |
-| Plans Completed | 39 (phases 1-10 complete + 11-01, 11-02, 11-03) |
+| Plans Completed | 40 (phases 1-10 complete + 11-01, 11-02, 11-03, 11-04) |
 | Requirements Completed | 85 / 85 |
 | Test Coverage | 95%+ functions, 95%+ lines |
-| Total Tests | 1440 |
+| Total Tests | 1498 |
 
 ## Phase 2 Summary
 
@@ -346,10 +354,10 @@ None currently.
 | 11-01 | Entity Domain Type and Schema | 107 | Complete |
 | 11-02 | Entity Repository and Pattern Extractor | 56 | Complete |
 | 11-03 | Show Command | 36 | Complete |
-| 11-04 | Browse Command | - | Pending |
+| 11-04 | Session Picker and Browse Command | 23 | Complete |
 | 11-05 | LLM Extraction Service | - | Pending |
-| **Total** | | **199+** | **In Progress** |
+| **Total** | | **222+** | **In Progress** |
 
 ---
 
-*Last updated: 2026-01-31 (Plan 11-03 complete)*
+*Last updated: 2026-02-01 (Plan 11-04 complete)*
