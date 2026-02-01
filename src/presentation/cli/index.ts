@@ -14,6 +14,8 @@ import {
   createStatsCommand,
   createContextCommand,
   createRelatedCommand,
+  createShowCommand,
+  createBrowseCommand,
   createInstallCommand,
   createUninstallCommand,
   createStatusCommand,
@@ -41,14 +43,11 @@ program.addCommand(createStatsCommand());
 // Add context command from module
 program.addCommand(createContextCommand());
 
-program
-  .command("show <sessionId>")
-  .description("Show details for a specific session")
-  .action((sessionId) => {
-    console.log(`Showing session: ${sessionId}`);
-    // TODO: Implement show logic
-    console.log("(not yet implemented)");
-  });
+// Add show command from module
+program.addCommand(createShowCommand());
+
+// Add browse command from module
+program.addCommand(createBrowseCommand());
 
 // Add related command from module
 program.addCommand(createRelatedCommand());

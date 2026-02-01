@@ -11,6 +11,7 @@ export { createStatsCommand, executeStatsCommand } from "./stats.js";
 export { createContextCommand, executeContextCommand } from "./context.js";
 export { createRelatedCommand, executeRelatedCommand } from "./related.js";
 export { createShowCommand, executeShowCommand } from "./show.js";
+export { createBrowseCommand, executeBrowseCommand } from "./browse.js";
 
 // Hook management commands
 export { createInstallCommand, executeInstallCommand } from "./install.js";
