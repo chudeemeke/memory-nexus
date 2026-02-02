@@ -547,4 +547,195 @@ describe("SqliteSessionRepository", () => {
       expect(results).toHaveLength(20);
     });
   });
+
+  describe("updateSummary", () => {
+    it("should update the summary for a session", async () => {
+      const session = createTestSession({ id: "session-with-summary" });
+      await repository.save(session);
+
+      await repository.updateSummary(
+        "session-with-summary",
+        "Discussed authentication patterns using JWT."
+      );
+
+      const found = await repository.findById("session-with-summary");
+      expect(found).not.toBeNull();
+      expect(found!.summary).toBe("Discussed authentication patterns using JWT.");
+    });
+
+    it("should allow updating summary multiple times", async () => {
+      const session = createTestSession({ id: "session-update-summary" });
+      await repository.save(session);
+
+      await repository.updateSummary(
+        "session-update-summary",
+        "First summary."
+      );
+      await repository.updateSummary(
+        "session-update-summary",
+        "Updated summary with more details."
+      );
+
+      const found = await repository.findById("session-update-summary");
+      expect(found).not.toBeNull();
+      expect(found!.summary).toBe("Updated summary with more details.");
+    });
+
+    it("should not affect other session fields when updating summary", async () => {
+      const session = createTestSession({
+        id: "session-preserve-fields",
+        startTime: new Date("2026-01-28T10:00:00Z"),
+        endTime: new Date("2026-01-28T11:30:00Z"),
+      });
+      await repository.save(session);
+
+      await repository.updateSummary(
+        "session-preserve-fields",
+        "Test summary."
+      );
+
+      const found = await repository.findById("session-preserve-fields");
+      expect(found).not.toBeNull();
+      expect(found!.startTime.toISOString()).toBe("2026-01-28T10:00:00.000Z");
+      expect(found!.endTime!.toISOString()).toBe("2026-01-28T11:30:00.000Z");
+      expect(found!.projectPath.encoded).toBe(session.projectPath.encoded);
+    });
+
+    it("should handle empty summary", async () => {
+      const session = createTestSession({ id: "session-empty-summary" });
+      await repository.save(session);
+
+      await repository.updateSummary("session-empty-summary", "");
+
+      const found = await repository.findById("session-empty-summary");
+      expect(found).not.toBeNull();
+      // Empty string becomes undefined in Session entity
+      expect(found!.summary).toBe("");
+    });
+
+    it("should not throw when updating non-existent session", async () => {
+      // Should not throw, but also won't update anything
+      await repository.updateSummary("non-existent", "Summary.");
+    });
+  });
+
+  describe("summary FTS5 indexing", () => {
+    it("should index summary in sessions_fts", async () => {
+      const session = createTestSession({ id: "fts-test-session" });
+      await repository.save(session);
+
+      await repository.updateSummary(
+        "fts-test-session",
+        "Implemented hexagonal architecture with SOLID principles."
+      );
+
+      // Query the FTS table directly
+      const stmt = db.prepare(
+        "SELECT session_id, summary FROM sessions_fts WHERE sessions_fts MATCH 'hexagonal'"
+      );
+      const results = stmt.all() as { session_id: string; summary: string }[];
+
+      expect(results).toHaveLength(1);
+      expect(results[0].session_id).toBe("fts-test-session");
+      expect(results[0].summary).toContain("hexagonal");
+    });
+
+    it("should find sessions by summary content via FTS", async () => {
+      const session1 = createTestSession({ id: "session-jwt" });
+      const session2 = createTestSession({ id: "session-oauth" });
+      await repository.save(session1);
+      await repository.save(session2);
+
+      await repository.updateSummary(
+        "session-jwt",
+        "Implemented JWT authentication with refresh tokens."
+      );
+      await repository.updateSummary(
+        "session-oauth",
+        "Set up OAuth2 integration with Google provider."
+      );
+
+      // Search for JWT-related sessions
+      const jwtStmt = db.prepare(
+        "SELECT session_id FROM sessions_fts WHERE sessions_fts MATCH 'JWT'"
+      );
+      const jwtResults = jwtStmt.all() as { session_id: string }[];
+
+      expect(jwtResults).toHaveLength(1);
+      expect(jwtResults[0].session_id).toBe("session-jwt");
+
+      // Search for OAuth-related sessions
+      const oauthStmt = db.prepare(
+        "SELECT session_id FROM sessions_fts WHERE sessions_fts MATCH 'OAuth2'"
+      );
+      const oauthResults = oauthStmt.all() as { session_id: string }[];
+
+      expect(oauthResults).toHaveLength(1);
+      expect(oauthResults[0].session_id).toBe("session-oauth");
+    });
+
+    it("should update FTS index when summary is changed", async () => {
+      const session = createTestSession({ id: "fts-update-session" });
+      await repository.save(session);
+
+      await repository.updateSummary(
+        "fts-update-session",
+        "Initial topic about databases."
+      );
+
+      // Verify initial indexing
+      let stmt = db.prepare(
+        "SELECT session_id FROM sessions_fts WHERE sessions_fts MATCH 'databases'"
+      );
+      let results = stmt.all() as { session_id: string }[];
+      expect(results).toHaveLength(1);
+
+      // Update summary
+      await repository.updateSummary(
+        "fts-update-session",
+        "Changed topic to authentication."
+      );
+
+      // Old term should no longer match
+      stmt = db.prepare(
+        "SELECT session_id FROM sessions_fts WHERE sessions_fts MATCH 'databases'"
+      );
+      results = stmt.all() as { session_id: string }[];
+      expect(results).toHaveLength(0);
+
+      // New term should match
+      stmt = db.prepare(
+        "SELECT session_id FROM sessions_fts WHERE sessions_fts MATCH 'authentication'"
+      );
+      results = stmt.all() as { session_id: string }[];
+      expect(results).toHaveLength(1);
+    });
+
+    it("should remove FTS entry when session is deleted", async () => {
+      const session = createTestSession({ id: "fts-delete-session" });
+      await repository.save(session);
+
+      await repository.updateSummary(
+        "fts-delete-session",
+        "Session about microservices."
+      );
+
+      // Verify indexing
+      let stmt = db.prepare(
+        "SELECT session_id FROM sessions_fts WHERE sessions_fts MATCH 'microservices'"
+      );
+      let results = stmt.all() as { session_id: string }[];
+      expect(results).toHaveLength(1);
+
+      // Delete session
+      await repository.delete("fts-delete-session");
+
+      // FTS entry should be removed
+      stmt = db.prepare(
+        "SELECT session_id FROM sessions_fts WHERE sessions_fts MATCH 'microservices'"
+      );
+      results = stmt.all() as { session_id: string }[];
+      expect(results).toHaveLength(0);
+    });
+  });
 });

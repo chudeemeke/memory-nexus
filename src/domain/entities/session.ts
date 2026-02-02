@@ -19,6 +19,7 @@ interface SessionParams {
   startTime: Date;
   endTime?: Date | undefined;
   messages?: readonly Message[] | undefined;
+  summary?: string | undefined;
 }
 
 export class Session {
@@ -27,6 +28,7 @@ export class Session {
   private readonly _startTime: Date;
   private readonly _endTime?: Date | undefined;
   private readonly _messages: readonly Message[];
+  private readonly _summary?: string | undefined;
 
   private constructor(params: SessionParams) {
     this._id = params.id;
@@ -36,6 +38,7 @@ export class Session {
       ? new Date(params.endTime.getTime())
       : undefined;
     this._messages = Object.freeze([...(params.messages ?? [])]);
+    this._summary = params.summary;
   }
 
   /**
@@ -88,6 +91,13 @@ export class Session {
   }
 
   /**
+   * LLM-generated summary of this session (undefined if not extracted).
+   */
+  get summary(): string | undefined {
+    return this._summary;
+  }
+
+  /**
    * Session duration in milliseconds (undefined if not complete).
    */
   get durationMs(): number | undefined {
@@ -115,6 +125,7 @@ export class Session {
       startTime: this._startTime,
       endTime: this._endTime,
       messages: [...this._messages, message],
+      summary: this._summary,
     });
   }
 
@@ -133,6 +144,22 @@ export class Session {
       startTime: this._startTime,
       endTime,
       messages: [...this._messages],
+      summary: this._summary,
+    });
+  }
+
+  /**
+   * Set the summary for this session.
+   * Returns a new Session instance (immutability).
+   */
+  withSummary(summary: string): Session {
+    return new Session({
+      id: this._id,
+      projectPath: this._projectPath,
+      startTime: this._startTime,
+      endTime: this._endTime,
+      messages: [...this._messages],
+      summary,
     });
   }
 }

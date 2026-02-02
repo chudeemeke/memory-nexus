@@ -24,6 +24,7 @@ interface SessionRow {
   start_time: string;
   end_time: string | null;
   message_count: number;
+  summary: string | null;
 }
 
 /**
@@ -39,6 +40,7 @@ export class SqliteSessionRepository implements ISessionRepository {
   private readonly findRecentStmt: Statement;
   private readonly insertStmt: Statement;
   private readonly deleteStmt: Statement;
+  private readonly updateSummaryStmt: Statement;
 
   constructor(db: Database) {
     this.db = db;
@@ -46,14 +48,14 @@ export class SqliteSessionRepository implements ISessionRepository {
     // Prepare all statements once for reuse
     this.findByIdStmt = db.prepare(`
       SELECT id, project_path_encoded, project_path_decoded, project_name,
-             start_time, end_time, message_count
+             start_time, end_time, message_count, summary
       FROM sessions
       WHERE id = $id
     `);
 
     this.findByProjectStmt = db.prepare(`
       SELECT id, project_path_encoded, project_path_decoded, project_name,
-             start_time, end_time, message_count
+             start_time, end_time, message_count, summary
       FROM sessions
       WHERE project_path_encoded = $projectPath
       ORDER BY start_time DESC
@@ -61,7 +63,7 @@ export class SqliteSessionRepository implements ISessionRepository {
 
     this.findRecentStmt = db.prepare(`
       SELECT id, project_path_encoded, project_path_decoded, project_name,
-             start_time, end_time, message_count
+             start_time, end_time, message_count, summary
       FROM sessions
       ORDER BY start_time DESC
       LIMIT $limit
@@ -79,6 +81,11 @@ export class SqliteSessionRepository implements ISessionRepository {
     this.deleteStmt = db.prepare(`
       DELETE FROM sessions WHERE id = $id
     `);
+
+    this.updateSummaryStmt = db.prepare(`
+      UPDATE sessions SET summary = $summary, updated_at = datetime('now')
+      WHERE id = $id
+    `);
   }
 
   /**
@@ -95,6 +102,7 @@ export class SqliteSessionRepository implements ISessionRepository {
       projectPath,
       startTime: new Date(row.start_time),
       endTime: row.end_time ? new Date(row.end_time) : undefined,
+      summary: row.summary ?? undefined,
     });
   }
 
@@ -174,6 +182,19 @@ export class SqliteSessionRepository implements ISessionRepository {
   }
 
   /**
+   * Update the summary for a session.
+   *
+   * This triggers the sessions_fts_update trigger which indexes the summary
+   * in the FTS5 virtual table for full-text search.
+   *
+   * @param sessionId - Session identifier
+   * @param summary - LLM-generated summary text
+   */
+  async updateSummary(sessionId: string, summary: string): Promise<void> {
+    this.updateSummaryStmt.run({ $id: sessionId, $summary: summary });
+  }
+
+  /**
    * Find sessions with filtering options.
    * Builds dynamic WHERE clause based on provided filters.
    */
@@ -201,7 +222,7 @@ export class SqliteSessionRepository implements ISessionRepository {
 
     const sql = `
       SELECT id, project_path_encoded, project_path_decoded, project_name,
-             start_time, end_time, message_count
+             start_time, end_time, message_count, summary
       FROM sessions
       ${whereClause}
       ORDER BY start_time DESC

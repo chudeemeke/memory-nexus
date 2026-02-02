@@ -19,6 +19,7 @@ CREATE TABLE IF NOT EXISTS sessions (
     start_time TEXT NOT NULL,
     end_time TEXT,
     message_count INTEGER DEFAULT 0,
+    summary TEXT,
     created_at TEXT DEFAULT (datetime('now')),
     updated_at TEXT DEFAULT (datetime('now'))
 );
@@ -191,6 +192,41 @@ CREATE TABLE IF NOT EXISTS entity_links (
 `;
 
 /**
+ * Sessions FTS5 virtual table - for summary full-text search
+ *
+ * Uses standalone FTS5 table (not external content) because summaries
+ * are only added/updated after session ends, and we want FTS5 to manage
+ * its own content for simplicity.
+ */
+export const SESSIONS_FTS_TABLE = `
+CREATE VIRTUAL TABLE IF NOT EXISTS sessions_fts USING fts5(
+    session_id,
+    summary,
+    tokenize='porter unicode61'
+);
+`;
+
+/**
+ * Sessions FTS5 synchronization triggers
+ * Keep sessions_fts index in sync with sessions summary updates
+ *
+ * Note: INSERT trigger does not index since summary is NULL on insert.
+ * Only UPDATE trigger handles FTS indexing when summary is set.
+ */
+export const SESSIONS_FTS_TRIGGERS = `
+CREATE TRIGGER IF NOT EXISTS sessions_fts_update AFTER UPDATE OF summary ON sessions
+WHEN new.summary IS NOT NULL AND new.summary != ''
+BEGIN
+    DELETE FROM sessions_fts WHERE session_id = old.id;
+    INSERT INTO sessions_fts(session_id, summary) VALUES (new.id, new.summary);
+END;
+
+CREATE TRIGGER IF NOT EXISTS sessions_fts_delete AFTER DELETE ON sessions BEGIN
+    DELETE FROM sessions_fts WHERE session_id = old.id;
+END;
+`;
+
+/**
  * Complete schema SQL statements in dependency order
  *
  * Order matters:
@@ -205,6 +241,8 @@ CREATE TABLE IF NOT EXISTS entity_links (
  * 9. entities (no dependencies)
  * 10. session_entities (depends on sessions, entities)
  * 11. entity_links (depends on entities)
+ * 12. sessions_fts (depends on sessions)
+ * 13. sessions_fts triggers (depends on sessions, sessions_fts)
  */
 export const SCHEMA_SQL: readonly string[] = [
     SESSIONS_TABLE,
@@ -218,6 +256,8 @@ export const SCHEMA_SQL: readonly string[] = [
     ENTITIES_TABLE,
     SESSION_ENTITIES_TABLE,
     ENTITY_LINKS_TABLE,
+    SESSIONS_FTS_TABLE,
+    SESSIONS_FTS_TRIGGERS,
 ];
 
 /**
