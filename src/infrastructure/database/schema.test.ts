@@ -21,6 +21,8 @@ import {
     ENTITIES_TABLE,
     SESSION_ENTITIES_TABLE,
     ENTITY_LINKS_TABLE,
+    SESSIONS_FTS_TABLE,
+    SESSIONS_FTS_TRIGGERS,
 } from "./schema.js";
 
 describe("Database Schema", () => {
@@ -48,11 +50,13 @@ describe("Database Schema", () => {
             expect(ENTITIES_TABLE).toBeDefined();
             expect(SESSION_ENTITIES_TABLE).toBeDefined();
             expect(ENTITY_LINKS_TABLE).toBeDefined();
+            expect(SESSIONS_FTS_TABLE).toBeDefined();
+            expect(SESSIONS_FTS_TRIGGERS).toBeDefined();
         });
 
         it("should have SCHEMA_SQL as an array with correct order", () => {
             expect(Array.isArray(SCHEMA_SQL)).toBe(true);
-            expect(SCHEMA_SQL.length).toBe(11);
+            expect(SCHEMA_SQL.length).toBe(13);
             expect(SCHEMA_SQL[0]).toBe(SESSIONS_TABLE);
             expect(SCHEMA_SQL[1]).toBe(MESSAGES_META_TABLE);
             expect(SCHEMA_SQL[2]).toBe(MESSAGES_FTS_TABLE);
@@ -64,6 +68,8 @@ describe("Database Schema", () => {
             expect(SCHEMA_SQL[8]).toBe(ENTITIES_TABLE);
             expect(SCHEMA_SQL[9]).toBe(SESSION_ENTITIES_TABLE);
             expect(SCHEMA_SQL[10]).toBe(ENTITY_LINKS_TABLE);
+            expect(SCHEMA_SQL[11]).toBe(SESSIONS_FTS_TABLE);
+            expect(SCHEMA_SQL[12]).toBe(SESSIONS_FTS_TRIGGERS);
         });
     });
 
