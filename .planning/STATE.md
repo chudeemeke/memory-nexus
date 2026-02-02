@@ -99,6 +99,10 @@
 | setMocks injection pattern | Mock @inquirer modules by exporting setMocks(searchFn, selectFn) | 2026-02-01 |
 | setTtyOverride pattern | Allow tests to simulate TTY/non-TTY environments | 2026-02-01 |
 | Default import for @inquirer | Both search and select use default exports, not named | 2026-02-01 |
+| Asterisk markers for non-TTY | Use *text* markers instead of stripping tags in non-TTY environments | 2026-02-02 |
+| 16-char session ID display | Readable session IDs without showing full UUID (was 8 chars) | 2026-02-02 |
+| 64-token FTS5 snippets | Doubled from 32 for meaningful context around matched text | 2026-02-02 |
+| Role field in SearchResult | Propagate role from messages_meta through to CLI display | 2026-02-02 |
 
 ### Blockers
 
@@ -235,32 +239,30 @@ None currently.
 ### Last Session
 
 **Date:** 2026-02-02
-**Completed:** Phase 11 execution complete, identified UAT gap across project
-**Next:** Run /gsd:verify-work for phases missing UAT (1-2, 4-6, 8-9, 11), then Phase 12
+**Completed:** Phase 6 Plan 03 (Gap Closure) - Search result intelligibility fixes
+**Next:** Continue UAT verification for remaining phases
 
 ### Context for Next Session
 
-1. Phase 11 complete - All 5 plans executed successfully
-2. ~1541 tests passing (43 tests added in 11-05)
-3. LlmExtractor service created for Claude-powered entity extraction
-4. Hook runner integrates LLM extraction during SessionStop
-5. Session summary field with FTS5 indexing for full-text search
-6. Entity extraction (pattern + LLM) fully integrated
-7. All session navigation commands functional: show, search, browse, context, related
-8. **ACTION REQUIRED:** Run /gsd:verify-work for phases 1-2, 4-6, 8-9, 11 before Phase 12 or milestone completion (see Process Notes)
+1. Phase 6 Plan 03 complete - Search results now intelligible
+2. ~1548 tests passing (7 tests added in 06-03)
+3. SearchResult value object now includes role property
+4. FTS5 snippet token count increased from 32 to 64
+5. Session ID display increased from 8 to 16 characters
+6. Non-TTY environments use asterisk markers (*text*) for highlighting
+7. All output formatters (default, verbose, quiet, json) updated with role field
 
 ### Files Modified This Session
 
-- src/application/services/llm-extractor.ts (created)
-- src/application/services/llm-extractor.test.ts (created)
-- src/application/services/index.ts (modified)
-- src/infrastructure/hooks/hook-runner.ts (modified)
-- src/infrastructure/hooks/hook-runner.test.ts (modified)
-- src/infrastructure/database/schema.ts (modified)
-- src/infrastructure/database/repositories/session-repository.ts (modified)
-- src/infrastructure/database/repositories/session-repository.test.ts (modified)
-- src/domain/entities/session.ts (modified)
-- .planning/phases/11-session-navigation/11-05-SUMMARY.md (created)
+- src/domain/value-objects/search-result.ts (modified - added role)
+- src/domain/value-objects/search-result.test.ts (modified)
+- src/infrastructure/database/services/search-service.ts (modified - added role, 64 tokens)
+- src/infrastructure/database/services/search-service.test.ts (modified)
+- src/presentation/cli/formatters/output-formatter.ts (modified - role display, 16-char IDs, asterisks)
+- src/presentation/cli/formatters/output-formatter.test.ts (modified)
+- src/presentation/cli/commands/search.test.ts (modified - role integration test)
+- src/domain/ports/ports.test.ts (modified - fixed mock)
+- .planning/phases/06-search-command-fts5/06-03-SUMMARY.md (created)
 - .planning/STATE.md (updated)
 
 ## Performance Metrics
@@ -271,7 +273,7 @@ None currently.
 | Plans Completed | 41 (phases 1-11 complete) |
 | Requirements Completed | 85 / 85 |
 | Test Coverage | 95%+ functions, 95%+ lines |
-| Total Tests | ~1541 |
+| Total Tests | ~1548 |
 
 ## Phase 2 Summary
 
@@ -319,7 +321,8 @@ None currently.
 |------|-------------|-------|--------|
 | 06-01 | Search Command Implementation | 28 | Complete |
 | 06-02 | Case Sensitivity Options | 14 | Complete |
-| **Total** | | **42** | **Complete** |
+| 06-03 | Gap Closure (Role, IDs, Snippets) | 7 | Complete |
+| **Total** | | **49** | **Complete** |
 
 ## Phase 7 Summary
 
@@ -372,4 +375,4 @@ None currently.
 
 ---
 
-*Last updated: 2026-02-02 (Phase 11 complete, UAT gap identified)*
+*Last updated: 2026-02-02 (Phase 6 Plan 03 gap closure complete)*
