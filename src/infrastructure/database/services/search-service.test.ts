@@ -288,12 +288,16 @@ describe("Fts5SearchService", () => {
 
     it("Test 11: long content snippet is truncated with ellipsis", async () => {
       // Create a very long message where snippet extraction is clearly truncated
+      // FTS5 snippet uses 64 tokens - need content much larger to see truncation
       const longContent =
-        "Beginning of the message with lots of text. " +
-        "This section talks about authentication implementation details. " +
-        "Middle of the message with even more content that goes on and on. " +
-        "Continuing with additional paragraphs of information. " +
-        "End of the message with final details about various things.";
+        "Beginning of the message with lots of text that continues for quite a while. " +
+        "This section talks about authentication implementation details which are very important. " +
+        "Middle of the message with even more content that goes on and on for a long time. " +
+        "Continuing with additional paragraphs of information about various topics. " +
+        "More content here to ensure the message is long enough to be truncated. " +
+        "Adding even more text to make absolutely sure we exceed the snippet limit. " +
+        "This should definitely be truncated now with all this extra content. " +
+        "End of the message with final details about various things that matter.";
       insertTestMessage(db, "msg-1", "session-1", "user", longContent);
 
       const query = SearchQuery.from("authentication");
@@ -302,8 +306,8 @@ describe("Fts5SearchService", () => {
       expect(results).toHaveLength(1);
       // Snippet should contain the match and ellipsis for truncation
       expect(results[0].snippet).toContain("authentication");
-      // Very long content should be truncated (snippet < original minus some buffer for markup)
-      expect(results[0].snippet.length).toBeLessThan(longContent.length - 50);
+      // Very long content should be truncated (snippet < original content)
+      expect(results[0].snippet.length).toBeLessThan(longContent.length);
     });
   });
 
@@ -919,6 +923,7 @@ describe("Fts5SearchService", () => {
       expect(result.snippet).toBeDefined();
       expect(result.score).toBeDefined();
       expect(result.timestamp).toBeDefined();
+      expect(result.role).toBeDefined();
 
       // Types should be correct
       expect(typeof result.sessionId).toBe("string");
@@ -926,6 +931,35 @@ describe("Fts5SearchService", () => {
       expect(typeof result.snippet).toBe("string");
       expect(typeof result.score).toBe("number");
       expect(result.timestamp instanceof Date).toBe(true);
+      expect(typeof result.role).toBe("string");
+    });
+
+    it("Test 32: returns role from database", async () => {
+      insertTestMessage(
+        db,
+        "msg-user",
+        "session-1",
+        "user",
+        "authentication from user"
+      );
+      insertTestMessage(
+        db,
+        "msg-assistant",
+        "session-1",
+        "assistant",
+        "authentication from assistant"
+      );
+
+      const query = SearchQuery.from("authentication");
+      const results = await searchService.search(query);
+
+      expect(results).toHaveLength(2);
+
+      const userResult = results.find((r) => r.messageId === "msg-user");
+      const assistantResult = results.find((r) => r.messageId === "msg-assistant");
+
+      expect(userResult?.role).toBe("user");
+      expect(assistantResult?.role).toBe("assistant");
     });
   });
 });

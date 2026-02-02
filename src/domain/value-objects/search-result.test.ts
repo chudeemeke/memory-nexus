@@ -8,6 +8,7 @@ describe("SearchResult value object", () => {
     snippet: "This is a matching text snippet...",
     score: 0.95,
     timestamp: new Date("2024-01-15T10:30:00Z"),
+    role: "user",
   };
 
   describe("construction", () => {
@@ -18,6 +19,7 @@ describe("SearchResult value object", () => {
       expect(result.snippet).toBe("This is a matching text snippet...");
       expect(result.score).toBe(0.95);
       expect(result.timestamp).toEqual(new Date("2024-01-15T10:30:00Z"));
+      expect(result.role).toBe("user");
     });
 
     it("throws on empty sessionId", () => {
@@ -50,6 +52,12 @@ describe("SearchResult value object", () => {
       ).toThrow("Score must be between 0 and 1");
     });
 
+    it("throws on empty role", () => {
+      expect(() =>
+        SearchResult.create({ ...validParams, role: "" })
+      ).toThrow("Role cannot be empty");
+    });
+
     it("accepts score of 0", () => {
       const result = SearchResult.create({ ...validParams, score: 0 });
       expect(result.score).toBe(0);
@@ -68,6 +76,7 @@ describe("SearchResult value object", () => {
       expect(result.messageId).toBe("msg-456");
       expect(result.snippet).toBe("This is a matching text snippet...");
       expect(result.score).toBe(0.95);
+      expect(result.role).toBe("user");
     });
 
     it("timestamp is a copy, not reference", () => {

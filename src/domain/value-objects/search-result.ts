@@ -16,6 +16,7 @@ interface SearchResultParams {
   snippet: string;
   score: number;
   timestamp: Date;
+  role: string;
 }
 
 export class SearchResult {
@@ -24,6 +25,7 @@ export class SearchResult {
   private readonly _snippet: string;
   private readonly _score: number;
   private readonly _timestamp: Date;
+  private readonly _role: string;
 
   private constructor(params: SearchResultParams) {
     this._sessionId = params.sessionId;
@@ -32,6 +34,7 @@ export class SearchResult {
     this._score = params.score;
     // Copy the date to ensure immutability
     this._timestamp = new Date(params.timestamp.getTime());
+    this._role = params.role;
   }
 
   /**
@@ -50,6 +53,9 @@ export class SearchResult {
     }
     if (params.score < 0 || params.score > 1) {
       throw new Error("Score must be between 0 and 1");
+    }
+    if (!params.role || params.role.trim() === "") {
+      throw new Error("Role cannot be empty");
     }
     return new SearchResult(params);
   }
@@ -88,6 +94,13 @@ export class SearchResult {
   get timestamp(): Date {
     // Return a copy to maintain immutability
     return new Date(this._timestamp.getTime());
+  }
+
+  /**
+   * The role of the message author (user, assistant, system).
+   */
+  get role(): string {
+    return this._role;
   }
 
   /**

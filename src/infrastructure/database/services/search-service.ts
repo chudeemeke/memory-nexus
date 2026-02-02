@@ -20,6 +20,7 @@ interface SearchRow {
   timestamp: string;
   score: number;
   snippet: string;
+  role: string;
 }
 
 /**
@@ -53,10 +54,11 @@ export class Fts5SearchService implements ISearchService {
       SELECT
         m.id,
         m.session_id,
+        m.role,
         m.content,
         m.timestamp,
         bm25(messages_fts) as score,
-        snippet(messages_fts, 0, '<mark>', '</mark>', '...', 32) as snippet
+        snippet(messages_fts, 0, '<mark>', '</mark>', '...', 64) as snippet
       FROM messages_fts f
       JOIN messages_meta m ON f.rowid = m.rowid
       WHERE messages_fts MATCH ?
@@ -102,6 +104,7 @@ export class Fts5SearchService implements ISearchService {
         snippet: row.snippet,
         score: row.normalizedScore,
         timestamp: new Date(row.timestamp),
+        role: row.role,
       })
     );
   }
@@ -166,10 +169,11 @@ export class Fts5SearchService implements ISearchService {
       SELECT
         m.id,
         m.session_id,
+        m.role,
         m.content,
         m.timestamp,
         bm25(messages_fts) as score,
-        snippet(messages_fts, 0, '<mark>', '</mark>', '...', 32) as snippet
+        snippet(messages_fts, 0, '<mark>', '</mark>', '...', 64) as snippet
       ${joinClauses}
       WHERE ${whereClauses.join(" AND ")}
       ORDER BY score
