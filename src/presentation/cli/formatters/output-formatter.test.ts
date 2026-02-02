@@ -19,6 +19,7 @@ describe("OutputFormatter", () => {
     {
       sessionId: "session-1234-abcd-efgh",
       messageId: "msg-001",
+      role: "user",
       score: 0.95,
       timestamp: new Date("2026-01-27T14:30:00Z"),
       snippet: "This is a <mark>test</mark> snippet for searching",
@@ -26,6 +27,7 @@ describe("OutputFormatter", () => {
     {
       sessionId: "session-5678-ijkl-mnop",
       messageId: "msg-002",
+      role: "assistant",
       score: 0.85,
       timestamp: new Date("2026-01-28T10:00:00Z"),
       snippet: "Another <mark>test</mark> result here",
@@ -57,9 +59,15 @@ describe("OutputFormatter", () => {
       expect(output).toContain("Found 2 result(s)");
     });
 
-    it("includes session ID (truncated to 8 chars)", () => {
+    it("includes session ID (truncated to 16 chars)", () => {
       const output = formatter.formatResults(mockResults, { query: "test" });
-      expect(output).toContain("session-");
+      expect(output).toContain("session-1234-abc");
+    });
+
+    it("includes role label", () => {
+      const output = formatter.formatResults(mockResults, { query: "test" });
+      expect(output).toContain("[User]");
+      expect(output).toContain("[Assistant]");
     });
 
     it("includes score as percentage", () => {
@@ -89,6 +97,17 @@ describe("OutputFormatter", () => {
     });
   });
 
+  describe("default mode without colors", () => {
+    const formatter = createOutputFormatter("default", false);
+
+    it("uses asterisk markers for highlighting", () => {
+      const output = formatter.formatResults(mockResults, { query: "test" });
+      expect(output).toContain("*test*");
+      expect(output).not.toContain("<mark>");
+      expect(output).not.toContain("</mark>");
+    });
+  });
+
   describe("json mode", () => {
     const formatter = createOutputFormatter("json", false);
 
@@ -98,13 +117,14 @@ describe("OutputFormatter", () => {
       expect(Array.isArray(parsed)).toBe(true);
     });
 
-    it("includes all required fields", () => {
+    it("includes all required fields including role", () => {
       const output = formatter.formatResults(mockResults, { query: "test" });
       const parsed = JSON.parse(output);
       const first = parsed[0];
 
       expect(first.sessionId).toBe("session-1234-abcd-efgh");
       expect(first.messageId).toBe("msg-001");
+      expect(first.role).toBe("user");
       expect(first.score).toBe(0.95);
       expect(first.timestamp).toBeDefined();
       expect(first.snippet).toContain("test");
@@ -130,10 +150,15 @@ describe("OutputFormatter", () => {
       expect(output).not.toContain("Found");
     });
 
-    it("outputs session ID and snippet only", () => {
+    it("outputs session ID (16 chars) and snippet", () => {
       const output = formatter.formatResults(mockResults, { query: "test" });
-      expect(output).toContain("session-");
+      expect(output).toContain("session-1234-abc");
       expect(output).toContain("test");
+    });
+
+    it("uses asterisk markers for highlighting", () => {
+      const output = formatter.formatResults(mockResults, { query: "test" });
+      expect(output).toContain("*test*");
     });
 
     it("returns empty string when no results", () => {
@@ -148,6 +173,12 @@ describe("OutputFormatter", () => {
     it("shows full session ID (not truncated)", () => {
       const output = formatter.formatResults(mockResults, { query: "test" });
       expect(output).toContain("session-1234-abcd-efgh");
+    });
+
+    it("includes role label", () => {
+      const output = formatter.formatResults(mockResults, { query: "test" });
+      expect(output).toContain("[User]");
+      expect(output).toContain("[Assistant]");
     });
 
     it("shows execution details when provided", () => {
@@ -223,6 +254,7 @@ describe("OutputFormatter", () => {
       const manyResults: SearchResult[] = Array.from({ length: 1000 }, (_, i) => ({
         sessionId: `session-${i.toString().padStart(4, "0")}-abcd-efgh`,
         messageId: `msg-${i}`,
+        role: "user",
         score: 0.9,
         timestamp: new Date("2026-01-27T14:30:00Z"),
         snippet: "A".repeat(200), // 200 chars per snippet

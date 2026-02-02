@@ -76,12 +76,15 @@ export function createOutputFormatter(mode: OutputMode, useColor: boolean): Outp
 }
 
 /**
- * Convert <mark> tags to ANSI bold codes.
+ * Convert <mark> tags to ANSI bold codes or asterisk markers.
+ * When colors are disabled, uses asterisks for visible highlighting in non-TTY environments.
  */
 function highlightSnippet(snippet: string, useColor: boolean): string {
   if (!useColor) {
-    // Remove <mark> tags entirely when not using color
-    return snippet.replace(/<\/?mark>/g, "");
+    // Use asterisks for visible highlighting in non-TTY environments
+    return snippet
+      .replace(/<mark>/g, "*")
+      .replace(/<\/mark>/g, "*");
   }
   return snippet
     .replace(/<mark>/g, "\x1b[1m")
@@ -122,11 +125,12 @@ class DefaultOutputFormatter implements OutputFormatter {
 
   private formatResult(result: SearchResult, index: number): string {
     const scorePercent = (result.score * 100).toFixed(0);
-    const sessionShort = result.sessionId.substring(0, 8);
+    const sessionShort = result.sessionId.substring(0, 16);
     const timestamp = formatTimestamp(result.timestamp);
     const snippet = highlightSnippet(result.snippet, this.useColor);
+    const role = result.role.charAt(0).toUpperCase() + result.role.slice(1);
 
-    return `${index}. [${scorePercent}%] ${sessionShort}...\n   ${timestamp}\n   ${snippet}\n\n`;
+    return `${index}. [${scorePercent}%] [${role}] ${sessionShort}...\n   ${timestamp}\n   ${snippet}\n\n`;
   }
 
   formatError(error: Error): string {
@@ -154,6 +158,7 @@ class JsonOutputFormatter implements OutputFormatter {
     const jsonResults = results.map((r) => ({
       sessionId: r.sessionId,
       messageId: r.messageId,
+      role: r.role,
       score: r.score,
       timestamp: r.timestamp.toISOString(),
       snippet: r.snippet.replace(/<\/?mark>/g, ""), // Remove HTML tags
@@ -200,8 +205,10 @@ class QuietOutputFormatter implements OutputFormatter {
 
     return results
       .map((r) => {
-        const sessionShort = r.sessionId.substring(0, 8);
-        const snippet = r.snippet.replace(/<\/?mark>/g, "");
+        const sessionShort = r.sessionId.substring(0, 16);
+        const snippet = r.snippet
+          .replace(/<mark>/g, "*")
+          .replace(/<\/mark>/g, "*");
         return `${sessionShort} ${snippet}`;
       })
       .join("\n");
@@ -272,9 +279,10 @@ class VerboseOutputFormatter implements OutputFormatter {
     const scorePercent = (result.score * 100).toFixed(0);
     const timestamp = formatTimestamp(result.timestamp);
     const snippet = highlightSnippet(result.snippet, this.useColor);
+    const role = result.role.charAt(0).toUpperCase() + result.role.slice(1);
 
     // Full session ID in verbose mode
-    return `${index}. [${scorePercent}%] ${result.sessionId}\n   ${timestamp}\n   ${snippet}\n\n`;
+    return `${index}. [${scorePercent}%] [${role}] ${result.sessionId}\n   ${timestamp}\n   ${snippet}\n\n`;
   }
 
   formatError(error: Error): string {
