@@ -510,6 +510,55 @@ describe("Search Command", () => {
         closeDatabase(db);
       }
     });
+
+    it("returns role field from search results", async () => {
+      const { db } = initializeDatabase({ path: ":memory:" });
+
+      try {
+        const projectPath = ProjectPath.fromDecoded("/home/test/project");
+        const session = Session.create({
+          id: "session-role-test",
+          projectPath,
+          startTime: new Date("2026-01-28T10:00:00Z"),
+        });
+
+        const userMessage = Message.create({
+          id: "message-user",
+          role: "user",
+          content: "Question about authentication implementation",
+          timestamp: new Date("2026-01-28T10:01:00Z"),
+        });
+
+        const assistantMessage = Message.create({
+          id: "message-assistant",
+          role: "assistant",
+          content: "Here is how authentication works",
+          timestamp: new Date("2026-01-28T10:02:00Z"),
+        });
+
+        const sessionRepo = new SqliteSessionRepository(db);
+        const messageRepo = new SqliteMessageRepository(db);
+
+        await sessionRepo.save(session);
+        await messageRepo.save(userMessage, "session-role-test");
+        await messageRepo.save(assistantMessage, "session-role-test");
+
+        const searchService = new Fts5SearchService(db);
+        const query = SearchQuery.from("authentication");
+        const results = await searchService.search(query, { limit: 10 });
+
+        expect(results.length).toBe(2);
+
+        // Find each result by messageId
+        const userResult = results.find(r => r.messageId === "message-user");
+        const assistantResult = results.find(r => r.messageId === "message-assistant");
+
+        expect(userResult?.role).toBe("user");
+        expect(assistantResult?.role).toBe("assistant");
+      } finally {
+        closeDatabase(db);
+      }
+    });
   });
 
   describe("filter options", () => {
@@ -791,6 +840,7 @@ describe("Search Command", () => {
     const createMockResult = (snippet: string, id = "test-id"): SearchResult => ({
       sessionId: "session-123",
       messageId: id,
+      role: "user",
       score: 0.8,
       timestamp: new Date("2026-01-28T10:00:00Z"),
       snippet,

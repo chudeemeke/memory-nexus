@@ -232,6 +232,7 @@ describe("Service Port Interfaces", () => {
         snippet: "matching text",
         score: 0.95,
         timestamp: new Date(),
+        role: "user",
       });
 
       const mockService: ISearchService = {
