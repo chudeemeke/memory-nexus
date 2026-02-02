@@ -11,13 +11,13 @@
 ## Current Position
 
 **Milestone:** v1 - Full Vision Implementation
-**Phase:** 11 - Session Navigation (Show, Search) (In Progress)
-**Plan:** 11-04 complete, 11-05 remaining
-**Status:** Executing Phase 11
+**Phase:** 11 - Session Navigation (Show, Search) (Complete)
+**Plan:** 11-05 complete (all plans done)
+**Status:** Phase 11 Complete
 
 ```
-[█████████████████████████████████████░░░] 93%
-10 of 12 phases complete | 1498 tests passing | Plan 11-04 Complete
+[█████████████████████████████████████████] 100%
+11 of 12 phases complete | ~1541 tests passing | Phase 11 Complete
 ```
 
 ## Accumulated Context
@@ -224,42 +224,42 @@ None currently.
 ### Last Session
 
 **Date:** 2026-02-01
-**Completed:** Plan 11-04 Interactive Session Picker and Browse Command
-**Next:** Execute Phase 11 plan 11-05 (LLM extraction service)
+**Completed:** Plan 11-05 LLM Extraction Service - Phase 11 Complete
+**Next:** Phase 12 (if defined) or project completion
 
 ### Context for Next Session
 
-1. Plan 11-04 complete - Session picker and browse command implemented
-2. 1498 tests passing (23 tests added: 12 picker + 11 browse)
-3. Remaining Phase 11 plans:
-   - 11-05: LLM extraction service for topics and summaries
-4. Session picker uses @inquirer/search with fuzzy library for filtering
-5. Browse command dispatches to show/search/context/related based on action
-6. setMocks and setTtyOverride patterns for testing interactive components
-7. Non-TTY mode shows helpful error with alternative commands
+1. Phase 11 complete - All 5 plans executed successfully
+2. ~1541 tests passing (43 tests added in 11-05)
+3. LlmExtractor service created for Claude-powered entity extraction
+4. Hook runner integrates LLM extraction during SessionStop
+5. Session summary field with FTS5 indexing for full-text search
+6. Entity extraction (pattern + LLM) fully integrated
+7. All session navigation commands functional: show, search, browse, context, related
 
 ### Files Modified This Session
 
-- src/presentation/cli/pickers/session-picker.ts (created)
-- src/presentation/cli/pickers/session-picker.test.ts (created)
-- src/presentation/cli/pickers/index.ts (created)
-- src/presentation/cli/commands/browse.ts (created)
-- src/presentation/cli/commands/browse.test.ts (created)
-- src/presentation/cli/commands/index.ts (modified)
-- src/presentation/cli/index.ts (modified)
-- package.json (modified)
-- .planning/phases/11-session-navigation/11-04-SUMMARY.md (created)
+- src/application/services/llm-extractor.ts (created)
+- src/application/services/llm-extractor.test.ts (created)
+- src/application/services/index.ts (modified)
+- src/infrastructure/hooks/hook-runner.ts (modified)
+- src/infrastructure/hooks/hook-runner.test.ts (modified)
+- src/infrastructure/database/schema.ts (modified)
+- src/infrastructure/database/repositories/session-repository.ts (modified)
+- src/infrastructure/database/repositories/session-repository.test.ts (modified)
+- src/domain/entities/session.ts (modified)
+- .planning/phases/11-session-navigation/11-05-SUMMARY.md (created)
 - .planning/STATE.md (updated)
 
 ## Performance Metrics
 
 | Metric | Value |
 |--------|-------|
-| Phases Completed | 10 / 12 |
-| Plans Completed | 40 (phases 1-10 complete + 11-01, 11-02, 11-03, 11-04) |
+| Phases Completed | 11 / 12 |
+| Plans Completed | 41 (phases 1-11 complete) |
 | Requirements Completed | 85 / 85 |
 | Test Coverage | 95%+ functions, 95%+ lines |
-| Total Tests | 1498 |
+| Total Tests | ~1541 |
 
 ## Phase 2 Summary
 
@@ -355,9 +355,9 @@ None currently.
 | 11-02 | Entity Repository and Pattern Extractor | 56 | Complete |
 | 11-03 | Show Command | 36 | Complete |
 | 11-04 | Session Picker and Browse Command | 23 | Complete |
-| 11-05 | LLM Extraction Service | - | Pending |
-| **Total** | | **222+** | **In Progress** |
+| 11-05 | LLM Extraction Service | 43 | Complete |
+| **Total** | | **265** | **Complete** |
 
 ---
 
-*Last updated: 2026-02-01 (Plan 11-04 complete)*
+*Last updated: 2026-02-01 (Phase 11 complete)*
