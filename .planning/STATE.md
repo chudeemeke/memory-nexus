@@ -104,6 +104,17 @@
 
 None currently.
 
+### Process Notes
+
+**UAT Gap (2026-02-02):** User Acceptance Testing (/gsd:verify-work) was not run after phases 1-2, 4-6, 8-9, and 11. Only phases 3, 7, and 10 have UAT.md files. This was identified during Phase 11 execution when memory constraints caused test failures that weren't caught by executor agents (agents run their specific test files, not the full suite).
+
+**Resolution required before milestone completion:**
+- Run `/gsd:verify-work` for phases 1-2, 4-6, 8-9, 11
+- Any issues found will generate fix plans to execute within each phase
+- Then proceed with Phase 12 or `/gsd:audit-milestone` if all phases complete
+
+**Root cause:** Executor agents completed their tasks successfully but cross-file regressions (e.g., schema.test.ts expecting 11 items when 13 existed) weren't caught until full test suite was run post-phase. The verify-work step was skipped during rapid phase execution.
+
 ### TODOs
 
 - [x] Create Phase 1 task plan - See .planning/phases/phase-01/PLAN.md
@@ -223,9 +234,9 @@ None currently.
 
 ### Last Session
 
-**Date:** 2026-02-01
-**Completed:** Plan 11-05 LLM Extraction Service - Phase 11 Complete
-**Next:** Phase 12 (if defined) or project completion
+**Date:** 2026-02-02
+**Completed:** Phase 11 execution complete, identified UAT gap across project
+**Next:** Run /gsd:verify-work for phases missing UAT (1-2, 4-6, 8-9, 11), then Phase 12
 
 ### Context for Next Session
 
@@ -236,6 +247,7 @@ None currently.
 5. Session summary field with FTS5 indexing for full-text search
 6. Entity extraction (pattern + LLM) fully integrated
 7. All session navigation commands functional: show, search, browse, context, related
+8. **ACTION REQUIRED:** Run /gsd:verify-work for phases 1-2, 4-6, 8-9, 11 before Phase 12 or milestone completion (see Process Notes)
 
 ### Files Modified This Session
 
@@ -360,4 +372,4 @@ None currently.
 
 ---
 
-*Last updated: 2026-02-01 (Phase 11 complete)*
+*Last updated: 2026-02-02 (Phase 11 complete, UAT gap identified)*
