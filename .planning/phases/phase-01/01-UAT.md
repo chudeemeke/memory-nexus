@@ -1,9 +1,9 @@
 ---
-status: complete
+status: diagnosed
 phase: 01-project-setup-and-domain-entities
 source: SUMMARY.md
 started: 2026-02-02T12:00:00Z
-updated: 2026-02-02T12:30:00Z
+updated: 2026-02-02T12:35:00Z
 ---
 
 ## Current Test
@@ -51,21 +51,31 @@ skipped: 0
 ## Gaps
 
 - truth: "CLI --version displays version number and --help shows available commands"
-  status: failed
+  status: resolved
   reason: "User reported: Both --version and --help produce no output"
   severity: major
   test: 3
-  root_cause: ""
-  artifacts: []
+  root_cause: "Test used wrong entry point. CLI is at src/presentation/cli/index.ts, not src/index.ts"
+  artifacts:
+    - path: "src/index.ts"
+      issue: "Library export file, not CLI entry point"
+    - path: "src/presentation/cli/index.ts"
+      issue: "Actual CLI entry point with Commander.js"
   missing: []
-  debug_session: ""
+  debug_session: "inline-diagnosis"
+  resolution: "Not a bug - correct invocation is `bun run src/presentation/cli/index.ts --version`"
 
 - truth: "CLI commands show placeholder messages (no crash)"
-  status: failed
+  status: resolved
   reason: "User reported: All commands produce no output - no crash but no placeholder messages either"
   severity: major
   test: 4
-  root_cause: ""
-  artifacts: []
+  root_cause: "Test used wrong entry point. CLI is at src/presentation/cli/index.ts, not src/index.ts"
+  artifacts:
+    - path: "src/index.ts"
+      issue: "Library export file, not CLI entry point"
+    - path: "src/presentation/cli/index.ts"
+      issue: "Actual CLI entry point with Commander.js"
   missing: []
-  debug_session: ""
+  debug_session: "inline-diagnosis"
+  resolution: "Not a bug - correct invocation is `bun run src/presentation/cli/index.ts sync`"
