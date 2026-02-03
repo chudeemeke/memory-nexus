@@ -216,13 +216,15 @@ Plans:
 4. `--json` flag outputs valid JSON that can be piped to jq
 5. Output formatting is consistent: all commands use same structure
 
-**Plans:** 4 plans
+**Plans:** 6 plans
 
 Plans:
 - [x] 07-01-PLAN.md - Date parser and timestamp formatter
 - [x] 07-02-PLAN.md - Search filter options
 - [x] 07-03-PLAN.md - Output formatter and color utilities
 - [x] 07-04-PLAN.md - Apply formatting to search and sync commands
+- [ ] 07-05-PLAN.md - Gap closure: Fix project filter to use project_name LIKE
+- [ ] 07-06-PLAN.md - Gap closure: Fix match highlighting with bold+cyan
 
 ---
 
@@ -341,13 +343,14 @@ Plans:
 4. Topic extraction identifies key concepts discussed in sessions
 5. Session summaries are indexed and searchable
 
-**Plans:** 4 plans
+**Plans:** 5 plans
 
 Plans:
-- [ ] 11-01-PLAN.md - Entity domain type and database schema
-- [ ] 11-02-PLAN.md - Entity repository and pattern extractor
-- [ ] 11-03-PLAN.md - Show command with conversation thread formatter
-- [ ] 11-04-PLAN.md - Interactive session picker with browse command
+- [x] 11-01-PLAN.md - Entity domain type and database schema
+- [x] 11-02-PLAN.md - Entity repository and pattern extractor
+- [x] 11-03-PLAN.md - Show command with conversation thread formatter
+- [x] 11-04-PLAN.md - Interactive session picker with browse command
+- [x] 11-05-PLAN.md - LLM extraction service for topics and summaries
 
 ---
 
@@ -388,11 +391,11 @@ Plans:
 | 4 | Storage Adapters | Complete | 100% |
 | 5 | Basic Sync Command | Complete | 100% |
 | 6 | Search Command with FTS5 | Complete | 100% |
-| 7 | Filtering and Output Formatting | Complete | 100% |
+| 7 | Filtering and Output Formatting | Gap Closure | 95% |
 | 8 | Stats and List Commands | Complete | 100% |
 | 9 | Context and Related Commands | Complete | 100% |
 | 10 | Hook Integration | Complete | 100% |
-| 11 | Session Navigation | Planned | 0% |
+| 11 | Session Navigation | Complete | 100% |
 | 12 | Polish and Error Handling | Not Started | 0% |
 
 ---
@@ -451,4 +454,4 @@ Phase 1 (Domain Entities)
 
 ---
 
-*Last updated: 2026-01-31 (Phase 11 planned)*
+*Last updated: 2026-02-03 (Phase 7 gap closure plans created)*
