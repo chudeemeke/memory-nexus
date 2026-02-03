@@ -90,10 +90,18 @@ describe("OutputFormatter", () => {
   describe("default mode with colors", () => {
     const formatter = createOutputFormatter("default", true);
 
-    it("converts <mark> tags to ANSI bold", () => {
+    it("highlights matches with bold cyan in TTY mode", () => {
       const output = formatter.formatResults(mockResults, { query: "test" });
-      expect(output).toContain("\x1b[1m");
+      // Bold+cyan (1;36m) for maximum visibility across terminals
+      expect(output).toContain("\x1b[1;36m");
       expect(output).toContain("\x1b[0m");
+    });
+
+    it("does not use plain bold without color", () => {
+      const output = formatter.formatResults(mockResults, { query: "test" });
+      // Should NOT have plain bold (1m) without cyan
+      // The snippet should have bold+cyan, not just bold
+      expect(output).not.toMatch(/\x1b\[1m[^3]/); // \x1b[1m not followed by ;36
     });
   });
 

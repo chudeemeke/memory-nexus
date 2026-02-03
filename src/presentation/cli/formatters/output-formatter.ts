@@ -76,8 +76,9 @@ export function createOutputFormatter(mode: OutputMode, useColor: boolean): Outp
 }
 
 /**
- * Convert <mark> tags to ANSI bold codes or asterisk markers.
+ * Convert <mark> tags to ANSI bold+cyan codes or asterisk markers.
  * When colors are disabled, uses asterisks for visible highlighting in non-TTY environments.
+ * Uses bold+cyan (1;36m) for maximum visibility across terminals including Git Bash.
  */
 function highlightSnippet(snippet: string, useColor: boolean): string {
   if (!useColor) {
@@ -86,8 +87,9 @@ function highlightSnippet(snippet: string, useColor: boolean): string {
       .replace(/<mark>/g, "*")
       .replace(/<\/mark>/g, "*");
   }
+  // Use bold+cyan (1;36m) for maximum visibility across terminals
   return snippet
-    .replace(/<mark>/g, "\x1b[1m")
+    .replace(/<mark>/g, "\x1b[1;36m")
     .replace(/<\/mark>/g, "\x1b[0m");
 }
 
