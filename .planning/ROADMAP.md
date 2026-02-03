@@ -250,11 +250,12 @@ Plans:
 4. `--project` filter limits listed sessions to specific project
 5. `--days` filter limits listed sessions to recent time window
 
-**Plans:** 2 plans
+**Plans:** 3 plans
 
 Plans:
 - [x] 08-01-PLAN.md - Stats service and command with per-project breakdown
 - [x] 08-02-PLAN.md - List command with project and date filtering
+- [ ] 08-03-PLAN.md - Gap closure: Quiet labels, filtered totals, message count
 
 ---
 
@@ -392,7 +393,7 @@ Plans:
 | 5 | Basic Sync Command | Complete | 100% |
 | 6 | Search Command with FTS5 | Complete | 100% |
 | 7 | Filtering and Output Formatting | Complete | 100% |
-| 8 | Stats and List Commands | Complete | 100% |
+| 8 | Stats and List Commands | In Progress | 67% |
 | 9 | Context and Related Commands | Complete | 100% |
 | 10 | Hook Integration | Complete | 100% |
 | 11 | Session Navigation | Complete | 100% |
@@ -454,4 +455,4 @@ Phase 1 (Domain Entities)
 
 ---
 
-*Last updated: 2026-02-03 (Phase 7 complete with gap closure)*
+*Last updated: 2026-02-03 (Phase 8 gap closure plan created)*
