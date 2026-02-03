@@ -233,6 +233,7 @@ None currently.
 - @inquirer/search and @inquirer/select use default exports, not named
 - setMocks pattern enables testing interactive picker components
 - Windows file locking requires try/catch around temp directory cleanup
+- ANSI bold alone (1m) not visually distinct in Git Bash/Windows Terminal; use bold+cyan (1;36m)
 
 ## Session Continuity
 
@@ -375,4 +376,4 @@ None currently.
 
 ---
 
-*Last updated: 2026-02-02 (Phase 6 Plan 03 gap closure complete)*
+*Last updated: 2026-02-03 (Phase 7 Plan 06 gap closure complete)*
