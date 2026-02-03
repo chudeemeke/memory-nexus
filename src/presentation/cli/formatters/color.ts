@@ -113,3 +113,25 @@ export function red(text: string, useColor?: boolean): string {
 export function yellow(text: string, useColor?: boolean): string {
   return colorize(text, "33", useColor ?? shouldUseColor());
 }
+
+/**
+ * Make text cyan (for highlighting matches).
+ *
+ * @param text Text to make cyan
+ * @param useColor Whether to apply color (defaults to shouldUseColor())
+ * @returns Cyan text or plain text
+ */
+export function cyan(text: string, useColor?: boolean): string {
+  return colorize(text, "36", useColor ?? shouldUseColor());
+}
+
+/**
+ * Make text bold and cyan (for highly visible highlighting).
+ *
+ * @param text Text to make bold and cyan
+ * @param useColor Whether to apply color (defaults to shouldUseColor())
+ * @returns Bold cyan text or plain text
+ */
+export function boldCyan(text: string, useColor?: boolean): string {
+  return colorize(text, "1;36", useColor ?? shouldUseColor());
+}
