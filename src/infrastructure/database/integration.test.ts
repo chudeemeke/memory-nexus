@@ -1116,10 +1116,10 @@ describe("Full Extraction Pipeline", () => {
         await messageRepo.save(msg1, session1.id);
         await messageRepo.save(msg2, session2.id);
 
-        // Search with project filter
+        // Search with project filter (case-insensitive substring match on project_name)
         const query = SearchQuery.from("authentication");
         const project1Results = await searchService.search(query, {
-            projectFilter: project1Path,
+            projectFilter: "Project1",
         });
 
         expect(project1Results).toHaveLength(1);

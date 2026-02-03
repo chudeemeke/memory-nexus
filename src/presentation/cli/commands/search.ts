@@ -10,7 +10,6 @@ import { SearchQuery } from "../../../domain/value-objects/search-query.js";
 import type { SearchResult } from "../../../domain/value-objects/search-result.js";
 import type { SearchOptions } from "../../../domain/ports/services.js";
 import type { MessageRole } from "../../../domain/entities/message.js";
-import { ProjectPath } from "../../../domain/value-objects/project-path.js";
 import {
   initializeDatabase,
   closeDatabase,
@@ -180,7 +179,7 @@ export async function executeSearchCommand(
     const fetchLimit = options.caseSensitive ? limit * 2 : limit;
     const searchOptions: SearchOptions = {
       limit: fetchLimit,
-      projectFilter: options.project ? ProjectPath.fromDecoded(options.project) : undefined,
+      projectFilter: options.project,
       roleFilter,
       sinceDate,
       beforeDate,

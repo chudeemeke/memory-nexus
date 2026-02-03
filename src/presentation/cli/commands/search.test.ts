@@ -559,6 +559,72 @@ describe("Search Command", () => {
         closeDatabase(db);
       }
     });
+
+    it("project filter uses substring matching", async () => {
+      const { db } = initializeDatabase({ path: ":memory:" });
+
+      try {
+        // Create two sessions with different project names
+        const wowPath = ProjectPath.fromDecoded("/home/test/wow-system");
+        const wowSession = Session.create({
+          id: "session-wow",
+          projectPath: wowPath,
+          startTime: new Date("2026-01-28T10:00:00Z"),
+        });
+
+        const nexusPath = ProjectPath.fromDecoded("/home/test/memory-nexus");
+        const nexusSession = Session.create({
+          id: "session-nexus",
+          projectPath: nexusPath,
+          startTime: new Date("2026-01-28T10:00:00Z"),
+        });
+
+        const sessionRepo = new SqliteSessionRepository(db);
+        const messageRepo = new SqliteMessageRepository(db);
+
+        await sessionRepo.save(wowSession);
+        await sessionRepo.save(nexusSession);
+
+        // Add messages to both sessions
+        const wowMsg = Message.create({
+          id: "msg-wow",
+          role: "user",
+          content: "Authentication implementation in wow-system",
+          timestamp: new Date("2026-01-28T10:01:00Z"),
+        });
+        await messageRepo.save(wowMsg, "session-wow");
+
+        const nexusMsg = Message.create({
+          id: "msg-nexus",
+          role: "user",
+          content: "Authentication implementation in memory-nexus",
+          timestamp: new Date("2026-01-28T10:01:00Z"),
+        });
+        await messageRepo.save(nexusMsg, "session-nexus");
+
+        // Search with partial project name "system"
+        const searchService = new Fts5SearchService(db);
+        const query = SearchQuery.from("authentication");
+        const results = await searchService.search(query, {
+          limit: 10,
+          projectFilter: "system",
+        });
+
+        // Should only match wow-system (contains "system")
+        expect(results.length).toBe(1);
+        expect(results[0].sessionId).toBe("session-wow");
+
+        // Also test case-insensitivity
+        const results2 = await searchService.search(query, {
+          limit: 10,
+          projectFilter: "SYSTEM",
+        });
+        expect(results2.length).toBe(1);
+        expect(results2[0].sessionId).toBe("session-wow");
+      } finally {
+        closeDatabase(db);
+      }
+    });
   });
 
   describe("filter options", () => {
