@@ -103,6 +103,7 @@
 | 16-char session ID display | Readable session IDs without showing full UUID (was 8 chars) | 2026-02-02 |
 | 64-token FTS5 snippets | Doubled from 32 for meaningful context around matched text | 2026-02-02 |
 | Role field in SearchResult | Propagate role from messages_meta through to CLI display | 2026-02-02 |
+| String projectFilter with LIKE query | Users expect to filter by project name ('wow-system'), not filesystem path; LIKE enables substring matching | 2026-02-03 |
 
 ### Blockers
 
@@ -239,31 +240,28 @@ None currently.
 
 ### Last Session
 
-**Date:** 2026-02-02
-**Completed:** Phase 6 Plan 03 (Gap Closure) - Search result intelligibility fixes
+**Date:** 2026-02-03
+**Completed:** Phase 7 Plan 05 (Gap Closure) - Project filter substring matching
 **Next:** Continue UAT verification for remaining phases
 
 ### Context for Next Session
 
-1. Phase 6 Plan 03 complete - Search results now intelligible
-2. ~1548 tests passing (7 tests added in 06-03)
-3. SearchResult value object now includes role property
-4. FTS5 snippet token count increased from 32 to 64
-5. Session ID display increased from 8 to 16 characters
-6. Non-TTY environments use asterisk markers (*text*) for highlighting
-7. All output formatters (default, verbose, quiet, json) updated with role field
+1. Phase 7 Plan 05 complete - Project filter now uses substring matching on project_name
+2. ~1551 tests passing (3 tests added/updated in 07-05)
+3. SearchOptions.projectFilter changed from ProjectPath to string
+4. SQL query uses LOWER(project_name) LIKE LOWER(?) for case-insensitive substring matching
+5. CLI --project option now accepts partial names (e.g., "system" matches "wow-system")
 
 ### Files Modified This Session
 
-- src/domain/value-objects/search-result.ts (modified - added role)
-- src/domain/value-objects/search-result.test.ts (modified)
-- src/infrastructure/database/services/search-service.ts (modified - added role, 64 tokens)
-- src/infrastructure/database/services/search-service.test.ts (modified)
-- src/presentation/cli/formatters/output-formatter.ts (modified - role display, 16-char IDs, asterisks)
-- src/presentation/cli/formatters/output-formatter.test.ts (modified)
-- src/presentation/cli/commands/search.test.ts (modified - role integration test)
-- src/domain/ports/ports.test.ts (modified - fixed mock)
-- .planning/phases/06-search-command-fts5/06-03-SUMMARY.md (created)
+- src/domain/ports/services.ts (modified - changed projectFilter to string)
+- src/infrastructure/database/services/search-service.ts (modified - LIKE query)
+- src/infrastructure/database/services/search-service.test.ts (modified - added Test 33)
+- src/domain/ports/ports.test.ts (modified - string projectFilter)
+- src/presentation/cli/commands/search.ts (modified - pass string directly)
+- src/presentation/cli/commands/search.test.ts (modified - substring test)
+- src/infrastructure/database/integration.test.ts (modified - Test 29 update)
+- .planning/phases/07-filtering-and-output-formatting/07-05-SUMMARY.md (created)
 - .planning/STATE.md (updated)
 
 ## Performance Metrics
@@ -271,10 +269,10 @@ None currently.
 | Metric | Value |
 |--------|-------|
 | Phases Completed | 11 / 12 |
-| Plans Completed | 41 (phases 1-11 complete) |
+| Plans Completed | 42 (phases 1-11 complete + gap closures) |
 | Requirements Completed | 85 / 85 |
 | Test Coverage | 95%+ functions, 95%+ lines |
-| Total Tests | ~1548 |
+| Total Tests | ~1551 |
 
 ## Phase 2 Summary
 
@@ -333,7 +331,8 @@ None currently.
 | 07-02 | Search Filter Options | 27 | Complete |
 | 07-03 | Output Formatter and Color Utilities | 38 | Complete |
 | 07-04 | Apply Formatting to Commands | 10 | Complete |
-| **Total** | | **109** | **Complete** |
+| 07-05 | Gap Closure (Project Filter) | 3 | Complete |
+| **Total** | | **112** | **Complete** |
 
 ## Phase 8 Summary
 
@@ -376,4 +375,4 @@ None currently.
 
 ---
 
-*Last updated: 2026-02-03 (Phase 7 Plan 06 gap closure complete)*
+*Last updated: 2026-02-03 (Phase 7 Plan 05 gap closure complete)*
