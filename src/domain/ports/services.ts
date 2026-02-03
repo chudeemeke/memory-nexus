@@ -8,7 +8,6 @@
 
 import type { SearchQuery } from "../value-objects/search-query.js";
 import type { SearchResult } from "../value-objects/search-result.js";
-import type { ProjectPath } from "../value-objects/project-path.js";
 import type { MessageRole } from "../entities/message.js";
 
 /**
@@ -22,8 +21,8 @@ export interface SearchOptions {
   /** Maximum number of results to return */
   limit?: number;
 
-  /** Filter results to a specific project */
-  projectFilter?: ProjectPath;
+  /** Filter results to a specific project name (case-insensitive substring match) */
+  projectFilter?: string;
 
   /** Filter by message role (user or assistant). Can be single role or array of roles. */
   roleFilter?: MessageRole | MessageRole[];

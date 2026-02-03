@@ -124,13 +124,13 @@ export class Fts5SearchService implements ISearchService {
       JOIN messages_meta m ON f.rowid = m.rowid
     `;
 
-    // Project filter requires joining to sessions table
+    // Project filter requires joining to sessions table (case-insensitive substring match)
     if (options?.projectFilter) {
       joinClauses += `
         JOIN sessions s ON m.session_id = s.id
       `;
-      whereClauses.push("s.project_path_encoded = ?");
-      params.push(options.projectFilter.encoded);
+      whereClauses.push("LOWER(s.project_name) LIKE LOWER(?)");
+      params.push(`%${options.projectFilter}%`);
     }
 
     // Role filter - supports single value or array

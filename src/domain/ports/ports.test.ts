@@ -256,11 +256,10 @@ describe("Service Port Interfaces", () => {
       };
 
       const query = SearchQuery.from("test");
-      const projectPath = ProjectPath.fromDecoded("C:\\Projects\\test");
 
       const options: SearchOptions = {
         limit: 10,
-        projectFilter: projectPath,
+        projectFilter: "test-project",
         roleFilter: "user",
         sinceDate: new Date("2026-01-01"),
         beforeDate: new Date("2026-12-31"),
@@ -270,6 +269,7 @@ describe("Service Port Interfaces", () => {
 
       expect(receivedOptions).toBeDefined();
       expect(receivedOptions!.limit).toBe(10);
+      expect(receivedOptions!.projectFilter).toBe("test-project");
       expect(receivedOptions!.roleFilter).toBe("user");
     });
 

@@ -15,7 +15,6 @@ import { Database } from "bun:sqlite";
 import { initializeDatabase, closeDatabase } from "../connection.js";
 import { Fts5SearchService } from "./search-service.js";
 import { SearchQuery } from "../../../domain/value-objects/search-query.js";
-import { ProjectPath } from "../../../domain/value-objects/project-path.js";
 
 // ============================================================================
 // Test Helpers
@@ -312,7 +311,7 @@ describe("Fts5SearchService", () => {
   });
 
   describe("Project Filter", () => {
-    it("Test 12: filters results by project", async () => {
+    it("Test 12: filters results by project name", async () => {
       // Create second project session
       insertTestSession(
         db,
@@ -337,10 +336,9 @@ describe("Fts5SearchService", () => {
         "authentication in OtherProject"
       );
 
-      const projectPath = ProjectPath.fromDecoded("C:\\Users\\Test\\TestProject");
       const query = SearchQuery.from("authentication");
       const results = await searchService.search(query, {
-        projectFilter: projectPath,
+        projectFilter: "TestProject",
       });
 
       expect(results).toHaveLength(1);
@@ -356,13 +354,71 @@ describe("Fts5SearchService", () => {
         "authentication content"
       );
 
-      const projectPath = ProjectPath.fromDecoded("C:\\Users\\Test\\NonexistentProject");
       const query = SearchQuery.from("authentication");
       const results = await searchService.search(query, {
-        projectFilter: projectPath,
+        projectFilter: "NonexistentProject",
       });
 
       expect(results).toHaveLength(0);
+    });
+
+    it("Test 33: project filter is case-insensitive substring match", async () => {
+      // Create projects with different names
+      insertTestSession(
+        db,
+        "session-2",
+        "C--Users-Test-wow-system",
+        "C:\\Users\\Test\\wow-system",
+        "wow-system"
+      );
+      insertTestSession(
+        db,
+        "session-3",
+        "C--Users-Test-memory-nexus",
+        "C:\\Users\\Test\\memory-nexus",
+        "memory-nexus"
+      );
+
+      insertTestMessage(
+        db,
+        "msg-1",
+        "session-1",
+        "user",
+        "authentication in TestProject"
+      );
+      insertTestMessage(
+        db,
+        "msg-2",
+        "session-2",
+        "user",
+        "authentication in wow-system"
+      );
+      insertTestMessage(
+        db,
+        "msg-3",
+        "session-3",
+        "user",
+        "authentication in memory-nexus"
+      );
+
+      // Case-insensitive partial match
+      const query = SearchQuery.from("authentication");
+
+      // "system" should match "wow-system" but not "TestProject" or "memory-nexus"
+      const results = await searchService.search(query, {
+        projectFilter: "system",
+      });
+
+      expect(results).toHaveLength(1);
+      expect(results[0].sessionId).toBe("session-2");
+
+      // Case-insensitive: "SYSTEM" should also match "wow-system"
+      const results2 = await searchService.search(query, {
+        projectFilter: "SYSTEM",
+      });
+
+      expect(results2).toHaveLength(1);
+      expect(results2[0].sessionId).toBe("session-2");
     });
   });
 
@@ -655,10 +711,9 @@ describe("Fts5SearchService", () => {
         "authentication OtherProject user"
       );
 
-      const projectPath = ProjectPath.fromDecoded("C:\\Users\\Test\\TestProject");
       const query = SearchQuery.from("authentication");
       const results = await searchService.search(query, {
-        projectFilter: projectPath,
+        projectFilter: "TestProject",
         roleFilter: "user",
       });
 
@@ -711,10 +766,9 @@ describe("Fts5SearchService", () => {
         date2
       );
 
-      const projectPath = ProjectPath.fromDecoded("C:\\Users\\Test\\TestProject");
       const query = SearchQuery.from("authentication");
       const results = await searchService.search(query, {
-        projectFilter: projectPath,
+        projectFilter: "TestProject",
         roleFilter: "user",
         sinceDate: new Date("2024-03-01T00:00:00Z"),
       });
