@@ -4,14 +4,27 @@
  * Represents a project directory path that can be encoded for filesystem-safe
  * storage (e.g., as directory names) and decoded back to the original path.
  *
- * Encoding rules:
- * - Windows backslash (\) becomes double-dash (--)
- * - Unix forward slash (/) becomes single-dash (-)
- * - This allows distinguishing between Windows and Unix paths when decoding
+ * IMPORTANT: Claude Code's encoding is LOSSY. Three different characters all
+ * become single dashes in the encoded form:
+ * - Backslash (path separator): \ -> -
+ * - Forward slash (path separator): / -> -
+ * - Space (in folder names): " " -> -
+ * - Hyphen (in folder names): - -> - (unchanged, but indistinguishable)
+ *
+ * Since information is lost during encoding, the decoded path is "best effort"
+ * and may not match the original path exactly. Use the encoded form as the
+ * canonical identifier for matching and comparison.
+ *
+ * Encoding rules (matching Claude Code behavior):
+ * - Windows drive letter + colon + backslash -> double-dash (C:\ -> C--)
+ * - All other backslashes -> single-dash
+ * - Forward slashes -> single-dash
+ * - Spaces -> single-dash
+ * - Hyphens -> single-dash (preserved but indistinguishable)
  *
  * Value object properties:
  * - Immutable after construction
- * - Equality based on decoded path value
+ * - Equality based on encoded path value (canonical identifier)
  * - Validates on construction (rejects empty paths)
  */
 export class ProjectPath {
@@ -84,15 +97,23 @@ export class ProjectPath {
 
   /**
    * Encode a path for filesystem-safe storage.
-   * Windows: colon-backslash becomes double-dash, other backslashes become single-dash.
-   * Unix: forward slash becomes single-dash.
+   * Matches Claude Code's encoding behavior:
+   * - Windows drive (C:\) becomes C--
+   * - All backslashes become single-dash
+   * - All forward slashes become single-dash
+   * - All spaces become single-dash
+   * - Hyphens remain as single-dash (lossy - indistinguishable from separators)
    */
   private static encode(path: string): string {
-    // Windows paths: "C:\" → "C--", other "\" → "-"
-    // First replace ":" followed by backslash with "--"
-    // Then replace remaining backslashes with "-"
-    // Finally replace forward slashes with "-"
-    return path.replace(/:\\/g, "--").replace(/\\/g, "-").replace(/\//g, "-");
+    // Windows paths: "C:\" -> "C--", other "\" -> "-"
+    // Unix paths: "/" -> "-"
+    // Spaces: " " -> "-"
+    // This matches Claude Code's actual encoding behavior
+    return path
+      .replace(/:\\/g, "--") // Drive letter colon-backslash -> double-dash
+      .replace(/\\/g, "-") // Other backslashes -> single-dash
+      .replace(/\//g, "-") // Forward slashes -> single-dash
+      .replace(/ /g, "-"); // Spaces -> single-dash
   }
 
   /**

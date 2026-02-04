@@ -33,7 +33,7 @@ describe("ProjectPath value object", () => {
   });
 
   describe("encoding", () => {
-    it("encodes Windows path - replaces backslash with double dash", () => {
+    it("encodes Windows path - replaces backslash with single dash", () => {
       const path = ProjectPath.fromDecoded("C:\\Users\\Destiny\\Projects\\foo");
       expect(path.encoded).toBe("C--Users-Destiny-Projects-foo");
     });
@@ -43,9 +43,16 @@ describe("ProjectPath value object", () => {
       expect(path.encoded).toBe("-home-user-projects-foo");
     });
 
-    it("encodes path with spaces", () => {
+    it("encodes path with spaces - spaces become dashes (matches Claude Code)", () => {
+      // Claude Code converts spaces to dashes, same as path separators
       const path = ProjectPath.fromDecoded("C:\\Users\\Destiny\\AI Tools\\Projects");
-      expect(path.encoded).toBe("C--Users-Destiny-AI Tools-Projects");
+      expect(path.encoded).toBe("C--Users-Destiny-AI-Tools-Projects");
+    });
+
+    it("encodes path with hyphens - hyphens preserved as dashes (lossy)", () => {
+      // Hyphens in original path become indistinguishable from path separators
+      const path = ProjectPath.fromDecoded("C:\\Users\\Destiny\\Projects\\memory-nexus");
+      expect(path.encoded).toBe("C--Users-Destiny-Projects-memory-nexus");
     });
 
     it("encodes drive letter correctly", () => {
@@ -54,20 +61,37 @@ describe("ProjectPath value object", () => {
     });
   });
 
-  describe("decoding", () => {
-    it("decodes Windows path - double dash to backslash", () => {
+  describe("decoding (lossy - best effort)", () => {
+    // NOTE: Claude Code encoding is LOSSY. Spaces, hyphens, and path separators
+    // all become single dashes. The decoder cannot distinguish between them.
+    // Decoded paths are "best effort" - they may not match the original.
+
+    it("decodes simple Windows path correctly", () => {
       const path = ProjectPath.fromEncoded("C--Users-Destiny-Projects-foo");
       expect(path.decoded).toBe("C:\\Users\\Destiny\\Projects\\foo");
     });
 
-    it("decodes Unix path - leading dash indicates Unix", () => {
+    it("decodes simple Unix path correctly", () => {
       const path = ProjectPath.fromEncoded("-home-user-projects-foo");
       expect(path.decoded).toBe("/home/user/projects/foo");
     });
 
-    it("decodes path with spaces preserved", () => {
-      const path = ProjectPath.fromEncoded("C--Users-Destiny-AI Tools-Projects");
-      expect(path.decoded).toBe("C:\\Users\\Destiny\\AI Tools\\Projects");
+    it("decoded path is best-effort for paths with spaces (lossy)", () => {
+      // Original: C:\Users\Destiny\AI Tools\Projects
+      // Encoded by Claude Code: C--Users-Destiny-AI-Tools-Projects
+      // Decoded: C:\Users\Destiny\AI\Tools\Projects (spaces become backslashes)
+      const path = ProjectPath.fromEncoded("C--Users-Destiny-AI-Tools-Projects");
+      // We cannot recover spaces - they become path separators
+      expect(path.decoded).toBe("C:\\Users\\Destiny\\AI\\Tools\\Projects");
+    });
+
+    it("decoded path is best-effort for paths with hyphens (lossy)", () => {
+      // Original: C:\Users\Destiny\Projects\memory-nexus
+      // Encoded by Claude Code: C--Users-Destiny-Projects-memory-nexus
+      // Decoded: C:\Users\Destiny\Projects\memory\nexus (hyphen becomes backslash)
+      const path = ProjectPath.fromEncoded("C--Users-Destiny-Projects-memory-nexus");
+      // We cannot recover hyphens - they become path separators
+      expect(path.decoded).toBe("C:\\Users\\Destiny\\Projects\\memory\\nexus");
     });
   });
 
@@ -82,11 +106,18 @@ describe("ProjectPath value object", () => {
       expect(path.projectName).toBe("memory-nexus");
     });
 
-    it("extracts project name from encoded path", () => {
-      // Note: encoding is lossy for names containing dashes
-      // "memory-nexus" in encoded form decodes to "memory\nexus"
+    it("extracts project name from encoded path (simple name)", () => {
       const path = ProjectPath.fromEncoded("C--Users-Destiny-Projects-foo");
       expect(path.projectName).toBe("foo");
+    });
+
+    it("extracts project name from encoded path with hyphen (last segment only)", () => {
+      // For encoded paths, project name is the last dash-separated segment
+      // This preserves the encoded form which is unambiguous
+      const path = ProjectPath.fromEncoded("C--Users-Destiny-Projects-memory-nexus");
+      // The last segment after the last dash is "nexus", not "memory-nexus"
+      // because we cannot distinguish hyphens from path separators
+      expect(path.projectName).toBe("nexus");
     });
 
     it("handles trailing separator in Windows path", () => {
@@ -131,9 +162,24 @@ describe("ProjectPath value object", () => {
       expect(path1.equals(path2)).toBe(false);
     });
 
-    it("path created from encoded equals path created from decoded", () => {
+    it("two paths with same encoded value are equal", () => {
+      const path1 = ProjectPath.fromEncoded("C--Users-Destiny-Projects-foo");
+      const path2 = ProjectPath.fromEncoded("C--Users-Destiny-Projects-foo");
+      expect(path1.equals(path2)).toBe(true);
+    });
+
+    it("path created from simple encoded equals path created from decoded", () => {
+      // For simple paths without spaces/hyphens, encoding is reversible
       const path1 = ProjectPath.fromEncoded("C--Users-Destiny-Projects-foo");
       const path2 = ProjectPath.fromDecoded("C:\\Users\\Destiny\\Projects\\foo");
+      expect(path1.equals(path2)).toBe(true);
+    });
+
+    it("equality based on encoded value (canonical identifier)", () => {
+      // Two ProjectPath objects are equal if their encoded forms match
+      // This is the reliable comparison since encoding is deterministic
+      const path1 = ProjectPath.fromEncoded("C--Users-Destiny-AI-Tools-Projects");
+      const path2 = ProjectPath.fromEncoded("C--Users-Destiny-AI-Tools-Projects");
       expect(path1.equals(path2)).toBe(true);
     });
   });

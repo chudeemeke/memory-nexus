@@ -78,6 +78,17 @@ describe("PathDecoder domain service", () => {
 
       expect(name).toBe("foo");
     });
+
+    it("extracts last segment for hyphenated project names (lossy)", () => {
+      // Claude Code encoding is lossy: "memory-nexus" becomes indistinguishable
+      // from "memory\nexus" or "memory nexus" in the encoded form.
+      // The extracted project name is just the last dash-separated segment.
+      const encoded = "C--Users-Destiny-Projects-memory-nexus";
+      const name = PathDecoder.extractProjectName(encoded);
+
+      // Returns "nexus" not "memory-nexus" because decoder cannot distinguish
+      expect(name).toBe("nexus");
+    });
   });
 
   describe("listSessionPaths", () => {
