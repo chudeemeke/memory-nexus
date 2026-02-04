@@ -203,16 +203,16 @@ class JsonStatsFormatter implements StatsFormatter {
 }
 
 /**
- * Quiet stats formatter - minimal output.
+ * Quiet stats formatter - minimal but labeled output.
  */
 class QuietStatsFormatter implements StatsFormatter {
   formatStats(stats: ExtendedStatsResult, _options?: StatsFormatOptions): string {
-    // Just numbers on separate lines: sessions, messages, tools, size
+    // Labeled format for both humans and agents to understand
     return [
-      String(stats.totalSessions),
-      String(stats.totalMessages),
-      String(stats.totalToolUses),
-      String(stats.databaseSizeBytes),
+      `Sessions: ${stats.totalSessions}`,
+      `Messages: ${stats.totalMessages}`,
+      `Tool uses: ${stats.totalToolUses}`,
+      `Size: ${stats.databaseSizeBytes}`,
     ].join("\n");
   }
 
@@ -222,7 +222,7 @@ class QuietStatsFormatter implements StatsFormatter {
   }
 
   formatEmpty(): string {
-    return "0\n0\n0\n0";
+    return "Sessions: 0\nMessages: 0\nTool uses: 0\nSize: 0";
   }
 }
 

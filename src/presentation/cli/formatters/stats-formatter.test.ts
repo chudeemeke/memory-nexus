@@ -135,20 +135,21 @@ describe("StatsFormatter", () => {
   describe("quiet mode", () => {
     const formatter = createStatsFormatter("quiet", false);
 
-    it("outputs just numbers on lines", () => {
+    it("outputs labeled values on lines", () => {
       const output = formatter.formatStats(mockStats);
       const lines = output.split("\n");
 
-      expect(lines[0]).toBe("42"); // sessions
-      expect(lines[1]).toBe("1234"); // messages
-      expect(lines[2]).toBe("567"); // tool uses
-      expect(lines[3]).toBe("1536000"); // size in bytes
+      expect(lines[0]).toBe("Sessions: 42");
+      expect(lines[1]).toBe("Messages: 1234");
+      expect(lines[2]).toBe("Tool uses: 567");
+      expect(lines[3]).toBe("Size: 1536000");
     });
 
-    it("has no header", () => {
+    it("has no header but has labels", () => {
       const output = formatter.formatStats(mockStats);
-      expect(output).not.toContain("Statistics");
       expect(output).not.toContain("===");
+      expect(output).toContain("Sessions:");
+      expect(output).toContain("Messages:");
     });
 
     it("has no project breakdown", () => {
@@ -203,11 +204,11 @@ describe("StatsFormatter", () => {
       expect(parsed.message).toContain("No sessions synced");
     });
 
-    it("returns zeros in quiet mode", () => {
+    it("returns labeled zeros in quiet mode", () => {
       const formatter = createStatsFormatter("quiet", false);
       const output = formatter.formatEmpty();
 
-      expect(output).toBe("0\n0\n0\n0");
+      expect(output).toBe("Sessions: 0\nMessages: 0\nTool uses: 0\nSize: 0");
     });
   });
 
@@ -463,11 +464,12 @@ describe("StatsFormatter", () => {
 
       it("does not include hooks info (minimal output)", () => {
         const output = formatter.formatStats(statsWithHooks);
-        // Quiet mode only outputs 4 numbers on lines
+        // Quiet mode only outputs 4 labeled values on lines
         const lines = output.split("\n");
         expect(lines.length).toBe(4);
         expect(output).not.toContain("Hooks");
-        expect(output).not.toContain("installed");
+        // Check "installed" is not present (but "Installed:" would be for hooks)
+        expect(output).not.toMatch(/\binstalled\b/i);
       });
     });
 
