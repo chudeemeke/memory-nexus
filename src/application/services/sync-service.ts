@@ -275,12 +275,13 @@ export class SyncService {
       const { messages, toolUses, firstTimestamp, lastTimestamp } =
         this.extractEntities(events);
 
-      // Create session entity
+      // Create session entity with message count for accurate list display
       const sessionEntity = Session.create({
         id: session.id,
         projectPath: session.projectPath,
         startTime: firstTimestamp ?? new Date(),
         endTime: lastTimestamp,
+        messageCount: messages.length,
       });
 
       // Transaction: save all data atomically

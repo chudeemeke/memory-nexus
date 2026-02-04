@@ -776,5 +776,50 @@ describe("SyncService", () => {
 
       expect(result.messagesInserted).toBe(1);
     });
+
+    test("stores messageCount in session during sync", async () => {
+      const sessions = [
+        createMockSessionInfo("session-mc", "C:\\Projects\\test", new Date(), 1000),
+      ];
+      (sessionSource.discoverSessions as ReturnType<typeof mock>).mockResolvedValue(sessions);
+
+      const timestamp = new Date().toISOString();
+      const eventsWithMultipleMessages: ParsedEvent[] = [
+        {
+          type: "user",
+          data: {
+            uuid: "msg-1",
+            message: { content: "First message" },
+            timestamp,
+          },
+        },
+        {
+          type: "assistant",
+          data: {
+            uuid: "msg-2",
+            message: { content: [{ type: "text", text: "Second message" }] },
+            timestamp,
+          },
+        },
+        {
+          type: "user",
+          data: {
+            uuid: "msg-3",
+            message: { content: "Third message" },
+            timestamp,
+          },
+        },
+      ];
+
+      const eventsMap = new Map([["/mock/path/session-mc.jsonl", eventsWithMultipleMessages]]);
+      (syncService as any).eventParser = createMockParser(eventsMap);
+
+      await syncService.sync();
+
+      // Verify session was saved with correct message count
+      // The mock sessionRepo.save is called with the Session entity
+      const savedSession = (sessionRepo.save as ReturnType<typeof mock>).mock.calls[0][0];
+      expect(savedSession.messageCount).toBe(3);
+    });
   });
 });
