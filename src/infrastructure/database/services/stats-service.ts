@@ -13,15 +13,6 @@ import type {
 } from "../../../domain/ports/services.js";
 
 /**
- * Raw totals row from database
- */
-interface TotalsRow {
-  totalSessions: number;
-  totalMessages: number;
-  totalToolUses: number;
-}
-
-/**
  * Raw size row from database
  */
 interface SizeRow {
@@ -60,23 +51,15 @@ export class SqliteStatsService implements IStatsService {
   /**
    * Get database-wide statistics with per-project breakdown.
    *
+   * When projectLimit is applied, totals (sessions and messages) are computed
+   * from the filtered project breakdown, so they match what's displayed.
+   * Database size and tool uses remain as database-wide totals.
+   *
    * @param projectLimit Maximum projects to include in breakdown (default 10)
    * @returns Statistics including totals and per-project breakdown
    */
   async getStats(projectLimit = 10): Promise<StatsResult> {
-    // Get totals using subqueries in single query
-    const totalsRow = this.db
-      .prepare<TotalsRow, []>(
-        `
-        SELECT
-          (SELECT COUNT(*) FROM sessions) as totalSessions,
-          (SELECT COUNT(*) FROM messages_meta) as totalMessages,
-          (SELECT COUNT(*) FROM tool_uses) as totalToolUses
-        `
-      )
-      .get();
-
-    // Get database size using table-valued PRAGMA
+    // Get database size using table-valued PRAGMA (always database-wide)
     const sizeRow = this.db
       .prepare<SizeRow, []>(
         `
@@ -86,7 +69,7 @@ export class SqliteStatsService implements IStatsService {
       )
       .get();
 
-    // Get per-project breakdown
+    // Get per-project breakdown (limited)
     const projectRows = this.db
       .prepare<ProjectStatsRow, [number]>(
         `
@@ -103,10 +86,21 @@ export class SqliteStatsService implements IStatsService {
       )
       .all(projectLimit);
 
+    // Compute totals from filtered breakdown (so totals match displayed projects)
+    const totalSessions = projectRows.reduce((sum, row) => sum + row.sessionCount, 0);
+    const totalMessages = projectRows.reduce((sum, row) => sum + row.messageCount, 0);
+
+    // Get total tool uses (database-wide, not per-project breakdown)
+    const toolUsesRow = this.db
+      .prepare<{ totalToolUses: number }, []>(
+        `SELECT COUNT(*) as totalToolUses FROM tool_uses`
+      )
+      .get();
+
     return {
-      totalSessions: totalsRow?.totalSessions ?? 0,
-      totalMessages: totalsRow?.totalMessages ?? 0,
-      totalToolUses: totalsRow?.totalToolUses ?? 0,
+      totalSessions,
+      totalMessages,
+      totalToolUses: toolUsesRow?.totalToolUses ?? 0,
       databaseSizeBytes: sizeRow?.size ?? 0,
       projectBreakdown: projectRows.map((row) => ({
         projectName: row.projectName,

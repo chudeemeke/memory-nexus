@@ -271,6 +271,77 @@ describe("SqliteStatsService", () => {
 
       expect(stats.projectBreakdown.length).toBe(2);
     });
+
+    it("Test 17: totals match sum of displayed projects when limit applied", async () => {
+      // Create 5 projects with different session/message counts
+      // Project0: 3 sessions, 6 messages (most active)
+      // Project1: 2 sessions, 4 messages
+      // Project2: 2 sessions, 3 messages
+      // Project3: 1 session, 2 messages
+      // Project4: 1 session, 1 message
+      for (let i = 0; i < 3; i++) {
+        insertTestSession(db, `s0-${i}`, "proj0", "/proj0", "Project0");
+      }
+      for (let i = 0; i < 2; i++) {
+        insertTestSession(db, `s1-${i}`, "proj1", "/proj1", "Project1");
+      }
+      for (let i = 0; i < 2; i++) {
+        insertTestSession(db, `s2-${i}`, "proj2", "/proj2", "Project2");
+      }
+      insertTestSession(db, "s3-0", "proj3", "/proj3", "Project3");
+      insertTestSession(db, "s4-0", "proj4", "/proj4", "Project4");
+
+      // Add messages to sessions
+      for (let i = 0; i < 6; i++) {
+        insertTestMessage(db, `m0-${i}`, `s0-${i % 3}`, "user", `Message ${i}`);
+      }
+      for (let i = 0; i < 4; i++) {
+        insertTestMessage(db, `m1-${i}`, `s1-${i % 2}`, "user", `Message ${i}`);
+      }
+      for (let i = 0; i < 3; i++) {
+        insertTestMessage(db, `m2-${i}`, `s2-${i % 2}`, "user", `Message ${i}`);
+      }
+      insertTestMessage(db, "m3-0", "s3-0", "user", "Message");
+      insertTestMessage(db, "m3-1", "s3-0", "user", "Message");
+      insertTestMessage(db, "m4-0", "s4-0", "user", "Message");
+
+      // Get stats with limit of 3 projects
+      const stats = await statsService.getStats(3);
+
+      // Should show top 3 projects: Project0 (3), Project1 (2), Project2 (2)
+      expect(stats.projectBreakdown.length).toBe(3);
+
+      // Totals should be sum of displayed projects only
+      const expectedSessions = 3 + 2 + 2; // 7, not 9 (total in DB)
+      const expectedMessages = 6 + 4 + 3; // 13, not 16 (total in DB)
+
+      expect(stats.totalSessions).toBe(expectedSessions);
+      expect(stats.totalMessages).toBe(expectedMessages);
+
+      // Verify breakdown matches
+      const sessionSum = stats.projectBreakdown.reduce((s, p) => s + p.sessionCount, 0);
+      const messageSum = stats.projectBreakdown.reduce((s, p) => s + p.messageCount, 0);
+
+      expect(stats.totalSessions).toBe(sessionSum);
+      expect(stats.totalMessages).toBe(messageSum);
+    });
+
+    it("Test 18: database size remains total even when limit applied", async () => {
+      // Create 5 projects
+      for (let i = 0; i < 5; i++) {
+        insertTestSession(db, `s${i}`, `proj${i}`, `/proj${i}`, `Project${i}`);
+      }
+
+      // Get stats with all projects
+      const fullStats = await statsService.getStats(10);
+      const fullSize = fullStats.databaseSizeBytes;
+
+      // Get stats with limit of 2 projects
+      const limitedStats = await statsService.getStats(2);
+
+      // Database size should be the same (total, not filtered)
+      expect(limitedStats.databaseSizeBytes).toBe(fullSize);
+    });
   });
 
   describe("Large Dataset", () => {
