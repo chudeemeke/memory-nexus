@@ -4,20 +4,20 @@
 
 **Core Value:** Knowledge gained in one Claude Code project becomes accessible from any other project. No more context silos.
 
-**Current Focus:** Phase 8 gap closure complete; continue UAT verification
+**Current Focus:** Phase 8 UAT complete; continue with remaining phase UAT verification
 
 **Tech Stack:** Bun, TypeScript 5.5+, bun:sqlite with FTS5, Commander.js v14, cli-progress@3.12.0, chrono-node
 
 ## Current Position
 
 **Milestone:** v1 - Full Vision Implementation
-**Phase:** 8 - Stats and List Commands (Complete with gap closure)
-**Plan:** 08-03 complete (gap closure done)
-**Status:** Phase 8 Complete (including gap closure)
+**Phase:** 8 - Stats and List Commands (UAT Complete)
+**Plan:** 08-04 complete (final gap closure)
+**Status:** Phase 8 UAT Verified
 
 ```
 [█████████████████████████████████████████] 100%
-11 of 12 phases complete | ~1563 tests passing | Phase 8 Gap Closure Complete
+11 of 12 phases complete | ~1564 tests passing | Phase 8 UAT Complete
 ```
 
 ## Accumulated Context
@@ -107,6 +107,7 @@
 | Labeled quiet stats output | Even minimal output should be self-documenting for agents | 2026-02-04 |
 | Filtered totals from breakdown | When --projects N used, totals match displayed N projects; db size stays total | 2026-02-04 |
 | Session messageCount property | Fallback to messages.length for backward compatibility; enables accurate display from DB | 2026-02-04 |
+| SyncService passes messageCount | Session.create() receives messages.length during extraction for accurate DB storage | 2026-02-04 |
 
 ### Blockers
 
@@ -244,29 +245,24 @@ None currently.
 ### Last Session
 
 **Date:** 2026-02-04
-**Completed:** Phase 8 Plan 03 (Gap Closure) - Quiet labels, filtered totals, messageCount
+**Completed:** Phase 8 Plan 04 (Final Gap Closure) - Sync messageCount population
 **Next:** Continue UAT verification for remaining phases
 
 ### Context for Next Session
 
-1. Phase 8 Plan 03 complete - Three UAT gaps closed
-2. ~1563 tests passing (13 tests added in 08-03)
-3. Quiet stats now outputs labeled format: `Sessions: X\nMessages: X\n...`
-4. Stats --projects N now shows totals matching sum of displayed projects
-5. Session entity has messageCount property, populated from DB in rowToSession()
+1. Phase 8 UAT complete - All gaps closed (08-03 and 08-04)
+2. ~1564 tests passing (1 test added in 08-04)
+3. SyncService.extractSession() now passes messageCount to Session.create()
+4. Re-sync required to populate existing sessions with message counts
+5. Tests 8 and 12 skipped (data-dependent, cannot verify)
 
 ### Files Modified This Session
 
-- src/presentation/cli/formatters/stats-formatter.ts (modified - labeled quiet output)
-- src/presentation/cli/formatters/stats-formatter.test.ts (modified - updated tests)
-- src/infrastructure/database/services/stats-service.ts (modified - filtered totals)
-- src/infrastructure/database/services/stats-service.test.ts (modified - added tests)
-- src/domain/entities/session.ts (modified - added messageCount)
-- src/domain/entities/session.test.ts (modified - added messageCount tests)
-- src/infrastructure/database/repositories/session-repository.ts (modified - populate messageCount)
-- src/infrastructure/database/repositories/session-repository.test.ts (modified - added tests)
-- src/presentation/cli/formatters/list-formatter.ts (modified - use session.messageCount)
-- .planning/phases/08-stats-and-list-commands/08-03-SUMMARY.md (created)
+- src/application/services/sync-service.ts (modified - add messageCount to Session.create)
+- src/application/services/sync-service.test.ts (modified - add messageCount test)
+- .planning/phases/08-stats-and-list-commands/08-04-PLAN.md (created)
+- .planning/phases/08-stats-and-list-commands/08-04-SUMMARY.md (created)
+- .planning/phases/08-stats-and-list-commands/08-UAT.md (updated - all gaps closed)
 - .planning/STATE.md (updated)
 
 ## Performance Metrics
@@ -277,7 +273,7 @@ None currently.
 | Plans Completed | 43 (phases 1-11 complete + gap closures) |
 | Requirements Completed | 85 / 85 |
 | Test Coverage | 95%+ functions, 95%+ lines |
-| Total Tests | ~1563 |
+| Total Tests | ~1564 |
 
 ## Phase 2 Summary
 
@@ -347,7 +343,8 @@ None currently.
 | 08-01 | Stats Command Implementation | 75 | Complete |
 | 08-02 | List Command Implementation | 50 | Complete |
 | 08-03 | Gap Closure (Quiet, Totals, MessageCount) | 13 | Complete |
-| **Total** | | **138** | **Complete** |
+| 08-04 | Gap Closure (Sync MessageCount) | 1 | Complete |
+| **Total** | | **139** | **Complete** |
 
 ## Phase 9 Summary
 
@@ -382,4 +379,4 @@ None currently.
 
 ---
 
-*Last updated: 2026-02-04 (Phase 8 complete with gap closure - 08-03)*
+*Last updated: 2026-02-04 (Phase 8 UAT complete - 08-04)*
