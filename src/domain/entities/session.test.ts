@@ -244,4 +244,93 @@ describe("Session entity", () => {
       );
     });
   });
+
+  describe("messageCount", () => {
+    it("returns provided messageCount when set", () => {
+      const session = Session.create({
+        id: "session-123",
+        projectPath,
+        startTime,
+        messageCount: 42,
+      });
+
+      expect(session.messageCount).toBe(42);
+    });
+
+    it("falls back to messages.length when messageCount not provided", () => {
+      const message = Message.create({
+        id: "msg-1",
+        role: "user",
+        content: "Hello",
+        timestamp: startTime,
+      });
+
+      const session = Session.create({
+        id: "session-123",
+        projectPath,
+        startTime,
+        messages: [message],
+      });
+
+      expect(session.messageCount).toBe(1);
+    });
+
+    it("returns 0 when no messages and no messageCount", () => {
+      const session = Session.create({
+        id: "session-123",
+        projectPath,
+        startTime,
+      });
+
+      expect(session.messageCount).toBe(0);
+    });
+
+    it("messageCount preserved through complete()", () => {
+      const session = Session.create({
+        id: "session-123",
+        projectPath,
+        startTime,
+        messageCount: 100,
+      });
+
+      const endTime = new Date("2024-01-15T12:00:00Z");
+      const completed = session.complete(endTime);
+
+      expect(completed.messageCount).toBe(100);
+    });
+
+    it("messageCount preserved through withSummary()", () => {
+      const session = Session.create({
+        id: "session-123",
+        projectPath,
+        startTime,
+        messageCount: 50,
+      });
+
+      const withSummary = session.withSummary("Test summary");
+
+      expect(withSummary.messageCount).toBe(50);
+    });
+
+    it("messageCount not preserved through addMessage() - uses messages.length", () => {
+      const session = Session.create({
+        id: "session-123",
+        projectPath,
+        startTime,
+        messageCount: 100,
+      });
+
+      const message = Message.create({
+        id: "msg-1",
+        role: "user",
+        content: "Hello",
+        timestamp: startTime,
+      });
+
+      const updated = session.addMessage(message);
+
+      // After adding message, messageCount should use messages.length (1), not preserved value (100)
+      expect(updated.messageCount).toBe(1);
+    });
+  });
 });

@@ -95,7 +95,7 @@ class DefaultListFormatter implements ListFormatter {
     const idShort = session.id.substring(0, 8);
     const projectName = session.projectPath.projectName;
     const relative = formatRelativeTime(session.startTime);
-    const messageCount = session.messages.length;
+    const messageCount = session.messageCount;
     const messageText = `${messageCount} ${pluralize(messageCount, "message", "messages")}`;
 
     // Pad columns for alignment
@@ -127,7 +127,7 @@ class JsonListFormatter implements ListFormatter {
       projectName: s.projectPath.projectName,
       startTime: s.startTime.toISOString(),
       endTime: s.endTime?.toISOString() ?? null,
-      messageCount: s.messages.length,
+      messageCount: s.messageCount,
     }));
 
     return JSON.stringify(jsonSessions, null, 2);
@@ -201,7 +201,7 @@ class VerboseListFormatter implements ListFormatter {
     const projectName = session.projectPath.projectName;
     const projectPath = session.projectPath.decoded;
     const timestamp = formatTimestamp(session.startTime);
-    const messageCount = session.messages.length;
+    const messageCount = session.messageCount;
     const messageText = `${messageCount} ${pluralize(messageCount, "message", "messages")}`;
 
     let output = `  ${session.id}\n`;

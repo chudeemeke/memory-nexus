@@ -619,6 +619,69 @@ describe("SqliteSessionRepository", () => {
     });
   });
 
+  describe("messageCount from database", () => {
+    it("should populate messageCount from row.message_count", async () => {
+      const session = createTestSession({ id: "session-with-messages" });
+      await repository.save(session);
+
+      // Insert messages directly into database
+      db.run(
+        `INSERT INTO messages_meta (id, session_id, role, content, timestamp)
+         VALUES ('m1', 'session-with-messages', 'user', 'Hello', datetime('now')),
+                ('m2', 'session-with-messages', 'assistant', 'Hi', datetime('now')),
+                ('m3', 'session-with-messages', 'user', 'How are you?', datetime('now'))`
+      );
+
+      // Update message_count in sessions table
+      db.run(
+        `UPDATE sessions SET message_count = 3 WHERE id = 'session-with-messages'`
+      );
+
+      const found = await repository.findById("session-with-messages");
+      expect(found).not.toBeNull();
+      expect(found!.messageCount).toBe(3);
+    });
+
+    it("should return 0 for session with no messages", async () => {
+      const session = createTestSession({ id: "empty-session" });
+      await repository.save(session);
+
+      const found = await repository.findById("empty-session");
+      expect(found).not.toBeNull();
+      expect(found!.messageCount).toBe(0);
+    });
+
+    it("should populate messageCount in findRecent results", async () => {
+      const session = createTestSession({ id: "recent-session" });
+      await repository.save(session);
+
+      // Update message_count
+      db.run(
+        `UPDATE sessions SET message_count = 15 WHERE id = 'recent-session'`
+      );
+
+      const recent = await repository.findRecent(10);
+      const found = recent.find(s => s.id === "recent-session");
+      expect(found).not.toBeUndefined();
+      expect(found!.messageCount).toBe(15);
+    });
+
+    it("should populate messageCount in findFiltered results", async () => {
+      const session = createTestSession({ id: "filtered-session" });
+      await repository.save(session);
+
+      // Update message_count
+      db.run(
+        `UPDATE sessions SET message_count = 25 WHERE id = 'filtered-session'`
+      );
+
+      const filtered = await repository.findFiltered({});
+      const found = filtered.find(s => s.id === "filtered-session");
+      expect(found).not.toBeUndefined();
+      expect(found!.messageCount).toBe(25);
+    });
+  });
+
   describe("summary FTS5 indexing", () => {
     it("should index summary in sessions_fts", async () => {
       const session = createTestSession({ id: "fts-test-session" });

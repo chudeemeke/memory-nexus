@@ -20,6 +20,7 @@ interface SessionParams {
   endTime?: Date | undefined;
   messages?: readonly Message[] | undefined;
   summary?: string | undefined;
+  messageCount?: number | undefined;
 }
 
 export class Session {
@@ -29,6 +30,7 @@ export class Session {
   private readonly _endTime?: Date | undefined;
   private readonly _messages: readonly Message[];
   private readonly _summary?: string | undefined;
+  private readonly _messageCount?: number | undefined;
 
   private constructor(params: SessionParams) {
     this._id = params.id;
@@ -39,6 +41,7 @@ export class Session {
       : undefined;
     this._messages = Object.freeze([...(params.messages ?? [])]);
     this._summary = params.summary;
+    this._messageCount = params.messageCount;
   }
 
   /**
@@ -98,6 +101,15 @@ export class Session {
   }
 
   /**
+   * Number of messages in this session.
+   * Returns explicit messageCount if set, otherwise falls back to messages.length.
+   * This allows displaying accurate counts from the database without loading all messages.
+   */
+  get messageCount(): number {
+    return this._messageCount ?? this._messages.length;
+  }
+
+  /**
    * Session duration in milliseconds (undefined if not complete).
    */
   get durationMs(): number | undefined {
@@ -117,6 +129,7 @@ export class Session {
   /**
    * Add a message to this session.
    * Returns a new Session instance (immutability).
+   * Note: When adding messages, messageCount is no longer used (falls back to messages.length).
    */
   addMessage(message: Message): Session {
     return new Session({
@@ -126,6 +139,7 @@ export class Session {
       endTime: this._endTime,
       messages: [...this._messages, message],
       summary: this._summary,
+      // Don't preserve messageCount - it's now outdated since we're adding a message
     });
   }
 
@@ -145,6 +159,7 @@ export class Session {
       endTime,
       messages: [...this._messages],
       summary: this._summary,
+      messageCount: this._messageCount,
     });
   }
 
@@ -160,6 +175,7 @@ export class Session {
       endTime: this._endTime,
       messages: [...this._messages],
       summary,
+      messageCount: this._messageCount,
     });
   }
 }

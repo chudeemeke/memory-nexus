@@ -94,6 +94,9 @@ export class SqliteSessionRepository implements ISessionRepository {
    * Uses project_path_decoded (lossless) not project_path_encoded (lossy
    * for paths containing hyphens). The encoded form is only used for
    * efficient lookups.
+   *
+   * Populates messageCount from the stored count in the database row,
+   * enabling accurate display without loading all messages.
    */
   private rowToSession(row: SessionRow): Session {
     const projectPath = ProjectPath.fromDecoded(row.project_path_decoded);
@@ -103,6 +106,7 @@ export class SqliteSessionRepository implements ISessionRepository {
       startTime: new Date(row.start_time),
       endTime: row.end_time ? new Date(row.end_time) : undefined,
       summary: row.summary ?? undefined,
+      messageCount: row.message_count,
     });
   }
 
