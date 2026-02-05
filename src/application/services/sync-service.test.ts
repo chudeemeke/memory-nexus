@@ -5,8 +5,11 @@
  * Verifies filtering, incremental detection, and progress callbacks.
  */
 
-import { describe, test, expect, mock, beforeEach } from "bun:test";
+import { describe, test, expect, mock, beforeEach, afterEach } from "bun:test";
 import { Database } from "bun:sqlite";
+import { join } from "node:path";
+import { mkdtempSync, rmSync } from "node:fs";
+import { tmpdir } from "node:os";
 import { SyncService, type SyncOptions, type SyncProgress } from "./sync-service.js";
 import type {
   ISessionSource,
@@ -23,6 +26,7 @@ import type {
 import { ExtractionState } from "../../domain/entities/extraction-state.js";
 import { ProjectPath } from "../../domain/value-objects/project-path.js";
 import { createSchema } from "../../infrastructure/database/schema.js";
+import { setTestCheckpointPath } from "../../infrastructure/signals/index.js";
 
 /**
  * Create a mock session file info
@@ -93,6 +97,7 @@ describe("SyncService", () => {
   let toolUseRepo: IToolUseRepository;
   let extractionStateRepo: IExtractionStateRepository;
   let syncService: SyncService;
+  let testDir: string;
 
   // Track mock calls
   let discoverSessionsCalls: number;
@@ -103,6 +108,10 @@ describe("SyncService", () => {
   let findBySessionPathResults: Map<string, ExtractionState | null>;
 
   beforeEach(() => {
+    // Create isolated temp directory for checkpoint files
+    testDir = mkdtempSync(join(tmpdir(), "sync-service-test-"));
+    setTestCheckpointPath(join(testDir, "sync-checkpoint.json"));
+
     // Create in-memory database with schema
     db = new Database(":memory:");
     createSchema(db);
@@ -190,6 +199,18 @@ describe("SyncService", () => {
       extractionStateRepo,
       db
     );
+  });
+
+  afterEach(() => {
+    // Reset checkpoint path override
+    setTestCheckpointPath(null);
+
+    // Clean up temp directory
+    try {
+      rmSync(testDir, { recursive: true, force: true });
+    } catch {
+      // Ignore cleanup errors on Windows
+    }
   });
 
   describe("sync() basic behavior", () => {
@@ -820,6 +841,321 @@ describe("SyncService", () => {
       // The mock sessionRepo.save is called with the Session entity
       const savedSession = (sessionRepo.save as ReturnType<typeof mock>).mock.calls[0][0];
       expect(savedSession.messageCount).toBe(3);
+    });
+  });
+
+  describe("checkpoint support", () => {
+    test("loads checkpoint at start when checkpointEnabled=true", async () => {
+      const sessions = [
+        createMockSessionInfo("session-1", "C:\\Projects\\test", new Date(), 1000),
+        createMockSessionInfo("session-2", "C:\\Projects\\test", new Date(), 2000),
+      ];
+      (sessionSource.discoverSessions as ReturnType<typeof mock>).mockResolvedValue(sessions);
+
+      const eventsMap = new Map([
+        ["/mock/path/session-2.jsonl", createSimpleSessionEvents()],
+      ]);
+      (syncService as any).eventParser = createMockParser(eventsMap);
+
+      // Create existing checkpoint with session-1 already completed
+      const { saveCheckpoint } = await import("../../infrastructure/signals/index.js");
+      saveCheckpoint({
+        startedAt: new Date().toISOString(),
+        totalSessions: 2,
+        completedSessions: 1,
+        completedSessionIds: ["session-1"],
+        lastCompletedAt: new Date().toISOString(),
+      });
+
+      const result = await syncService.sync({ checkpointEnabled: true });
+
+      // session-1 should be skipped (from checkpoint), session-2 processed
+      expect(result.sessionsProcessed).toBe(1);
+      expect(result.recoveredFromCheckpoint).toBe(1);
+    });
+
+    test("saves checkpoint after each session", async () => {
+      const sessions = [
+        createMockSessionInfo("session-1", "C:\\Projects\\test", new Date(), 1000),
+        createMockSessionInfo("session-2", "C:\\Projects\\test", new Date(), 2000),
+      ];
+      (sessionSource.discoverSessions as ReturnType<typeof mock>).mockResolvedValue(sessions);
+
+      const eventsMap = new Map([
+        ["/mock/path/session-1.jsonl", createSimpleSessionEvents()],
+        ["/mock/path/session-2.jsonl", createSimpleSessionEvents()],
+      ]);
+      (syncService as any).eventParser = createMockParser(eventsMap);
+
+      await syncService.sync({ checkpointEnabled: true });
+
+      // Verify checkpoint was cleared after successful completion
+      const { loadCheckpoint } = await import("../../infrastructure/signals/index.js");
+      const checkpoint = loadCheckpoint();
+      expect(checkpoint).toBeNull();
+    });
+
+    test("clears checkpoint on successful completion", async () => {
+      const sessions = [
+        createMockSessionInfo("session-1", "C:\\Projects\\test", new Date(), 1000),
+      ];
+      (sessionSource.discoverSessions as ReturnType<typeof mock>).mockResolvedValue(sessions);
+
+      const eventsMap = new Map([
+        ["/mock/path/session-1.jsonl", createSimpleSessionEvents()],
+      ]);
+      (syncService as any).eventParser = createMockParser(eventsMap);
+
+      // Create pre-existing checkpoint
+      const { saveCheckpoint, loadCheckpoint } = await import("../../infrastructure/signals/index.js");
+      saveCheckpoint({
+        startedAt: new Date().toISOString(),
+        totalSessions: 1,
+        completedSessions: 0,
+        completedSessionIds: [],
+        lastCompletedAt: null,
+      });
+
+      await syncService.sync({ checkpointEnabled: true });
+
+      // Checkpoint should be cleared after successful completion
+      const checkpointAfter = loadCheckpoint();
+      expect(checkpointAfter).toBeNull();
+    });
+
+    test("does not clear checkpoint when errors occur", async () => {
+      const sessions = [
+        createMockSessionInfo("session-1", "C:\\Projects\\test", new Date(), 1000),
+        createMockSessionInfo("session-2", "C:\\Projects\\test", new Date(), 2000),
+      ];
+      (sessionSource.discoverSessions as ReturnType<typeof mock>).mockResolvedValue(sessions);
+
+      // session-2 throws error
+      const errorParser: IEventParser = {
+        parse: async function* (filePath: string) {
+          if (filePath.includes("session-2")) {
+            throw new Error("Parse error");
+          }
+          for (const event of createSimpleSessionEvents()) {
+            yield event;
+          }
+        },
+      };
+      (syncService as any).eventParser = errorParser;
+
+      await syncService.sync({ checkpointEnabled: true });
+
+      // Checkpoint should still exist due to error
+      const { loadCheckpoint } = await import("../../infrastructure/signals/index.js");
+      const checkpoint = loadCheckpoint();
+      expect(checkpoint).not.toBeNull();
+      expect(checkpoint?.completedSessionIds).toContain("session-1");
+    });
+
+    test("skips checkpoint operations when checkpointEnabled=false", async () => {
+      const sessions = [
+        createMockSessionInfo("session-1", "C:\\Projects\\test", new Date(), 1000),
+      ];
+      (sessionSource.discoverSessions as ReturnType<typeof mock>).mockResolvedValue(sessions);
+
+      const eventsMap = new Map([
+        ["/mock/path/session-1.jsonl", createSimpleSessionEvents()],
+      ]);
+      (syncService as any).eventParser = createMockParser(eventsMap);
+
+      // Create pre-existing checkpoint
+      const { saveCheckpoint, loadCheckpoint } = await import("../../infrastructure/signals/index.js");
+      saveCheckpoint({
+        startedAt: new Date().toISOString(),
+        totalSessions: 1,
+        completedSessions: 0,
+        completedSessionIds: [],
+        lastCompletedAt: null,
+      });
+
+      await syncService.sync({ checkpointEnabled: false });
+
+      // Checkpoint should NOT be cleared when checkpointEnabled=false
+      const checkpointAfter = loadCheckpoint();
+      expect(checkpointAfter).not.toBeNull();
+    });
+
+    test("calls onSessionComplete callback after each session", async () => {
+      const sessions = [
+        createMockSessionInfo("session-1", "C:\\Projects\\test", new Date(), 1000),
+        createMockSessionInfo("session-2", "C:\\Projects\\test", new Date(), 2000),
+      ];
+      (sessionSource.discoverSessions as ReturnType<typeof mock>).mockResolvedValue(sessions);
+
+      const eventsMap = new Map([
+        ["/mock/path/session-1.jsonl", createSimpleSessionEvents()],
+        ["/mock/path/session-2.jsonl", createSimpleSessionEvents()],
+      ]);
+      (syncService as any).eventParser = createMockParser(eventsMap);
+
+      const completedSessionIds: string[] = [];
+      await syncService.sync({
+        onSessionComplete: (sessionId) => completedSessionIds.push(sessionId),
+      });
+
+      expect(completedSessionIds).toEqual(["session-1", "session-2"]);
+    });
+  });
+
+  describe("abort support", () => {
+    test("stops processing when shouldAbort returns true", async () => {
+      const sessions = [
+        createMockSessionInfo("session-1", "C:\\Projects\\test", new Date(), 1000),
+        createMockSessionInfo("session-2", "C:\\Projects\\test", new Date(), 2000),
+        createMockSessionInfo("session-3", "C:\\Projects\\test", new Date(), 3000),
+      ];
+      (sessionSource.discoverSessions as ReturnType<typeof mock>).mockResolvedValue(sessions);
+
+      const eventsMap = new Map([
+        ["/mock/path/session-1.jsonl", createSimpleSessionEvents()],
+        ["/mock/path/session-2.jsonl", createSimpleSessionEvents()],
+        ["/mock/path/session-3.jsonl", createSimpleSessionEvents()],
+      ]);
+      (syncService as any).eventParser = createMockParser(eventsMap);
+
+      // Set abort after first session
+      const { setShuttingDown, resetState } = await import("../../infrastructure/signals/index.js");
+      setShuttingDown(true);
+
+      const result = await syncService.sync();
+
+      // Should have aborted before processing any session
+      expect(result.aborted).toBe(true);
+      expect(result.sessionsProcessed).toBe(0);
+
+      // Clean up
+      resetState();
+    });
+
+    test("saves checkpoint when aborted", async () => {
+      const sessions = [
+        createMockSessionInfo("session-1", "C:\\Projects\\test", new Date(), 1000),
+      ];
+      (sessionSource.discoverSessions as ReturnType<typeof mock>).mockResolvedValue(sessions);
+
+      const eventsMap = new Map([
+        ["/mock/path/session-1.jsonl", createSimpleSessionEvents()],
+      ]);
+      (syncService as any).eventParser = createMockParser(eventsMap);
+
+      const { setShuttingDown, resetState, loadCheckpoint } = await import("../../infrastructure/signals/index.js");
+      setShuttingDown(true);
+
+      await syncService.sync({ checkpointEnabled: true });
+
+      // Checkpoint should be saved on abort
+      const checkpoint = loadCheckpoint();
+      expect(checkpoint).not.toBeNull();
+
+      // Clean up
+      resetState();
+    });
+
+    test("returns aborted=false when sync completes normally", async () => {
+      const sessions = [
+        createMockSessionInfo("session-1", "C:\\Projects\\test", new Date(), 1000),
+      ];
+      (sessionSource.discoverSessions as ReturnType<typeof mock>).mockResolvedValue(sessions);
+
+      const eventsMap = new Map([
+        ["/mock/path/session-1.jsonl", createSimpleSessionEvents()],
+      ]);
+      (syncService as any).eventParser = createMockParser(eventsMap);
+
+      const result = await syncService.sync();
+
+      expect(result.aborted).toBe(false);
+    });
+  });
+
+  describe("error wrapping", () => {
+    test("wraps file access errors with SOURCE_INACCESSIBLE code", async () => {
+      const sessions = [
+        createMockSessionInfo("session-1", "C:\\Projects\\test", new Date(), 1000),
+      ];
+      (sessionSource.discoverSessions as ReturnType<typeof mock>).mockResolvedValue(sessions);
+
+      const errorParser: IEventParser = {
+        parse: async function* () {
+          throw new Error("ENOENT: no such file or directory");
+        },
+      };
+      (syncService as any).eventParser = errorParser;
+
+      const result = await syncService.sync();
+
+      expect(result.errors.length).toBe(1);
+      expect(result.errors[0].error).toContain("Cannot access session file");
+    });
+
+    test("wraps JSON parse errors with INVALID_JSON code", async () => {
+      const sessions = [
+        createMockSessionInfo("session-1", "C:\\Projects\\test", new Date(), 1000),
+      ];
+      (sessionSource.discoverSessions as ReturnType<typeof mock>).mockResolvedValue(sessions);
+
+      const errorParser: IEventParser = {
+        parse: async function* () {
+          throw new Error("Unexpected token in JSON at position 0");
+        },
+      };
+      (syncService as any).eventParser = errorParser;
+
+      const result = await syncService.sync();
+
+      expect(result.errors.length).toBe(1);
+      expect(result.errors[0].error).toContain("Failed to parse session file");
+    });
+
+    test("wraps database lock errors with DB_LOCKED code", async () => {
+      const sessions = [
+        createMockSessionInfo("session-1", "C:\\Projects\\test", new Date(), 1000),
+      ];
+      (sessionSource.discoverSessions as ReturnType<typeof mock>).mockResolvedValue(sessions);
+
+      const errorParser: IEventParser = {
+        parse: async function* () {
+          throw new Error("SQLITE_BUSY: database is locked");
+        },
+      };
+      (syncService as any).eventParser = errorParser;
+
+      const result = await syncService.sync();
+
+      expect(result.errors.length).toBe(1);
+      expect(result.errors[0].error).toContain("Database is locked");
+    });
+
+    test("wraps generic database errors with DB_CONNECTION_FAILED code", async () => {
+      const sessions = [
+        createMockSessionInfo("session-1", "C:\\Projects\\test", new Date(), 1000),
+      ];
+      (sessionSource.discoverSessions as ReturnType<typeof mock>).mockResolvedValue(sessions);
+
+      const errorParser: IEventParser = {
+        parse: async function* () {
+          throw new Error("SQLITE_CORRUPT: database disk image is malformed");
+        },
+      };
+      (syncService as any).eventParser = errorParser;
+
+      const result = await syncService.sync();
+
+      expect(result.errors.length).toBe(1);
+      expect(result.errors[0].error).toContain("Database error");
+    });
+
+    test("wraps session discovery errors with SOURCE_INACCESSIBLE", async () => {
+      (sessionSource.discoverSessions as ReturnType<typeof mock>).mockRejectedValue(
+        new Error("Permission denied")
+      );
+
+      await expect(syncService.sync()).rejects.toThrow("Failed to discover sessions");
     });
   });
 });

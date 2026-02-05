@@ -5,6 +5,7 @@
  * Implements incremental sync detection using file mtime and size comparison.
  *
  * Per-session transaction boundary ensures atomicity and error isolation.
+ * Supports checkpoint-based recovery from interrupted syncs.
  */
 
 import type { Database } from "bun:sqlite";
@@ -24,6 +25,14 @@ import { Session } from "../../domain/entities/session.js";
 import { Message } from "../../domain/entities/message.js";
 import { ToolUse } from "../../domain/entities/tool-use.js";
 import { ExtractionState } from "../../domain/entities/extraction-state.js";
+import { MemoryNexusError, ErrorCode } from "../../domain/errors/index.js";
+import {
+  shouldAbort,
+  loadCheckpoint,
+  saveCheckpoint,
+  clearCheckpoint,
+  type SyncCheckpoint,
+} from "../../infrastructure/signals/index.js";
 
 /**
  * Options for controlling sync behavior
@@ -37,6 +46,10 @@ export interface SyncOptions {
   sessionFilter?: string;
   /** Progress callback invoked for each session */
   onProgress?: (progress: SyncProgress) => void;
+  /** Enable checkpoint-based recovery (default: true) */
+  checkpointEnabled?: boolean;
+  /** Callback invoked after each session completes */
+  onSessionComplete?: (sessionId: string) => void;
 }
 
 /**
@@ -76,6 +89,10 @@ export interface SyncResult {
   }>;
   /** Duration in milliseconds */
   durationMs: number;
+  /** Whether sync was aborted via signal */
+  aborted?: boolean;
+  /** Number of sessions recovered from checkpoint */
+  recoveredFromCheckpoint?: number;
 }
 
 /**
@@ -89,6 +106,7 @@ export interface SyncResult {
  * - Extract messages and tool uses from events
  * - Persist to repositories within per-session transactions
  * - Track extraction state for incremental sync
+ * - Support checkpoint-based recovery from interruption
  */
 export class SyncService {
   constructor(
@@ -108,11 +126,15 @@ export class SyncService {
    * and extracts sessions that need processing. Each session is
    * processed in its own transaction for error isolation.
    *
+   * Supports checkpoint-based recovery from interrupted syncs.
+   * Respects abort signals for graceful shutdown.
+   *
    * @param options Configuration for sync behavior
    * @returns Result with counts and any errors
    */
   async sync(options: SyncOptions = {}): Promise<SyncResult> {
     const startTime = Date.now();
+    const checkpointEnabled = options.checkpointEnabled !== false;
     const result: SyncResult = {
       success: true,
       sessionsDiscovered: 0,
@@ -122,7 +144,22 @@ export class SyncService {
       toolUsesInserted: 0,
       errors: [],
       durationMs: 0,
+      aborted: false,
     };
+
+    // Check for existing checkpoint for recovery
+    let checkpoint: SyncCheckpoint | null = null;
+    const completedSessionIds = new Set<string>();
+
+    if (checkpointEnabled) {
+      checkpoint = loadCheckpoint();
+      if (checkpoint) {
+        result.recoveredFromCheckpoint = checkpoint.completedSessions;
+        for (const id of checkpoint.completedSessionIds) {
+          completedSessionIds.add(id);
+        }
+      }
+    }
 
     // Discover all sessions
     options.onProgress?.({
@@ -132,20 +169,63 @@ export class SyncService {
       phase: "discovering",
     });
 
-    const allSessions = await this.sessionSource.discoverSessions();
+    let allSessions: SessionFileInfo[];
+    try {
+      allSessions = await this.sessionSource.discoverSessions();
+    } catch (error) {
+      throw new MemoryNexusError(
+        ErrorCode.SOURCE_INACCESSIBLE,
+        "Failed to discover sessions",
+        { reason: error instanceof Error ? error.message : String(error) }
+      );
+    }
     result.sessionsDiscovered = allSessions.length;
 
     // Filter sessions to process
-    const sessionsToProcess = await this.filterSessions(allSessions, options);
-    result.sessionsSkipped = result.sessionsDiscovered - sessionsToProcess.length;
+    let sessionsToProcess = await this.filterSessions(allSessions, options);
+
+    // Skip sessions already completed in checkpoint
+    if (completedSessionIds.size > 0) {
+      const beforeSkip = sessionsToProcess.length;
+      sessionsToProcess = sessionsToProcess.filter(
+        (s) => !completedSessionIds.has(s.id)
+      );
+      result.sessionsSkipped += beforeSkip - sessionsToProcess.length;
+    }
+
+    // Adjust skip count for sessions filtered by extraction state
+    result.sessionsSkipped =
+      result.sessionsDiscovered - sessionsToProcess.length - completedSessionIds.size;
+    if (result.sessionsSkipped < 0) {
+      result.sessionsSkipped = result.sessionsDiscovered - sessionsToProcess.length;
+    }
+
+    // Initialize checkpoint for new sync
+    const totalToProcess = sessionsToProcess.length + completedSessionIds.size;
+    const currentCheckpoint: SyncCheckpoint = checkpoint ?? {
+      startedAt: new Date().toISOString(),
+      totalSessions: totalToProcess,
+      completedSessions: completedSessionIds.size,
+      completedSessionIds: [...completedSessionIds],
+      lastCompletedAt: checkpoint?.lastCompletedAt ?? null,
+    };
 
     // Process each session
     for (let i = 0; i < sessionsToProcess.length; i++) {
+      // Check for abort signal before processing each session
+      if (shouldAbort()) {
+        result.aborted = true;
+        if (checkpointEnabled) {
+          saveCheckpoint(currentCheckpoint);
+        }
+        break;
+      }
+
       const session = sessionsToProcess[i];
 
       options.onProgress?.({
-        current: i + 1,
-        total: sessionsToProcess.length,
+        current: i + 1 + completedSessionIds.size,
+        total: totalToProcess,
         sessionId: session.id,
         phase: "extracting",
       });
@@ -155,24 +235,89 @@ export class SyncService {
         result.sessionsProcessed++;
         result.messagesInserted += extractionResult.messages;
         result.toolUsesInserted += extractionResult.toolUses;
+
+        // Update checkpoint after successful extraction
+        if (checkpointEnabled) {
+          currentCheckpoint.completedSessions++;
+          currentCheckpoint.completedSessionIds.push(session.id);
+          currentCheckpoint.lastCompletedAt = new Date().toISOString();
+          saveCheckpoint(currentCheckpoint);
+        }
+
+        // Notify callback
+        options.onSessionComplete?.(session.id);
       } catch (error) {
+        const wrappedError = this.wrapError(error, session.path);
         result.errors.push({
           sessionPath: session.path,
-          error: error instanceof Error ? error.message : String(error),
+          error: wrappedError.message,
         });
         result.success = false;
       }
     }
 
+    // Clear checkpoint on successful completion (no abort, no errors)
+    if (checkpointEnabled && !result.aborted && result.success) {
+      clearCheckpoint();
+    }
+
     options.onProgress?.({
-      current: sessionsToProcess.length,
-      total: sessionsToProcess.length,
+      current: totalToProcess,
+      total: totalToProcess,
       sessionId: "",
       phase: "complete",
     });
 
     result.durationMs = Date.now() - startTime;
     return result;
+  }
+
+  /**
+   * Wrap an error in MemoryNexusError with appropriate code and context.
+   */
+  private wrapError(error: unknown, sessionPath: string): MemoryNexusError {
+    if (error instanceof MemoryNexusError) {
+      return error;
+    }
+
+    const message = error instanceof Error ? error.message : String(error);
+
+    // Detect specific error types from message
+    if (message.includes("ENOENT") || message.includes("no such file")) {
+      return new MemoryNexusError(
+        ErrorCode.SOURCE_INACCESSIBLE,
+        `Cannot access session file: ${message}`,
+        { path: sessionPath }
+      );
+    }
+
+    if (message.includes("JSON") || message.includes("parse")) {
+      return new MemoryNexusError(
+        ErrorCode.INVALID_JSON,
+        `Failed to parse session file: ${message}`,
+        { path: sessionPath }
+      );
+    }
+
+    if (message.includes("locked") || message.includes("SQLITE_BUSY")) {
+      return new MemoryNexusError(
+        ErrorCode.DB_LOCKED,
+        `Database is locked: ${message}`,
+        { path: sessionPath }
+      );
+    }
+
+    if (message.includes("database") || message.includes("SQLITE")) {
+      return new MemoryNexusError(
+        ErrorCode.DB_CONNECTION_FAILED,
+        `Database error: ${message}`,
+        { path: sessionPath }
+      );
+    }
+
+    return new MemoryNexusError(ErrorCode.SYNC_FAILED, message, {
+      path: sessionPath,
+    });
   }
 
   /**
@@ -373,15 +518,24 @@ export class SyncService {
         case "assistant": {
           // Extract text content from content blocks
           const textContent = event.data.message.content
-            .filter((block): block is { type: "text"; text: string } => block.type === "text")
+            .filter(
+              (block): block is { type: "text"; text: string } =>
+                block.type === "text"
+            )
             .map((block) => block.text)
             .join("\n");
 
           // Extract tool use IDs from content blocks
           const toolUseIds = event.data.message.content
             .filter(
-              (block): block is { type: "tool_use"; id: string; name: string; input: Record<string, unknown> } =>
-                block.type === "tool_use"
+              (
+                block
+              ): block is {
+                type: "tool_use";
+                id: string;
+                name: string;
+                input: Record<string, unknown>;
+              } => block.type === "tool_use"
             )
             .map((block) => block.id);
 
