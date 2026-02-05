@@ -52,3 +52,20 @@ export {
   type ContextOptions,
   type ToolUsage,
 } from "./services/index.js";
+
+// Health checker
+export {
+  checkDatabaseIntegrity,
+  checkQuickIntegrity,
+  checkDirectoryPermissions,
+  checkConfigValidity,
+  checkHookStatus,
+  runHealthCheck,
+  setTestOverrides,
+  type DatabaseHealth,
+  type PermissionsHealth,
+  type HooksHealth,
+  type ConfigHealth,
+  type HealthCheckResult,
+  type HealthCheckOverrides,
+} from "./health-checker.js";
