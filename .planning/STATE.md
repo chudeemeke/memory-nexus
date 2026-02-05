@@ -4,20 +4,20 @@
 
 **Core Value:** Knowledge gained in one Claude Code project becomes accessible from any other project. No more context silos.
 
-**Current Focus:** Phase 8 UAT complete; continue with remaining phase UAT verification
+**Current Focus:** Phase 12 execution - Polish, Error Handling, Edge Cases
 
 **Tech Stack:** Bun, TypeScript 5.5+, bun:sqlite with FTS5, Commander.js v14, cli-progress@3.12.0, chrono-node
 
 ## Current Position
 
 **Milestone:** v1 - Full Vision Implementation
-**Phase:** 8 - Stats and List Commands (UAT Complete)
-**Plan:** 08-04 complete (final gap closure)
-**Status:** Phase 8 UAT Verified
+**Phase:** 12 - Polish, Error Handling, Edge Cases
+**Plan:** 12-01 complete (Error Codes and Error Formatter)
+**Status:** Phase 12 In Progress
 
 ```
-[█████████████████████████████████████████] 100%
-11 of 12 phases complete | ~1564 tests passing | Phase 8 UAT Complete
+[████████████████████████████████████░░░░░] 92%
+11 of 12 phases complete | ~1618 tests passing | Phase 12 Plan 01 Complete
 ```
 
 ## Accumulated Context
@@ -108,6 +108,9 @@
 | Filtered totals from breakdown | When --projects N used, totals match displayed N projects; db size stays total | 2026-02-04 |
 | Session messageCount property | Fallback to messages.length for backward compatibility; enables accurate display from DB | 2026-02-04 |
 | SyncService passes messageCount | Session.create() receives messages.length during extraction for accurate DB storage | 2026-02-04 |
+| ErrorCode as const object | Type-safe enum alternative with string values; keys equal values | 2026-02-05 |
+| UNKNOWN error code | Catch-all for generic errors not fitting other categories | 2026-02-05 |
+| Empty context omitted from JSON | toJSON() only includes context property when non-empty | 2026-02-05 |
 
 ### Blockers
 
@@ -174,6 +177,7 @@ None currently.
 - [x] Execute 11-02 - Entity Repository and Pattern Extractor (30 repo + 26 extractor tests)
 - [x] Execute 11-03 - Show Command with Conversation Thread (24 formatter + 12 command tests)
 - [x] Execute 11-04 - Interactive Session Picker and Browse Command (12 picker + 11 browse tests)
+- [x] Execute 12-01 - Error Codes and Error Formatter (54 tests: 20 domain + 34 formatter)
 
 ### Learnings
 
@@ -244,36 +248,39 @@ None currently.
 
 ### Last Session
 
-**Date:** 2026-02-04
-**Completed:** Phase 8 Plan 04 (Final Gap Closure) - Sync messageCount population
-**Next:** Continue UAT verification for remaining phases
+**Date:** 2026-02-05
+**Completed:** Phase 12 Plan 01 (Error Codes and Error Formatter)
+**Next:** Continue with Phase 12 Plan 02 (Graceful Degradation)
 
 ### Context for Next Session
 
-1. Phase 8 UAT complete - All gaps closed (08-03 and 08-04)
-2. ~1564 tests passing (1 test added in 08-04)
-3. SyncService.extractSession() now passes messageCount to Session.create()
-4. Re-sync required to populate existing sessions with message counts
-5. Tests 8 and 12 skipped (data-dependent, cannot verify)
+1. Error infrastructure complete: ErrorCode constant with 14 error types
+2. MemoryNexusError class with code, message, context, toJSON()
+3. formatError/formatErrorJson for consistent CLI error output
+4. getSuggestion provides corrective action recommendations
+5. 54 new tests (20 domain + 34 formatter)
 
 ### Files Modified This Session
 
-- src/application/services/sync-service.ts (modified - add messageCount to Session.create)
-- src/application/services/sync-service.test.ts (modified - add messageCount test)
-- .planning/phases/08-stats-and-list-commands/08-04-PLAN.md (created)
-- .planning/phases/08-stats-and-list-commands/08-04-SUMMARY.md (created)
-- .planning/phases/08-stats-and-list-commands/08-UAT.md (updated - all gaps closed)
-- .planning/STATE.md (updated)
+- src/domain/errors/error-codes.ts (created)
+- src/domain/errors/memory-nexus-error.ts (created)
+- src/domain/errors/index.ts (created)
+- src/domain/errors/error-codes.test.ts (created)
+- src/domain/errors/memory-nexus-error.test.ts (created)
+- src/domain/index.ts (modified - add errors export)
+- src/presentation/cli/formatters/error-formatter.ts (created)
+- src/presentation/cli/formatters/error-formatter.test.ts (created)
+- src/presentation/cli/formatters/index.ts (modified - add error formatter exports)
 
 ## Performance Metrics
 
 | Metric | Value |
 |--------|-------|
 | Phases Completed | 11 / 12 |
-| Plans Completed | 43 (phases 1-11 complete + gap closures) |
+| Plans Completed | 44 (phases 1-11 + 12-01) |
 | Requirements Completed | 85 / 85 |
 | Test Coverage | 95%+ functions, 95%+ lines |
-| Total Tests | ~1564 |
+| Total Tests | ~1618 |
 
 ## Phase 2 Summary
 
@@ -377,6 +384,24 @@ None currently.
 | 11-05 | LLM Extraction Service | 43 | Complete |
 | **Total** | | **265** | **Complete** |
 
+## Phase 12 Summary
+
+| Plan | Description | Tests | Status |
+|------|-------------|-------|--------|
+| 12-01 | Error Codes and Error Formatter | 54 | Complete |
+| 12-02 | Graceful Degradation | - | Pending |
+| 12-03 | Signal Handling | - | Pending |
+| 12-04 | Dry-Run Support | - | Pending |
+| 12-05 | Coverage Validation | - | Pending |
+| 12-06 | Doctor Command | - | Pending |
+| 12-07 | Export/Import Commands | - | Pending |
+| 12-08 | Purge Command | - | Pending |
+| 12-09 | Shell Completion | - | Pending |
+| 12-10 | Version Check | - | Pending |
+| 12-11 | Error Logging | - | Pending |
+| 12-12 | Final Integration | - | Pending |
+| **Total** | | **54** | **In Progress** |
+
 ---
 
-*Last updated: 2026-02-04 (Phase 8 UAT complete - 08-04)*
+*Last updated: 2026-02-05 (Phase 12 Plan 01 complete - 12-01)*
