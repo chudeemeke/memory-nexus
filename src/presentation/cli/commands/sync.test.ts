@@ -278,4 +278,64 @@ describe("Sync Command", () => {
       expect(helpInfo).toContain("detailed");
     });
   });
+
+  describe("new options", () => {
+    it("has --dry-run option", () => {
+      const command = createSyncCommand();
+      const dryRunOption = command.options.find(
+        (o) => o.short === "-n" || o.long === "--dry-run"
+      );
+      expect(dryRunOption).toBeDefined();
+    });
+
+    it("has --json option", () => {
+      const command = createSyncCommand();
+      const jsonOption = command.options.find((o) => o.long === "--json");
+      expect(jsonOption).toBeDefined();
+    });
+
+    it("parses --dry-run flag", () => {
+      const command = createSyncCommand();
+      let capturedOptions: Record<string, unknown> | undefined;
+      command.action((options) => {
+        capturedOptions = options;
+      });
+
+      command.parse(["--dry-run"], { from: "user" });
+
+      expect(capturedOptions?.dryRun).toBe(true);
+    });
+
+    it("parses -n shorthand for dry-run", () => {
+      const command = createSyncCommand();
+      let capturedOptions: Record<string, unknown> | undefined;
+      command.action((options) => {
+        capturedOptions = options;
+      });
+
+      command.parse(["-n"], { from: "user" });
+
+      expect(capturedOptions?.dryRun).toBe(true);
+    });
+
+    it("parses --json flag", () => {
+      const command = createSyncCommand();
+      let capturedOptions: Record<string, unknown> | undefined;
+      command.action((options) => {
+        capturedOptions = options;
+      });
+
+      command.parse(["--json"], { from: "user" });
+
+      expect(capturedOptions?.json).toBe(true);
+    });
+
+    it("dry-run and json options in help", () => {
+      const command = createSyncCommand();
+      const helpInfo = command.helpInformation();
+
+      expect(helpInfo).toContain("-n, --dry-run");
+      expect(helpInfo).toContain("--json");
+    });
+  });
 });
