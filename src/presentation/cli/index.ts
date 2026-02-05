@@ -19,6 +19,7 @@ import {
   createInstallCommand,
   createUninstallCommand,
   createStatusCommand,
+  createDoctorCommand,
 } from "./commands/index.js";
 
 const program = new Command();
@@ -56,6 +57,9 @@ program.addCommand(createRelatedCommand());
 program.addCommand(createInstallCommand());
 program.addCommand(createUninstallCommand());
 program.addCommand(createStatusCommand());
+
+// Diagnostic commands
+program.addCommand(createDoctorCommand());
 
 export { program };
 

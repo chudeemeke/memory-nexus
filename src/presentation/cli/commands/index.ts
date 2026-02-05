@@ -17,3 +17,6 @@ export { createBrowseCommand, executeBrowseCommand } from "./browse.js";
 export { createInstallCommand, executeInstallCommand } from "./install.js";
 export { createUninstallCommand, executeUninstallCommand } from "./uninstall.js";
 export { createStatusCommand, executeStatusCommand } from "./status.js";
+
+// Diagnostic commands
+export { createDoctorCommand, executeDoctorCommand } from "./doctor.js";
