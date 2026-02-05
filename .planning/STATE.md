@@ -12,12 +12,12 @@
 
 **Milestone:** v1 - Full Vision Implementation
 **Phase:** 12 - Polish, Error Handling, Edge Cases
-**Plan:** 12-06 complete (Purge Command)
+**Plan:** 12-12 complete (Shell Completion)
 **Status:** Phase 12 In Progress
 
 ```
-[████████████████████████████████████░░░░░] 94%
-11 of 12 phases complete | ~1755 tests passing | Phase 12 Plan 06 Complete
+[████████████████████████████████████░░░░░] 96%
+11 of 12 phases complete | ~1798 tests passing | Phase 12 Plan 12 Complete
 ```
 
 ## Accumulated Context
@@ -122,6 +122,7 @@
 | updated_at for purge filtering | Uses updated_at column, not start_time, to catch modified sessions | 2026-02-05 |
 | Cascade delete for purge | Foreign key constraints handle messages, tool_uses, session_entities cleanup | 2026-02-05 |
 | Confirmation mock pattern | setConfirmationMock() enables testing of interactive prompts | 2026-02-05 |
+| Native shell completion over Carapace | Carapace requires external install; native bash/zsh/fish scripts are self-contained | 2026-02-05 |
 
 ### Blockers
 
@@ -191,6 +192,7 @@ None currently.
 - [x] Execute 12-01 - Error Codes and Error Formatter (54 tests: 20 domain + 34 formatter)
 - [x] Execute 12-03 - Doctor Command (51 tests: 28 health-checker + 23 doctor)
 - [x] Execute 12-06 - Purge Command (51 tests: 12 session-repository + 39 purge)
+- [x] Execute 12-12 - Shell Completion (43 tests: completion command)
 
 ### Learnings
 
@@ -262,35 +264,33 @@ None currently.
 ### Last Session
 
 **Date:** 2026-02-05
-**Completed:** Phase 12 Plan 06 (Purge Command)
+**Completed:** Phase 12 Plan 12 (Shell Completion)
 **Next:** Continue with remaining Phase 12 plans
 
 ### Context for Next Session
 
-1. Purge command: --older-than duration, --force, --dry-run
-2. Duration parsing: parseDuration() for d/m/y units
-3. Session repository: findOlderThan, countOlderThan, deleteOlderThan
-4. Cascade deletes: messages, tool_uses, session_entities
-5. 51 new tests (12 session-repository + 39 purge)
+1. Shell completion: bash/zsh/fish generators
+2. Native completion scripts (no external dependency required)
+3. All 16 commands with full option coverage
+4. 43 new tests for completion command
 
 ### Files Modified This Session
 
-- src/infrastructure/database/repositories/session-repository.ts (modified - purge methods)
-- src/infrastructure/database/repositories/session-repository.test.ts (modified - 12 new tests)
-- src/presentation/cli/commands/purge.ts (created)
-- src/presentation/cli/commands/purge.test.ts (created)
-- src/presentation/cli/commands/index.ts (modified - export purge)
-- src/presentation/cli/index.ts (modified - register purge)
+- src/presentation/cli/commands/completion.ts (created - shell completion generators)
+- src/presentation/cli/commands/completion.test.ts (created - 43 tests)
+- src/presentation/cli/commands/index.ts (modified - export completion)
+- src/presentation/cli/index.ts (modified - register completion)
+- package.json (modified - add commander-completion-carapace)
 
 ## Performance Metrics
 
 | Metric | Value |
 |--------|-------|
 | Phases Completed | 11 / 12 |
-| Plans Completed | 48 (phases 1-11 + 12-01 + 12-03 + 12-04 + 12-06) |
+| Plans Completed | 49 (phases 1-11 + 12-01 + 12-03 + 12-04 + 12-06 + 12-12) |
 | Requirements Completed | 85 / 85 |
 | Test Coverage | 95%+ functions, 95%+ lines |
-| Total Tests | ~1755 |
+| Total Tests | ~1798 |
 
 ## Phase 2 Summary
 
@@ -404,11 +404,12 @@ None currently.
 | 12-04 | Sync Error Handling | 21 | Complete |
 | 12-05 | Coverage Validation | - | Pending |
 | 12-06 | Purge Command | 51 | Complete |
-| 12-07 | Shell Completion | - | Pending |
+| 12-07 | Export/Import Commands | - | Pending |
 | 12-08 | Version Check | - | Pending |
 | 12-09 | Final Integration | - | Pending |
-| **Total** | | **177** | **In Progress** |
+| 12-12 | Shell Completion | 43 | Complete |
+| **Total** | | **220** | **In Progress** |
 
 ---
 
-*Last updated: 2026-02-05 (Phase 12 Plan 04 complete - 12-04)*
+*Last updated: 2026-02-05 (Phase 12 Plan 12 complete - 12-12)*
