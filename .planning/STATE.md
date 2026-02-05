@@ -12,12 +12,12 @@
 
 **Milestone:** v1 - Full Vision Implementation
 **Phase:** 12 - Polish, Error Handling, Edge Cases
-**Plan:** 12-01 complete (Error Codes and Error Formatter)
+**Plan:** 12-03 complete (Doctor Command)
 **Status:** Phase 12 In Progress
 
 ```
 [████████████████████████████████████░░░░░] 92%
-11 of 12 phases complete | ~1618 tests passing | Phase 12 Plan 01 Complete
+11 of 12 phases complete | ~1704 tests passing | Phase 12 Plan 03 Complete
 ```
 
 ## Accumulated Context
@@ -111,6 +111,9 @@
 | ErrorCode as const object | Type-safe enum alternative with string values; keys equal values | 2026-02-05 |
 | UNKNOWN error code | Catch-all for generic errors not fitting other categories | 2026-02-05 |
 | Empty context omitted from JSON | toJSON() only includes context property when non-empty | 2026-02-05 |
+| PRAGMA quick_check for startup | Faster startup validation vs full integrity_check | 2026-02-05 |
+| HealthCheckResult struct | Comprehensive result type for database, permissions, hooks, config | 2026-02-05 |
+| attemptFixes directory creation only | Corruption requires manual user intervention | 2026-02-05 |
 
 ### Blockers
 
@@ -178,6 +181,7 @@ None currently.
 - [x] Execute 11-03 - Show Command with Conversation Thread (24 formatter + 12 command tests)
 - [x] Execute 11-04 - Interactive Session Picker and Browse Command (12 picker + 11 browse tests)
 - [x] Execute 12-01 - Error Codes and Error Formatter (54 tests: 20 domain + 34 formatter)
+- [x] Execute 12-03 - Doctor Command (51 tests: 28 health-checker + 23 doctor)
 
 ### Learnings
 
@@ -249,38 +253,36 @@ None currently.
 ### Last Session
 
 **Date:** 2026-02-05
-**Completed:** Phase 12 Plan 01 (Error Codes and Error Formatter)
-**Next:** Continue with Phase 12 Plan 02 (Graceful Degradation)
+**Completed:** Phase 12 Plan 03 (Doctor Command)
+**Next:** Continue with remaining Phase 12 plans
 
 ### Context for Next Session
 
-1. Error infrastructure complete: ErrorCode constant with 14 error types
-2. MemoryNexusError class with code, message, context, toJSON()
-3. formatError/formatErrorJson for consistent CLI error output
-4. getSuggestion provides corrective action recommendations
-5. 54 new tests (20 domain + 34 formatter)
+1. Health checker infrastructure: checkDatabaseIntegrity, checkQuickIntegrity
+2. System health checks: permissions, hooks, config validity
+3. CLI doctor command with --json and --fix options
+4. formatHealthResult for readable diagnostic output
+5. 51 new tests (28 health-checker + 23 doctor command)
 
 ### Files Modified This Session
 
-- src/domain/errors/error-codes.ts (created)
-- src/domain/errors/memory-nexus-error.ts (created)
-- src/domain/errors/index.ts (created)
-- src/domain/errors/error-codes.test.ts (created)
-- src/domain/errors/memory-nexus-error.test.ts (created)
-- src/domain/index.ts (modified - add errors export)
-- src/presentation/cli/formatters/error-formatter.ts (created)
-- src/presentation/cli/formatters/error-formatter.test.ts (created)
-- src/presentation/cli/formatters/index.ts (modified - add error formatter exports)
+- src/infrastructure/database/health-checker.ts (created)
+- src/infrastructure/database/health-checker.test.ts (created)
+- src/infrastructure/database/index.ts (modified - add health checker exports)
+- src/presentation/cli/commands/doctor.ts (created)
+- src/presentation/cli/commands/doctor.test.ts (created)
+- src/presentation/cli/commands/index.ts (modified - add doctor export)
+- src/presentation/cli/index.ts (modified - register doctor command)
 
 ## Performance Metrics
 
 | Metric | Value |
 |--------|-------|
 | Phases Completed | 11 / 12 |
-| Plans Completed | 44 (phases 1-11 + 12-01) |
+| Plans Completed | 46 (phases 1-11 + 12-01 + 12-03) |
 | Requirements Completed | 85 / 85 |
 | Test Coverage | 95%+ functions, 95%+ lines |
-| Total Tests | ~1618 |
+| Total Tests | ~1704 |
 
 ## Phase 2 Summary
 
@@ -390,18 +392,16 @@ None currently.
 |------|-------------|-------|--------|
 | 12-01 | Error Codes and Error Formatter | 54 | Complete |
 | 12-02 | Graceful Degradation | - | Pending |
-| 12-03 | Signal Handling | - | Pending |
+| 12-03 | Doctor Command | 51 | Complete |
 | 12-04 | Dry-Run Support | - | Pending |
 | 12-05 | Coverage Validation | - | Pending |
-| 12-06 | Doctor Command | - | Pending |
-| 12-07 | Export/Import Commands | - | Pending |
-| 12-08 | Purge Command | - | Pending |
-| 12-09 | Shell Completion | - | Pending |
-| 12-10 | Version Check | - | Pending |
-| 12-11 | Error Logging | - | Pending |
-| 12-12 | Final Integration | - | Pending |
-| **Total** | | **54** | **In Progress** |
+| 12-06 | Export/Import Commands | - | Pending |
+| 12-07 | Purge Command | - | Pending |
+| 12-08 | Shell Completion | - | Pending |
+| 12-09 | Version Check | - | Pending |
+| 12-10 | Final Integration | - | Pending |
+| **Total** | | **105** | **In Progress** |
 
 ---
 
-*Last updated: 2026-02-05 (Phase 12 Plan 01 complete - 12-01)*
+*Last updated: 2026-02-05 (Phase 12 Plan 03 complete - 12-03)*
