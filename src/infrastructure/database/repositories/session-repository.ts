@@ -199,6 +199,65 @@ export class SqliteSessionRepository implements ISessionRepository {
   }
 
   /**
+   * Find sessions older than a specified date.
+   * Returns sessions where updated_at < cutoffDate.
+   *
+   * @param cutoffDate - Sessions updated before this date will be returned
+   * @returns Array of sessions older than the cutoff
+   */
+  async findOlderThan(cutoffDate: Date): Promise<Session[]> {
+    const sql = `
+      SELECT id, project_path_encoded, project_path_decoded, project_name,
+             start_time, end_time, message_count, summary
+      FROM sessions
+      WHERE updated_at < $cutoffDate
+      ORDER BY updated_at ASC
+    `;
+    const stmt = this.db.prepare(sql);
+    const rows = stmt.all({ $cutoffDate: cutoffDate.toISOString() }) as SessionRow[];
+    return rows.map((row) => this.rowToSession(row));
+  }
+
+  /**
+   * Count sessions older than a specified date.
+   * Efficient for showing preview before purge.
+   *
+   * @param cutoffDate - Sessions updated before this date will be counted
+   * @returns Number of sessions older than the cutoff
+   */
+  async countOlderThan(cutoffDate: Date): Promise<number> {
+    const sql = `
+      SELECT COUNT(*) as count
+      FROM sessions
+      WHERE updated_at < $cutoffDate
+    `;
+    const stmt = this.db.prepare(sql);
+    const row = stmt.get({ $cutoffDate: cutoffDate.toISOString() }) as { count: number };
+    return row.count;
+  }
+
+  /**
+   * Delete sessions older than a specified date.
+   * Cascade deletes to messages, tool_uses, links, entities via foreign keys.
+   *
+   * @param cutoffDate - Sessions updated before this date will be deleted
+   * @returns Number of sessions deleted
+   */
+  async deleteOlderThan(cutoffDate: Date): Promise<number> {
+    // Get count before delete (since changes() might not work correctly with cascades)
+    const count = await this.countOlderThan(cutoffDate);
+
+    const sql = `
+      DELETE FROM sessions
+      WHERE updated_at < $cutoffDate
+    `;
+    const stmt = this.db.prepare(sql);
+    stmt.run({ $cutoffDate: cutoffDate.toISOString() });
+
+    return count;
+  }
+
+  /**
    * Find sessions with filtering options.
    * Builds dynamic WHERE clause based on provided filters.
    */

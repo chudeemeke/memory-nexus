@@ -682,6 +682,279 @@ describe("SqliteSessionRepository", () => {
     });
   });
 
+  describe("purge operations", () => {
+    describe("findOlderThan", () => {
+      it("should return sessions with updated_at older than cutoff", async () => {
+        // Create old session
+        const oldSession = createTestSession({
+          id: "old-session",
+          startTime: new Date("2026-01-10T10:00:00Z"),
+        });
+        await repository.save(oldSession);
+        // Manually set updated_at to old date
+        db.run(
+          `UPDATE sessions SET updated_at = '2026-01-10T10:00:00Z' WHERE id = 'old-session'`
+        );
+
+        // Create recent session
+        const recentSession = createTestSession({
+          id: "recent-session",
+          startTime: new Date("2026-01-28T10:00:00Z"),
+        });
+        await repository.save(recentSession);
+        // Manually set updated_at to recent date
+        db.run(
+          `UPDATE sessions SET updated_at = '2026-01-28T10:00:00Z' WHERE id = 'recent-session'`
+        );
+
+        // Cutoff between old and recent
+        const cutoffDate = new Date("2026-01-20T00:00:00Z");
+        const oldSessions = await repository.findOlderThan(cutoffDate);
+
+        expect(oldSessions).toHaveLength(1);
+        expect(oldSessions[0].id).toBe("old-session");
+      });
+
+      it("should return empty array when no sessions are older", async () => {
+        const session = createTestSession({ id: "recent-session" });
+        await repository.save(session);
+        // Default updated_at is 'now', so a past cutoff should return nothing
+        db.run(
+          `UPDATE sessions SET updated_at = '2026-01-28T10:00:00Z' WHERE id = 'recent-session'`
+        );
+
+        const cutoffDate = new Date("2026-01-01T00:00:00Z");
+        const oldSessions = await repository.findOlderThan(cutoffDate);
+
+        expect(oldSessions).toHaveLength(0);
+      });
+
+      it("should return sessions ordered by updated_at ascending", async () => {
+        const sessions = [
+          { id: "oldest", updated: "2026-01-05T10:00:00Z" },
+          { id: "middle", updated: "2026-01-10T10:00:00Z" },
+          { id: "recent", updated: "2026-01-25T10:00:00Z" },
+        ];
+
+        for (const s of sessions) {
+          const session = createTestSession({ id: s.id });
+          await repository.save(session);
+          db.run(`UPDATE sessions SET updated_at = '${s.updated}' WHERE id = '${s.id}'`);
+        }
+
+        // All sessions are older than this cutoff
+        const cutoffDate = new Date("2026-01-30T00:00:00Z");
+        const oldSessions = await repository.findOlderThan(cutoffDate);
+
+        expect(oldSessions).toHaveLength(3);
+        expect(oldSessions[0].id).toBe("oldest");
+        expect(oldSessions[1].id).toBe("middle");
+        expect(oldSessions[2].id).toBe("recent");
+      });
+    });
+
+    describe("countOlderThan", () => {
+      it("should return count of sessions older than cutoff", async () => {
+        // Create 3 old sessions
+        for (let i = 0; i < 3; i++) {
+          const session = createTestSession({ id: `old-${i}` });
+          await repository.save(session);
+          db.run(
+            `UPDATE sessions SET updated_at = '2026-01-10T10:00:00Z' WHERE id = 'old-${i}'`
+          );
+        }
+
+        // Create 2 recent sessions
+        for (let i = 0; i < 2; i++) {
+          const session = createTestSession({ id: `recent-${i}` });
+          await repository.save(session);
+          db.run(
+            `UPDATE sessions SET updated_at = '2026-01-28T10:00:00Z' WHERE id = 'recent-${i}'`
+          );
+        }
+
+        const cutoffDate = new Date("2026-01-20T00:00:00Z");
+        const count = await repository.countOlderThan(cutoffDate);
+
+        expect(count).toBe(3);
+      });
+
+      it("should return 0 when no sessions are older", async () => {
+        const session = createTestSession({ id: "recent-session" });
+        await repository.save(session);
+        db.run(
+          `UPDATE sessions SET updated_at = '2026-01-28T10:00:00Z' WHERE id = 'recent-session'`
+        );
+
+        const cutoffDate = new Date("2026-01-01T00:00:00Z");
+        const count = await repository.countOlderThan(cutoffDate);
+
+        expect(count).toBe(0);
+      });
+
+      it("should return 0 when database is empty", async () => {
+        const cutoffDate = new Date("2026-01-30T00:00:00Z");
+        const count = await repository.countOlderThan(cutoffDate);
+
+        expect(count).toBe(0);
+      });
+    });
+
+    describe("deleteOlderThan", () => {
+      it("should delete sessions older than cutoff and return count", async () => {
+        // Create 3 old sessions
+        for (let i = 0; i < 3; i++) {
+          const session = createTestSession({ id: `old-${i}` });
+          await repository.save(session);
+          db.run(
+            `UPDATE sessions SET updated_at = '2026-01-10T10:00:00Z' WHERE id = 'old-${i}'`
+          );
+        }
+
+        // Create 2 recent sessions
+        for (let i = 0; i < 2; i++) {
+          const session = createTestSession({ id: `recent-${i}` });
+          await repository.save(session);
+          db.run(
+            `UPDATE sessions SET updated_at = '2026-01-28T10:00:00Z' WHERE id = 'recent-${i}'`
+          );
+        }
+
+        const cutoffDate = new Date("2026-01-20T00:00:00Z");
+        const deletedCount = await repository.deleteOlderThan(cutoffDate);
+
+        expect(deletedCount).toBe(3);
+
+        // Verify old sessions are gone
+        for (let i = 0; i < 3; i++) {
+          const found = await repository.findById(`old-${i}`);
+          expect(found).toBeNull();
+        }
+
+        // Verify recent sessions remain
+        for (let i = 0; i < 2; i++) {
+          const found = await repository.findById(`recent-${i}`);
+          expect(found).not.toBeNull();
+        }
+      });
+
+      it("should return 0 and delete nothing when no sessions are older", async () => {
+        const session = createTestSession({ id: "recent-session" });
+        await repository.save(session);
+        db.run(
+          `UPDATE sessions SET updated_at = '2026-01-28T10:00:00Z' WHERE id = 'recent-session'`
+        );
+
+        const cutoffDate = new Date("2026-01-01T00:00:00Z");
+        const deletedCount = await repository.deleteOlderThan(cutoffDate);
+
+        expect(deletedCount).toBe(0);
+
+        // Verify session still exists
+        const found = await repository.findById("recent-session");
+        expect(found).not.toBeNull();
+      });
+
+      it("should cascade delete messages when session is deleted", async () => {
+        const session = createTestSession({ id: "session-with-messages" });
+        await repository.save(session);
+        db.run(
+          `UPDATE sessions SET updated_at = '2026-01-10T10:00:00Z' WHERE id = 'session-with-messages'`
+        );
+
+        // Insert messages
+        db.run(
+          `INSERT INTO messages_meta (id, session_id, role, content, timestamp)
+           VALUES ('m1', 'session-with-messages', 'user', 'Hello', datetime('now')),
+                  ('m2', 'session-with-messages', 'assistant', 'Hi', datetime('now'))`
+        );
+
+        // Verify messages exist
+        const msgsBefore = db.prepare(
+          `SELECT COUNT(*) as count FROM messages_meta WHERE session_id = 'session-with-messages'`
+        ).get() as { count: number };
+        expect(msgsBefore.count).toBe(2);
+
+        const cutoffDate = new Date("2026-01-20T00:00:00Z");
+        await repository.deleteOlderThan(cutoffDate);
+
+        // Verify messages are cascade deleted
+        const msgsAfter = db.prepare(
+          `SELECT COUNT(*) as count FROM messages_meta WHERE session_id = 'session-with-messages'`
+        ).get() as { count: number };
+        expect(msgsAfter.count).toBe(0);
+      });
+
+      it("should cascade delete tool_uses when session is deleted", async () => {
+        const session = createTestSession({ id: "session-with-tools" });
+        await repository.save(session);
+        db.run(
+          `UPDATE sessions SET updated_at = '2026-01-10T10:00:00Z' WHERE id = 'session-with-tools'`
+        );
+
+        // Insert tool uses
+        db.run(
+          `INSERT INTO tool_uses (id, session_id, name, input, timestamp, status)
+           VALUES ('t1', 'session-with-tools', 'Read', '{}', datetime('now'), 'success'),
+                  ('t2', 'session-with-tools', 'Write', '{}', datetime('now'), 'success')`
+        );
+
+        // Verify tool uses exist
+        const toolsBefore = db.prepare(
+          `SELECT COUNT(*) as count FROM tool_uses WHERE session_id = 'session-with-tools'`
+        ).get() as { count: number };
+        expect(toolsBefore.count).toBe(2);
+
+        const cutoffDate = new Date("2026-01-20T00:00:00Z");
+        await repository.deleteOlderThan(cutoffDate);
+
+        // Verify tool uses are cascade deleted
+        const toolsAfter = db.prepare(
+          `SELECT COUNT(*) as count FROM tool_uses WHERE session_id = 'session-with-tools'`
+        ).get() as { count: number };
+        expect(toolsAfter.count).toBe(0);
+      });
+
+      it("should cascade delete session_entities when session is deleted", async () => {
+        const session = createTestSession({ id: "session-with-entities" });
+        await repository.save(session);
+        db.run(
+          `UPDATE sessions SET updated_at = '2026-01-10T10:00:00Z' WHERE id = 'session-with-entities'`
+        );
+
+        // Insert entity and link
+        db.run(
+          `INSERT INTO entities (id, type, name) VALUES (1, 'concept', 'testing')`
+        );
+        db.run(
+          `INSERT INTO session_entities (session_id, entity_id, frequency)
+           VALUES ('session-with-entities', 1, 5)`
+        );
+
+        // Verify session_entities exist
+        const entitiesBefore = db.prepare(
+          `SELECT COUNT(*) as count FROM session_entities WHERE session_id = 'session-with-entities'`
+        ).get() as { count: number };
+        expect(entitiesBefore.count).toBe(1);
+
+        const cutoffDate = new Date("2026-01-20T00:00:00Z");
+        await repository.deleteOlderThan(cutoffDate);
+
+        // Verify session_entities are cascade deleted
+        const entitiesAfter = db.prepare(
+          `SELECT COUNT(*) as count FROM session_entities WHERE session_id = 'session-with-entities'`
+        ).get() as { count: number };
+        expect(entitiesAfter.count).toBe(0);
+
+        // Entity itself should still exist (only the link is deleted)
+        const entityStillExists = db.prepare(
+          `SELECT COUNT(*) as count FROM entities WHERE id = 1`
+        ).get() as { count: number };
+        expect(entityStillExists.count).toBe(1);
+      });
+    });
+  });
+
   describe("summary FTS5 indexing", () => {
     it("should index summary in sessions_fts", async () => {
       const session = createTestSession({ id: "fts-test-session" });
