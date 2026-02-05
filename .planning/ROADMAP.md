@@ -380,6 +380,21 @@ Plans:
 4. Test coverage meets 95% at EACH metric (not just overall)
 5. Concurrent sync and search commands do not deadlock
 
+**Plans:** 11 plans
+
+Plans:
+- [ ] 12-01-PLAN.md - Error codes and error formatting infrastructure
+- [ ] 12-02-PLAN.md - Signal handling and checkpoint management
+- [ ] 12-03-PLAN.md - Health checker and doctor command
+- [ ] 12-04-PLAN.md - Sync command error handling and recovery
+- [ ] 12-05-PLAN.md - Export and import commands
+- [ ] 12-06-PLAN.md - Purge command for data cleanup
+- [ ] 12-07-PLAN.md - Apply error handling to all commands
+- [ ] 12-08-PLAN.md - Database connection hardening
+- [ ] 12-09-PLAN.md - Integration tests (large files, recovery, concurrency)
+- [ ] 12-10-PLAN.md - Mutation testing and CLI smoke tests
+- [ ] 12-11-PLAN.md - Coverage gap analysis and completion
+
 ---
 
 ## Progress
@@ -397,7 +412,7 @@ Plans:
 | 9 | Context and Related Commands | Complete | 100% |
 | 10 | Hook Integration | Complete | 100% |
 | 11 | Session Navigation | Complete | 100% |
-| 12 | Polish and Error Handling | Not Started | 0% |
+| 12 | Polish and Error Handling | Planned | 0% |
 
 ---
 
@@ -455,4 +470,4 @@ Phase 1 (Domain Entities)
 
 ---
 
-*Last updated: 2026-02-03 (Phase 8 gap closure plan created)*
+*Last updated: 2026-02-05 (Phase 12 planning complete - 11 plans created)*
