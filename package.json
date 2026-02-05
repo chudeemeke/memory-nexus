@@ -13,15 +13,22 @@
     "build:hook": "bun build src/infrastructure/hooks/sync-hook-script.ts --outfile=dist/sync-hook.js --target=bun",
     "test": "bun test",
     "test:coverage": "bun test --coverage",
+    "test:smoke": "bun test tests/smoke",
     "typecheck": "tsc --noEmit",
-    "lint": "tsc --noEmit"
+    "lint": "tsc --noEmit",
+    "mutation": "stryker run",
+    "mutation:domain": "stryker run --mutate 'src/domain/**/!(*.test).ts'"
   },
   "author": "Chude <chude@emeke.org>",
   "license": "MIT",
   "devDependencies": {
+    "@stryker-mutator/core": "^9.0.0",
+    "@stryker-mutator/typescript-checker": "^9.0.0",
+    "@stryker-mutator/vitest-runner": "^9.0.0",
     "@types/bun": "^1.1.0",
     "@types/cli-progress": "^3.11.6",
-    "typescript": "^5.5.0"
+    "typescript": "^5.5.0",
+    "vitest": "^3.0.0"
   },
   "engines": {
     "bun": ">=1.0.0"
