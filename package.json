@@ -40,6 +40,7 @@
   },
   "dependencies": {
     "@anthropic-ai/claude-code": "^2.1.25",
+    "@gutenye/commander-completion-carapace": "^1.0.9",
     "@inquirer/search": "^4.1.0",
     "@inquirer/select": "^5.0.4",
     "chrono-node": "^2.9.0",
