@@ -12,12 +12,12 @@
 
 **Milestone:** v1 - Full Vision Implementation
 **Phase:** 12 - Polish, Error Handling, Edge Cases
-**Plan:** 12-03 complete (Doctor Command)
+**Plan:** 12-04 complete (Sync Error Handling)
 **Status:** Phase 12 In Progress
 
 ```
-[████████████████████████████████████░░░░░] 92%
-11 of 12 phases complete | ~1704 tests passing | Phase 12 Plan 03 Complete
+[████████████████████████████████████░░░░░] 93%
+11 of 12 phases complete | ~1725 tests passing | Phase 12 Plan 04 Complete
 ```
 
 ## Accumulated Context
@@ -114,6 +114,10 @@
 | PRAGMA quick_check for startup | Faster startup validation vs full integrity_check | 2026-02-05 |
 | HealthCheckResult struct | Comprehensive result type for database, permissions, hooks, config | 2026-02-05 |
 | attemptFixes directory creation only | Corruption requires manual user intervention | 2026-02-05 |
+| Checkpoint enabled by default | checkpointEnabled !== false enables checkpoint recovery opt-out | 2026-02-05 |
+| Error message pattern matching | Detect error types (ENOENT, JSON, SQLITE) from message content | 2026-02-05 |
+| Dry-run without database | FileSystemSessionSource only, no database initialization | 2026-02-05 |
+| Exit code 1 for abort | Aborted sync treated as non-success for scripting | 2026-02-05 |
 
 ### Blockers
 
@@ -253,36 +257,34 @@ None currently.
 ### Last Session
 
 **Date:** 2026-02-05
-**Completed:** Phase 12 Plan 03 (Doctor Command)
+**Completed:** Phase 12 Plan 04 (Sync Error Handling)
 **Next:** Continue with remaining Phase 12 plans
 
 ### Context for Next Session
 
-1. Health checker infrastructure: checkDatabaseIntegrity, checkQuickIntegrity
-2. System health checks: permissions, hooks, config validity
-3. CLI doctor command with --json and --fix options
-4. formatHealthResult for readable diagnostic output
-5. 51 new tests (28 health-checker + 23 doctor command)
+1. SyncService checkpoint support: load/save/clear checkpoint
+2. SyncService abort signal: shouldAbort() check in loop
+3. Error wrapping: MemoryNexusError with appropriate codes
+4. Sync CLI: --dry-run and --json options added
+5. Signal handlers: setupSignalHandlers(), registerCleanup()
+6. 21 new tests (14 sync-service + 7 sync command)
 
 ### Files Modified This Session
 
-- src/infrastructure/database/health-checker.ts (created)
-- src/infrastructure/database/health-checker.test.ts (created)
-- src/infrastructure/database/index.ts (modified - add health checker exports)
-- src/presentation/cli/commands/doctor.ts (created)
-- src/presentation/cli/commands/doctor.test.ts (created)
-- src/presentation/cli/commands/index.ts (modified - add doctor export)
-- src/presentation/cli/index.ts (modified - register doctor command)
+- src/application/services/sync-service.ts (modified - checkpoint/abort/error)
+- src/application/services/sync-service.test.ts (modified - 14 new tests)
+- src/presentation/cli/commands/sync.ts (modified - error handling)
+- src/presentation/cli/commands/sync.test.ts (modified - 7 new tests)
 
 ## Performance Metrics
 
 | Metric | Value |
 |--------|-------|
 | Phases Completed | 11 / 12 |
-| Plans Completed | 46 (phases 1-11 + 12-01 + 12-03) |
+| Plans Completed | 47 (phases 1-11 + 12-01 + 12-03 + 12-04) |
 | Requirements Completed | 85 / 85 |
 | Test Coverage | 95%+ functions, 95%+ lines |
-| Total Tests | ~1704 |
+| Total Tests | ~1725 |
 
 ## Phase 2 Summary
 
@@ -393,15 +395,15 @@ None currently.
 | 12-01 | Error Codes and Error Formatter | 54 | Complete |
 | 12-02 | Graceful Degradation | - | Pending |
 | 12-03 | Doctor Command | 51 | Complete |
-| 12-04 | Dry-Run Support | - | Pending |
+| 12-04 | Sync Error Handling | 21 | Complete |
 | 12-05 | Coverage Validation | - | Pending |
 | 12-06 | Export/Import Commands | - | Pending |
 | 12-07 | Purge Command | - | Pending |
 | 12-08 | Shell Completion | - | Pending |
 | 12-09 | Version Check | - | Pending |
 | 12-10 | Final Integration | - | Pending |
-| **Total** | | **105** | **In Progress** |
+| **Total** | | **126** | **In Progress** |
 
 ---
 
-*Last updated: 2026-02-05 (Phase 12 Plan 03 complete - 12-03)*
+*Last updated: 2026-02-05 (Phase 12 Plan 04 complete - 12-04)*
