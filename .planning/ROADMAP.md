@@ -380,7 +380,7 @@ Plans:
 4. Test coverage meets 95% at EACH metric (not just overall)
 5. Concurrent sync and search commands do not deadlock
 
-**Plans:** 11 plans
+**Plans:** 12 plans
 
 Plans:
 - [ ] 12-01-PLAN.md - Error codes and error formatting infrastructure
@@ -394,6 +394,7 @@ Plans:
 - [ ] 12-09-PLAN.md - Integration tests (large files, recovery, concurrency)
 - [ ] 12-10-PLAN.md - Mutation testing and CLI smoke tests
 - [ ] 12-11-PLAN.md - Coverage gap analysis and completion
+- [ ] 12-12-PLAN.md - Shell completion command (bash/zsh/fish)
 
 ---
 
@@ -470,4 +471,4 @@ Phase 1 (Domain Entities)
 
 ---
 
-*Last updated: 2026-02-05 (Phase 12 planning complete - 11 plans created)*
+*Last updated: 2026-02-05 (Phase 12 planning complete - 12 plans created)*
