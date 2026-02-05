@@ -20,6 +20,8 @@ import {
   createUninstallCommand,
   createStatusCommand,
   createDoctorCommand,
+  createPurgeCommand,
+  createCompletionCommand,
 } from "./commands/index.js";
 
 const program = new Command();
@@ -60,6 +62,12 @@ program.addCommand(createStatusCommand());
 
 // Diagnostic commands
 program.addCommand(createDoctorCommand());
+
+// Maintenance commands
+program.addCommand(createPurgeCommand());
+
+// Shell completion
+program.addCommand(createCompletionCommand());
 
 export { program };
 

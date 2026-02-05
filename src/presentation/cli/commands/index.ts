@@ -20,3 +20,13 @@ export { createStatusCommand, executeStatusCommand } from "./status.js";
 
 // Diagnostic commands
 export { createDoctorCommand, executeDoctorCommand } from "./doctor.js";
+
+// Maintenance commands
+export { createPurgeCommand, executePurgeCommand } from "./purge.js";
+
+// Backup commands
+export { createExportCommand, executeExportCommand } from "./export.js";
+export { createImportCommand, executeImportCommand } from "./import.js";
+
+// Shell completion
+export { createCompletionCommand, executeCompletionCommand } from "./completion.js";
