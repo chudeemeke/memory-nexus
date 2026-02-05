@@ -12,12 +12,12 @@
 
 **Milestone:** v1 - Full Vision Implementation
 **Phase:** 12 - Polish, Error Handling, Edge Cases
-**Plan:** 12-12 complete (Shell Completion)
+**Plan:** 12-05 complete (Export/Import Commands)
 **Status:** Phase 12 In Progress
 
 ```
 [████████████████████████████████████░░░░░] 96%
-11 of 12 phases complete | ~1798 tests passing | Phase 12 Plan 12 Complete
+11 of 12 phases complete | ~1854 tests passing | Phase 12 Plan 05 Complete
 ```
 
 ## Accumulated Context
@@ -123,6 +123,10 @@
 | Cascade delete for purge | Foreign key constraints handle messages, tool_uses, session_entities cleanup | 2026-02-05 |
 | Confirmation mock pattern | setConfirmationMock() enables testing of interactive prompts | 2026-02-05 |
 | Native shell completion over Carapace | Carapace requires external install; native bash/zsh/fish scripts are self-contained | 2026-02-05 |
+| Version field 1.0 in export | Export includes version for future compatibility checking | 2026-02-05 |
+| FTS5 deletion via triggers | Cannot DELETE FROM FTS5 external content tables; delete source table, triggers handle cleanup | 2026-02-05 |
+| process.exitCode = 0 reset | undefined doesn't clear previous value; must use 0 explicitly | 2026-02-05 |
+| --force vs --clear semantics | --clear replaces all data, --force allows merge with existing | 2026-02-05 |
 
 ### Blockers
 
@@ -193,6 +197,7 @@ None currently.
 - [x] Execute 12-03 - Doctor Command (51 tests: 28 health-checker + 23 doctor)
 - [x] Execute 12-06 - Purge Command (51 tests: 12 session-repository + 39 purge)
 - [x] Execute 12-12 - Shell Completion (43 tests: completion command)
+- [x] Execute 12-05 - Export/Import Commands (56 tests: 25 service + 31 CLI)
 
 ### Learnings
 
@@ -264,23 +269,26 @@ None currently.
 ### Last Session
 
 **Date:** 2026-02-05
-**Completed:** Phase 12 Plan 12 (Shell Completion)
+**Completed:** Phase 12 Plan 05 (Export/Import Commands)
 **Next:** Continue with remaining Phase 12 plans
 
 ### Context for Next Session
 
-1. Shell completion: bash/zsh/fish generators
-2. Native completion scripts (no external dependency required)
-3. All 16 commands with full option coverage
-4. 43 new tests for completion command
+1. Export/import commands for database backup/restore
+2. JSON serialization with version field for compatibility
+3. Round-trip integrity verification
+4. 56 new tests (25 service + 31 CLI)
 
 ### Files Modified This Session
 
-- src/presentation/cli/commands/completion.ts (created - shell completion generators)
-- src/presentation/cli/commands/completion.test.ts (created - 43 tests)
-- src/presentation/cli/commands/index.ts (modified - export completion)
-- src/presentation/cli/index.ts (modified - register completion)
-- package.json (modified - add commander-completion-carapace)
+- src/application/services/export-service.ts (created - export/import logic)
+- src/application/services/export-service.test.ts (created - 25 tests)
+- src/presentation/cli/commands/export.ts (created - CLI export command)
+- src/presentation/cli/commands/export.test.ts (created - 13 tests)
+- src/presentation/cli/commands/import.ts (created - CLI import command)
+- src/presentation/cli/commands/import.test.ts (created - 18 tests)
+- src/presentation/cli/commands/index.ts (modified - export commands)
+- src/presentation/cli/index.ts (modified - register commands)
 
 ## Performance Metrics
 
@@ -402,14 +410,14 @@ None currently.
 | 12-02 | Graceful Degradation | - | Pending |
 | 12-03 | Doctor Command | 51 | Complete |
 | 12-04 | Sync Error Handling | 21 | Complete |
-| 12-05 | Coverage Validation | - | Pending |
+| 12-05 | Export/Import Commands | 56 | Complete |
 | 12-06 | Purge Command | 51 | Complete |
 | 12-07 | Export/Import Commands | - | Pending |
 | 12-08 | Version Check | - | Pending |
 | 12-09 | Final Integration | - | Pending |
 | 12-12 | Shell Completion | 43 | Complete |
-| **Total** | | **220** | **In Progress** |
+| **Total** | | **276** | **In Progress** |
 
 ---
 
-*Last updated: 2026-02-05 (Phase 12 Plan 12 complete - 12-12)*
+*Last updated: 2026-02-05 (Phase 12 Plan 05 complete - 12-05)*
