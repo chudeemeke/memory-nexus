@@ -22,6 +22,7 @@ export {
 // Connection
 export {
     initializeDatabase,
+    initializeDatabaseSafe,
     closeDatabase,
     checkpointDatabase,
     bulkOperationCheckpoint,
