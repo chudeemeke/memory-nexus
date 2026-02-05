@@ -12,12 +12,12 @@
 
 **Milestone:** v1 - Full Vision Implementation
 **Phase:** 12 - Polish, Error Handling, Edge Cases
-**Plan:** 12-05 complete (Export/Import Commands)
+**Plan:** 12-08 complete (Database Connection Enhancement)
 **Status:** Phase 12 In Progress
 
 ```
 [████████████████████████████████████░░░░░] 96%
-11 of 12 phases complete | ~1854 tests passing | Phase 12 Plan 05 Complete
+11 of 12 phases complete | ~1878 tests passing | Phase 12 Plan 08 Complete
 ```
 
 ## Accumulated Context
@@ -127,6 +127,10 @@
 | FTS5 deletion via triggers | Cannot DELETE FROM FTS5 external content tables; delete source table, triggers handle cleanup | 2026-02-05 |
 | process.exitCode = 0 reset | undefined doesn't clear previous value; must use 0 explicitly | 2026-02-05 |
 | --force vs --clear semantics | --clear replaces all data, --force allows merge with existing | 2026-02-05 |
+| busy_timeout 5000ms default | Balance between waiting for locks and timing out on deadlocks | 2026-02-05 |
+| quickCheck for existing files | Fast startup validation; skip for new/memory databases | 2026-02-05 |
+| TTY detection for recovery | Both stdin and stdout must be TTY for interactive prompts | 2026-02-05 |
+| Backup naming pattern | .corrupted.{ISO-timestamp} for unique, sortable backups | 2026-02-05 |
 
 ### Blockers
 
@@ -198,6 +202,7 @@ None currently.
 - [x] Execute 12-06 - Purge Command (51 tests: 12 session-repository + 39 purge)
 - [x] Execute 12-12 - Shell Completion (43 tests: completion command)
 - [x] Execute 12-05 - Export/Import Commands (56 tests: 25 service + 31 CLI)
+- [x] Execute 12-08 - Database Connection Enhancement (24 tests: 14 connection + 10 db-startup)
 
 ### Learnings
 
@@ -263,42 +268,42 @@ None currently.
 - setMocks pattern enables testing interactive picker components
 - Windows file locking requires try/catch around temp directory cleanup
 - ANSI bold alone (1m) not visually distinct in Git Bash/Windows Terminal; use bold+cyan (1;36m)
+- PRAGMA busy_timeout returns { timeout: number }, not { busy_timeout: number }
+- SQLite "file is not a database" error occurs at first PRAGMA, not Database constructor
+- initializeDatabaseSafe wrapper enables consistent CLI error handling
 
 ## Session Continuity
 
 ### Last Session
 
 **Date:** 2026-02-05
-**Completed:** Phase 12 Plan 05 (Export/Import Commands)
+**Completed:** Phase 12 Plan 08 (Database Connection Enhancement)
 **Next:** Continue with remaining Phase 12 plans
 
 ### Context for Next Session
 
-1. Export/import commands for database backup/restore
-2. JSON serialization with version field for compatibility
-3. Round-trip integrity verification
-4. 56 new tests (25 service + 31 CLI)
+1. busy_timeout (5000ms) for concurrent access handling
+2. quick_check on startup for existing databases
+3. initializeDatabaseForCli helper for CLI corruption recovery
+4. 24 new tests (14 connection + 10 db-startup)
 
 ### Files Modified This Session
 
-- src/application/services/export-service.ts (created - export/import logic)
-- src/application/services/export-service.test.ts (created - 25 tests)
-- src/presentation/cli/commands/export.ts (created - CLI export command)
-- src/presentation/cli/commands/export.test.ts (created - 13 tests)
-- src/presentation/cli/commands/import.ts (created - CLI import command)
-- src/presentation/cli/commands/import.test.ts (created - 18 tests)
-- src/presentation/cli/commands/index.ts (modified - export commands)
-- src/presentation/cli/index.ts (modified - register commands)
+- src/infrastructure/database/connection.ts (modified - busy_timeout, quickCheck, error wrapping)
+- src/infrastructure/database/connection.test.ts (modified - 14 new tests)
+- src/infrastructure/database/index.ts (modified - export initializeDatabaseSafe)
+- src/presentation/cli/db-startup.ts (created - CLI startup utility)
+- src/presentation/cli/db-startup.test.ts (created - 10 tests)
 
 ## Performance Metrics
 
 | Metric | Value |
 |--------|-------|
 | Phases Completed | 11 / 12 |
-| Plans Completed | 49 (phases 1-11 + 12-01 + 12-03 + 12-04 + 12-06 + 12-12) |
+| Plans Completed | 50 (phases 1-11 + 12-01 + 12-03 + 12-04 + 12-05 + 12-06 + 12-08 + 12-12) |
 | Requirements Completed | 85 / 85 |
 | Test Coverage | 95%+ functions, 95%+ lines |
-| Total Tests | ~1798 |
+| Total Tests | ~1878 |
 
 ## Phase 2 Summary
 
@@ -412,12 +417,11 @@ None currently.
 | 12-04 | Sync Error Handling | 21 | Complete |
 | 12-05 | Export/Import Commands | 56 | Complete |
 | 12-06 | Purge Command | 51 | Complete |
-| 12-07 | Export/Import Commands | - | Pending |
-| 12-08 | Version Check | - | Pending |
+| 12-08 | Database Connection Enhancement | 24 | Complete |
 | 12-09 | Final Integration | - | Pending |
 | 12-12 | Shell Completion | 43 | Complete |
-| **Total** | | **276** | **In Progress** |
+| **Total** | | **300** | **In Progress** |
 
 ---
 
-*Last updated: 2026-02-05 (Phase 12 Plan 05 complete - 12-05)*
+*Last updated: 2026-02-05 (Phase 12 Plan 08 complete - 12-08)*
