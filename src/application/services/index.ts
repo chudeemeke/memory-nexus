@@ -28,3 +28,22 @@ export type {
   ExtractionResult,
   LlmExtractorOptions,
 } from "./llm-extractor.js";
+
+export {
+  exportToJson,
+  validateExportFile,
+  importFromJson,
+  hasExistingData,
+} from "./export-service.js";
+export type {
+  ExportData,
+  ExportStats,
+  ImportStats,
+  ValidationResult,
+  ImportOptions,
+  SessionExport,
+  MessageExport,
+  ToolUseExport,
+  EntityExport,
+  LinkExport,
+} from "./export-service.js";
