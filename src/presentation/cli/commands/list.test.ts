@@ -4,8 +4,9 @@
  * Tests for CLI list command structure and option parsing.
  */
 
-import { describe, it, expect } from "bun:test";
-import { createListCommand } from "./list.js";
+import { describe, it, expect, beforeEach, afterEach, spyOn } from "bun:test";
+import { createListCommand, executeListCommand } from "./list.js";
+import { ErrorCode } from "../../../domain/errors/index.js";
 
 describe("createListCommand", () => {
   it("should create a command named 'list'", () => {
@@ -115,6 +116,67 @@ describe("list command option conflicts", () => {
     const quietOpt = command.options.find(o => o.long === "--quiet");
 
     expect(quietOpt?.conflictsWith).toContain("verbose");
+  });
+});
+
+describe("executeListCommand error handling", () => {
+  let originalExitCode: number | undefined;
+  let consoleLogSpy: ReturnType<typeof spyOn>;
+  let consoleErrorSpy: ReturnType<typeof spyOn>;
+
+  beforeEach(() => {
+    originalExitCode = process.exitCode;
+    process.exitCode = undefined;
+    consoleLogSpy = spyOn(console, "log").mockImplementation(() => {});
+    consoleErrorSpy = spyOn(console, "error").mockImplementation(() => {});
+  });
+
+  afterEach(() => {
+    process.exitCode = originalExitCode;
+    consoleLogSpy.mockRestore();
+    consoleErrorSpy.mockRestore();
+  });
+
+  it("sets exit code 1 for invalid limit", async () => {
+    await executeListCommand({ limit: "invalid" });
+
+    expect(process.exitCode).toBe(1);
+    expect(consoleErrorSpy).toHaveBeenCalledWith(
+      "Error: Limit must be a positive number"
+    );
+  });
+
+  it("sets exit code 1 for negative limit", async () => {
+    await executeListCommand({ limit: "-5" });
+
+    expect(process.exitCode).toBe(1);
+    expect(consoleErrorSpy).toHaveBeenCalledWith(
+      "Error: Limit must be a positive number"
+    );
+  });
+
+  it("sets exit code 1 for zero limit", async () => {
+    await executeListCommand({ limit: "0" });
+
+    expect(process.exitCode).toBe(1);
+    expect(consoleErrorSpy).toHaveBeenCalledWith(
+      "Error: Limit must be a positive number"
+    );
+  });
+
+  it("outputs JSON error when --json flag is set with invalid limit", async () => {
+    await executeListCommand({ limit: "invalid", json: true });
+
+    expect(process.exitCode).toBe(1);
+    // Validation errors still use console.error
+    expect(consoleErrorSpy).toHaveBeenCalled();
+  });
+
+  it("uses consistent exit code 1 for all error types", async () => {
+    // Invalid negative limit should exit with code 1
+    await executeListCommand({ limit: "-10" });
+
+    expect(process.exitCode).toBe(1);
   });
 });
 

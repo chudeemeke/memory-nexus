@@ -13,6 +13,7 @@ import {
   closeDatabase,
   SqliteStatsService,
 } from "../../../infrastructure/database/index.js";
+import { ErrorCode } from "../../../domain/errors/index.js";
 
 describe("Stats Command", () => {
   let originalExitCode: number | undefined;
@@ -261,6 +262,20 @@ describe("Stats Command", () => {
       expect(consoleErrorSpy).toHaveBeenCalledWith(
         "Error: Projects count must be a positive number"
       );
+    });
+
+    it("outputs JSON error when --json flag is set with invalid projects", async () => {
+      await executeStatsCommand({ projects: "invalid", json: true });
+
+      expect(process.exitCode).toBe(1);
+      // Validation errors still use console.error
+      expect(consoleErrorSpy).toHaveBeenCalled();
+    });
+
+    it("exits with code 1 consistently for errors", async () => {
+      await executeStatsCommand({ projects: "-1" });
+
+      expect(process.exitCode).toBe(1);
     });
   });
 

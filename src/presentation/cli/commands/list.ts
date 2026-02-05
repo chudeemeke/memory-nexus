@@ -8,6 +8,7 @@
 import { Command, Option } from "commander";
 import { SqliteSessionRepository } from "../../../infrastructure/database/repositories/session-repository.js";
 import type { SessionListOptions } from "../../../domain/ports/repositories.js";
+import { ErrorCode, MemoryNexusError } from "../../../domain/errors/index.js";
 import {
   initializeDatabase,
   closeDatabase,
@@ -20,6 +21,7 @@ import {
 } from "../formatters/list-formatter.js";
 import { shouldUseColor } from "../formatters/color.js";
 import { parseDate, DateParseError } from "../parsers/date-parser.js";
+import { formatError, formatErrorJson } from "../formatters/error-formatter.js";
 
 /**
  * Options parsed from CLI arguments.
@@ -168,9 +170,22 @@ export async function executeListCommand(options: ListCommandOptions): Promise<v
     const output = formatter.formatSessions(sessions, formatOptions);
     console.log(output);
   } catch (error) {
-    const message = error instanceof Error ? error.message : String(error);
-    console.error(`Error: ${message}`);
-    process.exitCode = 2;
+    // Wrap in MemoryNexusError for consistent formatting
+    const nexusError =
+      error instanceof MemoryNexusError
+        ? error
+        : new MemoryNexusError(
+            ErrorCode.DB_CONNECTION_FAILED,
+            error instanceof Error ? error.message : String(error)
+          );
+
+    // Format error based on output mode
+    if (options.json) {
+      console.log(formatErrorJson(nexusError));
+    } else {
+      console.error(formatError(nexusError));
+    }
+    process.exitCode = 1;
   } finally {
     closeDatabase(db);
   }

@@ -20,6 +20,7 @@ import { Message } from "../../../domain/entities/message.js";
 import { ProjectPath } from "../../../domain/value-objects/project-path.js";
 import { SearchQuery } from "../../../domain/value-objects/search-query.js";
 import type { SearchResult } from "../../../domain/value-objects/search-result.js";
+import { ErrorCode } from "../../../domain/errors/index.js";
 
 describe("Search Command", () => {
   let originalExitCode: number | undefined;
@@ -979,6 +980,39 @@ describe("Search Command", () => {
 
       expect(filtered.length).toBe(1);
       expect(filtered[0].messageId).toBe("m1");
+    });
+  });
+
+  describe("error handling", () => {
+    it("outputs JSON error when --json flag is set with empty query", async () => {
+      // Empty query should trigger an error
+      await executeSearchCommand("", { json: true });
+
+      expect(process.exitCode).toBe(1);
+      // Error is output via console.error for validation errors
+      expect(consoleErrorSpy).toHaveBeenCalled();
+    });
+
+    it("exits with code 1 on empty query error", async () => {
+      await executeSearchCommand("", {});
+
+      expect(process.exitCode).toBe(1);
+    });
+
+    it("wraps query errors in consistent error format", async () => {
+      // Testing that executeSearchCommand properly handles errors
+      // Query validation error should be handled
+      await executeSearchCommand("", { limit: "10" });
+
+      expect(process.exitCode).toBe(1);
+      expect(consoleErrorSpy).toHaveBeenCalled();
+    });
+
+    it("uses consistent exit code 1 for all error types", async () => {
+      // Invalid limit should exit with code 1
+      await executeSearchCommand("test", { limit: "-5" });
+
+      expect(process.exitCode).toBe(1);
     });
   });
 

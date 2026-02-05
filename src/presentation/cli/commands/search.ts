@@ -10,6 +10,7 @@ import { SearchQuery } from "../../../domain/value-objects/search-query.js";
 import type { SearchResult } from "../../../domain/value-objects/search-result.js";
 import type { SearchOptions } from "../../../domain/ports/services.js";
 import type { MessageRole } from "../../../domain/entities/message.js";
+import { ErrorCode, MemoryNexusError } from "../../../domain/errors/index.js";
 import {
   initializeDatabase,
   closeDatabase,
@@ -23,6 +24,7 @@ import {
 } from "../formatters/output-formatter.js";
 import { shouldUseColor } from "../formatters/color.js";
 import { parseDate, DateParseError } from "../parsers/date-parser.js";
+import { formatError, formatErrorJson } from "../formatters/error-formatter.js";
 
 /**
  * Options parsed from CLI arguments.
@@ -225,9 +227,22 @@ export async function executeSearchCommand(
     const output = formatter.formatResults(results, formatOptions);
     console.log(output);
   } catch (error) {
-    const message = error instanceof Error ? error.message : String(error);
-    console.error(`Error: ${message}`);
-    process.exitCode = 2;
+    // Wrap in MemoryNexusError for consistent formatting
+    const nexusError =
+      error instanceof MemoryNexusError
+        ? error
+        : new MemoryNexusError(
+            ErrorCode.DB_CONNECTION_FAILED,
+            error instanceof Error ? error.message : String(error)
+          );
+
+    // Format error based on output mode
+    if (options.json) {
+      console.log(formatErrorJson(nexusError));
+    } else {
+      console.error(formatError(nexusError));
+    }
+    process.exitCode = 1;
   } finally {
     closeDatabase(db);
   }
