@@ -6,6 +6,7 @@
  */
 
 import { Command } from "commander";
+import { ErrorCode, MemoryNexusError } from "../../../domain/errors/index.js";
 import {
   sessionPicker,
   canUseInteractivePicker,
@@ -20,6 +21,7 @@ import {
   closeDatabase,
   getDefaultDbPath,
 } from "../../../infrastructure/database/index.js";
+import { formatError } from "../formatters/error-formatter.js";
 
 /**
  * Test database path override.
@@ -129,8 +131,16 @@ export async function executeBrowseCommand(
         break;
     }
   } catch (error) {
-    const message = error instanceof Error ? error.message : String(error);
-    console.error(`Error: ${message}`);
+    // Wrap in MemoryNexusError for consistent formatting
+    const nexusError =
+      error instanceof MemoryNexusError
+        ? error
+        : new MemoryNexusError(
+            ErrorCode.DB_CONNECTION_FAILED,
+            error instanceof Error ? error.message : String(error)
+          );
+
+    console.error(formatError(nexusError));
     process.exitCode = 1;
     try {
       closeDatabase(db);

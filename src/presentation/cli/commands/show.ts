@@ -6,6 +6,7 @@
  */
 
 import { Command, Option } from "commander";
+import { ErrorCode, MemoryNexusError } from "../../../domain/errors/index.js";
 import { SqliteSessionRepository } from "../../../infrastructure/database/repositories/session-repository.js";
 import { SqliteMessageRepository } from "../../../infrastructure/database/repositories/message-repository.js";
 import { SqliteToolUseRepository } from "../../../infrastructure/database/repositories/tool-use-repository.js";
@@ -20,6 +21,7 @@ import {
   type SessionDetail,
 } from "../formatters/show-formatter.js";
 import { shouldUseColor } from "../formatters/color.js";
+import { formatError, formatErrorJson } from "../formatters/error-formatter.js";
 import type { Session } from "../../../domain/entities/session.js";
 import type { ToolUse } from "../../../domain/entities/tool-use.js";
 import type { Database } from "bun:sqlite";
@@ -167,9 +169,22 @@ export async function executeShowCommand(
     });
     console.log(output);
   } catch (error) {
-    const message = error instanceof Error ? error.message : String(error);
-    console.error(`Error: ${message}`);
-    process.exitCode = 2;
+    // Wrap in MemoryNexusError for consistent formatting
+    const nexusError =
+      error instanceof MemoryNexusError
+        ? error
+        : new MemoryNexusError(
+            ErrorCode.DB_CONNECTION_FAILED,
+            error instanceof Error ? error.message : String(error)
+          );
+
+    // Format error based on output mode
+    if (options.json) {
+      console.log(formatErrorJson(nexusError));
+    } else {
+      console.error(formatError(nexusError));
+    }
+    process.exitCode = 1;
   } finally {
     closeDatabase(db);
   }

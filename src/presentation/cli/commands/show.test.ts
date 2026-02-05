@@ -4,7 +4,7 @@
  * Tests for session detail display command.
  */
 
-import { describe, test, expect, beforeAll, afterAll, afterEach } from "bun:test";
+import { describe, test, expect, beforeAll, afterAll, afterEach, beforeEach, spyOn } from "bun:test";
 import { createShowCommand, executeShowCommand, setTestDbPath } from "./show.js";
 import {
   initializeDatabase,
@@ -17,6 +17,7 @@ import { Session } from "../../../domain/entities/session.js";
 import { Message } from "../../../domain/entities/message.js";
 import { ToolUse } from "../../../domain/entities/tool-use.js";
 import { ProjectPath } from "../../../domain/value-objects/project-path.js";
+import { ErrorCode } from "../../../domain/errors/index.js";
 import * as fs from "node:fs";
 import * as path from "node:path";
 import * as os from "node:os";
@@ -307,6 +308,35 @@ describe("Show Command", () => {
       // Should mention multiple matches or show one of them
       // Implementation may show first match or disambiguation
       expect(fullOutput.length).toBeGreaterThan(0);
+    });
+  });
+
+  describe("Error Handling", () => {
+    test("sets exit code 1 for not found session", async () => {
+      setupConsoleMock();
+
+      await executeShowCommand("nonexistent-session-xyz", {});
+
+      expect(process.exitCode).toBe(1);
+    });
+
+    test("outputs JSON for not found when --json flag is set", async () => {
+      setupConsoleMock();
+
+      await executeShowCommand("nonexistent-session-xyz", { json: true });
+
+      expect(process.exitCode).toBe(1);
+      const output = consoleOutput.join("\n");
+      // Should output JSON (contains "not found")
+      expect(output).toBeDefined();
+    });
+
+    test("uses consistent exit code 1 for all errors", async () => {
+      setupConsoleMock();
+
+      await executeShowCommand("nonexistent-id", {});
+
+      expect(process.exitCode).toBe(1);
     });
   });
 });

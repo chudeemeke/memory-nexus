@@ -6,6 +6,7 @@
  */
 
 import { Command, Option } from "commander";
+import { ErrorCode, MemoryNexusError } from "../../../domain/errors/index.js";
 import { SqliteContextService } from "../../../infrastructure/database/services/context-service.js";
 import {
   initializeDatabase,
@@ -18,6 +19,7 @@ import {
   type ContextFormatOptions,
 } from "../formatters/context-formatter.js";
 import { shouldUseColor } from "../formatters/color.js";
+import { formatError, formatErrorJson } from "../formatters/error-formatter.js";
 
 /**
  * Options parsed from CLI arguments.
@@ -123,9 +125,22 @@ export async function executeContextCommand(
     const output = formatter.formatContext(context, formatOptions);
     console.log(output);
   } catch (error) {
-    const message = error instanceof Error ? error.message : String(error);
-    console.error(`Error: ${message}`);
-    process.exitCode = 2;
+    // Wrap in MemoryNexusError for consistent formatting
+    const nexusError =
+      error instanceof MemoryNexusError
+        ? error
+        : new MemoryNexusError(
+            ErrorCode.DB_CONNECTION_FAILED,
+            error instanceof Error ? error.message : String(error)
+          );
+
+    // Format error based on output mode
+    if (options.json) {
+      console.log(formatErrorJson(nexusError));
+    } else {
+      console.error(formatError(nexusError));
+    }
+    process.exitCode = 1;
   } finally {
     closeDatabase(db);
   }

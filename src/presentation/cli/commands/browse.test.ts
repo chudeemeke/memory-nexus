@@ -8,6 +8,7 @@ import { describe, it, expect, mock, beforeEach, afterEach } from "bun:test";
 import { createBrowseCommand, executeBrowseCommand, setTestDbPath } from "./browse.js";
 import { setTtyOverride, setMocks } from "../pickers/session-picker.js";
 import { initializeDatabase, closeDatabase } from "../../../infrastructure/database/index.js";
+import { ErrorCode } from "../../../domain/errors/index.js";
 import { mkdtempSync, rmSync, existsSync } from "fs";
 import { tmpdir } from "os";
 import { join } from "path";
@@ -229,5 +230,27 @@ describe("executeBrowseCommand", () => {
 
     // Picker should still be called even with no sessions
     expect(mockSearch).toHaveBeenCalled();
+  });
+
+  it("shows terminal warning with helpful suggestions in non-TTY", async () => {
+    setTtyOverride(false);
+    closeDatabase(db);
+
+    await executeBrowseCommand({ limit: "100" });
+
+    // Should suggest alternatives in error message
+    expect(consoleErrors.some((e) => e.includes("memory list"))).toBe(true);
+    expect(consoleErrors.some((e) => e.includes("memory show"))).toBe(true);
+    expect(consoleErrors.some((e) => e.includes("memory search"))).toBe(true);
+    expect(process.exitCode).toBe(1);
+  });
+
+  it("uses consistent exit code 1 for TTY errors", async () => {
+    setTtyOverride(false);
+    closeDatabase(db);
+
+    await executeBrowseCommand({});
+
+    expect(process.exitCode).toBe(1);
   });
 });
