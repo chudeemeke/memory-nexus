@@ -22,6 +22,8 @@ import {
   createDoctorCommand,
   createPurgeCommand,
   createCompletionCommand,
+  createExportCommand,
+  createImportCommand,
 } from "./commands/index.js";
 
 const program = new Command();
@@ -65,6 +67,10 @@ program.addCommand(createDoctorCommand());
 
 // Maintenance commands
 program.addCommand(createPurgeCommand());
+
+// Backup commands
+program.addCommand(createExportCommand());
+program.addCommand(createImportCommand());
 
 // Shell completion
 program.addCommand(createCompletionCommand());
