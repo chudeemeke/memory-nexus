@@ -67,3 +67,10 @@ export {
   type ShowFormatOptions,
   type ShowFormatter,
 } from "./show-formatter.js";
+
+export {
+  formatError,
+  formatErrorJson,
+  getSuggestion,
+  type ErrorFormatOptions,
+} from "./error-formatter.js";
