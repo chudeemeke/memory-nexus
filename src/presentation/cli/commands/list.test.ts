@@ -221,3 +221,36 @@ describe("list command --days validation", () => {
     expect(() => parser?.("-5", undefined)).toThrow("Days must be a positive number");
   });
 });
+
+describe("executeListCommand date parsing", () => {
+  let consoleLogSpy: ReturnType<typeof spyOn>;
+  let consoleErrorSpy: ReturnType<typeof spyOn>;
+  let originalExitCode: number | undefined;
+
+  beforeEach(() => {
+    consoleLogSpy = spyOn(console, "log").mockImplementation(() => {});
+    consoleErrorSpy = spyOn(console, "error").mockImplementation(() => {});
+    originalExitCode = process.exitCode;
+    process.exitCode = undefined;
+  });
+
+  afterEach(() => {
+    consoleLogSpy?.mockRestore();
+    consoleErrorSpy?.mockRestore();
+    process.exitCode = originalExitCode;
+  });
+
+  it("handles invalid --since date", async () => {
+    await executeListCommand({ since: "not-a-real-date-at-all" });
+
+    expect(process.exitCode).toBe(1);
+    expect(consoleErrorSpy).toHaveBeenCalled();
+  });
+
+  it("handles invalid --before date", async () => {
+    await executeListCommand({ before: "not-a-real-date-at-all" });
+
+    expect(process.exitCode).toBe(1);
+    expect(consoleErrorSpy).toHaveBeenCalled();
+  });
+});
