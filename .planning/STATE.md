@@ -12,12 +12,12 @@
 
 **Milestone:** v1 - Full Vision Implementation
 **Phase:** 12 - Polish, Error Handling, Edge Cases
-**Plan:** 12-09 complete (Final Integration Tests)
+**Plan:** 12-10 complete (Mutation Testing and Smoke Tests)
 **Status:** Phase 12 In Progress
 
 ```
-[████████████████████████████████████░░░░░] 97%
-11 of 12 phases complete | ~1914 tests passing | Phase 12 Plan 09 Complete
+[████████████████████████████████████░░░░░] 98%
+11 of 12 phases complete | ~1934 tests passing | Phase 12 Plan 10 Complete
 ```
 
 ## Accumulated Context
@@ -131,6 +131,12 @@
 | quickCheck for existing files | Fast startup validation; skip for new/memory databases | 2026-02-05 |
 | TTY detection for recovery | Both stdin and stdout must be TTY for interactive prompts | 2026-02-05 |
 | Backup naming pattern | .corrupted.{ISO-timestamp} for unique, sortable backups | 2026-02-05 |
+| Vitest only for Stryker | Regular tests use Bun; Vitest needed for Stryker's test runner | 2026-02-05 |
+| bun:test to vitest alias | Existing tests import from bun:test; alias enables Vitest compatibility | 2026-02-05 |
+| TypeScript checker disabled in Stryker | Bun-specific types (bun:sqlite) incompatible with tsc | 2026-02-05 |
+| Domain layer only for mutation | Infrastructure/presentation have Bun-specific code Vitest can't run | 2026-02-05 |
+| In-process CLI parsing for smoke tests | Process spawning took 3s/command; in-process takes <1s total | 2026-02-05 |
+| Glob pattern !(*.test).ts | Excludes test files from mutation to get accurate source scores | 2026-02-05 |
 
 ### Blockers
 
@@ -204,6 +210,7 @@ None currently.
 - [x] Execute 12-05 - Export/Import Commands (56 tests: 25 service + 31 CLI)
 - [x] Execute 12-08 - Database Connection Enhancement (24 tests: 14 connection + 10 db-startup)
 - [x] Execute 12-09 - Final Integration Tests (16 tests: 5 large-file + 6 interrupted-sync + 5 concurrent-commands)
+- [x] Execute 12-10 - Mutation Testing and Smoke Tests (20 smoke tests + 85.46% mutation score)
 
 ### Learnings
 
@@ -276,37 +283,43 @@ None currently.
 - Deadlock detection via Promise.race with timeout
 - Memory sampling at intervals validates streaming parser stability
 - SearchQuery uses from() factory method, not create()
+- Stryker mutation testing requires Vitest due to plugin architecture
+- bun:test alias to vitest enables test compatibility
+- Mutation score of 85.46% on domain layer indicates good test quality
+- In-process CLI testing via Commander.js program.parse() is much faster than spawning
+- process.exit must be mocked with throw to capture exit codes in tests
 
 ## Session Continuity
 
 ### Last Session
 
 **Date:** 2026-02-05
-**Completed:** Phase 12 Plan 09 (Final Integration Tests)
+**Completed:** Phase 12 Plan 10 (Mutation Testing and Smoke Tests)
 **Next:** Continue with remaining Phase 12 plans (12-02 Graceful Degradation)
 
 ### Context for Next Session
 
-1. 16 integration tests covering large files, sync recovery, concurrent access
-2. Test utilities in tests/integration/index.ts for reuse
-3. Requirements QUAL-03, QUAL-04, QUAL-05 validated
+1. Stryker mutation testing available via `bun run mutation:domain`
+2. CLI smoke tests available via `bun run test:smoke`
+3. Domain mutation score: 85.46% (exceeds 80% threshold)
+4. 20 smoke tests covering all 17 commands
 
 ### Files Created This Session
 
-- tests/integration/large-file.test.ts (5 tests)
-- tests/integration/interrupted-sync.test.ts (6 tests)
-- tests/integration/concurrent-commands.test.ts (5 tests)
-- tests/integration/index.ts (test utilities)
+- stryker.config.js (Stryker configuration)
+- vitest.config.ts (Vitest config for Stryker)
+- tests/smoke/cli-commands.test.ts (20 smoke tests)
 
 ## Performance Metrics
 
 | Metric | Value |
 |--------|-------|
 | Phases Completed | 11 / 12 |
-| Plans Completed | 51 (phases 1-11 + 12-01 + 12-03 + 12-04 + 12-05 + 12-06 + 12-08 + 12-09 + 12-12) |
+| Plans Completed | 52 (phases 1-11 + 12-01 + 12-03 + 12-04 + 12-05 + 12-06 + 12-08 + 12-09 + 12-10 + 12-12) |
 | Requirements Completed | 85 / 85 |
 | Test Coverage | 95%+ functions, 95%+ lines |
-| Total Tests | ~1914 |
+| Total Tests | ~1934 |
+| Mutation Score | 85.46% (domain layer) |
 
 ## Phase 2 Summary
 
@@ -423,9 +436,10 @@ None currently.
 | 12-07 | CLI Command Error Handling | 20 | Complete |
 | 12-08 | Database Connection Enhancement | 24 | Complete |
 | 12-09 | Final Integration | 16 | Complete |
+| 12-10 | Mutation Testing and Smoke Tests | 20 | Complete |
 | 12-12 | Shell Completion | 43 | Complete |
-| **Total** | | **336** | **In Progress** |
+| **Total** | | **356** | **In Progress** |
 
 ---
 
-*Last updated: 2026-02-05 (Phase 12 Plan 09 complete - 12-09)*
+*Last updated: 2026-02-05 (Phase 12 Plan 10 complete - 12-10)*
