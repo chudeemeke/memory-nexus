@@ -12,12 +12,12 @@
 
 **Milestone:** v1 - Full Vision Implementation
 **Phase:** 12 - Polish, Error Handling, Edge Cases
-**Plan:** 12-10 complete (Mutation Testing and Smoke Tests)
+**Plan:** 12-11 complete (Test Coverage)
 **Status:** Phase 12 In Progress
 
 ```
 [████████████████████████████████████░░░░░] 98%
-11 of 12 phases complete | ~1934 tests passing | Phase 12 Plan 10 Complete
+11 of 12 phases complete | ~1940 tests passing | Phase 12 Plan 11 Complete
 ```
 
 ## Accumulated Context
@@ -137,6 +137,9 @@
 | Domain layer only for mutation | Infrastructure/presentation have Bun-specific code Vitest can't run | 2026-02-05 |
 | In-process CLI parsing for smoke tests | Process spawning took 3s/command; in-process takes <1s total | 2026-02-05 |
 | Glob pattern !(*.test).ts | Excludes test files from mutation to get accurate source scores | 2026-02-05 |
+| Accept infrastructure coverage gaps | Signal handlers and process spawning code can't be unit tested | 2026-02-06 |
+| Accept presentation execution gaps | CLI execution paths covered by integration tests | 2026-02-06 |
+| Domain layer coverage 99.91% | Core business logic thoroughly tested | 2026-02-06 |
 
 ### Blockers
 
@@ -293,32 +296,31 @@ None currently.
 
 ### Last Session
 
-**Date:** 2026-02-05
-**Completed:** Phase 12 Plan 10 (Mutation Testing and Smoke Tests)
+**Date:** 2026-02-06
+**Completed:** Phase 12 Plan 11 (Test Coverage)
 **Next:** Continue with remaining Phase 12 plans (12-02 Graceful Degradation)
 
 ### Context for Next Session
 
-1. Stryker mutation testing available via `bun run mutation:domain`
-2. CLI smoke tests available via `bun run test:smoke`
-3. Domain mutation score: 85.46% (exceeds 80% threshold)
-4. 20 smoke tests covering all 17 commands
+1. Overall coverage: 95.62% lines, 94.48% functions
+2. Domain layer: 99.91% lines, 98.15% functions
+3. Infrastructure coverage gaps accepted (signal handlers, process spawning)
+4. Presentation coverage gaps covered by integration tests
 
-### Files Created This Session
+### Files Modified This Session
 
-- stryker.config.js (Stryker configuration)
-- vitest.config.ts (Vitest config for Stryker)
-- tests/smoke/cli-commands.test.ts (20 smoke tests)
+- src/domain/entities/session.test.ts (added summary getter tests)
+- src/presentation/cli/commands/list.test.ts (added date validation tests)
 
 ## Performance Metrics
 
 | Metric | Value |
 |--------|-------|
 | Phases Completed | 11 / 12 |
-| Plans Completed | 52 (phases 1-11 + 12-01 + 12-03 + 12-04 + 12-05 + 12-06 + 12-08 + 12-09 + 12-10 + 12-12) |
+| Plans Completed | 53 (phases 1-11 + 12-01 + 12-03 + 12-04 + 12-05 + 12-06 + 12-08 + 12-09 + 12-10 + 12-11 + 12-12) |
 | Requirements Completed | 85 / 85 |
-| Test Coverage | 95%+ functions, 95%+ lines |
-| Total Tests | ~1934 |
+| Test Coverage | 94.48% functions, 95.62% lines |
+| Total Tests | ~1940 |
 | Mutation Score | 85.46% (domain layer) |
 
 ## Phase 2 Summary
@@ -437,9 +439,10 @@ None currently.
 | 12-08 | Database Connection Enhancement | 24 | Complete |
 | 12-09 | Final Integration | 16 | Complete |
 | 12-10 | Mutation Testing and Smoke Tests | 20 | Complete |
+| 12-11 | Test Coverage | 6 | Complete |
 | 12-12 | Shell Completion | 43 | Complete |
-| **Total** | | **356** | **In Progress** |
+| **Total** | | **362** | **In Progress** |
 
 ---
 
-*Last updated: 2026-02-05 (Phase 12 Plan 10 complete - 12-10)*
+*Last updated: 2026-02-06 (Phase 12 Plan 11 complete - 12-11)*
