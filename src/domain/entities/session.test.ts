@@ -245,6 +245,42 @@ describe("Session entity", () => {
     });
   });
 
+  describe("summary", () => {
+    it("returns undefined when no summary is set", () => {
+      const session = Session.create({
+        id: "session-123",
+        projectPath,
+        startTime,
+      });
+
+      expect(session.summary).toBeUndefined();
+    });
+
+    it("returns provided summary when set", () => {
+      const session = Session.create({
+        id: "session-123",
+        projectPath,
+        startTime,
+        summary: "This is a test summary",
+      });
+
+      expect(session.summary).toBe("This is a test summary");
+    });
+
+    it("withSummary sets the summary and allows retrieval", () => {
+      const session = Session.create({
+        id: "session-123",
+        projectPath,
+        startTime,
+      });
+
+      const withSummary = session.withSummary("New summary text");
+
+      expect(withSummary.summary).toBe("New summary text");
+      expect(session.summary).toBeUndefined(); // Original unchanged
+    });
+  });
+
   describe("messageCount", () => {
     it("returns provided messageCount when set", () => {
       const session = Session.create({
