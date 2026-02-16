@@ -7,6 +7,7 @@
  */
 
 import { Command } from "commander";
+import pkg from "../../../package.json";
 import {
   createSyncCommand,
   createSearchCommand,
@@ -31,7 +32,7 @@ const program = new Command();
 program
   .name("memory")
   .description("Cross-project context persistence for Claude Code sessions")
-  .version("0.1.0");
+  .version(pkg.version);
 
 // Add sync command from module
 program.addCommand(createSyncCommand());
