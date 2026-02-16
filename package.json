@@ -1,6 +1,6 @@
 {
   "name": "memory-nexus",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Cross-project context persistence for Claude Code sessions",
   "type": "module",
   "main": "dist/index.js",
