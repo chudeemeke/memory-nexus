@@ -6,6 +6,7 @@
  */
 
 import { Command } from "commander";
+import type { CommandResult } from "../command-result.js";
 import { ErrorCode, MemoryNexusError } from "../../../domain/errors/index.js";
 import {
   sessionPicker,
@@ -58,7 +59,8 @@ export function createBrowseCommand(): Command {
     .description("Interactive session browser")
     .option("-l, --limit <count>", "Maximum sessions to show", "100")
     .action(async (options: BrowseCommandOptions) => {
-      await executeBrowseCommand(options);
+      const result = await executeBrowseCommand(options);
+      process.exitCode = result.exitCode;
     });
 }
 
@@ -72,7 +74,7 @@ export function createBrowseCommand(): Command {
  */
 export async function executeBrowseCommand(
   options: BrowseCommandOptions
-): Promise<void> {
+): Promise<CommandResult> {
   // Check TTY availability
   if (!canUseInteractivePicker()) {
     console.error("Error: Interactive mode requires a terminal.");
@@ -80,8 +82,7 @@ export async function executeBrowseCommand(
     console.error("  memory list          - List sessions");
     console.error("  memory show <id>     - Show session details");
     console.error("  memory search <q>    - Search sessions");
-    process.exitCode = 1;
-    return;
+    return { exitCode: 1 };
   }
 
   const limit = parseInt(options.limit ?? "100", 10);
@@ -97,7 +98,7 @@ export async function executeBrowseCommand(
     if (!result) {
       // User cancelled
       closeDatabase(db);
-      return;
+      return { exitCode: 0 };
     }
 
     // Close DB before dispatching (commands manage their own connections)
@@ -130,6 +131,8 @@ export async function executeBrowseCommand(
         await executeRelatedCommand(result.sessionId, {});
         break;
     }
+
+    return { exitCode: 0 };
   } catch (error) {
     // Wrap in MemoryNexusError for consistent formatting
     const nexusError =
@@ -141,11 +144,11 @@ export async function executeBrowseCommand(
           );
 
     console.error(formatError(nexusError));
-    process.exitCode = 1;
     try {
       closeDatabase(db);
     } catch {
       // Ignore close errors
     }
+    return { exitCode: 1 };
   }
 }

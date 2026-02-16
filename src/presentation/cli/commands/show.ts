@@ -6,6 +6,7 @@
  */
 
 import { Command, Option } from "commander";
+import type { CommandResult } from "../command-result.js";
 import { ErrorCode, MemoryNexusError } from "../../../domain/errors/index.js";
 import { SqliteSessionRepository } from "../../../infrastructure/database/repositories/session-repository.js";
 import { SqliteMessageRepository } from "../../../infrastructure/database/repositories/message-repository.js";
@@ -70,7 +71,8 @@ export function createShowCommand(): Command {
     )
     .option("--tools", "Show detailed tool inputs and outputs")
     .action(async (sessionId: string, options: ShowCommandOptions) => {
-      await executeShowCommand(sessionId, options);
+      const result = await executeShowCommand(sessionId, options);
+      process.exitCode = result.exitCode;
     });
 }
 
@@ -127,7 +129,7 @@ async function findSession(
 export async function executeShowCommand(
   sessionId: string,
   options: ShowCommandOptions
-): Promise<void> {
+): Promise<CommandResult> {
   const startTime = performance.now();
   const dbPath = testDbPath ?? getDefaultDbPath();
   const { db } = initializeDatabase({ path: dbPath });
@@ -143,8 +145,7 @@ export async function executeShowCommand(
       const mode = determineOutputMode(options);
       const formatter = createShowFormatter(mode, shouldUseColor());
       console.log(formatter.formatNotFound(sessionId));
-      process.exitCode = 1;
-      return;
+      return { exitCode: 1 };
     }
 
     // Load messages and tool uses
@@ -168,6 +169,7 @@ export async function executeShowCommand(
       executionTimeMs: Math.round(endTime - startTime),
     });
     console.log(output);
+    return { exitCode: 0 };
   } catch (error) {
     // Wrap in MemoryNexusError for consistent formatting
     const nexusError =
@@ -184,7 +186,7 @@ export async function executeShowCommand(
     } else {
       console.error(formatError(nexusError));
     }
-    process.exitCode = 1;
+    return { exitCode: 1 };
   } finally {
     closeDatabase(db);
   }

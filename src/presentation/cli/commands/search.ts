@@ -6,6 +6,7 @@
  */
 
 import { Command, Option } from "commander";
+import type { CommandResult } from "../command-result.js";
 import { SearchQuery } from "../../../domain/value-objects/search-query.js";
 import type { SearchResult } from "../../../domain/value-objects/search-result.js";
 import type { SearchOptions } from "../../../domain/ports/services.js";
@@ -86,7 +87,8 @@ export function createSearchCommand(): Command {
         .conflicts("verbose")
     )
     .action(async (query: string, options: SearchCommandOptions) => {
-      await executeSearchCommand(query, options);
+      const result = await executeSearchCommand(query, options);
+      process.exitCode = result.exitCode;
     });
 }
 
@@ -101,7 +103,7 @@ export function createSearchCommand(): Command {
 export async function executeSearchCommand(
   query: string,
   options: SearchCommandOptions
-): Promise<void> {
+): Promise<CommandResult> {
   const startTime = performance.now();
 
   // Validate query
@@ -110,8 +112,7 @@ export async function executeSearchCommand(
     searchQuery = SearchQuery.from(query);
   } catch (error) {
     console.error("Error: Query cannot be empty");
-    process.exitCode = 1;
-    return;
+    return { exitCode: 1 };
   }
 
   // Initialize database
@@ -126,8 +127,7 @@ export async function executeSearchCommand(
     const limit = parseInt(options.limit ?? "10", 10);
     if (isNaN(limit) || limit < 1) {
       console.error("Error: Limit must be a positive number");
-      process.exitCode = 1;
-      return;
+      return { exitCode: 1 };
     }
 
     // Parse role filter
@@ -157,8 +157,7 @@ export async function executeSearchCommand(
         } catch (err) {
           if (err instanceof DateParseError) {
             console.error(`Error: ${err.message}`);
-            process.exitCode = 1;
-            return;
+            return { exitCode: 1 };
           }
           throw err;
         }
@@ -169,8 +168,7 @@ export async function executeSearchCommand(
         } catch (err) {
           if (err instanceof DateParseError) {
             console.error(`Error: ${err.message}`);
-            process.exitCode = 1;
-            return;
+            return { exitCode: 1 };
           }
           throw err;
         }
@@ -226,6 +224,7 @@ export async function executeSearchCommand(
     // Output results using formatter
     const output = formatter.formatResults(results, formatOptions);
     console.log(output);
+    return { exitCode: 0 };
   } catch (error) {
     // Wrap in MemoryNexusError for consistent formatting
     const nexusError =
@@ -242,7 +241,7 @@ export async function executeSearchCommand(
     } else {
       console.error(formatError(nexusError));
     }
-    process.exitCode = 1;
+    return { exitCode: 1 };
   } finally {
     closeDatabase(db);
   }

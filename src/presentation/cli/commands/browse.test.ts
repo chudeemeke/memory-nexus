@@ -242,15 +242,14 @@ describe("executeBrowseCommand", () => {
     expect(consoleErrors.some((e) => e.includes("memory list"))).toBe(true);
     expect(consoleErrors.some((e) => e.includes("memory show"))).toBe(true);
     expect(consoleErrors.some((e) => e.includes("memory search"))).toBe(true);
-    expect(process.exitCode).toBe(1);
   });
 
   it("uses consistent exit code 1 for TTY errors", async () => {
     setTtyOverride(false);
     closeDatabase(db);
 
-    await executeBrowseCommand({});
+    const result = await executeBrowseCommand({});
 
-    expect(process.exitCode).toBe(1);
+    expect(result.exitCode).toBe(1);
   });
 });

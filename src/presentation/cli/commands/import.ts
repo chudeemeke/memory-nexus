@@ -6,6 +6,7 @@
  */
 
 import { Command, Option } from "commander";
+import type { CommandResult } from "../command-result.js";
 import {
   initializeDatabase,
   closeDatabase,
@@ -49,7 +50,8 @@ export function createImportCommand(): Command {
       new Option("--json", "Output stats as JSON").conflicts("quiet")
     )
     .action(async (inputFile: string, options: ImportOptions) => {
-      await executeImportCommand(inputFile, options);
+      const result = await executeImportCommand(inputFile, options);
+      process.exitCode = result.exitCode;
     });
 }
 
@@ -62,20 +64,18 @@ export function createImportCommand(): Command {
 export async function executeImportCommand(
   inputFile: string,
   options: ImportOptions = {}
-): Promise<void> {
+): Promise<CommandResult> {
   // Check input file exists
   if (!existsSync(inputFile)) {
     outputError("File does not exist", inputFile, options);
-    process.exitCode = 1;
-    return;
+    return { exitCode: 1 };
   }
 
   // Validate file before opening database
   const validation = await validateExportFile(inputFile);
   if (!validation.valid) {
     outputError(`Invalid backup file: ${validation.error}`, inputFile, options);
-    process.exitCode = 1;
-    return;
+    return { exitCode: 1 };
   }
 
   // Initialize database (creates if needed)
@@ -100,8 +100,7 @@ export async function executeImportCommand(
           inputFile,
           options
         );
-        process.exitCode = 1;
-        return;
+        return { exitCode: 1 };
       }
 
       // Interactive confirmation would go here, but for safety we require flags
@@ -110,8 +109,7 @@ export async function executeImportCommand(
         inputFile,
         options
       );
-      process.exitCode = 1;
-      return;
+      return { exitCode: 1 };
     }
 
     // Perform import
@@ -134,10 +132,12 @@ export async function executeImportCommand(
     } else {
       console.log(formatImportResult(stats, inputFile, options.clear ?? false));
     }
+
+    return { exitCode: 0 };
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     outputError(message, inputFile, options);
-    process.exitCode = 1;
+    return { exitCode: 1 };
   } finally {
     closeDatabase(db);
   }

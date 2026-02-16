@@ -23,7 +23,6 @@ const TEST_BASE = join(tmpdir(), `memory-nexus-import-cmd-test-${process.pid}`);
 describe("Import Command", () => {
   let consoleLogs: string[];
   let consoleErrors: string[];
-  let originalExitCode: number | undefined;
   let testDir: string;
   let mockDbPath: string;
   let exportFilePath: string;
@@ -44,10 +43,6 @@ describe("Import Command", () => {
     spyOn(console, "error").mockImplementation((msg) =>
       consoleErrors.push(String(msg))
     );
-
-    // Reset exit code - use 0 as "no error" state since undefined doesn't clear a previous value
-    originalExitCode = process.exitCode;
-    process.exitCode = 0;
 
     // Create a test export file
     const sourceDbPath = join(testDir, "source.db");
@@ -79,7 +74,6 @@ describe("Import Command", () => {
   });
 
   afterEach(() => {
-    process.exitCode = originalExitCode;
     // Try to clean up, ignore errors on Windows due to file locking
     try {
       rmSync(testDir, { recursive: true, force: true });
@@ -134,10 +128,10 @@ describe("Import Command", () => {
 
   describe("executeImportCommand", () => {
     test("imports from valid file", async () => {
-      await executeImportCommand(exportFilePath);
+      const result = await executeImportCommand(exportFilePath);
 
       // Should not have errors
-      expect(process.exitCode).toBe(0);
+      expect(result.exitCode).toBe(0);
 
       // Verify data was imported
       const { db } = initializeDatabase({ path: mockDbPath });
@@ -160,16 +154,16 @@ describe("Import Command", () => {
       const invalidFile = join(testDir, "invalid.json");
       await Bun.write(invalidFile, "not valid json");
 
-      await executeImportCommand(invalidFile);
+      const result = await executeImportCommand(invalidFile);
 
-      expect(process.exitCode).toBe(1);
+      expect(result.exitCode).toBe(1);
       expect(consoleErrors.join("\n")).toContain("Invalid backup file");
     });
 
     test("sets exit code 1 for missing file", async () => {
-      await executeImportCommand("/nonexistent/file.json");
+      const result = await executeImportCommand("/nonexistent/file.json");
 
-      expect(process.exitCode).toBe(1);
+      expect(result.exitCode).toBe(1);
       expect(consoleErrors.join("\n")).toContain("does not exist");
     });
 
@@ -228,10 +222,10 @@ describe("Import Command", () => {
       `);
       closeDatabase(db);
 
-      await executeImportCommand(exportFilePath);
+      const result = await executeImportCommand(exportFilePath);
 
       // Should fail without --force or --clear
-      expect(process.exitCode).toBe(1);
+      expect(result.exitCode).toBe(1);
     });
 
     test("--force allows merge with existing data", async () => {
@@ -244,11 +238,11 @@ describe("Import Command", () => {
       `);
       closeDatabase(db);
 
-      await executeImportCommand(exportFilePath, { force: true });
+      const result = await executeImportCommand(exportFilePath, { force: true });
 
-      // Check for any error messages - exitCode 0 means success
-      if (consoleErrors.length > 0 || process.exitCode !== 0) {
-        throw new Error(`Merge failed: exit=${process.exitCode}, errors=${JSON.stringify(consoleErrors)}, logs=${JSON.stringify(consoleLogs)}`);
+      // Check for any error messages
+      if (consoleErrors.length > 0 || result.exitCode !== 0) {
+        throw new Error(`Merge failed: exit=${result.exitCode}, errors=${JSON.stringify(consoleErrors)}, logs=${JSON.stringify(consoleLogs)}`);
       }
 
       const { db: checkDb } = initializeDatabase({ path: mockDbPath });

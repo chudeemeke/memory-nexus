@@ -6,6 +6,7 @@
  */
 
 import { Command, Option } from "commander";
+import type { CommandResult } from "../command-result.js";
 import { ErrorCode, MemoryNexusError } from "../../../domain/errors/index.js";
 import {
   SqliteLinkRepository,
@@ -87,7 +88,8 @@ export function createRelatedCommand(): Command {
         .conflicts("verbose")
     )
     .action(async (id: string, options: RelatedCommandOptions) => {
-      await executeRelatedCommand(id, options);
+      const result = await executeRelatedCommand(id, options);
+      process.exitCode = result.exitCode;
     });
 }
 
@@ -100,7 +102,7 @@ export function createRelatedCommand(): Command {
 export async function executeRelatedCommand(
   id: string,
   options: RelatedCommandOptions
-): Promise<void> {
+): Promise<CommandResult> {
   const startTime = performance.now();
 
   const dbPath = getDefaultDbPath();
@@ -144,8 +146,7 @@ export async function executeRelatedCommand(
         } else if (outputMode !== "quiet" || message) {
           console.error(message);
         }
-        process.exitCode = 1;
-        return;
+        return { exitCode: 1 };
       }
     }
 
@@ -188,8 +189,7 @@ export async function executeRelatedCommand(
       } else if (outputMode !== "quiet" || message) {
         console.error(message);
       }
-      process.exitCode = 1;
-      return;
+      return { exitCode: 1 };
     }
 
     // Format and output
@@ -200,6 +200,7 @@ export async function executeRelatedCommand(
     };
     const output = formatter.formatRelated(relatedSessions, formatOptions);
     console.log(output);
+    return { exitCode: 0 };
   } catch (error) {
     // Wrap in MemoryNexusError for consistent formatting
     const nexusError =
@@ -216,7 +217,7 @@ export async function executeRelatedCommand(
     } else {
       console.error(formatError(nexusError));
     }
-    process.exitCode = 1;
+    return { exitCode: 1 };
   } finally {
     closeDatabase(db);
   }

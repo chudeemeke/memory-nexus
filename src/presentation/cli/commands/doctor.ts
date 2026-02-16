@@ -7,6 +7,7 @@
  */
 
 import { Command } from "commander";
+import type { CommandResult } from "../command-result.js";
 import { mkdirSync, existsSync } from "node:fs";
 import {
     runHealthCheck,
@@ -272,7 +273,8 @@ export function createDoctorCommand(): Command {
         .option("--json", "Output as JSON")
         .option("--fix", "Attempt to fix common issues")
         .action(async (options: DoctorOptions) => {
-            await executeDoctorCommand(options);
+            const result = await executeDoctorCommand(options);
+            process.exitCode = result.exitCode;
         });
 }
 
@@ -281,31 +283,31 @@ export function createDoctorCommand(): Command {
  *
  * @param options Command options from CLI
  */
-export async function executeDoctorCommand(options: DoctorOptions): Promise<void> {
-    const result = runHealthCheck();
+export async function executeDoctorCommand(options: DoctorOptions): Promise<CommandResult> {
+    const healthResult = runHealthCheck();
     const useColor = shouldUseColor();
 
     if (options.json) {
         // Convert dates to ISO strings for JSON serialization
         const jsonResult = {
-            ...result,
+            ...healthResult,
             hooks: {
-                ...result.hooks,
-                lastRun: result.hooks.lastRun?.toISOString() ?? null,
+                ...healthResult.hooks,
+                lastRun: healthResult.hooks.lastRun?.toISOString() ?? null,
             },
         };
         console.log(JSON.stringify(jsonResult, null, 2));
-        return;
+        return { exitCode: 0 };
     }
 
     // Default output
-    console.log(formatHealthResult(result, useColor));
+    console.log(formatHealthResult(healthResult, useColor));
 
     // Attempt fixes if requested
     if (options.fix) {
         console.log("");
         console.log("Attempting fixes...");
-        const fixes = attemptFixes(result, useColor);
+        const fixes = attemptFixes(healthResult, useColor);
 
         if (fixes.length === 0) {
             console.log(dim("No automatic fixes available.", useColor));
@@ -315,4 +317,6 @@ export async function executeDoctorCommand(options: DoctorOptions): Promise<void
             }
         }
     }
+
+    return { exitCode: 0 };
 }

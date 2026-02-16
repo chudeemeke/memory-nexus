@@ -6,6 +6,7 @@
  */
 
 import { Command } from "commander";
+import type { CommandResult } from "../command-result.js";
 import { existsSync, unlinkSync } from "node:fs";
 import {
     uninstallHooks,
@@ -31,7 +32,8 @@ export function createUninstallCommand(): Command {
         .description("Remove Claude Code hooks for automatic session sync")
         .option("-r, --restore", "Restore settings.json from backup")
         .action(async (options: UninstallOptions) => {
-            await executeUninstallCommand(options);
+            const result = await executeUninstallCommand(options);
+            process.exitCode = result.exitCode;
         });
 }
 
@@ -42,7 +44,7 @@ export function createUninstallCommand(): Command {
  *
  * @param options Command options from CLI
  */
-export async function executeUninstallCommand(options: UninstallOptions): Promise<void> {
+export async function executeUninstallCommand(options: UninstallOptions): Promise<CommandResult> {
     const status = checkHooksInstalled();
 
     if (!status.sessionEnd && !status.preCompact) {
@@ -70,4 +72,6 @@ export async function executeUninstallCommand(options: UninstallOptions): Promis
     console.log("\nHooks uninstalled successfully.");
     console.log("Sessions will no longer sync automatically.");
     console.log("Manual sync still available: memory-nexus sync");
+
+    return { exitCode: 0 };
 }

@@ -6,6 +6,7 @@
  */
 
 import { Command, Option } from "commander";
+import type { CommandResult } from "../command-result.js";
 import { SqliteSessionRepository } from "../../../infrastructure/database/repositories/session-repository.js";
 import type { SessionListOptions } from "../../../domain/ports/repositories.js";
 import { ErrorCode, MemoryNexusError } from "../../../domain/errors/index.js";
@@ -71,7 +72,8 @@ export function createListCommand(): Command {
       new Option("-q, --quiet", "Minimal output (session IDs only)").conflicts("verbose")
     )
     .action(async (options: ListCommandOptions) => {
-      await executeListCommand(options);
+      const result = await executeListCommand(options);
+      process.exitCode = result.exitCode;
     });
 }
 
@@ -82,15 +84,14 @@ export function createListCommand(): Command {
  *
  * @param options Command options from CLI
  */
-export async function executeListCommand(options: ListCommandOptions): Promise<void> {
+export async function executeListCommand(options: ListCommandOptions): Promise<CommandResult> {
   const startTime = performance.now();
 
   // Parse limit
   const limit = parseInt(options.limit ?? "20", 10);
   if (isNaN(limit) || limit < 1) {
     console.error("Error: Limit must be a positive number");
-    process.exitCode = 1;
-    return;
+    return { exitCode: 1 };
   }
 
   // Parse date filters
@@ -109,8 +110,7 @@ export async function executeListCommand(options: ListCommandOptions): Promise<v
       } catch (err) {
         if (err instanceof DateParseError) {
           console.error(`Error: ${err.message}`);
-          process.exitCode = 1;
-          return;
+          return { exitCode: 1 };
         }
         throw err;
       }
@@ -121,8 +121,7 @@ export async function executeListCommand(options: ListCommandOptions): Promise<v
       } catch (err) {
         if (err instanceof DateParseError) {
           console.error(`Error: ${err.message}`);
-          process.exitCode = 1;
-          return;
+          return { exitCode: 1 };
         }
         throw err;
       }
@@ -158,7 +157,7 @@ export async function executeListCommand(options: ListCommandOptions): Promise<v
     // Check for empty result
     if (sessions.length === 0) {
       console.log(formatter.formatEmpty());
-      return;
+      return { exitCode: 0 };
     }
 
     // Format and output
@@ -169,6 +168,7 @@ export async function executeListCommand(options: ListCommandOptions): Promise<v
     };
     const output = formatter.formatSessions(sessions, formatOptions);
     console.log(output);
+    return { exitCode: 0 };
   } catch (error) {
     // Wrap in MemoryNexusError for consistent formatting
     const nexusError =
@@ -185,7 +185,7 @@ export async function executeListCommand(options: ListCommandOptions): Promise<v
     } else {
       console.error(formatError(nexusError));
     }
-    process.exitCode = 1;
+    return { exitCode: 1 };
   } finally {
     closeDatabase(db);
   }

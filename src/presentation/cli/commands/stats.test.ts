@@ -16,23 +16,15 @@ import {
 import { ErrorCode } from "../../../domain/errors/index.js";
 
 describe("Stats Command", () => {
-  let originalExitCode: number | undefined;
   let consoleLogSpy: ReturnType<typeof spyOn>;
   let consoleErrorSpy: ReturnType<typeof spyOn>;
 
   beforeEach(() => {
-    // Save original exit code
-    originalExitCode = process.exitCode;
-    process.exitCode = undefined;
-    // Spy on console methods
     consoleLogSpy = spyOn(console, "log").mockImplementation(() => {});
     consoleErrorSpy = spyOn(console, "error").mockImplementation(() => {});
   });
 
   afterEach(() => {
-    // Restore exit code
-    process.exitCode = originalExitCode;
-    // Restore console
     consoleLogSpy.mockRestore();
     consoleErrorSpy.mockRestore();
   });
@@ -238,44 +230,44 @@ describe("Stats Command", () => {
 
   describe("executeStatsCommand", () => {
     it("sets exit code 1 for invalid projects value", async () => {
-      await executeStatsCommand({ projects: "invalid" });
+      const result = await executeStatsCommand({ projects: "invalid" });
 
-      expect(process.exitCode).toBe(1);
+      expect(result.exitCode).toBe(1);
       expect(consoleErrorSpy).toHaveBeenCalledWith(
         "Error: Projects count must be a positive number"
       );
     });
 
     it("sets exit code 1 for negative projects value", async () => {
-      await executeStatsCommand({ projects: "-5" });
+      const result = await executeStatsCommand({ projects: "-5" });
 
-      expect(process.exitCode).toBe(1);
+      expect(result.exitCode).toBe(1);
       expect(consoleErrorSpy).toHaveBeenCalledWith(
         "Error: Projects count must be a positive number"
       );
     });
 
     it("sets exit code 1 for zero projects value", async () => {
-      await executeStatsCommand({ projects: "0" });
+      const result = await executeStatsCommand({ projects: "0" });
 
-      expect(process.exitCode).toBe(1);
+      expect(result.exitCode).toBe(1);
       expect(consoleErrorSpy).toHaveBeenCalledWith(
         "Error: Projects count must be a positive number"
       );
     });
 
     it("outputs JSON error when --json flag is set with invalid projects", async () => {
-      await executeStatsCommand({ projects: "invalid", json: true });
+      const result = await executeStatsCommand({ projects: "invalid", json: true });
 
-      expect(process.exitCode).toBe(1);
+      expect(result.exitCode).toBe(1);
       // Validation errors still use console.error
       expect(consoleErrorSpy).toHaveBeenCalled();
     });
 
     it("exits with code 1 consistently for errors", async () => {
-      await executeStatsCommand({ projects: "-1" });
+      const result = await executeStatsCommand({ projects: "-1" });
 
-      expect(process.exitCode).toBe(1);
+      expect(result.exitCode).toBe(1);
     });
   });
 

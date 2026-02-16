@@ -6,6 +6,7 @@
  */
 
 import { Command } from "commander";
+import type { CommandResult } from "../command-result.js";
 
 /**
  * Supported shell types for completion generation.
@@ -489,7 +490,8 @@ Usage:
         .argument("<shell>", "Shell type (bash, zsh, or fish)")
         .addHelpText("after", usageExamples)
         .action((shell: string) => {
-            executeCompletionCommand(shell);
+            const result = executeCompletionCommand(shell);
+            process.exitCode = result.exitCode;
         });
 }
 
@@ -498,13 +500,14 @@ Usage:
  *
  * @param shell Shell type from CLI argument
  */
-export function executeCompletionCommand(shell: string): void {
+export function executeCompletionCommand(shell: string): CommandResult {
     if (!isValidShell(shell)) {
         console.error(`Error: Invalid shell type '${shell}'`);
         console.error("Valid shells: bash, zsh, fish");
-        process.exit(1);
+        return { exitCode: 1 };
     }
 
     const script = generateCompletion(shell);
     console.log(script);
+    return { exitCode: 0 };
 }

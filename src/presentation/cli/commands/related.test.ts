@@ -206,41 +206,37 @@ describe("related command --hops validation", () => {
 });
 
 describe("executeRelatedCommand error handling", () => {
-  let originalExitCode: number | undefined;
   let consoleLogSpy: ReturnType<typeof spyOn>;
   let consoleErrorSpy: ReturnType<typeof spyOn>;
 
   beforeEach(() => {
-    originalExitCode = process.exitCode;
-    process.exitCode = undefined;
     consoleLogSpy = spyOn(console, "log").mockImplementation(() => {});
     consoleErrorSpy = spyOn(console, "error").mockImplementation(() => {});
   });
 
   afterEach(() => {
-    process.exitCode = originalExitCode;
     consoleLogSpy.mockRestore();
     consoleErrorSpy.mockRestore();
   });
 
   it("sets exit code 1 when session not found", async () => {
     // Non-existent session ID should trigger not found
-    await executeRelatedCommand("nonexistent-session-xyz", {});
+    const result = await executeRelatedCommand("nonexistent-session-xyz", {});
 
-    expect(process.exitCode).toBe(1);
+    expect(result.exitCode).toBe(1);
     expect(consoleErrorSpy).toHaveBeenCalled();
   });
 
   it("uses consistent exit code 1 for errors", async () => {
-    await executeRelatedCommand("nonexistent-session", {});
+    const result = await executeRelatedCommand("nonexistent-session", {});
 
-    expect(process.exitCode).toBe(1);
+    expect(result.exitCode).toBe(1);
   });
 
   it("outputs JSON error when --json flag is set", async () => {
-    await executeRelatedCommand("nonexistent-session", { json: true });
+    const result = await executeRelatedCommand("nonexistent-session", { json: true });
 
-    expect(process.exitCode).toBe(1);
+    expect(result.exitCode).toBe(1);
     // JSON errors go to console.log for structured output
     expect(consoleLogSpy).toHaveBeenCalled();
   });

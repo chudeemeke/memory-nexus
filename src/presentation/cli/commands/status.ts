@@ -6,6 +6,7 @@
  */
 
 import { Command } from "commander";
+import type { CommandResult } from "../command-result.js";
 import { existsSync } from "node:fs";
 import {
     loadConfig,
@@ -65,7 +66,8 @@ export function createStatusCommand(): Command {
         .description("Show hook installation status and configuration")
         .option("--json", "Output as JSON")
         .action(async (options: StatusOptions) => {
-            await executeStatusCommand(options);
+            const result = await executeStatusCommand(options);
+            process.exitCode = result.exitCode;
         });
 }
 
@@ -76,15 +78,16 @@ export function createStatusCommand(): Command {
  *
  * @param options Command options from CLI
  */
-export async function executeStatusCommand(options: StatusOptions): Promise<void> {
+export async function executeStatusCommand(options: StatusOptions): Promise<CommandResult> {
     const status = await gatherStatus();
 
     if (options.json) {
         console.log(JSON.stringify(status, null, 2));
-        return;
+        return { exitCode: 0 };
     }
 
     formatStatusOutput(status);
+    return { exitCode: 0 };
 }
 
 /**

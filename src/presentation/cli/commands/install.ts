@@ -6,6 +6,7 @@
  */
 
 import { Command } from "commander";
+import type { CommandResult } from "../command-result.js";
 import { copyFileSync, existsSync, mkdirSync } from "node:fs";
 import { dirname, join } from "node:path";
 import {
@@ -46,7 +47,8 @@ export function createInstallCommand(): Command {
         .description("Install Claude Code hooks for automatic session sync")
         .option("-f, --force", "Reinstall even if already installed")
         .action(async (options: InstallOptions) => {
-            await executeInstallCommand(options);
+            const result = await executeInstallCommand(options);
+            process.exitCode = result.exitCode;
         });
 }
 
@@ -57,14 +59,14 @@ export function createInstallCommand(): Command {
  *
  * @param options Command options from CLI
  */
-export async function executeInstallCommand(options: InstallOptions): Promise<void> {
+export async function executeInstallCommand(options: InstallOptions): Promise<CommandResult> {
     const status = checkHooksInstalled();
 
     // Check if already installed
     if (status.sessionEnd && status.preCompact && !options.force) {
         console.log("Hooks are already installed.");
         console.log("Use --force to reinstall.");
-        return;
+        return { exitCode: 0 };
     }
 
     // Copy hook script to ~/.memory-nexus/hooks/
@@ -75,8 +77,7 @@ export async function executeInstallCommand(options: InstallOptions): Promise<vo
     const hookScriptSrc = findHookScriptSource();
     if (!hookScriptSrc) {
         console.error("Error: Hook script not found. Run 'bun run build:hook' first.");
-        process.exitCode = 1;
-        return;
+        return { exitCode: 1 };
     }
 
     copyFileSync(hookScriptSrc, hookScriptDest);
@@ -92,8 +93,10 @@ export async function executeInstallCommand(options: InstallOptions): Promise<vo
         console.log("\nTo check status: memory-nexus status");
         console.log("To uninstall: memory-nexus uninstall");
     } else {
-        process.exitCode = 1;
+        return { exitCode: 1 };
     }
+
+    return { exitCode: 0 };
 }
 
 /**

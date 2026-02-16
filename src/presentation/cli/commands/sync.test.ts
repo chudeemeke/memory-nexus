@@ -10,18 +10,6 @@ import { Command, CommanderError } from "commander";
 import { createSyncCommand } from "./sync.js";
 
 describe("Sync Command", () => {
-  let originalExitCode: number | undefined;
-
-  beforeEach(() => {
-    // Save original exit code
-    originalExitCode = process.exitCode;
-    process.exitCode = undefined;
-  });
-
-  afterEach(() => {
-    // Restore exit code
-    process.exitCode = originalExitCode;
-  });
 
   describe("createSyncCommand", () => {
     it("returns a Command instance", () => {
@@ -336,6 +324,36 @@ describe("Sync Command", () => {
 
       expect(helpInfo).toContain("-n, --dry-run");
       expect(helpInfo).toContain("--json");
+    });
+  });
+
+  describe("--fix-names option", () => {
+    it("has --fix-names option", () => {
+      const command = createSyncCommand();
+      const fixNamesOption = command.options.find(
+        (o) => o.long === "--fix-names"
+      );
+      expect(fixNamesOption).toBeDefined();
+    });
+
+    it("parses --fix-names flag", () => {
+      const command = createSyncCommand();
+      let capturedOptions: Record<string, unknown> | undefined;
+      command.action((options) => {
+        capturedOptions = options;
+      });
+
+      command.parse(["--fix-names"], { from: "user" });
+
+      expect(capturedOptions?.fixNames).toBe(true);
+    });
+
+    it("fix-names appears in help text", () => {
+      const command = createSyncCommand();
+      const helpInfo = command.helpInformation();
+
+      expect(helpInfo).toContain("--fix-names");
+      expect(helpInfo).toContain("project names");
     });
   });
 });

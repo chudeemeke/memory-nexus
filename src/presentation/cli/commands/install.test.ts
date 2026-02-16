@@ -162,13 +162,10 @@ describe("install command", () => {
             // Set override to a non-existent path
             setTestHookScriptSourceOverride(join(testBaseDir, "nonexistent", "sync-hook.js"));
 
-            await executeInstallCommand({});
+            const result = await executeInstallCommand({});
 
             expect(errorOutput.join("\n")).toContain("Hook script not found");
-            expect(process.exitCode).toBe(1);
-
-            // Reset exit code
-            process.exitCode = 0;
+            expect(result.exitCode).toBe(1);
         });
     });
 

@@ -120,63 +120,59 @@ describe("list command option conflicts", () => {
 });
 
 describe("executeListCommand error handling", () => {
-  let originalExitCode: number | undefined;
   let consoleLogSpy: ReturnType<typeof spyOn>;
   let consoleErrorSpy: ReturnType<typeof spyOn>;
 
   beforeEach(() => {
-    originalExitCode = process.exitCode;
-    process.exitCode = undefined;
     consoleLogSpy = spyOn(console, "log").mockImplementation(() => {});
     consoleErrorSpy = spyOn(console, "error").mockImplementation(() => {});
   });
 
   afterEach(() => {
-    process.exitCode = originalExitCode;
     consoleLogSpy.mockRestore();
     consoleErrorSpy.mockRestore();
   });
 
-  it("sets exit code 1 for invalid limit", async () => {
-    await executeListCommand({ limit: "invalid" });
+  it("returns exit code 1 for invalid limit", async () => {
+    const result = await executeListCommand({ limit: "invalid" });
 
-    expect(process.exitCode).toBe(1);
+    expect(result.exitCode).toBe(1);
     expect(consoleErrorSpy).toHaveBeenCalledWith(
       "Error: Limit must be a positive number"
     );
   });
 
-  it("sets exit code 1 for negative limit", async () => {
-    await executeListCommand({ limit: "-5" });
+  it("returns exit code 1 for negative limit", async () => {
+    const result = await executeListCommand({ limit: "-5" });
 
-    expect(process.exitCode).toBe(1);
+    expect(result.exitCode).toBe(1);
     expect(consoleErrorSpy).toHaveBeenCalledWith(
       "Error: Limit must be a positive number"
     );
   });
 
-  it("sets exit code 1 for zero limit", async () => {
-    await executeListCommand({ limit: "0" });
+  it("returns exit code 1 for zero limit", async () => {
+    const result = await executeListCommand({ limit: "0" });
 
-    expect(process.exitCode).toBe(1);
+    expect(result.exitCode).toBe(1);
     expect(consoleErrorSpy).toHaveBeenCalledWith(
       "Error: Limit must be a positive number"
     );
   });
 
   it("outputs JSON error when --json flag is set with invalid limit", async () => {
-    await executeListCommand({ limit: "invalid", json: true });
+    const result = await executeListCommand({ limit: "invalid", json: true });
 
-    expect(process.exitCode).toBe(1);
+    expect(result.exitCode).toBe(1);
     // Validation errors still use console.error
     expect(consoleErrorSpy).toHaveBeenCalled();
   });
 
-  it("uses consistent exit code 1 for all error types", async () => {
-    // Invalid negative limit should exit with code 1
-    await executeListCommand({ limit: "-10" });
+  it("returns consistent exit code 1 for all error types", async () => {
+    // Invalid negative limit should return exit code 1
+    const result = await executeListCommand({ limit: "-10" });
 
-    expect(process.exitCode).toBe(1);
+    expect(result.exitCode).toBe(1);
   });
 });
 
@@ -225,32 +221,28 @@ describe("list command --days validation", () => {
 describe("executeListCommand date parsing", () => {
   let consoleLogSpy: ReturnType<typeof spyOn>;
   let consoleErrorSpy: ReturnType<typeof spyOn>;
-  let originalExitCode: number | undefined;
 
   beforeEach(() => {
     consoleLogSpy = spyOn(console, "log").mockImplementation(() => {});
     consoleErrorSpy = spyOn(console, "error").mockImplementation(() => {});
-    originalExitCode = process.exitCode;
-    process.exitCode = undefined;
   });
 
   afterEach(() => {
     consoleLogSpy?.mockRestore();
     consoleErrorSpy?.mockRestore();
-    process.exitCode = originalExitCode;
   });
 
   it("handles invalid --since date", async () => {
-    await executeListCommand({ since: "not-a-real-date-at-all" });
+    const result = await executeListCommand({ since: "not-a-real-date-at-all" });
 
-    expect(process.exitCode).toBe(1);
+    expect(result.exitCode).toBe(1);
     expect(consoleErrorSpy).toHaveBeenCalled();
   });
 
   it("handles invalid --before date", async () => {
-    await executeListCommand({ before: "not-a-real-date-at-all" });
+    const result = await executeListCommand({ before: "not-a-real-date-at-all" });
 
-    expect(process.exitCode).toBe(1);
+    expect(result.exitCode).toBe(1);
     expect(consoleErrorSpy).toHaveBeenCalled();
   });
 });

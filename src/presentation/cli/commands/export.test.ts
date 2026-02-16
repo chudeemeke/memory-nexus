@@ -19,7 +19,6 @@ const TEST_DIR = join(tmpdir(), "memory-nexus-export-cmd-test");
 describe("Export Command", () => {
   let consoleLogs: string[];
   let consoleErrors: string[];
-  let originalExitCode: number | undefined;
   let mockDbPath: string;
 
   beforeEach(() => {
@@ -32,10 +31,6 @@ describe("Export Command", () => {
     consoleErrors = [];
     spyOn(console, "log").mockImplementation((msg) => consoleLogs.push(String(msg)));
     spyOn(console, "error").mockImplementation((msg) => consoleErrors.push(String(msg)));
-
-    // Reset exit code - use 0 as "no error" state since undefined doesn't clear a previous value
-    originalExitCode = process.exitCode;
-    process.exitCode = 0;
 
     // Create a test database
     mockDbPath = join(TEST_DIR, "memory.db");
@@ -61,7 +56,6 @@ describe("Export Command", () => {
   });
 
   afterEach(() => {
-    process.exitCode = originalExitCode;
     rmSync(TEST_DIR, { recursive: true, force: true });
   });
 
@@ -140,9 +134,9 @@ describe("Export Command", () => {
     test("sets exit code 1 for invalid output directory", async () => {
       const outputPath = join(TEST_DIR, "nonexistent", "subdir", "export.json");
 
-      await executeExportCommand(outputPath);
+      const result = await executeExportCommand(outputPath);
 
-      expect(process.exitCode).toBe(1);
+      expect(result.exitCode).toBe(1);
       expect(consoleErrors.join("\n")).toContain("Directory does not exist");
     });
 
@@ -153,9 +147,9 @@ describe("Export Command", () => {
       );
 
       const outputPath = join(TEST_DIR, "export.json");
-      await executeExportCommand(outputPath);
+      const result = await executeExportCommand(outputPath);
 
-      expect(process.exitCode).toBe(1);
+      expect(result.exitCode).toBe(1);
       expect(consoleErrors.join("\n")).toContain("Database does not exist");
     });
 

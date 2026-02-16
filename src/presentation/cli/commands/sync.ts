@@ -6,6 +6,7 @@
  */
 
 import { Command, Option } from "commander";
+import type { CommandResult } from "../command-result.js";
 import {
   SyncService,
   type SyncOptions,
@@ -22,7 +23,10 @@ import {
   SqliteToolUseRepository,
   SqliteExtractionStateRepository,
 } from "../../../infrastructure/database/index.js";
-import { FileSystemSessionSource } from "../../../infrastructure/sources/index.js";
+import {
+  FileSystemSessionSource,
+  ProjectNameResolver,
+} from "../../../infrastructure/sources/index.js";
 import { JsonlEventParser } from "../../../infrastructure/parsers/index.js";
 import {
   setupSignalHandlers,
@@ -47,6 +51,7 @@ interface SyncCommandOptions {
   verbose?: boolean;
   json?: boolean;
   dryRun?: boolean;
+  fixNames?: boolean;
 }
 
 /**
@@ -61,6 +66,7 @@ export function createSyncCommand(): Command {
     .option("-p, --project <path>", "Sync only sessions from specific project")
     .option("-s, --session <id>", "Sync a specific session only")
     .option("-n, --dry-run", "Show what would be synced without syncing")
+    .option("--fix-names", "Fix truncated project names in existing sessions")
     .option("--json", "Output results as JSON")
     .addOption(
       new Option("-q, --quiet", "Suppress progress output")
@@ -71,7 +77,8 @@ export function createSyncCommand(): Command {
         .conflicts("quiet")
     )
     .action(async (options: SyncCommandOptions) => {
-      await executeSyncCommand(options);
+      const result = await executeSyncCommand(options);
+      process.exitCode = result.exitCode;
     });
 }
 
@@ -83,7 +90,7 @@ export function createSyncCommand(): Command {
  *
  * @param options Command options from CLI
  */
-export async function executeSyncCommand(options: SyncCommandOptions): Promise<void> {
+export async function executeSyncCommand(options: SyncCommandOptions): Promise<CommandResult> {
   // Set up signal handlers for graceful shutdown
   setupSignalHandlers();
 
@@ -105,8 +112,7 @@ export async function executeSyncCommand(options: SyncCommandOptions): Promise<v
 
   // For dry-run, check if database exists first
   if (options.dryRun) {
-    await executeDryRun(options);
-    return;
+    return await executeDryRun(options);
   }
 
   let db: ReturnType<typeof initializeDatabase>["db"];
@@ -115,8 +121,7 @@ export async function executeSyncCommand(options: SyncCommandOptions): Promise<v
     db = result.db;
   } catch (error) {
     handleError(error, options);
-    process.exitCode = 1;
-    return;
+    return { exitCode: 1 };
   }
 
   // Register database close as cleanup for signal handling
@@ -126,8 +131,13 @@ export async function executeSyncCommand(options: SyncCommandOptions): Promise<v
   registerCleanup(cleanupFn);
 
   try {
-    // Create dependencies
-    const sessionSource = new FileSystemSessionSource();
+    // Create resolver for correct project name resolution
+    const resolver = createDriveResolver();
+
+    // Create dependencies (pass resolver to session source for new syncs)
+    const sessionSource = new FileSystemSessionSource({
+      projectNameResolver: resolver,
+    });
     const eventParser = new JsonlEventParser();
     const sessionRepo = new SqliteSessionRepository(db);
     const messageRepo = new SqliteMessageRepository(db);
@@ -143,6 +153,15 @@ export async function executeSyncCommand(options: SyncCommandOptions): Promise<v
       extractionStateRepo,
       db
     );
+
+    // Fix existing project names if requested
+    if (options.fixNames) {
+      reporter.log("Fixing project names...");
+      const fixedCount = await syncService.fixProjectNames(resolver);
+      if (!options.quiet) {
+        console.log(`Fixed project names: ${fixedCount} sessions updated`);
+      }
+    }
 
     // Configure sync options with progress callback
     const syncOptions: SyncOptions = {
@@ -174,13 +193,12 @@ export async function executeSyncCommand(options: SyncCommandOptions): Promise<v
     reportResults(result, startTime, options);
 
     // Exit with error code if there were failures or abort
-    if (result.errors.length > 0 || result.aborted) {
-      process.exitCode = 1;
-    }
+    const exitCode = (result.errors.length > 0 || result.aborted) ? 1 : 0;
+    return { exitCode };
   } catch (error) {
     reporter.stop();
     handleError(error, options);
-    process.exitCode = 1;
+    return { exitCode: 1 };
   } finally {
     // Unregister cleanup before closing (prevents double-close)
     unregisterCleanup(cleanupFn);
@@ -191,7 +209,7 @@ export async function executeSyncCommand(options: SyncCommandOptions): Promise<v
 /**
  * Execute dry-run mode: show what would be synced without syncing.
  */
-async function executeDryRun(options: SyncCommandOptions): Promise<void> {
+async function executeDryRun(options: SyncCommandOptions): Promise<CommandResult> {
   const sessionSource = new FileSystemSessionSource();
 
   try {
@@ -252,9 +270,11 @@ async function executeDryRun(options: SyncCommandOptions): Promise<void> {
         }
       }
     }
+
+    return { exitCode: 0 };
   } catch (error) {
     handleError(error, options);
-    process.exitCode = 1;
+    return { exitCode: 1 };
   }
 }
 
@@ -328,4 +348,14 @@ function reportResults(
       console.log(`  ${err.sessionPath}: ${err.error}`);
     }
   }
+}
+
+/**
+ * Create a ProjectNameResolver rooted at the system drive.
+ * Detects the drive root from platform conventions.
+ */
+function createDriveResolver(): ProjectNameResolver {
+  // On Windows, use C:\ as root. On Unix, use /.
+  const root = process.platform === "win32" ? "C:\\" : "/";
+  return new ProjectNameResolver(root);
 }

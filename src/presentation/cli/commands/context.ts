@@ -6,6 +6,7 @@
  */
 
 import { Command, Option } from "commander";
+import type { CommandResult } from "../command-result.js";
 import { ErrorCode, MemoryNexusError } from "../../../domain/errors/index.js";
 import { SqliteContextService } from "../../../infrastructure/database/services/context-service.js";
 import {
@@ -64,7 +65,8 @@ export function createContextCommand(): Command {
         .conflicts("verbose")
     )
     .action(async (project: string, options: ContextCommandOptions) => {
-      await executeContextCommand(project, options);
+      const result = await executeContextCommand(project, options);
+      process.exitCode = result.exitCode;
     });
 }
 
@@ -77,7 +79,7 @@ export function createContextCommand(): Command {
 export async function executeContextCommand(
   project: string,
   options: ContextCommandOptions
-): Promise<void> {
+): Promise<CommandResult> {
   const startTime = performance.now();
 
   const dbPath = getDefaultDbPath();
@@ -112,8 +114,7 @@ export async function executeContextCommand(
       } else if (outputMode !== "quiet" || message) {
         console.error(message);
       }
-      process.exitCode = 1;
-      return;
+      return { exitCode: 1 };
     }
 
     // Format and output
@@ -124,6 +125,7 @@ export async function executeContextCommand(
     };
     const output = formatter.formatContext(context, formatOptions);
     console.log(output);
+    return { exitCode: 0 };
   } catch (error) {
     // Wrap in MemoryNexusError for consistent formatting
     const nexusError =
@@ -140,10 +142,11 @@ export async function executeContextCommand(
     } else {
       console.error(formatError(nexusError));
     }
-    process.exitCode = 1;
+    return { exitCode: 1 };
   } finally {
     closeDatabase(db);
   }
+  return { exitCode: 0 };
 }
 
 /**

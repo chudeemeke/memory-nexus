@@ -23,23 +23,15 @@ import type { SearchResult } from "../../../domain/value-objects/search-result.j
 import { ErrorCode } from "../../../domain/errors/index.js";
 
 describe("Search Command", () => {
-  let originalExitCode: number | undefined;
   let consoleLogSpy: ReturnType<typeof spyOn>;
   let consoleErrorSpy: ReturnType<typeof spyOn>;
 
   beforeEach(() => {
-    // Save original exit code
-    originalExitCode = process.exitCode;
-    process.exitCode = undefined;
-    // Spy on console methods
     consoleLogSpy = spyOn(console, "log").mockImplementation(() => {});
     consoleErrorSpy = spyOn(console, "error").mockImplementation(() => {});
   });
 
   afterEach(() => {
-    // Restore exit code
-    process.exitCode = originalExitCode;
-    // Restore console
     consoleLogSpy.mockRestore();
     consoleErrorSpy.mockRestore();
   });
@@ -323,37 +315,37 @@ describe("Search Command", () => {
 
   describe("executeSearchCommand", () => {
     it("sets exit code 1 for empty query", async () => {
-      await executeSearchCommand("", {});
+      const result = await executeSearchCommand("", {});
 
-      expect(process.exitCode).toBe(1);
+      expect(result.exitCode).toBe(1);
       expect(consoleErrorSpy).toHaveBeenCalledWith("Error: Query cannot be empty");
     });
 
     it("sets exit code 1 for whitespace-only query", async () => {
-      await executeSearchCommand("   ", {});
+      const result = await executeSearchCommand("   ", {});
 
-      expect(process.exitCode).toBe(1);
+      expect(result.exitCode).toBe(1);
       expect(consoleErrorSpy).toHaveBeenCalledWith("Error: Query cannot be empty");
     });
 
     it("sets exit code 1 for invalid limit", async () => {
-      await executeSearchCommand("test", { limit: "invalid" });
+      const result = await executeSearchCommand("test", { limit: "invalid" });
 
-      expect(process.exitCode).toBe(1);
+      expect(result.exitCode).toBe(1);
       expect(consoleErrorSpy).toHaveBeenCalledWith("Error: Limit must be a positive number");
     });
 
     it("sets exit code 1 for negative limit", async () => {
-      await executeSearchCommand("test", { limit: "-5" });
+      const result = await executeSearchCommand("test", { limit: "-5" });
 
-      expect(process.exitCode).toBe(1);
+      expect(result.exitCode).toBe(1);
       expect(consoleErrorSpy).toHaveBeenCalledWith("Error: Limit must be a positive number");
     });
 
     it("sets exit code 1 for zero limit", async () => {
-      await executeSearchCommand("test", { limit: "0" });
+      const result = await executeSearchCommand("test", { limit: "0" });
 
-      expect(process.exitCode).toBe(1);
+      expect(result.exitCode).toBe(1);
       expect(consoleErrorSpy).toHaveBeenCalledWith("Error: Limit must be a positive number");
     });
   });
@@ -986,33 +978,33 @@ describe("Search Command", () => {
   describe("error handling", () => {
     it("outputs JSON error when --json flag is set with empty query", async () => {
       // Empty query should trigger an error
-      await executeSearchCommand("", { json: true });
+      const result = await executeSearchCommand("", { json: true });
 
-      expect(process.exitCode).toBe(1);
+      expect(result.exitCode).toBe(1);
       // Error is output via console.error for validation errors
       expect(consoleErrorSpy).toHaveBeenCalled();
     });
 
     it("exits with code 1 on empty query error", async () => {
-      await executeSearchCommand("", {});
+      const result = await executeSearchCommand("", {});
 
-      expect(process.exitCode).toBe(1);
+      expect(result.exitCode).toBe(1);
     });
 
     it("wraps query errors in consistent error format", async () => {
       // Testing that executeSearchCommand properly handles errors
       // Query validation error should be handled
-      await executeSearchCommand("", { limit: "10" });
+      const result = await executeSearchCommand("", { limit: "10" });
 
-      expect(process.exitCode).toBe(1);
+      expect(result.exitCode).toBe(1);
       expect(consoleErrorSpy).toHaveBeenCalled();
     });
 
     it("uses consistent exit code 1 for all error types", async () => {
       // Invalid limit should exit with code 1
-      await executeSearchCommand("test", { limit: "-5" });
+      const result = await executeSearchCommand("test", { limit: "-5" });
 
-      expect(process.exitCode).toBe(1);
+      expect(result.exitCode).toBe(1);
     });
   });
 

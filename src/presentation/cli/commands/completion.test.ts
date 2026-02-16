@@ -19,27 +19,19 @@ describe("completion command", () => {
     // Capture console output
     let consoleOutput: string[] = [];
     let consoleErrors: string[] = [];
-    let exitCode: number | undefined;
     const originalLog = console.log;
     const originalError = console.error;
-    const originalExit = process.exit;
 
     beforeEach(() => {
         consoleOutput = [];
         consoleErrors = [];
-        exitCode = undefined;
         console.log = (msg: string) => consoleOutput.push(msg);
         console.error = (msg: string) => consoleErrors.push(msg);
-        process.exit = ((code?: number) => {
-            exitCode = code;
-            throw new Error(`process.exit(${code})`);
-        }) as never;
     });
 
     afterEach(() => {
         console.log = originalLog;
         console.error = originalError;
-        process.exit = originalExit;
     });
 
     describe("isValidShell", () => {
@@ -248,53 +240,45 @@ describe("completion command", () => {
 
     describe("executeCompletionCommand", () => {
         it("outputs bash completion for bash argument", () => {
-            executeCompletionCommand("bash");
+            const result = executeCompletionCommand("bash");
 
             const output = consoleOutput.join("\n");
             expect(output).toContain("complete -F");
-            expect(exitCode).toBeUndefined();
+            expect(result.exitCode).toBe(0);
         });
 
         it("outputs zsh completion for zsh argument", () => {
-            executeCompletionCommand("zsh");
+            const result = executeCompletionCommand("zsh");
 
             const output = consoleOutput.join("\n");
             expect(output).toContain("#compdef memory");
-            expect(exitCode).toBeUndefined();
+            expect(result.exitCode).toBe(0);
         });
 
         it("outputs fish completion for fish argument", () => {
-            executeCompletionCommand("fish");
+            const result = executeCompletionCommand("fish");
 
             const output = consoleOutput.join("\n");
             expect(output).toContain("complete -c memory");
-            expect(exitCode).toBeUndefined();
+            expect(result.exitCode).toBe(0);
         });
 
         it("shows error for invalid shell", () => {
-            try {
-                executeCompletionCommand("invalid");
-            } catch {
-                // Expected process.exit
-            }
+            const result = executeCompletionCommand("invalid");
 
             const errorOutput = consoleErrors.join("\n");
             expect(errorOutput).toContain("Invalid shell type");
             expect(errorOutput).toContain("invalid");
             expect(errorOutput).toContain("bash, zsh, fish");
-            expect(exitCode).toBe(1);
+            expect(result.exitCode).toBe(1);
         });
 
         it("shows error for empty shell", () => {
-            try {
-                executeCompletionCommand("");
-            } catch {
-                // Expected process.exit
-            }
+            const result = executeCompletionCommand("");
 
             const errorOutput = consoleErrors.join("\n");
             expect(errorOutput).toContain("Invalid shell type");
-            expect(exitCode).toBe(1);
+            expect(result.exitCode).toBe(1);
         });
     });
 

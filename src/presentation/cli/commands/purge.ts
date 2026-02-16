@@ -6,6 +6,7 @@
  */
 
 import { Command, Option } from "commander";
+import type { CommandResult } from "../command-result.js";
 import * as readline from "readline";
 import { SqliteSessionRepository } from "../../../infrastructure/database/repositories/session-repository.js";
 import {
@@ -165,7 +166,8 @@ export function createPurgeCommand(): Command {
       new Option("-q, --quiet", "Minimal output").conflicts("json")
     )
     .action(async (options: PurgeCommandOptions) => {
-      await executePurgeCommand(options);
+      const result = await executePurgeCommand(options);
+      process.exitCode = result.exitCode;
     });
 }
 
@@ -174,7 +176,7 @@ export function createPurgeCommand(): Command {
  *
  * @param options Command options from CLI
  */
-export async function executePurgeCommand(options: PurgeCommandOptions): Promise<void> {
+export async function executePurgeCommand(options: PurgeCommandOptions): Promise<CommandResult> {
   // Parse duration
   let cutoffDate: Date;
   try {
@@ -186,8 +188,7 @@ export async function executePurgeCommand(options: PurgeCommandOptions): Promise
     } else {
       console.error(`Error: ${message}`);
     }
-    process.exitCode = 1;
-    return;
+    return { exitCode: 1 };
   }
 
   const dbPath = testDbPath ?? getDefaultDbPath();
@@ -203,8 +204,7 @@ export async function executePurgeCommand(options: PurgeCommandOptions): Promise
     } else {
       console.error(`Error: Database not found or could not be opened.`);
     }
-    process.exitCode = 1;
-    return;
+    return { exitCode: 1 };
   }
 
   try {
@@ -228,7 +228,7 @@ export async function executePurgeCommand(options: PurgeCommandOptions): Promise
       } else if (!options.quiet) {
         console.log(`No sessions older than ${formattedDate}.`);
       }
-      return;
+      return { exitCode: 0 };
     }
 
     // Dry-run mode: show what would be deleted
@@ -267,7 +267,7 @@ export async function executePurgeCommand(options: PurgeCommandOptions): Promise
           }
         }
       }
-      return;
+      return { exitCode: 0 };
     }
 
     // If not force, prompt for confirmation
@@ -283,7 +283,7 @@ export async function executePurgeCommand(options: PurgeCommandOptions): Promise
         } else if (!options.quiet) {
           console.log("Purge cancelled.");
         }
-        return;
+        return { exitCode: 0 };
       }
     }
 
@@ -305,6 +305,7 @@ export async function executePurgeCommand(options: PurgeCommandOptions): Promise
       const formattedDate = formatCutoffDate(cutoffDate);
       console.log(`Deleted ${deletedCount} session(s) older than ${formattedDate}.`);
     }
+    return { exitCode: 0 };
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     if (options.json) {
@@ -312,7 +313,7 @@ export async function executePurgeCommand(options: PurgeCommandOptions): Promise
     } else {
       console.error(`Error: ${message}`);
     }
-    process.exitCode = 2;
+    return { exitCode: 2 };
   } finally {
     closeDatabase(db);
   }

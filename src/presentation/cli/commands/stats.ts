@@ -6,6 +6,7 @@
  */
 
 import { Command, Option } from "commander";
+import type { CommandResult } from "../command-result.js";
 import { ErrorCode, MemoryNexusError } from "../../../domain/errors/index.js";
 import {
   initializeDatabase,
@@ -61,7 +62,8 @@ export function createStatsCommand(): Command {
       "10"
     )
     .action(async (options: StatsCommandOptions) => {
-      await executeStatsCommand(options);
+      const result = await executeStatsCommand(options);
+      process.exitCode = result.exitCode;
     });
 }
 
@@ -74,7 +76,7 @@ export function createStatsCommand(): Command {
  */
 export async function executeStatsCommand(
   options: StatsCommandOptions
-): Promise<void> {
+): Promise<CommandResult> {
   const startTime = performance.now();
 
   // Initialize database
@@ -89,8 +91,7 @@ export async function executeStatsCommand(
     const projectLimit = parseInt(options.projects ?? "10", 10);
     if (isNaN(projectLimit) || projectLimit < 1) {
       console.error("Error: Projects count must be a positive number");
-      process.exitCode = 1;
-      return;
+      return { exitCode: 1 };
     }
 
     // Get stats
@@ -117,7 +118,7 @@ export async function executeStatsCommand(
     // Check for empty database
     if (stats.totalSessions === 0) {
       console.log(formatter.formatEmpty());
-      return;
+      return { exitCode: 0 };
     }
 
     // Format and output
@@ -126,6 +127,7 @@ export async function executeStatsCommand(
       executionTimeMs: Math.round(endTime - startTime),
     });
     console.log(output);
+    return { exitCode: 0 };
   } catch (error) {
     // Wrap in MemoryNexusError for consistent formatting
     const nexusError =
@@ -142,7 +144,7 @@ export async function executeStatsCommand(
     } else {
       console.error(formatError(nexusError));
     }
-    process.exitCode = 1;
+    return { exitCode: 1 };
   } finally {
     closeDatabase(db);
   }

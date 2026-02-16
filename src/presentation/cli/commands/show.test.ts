@@ -128,7 +128,6 @@ describe("Show Command", () => {
 
   afterEach(() => {
     restoreConsoleMock();
-    process.exitCode = undefined;
   });
 
   describe("createShowCommand", () => {
@@ -315,17 +314,17 @@ describe("Show Command", () => {
     test("sets exit code 1 for not found session", async () => {
       setupConsoleMock();
 
-      await executeShowCommand("nonexistent-session-xyz", {});
+      const result = await executeShowCommand("nonexistent-session-xyz", {});
 
-      expect(process.exitCode).toBe(1);
+      expect(result.exitCode).toBe(1);
     });
 
     test("outputs JSON for not found when --json flag is set", async () => {
       setupConsoleMock();
 
-      await executeShowCommand("nonexistent-session-xyz", { json: true });
+      const result = await executeShowCommand("nonexistent-session-xyz", { json: true });
 
-      expect(process.exitCode).toBe(1);
+      expect(result.exitCode).toBe(1);
       const output = consoleOutput.join("\n");
       // Should output JSON (contains "not found")
       expect(output).toBeDefined();
@@ -334,9 +333,9 @@ describe("Show Command", () => {
     test("uses consistent exit code 1 for all errors", async () => {
       setupConsoleMock();
 
-      await executeShowCommand("nonexistent-id", {});
+      const result = await executeShowCommand("nonexistent-id", {});
 
-      expect(process.exitCode).toBe(1);
+      expect(result.exitCode).toBe(1);
     });
   });
 });

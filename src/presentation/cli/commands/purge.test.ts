@@ -218,7 +218,6 @@ describe("executePurgeCommand integration", () => {
   let consoleErrorOutput: string[];
   let originalLog: typeof console.log;
   let originalError: typeof console.error;
-  let originalExitCode: number | undefined;
 
   function createTestSession(
     db: Database,
@@ -260,10 +259,6 @@ describe("executePurgeCommand integration", () => {
       consoleErrorOutput.push(args.map(String).join(" "));
     };
 
-    // Capture exit code
-    originalExitCode = process.exitCode;
-    process.exitCode = undefined;
-
     // Reset confirmation mock
     resetConfirmationMock();
   });
@@ -272,9 +267,6 @@ describe("executePurgeCommand integration", () => {
     // Restore console
     console.log = originalLog;
     console.error = originalError;
-
-    // Restore exit code
-    process.exitCode = originalExitCode;
 
     // Reset test path
     setTestDbPath(null);
@@ -294,10 +286,10 @@ describe("executePurgeCommand integration", () => {
         force: true,
       };
 
-      await executePurgeCommand(options);
+      const result = await executePurgeCommand(options);
 
       expect(consoleOutput.join("\n")).toContain("No sessions older than");
-      expect(process.exitCode).toBeUndefined();
+      expect(result.exitCode).toBe(0);
     });
 
     it("should output JSON when no sessions found with --json", async () => {
@@ -545,10 +537,10 @@ describe("executePurgeCommand integration", () => {
         force: true,
       };
 
-      await executePurgeCommand(options);
+      const result = await executePurgeCommand(options);
 
       expect(consoleErrorOutput.join("\n")).toContain("Invalid duration format");
-      expect(process.exitCode).toBe(1);
+      expect(result.exitCode).toBe(1);
     });
 
     it("should output JSON error for invalid duration with --json", async () => {
@@ -557,11 +549,11 @@ describe("executePurgeCommand integration", () => {
         json: true,
       };
 
-      await executePurgeCommand(options);
+      const result = await executePurgeCommand(options);
 
       const output = JSON.parse(consoleOutput.join("\n"));
       expect(output.error).toContain("Invalid duration format");
-      expect(process.exitCode).toBe(1);
+      expect(result.exitCode).toBe(1);
     });
   });
 });

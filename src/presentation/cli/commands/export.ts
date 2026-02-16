@@ -6,6 +6,7 @@
  */
 
 import { Command, Option } from "commander";
+import type { CommandResult } from "../command-result.js";
 import {
   initializeDatabase,
   closeDatabase,
@@ -44,7 +45,8 @@ export function createExportCommand(): Command {
       new Option("--json", "Output stats as JSON").conflicts("quiet")
     )
     .action(async (outputFile: string, options: ExportOptions) => {
-      await executeExportCommand(outputFile, options);
+      const result = await executeExportCommand(outputFile, options);
+      process.exitCode = result.exitCode;
     });
 }
 
@@ -57,21 +59,19 @@ export function createExportCommand(): Command {
 export async function executeExportCommand(
   outputFile: string,
   options: ExportOptions = {}
-): Promise<void> {
+): Promise<CommandResult> {
   // Validate output path parent directory exists
   const parentDir = dirname(outputFile);
   if (parentDir !== "." && !existsSync(parentDir)) {
     console.error(`Error: Directory does not exist: ${parentDir}`);
-    process.exitCode = 1;
-    return;
+    return { exitCode: 1 };
   }
 
   // Check if database exists
   const dbPath = getDefaultDbPath();
   if (!existsSync(dbPath)) {
     console.error("Error: Database does not exist. Run 'memory sync' first.");
-    process.exitCode = 1;
-    return;
+    return { exitCode: 1 };
   }
 
   // Initialize database
@@ -94,6 +94,8 @@ export async function executeExportCommand(
     } else {
       console.log(formatExportResult(stats, outputFile));
     }
+
+    return { exitCode: 0 };
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     if (options.json) {
@@ -101,7 +103,7 @@ export async function executeExportCommand(
     } else {
       console.error(`Error: ${message}`);
     }
-    process.exitCode = 1;
+    return { exitCode: 1 };
   } finally {
     closeDatabase(db);
   }
