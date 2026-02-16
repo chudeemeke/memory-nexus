@@ -2,7 +2,7 @@
 
 ## What This Is
 
-Cross-project context persistence for Claude Code sessions. Extracts JSONL session files into a searchable SQLite database with full-text search, relationship tracking, and graph-like traversal capabilities.
+Cross-project context persistence for Claude Code sessions. Extracts JSONL session files into a searchable SQLite database with full-text search, relationship tracking, entity extraction, and graph-like traversal capabilities. Ships as a standalone CLI with 16 commands covering sync, search, navigation, statistics, hooks, health checks, data management, and shell completion.
 
 **Core Value:** Knowledge gained in one Claude Code project becomes accessible from any other project. No more context silos.
 
@@ -10,7 +10,19 @@ Cross-project context persistence for Claude Code sessions. Extracts JSONL sessi
 
 - Not a cloud service - fully local, no network access
 - Not a replacement for Claude's context window - a complement to it
-- Not limited to MVP scope - building the full vision with relationships and hooks
+- Not a semantic/vector search tool (v1 uses keyword-based FTS5; vector search planned for v2)
+
+## Current State
+
+Shipped v1.0 with 49,764 LOC TypeScript (17,073 source + 32,691 tests).
+
+**Tech stack:** Bun, TypeScript 5.5+, bun:sqlite with FTS5, Commander.js v14, cli-progress, chrono-node
+
+**Architecture:** Hexagonal (Domain-Application-Infrastructure-Presentation) with strict layer separation. Domain layer has zero external dependencies. 99%+ domain coverage.
+
+**Commands:** sync, search, list, stats, context, related, show, browse, install, uninstall, status, doctor, purge, export, import, completion
+
+**Test suite:** ~1,966 tests, 95.67% line coverage, 94.49% function coverage, 85.46% mutation score (domain)
 
 ## Problem Statement
 
@@ -25,143 +37,89 @@ This creates context silos. Patterns learned in project A are forgotten when wor
 ## Solution
 
 Extract session JSONL files into SQLite + FTS5 database accessible via CLI commands:
-- `aidev memory sync` - Extract sessions to database
-- `aidev memory search "query"` - Full-text search across all sessions
-- `aidev memory context <project>` - Get project context
-- `aidev memory related <id>` - Find related sessions via topic/entity links
-- `aidev memory stats` - Database statistics
+- `memory-nexus sync` - Extract sessions to database (auto via hooks or manual)
+- `memory-nexus search "query"` - Full-text search across all sessions
+- `memory-nexus context <project>` - Get project context
+- `memory-nexus related <id>` - Find related sessions via topic/entity links
+- `memory-nexus show <id>` - View session conversation thread
+- `memory-nexus stats` - Database statistics
+- Plus 10 more commands for hooks, health, data management, and completion
 
 Both Claude and humans use the same commands. No special formatting needed.
-
-## Technical Approach
-
-**Database:** SQLite + FTS5 for embedded full-text search
-- Zero configuration, single portable file
-- FTS5 with porter tokenizer for natural language search
-- Links table for graph-like relationship traversal
-- Schema designed to accommodate future vector embeddings
-
-**Pipeline Architecture:**
-1. Discovery - Find and decode session directories
-2. Extraction - Parse JSONL, extract messages and metadata
-3. Storage - Persist to SQLite with FTS5 indexing
-4. Query - Execute full-text and relational queries
-
-**Integration:** Direct `aidev memory` subcommand (not standalone)
-
-**Sync Triggers:**
-- Automatic via Claude Code SessionStop hook
-- Manual via `aidev memory sync`
-- Both available, automatic by default
-
-## Constraints
-
-- **Local only** - No network access, no external APIs
-- **TypeScript/JavaScript** - Matches aidev ecosystem
-- **bun** - Package manager per WoW standards
-- **95%+ coverage at EACH metric** - Statements, branches, functions, lines individually
-- **Hexagonal architecture** - Domain-Application-Infrastructure-Presentation layers
-- **TDD** - Tests before implementation
 
 ## Requirements
 
 ### Validated
 
-(None yet - no implementation code exists)
+- SETUP-01 through SETUP-04: Project scaffolding, bun:sqlite, schema, CLI entry point -- v1.0
+- DOM-01 through DOM-12: All domain entities, value objects, ports, and services -- v1.0
+- PARSE-01 through PARSE-10: Streaming JSONL parser, event classification, timestamps -- v1.0
+- STOR-01 through STOR-08: All repository implementations, batch writes, WAL checkpoint -- v1.0
+- SYNC-01 through SYNC-08: Sync command with all options -- v1.0
+- SRCH-01 through SRCH-09: Search with FTS5, filters, ranking -- v1.0
+- OUT-01 through OUT-06: Output formatting, JSON mode, verbose/quiet -- v1.0
+- STAT-01 through STAT-04: Stats with per-project breakdown -- v1.0
+- NAV-01 through NAV-05: List, show, browse, session picker -- v1.0
+- CTX-01 through CTX-04: Context aggregation with filters -- v1.0
+- REL-01 through REL-05: Related command with graph traversal -- v1.0
+- HOOK-01 through HOOK-05: Hook integration with background sync -- v1.0
+- EXTR-01 through EXTR-04: Entity extraction, tool tracking -- v1.0
+- ERR-01 through ERR-05: Error handling, exit codes, signal handling -- v1.0
+- QUAL-02 through QUAL-05: Unit, integration, and concurrent tests -- v1.0
+- QUAL-01: Coverage threshold -- v1.0 (near-pass: 94.49% functions, Bun limitation)
 
 ### Active
 
-**Discovery:**
-- [ ] Locate Claude Code session directories at `~/.claude/projects/`
-- [ ] Decode encoded directory names (C--Users-Destiny-Projects-wow-system)
-- [ ] Map sessions to human-readable project names
-
-**Extraction:**
-- [ ] Parse JSONL files line-by-line (streaming for large files)
-- [ ] Extract messages by type: user, assistant, system
-- [ ] Extract tool uses with inputs and outputs
-- [ ] Extract file modifications from snapshots
-- [ ] Normalize timestamps to ISO 8601
-- [ ] Track extraction progress for incremental updates
-- [ ] Handle malformed JSON lines gracefully (skip and log)
-
-**Storage:**
-- [ ] Sessions table with metadata, project mapping, message counts
-- [ ] Messages FTS5 virtual table with porter tokenizer
-- [ ] Messages_meta table for non-FTS queries
-- [ ] Tool_uses table for structured queries
-- [ ] File_modifications table for file tracking
-- [ ] Links table for graph-like relationship traversal
-- [ ] Topics table for extracted concepts
-- [ ] Extraction_state table for incremental sync
-- [ ] Schema accommodates future embedding column (nullable)
-
-**Query:**
-- [ ] Full-text search across all sessions
-- [ ] Project-filtered search
-- [ ] Role-filtered search (user, assistant, all)
-- [ ] Find related sessions via shared topics/entities
-- [ ] Rank results by relevance (BM25)
-- [ ] Format results with snippets and highlights
-
-**CLI:**
-- [ ] `aidev memory sync` - Full sync with options (--project, --session, --force, --quiet, --verbose)
-- [ ] `aidev memory search <query>` - Full-text search with options (--project, --limit, --role, --json)
-- [ ] `aidev memory context <project>` - Project context with options (--days, --format)
-- [ ] `aidev memory related <id>` - Find related items
-- [ ] `aidev memory stats` - Database statistics
-- [ ] Human-friendly default output, --json for structured output
-
-**Hooks:**
-- [ ] Claude Code SessionStop hook for automatic sync
-- [ ] Incremental sync (only new content since last sync)
-- [ ] Quiet mode for non-blocking hook execution
-
-**Relationships:**
-- [ ] Link sessions to topics
-- [ ] Link messages to entities (projects, files, concepts)
-- [ ] Cross-session relationship discovery
-- [ ] Weighted relationships for ranking
+(None yet -- define with `/gsd:new-milestone` for v2)
 
 ### Out of Scope
 
-- Vector embeddings - Deferred to v2, but schema accommodates
-- Web UI - CLI-only for v1
-- MCP server integration - May add later
-- Cross-machine sync - Local only
+- Vector/semantic search with embeddings -- Planned for v2 (informed by OpenClaw hybrid search patterns)
+- Web UI -- CLI-only tool
+- MCP server integration -- May add after CLI validates
+- Cross-machine sync -- Local only; iCloud/git handles backup
+- Multi-user support -- Personal productivity tool
+- Session editing -- Read-only extraction
+- Real-time streaming -- Sessions are batch files
+- Pre-compaction memory flush -- Requires Claude Code hook event that doesn't exist yet
 
 ## Key Decisions
 
 | Decision | Rationale | Outcome |
 |----------|-----------|---------|
-| SQLite + FTS5 | Embedded, no server, full-text search built-in, portable | Confirmed |
-| Direct aidev integration | Consistent with user's existing tooling, not standalone | Confirmed |
-| Relationships as core | Cross-session context is a primary use case | Confirmed |
-| Both auto + manual sync | Flexibility for different workflows | Confirmed |
-| Design for embeddings | Future-proofs schema without adding complexity now | Confirmed |
-| Both output formats | Human-friendly default, --json for scripts/automation | Confirmed |
-| TypeScript | Type safety, matches aidev ecosystem | Confirmed |
-| better-sqlite3 | Synchronous API, better performance, FTS5 support | Confirmed |
+| SQLite + FTS5 | Embedded, no server, full-text search built-in, portable | Good |
+| bun:sqlite over better-sqlite3 | ABI compatibility issues with Bun; bun:sqlite is 3-6x faster | Good |
+| Direct aidev integration | Consistent with user's existing tooling, not standalone | Good |
+| Hexagonal architecture | User's WoW standard; clear layer separation | Good |
+| Streaming JSONL parser | Session files can exceed 10,000 lines; memory exhaustion risk | Good |
+| FTS5 MATCH only | = operator causes full table scan; must enforce MATCH | Good |
+| BM25 ranking default | Lower (more negative) scores indicate better relevance | Good |
+| readline.createInterface | Node's built-in streaming for JSONL parsing | Good |
+| Post-filter for case sensitivity | FTS5 is inherently case-insensitive; post-filter with 2x fetch limit | Good |
+| Strategy pattern for formatters | OutputFormatter, ListFormatter, ShowFormatter enable clean output modes | Good |
+| WITH RECURSIVE CTE | Multi-hop graph traversal in SQLite for relationship discovery | Good |
+| Detached process for hooks | spawn() with detached:true, stdio:ignore + unref() for background | Good |
+| Native shell completion | Self-contained bash/zsh/fish scripts; no external dependency like Carapace | Good |
+| Commander.js v14 | Mature CLI framework with built-in conflicts(), argParser, and help | Good |
+| Design for embeddings | Schema accommodates future vector column without current complexity | Pending |
 
-## Open Questions
+## Resolved Questions
 
-These need research before implementation:
+All open questions from pre-implementation were resolved:
 
-1. **Session encoding** - How exactly does Claude Code encode directory paths? (Initial hypothesis: forward slashes and colons replaced with hyphens)
-2. **Session boundaries** - How to reliably detect session start/end in JSONL?
-3. **Incremental sync edge cases** - What if file is truncated? What if events are out of order?
-4. **Subagent sessions** - How do agent-*.jsonl files relate to main sessions?
+1. **Session encoding** -- Claude Code encodes as C--Users-Destiny-Projects-wow-system (forward slashes and colons replaced with hyphens)
+2. **Session boundaries** -- Each JSONL file is one session; no need for boundary detection within files
+3. **Incremental sync** -- mtime + fileSize comparison with per-session transaction boundaries for atomicity
+4. **Subagent sessions** -- Stored in `<session-uuid>/subagents/` directories; discoverable via glob
 
-## Source Data Reference
+## Constraints
 
-**Location:** `~/.claude/projects/<encoded-dir>/<session-id>.jsonl`
-
-**Event Types:**
-- system - Session metadata, hook outputs
-- user - User messages, tool results
-- assistant - Claude responses, tool uses, thinking blocks
-- file-history-snapshot - File modification tracking
-- summary - Session summaries
+- **Local only** -- No network access, no external APIs
+- **TypeScript** -- Matches aidev ecosystem
+- **bun** -- Package manager per WoW standards
+- **95%+ coverage at EACH metric** -- Statements, branches, functions, lines individually (Bun only measures functions + lines)
+- **Hexagonal architecture** -- Domain-Application-Infrastructure-Presentation layers
+- **TDD** -- Tests before implementation
 
 ## Related Projects
 
@@ -170,6 +128,7 @@ These need research before implementation:
 | ai-dev-environment | Integration target (aidev memory subcommand) |
 | wow-system | Where this idea originated |
 | get-stuff-done | Development methodology |
+| OpenClaw | Research reference for v2 semantic search patterns |
 
 ## Quality Standards
 
@@ -184,4 +143,4 @@ Per WoW (Ways of Working):
 
 ---
 
-*Last updated: 2026-01-27 after initialization*
+*Last updated: 2026-02-16 after v1.0 milestone*
