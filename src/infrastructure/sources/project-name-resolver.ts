@@ -17,7 +17,7 @@
  * Caches resolved prefixes to avoid redundant readdir calls.
  */
 
-import { readdirSync } from "node:fs";
+import { readdirSync, statSync } from "node:fs";
 
 /**
  * Encodes a single directory name the same way Claude Code does:
@@ -83,12 +83,8 @@ export class ProjectNameResolver {
     }
 
     const subdirs = this.listSubdirectories(currentDir);
-    if (subdirs.length === 0) {
-      return this.fallbackLastSegment(remaining);
-    }
 
-    // Build candidates: encode each subdirectory name and check if it
-    // matches as a prefix of the remaining encoded string.
+    // Build candidates from enumerable directories.
     // Sort by encoded length descending (greedy: prefer longer matches).
     const candidates: Array<{ name: string; encoded: string }> = [];
     for (const name of subdirs) {
@@ -109,17 +105,73 @@ export class ProjectNameResolver {
         const nextDir = `${currentDir}/${candidate.name}`;
         const result = this.walkAndResolve(nextDir, nextRemaining);
         if (result !== this.fallbackLastSegment(nextRemaining)) {
-          // Successful deeper resolution
           return result;
         }
-        // If deeper resolution failed (fell back), try this candidate
-        // as a successful intermediate match and return its deeper result
         return result;
       }
     }
 
+    // No enumerable match found. Probe for hidden/virtual directories
+    // (e.g., iCloudDrive on Windows) that readdirSync does not return.
+    const probeResult = this.probeHiddenDirectories(currentDir, remaining);
+    if (probeResult !== undefined) {
+      return probeResult;
+    }
+
     // No match found at this level
     return this.fallbackLastSegment(remaining);
+  }
+
+  /**
+   * Probe for hidden/virtual directories that readdirSync does not enumerate.
+   *
+   * Some directories (e.g., iCloudDrive on Windows) are valid and traversable
+   * but invisible to readdirSync. This method tries progressively longer
+   * dash-separated prefixes of the remaining encoded string as candidate
+   * directory names, checking each via statSync.
+   *
+   * @returns Resolved project name, or undefined if no hidden dir was found
+   */
+  private probeHiddenDirectories(
+    currentDir: string,
+    remaining: string,
+  ): string | undefined {
+    const parts = remaining.split("-");
+
+    // Try progressively longer prefixes as candidate directory names.
+    // Start at 1 segment, go up to all-but-one (the last combo is the
+    // exact-match case which would have been caught by walkAndResolve).
+    for (let i = 1; i < parts.length; i++) {
+      const candidateName = parts.slice(0, i).join("-");
+      const candidatePath = `${currentDir}/${candidateName}`;
+
+      if (this.isDirectory(candidatePath)) {
+        const nextRemaining = parts.slice(i).join("-");
+
+        if (nextRemaining === "") {
+          return candidateName;
+        }
+
+        const result = this.walkAndResolve(candidatePath, nextRemaining);
+        if (result !== this.fallbackLastSegment(nextRemaining)) {
+          return result;
+        }
+      }
+    }
+
+    return undefined;
+  }
+
+  /**
+   * Check if a path is a directory. Handles virtual/hidden dirs that
+   * exist on disk but are not returned by readdirSync.
+   */
+  private isDirectory(path: string): boolean {
+    try {
+      return statSync(path).isDirectory();
+    } catch {
+      return false;
+    }
   }
 
   /**

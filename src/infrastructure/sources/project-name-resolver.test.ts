@@ -143,6 +143,46 @@ describe("ProjectNameResolver", () => {
       const name = resolver.resolveProjectName("Users-AI-Tools-Projects-test");
       expect(name).toBe("test");
     });
+
+    test("probes hidden directories via statSync when readdirSync misses them", () => {
+      // iCloudDrive on Windows is a real directory that exists and is traversable,
+      // but readdirSync on its parent does not list it. The resolver must fall back
+      // to probing candidate names via statSync.
+      //
+      // We can't simulate a truly hidden directory in a temp dir, but we CAN test
+      // against the real filesystem if iCloudDrive exists. Skip otherwise.
+      const iCloudPath = "C:/Users/Destiny/iCloudDrive";
+      if (!existsSync(iCloudPath)) {
+        return; // Skip on systems without iCloudDrive
+      }
+
+      const resolver = new ProjectNameResolver("C:/");
+      const name = resolver.resolveFromEncodedPath(
+        "C--Users-Destiny-iCloudDrive-Documents-AI-Tools-Anthropic-Solution-Projects-memory-nexus"
+      );
+      expect(name).toBe("memory-nexus");
+    });
+
+    test("probes hidden directories for multiple project names", () => {
+      const iCloudPath = "C:/Users/Destiny/iCloudDrive";
+      if (!existsSync(iCloudPath)) {
+        return;
+      }
+
+      const resolver = new ProjectNameResolver("C:/");
+
+      const cases: Array<[string, string]> = [
+        ["C--Users-Destiny-iCloudDrive-Documents-AI-Tools-Anthropic-Solution-Projects-get-stuff-done", "get-stuff-done"],
+        ["C--Users-Destiny-iCloudDrive-Documents-AI-Tools-Anthropic-Solution-Projects-ai-dev-environment", "ai-dev-environment"],
+        ["C--Users-Destiny-iCloudDrive-Documents-AI-Tools-Anthropic-Solution-Projects-later", "later"],
+      ];
+
+      for (const [encoded, expected] of cases) {
+        if (existsSync(`C:/Users/Destiny/iCloudDrive/Documents/AI Tools/Anthropic Solution/Projects/${expected}`)) {
+          expect(resolver.resolveFromEncodedPath(encoded)).toBe(expected);
+        }
+      }
+    });
   });
 
   describe("resolveFromEncodedPath (with drive prefix)", () => {
