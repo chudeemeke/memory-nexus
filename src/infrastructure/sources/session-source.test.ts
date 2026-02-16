@@ -9,6 +9,7 @@ import { mkdirSync, writeFileSync, rmSync, existsSync } from "node:fs";
 import { join } from "node:path";
 import { tmpdir } from "node:os";
 import { FileSystemSessionSource } from "./session-source.js";
+import { ProjectNameResolver } from "./project-name-resolver.js";
 
 describe("FileSystemSessionSource", () => {
     let testDir: string;
@@ -243,6 +244,84 @@ describe("FileSystemSessionSource", () => {
             // Should return a valid path (either project)
             expect(result).not.toBeNull();
             expect(result).toMatch(new RegExp(`${sessionId}\\.jsonl$`));
+        });
+    });
+
+    describe("with ProjectNameResolver", () => {
+        test("resolves hyphenated project name correctly", async () => {
+            // Simulate the real directory structure for "memory-nexus"
+            // The encoded directory name is "C--Users-Destiny-Projects-memory-nexus"
+            // The resolver root has the actual directory "memory-nexus" under Projects
+            const resolverRoot = join(testDir, "drive-root");
+            mkdirSync(join(resolverRoot, "Users", "Destiny", "Projects", "memory-nexus"), { recursive: true });
+
+            // Create encoded project directory with a session
+            const encodedPath = "C--Users-Destiny-Projects-memory-nexus";
+            const projectDir = join(projectsDir, encodedPath);
+            mkdirSync(projectDir, { recursive: true });
+
+            const sessionId = "resolver-test-session-1234567890";
+            const sessionFile = join(projectDir, `${sessionId}.jsonl`);
+            writeFileSync(sessionFile, '{"type":"test"}\n');
+
+            const resolver = new ProjectNameResolver(resolverRoot);
+            const source = new FileSystemSessionSource({
+                claudeDir: projectsDir,
+                projectNameResolver: resolver,
+            });
+
+            const sessions = await source.discoverSessions();
+
+            expect(sessions).toHaveLength(1);
+            expect(sessions[0]?.projectPath.projectName).toBe("memory-nexus");
+        });
+
+        test("resolves project with spaces in path", async () => {
+            const resolverRoot = join(testDir, "drive-root");
+            mkdirSync(join(resolverRoot, "Users", "Destiny", "iCloudDrive", "Documents", "AI Tools", "Projects", "get-stuff-done"), { recursive: true });
+
+            const encodedPath = "C--Users-Destiny-iCloudDrive-Documents-AI-Tools-Projects-get-stuff-done";
+            const projectDir = join(projectsDir, encodedPath);
+            mkdirSync(projectDir, { recursive: true });
+
+            const sessionId = "resolver-test-session-9876543210";
+            writeFileSync(join(projectDir, `${sessionId}.jsonl`), '{"type":"test"}\n');
+
+            const resolver = new ProjectNameResolver(resolverRoot);
+            const source = new FileSystemSessionSource({
+                claudeDir: projectsDir,
+                projectNameResolver: resolver,
+            });
+
+            const sessions = await source.discoverSessions();
+
+            expect(sessions).toHaveLength(1);
+            expect(sessions[0]?.projectPath.projectName).toBe("get-stuff-done");
+        });
+
+        test("falls back to lossy decode when resolver cannot resolve", async () => {
+            // Resolver root has no matching directories
+            const resolverRoot = join(testDir, "empty-root");
+            mkdirSync(resolverRoot, { recursive: true });
+
+            const encodedPath = "C--Users-Destiny-Projects-memory-nexus";
+            const projectDir = join(projectsDir, encodedPath);
+            mkdirSync(projectDir, { recursive: true });
+
+            const sessionId = "fallback-test-session-111222333";
+            writeFileSync(join(projectDir, `${sessionId}.jsonl`), '{"type":"test"}\n');
+
+            const resolver = new ProjectNameResolver(resolverRoot);
+            const source = new FileSystemSessionSource({
+                claudeDir: projectsDir,
+                projectNameResolver: resolver,
+            });
+
+            const sessions = await source.discoverSessions();
+
+            expect(sessions).toHaveLength(1);
+            // Falls back to lossy: last segment is "nexus"
+            expect(sessions[0]?.projectPath.projectName).toBe("nexus");
         });
     });
 });

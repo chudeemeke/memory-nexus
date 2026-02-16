@@ -41,6 +41,8 @@ export class SqliteSessionRepository implements ISessionRepository {
   private readonly insertStmt: Statement;
   private readonly deleteStmt: Statement;
   private readonly updateSummaryStmt: Statement;
+  private readonly updateProjectNameStmt: Statement;
+  private readonly findDistinctEncodedPathsStmt: Statement;
 
   constructor(db: Database) {
     this.db = db;
@@ -85,6 +87,16 @@ export class SqliteSessionRepository implements ISessionRepository {
     this.updateSummaryStmt = db.prepare(`
       UPDATE sessions SET summary = $summary, updated_at = datetime('now')
       WHERE id = $id
+    `);
+
+    this.updateProjectNameStmt = db.prepare(`
+      UPDATE sessions SET project_name = $projectName, updated_at = datetime('now')
+      WHERE project_path_encoded = $encodedPath
+    `);
+
+    this.findDistinctEncodedPathsStmt = db.prepare(`
+      SELECT DISTINCT project_path_encoded FROM sessions
+      ORDER BY project_path_encoded
     `);
   }
 
@@ -255,6 +267,36 @@ export class SqliteSessionRepository implements ISessionRepository {
     stmt.run({ $cutoffDate: cutoffDate.toISOString() });
 
     return count;
+  }
+
+  /**
+   * Update the project name for all sessions with a matching encoded path.
+   */
+  async updateProjectName(encodedPath: string, projectName: string): Promise<number> {
+    // Count matching rows before update (since changes() can be unreliable with prepared stmts)
+    const countRow = this.db.prepare(
+      "SELECT COUNT(*) as count FROM sessions WHERE project_path_encoded = $encodedPath"
+    ).get({ $encodedPath: encodedPath }) as { count: number };
+    const count = countRow.count;
+
+    if (count > 0) {
+      this.updateProjectNameStmt.run({
+        $encodedPath: encodedPath,
+        $projectName: projectName,
+      });
+    }
+
+    return count;
+  }
+
+  /**
+   * Find all distinct encoded project paths stored in sessions.
+   */
+  async findDistinctEncodedPaths(): Promise<string[]> {
+    const rows = this.findDistinctEncodedPathsStmt.all() as Array<{
+      project_path_encoded: string;
+    }>;
+    return rows.map((r) => r.project_path_encoded);
   }
 
   /**

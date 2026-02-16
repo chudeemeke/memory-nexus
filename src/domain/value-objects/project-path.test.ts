@@ -215,4 +215,43 @@ describe("ProjectPath value object", () => {
       expect(path.projectName).toBe("foo");
     });
   });
+
+  describe("withProjectName", () => {
+    it("returns a new ProjectPath with overridden project name", () => {
+      const original = ProjectPath.fromEncoded("C--Users-Destiny-Projects-memory-nexus");
+      const fixed = original.withProjectName("memory-nexus");
+      expect(fixed.projectName).toBe("memory-nexus");
+    });
+
+    it("preserves encoded path", () => {
+      const original = ProjectPath.fromEncoded("C--Users-Destiny-Projects-memory-nexus");
+      const fixed = original.withProjectName("memory-nexus");
+      expect(fixed.encoded).toBe(original.encoded);
+    });
+
+    it("preserves decoded path", () => {
+      const original = ProjectPath.fromEncoded("C--Users-Destiny-Projects-memory-nexus");
+      const fixed = original.withProjectName("memory-nexus");
+      expect(fixed.decoded).toBe(original.decoded);
+    });
+
+    it("does not mutate the original instance", () => {
+      const original = ProjectPath.fromEncoded("C--Users-Destiny-Projects-memory-nexus");
+      original.withProjectName("memory-nexus");
+      // Original still has lossy project name
+      expect(original.projectName).toBe("nexus");
+    });
+
+    it("works with spaces in project name", () => {
+      const original = ProjectPath.fromEncoded("C--Users-Destiny-AI-Tools");
+      const fixed = original.withProjectName("AI Tools");
+      expect(fixed.projectName).toBe("AI Tools");
+    });
+
+    it("equality still based on decoded path", () => {
+      const original = ProjectPath.fromEncoded("C--Users-Destiny-Projects-memory-nexus");
+      const fixed = original.withProjectName("memory-nexus");
+      expect(fixed.equals(original)).toBe(true);
+    });
+  });
 });

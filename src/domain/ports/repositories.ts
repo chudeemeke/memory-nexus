@@ -88,6 +88,22 @@ export interface ISessionRepository {
    * @returns Array of sessions matching filters, ordered by start time descending
    */
   findFiltered(options: SessionListOptions): Promise<Session[]>;
+
+  /**
+   * Update the project name for all sessions with a matching encoded path.
+   * Used to fix lossy project names resolved via filesystem lookup.
+   * @param encodedPath The encoded project path to match
+   * @param projectName The correct project name
+   * @returns Number of rows updated
+   */
+  updateProjectName(encodedPath: string, projectName: string): Promise<number>;
+
+  /**
+   * Find all distinct encoded project paths stored in sessions.
+   * Used by fixProjectNames to enumerate paths needing resolution.
+   * @returns Array of distinct encoded path strings
+   */
+  findDistinctEncodedPaths(): Promise<string[]>;
 }
 
 /**

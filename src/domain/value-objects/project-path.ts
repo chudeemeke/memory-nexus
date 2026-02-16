@@ -32,10 +32,10 @@ export class ProjectPath {
   private readonly _encoded: string;
   private readonly _projectName: string;
 
-  private constructor(decoded: string, encoded: string) {
+  private constructor(decoded: string, encoded: string, projectName?: string) {
     this._decoded = decoded;
     this._encoded = encoded;
-    this._projectName = this.extractProjectName(decoded);
+    this._projectName = projectName ?? this.extractProjectName(decoded);
   }
 
   /**
@@ -85,6 +85,15 @@ export class ProjectPath {
    */
   get projectName(): string {
     return this._projectName;
+  }
+
+  /**
+   * Return a new ProjectPath with an overridden project name.
+   * Preserves encoded and decoded paths. Useful when the correct
+   * project name is resolved via filesystem lookup.
+   */
+  withProjectName(name: string): ProjectPath {
+    return new ProjectPath(this._decoded, this._encoded, name);
   }
 
   /**

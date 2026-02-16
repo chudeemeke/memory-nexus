@@ -12,6 +12,7 @@ import { join } from "node:path";
 import { homedir } from "node:os";
 import type { ISessionSource, SessionFileInfo } from "../../domain/ports/sources.js";
 import { ProjectPath } from "../../domain/value-objects/project-path.js";
+import type { ProjectNameResolver } from "./project-name-resolver.js";
 
 /**
  * Configuration options for FileSystemSessionSource
@@ -19,6 +20,8 @@ import { ProjectPath } from "../../domain/value-objects/project-path.js";
 export interface SessionSourceOptions {
     /** Custom path to the Claude projects directory */
     claudeDir?: string;
+    /** Resolver for fixing lossy project names via filesystem lookup */
+    projectNameResolver?: ProjectNameResolver;
 }
 
 /**
@@ -39,10 +42,12 @@ export interface SessionSourceOptions {
  */
 export class FileSystemSessionSource implements ISessionSource {
     private readonly claudeProjectsDir: string;
+    private readonly resolver: ProjectNameResolver | undefined;
 
     constructor(options?: SessionSourceOptions) {
         this.claudeProjectsDir =
             options?.claudeDir ?? join(homedir(), ".claude", "projects");
+        this.resolver = options?.projectNameResolver;
     }
 
     /**
@@ -90,6 +95,13 @@ export class FileSystemSessionSource implements ISessionSource {
             let projectPath: ProjectPath;
             try {
                 projectPath = ProjectPath.fromEncoded(encodedPath);
+                // Use resolver to fix lossy project name if available
+                if (this.resolver) {
+                    const resolvedName = this.resolver.resolveFromEncodedPath(encodedPath);
+                    if (resolvedName !== projectPath.projectName) {
+                        projectPath = projectPath.withProjectName(resolvedName);
+                    }
+                }
             } catch {
                 // Skip invalid encoded paths
                 continue;

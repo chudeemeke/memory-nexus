@@ -146,6 +146,9 @@ describe("SyncService", () => {
       }),
       saveMany: mock(async () => {}),
       delete: mock(async () => {}),
+      findFiltered: mock(async () => []),
+      updateProjectName: mock(async () => 0),
+      findDistinctEncodedPaths: mock(async () => []),
     };
 
     messageRepo = {
@@ -1156,6 +1159,63 @@ describe("SyncService", () => {
       );
 
       await expect(syncService.sync()).rejects.toThrow("Failed to discover sessions");
+    });
+  });
+
+  describe("fixProjectNames", () => {
+    test("resolves and updates project names for all distinct paths", async () => {
+      const paths = [
+        "C--Users-Destiny-Projects-memory-nexus",
+        "C--Users-Destiny-Projects-wow-system",
+      ];
+      (sessionRepo.findDistinctEncodedPaths as ReturnType<typeof mock>).mockResolvedValue(paths);
+      (sessionRepo.updateProjectName as ReturnType<typeof mock>).mockResolvedValue(3);
+
+      const mockResolver = {
+        resolveFromEncodedPath: mock((encoded: string) => {
+          if (encoded.endsWith("memory-nexus")) return "memory-nexus";
+          if (encoded.endsWith("wow-system")) return "wow-system";
+          return "unknown";
+        }),
+        resolveProjectName: mock(() => "test"),
+      };
+
+      const count = await syncService.fixProjectNames(mockResolver);
+
+      expect(count).toBe(6); // 3 rows updated per path * 2 paths
+      expect(mockResolver.resolveFromEncodedPath).toHaveBeenCalledTimes(2);
+      expect(sessionRepo.updateProjectName).toHaveBeenCalledTimes(2);
+    });
+
+    test("returns 0 when no sessions exist", async () => {
+      (sessionRepo.findDistinctEncodedPaths as ReturnType<typeof mock>).mockResolvedValue([]);
+
+      const mockResolver = {
+        resolveFromEncodedPath: mock(() => "test"),
+        resolveProjectName: mock(() => "test"),
+      };
+
+      const count = await syncService.fixProjectNames(mockResolver);
+
+      expect(count).toBe(0);
+      expect(mockResolver.resolveFromEncodedPath).not.toHaveBeenCalled();
+    });
+
+    test("skips paths where resolver returns same name as current lossy decode", async () => {
+      // Path where project name has no hyphens - resolver returns same as lossy
+      const paths = ["C--Users-Destiny-Projects-myproject"];
+      (sessionRepo.findDistinctEncodedPaths as ReturnType<typeof mock>).mockResolvedValue(paths);
+
+      const mockResolver = {
+        resolveFromEncodedPath: mock(() => "myproject"),
+        resolveProjectName: mock(() => "myproject"),
+      };
+
+      const count = await syncService.fixProjectNames(mockResolver);
+
+      // Should still call updateProjectName (resolver returns correct name)
+      expect(count).toBe(0);
+      expect(sessionRepo.updateProjectName).toHaveBeenCalledTimes(1);
     });
   });
 });

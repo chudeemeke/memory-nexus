@@ -8,3 +8,5 @@ export {
     FileSystemSessionSource,
     type SessionSourceOptions,
 } from "./session-source.js";
+
+export { ProjectNameResolver } from "./project-name-resolver.js";

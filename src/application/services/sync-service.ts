@@ -21,6 +21,7 @@ import type {
   IToolUseRepository,
   IExtractionStateRepository,
 } from "../../domain/ports/repositories.js";
+import type { ProjectNameResolver } from "../../infrastructure/sources/project-name-resolver.js";
 import { Session } from "../../domain/entities/session.js";
 import { Message } from "../../domain/entities/message.js";
 import { ToolUse } from "../../domain/entities/tool-use.js";
@@ -270,6 +271,29 @@ export class SyncService {
 
     result.durationMs = Date.now() - startTime;
     return result;
+  }
+
+  /**
+   * Fix project names in existing sessions by resolving them via filesystem lookup.
+   *
+   * Queries all distinct encoded project paths from the database, resolves the
+   * correct project name for each via the filesystem resolver, and updates
+   * all sessions with that encoded path.
+   *
+   * @param resolver The filesystem-based project name resolver
+   * @returns Total number of session rows updated
+   */
+  async fixProjectNames(resolver: ProjectNameResolver): Promise<number> {
+    const encodedPaths = await this.sessionRepo.findDistinctEncodedPaths();
+
+    let totalUpdated = 0;
+    for (const encodedPath of encodedPaths) {
+      const resolvedName = resolver.resolveFromEncodedPath(encodedPath);
+      const updated = await this.sessionRepo.updateProjectName(encodedPath, resolvedName);
+      totalUpdated += updated;
+    }
+
+    return totalUpdated;
   }
 
   /**

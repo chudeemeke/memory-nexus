@@ -955,6 +955,81 @@ describe("SqliteSessionRepository", () => {
     });
   });
 
+  describe("updateProjectName", () => {
+    it("should update project name for all sessions with matching encoded path", async () => {
+      const projectPath = ProjectPath.fromDecoded("C:\\Users\\Test\\Projects\\memory-nexus");
+
+      await repository.save(createTestSession({ id: "s1", projectPath }));
+      await repository.save(createTestSession({
+        id: "s2",
+        projectPath,
+        startTime: new Date("2026-01-28T11:00:00Z"),
+      }));
+
+      const count = await repository.updateProjectName(
+        projectPath.encoded,
+        "memory-nexus"
+      );
+
+      expect(count).toBe(2);
+
+      // Verify the project name was updated in the database
+      const row = db.prepare(
+        "SELECT project_name FROM sessions WHERE id = 's1'"
+      ).get() as { project_name: string };
+      expect(row.project_name).toBe("memory-nexus");
+    });
+
+    it("should return 0 when no sessions match the encoded path", async () => {
+      const count = await repository.updateProjectName(
+        "C--nonexistent-path",
+        "test"
+      );
+      expect(count).toBe(0);
+    });
+
+    it("should not affect sessions with different encoded paths", async () => {
+      const pathA = ProjectPath.fromDecoded("C:\\Users\\Test\\Projects\\project-a");
+      const pathB = ProjectPath.fromDecoded("C:\\Users\\Test\\Projects\\project-b");
+
+      await repository.save(createTestSession({ id: "s1", projectPath: pathA }));
+      await repository.save(createTestSession({ id: "s2", projectPath: pathB }));
+
+      await repository.updateProjectName(pathA.encoded, "project-a");
+
+      // pathB session should be unchanged (fromDecoded correctly extracts "project-b")
+      const row = db.prepare(
+        "SELECT project_name FROM sessions WHERE id = 's2'"
+      ).get() as { project_name: string };
+      expect(row.project_name).toBe("project-b");
+    });
+  });
+
+  describe("findDistinctEncodedPaths", () => {
+    it("should return distinct encoded paths from sessions", async () => {
+      const pathA = ProjectPath.fromDecoded("C:\\Users\\Test\\Projects\\project-a");
+      const pathB = ProjectPath.fromDecoded("C:\\Users\\Test\\Projects\\project-b");
+
+      await repository.save(createTestSession({ id: "s1", projectPath: pathA }));
+      await repository.save(createTestSession({
+        id: "s2",
+        projectPath: pathA,
+        startTime: new Date("2026-01-28T11:00:00Z"),
+      }));
+      await repository.save(createTestSession({ id: "s3", projectPath: pathB }));
+
+      const paths = await repository.findDistinctEncodedPaths();
+
+      expect(paths).toHaveLength(2);
+      expect(paths.sort()).toEqual([pathA.encoded, pathB.encoded].sort());
+    });
+
+    it("should return empty array when no sessions exist", async () => {
+      const paths = await repository.findDistinctEncodedPaths();
+      expect(paths).toHaveLength(0);
+    });
+  });
+
   describe("summary FTS5 indexing", () => {
     it("should index summary in sessions_fts", async () => {
       const session = createTestSession({ id: "fts-test-session" });
