@@ -358,15 +358,42 @@ describe("SqliteContextService", () => {
       expect(context!.projectName).toBe("memory-nexus");
     });
 
-    it("Test 18: returns first match when multiple projects match filter", async () => {
-      insertTestSession(db, "s1", "proj1", "/proj1", "project-alpha");
-      insertTestSession(db, "s2", "proj2", "/proj2", "project-beta");
+    it("Test 18: prefers project with most sessions when multiple match substring", async () => {
+      // mcp-nexus: 2 sessions
+      insertTestSession(db, "s1", "proj1", "/proj1", "mcp-nexus");
+      insertTestSession(db, "s2", "proj1", "/proj1", "mcp-nexus");
+      // memory-nexus: 5 sessions (should win)
+      for (let i = 0; i < 5; i++) {
+        insertTestSession(db, `s-mn-${i}`, "proj2", "/proj2", "memory-nexus");
+      }
 
-      const context = await contextService.getProjectContext("project");
+      const context = await contextService.getProjectContext("nexus");
 
       expect(context).not.toBeNull();
-      // Should return one of them (first match)
-      expect(["project-alpha", "project-beta"]).toContain(context!.projectName);
+      expect(context!.projectName).toBe("memory-nexus");
+    });
+
+    it("Test 18b: exact match takes priority over substring with more sessions", async () => {
+      // "nexus" project: 1 session (exact match)
+      insertTestSession(db, "s1", "proj1", "/proj1", "nexus");
+      // "memory-nexus": 10 sessions (more sessions but only substring match)
+      for (let i = 0; i < 10; i++) {
+        insertTestSession(db, `s-mn-${i}`, "proj2", "/proj2", "memory-nexus");
+      }
+
+      const context = await contextService.getProjectContext("nexus");
+
+      expect(context).not.toBeNull();
+      expect(context!.projectName).toBe("nexus");
+    });
+
+    it("Test 18c: exact match is case-insensitive", async () => {
+      insertTestSession(db, "s1", "proj1", "/proj1", "MyProject");
+
+      const context = await contextService.getProjectContext("myproject");
+
+      expect(context).not.toBeNull();
+      expect(context!.projectName).toBe("MyProject");
     });
 
     it("Test 19: returns project path in context", async () => {

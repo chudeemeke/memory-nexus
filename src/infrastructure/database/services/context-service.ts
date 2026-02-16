@@ -121,17 +121,26 @@ export class SqliteContextService {
       sinceDate = new Date(startOfToday.getTime() - (options.days - 1) * 24 * 60 * 60 * 1000);
     }
 
-    // Find project by name (LIKE match for substring)
-    const projectRow = this.db
-      .prepare<ProjectRow, [string]>(
-        `
-        SELECT DISTINCT project_name, project_path_decoded, project_path_encoded
-        FROM sessions
-        WHERE project_name LIKE '%' || ? || '%'
-        LIMIT 1
-        `
-      )
-      .get(projectFilter);
+    // Find project by name: exact match first, then substring ranked by session count
+    const projectRow =
+      this.db
+        .prepare<ProjectRow, [string]>(
+          `SELECT DISTINCT project_name, project_path_decoded, project_path_encoded
+           FROM sessions
+           WHERE LOWER(project_name) = LOWER(?)
+           LIMIT 1`
+        )
+        .get(projectFilter) ??
+      this.db
+        .prepare<ProjectRow, [string]>(
+          `SELECT project_name, project_path_decoded, project_path_encoded
+           FROM sessions
+           WHERE project_name LIKE '%' || ? || '%'
+           GROUP BY project_name
+           ORDER BY COUNT(*) DESC
+           LIMIT 1`
+        )
+        .get(projectFilter);
 
     if (!projectRow) {
       return null;
