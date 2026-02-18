@@ -10,13 +10,13 @@ Cross-project context persistence for Claude Code sessions. Extracts JSONL sessi
 
 - Not a cloud service - fully local, no network access
 - Not a replacement for Claude's context window - a complement to it
-- Not a semantic/vector search tool (v1 uses keyword-based FTS5; vector search planned for v2)
+- Not a semantic/vector search tool (v1 uses keyword-based FTS5; hybrid search shipping in v2)
 
 ## Current State
 
 Shipped v1.0 with 49,764 LOC TypeScript (17,073 source + 32,691 tests).
 
-**Tech stack:** Bun, TypeScript 5.5+, bun:sqlite with FTS5, Commander.js v14, cli-progress, chrono-node
+**Tech stack:** Bun, TypeScript 5.5+, bun:sqlite with FTS5 + sqlite-vec, Commander.js v14, cli-progress, chrono-node, @huggingface/transformers v3
 
 **Architecture:** Hexagonal (Domain-Application-Infrastructure-Presentation) with strict layer separation. Domain layer has zero external dependencies. 99%+ domain coverage.
 
@@ -70,11 +70,17 @@ Both Claude and humans use the same commands. No special formatting needed.
 
 ### Active
 
-(None yet -- define with `/gsd:new-milestone` for v2)
+- [ ] Hybrid search combining vector similarity (sqlite-vec) with BM25 (FTS5) using Reciprocal Rank Fusion
+- [ ] Pluggable embedding provider architecture (IEmbeddingProvider port) with local default (Transformers.js + all-MiniLM-L6-v2) and optional API providers (OpenAI, Ollama)
+- [ ] Embedding pipeline integrated into sync workflow with background processing, model-hash cache tracking, and progress reporting
+- [ ] sqlite-vec extension loading alongside existing FTS5 with schema migration from v1.0
+- [ ] Graceful degradation: falls back to FTS5-only when embeddings unavailable
+- [ ] aidev integration: memory-nexus as npm dependency in aidev's TypeScript CLI, exposed via MemoryCommand following AgentCommand pattern
+- [ ] Bash dispatcher wiring: `cmd_memory()` delegates to aidev's TS CLI for full memory functionality
+- [ ] Programmatic API surface: stable execute*Command exports for library consumption
 
 ### Out of Scope
 
-- Vector/semantic search with embeddings -- Planned for v2 (informed by OpenClaw hybrid search patterns)
 - Web UI -- CLI-only tool
 - MCP server integration -- May add after CLI validates
 - Cross-machine sync -- Local only; iCloud/git handles backup
@@ -101,7 +107,15 @@ Both Claude and humans use the same commands. No special formatting needed.
 | Detached process for hooks | spawn() with detached:true, stdio:ignore + unref() for background | Good |
 | Native shell completion | Self-contained bash/zsh/fish scripts; no external dependency like Carapace | Good |
 | Commander.js v14 | Mature CLI framework with built-in conflicts(), argParser, and help | Good |
-| Design for embeddings | Schema accommodates future vector column without current complexity | Pending |
+| Design for embeddings | Schema accommodates future vector column without current complexity | Good |
+| Standalone + platform integration | Docker model: memory is standalone product, aidev integrates as platform; keeps independent utility | Good |
+| Rename to @chude/memory | Package: @chude/memory, binary: memory, matches aidev subcommand; memory-nexus deprecated | Pending |
+| TypeScript for CLI migration | TS over Go/Rust: existing ecosystem, Bun runtime already required, maintainable by user, highest proficiency | Good |
+| Option E hybrid integration | memory-nexus as npm dep in aidev TS CLI, not full source merge; discover integration surface before committing to merge | Pending |
+| Transformers.js v3 over v4 | v3 is stable, v4 is preview-only; migrate to v4 when stable for 4x embedding speedup | Pending |
+| sqlite-vec brute-force over ANN | Under 200K messages, brute-force is <75ms; ANN unnecessary at current scale | Pending |
+| RRF over linear combination | BM25 and cosine scores are incompatible scales; RRF works with ranks, avoids normalization | Pending |
+| all-MiniLM-L6-v2 default model | 23MB quantized, fastest inference, 384d; hybrid search compensates for moderate quality | Pending |
 
 ## Resolved Questions
 
@@ -114,7 +128,7 @@ All open questions from pre-implementation were resolved:
 
 ## Constraints
 
-- **Local only** -- No network access, no external APIs
+- **Local-first** -- No mandatory network access. Optional API embedding providers require user-configured API keys
 - **TypeScript** -- Matches aidev ecosystem
 - **bun** -- Package manager per WoW standards
 - **95%+ coverage at EACH metric** -- Statements, branches, functions, lines individually (Bun only measures functions + lines)
@@ -143,4 +157,4 @@ Per WoW (Ways of Working):
 
 ---
 
-*Last updated: 2026-02-16 after v1.0 milestone*
+*Last updated: 2026-02-18 after v2.0 milestone questioning*
