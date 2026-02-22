@@ -13,7 +13,7 @@ import {
   type DatabaseConfig,
   type DatabaseInitResult,
 } from "../../infrastructure/database/index.js";
-import { ErrorCode, MemoryNexusError } from "../../domain/index.js";
+import { ErrorCode, MemoryError } from "../../domain/index.js";
 import { formatError, formatErrorJson } from "./formatters/index.js";
 
 /**
@@ -35,7 +35,7 @@ export interface DbStartupOptions {
  */
 export type DbStartupResult =
   | { success: true; db: DatabaseInitResult["db"] }
-  | { success: false; error: MemoryNexusError };
+  | { success: false; error: MemoryError };
 
 /**
  * Check if running in an interactive TTY environment.
@@ -92,7 +92,7 @@ function backupCorruptedDatabase(dbPath: string): string {
  * @returns Startup result after handling (may succeed if recreated)
  */
 async function handleCorruptedDatabase(
-  error: MemoryNexusError,
+  error: MemoryError,
   dbPath: string,
   options: DbStartupOptions
 ): Promise<DbStartupResult> {
@@ -142,9 +142,9 @@ async function handleCorruptedDatabase(
     return { success: true, db: result.db };
   } catch (recreateError) {
     const newError =
-      recreateError instanceof MemoryNexusError
+      recreateError instanceof MemoryError
         ? recreateError
-        : new MemoryNexusError(
+        : new MemoryError(
             ErrorCode.DB_CONNECTION_FAILED,
             `Failed to create new database: ${recreateError instanceof Error ? recreateError.message : String(recreateError)}`
           );
@@ -184,9 +184,9 @@ export async function initializeDatabaseForCli(
     return { success: true, db: result.db };
   } catch (error) {
     const nexusError =
-      error instanceof MemoryNexusError
+      error instanceof MemoryError
         ? error
-        : new MemoryNexusError(
+        : new MemoryError(
             ErrorCode.DB_CONNECTION_FAILED,
             error instanceof Error ? error.message : String(error)
           );

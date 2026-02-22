@@ -1,6 +1,6 @@
 #!/usr/bin/env bun
 /**
- * Memory-Nexus CLI Entry Point
+ * Memory CLI Entry Point
  *
  * Cross-project context persistence for Claude Code sessions.
  * Provides commands for syncing, searching, and retrieving session context.
@@ -8,6 +8,7 @@
 
 import { Command } from "commander";
 import pkg from "../../../package.json";
+import { migrateFromLegacy } from "../../infrastructure/migration.js";
 import {
   createSyncCommand,
   createSearchCommand,
@@ -80,5 +81,6 @@ export { program };
 
 // Run if executed directly
 if (import.meta.main) {
+  migrateFromLegacy();
   program.parse();
 }

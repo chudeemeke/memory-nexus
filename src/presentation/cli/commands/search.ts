@@ -11,7 +11,7 @@ import { SearchQuery } from "../../../domain/value-objects/search-query.js";
 import type { SearchResult } from "../../../domain/value-objects/search-result.js";
 import type { SearchOptions } from "../../../domain/ports/services.js";
 import type { MessageRole } from "../../../domain/entities/message.js";
-import { ErrorCode, MemoryNexusError } from "../../../domain/errors/index.js";
+import { ErrorCode, MemoryError } from "../../../domain/errors/index.js";
 import {
   initializeDatabase,
   closeDatabase,
@@ -226,11 +226,11 @@ export async function executeSearchCommand(
     console.log(output);
     return { exitCode: 0 };
   } catch (error) {
-    // Wrap in MemoryNexusError for consistent formatting
+    // Wrap in MemoryError for consistent formatting
     const nexusError =
-      error instanceof MemoryNexusError
+      error instanceof MemoryError
         ? error
-        : new MemoryNexusError(
+        : new MemoryError(
             ErrorCode.DB_CONNECTION_FAILED,
             error instanceof Error ? error.message : String(error)
           );

@@ -23,7 +23,7 @@ import {
     checkHooksInstalled,
     readRecentLogs,
     DEFAULT_CONFIG,
-    type MemoryNexusConfig,
+    type MemoryConfig,
 } from "../hooks/index.js";
 
 /**
@@ -46,9 +46,9 @@ export interface DatabaseHealth {
  * Directory permissions status
  */
 export interface PermissionsHealth {
-    /** Config directory (~/.memory-nexus) is accessible */
+    /** Config directory is accessible */
     configDir: boolean;
-    /** Logs directory (~/.memory-nexus/logs) is accessible */
+    /** Logs directory is accessible */
     logsDir: boolean;
     /** Claude source directory (~/.claude/projects) is accessible */
     sourceDir: boolean;

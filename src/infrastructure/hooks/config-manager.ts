@@ -30,7 +30,7 @@ export function setTestConfigPath(path: string | null): void {
 }
 
 /**
- * Memory-nexus configuration interface
+ * Memory configuration interface
  *
  * All options from CONTEXT.md:
  * - autoSync: Enable automatic hook-based sync
@@ -41,7 +41,7 @@ export function setTestConfigPath(path: string | null): void {
  * - logRetentionDays: Days to keep log files
  * - showFailures: Show failure notifications to user
  */
-export interface MemoryNexusConfig {
+export interface MemoryConfig {
     /** Enable automatic hook-based sync */
     autoSync: boolean;
     /** Scan for unsaved sessions on first command */
@@ -68,7 +68,7 @@ export interface MemoryNexusConfig {
  * - 7 day log retention
  * - Silent failures by default (never interrupt user)
  */
-export const DEFAULT_CONFIG: MemoryNexusConfig = {
+export const DEFAULT_CONFIG: MemoryConfig = {
     autoSync: true,
     recoveryOnStartup: true,
     syncOnCompaction: true,
@@ -112,7 +112,7 @@ export function getConfigPath(): string {
  *
  * @returns Complete configuration with defaults applied
  */
-export function loadConfig(): MemoryNexusConfig {
+export function loadConfig(): MemoryConfig {
     const configPath = getConfigPath();
 
     if (!existsSync(configPath)) {
@@ -121,7 +121,7 @@ export function loadConfig(): MemoryNexusConfig {
 
     try {
         const content = readFileSync(configPath, "utf-8");
-        const loaded = JSON.parse(content) as Partial<MemoryNexusConfig>;
+        const loaded = JSON.parse(content) as Partial<MemoryConfig>;
         return { ...DEFAULT_CONFIG, ...loaded };
     } catch {
         // Invalid config: fall back to defaults with warning
@@ -140,7 +140,7 @@ export function loadConfig(): MemoryNexusConfig {
  *
  * @param config Partial configuration to save (merged with existing)
  */
-export function saveConfig(config: Partial<MemoryNexusConfig>): void {
+export function saveConfig(config: Partial<MemoryConfig>): void {
     const configPath = getConfigPath();
     const configDir = dirname(configPath);
 
@@ -148,11 +148,11 @@ export function saveConfig(config: Partial<MemoryNexusConfig>): void {
     mkdirSync(configDir, { recursive: true });
 
     // Load existing config if present
-    let existing: Partial<MemoryNexusConfig> = {};
+    let existing: Partial<MemoryConfig> = {};
     if (existsSync(configPath)) {
         try {
             const content = readFileSync(configPath, "utf-8");
-            existing = JSON.parse(content) as Partial<MemoryNexusConfig>;
+            existing = JSON.parse(content) as Partial<MemoryConfig>;
         } catch {
             // Ignore invalid existing config
         }

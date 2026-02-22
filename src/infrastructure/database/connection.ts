@@ -9,7 +9,7 @@ import { Database } from "bun:sqlite";
 import { existsSync, mkdirSync } from "node:fs";
 import { dirname } from "node:path";
 import { createSchema, checkFts5Support } from "./schema.js";
-import { ErrorCode, MemoryNexusError } from "../../domain/index.js";
+import { ErrorCode, MemoryError } from "../../domain/index.js";
 import { getDbPath as pathsGetDbPath } from "../paths.js";
 
 /**
@@ -100,7 +100,7 @@ export function initializeDatabase(config: DatabaseConfig): DatabaseInitResult {
             mkdirSync(dirname(path), { recursive: true });
         } catch (error) {
             const message = error instanceof Error ? error.message : String(error);
-            throw new MemoryNexusError(
+            throw new MemoryError(
                 ErrorCode.DB_CONNECTION_FAILED,
                 `Failed to create database directory: ${message}`,
                 { path: dirname(path) }
@@ -115,7 +115,7 @@ export function initializeDatabase(config: DatabaseConfig): DatabaseInitResult {
     } catch (error) {
         const message = error instanceof Error ? error.message : String(error);
         const errno = (error as NodeJS.ErrnoException).code;
-        throw new MemoryNexusError(
+        throw new MemoryError(
             ErrorCode.DB_CONNECTION_FAILED,
             `Failed to connect to database: ${message}`,
             { path, ...(errno ? { errno } : {}) }
@@ -128,13 +128,13 @@ export function initializeDatabase(config: DatabaseConfig): DatabaseInitResult {
         const message = error instanceof Error ? error.message : String(error);
         // "file is not a database" or similar indicates corruption
         if (message.includes("not a database") || message.includes("SQLITE_NOTADB")) {
-            throw new MemoryNexusError(
+            throw new MemoryError(
                 ErrorCode.DB_CORRUPTED,
                 "Database file is corrupted or not a valid SQLite database",
                 { path }
             );
         }
-        throw new MemoryNexusError(
+        throw new MemoryError(
             ErrorCode.DB_CONNECTION_FAILED,
             `Failed to initialize database: ${message}`,
             { path }
@@ -170,9 +170,9 @@ export function initializeDatabase(config: DatabaseConfig): DatabaseInitResult {
             // Get SQLite version for error context before closing
             const versionResult = db.query<{ version: string }, []>("SELECT sqlite_version() as version").get();
             db.close();
-            throw new MemoryNexusError(
+            throw new MemoryError(
                 ErrorCode.DB_CONNECTION_FAILED,
-                "FTS5 is not available. memory-nexus requires FTS5 for full-text search.",
+                "FTS5 is not available. memory requires FTS5 for full-text search.",
                 { sqliteVersion: versionResult?.version ?? "unknown" }
             );
         }
@@ -182,7 +182,7 @@ export function initializeDatabase(config: DatabaseConfig): DatabaseInitResult {
             const result = db.query<{ quick_check: string }, []>("PRAGMA quick_check(1);").get();
             if (result?.quick_check !== "ok") {
                 db.close();
-                throw new MemoryNexusError(
+                throw new MemoryError(
                     ErrorCode.DB_CORRUPTED,
                     "Database integrity check failed",
                     { path, checkResult: result?.quick_check ?? "unknown" }
@@ -197,7 +197,7 @@ export function initializeDatabase(config: DatabaseConfig): DatabaseInitResult {
 
         return { db, walEnabled, fts5Available };
     } catch (error) {
-        if (error instanceof MemoryNexusError) {
+        if (error instanceof MemoryError) {
             throw error;
         }
         handleDbError(error);
@@ -273,19 +273,19 @@ export function bulkOperationCheckpoint(db: Database): CheckpointResult {
 /**
  * Initialize a database with error wrapping
  *
- * Wraps initializeDatabase and ensures all errors are MemoryNexusError instances.
+ * Wraps initializeDatabase and ensures all errors are MemoryError instances.
  * Use this for CLI entry points where structured error handling is needed.
  *
  * @param config - Database configuration options
  * @returns Database instance with initialization status
- * @throws MemoryNexusError for any initialization failure
+ * @throws MemoryError for any initialization failure
  *
  * @example
  * ```typescript
  * try {
  *     const { db } = initializeDatabaseSafe({ path: "./data/memory.db" });
  * } catch (error) {
- *     if (error instanceof MemoryNexusError) {
+ *     if (error instanceof MemoryError) {
  *         console.error(`[${error.code}] ${error.message}`);
  *     }
  * }
@@ -295,15 +295,15 @@ export function initializeDatabaseSafe(config: DatabaseConfig): DatabaseInitResu
     try {
         return initializeDatabase(config);
     } catch (error) {
-        // Already a MemoryNexusError, rethrow
-        if (error instanceof MemoryNexusError) {
+        // Already a MemoryError, rethrow
+        if (error instanceof MemoryError) {
             throw error;
         }
 
         // Wrap generic errors
         const message = error instanceof Error ? error.message : String(error);
         const errno = (error as NodeJS.ErrnoException).code;
-        throw new MemoryNexusError(
+        throw new MemoryError(
             ErrorCode.DB_CONNECTION_FAILED,
             `Database initialization failed: ${message}`,
             { path: config.path, ...(errno ? { errno } : {}) }

@@ -1,5 +1,5 @@
 /**
- * memory-nexus
+ * memory
  *
  * Cross-project context persistence for Claude Code sessions.
  */

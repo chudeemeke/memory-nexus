@@ -186,7 +186,7 @@ describe("hook-runner", () => {
             spawnSpy.mockRestore();
         });
 
-        test("sets MEMORY_NEXUS_HOOK environment variable", () => {
+        test("sets MEMORY_HOOK environment variable", () => {
             const spawnSpy = spyOn(childProcess, "spawn").mockReturnValue({
                 unref: () => {},
                 pid: 12345,
@@ -197,7 +197,7 @@ describe("hook-runner", () => {
             });
 
             const [, , options] = spawnSpy.mock.calls[0];
-            expect(options.env).toHaveProperty("MEMORY_NEXUS_HOOK", "1");
+            expect(options.env).toHaveProperty("MEMORY_HOOK", "1");
 
             spawnSpy.mockRestore();
         });
@@ -481,34 +481,34 @@ describe("hook-runner", () => {
     });
 
     describe("isInvokedByHook", () => {
-        const originalEnv = process.env.MEMORY_NEXUS_HOOK;
+        const originalEnv = process.env.MEMORY_HOOK;
 
         afterEach(() => {
             // Restore original env
             if (originalEnv === undefined) {
-                delete process.env.MEMORY_NEXUS_HOOK;
+                delete process.env.MEMORY_HOOK;
             } else {
-                process.env.MEMORY_NEXUS_HOOK = originalEnv;
+                process.env.MEMORY_HOOK = originalEnv;
             }
         });
 
-        test("returns true when MEMORY_NEXUS_HOOK is 1", () => {
-            process.env.MEMORY_NEXUS_HOOK = "1";
+        test("returns true when MEMORY_HOOK is 1", () => {
+            process.env.MEMORY_HOOK = "1";
             expect(isInvokedByHook()).toBe(true);
         });
 
-        test("returns false when MEMORY_NEXUS_HOOK is not set", () => {
-            delete process.env.MEMORY_NEXUS_HOOK;
+        test("returns false when MEMORY_HOOK is not set", () => {
+            delete process.env.MEMORY_HOOK;
             expect(isInvokedByHook()).toBe(false);
         });
 
-        test("returns false when MEMORY_NEXUS_HOOK is 0", () => {
-            process.env.MEMORY_NEXUS_HOOK = "0";
+        test("returns false when MEMORY_HOOK is 0", () => {
+            process.env.MEMORY_HOOK = "0";
             expect(isInvokedByHook()).toBe(false);
         });
 
-        test("returns false when MEMORY_NEXUS_HOOK is empty", () => {
-            process.env.MEMORY_NEXUS_HOOK = "";
+        test("returns false when MEMORY_HOOK is empty", () => {
+            process.env.MEMORY_HOOK = "";
             expect(isInvokedByHook()).toBe(false);
         });
     });

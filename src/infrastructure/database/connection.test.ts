@@ -18,7 +18,7 @@ import {
     getDefaultDbPath,
     type DatabaseConfig,
 } from "./connection.js";
-import { ErrorCode, MemoryNexusError } from "../../domain/index.js";
+import { ErrorCode, MemoryError } from "../../domain/index.js";
 
 /**
  * Create a temporary database path in a unique directory
@@ -363,8 +363,8 @@ describe("Database Connection", () => {
                 });
                 expect(false).toBe(true); // Should not reach here
             } catch (error) {
-                expect(error).toBeInstanceOf(MemoryNexusError);
-                const mnError = error as MemoryNexusError;
+                expect(error).toBeInstanceOf(MemoryError);
+                const mnError = error as MemoryError;
                 // DB_CORRUPTED is thrown when "file is not a database" detected
                 expect(mnError.code).toBe(ErrorCode.DB_CORRUPTED);
                 expect(mnError.context?.path).toBe(dbPath);
@@ -405,15 +405,15 @@ describe("Database Connection", () => {
             expect(fts5Available).toBe(true);
         });
 
-        test("wraps errors in MemoryNexusError", () => {
+        test("wraps errors in MemoryError", () => {
             // Try to open a path that doesn't exist with create: false
             expect(() => initializeDatabaseSafe({
                 path: "/nonexistent/path/to/database.db",
                 create: false,
-            })).toThrow(MemoryNexusError);
+            })).toThrow(MemoryError);
         });
 
-        test("preserves MemoryNexusError from initializeDatabase", () => {
+        test("preserves MemoryError from initializeDatabase", () => {
             const dbPath = createTempDbPath();
             tempPaths.push(dbPath);
 
@@ -427,7 +427,7 @@ describe("Database Connection", () => {
                 });
                 expect(false).toBe(true); // Should not reach here
             } catch (error) {
-                expect(error).toBeInstanceOf(MemoryNexusError);
+                expect(error).toBeInstanceOf(MemoryError);
             }
         });
 
@@ -439,20 +439,20 @@ describe("Database Connection", () => {
                 });
                 expect(false).toBe(true); // Should not reach here
             } catch (error) {
-                expect(error).toBeInstanceOf(MemoryNexusError);
-                const mnError = error as MemoryNexusError;
+                expect(error).toBeInstanceOf(MemoryError);
+                const mnError = error as MemoryError;
                 expect(mnError.context?.path).toBe("/definitely/not/a/real/path/database.db");
             }
         });
     });
 
     describe("error handling", () => {
-        test("throws MemoryNexusError for connection failure", () => {
+        test("throws MemoryError for connection failure", () => {
             // Try to open a path that doesn't exist with create: false
             expect(() => initializeDatabase({
                 path: "/nonexistent/path/to/database.db",
                 create: false,
-            })).toThrow(MemoryNexusError);
+            })).toThrow(MemoryError);
         });
 
         test("error includes path context", () => {
@@ -464,8 +464,8 @@ describe("Database Connection", () => {
                 });
                 expect(false).toBe(true); // Should not reach here
             } catch (error) {
-                expect(error).toBeInstanceOf(MemoryNexusError);
-                const mnError = error as MemoryNexusError;
+                expect(error).toBeInstanceOf(MemoryError);
+                const mnError = error as MemoryError;
                 expect(mnError.code).toBe(ErrorCode.DB_CONNECTION_FAILED);
                 expect(mnError.context?.path).toBe(badPath);
             }

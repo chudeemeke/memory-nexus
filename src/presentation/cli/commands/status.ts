@@ -13,7 +13,7 @@ import {
     checkHooksInstalled,
     readRecentLogs,
     type HookStatus,
-    type MemoryNexusConfig,
+    type MemoryConfig,
 } from "../../../infrastructure/hooks/index.js";
 import {
     initializeDatabase,
@@ -50,7 +50,7 @@ interface StatusOptions {
  */
 export interface StatusInfo {
     hooks: HookStatus;
-    config: MemoryNexusConfig;
+    config: MemoryConfig;
     lastSync: string | null;
     pendingSessions: number;
     recentLogs: number;

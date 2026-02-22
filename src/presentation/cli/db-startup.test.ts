@@ -14,7 +14,7 @@ import {
   type DbStartupOptions,
 } from "./db-startup.js";
 import { closeDatabase } from "../../infrastructure/database/index.js";
-import { ErrorCode, MemoryNexusError } from "../../domain/index.js";
+import { ErrorCode, MemoryError } from "../../domain/index.js";
 
 /**
  * Create a temporary database path in a unique directory
@@ -121,7 +121,7 @@ describe("db-startup", () => {
 
       expect(result.success).toBe(false);
       if (!result.success) {
-        expect(result.error).toBeInstanceOf(MemoryNexusError);
+        expect(result.error).toBeInstanceOf(MemoryError);
         expect(result.error.code).toBe(ErrorCode.DB_CORRUPTED);
       }
 
@@ -180,7 +180,7 @@ describe("db-startup", () => {
       // The initializeDatabaseSafe will wrap this error
       expect(result.success).toBe(false);
       if (!result.success) {
-        expect(result.error).toBeInstanceOf(MemoryNexusError);
+        expect(result.error).toBeInstanceOf(MemoryError);
       }
     });
 

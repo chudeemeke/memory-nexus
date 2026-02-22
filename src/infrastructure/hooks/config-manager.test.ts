@@ -17,7 +17,7 @@ import {
     getConfigPath,
     getConfigDir,
     DEFAULT_CONFIG,
-    type MemoryNexusConfig,
+    type MemoryConfig,
 } from "./config-manager.js";
 
 describe("config-manager", () => {
@@ -169,7 +169,7 @@ describe("config-manager", () => {
         });
 
         test("loads all config values correctly", () => {
-            const customConfig: MemoryNexusConfig = {
+            const customConfig: MemoryConfig = {
                 autoSync: false,
                 recoveryOnStartup: false,
                 syncOnCompaction: false,

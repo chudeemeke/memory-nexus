@@ -89,8 +89,11 @@ export interface OperationResult {
     message: string;
 }
 
-/** Marker to identify memory-nexus hooks */
-const MEMORY_NEXUS_MARKER = "memory-nexus";
+/** Marker to identify memory hooks in settings.json */
+const MEMORY_MARKER = "memory";
+
+/** Legacy marker for detecting old memory-nexus hooks during transition */
+const LEGACY_MARKER = "memory-nexus";
 
 /**
  * Path overrides for testing
@@ -101,9 +104,9 @@ const MEMORY_NEXUS_MARKER = "memory-nexus";
 export interface PathOverrides {
     /** Override ~/.claude/settings.json */
     settingsPath?: string;
-    /** Override ~/.memory-nexus/backups/settings.json.backup */
+    /** Override backups/settings.json.backup */
     backupPath?: string;
-    /** Override ~/.memory-nexus/hooks/sync-hook.js */
+    /** Override hooks/sync-hook.js */
     hookScriptPath?: string;
 }
 
@@ -170,7 +173,7 @@ export function loadClaudeSettings(): ClaudeSettings {
 /**
  * Backup current settings.json
  *
- * Creates a copy of the current settings to ~/.memory-nexus/backups/.
+ * Creates a copy of the current settings to the backups directory.
  * Safe to call even if settings don't exist.
  *
  * @returns true if backup was created, false if no settings to backup
@@ -218,7 +221,7 @@ export function restoreFromBackup(): boolean {
 }
 
 /**
- * Install memory-nexus hooks into Claude Code settings
+ * Install memory hooks into Claude Code settings
  *
  * Adds SessionEnd and PreCompact hooks to settings.json.
  * Creates backup before modifying.
@@ -242,9 +245,9 @@ export function installHooks(): OperationResult {
     // Initialize hooks object if missing
     settings.hooks = settings.hooks ?? {};
 
-    // Check if already installed
+    // Check if already installed (detect both current and legacy markers)
     const alreadyInstalled = settings.hooks.SessionEnd?.some((h) =>
-        h.hooks.some((e) => e.command.includes(MEMORY_NEXUS_MARKER))
+        h.hooks.some((e) => e.command.includes(MEMORY_MARKER) || e.command.includes(LEGACY_MARKER))
     );
 
     if (alreadyInstalled) {
@@ -284,9 +287,9 @@ export function installHooks(): OperationResult {
 }
 
 /**
- * Uninstall memory-nexus hooks from Claude Code settings
+ * Uninstall memory hooks from Claude Code settings
  *
- * Removes SessionEnd and PreCompact hooks containing the memory-nexus marker.
+ * Removes SessionEnd and PreCompact hooks containing the memory marker.
  * Preserves other hooks and settings.
  *
  * @returns Operation result with success status and message
@@ -302,10 +305,10 @@ export function uninstallHooks(): OperationResult {
         return { success: true, message: "No hooks to uninstall" };
     }
 
-    // Filter out memory-nexus hooks from SessionEnd
+    // Filter out memory hooks from SessionEnd (detect both current and legacy markers)
     if (settings.hooks.SessionEnd) {
         settings.hooks.SessionEnd = settings.hooks.SessionEnd.filter(
-            (h) => !h.hooks.some((e) => e.command.includes(MEMORY_NEXUS_MARKER))
+            (h) => !h.hooks.some((e) => e.command.includes(MEMORY_MARKER) || e.command.includes(LEGACY_MARKER))
         );
 
         // Remove empty array
@@ -314,10 +317,10 @@ export function uninstallHooks(): OperationResult {
         }
     }
 
-    // Filter out memory-nexus hooks from PreCompact
+    // Filter out memory hooks from PreCompact (detect both current and legacy markers)
     if (settings.hooks.PreCompact) {
         settings.hooks.PreCompact = settings.hooks.PreCompact.filter(
-            (h) => !h.hooks.some((e) => e.command.includes(MEMORY_NEXUS_MARKER))
+            (h) => !h.hooks.some((e) => e.command.includes(MEMORY_MARKER) || e.command.includes(LEGACY_MARKER))
         );
 
         // Remove empty array
@@ -338,7 +341,7 @@ export function uninstallHooks(): OperationResult {
 }
 
 /**
- * Check if memory-nexus hooks are installed
+ * Check if memory hooks are installed
  *
  * Returns status of each component:
  * - SessionEnd hook in settings.json
@@ -356,11 +359,11 @@ export function checkHooksInstalled(): HookStatus {
     return {
         sessionEnd:
             settings.hooks?.SessionEnd?.some((h) =>
-                h.hooks.some((e) => e.command.includes(MEMORY_NEXUS_MARKER))
+                h.hooks.some((e) => e.command.includes(MEMORY_MARKER) || e.command.includes(LEGACY_MARKER))
             ) ?? false,
         preCompact:
             settings.hooks?.PreCompact?.some((h) =>
-                h.hooks.some((e) => e.command.includes(MEMORY_NEXUS_MARKER))
+                h.hooks.some((e) => e.command.includes(MEMORY_MARKER) || e.command.includes(LEGACY_MARKER))
             ) ?? false,
         hookScriptExists: existsSync(hookScriptPath),
         backupExists: existsSync(backupPath),

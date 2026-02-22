@@ -6,7 +6,7 @@
 
 export { ErrorCode, type ErrorCodeType } from "./error-codes.js";
 export {
-  MemoryNexusError,
+  MemoryError,
   type ErrorContext,
   type ErrorJson,
-} from "./memory-nexus-error.js";
+} from "./memory-error.js";

@@ -1,15 +1,15 @@
 /**
- * MemoryNexusError Tests
+ * MemoryError Tests
  */
 
 import { describe, expect, test } from "bun:test";
 import { ErrorCode } from "./error-codes.js";
-import { MemoryNexusError, type ErrorJson } from "./memory-nexus-error.js";
+import { MemoryError, type ErrorJson } from "./memory-error.js";
 
-describe("MemoryNexusError", () => {
+describe("MemoryError", () => {
   describe("constructor", () => {
     test("creates error with code and message", () => {
-      const error = new MemoryNexusError(
+      const error = new MemoryError(
         ErrorCode.DB_CONNECTION_FAILED,
         "Could not connect to database"
       );
@@ -20,7 +20,7 @@ describe("MemoryNexusError", () => {
     });
 
     test("creates error with code, message, and context", () => {
-      const error = new MemoryNexusError(
+      const error = new MemoryError(
         ErrorCode.SOURCE_INACCESSIBLE,
         "Cannot read session file",
         { path: "/home/user/.claude/sessions/abc.jsonl", permissions: "000" }
@@ -34,39 +34,39 @@ describe("MemoryNexusError", () => {
       });
     });
 
-    test("sets name to MemoryNexusError", () => {
-      const error = new MemoryNexusError(
+    test("sets name to MemoryError", () => {
+      const error = new MemoryError(
         ErrorCode.INVALID_JSON,
         "Invalid JSON"
       );
 
-      expect(error.name).toBe("MemoryNexusError");
+      expect(error.name).toBe("MemoryError");
     });
 
     test("extends Error class", () => {
-      const error = new MemoryNexusError(
+      const error = new MemoryError(
         ErrorCode.SYNC_FAILED,
         "Sync failed"
       );
 
       expect(error).toBeInstanceOf(Error);
-      expect(error).toBeInstanceOf(MemoryNexusError);
+      expect(error).toBeInstanceOf(MemoryError);
     });
 
     test("has stack trace", () => {
-      const error = new MemoryNexusError(
+      const error = new MemoryError(
         ErrorCode.DB_CORRUPTED,
         "Database corrupted"
       );
 
       expect(error.stack).toBeDefined();
-      expect(error.stack).toContain("MemoryNexusError");
+      expect(error.stack).toContain("MemoryError");
     });
   });
 
   describe("toJSON", () => {
     test("returns structured error without context", () => {
-      const error = new MemoryNexusError(
+      const error = new MemoryError(
         ErrorCode.SESSION_NOT_FOUND,
         "Session abc123 not found"
       );
@@ -82,7 +82,7 @@ describe("MemoryNexusError", () => {
     });
 
     test("returns structured error with context", () => {
-      const error = new MemoryNexusError(
+      const error = new MemoryError(
         ErrorCode.INVALID_JSON,
         "Failed to parse line 42",
         {
@@ -108,7 +108,7 @@ describe("MemoryNexusError", () => {
     });
 
     test("omits empty context object", () => {
-      const error = new MemoryNexusError(
+      const error = new MemoryError(
         ErrorCode.DISK_FULL,
         "Disk is full",
         {}
@@ -126,7 +126,7 @@ describe("MemoryNexusError", () => {
     });
 
     test("can be serialized to JSON string", () => {
-      const error = new MemoryNexusError(
+      const error = new MemoryError(
         ErrorCode.DB_LOCKED,
         "Database is locked by another process",
         { pid: 12345 }
@@ -145,7 +145,7 @@ describe("MemoryNexusError", () => {
     });
 
     test("context with nested objects", () => {
-      const error = new MemoryNexusError(
+      const error = new MemoryError(
         ErrorCode.SYNC_INTERRUPTED,
         "Sync was interrupted",
         {
@@ -171,7 +171,7 @@ describe("MemoryNexusError", () => {
 
   describe("type safety", () => {
     test("ErrorJson interface matches toJSON output", () => {
-      const error = new MemoryNexusError(
+      const error = new MemoryError(
         ErrorCode.UNKNOWN,
         "Unknown error"
       );

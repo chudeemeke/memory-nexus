@@ -10,7 +10,7 @@
  * - Detached process runs in own process group
  * - Parent can exit without waiting (unref)
  * - Output redirected to sync.log for debugging
- * - MEMORY_NEXUS_HOOK env var allows sync to detect hook invocation
+ * - MEMORY_HOOK env var allows sync to detect hook invocation
  * - Entity extraction runs after session sync when hook is triggered
  */
 
@@ -82,7 +82,7 @@ export function ensureLogDirectory(logDir?: string): void {
  * - detached: true - Process runs in own process group
  * - stdio: Redirect stdout/stderr to log file (stdin ignored)
  * - unref() - Parent can exit without waiting
- * - MEMORY_NEXUS_HOOK=1 - Sync can detect hook invocation
+ * - MEMORY_HOOK=1 - Sync can detect hook invocation
  *
  * @param sessionId Session identifier to sync
  * @param options Configuration options
@@ -113,7 +113,7 @@ export function spawnBackgroundSync(
     const subprocess: ChildProcess = spawn(command, args, {
         detached: true,
         stdio: ["ignore", out, err],
-        env: { ...process.env, MEMORY_NEXUS_HOOK: "1" },
+        env: { ...process.env, MEMORY_HOOK: "1" },
     });
 
     // Allow parent to exit without waiting for child
@@ -236,12 +236,12 @@ export async function extractEntitiesFromSession(
 /**
  * Check if the current process was invoked by a hook.
  *
- * The hook runner sets MEMORY_NEXUS_HOOK=1 when spawning sync processes.
+ * The hook runner sets MEMORY_HOOK=1 when spawning sync processes.
  * This allows the sync command to detect hook invocation and enable
  * additional processing like LLM extraction.
  *
  * @returns true if invoked by hook, false otherwise
  */
 export function isInvokedByHook(): boolean {
-    return process.env.MEMORY_NEXUS_HOOK === "1";
+    return process.env.MEMORY_HOOK === "1";
 }

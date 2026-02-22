@@ -26,7 +26,7 @@ import { Session } from "../../domain/entities/session.js";
 import { Message } from "../../domain/entities/message.js";
 import { ToolUse } from "../../domain/entities/tool-use.js";
 import { ExtractionState } from "../../domain/entities/extraction-state.js";
-import { MemoryNexusError, ErrorCode } from "../../domain/errors/index.js";
+import { MemoryError, ErrorCode } from "../../domain/errors/index.js";
 import {
   shouldAbort,
   loadCheckpoint,
@@ -174,7 +174,7 @@ export class SyncService {
     try {
       allSessions = await this.sessionSource.discoverSessions();
     } catch (error) {
-      throw new MemoryNexusError(
+      throw new MemoryError(
         ErrorCode.SOURCE_INACCESSIBLE,
         "Failed to discover sessions",
         { reason: error instanceof Error ? error.message : String(error) }
@@ -297,10 +297,10 @@ export class SyncService {
   }
 
   /**
-   * Wrap an error in MemoryNexusError with appropriate code and context.
+   * Wrap an error in MemoryError with appropriate code and context.
    */
-  private wrapError(error: unknown, sessionPath: string): MemoryNexusError {
-    if (error instanceof MemoryNexusError) {
+  private wrapError(error: unknown, sessionPath: string): MemoryError {
+    if (error instanceof MemoryError) {
       return error;
     }
 
@@ -308,7 +308,7 @@ export class SyncService {
 
     // Detect specific error types from message
     if (message.includes("ENOENT") || message.includes("no such file")) {
-      return new MemoryNexusError(
+      return new MemoryError(
         ErrorCode.SOURCE_INACCESSIBLE,
         `Cannot access session file: ${message}`,
         { path: sessionPath }
@@ -316,7 +316,7 @@ export class SyncService {
     }
 
     if (message.includes("JSON") || message.includes("parse")) {
-      return new MemoryNexusError(
+      return new MemoryError(
         ErrorCode.INVALID_JSON,
         `Failed to parse session file: ${message}`,
         { path: sessionPath }
@@ -324,7 +324,7 @@ export class SyncService {
     }
 
     if (message.includes("locked") || message.includes("SQLITE_BUSY")) {
-      return new MemoryNexusError(
+      return new MemoryError(
         ErrorCode.DB_LOCKED,
         `Database is locked: ${message}`,
         { path: sessionPath }
@@ -332,14 +332,14 @@ export class SyncService {
     }
 
     if (message.includes("database") || message.includes("SQLITE")) {
-      return new MemoryNexusError(
+      return new MemoryError(
         ErrorCode.DB_CONNECTION_FAILED,
         `Database error: ${message}`,
         { path: sessionPath }
       );
     }
 
-    return new MemoryNexusError(ErrorCode.SYNC_FAILED, message, {
+    return new MemoryError(ErrorCode.SYNC_FAILED, message, {
       path: sessionPath,
     });
   }

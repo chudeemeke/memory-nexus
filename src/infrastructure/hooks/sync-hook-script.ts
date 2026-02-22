@@ -20,7 +20,7 @@
  *     "SessionEnd": [{
  *       "hooks": [{
  *         "type": "command",
- *         "command": "bun ~/.memory-nexus/hooks/sync-hook.js",
+ *         "command": "bun ~/.local/share/memory/hooks/sync-hook.js",
  *         "timeout": 5
  *       }]
  *     }]

@@ -1,5 +1,5 @@
 /**
- * Memory Nexus Error
+ * Memory Error
  *
  * Base error class with structured JSON output for programmatic handling.
  */
@@ -12,7 +12,7 @@ import type { ErrorCodeType } from "./error-codes.js";
 export type ErrorContext = Record<string, unknown>;
 
 /**
- * JSON representation of a MemoryNexusError.
+ * JSON representation of a MemoryError.
  */
 export interface ErrorJson {
   error: {
@@ -23,14 +23,14 @@ export interface ErrorJson {
 }
 
 /**
- * Base error class for memory-nexus.
+ * Base error class for memory.
  *
  * Provides structured error information with:
  * - Stable error codes for programmatic handling
  * - Contextual information (file paths, line numbers, etc.)
  * - JSON serialization for machine-readable output
  */
-export class MemoryNexusError extends Error {
+export class MemoryError extends Error {
   /**
    * Stable error code for programmatic handling.
    */
@@ -42,7 +42,7 @@ export class MemoryNexusError extends Error {
   readonly context?: ErrorContext;
 
   /**
-   * Create a new MemoryNexusError.
+   * Create a new MemoryError.
    *
    * @param code Stable error code for programmatic handling
    * @param message Human-readable error message
@@ -50,13 +50,13 @@ export class MemoryNexusError extends Error {
    */
   constructor(code: ErrorCodeType, message: string, context?: ErrorContext) {
     super(message);
-    this.name = "MemoryNexusError";
+    this.name = "MemoryError";
     this.code = code;
     this.context = context;
 
     // Maintain proper stack trace in V8 environments
     if (Error.captureStackTrace) {
-      Error.captureStackTrace(this, MemoryNexusError);
+      Error.captureStackTrace(this, MemoryError);
     }
   }
 

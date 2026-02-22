@@ -13,7 +13,7 @@ export {
     getConfigDir,
     DEFAULT_CONFIG,
     setTestConfigPath,
-    type MemoryNexusConfig,
+    type MemoryConfig,
 } from "./config-manager.js";
 
 // Log exports

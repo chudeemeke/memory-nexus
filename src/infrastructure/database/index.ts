@@ -2,7 +2,7 @@
  * Database Infrastructure
  *
  * Provides SQLite database initialization, schema management,
- * and connection utilities for memory-nexus.
+ * and connection utilities for memory.
  */
 
 // Schema

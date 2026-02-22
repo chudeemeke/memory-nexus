@@ -6,7 +6,7 @@
 
 import {
   ErrorCode,
-  MemoryNexusError,
+  MemoryError,
   type ErrorCodeType,
 } from "../../../domain/index.js";
 import { red, shouldUseColor } from "./color.js";
@@ -88,13 +88,13 @@ function formatContextValue(key: string, value: unknown): string {
  * @returns Formatted error string
  */
 export function formatError(
-  error: Error | MemoryNexusError,
+  error: Error | MemoryError,
   options: ErrorFormatOptions = {}
 ): string {
   const useColor = options.useColor ?? shouldUseColor();
   const lines: string[] = [];
 
-  if (error instanceof MemoryNexusError) {
+  if (error instanceof MemoryError) {
     // Format: "Error [CODE]: message"
     const prefix = red(`Error [${error.code}]:`, useColor);
     lines.push(`${prefix} ${error.message}`);
@@ -144,8 +144,8 @@ interface GenericErrorJson {
  * @param error Error to format
  * @returns JSON string with structured error
  */
-export function formatErrorJson(error: Error | MemoryNexusError): string {
-  if (error instanceof MemoryNexusError) {
+export function formatErrorJson(error: Error | MemoryError): string {
+  if (error instanceof MemoryError) {
     return JSON.stringify(error.toJSON());
   }
 

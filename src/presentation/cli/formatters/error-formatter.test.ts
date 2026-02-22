@@ -3,7 +3,7 @@
  */
 
 import { describe, expect, test, beforeEach, afterEach } from "bun:test";
-import { ErrorCode, MemoryNexusError } from "../../../domain/index.js";
+import { ErrorCode, MemoryError } from "../../../domain/index.js";
 import {
   formatError,
   formatErrorJson,
@@ -96,9 +96,9 @@ describe("error-formatter", () => {
   });
 
   describe("formatError", () => {
-    describe("with MemoryNexusError", () => {
+    describe("with MemoryError", () => {
       test("formats basic error with code and message", () => {
-        const error = new MemoryNexusError(
+        const error = new MemoryError(
           ErrorCode.SESSION_NOT_FOUND,
           "Session abc123 not found"
         );
@@ -110,7 +110,7 @@ describe("error-formatter", () => {
       });
 
       test("includes context values", () => {
-        const error = new MemoryNexusError(
+        const error = new MemoryError(
           ErrorCode.INVALID_JSON,
           "Failed to parse line 42",
           {
@@ -126,7 +126,7 @@ describe("error-formatter", () => {
       });
 
       test("formats complex context values as JSON", () => {
-        const error = new MemoryNexusError(
+        const error = new MemoryError(
           ErrorCode.SYNC_INTERRUPTED,
           "Sync was interrupted",
           {
@@ -140,7 +140,7 @@ describe("error-formatter", () => {
       });
 
       test("includes suggestion when available", () => {
-        const error = new MemoryNexusError(
+        const error = new MemoryError(
           ErrorCode.SOURCE_INACCESSIBLE,
           "Cannot read session directory"
         );
@@ -154,7 +154,7 @@ describe("error-formatter", () => {
       });
 
       test("omits suggestion for UNKNOWN errors", () => {
-        const error = new MemoryNexusError(
+        const error = new MemoryError(
           ErrorCode.UNKNOWN,
           "Something went wrong"
         );
@@ -165,7 +165,7 @@ describe("error-formatter", () => {
       });
 
       test("includes stack trace when verbose", () => {
-        const error = new MemoryNexusError(
+        const error = new MemoryError(
           ErrorCode.DB_CORRUPTED,
           "Database corrupted"
         );
@@ -173,11 +173,11 @@ describe("error-formatter", () => {
         const result = formatError(error, { verbose: true, useColor: false });
 
         expect(result).toContain("Stack trace:");
-        expect(result).toContain("MemoryNexusError");
+        expect(result).toContain("MemoryError");
       });
 
       test("omits stack trace when not verbose", () => {
-        const error = new MemoryNexusError(
+        const error = new MemoryError(
           ErrorCode.DB_CORRUPTED,
           "Database corrupted"
         );
@@ -217,7 +217,7 @@ describe("error-formatter", () => {
 
     describe("color handling", () => {
       test("applies red color when useColor is true", () => {
-        const error = new MemoryNexusError(
+        const error = new MemoryError(
           ErrorCode.DB_LOCKED,
           "Database locked"
         );
@@ -230,7 +230,7 @@ describe("error-formatter", () => {
       });
 
       test("no color when useColor is false", () => {
-        const error = new MemoryNexusError(
+        const error = new MemoryError(
           ErrorCode.DB_LOCKED,
           "Database locked"
         );
@@ -244,9 +244,9 @@ describe("error-formatter", () => {
   });
 
   describe("formatErrorJson", () => {
-    describe("with MemoryNexusError", () => {
+    describe("with MemoryError", () => {
       test("returns valid JSON string", () => {
-        const error = new MemoryNexusError(
+        const error = new MemoryError(
           ErrorCode.SESSION_NOT_FOUND,
           "Session not found"
         );
@@ -257,7 +257,7 @@ describe("error-formatter", () => {
       });
 
       test("returns correct structure without context", () => {
-        const error = new MemoryNexusError(
+        const error = new MemoryError(
           ErrorCode.DISK_FULL,
           "Disk is full"
         );
@@ -273,7 +273,7 @@ describe("error-formatter", () => {
       });
 
       test("returns correct structure with context", () => {
-        const error = new MemoryNexusError(
+        const error = new MemoryError(
           ErrorCode.INVALID_JSON,
           "Parse error at line 5",
           {
@@ -322,7 +322,7 @@ describe("error-formatter", () => {
 
     describe("JSON validity", () => {
       test("escapes special characters in message", () => {
-        const error = new MemoryNexusError(
+        const error = new MemoryError(
           ErrorCode.INVALID_JSON,
           'Invalid JSON: "unexpected token"'
         );
@@ -335,7 +335,7 @@ describe("error-formatter", () => {
       });
 
       test("escapes newlines in message", () => {
-        const error = new MemoryNexusError(
+        const error = new MemoryError(
           ErrorCode.UNKNOWN,
           "Line 1\nLine 2"
         );
@@ -348,7 +348,7 @@ describe("error-formatter", () => {
       });
 
       test("handles unicode in message", () => {
-        const error = new MemoryNexusError(
+        const error = new MemoryError(
           ErrorCode.UNKNOWN,
           "Error with unicode: \u2603"
         );

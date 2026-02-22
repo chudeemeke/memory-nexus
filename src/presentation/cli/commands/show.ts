@@ -7,7 +7,7 @@
 
 import { Command, Option } from "commander";
 import type { CommandResult } from "../command-result.js";
-import { ErrorCode, MemoryNexusError } from "../../../domain/errors/index.js";
+import { ErrorCode, MemoryError } from "../../../domain/errors/index.js";
 import { SqliteSessionRepository } from "../../../infrastructure/database/repositories/session-repository.js";
 import { SqliteMessageRepository } from "../../../infrastructure/database/repositories/message-repository.js";
 import { SqliteToolUseRepository } from "../../../infrastructure/database/repositories/tool-use-repository.js";
@@ -171,11 +171,11 @@ export async function executeShowCommand(
     console.log(output);
     return { exitCode: 0 };
   } catch (error) {
-    // Wrap in MemoryNexusError for consistent formatting
+    // Wrap in MemoryError for consistent formatting
     const nexusError =
-      error instanceof MemoryNexusError
+      error instanceof MemoryError
         ? error
-        : new MemoryNexusError(
+        : new MemoryError(
             ErrorCode.DB_CONNECTION_FAILED,
             error instanceof Error ? error.message : String(error)
           );
