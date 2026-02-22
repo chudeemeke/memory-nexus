@@ -39,7 +39,12 @@
 **Goal:** Users install and run `@chude/memory` with the `memory` binary; the old `memory-nexus` name is deprecated and redirects to the new package.
 
 **Depends on:** None (no v2 dependencies; builds on shipped v1.0)
-**Estimated Plans:** 2-3
+**Plans:** 3 plans
+
+Plans:
+- [ ] 13-01-PLAN.md -- Centralized XDG paths module and legacy migration with rollback
+- [ ] 13-02-PLAN.md -- Rename all internal identifiers and user-facing strings
+- [ ] 13-03-PLAN.md -- Deprecation stub, migration docs, CLAUDE.md updates
 
 Requirements: RENAME-01, RENAME-02, RENAME-03, RENAME-04, RENAME-05
 
@@ -175,7 +180,7 @@ Phase 13 (Package Rename)
 | Phase | Milestone | Plans | Status | Completed |
 |-------|-----------|-------|--------|-----------|
 | 1-12 | v1.0 | 56 | Complete | 2026-02-06 |
-| 13 | v2.0 | -- | Pending | -- |
+| 13 | v2.0 | 3 | Planned | -- |
 | 14 | v2.0 | -- | Pending | -- |
 | 15 | v2.0 | -- | Pending | -- |
 | 16 | v2.0 | -- | Pending | -- |
@@ -184,4 +189,4 @@ Phase 13 (Package Rename)
 
 ---
 
-*Last updated: 2026-02-18 (v2.0 milestone roadmap created)*
+*Last updated: 2026-02-22 (Phase 13 planned)*
