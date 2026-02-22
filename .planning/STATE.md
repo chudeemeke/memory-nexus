@@ -13,12 +13,12 @@ See: .planning/PROJECT.md (updated 2026-02-18)
 ## Current Position
 
 **Milestone:** v2.0 Hybrid Search and Rebrand
-**Phase:** 13 (Package Rename) -- not yet started
-**Status:** Roadmap created, awaiting plan-phase
+**Phase:** 13 (Package Rename) -- Plan 01 complete, Plan 02 next
+**Status:** Executing phase 13
 
 ```
 v2.0 Progress: [....................] 0/6 phases
-  Phase 13: Package Rename          [ ] Pending
+  Phase 13: Package Rename          [>] In Progress (Plan 01/03 complete)
   Phase 14: Embedding Infrastructure [ ] Pending
   Phase 15: Embedding Pipeline       [ ] Pending
   Phase 16: Hybrid Search            [ ] Pending
@@ -39,6 +39,12 @@ v2.0 Progress: [....................] 0/6 phases
 - 95%+ coverage at EACH metric for all new code
 - Zero domain layer external dependencies maintained
 
+**v2.0 (actual):**
+
+| Phase | Plan | Duration | Tasks | Files |
+|-------|------|----------|-------|-------|
+| 13-01 | Centralized paths + migration | 14min | 2 | 18 |
+
 ## Accumulated Context
 
 ### Key Technical Decisions (v2.0)
@@ -54,6 +60,8 @@ v2.0 Progress: [....................] 0/6 phases
 | WASM fallback | Automatic on native failure | Transparent to user; 2-5x slower but always works |
 | aidev integration | Option E (npm dependency) | memory as dependency in aidev TS CLI; discover surface before committing to merge |
 | Package name | @chude/memory, binary: memory | Matches aidev subcommand; memory-nexus deprecated |
+| XDG paths | ~/.config/memory (config), ~/.local/share/memory (data) | XDG Base Directory Specification compliance |
+| Migration hook re-install | Non-fatal (logged, data migration still succeeds) | Data integrity prioritized over hook state |
 
 ### Research Completed
 
@@ -72,19 +80,18 @@ None.
 
 ### Last Session
 
-**Date:** 2026-02-18
-**Completed:** v2.0 roadmap created (Phases 13-18), requirements defined, research completed
-**Next:** Run `/gsd:plan-phase 13` to plan the Package Rename phase
+**Date:** 2026-02-22
+**Completed:** Phase 13 Plan 01 -- centralized paths module and legacy migration with infrastructure rewiring
+**Stopped at:** Completed 13-01-PLAN.md
 
 ### Context for Next Session
 
-1. v2.0 roadmap is final with 6 phases (13-18)
-2. Phase 13 (Package Rename) has no dependencies and should start first
-3. Research documents contain implementation patterns and code examples ready for use
-4. REQUIREMENTS.md has full traceability table mapping all 35 requirements to phases
-5. Phase 17 (Provider Ecosystem) can run in parallel with Phases 15-16 once Phase 14 completes
-6. QUAL requirements are cross-cutting and enforced in every phase
+1. Phase 13 Plan 01 complete: paths.ts, migration.ts, all infrastructure rewired
+2. Next: Phase 13 Plan 02 (package.json rename, binary name, output text)
+3. All tests pass: 2061 tests, zero regressions
+4. New XDG paths: ~/.config/memory (config), ~/.local/share/memory (data)
+5. Migration module ready but not yet integrated into CLI startup flow
 
 ---
 
-*Last updated: 2026-02-18 (v2.0 roadmap created)*
+*Last updated: 2026-02-22 (Phase 13 Plan 01 complete)*
