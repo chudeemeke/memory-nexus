@@ -151,8 +151,8 @@ export async function gatherStatus(options: GatherStatusOptions = {}): Promise<S
  * @param status Status information to display
  */
 export function formatStatusOutput(status: StatusInfo): void {
-    console.log("Memory-Nexus Status");
-    console.log("===================\n");
+    console.log("Memory Status");
+    console.log("=============\n");
 
     console.log("Hooks:");
     console.log(`  SessionEnd:  ${status.hooks.sessionEnd ? "installed" : "not installed"}`);
@@ -177,9 +177,9 @@ export function formatStatusOutput(status: StatusInfo): void {
 
     // Recommendations
     if (!status.hooks.sessionEnd || !status.hooks.preCompact) {
-        console.log("\nRecommendation: Run 'memory-nexus install' to enable automatic sync.");
+        console.log("\nRecommendation: Run 'memory install' to enable automatic sync.");
     }
     if (status.pendingSessions > 0) {
-        console.log(`\nNote: ${status.pendingSessions} session(s) pending sync. Run 'memory-nexus sync' to sync now.`);
+        console.log(`\nNote: ${status.pendingSessions} session(s) pending sync. Run 'memory sync' to sync now.`);
     }
 }

@@ -232,7 +232,7 @@ describe("status command", () => {
 
             formatStatusOutput(status);
 
-            expect(logOutput.join("\n")).toContain("Recommendation: Run 'memory-nexus install'");
+            expect(logOutput.join("\n")).toContain("Recommendation: Run 'memory install'");
         });
 
         test("shows note when sessions pending", () => {
@@ -252,7 +252,7 @@ describe("status command", () => {
             formatStatusOutput(status);
 
             expect(logOutput.join("\n")).toContain("5 session(s) pending sync");
-            expect(logOutput.join("\n")).toContain("memory-nexus sync");
+            expect(logOutput.join("\n")).toContain("memory sync");
         });
     });
 
@@ -260,7 +260,7 @@ describe("status command", () => {
         test("displays formatted output by default", async () => {
             await executeStatusCommand({});
 
-            expect(logOutput.join("\n")).toContain("Memory-Nexus Status");
+            expect(logOutput.join("\n")).toContain("Memory Status");
             expect(logOutput.join("\n")).toContain("Hooks:");
             expect(logOutput.join("\n")).toContain("Configuration:");
             expect(logOutput.join("\n")).toContain("Activity:");

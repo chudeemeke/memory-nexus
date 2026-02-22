@@ -9,6 +9,7 @@ import {
   formatErrorJson,
   getSuggestion,
 } from "./error-formatter.js";
+import { getLogDir } from "../../../infrastructure/paths.js";
 
 describe("error-formatter", () => {
   describe("getSuggestion", () => {
@@ -74,7 +75,7 @@ describe("error-formatter", () => {
 
     test("returns suggestion for SYNC_FAILED", () => {
       expect(getSuggestion(ErrorCode.SYNC_FAILED)).toBe(
-        "Check logs at ~/.memory-nexus/logs for details"
+        `Check logs at ${getLogDir()} for details`
       );
     });
 

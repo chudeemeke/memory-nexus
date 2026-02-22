@@ -9,6 +9,7 @@ import {
   MemoryError,
   type ErrorCodeType,
 } from "../../../domain/index.js";
+import { getLogDir } from "../../../infrastructure/paths.js";
 import { red, shouldUseColor } from "./color.js";
 
 /**
@@ -55,7 +56,7 @@ export function getSuggestion(code: ErrorCodeType): string | null {
     case ErrorCode.SYNC_INTERRUPTED:
       return "Run 'memory sync' again to resume";
     case ErrorCode.SYNC_FAILED:
-      return "Check logs at ~/.memory-nexus/logs for details";
+      return `Check logs at ${getLogDir()} for details`;
     case ErrorCode.INVALID_ARGUMENT:
       return "Run command with --help to see valid options";
     case ErrorCode.MISSING_ARGUMENT:

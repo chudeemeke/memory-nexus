@@ -29,7 +29,7 @@ export function isValidShell(shell: string): shell is ShellType {
  * @returns Bash completion script string
  */
 export function generateBashCompletion(): string {
-    return `# memory-nexus bash completion
+    return `# memory bash completion
 # Add to ~/.bashrc: eval "$(memory completion bash)"
 
 _memory_completion() {
@@ -162,7 +162,7 @@ complete -F _memory_completion memory
  */
 export function generateZshCompletion(): string {
     return `#compdef memory
-# memory-nexus zsh completion
+# memory zsh completion
 # Add to ~/.zshrc: eval "$(memory completion zsh)"
 
 _memory() {
@@ -330,7 +330,7 @@ _memory "\$@"
  * @returns Fish completion script string
  */
 export function generateFishCompletion(): string {
-    return `# memory-nexus fish completion
+    return `# memory fish completion
 # Save to ~/.config/fish/completions/memory.fish:
 #   memory completion fish > ~/.config/fish/completions/memory.fish
 

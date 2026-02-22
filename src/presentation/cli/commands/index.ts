@@ -1,7 +1,7 @@
 /**
  * CLI Commands
  *
- * Command handlers for the memory-nexus CLI.
+ * Command handlers for the memory CLI.
  */
 
 export type { CommandResult } from "../command-result.js";

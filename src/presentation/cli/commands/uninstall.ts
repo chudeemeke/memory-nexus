@@ -71,7 +71,7 @@ export async function executeUninstallCommand(options: UninstallOptions): Promis
 
     console.log("\nHooks uninstalled successfully.");
     console.log("Sessions will no longer sync automatically.");
-    console.log("Manual sync still available: memory-nexus sync");
+    console.log("Manual sync still available: memory sync");
 
     return { exitCode: 0 };
 }

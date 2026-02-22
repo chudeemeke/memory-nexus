@@ -252,7 +252,7 @@ export function attemptFixes(result: HealthCheckResult, useColor: boolean): stri
     if (result.database.integrity === "corrupted") {
         messages.push(yellow("Database corruption detected. Consider:", useColor));
         messages.push("  1. Backup your database file");
-        messages.push("  2. Delete the database: rm ~/.memory-nexus/memory.db");
+        messages.push(`  2. Delete the database: rm ${getDefaultDbPath()}`);
         messages.push("  3. Re-sync: memory sync");
     }
 

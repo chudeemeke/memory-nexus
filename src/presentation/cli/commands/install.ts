@@ -69,7 +69,7 @@ export async function executeInstallCommand(options: InstallOptions): Promise<Co
         return { exitCode: 0 };
     }
 
-    // Copy hook script to ~/.memory-nexus/hooks/
+    // Copy hook script to hooks directory
     const hookScriptDest = getHookScriptPath();
     mkdirSync(dirname(hookScriptDest), { recursive: true });
 
@@ -90,8 +90,8 @@ export async function executeInstallCommand(options: InstallOptions): Promise<Co
     if (result.success) {
         console.log("\nHook installation complete!");
         console.log("Sessions will now sync automatically when they end.");
-        console.log("\nTo check status: memory-nexus status");
-        console.log("To uninstall: memory-nexus uninstall");
+        console.log("\nTo check status: memory status");
+        console.log("To uninstall: memory uninstall");
     } else {
         return { exitCode: 1 };
     }

@@ -1,12 +1,12 @@
 {
-  "name": "memory-nexus",
-  "version": "0.1.2",
+  "name": "@chude/memory",
+  "version": "2.0.0",
   "description": "Cross-project context persistence for Claude Code sessions",
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "bin": {
-    "memory-nexus": "dist/presentation/cli/index.js"
+    "memory": "dist/presentation/cli/index.js"
   },
   "files": [
     "dist"
