@@ -13,12 +13,12 @@ See: .planning/PROJECT.md (updated 2026-02-18)
 ## Current Position
 
 **Milestone:** v2.0 Hybrid Search and Rebrand
-**Phase:** 13 (Package Rename) -- Plan 01 complete, Plan 02 next
+**Phase:** 13 (Package Rename) -- Plan 02 complete, Plan 03 next
 **Status:** Executing phase 13
 
 ```
 v2.0 Progress: [....................] 0/6 phases
-  Phase 13: Package Rename          [>] In Progress (Plan 01/03 complete)
+  Phase 13: Package Rename          [>] In Progress (Plan 02/03 complete)
   Phase 14: Embedding Infrastructure [ ] Pending
   Phase 15: Embedding Pipeline       [ ] Pending
   Phase 16: Hybrid Search            [ ] Pending
@@ -44,6 +44,7 @@ v2.0 Progress: [....................] 0/6 phases
 | Phase | Plan | Duration | Tasks | Files |
 |-------|------|----------|-------|-------|
 | 13-01 | Centralized paths + migration | 14min | 2 | 18 |
+| 13-02 | Internal identity rename + user-facing strings | 25min | 2 | 36 |
 
 ## Accumulated Context
 
@@ -62,6 +63,8 @@ v2.0 Progress: [....................] 0/6 phases
 | Package name | @chude/memory, binary: memory | Matches aidev subcommand; memory-nexus deprecated |
 | XDG paths | ~/.config/memory (config), ~/.local/share/memory (data) | XDG Base Directory Specification compliance |
 | Migration hook re-install | Non-fatal (logged, data migration still succeeds) | Data integrity prioritized over hook state |
+| Dual marker hook detection | MEMORY_MARKER + LEGACY_MARKER | Backward compatible detection of old hooks during rename transition |
+| Dynamic error paths | getLogDir() in SYNC_FAILED suggestion | User-facing paths always resolve correctly regardless of XDG config |
 
 ### Research Completed
 
@@ -81,17 +84,19 @@ None.
 ### Last Session
 
 **Date:** 2026-02-22
-**Completed:** Phase 13 Plan 01 -- centralized paths module and legacy migration with infrastructure rewiring
-**Stopped at:** Completed 13-01-PLAN.md
+**Completed:** Phase 13 Plan 02 -- internal identity rename and user-facing string updates
+**Stopped at:** Completed 13-02-PLAN.md
 
 ### Context for Next Session
 
-1. Phase 13 Plan 01 complete: paths.ts, migration.ts, all infrastructure rewired
-2. Next: Phase 13 Plan 02 (package.json rename, binary name, output text)
-3. All tests pass: 2061 tests, zero regressions
-4. New XDG paths: ~/.config/memory (config), ~/.local/share/memory (data)
-5. Migration module ready but not yet integrated into CLI startup flow
+1. Phase 13 Plans 01-02 complete: paths, migration, identity rename all done
+2. Next: Phase 13 Plan 03 (documentation, README, changelog updates)
+3. All tests pass: 2056 pass, 5 pre-existing timeouts in browse/context tests
+4. Package identity: @chude/memory v2.0.0, binary: memory
+5. migrateFromLegacy() wired into CLI startup (runs before program.parse())
+6. Dual marker detection in settings-manager.ts for backward-compatible hook detection
+7. No "memory-nexus" in source files except: test data project names, test temp dirs, doctor.ts legacy path messages
 
 ---
 
-*Last updated: 2026-02-22 (Phase 13 Plan 01 complete)*
+*Last updated: 2026-02-22 (Phase 13 Plan 02 complete)*
