@@ -82,9 +82,9 @@ describe("settings-manager", () => {
 
             expect(getClaudeSettingsPath()).toContain(".claude");
             expect(getClaudeSettingsPath()).toContain("settings.json");
-            expect(getBackupPath()).toContain(".memory-nexus");
+            expect(getBackupPath()).toContain("memory");
             expect(getBackupPath()).toContain("backups");
-            expect(getHookScriptPath()).toContain(".memory-nexus");
+            expect(getHookScriptPath()).toContain("memory");
             expect(getHookScriptPath()).toContain("hooks");
 
             // Restore for other tests

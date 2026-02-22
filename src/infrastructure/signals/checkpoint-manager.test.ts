@@ -50,7 +50,7 @@ describe("checkpoint-manager", () => {
         test("returns default path when no override", () => {
             setTestCheckpointPath(null);
             const path = getCheckpointPath();
-            expect(path).toContain(".memory-nexus");
+            expect(path).toContain("memory");
             expect(path).toContain("sync-checkpoint.json");
         });
     });

@@ -39,9 +39,9 @@ describe("hook-runner", () => {
     });
 
     describe("getLogPath", () => {
-        test("returns path under .memory-nexus/logs", () => {
+        test("returns path under memory/logs", () => {
             const logPath = getLogPath();
-            expect(logPath).toContain(".memory-nexus");
+            expect(logPath).toContain("memory");
             expect(logPath).toContain("logs");
             expect(logPath).toEndWith("sync.log");
         });

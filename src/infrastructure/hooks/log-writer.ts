@@ -2,7 +2,7 @@
  * Log Writer
  *
  * Structured JSON log writer with rotation support.
- * Logs stored in ~/.memory-nexus/logs/sync.log
+ * Logs stored at the XDG data path via centralized paths module.
  *
  * Features:
  * - Append-only JSON lines format (machine-parseable)
@@ -19,8 +19,8 @@ import {
     renameSync,
     statSync,
 } from "node:fs";
-import { homedir } from "node:os";
 import { dirname, join } from "node:path";
+import { getLogDir as pathsGetLogDir } from "../paths.js";
 
 /**
  * Test path override for log file
@@ -74,19 +74,19 @@ export type LogEntryInput = Omit<LogEntry, "timestamp">;
 /**
  * Get the path to the log directory
  *
- * @returns Path to ~/.memory-nexus/logs/ (or test override directory)
+ * @returns Path to the logs directory (or test override directory)
  */
 export function getLogDir(): string {
     if (testLogPath !== null) {
         return dirname(testLogPath);
     }
-    return join(homedir(), ".memory-nexus", "logs");
+    return pathsGetLogDir();
 }
 
 /**
  * Get the path to the sync log file
  *
- * @returns Path to ~/.memory-nexus/logs/sync.log (or test override)
+ * @returns Path to sync.log (or test override)
  */
 export function getLogPath(): string {
     if (testLogPath !== null) {

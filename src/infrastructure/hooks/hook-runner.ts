@@ -16,8 +16,8 @@
 
 import { spawn, type ChildProcess } from "node:child_process";
 import { openSync, mkdirSync } from "node:fs";
-import { homedir } from "node:os";
 import { join } from "node:path";
+import { getLogDir as pathsGetLogDir } from "../paths.js";
 import type { Database } from "bun:sqlite";
 import type { Message } from "../../domain/entities/message.js";
 import { LlmExtractor, type ExtractionResult } from "../../application/services/llm-extractor.js";
@@ -48,10 +48,10 @@ export interface SpawnResult {
 /**
  * Get the path to the sync log file
  *
- * @returns Path to ~/.memory-nexus/logs/sync.log
+ * @returns Path to logs/sync.log
  */
 export function getLogPath(): string {
-    return join(homedir(), ".memory-nexus", "logs", "sync.log");
+    return join(pathsGetLogDir(), "sync.log");
 }
 
 /**
@@ -63,7 +63,7 @@ export function getLogPath(): string {
  * @param logDir Optional custom log directory path
  */
 export function ensureLogDirectory(logDir?: string): void {
-    const dir = logDir ?? join(homedir(), ".memory-nexus", "logs");
+    const dir = logDir ?? pathsGetLogDir();
     mkdirSync(dir, { recursive: true });
 }
 
@@ -95,7 +95,7 @@ export function spawnBackgroundSync(
     const { command = "aidev", quiet = true, logDir } = options;
 
     // Ensure log directory exists
-    const logDirPath = logDir ?? join(homedir(), ".memory-nexus", "logs");
+    const logDirPath = logDir ?? pathsGetLogDir();
     ensureLogDirectory(logDirPath);
 
     // Open log file for append (stdout and stderr)

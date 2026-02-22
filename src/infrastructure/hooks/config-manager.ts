@@ -1,15 +1,18 @@
 /**
  * Configuration Manager
  *
- * Manages memory-nexus configuration with defaults.
- * Configuration stored in ~/.memory-nexus/config.json
+ * Manages memory configuration with defaults.
+ * Configuration stored at the XDG config path via centralized paths module.
  *
  * Implements graceful handling of missing/invalid config files.
  */
 
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
-import { homedir } from "node:os";
-import { dirname, join } from "node:path";
+import { dirname } from "node:path";
+import {
+    getConfigDir as pathsGetConfigDir,
+    getConfigPath as pathsGetConfigPath,
+} from "../paths.js";
 
 /**
  * Test path override for config file
@@ -78,25 +81,25 @@ export const DEFAULT_CONFIG: MemoryNexusConfig = {
 /**
  * Get the path to the config directory
  *
- * @returns Path to ~/.memory-nexus/ (or test override directory)
+ * @returns Path to the config directory (or test override directory)
  */
 export function getConfigDir(): string {
     if (testConfigPath !== null) {
         return dirname(testConfigPath);
     }
-    return join(homedir(), ".memory-nexus");
+    return pathsGetConfigDir();
 }
 
 /**
  * Get the path to the config file
  *
- * @returns Path to ~/.memory-nexus/config.json (or test override)
+ * @returns Path to config.json (or test override)
  */
 export function getConfigPath(): string {
     if (testConfigPath !== null) {
         return testConfigPath;
     }
-    return join(getConfigDir(), "config.json");
+    return pathsGetConfigPath();
 }
 
 /**

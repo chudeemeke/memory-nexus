@@ -352,6 +352,23 @@ describe("doctor command", () => {
         });
     });
 
+    describe("migration status", () => {
+        it("JSON output includes migration field", async () => {
+            consoleOutput = [];
+            console.log = (msg: string) => consoleOutput.push(msg);
+
+            await executeDoctorCommand({ json: true });
+
+            const output = consoleOutput.join("\n");
+            const parsed = JSON.parse(output);
+
+            expect(parsed).toHaveProperty("migration");
+            expect(parsed.migration).toHaveProperty("status");
+            expect(parsed.migration).toHaveProperty("legacyExists");
+            expect(parsed.migration).toHaveProperty("newExists");
+        });
+    });
+
     describe("executeDoctorCommand", () => {
         it("outputs formatted result by default", async () => {
             consoleOutput = [];

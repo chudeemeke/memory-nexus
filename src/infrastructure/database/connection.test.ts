@@ -226,9 +226,9 @@ describe("Database Connection", () => {
     });
 
     describe("getDefaultDbPath", () => {
-        test("returns path containing .memory-nexus", () => {
+        test("returns path containing memory", () => {
             const path = getDefaultDbPath();
-            expect(path).toContain(".memory-nexus");
+            expect(path).toContain("memory");
         });
 
         test("returns path ending with memory.db", () => {

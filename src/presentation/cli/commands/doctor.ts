@@ -25,6 +25,7 @@ import {
     dim,
     shouldUseColor,
 } from "../formatters/color.js";
+import { getMigrationStatus } from "../../../infrastructure/migration.js";
 
 /**
  * Options parsed from CLI arguments.
@@ -289,12 +290,14 @@ export async function executeDoctorCommand(options: DoctorOptions): Promise<Comm
 
     if (options.json) {
         // Convert dates to ISO strings for JSON serialization
+        const migration = getMigrationStatus();
         const jsonResult = {
             ...healthResult,
             hooks: {
                 ...healthResult.hooks,
                 lastRun: healthResult.hooks.lastRun?.toISOString() ?? null,
             },
+            migration,
         };
         console.log(JSON.stringify(jsonResult, null, 2));
         return { exitCode: 0 };
@@ -302,6 +305,16 @@ export async function executeDoctorCommand(options: DoctorOptions): Promise<Comm
 
     // Default output
     console.log(formatHealthResult(healthResult, useColor));
+
+    // Migration status check
+    const migration = getMigrationStatus();
+    if (migration.status === "pending") {
+        console.log("");
+        console.log(yellow("Legacy data found at ~/.memory-nexus/. Run any memory command to auto-migrate.", useColor));
+    } else if (migration.status === "partial") {
+        console.log("");
+        console.log(yellow("Partial migration detected. Some data in ~/.memory-nexus/ and some in new paths. Re-run migration or check manually.", useColor));
+    }
 
     // Attempt fixes if requested
     if (options.fix) {

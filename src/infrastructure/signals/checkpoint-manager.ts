@@ -8,8 +8,8 @@
  */
 
 import { existsSync, mkdirSync, readFileSync, unlinkSync, writeFileSync } from "node:fs";
-import { homedir } from "node:os";
-import { dirname, join } from "node:path";
+import { dirname } from "node:path";
+import { getCheckpointPath as resolveCheckpointPath } from "../paths.js";
 
 /**
  * Test path override for checkpoint file
@@ -52,13 +52,13 @@ export interface SyncCheckpoint {
 /**
  * Get the path to the checkpoint file
  *
- * @returns Path to ~/.memory-nexus/sync-checkpoint.json (or test override)
+ * @returns Path to sync-checkpoint.json (or test override)
  */
 export function getCheckpointPath(): string {
     if (testCheckpointPath !== null) {
         return testCheckpointPath;
     }
-    return join(homedir(), ".memory-nexus", "sync-checkpoint.json");
+    return resolveCheckpointPath();
 }
 
 /**

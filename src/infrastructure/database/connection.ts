@@ -7,10 +7,10 @@
 
 import { Database } from "bun:sqlite";
 import { existsSync, mkdirSync } from "node:fs";
-import { homedir } from "node:os";
-import { dirname, join } from "node:path";
+import { dirname } from "node:path";
 import { createSchema, checkFts5Support } from "./schema.js";
 import { ErrorCode, MemoryNexusError } from "../../domain/index.js";
+import { getDbPath as pathsGetDbPath } from "../paths.js";
 
 /**
  * Database configuration options
@@ -47,10 +47,10 @@ export interface DatabaseInitResult {
 /**
  * Get the default database path
  *
- * @returns Path to ~/.memory-nexus/memory.db
+ * @returns Path to the database file
  */
 export function getDefaultDbPath(): string {
-    return join(homedir(), ".memory-nexus", "memory.db");
+    return pathsGetDbPath();
 }
 
 /**

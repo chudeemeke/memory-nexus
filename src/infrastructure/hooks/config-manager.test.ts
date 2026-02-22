@@ -87,14 +87,14 @@ describe("config-manager", () => {
     describe("getConfigDir", () => {
         test("returns path under home directory", () => {
             const configDir = getConfigDir();
-            expect(configDir).toContain(".memory-nexus");
+            expect(configDir).toContain("memory");
         });
     });
 
     describe("getConfigPath", () => {
         test("returns path to config.json", () => {
             const configPath = getConfigPath();
-            expect(configPath).toContain(".memory-nexus");
+            expect(configPath).toContain("memory");
             expect(configPath).toEndWith("config.json");
         });
     });
@@ -107,7 +107,7 @@ describe("config-manager", () => {
 
         test("merges partial config with defaults", () => {
             // Create config directory and write partial config
-            const configDir = join(testDir, ".memory-nexus");
+            const configDir = join(testDir, ".config", "memory");
             mkdirSync(configDir, { recursive: true });
             writeFileSync(
                 join(configDir, "config.json"),
@@ -130,7 +130,7 @@ describe("config-manager", () => {
 
         test("handles invalid JSON (returns defaults)", () => {
             // Create config directory and write invalid JSON
-            const configDir = join(testDir, ".memory-nexus");
+            const configDir = join(testDir, ".config", "memory");
             mkdirSync(configDir, { recursive: true });
             writeFileSync(join(configDir, "config.json"), "{ invalid json }");
 
@@ -140,7 +140,7 @@ describe("config-manager", () => {
 
         test("handles malformed JSON (syntax error)", () => {
             // Create config directory and write malformed JSON
-            const configDir = join(testDir, ".memory-nexus");
+            const configDir = join(testDir, ".config", "memory");
             mkdirSync(configDir, { recursive: true });
             writeFileSync(join(configDir, "config.json"), "not json at all");
 
@@ -150,7 +150,7 @@ describe("config-manager", () => {
 
         test("handles empty config file", () => {
             // Create config directory and write empty file
-            const configDir = join(testDir, ".memory-nexus");
+            const configDir = join(testDir, ".config", "memory");
             mkdirSync(configDir, { recursive: true });
             writeFileSync(join(configDir, "config.json"), "");
 
@@ -160,7 +160,7 @@ describe("config-manager", () => {
 
         test("handles empty JSON object", () => {
             // Create config directory and write empty object
-            const configDir = join(testDir, ".memory-nexus");
+            const configDir = join(testDir, ".config", "memory");
             mkdirSync(configDir, { recursive: true });
             writeFileSync(join(configDir, "config.json"), "{}");
 
@@ -179,7 +179,7 @@ describe("config-manager", () => {
                 showFailures: true,
             };
 
-            const configDir = join(testDir, ".memory-nexus");
+            const configDir = join(testDir, ".config", "memory");
             mkdirSync(configDir, { recursive: true });
             writeFileSync(join(configDir, "config.json"), JSON.stringify(customConfig));
 
@@ -200,7 +200,7 @@ describe("config-manager", () => {
 
     describe("saveConfig", () => {
         test("creates directory if missing", () => {
-            const configDir = join(testDir, ".memory-nexus");
+            const configDir = join(testDir, ".config", "memory");
             expect(existsSync(configDir)).toBe(false);
 
             saveConfig({ autoSync: true });
@@ -211,7 +211,7 @@ describe("config-manager", () => {
         test("writes valid JSON", () => {
             saveConfig({ autoSync: false });
 
-            const configPath = join(testDir, ".memory-nexus", "config.json");
+            const configPath = join(testDir, ".config", "memory", "config.json");
             const content = readFileSync(configPath, "utf-8");
 
             // Should not throw
@@ -226,7 +226,7 @@ describe("config-manager", () => {
             // Second save (should merge)
             saveConfig({ recoveryOnStartup: false });
 
-            const configPath = join(testDir, ".memory-nexus", "config.json");
+            const configPath = join(testDir, ".config", "memory", "config.json");
             const content = readFileSync(configPath, "utf-8");
             const parsed = JSON.parse(content);
 
@@ -240,7 +240,7 @@ describe("config-manager", () => {
             saveConfig({ timeout: 3000 });
             saveConfig({ timeout: 5000 });
 
-            const configPath = join(testDir, ".memory-nexus", "config.json");
+            const configPath = join(testDir, ".config", "memory", "config.json");
             const content = readFileSync(configPath, "utf-8");
             const parsed = JSON.parse(content);
 
@@ -250,7 +250,7 @@ describe("config-manager", () => {
         test("writes with 2-space indent for readability", () => {
             saveConfig({ autoSync: true, timeout: 5000 });
 
-            const configPath = join(testDir, ".memory-nexus", "config.json");
+            const configPath = join(testDir, ".config", "memory", "config.json");
             const content = readFileSync(configPath, "utf-8");
 
             // Should be pretty-printed with 2 spaces
@@ -261,7 +261,7 @@ describe("config-manager", () => {
         test("adds trailing newline", () => {
             saveConfig({ autoSync: true });
 
-            const configPath = join(testDir, ".memory-nexus", "config.json");
+            const configPath = join(testDir, ".config", "memory", "config.json");
             const content = readFileSync(configPath, "utf-8");
 
             expect(content).toEndWith("\n");
@@ -269,7 +269,7 @@ describe("config-manager", () => {
 
         test("handles invalid existing config gracefully", () => {
             // Create config directory with invalid JSON
-            const configDir = join(testDir, ".memory-nexus");
+            const configDir = join(testDir, ".config", "memory");
             mkdirSync(configDir, { recursive: true });
             writeFileSync(join(configDir, "config.json"), "invalid json");
 

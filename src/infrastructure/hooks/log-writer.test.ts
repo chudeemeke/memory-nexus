@@ -51,7 +51,7 @@ describe("log-writer", () => {
     describe("getLogDir", () => {
         test("returns path under home directory", () => {
             const logDir = getLogDir();
-            expect(logDir).toContain(".memory-nexus");
+            expect(logDir).toContain("memory");
             expect(logDir).toContain("logs");
         });
     });
@@ -59,7 +59,7 @@ describe("log-writer", () => {
     describe("getLogPath", () => {
         test("returns path to sync.log", () => {
             const logPath = getLogPath();
-            expect(logPath).toContain(".memory-nexus");
+            expect(logPath).toContain("memory");
             expect(logPath).toContain("logs");
             expect(logPath).toEndWith("sync.log");
         });
@@ -67,7 +67,7 @@ describe("log-writer", () => {
 
     describe("logSync", () => {
         test("creates directory if missing", () => {
-            const logDir = join(testDir, ".memory-nexus", "logs");
+            const logDir = join(testDir, ".local", "share", "memory", "logs");
             expect(existsSync(logDir)).toBe(false);
 
             logSync({ level: "info", message: "test" });
@@ -78,7 +78,7 @@ describe("log-writer", () => {
         test("appends entry with timestamp", () => {
             logSync({ level: "info", message: "test message" });
 
-            const logPath = join(testDir, ".memory-nexus", "logs", "sync.log");
+            const logPath = join(testDir, ".local", "share", "memory", "logs", "sync.log");
             const content = readFileSync(logPath, "utf-8");
             const entry = JSON.parse(content.trim()) as LogEntry;
 
@@ -92,7 +92,7 @@ describe("log-writer", () => {
             logSync({ level: "info", message: "message 1" });
             logSync({ level: "warn", message: "message 2" });
 
-            const logPath = join(testDir, ".memory-nexus", "logs", "sync.log");
+            const logPath = join(testDir, ".local", "share", "memory", "logs", "sync.log");
             const content = readFileSync(logPath, "utf-8");
             const lines = content.trim().split("\n");
 
@@ -109,7 +109,7 @@ describe("log-writer", () => {
             logSync({ level: "warn", message: "second" });
             logSync({ level: "error", message: "third" });
 
-            const logPath = join(testDir, ".memory-nexus", "logs", "sync.log");
+            const logPath = join(testDir, ".local", "share", "memory", "logs", "sync.log");
             const content = readFileSync(logPath, "utf-8");
             const lines = content.trim().split("\n");
 
@@ -124,7 +124,7 @@ describe("log-writer", () => {
         test("includes optional sessionId", () => {
             logSync({ level: "info", message: "sync started", sessionId: "abc-123" });
 
-            const logPath = join(testDir, ".memory-nexus", "logs", "sync.log");
+            const logPath = join(testDir, ".local", "share", "memory", "logs", "sync.log");
             const content = readFileSync(logPath, "utf-8");
             const entry = JSON.parse(content.trim()) as LogEntry;
 
@@ -134,7 +134,7 @@ describe("log-writer", () => {
         test("includes optional durationMs", () => {
             logSync({ level: "info", message: "sync complete", durationMs: 1234 });
 
-            const logPath = join(testDir, ".memory-nexus", "logs", "sync.log");
+            const logPath = join(testDir, ".local", "share", "memory", "logs", "sync.log");
             const content = readFileSync(logPath, "utf-8");
             const entry = JSON.parse(content.trim()) as LogEntry;
 
@@ -144,7 +144,7 @@ describe("log-writer", () => {
         test("includes optional error", () => {
             logSync({ level: "error", message: "sync failed", error: "Connection timeout" });
 
-            const logPath = join(testDir, ".memory-nexus", "logs", "sync.log");
+            const logPath = join(testDir, ".local", "share", "memory", "logs", "sync.log");
             const content = readFileSync(logPath, "utf-8");
             const entry = JSON.parse(content.trim()) as LogEntry;
 
@@ -154,7 +154,7 @@ describe("log-writer", () => {
         test("includes optional hookEvent", () => {
             logSync({ level: "info", message: "hook triggered", hookEvent: "SessionEnd" });
 
-            const logPath = join(testDir, ".memory-nexus", "logs", "sync.log");
+            const logPath = join(testDir, ".local", "share", "memory", "logs", "sync.log");
             const content = readFileSync(logPath, "utf-8");
             const entry = JSON.parse(content.trim()) as LogEntry;
 
@@ -173,7 +173,7 @@ describe("log-writer", () => {
                 logSync({ level, message: `${level} message` });
             }
 
-            const logPath = join(testDir, ".memory-nexus", "logs", "sync.log");
+            const logPath = join(testDir, ".local", "share", "memory", "logs", "sync.log");
             const content = readFileSync(logPath, "utf-8");
             const lines = content.trim().split("\n");
 
@@ -187,7 +187,7 @@ describe("log-writer", () => {
     describe("rotateLogsIfNeeded", () => {
         test("renames old log file", () => {
             // Create log directory and old log file
-            const logDir = join(testDir, ".memory-nexus", "logs");
+            const logDir = join(testDir, ".local", "share", "memory", "logs");
             mkdirSync(logDir, { recursive: true });
             const logPath = join(logDir, "sync.log");
             writeFileSync(logPath, '{"level":"info","message":"old entry"}\n');
@@ -210,7 +210,7 @@ describe("log-writer", () => {
 
         test("no-op if file is recent", () => {
             // Create log directory and recent log file
-            const logDir = join(testDir, ".memory-nexus", "logs");
+            const logDir = join(testDir, ".local", "share", "memory", "logs");
             mkdirSync(logDir, { recursive: true });
             const logPath = join(logDir, "sync.log");
             writeFileSync(logPath, '{"level":"info","message":"recent entry"}\n');
@@ -233,13 +233,13 @@ describe("log-writer", () => {
             rotateLogsIfNeeded(7);
 
             // No file created
-            const logPath = join(testDir, ".memory-nexus", "logs", "sync.log");
+            const logPath = join(testDir, ".local", "share", "memory", "logs", "sync.log");
             expect(existsSync(logPath)).toBe(false);
         });
 
         test("handles zero retention days", () => {
             // Create log directory and log file
-            const logDir = join(testDir, ".memory-nexus", "logs");
+            const logDir = join(testDir, ".local", "share", "memory", "logs");
             mkdirSync(logDir, { recursive: true });
             const logPath = join(logDir, "sync.log");
             writeFileSync(logPath, '{"level":"info","message":"entry"}\n');
@@ -259,7 +259,7 @@ describe("log-writer", () => {
     describe("readRecentLogs", () => {
         test("returns parsed entries", () => {
             // Create log directory and log file
-            const logDir = join(testDir, ".memory-nexus", "logs");
+            const logDir = join(testDir, ".local", "share", "memory", "logs");
             mkdirSync(logDir, { recursive: true });
             const logPath = join(logDir, "sync.log");
 
@@ -283,7 +283,7 @@ describe("log-writer", () => {
 
         test("handles malformed lines gracefully", () => {
             // Create log directory and log file with mixed content
-            const logDir = join(testDir, ".memory-nexus", "logs");
+            const logDir = join(testDir, ".local", "share", "memory", "logs");
             mkdirSync(logDir, { recursive: true });
             const logPath = join(logDir, "sync.log");
 
@@ -305,7 +305,7 @@ describe("log-writer", () => {
 
         test("respects limit parameter", () => {
             // Create log directory and log file with many entries
-            const logDir = join(testDir, ".memory-nexus", "logs");
+            const logDir = join(testDir, ".local", "share", "memory", "logs");
             mkdirSync(logDir, { recursive: true });
             const logPath = join(logDir, "sync.log");
 
@@ -330,7 +330,7 @@ describe("log-writer", () => {
 
         test("handles empty file", () => {
             // Create empty log file
-            const logDir = join(testDir, ".memory-nexus", "logs");
+            const logDir = join(testDir, ".local", "share", "memory", "logs");
             mkdirSync(logDir, { recursive: true });
             const logPath = join(logDir, "sync.log");
             writeFileSync(logPath, "");
@@ -340,7 +340,7 @@ describe("log-writer", () => {
         });
 
         test("handles file with only whitespace", () => {
-            const logDir = join(testDir, ".memory-nexus", "logs");
+            const logDir = join(testDir, ".local", "share", "memory", "logs");
             mkdirSync(logDir, { recursive: true });
             const logPath = join(logDir, "sync.log");
             writeFileSync(logPath, "   \n   \n   ");
@@ -350,7 +350,7 @@ describe("log-writer", () => {
         });
 
         test("returns all entries when under limit", () => {
-            const logDir = join(testDir, ".memory-nexus", "logs");
+            const logDir = join(testDir, ".local", "share", "memory", "logs");
             mkdirSync(logDir, { recursive: true });
             const logPath = join(logDir, "sync.log");
 
@@ -367,7 +367,7 @@ describe("log-writer", () => {
         });
 
         test("default limit is 100", () => {
-            const logDir = join(testDir, ".memory-nexus", "logs");
+            const logDir = join(testDir, ".local", "share", "memory", "logs");
             mkdirSync(logDir, { recursive: true });
             const logPath = join(logDir, "sync.log");
 

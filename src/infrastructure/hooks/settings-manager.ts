@@ -21,6 +21,10 @@ import {
 } from "node:fs";
 import { dirname, join } from "node:path";
 import { homedir } from "node:os";
+import {
+    getBackupDir as pathsGetBackupDir,
+    getHookDir as pathsGetHookDir,
+} from "../paths.js";
 
 /**
  * Hook entry in Claude Code settings
@@ -126,19 +130,19 @@ export function getClaudeSettingsPath(): string {
 /**
  * Get the path to the settings backup file
  *
- * @returns Path to ~/.memory-nexus/backups/settings.json.backup (or test override)
+ * @returns Path to backups/settings.json.backup (or test override)
  */
 export function getBackupPath(): string {
-    return testPathOverrides?.backupPath ?? join(homedir(), ".memory-nexus", "backups", "settings.json.backup");
+    return testPathOverrides?.backupPath ?? join(pathsGetBackupDir(), "settings.json.backup");
 }
 
 /**
  * Get the path to the hook script
  *
- * @returns Path to ~/.memory-nexus/hooks/sync-hook.js (or test override)
+ * @returns Path to hooks/sync-hook.js (or test override)
  */
 export function getHookScriptPath(): string {
-    return testPathOverrides?.hookScriptPath ?? join(homedir(), ".memory-nexus", "hooks", "sync-hook.js");
+    return testPathOverrides?.hookScriptPath ?? join(pathsGetHookDir(), "sync-hook.js");
 }
 
 /**
