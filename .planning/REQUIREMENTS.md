@@ -9,11 +9,11 @@ Requirements for v2.0: Hybrid Search, Package Rename, and API Stabilization.
 
 ### Package Rename
 
-- [ ] **RENAME-01**: Rename npm package from `memory-nexus` to `@chude/memory`
-- [ ] **RENAME-02**: Change CLI binary name from `memory-nexus` to `memory` in package.json bin field
-- [ ] **RENAME-03**: Update all internal references (config paths, database location, log directories, hook scripts) from `memory-nexus` to `memory`
-- [ ] **RENAME-04**: Deprecate `memory-nexus` npm package with pointer to `@chude/memory`
-- [ ] **RENAME-05**: Update CLAUDE.md, WoW rules, and hook configurations to reference `memory` binary
+- [x] **RENAME-01**: Rename npm package from `memory-nexus` to `@chude/memory`
+- [x] **RENAME-02**: Change CLI binary name from `memory-nexus` to `memory` in package.json bin field
+- [x] **RENAME-03**: Update all internal references (config paths, database location, log directories, hook scripts) from `memory-nexus` to `memory`
+- [x] **RENAME-04**: Deprecate `memory-nexus` npm package with pointer to `@chude/memory`
+- [x] **RENAME-05**: Update CLAUDE.md, WoW rules, and hook configurations to reference `memory` binary
 
 ### Embedding Infrastructure
 
@@ -107,11 +107,11 @@ Deferred. Tracked for context, not in current roadmap.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| RENAME-01 | Phase 13 | Pending |
-| RENAME-02 | Phase 13 | Pending |
-| RENAME-03 | Phase 13 | Pending |
-| RENAME-04 | Phase 13 | Pending |
-| RENAME-05 | Phase 13 | Pending |
+| RENAME-01 | Phase 13 | Complete |
+| RENAME-02 | Phase 13 | Complete |
+| RENAME-03 | Phase 13 | Complete |
+| RENAME-04 | Phase 13 | Complete |
+| RENAME-05 | Phase 13 | Complete |
 | EMBED-01 | Phase 14 | Pending |
 | EMBED-02 | Phase 14 | Pending |
 | EMBED-03 | Phase 14 | Pending |
@@ -154,4 +154,4 @@ Deferred. Tracked for context, not in current roadmap.
 
 ---
 *Requirements defined: 2026-02-18*
-*Last updated: 2026-02-18 after milestone questioning*
+*Last updated: 2026-02-25 (Phase 13 RENAME requirements complete)*
