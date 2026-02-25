@@ -2,8 +2,8 @@
 phase: 14
 slug: embedding-infrastructure
 status: draft
-nyquist_compliant: false
-wave_0_complete: false
+nyquist_compliant: true
+wave_0_complete: true
 created: 2026-02-25
 ---
 
@@ -45,6 +45,14 @@ created: 2026-02-25
 
 | Task ID | Plan | Wave | Requirement | Test Type | Automated Command | File Exists | Status |
 |---------|------|------|-------------|-----------|-------------------|-------------|--------|
+| 14-01-A | 14-01 | 1 | EMBED-01 | unit (TDD) | `bun test src/domain/value-objects/embedding-result.test.ts src/domain/value-objects/embedding-config.test.ts --bail` | Wave 0 (created in Red Phase) | pending |
+| 14-01-B | 14-01 | 1 | EMBED-01 | unit (TDD) | `bun test src/domain/ports/embedding.test.ts src/domain/ports/ports.test.ts --bail` | Wave 0 (created in Red Phase) | pending |
+| 14-02-A | 14-02 | 1 | EMBED-04 | unit (TDD) | `bun test src/infrastructure/database/schema.test.ts --bail` | Existing (extended in Red Phase) | pending |
+| 14-02-B | 14-02 | 1 | EMBED-03 | unit (TDD) | `bun test src/infrastructure/database/connection.test.ts --bail` | Existing (extended in Red Phase) | pending |
+| 14-03-A | 14-03 | 2 | EMBED-02 | unit (TDD, mocked) | `bun test src/infrastructure/embedding/transformers-js-provider.test.ts --bail` | Wave 0 (created in Red Phase) | pending |
+| 14-03-B | 14-03 | 2 | EMBED-06, EMBED-07 | unit (TDD, mocked) | `bun test src/infrastructure/embedding/transformers-js-provider.test.ts --bail` | Wave 0 (created in Task A Red Phase) | pending |
+| 14-04-A | 14-04 | 3 | EMBED-05 | unit (TDD) | `bun test src/infrastructure/embedding/embedding-provider-factory.test.ts src/infrastructure/hooks/config-manager.test.ts --bail` | Wave 0 (created in Red Phase) | pending |
+| 14-04-B | 14-04 | 3 | EMBED-05 (doctor) | unit (TDD) | `bun test src/infrastructure/database/health-checker.test.ts src/presentation/cli/commands/doctor.test.ts --bail` | Existing (extended in Red Phase) | pending |
 
 ---
 
@@ -52,7 +60,21 @@ created: 2026-02-25
 
 > Test scaffolding committed BEFORE any implementation task. Executor runs Wave 0 first.
 
-*Determined by planner -- embedding domain ports, sqlite-vec extension loading, and provider test fixtures.*
+Wave 0 is embedded within each task's Red Phase (TDD structure). The Red Phase of each task creates the test file before any implementation. Tasks must be executed in wave order: Wave 1 tasks (14-01-A, 14-01-B, 14-02-A, 14-02-B) before Wave 2 (14-03-A, 14-03-B) before Wave 3 (14-04-A, 14-04-B).
+
+New test files created during Red Phases:
+- `src/domain/ports/embedding.test.ts` (Task 14-01-B Red Phase)
+- `src/domain/value-objects/embedding-result.test.ts` (Task 14-01-A Red Phase)
+- `src/domain/value-objects/embedding-config.test.ts` (Task 14-01-A Red Phase)
+- `src/infrastructure/embedding/transformers-js-provider.test.ts` (Task 14-03-A Red Phase)
+- `src/infrastructure/embedding/embedding-provider-factory.test.ts` (Task 14-04-A Red Phase)
+
+Existing test files extended during Red Phases:
+- `src/infrastructure/database/connection.test.ts` (Task 14-02-B Red Phase)
+- `src/infrastructure/database/schema.test.ts` (Task 14-02-A Red Phase)
+- `src/infrastructure/hooks/config-manager.test.ts` (Task 14-04-A Red Phase)
+- `src/infrastructure/database/health-checker.test.ts` (Task 14-04-B Red Phase)
+- `src/presentation/cli/commands/doctor.test.ts` (Task 14-04-B Red Phase)
 
 ---
 
@@ -71,14 +93,14 @@ created: 2026-02-25
 
 Updated by `gsd-plan-checker` when plans are approved:
 
-- [ ] All tasks have `<automated>` verify commands or Wave 0 dependencies
-- [ ] No 3 consecutive implementation tasks without automated verify (sampling continuity)
-- [ ] Wave 0 test files cover all MISSING references
-- [ ] No watch-mode flags in any automated command
-- [ ] Feedback latency per task: < 30s
-- [ ] `nyquist_compliant: true` set in frontmatter
+- [x] All tasks have `<automated>` verify commands or Wave 0 dependencies
+- [x] No 3 consecutive implementation tasks without automated verify (sampling continuity)
+- [x] Wave 0 test files cover all MISSING references (embedded in task Red Phases)
+- [x] No watch-mode flags in any automated command
+- [x] Feedback latency per task: < 30s
+- [x] `nyquist_compliant: true` set in frontmatter
 
-**Plan-checker approval:** pending
+**Plan-checker approval:** 2026-02-25 — PASS with warnings (see plan-checker report)
 
 ---
 
@@ -88,8 +110,56 @@ Updated during `/gsd:execute-phase 14`:
 
 | Wave | Tasks | Tests Run | Pass | Fail | Sampling Status |
 |------|-------|-----------|------|------|-----------------|
-| 0 | - | - | - | - | scaffold |
+| 0 | - | - | - | - | scaffold (embedded in Red Phases) |
 | 1 | - | - | - | - | pending |
 | 2 | - | - | - | - | pending |
+| 3 | - | - | - | - | pending |
 
 **Phase validation complete:** pending
+
+---
+
+## Plan Checker Report
+
+**Iteration:** 1 of 3
+**Coverage Score:** 92.8%
+**Status:** Passed with warnings
+
+### Coverage Matrix
+
+| Requirement | Plans | Tasks | Status |
+|-------------|-------|-------|--------|
+| EMBED-01: IEmbeddingProvider port + value objects | 14-01 | 14-01-A, 14-01-B | Covered |
+| EMBED-02: TransformersJsProvider adapter | 14-03 | 14-03-A | Covered |
+| EMBED-03: sqlite-vec extension loading | 14-02 | 14-02-B | Covered |
+| EMBED-04: message_embeddings + embedding_state tables | 14-02 | 14-02-A | Covered |
+| EMBED-05: EmbeddingProviderFactory + lazy loading | 14-04 | 14-04-A | Covered |
+| EMBED-06: Progress indicator for model download | 14-03 | 14-03-B | Partial (callback infrastructure only; CLI wiring deferred to Phase 15) |
+| EMBED-07: WASM fallback with warning | 14-03 | 14-03-B | Covered |
+
+### Warnings
+
+```yaml
+warnings:
+  - plan: "14-03"
+    dimension: "requirement_coverage"
+    severity: "warning"
+    description: "EMBED-06 progress indicator is infrastructure-only. The onProgress callback mechanism and mocked tests exist, but no plan wires it to visible CLI output. User-visible progress bar requires Phase 15/16."
+    task: "14-03-B"
+    resolution: "Documented in plan must_haves that Phase 15 MUST wire onProgress to cli-progress bar."
+
+  - plan: "14-04"
+    dimension: "task_completeness"
+    severity: "warning"
+    description: "EmbeddingProviderFactory.createFromConfig() referenced DEFAULT_EMBEDDING_CONFIG without import."
+    task: "14-04-A"
+    resolution: "Fixed — import added to plan implementation sketch."
+```
+
+### Issues
+
+None (0 blockers)
+
+### Recommendation
+
+No blockers. Both warnings addressed post-check: missing import fixed in plan, EMBED-06 scope documented explicitly. Plans ready for execution.
