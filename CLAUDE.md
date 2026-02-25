@@ -1,4 +1,4 @@
-# Memory-Nexus
+# @chude/memory
 
 Cross-project context persistence for Claude Code sessions.
 
@@ -6,9 +6,10 @@ Cross-project context persistence for Claude Code sessions.
 
 **Problem:** Claude Code sessions are per-directory and deleted after 30 days. Context does not transfer between projects. Knowledge gained in one project is invisible to work in another.
 
-**Solution:** Extract session JSONL files into a searchable SQLite database accessible from any project via CLI commands.
+**Solution:** Extract session JSONL files into a searchable SQLite database accessible from any project via the `memory` CLI.
 
-**Status:** Documentation complete. Implementation deferred until after WoW v8.0.
+**Package:** `@chude/memory` (binary: `memory`)
+**Install:** `bun add -g @chude/memory`
 
 ## AI-First Design
 
@@ -16,13 +17,13 @@ Cross-project context persistence for Claude Code sessions.
 
 ### How It Works
 
-Memory-nexus creates a well-structured SQLite database. Both Claude and humans query it using the same CLI commands:
+Memory creates a well-structured SQLite database. Both Claude and humans query it using the same CLI commands:
 
 ```bash
 # These work identically whether Claude or human runs them
-aidev memory search "authentication patterns"
-aidev memory context wow-system
-aidev memory related <session-id>
+memory search "authentication patterns"
+memory context wow-system
+memory related <session-id>
 ```
 
 Claude uses the Bash tool to run these commands. No special formatting needed - good database design + standard CLI = works for everyone.
@@ -53,9 +54,9 @@ CREATE TABLE links (
 - Looking for patterns across projects
 - Retrieving decisions/rationale from past sessions
 
-### Future Enhancement: Vector Embeddings (Phase 4)
+### Future Enhancement: Vector Embeddings
 
-Semantic similarity search can be added later without major refactoring. Not needed for MVP.
+Semantic similarity search via embedding infrastructure. Phases 14-16 add sqlite-vec, embedding pipeline, and hybrid BM25+cosine search.
 
 ## Documentation
 
@@ -70,17 +71,23 @@ Read these in order to understand the full context:
 ## Project Structure
 
 ```
-memory-nexus/
-├── CLAUDE.md           # This file - project guidance
+memory/
+├── CLAUDE.md               # This file - project guidance
+├── MIGRATION.md            # Upgrade guide from memory-nexus to @chude/memory
+├── deprecation-stub/       # Stub package published as "memory-nexus" on npm
 ├── docs/
-│   ├── SCRATCHPAD.md   # Documentation coordination
-│   ├── 01-VISION.md    # Problem and vision
-│   ├── 02-RESEARCH.md  # Technical research
+│   ├── SCRATCHPAD.md       # Documentation coordination
+│   ├── 01-VISION.md        # Problem and vision
+│   ├── 02-RESEARCH.md      # Technical research
 │   ├── 03-DECISION-JOURNEY.md  # Design decisions
 │   ├── 04-ARCHITECTURE.md      # Technical design
 │   └── 05-IMPLEMENTATION.md    # Build plan
-├── src/                # Implementation (future)
-└── tests/              # Test suites (future)
+├── src/                    # Implementation
+│   ├── domain/             # Domain layer (zero external deps)
+│   ├── application/        # Application services
+│   ├── infrastructure/     # Database, hooks, filesystem
+│   └── presentation/       # CLI commands
+└── tests/                  # Test suites
 ```
 
 ## Related Projects
@@ -96,11 +103,12 @@ memory-nexus/
 
 | Decision | Choice | Rationale |
 |----------|--------|-----------|
+| Package name | @chude/memory, binary: memory | Matches aidev subcommand; old name deprecated |
 | Database | SQLite + FTS5 | Embedded, no server, full-text search built-in |
+| Paths | XDG Base Directory Specification | ~/.config/memory (config), ~/.local/share/memory (data) |
 | Trigger | Hook + manual CLI | Automatic extraction with manual fallback |
 | Integration | aidev subcommand | Consistent with user's existing tooling |
-| Scope | MVP first | Avoid over-engineering, validate core value |
-| Timing | After WoW v8.0 | GSD-Lite methodology validated first |
+| Migration | Automatic on first run | Detects ~/.memory-nexus/ and migrates to XDG paths |
 
 ## Session Storage Reference
 
@@ -112,59 +120,43 @@ Understanding Claude Code's session storage is critical for this project:
 - **Encoding:** Directory path is encoded (possibly base64 or hash)
 - **Limitation:** Sessions are NOT portable between project directories
 
-## Planned Commands
+## Commands
 
 ```bash
 # Sync all sessions to database
-aidev memory sync
+memory sync
 
 # Full-text search across all sessions
-aidev memory search "query"
+memory search "query"
 
 # Get context for specific project
-aidev memory context <project>
+memory context <project>
 
 # List recent sessions
-aidev memory list
+memory list
 
 # Show session details
-aidev memory show <session-id>
+memory show <session-id>
+
+# Install/uninstall Claude Code hooks
+memory install
+memory uninstall
+
+# Check installation health
+memory doctor
+memory status
 ```
 
-## Development Methodology
+## Data Paths
 
-When building this project, use **GSD-Lite** (manual 4-phase process):
-
-### Phase 1: DISCUSS
-- Clarify requirements before planning
-- Ask questions to eliminate ambiguity
-- Confirm scope and constraints
-
-### Phase 2: PLAN
-- Create atomic task plans
-- Use backward reasoning from goal
-- Identify dependencies
-
-### Phase 3: EXECUTE
-- One task at a time
-- Commit after each completed task
-- No skipping ahead
-
-### Phase 4: VERIFY
-- Test against success conditions
-- Validate assumptions
-- Document learnings
-
-**Reference:** ~/Projects/get-stuff-done/docs/GSD-LITE-MANUAL.md
-
-## When to Start Implementation
-
-**After WoW v8.0 is complete.**
-
-Rationale:
-1. GSD-Lite methodology will be validated on WoW v8.0 first
-2. No delays to the primary project (wow-system)
-3. Build with a proven approach rather than experimental
+| Purpose | Path |
+|---------|------|
+| Config | `~/.config/memory/config.json` |
+| Database | `~/.local/share/memory/memory.db` |
+| Logs | `~/.local/share/memory/logs/` |
+| Hooks | `~/.local/share/memory/hooks/` |
+| Backups | `~/.local/share/memory/backups/` |
+| Legacy (migration source) | `~/.memory-nexus/` |
 
 ## Quality Standards
 
@@ -208,39 +200,24 @@ with open(session_file) as f:
 
 ### Hook Integration
 
-Claude Code hooks can trigger extraction:
+Claude Code hooks trigger automatic sync:
 ```json
 {
   "hooks": {
-    "PostToolUse": [{
-      "matcher": "SessionEnd",
-      "command": "aidev memory sync --session $SESSION_ID"
+    "SessionEnd": [{
+      "hooks": [{
+        "type": "command",
+        "command": "bun run ~/.local/share/memory/hooks/sync-hook.js",
+        "timeout": 5
+      }]
     }]
   }
 }
 ```
 
-## Open Questions
-
-These should be resolved during implementation:
-
-1. **Encoding:** How exactly does Claude Code encode directory paths?
-2. **Session boundaries:** How to detect session start/end in JSONL?
-3. **Incremental sync:** How to avoid re-processing already-synced sessions?
-4. **Conflict resolution:** What if same session is synced from different machines?
-
-## Success Criteria
-
-MVP is complete when:
-- [ ] Can sync all sessions from ~/.claude/projects/ to SQLite
-- [ ] Can search across all sessions with full-text search
-- [ ] Can retrieve context for a specific project
-- [ ] Integration with aidev CLI works
-- [ ] Hook-based automatic sync works
-
 ## History
 
 - **Origin:** Idea emerged during WoW v8.0 planning session
 - **MCP Attempt:** Previous approach using MCP server (abandoned)
-- **Current:** Documentation-first approach, defer implementation
-- **Next:** Build after WoW v8.0 validates GSD methodology
+- **v1.0:** Shipped as memory-nexus with full CLI, sync, search, and hooks
+- **v2.0:** Renamed to @chude/memory, XDG paths, embedding infrastructure planned
