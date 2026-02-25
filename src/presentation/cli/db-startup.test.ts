@@ -116,17 +116,27 @@ describe("db-startup", () => {
       // Create corrupted file
       writeFileSync(dbPath, "not a valid sqlite database");
 
-      // Non-TTY can't prompt
-      const result = await initializeDatabaseForCli({ dbPath });
+      // Force non-TTY so handleCorruptedDatabase takes the fail path
+      const origStdinTTY = process.stdin.isTTY;
+      const origStdoutTTY = process.stdout.isTTY;
+      process.stdin.isTTY = undefined as unknown as boolean;
+      process.stdout.isTTY = undefined as unknown as boolean;
 
-      expect(result.success).toBe(false);
-      if (!result.success) {
-        expect(result.error).toBeInstanceOf(MemoryError);
-        expect(result.error.code).toBe(ErrorCode.DB_CORRUPTED);
+      try {
+        const result = await initializeDatabaseForCli({ dbPath });
+
+        expect(result.success).toBe(false);
+        if (!result.success) {
+          expect(result.error).toBeInstanceOf(MemoryError);
+          expect(result.error.code).toBe(ErrorCode.DB_CORRUPTED);
+        }
+
+        // Should show error message
+        expect(consoleErrors.some((e) => e.includes("DB_CORRUPTED"))).toBe(true);
+      } finally {
+        process.stdin.isTTY = origStdinTTY;
+        process.stdout.isTTY = origStdoutTTY;
       }
-
-      // Should show error message
-      expect(consoleErrors.some((e) => e.includes("DB_CORRUPTED"))).toBe(true);
     });
 
     test("outputs JSON error when json option is true", async () => {
@@ -136,16 +146,27 @@ describe("db-startup", () => {
       // Create corrupted file
       writeFileSync(dbPath, "corrupted data");
 
-      const result = await initializeDatabaseForCli({ dbPath, json: true });
+      // Force non-TTY so handleCorruptedDatabase takes the fail path
+      const origStdinTTY = process.stdin.isTTY;
+      const origStdoutTTY = process.stdout.isTTY;
+      process.stdin.isTTY = undefined as unknown as boolean;
+      process.stdout.isTTY = undefined as unknown as boolean;
 
-      expect(result.success).toBe(false);
+      try {
+        const result = await initializeDatabaseForCli({ dbPath, json: true });
 
-      // Should output JSON
-      const jsonOutput = consoleErrors.find((e) => e.includes("{"));
-      expect(jsonOutput).toBeDefined();
-      if (jsonOutput) {
-        const parsed = JSON.parse(jsonOutput);
-        expect(parsed.error.code).toBe(ErrorCode.DB_CORRUPTED);
+        expect(result.success).toBe(false);
+
+        // Should output JSON
+        const jsonOutput = consoleErrors.find((e) => e.includes("{"));
+        expect(jsonOutput).toBeDefined();
+        if (jsonOutput) {
+          const parsed = JSON.parse(jsonOutput);
+          expect(parsed.error.code).toBe(ErrorCode.DB_CORRUPTED);
+        }
+      } finally {
+        process.stdin.isTTY = origStdinTTY;
+        process.stdout.isTTY = origStdoutTTY;
       }
     });
 
@@ -210,12 +231,23 @@ describe("db-startup", () => {
 
       writeFileSync(dbPath, "corrupt");
 
-      await initializeDatabaseForCli({ dbPath });
+      // Force non-TTY
+      const origStdinTTY = process.stdin.isTTY;
+      const origStdoutTTY = process.stdout.isTTY;
+      process.stdin.isTTY = undefined as unknown as boolean;
+      process.stdout.isTTY = undefined as unknown as boolean;
 
-      // Should mention corruption in error output
-      expect(consoleErrors.some((e) =>
-        e.includes("corrupted") || e.includes("CORRUPTED")
-      )).toBe(true);
+      try {
+        await initializeDatabaseForCli({ dbPath });
+
+        // Should mention corruption in error output
+        expect(consoleErrors.some((e) =>
+          e.includes("corrupted") || e.includes("CORRUPTED")
+        )).toBe(true);
+      } finally {
+        process.stdin.isTTY = origStdinTTY;
+        process.stdout.isTTY = origStdoutTTY;
+      }
     });
 
     test("shows TTY prompt message in non-TTY environment", async () => {
@@ -224,12 +256,23 @@ describe("db-startup", () => {
 
       writeFileSync(dbPath, "corrupt");
 
-      await initializeDatabaseForCli({ dbPath });
+      // Force non-TTY
+      const origStdinTTY = process.stdin.isTTY;
+      const origStdoutTTY = process.stdout.isTTY;
+      process.stdin.isTTY = undefined as unknown as boolean;
+      process.stdout.isTTY = undefined as unknown as boolean;
 
-      // Should mention interactive mode for recreation
-      expect(consoleErrors.some((e) =>
-        e.includes("interactively")
-      )).toBe(true);
+      try {
+        await initializeDatabaseForCli({ dbPath });
+
+        // Should mention interactive mode for recreation
+        expect(consoleErrors.some((e) =>
+          e.includes("interactively")
+        )).toBe(true);
+      } finally {
+        process.stdin.isTTY = origStdinTTY;
+        process.stdout.isTTY = origStdoutTTY;
+      }
     });
   });
 });
