@@ -24,10 +24,10 @@ import { setTestPathOverrides } from "../../../infrastructure/hooks/settings-man
 
 describe("install command", () => {
     // Use a test-specific directory to avoid modifying actual settings
-    const testBaseDir = join(homedir(), ".memory-nexus-test-install");
+    const testBaseDir = join(homedir(), ".memory-test-install");
     const testSettingsPath = join(testBaseDir, ".claude", "settings.json");
-    const testBackupPath = join(testBaseDir, ".memory-nexus", "backups", "settings.json.backup");
-    const testHookScriptPath = join(testBaseDir, ".memory-nexus", "hooks", "sync-hook.js");
+    const testBackupPath = join(testBaseDir, "memory", "backups", "settings.json.backup");
+    const testHookScriptPath = join(testBaseDir, "memory", "hooks", "sync-hook.js");
 
     // Create a mock hook script source
     const mockHookScriptDir = join(testBaseDir, "dist");
@@ -166,6 +166,57 @@ describe("install command", () => {
 
             expect(errorOutput.join("\n")).toContain("Hook script not found");
             expect(result.exitCode).toBe(1);
+        });
+    });
+
+    describe("stale hook detection", () => {
+        test("warns when settings contain hooks with memory-nexus in command", async () => {
+            // Pre-create settings with stale memory-nexus hooks
+            mkdirSync(dirname(testSettingsPath), { recursive: true });
+            writeFileSync(
+                testSettingsPath,
+                JSON.stringify({
+                    hooks: {
+                        SessionEnd: [
+                            {
+                                hooks: [
+                                    {
+                                        type: "command",
+                                        command: 'bun run "/home/user/.memory-nexus/hooks/sync-hook.js"',
+                                        timeout: 5,
+                                    },
+                                ],
+                            },
+                        ],
+                    },
+                })
+            );
+
+            await executeInstallCommand({ force: true });
+
+            const allError = errorOutput.join("\n");
+            expect(allError).toContain("Stale memory-nexus hook references detected");
+            expect(allError).toContain("memory uninstall");
+            expect(allError).toContain("memory install");
+        });
+
+        test("does not warn when settings contain only new memory hooks", async () => {
+            // Install fresh hooks (uses new "memory" marker, not "memory-nexus")
+            await executeInstallCommand({});
+
+            const allError = errorOutput.join("\n");
+            expect(allError).not.toContain("Stale memory-nexus hook references detected");
+        });
+
+        test("does not warn when settings have no hooks", async () => {
+            // Create empty settings with no hooks
+            mkdirSync(dirname(testSettingsPath), { recursive: true });
+            writeFileSync(testSettingsPath, JSON.stringify({}));
+
+            await executeInstallCommand({});
+
+            const allError = errorOutput.join("\n");
+            expect(allError).not.toContain("Stale memory-nexus hook references detected");
         });
     });
 

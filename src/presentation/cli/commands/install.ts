@@ -13,6 +13,7 @@ import {
     installHooks,
     checkHooksInstalled,
     getHookScriptPath,
+    loadClaudeSettings,
 } from "../../../infrastructure/hooks/index.js";
 
 /**
@@ -92,11 +93,54 @@ export async function executeInstallCommand(options: InstallOptions): Promise<Co
         console.log("Sessions will now sync automatically when they end.");
         console.log("\nTo check status: memory status");
         console.log("To uninstall: memory uninstall");
+
+        // Check for stale memory-nexus hook references
+        warnStaleHookReferences();
     } else {
         return { exitCode: 1 };
     }
 
     return { exitCode: 0 };
+}
+
+/**
+ * Scan settings.json for stale memory-nexus hook references.
+ *
+ * After hook installation, checks if any hook commands still reference
+ * the old "memory-nexus" binary name. Prints a warning to stderr if found.
+ */
+export function warnStaleHookReferences(): void {
+    const settings = loadClaudeSettings();
+    if (!settings.hooks) {
+        return;
+    }
+
+    const LEGACY_MARKER = "memory-nexus";
+    let hasStale = false;
+
+    for (const hookConfigs of Object.values(settings.hooks)) {
+        if (!Array.isArray(hookConfigs)) continue;
+        for (const config of hookConfigs) {
+            if (!config?.hooks) continue;
+            for (const entry of config.hooks) {
+                if (entry.command?.includes(LEGACY_MARKER)) {
+                    hasStale = true;
+                    break;
+                }
+            }
+            if (hasStale) break;
+        }
+        if (hasStale) break;
+    }
+
+    if (hasStale) {
+        console.error(
+            "\nWarning: Stale memory-nexus hook references detected in settings.json."
+        );
+        console.error(
+            "Run 'memory uninstall' then 'memory install' to clean up."
+        );
+    }
 }
 
 /**

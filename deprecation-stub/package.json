@@ -1,0 +1,11 @@
+{
+  "name": "memory-nexus",
+  "version": "0.2.0",
+  "description": "DEPRECATED: Use @chude/memory instead",
+  "bin": {
+    "memory-nexus": "index.js"
+  },
+  "author": "Chude <chude@emeke.org>",
+  "license": "MIT",
+  "keywords": ["deprecated"]
+}
