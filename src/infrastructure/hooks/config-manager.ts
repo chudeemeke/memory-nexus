@@ -30,6 +30,23 @@ export function setTestConfigPath(path: string | null): void {
 }
 
 /**
+ * Embedding configuration data interface
+ *
+ * Plain object shape for embedding config stored in JSON.
+ * The factory validates via domain value objects when needed.
+ */
+export interface EmbeddingConfigData {
+    /** Whether embedding generation is enabled */
+    enabled: boolean;
+    /** Provider identifier (e.g., "local", "openai", "ollama") */
+    provider: string;
+    /** Model identifier (e.g., "Xenova/all-MiniLM-L6-v2") */
+    model: string;
+    /** Number of dimensions in the embedding vectors */
+    dimensions: number;
+}
+
+/**
  * Memory configuration interface
  *
  * All options from CONTEXT.md:
@@ -40,6 +57,7 @@ export function setTestConfigPath(path: string | null): void {
  * - logLevel: Logging verbosity
  * - logRetentionDays: Days to keep log files
  * - showFailures: Show failure notifications to user
+ * - embedding: Embedding provider configuration
  */
 export interface MemoryConfig {
     /** Enable automatic hook-based sync */
@@ -56,7 +74,22 @@ export interface MemoryConfig {
     logRetentionDays: number;
     /** Show failure notifications to user */
     showFailures: boolean;
+    /** Embedding provider configuration */
+    embedding: EmbeddingConfigData;
 }
+
+/**
+ * Default embedding configuration
+ *
+ * Local provider with all-MiniLM-L6-v2 model (384 dimensions).
+ * Enabled by default so embedding features are opt-out.
+ */
+export const DEFAULT_EMBEDDING_CONFIG: EmbeddingConfigData = {
+    enabled: true,
+    provider: "local",
+    model: "Xenova/all-MiniLM-L6-v2",
+    dimensions: 384,
+};
 
 /**
  * Default configuration with all features enabled
@@ -67,6 +100,7 @@ export interface MemoryConfig {
  * - Info log level for reasonable verbosity
  * - 7 day log retention
  * - Silent failures by default (never interrupt user)
+ * - Local embedding provider with all-MiniLM-L6-v2
  */
 export const DEFAULT_CONFIG: MemoryConfig = {
     autoSync: true,
@@ -76,6 +110,7 @@ export const DEFAULT_CONFIG: MemoryConfig = {
     logLevel: "info",
     logRetentionDays: 7,
     showFailures: false,
+    embedding: DEFAULT_EMBEDDING_CONFIG,
 };
 
 /**
@@ -122,7 +157,11 @@ export function loadConfig(): MemoryConfig {
     try {
         const content = readFileSync(configPath, "utf-8");
         const loaded = JSON.parse(content) as Partial<MemoryConfig>;
-        return { ...DEFAULT_CONFIG, ...loaded };
+        return {
+            ...DEFAULT_CONFIG,
+            ...loaded,
+            embedding: { ...DEFAULT_EMBEDDING_CONFIG, ...(loaded.embedding ?? {}) },
+        };
     } catch {
         // Invalid config: fall back to defaults with warning
         // Note: Using console.warn to avoid circular dependency with log-writer

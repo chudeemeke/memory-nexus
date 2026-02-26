@@ -17,7 +17,9 @@ import {
     getConfigPath,
     getConfigDir,
     DEFAULT_CONFIG,
+    DEFAULT_EMBEDDING_CONFIG,
     type MemoryConfig,
+    type EmbeddingConfigData,
 } from "./config-manager.js";
 
 describe("config-manager", () => {
@@ -177,6 +179,12 @@ describe("config-manager", () => {
                 logLevel: "debug",
                 logRetentionDays: 14,
                 showFailures: true,
+                embedding: {
+                    enabled: false,
+                    provider: "openai",
+                    model: "text-embedding-3-small",
+                    dimensions: 1536,
+                },
             };
 
             const configDir = join(testDir, ".config", "memory");
@@ -282,6 +290,82 @@ describe("config-manager", () => {
             const parsed = JSON.parse(content);
 
             expect(parsed.autoSync).toBe(false);
+        });
+    });
+
+    describe("embedding config", () => {
+        test("DEFAULT_CONFIG has embedding property with expected defaults", () => {
+            expect(DEFAULT_CONFIG).toHaveProperty("embedding");
+            expect(DEFAULT_CONFIG.embedding).toEqual({
+                enabled: true,
+                provider: "local",
+                model: "Xenova/all-MiniLM-L6-v2",
+                dimensions: 384,
+            });
+        });
+
+        test("DEFAULT_EMBEDDING_CONFIG matches DEFAULT_CONFIG.embedding", () => {
+            expect(DEFAULT_EMBEDDING_CONFIG).toEqual(DEFAULT_CONFIG.embedding);
+        });
+
+        test("loadConfig() with no config file returns default embedding config", () => {
+            const config = loadConfig();
+            expect(config.embedding).toEqual(DEFAULT_EMBEDDING_CONFIG);
+        });
+
+        test("loadConfig() with partial embedding config merges correctly", () => {
+            const configDir = join(testDir, ".config", "memory");
+            mkdirSync(configDir, { recursive: true });
+            writeFileSync(
+                join(configDir, "config.json"),
+                JSON.stringify({ embedding: { model: "custom/model" } })
+            );
+
+            const config = loadConfig();
+
+            // Overridden value
+            expect(config.embedding.model).toBe("custom/model");
+
+            // Default values preserved
+            expect(config.embedding.enabled).toBe(true);
+            expect(config.embedding.provider).toBe("local");
+            expect(config.embedding.dimensions).toBe(384);
+        });
+
+        test("saveConfig() with embedding section persists correctly", () => {
+            saveConfig({ embedding: { enabled: true, provider: "local", model: "custom/model", dimensions: 768 } } as Partial<MemoryConfig>);
+
+            const configPath = join(testDir, ".config", "memory", "config.json");
+            const content = readFileSync(configPath, "utf-8");
+            const parsed = JSON.parse(content);
+
+            expect(parsed.embedding.model).toBe("custom/model");
+            expect(parsed.embedding.dimensions).toBe(768);
+        });
+
+        test("loadConfig() deep-merges nested embedding section", () => {
+            const configDir = join(testDir, ".config", "memory");
+            mkdirSync(configDir, { recursive: true });
+            writeFileSync(
+                join(configDir, "config.json"),
+                JSON.stringify({
+                    autoSync: false,
+                    embedding: { dimensions: 768 },
+                })
+            );
+
+            const config = loadConfig();
+
+            // Top-level override
+            expect(config.autoSync).toBe(false);
+
+            // Embedding deep-merge: overridden field
+            expect(config.embedding.dimensions).toBe(768);
+
+            // Embedding deep-merge: default fields preserved
+            expect(config.embedding.enabled).toBe(true);
+            expect(config.embedding.provider).toBe("local");
+            expect(config.embedding.model).toBe("Xenova/all-MiniLM-L6-v2");
         });
     });
 });
