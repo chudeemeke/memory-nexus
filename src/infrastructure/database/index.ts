@@ -17,6 +17,9 @@ export {
     LINKS_TABLE,
     TOPICS_TABLE,
     EXTRACTION_STATE_TABLE,
+    EMBEDDING_STATE_TABLE,
+    MESSAGE_EMBEDDINGS_TABLE,
+    type SchemaOptions,
 } from "./schema.js";
 
 // Connection

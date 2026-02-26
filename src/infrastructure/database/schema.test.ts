@@ -23,7 +23,11 @@ import {
     ENTITY_LINKS_TABLE,
     SESSIONS_FTS_TABLE,
     SESSIONS_FTS_TRIGGERS,
+    EMBEDDING_STATE_TABLE,
+    MESSAGE_EMBEDDINGS_TABLE,
+    type SchemaOptions,
 } from "./schema.js";
+import * as sqliteVec from "sqlite-vec";
 
 describe("Database Schema", () => {
     let db: Database;
@@ -56,7 +60,7 @@ describe("Database Schema", () => {
 
         it("should have SCHEMA_SQL as an array with correct order", () => {
             expect(Array.isArray(SCHEMA_SQL)).toBe(true);
-            expect(SCHEMA_SQL.length).toBe(13);
+            expect(SCHEMA_SQL.length).toBe(14);
             expect(SCHEMA_SQL[0]).toBe(SESSIONS_TABLE);
             expect(SCHEMA_SQL[1]).toBe(MESSAGES_META_TABLE);
             expect(SCHEMA_SQL[2]).toBe(MESSAGES_FTS_TABLE);
@@ -70,6 +74,7 @@ describe("Database Schema", () => {
             expect(SCHEMA_SQL[10]).toBe(ENTITY_LINKS_TABLE);
             expect(SCHEMA_SQL[11]).toBe(SESSIONS_FTS_TABLE);
             expect(SCHEMA_SQL[12]).toBe(SESSIONS_FTS_TRIGGERS);
+            expect(SCHEMA_SQL[13]).toBe(EMBEDDING_STATE_TABLE);
         });
     });
 
@@ -1260,6 +1265,269 @@ describe("Database Schema", () => {
                     .all();
                 expect(links.length).toBe(0);
             });
+        });
+    });
+
+    describe("embedding_state table", () => {
+        it("should export EMBEDDING_STATE_TABLE SQL constant", () => {
+            expect(EMBEDDING_STATE_TABLE).toBeDefined();
+            expect(typeof EMBEDDING_STATE_TABLE).toBe("string");
+            expect(EMBEDDING_STATE_TABLE).toContain("embedding_state");
+        });
+
+        it("should create embedding_state table when sqliteVecAvailable is false", () => {
+            createSchema(db, { sqliteVecAvailable: false });
+
+            const tables = db
+                .query<{ name: string }, []>(
+                    "SELECT name FROM sqlite_master WHERE type='table' AND name='embedding_state'"
+                )
+                .all();
+
+            expect(tables.length).toBe(1);
+        });
+
+        it("should create embedding_state table when sqliteVecAvailable is true", () => {
+            sqliteVec.load(db);
+            createSchema(db, { sqliteVecAvailable: true });
+
+            const tables = db
+                .query<{ name: string }, []>(
+                    "SELECT name FROM sqlite_master WHERE type='table' AND name='embedding_state'"
+                )
+                .all();
+
+            expect(tables.length).toBe(1);
+        });
+
+        it("should have correct columns: message_id, embedded_at, model_hash", () => {
+            createSchema(db, { sqliteVecAvailable: false });
+
+            const columns = db
+                .query<{ name: string; type: string; notnull: number; pk: number }, []>(
+                    "PRAGMA table_info(embedding_state)"
+                )
+                .all();
+
+            const colMap = new Map(columns.map((c) => [c.name, c]));
+
+            // message_id: INTEGER PRIMARY KEY
+            expect(colMap.get("message_id")).toBeDefined();
+            expect(colMap.get("message_id")!.type).toBe("INTEGER");
+            expect(colMap.get("message_id")!.pk).toBe(1);
+
+            // embedded_at: TEXT NOT NULL
+            expect(colMap.get("embedded_at")).toBeDefined();
+            expect(colMap.get("embedded_at")!.type).toBe("TEXT");
+            expect(colMap.get("embedded_at")!.notnull).toBe(1);
+
+            // model_hash: TEXT NOT NULL
+            expect(colMap.get("model_hash")).toBeDefined();
+            expect(colMap.get("model_hash")!.type).toBe("TEXT");
+            expect(colMap.get("model_hash")!.notnull).toBe(1);
+        });
+
+        it("should have index idx_embedding_state_model on model_hash", () => {
+            createSchema(db, { sqliteVecAvailable: false });
+
+            const indexes = db
+                .query<{ name: string }, []>(
+                    "SELECT name FROM sqlite_master WHERE type='index' AND name='idx_embedding_state_model'"
+                )
+                .all();
+
+            expect(indexes.length).toBe(1);
+        });
+
+        it("should have foreign key on message_id referencing messages_meta(rowid)", () => {
+            createSchema(db, { sqliteVecAvailable: false });
+
+            const fks = db
+                .query<{ table: string; from: string; to: string }, []>(
+                    "PRAGMA foreign_key_list(embedding_state)"
+                )
+                .all();
+
+            expect(fks.length).toBe(1);
+            expect(fks[0]!.table).toBe("messages_meta");
+            expect(fks[0]!.from).toBe("message_id");
+            expect(fks[0]!.to).toBe("rowid");
+        });
+
+        it("should be idempotent (calling createSchema twice does not error)", () => {
+            createSchema(db, { sqliteVecAvailable: false });
+            expect(() => createSchema(db, { sqliteVecAvailable: false })).not.toThrow();
+        });
+
+        it("should cascade delete embedding_state when message is deleted", () => {
+            createSchema(db, { sqliteVecAvailable: false });
+
+            // Insert session and message
+            db.exec(`
+                INSERT INTO sessions (id, project_path_encoded, project_path_decoded, project_name, start_time)
+                VALUES ('session-embed', 'path', 'path', 'Test', '2026-01-27T10:00:00Z')
+            `);
+            db.exec(`
+                INSERT INTO messages_meta (id, session_id, role, content, timestamp)
+                VALUES ('msg-embed', 'session-embed', 'user', 'Test', '2026-01-27T10:01:00Z')
+            `);
+
+            // Get the rowid of the message
+            const msg = db
+                .query<{ rowid: number }, []>("SELECT rowid FROM messages_meta WHERE id = 'msg-embed'")
+                .get();
+
+            // Insert embedding state
+            db.exec(`
+                INSERT INTO embedding_state (message_id, embedded_at, model_hash)
+                VALUES (${msg!.rowid}, '2026-01-27T10:02:00Z', 'abc123')
+            `);
+
+            // Verify it exists
+            let states = db
+                .query<{ message_id: number }, []>(
+                    `SELECT message_id FROM embedding_state WHERE message_id = ${msg!.rowid}`
+                )
+                .all();
+            expect(states.length).toBe(1);
+
+            // Delete the message (should cascade)
+            db.exec("DELETE FROM messages_meta WHERE id = 'msg-embed'");
+
+            states = db
+                .query<{ message_id: number }, []>(
+                    `SELECT message_id FROM embedding_state WHERE message_id = ${msg!.rowid}`
+                )
+                .all();
+            expect(states.length).toBe(0);
+        });
+    });
+
+    describe("message_embeddings table", () => {
+        it("should export MESSAGE_EMBEDDINGS_TABLE SQL constant", () => {
+            expect(MESSAGE_EMBEDDINGS_TABLE).toBeDefined();
+            expect(typeof MESSAGE_EMBEDDINGS_TABLE).toBe("string");
+            expect(MESSAGE_EMBEDDINGS_TABLE).toContain("message_embeddings");
+            expect(MESSAGE_EMBEDDINGS_TABLE).toContain("vec0");
+            expect(MESSAGE_EMBEDDINGS_TABLE).toContain("float[384]");
+        });
+
+        it("should create message_embeddings virtual table when sqlite-vec is loaded", () => {
+            sqliteVec.load(db);
+            createSchema(db, { sqliteVecAvailable: true });
+
+            const tables = db
+                .query<{ name: string }, []>(
+                    "SELECT name FROM sqlite_master WHERE name='message_embeddings'"
+                )
+                .all();
+
+            expect(tables.length).toBe(1);
+        });
+
+        it("should NOT create message_embeddings when sqliteVecAvailable is false", () => {
+            createSchema(db, { sqliteVecAvailable: false });
+
+            const tables = db
+                .query<{ name: string }, []>(
+                    "SELECT name FROM sqlite_master WHERE name='message_embeddings'"
+                )
+                .all();
+
+            expect(tables.length).toBe(0);
+        });
+
+        it("should not error when sqlite-vec unavailable and sqliteVecAvailable is false", () => {
+            // No sqliteVec.load(db) -- vec0 module not available
+            expect(() => createSchema(db, { sqliteVecAvailable: false })).not.toThrow();
+        });
+    });
+
+    describe("createSchema options parameter", () => {
+        it("should default to sqliteVecAvailable: false when no options provided", () => {
+            // Calling createSchema(db) with no options should NOT try to create vec0 tables
+            createSchema(db);
+
+            const tables = db
+                .query<{ name: string }, []>(
+                    "SELECT name FROM sqlite_master WHERE name='message_embeddings'"
+                )
+                .all();
+
+            // message_embeddings should NOT exist (defaults to vec unavailable)
+            expect(tables.length).toBe(0);
+        });
+
+        it("should create embedding_state even with no options (backward compatible)", () => {
+            createSchema(db);
+
+            const tables = db
+                .query<{ name: string }, []>(
+                    "SELECT name FROM sqlite_master WHERE type='table' AND name='embedding_state'"
+                )
+                .all();
+
+            expect(tables.length).toBe(1);
+        });
+
+        it("should create both embedding tables when sqliteVecAvailable is true", () => {
+            sqliteVec.load(db);
+            createSchema(db, { sqliteVecAvailable: true });
+
+            const embeddingState = db
+                .query<{ name: string }, []>(
+                    "SELECT name FROM sqlite_master WHERE type='table' AND name='embedding_state'"
+                )
+                .all();
+            expect(embeddingState.length).toBe(1);
+
+            const messageEmbeddings = db
+                .query<{ name: string }, []>(
+                    "SELECT name FROM sqlite_master WHERE name='message_embeddings'"
+                )
+                .all();
+            expect(messageEmbeddings.length).toBe(1);
+        });
+
+        it("should create only embedding_state when sqliteVecAvailable is false", () => {
+            createSchema(db, { sqliteVecAvailable: false });
+
+            const embeddingState = db
+                .query<{ name: string }, []>(
+                    "SELECT name FROM sqlite_master WHERE type='table' AND name='embedding_state'"
+                )
+                .all();
+            expect(embeddingState.length).toBe(1);
+
+            const messageEmbeddings = db
+                .query<{ name: string }, []>(
+                    "SELECT name FROM sqlite_master WHERE name='message_embeddings'"
+                )
+                .all();
+            expect(messageEmbeddings.length).toBe(0);
+        });
+
+        it("should not break existing tables when options provided", () => {
+            createSchema(db, { sqliteVecAvailable: false });
+
+            // All existing tables should still be created
+            const tables = db
+                .query<{ name: string }, []>(
+                    "SELECT name FROM sqlite_master WHERE type='table' ORDER BY name"
+                )
+                .all();
+
+            const tableNames = tables.map((t) => t.name);
+            expect(tableNames).toContain("sessions");
+            expect(tableNames).toContain("messages_meta");
+            expect(tableNames).toContain("tool_uses");
+            expect(tableNames).toContain("links");
+            expect(tableNames).toContain("topics");
+            expect(tableNames).toContain("extraction_state");
+            expect(tableNames).toContain("entities");
+            expect(tableNames).toContain("session_entities");
+            expect(tableNames).toContain("entity_links");
+            expect(tableNames).toContain("embedding_state");
         });
     });
 });

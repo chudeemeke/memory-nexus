@@ -192,6 +192,42 @@ CREATE TABLE IF NOT EXISTS entity_links (
 `;
 
 /**
+ * Embedding state table - tracks which messages have been embedded
+ * and with which model, for incremental embedding and re-embedding detection.
+ *
+ * Always created regardless of sqlite-vec availability (regular SQL table).
+ */
+export const EMBEDDING_STATE_TABLE = `
+CREATE TABLE IF NOT EXISTS embedding_state (
+    message_id INTEGER PRIMARY KEY,
+    embedded_at TEXT NOT NULL,
+    model_hash TEXT NOT NULL,
+    FOREIGN KEY (message_id) REFERENCES messages_meta(rowid) ON DELETE CASCADE
+);
+CREATE INDEX IF NOT EXISTS idx_embedding_state_model ON embedding_state(model_hash);
+`;
+
+/**
+ * Message embeddings vec0 virtual table - stores vector embeddings for messages.
+ *
+ * Only created when sqlite-vec extension is loaded (sqliteVecAvailable: true).
+ * Uses 384-dimensional float vectors matching all-MiniLM-L6-v2 default model.
+ */
+export const MESSAGE_EMBEDDINGS_TABLE = `
+CREATE VIRTUAL TABLE IF NOT EXISTS message_embeddings USING vec0(
+    embedding float[384]
+);
+`;
+
+/**
+ * Schema options for conditional table creation
+ */
+export interface SchemaOptions {
+    /** Whether sqlite-vec extension is loaded and vec0 tables can be created. Default: false */
+    sqliteVecAvailable?: boolean;
+}
+
+/**
  * Sessions FTS5 virtual table - for summary full-text search
  *
  * Uses standalone FTS5 table (not external content) because summaries
@@ -243,6 +279,10 @@ END;
  * 11. entity_links (depends on entities)
  * 12. sessions_fts (depends on sessions)
  * 13. sessions_fts triggers (depends on sessions, sessions_fts)
+ * 14. embedding_state (depends on messages_meta) -- always created
+ *
+ * Note: message_embeddings (vec0) is NOT in this array.
+ * It is conditionally created in createSchema() when sqliteVecAvailable is true.
  */
 export const SCHEMA_SQL: readonly string[] = [
     SESSIONS_TABLE,
@@ -258,6 +298,7 @@ export const SCHEMA_SQL: readonly string[] = [
     ENTITY_LINKS_TABLE,
     SESSIONS_FTS_TABLE,
     SESSIONS_FTS_TRIGGERS,
+    EMBEDDING_STATE_TABLE,
 ];
 
 /**
@@ -282,10 +323,17 @@ export function checkFts5Support(db: Database): boolean {
  * Executes all DDL statements in dependency order.
  * Safe to call multiple times (uses IF NOT EXISTS).
  *
+ * When sqliteVecAvailable is true, also creates the message_embeddings
+ * vec0 virtual table for vector similarity search. The embedding_state
+ * tracking table is always created regardless of sqlite-vec availability.
+ *
  * @param db - SQLite database instance
+ * @param options - Schema creation options (defaults to sqliteVecAvailable: false)
  * @throws Error if FTS5 is not supported or SQL execution fails
  */
-export function createSchema(db: Database): void {
+export function createSchema(db: Database, options?: SchemaOptions): void {
+    const { sqliteVecAvailable = false } = options ?? {};
+
     // Verify FTS5 support before creating schema
     if (!checkFts5Support(db)) {
         throw new Error(
@@ -295,7 +343,13 @@ export function createSchema(db: Database): void {
     }
 
     // Execute all schema statements in order
+    // (includes embedding_state which is always created)
     for (const sql of SCHEMA_SQL) {
         db.exec(sql);
+    }
+
+    // Conditionally create vec0 virtual table (requires sqlite-vec extension)
+    if (sqliteVecAvailable) {
+        db.exec(MESSAGE_EMBEDDINGS_TABLE);
     }
 }
