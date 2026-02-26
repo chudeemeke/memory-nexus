@@ -11,7 +11,14 @@ import {
   PlainProgressReporter,
   QuietProgressReporter,
   type ProgressReporter,
+  TtyEmbeddingProgressReporter,
+  PlainEmbeddingProgressReporter,
+  QuietEmbeddingProgressReporter,
+  createEmbeddingProgressReporter,
+  createModelDownloadHandler,
+  type EmbeddingProgressReporter,
 } from "./progress-reporter.js";
+import type { DownloadProgress } from "../../domain/ports/embedding.js";
 
 describe("ProgressReporter", () => {
   describe("QuietProgressReporter", () => {
@@ -335,5 +342,242 @@ describe("ProgressReporter", () => {
         configurable: true,
       });
     });
+  });
+});
+
+describe("EmbeddingProgressReporter", () => {
+  describe("TtyEmbeddingProgressReporter", () => {
+    it("implements EmbeddingProgressReporter interface", () => {
+      const reporter = new TtyEmbeddingProgressReporter();
+      expect(typeof reporter.start).toBe("function");
+      expect(typeof reporter.update).toBe("function");
+      expect(typeof reporter.stop).toBe("function");
+    });
+
+    it("start/update/stop sequence completes without error", () => {
+      const reporter = new TtyEmbeddingProgressReporter();
+
+      expect(() => {
+        reporter.start(500);
+        reporter.update(100);
+        reporter.update(250);
+        reporter.stop();
+      }).not.toThrow();
+    });
+
+    it("handles zero total", () => {
+      const reporter = new TtyEmbeddingProgressReporter();
+
+      expect(() => {
+        reporter.start(0);
+        reporter.stop();
+      }).not.toThrow();
+    });
+  });
+
+  describe("PlainEmbeddingProgressReporter", () => {
+    let logSpy: ReturnType<typeof spyOn>;
+
+    beforeEach(() => {
+      logSpy = spyOn(console, "log").mockImplementation(() => {});
+    });
+
+    afterEach(() => {
+      logSpy.mockRestore();
+    });
+
+    it("implements EmbeddingProgressReporter interface", () => {
+      const reporter = new PlainEmbeddingProgressReporter();
+      expect(typeof reporter.start).toBe("function");
+      expect(typeof reporter.update).toBe("function");
+      expect(typeof reporter.stop).toBe("function");
+    });
+
+    it("start() prints embedding message with total count", () => {
+      const reporter = new PlainEmbeddingProgressReporter();
+      reporter.start(500);
+
+      expect(logSpy).toHaveBeenCalledWith("Embedding 500 messages...");
+    });
+
+    it("update() does not produce output", () => {
+      const reporter = new PlainEmbeddingProgressReporter();
+      reporter.start(500);
+      logSpy.mockClear();
+
+      reporter.update(100);
+
+      expect(logSpy).not.toHaveBeenCalled();
+    });
+
+    it("stop() prints done message", () => {
+      const reporter = new PlainEmbeddingProgressReporter();
+      reporter.stop();
+
+      expect(logSpy).toHaveBeenCalledWith("Done.");
+    });
+  });
+
+  describe("QuietEmbeddingProgressReporter", () => {
+    it("implements EmbeddingProgressReporter interface", () => {
+      const reporter = new QuietEmbeddingProgressReporter();
+      expect(typeof reporter.start).toBe("function");
+      expect(typeof reporter.update).toBe("function");
+      expect(typeof reporter.stop).toBe("function");
+    });
+
+    it("all methods are no-ops that produce no output", () => {
+      const logSpy = spyOn(console, "log").mockImplementation(() => {});
+
+      const reporter = new QuietEmbeddingProgressReporter();
+      reporter.start(500);
+      reporter.update(100);
+      reporter.update(250);
+      reporter.stop();
+
+      expect(logSpy).not.toHaveBeenCalled();
+      logSpy.mockRestore();
+    });
+  });
+});
+
+describe("createEmbeddingProgressReporter", () => {
+  const originalIsTTY = process.stdout.isTTY;
+
+  afterEach(() => {
+    Object.defineProperty(process.stdout, "isTTY", {
+      value: originalIsTTY,
+      writable: true,
+      configurable: true,
+    });
+  });
+
+  it("returns quiet reporter when options.quiet is true", () => {
+    const reporter = createEmbeddingProgressReporter({ quiet: true });
+    expect(reporter).toBeInstanceOf(QuietEmbeddingProgressReporter);
+  });
+
+  it("returns plain reporter when stdout is not TTY", () => {
+    Object.defineProperty(process.stdout, "isTTY", {
+      value: false,
+      writable: true,
+      configurable: true,
+    });
+
+    const reporter = createEmbeddingProgressReporter({});
+    expect(reporter).toBeInstanceOf(PlainEmbeddingProgressReporter);
+  });
+
+  it("returns TTY reporter when stdout is TTY", () => {
+    Object.defineProperty(process.stdout, "isTTY", {
+      value: true,
+      writable: true,
+      configurable: true,
+    });
+
+    const reporter = createEmbeddingProgressReporter({});
+    expect(reporter).toBeInstanceOf(TtyEmbeddingProgressReporter);
+  });
+
+  it("quiet takes precedence over TTY", () => {
+    Object.defineProperty(process.stdout, "isTTY", {
+      value: true,
+      writable: true,
+      configurable: true,
+    });
+
+    const reporter = createEmbeddingProgressReporter({ quiet: true });
+    expect(reporter).toBeInstanceOf(QuietEmbeddingProgressReporter);
+  });
+});
+
+describe("ModelDownloadReporter", () => {
+  const originalIsTTY = process.stdout.isTTY;
+
+  afterEach(() => {
+    Object.defineProperty(process.stdout, "isTTY", {
+      value: originalIsTTY,
+      writable: true,
+      configurable: true,
+    });
+  });
+
+  it("quiet mode produces no output on download", () => {
+    const logSpy = spyOn(console, "log").mockImplementation(() => {});
+    const handler = createModelDownloadHandler({ quiet: true });
+
+    const progress: DownloadProgress = {
+      status: "downloading",
+      file: "model.onnx",
+      loaded: 5000000,
+      total: 23000000,
+    };
+    handler(progress);
+
+    expect(logSpy).not.toHaveBeenCalled();
+    logSpy.mockRestore();
+  });
+
+  it("non-TTY mode announces download once", () => {
+    Object.defineProperty(process.stdout, "isTTY", {
+      value: false,
+      writable: true,
+      configurable: true,
+    });
+
+    const logSpy = spyOn(console, "log").mockImplementation(() => {});
+    const handler = createModelDownloadHandler({});
+
+    handler({ status: "downloading", file: "model.onnx", loaded: 1000, total: 23000000 });
+    handler({ status: "downloading", file: "model.onnx", loaded: 5000000, total: 23000000 });
+
+    expect(logSpy).toHaveBeenCalledTimes(1);
+    expect(logSpy).toHaveBeenCalledWith("Downloading embedding model (one-time setup)...");
+    logSpy.mockRestore();
+  });
+
+  it("TTY mode handles download progress without error", () => {
+    Object.defineProperty(process.stdout, "isTTY", {
+      value: true,
+      writable: true,
+      configurable: true,
+    });
+
+    const handler = createModelDownloadHandler({});
+
+    expect(() => {
+      handler({ status: "downloading", file: "model.onnx", loaded: 5000000, total: 23000000 });
+      handler({ status: "downloading", file: "model.onnx", loaded: 15000000, total: 23000000 });
+      handler({ status: "ready", file: "model.onnx", loaded: 23000000, total: 23000000 });
+    }).not.toThrow();
+  });
+
+  it("TTY mode handles ready status after download", () => {
+    Object.defineProperty(process.stdout, "isTTY", {
+      value: true,
+      writable: true,
+      configurable: true,
+    });
+
+    const handler = createModelDownloadHandler({});
+
+    expect(() => {
+      handler({ status: "downloading", file: "model.onnx", loaded: 5000000, total: 23000000 });
+      handler({ status: "ready", file: "model.onnx", loaded: 23000000, total: 23000000 });
+    }).not.toThrow();
+  });
+
+  it("ready status without prior download does not error", () => {
+    Object.defineProperty(process.stdout, "isTTY", {
+      value: true,
+      writable: true,
+      configurable: true,
+    });
+
+    const handler = createModelDownloadHandler({});
+
+    expect(() => {
+      handler({ status: "ready", file: "model.onnx", loaded: 23000000, total: 23000000 });
+    }).not.toThrow();
   });
 });
