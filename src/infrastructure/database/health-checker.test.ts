@@ -15,6 +15,8 @@ import {
     checkDirectoryPermissions,
     checkConfigValidity,
     checkHookStatus,
+    checkSqliteVecAvailability,
+    checkEmbeddingConfig,
     runHealthCheck,
     setTestOverrides,
     type HealthCheckResult,
@@ -432,6 +434,84 @@ describe("health-checker", () => {
             expect(result).toHaveProperty("permissions");
             expect(result).toHaveProperty("hooks");
             expect(result).toHaveProperty("config");
+        });
+
+        it("includes embedding field in result", () => {
+            setTestOverrides({
+                dbPath: testDbPath,
+                configDir: testDir,
+                logsDir: join(testDir, "logs"),
+                sourceDir: testDir,
+            });
+
+            const result = runHealthCheck();
+            expect(result).toHaveProperty("embedding");
+            expect(result.embedding).toHaveProperty("configured");
+            expect(result.embedding).toHaveProperty("provider");
+            expect(result.embedding).toHaveProperty("model");
+            expect(result.embedding).toHaveProperty("dimensions");
+            expect(result.embedding).toHaveProperty("enabled");
+        });
+
+        it("includes sqliteVec field in result", () => {
+            setTestOverrides({
+                dbPath: testDbPath,
+                configDir: testDir,
+                logsDir: join(testDir, "logs"),
+                sourceDir: testDir,
+            });
+
+            const result = runHealthCheck();
+            expect(result).toHaveProperty("sqliteVec");
+            expect(result.sqliteVec).toHaveProperty("available");
+            expect(result.sqliteVec).toHaveProperty("version");
+        });
+    });
+
+    describe("checkSqliteVecAvailability", () => {
+        it("returns available: true when sqlite-vec is loadable", () => {
+            const result = checkSqliteVecAvailability();
+            // sqlite-vec is installed in this project, so it should be available
+            expect(result.available).toBe(true);
+            expect(typeof result.version).toBe("string");
+            expect(result.version!.length).toBeGreaterThan(0);
+        });
+    });
+
+    describe("checkEmbeddingConfig", () => {
+        afterEach(() => {
+            try {
+                rmSync(testConfigPath, { force: true });
+            } catch {
+                // Ignore
+            }
+        });
+
+        it("returns default embedding config when no config file", () => {
+            const result = checkEmbeddingConfig();
+            expect(result.configured).toBe(true);
+            expect(result.provider).toBe("local");
+            expect(result.model).toBe("Xenova/all-MiniLM-L6-v2");
+            expect(result.dimensions).toBe(384);
+            expect(result.enabled).toBe(true);
+        });
+
+        it("reflects custom config from config file", () => {
+            writeFileSync(testConfigPath, JSON.stringify({
+                embedding: {
+                    enabled: false,
+                    provider: "openai",
+                    model: "text-embedding-3-small",
+                    dimensions: 1536,
+                },
+            }));
+
+            const result = checkEmbeddingConfig();
+            expect(result.configured).toBe(true);
+            expect(result.provider).toBe("openai");
+            expect(result.model).toBe("text-embedding-3-small");
+            expect(result.dimensions).toBe(1536);
+            expect(result.enabled).toBe(false);
         });
     });
 });

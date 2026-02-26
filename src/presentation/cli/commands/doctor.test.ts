@@ -129,6 +129,17 @@ describe("doctor command", () => {
                 valid: true,
                 issues: [],
             },
+            embedding: {
+                configured: true,
+                provider: "local",
+                model: "Xenova/all-MiniLM-L6-v2",
+                dimensions: 384,
+                enabled: true,
+            },
+            sqliteVec: {
+                available: true,
+                version: "0.1.6",
+            },
         };
 
         it("formats healthy result with all passes", () => {
@@ -259,6 +270,17 @@ describe("doctor command", () => {
             config: {
                 valid: true,
                 issues: [],
+            },
+            embedding: {
+                configured: true,
+                provider: "local",
+                model: "Xenova/all-MiniLM-L6-v2",
+                dimensions: 384,
+                enabled: true,
+            },
+            sqliteVec: {
+                available: true,
+                version: "0.1.6",
             },
         };
 
@@ -422,6 +444,132 @@ describe("doctor command", () => {
 
             const output = consoleOutput.join("\n");
             expect(output).toContain("fixes");
+        });
+    });
+
+    describe("embedding section in output", () => {
+        it("formatHealthResult includes Embeddings section header", () => {
+            const result: HealthCheckResult = {
+                database: { exists: true, readable: true, writable: true, integrity: "ok", size: 1000 },
+                permissions: { configDir: true, logsDir: true, sourceDir: true },
+                hooks: { installed: true, enabled: true, lastRun: null },
+                config: { valid: true, issues: [] },
+                embedding: {
+                    configured: true,
+                    provider: "local",
+                    model: "Xenova/all-MiniLM-L6-v2",
+                    dimensions: 384,
+                    enabled: true,
+                },
+                sqliteVec: { available: true, version: "0.1.6" },
+            };
+
+            const output = formatHealthResult(result, false);
+            expect(output).toContain("Embeddings");
+        });
+
+        it("shows provider, model, and dimensions", () => {
+            const result: HealthCheckResult = {
+                database: { exists: true, readable: true, writable: true, integrity: "ok", size: 1000 },
+                permissions: { configDir: true, logsDir: true, sourceDir: true },
+                hooks: { installed: true, enabled: true, lastRun: null },
+                config: { valid: true, issues: [] },
+                embedding: {
+                    configured: true,
+                    provider: "local",
+                    model: "Xenova/all-MiniLM-L6-v2",
+                    dimensions: 384,
+                    enabled: true,
+                },
+                sqliteVec: { available: true, version: "0.1.6" },
+            };
+
+            const output = formatHealthResult(result, false);
+            expect(output).toContain("local");
+            expect(output).toContain("Xenova/all-MiniLM-L6-v2");
+            expect(output).toContain("384");
+        });
+
+        it("shows enabled/disabled status", () => {
+            const disabledResult: HealthCheckResult = {
+                database: { exists: true, readable: true, writable: true, integrity: "ok", size: 1000 },
+                permissions: { configDir: true, logsDir: true, sourceDir: true },
+                hooks: { installed: true, enabled: true, lastRun: null },
+                config: { valid: true, issues: [] },
+                embedding: {
+                    configured: true,
+                    provider: "local",
+                    model: "Xenova/all-MiniLM-L6-v2",
+                    dimensions: 384,
+                    enabled: false,
+                },
+                sqliteVec: { available: true, version: "0.1.6" },
+            };
+
+            const output = formatHealthResult(disabledResult, false);
+            expect(output).toContain("no");
+        });
+
+        it("shows sqlite-vec status in Database section", () => {
+            const result: HealthCheckResult = {
+                database: { exists: true, readable: true, writable: true, integrity: "ok", size: 1000 },
+                permissions: { configDir: true, logsDir: true, sourceDir: true },
+                hooks: { installed: true, enabled: true, lastRun: null },
+                config: { valid: true, issues: [] },
+                embedding: {
+                    configured: true,
+                    provider: "local",
+                    model: "Xenova/all-MiniLM-L6-v2",
+                    dimensions: 384,
+                    enabled: true,
+                },
+                sqliteVec: { available: true, version: "0.1.6" },
+            };
+
+            const output = formatHealthResult(result, false);
+            expect(output).toContain("sqlite-vec");
+            expect(output).toContain("v0.1.6");
+        });
+
+        it("shows sqlite-vec not available status", () => {
+            const result: HealthCheckResult = {
+                database: { exists: true, readable: true, writable: true, integrity: "ok", size: 1000 },
+                permissions: { configDir: true, logsDir: true, sourceDir: true },
+                hooks: { installed: true, enabled: true, lastRun: null },
+                config: { valid: true, issues: [] },
+                embedding: {
+                    configured: true,
+                    provider: "local",
+                    model: "Xenova/all-MiniLM-L6-v2",
+                    dimensions: 384,
+                    enabled: true,
+                },
+                sqliteVec: { available: false, version: null },
+            };
+
+            const output = formatHealthResult(result, false);
+            expect(output).toContain("sqlite-vec");
+            expect(output).toContain("not available");
+        });
+
+        it("JSON output includes embedding and sqliteVec fields", async () => {
+            consoleOutput = [];
+            console.log = (msg: string) => consoleOutput.push(msg);
+
+            await executeDoctorCommand({ json: true });
+
+            const output = consoleOutput.join("\n");
+            const parsed = JSON.parse(output);
+
+            expect(parsed).toHaveProperty("embedding");
+            expect(parsed.embedding).toHaveProperty("provider");
+            expect(parsed.embedding).toHaveProperty("model");
+            expect(parsed.embedding).toHaveProperty("dimensions");
+            expect(parsed.embedding).toHaveProperty("enabled");
+
+            expect(parsed).toHaveProperty("sqliteVec");
+            expect(parsed.sqliteVec).toHaveProperty("available");
+            expect(parsed.sqliteVec).toHaveProperty("version");
         });
     });
 });

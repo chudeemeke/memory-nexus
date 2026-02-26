@@ -136,6 +136,13 @@ export function formatHealthResult(result: HealthCheckResult, useColor: boolean)
         lines.push(`  ${dim("Run 'memory sync' to create database", useColor)}`);
     }
 
+    // sqlite-vec status within Database section
+    if (result.sqliteVec.available) {
+        lines.push(`  ${formatStatus(true, useColor)} sqlite-vec: v${result.sqliteVec.version}`);
+    } else {
+        lines.push(`  ${formatStatus(false, useColor)} sqlite-vec: not available`);
+    }
+
     lines.push("");
 
     // Permissions section
@@ -172,6 +179,15 @@ export function formatHealthResult(result: HealthCheckResult, useColor: boolean)
             lines.push(`    ${red("-", useColor)} ${issue}`);
         }
     }
+
+    lines.push("");
+
+    // Embeddings section
+    lines.push("Embeddings");
+    lines.push(`  ${formatStatus(result.embedding.enabled, useColor)} Enabled: ${result.embedding.enabled ? "yes" : "no"}`);
+    lines.push(`  ${dim(`Provider: ${result.embedding.provider}`, useColor)}`);
+    lines.push(`  ${dim(`Model: ${result.embedding.model}`, useColor)}`);
+    lines.push(`  ${dim(`Dimensions: ${result.embedding.dimensions}`, useColor)}`);
 
     lines.push("");
 

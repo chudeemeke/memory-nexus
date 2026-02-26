@@ -77,6 +77,32 @@ export interface ConfigHealth {
 }
 
 /**
+ * Embedding health status
+ */
+export interface EmbeddingHealth {
+    /** Whether embedding config exists */
+    configured: boolean;
+    /** Provider identifier */
+    provider: string;
+    /** Model identifier */
+    model: string;
+    /** Embedding dimensions */
+    dimensions: number;
+    /** Whether embedding is enabled */
+    enabled: boolean;
+}
+
+/**
+ * sqlite-vec extension health status
+ */
+export interface SqliteVecHealth {
+    /** Whether sqlite-vec extension is loadable */
+    available: boolean;
+    /** sqlite-vec version string, or null if not available */
+    version: string | null;
+}
+
+/**
  * Complete health check result
  */
 export interface HealthCheckResult {
@@ -88,6 +114,10 @@ export interface HealthCheckResult {
     hooks: HooksHealth;
     /** Configuration validity status */
     config: ConfigHealth;
+    /** Embedding configuration status */
+    embedding: EmbeddingHealth;
+    /** sqlite-vec extension availability */
+    sqliteVec: SqliteVecHealth;
 }
 
 /**
@@ -269,6 +299,49 @@ export function checkConfigValidity(): ConfigHealth {
 }
 
 /**
+ * Check sqlite-vec extension availability
+ *
+ * Attempts to load sqlite-vec in a temporary in-memory database
+ * and query its version. Closes the database before returning.
+ *
+ * @returns sqlite-vec availability and version
+ */
+export function checkSqliteVecAvailability(): SqliteVecHealth {
+    try {
+        const sqliteVec = require("sqlite-vec");
+        const db = new Database(":memory:");
+        try {
+            sqliteVec.load(db);
+            const result = db.query("SELECT vec_version()").get() as { "vec_version()": string };
+            return { available: true, version: result["vec_version()"] };
+        } finally {
+            db.close();
+        }
+    } catch {
+        return { available: false, version: null };
+    }
+}
+
+/**
+ * Check embedding configuration status
+ *
+ * Loads config and returns the embedding section values.
+ *
+ * @returns Embedding health status
+ */
+export function checkEmbeddingConfig(): EmbeddingHealth {
+    const config = loadConfig();
+    const embedding = config.embedding;
+    return {
+        configured: true,
+        provider: embedding.provider,
+        model: embedding.model,
+        dimensions: embedding.dimensions,
+        enabled: embedding.enabled,
+    };
+}
+
+/**
  * Run comprehensive health check
  *
  * Orchestrates all health checks:
@@ -276,6 +349,8 @@ export function checkConfigValidity(): ConfigHealth {
  * - Directory permissions (config, logs, source)
  * - Hook installation and configuration
  * - Configuration validity
+ * - Embedding configuration
+ * - sqlite-vec extension availability
  *
  * @param overrides Optional path overrides for testing
  * @returns Complete health check result
@@ -308,11 +383,19 @@ export function runHealthCheck(overrides?: HealthCheckOverrides): HealthCheckRes
     // Config validity
     const config = checkConfigValidity();
 
+    // Embedding config
+    const embedding = checkEmbeddingConfig();
+
+    // sqlite-vec availability
+    const sqliteVec = checkSqliteVecAvailability();
+
     return {
         database,
         permissions,
         hooks,
         config,
+        embedding,
+        sqliteVec,
     };
 }
 
