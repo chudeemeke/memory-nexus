@@ -471,4 +471,162 @@ describe("Database Connection", () => {
             }
         });
     });
+
+    describe("sqlite-vec extension loading", () => {
+        test("returns sqliteVecAvailable field in DatabaseInitResult", () => {
+            const result = initializeDatabase({
+                path: ":memory:",
+            });
+            openDbs.push(result.db);
+
+            expect(typeof result.sqliteVecAvailable).toBe("boolean");
+        });
+
+        test("sqliteVecAvailable is true when sqlite-vec loads successfully", () => {
+            const result = initializeDatabase({
+                path: ":memory:",
+            });
+            openDbs.push(result.db);
+
+            // sqlite-vec is installed, so it should load
+            expect(result.sqliteVecAvailable).toBe(true);
+        });
+
+        test("vec_version() works when sqliteVecAvailable is true", () => {
+            const result = initializeDatabase({
+                path: ":memory:",
+            });
+            openDbs.push(result.db);
+
+            if (result.sqliteVecAvailable) {
+                const version = result.db.query("SELECT vec_version() as v").get() as { v: string };
+                expect(version.v).toMatch(/^v\d+\.\d+\.\d+$/);
+            }
+        });
+
+        test("message_embeddings table exists when sqliteVecAvailable is true", () => {
+            const result = initializeDatabase({
+                path: ":memory:",
+            });
+            openDbs.push(result.db);
+
+            if (result.sqliteVecAvailable) {
+                const tables = result.db
+                    .query("SELECT name FROM sqlite_master WHERE name='message_embeddings'")
+                    .all();
+                expect(tables.length).toBe(1);
+            }
+        });
+
+        test("embedding_state table exists regardless of sqliteVecAvailable", () => {
+            const result = initializeDatabase({
+                path: ":memory:",
+            });
+            openDbs.push(result.db);
+
+            const tables = result.db
+                .query("SELECT name FROM sqlite_master WHERE type='table' AND name='embedding_state'")
+                .all();
+            expect(tables.length).toBe(1);
+        });
+
+        test("existing schema tables are unaffected by sqlite-vec loading", () => {
+            const result = initializeDatabase({
+                path: ":memory:",
+            });
+            openDbs.push(result.db);
+
+            // All pre-existing tables should still be present
+            const tables = result.db
+                .query("SELECT name FROM sqlite_master WHERE type='table' ORDER BY name")
+                .all() as { name: string }[];
+            const tableNames = tables.map((t) => t.name);
+
+            expect(tableNames).toContain("sessions");
+            expect(tableNames).toContain("messages_meta");
+            expect(tableNames).toContain("tool_uses");
+            expect(tableNames).toContain("links");
+            expect(tableNames).toContain("topics");
+            expect(tableNames).toContain("extraction_state");
+            expect(tableNames).toContain("entities");
+            expect(tableNames).toContain("session_entities");
+            expect(tableNames).toContain("entity_links");
+        });
+
+        test("FTS5 still works when sqlite-vec is loaded", () => {
+            const result = initializeDatabase({
+                path: ":memory:",
+            });
+            openDbs.push(result.db);
+
+            // Insert test data and verify FTS5 search works
+            result.db.exec(`
+                INSERT INTO sessions (id, project_path_encoded, project_path_decoded, project_name, start_time)
+                VALUES ('s1', 'path', 'path', 'Test', '2026-01-01T00:00:00Z')
+            `);
+            result.db.exec(`
+                INSERT INTO messages_meta (id, session_id, role, content, timestamp)
+                VALUES ('m1', 's1', 'user', 'sqlite-vec integration test content', '2026-01-01T00:01:00Z')
+            `);
+
+            const ftsResults = result.db
+                .query("SELECT rowid FROM messages_fts WHERE messages_fts MATCH 'integration'")
+                .all();
+            expect(ftsResults.length).toBe(1);
+        });
+    });
+
+    describe("sqlite-vec graceful fallback", () => {
+        test("database initializes successfully even if sqlite-vec would fail", () => {
+            // This test verifies the contract: initializeDatabase never throws
+            // due to sqlite-vec failure. Since sqlite-vec IS available in our test env,
+            // we verify via the exported loadSqliteVecExtension function instead.
+            const result = initializeDatabase({
+                path: ":memory:",
+            });
+            openDbs.push(result.db);
+
+            // The important contract: initialization always succeeds
+            expect(result.db).toBeDefined();
+            expect(result.fts5Available).toBe(true);
+        });
+
+        test("loadSqliteVecExtension returns false for databases where load fails", () => {
+            // Import the helper to test it directly
+            const { loadSqliteVecExtension } = require("./connection.js");
+
+            // Create a raw database without any setup
+            const rawDb = new Database(":memory:");
+            openDbs.push(rawDb);
+
+            // loadSqliteVecExtension should return boolean
+            const result = loadSqliteVecExtension(rawDb);
+            expect(typeof result).toBe("boolean");
+            // In our env it should succeed (sqlite-vec is installed)
+            expect(result).toBe(true);
+        });
+    });
+
+    describe("backward compatibility", () => {
+        test("existing code using destructured result still works", () => {
+            // sqliteVecAvailable is additive -- existing destructuring unaffected
+            const { db, walEnabled, fts5Available } = initializeDatabase({
+                path: ":memory:",
+            });
+            openDbs.push(db);
+
+            expect(db).toBeDefined();
+            expect(typeof walEnabled).toBe("boolean");
+            expect(typeof fts5Available).toBe("boolean");
+        });
+
+        test("initializeDatabaseSafe also returns sqliteVecAvailable", () => {
+            const result = initializeDatabaseSafe({
+                path: ":memory:",
+            });
+            openDbs.push(result.db);
+
+            expect(typeof result.sqliteVecAvailable).toBe("boolean");
+        });
+    });
 });

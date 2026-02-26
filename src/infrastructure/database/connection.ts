@@ -42,6 +42,30 @@ export interface DatabaseInitResult {
     walEnabled: boolean;
     /** Whether FTS5 extension is available */
     fts5Available: boolean;
+    /** Whether sqlite-vec extension is loaded (vector search available) */
+    sqliteVecAvailable: boolean;
+}
+
+/**
+ * Attempt to load the sqlite-vec extension into a database.
+ *
+ * sqlite-vec enables vector similarity search via vec0 virtual tables.
+ * If the extension is not available (e.g., not installed), this returns false
+ * and the database continues to work with FTS5-only search.
+ *
+ * @param db - Database instance to load the extension into
+ * @returns true if loaded successfully, false otherwise
+ */
+export function loadSqliteVecExtension(db: Database): boolean {
+    try {
+        // eslint-disable-next-line @typescript-eslint/no-require-imports
+        const sqliteVec = require("sqlite-vec");
+        sqliteVec.load(db);
+        return true;
+    } catch {
+        // sqlite-vec not available -- vector search will be disabled
+        return false;
+    }
 }
 
 /**
@@ -190,12 +214,15 @@ export function initializeDatabase(config: DatabaseConfig): DatabaseInitResult {
             }
         }
 
+        // Load sqlite-vec extension (optional -- vector search disabled if unavailable)
+        const sqliteVecAvailable = loadSqliteVecExtension(db);
+
         // Apply schema
         if (applySchema) {
-            createSchema(db);
+            createSchema(db, { sqliteVecAvailable });
         }
 
-        return { db, walEnabled, fts5Available };
+        return { db, walEnabled, fts5Available, sqliteVecAvailable };
     } catch (error) {
         if (error instanceof MemoryError) {
             throw error;
