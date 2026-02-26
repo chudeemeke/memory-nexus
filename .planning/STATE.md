@@ -13,14 +13,14 @@ See: .planning/PROJECT.md (updated 2026-02-18)
 ## Current Position
 
 **Milestone:** v2.0 Hybrid Search and Rebrand
-**Phase:** 14 (Embedding Infrastructure) -- COMPLETE (4/4 plans done)
-**Status:** Milestone complete
+**Phase:** 15 (Embedding Pipeline) -- IN PROGRESS (1/3 plans done)
+**Status:** Active
 
 ```
 v2.0 Progress: [########............] 3/6 phases
   Phase 13: Package Rename          [x] Complete (3/3 plans)
   Phase 14: Embedding Infrastructure [x] Complete (4/4 plans)
-  Phase 15: Embedding Pipeline       [ ] Pending
+  Phase 15: Embedding Pipeline       [~] In Progress (1/3 plans)
   Phase 16: Hybrid Search            [ ] Pending
   Phase 17: Provider Ecosystem       [ ] Pending
   Phase 18: API Stabilization        [ ] Pending
@@ -50,6 +50,7 @@ v2.0 Progress: [########............] 3/6 phases
 | 14-02 | sqlite-vec extension loading and schema migration | 6min | 2 | 7 |
 | 14-03 | TransformersJsProvider with lazy loading and WASM fallback | 5min | 2 | 5 |
 | 14-04 | EmbeddingProviderFactory, config integration, doctor reporting | 5min | 2 | 11 |
+| 15-01 | EmbeddingRepository and EmbeddingService with model hash tracking | 6min | 2 | 10 |
 
 ## Accumulated Context
 
@@ -84,6 +85,11 @@ v2.0 Progress: [########............] 3/6 phases
 | Factory cache key | provider:model:dimensions composite | Distinguishes configs with different parameters |
 | Factory lazy initialization | create() does NOT call initialize() | Caller controls ONNX runtime load timing |
 | Doctor health extension | New check functions + extended HealthCheckResult | Consistent pattern for adding health checks |
+| Float32Array to vec_f32() | Direct pass (no Buffer conversion) | bun:sqlite passes Float32Array correctly to sqlite-vec |
+| model_name migration | ALTER TABLE with PRAGMA table_info check | Idempotent migration for existing embedding_state tables |
+| computeModelHash | Standalone pure function (not method) | Reusable across modules without instantiating EmbeddingService |
+| EmbeddingService DI | Constructor injection of repo, provider, config | Testable with mock objects; no service locator |
+| Default batchSize | 100 messages per batch | Balance between throughput and memory usage |
 
 ### Research Completed
 
@@ -103,22 +109,22 @@ None.
 ### Last Session
 
 **Date:** 2026-02-26
-**Completed:** Phase 14 Plan 04 -- EmbeddingProviderFactory, config integration, doctor reporting
-**Stopped at:** Phase 15 context gathered
+**Completed:** Phase 15 Plan 01 -- EmbeddingRepository and EmbeddingService with model hash tracking
+**Stopped at:** Phase 15 Plan 01 complete, Plan 02 next
 
 ### Context for Next Session
 
-1. Phase 14 (Embedding Infrastructure) COMPLETE: 4/4 plans done
-2. Next: Phase 15 (Embedding Pipeline) -- sync workflow, embedding state tracking, background embedding
-3. Tests: 2195 total pass, 0 fail
-4. EmbeddingProviderFactory creates providers from config with singleton caching
-5. Config manager stores EmbeddingConfigData (plain interface) with deep-merge in loadConfig()
-6. Doctor command shows Embeddings section and sqlite-vec version
-7. Factory does NOT call initialize() -- caller controls ONNX load timing
-8. All infrastructure layers in place: port, provider, vec schema, factory, config, health checks
+1. Phase 15 (Embedding Pipeline) IN PROGRESS: 1/3 plans done
+2. Next: Phase 15 Plan 02 -- sync workflow integration with --embed flag
+3. EmbeddingRepository provides findUnembedded, storeBatch, model hash/name tracking, clear, counts
+4. EmbeddingService orchestrates: checkModelState -> embedUnembedded -> clearAndReembed
+5. computeModelHash generates 16-char hex SHA-256 from provider:model:dimensions
+6. EmbeddingConfigData extended with batchSize (default 100)
+7. model_name column added to embedding_state via ALTER TABLE migration
+8. Float32Array passes directly to sqlite-vec vec_f32() (no Buffer conversion needed)
 9. Zero external imports in domain layer maintained
 10. All new code at 100% function and line coverage
 
 ---
 
-*Last updated: 2026-02-26 (Phase 14 complete)*
+*Last updated: 2026-02-26 (Phase 15 Plan 01 complete)*
