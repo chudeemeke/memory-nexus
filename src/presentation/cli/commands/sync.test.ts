@@ -7,7 +7,8 @@
 
 import { describe, expect, it, beforeEach, afterEach, spyOn, mock } from "bun:test";
 import { Command, CommanderError } from "commander";
-import { createSyncCommand } from "./sync.js";
+import { createSyncCommand, runEmbeddingPass, handleModelChange } from "./sync.js";
+import type { ModelState } from "../../../application/services/embedding-service.js";
 
 describe("Sync Command", () => {
 
@@ -355,5 +356,489 @@ describe("Sync Command", () => {
       expect(helpInfo).toContain("--fix-names");
       expect(helpInfo).toContain("project names");
     });
+  });
+
+  describe("--embed flag", () => {
+    it("has --embed option", () => {
+      const command = createSyncCommand();
+      const embedOption = command.options.find(
+        (o) => o.long === "--embed"
+      );
+      expect(embedOption).toBeDefined();
+    });
+
+    it("parses --embed flag", () => {
+      const command = createSyncCommand();
+      let capturedOptions: Record<string, unknown> | undefined;
+      command.action((options) => {
+        capturedOptions = options;
+      });
+
+      command.parse(["--embed"], { from: "user" });
+
+      expect(capturedOptions?.embed).toBe(true);
+    });
+
+    it("--embed appears in help text", () => {
+      const command = createSyncCommand();
+      const helpInfo = command.helpInformation();
+
+      expect(helpInfo).toContain("--embed");
+    });
+
+    it("has --background option", () => {
+      const command = createSyncCommand();
+      const bgOption = command.options.find(
+        (o) => o.long === "--background"
+      );
+      expect(bgOption).toBeDefined();
+    });
+
+    it("parses --background flag", () => {
+      const command = createSyncCommand();
+      let capturedOptions: Record<string, unknown> | undefined;
+      command.action((options) => {
+        capturedOptions = options;
+      });
+
+      command.parse(["--background"], { from: "user" });
+
+      expect(capturedOptions?.background).toBe(true);
+    });
+
+    it("--background appears in help text", () => {
+      const command = createSyncCommand();
+      const helpInfo = command.helpInformation();
+
+      expect(helpInfo).toContain("--background");
+    });
+
+    it("defaults to undefined for embed and background when not set", () => {
+      const command = createSyncCommand();
+      let capturedOptions: Record<string, unknown> | undefined;
+      command.action((options) => {
+        capturedOptions = options;
+      });
+
+      command.parse([], { from: "user" });
+
+      expect(capturedOptions?.embed).toBeUndefined();
+      expect(capturedOptions?.background).toBeUndefined();
+    });
+  });
+});
+
+describe("runEmbeddingPass", () => {
+  it("returns without action when provider is null (embedding disabled)", async () => {
+    const logSpy = spyOn(console, "error").mockImplementation(() => {});
+
+    const mockDb = {} as any;
+    const mockFactory = {
+      createFromConfig: () => null,
+      dispose: async () => {},
+    };
+    const mockConfig = {
+      embedding: {
+        enabled: false,
+        provider: "local",
+        model: "test-model",
+        dimensions: 384,
+        batchSize: 100,
+      },
+    };
+
+    await runEmbeddingPass(mockDb, {}, {
+      factory: mockFactory as any,
+      config: mockConfig,
+    });
+
+    expect(logSpy).toHaveBeenCalledWith(
+      expect.stringContaining("disabled")
+    );
+    logSpy.mockRestore();
+  });
+
+  it("prints message and returns when all messages already embedded", async () => {
+    const logSpy = spyOn(console, "log").mockImplementation(() => {});
+
+    const mockProvider = {
+      name: "local",
+      model: "test-model",
+      dimensions: 384,
+      isReady: () => true,
+      initialize: async () => {},
+      embed: async () => {},
+      embedBatch: async () => [],
+      dispose: async () => {},
+    };
+
+    const mockFactory = {
+      createFromConfig: () => mockProvider,
+      dispose: async () => {},
+    };
+
+    const mockConfig = {
+      embedding: {
+        enabled: true,
+        provider: "local",
+        model: "test-model",
+        dimensions: 384,
+        batchSize: 100,
+      },
+    };
+
+    const mockRepo = {
+      getStoredModelHash: () => null,
+      getStoredModelName: () => null,
+      getEmbeddedCount: () => 50,
+      getTotalMessageCount: () => 50,
+      findUnembedded: () => [],
+      storeBatch: () => {},
+      clearAllEmbeddings: () => {},
+    };
+
+    await runEmbeddingPass({} as any, {}, {
+      factory: mockFactory as any,
+      config: mockConfig,
+      repositoryOverride: mockRepo as any,
+    });
+
+    expect(logSpy).toHaveBeenCalledWith(
+      expect.stringContaining("already embedded")
+    );
+    logSpy.mockRestore();
+  });
+
+  it("calls embedUnembedded and prints completion summary", async () => {
+    const logSpy = spyOn(console, "log").mockImplementation(() => {});
+
+    let embedCalled = false;
+
+    const mockProvider = {
+      name: "local",
+      model: "test-model",
+      dimensions: 384,
+      isReady: () => true,
+      initialize: async () => {},
+      embed: async () => {},
+      embedBatch: async (texts: string[]) => texts.map(() => ({
+        embedding: new Float32Array(384),
+        model: "test-model",
+        dimensions: 384,
+      })),
+      dispose: async () => {},
+    };
+
+    const mockFactory = {
+      createFromConfig: () => mockProvider,
+      dispose: async () => {},
+    };
+
+    const mockConfig = {
+      embedding: {
+        enabled: true,
+        provider: "local",
+        model: "test-model",
+        dimensions: 384,
+        batchSize: 100,
+      },
+    };
+
+    let callCount = 0;
+    const mockRepo = {
+      getStoredModelHash: () => null,
+      getStoredModelName: () => null,
+      getEmbeddedCount: () => 0,
+      getTotalMessageCount: () => 10,
+      findUnembedded: (limit: number) => {
+        callCount++;
+        if (callCount === 1) {
+          return Array.from({ length: 10 }, (_, i) => ({
+            rowid: i + 1,
+            content: `message ${i}`,
+          }));
+        }
+        return [];
+      },
+      storeBatch: () => { embedCalled = true; },
+      clearAllEmbeddings: () => {},
+    };
+
+    await runEmbeddingPass({} as any, {}, {
+      factory: mockFactory as any,
+      config: mockConfig,
+      repositoryOverride: mockRepo as any,
+    });
+
+    expect(embedCalled).toBe(true);
+    // Verify completion message format: "Embedded N messages in Xs (Y.Z msg/s)"
+    const logCalls = logSpy.mock.calls.map(c => c[0]);
+    const summaryLine = logCalls.find((s: string) => typeof s === "string" && s.includes("Embedded"));
+    expect(summaryLine).toBeDefined();
+    expect(summaryLine).toMatch(/Embedded \d+ messages in \d+s \(\d+\.?\d* msg\/s\)/);
+
+    logSpy.mockRestore();
+  });
+
+  it("prints failure message and throws on embedding error", async () => {
+    const errorSpy = spyOn(console, "error").mockImplementation(() => {});
+    const logSpy = spyOn(console, "log").mockImplementation(() => {});
+
+    const mockProvider = {
+      name: "local",
+      model: "test-model",
+      dimensions: 384,
+      isReady: () => true,
+      initialize: async () => {},
+      embed: async () => {},
+      embedBatch: async () => { throw new Error("ONNX failure"); },
+      dispose: async () => {},
+    };
+
+    const mockFactory = {
+      createFromConfig: () => mockProvider,
+      dispose: async () => {},
+    };
+
+    const mockConfig = {
+      embedding: {
+        enabled: true,
+        provider: "local",
+        model: "test-model",
+        dimensions: 384,
+        batchSize: 100,
+      },
+    };
+
+    const mockRepo = {
+      getStoredModelHash: () => null,
+      getStoredModelName: () => null,
+      getEmbeddedCount: () => 5,
+      getTotalMessageCount: () => 20,
+      findUnembedded: () => [{ rowid: 1, content: "test" }],
+      storeBatch: () => {},
+      clearAllEmbeddings: () => {},
+    };
+
+    await expect(
+      runEmbeddingPass({} as any, {}, {
+        factory: mockFactory as any,
+        config: mockConfig,
+        repositoryOverride: mockRepo as any,
+      })
+    ).rejects.toThrow("ONNX failure");
+
+    const errorCalls = errorSpy.mock.calls.map(c => c[0]);
+    const failureLine = errorCalls.find((s: string) => typeof s === "string" && s.includes("Embedding failed"));
+    expect(failureLine).toBeDefined();
+    expect(failureLine).toContain("Run memory sync --embed to resume");
+
+    errorSpy.mockRestore();
+    logSpy.mockRestore();
+  });
+
+  it("disposes factory even on error", async () => {
+    spyOn(console, "error").mockImplementation(() => {});
+    spyOn(console, "log").mockImplementation(() => {});
+
+    let disposed = false;
+    const mockProvider = {
+      name: "local",
+      model: "test-model",
+      dimensions: 384,
+      isReady: () => true,
+      initialize: async () => {},
+      embed: async () => {},
+      embedBatch: async () => { throw new Error("fail"); },
+      dispose: async () => {},
+    };
+
+    const mockFactory = {
+      createFromConfig: () => mockProvider,
+      dispose: async () => { disposed = true; },
+    };
+
+    const mockConfig = {
+      embedding: {
+        enabled: true,
+        provider: "local",
+        model: "test-model",
+        dimensions: 384,
+        batchSize: 100,
+      },
+    };
+
+    const mockRepo = {
+      getStoredModelHash: () => null,
+      getStoredModelName: () => null,
+      getEmbeddedCount: () => 0,
+      getTotalMessageCount: () => 5,
+      findUnembedded: () => [{ rowid: 1, content: "test" }],
+      storeBatch: () => {},
+      clearAllEmbeddings: () => {},
+    };
+
+    try {
+      await runEmbeddingPass({} as any, {}, {
+        factory: mockFactory as any,
+        config: mockConfig,
+        repositoryOverride: mockRepo as any,
+      });
+    } catch {
+      // expected
+    }
+
+    expect(disposed).toBe(true);
+  });
+});
+
+describe("handleModelChange", () => {
+  const originalStdinIsTTY = process.stdin.isTTY;
+
+  afterEach(() => {
+    Object.defineProperty(process.stdin, "isTTY", {
+      value: originalStdinIsTTY,
+      writable: true,
+      configurable: true,
+    });
+  });
+
+  it("returns true when --force is set", async () => {
+    const modelState: ModelState = {
+      modelChanged: true,
+      needsReEmbed: true,
+      storedHash: "abc123",
+      currentHash: "def456",
+      storedModelName: "Xenova/all-MiniLM-L6-v2",
+      currentModelName: "text-embedding-3-small",
+      embeddedCount: 100,
+    };
+
+    const result = await handleModelChange(modelState, { force: true });
+    expect(result).toBe(true);
+  });
+
+  it("returns false with warning in non-interactive mode (no TTY)", async () => {
+    Object.defineProperty(process.stdin, "isTTY", {
+      value: false,
+      writable: true,
+      configurable: true,
+    });
+
+    const errorSpy = spyOn(console, "error").mockImplementation(() => {});
+
+    const modelState: ModelState = {
+      modelChanged: true,
+      needsReEmbed: true,
+      storedHash: "abc123",
+      currentHash: "def456",
+      storedModelName: "Xenova/all-MiniLM-L6-v2",
+      currentModelName: "text-embedding-3-small",
+      embeddedCount: 100,
+    };
+
+    const result = await handleModelChange(modelState, {});
+    expect(result).toBe(false);
+
+    const errorCalls = errorSpy.mock.calls.map(c => c[0]);
+    const warningLine = errorCalls.find((s: string) =>
+      typeof s === "string" && s.includes("Model changed")
+    );
+    expect(warningLine).toBeDefined();
+    expect(warningLine).toContain("Xenova/all-MiniLM-L6-v2");
+    expect(warningLine).toContain("text-embedding-3-small");
+    expect(warningLine).toContain("non-interactive");
+
+    errorSpy.mockRestore();
+  });
+
+  it("returns false with warning in quiet mode", async () => {
+    Object.defineProperty(process.stdin, "isTTY", {
+      value: true,
+      writable: true,
+      configurable: true,
+    });
+
+    const errorSpy = spyOn(console, "error").mockImplementation(() => {});
+
+    const modelState: ModelState = {
+      modelChanged: true,
+      needsReEmbed: true,
+      storedHash: "abc123",
+      currentHash: "def456",
+      storedModelName: "old-model",
+      currentModelName: "new-model",
+      embeddedCount: 50,
+    };
+
+    const result = await handleModelChange(modelState, { quiet: true });
+    expect(result).toBe(false);
+
+    errorSpy.mockRestore();
+  });
+
+  it("uses storedHash as fallback when storedModelName is undefined", async () => {
+    Object.defineProperty(process.stdin, "isTTY", {
+      value: false,
+      writable: true,
+      configurable: true,
+    });
+
+    const errorSpy = spyOn(console, "error").mockImplementation(() => {});
+
+    const modelState: ModelState = {
+      modelChanged: true,
+      needsReEmbed: true,
+      storedHash: "abc123deadbeef00",
+      currentHash: "def456",
+      storedModelName: undefined,
+      currentModelName: "new-model",
+      embeddedCount: 50,
+    };
+
+    const result = await handleModelChange(modelState, {});
+    expect(result).toBe(false);
+
+    const errorCalls = errorSpy.mock.calls.map(c => c[0]);
+    const warningLine = errorCalls.find((s: string) =>
+      typeof s === "string" && s.includes("abc123deadbeef00")
+    );
+    expect(warningLine).toBeDefined();
+
+    errorSpy.mockRestore();
+  });
+
+  it("uses human-readable model names (not hashes) in messages", async () => {
+    Object.defineProperty(process.stdin, "isTTY", {
+      value: false,
+      writable: true,
+      configurable: true,
+    });
+
+    const errorSpy = spyOn(console, "error").mockImplementation(() => {});
+
+    const modelState: ModelState = {
+      modelChanged: true,
+      needsReEmbed: true,
+      storedHash: "abc123",
+      currentHash: "def456",
+      storedModelName: "Xenova/all-MiniLM-L6-v2",
+      currentModelName: "nomic-embed-text-v1.5",
+      embeddedCount: 200,
+    };
+
+    await handleModelChange(modelState, {});
+
+    const errorCalls = errorSpy.mock.calls.map(c => c[0]);
+    const warningLine = errorCalls.find((s: string) =>
+      typeof s === "string" && s.includes("Model changed")
+    );
+    expect(warningLine).toContain("Xenova/all-MiniLM-L6-v2");
+    expect(warningLine).toContain("nomic-embed-text-v1.5");
+    // Should NOT contain the hash
+    expect(warningLine).not.toContain("abc123");
+    expect(warningLine).not.toContain("def456");
+
+    errorSpy.mockRestore();
   });
 });
