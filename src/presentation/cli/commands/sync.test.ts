@@ -643,6 +643,157 @@ describe("runEmbeddingPass", () => {
     logSpy.mockRestore();
   });
 
+  it("disposes factory and returns when model change is declined (non-interactive)", async () => {
+    const errorSpy = spyOn(console, "error").mockImplementation(() => {});
+    const logSpy = spyOn(console, "log").mockImplementation(() => {});
+
+    // Set non-interactive so handleModelChange returns false
+    const originalTTY = process.stdin.isTTY;
+    Object.defineProperty(process.stdin, "isTTY", {
+      value: false,
+      writable: true,
+      configurable: true,
+    });
+
+    let disposed = false;
+    const mockProvider = {
+      name: "local",
+      model: "test-model",
+      dimensions: 384,
+      isReady: () => true,
+      initialize: async () => {},
+      embed: async () => {},
+      embedBatch: async () => [],
+      dispose: async () => {},
+    };
+
+    const mockFactory = {
+      createFromConfig: () => mockProvider,
+      dispose: async () => { disposed = true; },
+    };
+
+    const mockConfig = {
+      embedding: {
+        enabled: true,
+        provider: "local",
+        model: "new-model",
+        dimensions: 384,
+        batchSize: 100,
+      },
+    };
+
+    // Repository with existing embeddings using a DIFFERENT model hash
+    const mockRepo = {
+      getStoredModelHash: () => "old-hash-different",
+      getStoredModelName: () => "old-model/v1",
+      getEmbeddedCount: () => 50,
+      getTotalMessageCount: () => 100,
+      findUnembedded: () => [],
+      storeBatch: () => {},
+      clearAllEmbeddings: () => {},
+    };
+
+    let embedBatchCalled = false;
+    mockProvider.embedBatch = async () => {
+      embedBatchCalled = true;
+      return [];
+    };
+
+    await runEmbeddingPass({} as any, {}, {
+      factory: mockFactory as any,
+      config: mockConfig,
+      repositoryOverride: mockRepo as any,
+    });
+
+    expect(disposed).toBe(true);
+    expect(embedBatchCalled).toBe(false);
+
+    // Restore
+    Object.defineProperty(process.stdin, "isTTY", {
+      value: originalTTY,
+      writable: true,
+      configurable: true,
+    });
+    errorSpy.mockRestore();
+    logSpy.mockRestore();
+  });
+
+  it("logs clearing message and re-embeds when model change is accepted (force mode)", async () => {
+    const logSpy = spyOn(console, "log").mockImplementation(() => {});
+
+    let clearCalled = false;
+    let embedBatchCalled = false;
+
+    const mockProvider = {
+      name: "local",
+      model: "new-model",
+      dimensions: 384,
+      isReady: () => true,
+      initialize: async () => {},
+      embed: async () => {},
+      embedBatch: async (texts: string[]) => {
+        embedBatchCalled = true;
+        return texts.map(() => ({
+          embedding: new Float32Array(384),
+          model: "new-model",
+          dimensions: 384,
+        }));
+      },
+      dispose: async () => {},
+    };
+
+    const mockFactory = {
+      createFromConfig: () => mockProvider,
+      dispose: async () => {},
+    };
+
+    const mockConfig = {
+      embedding: {
+        enabled: true,
+        provider: "local",
+        model: "new-model",
+        dimensions: 384,
+        batchSize: 100,
+      },
+    };
+
+    let callCount = 0;
+    const mockRepo = {
+      getStoredModelHash: () => "old-hash-different",
+      getStoredModelName: () => "old-model/v1",
+      getEmbeddedCount: () => 0,
+      getTotalMessageCount: () => 5,
+      findUnembedded: (limit: number) => {
+        callCount++;
+        if (callCount === 1) {
+          return Array.from({ length: 5 }, (_, i) => ({
+            rowid: i + 1,
+            content: `message ${i}`,
+          }));
+        }
+        return [];
+      },
+      storeBatch: () => {},
+      clearAllEmbeddings: () => { clearCalled = true; },
+    };
+
+    await runEmbeddingPass({} as any, { force: true }, {
+      factory: mockFactory as any,
+      config: mockConfig,
+      repositoryOverride: mockRepo as any,
+    });
+
+    // Should have logged the clearing message
+    const logCalls = logSpy.mock.calls.map(c => c[0]);
+    const clearLine = logCalls.find((s: string) =>
+      typeof s === "string" && s.includes("Clearing existing embeddings")
+    );
+    expect(clearLine).toBeDefined();
+    expect(clearCalled).toBe(true);
+
+    logSpy.mockRestore();
+  });
+
   it("disposes factory even on error", async () => {
     spyOn(console, "error").mockImplementation(() => {});
     spyOn(console, "log").mockImplementation(() => {});
@@ -849,6 +1000,110 @@ describe("handleModelChange", () => {
   });
 });
 
+describe("handleModelChange interactive readline", () => {
+  const originalStdinIsTTY = process.stdin.isTTY;
+
+  afterEach(() => {
+    Object.defineProperty(process.stdin, "isTTY", {
+      value: originalStdinIsTTY,
+      writable: true,
+      configurable: true,
+    });
+  });
+
+  it("returns true when user types 'y' at interactive prompt", async () => {
+    Object.defineProperty(process.stdin, "isTTY", {
+      value: true,
+      writable: true,
+      configurable: true,
+    });
+
+    // Mock readline to immediately invoke callback with "y"
+    const originalImport = globalThis.Bun;
+    mock.module("node:readline", () => ({
+      createInterface: () => ({
+        question: (_prompt: string, cb: (answer: string) => void) => {
+          cb("y");
+        },
+        close: () => {},
+      }),
+    }));
+
+    const modelState: ModelState = {
+      modelChanged: true,
+      needsReEmbed: true,
+      storedHash: "abc123",
+      currentHash: "def456",
+      storedModelName: "old-model",
+      currentModelName: "new-model",
+      embeddedCount: 50,
+    };
+
+    const result = await handleModelChange(modelState, {});
+    expect(result).toBe(true);
+  });
+
+  it("returns false when user types 'n' at interactive prompt", async () => {
+    Object.defineProperty(process.stdin, "isTTY", {
+      value: true,
+      writable: true,
+      configurable: true,
+    });
+
+    mock.module("node:readline", () => ({
+      createInterface: () => ({
+        question: (_prompt: string, cb: (answer: string) => void) => {
+          cb("n");
+        },
+        close: () => {},
+      }),
+    }));
+
+    const modelState: ModelState = {
+      modelChanged: true,
+      needsReEmbed: true,
+      storedHash: "abc123",
+      currentHash: "def456",
+      storedModelName: "old-model",
+      currentModelName: "new-model",
+      embeddedCount: 50,
+    };
+
+    const result = await handleModelChange(modelState, {});
+    expect(result).toBe(false);
+  });
+
+  it("returns false when user presses enter without input (default is No)", async () => {
+    Object.defineProperty(process.stdin, "isTTY", {
+      value: true,
+      writable: true,
+      configurable: true,
+    });
+
+    mock.module("node:readline", () => ({
+      createInterface: () => ({
+        question: (_prompt: string, cb: (answer: string) => void) => {
+          cb("");
+        },
+        close: () => {},
+      }),
+    }));
+
+    const modelState: ModelState = {
+      modelChanged: true,
+      needsReEmbed: true,
+      storedHash: "abc123",
+      currentHash: "def456",
+      storedModelName: "old-model",
+      currentModelName: "new-model",
+      embeddedCount: 50,
+    };
+
+    const result = await handleModelChange(modelState, {});
+    expect(result).toBe(false);
+  });
+});
+
 describe("handleBackgroundMode", () => {
   it("prints hint and returns exitCode 0 when --embed is not set", async () => {
     const logSpy = spyOn(console, "log").mockImplementation(() => {});
@@ -943,26 +1198,6 @@ describe("handleBackgroundMode", () => {
   });
 });
 
-describe("background process self-detection", () => {
-  const originalEnv = process.env.MEMORY_EMBED_BACKGROUND;
-
-  afterEach(() => {
-    if (originalEnv === undefined) {
-      delete process.env.MEMORY_EMBED_BACKGROUND;
-    } else {
-      process.env.MEMORY_EMBED_BACKGROUND = originalEnv;
-    }
-  });
-
-  it("isBackgroundEmbedding returns true when env var is set", () => {
-    process.env.MEMORY_EMBED_BACKGROUND = "1";
-    const { isBackgroundEmbedding } = require("../../../infrastructure/embedding/background-embedder.js");
-    expect(isBackgroundEmbedding()).toBe(true);
-  });
-
-  it("isBackgroundEmbedding returns false when env var is not set", () => {
-    delete process.env.MEMORY_EMBED_BACKGROUND;
-    const { isBackgroundEmbedding } = require("../../../infrastructure/embedding/background-embedder.js");
-    expect(isBackgroundEmbedding()).toBe(false);
-  });
-});
+// Note: "background process self-detection" tests (isBackgroundEmbedding) are
+// covered in background-embedder.test.ts. Removed from here to avoid mock.module
+// leakage when sync-lazy-loaders.test.ts runs in the same test process.
