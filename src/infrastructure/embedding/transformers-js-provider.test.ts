@@ -233,4 +233,257 @@ describe("TransformersJsProvider", () => {
       );
     });
   });
+
+  // -------------------------------------------------------------------------
+  // Tests: Task 14-03-B -- Progress Callback and WASM Fallback
+  // -------------------------------------------------------------------------
+
+  describe("progress callback (EMBED-06)", () => {
+    it("forwards progress events to onProgress callback", async () => {
+      // Configure pipeline mock to invoke progress_callback from options
+      mockState.pipelineFn = mock(async (_task: string, _model: string, opts?: any) => {
+        if (opts?.progress_callback) {
+          opts.progress_callback({ status: "progress", file: "model.onnx", loaded: 5000, total: 23000 });
+          opts.progress_callback({ status: "ready", file: "model.onnx", loaded: 23000, total: 23000 });
+        }
+        return mockState.extractor;
+      });
+
+      const provider = new TransformersJsProvider();
+      const events: any[] = [];
+      await provider.initialize((p) => events.push(p));
+
+      expect(events).toHaveLength(2);
+      expect(events[0]).toEqual({
+        status: "downloading",
+        file: "model.onnx",
+        loaded: 5000,
+        total: 23000,
+      });
+      expect(events[1]).toEqual({
+        status: "ready",
+        file: "model.onnx",
+        loaded: 23000,
+        total: 23000,
+      });
+    });
+
+    it("maps 'progress' status to 'downloading'", async () => {
+      mockState.pipelineFn = mock(async (_task: string, _model: string, opts?: any) => {
+        if (opts?.progress_callback) {
+          opts.progress_callback({ status: "progress", file: "weights.bin", loaded: 100, total: 1000 });
+        }
+        return mockState.extractor;
+      });
+
+      const provider = new TransformersJsProvider();
+      const events: any[] = [];
+      await provider.initialize((p) => events.push(p));
+
+      expect(events[0].status).toBe("downloading");
+    });
+
+    it("maps unknown status strings to 'downloading'", async () => {
+      mockState.pipelineFn = mock(async (_task: string, _model: string, opts?: any) => {
+        if (opts?.progress_callback) {
+          opts.progress_callback({ status: "initiate", file: "config.json", loaded: 0, total: 0 });
+        }
+        return mockState.extractor;
+      });
+
+      const provider = new TransformersJsProvider();
+      const events: any[] = [];
+      await provider.initialize((p) => events.push(p));
+
+      expect(events[0].status).toBe("downloading");
+    });
+
+    it("handles events with missing loaded/total fields gracefully", async () => {
+      mockState.pipelineFn = mock(async (_task: string, _model: string, opts?: any) => {
+        if (opts?.progress_callback) {
+          opts.progress_callback({ status: "progress" });
+        }
+        return mockState.extractor;
+      });
+
+      const provider = new TransformersJsProvider();
+      const events: any[] = [];
+      await provider.initialize((p) => events.push(p));
+
+      expect(events[0]).toEqual({
+        status: "downloading",
+        file: "",
+        loaded: 0,
+        total: 0,
+      });
+    });
+
+    it("does not pass progress_callback when onProgress is undefined", async () => {
+      const provider = new TransformersJsProvider();
+      await provider.initialize();
+
+      const opts = mockState.pipelineFn.mock.calls[0][2];
+      expect(opts.progress_callback).toBeUndefined();
+    });
+  });
+
+  describe("WASM fallback (EMBED-07)", () => {
+    it("falls back to WASM when native pipeline throws", async () => {
+      let callCount = 0;
+      mockState.pipelineFn = mock(async (_task: string, _model: string, opts?: any) => {
+        callCount++;
+        if (callCount === 1) {
+          throw new Error("Native ONNX runtime not available");
+        }
+        return mockState.extractor;
+      });
+
+      const warnSpy = spyOn(console, "warn").mockImplementation(() => {});
+      try {
+        const provider = new TransformersJsProvider();
+        await provider.initialize();
+
+        // Pipeline called twice: native attempt + WASM fallback
+        expect(mockState.pipelineFn).toHaveBeenCalledTimes(2);
+        expect(provider.isReady()).toBe(true);
+      } finally {
+        warnSpy.mockRestore();
+      }
+    });
+
+    it("sets numThreads to 1 before WASM retry", async () => {
+      let callCount = 0;
+      mockState.pipelineFn = mock(async (_task: string, _model: string, opts?: any) => {
+        callCount++;
+        if (callCount === 1) {
+          throw new Error("Native ONNX runtime not available");
+        }
+        return mockState.extractor;
+      });
+
+      const warnSpy = spyOn(console, "warn").mockImplementation(() => {});
+      try {
+        const provider = new TransformersJsProvider();
+        await provider.initialize();
+
+        expect(mockState.env.backends.onnx.wasm.numThreads).toBe(1);
+      } finally {
+        warnSpy.mockRestore();
+      }
+    });
+
+    it("passes device: 'wasm' to the fallback pipeline call", async () => {
+      let callCount = 0;
+      mockState.pipelineFn = mock(async (_task: string, _model: string, opts?: any) => {
+        callCount++;
+        if (callCount === 1) {
+          throw new Error("Native ONNX runtime not available");
+        }
+        return mockState.extractor;
+      });
+
+      const warnSpy = spyOn(console, "warn").mockImplementation(() => {});
+      try {
+        const provider = new TransformersJsProvider();
+        await provider.initialize();
+
+        const fallbackOpts = mockState.pipelineFn.mock.calls[1][2];
+        expect(fallbackOpts).toMatchObject({ device: "wasm", dtype: "q8" });
+      } finally {
+        warnSpy.mockRestore();
+      }
+    });
+
+    it("logs warnings about native failure and WASM fallback", async () => {
+      let callCount = 0;
+      mockState.pipelineFn = mock(async (_task: string, _model: string, opts?: any) => {
+        callCount++;
+        if (callCount === 1) {
+          throw new Error("ONNX DLL not found");
+        }
+        return mockState.extractor;
+      });
+
+      const warnSpy = spyOn(console, "warn").mockImplementation(() => {});
+      try {
+        const provider = new TransformersJsProvider();
+        await provider.initialize();
+
+        expect(warnSpy).toHaveBeenCalledTimes(2);
+        expect(warnSpy.mock.calls[0][0]).toContain("Native ONNX runtime failed");
+        expect(warnSpy.mock.calls[0][0]).toContain("ONNX DLL not found");
+        expect(warnSpy.mock.calls[1][0]).toContain("Falling back to WASM backend");
+      } finally {
+        warnSpy.mockRestore();
+      }
+    });
+
+    it("allows embed() to work after WASM fallback succeeds", async () => {
+      let callCount = 0;
+      mockState.pipelineFn = mock(async (_task: string, _model: string, opts?: any) => {
+        callCount++;
+        if (callCount === 1) {
+          throw new Error("Native failed");
+        }
+        return mockState.extractor;
+      });
+
+      const warnSpy = spyOn(console, "warn").mockImplementation(() => {});
+      try {
+        const provider = new TransformersJsProvider();
+        await provider.initialize();
+
+        const result = await provider.embed("test after fallback");
+        expect(result).toBeInstanceOf(EmbeddingResult);
+        expect(result.dimensions).toBe(384);
+      } finally {
+        warnSpy.mockRestore();
+      }
+    });
+
+    it("throws combined error when both native and WASM fail", async () => {
+      let callCount = 0;
+      mockState.pipelineFn = mock(async (_task: string, _model: string, opts?: any) => {
+        callCount++;
+        if (callCount === 1) {
+          throw new Error("Native runtime missing");
+        }
+        throw new Error("WASM SharedArrayBuffer unavailable");
+      });
+
+      const warnSpy = spyOn(console, "warn").mockImplementation(() => {});
+      try {
+        const provider = new TransformersJsProvider();
+
+        await expect(provider.initialize()).rejects.toThrow(
+          "Embedding initialization failed. Native: Native runtime missing. WASM: WASM SharedArrayBuffer unavailable",
+        );
+        expect(provider.isReady()).toBe(false);
+      } finally {
+        warnSpy.mockRestore();
+      }
+    });
+
+    it("handles non-Error native failures in the combined error message", async () => {
+      let callCount = 0;
+      mockState.pipelineFn = mock(async (_task: string, _model: string, opts?: any) => {
+        callCount++;
+        if (callCount === 1) {
+          throw "string error";
+        }
+        throw 42;
+      });
+
+      const warnSpy = spyOn(console, "warn").mockImplementation(() => {});
+      try {
+        const provider = new TransformersJsProvider();
+
+        await expect(provider.initialize()).rejects.toThrow(
+          "Embedding initialization failed. Native: string error. WASM: 42",
+        );
+      } finally {
+        warnSpy.mockRestore();
+      }
+    });
+  });
 });
