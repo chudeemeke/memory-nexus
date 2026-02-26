@@ -1,7 +1,7 @@
 ---
 agent: gsd-executor
-updated: 2026-02-25
-entries: 9
+updated: 2026-02-26
+entries: 15
 ---
 
 - finding: "Bun test spyOn mock leakage: when mocking nodeFs.renameSync, must restore before assertions, not in afterEach. Mock affects subsequent tests in same file if not restored promptly."
@@ -57,3 +57,39 @@ entries: 9
   confidence: HIGH
   phase: "13-package-rename"
   date: "2026-02-25"
+
+- finding: "Bun resolves type-only imports from nonexistent .ts files without error at runtime. When writing TDD RED tests for interfaces (type-only imports), the test may pass even before creating the source file because bun treats missing type-only modules as structurally inferred. The GREEN phase still matters because it creates the actual typed contract."
+  source: "Phase 14, Plan 01, Task B"
+  confidence: HIGH
+  phase: "14-embedding-infrastructure"
+  date: "2026-02-26"
+
+- finding: "Pre-existing flaky test in connection.test.ts (sqlite-vec extension loading) fails intermittently in full suite but passes in isolation. This is a test ordering/isolation issue, not a real regression. Document and skip rather than debugging."
+  source: "Phase 14, Plan 01"
+  confidence: HIGH
+  phase: "14-embedding-infrastructure"
+  date: "2026-02-26"
+
+- finding: "sqlite-vec@0.1.6 loads successfully via require() in bun:sqlite on Windows MINGW64. The load(db) API is synchronous and compatible with initializeDatabase's sync design."
+  source: "Phase 14, Plan 02, Task B"
+  confidence: HIGH
+  phase: "14-embedding-infrastructure"
+  date: "2026-02-26"
+
+- finding: "When adding entries to SCHEMA_SQL array, existing tests that assert array length must be updated. Always check for hardcoded length assertions in schema.test.ts."
+  source: "Phase 14, Plan 02, Task A"
+  confidence: HIGH
+  phase: "14-embedding-infrastructure"
+  date: "2026-02-26"
+
+- finding: "Bun mock.module for dynamic imports: the returned object is resolved once and cached. Getter-based delegation (get prop() { return variable; }) does NOT work because bun evaluates the getter at registration time. Use a shared mutable state object where properties are mutated in place (never reassigned). For env-like objects, reset properties in beforeEach rather than replacing the whole object."
+  source: "Phase 14, Plan 03, Task A"
+  confidence: HIGH
+  phase: "14-embedding-infrastructure"
+  date: "2026-02-26"
+
+- finding: "When plan specifies types/signatures that conflict with the domain port (e.g., async isReady(): Promise<boolean> vs synchronous isReady(): boolean), always follow the domain port. The port is the contract; the plan's implementation section is guidance."
+  source: "Phase 14, Plan 03, Task A"
+  confidence: HIGH
+  phase: "14-embedding-infrastructure"
+  date: "2026-02-26"

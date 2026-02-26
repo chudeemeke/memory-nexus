@@ -18,12 +18,12 @@ Requirements for v2.0: Hybrid Search, Package Rename, and API Stabilization.
 ### Embedding Infrastructure
 
 - [x] **EMBED-01**: Define `IEmbeddingProvider` port in domain layer with embed, embedBatch, isReady, initialize, dispose methods
-- [ ] **EMBED-02**: Implement `TransformersJsProvider` adapter using @huggingface/transformers v3 with all-MiniLM-L6-v2 default model (384 dimensions)
+- [x] **EMBED-02**: Implement `TransformersJsProvider` adapter using @huggingface/transformers v3 with all-MiniLM-L6-v2 default model (384 dimensions)
 - [x] **EMBED-03**: Load sqlite-vec extension alongside existing FTS5 extension in database initialization
 - [x] **EMBED-04**: Create `message_embeddings` virtual table (vec0, float[384]) and `embedding_state` tracking table via schema migration
 - [ ] **EMBED-05**: Implement `EmbeddingProviderFactory` with config-driven provider selection and lazy loading (ONNX runtime loads only when semantic search invoked)
-- [ ] **EMBED-06**: First-run model download with progress indicator ("Downloading embedding model (23 MB, one-time setup)...")
-- [ ] **EMBED-07**: WASM fallback when onnxruntime-node initialization fails, with user warning
+- [x] **EMBED-06**: First-run model download with progress indicator ("Downloading embedding model (23 MB, one-time setup)...")
+- [x] **EMBED-07**: WASM fallback when onnxruntime-node initialization fails, with user warning
 
 ### Embedding Pipeline
 
@@ -113,12 +113,12 @@ Deferred. Tracked for context, not in current roadmap.
 | RENAME-04 | Phase 13 | Complete |
 | RENAME-05 | Phase 13 | Complete |
 | EMBED-01 | Phase 14 | Complete |
-| EMBED-02 | Phase 14 | Pending |
+| EMBED-02 | Phase 14 | Complete |
 | EMBED-03 | Phase 14 | Complete |
 | EMBED-04 | Phase 14 | Complete |
 | EMBED-05 | Phase 14 | Pending |
-| EMBED-06 | Phase 14 | Pending |
-| EMBED-07 | Phase 14 | Pending |
+| EMBED-06 | Phase 14 | Complete |
+| EMBED-07 | Phase 14 | Complete |
 | PIPE-01 | Phase 15 | Pending |
 | PIPE-02 | Phase 15 | Pending |
 | PIPE-03 | Phase 15 | Pending |
@@ -154,4 +154,4 @@ Deferred. Tracked for context, not in current roadmap.
 
 ---
 *Requirements defined: 2026-02-18*
-*Last updated: 2026-02-26 (EMBED-03, EMBED-04 complete)*
+*Last updated: 2026-02-26 (EMBED-02, EMBED-06, EMBED-07 complete)*
