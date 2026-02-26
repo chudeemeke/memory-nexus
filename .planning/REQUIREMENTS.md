@@ -17,7 +17,7 @@ Requirements for v2.0: Hybrid Search, Package Rename, and API Stabilization.
 
 ### Embedding Infrastructure
 
-- [ ] **EMBED-01**: Define `IEmbeddingProvider` port in domain layer with embed, embedBatch, isReady, initialize, dispose methods
+- [x] **EMBED-01**: Define `IEmbeddingProvider` port in domain layer with embed, embedBatch, isReady, initialize, dispose methods
 - [ ] **EMBED-02**: Implement `TransformersJsProvider` adapter using @huggingface/transformers v3 with all-MiniLM-L6-v2 default model (384 dimensions)
 - [ ] **EMBED-03**: Load sqlite-vec extension alongside existing FTS5 extension in database initialization
 - [ ] **EMBED-04**: Create `message_embeddings` virtual table (vec0, float[384]) and `embedding_state` tracking table via schema migration
@@ -112,7 +112,7 @@ Deferred. Tracked for context, not in current roadmap.
 | RENAME-03 | Phase 13 | Complete |
 | RENAME-04 | Phase 13 | Complete |
 | RENAME-05 | Phase 13 | Complete |
-| EMBED-01 | Phase 14 | Pending |
+| EMBED-01 | Phase 14 | Complete |
 | EMBED-02 | Phase 14 | Pending |
 | EMBED-03 | Phase 14 | Pending |
 | EMBED-04 | Phase 14 | Pending |
@@ -154,4 +154,4 @@ Deferred. Tracked for context, not in current roadmap.
 
 ---
 *Requirements defined: 2026-02-18*
-*Last updated: 2026-02-25 (Phase 13 RENAME requirements complete)*
+*Last updated: 2026-02-26 (EMBED-01 complete)*

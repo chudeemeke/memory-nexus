@@ -13,13 +13,13 @@ See: .planning/PROJECT.md (updated 2026-02-18)
 ## Current Position
 
 **Milestone:** v2.0 Hybrid Search and Rebrand
-**Phase:** 13 (Package Rename) -- COMPLETE (all 3 plans done)
-**Status:** Phase 13 complete, ready for Phase 14
+**Phase:** 14 (Embedding Infrastructure) -- IN PROGRESS (2/4 plans done)
+**Status:** Plan 14-02 complete, continuing with 14-03
 
 ```
-v2.0 Progress: [###.................] 1/6 phases
+v2.0 Progress: [#####...............] 2/6 phases
   Phase 13: Package Rename          [x] Complete (3/3 plans)
-  Phase 14: Embedding Infrastructure [ ] Pending
+  Phase 14: Embedding Infrastructure [~] In Progress (2/4 plans)
   Phase 15: Embedding Pipeline       [ ] Pending
   Phase 16: Hybrid Search            [ ] Pending
   Phase 17: Provider Ecosystem       [ ] Pending
@@ -46,6 +46,8 @@ v2.0 Progress: [###.................] 1/6 phases
 | 13-01 | Centralized paths + migration | 14min | 2 | 18 |
 | 13-02 | Internal identity rename + user-facing strings | 25min | 2 | 36 |
 | 13-03 | Deprecation stub, migration docs, CLAUDE.md updates | 6min | 2 | 11 |
+| 14-01 | Domain embedding port and value objects | 5min | 2 | 9 |
+| 14-02 | sqlite-vec extension loading and schema migration | 6min | 2 | 7 |
 
 ## Accumulated Context
 
@@ -68,6 +70,11 @@ v2.0 Progress: [###.................] 1/6 phases
 | Dynamic error paths | getLogDir() in SYNC_FAILED suggestion | User-facing paths always resolve correctly regardless of XDG config |
 | Deprecation stub version | 0.2.0 (not matching main 2.0.0) | Stub is static signpost; its own version history is independent |
 | Stale hook detection | warnStaleHookReferences() in install | Warns users if old memory-nexus hooks persist in settings.json |
+| Float32Array immutability | Copy on construct + copy on getter | Full value object immutability at cost of allocation per access |
+| Provider lifecycle | initialize(onProgress?) -> embed -> dispose | Consistent lifecycle pattern for all embedding providers |
+| Default embedding config | Xenova/all-MiniLM-L6-v2, 384d, local | Matches research decision; EmbeddingConfig.defaults() codifies this |
+| sqlite-vec loading | require() in try/catch, sync | Keeps initializeDatabase sync; graceful fallback to FTS5-only |
+| Conditional vec0 schema | SchemaOptions.sqliteVecAvailable | vec0 tables only when extension loaded; embedding_state always created |
 
 ### Research Completed
 
@@ -86,21 +93,22 @@ None.
 
 ### Last Session
 
-**Date:** 2026-02-25
-**Completed:** Phase 13 Plan 03 -- deprecation stub, migration docs, CLAUDE.md updates (Phase 13 COMPLETE)
-**Stopped at:** Completed 13-03-PLAN.md
+**Date:** 2026-02-26
+**Completed:** Phase 14 Plan 02 -- sqlite-vec extension loading and schema migration
+**Stopped at:** Completed 14-02-PLAN.md
 
 ### Context for Next Session
 
-1. Phase 13 (Package Rename) complete: all 3 plans done
-2. Next: Phase 14 (Embedding Infrastructure)
-3. All tests pass: 2064 pass, 0 fail
-4. Package identity: @chude/memory v2.0.0, binary: memory
-5. Deprecation stub at deprecation-stub/ ready for independent npm publish
-6. MIGRATION.md, README.md, CLAUDE.md all updated to @chude/memory identity
-7. External WoW rules file renamed: ~/.claude/rules/memory.md (was memory-nexus.md)
-8. Install command now detects and warns about stale memory-nexus hook references
+1. Phase 14 (Embedding Infrastructure) in progress: 2/4 plans done
+2. Next: Phase 14-03 (TransformersJsProvider adapter)
+3. Tests: 2138 total pass, 0 fail
+4. sqlite-vec@0.1.6 installed and loading; vec0 virtual tables available
+5. embedding_state table always created; message_embeddings created when sqlite-vec available
+6. loadSqliteVecExtension() exported from connection.ts for reuse
+7. Domain layer: IEmbeddingProvider port, EmbeddingResult, EmbeddingConfig all defined and tested
+8. All new code at 100% function and line coverage
+9. Zero external imports in domain layer maintained
 
 ---
 
-*Last updated: 2026-02-25 (Phase 13 complete)*
+*Last updated: 2026-02-26 (Phase 14 plan 02 complete)*
