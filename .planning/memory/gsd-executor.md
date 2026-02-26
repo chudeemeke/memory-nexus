@@ -1,7 +1,7 @@
 ---
 agent: gsd-executor
 updated: 2026-02-26
-entries: 22
+entries: 24
 ---
 
 - finding: "Bun test spyOn mock leakage: when mocking nodeFs.renameSync, must restore before assertions, not in afterEach. Mock affects subsequent tests in same file if not restored promptly."
@@ -132,6 +132,18 @@ entries: 22
 
 - finding: "When adding new options to Commander.js commands, tests must check both option existence AND help text. Integration tests that spawn the CLI process verify real help output. Unit tests verify option parsing via command.parse() with action override."
   source: "Phase 15, Plan 02, Task B"
+  confidence: HIGH
+  phase: "15-embedding-pipeline"
+  date: "2026-02-26"
+
+- finding: "When extending StatusInfo (or any interface used in test fixtures), ALL existing test fixtures that construct the interface must be updated to include the new field. The formatStatusOutput function accesses status.embedding.active which crashes if embedding is undefined. Add embedding: { active: false } to all existing StatusInfo fixtures."
+  source: "Phase 15, Plan 03, Task B"
+  confidence: HIGH
+  phase: "15-embedding-pipeline"
+  date: "2026-02-26"
+
+- finding: "For functions that spawn child processes, use DI overrides (BackgroundModeDeps pattern) rather than mock.module to test. Export the handler function separately and accept optional dependency parameters. This avoids actually spawning processes in tests and follows the same proven pattern as EmbeddingPassDeps."
+  source: "Phase 15, Plan 03, Task B"
   confidence: HIGH
   phase: "15-embedding-pipeline"
   date: "2026-02-26"

@@ -13,14 +13,14 @@ See: .planning/PROJECT.md (updated 2026-02-18)
 ## Current Position
 
 **Milestone:** v2.0 Hybrid Search and Rebrand
-**Phase:** 15 (Embedding Pipeline) -- IN PROGRESS (2/3 plans done)
-**Status:** Active
+**Phase:** 15 (Embedding Pipeline) -- COMPLETE (3/3 plans done)
+**Status:** Active -- ready for Phase 16
 
 ```
-v2.0 Progress: [########............] 3/6 phases
+v2.0 Progress: [##########..........] 4/6 phases
   Phase 13: Package Rename          [x] Complete (3/3 plans)
   Phase 14: Embedding Infrastructure [x] Complete (4/4 plans)
-  Phase 15: Embedding Pipeline       [~] In Progress (2/3 plans)
+  Phase 15: Embedding Pipeline       [x] Complete (3/3 plans)
   Phase 16: Hybrid Search            [ ] Pending
   Phase 17: Provider Ecosystem       [ ] Pending
   Phase 18: API Stabilization        [ ] Pending
@@ -52,6 +52,7 @@ v2.0 Progress: [########............] 3/6 phases
 | 14-04 | EmbeddingProviderFactory, config integration, doctor reporting | 5min | 2 | 11 |
 | 15-01 | EmbeddingRepository and EmbeddingService with model hash tracking | 6min | 2 | 10 |
 | 15-02 | Sync --embed integration with progress and model change handling | 7min | 2 | 5 |
+| 15-03 | Background embedding with PID lock and status command extension | 7min | 2 | 7 |
 
 ## Accumulated Context
 
@@ -95,6 +96,11 @@ v2.0 Progress: [########............] 3/6 phases
 | Dynamic import for --embed | import() inside runEmbeddingPass | Zero ONNX overhead when --embed not specified |
 | Separate EmbeddingProgressReporter | New interface without sessionId | ISP compliance; embedding update(current) vs sync update(current, sessionId) |
 | handleModelChange prompt | Human-readable model names from ModelState | storedModelName/currentModelName, hash fallback for legacy data |
+| Background embedding DI | BackgroundModeDeps interface for testing | Same DI pattern as EmbeddingPassDeps; avoids spawning real processes |
+| Pre-spawn lock check | Check existing lock BEFORE spawning | Avoids wasting a process if lock already held |
+| Status embedding progress | Database queries, not LockData.totalMessages | totalMessages is 0 at spawn; live counts from EmbeddingRepository |
+| Background lock cleanup | finally block in embedding pass | Ensures cleanup on both success and failure |
+| Background env detection | MEMORY_EMBED_BACKGROUND=1 env var | Prevents infinite recursion; background process skips re-spawn |
 
 ### Research Completed
 
@@ -114,22 +120,22 @@ None.
 ### Last Session
 
 **Date:** 2026-02-26
-**Completed:** Phase 15 Plan 02 -- Sync --embed integration with progress and model change handling
-**Stopped at:** Phase 15 Plan 02 complete, Plan 03 next
+**Completed:** Phase 15 Plan 03 -- Background embedding with PID lock and status command extension
+**Stopped at:** Phase 15 complete (3/3 plans), Phase 16 next
 
 ### Context for Next Session
 
-1. Phase 15 (Embedding Pipeline) IN PROGRESS: 2/3 plans done
-2. Next: Phase 15 Plan 03 -- background embedding (--background flag)
-3. runEmbeddingPass exported with DI overrides for testing (EmbeddingPassDeps)
-4. handleModelChange exported, uses human-readable model names
-5. --embed and --background options defined on sync command
-6. --background handler deferred to Plan 15-03 (option registered, no implementation)
-7. EmbeddingProgressReporter interface + 3 implementations + factory
-8. createModelDownloadHandler for first-run model download progress
-9. Dynamic import in runEmbeddingPass ensures zero ONNX overhead without --embed
-10. Error isolation: embedding failure preserves sync data, returns exit code 1
+1. Phase 15 (Embedding Pipeline) COMPLETE: 3/3 plans done
+2. Next: Phase 16 (Hybrid Search and Graceful Degradation)
+3. BackgroundEmbedder: PID lock at {dataDir}/embedding.lock, stale lock detection, detached child process
+4. handleBackgroundMode with BackgroundModeDeps DI overrides for testing
+5. MEMORY_EMBED_BACKGROUND=1 env var signals background process (prevents re-spawn)
+6. Status command shows embedding section: active (PID, progress) or idle
+7. Status queries database for live embeddedCount/totalMessages (not LockData)
+8. Background process cleans up lock in finally block (success and failure)
+9. 2259 tests passing across full suite (excluding known EBUSY export flaky test)
+10. All PIPE requirements complete (PIPE-01 through PIPE-05)
 
 ---
 
-*Last updated: 2026-02-26 (Phase 15 Plan 02 complete)*
+*Last updated: 2026-02-26 (Phase 15 Plan 03 complete)*
