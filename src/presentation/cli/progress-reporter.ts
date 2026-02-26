@@ -158,3 +158,149 @@ export function createProgressReporter(options: {
 
   return new TtyProgressReporter(options.verbose);
 }
+
+// --- Embedding Progress Reporters ---
+
+/**
+ * Interface for reporting embedding progress.
+ *
+ * Separate from ProgressReporter because embedding uses a different
+ * format (no sessionId) and different progress bar text.
+ */
+export interface EmbeddingProgressReporter {
+  /** Start progress tracking with total count. */
+  start(total: number): void;
+  /** Update progress to current value. */
+  update(current: number): void;
+  /** Stop progress tracking and finalize output. */
+  stop(): void;
+}
+
+/**
+ * Embedding progress reporter for TTY environments.
+ *
+ * Displays an animated progress bar with embedding-specific format.
+ */
+export class TtyEmbeddingProgressReporter implements EmbeddingProgressReporter {
+  private bar: cliProgress.SingleBar;
+
+  constructor() {
+    this.bar = new cliProgress.SingleBar({
+      format:
+        "Embedding |{bar}| {percentage}% | {value}/{total} messages | ETA: {eta_formatted}",
+      barCompleteChar: "\u2588",
+      barIncompleteChar: "\u2591",
+      hideCursor: true,
+      etaBuffer: 20,
+    });
+  }
+
+  start(total: number): void {
+    this.bar.start(total, 0);
+  }
+
+  update(current: number): void {
+    this.bar.update(current);
+  }
+
+  stop(): void {
+    this.bar.stop();
+  }
+}
+
+/**
+ * Embedding progress reporter for non-TTY environments (pipes, CI).
+ *
+ * Uses plain text output instead of escape codes.
+ */
+export class PlainEmbeddingProgressReporter implements EmbeddingProgressReporter {
+  start(total: number): void {
+    console.log(`Embedding ${total} messages...`);
+  }
+
+  update(_current: number): void {
+    /* batch updates not shown in plain mode */
+  }
+
+  stop(): void {
+    console.log("Done.");
+  }
+}
+
+/**
+ * Embedding progress reporter that suppresses all output.
+ *
+ * Used for --quiet mode (hooks, scripting).
+ */
+export class QuietEmbeddingProgressReporter implements EmbeddingProgressReporter {
+  start(_total: number): void {}
+  update(_current: number): void {}
+  stop(): void {}
+}
+
+/**
+ * Create appropriate embedding progress reporter based on options and environment.
+ *
+ * @param options Configuration options
+ * @returns Appropriate EmbeddingProgressReporter for the environment
+ */
+export function createEmbeddingProgressReporter(options: {
+  quiet?: boolean;
+}): EmbeddingProgressReporter {
+  if (options.quiet) return new QuietEmbeddingProgressReporter();
+  if (!process.stdout.isTTY) return new PlainEmbeddingProgressReporter();
+  return new TtyEmbeddingProgressReporter();
+}
+
+// --- Model Download Progress ---
+
+import type { DownloadProgress } from "../../domain/ports/embedding.js";
+
+/**
+ * Create a handler for model download progress events.
+ *
+ * On TTY: shows animated progress bar for download.
+ * On non-TTY: prints a single announcement line.
+ * On quiet: suppresses all output.
+ *
+ * @param options Configuration options
+ * @returns Callback for DownloadProgress events from provider.initialize()
+ */
+export function createModelDownloadHandler(options: {
+  quiet?: boolean;
+}): (progress: DownloadProgress) => void {
+  if (options.quiet || !process.stdout.isTTY) {
+    // Non-TTY: show a single line when download starts
+    let announced = false;
+    return (progress: DownloadProgress) => {
+      if (!announced && progress.status === "downloading" && !options.quiet) {
+        console.log("Downloading embedding model (one-time setup)...");
+        announced = true;
+      }
+    };
+  }
+
+  // TTY: show animated progress bar for download
+  const downloadBar = new cliProgress.SingleBar({
+    format: "Downloading model |{bar}| {percentage}% | {value}/{total} MB",
+    barCompleteChar: "\u2588",
+    barIncompleteChar: "\u2591",
+    hideCursor: true,
+  });
+  let started = false;
+
+  return (progress: DownloadProgress) => {
+    if (progress.status === "downloading") {
+      const loadedMb = Math.round(progress.loaded / 1048576);
+      const totalMb = Math.round(progress.total / 1048576);
+      if (!started) {
+        downloadBar.start(totalMb, loadedMb);
+        started = true;
+      } else {
+        downloadBar.update(loadedMb);
+      }
+    } else if (progress.status === "ready" && started) {
+      downloadBar.stop();
+    }
+  };
+}
