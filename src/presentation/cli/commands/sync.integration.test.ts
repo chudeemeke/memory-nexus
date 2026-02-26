@@ -25,6 +25,8 @@ describe("CLI sync command", () => {
     expect(output).toContain("--session");
     expect(output).toContain("--quiet");
     expect(output).toContain("--verbose");
+    expect(output).toContain("--embed");
+    expect(output).toContain("--background");
     expect(output).toContain("-f");
     expect(output).toContain("-p");
     expect(output).toContain("-s");
