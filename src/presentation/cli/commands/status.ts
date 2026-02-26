@@ -46,6 +46,17 @@ interface StatusOptions {
 }
 
 /**
+ * Embedding background process status.
+ */
+export interface EmbeddingStatus {
+    active: boolean;
+    pid?: number;
+    startedAt?: string;
+    embeddedCount?: number;
+    totalMessages?: number;
+}
+
+/**
  * Aggregated status information.
  */
 export interface StatusInfo {
@@ -54,6 +65,7 @@ export interface StatusInfo {
     lastSync: string | null;
     pendingSessions: number;
     recentLogs: number;
+    embedding: EmbeddingStatus;
 }
 
 /**
@@ -136,12 +148,55 @@ export async function gatherStatus(options: GatherStatusOptions = {}): Promise<S
         }
     }
 
+    // Check embedding background status
+    let embeddingStatus: EmbeddingStatus = { active: false };
+    try {
+        const { readLock, isProcessAlive } = await import(
+            "../../../infrastructure/embedding/background-embedder.js"
+        );
+        const lock = readLock();
+        if (lock && isProcessAlive(lock.pid)) {
+            // Query database for live progress counts instead of relying on
+            // LockData.totalMessages (which is 0 at spawn and never updated).
+            let embeddedCount: number | undefined;
+            let totalMessages: number | undefined;
+            if (existsSync(dbPath)) {
+                try {
+                    const { db: statusDb } = initializeDatabase({ path: dbPath });
+                    try {
+                        const { EmbeddingRepository } = await import(
+                            "../../../infrastructure/database/repositories/embedding-repository.js"
+                        );
+                        const embeddingRepo = new EmbeddingRepository(statusDb);
+                        embeddedCount = embeddingRepo.getEmbeddedCount();
+                        totalMessages = embeddingRepo.getTotalMessageCount();
+                    } finally {
+                        closeDatabase(statusDb);
+                    }
+                } catch {
+                    // Database query failed -- show status without counts
+                }
+            }
+
+            embeddingStatus = {
+                active: true,
+                pid: lock.pid,
+                startedAt: lock.startedAt,
+                embeddedCount,
+                totalMessages,
+            };
+        }
+    } catch {
+        // Embedding module not available -- fine, show idle
+    }
+
     return {
         hooks,
         config,
         lastSync: logs.length > 0 ? logs[0].timestamp : null,
         pendingSessions,
         recentLogs: readRecentLogs(100).length,
+        embedding: embeddingStatus,
     };
 }
 
@@ -174,6 +229,22 @@ export function formatStatusOutput(status: StatusInfo): void {
     console.log(`  Last sync:         ${status.lastSync ?? "never"}`);
     console.log(`  Pending sessions:  ${status.pendingSessions}`);
     console.log(`  Recent log entries: ${status.recentLogs}`);
+    console.log("");
+
+    console.log("Embedding:");
+    if (status.embedding.active) {
+        const ago = status.embedding.startedAt
+            ? formatTimeAgo(status.embedding.startedAt)
+            : "unknown";
+        const progress =
+            status.embedding.embeddedCount !== undefined &&
+            status.embedding.totalMessages !== undefined
+                ? `, ${status.embedding.embeddedCount}/${status.embedding.totalMessages} messages`
+                : "";
+        console.log(`  Status:    active (PID ${status.embedding.pid}${progress}, started ${ago})`);
+    } else {
+        console.log("  Status:    idle");
+    }
 
     // Recommendations
     if (!status.hooks.sessionEnd || !status.hooks.preCompact) {
@@ -182,4 +253,20 @@ export function formatStatusOutput(status: StatusInfo): void {
     if (status.pendingSessions > 0) {
         console.log(`\nNote: ${status.pendingSessions} session(s) pending sync. Run 'memory sync' to sync now.`);
     }
+}
+
+/**
+ * Format an ISO timestamp as a human-readable relative time.
+ *
+ * @param isoTimestamp ISO 8601 timestamp string
+ * @returns Relative time string (e.g., "5 min ago", "2h ago")
+ */
+export function formatTimeAgo(isoTimestamp: string): string {
+    const diff = Date.now() - new Date(isoTimestamp).getTime();
+    const minutes = Math.floor(diff / 60000);
+    if (minutes < 1) return "just now";
+    if (minutes < 60) return `${minutes} min ago`;
+    const hours = Math.floor(minutes / 60);
+    if (hours < 24) return `${hours}h ago`;
+    return `${Math.floor(hours / 24)}d ago`;
 }

@@ -157,6 +157,7 @@ describe("status command", () => {
                 lastSync: null,
                 pendingSessions: 0,
                 recentLogs: 0,
+                embedding: { active: false },
             };
 
             formatStatusOutput(status);
@@ -186,6 +187,7 @@ describe("status command", () => {
                 lastSync: null,
                 pendingSessions: 0,
                 recentLogs: 0,
+                embedding: { active: false },
             };
 
             formatStatusOutput(status);
@@ -208,6 +210,7 @@ describe("status command", () => {
                 lastSync: "2024-01-15T10:30:00Z",
                 pendingSessions: 3,
                 recentLogs: 25,
+                embedding: { active: false },
             };
 
             formatStatusOutput(status);
@@ -229,6 +232,7 @@ describe("status command", () => {
                 lastSync: null,
                 pendingSessions: 0,
                 recentLogs: 0,
+                embedding: { active: false },
             };
 
             formatStatusOutput(status);
@@ -248,6 +252,7 @@ describe("status command", () => {
                 lastSync: null,
                 pendingSessions: 5,
                 recentLogs: 0,
+                embedding: { active: false },
             };
 
             formatStatusOutput(status);
