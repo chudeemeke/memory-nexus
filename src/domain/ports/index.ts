@@ -14,6 +14,13 @@ export type {
   IExtractionStateRepository,
 } from "./repositories.js";
 
+// Embedding provider port
+export type {
+  IEmbeddingProvider,
+  DownloadProgress,
+  EmbeddingModelInfo,
+} from "./embedding.js";
+
 // Service interfaces
 export type { ISearchService, SearchOptions } from "./services.js";
 

@@ -13,6 +13,9 @@ import type {
   IToolUseRepository,
   ILinkRepository,
   IExtractionStateRepository,
+  IEmbeddingProvider,
+  DownloadProgress,
+  EmbeddingModelInfo,
   ISearchService,
   ISessionSource,
   IEventParser,
@@ -35,6 +38,7 @@ import { ExtractionState } from "../entities/extraction-state.js";
 import { ProjectPath } from "../value-objects/project-path.js";
 import { SearchQuery } from "../value-objects/search-query.js";
 import { SearchResult } from "../value-objects/search-result.js";
+import { EmbeddingResult } from "../value-objects/embedding-result.js";
 
 describe("Repository Port Interfaces", () => {
   describe("ISessionRepository", () => {
@@ -281,6 +285,65 @@ describe("Service Port Interfaces", () => {
       expect(emptyOptions.roleFilter).toBeUndefined();
       expect(emptyOptions.sinceDate).toBeUndefined();
       expect(emptyOptions.beforeDate).toBeUndefined();
+    });
+  });
+});
+
+describe("Embedding Provider Port Interface", () => {
+  describe("IEmbeddingProvider", () => {
+    it("can be implemented with a mock", async () => {
+      const mockProvider: IEmbeddingProvider = {
+        name: "mock",
+        dimensions: 384,
+        model: "test-model",
+        embed: async () =>
+          EmbeddingResult.create({
+            embedding: new Float32Array(384).fill(0.1),
+            model: "test-model",
+            dimensions: 384,
+          }),
+        embedBatch: async (texts) =>
+          texts.map(() =>
+            EmbeddingResult.create({
+              embedding: new Float32Array(384).fill(0.1),
+              model: "test-model",
+              dimensions: 384,
+            }),
+          ),
+        isReady: () => true,
+        initialize: async () => {},
+        dispose: async () => {},
+      };
+
+      expect(mockProvider.name).toBe("mock");
+      expect(mockProvider.dimensions).toBe(384);
+      expect(mockProvider.model).toBe("test-model");
+      expect(mockProvider.isReady()).toBe(true);
+
+      const result = await mockProvider.embed("test");
+      expect(result.dimensions).toBe(384);
+
+      const batch = await mockProvider.embedBatch(["a", "b"]);
+      expect(batch).toHaveLength(2);
+    });
+
+    it("types are exported from ports index", () => {
+      // This test verifies the types compile correctly
+      // by using them in type positions
+      const progress: DownloadProgress = {
+        status: "downloading",
+        file: "model.onnx",
+        loaded: 1000,
+        total: 23_000_000,
+      };
+      expect(progress.status).toBe("downloading");
+
+      const info: EmbeddingModelInfo = {
+        name: "test",
+        dimensions: 384,
+        sizeBytes: 23_000_000,
+      };
+      expect(info.name).toBe("test");
     });
   });
 });
