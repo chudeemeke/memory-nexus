@@ -18,6 +18,7 @@ export {
     TOPICS_TABLE,
     EXTRACTION_STATE_TABLE,
     EMBEDDING_STATE_TABLE,
+    EMBEDDING_STATE_ADD_MODEL_NAME,
     MESSAGE_EMBEDDINGS_TABLE,
     type SchemaOptions,
 } from "./schema.js";
@@ -45,6 +46,9 @@ export {
     type BatchResult,
     type BatchOptions,
     type RelatedLink,
+    EmbeddingRepository,
+    type UnembeddedMessage,
+    type EmbeddingBatchItem,
 } from "./repositories/index.js";
 
 // Services

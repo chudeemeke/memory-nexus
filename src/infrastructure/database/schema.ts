@@ -220,6 +220,20 @@ CREATE VIRTUAL TABLE IF NOT EXISTS message_embeddings USING vec0(
 `;
 
 /**
+ * Migration: Add model_name column to embedding_state.
+ *
+ * The model_name stores the human-readable model identifier (e.g., "Xenova/all-MiniLM-L6-v2")
+ * alongside the model_hash. Required for user-facing prompts like "Model changed from X to Y"
+ * where X and Y must be readable model names, not opaque hex hashes.
+ *
+ * Uses ALTER TABLE with DEFAULT '' so existing rows (if any) get an empty string,
+ * and new rows always store the model name explicitly.
+ */
+export const EMBEDDING_STATE_ADD_MODEL_NAME = `
+ALTER TABLE embedding_state ADD COLUMN model_name TEXT NOT NULL DEFAULT '';
+`;
+
+/**
  * Schema options for conditional table creation
  */
 export interface SchemaOptions {
@@ -346,6 +360,13 @@ export function createSchema(db: Database, options?: SchemaOptions): void {
     // (includes embedding_state which is always created)
     for (const sql of SCHEMA_SQL) {
         db.exec(sql);
+    }
+
+    // Migration: add model_name column to embedding_state if not present
+    const columns = db.prepare("PRAGMA table_info(embedding_state)").all() as Array<{ name: string }>;
+    const hasModelName = columns.some(c => c.name === "model_name");
+    if (!hasModelName) {
+        db.exec(EMBEDDING_STATE_ADD_MODEL_NAME);
     }
 
     // Conditionally create vec0 virtual table (requires sqlite-vec extension)

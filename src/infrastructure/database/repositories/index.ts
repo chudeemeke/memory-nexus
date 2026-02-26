@@ -28,3 +28,10 @@ export {
 
 // Entity Repository
 export { SqliteEntityRepository } from "./entity-repository.js";
+
+// Embedding Repository
+export {
+    EmbeddingRepository,
+    type UnembeddedMessage,
+    type EmbeddingBatchItem,
+} from "./embedding-repository.js";
