@@ -44,6 +44,8 @@ export interface EmbeddingConfigData {
     model: string;
     /** Number of dimensions in the embedding vectors */
     dimensions: number;
+    /** Number of messages to embed per batch */
+    batchSize: number;
 }
 
 /**
@@ -89,6 +91,7 @@ export const DEFAULT_EMBEDDING_CONFIG: EmbeddingConfigData = {
     provider: "local",
     model: "Xenova/all-MiniLM-L6-v2",
     dimensions: 384,
+    batchSize: 100,
 };
 
 /**

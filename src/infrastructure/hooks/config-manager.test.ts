@@ -184,6 +184,7 @@ describe("config-manager", () => {
                     provider: "openai",
                     model: "text-embedding-3-small",
                     dimensions: 1536,
+                    batchSize: 200,
                 },
             };
 
@@ -301,6 +302,7 @@ describe("config-manager", () => {
                 provider: "local",
                 model: "Xenova/all-MiniLM-L6-v2",
                 dimensions: 384,
+                batchSize: 100,
             });
         });
 
@@ -341,6 +343,28 @@ describe("config-manager", () => {
 
             expect(parsed.embedding.model).toBe("custom/model");
             expect(parsed.embedding.dimensions).toBe(768);
+        });
+
+        test("DEFAULT_EMBEDDING_CONFIG includes batchSize of 100", () => {
+            expect(DEFAULT_EMBEDDING_CONFIG).toHaveProperty("batchSize");
+            expect(DEFAULT_EMBEDDING_CONFIG.batchSize).toBe(100);
+        });
+
+        test("loadConfig() with custom batchSize merges correctly", () => {
+            const configDir = join(testDir, ".config", "memory");
+            mkdirSync(configDir, { recursive: true });
+            writeFileSync(
+                join(configDir, "config.json"),
+                JSON.stringify({ embedding: { batchSize: 50 } })
+            );
+
+            const config = loadConfig();
+            expect(config.embedding.batchSize).toBe(50);
+            // Other defaults preserved
+            expect(config.embedding.enabled).toBe(true);
+            expect(config.embedding.provider).toBe("local");
+            expect(config.embedding.model).toBe("Xenova/all-MiniLM-L6-v2");
+            expect(config.embedding.dimensions).toBe(384);
         });
 
         test("loadConfig() deep-merges nested embedding section", () => {

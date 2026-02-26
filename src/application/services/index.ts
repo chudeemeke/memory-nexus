@@ -29,6 +29,14 @@ export type {
   LlmExtractorOptions,
 } from "./llm-extractor.js";
 
+export { EmbeddingService, computeModelHash } from "./embedding-service.js";
+export type {
+  EmbedOptions,
+  EmbedProgress,
+  EmbedResult,
+  ModelState,
+} from "./embedding-service.js";
+
 export {
   exportToJson,
   validateExportFile,
