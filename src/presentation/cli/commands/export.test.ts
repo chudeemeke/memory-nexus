@@ -5,58 +5,50 @@
  */
 
 import { describe, test, expect, beforeEach, afterEach, spyOn } from "bun:test";
-import { mkdirSync, rmSync, existsSync, writeFileSync } from "node:fs";
+import { existsSync } from "node:fs";
 import { join } from "node:path";
-import { tmpdir } from "node:os";
 import { Command } from "commander";
 import { createExportCommand, executeExportCommand } from "./export.js";
-import { initializeDatabase, closeDatabase } from "../../../infrastructure/database/index.js";
+import { closeDatabase } from "../../../infrastructure/database/index.js";
 import * as connectionModule from "../../../infrastructure/database/connection.js";
-
-// Test directory for file operations
-const TEST_DIR = join(tmpdir(), "memory-nexus-export-cmd-test");
+import { createTestDatabase, type TestDatabase } from "../../../../tests/helpers/test-database.js";
 
 describe("Export Command", () => {
   let consoleLogs: string[];
   let consoleErrors: string[];
-  let mockDbPath: string;
+  let testDb: TestDatabase;
 
   beforeEach(() => {
-    // Create fresh test directory
-    rmSync(TEST_DIR, { recursive: true, force: true });
-    mkdirSync(TEST_DIR, { recursive: true });
-
     // Capture console output
     consoleLogs = [];
     consoleErrors = [];
     spyOn(console, "log").mockImplementation((msg) => consoleLogs.push(String(msg)));
     spyOn(console, "error").mockImplementation((msg) => consoleErrors.push(String(msg)));
 
-    // Create a test database
-    mockDbPath = join(TEST_DIR, "memory.db");
-    const { db } = initializeDatabase({ path: mockDbPath });
+    // Create a managed test database
+    testDb = createTestDatabase({ prefix: "memory-export-cmd-" });
 
     // Seed some test data
-    db.exec(`
+    testDb.db.exec(`
       INSERT INTO sessions (id, project_path_encoded, project_path_decoded,
         project_name, start_time, message_count)
       VALUES ('test-session-1', 'test', '/test', 'test', '2024-01-01T00:00:00Z', 2)
     `);
-    db.exec(`
+    testDb.db.exec(`
       INSERT INTO messages_meta (id, session_id, role, content, timestamp)
       VALUES
         ('msg-1', 'test-session-1', 'user', 'Hello', '2024-01-01T00:00:00Z'),
         ('msg-2', 'test-session-1', 'assistant', 'Hi', '2024-01-01T00:01:00Z')
     `);
 
-    closeDatabase(db);
+    closeDatabase(testDb.db);
 
-    // Mock getDefaultDbPath
-    spyOn(connectionModule, "getDefaultDbPath").mockReturnValue(mockDbPath);
+    // Mock getDefaultDbPath to point at the test database
+    spyOn(connectionModule, "getDefaultDbPath").mockReturnValue(testDb.path);
   });
 
   afterEach(() => {
-    rmSync(TEST_DIR, { recursive: true, force: true });
+    testDb.cleanup();
   });
 
   describe("createExportCommand", () => {
@@ -92,7 +84,7 @@ describe("Export Command", () => {
 
   describe("executeExportCommand", () => {
     test("creates export file at specified path", async () => {
-      const outputPath = join(TEST_DIR, "export.json");
+      const outputPath = join(testDb.dir, "export.json");
 
       await executeExportCommand(outputPath);
 
@@ -100,7 +92,7 @@ describe("Export Command", () => {
     });
 
     test("outputs summary in default mode", async () => {
-      const outputPath = join(TEST_DIR, "export.json");
+      const outputPath = join(testDb.dir, "export.json");
 
       await executeExportCommand(outputPath);
 
@@ -109,7 +101,7 @@ describe("Export Command", () => {
     });
 
     test("--quiet suppresses output except path", async () => {
-      const outputPath = join(TEST_DIR, "export.json");
+      const outputPath = join(testDb.dir, "export.json");
 
       await executeExportCommand(outputPath, { quiet: true });
 
@@ -119,7 +111,7 @@ describe("Export Command", () => {
     });
 
     test("--json outputs stats as JSON", async () => {
-      const outputPath = join(TEST_DIR, "export.json");
+      const outputPath = join(testDb.dir, "export.json");
 
       await executeExportCommand(outputPath, { json: true });
 
@@ -132,7 +124,7 @@ describe("Export Command", () => {
     });
 
     test("sets exit code 1 for invalid output directory", async () => {
-      const outputPath = join(TEST_DIR, "nonexistent", "subdir", "export.json");
+      const outputPath = join(testDb.dir, "nonexistent", "subdir", "export.json");
 
       const result = await executeExportCommand(outputPath);
 
@@ -143,10 +135,10 @@ describe("Export Command", () => {
     test("sets exit code 1 when database does not exist", async () => {
       // Point to nonexistent database
       spyOn(connectionModule, "getDefaultDbPath").mockReturnValue(
-        join(TEST_DIR, "nonexistent.db")
+        join(testDb.dir, "nonexistent.db")
       );
 
-      const outputPath = join(TEST_DIR, "export.json");
+      const outputPath = join(testDb.dir, "export.json");
       const result = await executeExportCommand(outputPath);
 
       expect(result.exitCode).toBe(1);
@@ -154,7 +146,7 @@ describe("Export Command", () => {
     });
 
     test("includes file size in default output", async () => {
-      const outputPath = join(TEST_DIR, "export.json");
+      const outputPath = join(testDb.dir, "export.json");
 
       await executeExportCommand(outputPath);
 
@@ -162,7 +154,7 @@ describe("Export Command", () => {
     });
 
     test("json output includes bytes in stats", async () => {
-      const outputPath = join(TEST_DIR, "export.json");
+      const outputPath = join(testDb.dir, "export.json");
 
       await executeExportCommand(outputPath, { json: true });
 

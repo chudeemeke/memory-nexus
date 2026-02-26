@@ -234,8 +234,18 @@ export function initializeDatabase(config: DatabaseConfig): DatabaseInitResult {
 /**
  * Close the database connection with proper cleanup
  *
- * Performs a WAL checkpoint before closing to ensure
- * all changes are written to the main database file.
+ * Performs a WAL checkpoint before closing to ensure all changes are
+ * written to the main database file. Switches journal mode to DELETE
+ * to remove WAL/SHM files that would otherwise retain OS-level locks
+ * on Windows.
+ *
+ * initializeDatabase() re-enables WAL on the next open, so the
+ * journal mode switch has no functional impact on subsequent connections.
+ *
+ * Note: On Windows, Bun's SQLite binding may hold the .db file descriptor
+ * until garbage collection. Test code that needs to delete the database
+ * file immediately after close should use tests/helpers/test-database.ts
+ * which handles this with a conditional GC + retry strategy.
  *
  * @param db - Database instance to close
  */
@@ -244,7 +254,13 @@ export function closeDatabase(db: Database): void {
     try {
         db.exec("PRAGMA wal_checkpoint(TRUNCATE);");
     } catch {
-        // Ignore errors (e.g., if not in WAL mode)
+        // Ignore errors (e.g., if not in WAL mode or :memory: database)
+    }
+    // Switch to DELETE journal mode to remove WAL/SHM files.
+    try {
+        db.exec("PRAGMA journal_mode = DELETE;");
+    } catch {
+        // Ignore errors (e.g., if database is read-only)
     }
     db.close();
 }
