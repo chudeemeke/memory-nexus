@@ -426,12 +426,150 @@ console.log(`\nEmbedded ${embedded} messages in ${(durationMs / 1000).toFixed(0)
 ### Tertiary (LOW confidence)
 - vec_f32() + bun:sqlite Float32Array interop -- needs validation (see Open Question 1)
 
+## Validation Architecture
+
+### Test Framework
+| Property | Value |
+|----------|-------|
+| Framework | bun:test (Bun built-in test runner, v1.1+) |
+| Config file | None (Bun uses defaults; `vitest.config.ts` is Stryker-only) |
+| Coverage tool | `bun test --coverage` (V8 provider, built-in) |
+| Mock framework | `bun:test` built-in (`mock`, `spyOn`, manual mock objects) |
+| Mutation testing | Stryker + Vitest (domain layer only) |
+| Quick run command | `bun test --filter embedding` |
+| Full suite command | `bun test` |
+
+### Test Patterns
+| Pattern | File Locations | Example |
+|---------|---------------|---------|
+| Co-located unit tests | `src/**/*.test.ts` next to source | `embedding-provider-factory.test.ts` beside `embedding-provider-factory.ts` |
+| Integration tests (co-located) | `src/**/*.integration.test.ts` | `sync-service.integration.test.ts` with real DB + file I/O |
+| Integration tests (standalone) | `tests/integration/*.test.ts` | `interrupted-sync.test.ts`, `concurrent-commands.test.ts` |
+| Smoke tests | `tests/smoke/*.test.ts` | `cli-commands.test.ts` -- all CLI commands respond to `--help` |
+| Domain port contract tests | `src/domain/ports/*.test.ts` | `embedding.test.ts` -- mock provider implements IEmbeddingProvider |
+| Repository tests (in-memory DB) | `src/infrastructure/database/repositories/*.test.ts` | `session-repository.test.ts` with `Database(":memory:")` + `createSchema(db)` |
+
+### Database Testing Pattern
+Tests use `bun:sqlite` in-memory databases for isolation:
+```typescript
+import { Database } from "bun:sqlite";
+import { createSchema } from "../schema.js";
+
+let db: Database;
+beforeEach(() => {
+  db = new Database(":memory:");
+  db.exec("PRAGMA foreign_keys = ON;");
+  createSchema(db);
+});
+afterEach(() => { db.close(); });
+```
+
+For Phase 15, the `createSchema(db)` call creates `embedding_state` and `message_embeddings` (vec0) tables. The `message_embeddings` table requires the `sqlite-vec` extension to be loaded. Tests that insert into `message_embeddings` must use a schema with `loadVec: true` (or use the `initializeDatabase` helper which loads extensions automatically).
+
+### External Service Mocking
+The project uses manual mock objects matching port interfaces (no DI container). The `IEmbeddingProvider` port already has an established mock pattern in `src/domain/ports/embedding.test.ts`:
+```typescript
+const createMockProvider = (
+  overrides: Partial<IEmbeddingProvider> = {},
+): IEmbeddingProvider => ({
+  name: "mock-provider",
+  dimensions: 384,
+  model: "test-model",
+  embed: async (text) =>
+    EmbeddingResult.create({
+      embedding: new Float32Array(384).fill(0.1),
+      model: "test-model",
+      dimensions: 384,
+    }),
+  embedBatch: async (texts) =>
+    texts.map(() =>
+      EmbeddingResult.create({
+        embedding: new Float32Array(384).fill(0.1),
+        model: "test-model",
+        dimensions: 384,
+      }),
+    ),
+  isReady: () => true,
+  initialize: async () => {},
+  dispose: async () => {},
+  ...overrides,
+});
+```
+
+For `node:child_process`, the project uses `spyOn` on the module (see `hook-runner.test.ts`):
+```typescript
+import * as childProcess from "node:child_process";
+const spawnSpy = spyOn(childProcess, "spawn").mockReturnValue(mockProcess);
+```
+
+### Phase Requirements -> Test Map
+| Req ID | Behavior | Test Type | Automated Command | File Exists? |
+|--------|----------|-----------|-------------------|-------------|
+| PIPE-01 | `--embed` flag triggers embedding pass after extraction | unit | `bun test src/presentation/cli/commands/sync.test.ts` | Exists (needs --embed tests added) |
+| PIPE-01 | EmbeddingService.embedUnembedded() orchestrates batch pipeline | unit | `bun test src/application/services/embedding-service.test.ts` | Wave 0 |
+| PIPE-01 | Sync with --embed end-to-end (extract then embed) | integration | `bun test src/application/services/sync-service.integration.test.ts` | Exists (needs --embed scenario added) |
+| PIPE-02 | computeModelHash() produces consistent SHA-256 truncated hash | unit | `bun test src/application/services/embedding-service.test.ts` | Wave 0 |
+| PIPE-02 | Model change detection: different hash triggers prompt | unit | `bun test src/application/services/embedding-service.test.ts` | Wave 0 |
+| PIPE-02 | Re-embedding clears all vectors + state, then re-embeds | integration | `bun test src/infrastructure/database/repositories/embedding-repository.test.ts` | Wave 0 |
+| PIPE-03 | Batch processing with configurable size and progress callback | unit | `bun test src/application/services/embedding-service.test.ts` | Wave 0 |
+| PIPE-03 | Progress bar updates during embedding pass | unit | `bun test src/presentation/cli/progress-reporter.test.ts` | Exists (needs embedding reporter tests) |
+| PIPE-04 | --background spawns detached process, writes PID lock | unit | `bun test src/presentation/cli/commands/sync.test.ts` | Exists (needs --background tests added) |
+| PIPE-04 | PID lock prevents double-run, stale lock detection | unit | `bun test src/application/services/embedding-service.test.ts` | Wave 0 |
+| PIPE-04 | status command shows background embedding info | unit | `bun test src/presentation/cli/commands/status.test.ts` | Exists (needs embedding status tests) |
+| PIPE-05 | embedding_state CRUD: insert, query unembedded, delete all | integration | `bun test src/infrastructure/database/repositories/embedding-repository.test.ts` | Wave 0 |
+| PIPE-05 | message_embeddings vec0 insert with vec_f32() | integration | `bun test src/infrastructure/database/repositories/embedding-repository.test.ts` | Wave 0 |
+
+### Sampling Rate
+- **Per task commit:** `bun test --filter embedding` (runs only embedding-related tests, < 10s)
+- **Per wave merge:** `bun test` (full suite, all unit + integration + smoke tests)
+- **Phase gate:** Full suite green + `bun test --coverage` showing 95%+ at each metric before verification
+
+### Wave 0 Gaps
+- [ ] `src/application/services/embedding-service.test.ts` -- covers PIPE-01, PIPE-02, PIPE-03, PIPE-04 (unit tests for EmbeddingService orchestration, model hash, batching, PID lock)
+- [ ] `src/infrastructure/database/repositories/embedding-repository.test.ts` -- covers PIPE-02, PIPE-05 (integration tests: embedding_state CRUD, message_embeddings vec0 inserts, bulk delete for re-embedding, unembedded message query)
+- [ ] Verify `createSchema(db)` with sqlite-vec loads correctly in test environment for vec0 table operations (Open Question 1: Float32Array + vec_f32() interop)
+- [ ] Add `--embed` and `--background` flag tests to existing `src/presentation/cli/commands/sync.test.ts`
+- [ ] Add embedding progress reporter variant tests to existing `src/presentation/cli/progress-reporter.test.ts`
+- [ ] Add background embedding status display tests to existing `src/presentation/cli/commands/status.test.ts`
+
+### Phase-Specific Validation Risks
+| Risk | What Can Go Wrong | How to Verify | Test Type |
+|------|-------------------|---------------|-----------|
+| vec_f32() + Float32Array interop | bun:sqlite may not pass Float32Array correctly to sqlite-vec vec_f32() function; could need Buffer conversion | Insert a Float32Array via vec_f32() and read it back; compare dimensions | integration |
+| Stale PID lock | Background process crashes, lock file remains, next run blocked | Write lock with fake PID, verify detection + cleanup via process.kill(pid, 0) catch | unit |
+| Mixed model vectors | Partial re-embedding leaves inconsistent vectors | Assert re-embedding deletes ALL from both tables before re-inserting | integration |
+| Embedding transaction isolation | Embedding failure rolls back sync data | Run sync with failing mock provider; verify extraction data persists | integration |
+| Background + model change | Background mode attempts interactive prompt (hangs) | Spawn with model change; verify non-interactive skip with warning logged | unit |
+| Batch boundary edge cases | Off-by-one in chunking logic; last batch smaller than batchSize | Embed exactly batchSize, batchSize+1, batchSize-1, 0 messages | unit |
+
+### Coverage Strategy
+
+**Unit tests (src/**/*.test.ts):**
+- EmbeddingService: embedUnembedded(), computeModelHash(), batch chunking, error handling, progress callbacks, PID lock management
+- Sync command: --embed flag parsing, --background flag parsing, --force + model change bypass
+- Progress reporter: embedding-specific bar format, download progress indicator
+
+**Integration tests (*.integration.test.ts + tests/integration/):**
+- EmbeddingRepository: INSERT into embedding_state + message_embeddings vec0 table, LEFT JOIN unembedded query, bulk DELETE for re-embedding, round-trip verification
+- Sync pipeline with --embed: full extract-then-embed flow with in-memory DB and mock provider
+- vec_f32() interop validation: Float32Array insert + readback
+
+**Smoke tests (tests/smoke/):**
+- `memory sync --embed --help` responds correctly
+- `memory status --help` includes embedding fields
+
+### Test Infrastructure Notes
+- No new test framework dependencies needed; bun:test covers all requirements
+- The `createMockProvider()` pattern from `embedding.test.ts` should be extracted to a shared test helper (e.g., `tests/helpers/mock-provider.ts`) to avoid duplication across EmbeddingService tests, sync integration tests, and repository tests
+- Repository integration tests require sqlite-vec extension loaded; use `initializeDatabase()` helper (from `connection.ts`) which handles extension loading, rather than raw `Database(":memory:")` + manual `createSchema()`
+
 ## Metadata
 
 **Confidence breakdown:**
 - Standard stack: HIGH -- all libraries already in use, no new dependencies
 - Architecture: HIGH -- follows existing sync service + progress reporter patterns, CONTEXT.md decisions are clear
 - Pitfalls: HIGH -- identified from direct codebase analysis (rowid keys, sequential embedBatch, PID locks, re-embedding semantics)
+- Validation: HIGH -- test framework, patterns, and mock strategies all verified from existing codebase
 
 **Research date:** 2026-02-26
 **Valid until:** 2026-03-26 (stable -- no fast-moving dependencies)
