@@ -14,7 +14,7 @@ See: .planning/PROJECT.md (updated 2026-02-18)
 
 **Milestone:** v2.0 Hybrid Search and Rebrand
 **Phase:** 14 (Embedding Infrastructure) -- COMPLETE (4/4 plans done)
-**Status:** Phase 14 complete, next is Phase 15 (Embedding Pipeline)
+**Status:** Milestone complete
 
 ```
 v2.0 Progress: [########............] 3/6 phases
