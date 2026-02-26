@@ -49,7 +49,7 @@
     "url": "https://github.com/user/memory-nexus"
   },
   "dependencies": {
-    "@anthropic-ai/claude-code": "^2.1.25",
+    "@anthropic-ai/claude-code": "^2.1.58",
     "@gutenye/commander-completion-carapace": "^1.0.9",
     "@inquirer/search": "^4.1.0",
     "@inquirer/select": "^5.0.4",
