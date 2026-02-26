@@ -21,7 +21,7 @@ Requirements for v2.0: Hybrid Search, Package Rename, and API Stabilization.
 - [x] **EMBED-02**: Implement `TransformersJsProvider` adapter using @huggingface/transformers v3 with all-MiniLM-L6-v2 default model (384 dimensions)
 - [x] **EMBED-03**: Load sqlite-vec extension alongside existing FTS5 extension in database initialization
 - [x] **EMBED-04**: Create `message_embeddings` virtual table (vec0, float[384]) and `embedding_state` tracking table via schema migration
-- [ ] **EMBED-05**: Implement `EmbeddingProviderFactory` with config-driven provider selection and lazy loading (ONNX runtime loads only when semantic search invoked)
+- [x] **EMBED-05**: Implement `EmbeddingProviderFactory` with config-driven provider selection and lazy loading (ONNX runtime loads only when semantic search invoked)
 - [x] **EMBED-06**: First-run model download with progress indicator ("Downloading embedding model (23 MB, one-time setup)...")
 - [x] **EMBED-07**: WASM fallback when onnxruntime-node initialization fails, with user warning
 
@@ -116,7 +116,7 @@ Deferred. Tracked for context, not in current roadmap.
 | EMBED-02 | Phase 14 | Complete |
 | EMBED-03 | Phase 14 | Complete |
 | EMBED-04 | Phase 14 | Complete |
-| EMBED-05 | Phase 14 | Pending |
+| EMBED-05 | Phase 14 | Complete |
 | EMBED-06 | Phase 14 | Complete |
 | EMBED-07 | Phase 14 | Complete |
 | PIPE-01 | Phase 15 | Pending |

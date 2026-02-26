@@ -13,13 +13,13 @@ See: .planning/PROJECT.md (updated 2026-02-18)
 ## Current Position
 
 **Milestone:** v2.0 Hybrid Search and Rebrand
-**Phase:** 14 (Embedding Infrastructure) -- IN PROGRESS (3/4 plans done)
-**Status:** Plan 14-03 complete, continuing with 14-04
+**Phase:** 14 (Embedding Infrastructure) -- COMPLETE (4/4 plans done)
+**Status:** Phase 14 complete, next is Phase 15 (Embedding Pipeline)
 
 ```
-v2.0 Progress: [#####...............] 2/6 phases
+v2.0 Progress: [########............] 3/6 phases
   Phase 13: Package Rename          [x] Complete (3/3 plans)
-  Phase 14: Embedding Infrastructure [~] In Progress (3/4 plans)
+  Phase 14: Embedding Infrastructure [x] Complete (4/4 plans)
   Phase 15: Embedding Pipeline       [ ] Pending
   Phase 16: Hybrid Search            [ ] Pending
   Phase 17: Provider Ecosystem       [ ] Pending
@@ -49,6 +49,7 @@ v2.0 Progress: [#####...............] 2/6 phases
 | 14-01 | Domain embedding port and value objects | 5min | 2 | 9 |
 | 14-02 | sqlite-vec extension loading and schema migration | 6min | 2 | 7 |
 | 14-03 | TransformersJsProvider with lazy loading and WASM fallback | 5min | 2 | 5 |
+| 14-04 | EmbeddingProviderFactory, config integration, doctor reporting | 5min | 2 | 11 |
 
 ## Accumulated Context
 
@@ -79,6 +80,10 @@ v2.0 Progress: [#####...............] 2/6 phases
 | TransformersJsProvider isReady() | Synchronous (boolean) | Matches domain port contract; no async overhead for status check |
 | Sequential embedBatch() | Process one at a time | Simple and correct; batch optimization deferred to Phase 15 |
 | Bun mock.module pattern | Shared mutable state, env mutated in place | Bun caches dynamic imports; getter-based delegation fails |
+| Config stores plain data | EmbeddingConfigData interface, not domain class | Config files are JSON; factory validates via domain value objects |
+| Factory cache key | provider:model:dimensions composite | Distinguishes configs with different parameters |
+| Factory lazy initialization | create() does NOT call initialize() | Caller controls ONNX runtime load timing |
+| Doctor health extension | New check functions + extended HealthCheckResult | Consistent pattern for adding health checks |
 
 ### Research Completed
 
@@ -98,22 +103,22 @@ None.
 ### Last Session
 
 **Date:** 2026-02-26
-**Completed:** Phase 14 Plan 03 -- TransformersJsProvider with lazy loading and WASM fallback
-**Stopped at:** Completed 14-03-PLAN.md
+**Completed:** Phase 14 Plan 04 -- EmbeddingProviderFactory, config integration, doctor reporting
+**Stopped at:** Completed 14-04-PLAN.md (Phase 14 complete)
 
 ### Context for Next Session
 
-1. Phase 14 (Embedding Infrastructure) in progress: 3/4 plans done
-2. Next: Phase 14-04 (EmbeddingProviderFactory)
-3. Tests: 2167 total pass, 0 fail
-4. TransformersJsProvider implements IEmbeddingProvider with lazy dynamic import
-5. @huggingface/transformers@^3.8.1 installed; never top-level imported
-6. WASM fallback path tested and working (numThreads=1, device:"wasm")
-7. Progress callback infrastructure ready for Phase 15 CLI wiring
-8. TransformersJsProvider exported from src/infrastructure/embedding/index.ts
-9. All new code at 100% function and line coverage
-10. Zero external imports in domain layer maintained
+1. Phase 14 (Embedding Infrastructure) COMPLETE: 4/4 plans done
+2. Next: Phase 15 (Embedding Pipeline) -- sync workflow, embedding state tracking, background embedding
+3. Tests: 2195 total pass, 0 fail
+4. EmbeddingProviderFactory creates providers from config with singleton caching
+5. Config manager stores EmbeddingConfigData (plain interface) with deep-merge in loadConfig()
+6. Doctor command shows Embeddings section and sqlite-vec version
+7. Factory does NOT call initialize() -- caller controls ONNX load timing
+8. All infrastructure layers in place: port, provider, vec schema, factory, config, health checks
+9. Zero external imports in domain layer maintained
+10. All new code at 100% function and line coverage
 
 ---
 
-*Last updated: 2026-02-26 (Phase 14 plan 03 complete)*
+*Last updated: 2026-02-26 (Phase 14 complete)*
