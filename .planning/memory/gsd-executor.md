@@ -1,7 +1,7 @@
 ---
 agent: gsd-executor
 updated: 2026-02-26
-entries: 24
+entries: 27
 ---
 
 - finding: "Bun test spyOn mock leakage: when mocking nodeFs.renameSync, must restore before assertions, not in afterEach. Mock affects subsequent tests in same file if not restored promptly."
@@ -144,6 +144,24 @@ entries: 24
 
 - finding: "For functions that spawn child processes, use DI overrides (BackgroundModeDeps pattern) rather than mock.module to test. Export the handler function separately and accept optional dependency parameters. This avoids actually spawning processes in tests and follows the same proven pattern as EmbeddingPassDeps."
   source: "Phase 15, Plan 03, Task B"
+  confidence: HIGH
+  phase: "15-embedding-pipeline"
+  date: "2026-02-26"
+
+- finding: "When using mock.module for infrastructure modules in bun:test, place those tests in a SEPARATE test file from tests that use the real module via require(). Bun's mock.module has global scope and leaks between test files run in the same process. The sync-lazy-loaders.test.ts pattern demonstrates this isolation."
+  source: "Phase 15, Plan 04, Task B"
+  confidence: HIGH
+  phase: "15-embedding-pipeline"
+  date: "2026-02-26"
+
+- finding: "For testing spawn() failure paths (pid undefined, race conditions), use spyOn(childProcess, 'spawn').mockReturnValue/mockImplementation with a mock subprocess object. Side effects in mockImplementation can simulate race conditions (e.g., writing a lock file between spawn and acquireLock)."
+  source: "Phase 15, Plan 04, Task A"
+  confidence: HIGH
+  phase: "15-embedding-pipeline"
+  date: "2026-02-26"
+
+- finding: "Windows EBUSY on test cleanup: when tests open/close SQLite databases, WAL files may hold locks briefly. Use isolated temp directories (tmpdir() not shared testBaseDir) and best-effort cleanup with try/catch in afterEach to avoid cascading failures."
+  source: "Phase 15, Plan 04, Task A"
   confidence: HIGH
   phase: "15-embedding-pipeline"
   date: "2026-02-26"

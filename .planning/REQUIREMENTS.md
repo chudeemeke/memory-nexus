@@ -154,4 +154,4 @@ Deferred. Tracked for context, not in current roadmap.
 
 ---
 *Requirements defined: 2026-02-18*
-*Last updated: 2026-02-26 (PIPE-04 complete, Phase 15 all PIPE requirements done)*
+*Last updated: 2026-02-26 (Phase 15 gap closure complete, all PIPE requirements coverage-verified)*

@@ -13,14 +13,14 @@ See: .planning/PROJECT.md (updated 2026-02-18)
 ## Current Position
 
 **Milestone:** v2.0 Hybrid Search and Rebrand
-**Phase:** 15 (Embedding Pipeline) -- COMPLETE (3/3 plans done)
+**Phase:** 15 (Embedding Pipeline) -- COMPLETE (4/4 plans done, including gap closure)
 **Status:** Active -- ready for Phase 16
 
 ```
 v2.0 Progress: [##########..........] 4/6 phases
   Phase 13: Package Rename          [x] Complete (3/3 plans)
   Phase 14: Embedding Infrastructure [x] Complete (4/4 plans)
-  Phase 15: Embedding Pipeline       [x] Complete (3/3 plans)
+  Phase 15: Embedding Pipeline       [x] Complete (4/4 plans)
   Phase 16: Hybrid Search            [ ] Pending
   Phase 17: Provider Ecosystem       [ ] Pending
   Phase 18: API Stabilization        [ ] Pending
@@ -53,6 +53,7 @@ v2.0 Progress: [##########..........] 4/6 phases
 | 15-01 | EmbeddingRepository and EmbeddingService with model hash tracking | 6min | 2 | 10 |
 | 15-02 | Sync --embed integration with progress and model change handling | 7min | 2 | 5 |
 | 15-03 | Background embedding with PID lock and status command extension | 7min | 2 | 7 |
+| 15-04 | Coverage gap closure for Phase 15 embedding pipeline | 9min | 2 | 4 |
 
 ## Accumulated Context
 
@@ -101,6 +102,7 @@ v2.0 Progress: [##########..........] 4/6 phases
 | Status embedding progress | Database queries, not LockData.totalMessages | totalMessages is 0 at spawn; live counts from EmbeddingRepository |
 | Background lock cleanup | finally block in embedding pass | Ensures cleanup on both success and failure |
 | Background env detection | MEMORY_EMBED_BACKGROUND=1 env var | Prevents infinite recursion; background process skips re-spawn |
+| mock.module isolation | Separate test file for lazy loaders | Bun's mock.module is global; prevents leakage to other test files |
 
 ### Research Completed
 
@@ -120,22 +122,20 @@ None.
 ### Last Session
 
 **Date:** 2026-02-26
-**Completed:** Phase 15 Plan 03 -- Background embedding with PID lock and status command extension
-**Stopped at:** Phase 15 complete (3/3 plans), Phase 16 next
+**Completed:** Phase 15 Plan 04 -- Coverage gap closure for Phase 15 embedding pipeline
+**Stopped at:** Phase 15 complete (4/4 plans including gap closure), Phase 16 next
 
 ### Context for Next Session
 
-1. Phase 15 (Embedding Pipeline) COMPLETE: 3/3 plans done
+1. Phase 15 (Embedding Pipeline) COMPLETE: 4/4 plans done (including gap closure)
 2. Next: Phase 16 (Hybrid Search and Graceful Degradation)
-3. BackgroundEmbedder: PID lock at {dataDir}/embedding.lock, stale lock detection, detached child process
-4. handleBackgroundMode with BackgroundModeDeps DI overrides for testing
-5. MEMORY_EMBED_BACKGROUND=1 env var signals background process (prevents re-spawn)
-6. Status command shows embedding section: active (PID, progress) or idle
-7. Status queries database for live embeddedCount/totalMessages (not LockData)
-8. Background process cleans up lock in finally block (success and failure)
-9. 2259 tests passing across full suite (excluding known EBUSY export flaky test)
-10. All PIPE requirements complete (PIPE-01 through PIPE-05)
+3. background-embedder.ts at 100% line/function coverage
+4. status.ts embedding paths (gatherStatus active lock + DB counts) covered
+5. sync.ts Phase 15 paths covered: model-change-declined, interactive readline, lazy loaders
+6. Lazy loader tests in separate file (sync-lazy-loaders.test.ts) to avoid mock.module leakage
+7. 2319 tests passing across full suite
+8. All PIPE requirements complete and coverage-verified (PIPE-01 through PIPE-05)
 
 ---
 
-*Last updated: 2026-02-26 (Phase 15 Plan 03 complete)*
+*Last updated: 2026-02-26 (Phase 15 Plan 04 complete)*
