@@ -1,7 +1,7 @@
 ---
 agent: gsd-executor
 updated: 2026-02-26
-entries: 15
+entries: 20
 ---
 
 - finding: "Bun test spyOn mock leakage: when mocking nodeFs.renameSync, must restore before assertions, not in afterEach. Mock affects subsequent tests in same file if not restored promptly."
@@ -92,4 +92,34 @@ entries: 15
   source: "Phase 14, Plan 03, Task A"
   confidence: HIGH
   phase: "14-embedding-infrastructure"
+  date: "2026-02-26"
+
+- finding: "When extending MemoryConfig with a nested object (e.g., embedding), loadConfig() needs deep-merge: { ...DEFAULT_CONFIG, ...loaded, nested: { ...DEFAULT_NESTED, ...(loaded.nested ?? {}) } }. Shallow spread replaces entire nested object. Existing tests asserting toEqual(customConfig) without the new field will fail."
+  source: "Phase 14, Plan 04, Task A"
+  confidence: HIGH
+  phase: "14-embedding-infrastructure"
+  date: "2026-02-26"
+
+- finding: "When extending HealthCheckResult with new fields, all test fixtures that construct HealthCheckResult objects must be updated to include the new fields. The doctor.test.ts has multiple fixtures (healthyResult in formatHealthResult and attemptFixes describes) that need updating."
+  source: "Phase 14, Plan 04, Task B"
+  confidence: HIGH
+  phase: "14-embedding-infrastructure"
+  date: "2026-02-26"
+
+- finding: "Float32Array passes directly to sqlite-vec vec_f32() in bun:sqlite without conversion. No Buffer.from(embedding.buffer) needed. The plan flagged this as MEDIUM confidence but it works correctly."
+  source: "Phase 15, Plan 01, Task A"
+  confidence: HIGH
+  phase: "15-embedding-pipeline"
+  date: "2026-02-26"
+
+- finding: "When adding a new field to EmbeddingConfigData (e.g., batchSize), tests asserting toEqual on the full config object must include the new field. The 'loads all config values correctly' test and 'DEFAULT_CONFIG has embedding property' test both need updating."
+  source: "Phase 15, Plan 01, Task B"
+  confidence: HIGH
+  phase: "15-embedding-pipeline"
+  date: "2026-02-26"
+
+- finding: "Pre-existing EBUSY flaky test in export.test.ts on Windows -- rmSync fails with 'resource busy or locked' on tmpdir cleanup. Not related to any plan changes. Appears consistently now (not just intermittent). Consider fixing in a cleanup plan."
+  source: "Phase 15, Plan 01"
+  confidence: HIGH
+  phase: "15-embedding-pipeline"
   date: "2026-02-26"
