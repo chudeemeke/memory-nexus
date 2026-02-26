@@ -5,7 +5,8 @@
  * Uses temporary directories for lock and log file isolation.
  */
 
-import { describe, expect, it, beforeEach, afterEach } from "bun:test";
+import { describe, expect, it, beforeEach, afterEach, spyOn } from "bun:test";
+import * as childProcess from "node:child_process";
 import {
   existsSync,
   mkdirSync,
@@ -276,6 +277,110 @@ describe("spawnBackgroundEmbedding()", () => {
     });
 
     expect(existsSync(newLogDir)).toBe(true);
+  });
+
+  it("removes stale lock and proceeds to spawn", () => {
+    // Write a lock with a dead PID (999999999 is extremely unlikely to exist)
+    writeLock({
+      pid: 999999999,
+      startedAt: "2026-01-01T00:00:00.000Z",
+      totalMessages: 0,
+    }, testDir);
+
+    // Verify stale lock exists before spawn
+    const staleLock = readLock(testDir);
+    expect(staleLock).not.toBeNull();
+    expect(staleLock!.pid).toBe(999999999);
+
+    const result = spawnBackgroundEmbedding({
+      dataDir: testDir,
+      logDir,
+    });
+
+    // The stale lock should have been removed and a new process spawned.
+    // Even if spawn itself fails (no entry point), the stale lock at 999999999
+    // should be gone -- either replaced by new lock or removed entirely.
+    const currentLock = readLock(testDir);
+    if (result.started) {
+      // New lock was written with spawned PID
+      expect(currentLock).not.toBeNull();
+      expect(currentLock!.pid).not.toBe(999999999);
+    } else {
+      // Spawn may fail on test runner, but stale lock should not remain with old PID
+      if (currentLock) {
+        expect(currentLock.pid).not.toBe(999999999);
+      }
+    }
+  });
+
+  it("returns spawn_failed when subprocess.pid is undefined", () => {
+    const mockProcess = {
+      pid: undefined,
+      unref: () => {},
+      on: () => mockProcess,
+      once: () => mockProcess,
+      removeListener: () => mockProcess,
+      emit: () => false,
+    } as any;
+
+    const spawnSpy = spyOn(childProcess, "spawn").mockReturnValue(mockProcess);
+
+    try {
+      const result = spawnBackgroundEmbedding({
+        dataDir: testDir,
+        logDir,
+      });
+
+      expect(result.started).toBe(false);
+      expect(result.reason).toBe("spawn_failed");
+    } finally {
+      spawnSpy.mockRestore();
+    }
+  });
+
+  it("returns already_running when acquireLock fails after spawn (race condition)", () => {
+    // Write a stale lock so pre-spawn check passes (dead PID)
+    writeLock({
+      pid: 999999999,
+      startedAt: "2026-01-01T00:00:00.000Z",
+      totalMessages: 0,
+    }, testDir);
+
+    // Mock spawn to return a valid PID but also write a lock with an alive PID
+    // as a side effect (simulating a race condition where another process
+    // acquires the lock between our stale removal and acquireLock call)
+    const mockProcess = {
+      pid: 77777,
+      unref: () => {},
+      on: () => mockProcess,
+      once: () => mockProcess,
+      removeListener: () => mockProcess,
+      emit: () => false,
+    } as any;
+
+    const spawnSpy = spyOn(childProcess, "spawn").mockImplementation(() => {
+      // Side effect: write a lock with alive PID (current process) to
+      // simulate another process grabbing the lock during the race window
+      writeLock({
+        pid: process.pid,
+        startedAt: new Date().toISOString(),
+        totalMessages: 0,
+      }, testDir);
+      return mockProcess;
+    });
+
+    try {
+      const result = spawnBackgroundEmbedding({
+        dataDir: testDir,
+        logDir,
+      });
+
+      expect(result.started).toBe(false);
+      expect(result.reason).toBe("already_running");
+      expect(result.pid).toBe(process.pid);
+    } finally {
+      spawnSpy.mockRestore();
+    }
   });
 });
 

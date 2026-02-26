@@ -13,7 +13,7 @@ import {
     writeFileSync,
 } from "node:fs";
 import { dirname, join } from "node:path";
-import { homedir } from "node:os";
+import { homedir, tmpdir } from "node:os";
 import {
     executeStatusCommand,
     gatherStatus,
@@ -34,6 +34,18 @@ import {
 import {
     setTestLogPath,
 } from "../../../infrastructure/hooks/log-writer.js";
+import {
+    setTestPaths,
+    resetTestPaths,
+} from "../../../infrastructure/paths.js";
+import {
+    writeLock,
+    removeLock,
+} from "../../../infrastructure/embedding/background-embedder.js";
+import {
+    initializeDatabase,
+    closeDatabase,
+} from "../../../infrastructure/database/index.js";
 
 describe("status command", () => {
     // Use a test-specific directory to avoid modifying actual settings
@@ -84,7 +96,11 @@ describe("status command", () => {
 
         // Clean up test directory
         if (existsSync(testBaseDir)) {
-            rmSync(testBaseDir, { recursive: true, force: true });
+            try {
+                rmSync(testBaseDir, { recursive: true, force: true });
+            } catch {
+                // Best-effort cleanup on Windows (EBUSY from WAL file locks)
+            }
         }
     });
 
@@ -141,6 +157,69 @@ describe("status command", () => {
             const status = await gatherStatus();
 
             expect(status.pendingSessions).toBe(0);
+        });
+
+        test("returns active embedding with DB counts when lock has alive PID", async () => {
+            // Use a separate temp dir for this test to avoid EBUSY on Windows
+            const isolatedDir = join(tmpdir(), `memory-status-embed-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`);
+            mkdirSync(isolatedDir, { recursive: true });
+
+            // Set up data dir for the lock file
+            setTestPaths({ dataDir: isolatedDir });
+
+            // Write a lock file with the current process PID (always alive)
+            writeLock({
+                pid: process.pid,
+                startedAt: new Date().toISOString(),
+                totalMessages: 0,
+            }, isolatedDir);
+
+            // Create a real database with some messages and embedding_state rows
+            const embeddingTestDb = join(isolatedDir, "embed-test.db");
+            setTestDbPath(embeddingTestDb);
+            const { db } = initializeDatabase({ path: embeddingTestDb });
+
+            try {
+                // Insert test sessions and messages using correct schema columns
+                db.exec(`
+                    INSERT INTO sessions (id, project_path_encoded, project_path_decoded, project_name, start_time, message_count)
+                    VALUES ('test-session-1', 'encoded-path', '/test/project', 'test-project', '2026-01-01T00:00:00Z', 5)
+                `);
+                for (let i = 1; i <= 5; i++) {
+                    db.exec(`
+                        INSERT INTO messages_meta (id, session_id, role, content, timestamp)
+                        VALUES ('msg-${i}', 'test-session-1', 'assistant', 'message content ${i}', '2026-01-01T00:00:00Z')
+                    `);
+                }
+
+                // Insert embedding_state for 3 of the 5 messages (partially embedded)
+                for (let i = 1; i <= 3; i++) {
+                    db.exec(`
+                        INSERT INTO embedding_state (message_id, embedded_at, model_hash, model_name)
+                        VALUES (${i}, '2026-01-01T00:00:00Z', 'test-hash-123', 'test-model')
+                    `);
+                }
+
+                closeDatabase(db);
+
+                const status = await gatherStatus();
+
+                expect(status.embedding.active).toBe(true);
+                expect(status.embedding.pid).toBe(process.pid);
+                expect(status.embedding.embeddedCount).toBe(3);
+                expect(status.embedding.totalMessages).toBe(5);
+                expect(status.embedding.startedAt).toBeDefined();
+            } finally {
+                // Clean up
+                removeLock(isolatedDir);
+                resetTestPaths();
+                setTestDbPath(testDbPath); // Restore original test DB path
+                try {
+                    rmSync(isolatedDir, { recursive: true, force: true });
+                } catch {
+                    // Best-effort cleanup on Windows
+                }
+            }
         });
     });
 
