@@ -18,6 +18,7 @@ import {
     executeStatusCommand,
     gatherStatus,
     formatStatusOutput,
+    formatTimeAgo,
     setTestDbPath,
     type StatusInfo,
     type GatherStatusOptions,
@@ -290,6 +291,115 @@ describe("status command", () => {
 
             expect(parsed.hooks.sessionEnd).toBe(true);
             expect(parsed.hooks.preCompact).toBe(true);
+        });
+    });
+
+    describe("embedding status section", () => {
+        test("formatStatusOutput shows 'Embedding: idle' when not active", () => {
+            const status: StatusInfo = {
+                hooks: {
+                    sessionEnd: true,
+                    preCompact: true,
+                    hookScriptExists: true,
+                    backupExists: false,
+                },
+                config: DEFAULT_CONFIG,
+                lastSync: null,
+                pendingSessions: 0,
+                recentLogs: 0,
+                embedding: { active: false },
+            };
+
+            formatStatusOutput(status);
+
+            const output = logOutput.join("\n");
+            expect(output).toContain("Embedding:");
+            expect(output).toContain("idle");
+        });
+
+        test("formatStatusOutput shows active with PID and progress when embedding active", () => {
+            const fiveMinAgo = new Date(Date.now() - 5 * 60 * 1000).toISOString();
+            const status: StatusInfo = {
+                hooks: {
+                    sessionEnd: true,
+                    preCompact: true,
+                    hookScriptExists: true,
+                    backupExists: false,
+                },
+                config: DEFAULT_CONFIG,
+                lastSync: null,
+                pendingSessions: 0,
+                recentLogs: 0,
+                embedding: {
+                    active: true,
+                    pid: 12345,
+                    startedAt: fiveMinAgo,
+                    embeddedCount: 150,
+                    totalMessages: 500,
+                },
+            };
+
+            formatStatusOutput(status);
+
+            const output = logOutput.join("\n");
+            expect(output).toContain("Embedding:");
+            expect(output).toContain("active");
+            expect(output).toContain("PID 12345");
+            expect(output).toContain("150/500 messages");
+        });
+
+        test("formatStatusOutput shows idle when lock has dead PID", () => {
+            // The StatusInfo with active:false represents dead PID case
+            const status: StatusInfo = {
+                hooks: {
+                    sessionEnd: true,
+                    preCompact: true,
+                    hookScriptExists: true,
+                    backupExists: false,
+                },
+                config: DEFAULT_CONFIG,
+                lastSync: null,
+                pendingSessions: 0,
+                recentLogs: 0,
+                embedding: { active: false },
+            };
+
+            formatStatusOutput(status);
+
+            const output = logOutput.join("\n");
+            expect(output).toContain("idle");
+        });
+
+        test("JSON output includes embedding field", async () => {
+            await executeStatusCommand({ json: true });
+
+            const output = logOutput.join("\n");
+            const parsed = JSON.parse(output);
+
+            expect(parsed).toHaveProperty("embedding");
+            expect(parsed.embedding).toHaveProperty("active");
+        });
+    });
+
+    describe("formatTimeAgo", () => {
+        test("returns 'just now' for timestamps less than 1 minute ago", () => {
+            const now = new Date().toISOString();
+            expect(formatTimeAgo(now)).toBe("just now");
+        });
+
+        test("returns minutes for timestamps less than 1 hour ago", () => {
+            const thirtyMinAgo = new Date(Date.now() - 30 * 60 * 1000).toISOString();
+            expect(formatTimeAgo(thirtyMinAgo)).toBe("30 min ago");
+        });
+
+        test("returns hours for timestamps less than 24 hours ago", () => {
+            const twoHoursAgo = new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString();
+            expect(formatTimeAgo(twoHoursAgo)).toBe("2h ago");
+        });
+
+        test("returns days for timestamps more than 24 hours ago", () => {
+            const threeDaysAgo = new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString();
+            expect(formatTimeAgo(threeDaysAgo)).toBe("3d ago");
         });
     });
 });
