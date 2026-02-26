@@ -1,7 +1,7 @@
 ---
 agent: gsd-executor
 updated: 2026-02-26
-entries: 20
+entries: 22
 ---
 
 - finding: "Bun test spyOn mock leakage: when mocking nodeFs.renameSync, must restore before assertions, not in afterEach. Mock affects subsequent tests in same file if not restored promptly."
@@ -120,6 +120,18 @@ entries: 20
 
 - finding: "Pre-existing EBUSY flaky test in export.test.ts on Windows -- rmSync fails with 'resource busy or locked' on tmpdir cleanup. Not related to any plan changes. Appears consistently now (not just intermittent). Consider fixing in a cleanup plan."
   source: "Phase 15, Plan 01"
+  confidence: HIGH
+  phase: "15-embedding-pipeline"
+  date: "2026-02-26"
+
+- finding: "For testing async orchestration functions that use dynamic import(), prefer DI overrides (EmbeddingPassDeps pattern) over mock.module. Export the function and accept optional dependency parameters. This avoids bun's mock caching issues entirely and produces cleaner, faster tests."
+  source: "Phase 15, Plan 02, Task B"
+  confidence: HIGH
+  phase: "15-embedding-pipeline"
+  date: "2026-02-26"
+
+- finding: "When adding new options to Commander.js commands, tests must check both option existence AND help text. Integration tests that spawn the CLI process verify real help output. Unit tests verify option parsing via command.parse() with action override."
+  source: "Phase 15, Plan 02, Task B"
   confidence: HIGH
   phase: "15-embedding-pipeline"
   date: "2026-02-26"

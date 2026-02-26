@@ -27,7 +27,7 @@ Requirements for v2.0: Hybrid Search, Package Rename, and API Stabilization.
 
 ### Embedding Pipeline
 
-- [ ] **PIPE-01**: Integrate embedding generation into sync pipeline (embed messages after extraction) with `--embed` flag
+- [x] **PIPE-01**: Integrate embedding generation into sync pipeline (embed messages after extraction) with `--embed` flag
 - [x] **PIPE-02**: Implement embedding cache with model_hash tracking; model change triggers full re-embedding
 - [x] **PIPE-03**: Batch embedding with configurable batch size and progress reporting
 - [ ] **PIPE-04**: Background embedding: sync completes immediately, embeddings generate asynchronously
@@ -119,7 +119,7 @@ Deferred. Tracked for context, not in current roadmap.
 | EMBED-05 | Phase 14 | Complete |
 | EMBED-06 | Phase 14 | Complete |
 | EMBED-07 | Phase 14 | Complete |
-| PIPE-01 | Phase 15 | Pending |
+| PIPE-01 | Phase 15 | Complete |
 | PIPE-02 | Phase 15 | Complete |
 | PIPE-03 | Phase 15 | Complete |
 | PIPE-04 | Phase 15 | Pending |
@@ -154,4 +154,4 @@ Deferred. Tracked for context, not in current roadmap.
 
 ---
 *Requirements defined: 2026-02-18*
-*Last updated: 2026-02-26 (PIPE-02, PIPE-03, PIPE-05 complete)*
+*Last updated: 2026-02-26 (PIPE-01, PIPE-02, PIPE-03, PIPE-05 complete)*

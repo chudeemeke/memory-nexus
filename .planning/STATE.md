@@ -13,14 +13,14 @@ See: .planning/PROJECT.md (updated 2026-02-18)
 ## Current Position
 
 **Milestone:** v2.0 Hybrid Search and Rebrand
-**Phase:** 15 (Embedding Pipeline) -- IN PROGRESS (1/3 plans done)
+**Phase:** 15 (Embedding Pipeline) -- IN PROGRESS (2/3 plans done)
 **Status:** Active
 
 ```
 v2.0 Progress: [########............] 3/6 phases
   Phase 13: Package Rename          [x] Complete (3/3 plans)
   Phase 14: Embedding Infrastructure [x] Complete (4/4 plans)
-  Phase 15: Embedding Pipeline       [~] In Progress (1/3 plans)
+  Phase 15: Embedding Pipeline       [~] In Progress (2/3 plans)
   Phase 16: Hybrid Search            [ ] Pending
   Phase 17: Provider Ecosystem       [ ] Pending
   Phase 18: API Stabilization        [ ] Pending
@@ -51,6 +51,7 @@ v2.0 Progress: [########............] 3/6 phases
 | 14-03 | TransformersJsProvider with lazy loading and WASM fallback | 5min | 2 | 5 |
 | 14-04 | EmbeddingProviderFactory, config integration, doctor reporting | 5min | 2 | 11 |
 | 15-01 | EmbeddingRepository and EmbeddingService with model hash tracking | 6min | 2 | 10 |
+| 15-02 | Sync --embed integration with progress and model change handling | 7min | 2 | 5 |
 
 ## Accumulated Context
 
@@ -90,6 +91,10 @@ v2.0 Progress: [########............] 3/6 phases
 | computeModelHash | Standalone pure function (not method) | Reusable across modules without instantiating EmbeddingService |
 | EmbeddingService DI | Constructor injection of repo, provider, config | Testable with mock objects; no service locator |
 | Default batchSize | 100 messages per batch | Balance between throughput and memory usage |
+| Embedding pass DI | EmbeddingPassDeps interface for testing | Avoids mock.module; factory/config/repo overrides |
+| Dynamic import for --embed | import() inside runEmbeddingPass | Zero ONNX overhead when --embed not specified |
+| Separate EmbeddingProgressReporter | New interface without sessionId | ISP compliance; embedding update(current) vs sync update(current, sessionId) |
+| handleModelChange prompt | Human-readable model names from ModelState | storedModelName/currentModelName, hash fallback for legacy data |
 
 ### Research Completed
 
@@ -109,22 +114,22 @@ None.
 ### Last Session
 
 **Date:** 2026-02-26
-**Completed:** Phase 15 Plan 01 -- EmbeddingRepository and EmbeddingService with model hash tracking
-**Stopped at:** Phase 15 Plan 01 complete, Plan 02 next
+**Completed:** Phase 15 Plan 02 -- Sync --embed integration with progress and model change handling
+**Stopped at:** Phase 15 Plan 02 complete, Plan 03 next
 
 ### Context for Next Session
 
-1. Phase 15 (Embedding Pipeline) IN PROGRESS: 1/3 plans done
-2. Next: Phase 15 Plan 02 -- sync workflow integration with --embed flag
-3. EmbeddingRepository provides findUnembedded, storeBatch, model hash/name tracking, clear, counts
-4. EmbeddingService orchestrates: checkModelState -> embedUnembedded -> clearAndReembed
-5. computeModelHash generates 16-char hex SHA-256 from provider:model:dimensions
-6. EmbeddingConfigData extended with batchSize (default 100)
-7. model_name column added to embedding_state via ALTER TABLE migration
-8. Float32Array passes directly to sqlite-vec vec_f32() (no Buffer conversion needed)
-9. Zero external imports in domain layer maintained
-10. All new code at 100% function and line coverage
+1. Phase 15 (Embedding Pipeline) IN PROGRESS: 2/3 plans done
+2. Next: Phase 15 Plan 03 -- background embedding (--background flag)
+3. runEmbeddingPass exported with DI overrides for testing (EmbeddingPassDeps)
+4. handleModelChange exported, uses human-readable model names
+5. --embed and --background options defined on sync command
+6. --background handler deferred to Plan 15-03 (option registered, no implementation)
+7. EmbeddingProgressReporter interface + 3 implementations + factory
+8. createModelDownloadHandler for first-run model download progress
+9. Dynamic import in runEmbeddingPass ensures zero ONNX overhead without --embed
+10. Error isolation: embedding failure preserves sync data, returns exit code 1
 
 ---
 
-*Last updated: 2026-02-26 (Phase 15 Plan 01 complete)*
+*Last updated: 2026-02-26 (Phase 15 Plan 02 complete)*
