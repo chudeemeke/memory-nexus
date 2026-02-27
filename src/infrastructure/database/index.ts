@@ -54,6 +54,9 @@ export {
 // Services
 export {
   Fts5SearchService,
+  HybridSearchService,
+  type HybridSearchDeps,
+  type SearchMeta,
   SqliteStatsService,
   SqliteContextService,
   type ProjectContext,
