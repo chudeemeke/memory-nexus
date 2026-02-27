@@ -14,7 +14,7 @@ See: .planning/PROJECT.md (updated 2026-02-18)
 
 **Milestone:** v2.0 Hybrid Search and Rebrand
 **Phase:** 16 (Hybrid Search) -- COMPLETE (3/3 plans done)
-**Status:** Phase 16 complete -- ready for Phase 17
+**Status:** Milestone complete
 
 ```
 v2.0 Progress: [#############.......] 4.5/6 phases
