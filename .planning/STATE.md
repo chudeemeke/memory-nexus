@@ -13,8 +13,8 @@ See: .planning/PROJECT.md (updated 2026-02-18)
 ## Current Position
 
 **Milestone:** v2.0 Hybrid Search and Rebrand
-**Phase:** 16.1 (Migration Race Condition Fix) -- COMPLETE
-**Status:** Active -- Phase 16.1 done, ready for Phase 17
+**Phase:** 17 (Provider Ecosystem) -- PENDING
+**Status:** Active -- Phase 16.1 complete, ready for Phase 17 planning
 
 ```
 v2.0 Progress: [##############......] 5/7 phases
