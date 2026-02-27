@@ -55,3 +55,15 @@ export type {
   EntityExport,
   LinkExport,
 } from "./export-service.js";
+
+export { reciprocalRankFusion } from "./rrf-fusion.js";
+export type {
+  RankedCandidate,
+  FusedResult,
+} from "./rrf-fusion.js";
+
+export { applyTemporalDecay } from "./temporal-decay.js";
+export type {
+  DecayableResult,
+  DecayedResult,
+} from "./temporal-decay.js";

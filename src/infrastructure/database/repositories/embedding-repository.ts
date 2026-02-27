@@ -13,6 +13,16 @@
 import type { Database } from "bun:sqlite";
 
 /**
+ * A vector KNN search result row.
+ */
+export interface VectorSearchRow {
+    /** The rowid of the matching message embedding */
+    rowid: number;
+    /** Cosine distance (0 = identical, 2 = opposite) */
+    distance: number;
+}
+
+/**
  * A message that has not yet been embedded.
  */
 export interface UnembeddedMessage {
@@ -152,5 +162,27 @@ export class EmbeddingRepository {
             "SELECT COUNT(*) as count FROM messages_meta"
         ).get();
         return row?.count ?? 0;
+    }
+
+    /**
+     * Search for nearest neighbors using sqlite-vec MATCH.
+     *
+     * Uses cosine distance via vec0 virtual table. Results are
+     * ordered by distance ASC (lower distance = more similar).
+     *
+     * @param queryEmbedding The query vector (Float32Array)
+     * @param limit Maximum number of results
+     * @returns Array of { rowid, distance } sorted by distance ASC
+     */
+    vectorKnnSearch(queryEmbedding: Float32Array, limit: number): VectorSearchRow[] {
+        if (limit <= 0) return [];
+        const stmt = this.db.prepare<VectorSearchRow, [Float32Array, number]>(`
+            SELECT rowid, distance
+            FROM message_embeddings
+            WHERE embedding MATCH ?
+            ORDER BY distance
+            LIMIT ?
+        `);
+        return stmt.all(queryEmbedding, limit);
     }
 }

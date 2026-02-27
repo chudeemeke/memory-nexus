@@ -13,6 +13,7 @@ import {
     EmbeddingRepository,
     type UnembeddedMessage,
     type EmbeddingBatchItem,
+    type VectorSearchRow,
 } from "./embedding-repository.js";
 
 /**
@@ -387,6 +388,110 @@ describe("EmbeddingRepository", () => {
         test("returns correct count after inserting messages", () => {
             insertTestMessages(db, 5);
             expect(repo.getTotalMessageCount()).toBe(5);
+        });
+    });
+
+    describe("vectorKnnSearch()", () => {
+        test("returns results with rowid and distance shape", () => {
+            if (!sqliteVecAvailable) {
+                console.warn("Skipping vectorKnnSearch test: sqlite-vec not available");
+                return;
+            }
+
+            const rowids = insertTestMessages(db, 5);
+            const items: EmbeddingBatchItem[] = rowids.map((rowid, i) => ({
+                rowid,
+                embedding: createTestEmbedding(i + 1),
+            }));
+            repo.storeBatch(items, "hash1", "model1");
+
+            const queryEmbedding = createTestEmbedding(1);
+            const results = repo.vectorKnnSearch(queryEmbedding, 3);
+
+            expect(results).toHaveLength(3);
+            expect(results[0]).toHaveProperty("rowid");
+            expect(results[0]).toHaveProperty("distance");
+        });
+
+        test("results are ordered by distance ASC (most similar first)", () => {
+            if (!sqliteVecAvailable) {
+                console.warn("Skipping vectorKnnSearch test: sqlite-vec not available");
+                return;
+            }
+
+            const rowids = insertTestMessages(db, 5);
+            const items: EmbeddingBatchItem[] = rowids.map((rowid, i) => ({
+                rowid,
+                embedding: createTestEmbedding(i + 1),
+            }));
+            repo.storeBatch(items, "hash1", "model1");
+
+            const queryEmbedding = createTestEmbedding(1);
+            const results = repo.vectorKnnSearch(queryEmbedding, 5);
+
+            for (let i = 0; i < results.length - 1; i++) {
+                expect(results[i].distance).toBeLessThanOrEqual(results[i + 1].distance);
+            }
+        });
+
+        test("returned rowids correspond to actual message rowids", () => {
+            if (!sqliteVecAvailable) {
+                console.warn("Skipping vectorKnnSearch test: sqlite-vec not available");
+                return;
+            }
+
+            const rowids = insertTestMessages(db, 5);
+            const items: EmbeddingBatchItem[] = rowids.map((rowid, i) => ({
+                rowid,
+                embedding: createTestEmbedding(i + 1),
+            }));
+            repo.storeBatch(items, "hash1", "model1");
+
+            const queryEmbedding = createTestEmbedding(3);
+            const results = repo.vectorKnnSearch(queryEmbedding, 5);
+
+            const validRowids = new Set(rowids);
+            for (const r of results) {
+                expect(validRowids.has(r.rowid)).toBe(true);
+            }
+        });
+
+        test("returns at most available embeddings when limit exceeds count", () => {
+            if (!sqliteVecAvailable) {
+                console.warn("Skipping vectorKnnSearch test: sqlite-vec not available");
+                return;
+            }
+
+            const rowids = insertTestMessages(db, 5);
+            const items: EmbeddingBatchItem[] = rowids.map((rowid, i) => ({
+                rowid,
+                embedding: createTestEmbedding(i + 1),
+            }));
+            repo.storeBatch(items, "hash1", "model1");
+
+            const queryEmbedding = createTestEmbedding(1);
+            const results = repo.vectorKnnSearch(queryEmbedding, 10);
+
+            expect(results).toHaveLength(5);
+        });
+
+        test("returns empty array when limit is 0", () => {
+            if (!sqliteVecAvailable) {
+                console.warn("Skipping vectorKnnSearch test: sqlite-vec not available");
+                return;
+            }
+
+            const rowids = insertTestMessages(db, 3);
+            const items: EmbeddingBatchItem[] = rowids.map((rowid, i) => ({
+                rowid,
+                embedding: createTestEmbedding(i + 1),
+            }));
+            repo.storeBatch(items, "hash1", "model1");
+
+            const queryEmbedding = createTestEmbedding(1);
+            const results = repo.vectorKnnSearch(queryEmbedding, 0);
+
+            expect(results).toHaveLength(0);
         });
     });
 });
