@@ -119,6 +119,9 @@ Success Criteria:
 **Depends on:** Phase 16 (discovered during Phase 16 human verification)
 **Estimated Plans:** 1-2
 
+Plans:
+- [x] 16.1-01-PLAN.md -- Size-aware migration conflict resolution with WAL/SHM cleanup and pending guard
+
 Requirements: (cross-cutting infrastructure fix -- no dedicated requirement IDs; validates RENAME-02 migration correctness)
 
 Success Criteria:
@@ -205,10 +208,10 @@ Phase 13 (Package Rename)
 | 14 | v2.0 | Complete    | 2026-02-26 | 2026-02-26 |
 | 15 | v2.0 | Complete    | 2026-02-27 | 2026-02-26 |
 | 16 | 3/3 | Complete    | 2026-02-27 | -- |
-| 16.1 | v2.0 | -- | Pending (urgent) | -- |
+| 16.1 | v2.0 | 1/1 | Complete | 2026-02-27 |
 | 17 | v2.0 | -- | Pending | -- |
 | 18 | v2.0 | -- | Pending | -- |
 
 ---
 
-*Last updated: 2026-02-27 (Phase 16 Plan 02 complete)*
+*Last updated: 2026-02-27 (Phase 16.1 Plan 01 complete)*

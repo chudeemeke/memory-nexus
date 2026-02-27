@@ -13,16 +13,16 @@ See: .planning/PROJECT.md (updated 2026-02-18)
 ## Current Position
 
 **Milestone:** v2.0 Hybrid Search and Rebrand
-**Phase:** 16.1 (Migration Race Condition Fix) -- PENDING (urgent insert)
-**Status:** Active -- ready for Phase 16.1 planning
+**Phase:** 16.1 (Migration Race Condition Fix) -- COMPLETE
+**Status:** Active -- Phase 16.1 done, ready for Phase 17
 
 ```
-v2.0 Progress: [############........] 4/7 phases
+v2.0 Progress: [##############......] 5/7 phases
   Phase 13: Package Rename          [x] Complete (3/3 plans)
   Phase 14: Embedding Infrastructure [x] Complete (4/4 plans)
   Phase 15: Embedding Pipeline       [x] Complete (4/4 plans)
   Phase 16: Hybrid Search            [x] Complete (3/3 plans)
-  Phase 16.1: Migration Race Fix     [ ] Pending (urgent)
+  Phase 16.1: Migration Race Fix     [x] Complete (1/1 plans)
   Phase 17: Provider Ecosystem       [ ] Pending
   Phase 18: API Stabilization        [ ] Pending
 ```
@@ -58,6 +58,7 @@ v2.0 Progress: [############........] 4/7 phases
 | 16-01 | Domain types, RRF algorithm, vector KNN, search config | 3min | 2 | 13 |
 | 16-02 | HybridSearchService with mode resolution and graceful degradation | 12min | 2 | 6 |
 | 16-03 | CLI integration, output formatting, and doctor enhancement | ~30min | 2 | 9 |
+| 16.1-01 | Size-aware migration conflict resolution with WAL/SHM cleanup | 4min | 2 | 3 |
 
 ## Accumulated Context
 
@@ -120,6 +121,10 @@ v2.0 Progress: [############........] 4/7 phases
 | JSON metadata envelope | Additive-only, envelope when searchMeta present | Old consumers see plain array; new consumers get meta + results |
 | Doctor exit codes | 0=OK+vectorReady, 1=degraded, 2=broken | Degraded includes no embeddings or permission issues |
 | Context/related hybrid benefit | Deferred (SqliteContextService does own SQL) | Requires constructor injection refactor; search benefits immediately |
+| Migration conflict resolution | Size comparison (larger file wins) | Simple, correct, fast; no content hashing or timestamps needed |
+| WAL/SHM sidecar cleanup | Only on overwrite (source > dest) | Prevents stale WAL state corrupting migrated database |
+| Migration guard placement | CLI entry point (index.ts), not connection.ts | No coupling between migration and database initialization modules |
+| Entry-point migration guard | isMigrationPending() before program.parse() | Prevents empty-stub race; fast path (single existsSync) when no legacy |
 
 ### Research Completed
 
@@ -139,28 +144,27 @@ None blocking. All technical questions resolved during research phase.
 
 ### Blockers
 
-Phase 16.1 must complete before Phase 17/18 can proceed.
+None. Phase 16.1 complete; Phase 17/18 unblocked.
 
 ## Session Continuity
 
 ### Last Session
 
 **Date:** 2026-02-27
-**Completed:** Phase 16 (3/3 plans), inserted Phase 16.1 (urgent)
-**Stopped at:** Phase 16.1 inserted, ready for planning
+**Completed:** Phase 16.1 (1/1 plans) -- migration race condition fix
+**Stopped at:** Phase 16.1 complete, ready for Phase 17
 
 ### Context for Next Session
 
-1. Phase 16 (Hybrid Search) COMPLETE: 3/3 plans done, automated verification passed
-2. Human verification FAILED: migration race condition prevents hybrid search against real data
-3. Phase 16.1 inserted for migration race condition fix
-4. Next: `/gsd:plan-phase 16.1`
-4. JSON output supports metadata envelope (additive, backward-compatible)
-5. Doctor reports Search Capability section with exit codes (0/1/2)
-6. 2438 tests passing across full suite
+1. Phase 16.1 (Migration Race Fix) COMPLETE: size-aware conflict resolution, WAL/SHM cleanup, isMigrationPending guard
+2. Migration race condition resolved: legacy 266MB DB now correctly replaces empty 221KB XDG stub
+3. 2452 tests passing across full suite (14 new migration tests)
+4. Phase 17 (Provider Ecosystem) and Phase 18 (API Stabilization) unblocked
+5. JSON output supports metadata envelope (additive, backward-compatible)
+6. Doctor reports Search Capability section with exit codes (0/1/2)
 7. Context/related hybrid benefit deferred (SqliteContextService does own SQL)
 8. All Phase 16 requirements met: HSRCH-01 through HSRCH-06, DEGRADE-01 through DEGRADE-04
 
 ---
 
-*Last updated: 2026-02-27 (Plan 16-03 complete -- Phase 16 done)*
+*Last updated: 2026-02-27 (Plan 16.1-01 complete -- Phase 16.1 done)*
