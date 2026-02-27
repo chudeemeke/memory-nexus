@@ -112,6 +112,24 @@ Success Criteria:
 
 ---
 
+### Phase 16.1: Migration Race Condition Fix (urgent)
+
+**Goal:** Fix race condition where `initializeDatabase()` creates an empty database at the XDG path before `migrateFromLegacy()` can move real data from the legacy path. Ensures migration always preserves the user's 266MB database over an empty 221KB stub, with defense-in-depth to prevent the race from recurring.
+
+**Depends on:** Phase 16 (discovered during Phase 16 human verification)
+**Estimated Plans:** 1-2
+
+Requirements: (cross-cutting infrastructure fix -- no dedicated requirement IDs; validates RENAME-02 migration correctness)
+
+Success Criteria:
+1. Running `memory search "authentication patterns" --mode hybrid` against a system with legacy data at `~/.memory-nexus/memory.db` (266MB) and an empty XDG database at `~/.local/share/memory/memory.db` returns real results (migration resolves conflict correctly)
+2. `migrateFromLegacy()` detects when destination exists with less data than source and overwrites the empty stub
+3. `initializeDatabase()` refuses to create a new database when `isMigrationPending()` returns true
+4. Migration is idempotent: running it twice produces the same result
+5. All existing tests pass with no regressions
+
+---
+
 ### Phase 17: Provider Ecosystem
 
 **Goal:** Users can configure alternative embedding providers (OpenAI API, local Ollama server) beyond the default local Transformers.js model, with automatic re-embedding when the provider or model changes.
@@ -170,7 +188,9 @@ Phase 13 (Package Rename)
               |         |
               |         +---> Phase 16 (Hybrid Search + Degradation)
               |                   |
-              |                   +---> Phase 18 (API Stabilization)
+              |                   +---> Phase 16.1 (Migration Race Fix) [urgent]
+              |                         |
+              |                         +---> Phase 18 (API Stabilization)
               |
               +---> Phase 17 (Provider Ecosystem)
                     [parallel with Phases 15-16]
@@ -185,6 +205,7 @@ Phase 13 (Package Rename)
 | 14 | v2.0 | Complete    | 2026-02-26 | 2026-02-26 |
 | 15 | v2.0 | Complete    | 2026-02-27 | 2026-02-26 |
 | 16 | 3/3 | Complete    | 2026-02-27 | -- |
+| 16.1 | v2.0 | -- | Pending (urgent) | -- |
 | 17 | v2.0 | -- | Pending | -- |
 | 18 | v2.0 | -- | Pending | -- |
 

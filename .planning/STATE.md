@@ -13,15 +13,16 @@ See: .planning/PROJECT.md (updated 2026-02-18)
 ## Current Position
 
 **Milestone:** v2.0 Hybrid Search and Rebrand
-**Phase:** 16 (Hybrid Search) -- COMPLETE (3/3 plans done)
-**Status:** Milestone complete
+**Phase:** 16.1 (Migration Race Condition Fix) -- PENDING (urgent insert)
+**Status:** Active -- ready for Phase 16.1 planning
 
 ```
-v2.0 Progress: [#############.......] 4.5/6 phases
+v2.0 Progress: [############........] 4/7 phases
   Phase 13: Package Rename          [x] Complete (3/3 plans)
   Phase 14: Embedding Infrastructure [x] Complete (4/4 plans)
   Phase 15: Embedding Pipeline       [x] Complete (4/4 plans)
   Phase 16: Hybrid Search            [x] Complete (3/3 plans)
+  Phase 16.1: Migration Race Fix     [ ] Pending (urgent)
   Phase 17: Provider Ecosystem       [ ] Pending
   Phase 18: API Stabilization        [ ] Pending
 ```
@@ -129,23 +130,31 @@ v2.0 Progress: [#############.......] 4.5/6 phases
 
 None blocking. All technical questions resolved during research phase.
 
+### Roadmap Evolution
+
+- Inserted Phase 16.1: Migration Race Condition Fix (urgent) (2026-02-27)
+  - Discovered during Phase 16 human verification: `memory search --mode hybrid` returned no results because the CLI reads from an empty XDG database while real data sits at the legacy path
+  - Root cause: `initializeDatabase()` creates an empty DB at XDG path before `migrateFromLegacy()` can move the real 266MB database from `~/.memory-nexus/`
+  - Blocks Phase 17/18: hybrid search cannot be validated against real data until migration works correctly
+
 ### Blockers
 
-None.
+Phase 16.1 must complete before Phase 17/18 can proceed.
 
 ## Session Continuity
 
 ### Last Session
 
 **Date:** 2026-02-27
-**Completed:** Plan 16-03 (CLI integration, output formatting, and doctor enhancement)
-**Stopped at:** Completed 16-03-PLAN.md -- Phase 16 fully complete
+**Completed:** Phase 16 (3/3 plans), inserted Phase 16.1 (urgent)
+**Stopped at:** Phase 16.1 inserted, ready for planning
 
 ### Context for Next Session
 
-1. Phase 16 (Hybrid Search) COMPLETE: 3/3 plans done
-2. Next: Phase 17 (Provider Ecosystem) or Phase 18 (API Stabilization)
-3. Search CLI fully wired: --mode auto|fts|vector|hybrid, --no-vector, --no-decay
+1. Phase 16 (Hybrid Search) COMPLETE: 3/3 plans done, automated verification passed
+2. Human verification FAILED: migration race condition prevents hybrid search against real data
+3. Phase 16.1 inserted for migration race condition fix
+4. Next: `/gsd:plan-phase 16.1`
 4. JSON output supports metadata envelope (additive, backward-compatible)
 5. Doctor reports Search Capability section with exit codes (0/1/2)
 6. 2438 tests passing across full suite
