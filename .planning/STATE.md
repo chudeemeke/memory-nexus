@@ -13,7 +13,7 @@ See: .planning/PROJECT.md (updated 2026-02-18)
 ## Current Position
 
 **Milestone:** v2.0 Hybrid Search and Rebrand
-**Phase:** 15 (Embedding Pipeline) -- COMPLETE (4/4 plans done, including gap closure)
+**Phase:** 15 (Embedding Pipeline) -- COMPLETE (4/4 plans done, human verified)
 **Status:** Active -- ready for Phase 16
 
 ```
@@ -121,21 +121,21 @@ None.
 
 ### Last Session
 
-**Date:** 2026-02-26
-**Completed:** Phase 15 Plan 04 -- Coverage gap closure for Phase 15 embedding pipeline
-**Stopped at:** Phase 15 complete (4/4 plans including gap closure), Phase 16 next
+**Date:** 2026-02-27
+**Completed:** Phase 15 -- Human verification passed (all 4 items confirmed)
+**Stopped at:** Phase 15 fully complete and verified, Phase 16 next
 
 ### Context for Next Session
 
-1. Phase 15 (Embedding Pipeline) COMPLETE: 4/4 plans done (including gap closure)
+1. Phase 15 (Embedding Pipeline) FULLY COMPLETE: 4/4 plans, human verified
 2. Next: Phase 16 (Hybrid Search and Graceful Degradation)
-3. background-embedder.ts at 100% line/function coverage
-4. status.ts embedding paths (gatherStatus active lock + DB counts) covered
-5. sync.ts Phase 15 paths covered: model-change-declined, interactive readline, lazy loaders
-6. Lazy loader tests in separate file (sync-lazy-loaders.test.ts) to avoid mock.module leakage
-7. 2319 tests passing across full suite
-8. All PIPE requirements complete and coverage-verified (PIPE-01 through PIPE-05)
+3. 96,419 messages embedded with Xenova/all-MiniLM-L6-v2 (384d) at 22.8 msg/s
+4. Human verification confirmed: sync --embed, --background, status during embedding, model change prompt
+5. 2319 tests passing across full suite
+6. All PIPE requirements complete (PIPE-01 through PIPE-05)
+7. Known issues logged as todos: ONNX bundling (high), checkpoint EUNKNOWN, download progress 0/0 MB, status delay
+8. v2.0 database at 257MB with ~96K embedded messages
 
 ---
 
-*Last updated: 2026-02-26 (Phase 15 Plan 04 complete)*
+*Last updated: 2026-02-27 (Phase 15 human verification complete)*
