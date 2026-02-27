@@ -112,10 +112,63 @@ export function getMigrationStatus(): MigrationStatusResult {
 /**
  * Check whether a legacy database needs migration to XDG paths.
  *
- * Stub: implementation in Task 16.1-01-B.
+ * Returns true when the legacy ~/.memory-nexus/memory.db exists AND either:
+ *   (a) no XDG database exists yet, OR
+ *   (b) the legacy database is larger than the XDG database (empty stub).
+ *
+ * This is a lightweight check for the CLI entry point to decide whether
+ * to run migrateFromLegacy() before any command action can create an
+ * empty database via initializeDatabase().
+ *
+ * ORDERING CONTRACT: The CLI entry point (index.ts) must call this
+ * function and, if true, call migrateFromLegacy() BEFORE program.parse()
+ * dispatches to any command that calls initializeDatabase(). This
+ * prevents the empty-stub race condition where initializeDatabase()
+ * creates a 221KB empty database before migration can move the real
+ * 266MB legacy database into place.
+ *
+ * This function does NOT import from connection.ts. The guard lives
+ * at the presentation layer (index.ts), not the infrastructure layer
+ * (connection.ts), to avoid coupling between independent modules.
  */
 export function isMigrationPending(): boolean {
-    return false;
+    const legacyDir = getLegacyDir();
+    if (!existsSync(legacyDir)) {
+        return false;
+    }
+
+    const legacyDbPath = join(legacyDir, "memory.db");
+    if (!existsSync(legacyDbPath)) {
+        return false;
+    }
+
+    const xdgDbPath = getDbPath();
+    if (!existsSync(xdgDbPath)) {
+        return true; // Legacy DB exists, XDG does not -- migration needed
+    }
+
+    // Both exist: migration needed only if legacy is larger (XDG is an empty stub)
+    const legacySize = statSync(legacyDbPath).size;
+    const xdgSize = statSync(xdgDbPath).size;
+    return legacySize > xdgSize;
+}
+
+/**
+ * Remove WAL and SHM sidecar files for a database.
+ *
+ * SQLite WAL mode creates .db-wal and .db-shm files alongside the main
+ * database. When replacing the main file, stale sidecars must be removed
+ * to prevent the new database from inheriting old WAL state (corruption).
+ *
+ * @param dbPath Path to the main .db file
+ */
+function cleanupDatabaseSidecars(dbPath: string): void {
+    for (const suffix of ["-wal", "-shm"]) {
+        const sidecarPath = dbPath + suffix;
+        if (existsSync(sidecarPath)) {
+            unlinkSync(sidecarPath);
+        }
+    }
 }
 
 /**
@@ -202,6 +255,33 @@ export function migrateFromLegacy(): MigrationResult {
         // Skip items that don't exist in legacy dir
         if (!existsSync(item.source)) {
             continue;
+        }
+
+        // Handle destination already exists (partial migration state)
+        if (existsSync(item.dest)) {
+            if (item.isDir) {
+                // Directories: skip when destination already exists.
+                // Logs, hooks, backups are not critical enough to merge.
+                continue;
+            }
+
+            // Files: compare sizes to determine which to keep
+            const sourceSize = statSync(item.source).size;
+            const destSize = statSync(item.dest).size;
+
+            if (destSize >= sourceSize) {
+                // Destination has equal or more data; keep it, remove legacy copy
+                unlinkSync(item.source);
+                itemsMoved.push(item.name);
+                continue;
+            }
+
+            // Source is larger: clean up destination sidecar files before overwrite
+            // (prevents stale WAL/SHM from corrupting the migrated database)
+            if (item.dest.endsWith(".db")) {
+                cleanupDatabaseSidecars(item.dest);
+            }
+            // Fall through to normal moveFileOrDir() which overwrites destination
         }
 
         try {

@@ -8,7 +8,7 @@
 
 import { Command } from "commander";
 import pkg from "../../../package.json";
-import { migrateFromLegacy } from "../../infrastructure/migration.js";
+import { isMigrationPending, migrateFromLegacy } from "../../infrastructure/migration.js";
 import {
   createSyncCommand,
   createSearchCommand,
@@ -81,6 +81,12 @@ export { program };
 
 // Run if executed directly
 if (import.meta.main) {
-  migrateFromLegacy();
+  // ORDERING CONTRACT: migration MUST complete before program.parse()
+  // dispatches to any command action that calls initializeDatabase().
+  // isMigrationPending() is a lightweight check that avoids running
+  // the full migration logic on every invocation when no legacy data exists.
+  if (isMigrationPending()) {
+    migrateFromLegacy();
+  }
   program.parse();
 }
