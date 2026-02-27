@@ -37,16 +37,16 @@ Requirements for v2.0: Hybrid Search, Package Rename, and API Stabilization.
 
 - [x] **HSRCH-01**: Implement vector KNN query via sqlite-vec MATCH operator with configurable result limit
 - [x] **HSRCH-02**: Implement Reciprocal Rank Fusion (RRF) combining FTS5 BM25 ranks with vector similarity ranks (k=60)
-- [ ] **HSRCH-03**: Extend search command with `--mode fts|vector|hybrid` flag (default: hybrid when embeddings available, fts when not)
+- [x] **HSRCH-03**: Extend search command with `--mode fts|vector|hybrid` flag (default: hybrid when embeddings available, fts when not)
 - [x] **HSRCH-04**: Candidate multiplier: fetch 4x candidates from each ranker before fusion
 - [x] **HSRCH-05**: Minimum score threshold to filter noise from hybrid results
-- [ ] **HSRCH-06**: Embed query at search time via configured provider (sub-second for local model after first load)
+- [x] **HSRCH-06**: Embed query at search time via configured provider (sub-second for local model after first load)
 
 ### Graceful Degradation
 
-- [ ] **DEGRADE-01**: Fall back to FTS5-only when embedding model not downloaded
-- [ ] **DEGRADE-02**: Fall back to FTS5-only when sqlite-vec extension unavailable
-- [ ] **DEGRADE-03**: Use FTS5 for unembedded messages, hybrid for embedded ones (partial coverage)
+- [x] **DEGRADE-01**: Fall back to FTS5-only when embedding model not downloaded
+- [x] **DEGRADE-02**: Fall back to FTS5-only when sqlite-vec extension unavailable
+- [x] **DEGRADE-03**: Use FTS5 for unembedded messages, hybrid for embedded ones (partial coverage)
 - [ ] **DEGRADE-04**: `--no-vector` flag to explicitly disable semantic search
 
 ### Provider Ecosystem
@@ -124,15 +124,15 @@ Deferred. Tracked for context, not in current roadmap.
 | PIPE-03 | Phase 15 | Complete |
 | PIPE-04 | Phase 15 | Complete |
 | PIPE-05 | Phase 15 | Complete |
-| HSRCH-01 | Phase 16 | Pending |
-| HSRCH-02 | Phase 16 | Pending |
-| HSRCH-03 | Phase 16 | Pending |
-| HSRCH-04 | Phase 16 | Pending |
-| HSRCH-05 | Phase 16 | Pending |
-| HSRCH-06 | Phase 16 | Pending |
-| DEGRADE-01 | Phase 16 | Pending |
-| DEGRADE-02 | Phase 16 | Pending |
-| DEGRADE-03 | Phase 16 | Pending |
+| HSRCH-01 | Phase 16 | Complete |
+| HSRCH-02 | Phase 16 | Complete |
+| HSRCH-03 | Phase 16 | Complete |
+| HSRCH-04 | Phase 16 | Complete |
+| HSRCH-05 | Phase 16 | Complete |
+| HSRCH-06 | Phase 16 | Complete |
+| DEGRADE-01 | Phase 16 | Complete |
+| DEGRADE-02 | Phase 16 | Complete |
+| DEGRADE-03 | Phase 16 | Complete |
 | DEGRADE-04 | Phase 16 | Pending |
 | PROV-01 | Phase 17 | Pending |
 | PROV-02 | Phase 17 | Pending |
@@ -154,4 +154,4 @@ Deferred. Tracked for context, not in current roadmap.
 
 ---
 *Requirements defined: 2026-02-18*
-*Last updated: 2026-02-26 (Phase 15 gap closure complete, all PIPE requirements coverage-verified)*
+*Last updated: 2026-02-27 (Phase 16 Plan 02 complete, HSRCH and DEGRADE requirements updated)*

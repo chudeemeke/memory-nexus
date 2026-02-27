@@ -1,7 +1,7 @@
 ---
 agent: gsd-executor
-updated: 2026-02-26
-entries: 27
+updated: 2026-02-27
+entries: 30
 ---
 
 - finding: "Bun test spyOn mock leakage: when mocking nodeFs.renameSync, must restore before assertions, not in afterEach. Mock affects subsequent tests in same file if not restored promptly."
@@ -165,3 +165,21 @@ entries: 27
   confidence: HIGH
   phase: "15-embedding-pipeline"
   date: "2026-02-26"
+
+- finding: "When a previous session partially completed plan tasks and committed them, the executor must detect existing commits (git log, git status) and only commit remaining uncommitted work. Do not redo committed tasks. Check git status at start to understand what is already done vs what remains."
+  source: "Phase 16, Plan 01"
+  confidence: HIGH
+  phase: "16-hybrid-search"
+  date: "2026-02-27"
+
+- finding: "When a service method internally degrades (e.g., hybrid search falls back to FTS), the degradation state must be communicated back to the caller that builds metadata. Using return objects { results, degraded, degradationReason } is cleaner than mutable state tracking."
+  source: "Phase 16, Plan 02, Task A"
+  confidence: HIGH
+  phase: "16-hybrid-search"
+  date: "2026-02-27"
+
+- finding: "Dimension mismatch detection should compare against actual stored embedding dimensions (queried from vec0 table) rather than config-vs-config values. The config may match the provider while stored embeddings have different dimensions from a previous model."
+  source: "Phase 16, Plan 02, Task A"
+  confidence: HIGH
+  phase: "16-hybrid-search"
+  date: "2026-02-27"

@@ -13,15 +13,15 @@ See: .planning/PROJECT.md (updated 2026-02-18)
 ## Current Position
 
 **Milestone:** v2.0 Hybrid Search and Rebrand
-**Phase:** 16 (Hybrid Search) -- IN PROGRESS (1/3 plans done)
-**Status:** Active -- Plan 16-01 complete, ready for Plan 16-02
+**Phase:** 16 (Hybrid Search) -- IN PROGRESS (2/3 plans done)
+**Status:** Active -- Plan 16-02 complete, ready for Plan 16-03
 
 ```
 v2.0 Progress: [##########..........] 4/6 phases
   Phase 13: Package Rename          [x] Complete (3/3 plans)
   Phase 14: Embedding Infrastructure [x] Complete (4/4 plans)
   Phase 15: Embedding Pipeline       [x] Complete (4/4 plans)
-  Phase 16: Hybrid Search            [~] In Progress (1/3 plans)
+  Phase 16: Hybrid Search            [~] In Progress (2/3 plans)
   Phase 17: Provider Ecosystem       [ ] Pending
   Phase 18: API Stabilization        [ ] Pending
 ```
@@ -55,6 +55,7 @@ v2.0 Progress: [##########..........] 4/6 phases
 | 15-03 | Background embedding with PID lock and status command extension | 7min | 2 | 7 |
 | 15-04 | Coverage gap closure for Phase 15 embedding pipeline | 9min | 2 | 4 |
 | 16-01 | Domain types, RRF algorithm, vector KNN, search config | 3min | 2 | 13 |
+| 16-02 | HybridSearchService with mode resolution and graceful degradation | 12min | 2 | 6 |
 
 ## Accumulated Context
 
@@ -109,6 +110,10 @@ v2.0 Progress: [##########..........] 4/6 phases
 | Temporal decay missing timestamp | Score unchanged | Safe default; no penalty for incomplete data |
 | vectorKnnSearch guard clause | Return empty for limit <= 0 | Avoids unnecessary SQL roundtrip |
 | SearchConfig deep merge | Two-level (search + search.temporalDecay) | Matches embedding pattern; supports partial config overrides |
+| HybridSearchService degradation tracking | Return objects from hybridSearch() | Cleaner data flow than mutation; caller updates metadata accurately |
+| Dimension mismatch detection | Query actual stored embedding from vec0 | More reliable than comparing config values; detects real mismatches |
+| Provider initialization timing | Deferred to search execution | FTS mode never touches provider; zero ONNX overhead for keyword search |
+| Hybrid filter application | FTS via SQL, vector/hybrid via post-hydration | FTS leg uses SQL WHERE clauses; hybrid filters during result assembly |
 
 ### Research Completed
 
@@ -128,19 +133,19 @@ None.
 ### Last Session
 
 **Date:** 2026-02-27
-**Completed:** Plan 16-01 (Domain types, RRF, vector KNN, search config)
-**Stopped at:** Completed 16-01-PLAN.md
+**Completed:** Plan 16-02 (HybridSearchService with mode resolution and graceful degradation)
+**Stopped at:** Completed 16-02-PLAN.md
 
 ### Context for Next Session
 
-1. Phase 16 (Hybrid Search) IN PROGRESS: 1/3 plans done
-2. Next: Plan 16-02 (HybridSearchService composition)
-3. Building blocks ready: RRF fusion, temporal decay, vector KNN, search types/config
-4. 2360 tests passing across full suite
-5. All Plan 16-01 requirements met: HSRCH-01, HSRCH-02, HSRCH-04, HSRCH-05
-6. Pure algorithm functions have zero infrastructure deps (verified)
-7. Domain layer boundary clean (verified)
+1. Phase 16 (Hybrid Search) IN PROGRESS: 2/3 plans done
+2. Next: Plan 16-03 (CLI integration for search modes)
+3. HybridSearchService ready: 4 modes (auto/fts/vector/hybrid), degradation, metadata
+4. 2400 tests passing across full suite
+5. All Plan 16-02 requirements met: HSRCH-03, HSRCH-06, DEGRADE-01, DEGRADE-02, DEGRADE-03
+6. Fts5SearchService unchanged (composed, not modified)
+7. Error formatter extended with embedding/vector suggestions
 
 ---
 
-*Last updated: 2026-02-27 (Plan 16-01 complete)*
+*Last updated: 2026-02-27 (Plan 16-02 complete)*
