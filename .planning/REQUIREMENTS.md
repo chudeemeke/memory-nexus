@@ -35,11 +35,11 @@ Requirements for v2.0: Hybrid Search, Package Rename, and API Stabilization.
 
 ### Hybrid Search
 
-- [ ] **HSRCH-01**: Implement vector KNN query via sqlite-vec MATCH operator with configurable result limit
-- [ ] **HSRCH-02**: Implement Reciprocal Rank Fusion (RRF) combining FTS5 BM25 ranks with vector similarity ranks (k=60)
+- [x] **HSRCH-01**: Implement vector KNN query via sqlite-vec MATCH operator with configurable result limit
+- [x] **HSRCH-02**: Implement Reciprocal Rank Fusion (RRF) combining FTS5 BM25 ranks with vector similarity ranks (k=60)
 - [ ] **HSRCH-03**: Extend search command with `--mode fts|vector|hybrid` flag (default: hybrid when embeddings available, fts when not)
-- [ ] **HSRCH-04**: Candidate multiplier: fetch 4x candidates from each ranker before fusion
-- [ ] **HSRCH-05**: Minimum score threshold to filter noise from hybrid results
+- [x] **HSRCH-04**: Candidate multiplier: fetch 4x candidates from each ranker before fusion
+- [x] **HSRCH-05**: Minimum score threshold to filter noise from hybrid results
 - [ ] **HSRCH-06**: Embed query at search time via configured provider (sub-second for local model after first load)
 
 ### Graceful Degradation

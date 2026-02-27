@@ -13,15 +13,15 @@ See: .planning/PROJECT.md (updated 2026-02-18)
 ## Current Position
 
 **Milestone:** v2.0 Hybrid Search and Rebrand
-**Phase:** 15 (Embedding Pipeline) -- COMPLETE (4/4 plans done, human verified)
-**Status:** Active -- ready for Phase 16
+**Phase:** 16 (Hybrid Search) -- IN PROGRESS (1/3 plans done)
+**Status:** Active -- Plan 16-01 complete, ready for Plan 16-02
 
 ```
 v2.0 Progress: [##########..........] 4/6 phases
   Phase 13: Package Rename          [x] Complete (3/3 plans)
   Phase 14: Embedding Infrastructure [x] Complete (4/4 plans)
   Phase 15: Embedding Pipeline       [x] Complete (4/4 plans)
-  Phase 16: Hybrid Search            [ ] Pending
+  Phase 16: Hybrid Search            [~] In Progress (1/3 plans)
   Phase 17: Provider Ecosystem       [ ] Pending
   Phase 18: API Stabilization        [ ] Pending
 ```
@@ -54,6 +54,7 @@ v2.0 Progress: [##########..........] 4/6 phases
 | 15-02 | Sync --embed integration with progress and model change handling | 7min | 2 | 5 |
 | 15-03 | Background embedding with PID lock and status command extension | 7min | 2 | 7 |
 | 15-04 | Coverage gap closure for Phase 15 embedding pipeline | 9min | 2 | 4 |
+| 16-01 | Domain types, RRF algorithm, vector KNN, search config | 3min | 2 | 13 |
 
 ## Accumulated Context
 
@@ -103,6 +104,11 @@ v2.0 Progress: [##########..........] 4/6 phases
 | Background lock cleanup | finally block in embedding pass | Ensures cleanup on both success and failure |
 | Background env detection | MEMORY_EMBED_BACKGROUND=1 env var | Prevents infinite recursion; background process skips re-spawn |
 | mock.module isolation | Separate test file for lazy loaders | Bun's mock.module is global; prevents leakage to other test files |
+| RRF minimum score threshold | 0.001 | Filters rank-1000+ noise while keeping moderate single-source results |
+| RRF score normalization | Max-score division (top result = 1.0) | Proportional scaling; consistent 0-1 range for SearchResult |
+| Temporal decay missing timestamp | Score unchanged | Safe default; no penalty for incomplete data |
+| vectorKnnSearch guard clause | Return empty for limit <= 0 | Avoids unnecessary SQL roundtrip |
+| SearchConfig deep merge | Two-level (search + search.temporalDecay) | Matches embedding pattern; supports partial config overrides |
 
 ### Research Completed
 
@@ -122,20 +128,19 @@ None.
 ### Last Session
 
 **Date:** 2026-02-27
-**Completed:** Phase 15 -- Human verification passed (all 4 items confirmed)
-**Stopped at:** Phase 16 context gathered
+**Completed:** Plan 16-01 (Domain types, RRF, vector KNN, search config)
+**Stopped at:** Completed 16-01-PLAN.md
 
 ### Context for Next Session
 
-1. Phase 15 (Embedding Pipeline) FULLY COMPLETE: 4/4 plans, human verified
-2. Next: Phase 16 (Hybrid Search and Graceful Degradation)
-3. 96,419 messages embedded with Xenova/all-MiniLM-L6-v2 (384d) at 22.8 msg/s
-4. Human verification confirmed: sync --embed, --background, status during embedding, model change prompt
-5. 2319 tests passing across full suite
-6. All PIPE requirements complete (PIPE-01 through PIPE-05)
-7. Known issues logged as todos: ONNX bundling (high), checkpoint EUNKNOWN, download progress 0/0 MB, status delay
-8. v2.0 database at 257MB with ~96K embedded messages
+1. Phase 16 (Hybrid Search) IN PROGRESS: 1/3 plans done
+2. Next: Plan 16-02 (HybridSearchService composition)
+3. Building blocks ready: RRF fusion, temporal decay, vector KNN, search types/config
+4. 2360 tests passing across full suite
+5. All Plan 16-01 requirements met: HSRCH-01, HSRCH-02, HSRCH-04, HSRCH-05
+6. Pure algorithm functions have zero infrastructure deps (verified)
+7. Domain layer boundary clean (verified)
 
 ---
 
-*Last updated: 2026-02-27 (Phase 15 human verification complete)*
+*Last updated: 2026-02-27 (Plan 16-01 complete)*
