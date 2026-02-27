@@ -13,15 +13,15 @@ See: .planning/PROJECT.md (updated 2026-02-18)
 ## Current Position
 
 **Milestone:** v2.0 Hybrid Search and Rebrand
-**Phase:** 16 (Hybrid Search) -- IN PROGRESS (2/3 plans done)
-**Status:** Active -- Plan 16-02 complete, ready for Plan 16-03
+**Phase:** 16 (Hybrid Search) -- COMPLETE (3/3 plans done)
+**Status:** Phase 16 complete -- ready for Phase 17
 
 ```
-v2.0 Progress: [##########..........] 4/6 phases
+v2.0 Progress: [#############.......] 4.5/6 phases
   Phase 13: Package Rename          [x] Complete (3/3 plans)
   Phase 14: Embedding Infrastructure [x] Complete (4/4 plans)
   Phase 15: Embedding Pipeline       [x] Complete (4/4 plans)
-  Phase 16: Hybrid Search            [~] In Progress (2/3 plans)
+  Phase 16: Hybrid Search            [x] Complete (3/3 plans)
   Phase 17: Provider Ecosystem       [ ] Pending
   Phase 18: API Stabilization        [ ] Pending
 ```
@@ -56,6 +56,7 @@ v2.0 Progress: [##########..........] 4/6 phases
 | 15-04 | Coverage gap closure for Phase 15 embedding pipeline | 9min | 2 | 4 |
 | 16-01 | Domain types, RRF algorithm, vector KNN, search config | 3min | 2 | 13 |
 | 16-02 | HybridSearchService with mode resolution and graceful degradation | 12min | 2 | 6 |
+| 16-03 | CLI integration, output formatting, and doctor enhancement | ~30min | 2 | 9 |
 
 ## Accumulated Context
 
@@ -114,6 +115,10 @@ v2.0 Progress: [##########..........] 4/6 phases
 | Dimension mismatch detection | Query actual stored embedding from vec0 | More reliable than comparing config values; detects real mismatches |
 | Provider initialization timing | Deferred to search execution | FTS mode never touches provider; zero ONNX overhead for keyword search |
 | Hybrid filter application | FTS via SQL, vector/hybrid via post-hydration | FTS leg uses SQL WHERE clauses; hybrid filters during result assembly |
+| Commander --no-X pattern | opts.X = false (not opts.noX = true) | Commander.js negation convention; check opts.vector === false |
+| JSON metadata envelope | Additive-only, envelope when searchMeta present | Old consumers see plain array; new consumers get meta + results |
+| Doctor exit codes | 0=OK+vectorReady, 1=degraded, 2=broken | Degraded includes no embeddings or permission issues |
+| Context/related hybrid benefit | Deferred (SqliteContextService does own SQL) | Requires constructor injection refactor; search benefits immediately |
 
 ### Research Completed
 
@@ -133,19 +138,20 @@ None.
 ### Last Session
 
 **Date:** 2026-02-27
-**Completed:** Plan 16-02 (HybridSearchService with mode resolution and graceful degradation)
-**Stopped at:** Completed 16-02-PLAN.md
+**Completed:** Plan 16-03 (CLI integration, output formatting, and doctor enhancement)
+**Stopped at:** Completed 16-03-PLAN.md -- Phase 16 fully complete
 
 ### Context for Next Session
 
-1. Phase 16 (Hybrid Search) IN PROGRESS: 2/3 plans done
-2. Next: Plan 16-03 (CLI integration for search modes)
-3. HybridSearchService ready: 4 modes (auto/fts/vector/hybrid), degradation, metadata
-4. 2400 tests passing across full suite
-5. All Plan 16-02 requirements met: HSRCH-03, HSRCH-06, DEGRADE-01, DEGRADE-02, DEGRADE-03
-6. Fts5SearchService unchanged (composed, not modified)
-7. Error formatter extended with embedding/vector suggestions
+1. Phase 16 (Hybrid Search) COMPLETE: 3/3 plans done
+2. Next: Phase 17 (Provider Ecosystem) or Phase 18 (API Stabilization)
+3. Search CLI fully wired: --mode auto|fts|vector|hybrid, --no-vector, --no-decay
+4. JSON output supports metadata envelope (additive, backward-compatible)
+5. Doctor reports Search Capability section with exit codes (0/1/2)
+6. 2438 tests passing across full suite
+7. Context/related hybrid benefit deferred (SqliteContextService does own SQL)
+8. All Phase 16 requirements met: HSRCH-01 through HSRCH-06, DEGRADE-01 through DEGRADE-04
 
 ---
 
-*Last updated: 2026-02-27 (Plan 16-02 complete)*
+*Last updated: 2026-02-27 (Plan 16-03 complete -- Phase 16 done)*

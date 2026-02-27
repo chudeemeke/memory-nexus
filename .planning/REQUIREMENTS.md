@@ -47,7 +47,7 @@ Requirements for v2.0: Hybrid Search, Package Rename, and API Stabilization.
 - [x] **DEGRADE-01**: Fall back to FTS5-only when embedding model not downloaded
 - [x] **DEGRADE-02**: Fall back to FTS5-only when sqlite-vec extension unavailable
 - [x] **DEGRADE-03**: Use FTS5 for unembedded messages, hybrid for embedded ones (partial coverage)
-- [ ] **DEGRADE-04**: `--no-vector` flag to explicitly disable semantic search
+- [x] **DEGRADE-04**: `--no-vector` flag to explicitly disable semantic search
 
 ### Provider Ecosystem
 
@@ -133,7 +133,7 @@ Deferred. Tracked for context, not in current roadmap.
 | DEGRADE-01 | Phase 16 | Complete |
 | DEGRADE-02 | Phase 16 | Complete |
 | DEGRADE-03 | Phase 16 | Complete |
-| DEGRADE-04 | Phase 16 | Pending |
+| DEGRADE-04 | Phase 16 | Complete |
 | PROV-01 | Phase 17 | Pending |
 | PROV-02 | Phase 17 | Pending |
 | PROV-03 | Phase 17 | Pending |
