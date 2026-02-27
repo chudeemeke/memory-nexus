@@ -7,7 +7,7 @@
 
 import { describe, expect, it, beforeEach, afterEach, spyOn } from "bun:test";
 import { Command, CommanderError } from "commander";
-import { createSearchCommand, executeSearchCommand, filterCaseSensitive } from "./search.js";
+import { createSearchCommand, executeSearchCommand, filterCaseSensitive, resolveSearchMode } from "./search.js";
 import {
   initializeDatabase,
   closeDatabase,
@@ -49,7 +49,7 @@ describe("Search Command", () => {
 
     it("has description", () => {
       const command = createSearchCommand();
-      expect(command.description()).toContain("Full-text search");
+      expect(command.description()).toContain("Search across all sessions");
     });
 
     it("has required <query> argument", () => {
@@ -1005,6 +1005,150 @@ describe("Search Command", () => {
       const result = await executeSearchCommand("test", { limit: "-5" });
 
       expect(result.exitCode).toBe(1);
+    });
+  });
+
+  describe("hybrid search flags", () => {
+    it("has --mode option with choices", () => {
+      const command = createSearchCommand();
+      const modeOption = command.options.find(
+        (o) => o.long === "--mode"
+      );
+      expect(modeOption).toBeDefined();
+    });
+
+    it("parses --mode hybrid", () => {
+      const command = createSearchCommand();
+      let capturedOptions: Record<string, unknown> | undefined;
+      command.action((_query: string, options: Record<string, unknown>) => {
+        capturedOptions = options;
+      });
+
+      command.parse(["test", "--mode", "hybrid"], { from: "user" });
+
+      expect(capturedOptions?.mode).toBe("hybrid");
+    });
+
+    it("parses --mode fts", () => {
+      const command = createSearchCommand();
+      let capturedOptions: Record<string, unknown> | undefined;
+      command.action((_query: string, options: Record<string, unknown>) => {
+        capturedOptions = options;
+      });
+
+      command.parse(["test", "--mode", "fts"], { from: "user" });
+
+      expect(capturedOptions?.mode).toBe("fts");
+    });
+
+    it("parses --mode vector", () => {
+      const command = createSearchCommand();
+      let capturedOptions: Record<string, unknown> | undefined;
+      command.action((_query: string, options: Record<string, unknown>) => {
+        capturedOptions = options;
+      });
+
+      command.parse(["test", "--mode", "vector"], { from: "user" });
+
+      expect(capturedOptions?.mode).toBe("vector");
+    });
+
+    it("defaults --mode to auto", () => {
+      const command = createSearchCommand();
+      let capturedOptions: Record<string, unknown> | undefined;
+      command.action((_query: string, options: Record<string, unknown>) => {
+        capturedOptions = options;
+      });
+
+      command.parse(["test"], { from: "user" });
+
+      expect(capturedOptions?.mode).toBe("auto");
+    });
+
+    it("rejects invalid --mode value", () => {
+      const command = createSearchCommand();
+      command.exitOverride();
+
+      expect(() => {
+        command.parse(["test", "--mode", "foo"], { from: "user" });
+      }).toThrow();
+    });
+
+    it("has --no-vector option", () => {
+      const command = createSearchCommand();
+      const noVectorOption = command.options.find(
+        (o) => o.long === "--no-vector"
+      );
+      expect(noVectorOption).toBeDefined();
+    });
+
+    it("parses --no-vector flag (sets vector to false)", () => {
+      const command = createSearchCommand();
+      let capturedOptions: Record<string, unknown> | undefined;
+      command.action((_query: string, options: Record<string, unknown>) => {
+        capturedOptions = options;
+      });
+
+      command.parse(["test", "--no-vector"], { from: "user" });
+
+      expect(capturedOptions?.vector).toBe(false);
+    });
+
+    it("has --no-decay option", () => {
+      const command = createSearchCommand();
+      const noDecayOption = command.options.find(
+        (o) => o.long === "--no-decay"
+      );
+      expect(noDecayOption).toBeDefined();
+    });
+
+    it("parses --no-decay flag (sets decay to false)", () => {
+      const command = createSearchCommand();
+      let capturedOptions: Record<string, unknown> | undefined;
+      command.action((_query: string, options: Record<string, unknown>) => {
+        capturedOptions = options;
+      });
+
+      command.parse(["test", "--no-decay"], { from: "user" });
+
+      expect(capturedOptions?.decay).toBe(false);
+    });
+
+    it("includes new flags in help text", () => {
+      const command = createSearchCommand();
+      const helpInfo = command.helpInformation();
+
+      expect(helpInfo).toContain("--mode");
+      expect(helpInfo).toContain("--no-vector");
+      expect(helpInfo).toContain("--no-decay");
+    });
+  });
+
+  describe("resolveSearchMode", () => {
+    it("returns fts when --no-vector is set (vector === false)", () => {
+      const mode = resolveSearchMode({ vector: false, mode: "auto" });
+      expect(mode).toBe("fts");
+    });
+
+    it("returns fts when --no-vector overrides --mode hybrid", () => {
+      const mode = resolveSearchMode({ vector: false, mode: "hybrid" });
+      expect(mode).toBe("fts");
+    });
+
+    it("returns undefined for auto mode (let HybridSearchService decide)", () => {
+      const mode = resolveSearchMode({ mode: "auto" });
+      expect(mode).toBeUndefined();
+    });
+
+    it("returns explicit mode for non-auto modes", () => {
+      expect(resolveSearchMode({ mode: "fts" })).toBe("fts");
+      expect(resolveSearchMode({ mode: "vector" })).toBe("vector");
+      expect(resolveSearchMode({ mode: "hybrid" })).toBe("hybrid");
+    });
+
+    it("returns undefined when no mode specified", () => {
+      const mode = resolveSearchMode({});
+      expect(mode).toBeUndefined();
     });
   });
 

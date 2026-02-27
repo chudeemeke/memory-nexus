@@ -1,15 +1,15 @@
 /**
  * Search Command Handler
  *
- * CLI command for full-text search across synced sessions.
- * Wires to Fts5SearchService with result formatting.
+ * CLI command for full-text and hybrid search across synced sessions.
+ * Wires to HybridSearchService supporting auto, FTS, vector, and hybrid modes.
  */
 
 import { Command, Option } from "commander";
 import type { CommandResult } from "../command-result.js";
 import { SearchQuery } from "../../../domain/value-objects/search-query.js";
 import type { SearchResult } from "../../../domain/value-objects/search-result.js";
-import type { SearchOptions } from "../../../domain/ports/services.js";
+import type { SearchMode, HybridSearchOptions } from "../../../domain/ports/services.js";
 import type { MessageRole } from "../../../domain/entities/message.js";
 import { ErrorCode, MemoryError } from "../../../domain/errors/index.js";
 import {
@@ -17,7 +17,15 @@ import {
   closeDatabase,
   getDefaultDbPath,
   Fts5SearchService,
+  HybridSearchService,
+  EmbeddingRepository,
+  type SearchMeta,
 } from "../../../infrastructure/database/index.js";
+import { EmbeddingProviderFactory } from "../../../infrastructure/embedding/embedding-provider-factory.js";
+import {
+  loadConfig,
+  saveConfig,
+} from "../../../infrastructure/hooks/config-manager.js";
 import {
   createOutputFormatter,
   type OutputMode,
@@ -43,6 +51,36 @@ interface SearchCommandOptions {
   caseSensitive?: boolean;
   verbose?: boolean;
   quiet?: boolean;
+  mode?: string;
+  vector?: boolean;
+  decay?: boolean;
+}
+
+/**
+ * Resolve the effective search mode from CLI flags.
+ *
+ * --no-vector always forces FTS mode (DEGRADE-04), overriding --mode.
+ * --mode auto returns undefined to let HybridSearchService decide.
+ * Explicit modes (fts, vector, hybrid) are returned directly.
+ *
+ * @param options Partial options with mode and noVector flags
+ * @returns Resolved SearchMode or undefined for auto
+ */
+export function resolveSearchMode(
+  options: { mode?: string; vector?: boolean }
+): SearchMode | undefined {
+  // --no-vector (vector === false) overrides everything: force FTS
+  if (options.vector === false) {
+    return "fts";
+  }
+
+  // No mode specified or auto: let HybridSearchService auto-resolve
+  if (!options.mode || options.mode === "auto") {
+    return undefined;
+  }
+
+  // Explicit mode
+  return options.mode as SearchMode;
 }
 
 /**
@@ -53,7 +91,7 @@ interface SearchCommandOptions {
 export function createSearchCommand(): Command {
   return new Command("search")
     .argument("<query>", "Search query text")
-    .description("Full-text search across all sessions")
+    .description("Search across all sessions (keyword, semantic, or hybrid)")
     .option("-l, --limit <count>", "Maximum results to return", "10")
     .option("-p, --project <name>", "Filter by project name")
     .option("-s, --session <id>", "Filter by session ID")
@@ -79,6 +117,17 @@ export function createSearchCommand(): Command {
     .option("-i, --ignore-case", "Case-insensitive search (default)")
     .option("-c, --case-sensitive", "Case-sensitive search")
     .addOption(
+      new Option("--mode <mode>", "Search mode: auto, fts, vector, hybrid")
+        .choices(["auto", "fts", "vector", "hybrid"])
+        .default("auto")
+    )
+    .addOption(
+      new Option("--no-vector", "Disable vector search (same as --mode fts)")
+    )
+    .addOption(
+      new Option("--no-decay", "Disable temporal decay scoring")
+    )
+    .addOption(
       new Option("-v, --verbose", "Show detailed output with execution info")
         .conflicts("quiet")
     )
@@ -96,6 +145,7 @@ export function createSearchCommand(): Command {
  * Execute the search command with given options.
  *
  * Creates dependencies, runs search, and outputs results.
+ * Uses HybridSearchService as the default search service.
  *
  * @param query Search query string
  * @param options Command options from CLI
@@ -117,11 +167,26 @@ export async function executeSearchCommand(
 
   // Initialize database
   const dbPath = getDefaultDbPath();
-  const { db } = initializeDatabase({ path: dbPath });
+  const { db, sqliteVecAvailable } = initializeDatabase({ path: dbPath });
+
+  const providerFactory = new EmbeddingProviderFactory();
 
   try {
-    // Create search service
-    const searchService = new Fts5SearchService(db);
+    // Load config
+    const config = loadConfig();
+
+    // Create hybrid search service
+    const fts5Service = new Fts5SearchService(db);
+    const embeddingRepo = new EmbeddingRepository(db);
+
+    const searchService = new HybridSearchService({
+      db,
+      fts5Service,
+      embeddingRepo,
+      providerFactory,
+      config,
+      sqliteVecAvailable,
+    });
 
     // Parse limit option
     const limit = parseInt(options.limit ?? "10", 10);
@@ -175,20 +240,25 @@ export async function executeSearchCommand(
       }
     }
 
-    // Build complete SearchOptions
+    // Resolve search mode from flags
+    // --no-vector sets options.vector = false; --no-decay sets options.decay = false
+    const searchMode = resolveSearchMode(options);
+
+    // Build complete HybridSearchOptions
     const fetchLimit = options.caseSensitive ? limit * 2 : limit;
-    const searchOptions: SearchOptions = {
+    const hybridOptions: HybridSearchOptions = {
       limit: fetchLimit,
       projectFilter: options.project,
       roleFilter,
       sinceDate,
       beforeDate,
       sessionFilter: options.session,
+      mode: searchMode,
+      noDecay: options.decay === false,
     };
 
-    // Execute search with case-sensitive awareness
-    // If case-sensitive, fetch 2x results to account for filtering
-    let results = await searchService.search(searchQuery, searchOptions);
+    // Execute search
+    let results = await searchService.search(searchQuery, hybridOptions);
 
     // Apply case-sensitive filter if requested
     let caseSensitiveFiltered = false;
@@ -200,6 +270,9 @@ export async function executeSearchCommand(
       // Ensure we respect the original limit for non-case-sensitive search
       results = results.slice(0, limit);
     }
+
+    // Get search metadata for output formatting
+    const searchMeta = searchService.getLastSearchMeta();
 
     // Determine output mode
     let outputMode: OutputMode = "default";
@@ -219,11 +292,34 @@ export async function executeSearchCommand(
         ftsQuery: query,
         filtersApplied: buildFiltersList(options, caseSensitiveFiltered),
       },
+      searchMeta: searchMeta ?? undefined,
     };
+
+    // Handle empty results with mode-specific messages
+    if (results.length === 0 && searchMeta?.mode === "vector") {
+      if (options.json) {
+        const output = formatter.formatResults(results, formatOptions);
+        console.log(output);
+      } else {
+        console.log(`No semantic matches for "${query}"`);
+      }
+      return { exitCode: 0 };
+    }
 
     // Output results using formatter
     const output = formatter.formatResults(results, formatOptions);
     console.log(output);
+
+    // One-time hint for zero embedding coverage
+    if (
+      searchMeta &&
+      searchMeta.embeddingCoverage === 0 &&
+      !config.search?.hintShown
+    ) {
+      console.error("Tip: run 'memory sync --embed' to enable semantic search");
+      saveConfig({ search: { ...config.search, hintShown: true } });
+    }
+
     return { exitCode: 0 };
   } catch (error) {
     // Wrap in MemoryError for consistent formatting
@@ -243,6 +339,7 @@ export async function executeSearchCommand(
     }
     return { exitCode: 1 };
   } finally {
+    await providerFactory.dispose();
     closeDatabase(db);
   }
 }
@@ -261,6 +358,9 @@ function buildFiltersList(options: SearchCommandOptions, caseSensitiveFiltered: 
   if (options.before) filters.push(`before: ${options.before}`);
   if (options.caseSensitive) filters.push("case-sensitive");
   if (caseSensitiveFiltered) filters.push("case-sensitive filter applied");
+  if (options.mode && options.mode !== "auto") filters.push(`mode: ${options.mode}`);
+  if (options.vector === false) filters.push("no-vector");
+  if (options.decay === false) filters.push("no-decay");
   return filters;
 }
 
@@ -285,4 +385,3 @@ export function filterCaseSensitive(
   });
   return filtered.slice(0, limit);
 }
-

@@ -63,6 +63,8 @@ export interface SearchConfigData {
         /** Half-life in days for temporal decay */
         halfLifeDays: number;
     };
+    /** Whether the embedding hint has been shown (one-time) */
+    hintShown?: boolean;
 }
 
 /**

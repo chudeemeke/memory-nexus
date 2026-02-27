@@ -29,12 +29,35 @@ export interface ExecutionDetails {
 }
 
 /**
+ * Hybrid search metadata for output formatting.
+ * Re-exported from HybridSearchService for formatter consumption.
+ */
+export interface SearchMetaInfo {
+  /** The effective search mode used */
+  mode: string;
+  /** Reason for the mode selection */
+  modeReason: string;
+  /** Whether the search degraded from requested mode */
+  degraded: boolean;
+  /** Reason for degradation, if any */
+  degradationReason?: string;
+  /** Fraction of messages with embeddings (0-1) */
+  embeddingCoverage: number;
+  /** System capabilities for this search */
+  capabilities: { fts: boolean; vector: boolean; hybrid: boolean };
+  /** Total search time in milliseconds */
+  timingMs: number;
+}
+
+/**
  * Options for formatting results.
  */
 export interface FormatOptions {
   query?: string;
   executionDetails?: ExecutionDetails;
   contextBudget?: number;
+  /** Hybrid search metadata (additive: when absent, output is backward-compatible) */
+  searchMeta?: SearchMetaInfo;
 }
 
 /**
