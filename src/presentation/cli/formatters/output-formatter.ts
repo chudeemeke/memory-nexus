@@ -3,6 +3,7 @@
  *
  * Strategy pattern for formatting search results.
  * Supports default, JSON, quiet, and verbose output modes.
+ * JSON mode supports hybrid search metadata envelope (additive, backward-compatible).
  */
 
 import type { SearchResult } from "../../../domain/value-objects/search-result.js";
@@ -99,6 +100,37 @@ export function createOutputFormatter(mode: OutputMode, useColor: boolean): Outp
 }
 
 /**
+ * Extract highlight positions from a snippet containing <mark> tags.
+ *
+ * Parses <mark>...</mark> tags and returns offset/length pairs
+ * relative to the clean (tag-free) text.
+ *
+ * @param snippet Raw snippet with <mark> tags
+ * @returns Array of { offset, length } highlight positions
+ */
+export function extractHighlights(snippet: string): Array<{ offset: number; length: number }> {
+  const highlights: Array<{ offset: number; length: number }> = [];
+  let cleanLength = 0;
+  let i = 0;
+
+  while (i < snippet.length) {
+    if (snippet.startsWith("<mark>", i)) {
+      i += 6; // skip <mark>
+      const end = snippet.indexOf("</mark>", i);
+      if (end === -1) break;
+      highlights.push({ offset: cleanLength, length: end - i });
+      cleanLength += end - i;
+      i = end + 7; // skip </mark>
+    } else {
+      cleanLength++;
+      i++;
+    }
+  }
+
+  return highlights;
+}
+
+/**
  * Convert <mark> tags to ANSI bold+cyan codes or asterisk markers.
  * When colors are disabled, uses asterisks for visible highlighting in non-TTY environments.
  * Uses bold+cyan (1;36m) for maximum visibility across terminals including Git Bash.
@@ -174,22 +206,72 @@ class DefaultOutputFormatter implements OutputFormatter {
 
 /**
  * JSON output formatter.
+ *
+ * When searchMeta is provided, wraps output in a metadata envelope:
+ * { meta: {...}, results: [...] }
+ *
+ * When searchMeta is absent, outputs backward-compatible array format.
  */
 class JsonOutputFormatter implements OutputFormatter {
   formatResults(results: SearchResult[], options?: FormatOptions): string {
     const budget = options?.contextBudget ?? CONTEXT_BUDGET;
 
-    // Transform to JSON-friendly format
-    const jsonResults = results.map((r) => ({
-      sessionId: r.sessionId,
-      messageId: r.messageId,
-      role: r.role,
-      score: r.score,
-      timestamp: r.timestamp.toISOString(),
-      snippet: r.snippet.replace(/<\/?mark>/g, ""), // Remove HTML tags
-    }));
+    // Build per-result JSON objects
+    const jsonResults = results.map((r, i) => {
+      const base: Record<string, unknown> = {
+        sessionId: r.sessionId,
+        messageId: r.messageId,
+        role: r.role,
+        score: r.score,
+        timestamp: r.timestamp.toISOString(),
+        snippet: r.snippet.replace(/<\/?mark>/g, ""), // Remove HTML tags
+      };
 
-    // Check budget and truncate if needed
+      // Add hybrid-specific fields when present (additive)
+      if (options?.searchMeta) {
+        base.rank = i + 1;
+        if (r.rawScores) {
+          base.raw_scores = r.rawScores;
+        }
+        if (r.source) {
+          base.source = r.source;
+        }
+        // Extract highlights from original snippet
+        const highlights = extractHighlights(r.snippet);
+        if (highlights.length > 0) {
+          base.highlights = highlights;
+        }
+      }
+
+      return base;
+    });
+
+    // If searchMeta provided, wrap in metadata envelope
+    if (options?.searchMeta) {
+      const meta: Record<string, unknown> = {
+        query: options.query ?? "",
+        mode: options.searchMeta.mode,
+        mode_reason: options.searchMeta.modeReason,
+        total_results: results.length,
+        embedding_coverage: options.searchMeta.embeddingCoverage,
+        degraded: options.searchMeta.degraded,
+        capabilities: options.searchMeta.capabilities,
+        timing_ms: options.searchMeta.timingMs,
+      };
+
+      if (options.searchMeta.degradationReason) {
+        meta.degradation_reason = options.searchMeta.degradationReason;
+      }
+
+      const envelope = {
+        meta,
+        results: jsonResults,
+      };
+
+      return JSON.stringify(envelope, null, 2);
+    }
+
+    // Backward-compatible: plain array
     let output = JSON.stringify(jsonResults, null, 2);
 
     if (output.length > budget) {
@@ -252,6 +334,8 @@ class QuietOutputFormatter implements OutputFormatter {
 
 /**
  * Verbose output formatter - full details.
+ *
+ * When searchMeta is provided, shows mode info and per-ranker breakdown.
  */
 class VerboseOutputFormatter implements OutputFormatter {
   constructor(private useColor: boolean) {}
@@ -264,6 +348,15 @@ class VerboseOutputFormatter implements OutputFormatter {
     }
 
     let output = "";
+
+    // Show search mode info when searchMeta provided
+    if (options?.searchMeta) {
+      output += `Mode: ${options.searchMeta.mode}`;
+      if (options.searchMeta.degraded) {
+        output += ` (degraded: ${options.searchMeta.degradationReason ?? "unknown"})`;
+      }
+      output += "\n";
+    }
 
     // Show execution details if provided
     if (options?.executionDetails) {
@@ -286,7 +379,7 @@ class VerboseOutputFormatter implements OutputFormatter {
 
     for (let i = 0; i < results.length; i++) {
       const result = results[i];
-      const line = this.formatResult(result, i + 1);
+      const line = this.formatResult(result, i + 1, !!options?.searchMeta);
 
       if (output.length + line.length > budget) {
         truncated = true;
@@ -300,14 +393,36 @@ class VerboseOutputFormatter implements OutputFormatter {
     return output;
   }
 
-  private formatResult(result: SearchResult, index: number): string {
+  private formatResult(result: SearchResult, index: number, showRankerBreakdown: boolean): string {
     const scorePercent = (result.score * 100).toFixed(0);
     const timestamp = formatTimestamp(result.timestamp);
     const snippet = highlightSnippet(result.snippet, this.useColor);
     const role = result.role.charAt(0).toUpperCase() + result.role.slice(1);
 
-    // Full session ID in verbose mode
-    return `${index}. [${scorePercent}%] [${role}] ${result.sessionId}\n   ${timestamp}\n   ${snippet}\n\n`;
+    let line = `${index}. [${scorePercent}%] [${role}] ${result.sessionId}\n   ${timestamp}\n   ${snippet}\n`;
+
+    // Show per-ranker breakdown when searchMeta available and result has rawScores
+    if (showRankerBreakdown && result.rawScores) {
+      const parts: string[] = [];
+      if (result.rawScores.bm25 !== undefined) {
+        parts.push(`bm25: ${result.rawScores.bm25}`);
+      }
+      if (result.rawScores.cosine !== undefined) {
+        parts.push(`cosine: ${result.rawScores.cosine}`);
+      }
+      if (result.rawScores.rrf !== undefined) {
+        parts.push(`rrf: ${result.rawScores.rrf}`);
+      }
+      if (parts.length > 0) {
+        line += `   Scores: ${parts.join(", ")}\n`;
+      }
+      if (result.source) {
+        line += `   Source: ${result.source}\n`;
+      }
+    }
+
+    line += "\n";
+    return line;
   }
 
   formatError(error: Error): string {

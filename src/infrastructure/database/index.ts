@@ -83,4 +83,5 @@ export {
   type SqliteVecHealth,
   type HealthCheckResult,
   type HealthCheckOverrides,
+  type SearchCapability,
 } from "./health-checker.js";

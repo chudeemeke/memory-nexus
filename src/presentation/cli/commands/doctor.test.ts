@@ -140,6 +140,15 @@ describe("doctor command", () => {
                 available: true,
                 version: "0.1.6",
             },
+            searchCapability: {
+                fts5: true,
+                sqliteVec: true,
+                embeddedCount: 100,
+                totalMessages: 100,
+                coveragePercent: 100,
+                defaultMode: "auto",
+                vectorReady: true,
+            },
         };
 
         it("formats healthy result with all passes", () => {
@@ -281,6 +290,15 @@ describe("doctor command", () => {
             sqliteVec: {
                 available: true,
                 version: "0.1.6",
+            },
+            searchCapability: {
+                fts5: true,
+                sqliteVec: true,
+                embeddedCount: 100,
+                totalMessages: 100,
+                coveragePercent: 100,
+                defaultMode: "auto",
+                vectorReady: true,
             },
         };
 
@@ -447,6 +465,192 @@ describe("doctor command", () => {
         });
     });
 
+    describe("search capability section", () => {
+        it("formatHealthResult includes Search Capability section", () => {
+            const result: HealthCheckResult = {
+                database: { exists: true, readable: true, writable: true, integrity: "ok", size: 1000 },
+                permissions: { configDir: true, logsDir: true, sourceDir: true },
+                hooks: { installed: true, enabled: true, lastRun: null },
+                config: { valid: true, issues: [] },
+                embedding: {
+                    configured: true,
+                    provider: "local",
+                    model: "Xenova/all-MiniLM-L6-v2",
+                    dimensions: 384,
+                    enabled: true,
+                },
+                sqliteVec: { available: true, version: "0.1.6" },
+                searchCapability: {
+                    fts5: true,
+                    sqliteVec: true,
+                    embeddedCount: 500,
+                    totalMessages: 1000,
+                    coveragePercent: 50,
+                    defaultMode: "auto",
+                    vectorReady: true,
+                },
+            };
+
+            const output = formatHealthResult(result, false);
+            expect(output).toContain("Search Capability");
+        });
+
+        it("shows FTS5 and sqlite-vec status in search capability", () => {
+            const result: HealthCheckResult = {
+                database: { exists: true, readable: true, writable: true, integrity: "ok", size: 1000 },
+                permissions: { configDir: true, logsDir: true, sourceDir: true },
+                hooks: { installed: true, enabled: true, lastRun: null },
+                config: { valid: true, issues: [] },
+                embedding: {
+                    configured: true,
+                    provider: "local",
+                    model: "Xenova/all-MiniLM-L6-v2",
+                    dimensions: 384,
+                    enabled: true,
+                },
+                sqliteVec: { available: true, version: "0.1.6" },
+                searchCapability: {
+                    fts5: true,
+                    sqliteVec: true,
+                    embeddedCount: 500,
+                    totalMessages: 1000,
+                    coveragePercent: 50,
+                    defaultMode: "auto",
+                    vectorReady: true,
+                },
+            };
+
+            const output = formatHealthResult(result, false);
+            expect(output).toContain("FTS5");
+            expect(output).toContain("Vector search");
+        });
+
+        it("shows embedding count and coverage percentage", () => {
+            const result: HealthCheckResult = {
+                database: { exists: true, readable: true, writable: true, integrity: "ok", size: 1000 },
+                permissions: { configDir: true, logsDir: true, sourceDir: true },
+                hooks: { installed: true, enabled: true, lastRun: null },
+                config: { valid: true, issues: [] },
+                embedding: {
+                    configured: true,
+                    provider: "local",
+                    model: "Xenova/all-MiniLM-L6-v2",
+                    dimensions: 384,
+                    enabled: true,
+                },
+                sqliteVec: { available: true, version: "0.1.6" },
+                searchCapability: {
+                    fts5: true,
+                    sqliteVec: true,
+                    embeddedCount: 500,
+                    totalMessages: 1000,
+                    coveragePercent: 50,
+                    defaultMode: "auto",
+                    vectorReady: true,
+                },
+            };
+
+            const output = formatHealthResult(result, false);
+            expect(output).toContain("500/1000");
+            expect(output).toContain("50%");
+        });
+
+        it("shows default mode", () => {
+            const result: HealthCheckResult = {
+                database: { exists: true, readable: true, writable: true, integrity: "ok", size: 1000 },
+                permissions: { configDir: true, logsDir: true, sourceDir: true },
+                hooks: { installed: true, enabled: true, lastRun: null },
+                config: { valid: true, issues: [] },
+                embedding: {
+                    configured: true,
+                    provider: "local",
+                    model: "Xenova/all-MiniLM-L6-v2",
+                    dimensions: 384,
+                    enabled: true,
+                },
+                sqliteVec: { available: true, version: "0.1.6" },
+                searchCapability: {
+                    fts5: true,
+                    sqliteVec: true,
+                    embeddedCount: 100,
+                    totalMessages: 100,
+                    coveragePercent: 100,
+                    defaultMode: "auto",
+                    vectorReady: true,
+                },
+            };
+
+            const output = formatHealthResult(result, false);
+            expect(output).toContain("auto");
+        });
+
+        it("shows vector not ready when sqlite-vec unavailable", () => {
+            const result: HealthCheckResult = {
+                database: { exists: true, readable: true, writable: true, integrity: "ok", size: 1000 },
+                permissions: { configDir: true, logsDir: true, sourceDir: true },
+                hooks: { installed: true, enabled: true, lastRun: null },
+                config: { valid: true, issues: [] },
+                embedding: {
+                    configured: true,
+                    provider: "local",
+                    model: "Xenova/all-MiniLM-L6-v2",
+                    dimensions: 384,
+                    enabled: true,
+                },
+                sqliteVec: { available: false, version: null },
+                searchCapability: {
+                    fts5: true,
+                    sqliteVec: false,
+                    embeddedCount: 0,
+                    totalMessages: 100,
+                    coveragePercent: 0,
+                    defaultMode: "auto",
+                    vectorReady: false,
+                },
+            };
+
+            const output = formatHealthResult(result, false);
+            expect(output).toContain("not ready");
+        });
+    });
+
+    describe("doctor exit codes", () => {
+        it("returns exit code 0 or 1 depending on vector readiness", async () => {
+            consoleOutput = [];
+            console.log = (msg: string) => consoleOutput.push(msg);
+
+            const result = await executeDoctorCommand({});
+            // Exit code 0 when fully healthy (vector ready), 1 when degraded (no embeddings/sqlite-vec)
+            // Test environment typically has no embeddings, so 1 (degraded) is expected
+            expect(result.exitCode).toBeLessThanOrEqual(1);
+            expect(result.exitCode).toBeGreaterThanOrEqual(0);
+        });
+
+        it("returns exit code 2 when database not found", async () => {
+            // Override with non-existent database path
+            setTestOverrides({
+                dbPath: join(testDir, "nonexistent.db"),
+                configDir: testDir,
+                logsDir: join(testDir, "logs"),
+                sourceDir: testDir,
+            });
+
+            consoleOutput = [];
+            console.log = (msg: string) => consoleOutput.push(msg);
+
+            const result = await executeDoctorCommand({});
+            expect(result.exitCode).toBe(2);
+
+            // Reset overrides
+            setTestOverrides({
+                dbPath: testDbPath,
+                configDir: testDir,
+                logsDir: join(testDir, "logs"),
+                sourceDir: testDir,
+            });
+        });
+    });
+
     describe("embedding section in output", () => {
         it("formatHealthResult includes Embeddings section header", () => {
             const result: HealthCheckResult = {
@@ -462,6 +666,7 @@ describe("doctor command", () => {
                     enabled: true,
                 },
                 sqliteVec: { available: true, version: "0.1.6" },
+                searchCapability: { fts5: true, sqliteVec: true, embeddedCount: 0, totalMessages: 0, coveragePercent: 0, defaultMode: "auto", vectorReady: false },
             };
 
             const output = formatHealthResult(result, false);
@@ -482,6 +687,7 @@ describe("doctor command", () => {
                     enabled: true,
                 },
                 sqliteVec: { available: true, version: "0.1.6" },
+                searchCapability: { fts5: true, sqliteVec: true, embeddedCount: 0, totalMessages: 0, coveragePercent: 0, defaultMode: "auto", vectorReady: false },
             };
 
             const output = formatHealthResult(result, false);
@@ -504,6 +710,7 @@ describe("doctor command", () => {
                     enabled: false,
                 },
                 sqliteVec: { available: true, version: "0.1.6" },
+                searchCapability: { fts5: true, sqliteVec: true, embeddedCount: 0, totalMessages: 0, coveragePercent: 0, defaultMode: "auto", vectorReady: false },
             };
 
             const output = formatHealthResult(disabledResult, false);
@@ -524,6 +731,7 @@ describe("doctor command", () => {
                     enabled: true,
                 },
                 sqliteVec: { available: true, version: "0.1.6" },
+                searchCapability: { fts5: true, sqliteVec: true, embeddedCount: 0, totalMessages: 0, coveragePercent: 0, defaultMode: "auto", vectorReady: false },
             };
 
             const output = formatHealthResult(result, false);
@@ -545,6 +753,7 @@ describe("doctor command", () => {
                     enabled: true,
                 },
                 sqliteVec: { available: false, version: null },
+                searchCapability: { fts5: true, sqliteVec: false, embeddedCount: 0, totalMessages: 0, coveragePercent: 0, defaultMode: "auto", vectorReady: false },
             };
 
             const output = formatHealthResult(result, false);

@@ -3,7 +3,12 @@
  *
  * CLI command for checking system health and diagnosing issues.
  * Provides comprehensive diagnostic output for database, permissions,
- * hooks, and configuration.
+ * hooks, configuration, and search capability.
+ *
+ * Exit codes:
+ * - 0: All checks passed
+ * - 1: Degraded but functional (e.g., sqlite-vec unavailable)
+ * - 2: Broken (database inaccessible)
  */
 
 import { Command } from "commander";
@@ -191,6 +196,16 @@ export function formatHealthResult(result: HealthCheckResult, useColor: boolean)
 
     lines.push("");
 
+    // Search Capability section
+    lines.push("Search Capability");
+    lines.push(`  ${formatStatus(result.searchCapability.fts5, useColor)} FTS5: available`);
+    lines.push(`  ${formatStatus(result.searchCapability.sqliteVec, useColor)} sqlite-vec: ${result.searchCapability.sqliteVec ? "available" : "not available"}`);
+    lines.push(`  ${dim(`Embeddings: ${result.searchCapability.embeddedCount}/${result.searchCapability.totalMessages} (${result.searchCapability.coveragePercent}%)`, useColor)}`);
+    lines.push(`  ${dim(`Default mode: ${result.searchCapability.defaultMode}`, useColor)}`);
+    lines.push(`  ${formatStatus(result.searchCapability.vectorReady, useColor)} Vector search: ${result.searchCapability.vectorReady ? "ready" : "not ready"}`);
+
+    lines.push("");
+
     // Summary
     const issueCount = countIssues(result);
     if (issueCount === 0) {
@@ -228,6 +243,28 @@ function countIssues(result: HealthCheckResult): number {
     count += result.config.issues.length;
 
     return count;
+}
+
+/**
+ * Determine doctor exit code from health check result.
+ *
+ * @param result Health check result
+ * @returns Exit code: 0=OK, 1=degraded, 2=broken
+ */
+function determineExitCode(result: HealthCheckResult): number {
+    // Broken: database not accessible or corrupted
+    if (!result.database.exists || result.database.integrity === "corrupted") {
+        return 2;
+    }
+
+    // Degraded: issues found or vector not ready
+    const issueCount = countIssues(result);
+    if (issueCount > 0 || !result.searchCapability.vectorReady) {
+        return 1;
+    }
+
+    // All OK
+    return 0;
 }
 
 /**
@@ -304,6 +341,9 @@ export async function executeDoctorCommand(options: DoctorOptions): Promise<Comm
     const healthResult = runHealthCheck();
     const useColor = shouldUseColor();
 
+    // Determine exit code from health status
+    const exitCode = determineExitCode(healthResult);
+
     if (options.json) {
         // Convert dates to ISO strings for JSON serialization
         const migration = getMigrationStatus();
@@ -316,7 +356,7 @@ export async function executeDoctorCommand(options: DoctorOptions): Promise<Comm
             migration,
         };
         console.log(JSON.stringify(jsonResult, null, 2));
-        return { exitCode: 0 };
+        return { exitCode };
     }
 
     // Default output
@@ -347,5 +387,5 @@ export async function executeDoctorCommand(options: DoctorOptions): Promise<Comm
         }
     }
 
-    return { exitCode: 0 };
+    return { exitCode };
 }

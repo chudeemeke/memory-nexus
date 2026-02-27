@@ -103,6 +103,26 @@ export interface SqliteVecHealth {
 }
 
 /**
+ * Search capability status
+ */
+export interface SearchCapability {
+    /** FTS5 is available */
+    fts5: boolean;
+    /** sqlite-vec extension is loaded */
+    sqliteVec: boolean;
+    /** Number of messages with embeddings */
+    embeddedCount: number;
+    /** Total number of messages */
+    totalMessages: number;
+    /** Percentage of messages with embeddings */
+    coveragePercent: number;
+    /** Default search mode from config */
+    defaultMode: string;
+    /** Whether vector search is ready (extension + embeddings) */
+    vectorReady: boolean;
+}
+
+/**
  * Complete health check result
  */
 export interface HealthCheckResult {
@@ -118,6 +138,8 @@ export interface HealthCheckResult {
     embedding: EmbeddingHealth;
     /** sqlite-vec extension availability */
     sqliteVec: SqliteVecHealth;
+    /** Search capability status */
+    searchCapability: SearchCapability;
 }
 
 /**
@@ -383,11 +405,17 @@ export function runHealthCheck(overrides?: HealthCheckOverrides): HealthCheckRes
     // Config validity
     const config = checkConfigValidity();
 
+    // Load config once for embedding and search capability
+    const loadedConfig = loadConfig();
+
     // Embedding config
     const embedding = checkEmbeddingConfig();
 
     // sqlite-vec availability
     const sqliteVec = checkSqliteVecAvailability();
+
+    // Search capability
+    const searchCapability = checkSearchCapability(dbPath, sqliteVec, loadedConfig);
 
     return {
         database,
@@ -396,6 +424,58 @@ export function runHealthCheck(overrides?: HealthCheckOverrides): HealthCheckRes
         config,
         embedding,
         sqliteVec,
+        searchCapability,
+    };
+}
+
+/**
+ * Check search capability
+ *
+ * Queries the database for embedding counts and determines
+ * vector readiness based on extension and embedding availability.
+ *
+ * @param dbPath Path to database file
+ * @param sqliteVec sqlite-vec health status
+ * @param config Loaded config for default mode
+ * @returns Search capability status
+ */
+function checkSearchCapability(
+    dbPath: string,
+    sqliteVec: SqliteVecHealth,
+    config: MemoryConfig
+): SearchCapability {
+    let embeddedCount = 0;
+    let totalMessages = 0;
+
+    try {
+        if (existsSync(dbPath)) {
+            const db = new Database(dbPath, { create: false, readonly: true });
+            try {
+                const embRow = db.query("SELECT COUNT(*) as count FROM embedding_state").get() as { count: number } | null;
+                embeddedCount = embRow?.count ?? 0;
+
+                const msgRow = db.query("SELECT COUNT(*) as count FROM messages_meta").get() as { count: number } | null;
+                totalMessages = msgRow?.count ?? 0;
+            } finally {
+                db.close();
+            }
+        }
+    } catch {
+        // Tables may not exist yet -- counts remain 0
+    }
+
+    const coveragePercent = totalMessages > 0
+        ? Math.round((embeddedCount / totalMessages) * 100)
+        : 0;
+
+    return {
+        fts5: true, // FTS5 is always available (core schema)
+        sqliteVec: sqliteVec.available,
+        embeddedCount,
+        totalMessages,
+        coveragePercent,
+        defaultMode: config.search?.defaultMode ?? "auto",
+        vectorReady: sqliteVec.available && embeddedCount > 0,
     };
 }
 

@@ -7,8 +7,10 @@
 import { describe, it, expect } from "bun:test";
 import {
   createOutputFormatter,
+  extractHighlights,
   type OutputMode,
   type FormatOptions,
+  type SearchMetaInfo,
   CONTEXT_BUDGET,
 } from "./output-formatter.js";
 import type { SearchResult } from "../../../domain/value-objects/search-result.js";
@@ -249,6 +251,215 @@ describe("OutputFormatter", () => {
       const quietFormatter = createOutputFormatter("quiet", false);
       const output = quietFormatter.formatSummary({ found: 100, shown: 10 });
       expect(output).toBe("");
+    });
+  });
+
+  describe("json mode with searchMeta envelope", () => {
+    const formatter = createOutputFormatter("json", false);
+    const mockMeta: SearchMetaInfo = {
+      mode: "hybrid",
+      modeReason: "auto_hybrid",
+      degraded: false,
+      embeddingCoverage: 0.85,
+      capabilities: { fts: true, vector: true, hybrid: true },
+      timingMs: 142,
+    };
+
+    const hybridResults: SearchResult[] = [
+      {
+        sessionId: "session-1234-abcd-efgh",
+        messageId: "msg-001",
+        role: "user",
+        score: 0.95,
+        timestamp: new Date("2026-01-27T14:30:00Z"),
+        snippet: "This is a <mark>test</mark> snippet",
+        source: "both",
+        rawScores: { bm25: -3.2, cosine: 0.87, rrf: 0.032 },
+      },
+    ];
+
+    it("wraps output in meta envelope when searchMeta provided", () => {
+      const output = formatter.formatResults(hybridResults, {
+        query: "test",
+        searchMeta: mockMeta,
+      });
+      const parsed = JSON.parse(output);
+
+      expect(parsed.meta).toBeDefined();
+      expect(parsed.meta.query).toBe("test");
+      expect(parsed.meta.mode).toBe("hybrid");
+      expect(parsed.meta.mode_reason).toBe("auto_hybrid");
+      expect(parsed.meta.total_results).toBe(1);
+      expect(parsed.meta.embedding_coverage).toBe(0.85);
+      expect(parsed.meta.degraded).toBe(false);
+      expect(parsed.meta.capabilities).toEqual({ fts: true, vector: true, hybrid: true });
+      expect(parsed.meta.timing_ms).toBe(142);
+      expect(parsed.results).toBeDefined();
+      expect(parsed.results.length).toBe(1);
+    });
+
+    it("includes degradation_reason when degraded", () => {
+      const degradedMeta: SearchMetaInfo = {
+        ...mockMeta,
+        degraded: true,
+        degradationReason: "no_embeddings",
+      };
+      const output = formatter.formatResults(hybridResults, {
+        query: "test",
+        searchMeta: degradedMeta,
+      });
+      const parsed = JSON.parse(output);
+      expect(parsed.meta.degraded).toBe(true);
+      expect(parsed.meta.degradation_reason).toBe("no_embeddings");
+    });
+
+    it("omits degradation_reason when not degraded", () => {
+      const output = formatter.formatResults(hybridResults, {
+        query: "test",
+        searchMeta: mockMeta,
+      });
+      const parsed = JSON.parse(output);
+      expect(parsed.meta.degradation_reason).toBeUndefined();
+    });
+
+    it("includes per-result rank, score, raw_scores, source", () => {
+      const output = formatter.formatResults(hybridResults, {
+        query: "test",
+        searchMeta: mockMeta,
+      });
+      const parsed = JSON.parse(output);
+      const first = parsed.results[0];
+
+      expect(first.rank).toBe(1);
+      expect(first.score).toBe(0.95);
+      expect(first.raw_scores).toEqual({ bm25: -3.2, cosine: 0.87, rrf: 0.032 });
+      expect(first.source).toBe("both");
+    });
+
+    it("includes highlights extracted from mark tags", () => {
+      const output = formatter.formatResults(hybridResults, {
+        query: "test",
+        searchMeta: mockMeta,
+      });
+      const parsed = JSON.parse(output);
+      const first = parsed.results[0];
+
+      expect(first.highlights).toBeDefined();
+      expect(first.highlights.length).toBeGreaterThan(0);
+      expect(first.highlights[0]).toEqual({ offset: 10, length: 4 });
+    });
+
+    it("outputs backward-compatible array when no searchMeta", () => {
+      const output = formatter.formatResults(hybridResults, { query: "test" });
+      const parsed = JSON.parse(output);
+      expect(Array.isArray(parsed)).toBe(true);
+    });
+
+    it("omits raw_scores and source from per-result when not present", () => {
+      const plainResults: SearchResult[] = [
+        {
+          sessionId: "session-1234-abcd-efgh",
+          messageId: "msg-001",
+          role: "user",
+          score: 0.95,
+          timestamp: new Date("2026-01-27T14:30:00Z"),
+          snippet: "No marks here",
+        },
+      ];
+      const output = formatter.formatResults(plainResults, { query: "test" });
+      const parsed = JSON.parse(output);
+      const first = parsed[0];
+      expect(first.raw_scores).toBeUndefined();
+      expect(first.source).toBeUndefined();
+    });
+  });
+
+  describe("verbose mode with searchMeta", () => {
+    const formatter = createOutputFormatter("verbose", false);
+    const mockMeta: SearchMetaInfo = {
+      mode: "hybrid",
+      modeReason: "auto_hybrid",
+      degraded: false,
+      embeddingCoverage: 0.85,
+      capabilities: { fts: true, vector: true, hybrid: true },
+      timingMs: 142,
+    };
+
+    const hybridResults: SearchResult[] = [
+      {
+        sessionId: "session-1234-abcd-efgh",
+        messageId: "msg-001",
+        role: "user",
+        score: 0.95,
+        timestamp: new Date("2026-01-27T14:30:00Z"),
+        snippet: "Test snippet",
+        source: "both",
+        rawScores: { bm25: -2.1, cosine: 0.92, rrf: 0.028 },
+      },
+    ];
+
+    it("includes mode info when searchMeta provided", () => {
+      const output = formatter.formatResults(hybridResults, {
+        query: "test",
+        searchMeta: mockMeta,
+      });
+      expect(output).toContain("Mode: hybrid");
+    });
+
+    it("includes degradation info when degraded", () => {
+      const degradedMeta: SearchMetaInfo = {
+        ...mockMeta,
+        degraded: true,
+        degradationReason: "provider_unavailable",
+      };
+      const output = formatter.formatResults(hybridResults, {
+        query: "test",
+        searchMeta: degradedMeta,
+      });
+      expect(output).toContain("degraded");
+      expect(output).toContain("provider_unavailable");
+    });
+
+    it("includes per-ranker breakdown for results with rawScores", () => {
+      const output = formatter.formatResults(hybridResults, {
+        query: "test",
+        searchMeta: mockMeta,
+      });
+      expect(output).toContain("bm25");
+      expect(output).toContain("cosine");
+    });
+
+    it("shows existing format without searchMeta (backward compat)", () => {
+      const output = formatter.formatResults(hybridResults, { query: "test" });
+      expect(output).not.toContain("Mode:");
+    });
+  });
+
+  describe("extractHighlights", () => {
+    it("extracts single mark tag", () => {
+      const highlights = extractHighlights("This is a <mark>test</mark> snippet");
+      expect(highlights).toEqual([{ offset: 10, length: 4 }]);
+    });
+
+    it("extracts multiple mark tags", () => {
+      const highlights = extractHighlights("<mark>auth</mark> and <mark>JWT</mark>");
+      expect(highlights).toEqual([
+        { offset: 0, length: 4 },
+        { offset: 9, length: 3 },
+      ]);
+    });
+
+    it("returns empty array when no marks", () => {
+      const highlights = extractHighlights("No highlights here");
+      expect(highlights).toEqual([]);
+    });
+
+    it("handles adjacent mark tags", () => {
+      const highlights = extractHighlights("<mark>hello</mark><mark>world</mark>");
+      expect(highlights).toEqual([
+        { offset: 0, length: 5 },
+        { offset: 5, length: 5 },
+      ]);
     });
   });
 
