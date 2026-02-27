@@ -110,6 +110,15 @@ export function getMigrationStatus(): MigrationStatusResult {
 }
 
 /**
+ * Check whether a legacy database needs migration to XDG paths.
+ *
+ * Stub: implementation in Task 16.1-01-B.
+ */
+export function isMigrationPending(): boolean {
+    return false;
+}
+
+/**
  * Migrate data from legacy ~/.memory-nexus/ to new XDG paths.
  *
  * This function is SYNCHRONOUS. All filesystem operations use sync variants.

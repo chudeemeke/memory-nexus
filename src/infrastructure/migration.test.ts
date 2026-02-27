@@ -11,6 +11,7 @@ import {
     mkdtempSync,
     readFileSync,
     rmSync,
+    statSync,
     writeFileSync,
 } from "node:fs";
 import * as nodeFs from "node:fs";
@@ -20,6 +21,7 @@ import { join } from "node:path";
 import { setTestPaths, resetTestPaths } from "./paths.js";
 import {
     getMigrationStatus,
+    isMigrationPending,
     migrateFromLegacy,
     moveFileOrDir,
     type MigrationResult,
@@ -605,6 +607,312 @@ describe("migration", () => {
             stderrSpy.mockRestore();
             uninstallSpy.mockRestore();
             installSpy.mockRestore();
+        });
+
+        describe("partial migration (destination exists)", () => {
+            test("overwrites smaller destination DB with larger legacy DB", () => {
+                mkdirSync(legacyDir, { recursive: true });
+                const legacyContent = Buffer.alloc(1000, 0x42);
+                writeFileSync(join(legacyDir, "memory.db"), legacyContent);
+
+                mkdirSync(dataDir, { recursive: true });
+                const stubContent = Buffer.alloc(100, 0x00);
+                writeFileSync(join(dataDir, "memory.db"), stubContent);
+
+                const uninstallSpy = spyOn(settingsManager, "uninstallHooks").mockReturnValue({
+                    success: true,
+                    message: "ok",
+                });
+                const installSpy = spyOn(settingsManager, "installHooks").mockReturnValue({
+                    success: true,
+                    message: "ok",
+                });
+
+                const result = migrateFromLegacy();
+
+                expect(result.migrated).toBe(true);
+                expect(result.itemsMoved).toContain("memory.db");
+
+                const destDb = join(dataDir, "memory.db");
+                expect(statSync(destDb).size).toBe(1000);
+                const destContent = readFileSync(destDb);
+                expect(destContent.equals(legacyContent)).toBe(true);
+
+                expect(existsSync(join(legacyDir, "memory.db"))).toBe(false);
+
+                uninstallSpy.mockRestore();
+                installSpy.mockRestore();
+            });
+
+            test("keeps larger destination DB when legacy DB is smaller", () => {
+                mkdirSync(legacyDir, { recursive: true });
+                writeFileSync(join(legacyDir, "memory.db"), Buffer.alloc(100, 0x01));
+
+                mkdirSync(dataDir, { recursive: true });
+                const xdgContent = Buffer.alloc(1000, 0x02);
+                writeFileSync(join(dataDir, "memory.db"), xdgContent);
+
+                const uninstallSpy = spyOn(settingsManager, "uninstallHooks").mockReturnValue({
+                    success: true,
+                    message: "ok",
+                });
+                const installSpy = spyOn(settingsManager, "installHooks").mockReturnValue({
+                    success: true,
+                    message: "ok",
+                });
+
+                const result = migrateFromLegacy();
+
+                expect(result.migrated).toBe(true);
+                expect(result.itemsMoved).toContain("memory.db");
+
+                const destDb = join(dataDir, "memory.db");
+                expect(statSync(destDb).size).toBe(1000);
+                const destContent = readFileSync(destDb);
+                expect(destContent.equals(xdgContent)).toBe(true);
+
+                expect(existsSync(join(legacyDir, "memory.db"))).toBe(false);
+
+                uninstallSpy.mockRestore();
+                installSpy.mockRestore();
+            });
+
+            test("keeps destination DB when sizes are equal", () => {
+                mkdirSync(legacyDir, { recursive: true });
+                writeFileSync(join(legacyDir, "memory.db"), Buffer.alloc(500, 0xAA));
+
+                mkdirSync(dataDir, { recursive: true });
+                const xdgContent = Buffer.alloc(500, 0xBB);
+                writeFileSync(join(dataDir, "memory.db"), xdgContent);
+
+                const uninstallSpy = spyOn(settingsManager, "uninstallHooks").mockReturnValue({
+                    success: true,
+                    message: "ok",
+                });
+                const installSpy = spyOn(settingsManager, "installHooks").mockReturnValue({
+                    success: true,
+                    message: "ok",
+                });
+
+                const result = migrateFromLegacy();
+
+                const destDb = join(dataDir, "memory.db");
+                expect(statSync(destDb).size).toBe(500);
+                const destContent = readFileSync(destDb);
+                expect(destContent.equals(xdgContent)).toBe(true);
+
+                expect(existsSync(join(legacyDir, "memory.db"))).toBe(false);
+
+                uninstallSpy.mockRestore();
+                installSpy.mockRestore();
+            });
+
+            test("cleans up WAL and SHM files at destination before overwrite", () => {
+                mkdirSync(legacyDir, { recursive: true });
+                writeFileSync(join(legacyDir, "memory.db"), Buffer.alloc(1000, 0x42));
+
+                mkdirSync(dataDir, { recursive: true });
+                writeFileSync(join(dataDir, "memory.db"), Buffer.alloc(100, 0x00));
+                writeFileSync(join(dataDir, "memory.db-wal"), Buffer.alloc(50, 0x01));
+                writeFileSync(join(dataDir, "memory.db-shm"), Buffer.alloc(32, 0x02));
+
+                const uninstallSpy = spyOn(settingsManager, "uninstallHooks").mockReturnValue({
+                    success: true,
+                    message: "ok",
+                });
+                const installSpy = spyOn(settingsManager, "installHooks").mockReturnValue({
+                    success: true,
+                    message: "ok",
+                });
+
+                const result = migrateFromLegacy();
+
+                expect(statSync(join(dataDir, "memory.db")).size).toBe(1000);
+                expect(existsSync(join(dataDir, "memory.db-wal"))).toBe(false);
+                expect(existsSync(join(dataDir, "memory.db-shm"))).toBe(false);
+
+                uninstallSpy.mockRestore();
+                installSpy.mockRestore();
+            });
+
+            test("does not clean up WAL/SHM when destination is kept (larger)", () => {
+                mkdirSync(legacyDir, { recursive: true });
+                writeFileSync(join(legacyDir, "memory.db"), Buffer.alloc(100, 0x01));
+
+                mkdirSync(dataDir, { recursive: true });
+                writeFileSync(join(dataDir, "memory.db"), Buffer.alloc(1000, 0x02));
+                writeFileSync(join(dataDir, "memory.db-wal"), Buffer.alloc(50, 0x03));
+
+                const uninstallSpy = spyOn(settingsManager, "uninstallHooks").mockReturnValue({
+                    success: true,
+                    message: "ok",
+                });
+                const installSpy = spyOn(settingsManager, "installHooks").mockReturnValue({
+                    success: true,
+                    message: "ok",
+                });
+
+                migrateFromLegacy();
+
+                expect(existsSync(join(dataDir, "memory.db-wal"))).toBe(true);
+
+                uninstallSpy.mockRestore();
+                installSpy.mockRestore();
+            });
+
+            test("skips directory move when destination directory already exists", () => {
+                const legacyLogs = join(legacyDir, "logs");
+                mkdirSync(legacyLogs, { recursive: true });
+                writeFileSync(join(legacyLogs, "sync.log"), "legacy-log-entry");
+
+                const xdgLogs = join(dataDir, "logs");
+                mkdirSync(xdgLogs, { recursive: true });
+                writeFileSync(join(xdgLogs, "other.log"), "xdg-log-entry");
+
+                const uninstallSpy = spyOn(settingsManager, "uninstallHooks").mockReturnValue({
+                    success: true,
+                    message: "ok",
+                });
+                const installSpy = spyOn(settingsManager, "installHooks").mockReturnValue({
+                    success: true,
+                    message: "ok",
+                });
+
+                const result = migrateFromLegacy();
+
+                // Destination preserved
+                expect(existsSync(join(xdgLogs, "other.log"))).toBe(true);
+                expect(readFileSync(join(xdgLogs, "other.log"), "utf-8")).toBe("xdg-log-entry");
+
+                // Source preserved (directory was skipped entirely)
+                expect(existsSync(join(legacyLogs, "sync.log"))).toBe(true);
+
+                // logs should NOT be in itemsMoved since it was skipped
+                expect(result.itemsMoved).not.toContain("logs");
+
+                uninstallSpy.mockRestore();
+                installSpy.mockRestore();
+            });
+
+            test("handles mixed partial state (some items need moving, some have conflicts)", () => {
+                // Legacy: memory.db (1000 bytes), config.json (50 bytes), logs/ dir
+                mkdirSync(legacyDir, { recursive: true });
+                writeFileSync(join(legacyDir, "memory.db"), Buffer.alloc(1000, 0x42));
+                writeFileSync(join(legacyDir, "config.json"), '{"autoSync":true}');
+                mkdirSync(join(legacyDir, "logs"), { recursive: true });
+                writeFileSync(join(legacyDir, "logs", "sync.log"), "log");
+
+                // XDG: memory.db (100 bytes -- stub), logs/ exists
+                mkdirSync(dataDir, { recursive: true });
+                writeFileSync(join(dataDir, "memory.db"), Buffer.alloc(100, 0x00));
+                mkdirSync(join(dataDir, "logs"), { recursive: true });
+                // No config.json at XDG
+
+                const uninstallSpy = spyOn(settingsManager, "uninstallHooks").mockReturnValue({
+                    success: true,
+                    message: "ok",
+                });
+                const installSpy = spyOn(settingsManager, "installHooks").mockReturnValue({
+                    success: true,
+                    message: "ok",
+                });
+
+                const result = migrateFromLegacy();
+
+                expect(result.migrated).toBe(true);
+                // memory.db overwritten (legacy larger), config.json moved normally
+                expect(statSync(join(dataDir, "memory.db")).size).toBe(1000);
+                expect(existsSync(join(configDir, "config.json"))).toBe(true);
+                expect(readFileSync(join(configDir, "config.json"), "utf-8")).toBe('{"autoSync":true}');
+
+                // logs dir skipped (both exist)
+                expect(result.itemsMoved).not.toContain("logs");
+
+                uninstallSpy.mockRestore();
+                installSpy.mockRestore();
+            });
+
+            test("partial migration is idempotent (second run is no-op)", () => {
+                mkdirSync(legacyDir, { recursive: true });
+                writeFileSync(join(legacyDir, "memory.db"), Buffer.alloc(1000, 0x42));
+
+                mkdirSync(dataDir, { recursive: true });
+                writeFileSync(join(dataDir, "memory.db"), Buffer.alloc(100, 0x00));
+
+                const uninstallSpy = spyOn(settingsManager, "uninstallHooks").mockReturnValue({
+                    success: true,
+                    message: "ok",
+                });
+                const installSpy = spyOn(settingsManager, "installHooks").mockReturnValue({
+                    success: true,
+                    message: "ok",
+                });
+
+                // First call: overwrites stub
+                const result1 = migrateFromLegacy();
+                expect(result1.migrated).toBe(true);
+                expect(existsSync(join(legacyDir, "memory.db"))).toBe(false);
+
+                // Second call: legacy dir is gone (cleaned up)
+                const result2 = migrateFromLegacy();
+                expect(result2.migrated).toBe(false);
+
+                uninstallSpy.mockRestore();
+                installSpy.mockRestore();
+            });
+        });
+    });
+
+    describe("isMigrationPending", () => {
+        test("returns true when legacy DB exists and XDG DB does not", () => {
+            mkdirSync(legacyDir, { recursive: true });
+            writeFileSync(join(legacyDir, "memory.db"), Buffer.alloc(1000, 0x42));
+            // Do NOT create XDG data dir or memory.db
+
+            expect(isMigrationPending()).toBe(true);
+        });
+
+        test("returns true when legacy DB is larger than XDG DB", () => {
+            mkdirSync(legacyDir, { recursive: true });
+            writeFileSync(join(legacyDir, "memory.db"), Buffer.alloc(1000, 0x42));
+
+            mkdirSync(dataDir, { recursive: true });
+            writeFileSync(join(dataDir, "memory.db"), Buffer.alloc(100, 0x00));
+
+            expect(isMigrationPending()).toBe(true);
+        });
+
+        test("returns false when no legacy directory exists", () => {
+            // Do NOT create legacy dir
+            expect(isMigrationPending()).toBe(false);
+        });
+
+        test("returns false when legacy DB does not exist (legacy dir exists but no DB)", () => {
+            mkdirSync(legacyDir, { recursive: true });
+            writeFileSync(join(legacyDir, "config.json"), '{}');
+            // No memory.db in legacy dir
+
+            expect(isMigrationPending()).toBe(false);
+        });
+
+        test("returns false when XDG DB is larger than legacy DB", () => {
+            mkdirSync(legacyDir, { recursive: true });
+            writeFileSync(join(legacyDir, "memory.db"), Buffer.alloc(100, 0x01));
+
+            mkdirSync(dataDir, { recursive: true });
+            writeFileSync(join(dataDir, "memory.db"), Buffer.alloc(1000, 0x02));
+
+            expect(isMigrationPending()).toBe(false);
+        });
+
+        test("returns false when XDG DB equals legacy DB size", () => {
+            mkdirSync(legacyDir, { recursive: true });
+            writeFileSync(join(legacyDir, "memory.db"), Buffer.alloc(500, 0xAA));
+
+            mkdirSync(dataDir, { recursive: true });
+            writeFileSync(join(dataDir, "memory.db"), Buffer.alloc(500, 0xBB));
+
+            expect(isMigrationPending()).toBe(false);
         });
     });
 
