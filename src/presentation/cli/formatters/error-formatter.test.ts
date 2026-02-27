@@ -91,6 +91,36 @@ describe("error-formatter", () => {
       );
     });
 
+    test("returns suggestion for VECTOR_UNAVAILABLE", () => {
+      const suggestion = getSuggestion(ErrorCode.VECTOR_UNAVAILABLE);
+      expect(suggestion).not.toBeNull();
+      expect(suggestion).toContain("memory sync --embed");
+    });
+
+    test("returns suggestion for PROVIDER_TIMEOUT", () => {
+      const suggestion = getSuggestion(ErrorCode.PROVIDER_TIMEOUT);
+      expect(suggestion).not.toBeNull();
+      expect(suggestion).toContain("provider");
+    });
+
+    test("returns suggestion for PROVIDER_CONFIG_INVALID", () => {
+      const suggestion = getSuggestion(ErrorCode.PROVIDER_CONFIG_INVALID);
+      expect(suggestion).not.toBeNull();
+      expect(suggestion).toContain("config");
+    });
+
+    test("returns suggestion for EMBEDDING_DIMENSION_MISMATCH", () => {
+      const suggestion = getSuggestion(ErrorCode.EMBEDDING_DIMENSION_MISMATCH);
+      expect(suggestion).not.toBeNull();
+      expect(suggestion).toContain("re-embed");
+    });
+
+    test("returns suggestion for MODEL_CORRUPTED", () => {
+      const suggestion = getSuggestion(ErrorCode.MODEL_CORRUPTED);
+      expect(suggestion).not.toBeNull();
+      expect(suggestion).toContain("memory sync --embed");
+    });
+
     test("returns null for UNKNOWN", () => {
       expect(getSuggestion(ErrorCode.UNKNOWN)).toBeNull();
     });

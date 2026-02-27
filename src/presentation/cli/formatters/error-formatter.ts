@@ -61,6 +61,16 @@ export function getSuggestion(code: ErrorCodeType): string | null {
       return "Run command with --help to see valid options";
     case ErrorCode.MISSING_ARGUMENT:
       return "Run command with --help to see required arguments";
+    case ErrorCode.VECTOR_UNAVAILABLE:
+      return "Run 'memory sync --embed' to generate embeddings, or use '--mode fts' for keyword-only search";
+    case ErrorCode.PROVIDER_TIMEOUT:
+      return "Check network connection or switch to local provider in config";
+    case ErrorCode.PROVIDER_CONFIG_INVALID:
+      return "Check embedding config in ~/.config/memory/config.json";
+    case ErrorCode.EMBEDDING_DIMENSION_MISMATCH:
+      return "Run 'memory sync --embed' to re-embed with the current model";
+    case ErrorCode.MODEL_CORRUPTED:
+      return "Delete cached model files and run 'memory sync --embed' to re-download";
     case ErrorCode.UNKNOWN:
     default:
       return null;

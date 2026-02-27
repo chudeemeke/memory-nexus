@@ -880,5 +880,121 @@ describe("HybridSearchService", () => {
         expect(r.sessionId).toBe("session-1");
       }
     });
+
+    it("provider returns embedding with wrong dimensions degrades to FTS in hybrid", async () => {
+      if (!sqliteVecAvailable) return;
+
+      const rowid = insertTestMessage(
+        db, "msg-1", "session-1", "user", "authentication patterns for security"
+      );
+      insertTestEmbedding(db, rowid, 384);
+
+      // Provider returns wrong-dimension embedding
+      const badProvider = createMockProvider({
+        dimensions: 768,
+        embed: mock(() =>
+          Promise.resolve({
+            embedding: new Float32Array(768),
+            model: "bad-model",
+            dimensions: 768,
+          } as EmbeddingResult)
+        ),
+      });
+      const config: MemoryConfig = {
+        ...DEFAULT_CONFIG,
+        embedding: { ...DEFAULT_CONFIG.embedding, dimensions: 768 },
+      };
+      const deps = createDeps(db, {
+        sqliteVecAvailable: true,
+        config,
+        providerFactory: createMockFactory(badProvider),
+      });
+      const service = new HybridSearchService(deps);
+      const query = SearchQuery.from("authentication");
+
+      const results = await service.search(query, { mode: "hybrid" });
+      expect(results.length).toBeGreaterThan(0);
+      const meta = service.getLastSearchMeta();
+      expect(meta?.degraded).toBe(true);
+    });
+
+    it("concurrent searches do not conflict (WAL mode)", async () => {
+      insertTestMessage(db, "msg-1", "session-1", "user", "authentication patterns");
+      insertTestMessage(db, "msg-2", "session-1", "user", "security patterns");
+
+      const deps = createDeps(db, { sqliteVecAvailable });
+      const service = new HybridSearchService(deps);
+
+      const query1 = SearchQuery.from("authentication");
+      const query2 = SearchQuery.from("security");
+
+      // Run two searches concurrently
+      const [results1, results2] = await Promise.all([
+        service.search(query1, { mode: "fts" }),
+        service.search(query2, { mode: "fts" }),
+      ]);
+
+      expect(results1.length).toBeGreaterThan(0);
+      expect(results2.length).toBeGreaterThan(0);
+    });
+
+    it("timing metadata is a positive number", async () => {
+      insertTestMessage(db, "msg-1", "session-1", "user", "authentication patterns");
+
+      const deps = createDeps(db, { sqliteVecAvailable });
+      const service = new HybridSearchService(deps);
+      const query = SearchQuery.from("authentication");
+
+      await service.search(query, { mode: "fts" });
+
+      const meta = service.getLastSearchMeta();
+      expect(meta).toBeDefined();
+      expect(typeof meta!.timingMs).toBe("number");
+      expect(meta!.timingMs).toBeGreaterThanOrEqual(0);
+    });
+
+    it("search result has populated source and rawScores fields", async () => {
+      insertTestMessage(db, "msg-1", "session-1", "user", "authentication patterns for testing");
+
+      const deps = createDeps(db, { sqliteVecAvailable });
+      const service = new HybridSearchService(deps);
+      const query = SearchQuery.from("authentication");
+
+      const results = await service.search(query, { mode: "fts" });
+      expect(results.length).toBeGreaterThan(0);
+      expect(results[0].source).toBe("fts");
+      expect(results[0].rawScores).toBeDefined();
+      expect(results[0].rawScores!.bm25).toBeDefined();
+    });
+
+    it("vector mode dimension mismatch throws EMBEDDING_DIMENSION_MISMATCH", async () => {
+      if (!sqliteVecAvailable) return;
+
+      const rowid = insertTestMessage(
+        db, "msg-1", "session-1", "user", "authentication patterns"
+      );
+      insertTestEmbedding(db, rowid, 384);
+
+      const mismatchProvider = createMockProvider({ dimensions: 768 });
+      const config: MemoryConfig = {
+        ...DEFAULT_CONFIG,
+        embedding: { ...DEFAULT_CONFIG.embedding, dimensions: 768 },
+      };
+      const deps = createDeps(db, {
+        sqliteVecAvailable: true,
+        config,
+        providerFactory: createMockFactory(mismatchProvider),
+      });
+      const service = new HybridSearchService(deps);
+      const query = SearchQuery.from("authentication");
+
+      try {
+        await service.search(query, { mode: "vector" });
+        expect(true).toBe(false);
+      } catch (e) {
+        expect(e).toBeInstanceOf(MemoryError);
+        expect((e as MemoryError).code).toBe(ErrorCode.EMBEDDING_DIMENSION_MISMATCH);
+      }
+    });
   });
 });
