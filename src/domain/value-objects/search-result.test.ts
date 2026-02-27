@@ -1,5 +1,6 @@
 import { describe, expect, it } from "bun:test";
 import { SearchResult } from "./search-result.js";
+import type { SearchMode, HybridSearchOptions } from "../ports/services.js";
 
 describe("SearchResult value object", () => {
   const validParams = {
@@ -132,6 +133,66 @@ describe("SearchResult value object", () => {
       const result1 = SearchResult.create({ ...validParams, score: 0.8 });
       const result2 = SearchResult.create({ ...validParams, messageId: "other", score: 0.8 });
       expect(result1.compareByScore(result2)).toBe(0);
+    });
+  });
+
+  describe("hybrid search extensions", () => {
+    it("source and rawScores are undefined when not provided", () => {
+      const result = SearchResult.create(validParams);
+      expect(result.source).toBeUndefined();
+      expect(result.rawScores).toBeUndefined();
+    });
+
+    it("accepts source 'fts'", () => {
+      const result = SearchResult.create({ ...validParams, source: "fts" });
+      expect(result.source).toBe("fts");
+    });
+
+    it("accepts source 'vector'", () => {
+      const result = SearchResult.create({ ...validParams, source: "vector" });
+      expect(result.source).toBe("vector");
+    });
+
+    it("accepts source 'both'", () => {
+      const result = SearchResult.create({ ...validParams, source: "both" });
+      expect(result.source).toBe("both");
+    });
+
+    it("accepts rawScores object", () => {
+      const rawScores = { bm25: -5.2, cosine: 0.85, rrf: 0.032 };
+      const result = SearchResult.create({ ...validParams, rawScores });
+      expect(result.rawScores).toEqual(rawScores);
+    });
+
+    it("rawScores and source are independent", () => {
+      const rawScores = { cosine: 0.9 };
+      const result = SearchResult.create({ ...validParams, source: "vector", rawScores });
+      expect(result.source).toBe("vector");
+      expect(result.rawScores).toEqual(rawScores);
+    });
+
+    it("equality is identity-based, ignores source differences", () => {
+      const result1 = SearchResult.create({ ...validParams, source: "fts" });
+      const result2 = SearchResult.create({ ...validParams, source: "vector" });
+      expect(result1.equals(result2)).toBe(true);
+    });
+  });
+
+  describe("domain type compilation", () => {
+    it("SearchMode type accepts valid values", () => {
+      const modes: SearchMode[] = ["auto", "fts", "vector", "hybrid"];
+      expect(modes).toHaveLength(4);
+    });
+
+    it("HybridSearchOptions extends SearchOptions", () => {
+      const opts: HybridSearchOptions = {
+        limit: 10,
+        mode: "hybrid",
+        noDecay: true,
+      };
+      expect(opts.mode).toBe("hybrid");
+      expect(opts.noDecay).toBe(true);
+      expect(opts.limit).toBe(10);
     });
   });
 });

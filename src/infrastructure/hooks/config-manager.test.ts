@@ -18,8 +18,10 @@ import {
     getConfigDir,
     DEFAULT_CONFIG,
     DEFAULT_EMBEDDING_CONFIG,
+    DEFAULT_SEARCH_CONFIG,
     type MemoryConfig,
     type EmbeddingConfigData,
+    type SearchConfigData,
 } from "./config-manager.js";
 
 describe("config-manager", () => {
@@ -185,6 +187,13 @@ describe("config-manager", () => {
                     model: "text-embedding-3-small",
                     dimensions: 1536,
                     batchSize: 200,
+                },
+                search: {
+                    defaultMode: "hybrid",
+                    temporalDecay: {
+                        enabled: false,
+                        halfLifeDays: 60,
+                    },
                 },
             };
 
@@ -390,6 +399,74 @@ describe("config-manager", () => {
             expect(config.embedding.enabled).toBe(true);
             expect(config.embedding.provider).toBe("local");
             expect(config.embedding.model).toBe("Xenova/all-MiniLM-L6-v2");
+        });
+    });
+
+    describe("search config", () => {
+        test("DEFAULT_CONFIG.search.defaultMode equals 'auto'", () => {
+            expect(DEFAULT_CONFIG.search.defaultMode).toBe("auto");
+        });
+
+        test("DEFAULT_CONFIG.search.temporalDecay.enabled equals true", () => {
+            expect(DEFAULT_CONFIG.search.temporalDecay.enabled).toBe(true);
+        });
+
+        test("DEFAULT_CONFIG.search.temporalDecay.halfLifeDays equals 30", () => {
+            expect(DEFAULT_CONFIG.search.temporalDecay.halfLifeDays).toBe(30);
+        });
+
+        test("DEFAULT_SEARCH_CONFIG matches DEFAULT_CONFIG.search", () => {
+            expect(DEFAULT_SEARCH_CONFIG).toEqual(DEFAULT_CONFIG.search);
+        });
+
+        test("loadConfig() with search.defaultMode override deep-merges correctly", () => {
+            const configDir = join(testDir, ".config", "memory");
+            mkdirSync(configDir, { recursive: true });
+            writeFileSync(
+                join(configDir, "config.json"),
+                JSON.stringify({ search: { defaultMode: "hybrid" } })
+            );
+
+            const config = loadConfig();
+
+            // Overridden
+            expect(config.search.defaultMode).toBe("hybrid");
+
+            // Nested defaults preserved
+            expect(config.search.temporalDecay.enabled).toBe(true);
+            expect(config.search.temporalDecay.halfLifeDays).toBe(30);
+        });
+
+        test("loadConfig() with search.temporalDecay.halfLifeDays override deep-merges nested", () => {
+            const configDir = join(testDir, ".config", "memory");
+            mkdirSync(configDir, { recursive: true });
+            writeFileSync(
+                join(configDir, "config.json"),
+                JSON.stringify({ search: { temporalDecay: { halfLifeDays: 60 } } })
+            );
+
+            const config = loadConfig();
+
+            // Nested override
+            expect(config.search.temporalDecay.halfLifeDays).toBe(60);
+
+            // Other nested defaults preserved
+            expect(config.search.temporalDecay.enabled).toBe(true);
+
+            // Sibling defaults preserved
+            expect(config.search.defaultMode).toBe("auto");
+        });
+
+        test("loadConfig() with no search key returns full defaults", () => {
+            const configDir = join(testDir, ".config", "memory");
+            mkdirSync(configDir, { recursive: true });
+            writeFileSync(
+                join(configDir, "config.json"),
+                JSON.stringify({ autoSync: false })
+            );
+
+            const config = loadConfig();
+            expect(config.search).toEqual(DEFAULT_SEARCH_CONFIG);
         });
     });
 });

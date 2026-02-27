@@ -49,6 +49,36 @@ export interface EmbeddingConfigData {
 }
 
 /**
+ * Search configuration data interface
+ *
+ * Plain object shape for search config stored in JSON.
+ */
+export interface SearchConfigData {
+    /** Default search mode */
+    defaultMode: "auto" | "fts" | "vector" | "hybrid";
+    /** Temporal decay settings */
+    temporalDecay: {
+        /** Whether temporal decay is enabled */
+        enabled: boolean;
+        /** Half-life in days for temporal decay */
+        halfLifeDays: number;
+    };
+}
+
+/**
+ * Default search configuration
+ *
+ * Auto mode with 30-day temporal decay half-life.
+ */
+export const DEFAULT_SEARCH_CONFIG: SearchConfigData = {
+    defaultMode: "auto",
+    temporalDecay: {
+        enabled: true,
+        halfLifeDays: 30,
+    },
+};
+
+/**
  * Memory configuration interface
  *
  * All options from CONTEXT.md:
@@ -60,6 +90,7 @@ export interface EmbeddingConfigData {
  * - logRetentionDays: Days to keep log files
  * - showFailures: Show failure notifications to user
  * - embedding: Embedding provider configuration
+ * - search: Hybrid search configuration
  */
 export interface MemoryConfig {
     /** Enable automatic hook-based sync */
@@ -78,6 +109,8 @@ export interface MemoryConfig {
     showFailures: boolean;
     /** Embedding provider configuration */
     embedding: EmbeddingConfigData;
+    /** Hybrid search configuration */
+    search: SearchConfigData;
 }
 
 /**
@@ -114,6 +147,7 @@ export const DEFAULT_CONFIG: MemoryConfig = {
     logRetentionDays: 7,
     showFailures: false,
     embedding: DEFAULT_EMBEDDING_CONFIG,
+    search: DEFAULT_SEARCH_CONFIG,
 };
 
 /**
@@ -164,6 +198,14 @@ export function loadConfig(): MemoryConfig {
             ...DEFAULT_CONFIG,
             ...loaded,
             embedding: { ...DEFAULT_EMBEDDING_CONFIG, ...(loaded.embedding ?? {}) },
+            search: {
+                ...DEFAULT_SEARCH_CONFIG,
+                ...(loaded.search ?? {}),
+                temporalDecay: {
+                    ...DEFAULT_SEARCH_CONFIG.temporalDecay,
+                    ...((loaded.search as Partial<SearchConfigData> | undefined)?.temporalDecay ?? {}),
+                },
+            },
         };
     } catch {
         // Invalid config: fall back to defaults with warning

@@ -37,6 +37,19 @@ export interface SearchOptions {
   sessionFilter?: string;
 }
 
+/** Search mode for hybrid search */
+export type SearchMode = "auto" | "fts" | "vector" | "hybrid";
+
+/**
+ * Extended search options with hybrid mode support.
+ */
+export interface HybridSearchOptions extends SearchOptions {
+  /** Search mode selection. Default: 'auto' */
+  mode?: SearchMode;
+  /** Disable temporal decay scoring for this search */
+  noDecay?: boolean;
+}
+
 /**
  * Service for full-text search across session content.
  *

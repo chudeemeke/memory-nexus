@@ -41,6 +41,14 @@ describe("ErrorCode", () => {
     expect(ErrorCode.UNKNOWN).toBe("UNKNOWN");
   });
 
+  test("contains vector/embedding error codes", () => {
+    expect(ErrorCode.VECTOR_UNAVAILABLE).toBe("VECTOR_UNAVAILABLE");
+    expect(ErrorCode.PROVIDER_TIMEOUT).toBe("PROVIDER_TIMEOUT");
+    expect(ErrorCode.PROVIDER_CONFIG_INVALID).toBe("PROVIDER_CONFIG_INVALID");
+    expect(ErrorCode.EMBEDDING_DIMENSION_MISMATCH).toBe("EMBEDDING_DIMENSION_MISMATCH");
+    expect(ErrorCode.MODEL_CORRUPTED).toBe("MODEL_CORRUPTED");
+  });
+
   test("ErrorCodeType accepts all error codes", () => {
     // Type check - these should compile without error
     const codes: ErrorCodeType[] = [
@@ -58,14 +66,19 @@ describe("ErrorCode", () => {
       ErrorCode.INVALID_ARGUMENT,
       ErrorCode.MISSING_ARGUMENT,
       ErrorCode.UNKNOWN,
+      ErrorCode.VECTOR_UNAVAILABLE,
+      ErrorCode.PROVIDER_TIMEOUT,
+      ErrorCode.PROVIDER_CONFIG_INVALID,
+      ErrorCode.EMBEDDING_DIMENSION_MISMATCH,
+      ErrorCode.MODEL_CORRUPTED,
     ];
-    expect(codes).toHaveLength(14);
+    expect(codes).toHaveLength(19);
   });
 
   test("ErrorCode is frozen (immutable)", () => {
     // Verify that ErrorCode values are string literals (const assertion)
     const keys = Object.keys(ErrorCode);
-    expect(keys.length).toBe(14);
+    expect(keys.length).toBe(19);
 
     // Each key should equal its value
     for (const key of keys) {
