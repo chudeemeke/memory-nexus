@@ -760,6 +760,99 @@ describe("migration", () => {
                 installSpy.mockRestore();
             });
 
+            test("cleans up source WAL/SHM sidecars when destination DB is kept (larger)", () => {
+                mkdirSync(legacyDir, { recursive: true });
+                writeFileSync(join(legacyDir, "memory.db"), Buffer.alloc(100, 0x01));
+                writeFileSync(join(legacyDir, "memory.db-wal"), Buffer.alloc(50, 0x03));
+                writeFileSync(join(legacyDir, "memory.db-shm"), Buffer.alloc(32, 0x04));
+
+                mkdirSync(dataDir, { recursive: true });
+                writeFileSync(join(dataDir, "memory.db"), Buffer.alloc(1000, 0x02));
+
+                const uninstallSpy = spyOn(settingsManager, "uninstallHooks").mockReturnValue({
+                    success: true,
+                    message: "ok",
+                });
+                const installSpy = spyOn(settingsManager, "installHooks").mockReturnValue({
+                    success: true,
+                    message: "ok",
+                });
+
+                migrateFromLegacy();
+
+                // Source sidecars should be cleaned up
+                expect(existsSync(join(legacyDir, "memory.db-wal"))).toBe(false);
+                expect(existsSync(join(legacyDir, "memory.db-shm"))).toBe(false);
+                // Source DB should also be removed (dest was larger)
+                expect(existsSync(join(legacyDir, "memory.db"))).toBe(false);
+
+                uninstallSpy.mockRestore();
+                installSpy.mockRestore();
+            });
+
+            test("cleans up source WAL/SHM sidecars after moving DB to destination", () => {
+                mkdirSync(legacyDir, { recursive: true });
+                writeFileSync(join(legacyDir, "memory.db"), Buffer.alloc(1000, 0x42));
+                writeFileSync(join(legacyDir, "memory.db-wal"), Buffer.alloc(50, 0x03));
+                writeFileSync(join(legacyDir, "memory.db-shm"), Buffer.alloc(32, 0x04));
+
+                const uninstallSpy = spyOn(settingsManager, "uninstallHooks").mockReturnValue({
+                    success: true,
+                    message: "ok",
+                });
+                const installSpy = spyOn(settingsManager, "installHooks").mockReturnValue({
+                    success: true,
+                    message: "ok",
+                });
+
+                migrateFromLegacy();
+
+                // Source sidecars should be cleaned up after move
+                expect(existsSync(join(legacyDir, "memory.db-wal"))).toBe(false);
+                expect(existsSync(join(legacyDir, "memory.db-shm"))).toBe(false);
+
+                uninstallSpy.mockRestore();
+                installSpy.mockRestore();
+            });
+
+            test("removes skipped legacy directories when destination already exists", () => {
+                // Legacy has DB + subdirectories with files
+                mkdirSync(legacyDir, { recursive: true });
+                writeFileSync(join(legacyDir, "memory.db"), "db");
+                mkdirSync(join(legacyDir, "logs"), { recursive: true });
+                writeFileSync(join(legacyDir, "logs", "sync.log"), "log-data");
+                mkdirSync(join(legacyDir, "hooks"), { recursive: true });
+                writeFileSync(join(legacyDir, "hooks", "sync-hook.js"), "hook-data");
+                mkdirSync(join(legacyDir, "backups"), { recursive: true });
+                writeFileSync(join(legacyDir, "backups", "settings.json.backup"), "backup-data");
+
+                // XDG already has the subdirectories (created by app)
+                mkdirSync(join(dataDir, "logs"), { recursive: true });
+                mkdirSync(join(dataDir, "hooks"), { recursive: true });
+                mkdirSync(join(dataDir, "backups"), { recursive: true });
+
+                const uninstallSpy = spyOn(settingsManager, "uninstallHooks").mockReturnValue({
+                    success: true,
+                    message: "ok",
+                });
+                const installSpy = spyOn(settingsManager, "installHooks").mockReturnValue({
+                    success: true,
+                    message: "ok",
+                });
+
+                migrateFromLegacy();
+
+                // Legacy subdirectories should be removed (redundant copies)
+                expect(existsSync(join(legacyDir, "logs"))).toBe(false);
+                expect(existsSync(join(legacyDir, "hooks"))).toBe(false);
+                expect(existsSync(join(legacyDir, "backups"))).toBe(false);
+                // Legacy dir itself should be removed (now empty)
+                expect(existsSync(legacyDir)).toBe(false);
+
+                uninstallSpy.mockRestore();
+                installSpy.mockRestore();
+            });
+
             test("skips directory move when destination directory already exists", () => {
                 const legacyLogs = join(legacyDir, "logs");
                 mkdirSync(legacyLogs, { recursive: true });

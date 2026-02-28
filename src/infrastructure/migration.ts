@@ -172,6 +172,49 @@ function cleanupDatabaseSidecars(dbPath: string): void {
 }
 
 /**
+ * Remove legacy remnants after successful migration.
+ *
+ * Handles two categories of leftovers that prevent legacy directory removal:
+ *
+ * 1. Skipped directories: When a directory (logs, hooks, backups) already exists
+ *    at the destination, the move loop skips it. The legacy copy is a redundant
+ *    duplicate that can be safely removed.
+ *
+ * 2. Orphaned files: Any remaining files in the legacy directory after all known
+ *    items have been processed. The legacy directory itself is removed if empty
+ *    after cleanup.
+ *
+ * Each removal is individually guarded — a failure to remove one item does not
+ * prevent attempting the others or removing the parent directory.
+ *
+ * @param legacyDir Path to the legacy directory
+ * @param moveList The move items that were processed during migration
+ */
+function cleanupLegacyRemnants(legacyDir: string, moveList: MoveItem[]): void {
+    // Remove skipped directories whose destination already exists
+    for (const item of moveList) {
+        if (item.isDir && existsSync(item.source) && existsSync(item.dest)) {
+            try {
+                rmSync(item.source, { recursive: true });
+            } catch {
+                // Non-critical: leave in place if removal fails
+            }
+        }
+    }
+
+    // Attempt to remove the legacy directory
+    // If unknown files remain, the directory is preserved (user's data)
+    try {
+        const remaining = readdirSync(legacyDir);
+        if (remaining.length === 0) {
+            rmSync(legacyDir, { recursive: true });
+        }
+    } catch {
+        // Non-critical: ignore removal errors
+    }
+}
+
+/**
  * Migrate data from legacy ~/.memory-nexus/ to new XDG paths.
  *
  * This function is SYNCHRONOUS. All filesystem operations use sync variants.
@@ -262,6 +305,7 @@ export function migrateFromLegacy(): MigrationResult {
             if (item.isDir) {
                 // Directories: skip when destination already exists.
                 // Logs, hooks, backups are not critical enough to merge.
+                // Legacy copy will be cleaned up in cleanupLegacyRemnants().
                 continue;
             }
 
@@ -272,6 +316,10 @@ export function migrateFromLegacy(): MigrationResult {
             if (destSize >= sourceSize) {
                 // Destination has equal or more data; keep it, remove legacy copy
                 unlinkSync(item.source);
+                // Clean up orphaned source sidecars (.db-shm, .db-wal)
+                if (item.source.endsWith(".db")) {
+                    cleanupDatabaseSidecars(item.source);
+                }
                 itemsMoved.push(item.name);
                 continue;
             }
@@ -288,6 +336,10 @@ export function migrateFromLegacy(): MigrationResult {
             moveFileOrDir(item.source, item.dest, item.isDir);
             completedMoves.push({ item, rolledBack: false });
             itemsMoved.push(item.name);
+            // Clean up orphaned source sidecars after moving a .db file
+            if (item.source.endsWith(".db")) {
+                cleanupDatabaseSidecars(item.source);
+            }
         } catch (error) {
             // Move failed: roll back all completed moves in reverse order
             const msg = error instanceof Error ? error.message : String(error);
@@ -323,15 +375,8 @@ export function migrateFromLegacy(): MigrationResult {
         errors.push(`hook re-install failed: ${msg}`);
     }
 
-    // Attempt to remove empty legacy directory
-    try {
-        const remaining = readdirSync(legacyDir);
-        if (remaining.length === 0) {
-            rmSync(legacyDir, { recursive: true });
-        }
-    } catch {
-        // Non-critical: ignore removal errors
-    }
+    // Clean up legacy remnants: skipped directories and orphaned files
+    cleanupLegacyRemnants(legacyDir, moveList);
 
     // Print notice to stderr
     process.stderr.write("Migrated data from ~/.memory-nexus to new paths\n");
