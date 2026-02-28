@@ -91,6 +91,41 @@ Updated by `gsd-plan-checker` when plans are approved:
 
 ---
 
+## Plan Checker Report
+
+### Iteration 1 -- Coverage: 100%
+
+2 warnings found:
+1. **[key_links_planned]** Plan 17-02 lists `schema.ts` in `files_modified` but no task modifies it.
+2. **[verification_derivation]** Ollama doctor readiness reports `ready: true` without clarifying deferred-check behavior.
+
+### Final (Iteration 2) -- Coverage: 100%
+
+**Status:** Passed
+
+Both warnings resolved:
+1. `schema.ts` removed from 17-02 `files_modified`
+2. Ollama readyReason added: "Server reachability verified at sync time"
+
+### Coverage Matrix
+
+| Requirement | Plan | Status |
+|-------------|------|--------|
+| PROV-01 | 17-01 | Covered |
+| PROV-02 | 17-01 | Covered |
+| PROV-03 | 17-01 | Covered |
+| PROV-04 | 17-02 | Covered |
+
+### Issues
+
+None
+
+### Recommendation
+
+Plans verified. Ready for execution.
+
+---
+
 ## Execution Tracking
 
 Updated during `/gsd:execute-phase 17`:
