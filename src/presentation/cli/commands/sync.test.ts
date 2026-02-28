@@ -761,6 +761,7 @@ describe("runEmbeddingPass", () => {
     const mockRepo = {
       getStoredModelHash: () => "old-hash-different",
       getStoredModelName: () => "old-model/v1",
+      getStoredEmbeddingDimensions: () => 384,
       getEmbeddedCount: () => 0,
       getTotalMessageCount: () => 5,
       findUnembedded: (limit: number) => {
@@ -775,6 +776,7 @@ describe("runEmbeddingPass", () => {
       },
       storeBatch: () => {},
       clearAllEmbeddings: () => { clearCalled = true; },
+      recreateVecTable: () => {},
     };
 
     await runEmbeddingPass({} as any, { force: true }, {
@@ -846,6 +848,356 @@ describe("runEmbeddingPass", () => {
     }
 
     expect(disposed).toBe(true);
+  });
+});
+
+describe("runEmbeddingPass dimension change detection", () => {
+  it("calls recreateVecTable when model changes AND dimensions change (384 -> 1536)", async () => {
+    const logSpy = spyOn(console, "log").mockImplementation(() => {});
+
+    let recreateVecTableCalled = false;
+    let recreateVecTableDims = 0;
+
+    const mockProvider = {
+      name: "openai",
+      model: "text-embedding-3-small",
+      dimensions: 1536,
+      isReady: () => true,
+      initialize: async () => {},
+      embed: async () => {},
+      embedBatch: async (texts: string[]) => texts.map(() => ({
+        embedding: new Float32Array(1536),
+        model: "text-embedding-3-small",
+        dimensions: 1536,
+      })),
+      dispose: async () => {},
+    };
+
+    const mockFactory = {
+      createFromConfig: () => mockProvider,
+      dispose: async () => {},
+    };
+
+    const mockConfig = {
+      embedding: {
+        enabled: true,
+        provider: "openai",
+        model: "text-embedding-3-small",
+        dimensions: 1536,
+        batchSize: 100,
+      },
+    };
+
+    let callCount = 0;
+    const mockRepo = {
+      getStoredModelHash: () => "old-hash-384",
+      getStoredModelName: () => "Xenova/all-MiniLM-L6-v2",
+      getStoredEmbeddingDimensions: () => 384,
+      getEmbeddedCount: () => 0,
+      getTotalMessageCount: () => 5,
+      findUnembedded: (limit: number) => {
+        callCount++;
+        if (callCount === 1) {
+          return Array.from({ length: 5 }, (_, i) => ({
+            rowid: i + 1,
+            content: `message ${i}`,
+          }));
+        }
+        return [];
+      },
+      storeBatch: () => {},
+      clearAllEmbeddings: () => {},
+      recreateVecTable: (dims: number) => {
+        recreateVecTableCalled = true;
+        recreateVecTableDims = dims;
+      },
+    };
+
+    await runEmbeddingPass({} as any, { force: true }, {
+      factory: mockFactory as any,
+      config: mockConfig,
+      repositoryOverride: mockRepo as any,
+    });
+
+    expect(recreateVecTableCalled).toBe(true);
+    expect(recreateVecTableDims).toBe(1536);
+
+    logSpy.mockRestore();
+  });
+
+  it("does NOT call recreateVecTable when model changes but dimensions stay the same (384 -> 384)", async () => {
+    const logSpy = spyOn(console, "log").mockImplementation(() => {});
+
+    let recreateVecTableCalled = false;
+
+    const mockProvider = {
+      name: "local",
+      model: "other-384d-model",
+      dimensions: 384,
+      isReady: () => true,
+      initialize: async () => {},
+      embed: async () => {},
+      embedBatch: async (texts: string[]) => texts.map(() => ({
+        embedding: new Float32Array(384),
+        model: "other-384d-model",
+        dimensions: 384,
+      })),
+      dispose: async () => {},
+    };
+
+    const mockFactory = {
+      createFromConfig: () => mockProvider,
+      dispose: async () => {},
+    };
+
+    const mockConfig = {
+      embedding: {
+        enabled: true,
+        provider: "local",
+        model: "other-384d-model",
+        dimensions: 384,
+        batchSize: 100,
+      },
+    };
+
+    let callCount = 0;
+    const mockRepo = {
+      getStoredModelHash: () => "old-hash-different",
+      getStoredModelName: () => "Xenova/all-MiniLM-L6-v2",
+      getStoredEmbeddingDimensions: () => 384,
+      getEmbeddedCount: () => 0,
+      getTotalMessageCount: () => 5,
+      findUnembedded: (limit: number) => {
+        callCount++;
+        if (callCount === 1) {
+          return Array.from({ length: 5 }, (_, i) => ({
+            rowid: i + 1,
+            content: `message ${i}`,
+          }));
+        }
+        return [];
+      },
+      storeBatch: () => {},
+      clearAllEmbeddings: () => {},
+      recreateVecTable: () => { recreateVecTableCalled = true; },
+    };
+
+    await runEmbeddingPass({} as any, { force: true }, {
+      factory: mockFactory as any,
+      config: mockConfig,
+      repositoryOverride: mockRepo as any,
+    });
+
+    expect(recreateVecTableCalled).toBe(false);
+
+    logSpy.mockRestore();
+  });
+
+  it("does NOT call recreateVecTable when no model change", async () => {
+    const logSpy = spyOn(console, "log").mockImplementation(() => {});
+
+    let recreateVecTableCalled = false;
+
+    const mockProvider = {
+      name: "local",
+      model: "test-model",
+      dimensions: 384,
+      isReady: () => true,
+      initialize: async () => {},
+      embed: async () => {},
+      embedBatch: async (texts: string[]) => texts.map(() => ({
+        embedding: new Float32Array(384),
+        model: "test-model",
+        dimensions: 384,
+      })),
+      dispose: async () => {},
+    };
+
+    const mockFactory = {
+      createFromConfig: () => mockProvider,
+      dispose: async () => {},
+    };
+
+    const mockConfig = {
+      embedding: {
+        enabled: true,
+        provider: "local",
+        model: "test-model",
+        dimensions: 384,
+        batchSize: 100,
+      },
+    };
+
+    let callCount = 0;
+    const mockRepo = {
+      getStoredModelHash: () => null,
+      getStoredModelName: () => null,
+      getStoredEmbeddingDimensions: () => null,
+      getEmbeddedCount: () => 0,
+      getTotalMessageCount: () => 5,
+      findUnembedded: (limit: number) => {
+        callCount++;
+        if (callCount === 1) {
+          return Array.from({ length: 5 }, (_, i) => ({
+            rowid: i + 1,
+            content: `message ${i}`,
+          }));
+        }
+        return [];
+      },
+      storeBatch: () => {},
+      clearAllEmbeddings: () => {},
+      recreateVecTable: () => { recreateVecTableCalled = true; },
+    };
+
+    await runEmbeddingPass({} as any, {}, {
+      factory: mockFactory as any,
+      config: mockConfig,
+      repositoryOverride: mockRepo as any,
+    });
+
+    expect(recreateVecTableCalled).toBe(false);
+
+    logSpy.mockRestore();
+  });
+
+  it("logs dimension change message when recreating vec table", async () => {
+    const logSpy = spyOn(console, "log").mockImplementation(() => {});
+
+    const mockProvider = {
+      name: "openai",
+      model: "text-embedding-3-small",
+      dimensions: 1536,
+      isReady: () => true,
+      initialize: async () => {},
+      embed: async () => {},
+      embedBatch: async (texts: string[]) => texts.map(() => ({
+        embedding: new Float32Array(1536),
+        model: "text-embedding-3-small",
+        dimensions: 1536,
+      })),
+      dispose: async () => {},
+    };
+
+    const mockFactory = {
+      createFromConfig: () => mockProvider,
+      dispose: async () => {},
+    };
+
+    const mockConfig = {
+      embedding: {
+        enabled: true,
+        provider: "openai",
+        model: "text-embedding-3-small",
+        dimensions: 1536,
+        batchSize: 100,
+      },
+    };
+
+    let callCount = 0;
+    const mockRepo = {
+      getStoredModelHash: () => "old-hash-384",
+      getStoredModelName: () => "Xenova/all-MiniLM-L6-v2",
+      getStoredEmbeddingDimensions: () => 384,
+      getEmbeddedCount: () => 0,
+      getTotalMessageCount: () => 5,
+      findUnembedded: (limit: number) => {
+        callCount++;
+        if (callCount === 1) {
+          return Array.from({ length: 5 }, (_, i) => ({
+            rowid: i + 1,
+            content: `message ${i}`,
+          }));
+        }
+        return [];
+      },
+      storeBatch: () => {},
+      clearAllEmbeddings: () => {},
+      recreateVecTable: () => {},
+    };
+
+    await runEmbeddingPass({} as any, { force: true }, {
+      factory: mockFactory as any,
+      config: mockConfig,
+      repositoryOverride: mockRepo as any,
+    });
+
+    const logCalls = logSpy.mock.calls.map(c => c[0]);
+    const dimensionLine = logCalls.find((s: string) =>
+      typeof s === "string" && s.includes("Recreating embedding table")
+    );
+    expect(dimensionLine).toBeDefined();
+    expect(dimensionLine).toContain("1536");
+
+    logSpy.mockRestore();
+  });
+
+  it("does NOT call recreateVecTable when getStoredEmbeddingDimensions returns null (no embeddings)", async () => {
+    const logSpy = spyOn(console, "log").mockImplementation(() => {});
+
+    let recreateVecTableCalled = false;
+
+    const mockProvider = {
+      name: "openai",
+      model: "text-embedding-3-small",
+      dimensions: 1536,
+      isReady: () => true,
+      initialize: async () => {},
+      embed: async () => {},
+      embedBatch: async (texts: string[]) => texts.map(() => ({
+        embedding: new Float32Array(1536),
+        model: "text-embedding-3-small",
+        dimensions: 1536,
+      })),
+      dispose: async () => {},
+    };
+
+    const mockFactory = {
+      createFromConfig: () => mockProvider,
+      dispose: async () => {},
+    };
+
+    const mockConfig = {
+      embedding: {
+        enabled: true,
+        provider: "openai",
+        model: "text-embedding-3-small",
+        dimensions: 1536,
+        batchSize: 100,
+      },
+    };
+
+    let callCount = 0;
+    const mockRepo = {
+      getStoredModelHash: () => "old-hash",
+      getStoredModelName: () => "old-model",
+      getStoredEmbeddingDimensions: () => null,
+      getEmbeddedCount: () => 0,
+      getTotalMessageCount: () => 5,
+      findUnembedded: (limit: number) => {
+        callCount++;
+        if (callCount === 1) {
+          return Array.from({ length: 5 }, (_, i) => ({
+            rowid: i + 1,
+            content: `message ${i}`,
+          }));
+        }
+        return [];
+      },
+      storeBatch: () => {},
+      clearAllEmbeddings: () => {},
+      recreateVecTable: () => { recreateVecTableCalled = true; },
+    };
+
+    await runEmbeddingPass({} as any, { force: true }, {
+      factory: mockFactory as any,
+      config: mockConfig,
+      repositoryOverride: mockRepo as any,
+    });
+
+    expect(recreateVecTableCalled).toBe(false);
+
+    logSpy.mockRestore();
   });
 });
 

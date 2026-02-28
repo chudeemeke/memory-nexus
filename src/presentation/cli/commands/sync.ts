@@ -322,6 +322,17 @@ export async function runEmbeddingPass(
       await factory.dispose();
       return;
     }
+
+    // Check for dimension change -- requires vec0 table recreation
+    const storedDimensions = repository.getStoredEmbeddingDimensions();
+    const newDimensions = config.embedding.dimensions;
+    if (storedDimensions !== null && storedDimensions !== newDimensions) {
+      if (!options.quiet) {
+        console.log(`Recreating embedding table for ${newDimensions}-dimensional vectors...`);
+      }
+      repository.recreateVecTable(newDimensions);
+    }
+
     if (!options.quiet) {
       console.log("Clearing existing embeddings for re-embedding...");
     }
