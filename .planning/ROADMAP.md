@@ -139,11 +139,12 @@ Success Criteria:
 
 **Depends on:** Phase 14 (needs `IEmbeddingProvider` port defined)
 **Can run in parallel with:** Phases 15-16 (only needs the port, not the pipeline or search)
-**Estimated Plans:** 2-3
+**Plans:** 3 plans
 
 Plans:
 - [x] 17-01-PLAN.md -- OpenAI and Ollama provider adapters with config and factory wiring
 - [x] 17-02-PLAN.md -- Dimension-aware re-embedding on provider/model change
+- [ ] 17-03-PLAN.md -- Fix provider-specific default resolution in config loading (gap closure)
 
 Requirements: PROV-01, PROV-02, PROV-03, PROV-04
 
@@ -213,9 +214,9 @@ Phase 13 (Package Rename)
 | 15 | v2.0 | Complete    | 2026-02-27 | 2026-02-26 |
 | 16 | 3/3 | Complete    | 2026-02-27 | -- |
 | 16.1 | v2.0 | Complete    | 2026-02-27 | 2026-02-27 |
-| 17 | v2.0 | 2/2 | Complete | 2026-02-28 |
+| 17 | v2.0 | 2/3 | Gap closure | -- |
 | 18 | v2.0 | -- | Pending | -- |
 
 ---
 
-*Last updated: 2026-02-28 (Phase 17 complete)*
+*Last updated: 2026-02-28 (Phase 17 gap closure plan added)*
