@@ -144,7 +144,7 @@ Success Criteria:
 Plans:
 - [x] 17-01-PLAN.md -- OpenAI and Ollama provider adapters with config and factory wiring
 - [x] 17-02-PLAN.md -- Dimension-aware re-embedding on provider/model change
-- [ ] 17-03-PLAN.md -- Fix provider-specific default resolution in config loading (gap closure)
+- [x] 17-03-PLAN.md -- Fix provider-specific default resolution in config loading (gap closure)
 
 Requirements: PROV-01, PROV-02, PROV-03, PROV-04
 
@@ -214,9 +214,9 @@ Phase 13 (Package Rename)
 | 15 | v2.0 | Complete    | 2026-02-27 | 2026-02-26 |
 | 16 | 3/3 | Complete    | 2026-02-27 | -- |
 | 16.1 | v2.0 | Complete    | 2026-02-27 | 2026-02-27 |
-| 17 | v2.0 | 2/3 | Gap closure | -- |
+| 17 | v2.0 | 3/3 | Complete | 2026-02-28 |
 | 18 | v2.0 | -- | Pending | -- |
 
 ---
 
-*Last updated: 2026-02-28 (Phase 17 gap closure plan added)*
+*Last updated: 2026-02-28 (Phase 17 complete - 3/3 plans including gap closure)*

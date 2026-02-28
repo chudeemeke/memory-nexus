@@ -1,7 +1,7 @@
 ---
 agent: gsd-executor
-updated: 2026-02-27
-entries: 30
+updated: 2026-02-28
+entries: 38
 ---
 
 - finding: "Bun test spyOn mock leakage: when mocking nodeFs.renameSync, must restore before assertions, not in afterEach. Mock affects subsequent tests in same file if not restored promptly."
@@ -183,3 +183,51 @@ entries: 30
   confidence: HIGH
   phase: "16-hybrid-search"
   date: "2026-02-27"
+
+- finding: "Commander.js --no-X negation pattern: --no-vector sets opts.vector = false (NOT opts.noVector = true). Interface must use vector?: boolean and check opts.vector === false. Same applies to --no-decay -> decay?: boolean."
+  source: "Phase 16, Plan 03, Task A"
+  confidence: HIGH
+  phase: "16-hybrid-search"
+  date: "2026-02-27"
+
+- finding: "When extending HealthCheckResult with searchCapability field, all existing test fixtures (formatHealthResult healthyResult, attemptFixes healthyResult, and inline fixtures in embedding section tests) must include the new field. This is the third time this pattern has occurred (embedding, sqliteVec, now searchCapability)."
+  source: "Phase 16, Plan 03, Task B"
+  confidence: HIGH
+  phase: "16-hybrid-search"
+  date: "2026-02-27"
+
+- finding: "Doctor exit codes depend on runtime environment: vectorReady requires sqlite-vec + embeddings. Tests for exit code 0 (all healthy) must account for the test environment not having embeddings. Use range assertions (exitCode <= 1) or mock the health check to control vectorReady."
+  source: "Phase 16, Plan 03, Task B"
+  confidence: HIGH
+  phase: "16-hybrid-search"
+  date: "2026-02-27"
+
+- finding: "When writing TDD RED tests that import a not-yet-existing export, bun:test fails at module level (SyntaxError on import). Add a minimal stub (e.g., function returning false) to make the import resolve, then verify tests fail on assertions. The stub is replaced in the GREEN phase."
+  source: "Phase 16.1, Plan 01, Task A"
+  confidence: HIGH
+  phase: "16.1-migration-race-condition-fix"
+  date: "2026-02-27"
+
+- finding: "When extending EmbeddingHealth with new fields (ready, readyReason), ALL HealthCheckResult test fixtures in doctor.test.ts must be updated. Use replace_all with the embedding block pattern to batch-update fixtures. This is the fourth time this fixture update pattern has occurred."
+  source: "Phase 17, Plan 01, Task 2"
+  confidence: HIGH
+  phase: "17-provider-ecosystem"
+  date: "2026-02-28"
+
+- finding: "For fetch-based provider adapters, mock globalThis.fetch in tests and restore in afterEach. The mock pattern works cleanly for both success and error scenarios. No need for mock.module since fetch is a global."
+  source: "Phase 17, Plan 01, Task 1"
+  confidence: HIGH
+  phase: "17-provider-ecosystem"
+  date: "2026-02-28"
+
+- finding: "When adding new methods to a repository class used by sync.ts through DI (EmbeddingPassDeps.repositoryOverride), all existing mock repos in sync.test.ts that hit the code path using those methods must also include the new methods. Check ALL mock repos in the test file, not just the ones for new tests."
+  source: "Phase 17, Plan 02, Task 2"
+  confidence: HIGH
+  phase: "17-provider-ecosystem"
+  date: "2026-02-28"
+
+- finding: "When loadConfig() deep-merges user config with defaults, provider-specific defaults (model/dimensions) are lost because DEFAULT_EMBEDDING_CONFIG hardcodes local values. Use a post-merge resolveProviderDefaults() step with 'in' operator to detect user-explicit fields vs inherited defaults. This pattern generalizes: any config where changing one field should change the defaults of related fields needs post-merge resolution."
+  source: "Phase 17, Plan 03, Task 1"
+  confidence: HIGH
+  phase: "17-provider-ecosystem"
+  date: "2026-02-28"

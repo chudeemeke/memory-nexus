@@ -13,7 +13,7 @@ See: .planning/PROJECT.md (updated 2026-02-18)
 ## Current Position
 
 **Milestone:** v2.0 Hybrid Search and Rebrand
-**Phase:** 17 (Provider Ecosystem) -- Complete (2/2 plans)
+**Phase:** 17 (Provider Ecosystem) -- Complete (3/3 plans, including gap closure)
 **Status:** Active -- Phase 17 complete, ready for Phase 18
 
 ```
@@ -23,7 +23,7 @@ v2.0 Progress: [################....] 6/7 phases
   Phase 15: Embedding Pipeline       [x] Complete (4/4 plans)
   Phase 16: Hybrid Search            [x] Complete (3/3 plans)
   Phase 16.1: Migration Race Fix     [x] Complete (1/1 plans)
-  Phase 17: Provider Ecosystem       [x] Complete (2/2 plans)
+  Phase 17: Provider Ecosystem       [x] Complete (3/3 plans)
   Phase 18: API Stabilization        [ ] Pending
 ```
 
@@ -61,6 +61,7 @@ v2.0 Progress: [################....] 6/7 phases
 | 16.1-01 | Size-aware migration conflict resolution with WAL/SHM cleanup | 4min | 2 | 3 |
 | 17-01 | OpenAI and Ollama provider adapters with config and factory wiring | 16min | 2 | 13 |
 | 17-02 | Dimension-aware re-embedding on provider/model change | 6min | 2 | 4 |
+| 17-03 | Provider-specific default resolution (gap closure) | 5min | 2 | 3 |
 
 ## Accumulated Context
 
@@ -136,6 +137,7 @@ v2.0 Progress: [################....] 6/7 phases
 | recreateVecTable atomicity | DROP vec0 + DELETE embedding_state | Prevents orphaned state when vectors are dropped |
 | Dimension change skip on null | Skip recreation when no stored embeddings | Table already correct from initial schema or will be created fresh |
 | Same-dimension model change | DELETE-only path (no table recreation) | No structural change needed when dimensions match |
+| Provider default resolution | "in" operator on raw user JSON | Distinguishes user-explicit from inherited defaults; unknown providers fall back to local |
 
 ### Research Completed
 
@@ -162,18 +164,17 @@ None. Phase 16.1 complete; Phase 17/18 unblocked.
 ### Last Session
 
 **Date:** 2026-02-28
-**Completed:** Phase 17, Plan 02 (Dimension-aware re-embedding)
-**Stopped at:** Completed 17-02-PLAN.md, Phase 17 complete
+**Completed:** Phase 17, Plan 03 (Provider-specific default resolution - gap closure)
+**Stopped at:** Completed 17-03-PLAN.md, Phase 17 fully complete (3/3 plans)
 
 ### Context for Next Session
 
-1. Phase 17 COMPLETE: All 4 PROV requirements satisfied (PROV-01 through PROV-04)
-2. 2523 tests passing across full suite (14 new tests from Plan 17-02)
-3. EmbeddingRepository has getStoredEmbeddingDimensions() and recreateVecTable(dims) methods
-4. Sync --embed flow detects dimension changes and recreates vec0 table before re-embedding
-5. Same-dimension model changes still use standard DELETE-only path
-6. Phase 18 (API Stabilization) is next and final phase of v2.0
+1. Phase 17 FULLY COMPLETE: All 4 PROV requirements satisfied, UAT gap resolved
+2. 2539 tests passing across full suite (16 new tests from Plan 17-03)
+3. loadConfig() now returns provider-appropriate model/dimensions via PROVIDER_DEFAULTS map
+4. Doctor and factory automatically receive correct values (no changes to health-checker or factory)
+5. Phase 18 (API Stabilization) is next and final phase of v2.0
 
 ---
 
-*Last updated: 2026-02-28 (Plan 17-02 complete, Phase 17 complete)*
+*Last updated: 2026-02-28 (Plan 17-03 complete, Phase 17 fully complete)*
