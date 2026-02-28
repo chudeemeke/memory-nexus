@@ -513,5 +513,61 @@ describe("health-checker", () => {
             expect(result.dimensions).toBe(1536);
             expect(result.enabled).toBe(false);
         });
+
+        it("includes ready and readyReason fields", () => {
+            const result = checkEmbeddingConfig();
+            expect(result).toHaveProperty("ready");
+            expect(typeof result.ready).toBe("boolean");
+        });
+
+        it("returns ready: true for local provider", () => {
+            // Default config is local provider
+            const result = checkEmbeddingConfig();
+            expect(result.ready).toBe(true);
+            expect(result.readyReason).toBeUndefined();
+        });
+
+        it("returns ready: false with reason when openai provider has no apiKey", () => {
+            writeFileSync(testConfigPath, JSON.stringify({
+                embedding: {
+                    provider: "openai",
+                    model: "text-embedding-3-small",
+                    dimensions: 1536,
+                },
+            }));
+
+            const result = checkEmbeddingConfig();
+            expect(result.ready).toBe(false);
+            expect(result.readyReason).toBe("API key not set");
+        });
+
+        it("returns ready: true when openai provider has apiKey", () => {
+            writeFileSync(testConfigPath, JSON.stringify({
+                embedding: {
+                    provider: "openai",
+                    model: "text-embedding-3-small",
+                    dimensions: 1536,
+                    apiKey: "sk-test-key",
+                },
+            }));
+
+            const result = checkEmbeddingConfig();
+            expect(result.ready).toBe(true);
+            expect(result.readyReason).toBeUndefined();
+        });
+
+        it("returns ready: true with deferred-check reason for ollama provider", () => {
+            writeFileSync(testConfigPath, JSON.stringify({
+                embedding: {
+                    provider: "ollama",
+                    model: "nomic-embed-text",
+                    dimensions: 768,
+                },
+            }));
+
+            const result = checkEmbeddingConfig();
+            expect(result.ready).toBe(true);
+            expect(result.readyReason).toBe("Server reachability verified at sync time");
+        });
     });
 });

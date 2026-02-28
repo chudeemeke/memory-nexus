@@ -193,6 +193,14 @@ export function formatHealthResult(result: HealthCheckResult, useColor: boolean)
     lines.push(`  ${dim(`Provider: ${result.embedding.provider}`, useColor)}`);
     lines.push(`  ${dim(`Model: ${result.embedding.model}`, useColor)}`);
     lines.push(`  ${dim(`Dimensions: ${result.embedding.dimensions}`, useColor)}`);
+    lines.push(`  ${formatStatus(result.embedding.ready, useColor)} Ready: ${result.embedding.ready ? "yes" : "no"}`);
+    if (result.embedding.readyReason) {
+        if (result.embedding.ready) {
+            lines.push(`  ${dim(`Note: ${result.embedding.readyReason}`, useColor)}`);
+        } else {
+            lines.push(`  ${red(`Reason: ${result.embedding.readyReason}`, useColor)}`);
+        }
+    }
 
     lines.push("");
 

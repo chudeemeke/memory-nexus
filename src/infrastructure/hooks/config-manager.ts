@@ -46,6 +46,10 @@ export interface EmbeddingConfigData {
     dimensions: number;
     /** Number of messages to embed per batch */
     batchSize: number;
+    /** API key for remote providers (e.g., OpenAI) */
+    apiKey?: string;
+    /** Base URL override for provider API endpoint */
+    baseUrl?: string;
 }
 
 /**

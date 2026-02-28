@@ -135,6 +135,7 @@ describe("doctor command", () => {
                 model: "Xenova/all-MiniLM-L6-v2",
                 dimensions: 384,
                 enabled: true,
+                ready: true,
             },
             sqliteVec: {
                 available: true,
@@ -286,6 +287,7 @@ describe("doctor command", () => {
                 model: "Xenova/all-MiniLM-L6-v2",
                 dimensions: 384,
                 enabled: true,
+                ready: true,
             },
             sqliteVec: {
                 available: true,
@@ -478,6 +480,7 @@ describe("doctor command", () => {
                     model: "Xenova/all-MiniLM-L6-v2",
                     dimensions: 384,
                     enabled: true,
+                    ready: true,
                 },
                 sqliteVec: { available: true, version: "0.1.6" },
                 searchCapability: {
@@ -507,6 +510,7 @@ describe("doctor command", () => {
                     model: "Xenova/all-MiniLM-L6-v2",
                     dimensions: 384,
                     enabled: true,
+                    ready: true,
                 },
                 sqliteVec: { available: true, version: "0.1.6" },
                 searchCapability: {
@@ -537,6 +541,7 @@ describe("doctor command", () => {
                     model: "Xenova/all-MiniLM-L6-v2",
                     dimensions: 384,
                     enabled: true,
+                    ready: true,
                 },
                 sqliteVec: { available: true, version: "0.1.6" },
                 searchCapability: {
@@ -567,6 +572,7 @@ describe("doctor command", () => {
                     model: "Xenova/all-MiniLM-L6-v2",
                     dimensions: 384,
                     enabled: true,
+                    ready: true,
                 },
                 sqliteVec: { available: true, version: "0.1.6" },
                 searchCapability: {
@@ -596,6 +602,7 @@ describe("doctor command", () => {
                     model: "Xenova/all-MiniLM-L6-v2",
                     dimensions: 384,
                     enabled: true,
+                    ready: true,
                 },
                 sqliteVec: { available: false, version: null },
                 searchCapability: {
@@ -611,6 +618,89 @@ describe("doctor command", () => {
 
             const output = formatHealthResult(result, false);
             expect(output).toContain("not ready");
+        });
+    });
+
+    describe("provider readiness in output", () => {
+        it("shows provider readiness status line", () => {
+            const result: HealthCheckResult = {
+                database: { exists: true, readable: true, writable: true, integrity: "ok", size: 1000 },
+                permissions: { configDir: true, logsDir: true, sourceDir: true },
+                hooks: { installed: true, enabled: true, lastRun: null },
+                config: { valid: true, issues: [] },
+                embedding: {
+                    configured: true,
+                    provider: "local",
+                    model: "Xenova/all-MiniLM-L6-v2",
+                    dimensions: 384,
+                    enabled: true,
+                    ready: true,
+                },
+                sqliteVec: { available: true, version: "0.1.6" },
+                searchCapability: { fts5: true, sqliteVec: true, embeddedCount: 0, totalMessages: 0, coveragePercent: 0, defaultMode: "auto", vectorReady: false },
+            };
+
+            const output = formatHealthResult(result, false);
+            expect(output).toContain("Ready");
+        });
+
+        it("shows readyReason when provider is not ready", () => {
+            const result: HealthCheckResult = {
+                database: { exists: true, readable: true, writable: true, integrity: "ok", size: 1000 },
+                permissions: { configDir: true, logsDir: true, sourceDir: true },
+                hooks: { installed: true, enabled: true, lastRun: null },
+                config: { valid: true, issues: [] },
+                embedding: {
+                    configured: true,
+                    provider: "openai",
+                    model: "text-embedding-3-small",
+                    dimensions: 1536,
+                    enabled: true,
+                    ready: false,
+                    readyReason: "API key not set",
+                },
+                sqliteVec: { available: true, version: "0.1.6" },
+                searchCapability: { fts5: true, sqliteVec: true, embeddedCount: 0, totalMessages: 0, coveragePercent: 0, defaultMode: "auto", vectorReady: false },
+            };
+
+            const output = formatHealthResult(result, false);
+            expect(output).toContain("API key not set");
+        });
+
+        it("shows readyReason as informational note for deferred-check providers", () => {
+            const result: HealthCheckResult = {
+                database: { exists: true, readable: true, writable: true, integrity: "ok", size: 1000 },
+                permissions: { configDir: true, logsDir: true, sourceDir: true },
+                hooks: { installed: true, enabled: true, lastRun: null },
+                config: { valid: true, issues: [] },
+                embedding: {
+                    configured: true,
+                    provider: "ollama",
+                    model: "nomic-embed-text",
+                    dimensions: 768,
+                    enabled: true,
+                    ready: true,
+                    readyReason: "Server reachability verified at sync time",
+                },
+                sqliteVec: { available: true, version: "0.1.6" },
+                searchCapability: { fts5: true, sqliteVec: true, embeddedCount: 0, totalMessages: 0, coveragePercent: 0, defaultMode: "auto", vectorReady: false },
+            };
+
+            const output = formatHealthResult(result, false);
+            expect(output).toContain("Server reachability verified at sync time");
+        });
+
+        it("JSON output includes ready and readyReason fields", async () => {
+            consoleOutput = [];
+            console.log = (msg: string) => consoleOutput.push(msg);
+
+            await executeDoctorCommand({ json: true });
+
+            const output = consoleOutput.join("\n");
+            const parsed = JSON.parse(output);
+
+            expect(parsed.embedding).toHaveProperty("ready");
+            expect(typeof parsed.embedding.ready).toBe("boolean");
         });
     });
 
@@ -664,6 +754,7 @@ describe("doctor command", () => {
                     model: "Xenova/all-MiniLM-L6-v2",
                     dimensions: 384,
                     enabled: true,
+                    ready: true,
                 },
                 sqliteVec: { available: true, version: "0.1.6" },
                 searchCapability: { fts5: true, sqliteVec: true, embeddedCount: 0, totalMessages: 0, coveragePercent: 0, defaultMode: "auto", vectorReady: false },
@@ -685,6 +776,7 @@ describe("doctor command", () => {
                     model: "Xenova/all-MiniLM-L6-v2",
                     dimensions: 384,
                     enabled: true,
+                    ready: true,
                 },
                 sqliteVec: { available: true, version: "0.1.6" },
                 searchCapability: { fts5: true, sqliteVec: true, embeddedCount: 0, totalMessages: 0, coveragePercent: 0, defaultMode: "auto", vectorReady: false },
@@ -708,6 +800,7 @@ describe("doctor command", () => {
                     model: "Xenova/all-MiniLM-L6-v2",
                     dimensions: 384,
                     enabled: false,
+                    ready: true,
                 },
                 sqliteVec: { available: true, version: "0.1.6" },
                 searchCapability: { fts5: true, sqliteVec: true, embeddedCount: 0, totalMessages: 0, coveragePercent: 0, defaultMode: "auto", vectorReady: false },
@@ -729,6 +822,7 @@ describe("doctor command", () => {
                     model: "Xenova/all-MiniLM-L6-v2",
                     dimensions: 384,
                     enabled: true,
+                    ready: true,
                 },
                 sqliteVec: { available: true, version: "0.1.6" },
                 searchCapability: { fts5: true, sqliteVec: true, embeddedCount: 0, totalMessages: 0, coveragePercent: 0, defaultMode: "auto", vectorReady: false },
@@ -751,6 +845,7 @@ describe("doctor command", () => {
                     model: "Xenova/all-MiniLM-L6-v2",
                     dimensions: 384,
                     enabled: true,
+                    ready: true,
                 },
                 sqliteVec: { available: false, version: null },
                 searchCapability: { fts5: true, sqliteVec: false, embeddedCount: 0, totalMessages: 0, coveragePercent: 0, defaultMode: "auto", vectorReady: false },

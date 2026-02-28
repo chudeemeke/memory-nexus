@@ -5,16 +5,18 @@
  * to avoid redundant resource allocation. The factory does NOT call
  * initialize() -- the caller controls when the ONNX runtime loads.
  *
- * Currently supports:
+ * Supported providers:
  * - "local" -> TransformersJsProvider
- *
- * Phase 17 will add OpenAI and Ollama providers.
+ * - "openai" -> OpenAiProvider
+ * - "ollama" -> OllamaProvider
  */
 
 import type { IEmbeddingProvider } from "../../domain/ports/embedding.js";
 import type { EmbeddingConfigData } from "../hooks/config-manager.js";
 import { DEFAULT_EMBEDDING_CONFIG } from "../hooks/config-manager.js";
 import { TransformersJsProvider } from "./transformers-js-provider.js";
+import { OpenAiProvider } from "./openai-provider.js";
+import { OllamaProvider } from "./ollama-provider.js";
 
 export class EmbeddingProviderFactory {
     private cache = new Map<string, IEmbeddingProvider>();
@@ -48,9 +50,24 @@ export class EmbeddingProviderFactory {
                     dimensions: config.dimensions,
                 });
                 break;
+            case "openai":
+                provider = new OpenAiProvider({
+                    apiKey: config.apiKey ?? "",
+                    model: config.model,
+                    dimensions: config.dimensions,
+                    baseUrl: config.baseUrl,
+                });
+                break;
+            case "ollama":
+                provider = new OllamaProvider({
+                    model: config.model,
+                    dimensions: config.dimensions,
+                    baseUrl: config.baseUrl,
+                });
+                break;
             default:
                 throw new Error(
-                    `Unsupported embedding provider: "${config.provider}". Supported: local`
+                    `Unsupported embedding provider: "${config.provider}". Supported: local, openai, ollama`
                 );
         }
 

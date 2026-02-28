@@ -402,6 +402,60 @@ describe("config-manager", () => {
         });
     });
 
+    describe("embedding config apiKey and baseUrl", () => {
+        test("EmbeddingConfigData accepts optional apiKey field (undefined by default)", () => {
+            const config = loadConfig();
+            expect(config.embedding.apiKey).toBeUndefined();
+        });
+
+        test("EmbeddingConfigData accepts optional baseUrl field (undefined by default)", () => {
+            const config = loadConfig();
+            expect(config.embedding.baseUrl).toBeUndefined();
+        });
+
+        test("loadConfig() preserves apiKey from config file", () => {
+            const configDir = join(testDir, ".config", "memory");
+            mkdirSync(configDir, { recursive: true });
+            writeFileSync(
+                join(configDir, "config.json"),
+                JSON.stringify({ embedding: { apiKey: "sk-test-key" } })
+            );
+
+            const config = loadConfig();
+            expect(config.embedding.apiKey).toBe("sk-test-key");
+        });
+
+        test("loadConfig() preserves baseUrl from config file", () => {
+            const configDir = join(testDir, ".config", "memory");
+            mkdirSync(configDir, { recursive: true });
+            writeFileSync(
+                join(configDir, "config.json"),
+                JSON.stringify({ embedding: { baseUrl: "https://custom.api.com/v1" } })
+            );
+
+            const config = loadConfig();
+            expect(config.embedding.baseUrl).toBe("https://custom.api.com/v1");
+        });
+
+        test("loadConfig() returns undefined for apiKey/baseUrl when not present in file", () => {
+            const configDir = join(testDir, ".config", "memory");
+            mkdirSync(configDir, { recursive: true });
+            writeFileSync(
+                join(configDir, "config.json"),
+                JSON.stringify({ embedding: { provider: "openai" } })
+            );
+
+            const config = loadConfig();
+            expect(config.embedding.apiKey).toBeUndefined();
+            expect(config.embedding.baseUrl).toBeUndefined();
+        });
+
+        test("DEFAULT_EMBEDDING_CONFIG does NOT include apiKey or baseUrl", () => {
+            expect(DEFAULT_EMBEDDING_CONFIG).not.toHaveProperty("apiKey");
+            expect(DEFAULT_EMBEDDING_CONFIG).not.toHaveProperty("baseUrl");
+        });
+    });
+
     describe("search config", () => {
         test("DEFAULT_CONFIG.search.defaultMode equals 'auto'", () => {
             expect(DEFAULT_CONFIG.search.defaultMode).toBe("auto");

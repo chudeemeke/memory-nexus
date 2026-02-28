@@ -90,6 +90,10 @@ export interface EmbeddingHealth {
     dimensions: number;
     /** Whether embedding is enabled */
     enabled: boolean;
+    /** Whether the provider is ready to generate embeddings */
+    ready: boolean;
+    /** Reason for readiness status (e.g., "API key not set") */
+    readyReason?: string;
 }
 
 /**
@@ -354,12 +358,37 @@ export function checkSqliteVecAvailability(): SqliteVecHealth {
 export function checkEmbeddingConfig(): EmbeddingHealth {
     const config = loadConfig();
     const embedding = config.embedding;
+
+    // Determine provider readiness
+    let ready = true;
+    let readyReason: string | undefined;
+
+    switch (embedding.provider) {
+        case "openai":
+            if (!embedding.apiKey) {
+                ready = false;
+                readyReason = "API key not set";
+            }
+            break;
+        case "ollama":
+            // Ollama server reachability is verified during initialize(),
+            // not during doctor. Report ready with a clarifying reason.
+            readyReason = "Server reachability verified at sync time";
+            break;
+        case "local":
+        default:
+            // Local provider is always ready (no external deps)
+            break;
+    }
+
     return {
         configured: true,
         provider: embedding.provider,
         model: embedding.model,
         dimensions: embedding.dimensions,
         enabled: embedding.enabled,
+        ready,
+        readyReason,
     };
 }
 
