@@ -569,5 +569,33 @@ describe("health-checker", () => {
             expect(result.ready).toBe(true);
             expect(result.readyReason).toBe("Server reachability verified at sync time");
         });
+
+        it("returns openai-specific model and dimensions when provider is openai without explicit model", () => {
+            writeFileSync(testConfigPath, JSON.stringify({
+                embedding: {
+                    provider: "openai",
+                    apiKey: "sk-test-key",
+                },
+            }));
+
+            const result = checkEmbeddingConfig();
+            expect(result.provider).toBe("openai");
+            expect(result.model).toBe("text-embedding-3-small");
+            expect(result.dimensions).toBe(1536);
+            expect(result.ready).toBe(true);
+        });
+
+        it("returns ollama-specific model and dimensions when provider is ollama without explicit model", () => {
+            writeFileSync(testConfigPath, JSON.stringify({
+                embedding: {
+                    provider: "ollama",
+                },
+            }));
+
+            const result = checkEmbeddingConfig();
+            expect(result.provider).toBe("ollama");
+            expect(result.model).toBe("nomic-embed-text");
+            expect(result.dimensions).toBe(768);
+        });
     });
 });
