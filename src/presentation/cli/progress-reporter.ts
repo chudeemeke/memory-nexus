@@ -2,12 +2,74 @@
  * Progress Reporter for CLI Sync Command
  *
  * Adapts progress display to TTY/non-TTY/quiet environments.
- * TTY: Shows animated progress bar
+ * TTY: Shows animated progress bar with Unicode or ASCII fallback
  * Non-TTY: Shows plain text output (safe for pipes/CI)
  * Quiet: Suppresses all progress output
  */
 
 import cliProgress from "cli-progress";
+
+/**
+ * Bar character pair for progress bar rendering.
+ */
+interface BarCharacters {
+    readonly complete: string;
+    readonly incomplete: string;
+}
+
+/** Unicode block characters for capable terminals. */
+const UNICODE_BAR: BarCharacters = {
+    complete: "\u2588",   // █
+    incomplete: "\u2591", // ░
+};
+
+/** ASCII fallback for terminals without Unicode support. */
+const ASCII_BAR: BarCharacters = {
+    complete: "#",
+    incomplete: "-",
+};
+
+/**
+ * Detect whether the current terminal supports Unicode output.
+ *
+ * Logic matches `is-unicode-supported` (sindresorhus) with an additional
+ * MINGW guard. On non-Windows platforms, Unicode is assumed supported
+ * unless TERM=linux (kernel console). On Windows, only terminals known
+ * to handle UTF-8 correctly are allowlisted.
+ *
+ * Exported for testing.
+ */
+export function isUnicodeSupported(): boolean {
+    const { env } = process;
+
+    // MINGW/MSYS (Git Bash) has unreliable UTF-8 output in Node/Bun
+    if (env.MSYSTEM) {
+        return false;
+    }
+
+    if (process.platform !== "win32") {
+        return env.TERM !== "linux"; // kernel console
+    }
+
+    // Windows: allowlist capable terminals
+    return Boolean(env.WT_SESSION)                       // Windows Terminal
+        || Boolean(env.TERMINUS_SUBLIME)                 // Terminus
+        || env.ConEmuTask === "{cmd::Cmder}"             // ConEmu/Cmder
+        || env.TERM_PROGRAM === "vscode"                 // VS Code terminal
+        || env.TERM === "xterm-256color"                 // xterm-compatible
+        || env.TERM === "alacritty"                      // Alacritty
+        || env.TERMINAL_EMULATOR === "JetBrains-JediTerm"; // JetBrains
+}
+
+/**
+ * Get the appropriate bar characters for the current terminal.
+ *
+ * Returns Unicode block characters on capable terminals,
+ * ASCII fallback otherwise.
+ */
+export function getBarCharacters(): BarCharacters {
+    return isUnicodeSupported() ? UNICODE_BAR : ASCII_BAR;
+}
 
 /**
  * Interface for reporting sync progress.
@@ -49,11 +111,12 @@ export class TtyProgressReporter implements ProgressReporter {
 
   constructor(verbose: boolean = false) {
     this.verbose = verbose;
+    const chars = getBarCharacters();
     this.bar = new cliProgress.SingleBar({
       format:
         "Syncing |{bar}| {percentage}% | {value}/{total} sessions",
-      barCompleteChar: "\u2588",
-      barIncompleteChar: "\u2591",
+      barCompleteChar: chars.complete,
+      barIncompleteChar: chars.incomplete,
       hideCursor: true,
     });
   }
@@ -185,11 +248,12 @@ export class TtyEmbeddingProgressReporter implements EmbeddingProgressReporter {
   private bar: cliProgress.SingleBar;
 
   constructor() {
+    const chars = getBarCharacters();
     this.bar = new cliProgress.SingleBar({
       format:
         "Embedding |{bar}| {percentage}% | {value}/{total} messages | ETA: {eta_formatted}",
-      barCompleteChar: "\u2588",
-      barIncompleteChar: "\u2591",
+      barCompleteChar: chars.complete,
+      barIncompleteChar: chars.incomplete,
       hideCursor: true,
       etaBuffer: 20,
     });
@@ -281,10 +345,11 @@ export function createModelDownloadHandler(options: {
   }
 
   // TTY: show animated progress bar for download
+  const chars = getBarCharacters();
   const downloadBar = new cliProgress.SingleBar({
     format: "Downloading model |{bar}| {percentage}% | {value}/{total} MB",
-    barCompleteChar: "\u2588",
-    barIncompleteChar: "\u2591",
+    barCompleteChar: chars.complete,
+    barIncompleteChar: chars.incomplete,
     hideCursor: true,
   });
   let started = false;

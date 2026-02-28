@@ -12,7 +12,7 @@
     "dist"
   ],
   "scripts": {
-    "build": "bun build src/presentation/cli/index.ts --outdir dist/presentation/cli --target node",
+    "build": "bun build src/presentation/cli/index.ts --outdir dist/presentation/cli --target bun --external onnxruntime-node",
     "build:hook": "bun build src/infrastructure/hooks/sync-hook-script.ts --outfile=dist/sync-hook.js --target=bun",
     "test": "bun test",
     "test:coverage": "bun test --coverage",

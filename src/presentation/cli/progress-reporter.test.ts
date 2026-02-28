@@ -17,8 +17,111 @@ import {
   createEmbeddingProgressReporter,
   createModelDownloadHandler,
   type EmbeddingProgressReporter,
+  isUnicodeSupported,
+  getBarCharacters,
 } from "./progress-reporter.js";
 import type { DownloadProgress } from "../../domain/ports/embedding.js";
+
+describe("isUnicodeSupported", () => {
+  let savedEnv: Record<string, string | undefined>;
+  let savedPlatform: string;
+
+  beforeEach(() => {
+    savedEnv = {
+      MSYSTEM: process.env.MSYSTEM,
+      WT_SESSION: process.env.WT_SESSION,
+      TERMINUS_SUBLIME: process.env.TERMINUS_SUBLIME,
+      ConEmuTask: process.env.ConEmuTask,
+      TERM_PROGRAM: process.env.TERM_PROGRAM,
+      TERM: process.env.TERM,
+      TERMINAL_EMULATOR: process.env.TERMINAL_EMULATOR,
+    };
+    savedPlatform = process.platform;
+    // Clear all detection env vars
+    delete process.env.MSYSTEM;
+    delete process.env.WT_SESSION;
+    delete process.env.TERMINUS_SUBLIME;
+    delete process.env.ConEmuTask;
+    delete process.env.TERM_PROGRAM;
+    delete process.env.TERM;
+    delete process.env.TERMINAL_EMULATOR;
+  });
+
+  afterEach(() => {
+    for (const [key, value] of Object.entries(savedEnv)) {
+      if (value === undefined) {
+        delete process.env[key];
+      } else {
+        process.env[key] = value;
+      }
+    }
+    Object.defineProperty(process, "platform", { value: savedPlatform });
+  });
+
+  it("returns false when MSYSTEM is set (MINGW/Git Bash)", () => {
+    process.env.MSYSTEM = "MINGW64";
+    expect(isUnicodeSupported()).toBe(false);
+  });
+
+  it("returns true on non-Windows platforms by default", () => {
+    Object.defineProperty(process, "platform", { value: "linux" });
+    expect(isUnicodeSupported()).toBe(true);
+  });
+
+  it("returns false on non-Windows with TERM=linux (kernel console)", () => {
+    Object.defineProperty(process, "platform", { value: "linux" });
+    process.env.TERM = "linux";
+    expect(isUnicodeSupported()).toBe(false);
+  });
+
+  it("returns true on Windows with WT_SESSION (Windows Terminal)", () => {
+    Object.defineProperty(process, "platform", { value: "win32" });
+    process.env.WT_SESSION = "some-guid";
+    expect(isUnicodeSupported()).toBe(true);
+  });
+
+  it("returns true on Windows with TERM_PROGRAM=vscode", () => {
+    Object.defineProperty(process, "platform", { value: "win32" });
+    process.env.TERM_PROGRAM = "vscode";
+    expect(isUnicodeSupported()).toBe(true);
+  });
+
+  it("returns false on plain Windows without capable terminal", () => {
+    Object.defineProperty(process, "platform", { value: "win32" });
+    expect(isUnicodeSupported()).toBe(false);
+  });
+});
+
+describe("getBarCharacters", () => {
+  let savedMSYSTEM: string | undefined;
+
+  beforeEach(() => {
+    savedMSYSTEM = process.env.MSYSTEM;
+  });
+
+  afterEach(() => {
+    if (savedMSYSTEM === undefined) {
+      delete process.env.MSYSTEM;
+    } else {
+      process.env.MSYSTEM = savedMSYSTEM;
+    }
+  });
+
+  it("returns object with complete and incomplete properties", () => {
+    const chars = getBarCharacters();
+    expect(typeof chars.complete).toBe("string");
+    expect(typeof chars.incomplete).toBe("string");
+    expect(chars.complete.length).toBeGreaterThan(0);
+    expect(chars.incomplete.length).toBeGreaterThan(0);
+  });
+
+  it("returns ASCII fallback when MSYSTEM is set", () => {
+    process.env.MSYSTEM = "MINGW64";
+    const chars = getBarCharacters();
+    expect(chars.complete).toBe("#");
+    expect(chars.incomplete).toBe("-");
+  });
+});
 
 describe("ProgressReporter", () => {
   describe("QuietProgressReporter", () => {
