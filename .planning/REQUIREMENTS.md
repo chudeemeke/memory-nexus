@@ -54,7 +54,7 @@ Requirements for v2.0: Hybrid Search, Package Rename, and API Stabilization.
 - [x] **PROV-01**: Implement OpenAI embedding provider adapter (text-embedding-3-small)
 - [x] **PROV-02**: Implement Ollama embedding provider adapter (local server)
 - [x] **PROV-03**: Provider configuration via `~/.config/memory/config.json` (provider, model, dimensions, apiKey, batchSize)
-- [ ] **PROV-04**: Model change detection: when configured model differs from embedded model_hash, trigger re-embedding with user confirmation
+- [x] **PROV-04**: Model change detection: when configured model differs from embedded model_hash, trigger re-embedding with user confirmation
 
 ### aidev Integration
 
@@ -137,7 +137,7 @@ Deferred. Tracked for context, not in current roadmap.
 | PROV-01 | Phase 17 | Complete |
 | PROV-02 | Phase 17 | Complete |
 | PROV-03 | Phase 17 | Complete |
-| PROV-04 | Phase 17 | Pending |
+| PROV-04 | Phase 17 | Complete |
 | INTEG-01 | Phase 18 | Pending |
 | INTEG-02 | Phase 18 | Pending |
 | INTEG-03 | Phase 18 | Pending |
@@ -154,4 +154,4 @@ Deferred. Tracked for context, not in current roadmap.
 
 ---
 *Requirements defined: 2026-02-18*
-*Last updated: 2026-02-28 (Phase 17 Plan 01 complete, PROV-01/02/03 requirements completed)*
+*Last updated: 2026-02-28 (Phase 17 complete, all PROV requirements completed)*

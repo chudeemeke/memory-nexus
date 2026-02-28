@@ -13,17 +13,17 @@ See: .planning/PROJECT.md (updated 2026-02-18)
 ## Current Position
 
 **Milestone:** v2.0 Hybrid Search and Rebrand
-**Phase:** 17 (Provider Ecosystem) -- Plan 1/2 complete
-**Status:** Active -- executing Phase 17
+**Phase:** 17 (Provider Ecosystem) -- Complete (2/2 plans)
+**Status:** Active -- Phase 17 complete, ready for Phase 18
 
 ```
-v2.0 Progress: [##############......] 5/7 phases
+v2.0 Progress: [################....] 6/7 phases
   Phase 13: Package Rename          [x] Complete (3/3 plans)
   Phase 14: Embedding Infrastructure [x] Complete (4/4 plans)
   Phase 15: Embedding Pipeline       [x] Complete (4/4 plans)
   Phase 16: Hybrid Search            [x] Complete (3/3 plans)
   Phase 16.1: Migration Race Fix     [x] Complete (1/1 plans)
-  Phase 17: Provider Ecosystem       [~] In Progress (1/2 plans)
+  Phase 17: Provider Ecosystem       [x] Complete (2/2 plans)
   Phase 18: API Stabilization        [ ] Pending
 ```
 
@@ -60,6 +60,7 @@ v2.0 Progress: [##############......] 5/7 phases
 | 16-03 | CLI integration, output formatting, and doctor enhancement | ~30min | 2 | 9 |
 | 16.1-01 | Size-aware migration conflict resolution with WAL/SHM cleanup | 4min | 2 | 3 |
 | 17-01 | OpenAI and Ollama provider adapters with config and factory wiring | 16min | 2 | 13 |
+| 17-02 | Dimension-aware re-embedding on provider/model change | 6min | 2 | 4 |
 
 ## Accumulated Context
 
@@ -131,6 +132,10 @@ v2.0 Progress: [##############......] 5/7 phases
 | Ollama doctor readiness deferred | ready:true + readyReason text | Server connectivity verified at sync time, not during doctor |
 | OpenAI doctor readiness gated on apiKey | ready:false when apiKey missing | Clear "API key not set" reason for user |
 | Fetch-based providers | Native fetch(), zero npm deps | OpenAI and Ollama both have simple HTTP APIs; no SDK needed |
+| Dimension detection method | Query stored embedding byteLength/4 | More reliable than PRAGMA on vec0 virtual tables |
+| recreateVecTable atomicity | DROP vec0 + DELETE embedding_state | Prevents orphaned state when vectors are dropped |
+| Dimension change skip on null | Skip recreation when no stored embeddings | Table already correct from initial schema or will be created fresh |
+| Same-dimension model change | DELETE-only path (no table recreation) | No structural change needed when dimensions match |
 
 ### Research Completed
 
@@ -157,20 +162,18 @@ None. Phase 16.1 complete; Phase 17/18 unblocked.
 ### Last Session
 
 **Date:** 2026-02-28
-**Completed:** Phase 17, Plan 01 (OpenAI and Ollama provider adapters)
-**Stopped at:** Completed 17-01-PLAN.md, ready for 17-02
+**Completed:** Phase 17, Plan 02 (Dimension-aware re-embedding)
+**Stopped at:** Completed 17-02-PLAN.md, Phase 17 complete
 
 ### Context for Next Session
 
-1. Phase 17, Plan 01 COMPLETE: OpenAI and Ollama providers, factory wiring, config extension, doctor readiness
-2. 2509 tests passing across full suite (57 new tests from this plan)
-3. Factory creates correct provider for "local", "openai", "ollama" configs
-4. EmbeddingConfigData now has optional apiKey and baseUrl fields
-5. EmbeddingHealth now has ready (boolean) and readyReason (string | undefined) fields
-6. Doctor displays provider readiness status with actionable reasons
-7. PROV-01, PROV-02, PROV-03 requirements complete; PROV-04 pending (Plan 17-02)
-8. Phase 18 (API Stabilization) unblocked
+1. Phase 17 COMPLETE: All 4 PROV requirements satisfied (PROV-01 through PROV-04)
+2. 2523 tests passing across full suite (14 new tests from Plan 17-02)
+3. EmbeddingRepository has getStoredEmbeddingDimensions() and recreateVecTable(dims) methods
+4. Sync --embed flow detects dimension changes and recreates vec0 table before re-embedding
+5. Same-dimension model changes still use standard DELETE-only path
+6. Phase 18 (API Stabilization) is next and final phase of v2.0
 
 ---
 
-*Last updated: 2026-02-28 (Plan 17-01 complete)*
+*Last updated: 2026-02-28 (Plan 17-02 complete, Phase 17 complete)*
