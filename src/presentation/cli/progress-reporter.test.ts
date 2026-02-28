@@ -58,9 +58,10 @@ describe("isUnicodeSupported", () => {
     Object.defineProperty(process, "platform", { value: savedPlatform });
   });
 
-  it("returns false when MSYSTEM is set (MINGW/Git Bash)", () => {
+  it("returns true when MSYSTEM is set (MINGW/Git Bash renders Unicode)", () => {
+    Object.defineProperty(process, "platform", { value: "win32" });
     process.env.MSYSTEM = "MINGW64";
-    expect(isUnicodeSupported()).toBe(false);
+    expect(isUnicodeSupported()).toBe(true);
   });
 
   it("returns true on non-Windows platforms by default", () => {
@@ -115,11 +116,12 @@ describe("getBarCharacters", () => {
     expect(chars.incomplete.length).toBeGreaterThan(0);
   });
 
-  it("returns ASCII fallback when MSYSTEM is set", () => {
+  it("returns Unicode characters when MSYSTEM is set (Git Bash)", () => {
+    Object.defineProperty(process, "platform", { value: "win32" });
     process.env.MSYSTEM = "MINGW64";
     const chars = getBarCharacters();
-    expect(chars.complete).toBe("#");
-    expect(chars.incomplete).toBe("-");
+    expect(chars.complete).toBe("\u2588");
+    expect(chars.incomplete).toBe("\u2591");
   });
 });
 

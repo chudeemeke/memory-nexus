@@ -32,27 +32,30 @@ const ASCII_BAR: BarCharacters = {
 /**
  * Detect whether the current terminal supports Unicode output.
  *
- * Logic matches `is-unicode-supported` (sindresorhus) with an additional
- * MINGW guard. On non-Windows platforms, Unicode is assumed supported
- * unless TERM=linux (kernel console). On Windows, only terminals known
- * to handle UTF-8 correctly are allowlisted.
+ * Most modern terminals (including MINGW64/Git Bash) render Unicode
+ * block characters correctly. The only known exceptions are the Linux
+ * kernel console (TERM=linux) and legacy Windows cmd.exe without
+ * Windows Terminal.
+ *
+ * Note: The Bun bundler's --target=node flag double-encodes UTF-8
+ * literals (Bun #25767), which produces garbled output regardless of
+ * terminal capability. The fix for that is --target=bun in the build
+ * command, not a runtime fallback.
  *
  * Exported for testing.
  */
 export function isUnicodeSupported(): boolean {
     const { env } = process;
 
-    // MINGW/MSYS (Git Bash) has unreliable UTF-8 output in Node/Bun
-    if (env.MSYSTEM) {
-        return false;
-    }
-
     if (process.platform !== "win32") {
-        return env.TERM !== "linux"; // kernel console
+        return env.TERM !== "linux"; // kernel console has limited Unicode
     }
 
-    // Windows: allowlist capable terminals
-    return Boolean(env.WT_SESSION)                       // Windows Terminal
+    // Windows: MINGW/Git Bash, Windows Terminal, VS Code, and most
+    // modern terminals handle Unicode block characters correctly.
+    // Only exclude plain cmd.exe/PowerShell without Windows Terminal.
+    return Boolean(env.MSYSTEM)                          // MINGW/Git Bash
+        || Boolean(env.WT_SESSION)                       // Windows Terminal
         || Boolean(env.TERMINUS_SUBLIME)                 // Terminus
         || env.ConEmuTask === "{cmd::Cmder}"             // ConEmu/Cmder
         || env.TERM_PROGRAM === "vscode"                 // VS Code terminal
