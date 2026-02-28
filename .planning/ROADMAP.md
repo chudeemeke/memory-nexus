@@ -139,7 +139,7 @@ Success Criteria:
 
 **Depends on:** Phase 14 (needs `IEmbeddingProvider` port defined)
 **Can run in parallel with:** Phases 15-16 (only needs the port, not the pipeline or search)
-**Plans:** 3 plans
+**Plans:** 3/3 plans complete
 
 Plans:
 - [x] 17-01-PLAN.md -- OpenAI and Ollama provider adapters with config and factory wiring
@@ -214,7 +214,7 @@ Phase 13 (Package Rename)
 | 15 | v2.0 | Complete    | 2026-02-27 | 2026-02-26 |
 | 16 | 3/3 | Complete    | 2026-02-27 | -- |
 | 16.1 | v2.0 | Complete    | 2026-02-27 | 2026-02-27 |
-| 17 | v2.0 | 3/3 | Complete | 2026-02-28 |
+| 17 | 3/3 | Complete   | 2026-02-28 | 2026-02-28 |
 | 18 | v2.0 | -- | Pending | -- |
 
 ---
