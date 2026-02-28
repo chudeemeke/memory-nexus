@@ -19,6 +19,8 @@ import {
     DEFAULT_CONFIG,
     DEFAULT_EMBEDDING_CONFIG,
     DEFAULT_SEARCH_CONFIG,
+    PROVIDER_DEFAULTS,
+    resolveProviderDefaults,
     type MemoryConfig,
     type EmbeddingConfigData,
     type SearchConfigData,
@@ -453,6 +455,155 @@ describe("config-manager", () => {
         test("DEFAULT_EMBEDDING_CONFIG does NOT include apiKey or baseUrl", () => {
             expect(DEFAULT_EMBEDDING_CONFIG).not.toHaveProperty("apiKey");
             expect(DEFAULT_EMBEDDING_CONFIG).not.toHaveProperty("baseUrl");
+        });
+    });
+
+    describe("PROVIDER_DEFAULTS", () => {
+        test("has entries for local, openai, and ollama", () => {
+            expect(PROVIDER_DEFAULTS).toHaveProperty("local");
+            expect(PROVIDER_DEFAULTS).toHaveProperty("openai");
+            expect(PROVIDER_DEFAULTS).toHaveProperty("ollama");
+        });
+
+        test("openai has correct model and dimensions", () => {
+            expect(PROVIDER_DEFAULTS.openai.model).toBe("text-embedding-3-small");
+            expect(PROVIDER_DEFAULTS.openai.dimensions).toBe(1536);
+        });
+
+        test("ollama has correct model and dimensions", () => {
+            expect(PROVIDER_DEFAULTS.ollama.model).toBe("nomic-embed-text");
+            expect(PROVIDER_DEFAULTS.ollama.dimensions).toBe(768);
+        });
+
+        test("local matches DEFAULT_EMBEDDING_CONFIG model and dimensions", () => {
+            expect(PROVIDER_DEFAULTS.local.model).toBe(DEFAULT_EMBEDDING_CONFIG.model);
+            expect(PROVIDER_DEFAULTS.local.dimensions).toBe(DEFAULT_EMBEDDING_CONFIG.dimensions);
+        });
+    });
+
+    describe("resolveProviderDefaults", () => {
+        test("applies openai defaults to raw merge result", () => {
+            const merged: EmbeddingConfigData = {
+                ...DEFAULT_EMBEDDING_CONFIG,
+                provider: "openai",
+            };
+            const userEmbedding = { provider: "openai" };
+
+            const resolved = resolveProviderDefaults(merged, userEmbedding);
+            expect(resolved.model).toBe("text-embedding-3-small");
+            expect(resolved.dimensions).toBe(1536);
+        });
+
+        test("preserves user-explicit model field", () => {
+            const merged: EmbeddingConfigData = {
+                ...DEFAULT_EMBEDDING_CONFIG,
+                provider: "openai",
+                model: "text-embedding-3-large",
+            };
+            const userEmbedding = { provider: "openai", model: "text-embedding-3-large" };
+
+            const resolved = resolveProviderDefaults(merged, userEmbedding);
+            expect(resolved.model).toBe("text-embedding-3-large");
+            expect(resolved.dimensions).toBe(1536);
+        });
+    });
+
+    describe("provider-specific default resolution", () => {
+        test("loadConfig() returns openai defaults when provider is openai without explicit model/dimensions", () => {
+            const configDir = join(testDir, ".config", "memory");
+            mkdirSync(configDir, { recursive: true });
+            writeFileSync(
+                join(configDir, "config.json"),
+                JSON.stringify({ embedding: { provider: "openai" } })
+            );
+
+            const config = loadConfig();
+            expect(config.embedding.model).toBe("text-embedding-3-small");
+            expect(config.embedding.dimensions).toBe(1536);
+        });
+
+        test("loadConfig() returns ollama defaults when provider is ollama without explicit model/dimensions", () => {
+            const configDir = join(testDir, ".config", "memory");
+            mkdirSync(configDir, { recursive: true });
+            writeFileSync(
+                join(configDir, "config.json"),
+                JSON.stringify({ embedding: { provider: "ollama" } })
+            );
+
+            const config = loadConfig();
+            expect(config.embedding.model).toBe("nomic-embed-text");
+            expect(config.embedding.dimensions).toBe(768);
+        });
+
+        test("loadConfig() preserves explicit model when provider is openai and model is set", () => {
+            const configDir = join(testDir, ".config", "memory");
+            mkdirSync(configDir, { recursive: true });
+            writeFileSync(
+                join(configDir, "config.json"),
+                JSON.stringify({ embedding: { provider: "openai", model: "text-embedding-3-large" } })
+            );
+
+            const config = loadConfig();
+            expect(config.embedding.model).toBe("text-embedding-3-large");
+            expect(config.embedding.dimensions).toBe(1536);
+        });
+
+        test("loadConfig() preserves explicit dimensions when provider is openai and dimensions is set", () => {
+            const configDir = join(testDir, ".config", "memory");
+            mkdirSync(configDir, { recursive: true });
+            writeFileSync(
+                join(configDir, "config.json"),
+                JSON.stringify({ embedding: { provider: "openai", dimensions: 3072 } })
+            );
+
+            const config = loadConfig();
+            expect(config.embedding.model).toBe("text-embedding-3-small");
+            expect(config.embedding.dimensions).toBe(3072);
+        });
+
+        test("loadConfig() preserves both explicit model and dimensions when both are set", () => {
+            const configDir = join(testDir, ".config", "memory");
+            mkdirSync(configDir, { recursive: true });
+            writeFileSync(
+                join(configDir, "config.json"),
+                JSON.stringify({ embedding: { provider: "openai", model: "custom-model", dimensions: 512 } })
+            );
+
+            const config = loadConfig();
+            expect(config.embedding.model).toBe("custom-model");
+            expect(config.embedding.dimensions).toBe(512);
+        });
+
+        test("loadConfig() returns local defaults for provider: local (unchanged behavior)", () => {
+            const configDir = join(testDir, ".config", "memory");
+            mkdirSync(configDir, { recursive: true });
+            writeFileSync(
+                join(configDir, "config.json"),
+                JSON.stringify({ embedding: { provider: "local" } })
+            );
+
+            const config = loadConfig();
+            expect(config.embedding.model).toBe("Xenova/all-MiniLM-L6-v2");
+            expect(config.embedding.dimensions).toBe(384);
+        });
+
+        test("loadConfig() returns local defaults for unknown provider (safe fallback)", () => {
+            const configDir = join(testDir, ".config", "memory");
+            mkdirSync(configDir, { recursive: true });
+            writeFileSync(
+                join(configDir, "config.json"),
+                JSON.stringify({ embedding: { provider: "cohere" } })
+            );
+
+            const config = loadConfig();
+            expect(config.embedding.model).toBe("Xenova/all-MiniLM-L6-v2");
+            expect(config.embedding.dimensions).toBe(384);
+        });
+
+        test("loadConfig() returns local defaults when no config file exists (unchanged behavior)", () => {
+            const config = loadConfig();
+            expect(config.embedding.model).toBe("Xenova/all-MiniLM-L6-v2");
+            expect(config.embedding.dimensions).toBe(384);
         });
     });
 

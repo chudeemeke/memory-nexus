@@ -120,6 +120,62 @@ export interface MemoryConfig {
 }
 
 /**
+ * Provider-specific default model and dimensions
+ *
+ * Maps provider identifiers to their default model and dimensions.
+ * Used by resolveProviderDefaults() to apply correct defaults
+ * when a user sets provider without explicit model/dimensions.
+ */
+export const PROVIDER_DEFAULTS: Record<string, { model: string; dimensions: number }> = {
+    local: { model: "Xenova/all-MiniLM-L6-v2", dimensions: 384 },
+    openai: { model: "text-embedding-3-small", dimensions: 1536 },
+    ollama: { model: "nomic-embed-text", dimensions: 768 },
+};
+
+/**
+ * Resolve provider-specific defaults for model and dimensions
+ *
+ * After deep-merging user config with DEFAULT_EMBEDDING_CONFIG,
+ * checks if the provider was changed from "local" and whether
+ * model/dimensions were user-explicit. If not, applies provider-specific
+ * defaults from PROVIDER_DEFAULTS.
+ *
+ * Uses `in` operator to check field presence in the raw user JSON:
+ * - "model" in userEmbedding returns true even if value matches a default
+ * - This correctly preserves user-explicit values
+ *
+ * @param merged The deep-merged embedding config
+ * @param userEmbedding The raw user embedding section from JSON (before merge)
+ * @returns Resolved embedding config with correct provider defaults
+ */
+export function resolveProviderDefaults(
+    merged: EmbeddingConfigData,
+    userEmbedding: Partial<EmbeddingConfigData> | undefined,
+): EmbeddingConfigData {
+    const provider = merged.provider;
+
+    // For local provider or when no user embedding section, defaults are already correct
+    if (provider === "local" || !userEmbedding) {
+        return merged;
+    }
+
+    const providerDefaults = PROVIDER_DEFAULTS[provider];
+    const result = { ...merged };
+
+    // Apply provider-specific model default if user did not explicitly set model
+    if (!("model" in userEmbedding)) {
+        result.model = providerDefaults?.model ?? merged.model;
+    }
+
+    // Apply provider-specific dimensions default if user did not explicitly set dimensions
+    if (!("dimensions" in userEmbedding)) {
+        result.dimensions = providerDefaults?.dimensions ?? merged.dimensions;
+    }
+
+    return result;
+}
+
+/**
  * Default embedding configuration
  *
  * Local provider with all-MiniLM-L6-v2 model (384 dimensions).
@@ -200,10 +256,12 @@ export function loadConfig(): MemoryConfig {
     try {
         const content = readFileSync(configPath, "utf-8");
         const loaded = JSON.parse(content) as Partial<MemoryConfig>;
+        const userEmbedding = loaded.embedding as Partial<EmbeddingConfigData> | undefined;
+        const mergedEmbedding = { ...DEFAULT_EMBEDDING_CONFIG, ...(userEmbedding ?? {}) };
         return {
             ...DEFAULT_CONFIG,
             ...loaded,
-            embedding: { ...DEFAULT_EMBEDDING_CONFIG, ...(loaded.embedding ?? {}) },
+            embedding: resolveProviderDefaults(mergedEmbedding, userEmbedding),
             search: {
                 ...DEFAULT_SEARCH_CONFIG,
                 ...(loaded.search ?? {}),
