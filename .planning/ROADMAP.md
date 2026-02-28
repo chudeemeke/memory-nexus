@@ -141,6 +141,10 @@ Success Criteria:
 **Can run in parallel with:** Phases 15-16 (only needs the port, not the pipeline or search)
 **Estimated Plans:** 2-3
 
+Plans:
+- [x] 17-01-PLAN.md -- OpenAI and Ollama provider adapters with config and factory wiring
+- [ ] 17-02-PLAN.md -- Model change detection and re-embedding confirmation
+
 Requirements: PROV-01, PROV-02, PROV-03, PROV-04
 
 Success Criteria:
@@ -209,9 +213,9 @@ Phase 13 (Package Rename)
 | 15 | v2.0 | Complete    | 2026-02-27 | 2026-02-26 |
 | 16 | 3/3 | Complete    | 2026-02-27 | -- |
 | 16.1 | v2.0 | Complete    | 2026-02-27 | 2026-02-27 |
-| 17 | v2.0 | -- | Pending | -- |
+| 17 | v2.0 | 1/2 | In Progress | -- |
 | 18 | v2.0 | -- | Pending | -- |
 
 ---
 
-*Last updated: 2026-02-27 (Phase 16.1 Plan 01 complete)*
+*Last updated: 2026-02-28 (Phase 17 Plan 01 complete)*

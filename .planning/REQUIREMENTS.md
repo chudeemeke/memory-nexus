@@ -51,9 +51,9 @@ Requirements for v2.0: Hybrid Search, Package Rename, and API Stabilization.
 
 ### Provider Ecosystem
 
-- [ ] **PROV-01**: Implement OpenAI embedding provider adapter (text-embedding-3-small)
-- [ ] **PROV-02**: Implement Ollama embedding provider adapter (local server)
-- [ ] **PROV-03**: Provider configuration via `~/.config/memory/config.json` (provider, model, dimensions, apiKey, batchSize)
+- [x] **PROV-01**: Implement OpenAI embedding provider adapter (text-embedding-3-small)
+- [x] **PROV-02**: Implement Ollama embedding provider adapter (local server)
+- [x] **PROV-03**: Provider configuration via `~/.config/memory/config.json` (provider, model, dimensions, apiKey, batchSize)
 - [ ] **PROV-04**: Model change detection: when configured model differs from embedded model_hash, trigger re-embedding with user confirmation
 
 ### aidev Integration
@@ -134,9 +134,9 @@ Deferred. Tracked for context, not in current roadmap.
 | DEGRADE-02 | Phase 16 | Complete |
 | DEGRADE-03 | Phase 16 | Complete |
 | DEGRADE-04 | Phase 16 | Complete |
-| PROV-01 | Phase 17 | Pending |
-| PROV-02 | Phase 17 | Pending |
-| PROV-03 | Phase 17 | Pending |
+| PROV-01 | Phase 17 | Complete |
+| PROV-02 | Phase 17 | Complete |
+| PROV-03 | Phase 17 | Complete |
 | PROV-04 | Phase 17 | Pending |
 | INTEG-01 | Phase 18 | Pending |
 | INTEG-02 | Phase 18 | Pending |
@@ -154,4 +154,4 @@ Deferred. Tracked for context, not in current roadmap.
 
 ---
 *Requirements defined: 2026-02-18*
-*Last updated: 2026-02-27 (Phase 16 Plan 02 complete, HSRCH and DEGRADE requirements updated)*
+*Last updated: 2026-02-28 (Phase 17 Plan 01 complete, PROV-01/02/03 requirements completed)*

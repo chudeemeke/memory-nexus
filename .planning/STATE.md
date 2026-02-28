@@ -13,8 +13,8 @@ See: .planning/PROJECT.md (updated 2026-02-18)
 ## Current Position
 
 **Milestone:** v2.0 Hybrid Search and Rebrand
-**Phase:** 17 (Provider Ecosystem) -- PENDING
-**Status:** Active -- Phase 16.1 complete, ready for Phase 17 planning
+**Phase:** 17 (Provider Ecosystem) -- Plan 1/2 complete
+**Status:** Active -- executing Phase 17
 
 ```
 v2.0 Progress: [##############......] 5/7 phases
@@ -23,7 +23,7 @@ v2.0 Progress: [##############......] 5/7 phases
   Phase 15: Embedding Pipeline       [x] Complete (4/4 plans)
   Phase 16: Hybrid Search            [x] Complete (3/3 plans)
   Phase 16.1: Migration Race Fix     [x] Complete (1/1 plans)
-  Phase 17: Provider Ecosystem       [ ] Pending
+  Phase 17: Provider Ecosystem       [~] In Progress (1/2 plans)
   Phase 18: API Stabilization        [ ] Pending
 ```
 
@@ -59,6 +59,7 @@ v2.0 Progress: [##############......] 5/7 phases
 | 16-02 | HybridSearchService with mode resolution and graceful degradation | 12min | 2 | 6 |
 | 16-03 | CLI integration, output formatting, and doctor enhancement | ~30min | 2 | 9 |
 | 16.1-01 | Size-aware migration conflict resolution with WAL/SHM cleanup | 4min | 2 | 3 |
+| 17-01 | OpenAI and Ollama provider adapters with config and factory wiring | 16min | 2 | 13 |
 
 ## Accumulated Context
 
@@ -125,6 +126,11 @@ v2.0 Progress: [##############......] 5/7 phases
 | WAL/SHM sidecar cleanup | Only on overwrite (source > dest) | Prevents stale WAL state corrupting migrated database |
 | Migration guard placement | CLI entry point (index.ts), not connection.ts | No coupling between migration and database initialization modules |
 | Entry-point migration guard | isMigrationPending() before program.parse() | Prevents empty-stub race; fast path (single existsSync) when no legacy |
+| OpenAI initialize() no-op | Mark ready immediately, no API health check | Auth errors surface on first embed(), avoiding blocking network calls |
+| Ollama initialize() reachability check | GET /api/tags with actionable error hints | Local server may not be running; clear recovery guidance needed |
+| Ollama doctor readiness deferred | ready:true + readyReason text | Server connectivity verified at sync time, not during doctor |
+| OpenAI doctor readiness gated on apiKey | ready:false when apiKey missing | Clear "API key not set" reason for user |
+| Fetch-based providers | Native fetch(), zero npm deps | OpenAI and Ollama both have simple HTTP APIs; no SDK needed |
 
 ### Research Completed
 
@@ -150,21 +156,21 @@ None. Phase 16.1 complete; Phase 17/18 unblocked.
 
 ### Last Session
 
-**Date:** 2026-02-27
-**Completed:** Phase 16.1 (1/1 plans) -- migration race condition fix
-**Stopped at:** Phase 16.1 complete, ready for Phase 17
+**Date:** 2026-02-28
+**Completed:** Phase 17, Plan 01 (OpenAI and Ollama provider adapters)
+**Stopped at:** Completed 17-01-PLAN.md, ready for 17-02
 
 ### Context for Next Session
 
-1. Phase 16.1 (Migration Race Fix) COMPLETE: size-aware conflict resolution, WAL/SHM cleanup, isMigrationPending guard
-2. Migration race condition resolved: legacy 266MB DB now correctly replaces empty 221KB XDG stub
-3. 2452 tests passing across full suite (14 new migration tests)
-4. Phase 17 (Provider Ecosystem) and Phase 18 (API Stabilization) unblocked
-5. JSON output supports metadata envelope (additive, backward-compatible)
-6. Doctor reports Search Capability section with exit codes (0/1/2)
-7. Context/related hybrid benefit deferred (SqliteContextService does own SQL)
-8. All Phase 16 requirements met: HSRCH-01 through HSRCH-06, DEGRADE-01 through DEGRADE-04
+1. Phase 17, Plan 01 COMPLETE: OpenAI and Ollama providers, factory wiring, config extension, doctor readiness
+2. 2509 tests passing across full suite (57 new tests from this plan)
+3. Factory creates correct provider for "local", "openai", "ollama" configs
+4. EmbeddingConfigData now has optional apiKey and baseUrl fields
+5. EmbeddingHealth now has ready (boolean) and readyReason (string | undefined) fields
+6. Doctor displays provider readiness status with actionable reasons
+7. PROV-01, PROV-02, PROV-03 requirements complete; PROV-04 pending (Plan 17-02)
+8. Phase 18 (API Stabilization) unblocked
 
 ---
 
-*Last updated: 2026-02-27 (Plan 16.1-01 complete -- Phase 16.1 done)*
+*Last updated: 2026-02-28 (Plan 17-01 complete)*
