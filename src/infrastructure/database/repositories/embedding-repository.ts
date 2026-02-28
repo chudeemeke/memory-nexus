@@ -185,4 +185,47 @@ export class EmbeddingRepository {
         `);
         return stmt.all(queryEmbedding, limit);
     }
+
+    /**
+     * Get the dimension of currently stored embeddings.
+     *
+     * Queries a single embedding from message_embeddings and determines
+     * its dimension from the byte length (Float32 = 4 bytes per dimension).
+     *
+     * @returns The dimension count, or null if no embeddings are stored
+     */
+    getStoredEmbeddingDimensions(): number | null {
+        const countRow = this.db.prepare<{ count: number }, []>(
+            "SELECT COUNT(*) as count FROM message_embeddings"
+        ).get();
+        if (!countRow || countRow.count === 0) return null;
+
+        const row = this.db.prepare<{ embedding: Uint8Array }, []>(
+            "SELECT embedding FROM message_embeddings LIMIT 1"
+        ).get();
+        if (!row || !row.embedding) return null;
+
+        // Float32 = 4 bytes per dimension
+        return row.embedding.byteLength / 4;
+    }
+
+    /**
+     * Drop and recreate the message_embeddings vec0 table with new dimensions.
+     *
+     * Used when the provider/model changes and the new model produces
+     * vectors of a different dimension than what is currently stored.
+     * Also clears embedding_state since the tracking data is logically
+     * paired with the vector data.
+     *
+     * @param dimensions The number of dimensions for the new vec0 table
+     */
+    recreateVecTable(dimensions: number): void {
+        this.db.exec("DROP TABLE IF EXISTS message_embeddings");
+        this.db.exec(
+            `CREATE VIRTUAL TABLE message_embeddings USING vec0(
+                embedding float[${dimensions}]
+            )`
+        );
+        this.db.exec("DELETE FROM embedding_state");
+    }
 }

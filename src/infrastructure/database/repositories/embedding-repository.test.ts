@@ -494,4 +494,206 @@ describe("EmbeddingRepository", () => {
             expect(results).toHaveLength(0);
         });
     });
+
+    describe("getStoredEmbeddingDimensions()", () => {
+        test("returns null when message_embeddings table has no rows", () => {
+            if (!sqliteVecAvailable) {
+                console.warn("Skipping test: sqlite-vec not available");
+                return;
+            }
+
+            const result = repo.getStoredEmbeddingDimensions();
+            expect(result).toBeNull();
+        });
+
+        test("returns the dimension of stored 384d embeddings", () => {
+            if (!sqliteVecAvailable) {
+                console.warn("Skipping test: sqlite-vec not available");
+                return;
+            }
+
+            const rowids = insertTestMessages(db, 1);
+            const embedding = createTestEmbedding(1, 384);
+            repo.storeBatch(
+                [{ rowid: rowids[0], embedding }],
+                "hash384",
+                "model384"
+            );
+
+            const result = repo.getStoredEmbeddingDimensions();
+            expect(result).toBe(384);
+        });
+
+        test("returns correct dimension after storing 1536d embeddings", () => {
+            if (!sqliteVecAvailable) {
+                console.warn("Skipping test: sqlite-vec not available");
+                return;
+            }
+
+            // Recreate the table with 1536 dimensions first
+            repo.recreateVecTable(1536);
+
+            const rowids = insertTestMessages(db, 1);
+            const embedding = createTestEmbedding(1, 1536);
+            repo.storeBatch(
+                [{ rowid: rowids[0], embedding }],
+                "hash1536",
+                "model1536"
+            );
+
+            const result = repo.getStoredEmbeddingDimensions();
+            expect(result).toBe(1536);
+        });
+    });
+
+    describe("recreateVecTable()", () => {
+        test("after recreateVecTable(1536), the message_embeddings table is empty", () => {
+            if (!sqliteVecAvailable) {
+                console.warn("Skipping test: sqlite-vec not available");
+                return;
+            }
+
+            // Store some 384d embeddings first
+            const rowids = insertTestMessages(db, 2);
+            repo.storeBatch(
+                rowids.map((rowid, i) => ({
+                    rowid,
+                    embedding: createTestEmbedding(i + 1, 384),
+                })),
+                "hash384",
+                "model384"
+            );
+
+            repo.recreateVecTable(1536);
+
+            const count = db.prepare(
+                "SELECT COUNT(*) as count FROM message_embeddings"
+            ).get() as { count: number };
+            expect(count.count).toBe(0);
+        });
+
+        test("after recreateVecTable(1536), storing a 1536d embedding succeeds", () => {
+            if (!sqliteVecAvailable) {
+                console.warn("Skipping test: sqlite-vec not available");
+                return;
+            }
+
+            repo.recreateVecTable(1536);
+
+            const rowids = insertTestMessages(db, 1);
+            const embedding = createTestEmbedding(1, 1536);
+
+            expect(() => {
+                repo.storeBatch(
+                    [{ rowid: rowids[0], embedding }],
+                    "hash1536",
+                    "model1536"
+                );
+            }).not.toThrow();
+
+            const vecCount = db.prepare(
+                "SELECT COUNT(*) as count FROM message_embeddings"
+            ).get() as { count: number };
+            expect(vecCount.count).toBe(1);
+        });
+
+        test("after recreateVecTable(1536), storing a 384d embedding fails", () => {
+            if (!sqliteVecAvailable) {
+                console.warn("Skipping test: sqlite-vec not available");
+                return;
+            }
+
+            repo.recreateVecTable(1536);
+
+            const rowids = insertTestMessages(db, 1);
+            const embedding = createTestEmbedding(1, 384);
+
+            expect(() => {
+                repo.storeBatch(
+                    [{ rowid: rowids[0], embedding }],
+                    "hash384",
+                    "model384"
+                );
+            }).toThrow();
+        });
+
+        test("recreateVecTable() also clears embedding_state", () => {
+            if (!sqliteVecAvailable) {
+                console.warn("Skipping test: sqlite-vec not available");
+                return;
+            }
+
+            // Store some embeddings with state
+            const rowids = insertTestMessages(db, 2);
+            repo.storeBatch(
+                rowids.map((rowid, i) => ({
+                    rowid,
+                    embedding: createTestEmbedding(i + 1, 384),
+                })),
+                "hash384",
+                "model384"
+            );
+
+            // Verify state exists
+            const beforeCount = db.prepare(
+                "SELECT COUNT(*) as count FROM embedding_state"
+            ).get() as { count: number };
+            expect(beforeCount.count).toBe(2);
+
+            repo.recreateVecTable(384);
+
+            const afterCount = db.prepare(
+                "SELECT COUNT(*) as count FROM embedding_state"
+            ).get() as { count: number };
+            expect(afterCount.count).toBe(0);
+        });
+
+        test("recreateVecTable() is idempotent (calling twice with same dimension is safe)", () => {
+            if (!sqliteVecAvailable) {
+                console.warn("Skipping test: sqlite-vec not available");
+                return;
+            }
+
+            expect(() => {
+                repo.recreateVecTable(768);
+                repo.recreateVecTable(768);
+            }).not.toThrow();
+
+            // Verify table is functional after double-call
+            const rowids = insertTestMessages(db, 1);
+            const embedding = createTestEmbedding(1, 768);
+            expect(() => {
+                repo.storeBatch(
+                    [{ rowid: rowids[0], embedding }],
+                    "hash768",
+                    "model768"
+                );
+            }).not.toThrow();
+        });
+
+        test("recreateVecTable() works when message_embeddings does not exist yet", () => {
+            if (!sqliteVecAvailable) {
+                console.warn("Skipping test: sqlite-vec not available");
+                return;
+            }
+
+            // Drop the table manually first
+            db.exec("DROP TABLE IF EXISTS message_embeddings");
+
+            expect(() => {
+                repo.recreateVecTable(512);
+            }).not.toThrow();
+
+            // Verify the table was created with correct dimensions
+            const rowids = insertTestMessages(db, 1);
+            const embedding = createTestEmbedding(1, 512);
+            expect(() => {
+                repo.storeBatch(
+                    [{ rowid: rowids[0], embedding }],
+                    "hash512",
+                    "model512"
+                );
+            }).not.toThrow();
+        });
+    });
 });
