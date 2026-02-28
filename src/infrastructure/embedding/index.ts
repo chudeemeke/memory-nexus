@@ -1,4 +1,6 @@
 export { TransformersJsProvider } from "./transformers-js-provider.js";
+export { OpenAiProvider } from "./openai-provider.js";
+export { OllamaProvider } from "./ollama-provider.js";
 export { EmbeddingProviderFactory } from "./embedding-provider-factory.js";
 export {
   writeLock,
