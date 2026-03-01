@@ -14,7 +14,7 @@ See: .planning/PROJECT.md (updated 2026-02-18)
 
 **Milestone:** v2.0 Hybrid Search and Rebrand
 **Phase:** 18 (API Stabilization) -- Complete (2/2 plans)
-**Status:** Complete -- All plans executed
+**Status:** Milestone complete
 
 ```
 v2.0 Progress: [####################] 7/7 phases
