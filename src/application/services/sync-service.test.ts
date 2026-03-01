@@ -7,15 +7,15 @@
 
 import { describe, test, expect, mock, beforeEach, afterEach } from "bun:test";
 import { Database } from "bun:sqlite";
-import { join } from "node:path";
-import { mkdtempSync, rmSync } from "node:fs";
-import { tmpdir } from "node:os";
 import { SyncService, type SyncOptions, type SyncProgress } from "./sync-service.js";
 import type {
   ISessionSource,
   IEventParser,
   SessionFileInfo,
   ParsedEvent,
+  ISyncAbortSignal,
+  ICheckpointManager,
+  SyncCheckpoint,
 } from "../../domain/ports/index.js";
 import type {
   ISessionRepository,
@@ -26,7 +26,6 @@ import type {
 import { ExtractionState } from "../../domain/entities/extraction-state.js";
 import { ProjectPath } from "../../domain/value-objects/project-path.js";
 import { createSchema } from "../../infrastructure/database/schema.js";
-import { setTestCheckpointPath } from "../../infrastructure/signals/index.js";
 
 /**
  * Create a mock session file info
@@ -96,8 +95,9 @@ describe("SyncService", () => {
   let messageRepo: IMessageRepository;
   let toolUseRepo: IToolUseRepository;
   let extractionStateRepo: IExtractionStateRepository;
+  let abortSignal: ISyncAbortSignal;
+  let checkpointManager: ICheckpointManager;
   let syncService: SyncService;
-  let testDir: string;
 
   // Track mock calls
   let discoverSessionsCalls: number;
@@ -107,10 +107,14 @@ describe("SyncService", () => {
   let saveStateCalls: ExtractionState[];
   let findBySessionPathResults: Map<string, ExtractionState | null>;
 
+  // Checkpoint mock state
+  let mockCheckpointStore: SyncCheckpoint | null;
+  let mockAbortFlag: boolean;
+
   beforeEach(() => {
-    // Create isolated temp directory for checkpoint files
-    testDir = mkdtempSync(join(tmpdir(), "sync-service-test-"));
-    setTestCheckpointPath(join(testDir, "sync-checkpoint.json"));
+    // Reset mock checkpoint state
+    mockCheckpointStore = null;
+    mockAbortFlag = false;
 
     // Create in-memory database with schema
     db = new Database(":memory:");
@@ -192,6 +196,18 @@ describe("SyncService", () => {
       }),
     };
 
+    // Create mock abort signal
+    abortSignal = {
+      shouldAbort: () => mockAbortFlag,
+    };
+
+    // Create mock checkpoint manager
+    checkpointManager = {
+      load: () => mockCheckpointStore,
+      save: (checkpoint: SyncCheckpoint) => { mockCheckpointStore = checkpoint; },
+      clear: () => { mockCheckpointStore = null; },
+    };
+
     // Create sync service
     syncService = new SyncService(
       sessionSource,
@@ -200,20 +216,16 @@ describe("SyncService", () => {
       messageRepo,
       toolUseRepo,
       extractionStateRepo,
-      db
+      db,
+      abortSignal,
+      checkpointManager,
     );
   });
 
   afterEach(() => {
-    // Reset checkpoint path override
-    setTestCheckpointPath(null);
-
-    // Clean up temp directory
-    try {
-      rmSync(testDir, { recursive: true, force: true });
-    } catch {
-      // Ignore cleanup errors on Windows
-    }
+    // Reset mock state
+    mockCheckpointStore = null;
+    mockAbortFlag = false;
   });
 
   describe("sync() basic behavior", () => {
@@ -861,14 +873,13 @@ describe("SyncService", () => {
       (syncService as any).eventParser = createMockParser(eventsMap);
 
       // Create existing checkpoint with session-1 already completed
-      const { saveCheckpoint } = await import("../../infrastructure/signals/index.js");
-      saveCheckpoint({
+      mockCheckpointStore = {
         startedAt: new Date().toISOString(),
         totalSessions: 2,
         completedSessions: 1,
         completedSessionIds: ["session-1"],
         lastCompletedAt: new Date().toISOString(),
-      });
+      };
 
       const result = await syncService.sync({ checkpointEnabled: true });
 
@@ -893,9 +904,7 @@ describe("SyncService", () => {
       await syncService.sync({ checkpointEnabled: true });
 
       // Verify checkpoint was cleared after successful completion
-      const { loadCheckpoint } = await import("../../infrastructure/signals/index.js");
-      const checkpoint = loadCheckpoint();
-      expect(checkpoint).toBeNull();
+      expect(mockCheckpointStore).toBeNull();
     });
 
     test("clears checkpoint on successful completion", async () => {
@@ -910,20 +919,18 @@ describe("SyncService", () => {
       (syncService as any).eventParser = createMockParser(eventsMap);
 
       // Create pre-existing checkpoint
-      const { saveCheckpoint, loadCheckpoint } = await import("../../infrastructure/signals/index.js");
-      saveCheckpoint({
+      mockCheckpointStore = {
         startedAt: new Date().toISOString(),
         totalSessions: 1,
         completedSessions: 0,
         completedSessionIds: [],
         lastCompletedAt: null,
-      });
+      };
 
       await syncService.sync({ checkpointEnabled: true });
 
       // Checkpoint should be cleared after successful completion
-      const checkpointAfter = loadCheckpoint();
-      expect(checkpointAfter).toBeNull();
+      expect(mockCheckpointStore).toBeNull();
     });
 
     test("does not clear checkpoint when errors occur", async () => {
@@ -949,10 +956,8 @@ describe("SyncService", () => {
       await syncService.sync({ checkpointEnabled: true });
 
       // Checkpoint should still exist due to error
-      const { loadCheckpoint } = await import("../../infrastructure/signals/index.js");
-      const checkpoint = loadCheckpoint();
-      expect(checkpoint).not.toBeNull();
-      expect(checkpoint?.completedSessionIds).toContain("session-1");
+      expect(mockCheckpointStore).not.toBeNull();
+      expect(mockCheckpointStore?.completedSessionIds).toContain("session-1");
     });
 
     test("skips checkpoint operations when checkpointEnabled=false", async () => {
@@ -966,21 +971,21 @@ describe("SyncService", () => {
       ]);
       (syncService as any).eventParser = createMockParser(eventsMap);
 
-      // Create pre-existing checkpoint
-      const { saveCheckpoint, loadCheckpoint } = await import("../../infrastructure/signals/index.js");
-      saveCheckpoint({
+      // Create pre-existing checkpoint (simulates previous interrupted sync)
+      const preExistingCheckpoint: SyncCheckpoint = {
         startedAt: new Date().toISOString(),
         totalSessions: 1,
         completedSessions: 0,
         completedSessionIds: [],
         lastCompletedAt: null,
-      });
+      };
+      mockCheckpointStore = preExistingCheckpoint;
 
       await syncService.sync({ checkpointEnabled: false });
 
       // Checkpoint should NOT be cleared when checkpointEnabled=false
-      const checkpointAfter = loadCheckpoint();
-      expect(checkpointAfter).not.toBeNull();
+      // (the mock store still holds the pre-existing checkpoint)
+      expect(mockCheckpointStore).not.toBeNull();
     });
 
     test("calls onSessionComplete callback after each session", async () => {
@@ -1021,18 +1026,14 @@ describe("SyncService", () => {
       ]);
       (syncService as any).eventParser = createMockParser(eventsMap);
 
-      // Set abort after first session
-      const { setShuttingDown, resetState } = await import("../../infrastructure/signals/index.js");
-      setShuttingDown(true);
+      // Set abort flag via mock
+      mockAbortFlag = true;
 
       const result = await syncService.sync();
 
       // Should have aborted before processing any session
       expect(result.aborted).toBe(true);
       expect(result.sessionsProcessed).toBe(0);
-
-      // Clean up
-      resetState();
     });
 
     test("saves checkpoint when aborted", async () => {
@@ -1046,17 +1047,13 @@ describe("SyncService", () => {
       ]);
       (syncService as any).eventParser = createMockParser(eventsMap);
 
-      const { setShuttingDown, resetState, loadCheckpoint } = await import("../../infrastructure/signals/index.js");
-      setShuttingDown(true);
+      // Set abort flag via mock
+      mockAbortFlag = true;
 
       await syncService.sync({ checkpointEnabled: true });
 
       // Checkpoint should be saved on abort
-      const checkpoint = loadCheckpoint();
-      expect(checkpoint).not.toBeNull();
-
-      // Clean up
-      resetState();
+      expect(mockCheckpointStore).not.toBeNull();
     });
 
     test("returns aborted=false when sync completes normally", async () => {

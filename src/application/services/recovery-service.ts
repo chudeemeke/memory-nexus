@@ -13,7 +13,7 @@
 
 import type { ISessionSource } from "../../domain/ports/sources.js";
 import type { IExtractionStateRepository } from "../../domain/ports/repositories.js";
-import { logSync, loadConfig } from "../../infrastructure/hooks/index.js";
+import type { ISyncLogger } from "../../domain/ports/signals.js";
 import type { SyncService } from "./sync-service.js";
 
 /**
@@ -50,7 +50,9 @@ export class RecoveryService {
   constructor(
     private readonly sessionSource: ISessionSource,
     private readonly extractionStateRepo: IExtractionStateRepository,
-    private readonly syncService: SyncService
+    private readonly syncService: SyncService,
+    private readonly syncLogger: ISyncLogger,
+    private readonly recoveryEnabled: boolean,
   ) {}
 
   /**
@@ -63,10 +65,8 @@ export class RecoveryService {
    * @returns Recovery result with pending sessions and sync counts
    */
   async recover(options: RecoveryOptions = {}): Promise<RecoveryResult> {
-    const config = loadConfig();
-
     // Check if recovery is enabled (unless explicit dryRun)
-    if (!config.recoveryOnStartup && !options.dryRun) {
+    if (!this.recoveryEnabled && !options.dryRun) {
       return {
         pendingSessions: [],
         syncedSessions: 0,
@@ -88,7 +88,7 @@ export class RecoveryService {
     }
 
     // Log discovery
-    logSync({
+    this.syncLogger.log({
       level: "info",
       message: `Recovery scan found ${pendingSessions.length} pending sessions`,
     });
@@ -119,7 +119,7 @@ export class RecoveryService {
         await this.syncService.sync({ sessionFilter: sessionId });
         syncedCount++;
 
-        logSync({
+        this.syncLogger.log({
           level: "info",
           message: `Recovery synced session ${sessionId}`,
           sessionId,
@@ -128,7 +128,7 @@ export class RecoveryService {
         const error = err instanceof Error ? err.message : String(err);
         errors.push({ sessionPath, error });
 
-        logSync({
+        this.syncLogger.log({
           level: "error",
           message: `Recovery failed for ${sessionPath}: ${error}`,
           error,

@@ -12,8 +12,12 @@ import type { Database } from "bun:sqlite";
 import type {
   ISessionSource,
   IEventParser,
+  IProjectNameResolver,
   SessionFileInfo,
   ParsedEvent,
+  SyncCheckpoint,
+  ISyncAbortSignal,
+  ICheckpointManager,
 } from "../../domain/ports/index.js";
 import type {
   ISessionRepository,
@@ -21,19 +25,11 @@ import type {
   IToolUseRepository,
   IExtractionStateRepository,
 } from "../../domain/ports/repositories.js";
-import type { ProjectNameResolver } from "../../infrastructure/sources/project-name-resolver.js";
 import { Session } from "../../domain/entities/session.js";
 import { Message } from "../../domain/entities/message.js";
 import { ToolUse } from "../../domain/entities/tool-use.js";
 import { ExtractionState } from "../../domain/entities/extraction-state.js";
 import { MemoryError, ErrorCode } from "../../domain/errors/index.js";
-import {
-  shouldAbort,
-  loadCheckpoint,
-  saveCheckpoint,
-  clearCheckpoint,
-  type SyncCheckpoint,
-} from "../../infrastructure/signals/index.js";
 
 /**
  * Options for controlling sync behavior
@@ -117,7 +113,9 @@ export class SyncService {
     private readonly messageRepo: IMessageRepository,
     private readonly toolUseRepo: IToolUseRepository,
     private readonly extractionStateRepo: IExtractionStateRepository,
-    private readonly db: Database
+    private readonly db: Database,
+    private readonly abortSignal: ISyncAbortSignal,
+    private readonly checkpointManager: ICheckpointManager,
   ) {}
 
   /**
@@ -153,7 +151,7 @@ export class SyncService {
     const completedSessionIds = new Set<string>();
 
     if (checkpointEnabled) {
-      checkpoint = loadCheckpoint();
+      checkpoint = this.checkpointManager.load();
       if (checkpoint) {
         result.recoveredFromCheckpoint = checkpoint.completedSessions;
         for (const id of checkpoint.completedSessionIds) {
@@ -214,10 +212,10 @@ export class SyncService {
     // Process each session
     for (let i = 0; i < sessionsToProcess.length; i++) {
       // Check for abort signal before processing each session
-      if (shouldAbort()) {
+      if (this.abortSignal.shouldAbort()) {
         result.aborted = true;
         if (checkpointEnabled) {
-          saveCheckpoint(currentCheckpoint);
+          this.checkpointManager.save(currentCheckpoint);
         }
         break;
       }
@@ -242,7 +240,7 @@ export class SyncService {
           currentCheckpoint.completedSessions++;
           currentCheckpoint.completedSessionIds.push(session.id);
           currentCheckpoint.lastCompletedAt = new Date().toISOString();
-          saveCheckpoint(currentCheckpoint);
+          this.checkpointManager.save(currentCheckpoint);
         }
 
         // Notify callback
@@ -259,7 +257,7 @@ export class SyncService {
 
     // Clear checkpoint on successful completion (no abort, no errors)
     if (checkpointEnabled && !result.aborted && result.success) {
-      clearCheckpoint();
+      this.checkpointManager.clear();
     }
 
     options.onProgress?.({
@@ -283,7 +281,7 @@ export class SyncService {
    * @param resolver The filesystem-based project name resolver
    * @returns Total number of session rows updated
    */
-  async fixProjectNames(resolver: ProjectNameResolver): Promise<number> {
+  async fixProjectNames(resolver: IProjectNameResolver): Promise<number> {
     const encodedPaths = await this.sessionRepo.findDistinctEncodedPaths();
 
     let totalUpdated = 0;

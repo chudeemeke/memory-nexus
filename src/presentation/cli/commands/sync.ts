@@ -36,6 +36,8 @@ import {
   unregisterCleanup,
   hasCheckpoint,
   loadCheckpoint,
+  ProcessAbortSignal,
+  FileCheckpointManager,
 } from "../../../infrastructure/signals/index.js";
 import {
   formatError,
@@ -203,7 +205,9 @@ export async function executeSyncCommand(options: SyncCommandOptions): Promise<C
       messageRepo,
       toolUseRepo,
       extractionStateRepo,
-      db
+      db,
+      new ProcessAbortSignal(),
+      new FileCheckpointManager(),
     );
 
     // Fix existing project names if requested

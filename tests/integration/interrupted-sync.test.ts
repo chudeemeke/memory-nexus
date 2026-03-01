@@ -30,6 +30,8 @@ import {
   clearCheckpoint,
   setShuttingDown,
   resetState,
+  ProcessAbortSignal,
+  FileCheckpointManager,
 } from "../../src/infrastructure/signals/index.js";
 
 /**
@@ -154,7 +156,9 @@ describe("Interrupted Sync Integration Tests", () => {
       messageRepo,
       toolUseRepo,
       extractionStateRepo,
-      db
+      db,
+      new ProcessAbortSignal(),
+      new FileCheckpointManager(),
     );
 
     // First sync: abort after 2 sessions by setting abort flag after session completes
@@ -209,7 +213,9 @@ describe("Interrupted Sync Integration Tests", () => {
       messageRepo,
       toolUseRepo,
       extractionStateRepo,
-      db
+      db,
+      new ProcessAbortSignal(),
+      new FileCheckpointManager(),
     );
 
     // Write corrupted checkpoint file
@@ -262,7 +268,9 @@ describe("Interrupted Sync Integration Tests", () => {
       messageRepo,
       toolUseRepo,
       extractionStateRepo,
-      db
+      db,
+      new ProcessAbortSignal(),
+      new FileCheckpointManager(),
     );
 
     // Sync should proceed normally, processing all discovered sessions
@@ -285,7 +293,9 @@ describe("Interrupted Sync Integration Tests", () => {
       messageRepo,
       toolUseRepo,
       extractionStateRepo,
-      db
+      db,
+      new ProcessAbortSignal(),
+      new FileCheckpointManager(),
     );
 
     const checkpointSnapshots: number[] = [];
@@ -329,7 +339,9 @@ describe("Interrupted Sync Integration Tests", () => {
       messageRepo,
       toolUseRepo,
       extractionStateRepo,
-      db
+      db,
+      new ProcessAbortSignal(),
+      new FileCheckpointManager(),
     );
 
     const result = await syncService.sync({
@@ -362,7 +374,9 @@ describe("Interrupted Sync Integration Tests", () => {
       messageRepo,
       toolUseRepo,
       extractionStateRepo,
-      db
+      db,
+      new ProcessAbortSignal(),
+      new FileCheckpointManager(),
     );
     result = await syncService1.sync({
       checkpointEnabled: true,
@@ -385,7 +399,9 @@ describe("Interrupted Sync Integration Tests", () => {
       messageRepo,
       toolUseRepo,
       extractionStateRepo,
-      db
+      db,
+      new ProcessAbortSignal(),
+      new FileCheckpointManager(),
     );
     result = await syncService2.sync({
       checkpointEnabled: true,
@@ -412,7 +428,9 @@ describe("Interrupted Sync Integration Tests", () => {
       messageRepo,
       toolUseRepo,
       extractionStateRepo,
-      db
+      db,
+      new ProcessAbortSignal(),
+      new FileCheckpointManager(),
     );
     result = await syncService3.sync({
       checkpointEnabled: true,

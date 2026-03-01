@@ -24,7 +24,12 @@ import { SqliteSessionRepository } from "../../src/infrastructure/database/repos
 import { SqliteMessageRepository } from "../../src/infrastructure/database/repositories/message-repository.js";
 import { SqliteToolUseRepository } from "../../src/infrastructure/database/repositories/tool-use-repository.js";
 import { SqliteExtractionStateRepository } from "../../src/infrastructure/database/repositories/extraction-state-repository.js";
-import { setTestCheckpointPath, resetState } from "../../src/infrastructure/signals/index.js";
+import {
+  setTestCheckpointPath,
+  resetState,
+  ProcessAbortSignal,
+  FileCheckpointManager,
+} from "../../src/infrastructure/signals/index.js";
 
 /**
  * Generate a session file with searchable content
@@ -167,7 +172,9 @@ describe("Concurrent Commands Integration Tests", () => {
       messageRepo,
       toolUseRepo,
       extractionStateRepo,
-      db
+      db,
+      new ProcessAbortSignal(),
+      new FileCheckpointManager(),
     );
 
     // Create a timeout promise to detect deadlock
@@ -292,7 +299,9 @@ describe("Concurrent Commands Integration Tests", () => {
       messageRepo,
       toolUseRepo,
       extractionStateRepo,
-      db
+      db,
+      new ProcessAbortSignal(),
+      new FileCheckpointManager(),
     );
 
     // Function to get stats (simulate stats command)
@@ -383,7 +392,9 @@ describe("Concurrent Commands Integration Tests", () => {
       messageRepo,
       toolUseRepo,
       extractionStateRepo,
-      db
+      db,
+      new ProcessAbortSignal(),
+      new FileCheckpointManager(),
     );
 
     const syncService2 = new SyncService(
@@ -393,7 +404,9 @@ describe("Concurrent Commands Integration Tests", () => {
       messageRepo,
       toolUseRepo,
       extractionStateRepo,
-      db
+      db,
+      new ProcessAbortSignal(),
+      new FileCheckpointManager(),
     );
 
     // Run both syncs concurrently
@@ -443,7 +456,9 @@ describe("Concurrent Commands Integration Tests", () => {
       messageRepo,
       toolUseRepo,
       extractionStateRepo,
-      db
+      db,
+      new ProcessAbortSignal(),
+      new FileCheckpointManager(),
     );
 
     // Run sync

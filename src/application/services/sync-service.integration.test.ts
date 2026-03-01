@@ -22,6 +22,7 @@ import {
 } from "../../infrastructure/database/index.js";
 import { FileSystemSessionSource } from "../../infrastructure/sources/index.js";
 import { JsonlEventParser } from "../../infrastructure/parsers/index.js";
+import { ProcessAbortSignal, FileCheckpointManager } from "../../infrastructure/signals/index.js";
 import { ProjectPath } from "../../domain/value-objects/project-path.js";
 
 /**
@@ -89,7 +90,9 @@ function createSyncService(
     messageRepo,
     toolUseRepo,
     extractionStateRepo,
-    db
+    db,
+    new ProcessAbortSignal(),
+    new FileCheckpointManager(),
   );
 }
 

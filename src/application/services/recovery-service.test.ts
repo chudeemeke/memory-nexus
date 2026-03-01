@@ -9,14 +9,10 @@ import { describe, test, expect, beforeEach, afterEach } from "bun:test";
 import { RecoveryService, extractSessionId } from "./recovery-service.js";
 import type { ISessionSource, SessionFileInfo } from "../../domain/ports/sources.js";
 import type { IExtractionStateRepository } from "../../domain/ports/repositories.js";
+import type { ISyncLogger } from "../../domain/ports/signals.js";
 import type { SyncService, SyncResult } from "./sync-service.js";
 import { ExtractionState } from "../../domain/entities/extraction-state.js";
 import { ProjectPath } from "../../domain/value-objects/project-path.js";
-import { setTestConfigPath } from "../../infrastructure/hooks/config-manager.js";
-import { setTestLogPath } from "../../infrastructure/hooks/log-writer.js";
-import { mkdirSync, rmSync, writeFileSync } from "node:fs";
-import { join } from "node:path";
-import { tmpdir } from "node:os";
 
 /**
  * Create a mock session file info
@@ -47,14 +43,11 @@ function createCompleteState(sessionPath: string): ExtractionState {
 }
 
 describe("RecoveryService", () => {
-  let testDir: string;
-  let configPath: string;
-  let logPath: string;
-
   // Mock dependencies
   let sessionSource: ISessionSource;
   let extractionStateRepo: IExtractionStateRepository;
   let syncService: SyncService;
+  let syncLogger: ISyncLogger;
   let recoveryService: RecoveryService;
 
   // Track mock behavior
@@ -62,26 +55,16 @@ describe("RecoveryService", () => {
   let stateMap: Map<string, ExtractionState>;
   let syncCalls: string[];
   let syncShouldFail: Set<string>;
+  let logEntries: Array<{ level: string; message: string }>;
 
   beforeEach(() => {
-    // Create unique test directory
-    testDir = join(tmpdir(), `recovery-test-${Date.now()}-${Math.random().toString(36).slice(2)}`);
-    mkdirSync(testDir, { recursive: true });
-
-    // Set up config for recoveryOnStartup
-    configPath = join(testDir, "config.json");
-    writeFileSync(configPath, JSON.stringify({ recoveryOnStartup: true }));
-    setTestConfigPath(configPath);
-
-    // Set up log path
-    logPath = join(testDir, "sync.log");
-    setTestLogPath(logPath);
 
     // Initialize tracking
     sessions = [];
     stateMap = new Map();
     syncCalls = [];
     syncShouldFail = new Set();
+    logEntries = [];
 
     // Create mock session source
     sessionSource = {
@@ -125,25 +108,23 @@ describe("RecoveryService", () => {
       },
     } as unknown as SyncService;
 
-    // Create service
+    // Create mock sync logger
+    syncLogger = {
+      log: (entry) => { logEntries.push(entry); },
+    };
+
+    // Create service (recoveryEnabled = true by default)
     recoveryService = new RecoveryService(
       sessionSource,
       extractionStateRepo,
-      syncService
+      syncService,
+      syncLogger,
+      true,
     );
   });
 
   afterEach(() => {
-    // Reset test paths
-    setTestConfigPath(null);
-    setTestLogPath(null);
-
-    // Clean up
-    try {
-      rmSync(testDir, { recursive: true, force: true });
-    } catch {
-      // Ignore cleanup errors
-    }
+    logEntries = [];
   });
 
   describe("recover()", () => {
@@ -169,8 +150,14 @@ describe("RecoveryService", () => {
     });
 
     test("respects recoveryOnStartup config when false", async () => {
-      // Disable recovery
-      writeFileSync(configPath, JSON.stringify({ recoveryOnStartup: false }));
+      // Create service with recovery disabled
+      recoveryService = new RecoveryService(
+        sessionSource,
+        extractionStateRepo,
+        syncService,
+        syncLogger,
+        false,
+      );
 
       sessions = [createMockSessionInfo("session-1", "/path/session-1.jsonl")];
 
@@ -279,8 +266,14 @@ describe("RecoveryService", () => {
     });
 
     test("dryRun bypasses recoveryOnStartup check", async () => {
-      // Disable recovery
-      writeFileSync(configPath, JSON.stringify({ recoveryOnStartup: false }));
+      // Create service with recovery disabled
+      recoveryService = new RecoveryService(
+        sessionSource,
+        extractionStateRepo,
+        syncService,
+        syncLogger,
+        false,
+      );
 
       sessions = [createMockSessionInfo("session-1", "/path/session-1.jsonl")];
 
