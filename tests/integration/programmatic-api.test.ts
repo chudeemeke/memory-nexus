@@ -47,6 +47,11 @@ import {
   type PurgeCommandOptions,
   type ExportOptions,
   type ImportOptions,
+  type SearchMode,
+  type HybridSearchOptions,
+  type IStatsService,
+  type StatsResult,
+  type ProjectStats,
 } from "../../src/index.js";
 
 /**
@@ -372,6 +377,62 @@ describe("Programmatic API", () => {
       const result = executeCompletionCommand("bash");
       expectCommandResult(result);
       expect(result.exitCode).toBe(0);
+    });
+  });
+
+  describe("Public API type exports", () => {
+    test("SearchMode union covers all valid modes", () => {
+      const modes: SearchMode[] = ["auto", "fts", "vector", "hybrid"];
+      expect(modes).toHaveLength(4);
+      expect(modes).toContain("auto");
+      expect(modes).toContain("fts");
+      expect(modes).toContain("vector");
+      expect(modes).toContain("hybrid");
+    });
+
+    test("HybridSearchOptions is assignable with mode and limit", () => {
+      const opts: HybridSearchOptions = { mode: "fts", limit: 5 };
+      expect(opts.mode).toBe("fts");
+      expect(opts.limit).toBe(5);
+    });
+
+    test("StatsResult shape matches domain definition", () => {
+      const result: StatsResult = {
+        totalSessions: 10,
+        totalMessages: 100,
+        totalToolUses: 50,
+        databaseSizeBytes: 1024,
+        projectBreakdown: [],
+      };
+      expect(result.totalSessions).toBe(10);
+      expect(result.totalMessages).toBe(100);
+      expect(result.totalToolUses).toBe(50);
+      expect(result.databaseSizeBytes).toBe(1024);
+      expect(result.projectBreakdown).toEqual([]);
+    });
+
+    test("ProjectStats shape is consumable", () => {
+      const stats: ProjectStats = {
+        projectName: "test-project",
+        sessionCount: 5,
+        messageCount: 42,
+      };
+      expect(stats.projectName).toBe("test-project");
+      expect(stats.sessionCount).toBe(5);
+      expect(stats.messageCount).toBe(42);
+    });
+
+    test("IStatsService interface is importable", () => {
+      const mockService: IStatsService = {
+        getStats: async (_projectLimit?: number) => ({
+          totalSessions: 0,
+          totalMessages: 0,
+          totalToolUses: 0,
+          databaseSizeBytes: 0,
+          projectBreakdown: [],
+        }),
+      };
+      expect(typeof mockService.getStats).toBe("function");
     });
   });
 

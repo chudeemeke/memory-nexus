@@ -22,7 +22,15 @@ export type {
 } from "./embedding.js";
 
 // Service interfaces
-export type { ISearchService, SearchOptions } from "./services.js";
+export type {
+  ISearchService,
+  SearchOptions,
+  SearchMode,
+  HybridSearchOptions,
+  IStatsService,
+  StatsResult,
+  ProjectStats,
+} from "./services.js";
 
 // Source interfaces
 export type {
