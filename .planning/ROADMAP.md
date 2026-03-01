@@ -187,6 +187,10 @@ Success Criteria:
 
 **Depends on:** Phase 18 (all functional work complete)
 **Type:** Gap closure (audit gaps 1, 2, 3)
+**Plans:** 1 plan
+
+Plans:
+- [ ] 19-01-PLAN.md -- Phase 13 verification, Phase 18 re-verification, QUAL formal verification
 
 Requirements: RENAME-01, RENAME-03, RENAME-04, RENAME-05, INTEG-04, QUAL-01, QUAL-02, QUAL-03, QUAL-04
 
