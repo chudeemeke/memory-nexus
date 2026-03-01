@@ -1,7 +1,7 @@
 ---
 agent: gsd-phase-researcher
 updated: 2026-03-01
-entries: 18
+entries: 21
 ---
 
 - finding: "When researching package renames, always read every infrastructure file that constructs paths -- path definitions are often scattered across multiple modules. Grep for the old name is not sufficient; you need to categorize each reference as (a) tool identity, (b) filesystem path, (c) test data."
@@ -114,8 +114,20 @@ entries: 18
   phase: "18-api-stabilization"
   date: "2026-03-01"
 
-- finding: "bun build does not emit .d.ts TypeScript declaration files. For a package to be properly typed when imported as a library, tsc must be used for the library build. Use dual build: tsc for library (with declarations), bun build for CLI binary (without declarations but bundled). Run bun build second so it overwrites tsc's unbundled CLI output with the proper bun-bundled binary."
-  source: "Phase 18, API Stabilization"
+- finding: "For verification closure phases (administrative gap closure), the research domain is the project's own planning artifacts, not external technology. The most valuable research output maps each gap to its evidence source (plan summaries, git commits, coverage reports, import audits) and specifies the exact commands or file reads the executor needs. No external research (Context7, WebSearch) adds value -- all evidence is internal."
+  source: "Phase 19, Verification Closure"
   confidence: HIGH
-  phase: "18-api-stabilization"
+  phase: "19-verification-closure"
+  date: "2026-03-01"
+
+- finding: "For TypeScript barrel export gap-closure phases, the critical research is tracing the full export chain upward from the leaf type definition to the public entry point (src/index.ts). A type defined in domain/ports/services.ts requires: (1) named export in domain/ports/index.ts, (2) domain/index.ts to include ports via export * from './ports/index.js', and (3) src/index.ts to export * from './domain/index.js'. Missing any link in this chain means the type is unreachable from the package name. Always trace the complete chain, not just the immediate file."
+  source: "Phase 20, Public API Type Exports"
+  confidence: HIGH
+  phase: "20-public-api-type-exports"
+  date: "2026-03-01"
+
+- finding: "For architecture boundary cleanup phases, the most valuable research is identifying EXACTLY which methods the application layer calls on the infrastructure class, then defining a MINIMAL port interface (ISP). Do not include all methods of the concrete class in the port -- only what crosses the boundary. Infrastructure-to-infrastructure imports are legal in hexagonal architecture and do not need ports. Also watch for config type dependencies: define a minimal domain type with only the fields the application layer reads, not the full infrastructure config shape."
+  source: "Phase 21, Architecture Boundary Cleanup"
+  confidence: HIGH
+  phase: "21-architecture-boundary-cleanup"
   date: "2026-03-01"
