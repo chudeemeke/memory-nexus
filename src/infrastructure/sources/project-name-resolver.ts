@@ -18,6 +18,7 @@
  */
 
 import { readdirSync, statSync } from "node:fs";
+import type { IProjectNameResolver } from "../../domain/ports/sources.js";
 
 /**
  * Encodes a single directory name the same way Claude Code does:
@@ -27,7 +28,7 @@ function encodeDirName(name: string): string {
   return name.replace(/ /g, "-").replace(/-/g, "-");
 }
 
-export class ProjectNameResolver {
+export class ProjectNameResolver implements IProjectNameResolver {
   private readonly rootDir: string;
   private readonly cache = new Map<string, string>();
   private readonly dirCache = new Map<string, string[]>();

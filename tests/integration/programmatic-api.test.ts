@@ -25,6 +25,7 @@ import {
   executeContextCommand,
   executeRelatedCommand,
   executeShowCommand,
+  executeBrowseCommand,
   executeInstallCommand,
   executeUninstallCommand,
   executeStatusCommand,
@@ -41,6 +42,7 @@ import {
   type ContextCommandOptions,
   type RelatedCommandOptions,
   type ShowCommandOptions,
+  type BrowseCommandOptions,
   type InstallOptions,
   type UninstallOptions,
   type DoctorOptions,
@@ -235,6 +237,22 @@ describe("Programmatic API", () => {
       const result = await executeShowCommand("nonexistent-session-id", options);
       expectCommandResult(result);
       expect(result.exitCode).toBe(1);
+    });
+  });
+
+  describe("executeBrowseCommand", () => {
+    test("non-TTY returns CommandResult with exitCode 1", async () => {
+      const options: BrowseCommandOptions = {};
+      const result = await executeBrowseCommand(options);
+      expectCommandResult(result);
+      // In test environment (non-TTY), browse returns exitCode 1
+      // with guidance to use specific commands instead
+      expect(result.exitCode).toBe(1);
+    });
+
+    test("exitCode is a number", async () => {
+      const result = await executeBrowseCommand({});
+      expect(typeof result.exitCode).toBe("number");
     });
   });
 

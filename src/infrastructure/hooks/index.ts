@@ -42,6 +42,9 @@ export {
 // Hook script exports
 export { type HookInput, readStdinJson } from "./sync-hook-script.js";
 
+// Domain port adapter
+export { FileSyncLogger } from "./sync-logger-adapter.js";
+
 // Settings manager exports
 export {
     getClaudeSettingsPath,

@@ -76,3 +76,20 @@ export interface IEventParser {
    */
   parse(filePath: string): AsyncIterable<ParsedEvent>;
 }
+
+/**
+ * Resolver for mapping encoded directory paths to project names.
+ *
+ * Claude Code encodes directory paths in a lossy way (spaces, hyphens,
+ * slashes all become dashes). Implementations resolve the actual project
+ * name by walking the filesystem or using cached mappings.
+ */
+export interface IProjectNameResolver {
+  /**
+   * Resolve a project name from a full encoded path.
+   *
+   * @param encodedPath The encoded directory path (e.g., "C--Users-Destiny-Projects-memory-nexus")
+   * @returns The resolved project name (e.g., "memory-nexus")
+   */
+  resolveFromEncodedPath(encodedPath: string): string;
+}

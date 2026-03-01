@@ -6,3 +6,4 @@
 
 export * from "./checkpoint-manager.js";
 export * from "./signal-handler.js";
+export { ProcessAbortSignal, FileCheckpointManager } from "./adapters.js";

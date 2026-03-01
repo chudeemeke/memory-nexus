@@ -40,8 +40,17 @@ export type {
 export type {
   ISessionSource,
   IEventParser,
+  IProjectNameResolver,
   SessionFileInfo,
 } from "./sources.js";
+
+// Signal interfaces
+export type {
+  SyncCheckpoint,
+  ISyncAbortSignal,
+  ICheckpointManager,
+  ISyncLogger,
+} from "./signals.js";
 
 // Parsed event types
 export type {
