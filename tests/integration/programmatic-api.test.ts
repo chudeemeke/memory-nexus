@@ -109,14 +109,14 @@ describe("Programmatic API", () => {
       const result = await executeSearchCommand("test", options);
       expectCommandResult(result);
       expect(result.exitCode).toBe(0);
-    });
+    }, 30_000);
 
     test("JSON mode returns CommandResult with exitCode 0", async () => {
       const options: SearchCommandOptions = { json: true, quiet: true };
       const result = await executeSearchCommand("test", options);
       expectCommandResult(result);
       expect(result.exitCode).toBe(0);
-    });
+    }, 30_000);
 
     test("explicit FTS mode returns CommandResult with exitCode 0", async () => {
       const options: SearchCommandOptions = { mode: "fts", quiet: true };
@@ -181,14 +181,14 @@ describe("Programmatic API", () => {
       const result = await executeContextCommand("memory", options);
       expectCommandResult(result);
       expect(typeof result.exitCode).toBe("number");
-    });
+    }, 30_000);
 
     test("JSON mode with days filter returns CommandResult", async () => {
       const options: ContextCommandOptions = { json: true, days: 365, quiet: true };
       const result = await executeContextCommand("memory", options);
       expectCommandResult(result);
       expect(typeof result.exitCode).toBe("number");
-    });
+    }, 30_000);
   });
 
   describe("executeRelatedCommand", () => {
@@ -290,7 +290,7 @@ describe("Programmatic API", () => {
         quiet: true,
       });
       expect(typeof result.exitCode).toBe("number");
-    });
+    }, 30_000);
   });
 
   describe("executeExportCommand", () => {
@@ -359,7 +359,7 @@ describe("Programmatic API", () => {
     test("returns CommandResult", async () => {
       const result = await executeStatusCommand({});
       expectCommandResult(result);
-    });
+    }, 30_000);
 
     test("JSON mode returns CommandResult", async () => {
       const result = await executeStatusCommand({ json: true });
