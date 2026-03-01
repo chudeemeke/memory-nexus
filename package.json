@@ -12,7 +12,10 @@
     "dist"
   ],
   "scripts": {
-    "build": "bun build src/presentation/cli/index.ts --outdir dist/presentation/cli --target bun --external onnxruntime-node",
+    "build:types": "tsc --project tsconfig.lib.json || true",
+    "build:lib": "bun build src/index.ts --outdir dist --target bun --external onnxruntime-node --external bun:sqlite --external @anthropic-ai/claude-code --external @huggingface/transformers --external sqlite-vec --external commander --external cli-progress --external chrono-node --external fuzzy --external @inquirer/search --external @inquirer/select --external @gutenye/commander-completion-carapace",
+    "build:cli": "bun build src/presentation/cli/index.ts --outdir dist/presentation/cli --target bun --external onnxruntime-node",
+    "build": "bun run build:types && bun run build:lib && bun run build:cli",
     "build:hook": "bun build src/infrastructure/hooks/sync-hook-script.ts --outfile=dist/sync-hook.js --target=bun",
     "test": "bun test",
     "test:coverage": "bun test --coverage",
