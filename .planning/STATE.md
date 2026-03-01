@@ -14,7 +14,7 @@ See: .planning/PROJECT.md (updated 2026-02-18)
 
 **Milestone:** v2.0 Hybrid Search and Rebrand
 **Phase:** 20 (Public API Type Exports) -- Complete (1/1 plans)
-**Status:** Ready to plan
+**Status:** Executed and verified
 
 ```
 v2.0 Progress: [######################] 9/10 phases
@@ -175,8 +175,8 @@ None. Phase 16.1 complete; Phase 17/18 unblocked.
 ### Last Session
 
 **Date:** 2026-03-01
-**Completed:** Phase 20, Plan 01 (Public API type exports)
-**Stopped at:** Completed 20-01-PLAN.md
+**Completed:** Phase 20 executed and verified (1/1 plans, all tests pass)
+**Stopped at:** Phase 20 verification complete
 
 ### Context for Next Session
 
