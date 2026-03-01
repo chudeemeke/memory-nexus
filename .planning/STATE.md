@@ -13,11 +13,11 @@ See: .planning/PROJECT.md (updated 2026-02-18)
 ## Current Position
 
 **Milestone:** v2.0 Hybrid Search and Rebrand
-**Phase:** 19 (Verification Closure) -- Complete (1/1 plans)
+**Phase:** 20 (Public API Type Exports) -- Complete (1/1 plans)
 **Status:** Ready to plan
 
 ```
-v2.0 Progress: [####################] 8/10 phases
+v2.0 Progress: [######################] 9/10 phases
   Phase 13: Package Rename          [x] Complete (3/3 plans)
   Phase 14: Embedding Infrastructure [x] Complete (4/4 plans)
   Phase 15: Embedding Pipeline       [x] Complete (4/4 plans)
@@ -26,7 +26,7 @@ v2.0 Progress: [####################] 8/10 phases
   Phase 17: Provider Ecosystem       [x] Complete (3/3 plans)
   Phase 18: API Stabilization        [x] Complete (2/2 plans)
   Phase 19: Verification Closure     [x] Complete (1/1 plans)
-  Phase 20: Public API Type Exports  [ ] Pending (gap closure)
+  Phase 20: Public API Type Exports  [x] Complete (1/1 plans)
   Phase 21: Architecture Boundary    [ ] Pending (gap closure)
 ```
 
@@ -68,6 +68,7 @@ v2.0 Progress: [####################] 8/10 phases
 | 18-01 | Build infrastructure and API export surface | 17min | 2 | 18 |
 | 18-02 | Integration tests and API documentation | 20min | 2 | 18 |
 | 19-01 | Verification closure (Phase 13, Phase 18 re-verify, QUAL formal verify) | 13min | 3 | 3 |
+| 20-01 | Export domain port types and verify public API surface | 15min | 2 | 4 |
 
 ## Accumulated Context
 
@@ -146,6 +147,7 @@ v2.0 Progress: [####################] 8/10 phases
 | Provider default resolution | "in" operator on raw user JSON | Distinguishes user-explicit from inherited defaults; unknown providers fall back to local |
 | Dual build system | tsc emitDeclarationOnly + bun build lib + bun build CLI | Pre-existing type errors prevent clean tsc emit; three-step pipeline produces declarations, library JS, and CLI binary independently |
 | Library externals | All npm deps externalized in bun build | Consumers install deps themselves; keeps library small; avoids native addon bundling issues |
+| Ports barrel re-export | export * from "./ports/index.js" in domain/index.ts | Consistent with existing barrel pattern; no selective re-exports needed |
 
 ### Research Completed
 
@@ -173,19 +175,18 @@ None. Phase 16.1 complete; Phase 17/18 unblocked.
 ### Last Session
 
 **Date:** 2026-03-01
-**Completed:** Phase 19, Plan 01 (Verification closure)
-**Stopped at:** Completed 19-01-PLAN.md
+**Completed:** Phase 20, Plan 01 (Public API type exports)
+**Stopped at:** Completed 20-01-PLAN.md
 
 ### Context for Next Session
 
-1. Phase 19 complete: all verification gaps closed (1/1 plans)
-2. Phase 13 VERIFICATION.md created -- 5/5 RENAME requirements SATISFIED
-3. Phase 18 VERIFICATION.md re-verified -- INTEG-04 gap closed (StatusOptions export at 38e4b29)
-4. QUAL-01 through QUAL-04 formally verified with codebase evidence
+1. Phase 20 complete: all 5 missing domain port types exported from public API (1/1 plans)
+2. SearchMode, HybridSearchOptions, IStatsService, StatsResult, ProjectStats now importable from @chude/memory
+3. 5 integration tests verify type importability and shape correctness
+4. README updated with Domain Types section and usage examples
 5. All 39 v2.0 requirements at Complete status in REQUIREMENTS.md
-6. 2598 tests passing, 1 pre-existing flaky failure
-7. Ready for Phase 20 (Public API Type Exports) and Phase 21 (Architecture Boundary)
+6. Ready for Phase 21 (Architecture Boundary Cleanup) -- last remaining gap closure phase
 
 ---
 
-*Last updated: 2026-03-01 (Plan 19-01 complete)*
+*Last updated: 2026-03-01 (Plan 20-01 complete)*

@@ -176,7 +176,7 @@ Success Criteria:
 ### Gap Closure
 
 - [x] Phase 19: Verification Closure (gap closure - 3 gaps)
-- [ ] Phase 20: Public API Type Exports (gap closure - 1 gap)
+- [x] Phase 20: Public API Type Exports (gap closure - 1 gap)
 - [ ] Phase 21: Architecture Boundary Cleanup (gap closure - 1 gap)
 
 ---
@@ -209,6 +209,10 @@ Success Criteria:
 
 **Depends on:** Phase 18 (API surface defined)
 **Type:** Gap closure (integration checker MISSING-01, MISSING-02)
+**Plans:** 1/1 plans complete
+
+Plans:
+- [x] 20-01-PLAN.md -- Export domain port types and verify public API surface
 
 Requirements: INTEG-01 (strengthened)
 
@@ -288,9 +292,9 @@ Phase 13 (Package Rename)
 | 17 | 3/3 | Complete   | 2026-02-28 | 2026-02-28 |
 | 18 | v2.0 | Complete    | 2026-03-01 | 2026-03-01 |
 | 19 | v2.0 | Complete    | 2026-03-01 | 2026-03-01 |
-| 20 | v2.0 | Pending | -- | -- |
+| 20 | v2.0 | 1/1 | Complete | 2026-03-01 |
 | 21 | v2.0 | Pending | -- | -- |
 
 ---
 
-*Last updated: 2026-03-01 (Phase 19 complete: verification closure)*
+*Last updated: 2026-03-01 (Phase 20 complete: public API type exports)*
