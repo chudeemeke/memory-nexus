@@ -230,7 +230,7 @@ Success Criteria:
 
 **Depends on:** Phase 14 (embedding infrastructure)
 **Type:** Gap closure (integration checker BOUNDARY-01)
-**Plans:** 1 plan
+**Plans:** 1/1 plans complete
 
 Plans:
 - [x] 21-01-PLAN.md -- Define IEmbeddingRepository port and fix application-to-infrastructure imports
@@ -297,7 +297,7 @@ Phase 13 (Package Rename)
 | 18 | v2.0 | Complete    | 2026-03-01 | 2026-03-01 |
 | 19 | v2.0 | Complete    | 2026-03-01 | 2026-03-01 |
 | 20 | v2.0 | 1/1 | Complete | 2026-03-01 |
-| 21 | v2.0 | 1/1 | Complete | 2026-03-01 |
+| 21 | v2.0 | Complete    | 2026-03-01 | 2026-03-01 |
 
 ---
 

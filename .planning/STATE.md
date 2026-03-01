@@ -14,7 +14,7 @@ See: .planning/PROJECT.md (updated 2026-02-18)
 
 **Milestone:** v2.0 Hybrid Search and Rebrand
 **Phase:** 21 (Architecture Boundary Cleanup) -- Complete (1/1 plans)
-**Status:** All 10/10 v2.0 phases complete
+**Status:** Milestone complete
 
 ```
 v2.0 Progress: [########################] 10/10 phases
