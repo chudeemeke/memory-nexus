@@ -19,7 +19,7 @@ import {
 /**
  * Options parsed from CLI arguments.
  */
-interface InstallOptions {
+export interface InstallOptions {
     force?: boolean;
 }
 

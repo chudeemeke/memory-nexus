@@ -38,7 +38,7 @@ import { formatError, formatErrorJson } from "../formatters/error-formatter.js";
 /**
  * Options parsed from CLI arguments.
  */
-interface SearchCommandOptions {
+export interface SearchCommandOptions {
   limit?: string;
   project?: string;
   session?: string;

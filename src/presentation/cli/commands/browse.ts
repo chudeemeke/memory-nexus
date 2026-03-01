@@ -45,7 +45,7 @@ export function setTestDbPath(path: string | null): void {
 /**
  * Options parsed from CLI arguments.
  */
-interface BrowseCommandOptions {
+export interface BrowseCommandOptions {
   limit?: string;
 }
 

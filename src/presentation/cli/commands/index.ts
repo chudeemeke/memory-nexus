@@ -32,3 +32,22 @@ export { createImportCommand, executeImportCommand } from "./import.js";
 
 // Shell completion
 export { createCompletionCommand, executeCompletionCommand } from "./completion.js";
+
+// Option types for programmatic API consumers
+export type { SyncCommandOptions } from "./sync.js";
+export type { EmbeddingPassDeps, BackgroundModeDeps } from "./sync.js";
+export type { SearchCommandOptions } from "./search.js";
+export type { ListCommandOptions } from "./list.js";
+export type { StatsCommandOptions } from "./stats.js";
+export type { ContextCommandOptions } from "./context.js";
+export type { RelatedCommandOptions } from "./related.js";
+export type { ShowCommandOptions } from "./show.js";
+export type { BrowseCommandOptions } from "./browse.js";
+export type { InstallOptions } from "./install.js";
+export type { UninstallOptions } from "./uninstall.js";
+export type { DoctorOptions } from "./doctor.js";
+export type { PurgeCommandOptions, PurgeResult } from "./purge.js";
+export type { ExportOptions } from "./export.js";
+export type { ImportOptions } from "./import.js";
+export type { ShellType } from "./completion.js";
+export type { StatusInfo, EmbeddingStatus, GatherStatusOptions } from "./status.js";

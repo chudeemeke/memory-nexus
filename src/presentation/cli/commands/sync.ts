@@ -45,7 +45,7 @@ import {
 /**
  * Options parsed from CLI arguments.
  */
-interface SyncCommandOptions {
+export interface SyncCommandOptions {
   force?: boolean;
   project?: string;
   session?: string;

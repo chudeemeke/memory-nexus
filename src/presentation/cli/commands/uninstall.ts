@@ -18,7 +18,7 @@ import {
 /**
  * Options parsed from CLI arguments.
  */
-interface UninstallOptions {
+export interface UninstallOptions {
     restore?: boolean;
 }
 

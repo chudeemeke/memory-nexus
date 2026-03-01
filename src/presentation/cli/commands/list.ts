@@ -27,7 +27,7 @@ import { formatError, formatErrorJson } from "../formatters/error-formatter.js";
 /**
  * Options parsed from CLI arguments.
  */
-interface ListCommandOptions {
+export interface ListCommandOptions {
   limit?: string;
   project?: string;
   since?: string;

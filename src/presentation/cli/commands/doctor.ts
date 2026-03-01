@@ -35,7 +35,7 @@ import { getMigrationStatus } from "../../../infrastructure/migration.js";
 /**
  * Options parsed from CLI arguments.
  */
-interface DoctorOptions {
+export interface DoctorOptions {
     json?: boolean;
     fix?: boolean;
 }

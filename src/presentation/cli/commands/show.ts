@@ -46,7 +46,7 @@ export function setTestDbPath(path: string | null): void {
 /**
  * Options parsed from CLI arguments.
  */
-interface ShowCommandOptions {
+export interface ShowCommandOptions {
   json?: boolean;
   verbose?: boolean;
   quiet?: boolean;

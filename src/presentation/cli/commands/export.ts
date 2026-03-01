@@ -22,7 +22,7 @@ import { dirname } from "node:path";
 /**
  * Options parsed from CLI arguments.
  */
-interface ExportOptions {
+export interface ExportOptions {
   quiet?: boolean;
   json?: boolean;
 }

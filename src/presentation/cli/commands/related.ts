@@ -31,7 +31,7 @@ import { formatError, formatErrorJson } from "../formatters/error-formatter.js";
 /**
  * Options parsed from CLI arguments.
  */
-interface RelatedCommandOptions {
+export interface RelatedCommandOptions {
   limit?: number;
   hops?: number;
   type?: "session" | "message" | "topic";

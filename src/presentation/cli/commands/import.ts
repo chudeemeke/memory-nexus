@@ -23,7 +23,7 @@ import { existsSync } from "node:fs";
 /**
  * Options parsed from CLI arguments.
  */
-interface ImportOptions {
+export interface ImportOptions {
   clear?: boolean;
   quiet?: boolean;
   json?: boolean;

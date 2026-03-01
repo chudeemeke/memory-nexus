@@ -32,7 +32,7 @@ import { formatError, formatErrorJson } from "../formatters/error-formatter.js";
 /**
  * Options parsed from CLI arguments.
  */
-interface StatsCommandOptions {
+export interface StatsCommandOptions {
   json?: boolean;
   verbose?: boolean;
   quiet?: boolean;

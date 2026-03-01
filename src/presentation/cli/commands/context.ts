@@ -25,7 +25,7 @@ import { formatError, formatErrorJson } from "../formatters/error-formatter.js";
 /**
  * Options parsed from CLI arguments.
  */
-interface ContextCommandOptions {
+export interface ContextCommandOptions {
   days?: number;
   format?: "brief" | "detailed";
   json?: boolean;
