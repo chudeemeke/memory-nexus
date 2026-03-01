@@ -13,11 +13,11 @@ See: .planning/PROJECT.md (updated 2026-02-18)
 ## Current Position
 
 **Milestone:** v2.0 Hybrid Search and Rebrand
-**Phase:** 20 (Public API Type Exports) -- Complete (1/1 plans)
-**Status:** Executed and verified
+**Phase:** 21 (Architecture Boundary Cleanup) -- Complete (1/1 plans)
+**Status:** All 10/10 v2.0 phases complete
 
 ```
-v2.0 Progress: [######################] 9/10 phases
+v2.0 Progress: [########################] 10/10 phases
   Phase 13: Package Rename          [x] Complete (3/3 plans)
   Phase 14: Embedding Infrastructure [x] Complete (4/4 plans)
   Phase 15: Embedding Pipeline       [x] Complete (4/4 plans)
@@ -27,7 +27,7 @@ v2.0 Progress: [######################] 9/10 phases
   Phase 18: API Stabilization        [x] Complete (2/2 plans)
   Phase 19: Verification Closure     [x] Complete (1/1 plans)
   Phase 20: Public API Type Exports  [x] Complete (1/1 plans)
-  Phase 21: Architecture Boundary    [ ] Pending (gap closure)
+  Phase 21: Architecture Boundary    [x] Complete (1/1 plans)
 ```
 
 ## Performance Metrics
@@ -69,6 +69,7 @@ v2.0 Progress: [######################] 9/10 phases
 | 18-02 | Integration tests and API documentation | 20min | 2 | 18 |
 | 19-01 | Verification closure (Phase 13, Phase 18 re-verify, QUAL formal verify) | 13min | 3 | 3 |
 | 20-01 | Export domain port types and verify public API surface | 15min | 2 | 4 |
+| 21-01 | IEmbeddingRepository domain port and boundary cleanup | 15min | 2 | 5 |
 
 ## Accumulated Context
 
@@ -148,6 +149,9 @@ v2.0 Progress: [######################] 9/10 phases
 | Dual build system | tsc emitDeclarationOnly + bun build lib + bun build CLI | Pre-existing type errors prevent clean tsc emit; three-step pipeline produces declarations, library JS, and CLI binary independently |
 | Library externals | All npm deps externalized in bun build | Consumers install deps themselves; keeps library small; avoids native addon bundling issues |
 | Ports barrel re-export | export * from "./ports/index.js" in domain/index.ts | Consistent with existing barrel pattern; no selective re-exports needed |
+| IEmbeddingRepository sync methods | Return T, not Promise<T> | bun:sqlite is synchronous; port contract matches actual API |
+| IEmbeddingRepository ISP | 7 methods (excludes vectorKnnSearch, etc.) | Only methods EmbeddingService uses; infrastructure-only methods stay on concrete class |
+| EmbeddingServiceConfig minimal subset | 4 fields (provider, model, dimensions, batchSize) | Application layer needs only operational config, not enabled/apiKey/baseUrl |
 
 ### Research Completed
 
@@ -175,18 +179,17 @@ None. Phase 16.1 complete; Phase 17/18 unblocked.
 ### Last Session
 
 **Date:** 2026-03-01
-**Completed:** Phase 20 executed and verified (1/1 plans, all tests pass)
-**Stopped at:** Phase 20 verification complete
+**Completed:** Phase 21 executed (1/1 plans, all 2604 tests pass, 0 failures)
+**Stopped at:** Phase 21 complete -- all v2.0 phases done
 
 ### Context for Next Session
 
-1. Phase 20 complete: all 5 missing domain port types exported from public API (1/1 plans)
-2. SearchMode, HybridSearchOptions, IStatsService, StatsResult, ProjectStats now importable from @chude/memory
-3. 5 integration tests verify type importability and shape correctness
-4. README updated with Domain Types section and usage examples
-5. All 39 v2.0 requirements at Complete status in REQUIREMENTS.md
-6. Ready for Phase 21 (Architecture Boundary Cleanup) -- last remaining gap closure phase
+1. Phase 21 complete: IEmbeddingRepository domain port closes last architecture boundary violation (BOUNDARY-01)
+2. All 10/10 v2.0 phases complete -- milestone ready for final sign-off
+3. 2604 tests pass, 0 fail, 5423 expect() calls
+4. All 39 v2.0 requirements at Complete status in REQUIREMENTS.md
+5. No remaining gap closure phases
 
 ---
 
-*Last updated: 2026-03-01 (Plan 20-01 complete)*
+*Last updated: 2026-03-01 (Plan 21-01 complete)*

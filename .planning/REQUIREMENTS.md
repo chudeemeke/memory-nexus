@@ -144,7 +144,7 @@ Deferred. Tracked for context, not in current roadmap.
 | INTEG-04 | Phase 18 | Complete |
 | QUAL-01 | Phase 19 (gap closure) | Complete |
 | QUAL-02 | Phase 19 (gap closure) | Complete |
-| QUAL-03 | Phase 19 + 21 (gap closure) | Complete (adapters verified; BOUNDARY-01 deferred to Phase 21) |
+| QUAL-03 | Phase 19 + 21 (gap closure) | Complete (all adapters follow port/adapter pattern; BOUNDARY-01 closed in Phase 21) |
 | QUAL-04 | Phase 19 (gap closure) | Complete |
 
 ### QUAL Evidence (Phase 19 Verification)
@@ -173,7 +173,7 @@ Note: embedding-provider-factory.ts shows 83.33% function coverage because `disp
 
 **QUAL-02 (Domain zero deps):** `grep -rn "from \"[^.]" src/domain/ --include="*.ts" | grep -v ".test.ts"` returned 0 results. Domain layer has zero external dependencies.
 
-**QUAL-03 (Port/adapter):** TransformersJsProvider, OpenAiProvider, and OllamaProvider all implement the `IEmbeddingProvider` domain port. BOUNDARY-01 (EmbeddingRepository lacks a domain port) is deferred to Phase 21.
+**QUAL-03 (Port/adapter):** TransformersJsProvider, OpenAiProvider, and OllamaProvider all implement the `IEmbeddingProvider` domain port. EmbeddingRepository implements `IEmbeddingRepository` domain port (BOUNDARY-01 closed in Phase 21). All infrastructure adapters now follow port/adapter pattern.
 
 **QUAL-04 (TDD):** Commit history shows test-first patterns across Phases 14-18. Examples:
 - Phase 16.1: `test(16.1-01): add failing tests` (2e5d1e1) before `feat(16.1-01): implement` (839fc83)
