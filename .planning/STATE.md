@@ -13,11 +13,11 @@ See: .planning/PROJECT.md (updated 2026-02-18)
 ## Current Position
 
 **Milestone:** v2.0 Hybrid Search and Rebrand
-**Phase:** 18 (API Stabilization) -- Complete (2/2 plans)
-**Status:** Milestone complete
+**Phase:** 19 (Verification Closure) -- Pending
+**Status:** Gap closure phases added from milestone audit
 
 ```
-v2.0 Progress: [####################] 7/7 phases
+v2.0 Progress: [##################--] 7/10 phases
   Phase 13: Package Rename          [x] Complete (3/3 plans)
   Phase 14: Embedding Infrastructure [x] Complete (4/4 plans)
   Phase 15: Embedding Pipeline       [x] Complete (4/4 plans)
@@ -25,6 +25,9 @@ v2.0 Progress: [####################] 7/7 phases
   Phase 16.1: Migration Race Fix     [x] Complete (1/1 plans)
   Phase 17: Provider Ecosystem       [x] Complete (3/3 plans)
   Phase 18: API Stabilization        [x] Complete (2/2 plans)
+  Phase 19: Verification Closure     [ ] Pending (gap closure)
+  Phase 20: Public API Type Exports  [ ] Pending (gap closure)
+  Phase 21: Architecture Boundary    [ ] Pending (gap closure)
 ```
 
 ## Performance Metrics
@@ -154,6 +157,7 @@ None blocking. All technical questions resolved during research phase.
 
 ### Roadmap Evolution
 
+- Added 3 gap closure phases (19-21) from milestone audit (2026-03-01)
 - Inserted Phase 16.1: Migration Race Condition Fix (urgent) (2026-02-27)
   - Discovered during Phase 16 human verification: `memory search --mode hybrid` returned no results because the CLI reads from an empty XDG database while real data sits at the legacy path
   - Root cause: `initializeDatabase()` creates an empty DB at XDG path before `migrateFromLegacy()` can move the real 266MB database from `~/.memory-nexus/`

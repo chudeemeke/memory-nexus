@@ -142,10 +142,10 @@ Deferred. Tracked for context, not in current roadmap.
 | INTEG-02 | Phase 18 | Complete |
 | INTEG-03 | Phase 18 | Complete |
 | INTEG-04 | Phase 18 | Complete |
-| QUAL-01 | All | Pending |
-| QUAL-02 | All | Pending |
-| QUAL-03 | All | Pending |
-| QUAL-04 | All | Pending |
+| QUAL-01 | Phase 19 (gap closure) | Pending |
+| QUAL-02 | Phase 19 (gap closure) | Pending |
+| QUAL-03 | Phase 19 + 21 (gap closure) | Pending |
+| QUAL-04 | Phase 19 (gap closure) | Pending |
 
 **Coverage:**
 - v2.0 requirements: 35 total (excluding QUAL cross-cutting)
@@ -154,4 +154,4 @@ Deferred. Tracked for context, not in current roadmap.
 
 ---
 *Requirements defined: 2026-02-18*
-*Last updated: 2026-03-01 (Phase 18 complete, all INTEG requirements completed)*
+*Last updated: 2026-03-01 (Added gap closure phases 19-21 from milestone audit)*

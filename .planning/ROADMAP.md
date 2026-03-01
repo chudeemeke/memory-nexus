@@ -173,6 +173,67 @@ Success Criteria:
 
 ---
 
+### Gap Closure
+
+- [ ] Phase 19: Verification Closure (gap closure - 3 gaps)
+- [ ] Phase 20: Public API Type Exports (gap closure - 1 gap)
+- [ ] Phase 21: Architecture Boundary Cleanup (gap closure - 1 gap)
+
+---
+
+### Phase 19: Verification Closure
+
+**Goal:** Close all administrative verification gaps blocking milestone sign-off: produce Phase 13 VERIFICATION.md, re-verify Phase 18, and formally verify cross-cutting quality requirements (QUAL-01 through QUAL-04).
+
+**Depends on:** Phase 18 (all functional work complete)
+**Type:** Gap closure (audit gaps 1, 2, 3)
+
+Requirements: RENAME-01, RENAME-03, RENAME-04, RENAME-05, INTEG-04, QUAL-01, QUAL-02, QUAL-03, QUAL-04
+
+Success Criteria:
+1. Phase 13 VERIFICATION.md exists and confirms all 5 RENAME requirements satisfied
+2. Phase 18 VERIFICATION.md updated to reflect INTEG-04 fix (StatusOptions export)
+3. QUAL-01 through QUAL-04 formally verified with evidence from codebase metrics
+4. REQUIREMENTS.md QUAL checkboxes updated to [x] with coverage metrics documented
+5. All 39 v2.0 requirements at 100% coverage in traceability table
+
+---
+
+### Phase 20: Public API Type Exports
+
+**Goal:** Export all domain types used in the public API surface so TypeScript consumers can import them by name instead of relying on structural typing.
+
+**Depends on:** Phase 18 (API surface defined)
+**Type:** Gap closure (integration checker MISSING-01, MISSING-02)
+
+Requirements: INTEG-01 (strengthened)
+
+Success Criteria:
+1. SearchMode and HybridSearchOptions exported from src/index.ts
+2. IStatsService, StatsResult, ProjectStats exported from domain/ports barrel
+3. All exported types documented in API reference
+4. No new test failures
+
+---
+
+### Phase 21: Architecture Boundary Cleanup
+
+**Goal:** Introduce IEmbeddingRepository port in the domain layer so EmbeddingService (application layer) depends on a domain port instead of importing infrastructure types directly.
+
+**Depends on:** Phase 14 (embedding infrastructure)
+**Type:** Gap closure (integration checker BOUNDARY-01)
+
+Requirements: QUAL-03 (strengthened)
+
+Success Criteria:
+1. IEmbeddingRepository port defined in domain/ports/
+2. EmbeddingService imports only from domain layer
+3. Infrastructure EmbeddingRepository implements the domain port
+4. All existing tests pass with no behavioral regression
+5. Architecture audit confirms no application-to-infrastructure imports
+
+---
+
 ### Cross-Cutting: Quality (All Phases)
 
 Requirements: QUAL-01, QUAL-02, QUAL-03, QUAL-04
@@ -199,6 +260,12 @@ Phase 13 (Package Rename)
               |                   +---> Phase 16.1 (Migration Race Fix) [urgent]
               |                         |
               |                         +---> Phase 18 (API Stabilization)
+              |                                   |
+              |                                   +---> Phase 19 (Verification Closure) [gap closure]
+              |                                   |         |
+              |                                   |         +---> Phase 20 (Public API Type Exports) [gap closure]
+              |                                   |
+              |                                   +---> Phase 21 (Architecture Boundary) [gap closure]
               |
               +---> Phase 17 (Provider Ecosystem)
                     [parallel with Phases 15-16]
@@ -216,7 +283,10 @@ Phase 13 (Package Rename)
 | 16.1 | v2.0 | Complete    | 2026-02-27 | 2026-02-27 |
 | 17 | 3/3 | Complete   | 2026-02-28 | 2026-02-28 |
 | 18 | v2.0 | Complete    | 2026-03-01 | 2026-03-01 |
+| 19 | v2.0 | Pending | -- | -- |
+| 20 | v2.0 | Pending | -- | -- |
+| 21 | v2.0 | Pending | -- | -- |
 
 ---
 
-*Last updated: 2026-03-01 (Phase 18 complete - 2/2 plans, v2.0 milestone fully complete)*
+*Last updated: 2026-03-01 (Added 3 gap closure phases 19-21 from milestone audit)*
