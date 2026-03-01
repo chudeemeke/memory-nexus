@@ -13,8 +13,8 @@ See: .planning/PROJECT.md (updated 2026-02-18)
 ## Current Position
 
 **Milestone:** v2.0 Hybrid Search and Rebrand
-**Phase:** 17 (Provider Ecosystem) -- Complete (3/3 plans, including gap closure)
-**Status:** Active -- Phase 17 complete, ready for Phase 18
+**Phase:** 18 (API Stabilization) -- In Progress (1/? plans)
+**Status:** Active -- Plan 18-01 complete (build infrastructure and API export surface)
 
 ```
 v2.0 Progress: [################....] 6/7 phases
@@ -24,7 +24,7 @@ v2.0 Progress: [################....] 6/7 phases
   Phase 16: Hybrid Search            [x] Complete (3/3 plans)
   Phase 16.1: Migration Race Fix     [x] Complete (1/1 plans)
   Phase 17: Provider Ecosystem       [x] Complete (3/3 plans)
-  Phase 18: API Stabilization        [ ] Pending
+  Phase 18: API Stabilization        [~] In Progress (1/? plans)
 ```
 
 ## Performance Metrics
@@ -62,6 +62,7 @@ v2.0 Progress: [################....] 6/7 phases
 | 17-01 | OpenAI and Ollama provider adapters with config and factory wiring | 16min | 2 | 13 |
 | 17-02 | Dimension-aware re-embedding on provider/model change | 6min | 2 | 4 |
 | 17-03 | Provider-specific default resolution (gap closure) | 5min | 2 | 3 |
+| 18-01 | Build infrastructure and API export surface | 17min | 2 | 18 |
 
 ## Accumulated Context
 
@@ -138,6 +139,8 @@ v2.0 Progress: [################....] 6/7 phases
 | Dimension change skip on null | Skip recreation when no stored embeddings | Table already correct from initial schema or will be created fresh |
 | Same-dimension model change | DELETE-only path (no table recreation) | No structural change needed when dimensions match |
 | Provider default resolution | "in" operator on raw user JSON | Distinguishes user-explicit from inherited defaults; unknown providers fall back to local |
+| Dual build system | tsc emitDeclarationOnly + bun build lib + bun build CLI | Pre-existing type errors prevent clean tsc emit; three-step pipeline produces declarations, library JS, and CLI binary independently |
+| Library externals | All npm deps externalized in bun build | Consumers install deps themselves; keeps library small; avoids native addon bundling issues |
 
 ### Research Completed
 
@@ -163,18 +166,19 @@ None. Phase 16.1 complete; Phase 17/18 unblocked.
 
 ### Last Session
 
-**Date:** 2026-02-28
-**Completed:** Phase 17, Plan 03 (Provider-specific default resolution - gap closure)
-**Stopped at:** Completed 17-03-PLAN.md, Phase 17 fully complete (3/3 plans)
+**Date:** 2026-03-01
+**Completed:** Phase 18, Plan 01 (Build infrastructure and API export surface)
+**Stopped at:** Completed 18-01-PLAN.md
 
 ### Context for Next Session
 
-1. Phase 17 FULLY COMPLETE: All 4 PROV requirements satisfied, UAT gap resolved
-2. 2539 tests passing across full suite (16 new tests from Plan 17-03)
-3. loadConfig() now returns provider-appropriate model/dimensions via PROVIDER_DEFAULTS map
-4. Doctor and factory automatically receive correct values (no changes to health-checker or factory)
-5. Phase 18 (API Stabilization) is next and final phase of v2.0
+1. Plan 18-01 complete: all 16 execute*Command functions exported from @chude/memory
+2. 2555 tests passing across full suite (6 new from smoke test)
+3. Dual build system: build:types (tsc .d.ts) -> build:lib (bun library JS) -> build:cli (bun CLI binary)
+4. dist/index.js importable as library; dist/index.d.ts has all type declarations
+5. Pre-existing 27 tsc type errors remain (bun:sqlite Statement types, missing module path) -- handled via noEmitOnError:false
+6. Remaining Phase 18 plans (if any) continue API stabilization work
 
 ---
 
-*Last updated: 2026-02-28 (Plan 17-03 complete, Phase 17 fully complete)*
+*Last updated: 2026-03-01 (Plan 18-01 complete)*
