@@ -25,16 +25,24 @@ import { parseDate, DateParseError } from "../parsers/date-parser.js";
 import { formatError, formatErrorJson } from "../formatters/error-formatter.js";
 
 /**
- * Options parsed from CLI arguments.
+ * Options for the list command.
  */
 export interface ListCommandOptions {
+  /** Maximum sessions to return (as string, parsed to integer) */
   limit?: string;
+  /** Filter by project name */
   project?: string;
+  /** Sessions after date (e.g., 'yesterday', '2 weeks ago') */
   since?: string;
+  /** Sessions before date */
   before?: string;
+  /** Sessions from last N days (includes today) */
   days?: number;
+  /** Output as JSON */
   json?: boolean;
+  /** Show detailed output */
   verbose?: boolean;
+  /** Minimal output (session IDs only) */
   quiet?: boolean;
 }
 
@@ -78,11 +86,13 @@ export function createListCommand(): Command {
 }
 
 /**
- * Execute the list command with given options.
+ * Execute the list command programmatically.
  *
- * Creates dependencies, queries sessions, and outputs results.
+ * Lists sessions with optional filtering by project, date range, or limit.
+ * Handles its own database initialization and teardown.
  *
- * @param options Command options from CLI
+ * @param options - List command options
+ * @returns CommandResult with exitCode 0 (success) or 1 (error)
  */
 export async function executeListCommand(options: ListCommandOptions): Promise<CommandResult> {
   const startTime = performance.now();

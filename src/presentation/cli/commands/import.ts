@@ -21,12 +21,16 @@ import {
 import { existsSync } from "node:fs";
 
 /**
- * Options parsed from CLI arguments.
+ * Options for the import command.
  */
 export interface ImportOptions {
+  /** Clear existing data before import */
   clear?: boolean;
+  /** Suppress output except errors */
   quiet?: boolean;
+  /** Output stats as JSON */
   json?: boolean;
+  /** Skip confirmation when merging with existing data */
   force?: boolean;
 }
 
@@ -56,10 +60,14 @@ export function createImportCommand(): Command {
 }
 
 /**
- * Execute the import command with given options.
+ * Execute the import command programmatically.
  *
- * @param inputFile Path to the backup file to import
- * @param options Command options from CLI
+ * Imports a previously exported JSON database file. Handles its own
+ * database initialization and teardown.
+ *
+ * @param inputFile - Source file path for the JSON backup
+ * @param options - Import command options
+ * @returns CommandResult with exitCode 0 (success) or 1 (file not found/error)
  */
 export async function executeImportCommand(
   inputFile: string,

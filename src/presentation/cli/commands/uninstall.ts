@@ -16,9 +16,10 @@ import {
 } from "../../../infrastructure/hooks/index.js";
 
 /**
- * Options parsed from CLI arguments.
+ * Options for the uninstall command.
  */
 export interface UninstallOptions {
+    /** Restore settings.json from backup instead of removing hooks */
     restore?: boolean;
 }
 
@@ -38,11 +39,14 @@ export function createUninstallCommand(): Command {
 }
 
 /**
- * Execute the uninstall command with given options.
+ * Execute the uninstall command programmatically.
  *
- * Removes hooks from settings.json and deletes hook script.
+ * Removes Claude Code hooks installed by the install command. Deletes
+ * hook entries from settings.json and removes the hook script file.
+ * Returns exitCode 0 if hooks are not installed (idempotent).
  *
- * @param options Command options from CLI
+ * @param options - Uninstall command options
+ * @returns CommandResult with exitCode 0 (success/not installed)
  */
 export async function executeUninstallCommand(options: UninstallOptions): Promise<CommandResult> {
     const status = checkHooksInstalled();

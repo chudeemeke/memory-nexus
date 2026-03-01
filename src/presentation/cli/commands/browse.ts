@@ -43,9 +43,10 @@ export function setTestDbPath(path: string | null): void {
 }
 
 /**
- * Options parsed from CLI arguments.
+ * Options for the browse command.
  */
 export interface BrowseCommandOptions {
+  /** Maximum sessions to show in the picker (as string, parsed to integer) */
   limit?: string;
 }
 
@@ -65,12 +66,14 @@ export function createBrowseCommand(): Command {
 }
 
 /**
- * Execute the browse command with given options.
+ * Execute the browse command programmatically.
  *
- * Launches interactive picker if TTY available, otherwise shows error
- * with hints about alternative commands.
+ * Interactively browse sessions using fuzzy search. Requires an
+ * interactive TTY; will return exitCode 1 in non-interactive environments.
+ * Handles its own database initialization and teardown.
  *
- * @param options Command options from CLI
+ * @param options - Browse command options
+ * @returns CommandResult with exitCode 0 (success) or 1 (not available/error)
  */
 export async function executeBrowseCommand(
   options: BrowseCommandOptions

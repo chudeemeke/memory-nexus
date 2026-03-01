@@ -33,10 +33,12 @@ import {
 import { getMigrationStatus } from "../../../infrastructure/migration.js";
 
 /**
- * Options parsed from CLI arguments.
+ * Options for the doctor command.
  */
 export interface DoctorOptions {
+    /** Output health check results as JSON */
     json?: boolean;
+    /** Attempt to fix common issues automatically */
     fix?: boolean;
 }
 
@@ -341,9 +343,13 @@ export function createDoctorCommand(): Command {
 }
 
 /**
- * Execute the doctor command with given options.
+ * Execute the doctor command programmatically.
  *
- * @param options Command options from CLI
+ * Runs health checks on the database, hooks, FTS5, sqlite-vec, and
+ * embedding provider. Handles its own database initialization.
+ *
+ * @param options - Doctor command options
+ * @returns CommandResult with exitCode 0 (healthy), 1 (degraded), or 2 (broken)
  */
 export async function executeDoctorCommand(options: DoctorOptions): Promise<CommandResult> {
     const healthResult = runHealthCheck();

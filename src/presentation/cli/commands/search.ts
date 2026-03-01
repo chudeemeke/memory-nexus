@@ -36,23 +36,38 @@ import { parseDate, DateParseError } from "../parsers/date-parser.js";
 import { formatError, formatErrorJson } from "../formatters/error-formatter.js";
 
 /**
- * Options parsed from CLI arguments.
+ * Options for the search command.
  */
 export interface SearchCommandOptions {
+  /** Maximum results to return (as string, parsed to integer) */
   limit?: string;
+  /** Filter by project name */
   project?: string;
+  /** Filter by session ID */
   session?: string;
+  /** Filter by role: user, assistant, or both (comma-separated) */
   role?: string;
+  /** Results after date (e.g., 'yesterday', '2 weeks ago') */
   since?: string;
+  /** Results before date */
   before?: string;
+  /** Results from last N days (includes today) */
   days?: number;
+  /** Output results as JSON */
   json?: boolean;
+  /** Case-insensitive search (default) */
   ignoreCase?: boolean;
+  /** Case-sensitive search */
   caseSensitive?: boolean;
+  /** Show detailed output with execution info */
   verbose?: boolean;
+  /** Suppress headers and decorations */
   quiet?: boolean;
+  /** Search mode: auto, fts, vector, or hybrid */
   mode?: string;
+  /** Set to false via --no-vector to disable vector search */
   vector?: boolean;
+  /** Set to false via --no-decay to disable temporal decay scoring */
   decay?: boolean;
 }
 
@@ -142,13 +157,14 @@ export function createSearchCommand(): Command {
 }
 
 /**
- * Execute the search command with given options.
+ * Execute the search command programmatically.
  *
- * Creates dependencies, runs search, and outputs results.
- * Uses HybridSearchService as the default search service.
+ * Searches sessions using FTS5 or hybrid semantic search. Handles its own
+ * database initialization and teardown.
  *
- * @param query Search query string
- * @param options Command options from CLI
+ * @param query - The search string (must be non-empty)
+ * @param options - Search command options
+ * @returns CommandResult with exitCode 0 (success) or 1 (error)
  */
 export async function executeSearchCommand(
   query: string,

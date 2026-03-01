@@ -39,9 +39,10 @@ export function setTestDbPath(path: string | null): void {
 }
 
 /**
- * Options parsed from CLI arguments.
+ * Options for the status command.
  */
 interface StatusOptions {
+    /** Output as JSON */
     json?: boolean;
 }
 
@@ -49,10 +50,15 @@ interface StatusOptions {
  * Embedding background process status.
  */
 export interface EmbeddingStatus {
+    /** Whether a background embedding process is currently running */
     active: boolean;
+    /** PID of the background embedding process */
     pid?: number;
+    /** ISO timestamp when the background process started */
     startedAt?: string;
+    /** Number of messages that have been embedded so far */
     embeddedCount?: number;
+    /** Total number of messages in the database */
     totalMessages?: number;
 }
 
@@ -60,11 +66,17 @@ export interface EmbeddingStatus {
  * Aggregated status information.
  */
 export interface StatusInfo {
+    /** Hook installation status */
     hooks: HookStatus;
+    /** Current configuration */
     config: MemoryConfig;
+    /** ISO timestamp of the last sync, or null if never synced */
     lastSync: string | null;
+    /** Number of sessions pending sync */
     pendingSessions: number;
+    /** Number of recent log entries */
     recentLogs: number;
+    /** Background embedding process status */
     embedding: EmbeddingStatus;
 }
 
@@ -84,11 +96,13 @@ export function createStatusCommand(): Command {
 }
 
 /**
- * Execute the status command with given options.
+ * Execute the status command programmatically.
  *
- * Gathers status information and displays it.
+ * Shows current hook installation status, configuration, pending sessions,
+ * and embedding progress. Handles its own database initialization.
  *
- * @param options Command options from CLI
+ * @param options - Status command options
+ * @returns CommandResult with exitCode 0 (always succeeds)
  */
 export async function executeStatusCommand(options: StatusOptions): Promise<CommandResult> {
     const status = await gatherStatus();

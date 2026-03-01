@@ -23,13 +23,18 @@ import { shouldUseColor } from "../formatters/color.js";
 import { formatError, formatErrorJson } from "../formatters/error-formatter.js";
 
 /**
- * Options parsed from CLI arguments.
+ * Options for the context command.
  */
 export interface ContextCommandOptions {
+  /** Sessions from last N days (includes today) */
   days?: number;
+  /** Output format: brief or detailed */
   format?: "brief" | "detailed";
+  /** Output as JSON */
   json?: boolean;
+  /** Show detailed output with timing */
   verbose?: boolean;
+  /** Minimal output */
   quiet?: boolean;
 }
 
@@ -71,10 +76,15 @@ export function createContextCommand(): Command {
 }
 
 /**
- * Execute the context command with given options.
+ * Execute the context command programmatically.
  *
- * @param project Project name or substring to filter by
- * @param options Command options from CLI
+ * Shows aggregated context for a project including recent topics,
+ * entities, and session summaries. Handles its own database
+ * initialization and teardown.
+ *
+ * @param project - Project name or substring to filter by
+ * @param options - Context command options
+ * @returns CommandResult with exitCode 0 (success) or 1 (not found/error)
  */
 export async function executeContextCommand(
   project: string,

@@ -43,18 +43,28 @@ import {
 } from "../formatters/index.js";
 
 /**
- * Options parsed from CLI arguments.
+ * Options for the sync command.
  */
 export interface SyncCommandOptions {
+  /** Force re-sync of all sessions, ignoring extraction state */
   force?: boolean;
+  /** Filter to sessions from a specific project */
   project?: string;
+  /** Filter to a specific session by ID */
   session?: string;
+  /** Suppress non-essential output */
   quiet?: boolean;
+  /** Show detailed output with timing information */
   verbose?: boolean;
+  /** Output results as JSON */
   json?: boolean;
+  /** Preview sync without modifying the database */
   dryRun?: boolean;
+  /** Fix project names using the resolver */
   fixNames?: boolean;
+  /** Generate embeddings for synced messages */
   embed?: boolean;
+  /** Run embedding generation in a background process */
   background?: boolean;
 }
 
@@ -64,8 +74,11 @@ export interface SyncCommandOptions {
  * When not provided, real dependencies are loaded via dynamic import.
  */
 export interface EmbeddingPassDeps {
+  /** Override embedding provider factory (avoids loading real ONNX runtime) */
   factory?: import("../../../infrastructure/embedding/embedding-provider-factory.js").EmbeddingProviderFactory;
+  /** Override configuration (avoids reading config file) */
   config?: import("../../../infrastructure/hooks/config-manager.js").MemoryConfig;
+  /** Override embedding repository (avoids real database operations) */
   repositoryOverride?: import("../../../infrastructure/database/repositories/embedding-repository.js").EmbeddingRepository;
 }
 
@@ -76,8 +89,11 @@ export interface EmbeddingPassDeps {
  * without spawning real child processes.
  */
 export interface BackgroundModeDeps {
+  /** Override background process spawning */
   spawnBackgroundEmbedding: (options?: any) => import("../../../infrastructure/embedding/background-embedder.js").SpawnResult;
+  /** Override lock file reading */
   readLock: (dataDir?: string) => import("../../../infrastructure/embedding/background-embedder.js").LockData | null;
+  /** Override process liveness check */
   isProcessAlive: (pid: number) => boolean;
 }
 
@@ -112,12 +128,14 @@ export function createSyncCommand(): Command {
 }
 
 /**
- * Execute the sync command with given options.
+ * Execute the sync command programmatically.
  *
- * Creates dependencies, runs SyncService, and reports results.
- * Handles errors gracefully with formatted output.
+ * Syncs Claude Code sessions from JSONL files into the SQLite database.
+ * Optionally generates embeddings with `embed: true`. Handles its own
+ * database initialization and teardown.
  *
- * @param options Command options from CLI
+ * @param options - Sync command options
+ * @returns CommandResult with exitCode 0 (success) or 1 (error)
  */
 export async function executeSyncCommand(options: SyncCommandOptions): Promise<CommandResult> {
   // Handle --background mode before anything else

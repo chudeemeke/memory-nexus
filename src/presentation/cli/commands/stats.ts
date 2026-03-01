@@ -30,12 +30,16 @@ import { FileSystemSessionSource } from "../../../infrastructure/sources/index.j
 import { formatError, formatErrorJson } from "../formatters/error-formatter.js";
 
 /**
- * Options parsed from CLI arguments.
+ * Options for the stats command.
  */
 export interface StatsCommandOptions {
+  /** Output as JSON */
   json?: boolean;
+  /** Show detailed output with timing */
   verbose?: boolean;
+  /** Minimal output */
   quiet?: boolean;
+  /** Number of projects to show in breakdown (as string, parsed to integer) */
   projects?: string;
 }
 
@@ -68,11 +72,13 @@ export function createStatsCommand(): Command {
 }
 
 /**
- * Execute the stats command with given options.
+ * Execute the stats command programmatically.
  *
- * Creates dependencies, retrieves stats, and outputs results.
+ * Shows database statistics including session count, message count, and
+ * storage size. Handles its own database initialization and teardown.
  *
- * @param options Command options from CLI
+ * @param options - Stats command options
+ * @returns CommandResult with exitCode 0 (success) or 1 (error)
  */
 export async function executeStatsCommand(
   options: StatsCommandOptions

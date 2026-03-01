@@ -17,9 +17,10 @@ import {
 } from "../../../infrastructure/hooks/index.js";
 
 /**
- * Options parsed from CLI arguments.
+ * Options for the install command.
  */
 export interface InstallOptions {
+    /** Reinstall even if hooks are already installed */
     force?: boolean;
 }
 
@@ -54,11 +55,14 @@ export function createInstallCommand(): Command {
 }
 
 /**
- * Execute the install command with given options.
+ * Execute the install command programmatically.
  *
- * Copies hook script and installs hooks into settings.json.
+ * Installs Claude Code hooks for automatic session sync on session end.
+ * Copies the hook script and modifies settings.json. Idempotent: returns
+ * exitCode 0 if hooks are already installed. Handles its own setup.
  *
- * @param options Command options from CLI
+ * @param options - Install command options
+ * @returns CommandResult with exitCode 0 (success/already installed) or 1 (error)
  */
 export async function executeInstallCommand(options: InstallOptions): Promise<CommandResult> {
     const status = checkHooksInstalled();

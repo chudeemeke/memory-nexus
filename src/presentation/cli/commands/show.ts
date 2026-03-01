@@ -44,12 +44,16 @@ export function setTestDbPath(path: string | null): void {
 }
 
 /**
- * Options parsed from CLI arguments.
+ * Options for the show command.
  */
 export interface ShowCommandOptions {
+  /** Output as JSON */
   json?: boolean;
+  /** Show detailed output */
   verbose?: boolean;
+  /** Minimal output (message content only) */
   quiet?: boolean;
+  /** Show detailed tool inputs and outputs */
   tools?: boolean;
 }
 
@@ -119,12 +123,15 @@ async function findSession(
 }
 
 /**
- * Execute the show command with given options.
+ * Execute the show command programmatically.
  *
- * Loads session, messages, and tool uses, then formats for display.
+ * Shows detailed information about a specific session including messages
+ * and optionally tool uses. Supports partial session ID matching.
+ * Handles its own database initialization and teardown.
  *
- * @param sessionId Full or partial session ID
- * @param options Command options from CLI
+ * @param sessionId - Full or partial session ID to display
+ * @param options - Show command options
+ * @returns CommandResult with exitCode 0 (success) or 1 (not found/error)
  */
 export async function executeShowCommand(
   sessionId: string,

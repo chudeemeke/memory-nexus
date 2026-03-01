@@ -29,15 +29,22 @@ import { shouldUseColor } from "../formatters/color.js";
 import { formatError, formatErrorJson } from "../formatters/error-formatter.js";
 
 /**
- * Options parsed from CLI arguments.
+ * Options for the related command.
  */
 export interface RelatedCommandOptions {
+  /** Maximum results to return */
   limit?: number;
+  /** Traversal depth (1-3) */
   hops?: number;
+  /** Entity type of the ID: session, message, or topic */
   type?: "session" | "message" | "topic";
+  /** Output format: brief or detailed */
   format?: "brief" | "detailed";
+  /** Output as JSON */
   json?: boolean;
+  /** Show detailed output with timing */
   verbose?: boolean;
+  /** Minimal output (session IDs only) */
   quiet?: boolean;
 }
 
@@ -94,10 +101,14 @@ export function createRelatedCommand(): Command {
 }
 
 /**
- * Execute the related command with given options.
+ * Execute the related command programmatically.
  *
- * @param id The source ID to find related sessions for
- * @param options Command options from CLI
+ * Finds sessions related to a given session by shared topics and entities.
+ * Handles its own database initialization and teardown.
+ *
+ * @param id - Session ID, message ID, or topic name to find related sessions for
+ * @param options - Related command options
+ * @returns CommandResult with exitCode 0 (success) or 1 (not found/error)
  */
 export async function executeRelatedCommand(
   id: string,

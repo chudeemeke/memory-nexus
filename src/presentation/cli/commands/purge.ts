@@ -32,22 +32,30 @@ export function setTestDbPath(path: string | null): void {
 }
 
 /**
- * Options parsed from CLI arguments.
+ * Options for the purge command.
  */
 export interface PurgeCommandOptions {
+  /** Duration threshold (e.g., "30d", "6m", "1y") -- sessions older than this are purged */
   olderThan: string;
+  /** Skip confirmation prompt */
   force?: boolean;
+  /** Preview purge without modifying the database */
   dryRun?: boolean;
+  /** Output results as JSON */
   json?: boolean;
+  /** Suppress non-essential output */
   quiet?: boolean;
 }
 
 /**
- * Result of purge operation.
+ * Result of a purge operation.
  */
 export interface PurgeResult {
+  /** Number of sessions deleted (0 if dryRun) */
   sessionsDeleted: number;
+  /** ISO date string of the cutoff threshold */
   cutoffDate: string;
+  /** Whether this was a dry-run (preview only) */
   dryRun: boolean;
 }
 
@@ -172,9 +180,14 @@ export function createPurgeCommand(): Command {
 }
 
 /**
- * Execute the purge command with given options.
+ * Execute the purge command programmatically.
  *
- * @param options Command options from CLI
+ * Purges sessions from the database older than the specified duration.
+ * Use dryRun to preview without deleting. Handles its own database
+ * initialization and teardown.
+ *
+ * @param options - Purge command options (olderThan is required)
+ * @returns CommandResult with exitCode 0 (success) or 1 (error)
  */
 export async function executePurgeCommand(options: PurgeCommandOptions): Promise<CommandResult> {
   // Parse duration

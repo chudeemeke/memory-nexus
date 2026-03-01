@@ -84,6 +84,74 @@ memory search "query" --limit 5
 
 Standard CLI output works for both humans and AI agents.
 
+## Programmatic API
+
+Install as a dependency:
+
+```bash
+bun add @chude/memory
+```
+
+Import and call execute functions:
+
+```typescript
+import {
+  executeSyncCommand,
+  executeSearchCommand,
+  executeContextCommand,
+  type CommandResult,
+  type SyncCommandOptions,
+  type SearchCommandOptions,
+} from "@chude/memory";
+
+// Sync sessions to database
+const syncResult = await executeSyncCommand({ quiet: true });
+// syncResult: { exitCode: 0 }
+
+// Search sessions
+const searchResult = await executeSearchCommand("authentication patterns", {
+  limit: "5",
+  json: true,
+});
+
+// Get project context
+const contextResult = await executeContextCommand("my-project", {
+  json: true,
+  days: 7,
+});
+```
+
+### Exported Functions
+
+| Function | Parameters | Returns |
+|----------|------------|---------|
+| `executeSyncCommand` | `options: SyncCommandOptions` | `Promise<CommandResult>` |
+| `executeSearchCommand` | `query: string, options: SearchCommandOptions` | `Promise<CommandResult>` |
+| `executeListCommand` | `options: ListCommandOptions` | `Promise<CommandResult>` |
+| `executeStatsCommand` | `options: StatsCommandOptions` | `Promise<CommandResult>` |
+| `executeContextCommand` | `project: string, options: ContextCommandOptions` | `Promise<CommandResult>` |
+| `executeRelatedCommand` | `sessionId: string, options: RelatedCommandOptions` | `Promise<CommandResult>` |
+| `executeShowCommand` | `sessionId: string, options: ShowCommandOptions` | `Promise<CommandResult>` |
+| `executeBrowseCommand` | `options: BrowseCommandOptions` | `Promise<CommandResult>` |
+| `executeInstallCommand` | `options: InstallOptions` | `Promise<CommandResult>` |
+| `executeUninstallCommand` | `options: UninstallOptions` | `Promise<CommandResult>` |
+| `executeStatusCommand` | `options: StatusOptions` | `Promise<CommandResult>` |
+| `executeDoctorCommand` | `options: DoctorOptions` | `Promise<CommandResult>` |
+| `executePurgeCommand` | `options: PurgeCommandOptions` | `Promise<CommandResult>` |
+| `executeExportCommand` | `outputPath: string, options: ExportOptions` | `Promise<CommandResult>` |
+| `executeImportCommand` | `inputPath: string, options: ImportOptions` | `Promise<CommandResult>` |
+| `executeCompletionCommand` | `shell: string` | `CommandResult` |
+
+### CommandResult
+
+```typescript
+interface CommandResult {
+  exitCode: number; // 0 = success, 1 = error/not found
+}
+```
+
+All functions handle their own database initialization and teardown. They never call `process.exit()`.
+
 ## Previously Published As
 
 This package was previously published as `memory-nexus`. The old package name now installs a deprecation stub. See [MIGRATION.md](MIGRATION.md) for upgrade instructions.

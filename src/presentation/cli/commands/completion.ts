@@ -496,9 +496,13 @@ Usage:
 }
 
 /**
- * Execute the completion command with given shell argument.
+ * Execute the completion command programmatically.
  *
- * @param shell Shell type from CLI argument
+ * Outputs a shell completion script for the specified shell type.
+ * Supported shells: bash, zsh, fish.
+ *
+ * @param shell - Shell type (bash, zsh, or fish)
+ * @returns CommandResult with exitCode 0 (success) or 1 (invalid shell)
  */
 export function executeCompletionCommand(shell: string): CommandResult {
     if (!isValidShell(shell)) {

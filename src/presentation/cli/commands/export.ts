@@ -20,10 +20,12 @@ import { existsSync } from "node:fs";
 import { dirname } from "node:path";
 
 /**
- * Options parsed from CLI arguments.
+ * Options for the export command.
  */
 export interface ExportOptions {
+  /** Suppress output except the file path */
   quiet?: boolean;
+  /** Output stats as JSON */
   json?: boolean;
 }
 
@@ -51,10 +53,14 @@ export function createExportCommand(): Command {
 }
 
 /**
- * Execute the export command with given options.
+ * Execute the export command programmatically.
  *
- * @param outputFile Path to write the backup file
- * @param options Command options from CLI
+ * Exports the database to a JSON backup file. Handles its own database
+ * initialization and teardown.
+ *
+ * @param outputFile - Destination file path for the JSON backup
+ * @param options - Export command options
+ * @returns CommandResult with exitCode 0 (success) or 1 (error)
  */
 export async function executeExportCommand(
   outputFile: string,
