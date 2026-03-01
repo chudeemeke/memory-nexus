@@ -49,7 +49,7 @@ export async function executeUninstallCommand(options: UninstallOptions): Promis
 
     if (!status.sessionEnd && !status.preCompact) {
         console.log("Hooks are not installed.");
-        return;
+        return { exitCode: 0 };
     }
 
     if (options.restore && status.backupExists) {
