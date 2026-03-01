@@ -12,6 +12,10 @@ export type {
   IToolUseRepository,
   ILinkRepository,
   IExtractionStateRepository,
+  IEmbeddingRepository,
+  UnembeddedMessage,
+  EmbeddingBatchItem,
+  EmbeddingServiceConfig,
 } from "./repositories.js";
 
 // Embedding provider port

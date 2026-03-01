@@ -363,3 +363,112 @@ export interface IEntityRepository {
     weight?: number
   ): Promise<void>;
 }
+
+/**
+ * A message that has not yet been embedded.
+ *
+ * Represents a row from messages_meta that has no corresponding
+ * entry in embedding_state. Used by the embedding pipeline to
+ * identify messages needing vector generation.
+ */
+export interface UnembeddedMessage {
+  /** The integer rowid from messages_meta (NOT the UUID id) */
+  rowid: number;
+  /** The message content text to embed */
+  content: string;
+}
+
+/**
+ * A single item in an embedding batch for storage.
+ *
+ * Pairs a message rowid with its computed embedding vector.
+ * Used by storeBatch to write both the vec0 table and
+ * the embedding_state tracking table atomically.
+ */
+export interface EmbeddingBatchItem {
+  /** The integer rowid matching messages_meta.rowid */
+  rowid: number;
+  /** The embedding vector */
+  embedding: Float32Array;
+}
+
+/**
+ * Domain-layer configuration contract for the embedding service.
+ *
+ * Contains only the fields that EmbeddingService needs to operate.
+ * Infrastructure's EmbeddingConfigData structurally satisfies this
+ * interface (it has all 4 fields plus additional ones like enabled,
+ * apiKey, baseUrl that the application layer does not need).
+ */
+export interface EmbeddingServiceConfig {
+  /** Embedding provider name (e.g., "local", "openai", "ollama") */
+  provider: string;
+  /** Model identifier (e.g., "Xenova/all-MiniLM-L6-v2") */
+  model: string;
+  /** Vector dimensions produced by the model */
+  dimensions: number;
+  /** Number of messages to process per batch */
+  batchSize: number;
+}
+
+/**
+ * Repository port for embedding data access.
+ *
+ * Defines the contract for querying unembedded messages, storing
+ * embedding results, tracking model hashes for change detection,
+ * and managing the embedding lifecycle (clear and re-embed).
+ *
+ * All methods are synchronous, matching bun:sqlite's synchronous API.
+ * Implemented by infrastructure's EmbeddingRepository.
+ *
+ * Note: Infrastructure-only methods (vectorKnnSearch, getStoredEmbeddingDimensions,
+ * recreateVecTable) are intentionally excluded per ISP -- they are used by
+ * HybridSearchService and sync commands, not by the application-layer
+ * EmbeddingService.
+ */
+export interface IEmbeddingRepository {
+  /**
+   * Find messages that have not yet been embedded.
+   * @param limit Maximum number of messages to return
+   * @returns Array of unembedded messages ordered by rowid ASC
+   */
+  findUnembedded(limit: number): UnembeddedMessage[];
+
+  /**
+   * Store a batch of embeddings in a single transaction.
+   * @param items Array of embedding batch items (rowid + vector)
+   * @param modelHash Hash identifying the model configuration
+   * @param modelName Human-readable model name
+   */
+  storeBatch(items: EmbeddingBatchItem[], modelHash: string, modelName: string): void;
+
+  /**
+   * Get the model hash currently stored in embedding_state.
+   * @returns The model hash string, or null if no embeddings exist
+   */
+  getStoredModelHash(): string | null;
+
+  /**
+   * Get the human-readable model name stored in embedding_state.
+   * @returns The model name string, or null if unavailable
+   */
+  getStoredModelName(): string | null;
+
+  /**
+   * Delete all embeddings and embedding state.
+   * Used before re-embedding when the model has changed.
+   */
+  clearAllEmbeddings(): void;
+
+  /**
+   * Count the number of embedded messages.
+   * @returns The number of rows in embedding_state
+   */
+  getEmbeddedCount(): number;
+
+  /**
+   * Count the total number of messages in the database.
+   * @returns The number of rows in messages_meta
+   */
+  getTotalMessageCount(): number;
+}
