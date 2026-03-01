@@ -11,6 +11,10 @@
  */
 
 import type { Database } from "bun:sqlite";
+import type { IEmbeddingRepository } from "../../../domain/ports/repositories.js";
+
+// Re-export domain types so existing infrastructure consumers don't break
+export type { UnembeddedMessage, EmbeddingBatchItem } from "../../../domain/ports/repositories.js";
 
 /**
  * A vector KNN search result row.
@@ -23,33 +27,13 @@ export interface VectorSearchRow {
 }
 
 /**
- * A message that has not yet been embedded.
- */
-export interface UnembeddedMessage {
-    /** The integer rowid from messages_meta (NOT the UUID id) */
-    rowid: number;
-    /** The message content text to embed */
-    content: string;
-}
-
-/**
- * A single item in an embedding batch for storage.
- */
-export interface EmbeddingBatchItem {
-    /** The integer rowid matching messages_meta.rowid */
-    rowid: number;
-    /** The embedding vector */
-    embedding: Float32Array;
-}
-
-/**
  * Repository for embedding data access.
  *
  * Provides methods for querying unembedded messages, storing embedding
  * results, tracking model hashes for change detection, and managing
  * the embedding lifecycle (clear + re-embed).
  */
-export class EmbeddingRepository {
+export class EmbeddingRepository implements IEmbeddingRepository {
     constructor(private readonly db: Database) {}
 
     /**

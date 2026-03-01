@@ -10,8 +10,7 @@ import { describe, expect, test, beforeEach, mock } from "bun:test";
 import { createHash } from "node:crypto";
 import type { IEmbeddingProvider } from "../../domain/ports/embedding.js";
 import type { EmbeddingResult } from "../../domain/value-objects/embedding-result.js";
-import type { EmbeddingRepository, UnembeddedMessage, EmbeddingBatchItem } from "../../infrastructure/database/repositories/embedding-repository.js";
-import type { EmbeddingConfigData } from "../../infrastructure/hooks/config-manager.js";
+import type { IEmbeddingRepository, UnembeddedMessage, EmbeddingBatchItem, EmbeddingServiceConfig } from "../../domain/ports/repositories.js";
 import {
     computeModelHash,
     EmbeddingService,
@@ -23,7 +22,7 @@ import {
 /**
  * Create a mock EmbeddingRepository with all methods stubbed.
  */
-function createMockRepository(overrides?: Partial<EmbeddingRepository>): EmbeddingRepository {
+function createMockRepository(overrides?: Partial<IEmbeddingRepository>): IEmbeddingRepository {
     return {
         findUnembedded: mock(() => [] as UnembeddedMessage[]),
         storeBatch: mock(() => {}),
@@ -33,7 +32,7 @@ function createMockRepository(overrides?: Partial<EmbeddingRepository>): Embeddi
         getEmbeddedCount: mock(() => 0),
         getTotalMessageCount: mock(() => 0),
         ...overrides,
-    } as unknown as EmbeddingRepository;
+    } as IEmbeddingRepository;
 }
 
 /**
@@ -69,8 +68,7 @@ function createFakeEmbeddingResult(seed: number = 1): EmbeddingResult {
     } as unknown as EmbeddingResult;
 }
 
-const DEFAULT_CONFIG: EmbeddingConfigData = {
-    enabled: true,
+const DEFAULT_CONFIG: EmbeddingServiceConfig = {
     provider: "local",
     model: "Xenova/all-MiniLM-L6-v2",
     dimensions: 384,

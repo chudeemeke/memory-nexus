@@ -13,8 +13,7 @@
 
 import { createHash } from "node:crypto";
 import type { IEmbeddingProvider } from "../../domain/ports/embedding.js";
-import type { EmbeddingRepository, EmbeddingBatchItem } from "../../infrastructure/database/repositories/embedding-repository.js";
-import type { EmbeddingConfigData } from "../../infrastructure/hooks/config-manager.js";
+import type { IEmbeddingRepository, EmbeddingBatchItem, EmbeddingServiceConfig } from "../../domain/ports/repositories.js";
 
 /**
  * Options for embedding operations.
@@ -84,7 +83,7 @@ export interface ModelState {
  * @returns 16-character hex hash string
  */
 export function computeModelHash(
-    config: Pick<EmbeddingConfigData, "provider" | "model" | "dimensions">,
+    config: Pick<EmbeddingServiceConfig, "provider" | "model" | "dimensions">,
 ): string {
     const input = `${config.provider}:${config.model}:${config.dimensions}`;
     return createHash("sha256").update(input).digest("hex").slice(0, 16);
@@ -98,16 +97,16 @@ export function computeModelHash(
  * injected via constructor for testability.
  */
 export class EmbeddingService {
-    private readonly repository: EmbeddingRepository;
+    private readonly repository: IEmbeddingRepository;
     private readonly provider: IEmbeddingProvider;
     private readonly batchSize: number;
     private readonly modelHash: string;
     private readonly modelName: string;
 
     constructor(deps: {
-        repository: EmbeddingRepository;
+        repository: IEmbeddingRepository;
         provider: IEmbeddingProvider;
-        config: EmbeddingConfigData;
+        config: EmbeddingServiceConfig;
     }) {
         this.repository = deps.repository;
         this.provider = deps.provider;
