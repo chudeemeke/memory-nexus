@@ -50,4 +50,4 @@ export type { PurgeCommandOptions, PurgeResult } from "./purge.js";
 export type { ExportOptions } from "./export.js";
 export type { ImportOptions } from "./import.js";
 export type { ShellType } from "./completion.js";
-export type { StatusInfo, EmbeddingStatus, GatherStatusOptions } from "./status.js";
+export type { StatusOptions, StatusInfo, EmbeddingStatus, GatherStatusOptions } from "./status.js";

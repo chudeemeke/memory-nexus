@@ -41,7 +41,7 @@ export function setTestDbPath(path: string | null): void {
 /**
  * Options for the status command.
  */
-interface StatusOptions {
+export interface StatusOptions {
     /** Output as JSON */
     json?: boolean;
 }

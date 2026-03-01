@@ -56,5 +56,6 @@ export type {
   ShellType,
   StatusInfo,
   EmbeddingStatus,
+  StatusOptions,
   GatherStatusOptions,
 } from "./presentation/cli/commands/index.js";
