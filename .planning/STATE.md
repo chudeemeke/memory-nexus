@@ -13,18 +13,18 @@ See: .planning/PROJECT.md (updated 2026-02-18)
 ## Current Position
 
 **Milestone:** v2.0 Hybrid Search and Rebrand
-**Phase:** 18 (API Stabilization) -- In Progress (1/? plans)
-**Status:** Active -- Plan 18-01 complete (build infrastructure and API export surface)
+**Phase:** 18 (API Stabilization) -- Complete (2/2 plans)
+**Status:** Complete -- All plans executed
 
 ```
-v2.0 Progress: [################....] 6/7 phases
+v2.0 Progress: [####################] 7/7 phases
   Phase 13: Package Rename          [x] Complete (3/3 plans)
   Phase 14: Embedding Infrastructure [x] Complete (4/4 plans)
   Phase 15: Embedding Pipeline       [x] Complete (4/4 plans)
   Phase 16: Hybrid Search            [x] Complete (3/3 plans)
   Phase 16.1: Migration Race Fix     [x] Complete (1/1 plans)
   Phase 17: Provider Ecosystem       [x] Complete (3/3 plans)
-  Phase 18: API Stabilization        [~] In Progress (1/? plans)
+  Phase 18: API Stabilization        [x] Complete (2/2 plans)
 ```
 
 ## Performance Metrics
@@ -63,6 +63,7 @@ v2.0 Progress: [################....] 6/7 phases
 | 17-02 | Dimension-aware re-embedding on provider/model change | 6min | 2 | 4 |
 | 17-03 | Provider-specific default resolution (gap closure) | 5min | 2 | 3 |
 | 18-01 | Build infrastructure and API export surface | 17min | 2 | 18 |
+| 18-02 | Integration tests and API documentation | 20min | 2 | 18 |
 
 ## Accumulated Context
 
@@ -167,18 +168,18 @@ None. Phase 16.1 complete; Phase 17/18 unblocked.
 ### Last Session
 
 **Date:** 2026-03-01
-**Completed:** Phase 18, Plan 01 (Build infrastructure and API export surface)
-**Stopped at:** Completed 18-01-PLAN.md
+**Completed:** Phase 18, Plan 02 (Integration tests and API documentation)
+**Stopped at:** Completed 18-02-PLAN.md
 
 ### Context for Next Session
 
-1. Plan 18-01 complete: all 16 execute*Command functions exported from @chude/memory
-2. 2555 tests passing across full suite (6 new from smoke test)
-3. Dual build system: build:types (tsc .d.ts) -> build:lib (bun library JS) -> build:cli (bun CLI binary)
-4. dist/index.js importable as library; dist/index.d.ts has all type declarations
-5. Pre-existing 27 tsc type errors remain (bun:sqlite Statement types, missing module path) -- handled via noEmitOnError:false
-6. Remaining Phase 18 plans (if any) continue API stabilization work
+1. Phase 18 complete: all API stabilization work done (2/2 plans)
+2. 2599 tests passing across full suite (43 new from programmatic API tests)
+3. All 16 execute*Command functions exported, tested, and documented with JSDoc
+4. README.md has Programmatic API section with function table and usage examples
+5. Fixed uninstall.ts returning undefined instead of CommandResult (Rule 1 bug fix)
+6. v2.0 milestone fully complete (7/7 phases)
 
 ---
 
-*Last updated: 2026-03-01 (Plan 18-01 complete)*
+*Last updated: 2026-03-01 (Plan 18-02 complete)*

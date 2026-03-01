@@ -60,8 +60,8 @@ Requirements for v2.0: Hybrid Search, Package Rename, and API Stabilization.
 
 - [x] **INTEG-01**: Export stable programmatic API surface (execute*Command functions with typed options and return values)
 - [x] **INTEG-02**: Verify memory-nexus works correctly when installed as npm dependency (not just standalone)
-- [ ] **INTEG-03**: Add integration tests calling execute*Command functions programmatically
-- [ ] **INTEG-04**: Document API surface for aidev MemoryCommand consumption
+- [x] **INTEG-03**: Add integration tests calling execute*Command functions programmatically
+- [x] **INTEG-04**: Document API surface for aidev MemoryCommand consumption
 
 ### Quality
 
@@ -140,8 +140,8 @@ Deferred. Tracked for context, not in current roadmap.
 | PROV-04 | Phase 17 | Complete |
 | INTEG-01 | Phase 18 | Complete |
 | INTEG-02 | Phase 18 | Complete |
-| INTEG-03 | Phase 18 | Pending |
-| INTEG-04 | Phase 18 | Pending |
+| INTEG-03 | Phase 18 | Complete |
+| INTEG-04 | Phase 18 | Complete |
 | QUAL-01 | All | Pending |
 | QUAL-02 | All | Pending |
 | QUAL-03 | All | Pending |
@@ -154,4 +154,4 @@ Deferred. Tracked for context, not in current roadmap.
 
 ---
 *Requirements defined: 2026-02-18*
-*Last updated: 2026-02-28 (Phase 17 complete, all PROV requirements completed)*
+*Last updated: 2026-03-01 (Phase 18 complete, all INTEG requirements completed)*

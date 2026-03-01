@@ -215,8 +215,8 @@ Phase 13 (Package Rename)
 | 16 | 3/3 | Complete    | 2026-02-27 | -- |
 | 16.1 | v2.0 | Complete    | 2026-02-27 | 2026-02-27 |
 | 17 | 3/3 | Complete   | 2026-02-28 | 2026-02-28 |
-| 18 | v2.0 | -- | Pending | -- |
+| 18 | v2.0 | 2/2 | Complete | 2026-03-01 |
 
 ---
 
-*Last updated: 2026-02-28 (Phase 17 complete - 3/3 plans including gap closure)*
+*Last updated: 2026-03-01 (Phase 18 complete - 2/2 plans, v2.0 milestone fully complete)*
