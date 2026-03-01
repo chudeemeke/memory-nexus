@@ -102,6 +102,7 @@ import {
   type CommandResult,
   type SyncCommandOptions,
   type SearchCommandOptions,
+  type SearchMode,
 } from "@chude/memory";
 
 // Sync sessions to database
@@ -151,6 +152,42 @@ interface CommandResult {
 ```
 
 All functions handle their own database initialization and teardown. They never call `process.exit()`.
+
+### Domain Types
+
+The following domain types are exported for TypeScript consumers who need typed search and stats operations:
+
+| Type | Description |
+|------|-------------|
+| `SearchMode` | Union type: `"auto" \| "fts" \| "vector" \| "hybrid"`. Controls search strategy. |
+| `HybridSearchOptions` | Extends `SearchOptions` with `mode` and `noDecay` fields for hybrid search. |
+| `IStatsService` | Port interface for database statistics queries. |
+| `StatsResult` | Return type from `IStatsService.getStats()`: session/message/tool-use totals, database size, and per-project breakdown. |
+| `ProjectStats` | Per-project statistics: `projectName`, `sessionCount`, `messageCount`. |
+
+```typescript
+import type {
+  SearchMode,
+  HybridSearchOptions,
+  IStatsService,
+  StatsResult,
+  ProjectStats,
+} from "@chude/memory";
+
+// Typed search options
+const opts: HybridSearchOptions = {
+  mode: "hybrid" satisfies SearchMode,
+  limit: 10,
+};
+
+// Typed stats result
+function processStats(stats: StatsResult): void {
+  console.log(`${stats.totalSessions} sessions, ${stats.totalMessages} messages`);
+  stats.projectBreakdown.forEach((p: ProjectStats) => {
+    console.log(`  ${p.projectName}: ${p.messageCount} messages`);
+  });
+}
+```
 
 ## Previously Published As
 
