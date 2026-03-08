@@ -1149,4 +1149,92 @@ describe("SqliteSessionRepository", () => {
       expect(results).toHaveLength(0);
     });
   });
+
+  describe("searchSummaries", () => {
+    it("should return sessions whose summary contains the query term", async () => {
+      const session = createTestSession({ id: "search-hex" });
+      await repository.save(session);
+      await repository.updateSummary(
+        "search-hex",
+        "Implemented hexagonal architecture with SOLID principles."
+      );
+
+      const results = await repository.searchSummaries("hexagonal");
+
+      expect(results).toHaveLength(1);
+      expect(results[0].id).toBe("search-hex");
+    });
+
+    it("should NOT throw FTS5 syntax error for 'Opus 4.6'", async () => {
+      const session = createTestSession({ id: "search-opus" });
+      await repository.save(session);
+      await repository.updateSummary(
+        "search-opus",
+        "Used Opus 4 6 model for quality generation tasks."
+      );
+
+      const results = await repository.searchSummaries("Opus 4.6");
+
+      // Should not throw; sanitizer strips period
+      expect(results).toHaveLength(1);
+    });
+
+    it("should NOT throw FTS5 syntax error for 'SYNC-09'", async () => {
+      const session = createTestSession({ id: "search-sync" });
+      await repository.save(session);
+      await repository.updateSummary(
+        "search-sync",
+        "Fixed SYNC 09 extraction pipeline bug."
+      );
+
+      const results = await repository.searchSummaries("SYNC-09");
+
+      // Should not throw; sanitizer strips hyphen
+      expect(results).toHaveLength(1);
+    });
+
+    it("should respect limit parameter", async () => {
+      for (let i = 0; i < 5; i++) {
+        const session = createTestSession({
+          id: `limit-session-${i}`,
+          startTime: new Date(Date.now() - i * 1000),
+        });
+        await repository.save(session);
+        await repository.updateSummary(
+          `limit-session-${i}`,
+          `Session ${i} about authentication patterns.`
+        );
+      }
+
+      const results = await repository.searchSummaries("authentication", 3);
+
+      expect(results).toHaveLength(3);
+    });
+
+    it("should return empty array for non-matching query", async () => {
+      const session = createTestSession({ id: "no-match-session" });
+      await repository.save(session);
+      await repository.updateSummary(
+        "no-match-session",
+        "Discussed database optimization strategies."
+      );
+
+      const results = await repository.searchSummaries("nonexistentterm");
+
+      expect(results).toHaveLength(0);
+    });
+
+    it("should return empty array for empty sanitized query", async () => {
+      const session = createTestSession({ id: "empty-query-session" });
+      await repository.save(session);
+      await repository.updateSummary(
+        "empty-query-session",
+        "Some content about things."
+      );
+
+      const results = await repository.searchSummaries("...");
+
+      expect(results).toHaveLength(0);
+    });
+  });
 });

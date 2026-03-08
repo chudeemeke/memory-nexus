@@ -1016,4 +1016,125 @@ describe("Fts5SearchService", () => {
       expect(assistantResult?.role).toBe("assistant");
     });
   });
+
+  describe("FTS5 Query Sanitization", () => {
+    it("Test 34: searching for 'SYNC-09' does NOT throw an FTS5 syntax error", async () => {
+      insertTestMessage(
+        db,
+        "msg-sync",
+        "session-1",
+        "user",
+        "Working on SYNC 09 integration task"
+      );
+
+      const query = SearchQuery.from("SYNC-09");
+      const results = await searchService.search(query);
+
+      // Should not throw, and should find messages containing SYNC or 09 tokens
+      expect(results).toHaveLength(1);
+      expect(results[0].messageId).toBe("msg-sync");
+    });
+
+    it("Test 35: searching for 'Opus 4.6' does NOT throw an FTS5 syntax error", async () => {
+      insertTestMessage(
+        db,
+        "msg-opus",
+        "session-1",
+        "user",
+        "Using Opus 4 6 model for quality tasks"
+      );
+
+      const query = SearchQuery.from("Opus 4.6");
+      const results = await searchService.search(query);
+
+      expect(results).toHaveLength(1);
+      expect(results[0].messageId).toBe("msg-opus");
+    });
+
+    it("Test 36: searching for 'v2.0-beta' returns matching results", async () => {
+      insertTestMessage(
+        db,
+        "msg-beta",
+        "session-1",
+        "user",
+        "Released v2 0 beta version today"
+      );
+
+      const query = SearchQuery.from("v2.0-beta");
+      const results = await searchService.search(query);
+
+      expect(results).toHaveLength(1);
+    });
+
+    it("Test 37: searching for 'error(code)' does NOT throw an FTS5 syntax error", async () => {
+      insertTestMessage(
+        db,
+        "msg-error",
+        "session-1",
+        "user",
+        "Got an error code in the build output"
+      );
+
+      const query = SearchQuery.from("error(code)");
+      const results = await searchService.search(query);
+
+      // Should find messages containing "error" and/or "code" tokens
+      expect(results).toHaveLength(1);
+    });
+
+    it("Test 38: normal query 'authentication' still returns correct results (regression)", async () => {
+      insertTestMessage(
+        db,
+        "msg-auth",
+        "session-1",
+        "user",
+        "Setting up authentication for the application"
+      );
+
+      const query = SearchQuery.from("authentication");
+      const results = await searchService.search(query);
+
+      expect(results).toHaveLength(1);
+      expect(results[0].messageId).toBe("msg-auth");
+    });
+
+    it("Test 39: 'auth AND security' still returns AND-combined results", async () => {
+      insertTestMessage(
+        db,
+        "msg-both",
+        "session-1",
+        "user",
+        "authentication and security best practices"
+      );
+      insertTestMessage(
+        db,
+        "msg-auth-only",
+        "session-1",
+        "assistant",
+        "authentication setup guide"
+      );
+
+      const query = SearchQuery.from("authentication AND security");
+      const results = await searchService.search(query);
+
+      // AND search should only match messages containing BOTH terms
+      expect(results).toHaveLength(1);
+      expect(results[0].messageId).toBe("msg-both");
+    });
+
+    it("Test 40: empty sanitized query returns empty results", async () => {
+      insertTestMessage(
+        db,
+        "msg-1",
+        "session-1",
+        "user",
+        "Some content here"
+      );
+
+      const query = SearchQuery.from("...");
+      const results = await searchService.search(query);
+
+      expect(results).toHaveLength(0);
+    });
+  });
 });
