@@ -5,6 +5,7 @@
  * These interfaces abstract filesystem and parsing operations.
  */
 
+import type { MemoryFileType } from "../entities/memory-file.js";
 import type { ProjectPath } from "../value-objects/project-path.js";
 import type { ParsedEvent } from "./types.js";
 
@@ -92,4 +93,42 @@ export interface IProjectNameResolver {
    * @returns The resolved project name (e.g., "memory-nexus")
    */
   resolveFromEncodedPath(encodedPath: string): string;
+}
+
+/**
+ * Information about a discovered memory file.
+ *
+ * Returned by IMemoryFileScanner during file discovery.
+ * Contains all data needed to create a MemoryFile entity.
+ */
+export interface MemoryFileInfo {
+  /** Path relative to ~/.memory/ (uses forward slashes) */
+  filePath: string;
+  /** Absolute path for reading */
+  absolutePath: string;
+  /** Classified file type */
+  fileType: MemoryFileType;
+  /** Encoded project path, or undefined for global files */
+  projectEncoded?: string;
+  /** SHA-256 hash of file content */
+  contentHash: string;
+  /** Full file content */
+  content: string;
+}
+
+/**
+ * Scanner for discovering memory files in ~/.memory/.
+ *
+ * Implementations discover .md files, classify their type from
+ * path patterns, extract project encoded names, and compute
+ * content hashes. Returns empty array when the directory does
+ * not exist (graceful no-op).
+ */
+export interface IMemoryFileScanner {
+  /**
+   * Discover all memory files in ~/.memory/.
+   *
+   * @returns Array of discovered file info, empty if directory missing
+   */
+  discoverFiles(): Promise<MemoryFileInfo[]>;
 }

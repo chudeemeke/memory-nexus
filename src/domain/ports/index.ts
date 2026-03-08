@@ -13,6 +13,7 @@ export type {
   ILinkRepository,
   IExtractionStateRepository,
   IEmbeddingRepository,
+  IMemoryFileRepository,
   UnembeddedMessage,
   EmbeddingBatchItem,
   EmbeddingServiceConfig,
@@ -41,7 +42,9 @@ export type {
   ISessionSource,
   IEventParser,
   IProjectNameResolver,
+  IMemoryFileScanner,
   SessionFileInfo,
+  MemoryFileInfo,
 } from "./sources.js";
 
 // Signal interfaces

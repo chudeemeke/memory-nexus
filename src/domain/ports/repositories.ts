@@ -16,6 +16,7 @@ import type { ToolUse } from "../entities/tool-use.js";
 import type { Link, EntityType } from "../entities/link.js";
 import type { ExtractionState } from "../entities/extraction-state.js";
 import type { Entity, ExtractedEntityType } from "../entities/entity.js";
+import type { MemoryFile, MemoryFileType } from "../entities/memory-file.js";
 import type { ProjectPath } from "../value-objects/project-path.js";
 
 /**
@@ -471,4 +472,53 @@ export interface IEmbeddingRepository {
    * @returns The number of rows in messages_meta
    */
   getTotalMessageCount(): number;
+}
+
+/**
+ * Repository for MemoryFile entities.
+ *
+ * Handles persistence of indexed memory files from ~/.memory/.
+ * Files are identified by their path relative to the memory directory.
+ */
+export interface IMemoryFileRepository {
+  /**
+   * Find a memory file by its relative path.
+   * @param filePath Path relative to ~/.memory/
+   * @returns The memory file if found, null otherwise
+   */
+  findByPath(filePath: string): Promise<MemoryFile | null>;
+
+  /**
+   * Find all memory files of a specific type.
+   * @param fileType The type to filter by
+   * @returns Array of matching memory files
+   */
+  findByType(fileType: MemoryFileType): Promise<MemoryFile[]>;
+
+  /**
+   * Find all memory files belonging to a specific project.
+   * @param projectEncoded The encoded project path
+   * @returns Array of memory files for the project
+   */
+  findByProject(projectEncoded: string): Promise<MemoryFile[]>;
+
+  /**
+   * Save a memory file (insert or update by file_path).
+   * @param file The memory file to save
+   */
+  save(file: MemoryFile): Promise<void>;
+
+  /**
+   * Save multiple memory files in a single transaction.
+   * @param files Array of memory files to save
+   */
+  saveMany(files: MemoryFile[]): Promise<void>;
+
+  /**
+   * Full-text search across memory file content.
+   * @param query The search query (already sanitized for FTS5)
+   * @param limit Maximum results (default: 20)
+   * @returns Array of matching memory files
+   */
+  searchContent(query: string, limit?: number): Promise<MemoryFile[]>;
 }
