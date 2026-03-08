@@ -10,3 +10,5 @@ export {
 } from "./session-source.js";
 
 export { ProjectNameResolver } from "./project-name-resolver.js";
+
+export { MemoryFileScanner } from "./memory-file-scanner.js";
