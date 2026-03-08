@@ -22,6 +22,7 @@ const APP_NAME = "memory";
 interface TestPathOverrides {
     configDir?: string;
     dataDir?: string;
+    memoryDir?: string;
 }
 
 let testOverrides: TestPathOverrides | null = null;
@@ -101,6 +102,25 @@ export function getDataDir(): string {
  */
 export function getLegacyDir(): string {
     return join(homedir(), ".memory-nexus");
+}
+
+/**
+ * Get the memory directory path.
+ *
+ * Returns ~/.memory/ where agent-written markdown files are stored.
+ * Not under XDG (uses home directory directly).
+ *
+ * Resolution order:
+ * 1. Test override (if set)
+ * 2. ~/.memory (default)
+ *
+ * @returns Absolute path to the memory directory
+ */
+export function getMemoryDir(): string {
+    if (testOverrides?.memoryDir !== undefined) {
+        return testOverrides.memoryDir;
+    }
+    return join(homedir(), ".memory");
 }
 
 /**

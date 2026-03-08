@@ -12,6 +12,7 @@ import {
     getConfigDir,
     getDataDir,
     getLegacyDir,
+    getMemoryDir,
     getConfigPath,
     getDbPath,
     getLogDir,
@@ -211,6 +212,34 @@ describe("paths", () => {
         test("getLegacyDir is not affected by test overrides", () => {
             setTestPaths({ configDir: "/test/config", dataDir: "/test/data" });
             expect(getLegacyDir()).toBe(join(home, ".memory-nexus"));
+        });
+
+        test("setTestPaths overrides memory dir", () => {
+            setTestPaths({ memoryDir: "/tmp/test-memory" });
+            expect(getMemoryDir()).toBe("/tmp/test-memory");
+        });
+
+        test("resetTestPaths restores getMemoryDir default", () => {
+            setTestPaths({ memoryDir: "/tmp/test-memory" });
+            resetTestPaths();
+            expect(getMemoryDir()).toBe(join(home, ".memory"));
+        });
+    });
+
+    describe("getMemoryDir", () => {
+        test("returns ~/.memory by default", () => {
+            const memoryDir = getMemoryDir();
+            expect(memoryDir).toBe(join(home, ".memory"));
+        });
+
+        test("ignores XDG_CONFIG_HOME", () => {
+            process.env.XDG_CONFIG_HOME = "/custom/config";
+            expect(getMemoryDir()).toBe(join(home, ".memory"));
+        });
+
+        test("ignores XDG_DATA_HOME", () => {
+            process.env.XDG_DATA_HOME = "/custom/data";
+            expect(getMemoryDir()).toBe(join(home, ".memory"));
         });
     });
 });

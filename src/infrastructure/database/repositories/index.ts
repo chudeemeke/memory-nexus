@@ -35,3 +35,6 @@ export {
     type UnembeddedMessage,
     type EmbeddingBatchItem,
 } from "./embedding-repository.js";
+
+// Memory File Repository
+export { SqliteMemoryFileRepository } from "./memory-file-repository.js";
