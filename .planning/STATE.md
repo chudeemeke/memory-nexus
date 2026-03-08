@@ -13,13 +13,13 @@ See: .planning/PROJECT.md (updated 2026-02-18)
 ## Current Position
 
 **Milestone:** v3.0 Knowledge Layer + Friction Logging
-**Phase:** 23 (Foundation) -- Plan 01 complete, executing plans
-**Status:** Plan 23-01 complete (MemoryFile entity + ports), 3 plans remaining
-**Current Plan:** 2 of 4
+**Phase:** 23 (Foundation) -- Plans 01-02 complete, executing plans
+**Status:** Plan 23-02 complete (FTS5 sanitizer + search integration), 2 plans remaining
+**Current Plan:** 3 of 4
 
 ```
 v3.0 Progress: [#####                   ] 1/5 phases (in progress)
-  Phase 23: Foundation                [~] In Progress (1/4 plans)
+  Phase 23: Foundation                [~] In Progress (2/4 plans)
   Phase 24: Friction System           [ ] Discussed (CONTEXT.md ready)
   Phase 25: Intelligence              [ ] Discussed (CONTEXT.md ready)
   Phase 26: Hooks + Backfill          [ ] Discussed (CONTEXT.md ready)
@@ -68,21 +68,25 @@ v3.0 Progress: [#####                   ] 1/5 phases (in progress)
 ### Last Session
 
 **Date:** 2026-03-08
-**Completed:** Plan 23-01 (MemoryFile entity, IMemoryFileRepository, IMemoryFileScanner ports)
-**Stopped at:** Completed 23-01-PLAN.md
+**Completed:** Plan 23-02 (FTS5 query sanitizer, search service integration, searchSummaries)
+**Stopped at:** Completed 23-02-PLAN.md
 
 ### Decisions
 
 - Lowercase-only hex validation for contentHash (/^[a-f0-9]{64}$/)
 - MemoryFileInfo placed in sources.ts alongside IMemoryFileScanner
+- Preserve asterisks in FTS5 sanitizer (valid prefix search operator)
+- Preserve balanced double quotes in FTS5 sanitizer (valid phrase search syntax)
+- Infrastructure importing application pure function accepted (matches existing codebase pattern)
 
 ### Context for Next Session
 
-1. Plan 23-01 complete: MemoryFile entity and ports ready for infrastructure adapters
-2. Continue with plans 23-02 through 23-04
-3. Phase 23 CONTEXT.md has full detail: directory structure, schema, FTS5 fix, file scanner
-4. 398 domain tests passing (27 new from plan 23-01)
+1. Plans 23-01 and 23-02 complete
+2. Continue with plans 23-03 and 23-04
+3. sanitizeFtsQuery() available in application/services for any FTS5 query path
+4. SessionRepository.searchSummaries() ready for context/intelligence features
+5. 1699 core tests passing, zero regressions
 
 ---
 
-*Last updated: 2026-03-08 (plan 23-01 complete)*
+*Last updated: 2026-03-08 (plan 23-02 complete)*
