@@ -352,13 +352,19 @@ describe("Friction Command", () => {
             expect(parsed.status).toBe("resolved");
         });
 
-        it("dashboard action returns exitCode 0", async () => {
+        it("dashboard action returns exitCode 0 with rich output", async () => {
+            // Prior tests log entries, so dashboard renders full output
             const result = await executeFrictionCommand({
                 action: "dashboard",
             });
 
             expect(result.exitCode).toBe(0);
-            expect(consoleLogSpy).toHaveBeenCalledWith("Friction Dashboard");
+            const output = consoleLogSpy.mock.calls[0][0] as string;
+            // formatFrictionDashboard output includes these sections
+            expect(output).toContain("Friction Dashboard");
+            expect(output).toContain("Overview");
+            expect(output).toContain("By Severity");
+            expect(output).toContain("By Category");
         });
 
         it("dashboard action with JSON output", async () => {
@@ -370,8 +376,21 @@ describe("Friction Command", () => {
             expect(result.exitCode).toBe(0);
             const output = consoleLogSpy.mock.calls[0][0] as string;
             const parsed = JSON.parse(output);
-            expect(typeof parsed.total).toBe("number");
-            expect(typeof parsed.open).toBe("number");
+            expect(typeof parsed.stats.total).toBe("number");
+            expect(typeof parsed.stats.open).toBe("number");
+            expect(Array.isArray(parsed.trends)).toBe(true);
+        });
+
+        it("dashboard action with --html writes file", async () => {
+            const result = await executeFrictionCommand({
+                action: "dashboard",
+                html: true,
+            });
+
+            expect(result.exitCode).toBe(0);
+            expect(consoleLogSpy).toHaveBeenCalledWith(
+                expect.stringContaining("Dashboard written to")
+            );
         });
 
         it("resolve action returns exitCode 1 without id", async () => {

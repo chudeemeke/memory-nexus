@@ -9,6 +9,10 @@
  */
 
 import { Command } from "commander";
+import { exec } from "node:child_process";
+import { mkdirSync, writeFileSync } from "node:fs";
+import { join } from "node:path";
+import { platform } from "node:os";
 import type { CommandResult } from "../command-result.js";
 import { ErrorCode, MemoryError } from "../../../domain/errors/index.js";
 import {
@@ -19,6 +23,9 @@ import {
 } from "../../../infrastructure/database/index.js";
 import { FrictionService } from "../../../application/services/friction-service.js";
 import { formatError, formatErrorJson } from "../formatters/error-formatter.js";
+import { formatFrictionDashboard, generateFrictionHtml } from "../formatters/friction-dashboard.js";
+import { shouldUseColor } from "../formatters/color.js";
+import { getMemoryDir } from "../../../infrastructure/paths.js";
 
 /**
  * Base options shared by all friction subcommands.
@@ -175,7 +182,7 @@ export function createFrictionCommand(): Command {
             )
     );
 
-    // dashboard subcommand (stub for Plan 03)
+    // dashboard subcommand
     friction.addCommand(
         new Command("dashboard")
             .description("Show friction dashboard")
@@ -419,38 +426,52 @@ async function handleWontFix(
 }
 
 /**
- * Handle the dashboard action (stub for Plan 03).
+ * Handle the dashboard action.
  *
- * Outputs basic stats. Plan 03 will replace with rich formatters.
+ * Three modes:
+ * - Default: Rich terminal output via formatFrictionDashboard
+ * - --html: Generate self-contained HTML file and open in browser
+ * - --json: Output stats and trends as JSON
  */
 async function handleDashboard(
     service: FrictionService,
     options: FrictionExecuteOptions
 ): Promise<CommandResult> {
     const stats = await service.getStats();
+    const trends = await service.getWeeklyTrends(12);
+    const openItems = await service.list();
 
-    if (options.json) {
-        console.log(JSON.stringify(stats));
+    if (options.html) {
+        const html = generateFrictionHtml(stats, trends, openItems);
+        const memoryDir = getMemoryDir();
+        mkdirSync(memoryDir, { recursive: true });
+        const dashboardPath = join(memoryDir, "dashboard.html");
+        writeFileSync(dashboardPath, html, "utf-8");
+
+        if (!options.json) {
+            console.log(`Dashboard written to ${dashboardPath}`);
+            openInBrowser(dashboardPath);
+        }
+    } else if (options.json) {
+        console.log(JSON.stringify({ stats, trends }, null, 2));
     } else {
-        console.log("Friction Dashboard");
-        console.log("==================");
-        console.log(`Total entries: ${stats.total}`);
-        console.log(`Open: ${stats.open}`);
-        console.log(`Resolved: ${stats.resolved}`);
-        console.log(`Won't fix: ${stats.wontFix}`);
-
-        if (stats.meanTimeToResolve !== null) {
-            console.log(
-                `Mean time to resolve: ${stats.meanTimeToResolve.toFixed(1)} days`
-            );
-        }
-
-        if (stats.oldestOpen) {
-            console.log(
-                `Oldest open: #${stats.oldestOpen.id} (${stats.oldestOpen.daysOpen}d) - ${stats.oldestOpen.description}`
-            );
-        }
+        const output = formatFrictionDashboard(stats, trends, openItems, shouldUseColor());
+        console.log(output);
     }
 
     return { exitCode: 0 };
+}
+
+/**
+ * Open a file in the system's default browser.
+ *
+ * Uses platform-specific commands: start (Windows), open (macOS),
+ * xdg-open (Linux).
+ *
+ * @param filePath Absolute path to the file to open
+ */
+function openInBrowser(filePath: string): void {
+    const cmd = platform() === "win32" ? "start" :
+                platform() === "darwin" ? "open" : "xdg-open";
+    exec(`${cmd} "${filePath}"`);
 }
