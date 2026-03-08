@@ -22,7 +22,7 @@ v3.0 Progress: [#####                   ] 1/5 phases (complete)
   Phase 23: Foundation                [x] Complete (4/4 plans)
   Phase 24: Friction System           [~] In Progress (2/3 plans)
   Phase 25: Intelligence              [ ] Discussed (CONTEXT.md ready)
-  Phase 26: Hooks + Backfill          [ ] Discussed (CONTEXT.md ready)
+  Phase 26: Hooks + Backfill          [~] In Progress (2/3 plans)
   Phase 27: qmd Integration           [ ] Discussed (CONTEXT.md ready)
 ```
 
@@ -68,8 +68,8 @@ v3.0 Progress: [#####                   ] 1/5 phases (complete)
 ### Last Session
 
 **Date:** 2026-03-08
-**Completed:** Plan 24-02 (FrictionService, CLI commands, public API)
-**Stopped at:** Executing 24-03 next
+**Completed:** Plans 24-02, 26-01, 26-02
+**Stopped at:** Executing 26-03 (Wave 2)
 
 ### Decisions
 
@@ -79,15 +79,18 @@ v3.0 Progress: [#####                   ] 1/5 phases (complete)
 - wontFix flow: resolve() then updateStatus() for correct final state
 - Added generic NOT_FOUND and INVALID_STATE error codes (not entity-specific)
 - --json on each subcommand individually (Commander.js pitfall)
+- Flush reminder outputs before syncOnCompaction check (always fires for PreCompact regardless of sync config)
 
 ### Context for Next Session
 
 1. Phase 24 (Friction System) in progress: 2/3 plans complete
-2. 24-01 complete: FrictionEntry entity, IFrictionRepository port, friction_log schema, SqliteFrictionRepository
-3. 24-02 complete: FrictionService, CLI friction commands (log/list/resolve/wont-fix/dashboard), executeFrictionCommand API
-4. Next: 24-03 (Dashboard formatters with rich output)
-5. 2862 tests passing, 1 pre-existing failure
+2. Phase 26 (Hooks + Backfill) in progress: 2/3 plans complete (26-01, 26-02 done)
+3. 24-01 complete: FrictionEntry entity, IFrictionRepository port, friction_log schema, SqliteFrictionRepository
+4. 24-02 complete: FrictionService, CLI friction commands, executeFrictionCommand API
+5. 26-01 complete: PreCompact flush reminder added to sync-hook-script.ts
+6. 26-02 complete: BackfillState entity, IBackfillStateRepository port, schema, SqliteBackfillStateRepository
+7. Next: 26-03 (BackfillService, ClaudeSummaryGenerator, backfill CLI command)
 
 ---
 
-*Last updated: 2026-03-08 (plan 24-02 complete)*
+*Last updated: 2026-03-08 (plans 26-01, 26-02 merged)*
