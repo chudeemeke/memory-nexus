@@ -10,8 +10,10 @@ import { Command, Option } from "commander";
 import type { CommandResult } from "../command-result.js";
 import {
   SyncService,
+  MemoryFileSyncService,
   type SyncOptions,
   type SyncResult,
+  type MemoryFileSyncResult,
   type ModelState,
 } from "../../../application/services/index.js";
 import { createProgressReporter } from "../progress-reporter.js";
@@ -28,7 +30,9 @@ import {
 import {
   FileSystemSessionSource,
   ProjectNameResolver,
+  MemoryFileScanner,
 } from "../../../infrastructure/sources/index.js";
+import { SqliteMemoryFileRepository } from "../../../infrastructure/database/repositories/memory-file-repository.js";
 import { JsonlEventParser } from "../../../infrastructure/parsers/index.js";
 import {
   setupSignalHandlers,
@@ -247,6 +251,12 @@ export async function executeSyncCommand(options: SyncCommandOptions): Promise<C
 
     // Report results
     reportResults(result, startTime, options);
+
+    // Memory file sync (after session extraction)
+    const memoryResult = await runMemoryFileSync(db, options);
+    if (memoryResult) {
+      reportMemoryFileResults(memoryResult, options);
+    }
 
     // Exit with error code if there were failures or abort
     const syncExitCode = (result.errors.length > 0 || result.aborted) ? 1 : 0;
@@ -518,6 +528,79 @@ export async function handleBackgroundMode(
   }
 
   return { exitCode: 0 };
+}
+
+/**
+ * Run memory file sync: discover and index ~/.memory/ markdown files.
+ *
+ * Runs after session extraction. Returns null if no memory files
+ * were processed (e.g., ~/.memory/ does not exist).
+ *
+ * @param db Database connection
+ * @param options Sync command options
+ * @returns Sync result, or null if nothing to report
+ */
+async function runMemoryFileSync(
+  db: ReturnType<typeof initializeDatabase>["db"],
+  options: SyncCommandOptions,
+): Promise<MemoryFileSyncResult | null> {
+  try {
+    const memoryFileRepo = new SqliteMemoryFileRepository(db);
+    const memoryFileScanner = new MemoryFileScanner();
+    const memoryFileSyncService = new MemoryFileSyncService(memoryFileRepo, memoryFileScanner);
+
+    const result = await memoryFileSyncService.syncMemoryFiles();
+
+    // Only return result if there was something to report
+    if (result.filesIndexed > 0 || result.filesSkipped > 0 || result.errors.length > 0) {
+      return result;
+    }
+    return null;
+  } catch (error) {
+    // Memory file sync failure should not fail the overall sync
+    if (!options.quiet) {
+      console.error(
+        `  Memory files: error (${error instanceof Error ? error.message : String(error)})`
+      );
+    }
+    return null;
+  }
+}
+
+/**
+ * Report memory file sync results to console.
+ *
+ * @param result Memory file sync result
+ * @param options Command options
+ */
+function reportMemoryFileResults(
+  result: MemoryFileSyncResult,
+  options: SyncCommandOptions,
+): void {
+  if (options.json) {
+    // JSON output handled by the main reportResults -- just log extra fields
+    const output = {
+      memoryFiles: {
+        indexed: result.filesIndexed,
+        skipped: result.filesSkipped,
+        errors: result.errors,
+      },
+    };
+    console.log(JSON.stringify(output, null, 2));
+    return;
+  }
+
+  if (options.quiet) {
+    return;
+  }
+
+  console.log(`  Memory files: ${result.filesIndexed} indexed, ${result.filesSkipped} skipped`);
+
+  if (result.errors.length > 0) {
+    for (const err of result.errors) {
+      console.log(`    Error: ${err.filePath}: ${err.error}`);
+    }
+  }
 }
 
 // --- Lazy loaders for dynamic import (avoid ONNX when --embed not used) ---
