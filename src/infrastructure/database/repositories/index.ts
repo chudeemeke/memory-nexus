@@ -41,3 +41,6 @@ export { SqliteMemoryFileRepository } from "./memory-file-repository.js";
 
 // Friction Repository
 export { SqliteFrictionRepository } from "./friction-repository.js";
+
+// Backfill State Repository
+export { SqliteBackfillStateRepository } from "./backfill-state-repository.js";

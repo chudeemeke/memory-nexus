@@ -21,6 +21,7 @@ export {
     EMBEDDING_STATE_ADD_MODEL_NAME,
     MESSAGE_EMBEDDINGS_TABLE,
     FRICTION_LOG_TABLE,
+    BACKFILL_STATE_TABLE,
     type SchemaOptions,
 } from "./schema.js";
 
@@ -51,6 +52,7 @@ export {
     type UnembeddedMessage,
     type EmbeddingBatchItem,
     SqliteFrictionRepository,
+    SqliteBackfillStateRepository,
 } from "./repositories/index.js";
 
 // Services

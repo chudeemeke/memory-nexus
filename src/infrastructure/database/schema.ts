@@ -306,6 +306,22 @@ CREATE INDEX IF NOT EXISTS idx_friction_category ON friction_log(category);
 `;
 
 /**
+ * Backfill state table - tracks which sessions have been backfilled
+ *
+ * Enables idempotent backfill: processed sessions are skipped on re-run.
+ * No foreign keys to sessions table (session_id is text reference only).
+ */
+export const BACKFILL_STATE_TABLE = `
+CREATE TABLE IF NOT EXISTS backfill_state (
+    session_id TEXT PRIMARY KEY,
+    backfilled_at TEXT NOT NULL,
+    daily_log_path TEXT NOT NULL,
+    success INTEGER DEFAULT 1,
+    error_message TEXT
+);
+`;
+
+/**
  * Schema options for conditional table creation
  */
 export interface SchemaOptions {
@@ -370,6 +386,7 @@ END;
  * 16. memory_files_fts (depends on memory_files)
  * 17. memory_files FTS triggers (depend on both memory_files tables)
  * 18. friction_log (no dependencies)
+ * 19. backfill_state (no dependencies)
  *
  * Note: message_embeddings (vec0) is NOT in this array.
  * It is conditionally created in createSchema() when sqliteVecAvailable is true.
@@ -393,6 +410,7 @@ export const SCHEMA_SQL: readonly string[] = [
     MEMORY_FILES_FTS_TABLE,
     MEMORY_FILES_FTS_TRIGGERS,
     FRICTION_LOG_TABLE,
+    BACKFILL_STATE_TABLE,
 ];
 
 /**
