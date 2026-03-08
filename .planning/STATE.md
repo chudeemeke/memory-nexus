@@ -14,8 +14,8 @@ See: .planning/PROJECT.md (updated 2026-02-18)
 
 **Milestone:** v3.0 Knowledge Layer + Friction Logging
 **Phase:** 23 (Foundation) -- COMPLETE (all 4 plans done)
-**Status:** Phase 23 complete, ready for Phase 24 (Friction System)
-**Current Plan:** Phase 23 complete
+**Status:** Ready to plan
+**Current Plan:** Not started
 
 ```
 v3.0 Progress: [#####                   ] 1/5 phases (complete)
