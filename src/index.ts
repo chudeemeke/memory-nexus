@@ -31,6 +31,7 @@ export {
   executeExportCommand,
   executeImportCommand,
   executeCompletionCommand,
+  executeFrictionCommand,
 } from "./presentation/cli/commands/index.js";
 
 // Programmatic API: result and option types
@@ -58,4 +59,9 @@ export type {
   EmbeddingStatus,
   StatusOptions,
   GatherStatusOptions,
+  FrictionCommandOptions,
+  FrictionLogOptions,
+  FrictionListOptions,
+  FrictionResolveOptions,
+  FrictionExecuteOptions,
 } from "./presentation/cli/commands/index.js";

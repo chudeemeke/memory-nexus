@@ -33,6 +33,9 @@ export { createImportCommand, executeImportCommand } from "./import.js";
 // Shell completion
 export { createCompletionCommand, executeCompletionCommand } from "./completion.js";
 
+// Friction commands
+export { createFrictionCommand, executeFrictionCommand } from "./friction.js";
+
 // Option types for programmatic API consumers
 export type { SyncCommandOptions } from "./sync.js";
 export type { EmbeddingPassDeps, BackgroundModeDeps } from "./sync.js";
@@ -51,3 +54,10 @@ export type { ExportOptions } from "./export.js";
 export type { ImportOptions } from "./import.js";
 export type { ShellType } from "./completion.js";
 export type { StatusOptions, StatusInfo, EmbeddingStatus, GatherStatusOptions } from "./status.js";
+export type {
+  FrictionCommandOptions,
+  FrictionLogOptions,
+  FrictionListOptions,
+  FrictionResolveOptions,
+  FrictionExecuteOptions,
+} from "./friction.js";

@@ -26,6 +26,7 @@ import {
   createCompletionCommand,
   createExportCommand,
   createImportCommand,
+  createFrictionCommand,
 } from "./commands/index.js";
 
 const program = new Command();
@@ -76,6 +77,9 @@ program.addCommand(createImportCommand());
 
 // Shell completion
 program.addCommand(createCompletionCommand());
+
+// Friction logging
+program.addCommand(createFrictionCommand());
 
 export { program };
 
