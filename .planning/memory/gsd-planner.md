@@ -1,7 +1,7 @@
 ---
 agent: gsd-planner
 updated: 2026-03-08
-entries: 42
+entries: 45
 ---
 
 - finding: "Large rename phases (375 occurrences across 59 files) need 3 sequential plans, not 2. Split by: (1) infrastructure foundation/paths, (2) identity rename, (3) external docs/stub."
@@ -254,4 +254,22 @@ entries: 42
   source: "Phase 26, revision (checker info on missing frontmatter fields)"
   confidence: HIGH
   phase: "26-hooks-and-backfill"
+  date: "2026-03-08"
+
+- finding: "Intelligence/composition phases that wire existing building blocks together decompose naturally by hexagonal layer: (1) pure utilities + data access extensions (Wave 1 -- presentation formatter + application decay extension + infrastructure repository query, all independent), (2) application orchestration service (Wave 2 -- composes the Wave 1 pieces), (3) CLI command rewrites + cross-cutting format flag (Wave 3 -- wires everything to user). The key insight is that the AI formatter utility lives in presentation but is used by both the application service (for token estimation) and the CLI commands (for ANSI stripping). This cross-layer usage is acceptable because the formatter is a pure utility with no external dependencies."
+  source: "Phase 25, planning (intelligence phase decomposition)"
+  confidence: HIGH
+  phase: "25-intelligence"
+  date: "2026-03-08"
+
+- finding: "When adding a --format flag to multiple commands, prefer per-command options over root-level Commander.js option inheritance. The context command already has --format with choices [brief, detailed]; adding 'ai' to that command's existing choices is safer than introducing root-level --format that may collide. For commands without --format, add it individually with choices [default, ai]. More boilerplate but avoids Commander.js inheritance edge cases (subcommand option takes precedence over root option, which is confusing behavior)."
+  source: "Phase 25, planning (--format flag collision avoidance)"
+  confidence: HIGH
+  phase: "25-intelligence"
+  date: "2026-03-08"
+
+- finding: "When an application service needs to resolve human-readable project names to encoded paths (for memory file lookup), extract the resolution logic into a dedicated IProjectResolver interface rather than coupling to the infrastructure SqliteContextService. The existing SqliteContextService has this logic embedded in getProjectContext() but it is not reusable. Creating SqliteProjectResolver in the infrastructure layer implementing IProjectResolver keeps the application service testable with mock resolvers."
+  source: "Phase 25, planning (project resolution extraction)"
+  confidence: HIGH
+  phase: "25-intelligence"
   date: "2026-03-08"

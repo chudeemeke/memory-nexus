@@ -1,7 +1,7 @@
 ---
 agent: gsd-executor
 updated: 2026-03-08
-entries: 51
+entries: 59
 ---
 
 - finding: "Bun test spyOn mock leakage: when mocking nodeFs.renameSync, must restore before assertions, not in afterEach. Mock affects subsequent tests in same file if not restored promptly."
@@ -308,4 +308,52 @@ entries: 51
   source: "Phase 23, Plan 04, Task B"
   confidence: HIGH
   phase: "23-foundation"
+  date: "2026-03-08"
+
+- finding: "Commander.js does not propagate parent options to subcommands. --json must be defined on each subcommand individually via .option('--json', 'Output as JSON'). This is the first command group using nested addCommand() pattern in this project."
+  source: "Phase 24, Plan 02, Task 2"
+  confidence: HIGH
+  phase: "24-friction-system"
+  date: "2026-03-08"
+
+- finding: "wontFix two-phase flow using locked IFrictionRepository port: call resolve(id, resolution) first (sets status='resolved', resolution, resolved_at), then updateStatus(id, 'wont-fix') to overwrite status. Net result: status=wont-fix with resolution and resolved_at correctly set. This avoids needing a new port method."
+  source: "Phase 24, Plan 02, Task 1"
+  confidence: HIGH
+  phase: "24-friction-system"
+  date: "2026-03-08"
+
+- finding: "When a worktree is created from main, files on disk reflect the HEAD commit -- NOT uncommitted changes from the main worktree. Prior session's uncommitted GREEN implementation must be re-applied manually. The Read tool may initially show cached content; verify with git show HEAD:path or sed to confirm actual file state."
+  source: "Phase 26, Plan 01"
+  confidence: HIGH
+  phase: "26-hooks-and-backfill"
+  date: "2026-03-08"
+
+- finding: "Project uses initializeDatabase() from infrastructure/database/index.js, NOT createConnection(). The function returns { db } and takes { path: dbPath, quickCheck? } config. Use closeDatabase(db) for cleanup. Pattern: const result = initializeDatabase({ path: dbPath }); const db = result.db;"
+  source: "Phase 26, Plan 03, Task C"
+  confidence: HIGH
+  phase: "26-hooks-and-backfill"
+  date: "2026-03-08"
+
+- finding: "For CLI commands that do heavy infrastructure work, use lazy imports (dynamic import() inside action handler) to avoid loading database/repository modules when other commands run. This follows the composition root pattern where the CLI action handler is the assembly point."
+  source: "Phase 26, Plan 03, Task C"
+  confidence: HIGH
+  phase: "26-hooks-and-backfill"
+  date: "2026-03-08"
+
+- finding: "Bun test count may appear stale when adding type-only import tests to existing files. Use --test-name-pattern to verify specific tests are running. The count IS correct even when it looks unchanged (verify by filtering)."
+  source: "Phase 26, Plan 03, Task A"
+  confidence: MEDIUM
+  phase: "26-hooks-and-backfill"
+  date: "2026-03-08"
+
+- finding: "Friction command tests share a real database across the test suite. Prior tests in the same file (log action tests) seed entries, so by the time the dashboard test runs, stats are always non-zero. Don't assert empty state for dashboard in integration tests -- assert structural output markers instead."
+  source: "Phase 24, Plan 03, Task 2"
+  confidence: HIGH
+  phase: "24-friction-system"
+  date: "2026-03-08"
+
+- finding: "When parallel worktrees (git worktree) merge to main, STATE.md gets merge conflicts. Check for UU (unmerged) status in git status before committing. Resolve by reading the merged content and using git add to mark resolved."
+  source: "Phase 24, Plan 03, Task 1"
+  confidence: HIGH
+  phase: "24-friction-system"
   date: "2026-03-08"

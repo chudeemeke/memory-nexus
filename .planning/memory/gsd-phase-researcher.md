@@ -1,7 +1,7 @@
 ---
 agent: gsd-phase-researcher
 updated: 2026-03-08
-entries: 26
+entries: 28
 ---
 
 - finding: "When researching package renames, always read every infrastructure file that constructs paths -- path definitions are often scattered across multiple modules. Grep for the old name is not sufficient; you need to categorize each reference as (a) tool identity, (b) filesystem path, (c) test data."
@@ -160,4 +160,16 @@ entries: 26
   source: "Phase 26, Hooks + Backfill"
   confidence: HIGH
   phase: "26-hooks-and-backfill"
+  date: "2026-03-08"
+
+- finding: "For intelligence/composition phases that wire existing components into new application services (Phase 25: SmartContextService composing MemoryFileRepository + FrictionRepository + SqliteContextService), the critical research finding is identifying the project-name-to-encoded-path resolution gap. Memory files use encoded paths (from ~/.claude/projects/ convention) but CLI accepts human-readable names. The existing SqliteContextService already resolves this via sessions table LIKE queries -- the new service must reuse this resolution, not reinvent it."
+  source: "Phase 25, Intelligence"
+  confidence: HIGH
+  phase: "25-intelligence"
+  date: "2026-03-08"
+
+- finding: "When a Commander.js codebase already has per-command --format with different choices per command (context: brief|detailed, search: none, list: none), adding a global --format ai is better done by extending each command's choices individually rather than using root-level option inheritance. Commander.js root options and subcommand options with the same name can create precedence confusion. The per-command approach matches the existing codebase pattern and avoids inheritance edge cases."
+  source: "Phase 25, Intelligence"
+  confidence: HIGH
+  phase: "25-intelligence"
   date: "2026-03-08"
