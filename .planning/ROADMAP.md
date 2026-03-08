@@ -396,6 +396,12 @@ Success Criteria:
 
 **Depends on:** Phase 23 (memory file indexing)
 **Discussion context:** .planning/phases/26-hooks-and-backfill/CONTEXT.md
+**Plans:** 3 plans
+
+Plans:
+- [x] 26-01-PLAN.md -- PreCompact flush reminder in sync hook script
+- [x] 26-02-PLAN.md -- BackfillState domain entity, IBackfillStateRepository port, schema, SqliteBackfillStateRepository
+- [x] 26-03-PLAN.md -- BackfillService, ClaudeSummaryGenerator, backfill CLI command with dry-run and progress
 
 Success Criteria:
 1. `memory install` installs both SessionEnd and PreCompact hooks
