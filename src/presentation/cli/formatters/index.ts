@@ -74,3 +74,8 @@ export {
   getSuggestion,
   type ErrorFormatOptions,
 } from "./error-formatter.js";
+
+export {
+  formatFrictionDashboard,
+  generateFrictionHtml,
+} from "./friction-dashboard.js";
