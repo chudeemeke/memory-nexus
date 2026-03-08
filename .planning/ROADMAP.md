@@ -3,7 +3,8 @@
 ## Milestones
 
 - SHIPPED **v1.0 Full Vision Implementation** -- Phases 1-12 (shipped 2026-02-16) -- [Archive](milestones/v1.0-ROADMAP.md)
-- ACTIVE **v2.0 Hybrid Search and Rebrand** -- Phases 13-18
+- SHIPPED **v2.0 Hybrid Search and Rebrand** -- Phases 13-21 (shipped 2026-03-01)
+- ACTIVE **v3.0 Knowledge Layer + Friction Logging** -- Phases 23-27
 
 ## Phases
 
@@ -301,4 +302,163 @@ Phase 13 (Package Rename)
 
 ---
 
-*Last updated: 2026-03-01 (Phase 21 complete: architecture boundary cleanup)*
+---
+
+### Phase 22: Integration Checker Cleanup (v2.0 gap closure)
+
+**Goal:** Resolve 3 non-critical findings from the v2.0 milestone audit integration checker.
+
+**Depends on:** Phase 21
+**Type:** Gap closure (ad-hoc, no PLAN.md files)
+**Status:** Complete (2 commits on main: eee5a25, 0f5a0eb)
+
+Resolved:
+- executeBrowseCommand integration test (INTEG-03)
+- Orphaned presentation/index.ts barrel (BARREL-01)
+- Application-to-infrastructure boundary violations in sync-service and recovery-service
+
+---
+
+### v3.0 Knowledge Layer + Friction Logging (Phases 23-27)
+
+**Overview:** Ship the complete knowledge layer alongside a friction logging system. Agent-written memory (daily logs, decisions, learnings), smart context briefings, temporal decay, FTS5 reliability, friction capture with visual dashboards, session backfill via Agent SDK, and qmd markdown search integration.
+
+**Depth:** Standard (5 phases)
+**Design doc:** docs/plans/2026-03-07-knowledge-layer-friction-design.md
+
+---
+
+### Phase 23: Foundation
+
+**Goal:** Establish the agent write protocol, global ~/.memory/ directory structure, memory file indexing in sync, and FTS5 search reliability fixes.
+
+**Depends on:** v2.0 complete
+**Discussion context:** .planning/phases/23-foundation/CONTEXT.md
+
+Success Criteria:
+1. ~/.memory/ directory structure created with encoded-path project subdirectories
+2. `memory sync` discovers and indexes ~/.memory/**/*.md files in a new memory_files table
+3. `memory search "SYNC-09"` returns results instead of FTS5 syntax error
+4. Daily log, DECISIONS.md, and LEARNINGS.md format conventions documented
+5. All existing tests pass with no behavioral regression
+
+---
+
+### Phase 24: Friction System
+
+**Goal:** Build the complete friction logging system: domain entity, repository, CLI commands (log, list, resolve, dashboard), and visual dashboard (CLI + HTML).
+
+**Depends on:** Phase 23 (schema infrastructure)
+**Discussion context:** .planning/phases/24-friction-system/CONTEXT.md
+
+Success Criteria:
+1. `memory friction log "description" --severity high --category search` creates a friction entry
+2. `memory friction list` shows open items; `memory friction list --all` shows all
+3. `memory friction resolve 42 --resolution "fixed"` closes an item with resolution
+4. `memory friction dashboard` renders rich terminal stats matching Claude Code /stats aesthetic
+5. `memory friction dashboard --html` generates and opens a Chart.js HTML report
+6. ~/.claude/rules/memory.md updated with friction logging protocol
+
+---
+
+### Phase 25: Intelligence
+
+**Goal:** Rewrite smart context to produce structured briefings from memory files, add temporal decay to search, implement AI-first output mode, and enable cross-project intelligence.
+
+**Depends on:** Phase 23 (memory file indexing), Phase 24 (friction in context)
+**Discussion context:** .planning/phases/25-intelligence/CONTEXT.md
+
+Success Criteria:
+1. `memory context kanbanflow --format ai --budget 1500` returns structured briefing within token budget
+2. Search results weighted by recency (30-day half-life); curated files exempt from decay
+3. `--format ai` available on all commands, outputs token-efficient text
+4. Learnings tagged "Applies to: cross-project" surfaced in `memory context --cross-project`
+
+---
+
+### Phase 26: Hooks + Backfill
+
+**Goal:** Install PreCompact hook for memory flush reminders, and build the backfill command that generates daily logs from historical sessions via the Agent SDK.
+
+**Depends on:** Phase 23 (memory file indexing)
+**Discussion context:** .planning/phases/26-hooks-and-backfill/CONTEXT.md
+
+Success Criteria:
+1. `memory install` installs both SessionEnd and PreCompact hooks
+2. PreCompact hook outputs memory flush reminder before context compression
+3. `memory backfill --dry-run` shows session count and estimated cost
+4. `memory backfill` generates daily log entries from historical sessions
+5. Backfill is idempotent (tracks state, skips already-processed sessions)
+
+---
+
+### Phase 27: qmd Integration
+
+**Goal:** Integrate qmd as an optional peer dependency for semantic markdown file search via `memory search --files`.
+
+**Depends on:** Phase 23 (files to search exist in ~/.memory/)
+**Discussion context:** .planning/phases/27-qmd-integration/CONTEXT.md
+
+Success Criteria:
+1. `memory search "query" --files` delegates to qmd when installed
+2. If qmd not installed, prints helpful install instructions
+3. `memory doctor` reports qmd availability status
+4. All existing search functionality works without qmd installed
+
+---
+
+### v3.0 Dependency Graph
+
+```
+Phase 23 (Foundation)
+    |
+    +---> Phase 24 (Friction System)
+    |         |
+    |         +---> Phase 25 (Intelligence)
+    |
+    +---> Phase 26 (Hooks + Backfill)
+    |     [parallel with Phase 24]
+    |
+    +---> Phase 27 (qmd Integration)
+          [parallel with Phase 24-26]
+```
+
+---
+
+### Cross-Cutting: Quality (All Phases)
+
+Requirements: QUAL-01, QUAL-02, QUAL-03, QUAL-04
+
+These are enforced in every phase, not assigned to a single phase:
+- 95%+ coverage at EACH metric for all new code
+- Domain layer maintains zero external dependencies
+- All new infrastructure adapters follow existing port/adapter patterns
+- TDD workflow (RED-GREEN-REFACTOR) for all new features
+
+---
+
+## Progress
+
+| Phase | Milestone | Plans | Status | Completed |
+|-------|-----------|-------|--------|-----------|
+| 1-12 | v1.0 | 56 | Complete | 2026-02-06 |
+| 13 | v2.0 | 3/3 | Complete | 2026-02-25 |
+| 14 | v2.0 | 4/4 | Complete | 2026-02-26 |
+| 15 | v2.0 | 4/4 | Complete | 2026-02-26 |
+| 16 | v2.0 | 3/3 | Complete | 2026-02-27 |
+| 16.1 | v2.0 | 1/1 | Complete | 2026-02-27 |
+| 17 | v2.0 | 3/3 | Complete | 2026-02-28 |
+| 18 | v2.0 | 2/2 | Complete | 2026-03-01 |
+| 19 | v2.0 | 1/1 | Complete | 2026-03-01 |
+| 20 | v2.0 | 1/1 | Complete | 2026-03-01 |
+| 21 | v2.0 | 1/1 | Complete | 2026-03-01 |
+| 22 | v2.0 | ad-hoc | Complete | 2026-03-07 |
+| 23 | v3.0 | -- | Discussed | -- |
+| 24 | v3.0 | -- | Discussed | -- |
+| 25 | v3.0 | -- | Discussed | -- |
+| 26 | v3.0 | -- | Discussed | -- |
+| 27 | v3.0 | -- | Discussed | -- |
+
+---
+
+*Last updated: 2026-03-08 (v3.0 milestone defined, phases 23-27 discussed)*
