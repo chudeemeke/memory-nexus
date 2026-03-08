@@ -301,9 +301,9 @@ Phase 13 (Package Rename)
 | 21 | v2.0 | 1/1 | Complete | 2026-03-01 |
 | 22 | v2.0 | ad-hoc | Complete | 2026-03-07 |
 | 23 | v3.0 | 4/4 | Complete | 2026-03-08 |
-| 24 | v3.0 | 2/3 | In Progress | -- |
+| 24 | v3.0 | 3/3 | Complete | 2026-03-08 |
 | 25 | v3.0 | -- | Discussed | -- |
-| 26 | v3.0 | -- | Discussed | -- |
+| 26 | v3.0 | 3/3 | Complete | 2026-03-08 |
 | 27 | v3.0 | -- | Discussed | -- |
 
 ---
