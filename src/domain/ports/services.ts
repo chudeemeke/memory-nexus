@@ -102,3 +102,29 @@ export interface IStatsService {
    */
   getStats(projectLimit?: number): Promise<StatsResult>;
 }
+
+/**
+ * Port for generating structured summaries from session content.
+ *
+ * Implementations invoke an LLM (e.g., claude -p) to produce
+ * a daily log entry from raw session messages.
+ */
+export interface ISummaryGenerator {
+  /**
+   * Generate a structured daily log summary from session content.
+   *
+   * @param content Extracted session content (user messages + assistant text)
+   * @param sessionId Session identifier for the summary header
+   * @param projectName Project name for context
+   * @param startTime Session start time (ISO string)
+   * @param endTime Session end time (ISO string)
+   * @returns Formatted markdown summary in daily log format
+   */
+  generateSummary(
+    content: string,
+    sessionId: string,
+    projectName: string,
+    startTime: string,
+    endTime: string,
+  ): Promise<string>;
+}

@@ -39,6 +39,7 @@ export type {
   IStatsService,
   StatsResult,
   ProjectStats,
+  ISummaryGenerator,
 } from "./services.js";
 
 // Source interfaces

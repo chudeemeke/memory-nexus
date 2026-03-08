@@ -24,6 +24,7 @@ import type {
   DownloadProgress,
   EmbeddingModelInfo,
   ISearchService,
+  ISummaryGenerator,
   ISessionSource,
   IEventParser,
   SearchOptions,
@@ -1073,4 +1074,48 @@ describe("IBackfillStateRepository", () => {
         const found = await mockRepo.findBySessionId("nonexistent");
         expect(found).toBeNull();
     });
+});
+
+describe("ISummaryGenerator", () => {
+  it("can be implemented with a mock", async () => {
+    const mockGenerator: ISummaryGenerator = {
+      generateSummary: async (
+        content: string,
+        sessionId: string,
+        projectName: string,
+        startTime: string,
+        endTime: string,
+      ) => {
+        return `## Session: ${sessionId}\n**Project:** ${projectName}\n### Topic\nSummary of content`;
+      },
+    };
+
+    const result = await mockGenerator.generateSummary(
+      "User: hello\n\nAssistant: hi",
+      "session-123",
+      "kanbanflow",
+      "2026-03-08T10:00:00Z",
+      "2026-03-08T11:00:00Z",
+    );
+
+    expect(result).toContain("session-123");
+    expect(result).toContain("kanbanflow");
+    expect(result).toContain("Topic");
+  });
+
+  it("returns a Promise<string>", async () => {
+    const mockGenerator: ISummaryGenerator = {
+      generateSummary: async () => "summary text",
+    };
+
+    const result = await mockGenerator.generateSummary(
+      "content",
+      "s1",
+      "proj",
+      "2026-03-08T10:00:00Z",
+      "2026-03-08T11:00:00Z",
+    );
+
+    expect(typeof result).toBe("string");
+  });
 });
