@@ -15,6 +15,8 @@ export type {
   IEmbeddingRepository,
   IMemoryFileRepository,
   IFrictionRepository,
+  IBackfillStateRepository,
+  BackfillStatusCounts,
   FrictionStats,
   UnembeddedMessage,
   EmbeddingBatchItem,

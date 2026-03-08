@@ -15,6 +15,8 @@ import type {
   IExtractionStateRepository,
   IMemoryFileRepository,
   IFrictionRepository,
+  IBackfillStateRepository,
+  BackfillStatusCounts,
   FrictionStats,
   IMemoryFileScanner,
   MemoryFileInfo,
@@ -44,6 +46,7 @@ import { MemoryFile } from "../entities/memory-file.js";
 import type { MemoryFileType } from "../entities/memory-file.js";
 import { FrictionEntry } from "../entities/friction-entry.js";
 import type { FrictionSeverity, FrictionCategory, FrictionStatus } from "../entities/friction-entry.js";
+import { BackfillState } from "../entities/backfill-state.js";
 import { ProjectPath } from "../value-objects/project-path.js";
 import { SearchQuery } from "../value-objects/search-query.js";
 import { SearchResult } from "../value-objects/search-result.js";
@@ -965,4 +968,109 @@ describe("Event Data Interfaces", () => {
     expect(minimal.leafUuid).toBeUndefined();
     expect(withLeaf.leafUuid).toBe("last-event-uuid");
   });
+});
+
+describe("IBackfillStateRepository", () => {
+    it("can be implemented with a mock", async () => {
+        const state = BackfillState.create({
+            sessionId: "abc-123",
+            backfilledAt: new Date("2026-03-08T10:00:00Z"),
+            dailyLogPath: "daily/2026-03-08.md",
+            success: true,
+        });
+
+        const store: BackfillState[] = [];
+
+        const mockRepo: IBackfillStateRepository = {
+            findBySessionId: async (sessionId: string) =>
+                store.find((s) => s.sessionId === sessionId) ?? null,
+            findAll: async () => [...store],
+            save: async (s: BackfillState) => {
+                const idx = store.findIndex((x) => x.sessionId === s.sessionId);
+                if (idx >= 0) {
+                    store[idx] = s;
+                } else {
+                    store.push(s);
+                }
+            },
+            countByStatus: async () => ({
+                total: store.length,
+                succeeded: store.filter((s) => s.success).length,
+                failed: store.filter((s) => !s.success).length,
+            }),
+        };
+
+        // findBySessionId returns null before save
+        const notFound = await mockRepo.findBySessionId("abc-123");
+        expect(notFound).toBeNull();
+
+        // findAll returns empty array
+        const empty = await mockRepo.findAll();
+        expect(empty).toHaveLength(0);
+
+        // save then findBySessionId returns it
+        await mockRepo.save(state);
+        const found = await mockRepo.findBySessionId("abc-123");
+        expect(found).not.toBeNull();
+        expect(found!.sessionId).toBe("abc-123");
+        expect(found!.dailyLogPath).toBe("daily/2026-03-08.md");
+        expect(found!.success).toBe(true);
+
+        // findAll returns the saved state
+        const all = await mockRepo.findAll();
+        expect(all).toHaveLength(1);
+    });
+
+    it("mock countByStatus returns correct structure", async () => {
+        const store: BackfillState[] = [];
+
+        const mockRepo: IBackfillStateRepository = {
+            findBySessionId: async () => null,
+            findAll: async () => [...store],
+            save: async (s: BackfillState) => { store.push(s); },
+            countByStatus: async () => ({
+                total: store.length,
+                succeeded: store.filter((s) => s.success).length,
+                failed: store.filter((s) => !s.success).length,
+            }),
+        };
+
+        // Empty counts
+        const emptyCounts = await mockRepo.countByStatus();
+        expect(emptyCounts.total).toBe(0);
+        expect(emptyCounts.succeeded).toBe(0);
+        expect(emptyCounts.failed).toBe(0);
+
+        // Add some states
+        await mockRepo.save(BackfillState.create({
+            sessionId: "s1",
+            backfilledAt: new Date(),
+            dailyLogPath: "daily/2026-03-08.md",
+            success: true,
+        }));
+        await mockRepo.save(BackfillState.create({
+            sessionId: "s2",
+            backfilledAt: new Date(),
+            dailyLogPath: "daily/2026-03-08.md",
+            success: false,
+            errorMessage: "timeout",
+        }));
+
+        const counts: BackfillStatusCounts = await mockRepo.countByStatus();
+        expect(counts.total).toBe(2);
+        expect(counts.succeeded).toBe(1);
+        expect(counts.failed).toBe(1);
+    });
+
+    it("returns null for non-existent session", async () => {
+        const mockRepo: IBackfillStateRepository = {
+            findBySessionId: async () => null,
+            findAll: async () => [],
+            save: async () => {},
+            countByStatus: async () => ({ total: 0, succeeded: 0, failed: 0 }),
+        };
+
+        const found = await mockRepo.findBySessionId("nonexistent");
+        expect(found).toBeNull();
+    });
 });

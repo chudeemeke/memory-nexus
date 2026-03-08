@@ -23,6 +23,7 @@ import type {
     FrictionCategory,
     FrictionStatus,
 } from "../entities/friction-entry.js";
+import type { BackfillState } from "../entities/backfill-state.js";
 import type { ProjectPath } from "../value-objects/project-path.js";
 
 /**
@@ -611,4 +612,46 @@ export interface IFrictionRepository {
     getWeeklyTrends(
         weeks: number
     ): Promise<Array<{ week: string; newCount: number; resolvedCount: number }>>;
+}
+
+/**
+ * Count of backfill states by success/failure status.
+ */
+export interface BackfillStatusCounts {
+    total: number;
+    succeeded: number;
+    failed: number;
+}
+
+/**
+ * Repository for BackfillState entities.
+ *
+ * Tracks which sessions have been backfilled (daily log generated).
+ * Enables idempotent backfill: processed sessions are skipped on re-run.
+ */
+export interface IBackfillStateRepository {
+    /**
+     * Find backfill state for a specific session.
+     * @param sessionId The session UUID
+     * @returns The backfill state if found, null otherwise
+     */
+    findBySessionId(sessionId: string): Promise<BackfillState | null>;
+
+    /**
+     * Find all backfill states.
+     * @returns Array of all backfill state records
+     */
+    findAll(): Promise<BackfillState[]>;
+
+    /**
+     * Save a backfill state record (insert or update by session_id).
+     * @param state The backfill state to save
+     */
+    save(state: BackfillState): Promise<void>;
+
+    /**
+     * Count backfill states by success/failure status.
+     * @returns Counts of total, succeeded, and failed backfills
+     */
+    countByStatus(): Promise<BackfillStatusCounts>;
 }
