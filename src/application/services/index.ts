@@ -67,3 +67,5 @@ export type {
   DecayableResult,
   DecayedResult,
 } from "./temporal-decay.js";
+
+export { sanitizeFtsQuery } from "./fts-sanitizer.js";
