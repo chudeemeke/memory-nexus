@@ -69,3 +69,10 @@ export type {
 } from "./temporal-decay.js";
 
 export { sanitizeFtsQuery } from "./fts-sanitizer.js";
+
+export { MemoryFileSyncService } from "./memory-file-sync-service.js";
+export type {
+  MemoryFileSyncResult,
+  MemoryFileSyncProgress,
+  MemoryFileSyncOptions,
+} from "./memory-file-sync-service.js";
