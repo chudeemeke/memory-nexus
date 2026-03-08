@@ -453,7 +453,7 @@ These are enforced in every phase, not assigned to a single phase:
 | 20 | v2.0 | 1/1 | Complete | 2026-03-01 |
 | 21 | v2.0 | 1/1 | Complete | 2026-03-01 |
 | 22 | v2.0 | ad-hoc | Complete | 2026-03-07 |
-| 23 | v3.0 | 3/4 | In Progress | -- |
+| 23 | v3.0 | 4/4 | Complete | 2026-03-08 |
 | 24 | v3.0 | -- | Discussed | -- |
 | 25 | v3.0 | -- | Discussed | -- |
 | 26 | v3.0 | -- | Discussed | -- |
