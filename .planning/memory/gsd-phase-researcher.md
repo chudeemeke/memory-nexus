@@ -1,7 +1,7 @@
 ---
 agent: gsd-phase-researcher
-updated: 2026-03-01
-entries: 21
+updated: 2026-03-08
+entries: 23
 ---
 
 - finding: "When researching package renames, always read every infrastructure file that constructs paths -- path definitions are often scattered across multiple modules. Grep for the old name is not sufficient; you need to categorize each reference as (a) tool identity, (b) filesystem path, (c) test data."
@@ -131,3 +131,15 @@ entries: 21
   confidence: HIGH
   phase: "21-architecture-boundary-cleanup"
   date: "2026-03-01"
+
+- finding: "For foundation phases that add new entity types alongside new infrastructure (Phase 23: MemoryFile entity + memory_files table + file scanner + FTS5 fix), the most valuable research is mapping every existing analog in the codebase: Entity->MemoryFile, SqliteSessionRepository->SqliteMemoryFileRepository, FileSystemSessionSource->MemoryFileScanner, messages_fts triggers->memory_files_fts triggers. When every new component has a 1:1 existing analog, external research adds zero value -- the codebase IS the documentation."
+  source: "Phase 23, Foundation"
+  confidence: HIGH
+  phase: "23-foundation"
+  date: "2026-03-08"
+
+- finding: "When a phase adds FTS5 sanitization that modifies existing search services (Fts5SearchService, HybridSearchService), the sanitizer must be a pure function in the application layer with no infrastructure dependencies. Placing it in the domain layer (e.g., SearchQuery value object) would violate the principle that the value object preserves the user's original input. Placing it in infrastructure would scatter the logic across multiple service files. Application layer utility is the correct location -- called at the boundary between domain query objects and infrastructure FTS5 execution."
+  source: "Phase 23, Foundation"
+  confidence: HIGH
+  phase: "23-foundation"
+  date: "2026-03-08"
