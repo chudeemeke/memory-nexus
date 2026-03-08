@@ -22,7 +22,7 @@ v3.0 Progress: [#####                   ] 1/5 phases (complete)
   Phase 23: Foundation                [x] Complete (4/4 plans)
   Phase 24: Friction System           [~] In Progress (1/3 plans)
   Phase 25: Intelligence              [ ] Discussed (CONTEXT.md ready)
-  Phase 26: Hooks + Backfill          [ ] Discussed (CONTEXT.md ready)
+  Phase 26: Hooks + Backfill          [~] In Progress (1/3 plans)
   Phase 27: qmd Integration           [ ] Discussed (CONTEXT.md ready)
 ```
 
@@ -68,22 +68,23 @@ v3.0 Progress: [#####                   ] 1/5 phases (complete)
 ### Last Session
 
 **Date:** 2026-03-08
-**Completed:** Plan 24-01 (FrictionEntry entity, repository, schema)
-**Stopped at:** Executing 24-02 next
+**Completed:** Plan 26-01 (PreCompact flush reminder in sync hook script)
+**Stopped at:** Plan 26-01 complete
 
 ### Decisions
 
 - FrictionEntry create() is permissive on resolution field (service enforces business rules)
 - getWeeklyTrends uses strftime('%Y-W%W') for ISO week grouping
 - friction_log CHECK constraints enforce valid values at database level
+- Flush reminder outputs before syncOnCompaction check (always fires for PreCompact regardless of sync config)
 
 ### Context for Next Session
 
 1. Phase 24 (Friction System) in progress: 1/3 plans complete
-2. 24-01 complete: FrictionEntry entity, IFrictionRepository port, friction_log schema, SqliteFrictionRepository
-3. Next: 24-02 (FrictionService application service, CLI commands, public API)
-4. 2806 tests passing, zero regressions
+2. Phase 26 (Hooks + Backfill) in progress: 1/3 plans complete (26-01 done)
+3. 26-01 complete: PreCompact flush reminder added to sync-hook-script.ts
+4. Next in phase 26: 26-02 (backfill state management) or 26-03 (Agent SDK backfill)
 
 ---
 
-*Last updated: 2026-03-08 (plan 24-01 complete)*
+*Last updated: 2026-03-08 (plan 26-01 complete)*
