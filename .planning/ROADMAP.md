@@ -361,7 +361,7 @@ Success Criteria:
 Plans:
 - [x] 24-01-PLAN.md -- FrictionEntry domain entity, IFrictionRepository port, schema, SqliteFrictionRepository
 - [x] 24-02-PLAN.md -- FrictionService application service, CLI friction commands, programmatic API
-- [ ] 24-03-PLAN.md -- Dashboard formatters (CLI + HTML with Chart.js), rules file update
+- [x] 24-03-PLAN.md -- Dashboard formatters (CLI + HTML with Chart.js), rules file update
 
 Requirements: FRIC-01, FRIC-02, FRIC-03, FRIC-04, FRIC-05, FRIC-06
 

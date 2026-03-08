@@ -18,9 +18,9 @@ See: .planning/PROJECT.md (updated 2026-02-18)
 **Current Plan:** 26-03 complete (3/3 plans)
 
 ```
-v3.0 Progress: [##########              ] 2/5 phases (complete)
+v3.0 Progress: [###############         ] 3/5 phases (complete)
   Phase 23: Foundation                [x] Complete (4/4 plans)
-  Phase 24: Friction System           [~] In Progress (2/3 plans)
+  Phase 24: Friction System           [x] Complete (3/3 plans)
   Phase 25: Intelligence              [ ] Discussed (CONTEXT.md ready)
   Phase 26: Hooks + Backfill          [x] Complete (3/3 plans)
   Phase 27: qmd Integration           [ ] Discussed (CONTEXT.md ready)
@@ -68,8 +68,8 @@ v3.0 Progress: [##########              ] 2/5 phases (complete)
 ### Last Session
 
 **Date:** 2026-03-08
-**Completed:** Plans 24-02, 26-01, 26-02, 26-03
-**Stopped at:** Completed 26-03 (Phase 26 complete)
+**Completed:** Plans 24-03, 26-01, 26-02, 26-03
+**Stopped at:** Phase 24 complete, Phase 26 complete
 
 ### Decisions
 
@@ -85,14 +85,18 @@ v3.0 Progress: [##########              ] 2/5 phases (complete)
 - FileDailyLogWriter in presentation layer (composition root pattern)
 - CLAUDECODE env var stripping via delete before spawn
 
+- Chart.js UMD read from node_modules at generation time (no CDN)
+- Dashboard HTML at ~/.memory/dashboard.html via getMemoryDir()
+
 ### Context for Next Session
 
-1. Phase 24 (Friction System) in progress: 2/3 plans complete (24-03 remaining: friction dashboard)
+1. Phase 24 (Friction System) complete: 3/3 plans done
 2. Phase 26 (Hooks + Backfill) complete: 3/3 plans done
-3. 26-03 complete: ISummaryGenerator port, ClaudeSummaryGenerator, BackfillService, backfill CLI
+3. 24-03 complete: friction dashboard (CLI + HTML with Chart.js)
 4. Phase 25 (Intelligence) and Phase 27 (qmd Integration) not started
 5. Pre-existing issues: error-codes.test.ts count assertion stale (expects 19, has 21)
+6. 2930 tests passing, 1 pre-existing failure
 
 ---
 
-*Last updated: 2026-03-08 (plan 26-03 complete, Phase 26 done)*
+*Last updated: 2026-03-08 (plan 24-03 complete, Phase 24 done)*
