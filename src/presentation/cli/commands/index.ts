@@ -36,6 +36,9 @@ export { createCompletionCommand, executeCompletionCommand } from "./completion.
 // Friction commands
 export { createFrictionCommand, executeFrictionCommand } from "./friction.js";
 
+// Backfill commands
+export { createBackfillCommand, executeBackfillCommand } from "./backfill.js";
+
 // Option types for programmatic API consumers
 export type { SyncCommandOptions } from "./sync.js";
 export type { EmbeddingPassDeps, BackgroundModeDeps } from "./sync.js";
@@ -61,3 +64,7 @@ export type {
   FrictionResolveOptions,
   FrictionExecuteOptions,
 } from "./friction.js";
+export type {
+  BackfillCommandOptions,
+  BackfillServiceDeps,
+} from "./backfill.js";

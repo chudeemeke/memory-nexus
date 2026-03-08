@@ -27,6 +27,7 @@ import {
   createExportCommand,
   createImportCommand,
   createFrictionCommand,
+  createBackfillCommand,
 } from "./commands/index.js";
 
 const program = new Command();
@@ -80,6 +81,9 @@ program.addCommand(createCompletionCommand());
 
 // Friction logging
 program.addCommand(createFrictionCommand());
+
+// Backfill (daily log generation from historical sessions)
+program.addCommand(createBackfillCommand());
 
 export { program };
 
