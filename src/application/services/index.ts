@@ -82,3 +82,12 @@ export type {
   LogFrictionParams,
   ListFrictionOptions,
 } from "./friction-service.js";
+
+export { BackfillService } from "./backfill-service.js";
+export type {
+  BackfillResult,
+  BackfillProgress,
+  DryRunResult,
+  BackfillOptions,
+  IDailyLogWriter,
+} from "./backfill-service.js";
