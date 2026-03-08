@@ -453,7 +453,7 @@ These are enforced in every phase, not assigned to a single phase:
 | 20 | v2.0 | 1/1 | Complete | 2026-03-01 |
 | 21 | v2.0 | 1/1 | Complete | 2026-03-01 |
 | 22 | v2.0 | ad-hoc | Complete | 2026-03-07 |
-| 23 | v3.0 | -- | Discussed | -- |
+| 23 | v3.0 | 1/4 | In Progress | -- |
 | 24 | v3.0 | -- | Discussed | -- |
 | 25 | v3.0 | -- | Discussed | -- |
 | 26 | v3.0 | -- | Discussed | -- |
@@ -461,4 +461,4 @@ These are enforced in every phase, not assigned to a single phase:
 
 ---
 
-*Last updated: 2026-03-08 (v3.0 milestone defined, phases 23-27 discussed)*
+*Last updated: 2026-03-08 (Phase 23 plan 01 complete)*
