@@ -29,6 +29,7 @@ import {
     MEMORY_FILES_FTS_TABLE,
     MEMORY_FILES_FTS_TRIGGERS,
     FRICTION_LOG_TABLE,
+    BACKFILL_STATE_TABLE,
     type SchemaOptions,
 } from "./schema.js";
 import * as sqliteVec from "sqlite-vec";
@@ -64,7 +65,7 @@ describe("Database Schema", () => {
 
         it("should have SCHEMA_SQL as an array with correct order", () => {
             expect(Array.isArray(SCHEMA_SQL)).toBe(true);
-            expect(SCHEMA_SQL.length).toBe(18);
+            expect(SCHEMA_SQL.length).toBe(19);
             expect(SCHEMA_SQL[0]).toBe(SESSIONS_TABLE);
             expect(SCHEMA_SQL[1]).toBe(MESSAGES_META_TABLE);
             expect(SCHEMA_SQL[2]).toBe(MESSAGES_FTS_TABLE);
