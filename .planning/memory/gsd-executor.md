@@ -1,7 +1,7 @@
 ---
 agent: gsd-executor
-updated: 2026-03-01
-entries: 46
+updated: 2026-03-08
+entries: 49
 ---
 
 - finding: "Bun test spyOn mock leakage: when mocking nodeFs.renameSync, must restore before assertions, not in afterEach. Mock affects subsequent tests in same file if not restored promptly."
@@ -279,3 +279,21 @@ entries: 46
   confidence: HIGH
   phase: "21-architecture-boundary-cleanup"
   date: "2026-03-01"
+
+- finding: "STATE.md for v3.0 uses free-form format without standard Current Plan / Total Plans fields. gsd-tools state advance-plan fails. Manual STATE.md updates required for this project."
+  source: "Phase 23, Plan 01"
+  confidence: HIGH
+  phase: "23-foundation"
+  date: "2026-03-08"
+
+- finding: "FTS5 asterisks (*) do NOT cause syntax errors -- they are valid prefix search operators. Only strip characters that actually produce FTS5 errors. Verified: wild*card returns empty results silently, auth* returns prefix matches."
+  source: "Phase 23, Plan 02, Task B"
+  confidence: HIGH
+  phase: "23-foundation"
+  date: "2026-03-08"
+
+- finding: "FTS5 double quotes: balanced pairs are valid phrase search syntax; only unmatched quotes cause 'unterminated string' errors. Count quotes and preserve when even, strip when odd. This preserves existing phrase search functionality."
+  source: "Phase 23, Plan 02, Task B"
+  confidence: HIGH
+  phase: "23-foundation"
+  date: "2026-03-08"
