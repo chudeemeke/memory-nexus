@@ -28,3 +28,4 @@ export {
     type FrictionCategory,
     type FrictionStatus,
 } from "./friction-entry.js";
+export { BackfillState } from "./backfill-state.js";
