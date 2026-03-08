@@ -13,16 +13,16 @@ See: .planning/PROJECT.md (updated 2026-02-18)
 ## Current Position
 
 **Milestone:** v3.0 Knowledge Layer + Friction Logging
-**Phase:** 24 (Friction System) -- IN PROGRESS
+**Phase:** 26 (Hooks + Backfill) -- COMPLETE
 **Status:** Executing
-**Current Plan:** 24-02 complete (2/3 plans)
+**Current Plan:** 26-03 complete (3/3 plans)
 
 ```
-v3.0 Progress: [#####                   ] 1/5 phases (complete)
+v3.0 Progress: [##########              ] 2/5 phases (complete)
   Phase 23: Foundation                [x] Complete (4/4 plans)
   Phase 24: Friction System           [~] In Progress (2/3 plans)
   Phase 25: Intelligence              [ ] Discussed (CONTEXT.md ready)
-  Phase 26: Hooks + Backfill          [~] In Progress (2/3 plans)
+  Phase 26: Hooks + Backfill          [x] Complete (3/3 plans)
   Phase 27: qmd Integration           [ ] Discussed (CONTEXT.md ready)
 ```
 
@@ -68,8 +68,8 @@ v3.0 Progress: [#####                   ] 1/5 phases (complete)
 ### Last Session
 
 **Date:** 2026-03-08
-**Completed:** Plans 24-02, 26-01, 26-02
-**Stopped at:** Executing 26-03 (Wave 2)
+**Completed:** Plans 24-02, 26-01, 26-02, 26-03
+**Stopped at:** Completed 26-03 (Phase 26 complete)
 
 ### Decisions
 
@@ -80,17 +80,19 @@ v3.0 Progress: [#####                   ] 1/5 phases (complete)
 - Added generic NOT_FOUND and INVALID_STATE error codes (not entity-specific)
 - --json on each subcommand individually (Commander.js pitfall)
 - Flush reminder outputs before syncOnCompaction check (always fires for PreCompact regardless of sync config)
+- executeBackfillCommand separated from createBackfillCommand for testability (DI pattern)
+- Lazy infrastructure imports in backfill CLI action handler to avoid startup cost
+- FileDailyLogWriter in presentation layer (composition root pattern)
+- CLAUDECODE env var stripping via delete before spawn
 
 ### Context for Next Session
 
-1. Phase 24 (Friction System) in progress: 2/3 plans complete
-2. Phase 26 (Hooks + Backfill) in progress: 2/3 plans complete (26-01, 26-02 done)
-3. 24-01 complete: FrictionEntry entity, IFrictionRepository port, friction_log schema, SqliteFrictionRepository
-4. 24-02 complete: FrictionService, CLI friction commands, executeFrictionCommand API
-5. 26-01 complete: PreCompact flush reminder added to sync-hook-script.ts
-6. 26-02 complete: BackfillState entity, IBackfillStateRepository port, schema, SqliteBackfillStateRepository
-7. Next: 26-03 (BackfillService, ClaudeSummaryGenerator, backfill CLI command)
+1. Phase 24 (Friction System) in progress: 2/3 plans complete (24-03 remaining: friction dashboard)
+2. Phase 26 (Hooks + Backfill) complete: 3/3 plans done
+3. 26-03 complete: ISummaryGenerator port, ClaudeSummaryGenerator, BackfillService, backfill CLI
+4. Phase 25 (Intelligence) and Phase 27 (qmd Integration) not started
+5. Pre-existing issues: error-codes.test.ts count assertion stale (expects 19, has 21)
 
 ---
 
-*Last updated: 2026-03-08 (plans 26-01, 26-02 merged)*
+*Last updated: 2026-03-08 (plan 26-03 complete, Phase 26 done)*
