@@ -22,3 +22,9 @@ export { Message, type MessageRole } from "./message.js";
 export { Session } from "./session.js";
 export { ToolUse, type ToolUseStatus } from "./tool-use.js";
 export { MemoryFile, type MemoryFileType } from "./memory-file.js";
+export {
+    FrictionEntry,
+    type FrictionSeverity,
+    type FrictionCategory,
+    type FrictionStatus,
+} from "./friction-entry.js";

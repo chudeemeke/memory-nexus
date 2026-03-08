@@ -14,6 +14,8 @@ export type {
   IExtractionStateRepository,
   IEmbeddingRepository,
   IMemoryFileRepository,
+  IFrictionRepository,
+  FrictionStats,
   UnembeddedMessage,
   EmbeddingBatchItem,
   EmbeddingServiceConfig,

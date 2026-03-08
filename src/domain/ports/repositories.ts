@@ -17,6 +17,12 @@ import type { Link, EntityType } from "../entities/link.js";
 import type { ExtractionState } from "../entities/extraction-state.js";
 import type { Entity, ExtractedEntityType } from "../entities/entity.js";
 import type { MemoryFile, MemoryFileType } from "../entities/memory-file.js";
+import type {
+    FrictionEntry,
+    FrictionSeverity,
+    FrictionCategory,
+    FrictionStatus,
+} from "../entities/friction-entry.js";
 import type { ProjectPath } from "../value-objects/project-path.js";
 
 /**
@@ -521,4 +527,88 @@ export interface IMemoryFileRepository {
    * @returns Array of matching memory files
    */
   searchContent(query: string, limit?: number): Promise<MemoryFile[]>;
+}
+
+/**
+ * Aggregated statistics for friction entries.
+ */
+export interface FrictionStats {
+    total: number;
+    open: number;
+    resolved: number;
+    wontFix: number;
+    bySeverity: Record<FrictionSeverity, number>;
+    byCategory: Record<FrictionCategory, number>;
+    meanTimeToResolve: number | null;
+    oldestOpen: { id: number; description: string; daysOpen: number } | null;
+}
+
+/**
+ * Repository for FrictionEntry entities.
+ *
+ * Handles persistence of friction log entries and provides
+ * aggregation queries for stats and trend analysis.
+ */
+export interface IFrictionRepository {
+    /**
+     * Save a friction entry to the repository.
+     * @param entry The entry to save
+     * @returns The entry with id assigned
+     */
+    save(entry: FrictionEntry): Promise<FrictionEntry>;
+
+    /**
+     * Find a friction entry by its database ID.
+     * @param id The entry database ID
+     * @returns The entry if found, null otherwise
+     */
+    findById(id: number): Promise<FrictionEntry | null>;
+
+    /**
+     * Find all open friction entries.
+     * @returns Array of open entries, ordered by logged_at descending
+     */
+    findOpen(): Promise<FrictionEntry[]>;
+
+    /**
+     * Find friction entries with optional filtering.
+     * @param options Filtering options (status, category, limit)
+     * @returns Array of matching entries, ordered by logged_at descending
+     */
+    findAll(options?: {
+        status?: FrictionStatus;
+        category?: FrictionCategory;
+        limit?: number;
+    }): Promise<FrictionEntry[]>;
+
+    /**
+     * Resolve a friction entry with a resolution description.
+     * @param id The entry database ID
+     * @param resolution How the friction was resolved
+     * @throws Error if entry not found
+     */
+    resolve(id: number, resolution: string): Promise<void>;
+
+    /**
+     * Update the status of a friction entry.
+     * @param id The entry database ID
+     * @param status The new status
+     * @throws Error if entry not found
+     */
+    updateStatus(id: number, status: FrictionStatus): Promise<void>;
+
+    /**
+     * Get aggregated statistics for all friction entries.
+     * @returns FrictionStats with counts, breakdowns, MTTR, oldest open
+     */
+    getStats(): Promise<FrictionStats>;
+
+    /**
+     * Get weekly trend data for friction entries.
+     * @param weeks Number of weeks to include
+     * @returns Array of weekly counts, zero-filled for inactive weeks
+     */
+    getWeeklyTrends(
+        weeks: number
+    ): Promise<Array<{ week: string; newCount: number; resolvedCount: number }>>;
 }

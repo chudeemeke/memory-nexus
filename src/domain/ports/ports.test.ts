@@ -14,6 +14,8 @@ import type {
   ILinkRepository,
   IExtractionStateRepository,
   IMemoryFileRepository,
+  IFrictionRepository,
+  FrictionStats,
   IMemoryFileScanner,
   MemoryFileInfo,
   IEmbeddingProvider,
@@ -40,6 +42,8 @@ import { Link } from "../entities/link.js";
 import { ExtractionState } from "../entities/extraction-state.js";
 import { MemoryFile } from "../entities/memory-file.js";
 import type { MemoryFileType } from "../entities/memory-file.js";
+import { FrictionEntry } from "../entities/friction-entry.js";
+import type { FrictionSeverity, FrictionCategory, FrictionStatus } from "../entities/friction-entry.js";
 import { ProjectPath } from "../value-objects/project-path.js";
 import { SearchQuery } from "../value-objects/search-query.js";
 import { SearchResult } from "../value-objects/search-result.js";
@@ -327,6 +331,115 @@ describe("Repository Port Interfaces", () => {
 
       const found = await mockRepo.findByPath("nonexistent.md");
       expect(found).toBeNull();
+    });
+  });
+
+  describe("IFrictionRepository", () => {
+    it("can be implemented with a mock", async () => {
+      const entry = FrictionEntry.create({
+        id: 1,
+        description: "Search fails on hyphens",
+        severity: "high",
+        category: "search",
+        status: "open",
+        loggedAt: new Date("2026-03-08T10:00:00Z"),
+      });
+
+      const store: FrictionEntry[] = [entry];
+
+      const mockRepo: IFrictionRepository = {
+        save: async (e: FrictionEntry) => {
+          store.push(e);
+          return FrictionEntry.create({
+            id: store.length,
+            description: e.description,
+            severity: e.severity,
+            category: e.category,
+            status: e.status,
+            loggedAt: e.loggedAt,
+          });
+        },
+        findById: async (id: number) =>
+          store.find((e) => e.id === id) ?? null,
+        findOpen: async () =>
+          store.filter((e) => e.status === "open"),
+        findAll: async () => store,
+        resolve: async () => {},
+        updateStatus: async () => {},
+        getStats: async () => ({
+          total: store.length,
+          open: store.filter((e) => e.status === "open").length,
+          resolved: 0,
+          wontFix: 0,
+          bySeverity: { low: 0, medium: 0, high: 1, critical: 0 },
+          byCategory: { search: 1, sync: 0, cli: 0, context: 0, integration: 0, ux: 0 },
+          meanTimeToResolve: null,
+          oldestOpen: { id: 1, description: "Search fails on hyphens", daysOpen: 5 },
+        }),
+        getWeeklyTrends: async () => [
+          { week: "2026-W10", newCount: 1, resolvedCount: 0 },
+        ],
+      };
+
+      const found = await mockRepo.findById(1);
+      expect(found).not.toBeNull();
+      expect(found!.description).toBe("Search fails on hyphens");
+
+      const open = await mockRepo.findOpen();
+      expect(open).toHaveLength(1);
+
+      const all = await mockRepo.findAll();
+      expect(all).toHaveLength(1);
+
+      const stats = await mockRepo.getStats();
+      expect(stats.total).toBe(1);
+      expect(stats.open).toBe(1);
+      expect(stats.bySeverity.high).toBe(1);
+
+      const trends = await mockRepo.getWeeklyTrends(4);
+      expect(trends).toHaveLength(1);
+      expect(trends[0].newCount).toBe(1);
+    });
+
+    it("FrictionStats interface shape is correct", () => {
+      const stats: FrictionStats = {
+        total: 10,
+        open: 3,
+        resolved: 5,
+        wontFix: 2,
+        bySeverity: { low: 2, medium: 3, high: 4, critical: 1 },
+        byCategory: { search: 2, sync: 1, cli: 3, context: 1, integration: 2, ux: 1 },
+        meanTimeToResolve: 3.5,
+        oldestOpen: { id: 42, description: "Old issue", daysOpen: 14 },
+      };
+
+      expect(stats.total).toBe(10);
+      expect(stats.open).toBe(3);
+      expect(stats.resolved).toBe(5);
+      expect(stats.wontFix).toBe(2);
+      expect(stats.bySeverity.low).toBe(2);
+      expect(stats.bySeverity.critical).toBe(1);
+      expect(stats.byCategory.search).toBe(2);
+      expect(stats.byCategory.ux).toBe(1);
+      expect(stats.meanTimeToResolve).toBe(3.5);
+      expect(stats.oldestOpen!.id).toBe(42);
+      expect(stats.oldestOpen!.daysOpen).toBe(14);
+    });
+
+    it("FrictionStats handles null meanTimeToResolve and oldestOpen", () => {
+      const emptyStats: FrictionStats = {
+        total: 0,
+        open: 0,
+        resolved: 0,
+        wontFix: 0,
+        bySeverity: { low: 0, medium: 0, high: 0, critical: 0 },
+        byCategory: { search: 0, sync: 0, cli: 0, context: 0, integration: 0, ux: 0 },
+        meanTimeToResolve: null,
+        oldestOpen: null,
+      };
+
+      expect(emptyStats.meanTimeToResolve).toBeNull();
+      expect(emptyStats.oldestOpen).toBeNull();
     });
   });
 });
