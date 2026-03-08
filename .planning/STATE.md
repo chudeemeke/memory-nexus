@@ -15,12 +15,12 @@ See: .planning/PROJECT.md (updated 2026-02-18)
 **Milestone:** v3.0 Knowledge Layer + Friction Logging
 **Phase:** 24 (Friction System) -- IN PROGRESS
 **Status:** Executing
-**Current Plan:** 24-01 complete (1/3 plans)
+**Current Plan:** 24-02 complete (2/3 plans)
 
 ```
 v3.0 Progress: [#####                   ] 1/5 phases (complete)
   Phase 23: Foundation                [x] Complete (4/4 plans)
-  Phase 24: Friction System           [~] In Progress (1/3 plans)
+  Phase 24: Friction System           [~] In Progress (2/3 plans)
   Phase 25: Intelligence              [ ] Discussed (CONTEXT.md ready)
   Phase 26: Hooks + Backfill          [ ] Discussed (CONTEXT.md ready)
   Phase 27: qmd Integration           [ ] Discussed (CONTEXT.md ready)
@@ -68,22 +68,26 @@ v3.0 Progress: [#####                   ] 1/5 phases (complete)
 ### Last Session
 
 **Date:** 2026-03-08
-**Completed:** Plan 24-01 (FrictionEntry entity, repository, schema)
-**Stopped at:** Executing 24-02 next
+**Completed:** Plan 24-02 (FrictionService, CLI commands, public API)
+**Stopped at:** Executing 24-03 next
 
 ### Decisions
 
 - FrictionEntry create() is permissive on resolution field (service enforces business rules)
 - getWeeklyTrends uses strftime('%Y-W%W') for ISO week grouping
 - friction_log CHECK constraints enforce valid values at database level
+- wontFix flow: resolve() then updateStatus() for correct final state
+- Added generic NOT_FOUND and INVALID_STATE error codes (not entity-specific)
+- --json on each subcommand individually (Commander.js pitfall)
 
 ### Context for Next Session
 
-1. Phase 24 (Friction System) in progress: 1/3 plans complete
+1. Phase 24 (Friction System) in progress: 2/3 plans complete
 2. 24-01 complete: FrictionEntry entity, IFrictionRepository port, friction_log schema, SqliteFrictionRepository
-3. Next: 24-02 (FrictionService application service, CLI commands, public API)
-4. 2806 tests passing, zero regressions
+3. 24-02 complete: FrictionService, CLI friction commands (log/list/resolve/wont-fix/dashboard), executeFrictionCommand API
+4. Next: 24-03 (Dashboard formatters with rich output)
+5. 2862 tests passing, 1 pre-existing failure
 
 ---
 
-*Last updated: 2026-03-08 (plan 24-01 complete)*
+*Last updated: 2026-03-08 (plan 24-02 complete)*
