@@ -25,6 +25,9 @@ import {
     SESSIONS_FTS_TRIGGERS,
     EMBEDDING_STATE_TABLE,
     MESSAGE_EMBEDDINGS_TABLE,
+    MEMORY_FILES_TABLE,
+    MEMORY_FILES_FTS_TABLE,
+    MEMORY_FILES_FTS_TRIGGERS,
     type SchemaOptions,
 } from "./schema.js";
 import * as sqliteVec from "sqlite-vec";
@@ -60,7 +63,7 @@ describe("Database Schema", () => {
 
         it("should have SCHEMA_SQL as an array with correct order", () => {
             expect(Array.isArray(SCHEMA_SQL)).toBe(true);
-            expect(SCHEMA_SQL.length).toBe(14);
+            expect(SCHEMA_SQL.length).toBe(17);
             expect(SCHEMA_SQL[0]).toBe(SESSIONS_TABLE);
             expect(SCHEMA_SQL[1]).toBe(MESSAGES_META_TABLE);
             expect(SCHEMA_SQL[2]).toBe(MESSAGES_FTS_TABLE);
@@ -1528,6 +1531,293 @@ describe("Database Schema", () => {
             expect(tableNames).toContain("session_entities");
             expect(tableNames).toContain("entity_links");
             expect(tableNames).toContain("embedding_state");
+        });
+    });
+
+    describe("Memory Files Schema", () => {
+        describe("SQL constants", () => {
+            it("should export MEMORY_FILES_TABLE constant", () => {
+                expect(MEMORY_FILES_TABLE).toBeDefined();
+                expect(typeof MEMORY_FILES_TABLE).toBe("string");
+                expect(MEMORY_FILES_TABLE).toContain("memory_files");
+            });
+
+            it("should export MEMORY_FILES_FTS_TABLE constant", () => {
+                expect(MEMORY_FILES_FTS_TABLE).toBeDefined();
+                expect(typeof MEMORY_FILES_FTS_TABLE).toBe("string");
+                expect(MEMORY_FILES_FTS_TABLE).toContain("memory_files_fts");
+            });
+
+            it("should export MEMORY_FILES_FTS_TRIGGERS constant", () => {
+                expect(MEMORY_FILES_FTS_TRIGGERS).toBeDefined();
+                expect(typeof MEMORY_FILES_FTS_TRIGGERS).toBe("string");
+                expect(MEMORY_FILES_FTS_TRIGGERS).toContain("memory_files_fts_insert");
+                expect(MEMORY_FILES_FTS_TRIGGERS).toContain("memory_files_fts_delete");
+                expect(MEMORY_FILES_FTS_TRIGGERS).toContain("memory_files_fts_update");
+            });
+
+            it("should include memory_files entries in SCHEMA_SQL array", () => {
+                expect(SCHEMA_SQL).toContain(MEMORY_FILES_TABLE);
+                expect(SCHEMA_SQL).toContain(MEMORY_FILES_FTS_TABLE);
+                expect(SCHEMA_SQL).toContain(MEMORY_FILES_FTS_TRIGGERS);
+            });
+        });
+
+        describe("memory_files table", () => {
+            beforeEach(() => {
+                createSchema(db);
+            });
+
+            it("should create memory_files table", () => {
+                const tables = db
+                    .query<{ name: string }, []>(
+                        "SELECT name FROM sqlite_master WHERE type='table' AND name='memory_files'"
+                    )
+                    .all();
+
+                expect(tables.length).toBe(1);
+            });
+
+            it("should have correct columns", () => {
+                const columns = db
+                    .query<{ name: string; type: string; notnull: number; pk: number }, []>(
+                        "PRAGMA table_info(memory_files)"
+                    )
+                    .all();
+
+                const colMap = new Map(columns.map((c) => [c.name, c]));
+
+                expect(colMap.get("id")).toBeDefined();
+                expect(colMap.get("id")!.type).toBe("INTEGER");
+                expect(colMap.get("id")!.pk).toBe(1);
+
+                expect(colMap.get("file_path")).toBeDefined();
+                expect(colMap.get("file_path")!.type).toBe("TEXT");
+                expect(colMap.get("file_path")!.notnull).toBe(1);
+
+                expect(colMap.get("file_type")).toBeDefined();
+                expect(colMap.get("file_type")!.type).toBe("TEXT");
+                expect(colMap.get("file_type")!.notnull).toBe(1);
+
+                expect(colMap.get("project_encoded")).toBeDefined();
+                expect(colMap.get("project_encoded")!.type).toBe("TEXT");
+
+                expect(colMap.get("content")).toBeDefined();
+                expect(colMap.get("content")!.type).toBe("TEXT");
+                expect(colMap.get("content")!.notnull).toBe(1);
+
+                expect(colMap.get("content_hash")).toBeDefined();
+                expect(colMap.get("content_hash")!.type).toBe("TEXT");
+                expect(colMap.get("content_hash")!.notnull).toBe(1);
+
+                expect(colMap.get("last_indexed_at")).toBeDefined();
+                expect(colMap.get("last_indexed_at")!.type).toBe("TEXT");
+                expect(colMap.get("last_indexed_at")!.notnull).toBe(1);
+
+                expect(colMap.get("created_at")).toBeDefined();
+                expect(colMap.get("created_at")!.type).toBe("TEXT");
+            });
+
+            it("should reject invalid file_type values", () => {
+                expect(() => {
+                    db.exec(`
+                        INSERT INTO memory_files (file_path, file_type, content, content_hash, last_indexed_at)
+                        VALUES ('test.md', 'invalid', 'content', 'abc123', '2026-03-08T10:00:00Z')
+                    `);
+                }).toThrow();
+            });
+
+            it("should accept all valid file_type values", () => {
+                const types = ["daily_log", "decisions", "learnings", "user_prefs"];
+
+                for (const type of types) {
+                    expect(() => {
+                        db.exec(`
+                            INSERT INTO memory_files (file_path, file_type, content, content_hash, last_indexed_at)
+                            VALUES ('test-${type}.md', '${type}', 'content', 'hash-${type}', '2026-03-08T10:00:00Z')
+                        `);
+                    }).not.toThrow();
+                }
+
+                const count = db
+                    .query<{ count: number }, []>("SELECT COUNT(*) as count FROM memory_files")
+                    .get();
+
+                expect(count?.count).toBe(4);
+            });
+
+            it("should enforce UNIQUE constraint on file_path", () => {
+                db.exec(`
+                    INSERT INTO memory_files (file_path, file_type, content, content_hash, last_indexed_at)
+                    VALUES ('duplicate.md', 'decisions', 'content1', 'hash1', '2026-03-08T10:00:00Z')
+                `);
+
+                expect(() => {
+                    db.exec(`
+                        INSERT INTO memory_files (file_path, file_type, content, content_hash, last_indexed_at)
+                        VALUES ('duplicate.md', 'decisions', 'content2', 'hash2', '2026-03-08T11:00:00Z')
+                    `);
+                }).toThrow();
+            });
+
+            it("should have indexes on file_type and project_encoded", () => {
+                const indexes = db
+                    .query<{ name: string }, []>(
+                        "SELECT name FROM sqlite_master WHERE type='index' AND tbl_name='memory_files'"
+                    )
+                    .all();
+
+                const indexNames = indexes.map((i) => i.name);
+                expect(indexNames).toContain("idx_memory_files_type");
+                expect(indexNames).toContain("idx_memory_files_project");
+            });
+
+            it("should set created_at to current datetime by default", () => {
+                db.exec(`
+                    INSERT INTO memory_files (file_path, file_type, content, content_hash, last_indexed_at)
+                    VALUES ('timestamp.md', 'decisions', 'content', 'hash', '2026-03-08T10:00:00Z')
+                `);
+
+                const row = db
+                    .query<{ created_at: string }, []>(
+                        "SELECT created_at FROM memory_files WHERE file_path = 'timestamp.md'"
+                    )
+                    .get();
+
+                expect(row?.created_at).toBeDefined();
+                expect(row?.created_at.startsWith("20")).toBe(true);
+            });
+
+            it("should allow null project_encoded", () => {
+                expect(() => {
+                    db.exec(`
+                        INSERT INTO memory_files (file_path, file_type, project_encoded, content, content_hash, last_indexed_at)
+                        VALUES ('global.md', 'decisions', NULL, 'content', 'hash', '2026-03-08T10:00:00Z')
+                    `);
+                }).not.toThrow();
+
+                const row = db
+                    .query<{ project_encoded: string | null }, []>(
+                        "SELECT project_encoded FROM memory_files WHERE file_path = 'global.md'"
+                    )
+                    .get();
+
+                expect(row?.project_encoded).toBeNull();
+            });
+        });
+
+        describe("memory_files_fts virtual table", () => {
+            beforeEach(() => {
+                createSchema(db);
+            });
+
+            it("should create memory_files_fts virtual table", () => {
+                const tables = db
+                    .query<{ name: string }, []>(
+                        "SELECT name FROM sqlite_master WHERE name='memory_files_fts'"
+                    )
+                    .all();
+
+                expect(tables.length).toBe(1);
+            });
+        });
+
+        describe("FTS5 triggers for memory_files", () => {
+            beforeEach(() => {
+                createSchema(db);
+            });
+
+            it("should auto-index on INSERT via trigger", () => {
+                db.exec(`
+                    INSERT INTO memory_files (file_path, file_type, content, content_hash, last_indexed_at)
+                    VALUES ('test.md', 'decisions', 'authentication patterns for JWT', 'hash1', '2026-03-08T10:00:00Z')
+                `);
+
+                const results = db
+                    .query<{ file_path: string }, []>(`
+                        SELECT m.file_path FROM memory_files m
+                        JOIN memory_files_fts f ON f.rowid = m.id
+                        WHERE memory_files_fts MATCH 'authentication'
+                    `)
+                    .all();
+
+                expect(results.length).toBe(1);
+                expect(results[0]!.file_path).toBe("test.md");
+            });
+
+            it("should update FTS5 index on UPDATE via trigger", () => {
+                db.exec(`
+                    INSERT INTO memory_files (file_path, file_type, content, content_hash, last_indexed_at)
+                    VALUES ('update-test.md', 'learnings', 'old content about databases', 'hash1', '2026-03-08T10:00:00Z')
+                `);
+
+                // Old content should be searchable
+                let results = db
+                    .query<{ file_path: string }, []>(`
+                        SELECT m.file_path FROM memory_files m
+                        JOIN memory_files_fts f ON f.rowid = m.id
+                        WHERE memory_files_fts MATCH 'databases'
+                    `)
+                    .all();
+                expect(results.length).toBe(1);
+
+                // Update content
+                db.exec(`
+                    UPDATE memory_files
+                    SET content = 'new content about authentication', content_hash = 'hash2'
+                    WHERE file_path = 'update-test.md'
+                `);
+
+                // Old content should no longer be searchable
+                results = db
+                    .query<{ file_path: string }, []>(`
+                        SELECT m.file_path FROM memory_files m
+                        JOIN memory_files_fts f ON f.rowid = m.id
+                        WHERE memory_files_fts MATCH 'databases'
+                    `)
+                    .all();
+                expect(results.length).toBe(0);
+
+                // New content should be searchable
+                results = db
+                    .query<{ file_path: string }, []>(`
+                        SELECT m.file_path FROM memory_files m
+                        JOIN memory_files_fts f ON f.rowid = m.id
+                        WHERE memory_files_fts MATCH 'authentication'
+                    `)
+                    .all();
+                expect(results.length).toBe(1);
+            });
+
+            it("should remove from FTS5 index on DELETE via trigger", () => {
+                db.exec(`
+                    INSERT INTO memory_files (file_path, file_type, content, content_hash, last_indexed_at)
+                    VALUES ('delete-test.md', 'daily_log', 'searchable content here', 'hash1', '2026-03-08T10:00:00Z')
+                `);
+
+                // Should be findable
+                let results = db
+                    .query<{ file_path: string }, []>(`
+                        SELECT m.file_path FROM memory_files m
+                        JOIN memory_files_fts f ON f.rowid = m.id
+                        WHERE memory_files_fts MATCH 'searchable'
+                    `)
+                    .all();
+                expect(results.length).toBe(1);
+
+                // Delete
+                db.exec("DELETE FROM memory_files WHERE file_path = 'delete-test.md'");
+
+                // Should no longer be findable
+                results = db
+                    .query<{ file_path: string }, []>(`
+                        SELECT m.file_path FROM memory_files m
+                        JOIN memory_files_fts f ON f.rowid = m.id
+                        WHERE memory_files_fts MATCH 'searchable'
+                    `)
+                    .all();
+                expect(results.length).toBe(0);
+            });
         });
     });
 });

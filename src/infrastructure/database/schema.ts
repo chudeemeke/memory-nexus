@@ -234,6 +234,57 @@ ALTER TABLE embedding_state ADD COLUMN model_name TEXT NOT NULL DEFAULT '';
 `;
 
 /**
+ * Memory files table - stores indexed ~/.memory/ markdown files
+ */
+export const MEMORY_FILES_TABLE = `
+CREATE TABLE IF NOT EXISTS memory_files (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    file_path TEXT UNIQUE NOT NULL,
+    file_type TEXT NOT NULL CHECK (file_type IN ('daily_log', 'decisions', 'learnings', 'user_prefs')),
+    project_encoded TEXT,
+    content TEXT NOT NULL,
+    content_hash TEXT NOT NULL,
+    last_indexed_at TEXT NOT NULL,
+    created_at TEXT DEFAULT (datetime('now'))
+);
+CREATE INDEX IF NOT EXISTS idx_memory_files_type ON memory_files(file_type);
+CREATE INDEX IF NOT EXISTS idx_memory_files_project ON memory_files(project_encoded);
+`;
+
+/**
+ * Memory files FTS5 virtual table - external content pattern
+ * References memory_files for content storage
+ */
+export const MEMORY_FILES_FTS_TABLE = `
+CREATE VIRTUAL TABLE IF NOT EXISTS memory_files_fts USING fts5(
+    content,
+    content=memory_files,
+    content_rowid=id,
+    tokenize='porter unicode61'
+);
+`;
+
+/**
+ * Memory files FTS5 synchronization triggers
+ * Keep memory_files_fts index in sync with memory_files content.
+ * Follows the same pattern as FTS_TRIGGERS for messages_fts.
+ */
+export const MEMORY_FILES_FTS_TRIGGERS = `
+CREATE TRIGGER IF NOT EXISTS memory_files_fts_insert AFTER INSERT ON memory_files BEGIN
+    INSERT INTO memory_files_fts(rowid, content) VALUES (new.id, new.content);
+END;
+
+CREATE TRIGGER IF NOT EXISTS memory_files_fts_delete AFTER DELETE ON memory_files BEGIN
+    INSERT INTO memory_files_fts(memory_files_fts, rowid, content) VALUES('delete', old.id, old.content);
+END;
+
+CREATE TRIGGER IF NOT EXISTS memory_files_fts_update AFTER UPDATE ON memory_files BEGIN
+    INSERT INTO memory_files_fts(memory_files_fts, rowid, content) VALUES('delete', old.id, old.content);
+    INSERT INTO memory_files_fts(rowid, content) VALUES (new.id, new.content);
+END;
+`;
+
+/**
  * Schema options for conditional table creation
  */
 export interface SchemaOptions {
@@ -294,6 +345,9 @@ END;
  * 12. sessions_fts (depends on sessions)
  * 13. sessions_fts triggers (depends on sessions, sessions_fts)
  * 14. embedding_state (depends on messages_meta) -- always created
+ * 15. memory_files (no dependencies)
+ * 16. memory_files_fts (depends on memory_files)
+ * 17. memory_files FTS triggers (depend on both memory_files tables)
  *
  * Note: message_embeddings (vec0) is NOT in this array.
  * It is conditionally created in createSchema() when sqliteVecAvailable is true.
@@ -313,6 +367,9 @@ export const SCHEMA_SQL: readonly string[] = [
     SESSIONS_FTS_TABLE,
     SESSIONS_FTS_TRIGGERS,
     EMBEDDING_STATE_TABLE,
+    MEMORY_FILES_TABLE,
+    MEMORY_FILES_FTS_TABLE,
+    MEMORY_FILES_FTS_TRIGGERS,
 ];
 
 /**
