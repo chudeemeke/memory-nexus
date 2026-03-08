@@ -13,13 +13,13 @@ See: .planning/PROJECT.md (updated 2026-02-18)
 ## Current Position
 
 **Milestone:** v3.0 Knowledge Layer + Friction Logging
-**Phase:** 23 (Foundation) -- Plans 01-02 complete, executing plans
-**Status:** Plan 23-02 complete (FTS5 sanitizer + search integration), 2 plans remaining
-**Current Plan:** 3 of 4
+**Phase:** 23 (Foundation) -- Plans 01-03 complete, executing plans
+**Status:** Plan 23-03 complete (schema, repository, scanner), 1 plan remaining
+**Current Plan:** 4 of 4
 
 ```
 v3.0 Progress: [#####                   ] 1/5 phases (in progress)
-  Phase 23: Foundation                [~] In Progress (2/4 plans)
+  Phase 23: Foundation                [~] In Progress (3/4 plans)
   Phase 24: Friction System           [ ] Discussed (CONTEXT.md ready)
   Phase 25: Intelligence              [ ] Discussed (CONTEXT.md ready)
   Phase 26: Hooks + Backfill          [ ] Discussed (CONTEXT.md ready)
@@ -68,8 +68,8 @@ v3.0 Progress: [#####                   ] 1/5 phases (in progress)
 ### Last Session
 
 **Date:** 2026-03-08
-**Completed:** Plan 23-02 (FTS5 query sanitizer, search service integration, searchSummaries)
-**Stopped at:** Completed 23-02-PLAN.md
+**Completed:** Plan 23-03 (schema extension, SqliteMemoryFileRepository, MemoryFileScanner)
+**Stopped at:** Completed 23-03-PLAN.md
 
 ### Decisions
 
@@ -78,15 +78,20 @@ v3.0 Progress: [#####                   ] 1/5 phases (in progress)
 - Preserve asterisks in FTS5 sanitizer (valid prefix search operator)
 - Preserve balanced double quotes in FTS5 sanitizer (valid phrase search syntax)
 - Infrastructure importing application pure function accepted (matches existing codebase pattern)
+- Skip unrecognized .md files in scanner (only 4 defined types indexed)
+- Deduplicated upsert SQL between save() and saveMany() via shared const
+- getMemoryDir() uses home directory directly, not XDG
 
 ### Context for Next Session
 
-1. Plans 23-01 and 23-02 complete
-2. Continue with plans 23-03 and 23-04
-3. sanitizeFtsQuery() available in application/services for any FTS5 query path
-4. SessionRepository.searchSummaries() ready for context/intelligence features
-5. 1699 core tests passing, zero regressions
+1. Plans 23-01, 23-02, and 23-03 complete
+2. Continue with plan 23-04 (sync integration)
+3. memory_files table, FTS5 virtual table, and triggers ready in schema
+4. SqliteMemoryFileRepository ready for sync service to persist indexed files
+5. MemoryFileScanner ready for sync service to discover ~/.memory/ files
+6. getMemoryDir() available for path resolution
+7. 2723 tests passing, zero regressions
 
 ---
 
-*Last updated: 2026-03-08 (plan 23-02 complete)*
+*Last updated: 2026-03-08 (plan 23-03 complete)*
