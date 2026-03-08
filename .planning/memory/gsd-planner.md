@@ -1,7 +1,7 @@
 ---
 agent: gsd-planner
 updated: 2026-03-08
-entries: 35
+entries: 42
 ---
 
 - finding: "Large rename phases (375 occurrences across 59 files) need 3 sequential plans, not 2. Split by: (1) infrastructure foundation/paths, (2) identity rename, (3) external docs/stub."
@@ -212,4 +212,46 @@ entries: 35
   source: "Phase 23, planning (unrecognized file type handling)"
   confidence: HIGH
   phase: "23-foundation"
+  date: "2026-03-08"
+
+- finding: "Feature subsystem phases (entity + repo + service + CLI + formatters) with Commander subcommand nesting decompose into 3 sequential plans: (1) domain entity + port + schema + repository (Wave 1), (2) application service + CLI commands + programmatic API + barrel exports (Wave 2), (3) rich formatters + external file updates (Wave 3). Each wave adds a hexagonal layer. The key tension is that the dashboard CLI command needs formatter imports from the same plan or a later plan -- resolve by having the dashboard command in Wave 2 with a placeholder, and replacing it with the real formatter in Wave 3."
+  source: "Phase 24, planning (feature subsystem decomposition)"
+  confidence: HIGH
+  phase: "24-friction-system"
+  date: "2026-03-08"
+
+- finding: "When a locked repository port has resolve() and updateStatus() as separate methods, but wont-fix requires both a status change AND setting resolution/resolvedAt, the service must orchestrate: call resolve(id, resolution) first to set resolution text + resolvedAt, then call updateStatus(id, 'wont-fix') to overwrite the status. This produces the correct final state (status=wont-fix, resolved_at=set, resolution=set) using only the locked port methods. Document this sequencing explicitly in the plan so the executor doesn't invent a different approach."
+  source: "Phase 24, planning (wont-fix via locked port methods)"
+  confidence: HIGH
+  phase: "24-friction-system"
+  date: "2026-03-08"
+
+- finding: "Dual-track phases (small hook modification + large new feature) decompose into 3 plans: (1) hook modification in Wave 1 (small, independent), (2) domain + port + schema + repository in Wave 1 parallel (no dependency on hook), (3) application service + CLI command in Wave 2 (depends on plan 2 for domain types and repository). The hook modification is so small it can be a single task in a single plan. The new feature decomposes along hexagonal layers as usual."
+  source: "Phase 26, planning (dual-track decomposition)"
+  confidence: HIGH
+  phase: "26-hooks-and-backfill"
+  date: "2026-03-08"
+
+- finding: "When an application service needs to call an external CLI (claude -p) rather than a library, abstract the invocation behind a domain port (ISummaryGenerator) and implement a infrastructure adapter (ClaudeSummaryGenerator) that handles spawn mechanics, env var stripping, and error handling. This keeps the service testable via mock injection. The key env var pitfall is CLAUDECODE -- it must be stripped to prevent nested session detection when running inside Claude Code."
+  source: "Phase 26, planning (external CLI as infrastructure adapter)"
+  confidence: HIGH
+  phase: "26-hooks-and-backfill"
+  date: "2026-03-08"
+
+- finding: "ALWAYS verify domain entity property names against actual source code before referencing them in plans. The Session entity has `projectPath: ProjectPath` (value object with `.decoded` and `.encoded` getters), NOT a `projectName` property. Similarly, ISessionRepository has `findFiltered(options: SessionListOptions)`, NOT `list()`. Use `session.projectPath.decoded` and extract display name from the path. These mismatches cause TypeScript compilation errors that the checker correctly flags as blockers."
+  source: "Phase 26, revision (checker blockers on session.projectName and sessionRepo.list)"
+  confidence: HIGH
+  phase: "26-hooks-and-backfill"
+  date: "2026-03-08"
+
+- finding: "When a plan says 'create file if it does not exist; otherwise add to existing', the executor gets an ambiguous instruction. ALWAYS verify whether the file exists during planning (use Glob/Read) and give a single clear directive: either 'Create src/domain/ports/services.ts' or 'Add to existing src/domain/ports/services.ts'. The checker flags ambiguity as a warning because it can cause executor hesitation."
+  source: "Phase 26, revision (checker warning on services.ts ambiguity)"
+  confidence: HIGH
+  phase: "26-hooks-and-backfill"
+  date: "2026-03-08"
+
+- finding: "Always include `phase` and `type` fields in plan frontmatter for gsd-tools compatibility. These were missing from Phase 26 plans. Format: `phase: 26`, `type: auto` (for autonomous execution plans)."
+  source: "Phase 26, revision (checker info on missing frontmatter fields)"
+  confidence: HIGH
+  phase: "26-hooks-and-backfill"
   date: "2026-03-08"

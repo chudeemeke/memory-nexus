@@ -1,7 +1,7 @@
 ---
 agent: gsd-phase-researcher
 updated: 2026-03-08
-entries: 23
+entries: 26
 ---
 
 - finding: "When researching package renames, always read every infrastructure file that constructs paths -- path definitions are often scattered across multiple modules. Grep for the old name is not sufficient; you need to categorize each reference as (a) tool identity, (b) filesystem path, (c) test data."
@@ -142,4 +142,22 @@ entries: 23
   source: "Phase 23, Foundation"
   confidence: HIGH
   phase: "23-foundation"
+  date: "2026-03-08"
+
+- finding: "For subsystem phases (Phase 24: Friction System) where every component has a 1:1 codebase analog (FrictionEntry->MemoryFile, SqliteFrictionRepository->SqliteMemoryFileRepository, friction commands->stats command), the research is almost entirely codebase analysis. External research only needed for two things: Commander.js subcommand nesting (addCommand pattern for memory friction <sub>) and Chart.js UMD inline embedding for HTML dashboards. Both are small, well-documented patterns."
+  source: "Phase 24, Friction System"
+  confidence: HIGH
+  phase: "24-friction-system"
+  date: "2026-03-08"
+
+- finding: "CONTEXT.md can describe implementation approaches that are technically impossible. Phase 26 CONTEXT.md described using @anthropic-ai/claude-code as a programmatic library ('agentSdk.complete(prompt)'), but the package has no main/exports field -- it is CLI-only with just a bin entry. Always verify CONTEXT.md's technical claims by reading the actual package.json and attempting import before committing to the described approach. The user's INTENT (use Claude for summarization) is correct; the MECHANISM (library import vs CLI invocation) needs correction."
+  source: "Phase 26, Hooks + Backfill"
+  confidence: HIGH
+  phase: "26-hooks-and-backfill"
+  date: "2026-03-08"
+
+- finding: "When a phase modifies an existing hook script to add new behavior (PreCompact reminder), the most critical research is determining the full existing state of the infrastructure. Phase 26 CONTEXT.md described changes to hook installer, install/uninstall commands, and doctor as if they needed to be built, but all of these were already implemented. The settings-manager already handles both hooks, install already checks both, uninstall already removes both, and health-checker already requires both for 'installed' status. The only actual change needed is in the hook script itself (sync-hook-script.ts) to output the reminder message."
+  source: "Phase 26, Hooks + Backfill"
+  confidence: HIGH
+  phase: "26-hooks-and-backfill"
   date: "2026-03-08"

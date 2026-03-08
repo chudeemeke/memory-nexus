@@ -1,7 +1,7 @@
 ---
 agent: gsd-verifier
-updated: 2026-03-01
-entries: 20
+updated: 2026-03-08
+entries: 23
 ---
 
 entries:
@@ -131,3 +131,21 @@ entries:
     confidence: HIGH
     phase: "21-architecture-boundary-cleanup"
     date: "2026-03-01"
+
+  - finding: "Phase 23 FTS5 sanitization preserves asterisks (prefix search) and balanced double quotes (phrase search) while stripping all other operator characters. The initial PLAN specified stripping both, but integration testing revealed existing search tests relied on these FTS5 features. The auto-fix deviation is correct -- strip characters that cause syntax errors, preserve characters that are valid FTS5 syntax."
+    source: "Phase 23, Plan 23-02 SUMMARY deviations"
+    confidence: HIGH
+    phase: "23-foundation"
+    date: "2026-03-08"
+
+  - finding: "Phase 23 separate sync service pattern: memory file indexing uses its own MemoryFileSyncService rather than extending SyncService (which would inflate its constructor to 11+ dependencies). The CLI sync command is the composition root, orchestrating both services sequentially. This avoids SRP violation and keeps each service focused on one concern."
+    source: "Phase 23, Plan 23-04"
+    confidence: HIGH
+    phase: "23-foundation"
+    date: "2026-03-08"
+
+  - finding: "UV_ENOSPC test failures in programmatic-api.test.ts export/import are environment-related (temp directory disk space), not code regressions. These tests were last modified in Phase 22. When verifying 'all tests pass' success criteria, attribute disk-space failures to the environment, not the phase under verification."
+    source: "Phase 23 verification"
+    confidence: HIGH
+    phase: "23-foundation"
+    date: "2026-03-08"
