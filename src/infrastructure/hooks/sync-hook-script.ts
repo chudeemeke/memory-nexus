@@ -127,6 +127,15 @@ async function main(): Promise<void> {
         process.exit(0); // Never block user
     }
 
+    // Output flush reminder for PreCompact (before sync check)
+    if (hookInput.hook_event_name === "PreCompact") {
+        console.log(
+            "MEMORY FLUSH: Session nearing compaction. " +
+            "Write important context (decisions, unresolved items, learnings) " +
+            "to ~/.memory/ files before context is compressed."
+        );
+    }
+
     // Check if this hook type is enabled
     if (hookInput.hook_event_name === "PreCompact" && !config.syncOnCompaction) {
         process.exit(0);
