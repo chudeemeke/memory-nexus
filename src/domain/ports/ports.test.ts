@@ -13,6 +13,9 @@ import type {
   IToolUseRepository,
   ILinkRepository,
   IExtractionStateRepository,
+  IMemoryFileRepository,
+  IMemoryFileScanner,
+  MemoryFileInfo,
   IEmbeddingProvider,
   DownloadProgress,
   EmbeddingModelInfo,
@@ -35,6 +38,8 @@ import { Message } from "../entities/message.js";
 import { ToolUse } from "../entities/tool-use.js";
 import { Link } from "../entities/link.js";
 import { ExtractionState } from "../entities/extraction-state.js";
+import { MemoryFile } from "../entities/memory-file.js";
+import type { MemoryFileType } from "../entities/memory-file.js";
 import { ProjectPath } from "../value-objects/project-path.js";
 import { SearchQuery } from "../value-objects/search-query.js";
 import { SearchResult } from "../value-objects/search-result.js";
@@ -223,6 +228,167 @@ describe("Repository Port Interfaces", () => {
 
       const pending = await mockRepo.findPending();
       expect(pending).toHaveLength(1);
+    });
+  });
+
+  describe("IMemoryFileRepository", () => {
+    it("can be implemented with a mock", async () => {
+      const memoryFile = MemoryFile.create({
+        id: 1,
+        filePath: "daily/2026-03-07.md",
+        fileType: "daily_log",
+        content: "# 2026-03-07\n\nSession notes",
+        contentHash: "a".repeat(64),
+        lastIndexedAt: new Date(),
+      });
+
+      const store: MemoryFile[] = [memoryFile];
+
+      const mockRepo: IMemoryFileRepository = {
+        findByPath: async (filePath: string) =>
+          store.find((f) => f.filePath === filePath) ?? null,
+        findByType: async (fileType: MemoryFileType) =>
+          store.filter((f) => f.fileType === fileType),
+        findByProject: async (projectEncoded: string) =>
+          store.filter((f) => f.projectEncoded === projectEncoded),
+        save: async (file: MemoryFile) => {
+          store.push(file);
+        },
+        saveMany: async (files: MemoryFile[]) => {
+          store.push(...files);
+        },
+        searchContent: async (_query: string, _limit?: number) =>
+          store,
+      };
+
+      const found = await mockRepo.findByPath("daily/2026-03-07.md");
+      expect(found).not.toBeNull();
+      expect(found!.filePath).toBe("daily/2026-03-07.md");
+      expect(found!.fileType).toBe("daily_log");
+
+      const byType = await mockRepo.findByType("daily_log");
+      expect(byType).toHaveLength(1);
+
+      const byProject = await mockRepo.findByProject("nonexistent");
+      expect(byProject).toHaveLength(0);
+
+      const searchResults = await mockRepo.searchContent("session", 10);
+      expect(searchResults).toHaveLength(1);
+    });
+
+    it("mock flow: save then findByPath returns it", async () => {
+      const store: MemoryFile[] = [];
+
+      const mockRepo: IMemoryFileRepository = {
+        findByPath: async (filePath: string) =>
+          store.find((f) => f.filePath === filePath) ?? null,
+        findByType: async (fileType: MemoryFileType) =>
+          store.filter((f) => f.fileType === fileType),
+        findByProject: async (projectEncoded: string) =>
+          store.filter((f) => f.projectEncoded === projectEncoded),
+        save: async (file: MemoryFile) => {
+          store.push(file);
+        },
+        saveMany: async (files: MemoryFile[]) => {
+          store.push(...files);
+        },
+        searchContent: async () => store,
+      };
+
+      // Initially empty
+      const notFound = await mockRepo.findByPath("daily/2026-03-07.md");
+      expect(notFound).toBeNull();
+
+      // Save a file
+      const file = MemoryFile.create({
+        filePath: "daily/2026-03-07.md",
+        fileType: "daily_log",
+        content: "# Daily log content",
+        contentHash: "b".repeat(64),
+        lastIndexedAt: new Date(),
+      });
+      await mockRepo.save(file);
+
+      // Now findable
+      const found = await mockRepo.findByPath("daily/2026-03-07.md");
+      expect(found).not.toBeNull();
+      expect(found!.content).toBe("# Daily log content");
+    });
+
+    it("returns null for non-existent path", async () => {
+      const mockRepo: IMemoryFileRepository = {
+        findByPath: async () => null,
+        findByType: async () => [],
+        findByProject: async () => [],
+        save: async () => {},
+        saveMany: async () => {},
+        searchContent: async () => [],
+      };
+
+      const found = await mockRepo.findByPath("nonexistent.md");
+      expect(found).toBeNull();
+    });
+  });
+});
+
+describe("Memory File Scanner Port Interface", () => {
+  describe("IMemoryFileScanner", () => {
+    it("can be implemented with a mock", async () => {
+      const mockInfo: MemoryFileInfo[] = [
+        {
+          filePath: "daily/2026-03-07.md",
+          absolutePath: "/home/user/.memory/daily/2026-03-07.md",
+          fileType: "daily_log",
+          contentHash: "a".repeat(64),
+          content: "# 2026-03-07\n\nSession notes",
+        },
+        {
+          filePath: "projects/test-project/DECISIONS.md",
+          absolutePath: "/home/user/.memory/projects/test-project/DECISIONS.md",
+          fileType: "decisions",
+          projectEncoded: "test-project",
+          contentHash: "b".repeat(64),
+          content: "# Decisions\n\nUsed Redis",
+        },
+      ];
+
+      const mockScanner: IMemoryFileScanner = {
+        discoverFiles: async () => mockInfo,
+      };
+
+      const files = await mockScanner.discoverFiles();
+      expect(files).toHaveLength(2);
+      expect(files[0].filePath).toBe("daily/2026-03-07.md");
+      expect(files[0].fileType).toBe("daily_log");
+      expect(files[0].absolutePath).toContain(".memory");
+      expect(files[0].projectEncoded).toBeUndefined();
+      expect(files[1].projectEncoded).toBe("test-project");
+    });
+
+    it("returns empty array when no files exist", async () => {
+      const mockScanner: IMemoryFileScanner = {
+        discoverFiles: async () => [],
+      };
+
+      const files = await mockScanner.discoverFiles();
+      expect(files).toHaveLength(0);
+    });
+
+    it("MemoryFileInfo has all required fields", () => {
+      const info: MemoryFileInfo = {
+        filePath: "daily/2026-03-07.md",
+        absolutePath: "/home/user/.memory/daily/2026-03-07.md",
+        fileType: "daily_log",
+        contentHash: "c".repeat(64),
+        content: "file content here",
+      };
+
+      expect(info.filePath).toBe("daily/2026-03-07.md");
+      expect(info.absolutePath).toContain(".memory");
+      expect(info.fileType).toBe("daily_log");
+      expect(info.contentHash).toBe("c".repeat(64));
+      expect(info.content).toBe("file content here");
+      expect(info.projectEncoded).toBeUndefined();
     });
   });
 });
