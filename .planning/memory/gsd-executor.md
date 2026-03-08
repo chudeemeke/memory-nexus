@@ -1,7 +1,7 @@
 ---
 agent: gsd-executor
 updated: 2026-03-08
-entries: 49
+entries: 51
 ---
 
 - finding: "Bun test spyOn mock leakage: when mocking nodeFs.renameSync, must restore before assertions, not in afterEach. Mock affects subsequent tests in same file if not restored promptly."
@@ -294,6 +294,18 @@ entries: 49
 
 - finding: "FTS5 double quotes: balanced pairs are valid phrase search syntax; only unmatched quotes cause 'unterminated string' errors. Count quotes and preserve when even, strip when odd. This preserves existing phrase search functionality."
   source: "Phase 23, Plan 02, Task B"
+  confidence: HIGH
+  phase: "23-foundation"
+  date: "2026-03-08"
+
+- finding: "Full test suite takes ~250s (4+ min) with extended timeout on this machine. 2723 tests as of plan 23-03. The executeSyncCommand integration test requires --timeout 30000 to avoid false timeout failures due to real filesystem discovery of 1803 sessions."
+  source: "Phase 23, Plan 03"
+  confidence: HIGH
+  phase: "23-foundation"
+  date: "2026-03-08"
+
+- finding: "setTestPaths({ memoryDir }) from infrastructure/paths.ts overrides getMemoryDir() for integration tests. Create temp dir with mkdtempSync, set test path, call resetTestPaths() in afterEach. This pattern enables real MemoryFileScanner + SqliteMemoryFileRepository integration tests without touching ~/.memory/."
+  source: "Phase 23, Plan 04, Task B"
   confidence: HIGH
   phase: "23-foundation"
   date: "2026-03-08"
