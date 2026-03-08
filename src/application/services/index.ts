@@ -76,3 +76,9 @@ export type {
   MemoryFileSyncProgress,
   MemoryFileSyncOptions,
 } from "./memory-file-sync-service.js";
+
+export { FrictionService } from "./friction-service.js";
+export type {
+  LogFrictionParams,
+  ListFrictionOptions,
+} from "./friction-service.js";

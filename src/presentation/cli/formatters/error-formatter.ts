@@ -71,6 +71,10 @@ export function getSuggestion(code: ErrorCodeType): string | null {
       return "Run 'memory sync --embed' to re-embed with the current model";
     case ErrorCode.MODEL_CORRUPTED:
       return "Delete cached model files and run 'memory sync --embed' to re-download";
+    case ErrorCode.NOT_FOUND:
+      return "Check the ID and try again";
+    case ErrorCode.INVALID_STATE:
+      return "The entity is not in a valid state for this operation";
     case ErrorCode.UNKNOWN:
     default:
       return null;
