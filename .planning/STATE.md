@@ -13,14 +13,14 @@ See: .planning/PROJECT.md (updated 2026-02-18)
 ## Current Position
 
 **Milestone:** v3.0 Knowledge Layer + Friction Logging
-**Phase:** 23 (Foundation) -- COMPLETE (all 4 plans done)
-**Status:** Ready to plan
-**Current Plan:** Not started
+**Phase:** 24 (Friction System) -- IN PROGRESS
+**Status:** Executing
+**Current Plan:** 24-01 complete (1/3 plans)
 
 ```
 v3.0 Progress: [#####                   ] 1/5 phases (complete)
   Phase 23: Foundation                [x] Complete (4/4 plans)
-  Phase 24: Friction System           [ ] Discussed (CONTEXT.md ready)
+  Phase 24: Friction System           [~] In Progress (1/3 plans)
   Phase 25: Intelligence              [ ] Discussed (CONTEXT.md ready)
   Phase 26: Hooks + Backfill          [ ] Discussed (CONTEXT.md ready)
   Phase 27: qmd Integration           [ ] Discussed (CONTEXT.md ready)
@@ -68,31 +68,22 @@ v3.0 Progress: [#####                   ] 1/5 phases (complete)
 ### Last Session
 
 **Date:** 2026-03-08
-**Completed:** Plan 23-04 (sync integration, agent write protocol documentation)
-**Stopped at:** Completed 23-04-PLAN.md (Phase 23 complete)
+**Completed:** Plan 24-01 (FrictionEntry entity, repository, schema)
+**Stopped at:** Executing 24-02 next
 
 ### Decisions
 
-- Lowercase-only hex validation for contentHash (/^[a-f0-9]{64}$/)
-- MemoryFileInfo placed in sources.ts alongside IMemoryFileScanner
-- Preserve asterisks in FTS5 sanitizer (valid prefix search operator)
-- Preserve balanced double quotes in FTS5 sanitizer (valid phrase search syntax)
-- Infrastructure importing application pure function accepted (matches existing codebase pattern)
-- Skip unrecognized .md files in scanner (only 4 defined types indexed)
-- Deduplicated upsert SQL between save() and saveMany() via shared const
-- getMemoryDir() uses home directory directly, not XDG
-- MemoryFileSyncService is separate from SyncService (avoids constructor inflation)
-- Memory file sync failure is non-fatal in CLI sync command
-- Memory file result line suppressed when ~/.memory/ does not exist
+- FrictionEntry create() is permissive on resolution field (service enforces business rules)
+- getWeeklyTrends uses strftime('%Y-W%W') for ISO week grouping
+- friction_log CHECK constraints enforce valid values at database level
 
 ### Context for Next Session
 
-1. Phase 23 (Foundation) complete: all 4 plans done
-2. Next: Phase 24 (Friction System) or Phase 26 (Hooks + Backfill) -- both depend only on Phase 23
-3. Full v3.0 foundation in place: MemoryFile entity, scanner, repository, FTS5, sync integration
-4. Agent write protocol documented at docs/agent-write-protocol.md
-5. 2737 tests passing, zero regressions
+1. Phase 24 (Friction System) in progress: 1/3 plans complete
+2. 24-01 complete: FrictionEntry entity, IFrictionRepository port, friction_log schema, SqliteFrictionRepository
+3. Next: 24-02 (FrictionService application service, CLI commands, public API)
+4. 2806 tests passing, zero regressions
 
 ---
 
-*Last updated: 2026-03-08 (plan 23-04 complete, Phase 23 complete)*
+*Last updated: 2026-03-08 (plan 24-01 complete)*
