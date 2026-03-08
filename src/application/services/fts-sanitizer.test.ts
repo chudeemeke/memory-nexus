@@ -48,12 +48,21 @@ describe("sanitizeFtsQuery", () => {
       expect(sanitizeFtsQuery("^prefix")).toBe("prefix");
     });
 
-    it("should replace asterisks with spaces", () => {
-      expect(sanitizeFtsQuery("wild*card")).toBe("wild card");
+    it("should preserve asterisks (FTS5 prefix search operator)", () => {
+      // Asterisks are valid FTS5 prefix operators (e.g., auth*) and don't cause
+      // syntax errors, so they are preserved to maintain prefix search functionality
+      expect(sanitizeFtsQuery("wild*card")).toBe("wild*card");
+      expect(sanitizeFtsQuery("auth*")).toBe("auth*");
     });
 
-    it("should replace double quotes with spaces", () => {
-      expect(sanitizeFtsQuery('"exact phrase"')).toBe("exact phrase");
+    it("should preserve balanced double quotes (FTS5 phrase search)", () => {
+      // Balanced quotes are valid FTS5 phrase search syntax
+      expect(sanitizeFtsQuery('"exact phrase"')).toBe('"exact phrase"');
+    });
+
+    it("should strip unmatched double quotes", () => {
+      // Unmatched quotes cause FTS5 "unterminated string" errors
+      expect(sanitizeFtsQuery('unmatched "quote')).toBe("unmatched quote");
     });
 
     it("should replace tildes with spaces", () => {

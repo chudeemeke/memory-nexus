@@ -12,6 +12,7 @@ import type {
 } from "../../../domain/ports/repositories.js";
 import { Session } from "../../../domain/entities/session.js";
 import { ProjectPath } from "../../../domain/value-objects/project-path.js";
+import { sanitizeFtsQuery } from "../../../application/services/fts-sanitizer.js";
 
 /**
  * Row shape from sessions table
@@ -336,6 +337,35 @@ export class SqliteSessionRepository implements ISessionRepository {
 
     const stmt = this.db.prepare(sql);
     const rows = stmt.all(params) as SessionRow[];
+    return rows.map((row) => this.rowToSession(row));
+  }
+
+  /**
+   * Search session summaries via FTS5.
+   *
+   * Queries the sessions_fts virtual table for summaries matching the
+   * given search term. Applies sanitizeFtsQuery() to prevent FTS5
+   * syntax errors from special characters in user input.
+   *
+   * @param query - Search query (sanitized internally for FTS5 safety)
+   * @param limit - Maximum results (default: 20)
+   * @returns Array of sessions whose summaries match the query
+   */
+  async searchSummaries(query: string, limit: number = 20): Promise<Session[]> {
+    const sanitized = sanitizeFtsQuery(query);
+    if (!sanitized) return [];
+
+    const sql = `
+      SELECT s.id, s.project_path_encoded, s.project_path_decoded, s.project_name,
+             s.start_time, s.end_time, s.message_count, s.summary
+      FROM sessions s
+      JOIN sessions_fts f ON f.session_id = s.id
+      WHERE sessions_fts MATCH $query
+      ORDER BY rank
+      LIMIT $limit
+    `;
+    const stmt = this.db.prepare(sql);
+    const rows = stmt.all({ $query: sanitized, $limit: limit }) as SessionRow[];
     return rows.map((row) => this.rowToSession(row));
   }
 }

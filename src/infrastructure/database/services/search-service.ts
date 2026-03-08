@@ -9,6 +9,7 @@ import type { Database, Statement } from "bun:sqlite";
 import type { ISearchService, SearchOptions } from "../../../domain/ports/services.js";
 import type { SearchQuery } from "../../../domain/value-objects/search-query.js";
 import { SearchResult } from "../../../domain/value-objects/search-result.js";
+import { sanitizeFtsQuery } from "../../../application/services/fts-sanitizer.js";
 
 /**
  * Raw search result row from database
@@ -80,7 +81,10 @@ export class Fts5SearchService implements ISearchService {
    */
   async search(query: SearchQuery, options?: SearchOptions): Promise<SearchResult[]> {
     const limit = options?.limit ?? 20;
-    const queryValue = query.value;
+    const queryValue = sanitizeFtsQuery(query.value);
+
+    // If sanitized query is empty, return empty results
+    if (!queryValue) return [];
 
     // Build dynamic query based on filters
     const { sql, params } = this.buildSearchQuery(queryValue, limit, options);
