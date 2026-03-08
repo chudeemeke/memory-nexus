@@ -38,3 +38,6 @@ export {
 
 // Memory File Repository
 export { SqliteMemoryFileRepository } from "./memory-file-repository.js";
+
+// Friction Repository
+export { SqliteFrictionRepository } from "./friction-repository.js";

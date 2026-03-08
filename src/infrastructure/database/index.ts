@@ -20,6 +20,7 @@ export {
     EMBEDDING_STATE_TABLE,
     EMBEDDING_STATE_ADD_MODEL_NAME,
     MESSAGE_EMBEDDINGS_TABLE,
+    FRICTION_LOG_TABLE,
     type SchemaOptions,
 } from "./schema.js";
 
@@ -49,6 +50,7 @@ export {
     EmbeddingRepository,
     type UnembeddedMessage,
     type EmbeddingBatchItem,
+    SqliteFrictionRepository,
 } from "./repositories/index.js";
 
 // Services

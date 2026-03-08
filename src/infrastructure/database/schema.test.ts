@@ -28,6 +28,7 @@ import {
     MEMORY_FILES_TABLE,
     MEMORY_FILES_FTS_TABLE,
     MEMORY_FILES_FTS_TRIGGERS,
+    FRICTION_LOG_TABLE,
     type SchemaOptions,
 } from "./schema.js";
 import * as sqliteVec from "sqlite-vec";
@@ -63,7 +64,7 @@ describe("Database Schema", () => {
 
         it("should have SCHEMA_SQL as an array with correct order", () => {
             expect(Array.isArray(SCHEMA_SQL)).toBe(true);
-            expect(SCHEMA_SQL.length).toBe(17);
+            expect(SCHEMA_SQL.length).toBe(18);
             expect(SCHEMA_SQL[0]).toBe(SESSIONS_TABLE);
             expect(SCHEMA_SQL[1]).toBe(MESSAGES_META_TABLE);
             expect(SCHEMA_SQL[2]).toBe(MESSAGES_FTS_TABLE);
@@ -1817,6 +1818,103 @@ describe("Database Schema", () => {
                     `)
                     .all();
                 expect(results.length).toBe(0);
+            });
+        });
+    });
+
+    describe("Friction Log Schema", () => {
+        describe("constants", () => {
+            it("should export FRICTION_LOG_TABLE constant", () => {
+                expect(FRICTION_LOG_TABLE).toBeDefined();
+                expect(FRICTION_LOG_TABLE).toContain("friction_log");
+            });
+
+            it("should include FRICTION_LOG_TABLE in SCHEMA_SQL array", () => {
+                expect(SCHEMA_SQL).toContain(FRICTION_LOG_TABLE);
+            });
+        });
+
+        describe("friction_log table", () => {
+            it("should create friction_log table with correct columns", () => {
+                createSchema(db);
+
+                const columns = db
+                    .prepare("PRAGMA table_info(friction_log)")
+                    .all() as Array<{ name: string; type: string; notnull: number }>;
+
+                const columnNames = columns.map((c) => c.name);
+                expect(columnNames).toContain("id");
+                expect(columnNames).toContain("description");
+                expect(columnNames).toContain("severity");
+                expect(columnNames).toContain("category");
+                expect(columnNames).toContain("status");
+                expect(columnNames).toContain("context");
+                expect(columnNames).toContain("source_project");
+                expect(columnNames).toContain("logged_at");
+                expect(columnNames).toContain("resolved_at");
+                expect(columnNames).toContain("resolution");
+            });
+
+            it("CHECK constraints enforce valid severity values", () => {
+                createSchema(db);
+
+                // Valid severity should work
+                expect(() =>
+                    db.exec(`INSERT INTO friction_log (description, severity, logged_at)
+                             VALUES ('test', 'high', '2026-03-08T00:00:00Z')`)
+                ).not.toThrow();
+
+                // Invalid severity should fail
+                expect(() =>
+                    db.exec(`INSERT INTO friction_log (description, severity, logged_at)
+                             VALUES ('test', 'extreme', '2026-03-08T00:00:00Z')`)
+                ).toThrow();
+            });
+
+            it("CHECK constraints enforce valid category values", () => {
+                createSchema(db);
+
+                // Valid category should work
+                expect(() =>
+                    db.exec(`INSERT INTO friction_log (description, category, logged_at)
+                             VALUES ('test', 'search', '2026-03-08T00:00:00Z')`)
+                ).not.toThrow();
+
+                // Invalid category should fail
+                expect(() =>
+                    db.exec(`INSERT INTO friction_log (description, category, logged_at)
+                             VALUES ('test', 'database', '2026-03-08T00:00:00Z')`)
+                ).toThrow();
+            });
+
+            it("CHECK constraints enforce valid status values", () => {
+                createSchema(db);
+
+                // Valid status should work
+                expect(() =>
+                    db.exec(`INSERT INTO friction_log (description, status, logged_at)
+                             VALUES ('test', 'wont-fix', '2026-03-08T00:00:00Z')`)
+                ).not.toThrow();
+
+                // Invalid status should fail
+                expect(() =>
+                    db.exec(`INSERT INTO friction_log (description, status, logged_at)
+                             VALUES ('test', 'closed', '2026-03-08T00:00:00Z')`)
+                ).toThrow();
+            });
+
+            it("indexes created on status, severity, category", () => {
+                createSchema(db);
+
+                const indexes = db
+                    .query<{ name: string }, []>(
+                        "SELECT name FROM sqlite_master WHERE type='index' AND tbl_name='friction_log'"
+                    )
+                    .all();
+                const indexNames = indexes.map((i) => i.name);
+                expect(indexNames).toContain("idx_friction_status");
+                expect(indexNames).toContain("idx_friction_severity");
+                expect(indexNames).toContain("idx_friction_category");
             });
         });
     });

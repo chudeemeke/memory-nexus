@@ -285,6 +285,27 @@ END;
 `;
 
 /**
+ * Friction log table - stores friction entries for tool self-improvement
+ */
+export const FRICTION_LOG_TABLE = `
+CREATE TABLE IF NOT EXISTS friction_log (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    description TEXT NOT NULL,
+    severity TEXT NOT NULL DEFAULT 'medium' CHECK (severity IN ('low', 'medium', 'high', 'critical')),
+    category TEXT NOT NULL DEFAULT 'cli' CHECK (category IN ('search', 'sync', 'cli', 'context', 'integration', 'ux')),
+    status TEXT NOT NULL DEFAULT 'open' CHECK (status IN ('open', 'resolved', 'wont-fix')),
+    context TEXT,
+    source_project TEXT,
+    logged_at TEXT NOT NULL,
+    resolved_at TEXT,
+    resolution TEXT
+);
+CREATE INDEX IF NOT EXISTS idx_friction_status ON friction_log(status);
+CREATE INDEX IF NOT EXISTS idx_friction_severity ON friction_log(severity);
+CREATE INDEX IF NOT EXISTS idx_friction_category ON friction_log(category);
+`;
+
+/**
  * Schema options for conditional table creation
  */
 export interface SchemaOptions {
@@ -348,6 +369,7 @@ END;
  * 15. memory_files (no dependencies)
  * 16. memory_files_fts (depends on memory_files)
  * 17. memory_files FTS triggers (depend on both memory_files tables)
+ * 18. friction_log (no dependencies)
  *
  * Note: message_embeddings (vec0) is NOT in this array.
  * It is conditionally created in createSchema() when sqliteVecAvailable is true.
@@ -370,6 +392,7 @@ export const SCHEMA_SQL: readonly string[] = [
     MEMORY_FILES_TABLE,
     MEMORY_FILES_FTS_TABLE,
     MEMORY_FILES_FTS_TRIGGERS,
+    FRICTION_LOG_TABLE,
 ];
 
 /**
