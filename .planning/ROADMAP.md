@@ -290,15 +290,21 @@ Phase 13 (Package Rename)
 |-------|-----------|-------|--------|-----------|
 | 1-12 | v1.0 | 56 | Complete | 2026-02-06 |
 | 13 | v2.0 | 3/3 | Complete | 2026-02-25 |
-| 14 | v2.0 | Complete    | 2026-02-26 | 2026-02-26 |
-| 15 | v2.0 | Complete    | 2026-02-27 | 2026-02-26 |
-| 16 | 3/3 | Complete    | 2026-02-27 | -- |
-| 16.1 | v2.0 | Complete    | 2026-02-27 | 2026-02-27 |
-| 17 | 3/3 | Complete   | 2026-02-28 | 2026-02-28 |
-| 18 | v2.0 | Complete    | 2026-03-01 | 2026-03-01 |
-| 19 | v2.0 | Complete    | 2026-03-01 | 2026-03-01 |
+| 14 | v2.0 | 4/4 | Complete | 2026-02-26 |
+| 15 | v2.0 | 4/4 | Complete | 2026-02-26 |
+| 16 | v2.0 | 3/3 | Complete | 2026-02-27 |
+| 16.1 | v2.0 | 1/1 | Complete | 2026-02-27 |
+| 17 | v2.0 | 3/3 | Complete | 2026-02-28 |
+| 18 | v2.0 | 2/2 | Complete | 2026-03-01 |
+| 19 | v2.0 | 1/1 | Complete | 2026-03-01 |
 | 20 | v2.0 | 1/1 | Complete | 2026-03-01 |
-| 21 | v2.0 | Complete    | 2026-03-01 | 2026-03-01 |
+| 21 | v2.0 | 1/1 | Complete | 2026-03-01 |
+| 22 | v2.0 | ad-hoc | Complete | 2026-03-07 |
+| 23 | v3.0 | 4/4 | Complete | 2026-03-08 |
+| 24 | v3.0 | 0/3 | Planned | -- |
+| 25 | v3.0 | -- | Discussed | -- |
+| 26 | v3.0 | -- | Discussed | -- |
+| 27 | v3.0 | -- | Discussed | -- |
 
 ---
 
@@ -350,6 +356,14 @@ Success Criteria:
 
 **Depends on:** Phase 23 (schema infrastructure)
 **Discussion context:** .planning/phases/24-friction-system/CONTEXT.md
+**Plans:** 3 plans
+
+Plans:
+- [ ] 24-01-PLAN.md -- FrictionEntry domain entity, IFrictionRepository port, schema, SqliteFrictionRepository
+- [ ] 24-02-PLAN.md -- FrictionService application service, CLI friction commands, programmatic API
+- [ ] 24-03-PLAN.md -- Dashboard formatters (CLI + HTML with Chart.js), rules file update
+
+Requirements: FRIC-01, FRIC-02, FRIC-03, FRIC-04, FRIC-05, FRIC-06
 
 Success Criteria:
 1. `memory friction log "description" --severity high --category search` creates a friction entry
@@ -437,28 +451,4 @@ These are enforced in every phase, not assigned to a single phase:
 
 ---
 
-## Progress
-
-| Phase | Milestone | Plans | Status | Completed |
-|-------|-----------|-------|--------|-----------|
-| 1-12 | v1.0 | 56 | Complete | 2026-02-06 |
-| 13 | v2.0 | 3/3 | Complete | 2026-02-25 |
-| 14 | v2.0 | 4/4 | Complete | 2026-02-26 |
-| 15 | v2.0 | 4/4 | Complete | 2026-02-26 |
-| 16 | v2.0 | 3/3 | Complete | 2026-02-27 |
-| 16.1 | v2.0 | 1/1 | Complete | 2026-02-27 |
-| 17 | v2.0 | 3/3 | Complete | 2026-02-28 |
-| 18 | v2.0 | 2/2 | Complete | 2026-03-01 |
-| 19 | v2.0 | 1/1 | Complete | 2026-03-01 |
-| 20 | v2.0 | 1/1 | Complete | 2026-03-01 |
-| 21 | v2.0 | 1/1 | Complete | 2026-03-01 |
-| 22 | v2.0 | ad-hoc | Complete | 2026-03-07 |
-| 23 | v3.0 | Complete    | 2026-03-08 | 2026-03-08 |
-| 24 | v3.0 | -- | Discussed | -- |
-| 25 | v3.0 | -- | Discussed | -- |
-| 26 | v3.0 | -- | Discussed | -- |
-| 27 | v3.0 | -- | Discussed | -- |
-
----
-
-*Last updated: 2026-03-08 (Phase 23 plan 03 complete)*
+*Last updated: 2026-03-08 (Phase 24 planned, 3 plans)*

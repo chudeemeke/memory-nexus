@@ -1,7 +1,7 @@
 ---
 agent: gsd-planner
-updated: 2026-03-01
-entries: 32
+updated: 2026-03-08
+entries: 35
 ---
 
 - finding: "Large rename phases (375 occurrences across 59 files) need 3 sequential plans, not 2. Split by: (1) infrastructure foundation/paths, (2) identity rename, (3) external docs/stub."
@@ -195,3 +195,21 @@ entries: 32
   confidence: HIGH
   phase: "21-architecture-boundary-cleanup"
   date: "2026-03-01"
+
+- finding: "Foundation phases with 4+ capabilities (entity, port, schema, scanner, sanitizer, sync integration, docs) decompose into 4 plans across 3 waves: Wave 1 parallelizes pure domain work (entity+port) with pure application work (sanitizer). Wave 2 builds infrastructure that depends on Wave 1 types (schema, repository, scanner, paths). Wave 3 integrates everything (sync service, CLI wiring, docs). This maximizes parallelism while respecting compile-time type dependencies."
+  source: "Phase 23, planning (foundation phase decomposition)"
+  confidence: HIGH
+  phase: "23-foundation"
+  date: "2026-03-08"
+
+- finding: "When adding a new sync concern (memory files) to an existing sync command, create a separate application service (MemoryFileSyncService) rather than inflating the existing SyncService constructor. The CLI command orchestrates both services sequentially. This keeps each service focused and avoids 10+ constructor parameters."
+  source: "Phase 23, planning (SyncService composition strategy)"
+  confidence: HIGH
+  phase: "23-foundation"
+  date: "2026-03-08"
+
+- finding: "When a schema defines a CHECK constraint for file types (4 known types), the scanner must handle unrecognized .md files gracefully. If adding a fifth type requires changing the CHECK constraint and was not discussed in CONTEXT.md, skip unrecognized files rather than risk schema/constraint violations. Document the decision in the plan so the executor and checker both know it was intentional."
+  source: "Phase 23, planning (unrecognized file type handling)"
+  confidence: HIGH
+  phase: "23-foundation"
+  date: "2026-03-08"
