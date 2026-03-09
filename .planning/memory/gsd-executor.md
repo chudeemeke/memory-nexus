@@ -1,7 +1,7 @@
 ---
 agent: gsd-executor
-updated: 2026-03-08
-entries: 59
+updated: 2026-03-09
+entries: 62
 ---
 
 - finding: "Bun test spyOn mock leakage: when mocking nodeFs.renameSync, must restore before assertions, not in afterEach. Mock affects subsequent tests in same file if not restored promptly."
@@ -357,3 +357,21 @@ entries: 59
   confidence: HIGH
   phase: "24-friction-system"
   date: "2026-03-08"
+
+- finding: "When moving temporal decay from a per-mode method to the unified search() pipeline exit, SearchResult.timestamp is directly accessible -- no need for the rowid-to-timestamp Map pattern used in the hybrid-only path. The refactor is a structural move, not a logic change, so all existing tests pass without modification."
+  source: "Phase 25, Plan 01, Task 4"
+  confidence: HIGH
+  phase: "25-intelligence"
+  date: "2026-03-09"
+
+- finding: "Application-layer services must not import from presentation layer (formatters, CLI). When a utility function like estimateTokens is needed in both layers, inline it in the application layer (3 lines) rather than creating a cross-layer dependency. The hexagonal boundary violation is caught by grep for 'from.*presentation' in application files."
+  source: "Phase 25, Plan 02, Task 2"
+  confidence: HIGH
+  phase: "25-intelligence"
+  date: "2026-03-09"
+
+- finding: "SmartContextService uses IProjectResolver port (defined in the service file) rather than directly depending on SqliteContextService. The getSessionSummary dep is an optional function, not a full service injection. Both patterns keep the application layer clean of infrastructure types."
+  source: "Phase 25, Plan 02, Task 2"
+  confidence: HIGH
+  phase: "25-intelligence"
+  date: "2026-03-09"

@@ -15,13 +15,13 @@ See: .planning/PROJECT.md (updated 2026-02-18)
 **Milestone:** v3.0 Knowledge Layer + Friction Logging
 **Phase:** 25 (Intelligence) -- IN PROGRESS
 **Status:** Executing
-**Current Plan:** 25-01 complete (1/3 plans)
+**Current Plan:** 25-02 complete (2/3 plans)
 
 ```
 v3.0 Progress: [###############         ] 3/5 phases (complete)
   Phase 23: Foundation                [x] Complete (4/4 plans)
   Phase 24: Friction System           [x] Complete (3/3 plans)
-  Phase 25: Intelligence              [~] In Progress (1/3 plans)
+  Phase 25: Intelligence              [~] In Progress (2/3 plans)
   Phase 26: Hooks + Backfill          [x] Complete (3/3 plans)
   Phase 27: qmd Integration           [ ] Discussed (CONTEXT.md ready)
 ```
@@ -68,8 +68,8 @@ v3.0 Progress: [###############         ] 3/5 phases (complete)
 ### Last Session
 
 **Date:** 2026-03-09
-**Completed:** Plan 25-01 (AI formatter, temporal decay extension, cross-project query, uniform search decay)
-**Stopped at:** Plan 25-01 complete
+**Completed:** Plan 25-02 (SmartContextService, budget allocator)
+**Stopped at:** Plan 25-02 complete
 
 ### Decisions
 
@@ -89,15 +89,21 @@ v3.0 Progress: [###############         ] 3/5 phases (complete)
 - CLAUDECODE env var stripping via delete before spawn
 - Chart.js UMD read from node_modules at generation time (no CDN)
 - Dashboard HTML at ~/.memory/dashboard.html via getMemoryDir()
+- Inlined estimateTokens in application layer to avoid presentation-layer import (hexagonal boundary)
+- IProjectResolver as separate port rather than direct infrastructure dependency
+- getSessionSummary as optional function dep rather than injecting full SqliteContextService
+- Daily log date filtering from file path parsing (daily/YYYY-MM-DD.md pattern)
+- Empty sections omitted entirely from SmartContextResult rather than included with empty content
 
 ### Context for Next Session
 
-1. Plan 25-01 complete: AI formatter, temporal decay exemptions, cross-project query, uniform decay
-2. Plans 25-02 (SmartContextService) and 25-03 (CLI integration) not started
-3. Phase 27 (qmd Integration) not started
-4. Pre-existing issues: error-codes.test.ts count assertion stale (expects 19, has 21)
-5. 2930+ tests passing (91 tests across plan 25-01 files), 1 pre-existing failure
+1. Plan 25-02 complete: SmartContextService and allocateBudget() in application layer
+2. Plan 25-03 (CLI integration: --format ai, --budget, --cross-project) not started
+3. IProjectResolver port needs concrete adapter wired in presentation layer (Plan 25-03)
+4. Phase 27 (qmd Integration) not started
+5. Pre-existing issues: error-codes.test.ts count assertion stale (expects 19, has 21)
+6. 48 new tests (19 budget allocator + 29 smart context), 1 pre-existing failure
 
 ---
 
-*Last updated: 2026-03-09 (plan 25-01 complete)*
+*Last updated: 2026-03-09 (plan 25-02 complete)*
