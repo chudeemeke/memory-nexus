@@ -13,15 +13,15 @@ See: .planning/PROJECT.md (updated 2026-02-18)
 ## Current Position
 
 **Milestone:** v3.0 Knowledge Layer + Friction Logging
-**Phase:** 26 (Hooks + Backfill) -- COMPLETE
+**Phase:** 25 (Intelligence) -- IN PROGRESS
 **Status:** Executing
-**Current Plan:** 26-03 complete (3/3 plans)
+**Current Plan:** 25-01 complete (1/3 plans)
 
 ```
 v3.0 Progress: [###############         ] 3/5 phases (complete)
   Phase 23: Foundation                [x] Complete (4/4 plans)
   Phase 24: Friction System           [x] Complete (3/3 plans)
-  Phase 25: Intelligence              [ ] Discussed (CONTEXT.md ready)
+  Phase 25: Intelligence              [~] In Progress (1/3 plans)
   Phase 26: Hooks + Backfill          [x] Complete (3/3 plans)
   Phase 27: qmd Integration           [ ] Discussed (CONTEXT.md ready)
 ```
@@ -67,12 +67,15 @@ v3.0 Progress: [###############         ] 3/5 phases (complete)
 
 ### Last Session
 
-**Date:** 2026-03-08
-**Completed:** Plans 24-03, 26-01, 26-02, 26-03
-**Stopped at:** Phase 24 complete, Phase 26 complete
+**Date:** 2026-03-09
+**Completed:** Plan 25-01 (AI formatter, temporal decay extension, cross-project query, uniform search decay)
+**Stopped at:** Plan 25-01 complete
 
 ### Decisions
 
+- SQL LIKE over FTS5 MATCH for cross-project tag: FTS5 tokenizes hyphens, causing false matches on small result sets
+- Decay at search() pipeline exit, not per-mode: SRP -- each mode handles retrieval, decay is cross-cutting scoring
+- applyDecayToResults inline in HybridSearchService using SearchResult.timestamp directly (no rowid-to-timestamp map)
 - FrictionEntry create() is permissive on resolution field (service enforces business rules)
 - getWeeklyTrends uses strftime('%Y-W%W') for ISO week grouping
 - friction_log CHECK constraints enforce valid values at database level
@@ -84,19 +87,17 @@ v3.0 Progress: [###############         ] 3/5 phases (complete)
 - Lazy infrastructure imports in backfill CLI action handler to avoid startup cost
 - FileDailyLogWriter in presentation layer (composition root pattern)
 - CLAUDECODE env var stripping via delete before spawn
-
 - Chart.js UMD read from node_modules at generation time (no CDN)
 - Dashboard HTML at ~/.memory/dashboard.html via getMemoryDir()
 
 ### Context for Next Session
 
-1. Phase 24 (Friction System) complete: 3/3 plans done
-2. Phase 26 (Hooks + Backfill) complete: 3/3 plans done
-3. 24-03 complete: friction dashboard (CLI + HTML with Chart.js)
-4. Phase 25 (Intelligence) and Phase 27 (qmd Integration) not started
-5. Pre-existing issues: error-codes.test.ts count assertion stale (expects 19, has 21)
-6. 2930 tests passing, 1 pre-existing failure
+1. Plan 25-01 complete: AI formatter, temporal decay exemptions, cross-project query, uniform decay
+2. Plans 25-02 (SmartContextService) and 25-03 (CLI integration) not started
+3. Phase 27 (qmd Integration) not started
+4. Pre-existing issues: error-codes.test.ts count assertion stale (expects 19, has 21)
+5. 2930+ tests passing (91 tests across plan 25-01 files), 1 pre-existing failure
 
 ---
 
-*Last updated: 2026-03-08 (plan 24-03 complete, Phase 24 done)*
+*Last updated: 2026-03-09 (plan 25-01 complete)*

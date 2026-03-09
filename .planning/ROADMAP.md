@@ -302,7 +302,7 @@ Phase 13 (Package Rename)
 | 22 | v2.0 | ad-hoc | Complete | 2026-03-07 |
 | 23 | v3.0 | 4/4 | Complete | 2026-03-08 |
 | 24 | v3.0 | 3/3 | Complete | 2026-03-08 |
-| 25 | v3.0 | -- | Discussed | -- |
+| 25 | v3.0 | 1/3 | In Progress | -- |
 | 26 | v3.0 | 3/3 | Complete | 2026-03-08 |
 | 27 | v3.0 | -- | Discussed | -- |
 | 28 | v3.0 | -- | Discussed | -- |
@@ -382,6 +382,12 @@ Success Criteria:
 
 **Depends on:** Phase 23 (memory file indexing), Phase 24 (friction in context)
 **Discussion context:** .planning/phases/25-intelligence/CONTEXT.md
+**Plans:** 1/3 plans complete
+
+Plans:
+- [x] 25-01-PLAN.md -- AI formatter, temporal decay extension, cross-project query, uniform search decay
+- [ ] 25-02-PLAN.md -- SmartContextService
+- [ ] 25-03-PLAN.md -- CLI integration (--format ai, --budget, --cross-project)
 
 Success Criteria:
 1. `memory context kanbanflow --format ai --budget 1500` returns structured briefing within token budget
@@ -477,4 +483,4 @@ Success Criteria:
 
 ---
 
-*Last updated: 2026-03-09 (Phase 28 added: Friction Universalization)*
+*Last updated: 2026-03-09 (Plan 25-01 complete: AI formatter, temporal decay, cross-project query)*
