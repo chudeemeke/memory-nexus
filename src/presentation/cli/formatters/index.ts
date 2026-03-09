@@ -79,3 +79,9 @@ export {
   formatFrictionDashboard,
   generateFrictionHtml,
 } from "./friction-dashboard.js";
+
+export {
+  stripAnsi,
+  estimateTokens,
+  formatForAi,
+} from "./ai-formatter.js";
