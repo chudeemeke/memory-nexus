@@ -102,3 +102,12 @@ export type {
   AllocatedSection,
   BudgetAllocationResult,
 } from "./budget-allocator.js";
+
+export { SmartContextService } from "./smart-context-service.js";
+export type {
+  SmartContextOptions,
+  SmartContextResult,
+  ContextSection,
+  IProjectResolver,
+  SmartContextDeps,
+} from "./smart-context-service.js";
