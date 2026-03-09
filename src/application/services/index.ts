@@ -62,7 +62,11 @@ export type {
   FusedResult,
 } from "./rrf-fusion.js";
 
-export { applyTemporalDecay } from "./temporal-decay.js";
+export {
+  applyTemporalDecay,
+  applyTemporalDecayWithExemptions,
+  CURATED_FILE_TYPES,
+} from "./temporal-decay.js";
 export type {
   DecayableResult,
   DecayedResult,

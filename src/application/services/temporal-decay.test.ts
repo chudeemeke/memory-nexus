@@ -8,6 +8,8 @@
 import { describe, expect, test } from "bun:test";
 import {
     applyTemporalDecay,
+    applyTemporalDecayWithExemptions,
+    CURATED_FILE_TYPES,
     type DecayableResult,
 } from "./temporal-decay.js";
 
@@ -132,5 +134,129 @@ describe("applyTemporalDecay()", () => {
         for (let i = 0; i < decayed.length - 1; i++) {
             expect(decayed[i].decayedScore).toBeGreaterThanOrEqual(decayed[i + 1].decayedScore);
         }
+    });
+});
+
+describe("applyTemporalDecayWithExemptions()", () => {
+    const now = new Date("2026-02-27T12:00:00Z");
+
+    function daysAgo(days: number): Date {
+        return new Date(now.getTime() - days * 24 * 60 * 60 * 1000);
+    }
+
+    test("exempt rowids retain original score (no decay applied)", () => {
+        const results: DecayableResult[] = [
+            { rowid: 1, score: 0.9 },
+            { rowid: 2, score: 0.8 },
+        ];
+        const timestamps = new Map<number, Date>([
+            [1, daysAgo(60)],
+            [2, daysAgo(60)],
+        ]);
+        const exemptRowids = new Set([1, 2]);
+
+        const decayed = applyTemporalDecayWithExemptions(
+            results, timestamps, exemptRowids, 30, now
+        );
+
+        expect(decayed[0].decayedScore).toBe(0.9);
+        expect(decayed[1].decayedScore).toBe(0.8);
+    });
+
+    test("non-exempt rowids are decayed normally", () => {
+        const results: DecayableResult[] = [
+            { rowid: 1, score: 1.0 },
+        ];
+        const timestamps = new Map<number, Date>([
+            [1, daysAgo(30)],
+        ]);
+        const exemptRowids = new Set<number>();
+
+        const decayed = applyTemporalDecayWithExemptions(
+            results, timestamps, exemptRowids, 30, now
+        );
+
+        expect(decayed[0].decayedScore).toBeCloseTo(0.5, 5);
+    });
+
+    test("results with no timestamp retain original score", () => {
+        const results: DecayableResult[] = [
+            { rowid: 1, score: 0.7 },
+        ];
+        const timestamps = new Map<number, Date>();
+        const exemptRowids = new Set<number>();
+
+        const decayed = applyTemporalDecayWithExemptions(
+            results, timestamps, exemptRowids, 30, now
+        );
+
+        expect(decayed[0].decayedScore).toBe(0.7);
+    });
+
+    test("mixed exempt and non-exempt results re-sorted by final score", () => {
+        const results: DecayableResult[] = [
+            { rowid: 1, score: 0.6 },   // exempt, keeps 0.6
+            { rowid: 2, score: 1.0 },   // non-exempt, 90 days old -> 0.125
+            { rowid: 3, score: 0.5 },   // non-exempt, today -> 0.5
+        ];
+        const timestamps = new Map<number, Date>([
+            [1, daysAgo(90)],
+            [2, daysAgo(90)],
+            [3, daysAgo(0)],
+        ]);
+        const exemptRowids = new Set([1]);
+
+        const decayed = applyTemporalDecayWithExemptions(
+            results, timestamps, exemptRowids, 30, now
+        );
+
+        // Expected order: rowid 1 (0.6), rowid 3 (0.5), rowid 2 (0.125)
+        expect(decayed[0].rowid).toBe(1);
+        expect(decayed[0].decayedScore).toBe(0.6);
+        expect(decayed[1].rowid).toBe(3);
+        expect(decayed[1].decayedScore).toBeCloseTo(0.5, 5);
+        expect(decayed[2].rowid).toBe(2);
+        expect(decayed[2].decayedScore).toBeCloseTo(0.125, 3);
+    });
+
+    test("empty exemptRowids set behaves identically to applyTemporalDecay", () => {
+        const results: DecayableResult[] = [
+            { rowid: 1, score: 0.9 },
+            { rowid: 2, score: 0.7 },
+        ];
+        const timestamps = new Map<number, Date>([
+            [1, daysAgo(30)],
+            [2, daysAgo(15)],
+        ]);
+
+        const withExemptions = applyTemporalDecayWithExemptions(
+            results, timestamps, new Set(), 30, now
+        );
+        const without = applyTemporalDecay(results, timestamps, 30, now);
+
+        expect(withExemptions.length).toBe(without.length);
+        for (let i = 0; i < withExemptions.length; i++) {
+            expect(withExemptions[i].rowid).toBe(without[i].rowid);
+            expect(withExemptions[i].decayedScore).toBeCloseTo(without[i].decayedScore, 10);
+        }
+    });
+
+    test("empty results array returns empty array", () => {
+        const decayed = applyTemporalDecayWithExemptions(
+            [], new Map(), new Set(), 30, now
+        );
+        expect(decayed).toEqual([]);
+    });
+});
+
+describe("CURATED_FILE_TYPES", () => {
+    test("contains exactly decisions, learnings, user_prefs", () => {
+        expect(CURATED_FILE_TYPES).toEqual(["decisions", "learnings", "user_prefs"]);
+    });
+
+    test("is a readonly array", () => {
+        // Type-level check: readonly arrays have readonly modifier
+        const arr: readonly string[] = CURATED_FILE_TYPES;
+        expect(arr.length).toBe(3);
     });
 });
