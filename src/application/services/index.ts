@@ -95,3 +95,10 @@ export type {
   BackfillOptions,
   IDailyLogWriter,
 } from "./backfill-service.js";
+
+export { allocateBudget } from "./budget-allocator.js";
+export type {
+  BudgetSection,
+  AllocatedSection,
+  BudgetAllocationResult,
+} from "./budget-allocator.js";
