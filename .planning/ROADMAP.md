@@ -4,7 +4,7 @@
 
 - SHIPPED **v1.0 Full Vision Implementation** -- Phases 1-12 (shipped 2026-02-16) -- [Archive](milestones/v1.0-ROADMAP.md)
 - SHIPPED **v2.0 Hybrid Search and Rebrand** -- Phases 13-21 (shipped 2026-03-01)
-- ACTIVE **v3.0 Knowledge Layer + Friction Logging** -- Phases 23-27
+- ACTIVE **v3.0 Knowledge Layer + Friction Logging** -- Phases 23-28
 
 ## Phases
 
@@ -305,6 +305,7 @@ Phase 13 (Package Rename)
 | 25 | v3.0 | -- | Discussed | -- |
 | 26 | v3.0 | 3/3 | Complete | 2026-03-08 |
 | 27 | v3.0 | -- | Discussed | -- |
+| 28 | v3.0 | -- | Discussed | -- |
 
 ---
 
@@ -435,6 +436,8 @@ Phase 23 (Foundation)
     +---> Phase 24 (Friction System)
     |         |
     |         +---> Phase 25 (Intelligence)
+    |         |
+    |         +---> Phase 28 (Friction Universalization)
     |
     +---> Phase 26 (Hooks + Backfill)
     |     [parallel with Phase 24]
@@ -455,6 +458,23 @@ These are enforced in every phase, not assigned to a single phase:
 - All new infrastructure adapters follow existing port/adapter patterns
 - TDD workflow (RED-GREEN-REFACTOR) for all new features
 
+### Phase 28: Friction Universalization
+
+**Goal:** Upgrade the Phase 24 friction system from memory-specific to universal tool tracking. Add a `tool` column as the primary dimension, generalize categories beyond memory-specific values, add source/tool filtering to queries, implement seen/unseen tracking with `last_reviewed_at`, auto-ingest the `~/.claude/friction.jsonl` fallback, de-brand the dashboard with a "By Tool" chart, and add recurrence/pattern detection for auto-escalation.
+
+**Depends on:** Phase 24 (friction system exists)
+**Discussion context:** .planning/phases/28-friction-universalization/CONTEXT.md
+
+Success Criteria:
+1. `memory friction log "desc" --tool aidev --severity high` stores friction with tool as a first-class field
+2. `memory friction list --tool aidev` returns only aidev friction; `--tool memory` returns only memory friction
+3. Categories are not limited to the 6 memory-specific values -- any string accepted, validated in app layer
+4. `memory friction dashboard` shows "By Tool" chart alongside existing severity/category/status charts
+5. Dashboard title is "Friction Dashboard" (not "Memory Friction Dashboard")
+6. On any `memory friction *` invocation, `~/.claude/friction.jsonl` is auto-ingested if present, then deleted
+7. `memory friction list` shows a "new" indicator on entries not yet reviewed (based on `last_reviewed_at` per tool)
+8. When 3+ open entries share the same tool+category, dashboard surfaces a "pattern detected" alert
+
 ---
 
-*Last updated: 2026-03-08 (Phase 24 planned, 3 plans)*
+*Last updated: 2026-03-09 (Phase 28 added: Friction Universalization)*
