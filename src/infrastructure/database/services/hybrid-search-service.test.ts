@@ -997,4 +997,185 @@ describe("HybridSearchService", () => {
       }
     });
   });
+
+  describe("uniform temporal decay", () => {
+    it("FTS-only mode applies temporal decay when enabled", async () => {
+      const oldDate = new Date("2020-01-01T00:00:00Z");
+      const newDate = new Date();
+
+      insertTestMessage(
+        db, "msg-old", "session-1", "user", "authentication old content", oldDate
+      );
+      insertTestMessage(
+        db, "msg-new", "session-1", "user", "authentication new content", newDate
+      );
+
+      const config: MemoryConfig = {
+        ...DEFAULT_CONFIG,
+        search: {
+          ...DEFAULT_SEARCH_CONFIG,
+          temporalDecay: { enabled: true, halfLifeDays: 30 },
+        },
+      };
+
+      const deps = createDeps(db, {
+        sqliteVecAvailable: false,
+        config,
+      });
+      const service = new HybridSearchService(deps);
+      const query = SearchQuery.from("authentication");
+
+      const results = await service.search(query, { mode: "fts" });
+
+      expect(results.length).toBe(2);
+      // Newer message should score higher with decay enabled
+      expect(results[0].messageId).toBe("msg-new");
+    });
+
+    it("FTS-only mode skips decay when noDecay option is true", async () => {
+      const oldDate = new Date("2020-01-01T00:00:00Z");
+      const newDate = new Date();
+
+      insertTestMessage(
+        db, "msg-old", "session-1", "user", "authentication old content", oldDate
+      );
+      insertTestMessage(
+        db, "msg-new", "session-1", "user", "authentication new content", newDate
+      );
+
+      const config: MemoryConfig = {
+        ...DEFAULT_CONFIG,
+        search: {
+          ...DEFAULT_SEARCH_CONFIG,
+          temporalDecay: { enabled: true, halfLifeDays: 30 },
+        },
+      };
+
+      const deps = createDeps(db, {
+        sqliteVecAvailable: false,
+        config,
+      });
+      const service = new HybridSearchService(deps);
+      const query = SearchQuery.from("authentication");
+
+      const results = await service.search(query, { mode: "fts", noDecay: true });
+
+      expect(results.length).toBe(2);
+      // Without decay, BM25 ordering preserved (both have same terms, order may vary)
+      const meta = service.getLastSearchMeta();
+      expect(meta?.mode).toBe("fts");
+    });
+
+    it("FTS-only mode skips decay when config temporalDecay.enabled is false", async () => {
+      const oldDate = new Date("2020-01-01T00:00:00Z");
+      const newDate = new Date();
+
+      insertTestMessage(
+        db, "msg-old", "session-1", "user", "authentication old content", oldDate
+      );
+      insertTestMessage(
+        db, "msg-new", "session-1", "user", "authentication new content", newDate
+      );
+
+      const config: MemoryConfig = {
+        ...DEFAULT_CONFIG,
+        search: {
+          ...DEFAULT_SEARCH_CONFIG,
+          temporalDecay: { enabled: false, halfLifeDays: 30 },
+        },
+      };
+
+      const deps = createDeps(db, {
+        sqliteVecAvailable: false,
+        config,
+      });
+      const service = new HybridSearchService(deps);
+      const query = SearchQuery.from("authentication");
+
+      const results = await service.search(query, { mode: "fts" });
+
+      expect(results.length).toBe(2);
+      // Without decay, BM25 ordering preserved
+      const meta = service.getLastSearchMeta();
+      expect(meta?.mode).toBe("fts");
+    });
+
+    it("vector-only mode applies temporal decay", async () => {
+      if (!sqliteVecAvailable) return;
+
+      const oldDate = new Date("2020-01-01T00:00:00Z");
+      const newDate = new Date();
+
+      const rowid1 = insertTestMessage(
+        db, "msg-old", "session-1", "user", "authentication old content", oldDate
+      );
+      const rowid2 = insertTestMessage(
+        db, "msg-new", "session-1", "user", "authentication new content", newDate
+      );
+      insertTestEmbedding(db, rowid1);
+      insertTestEmbedding(db, rowid2);
+
+      const config: MemoryConfig = {
+        ...DEFAULT_CONFIG,
+        search: {
+          ...DEFAULT_SEARCH_CONFIG,
+          temporalDecay: { enabled: true, halfLifeDays: 30 },
+        },
+      };
+
+      const mockProvider = createMockProvider();
+      const deps = createDeps(db, {
+        sqliteVecAvailable: true,
+        config,
+        providerFactory: createMockFactory(mockProvider),
+      });
+      const service = new HybridSearchService(deps);
+      const query = SearchQuery.from("authentication");
+
+      const results = await service.search(query, { mode: "vector" });
+
+      expect(results.length).toBe(2);
+      // Newer message should score higher with decay enabled
+      expect(results[0].messageId).toBe("msg-new");
+    });
+
+    it("hybrid mode still applies temporal decay (no regression)", async () => {
+      if (!sqliteVecAvailable) return;
+
+      const oldDate = new Date("2020-01-01T00:00:00Z");
+      const newDate = new Date();
+
+      const rowid1 = insertTestMessage(
+        db, "msg-old", "session-1", "user", "authentication old content", oldDate
+      );
+      const rowid2 = insertTestMessage(
+        db, "msg-new", "session-1", "user", "authentication new content", newDate
+      );
+      insertTestEmbedding(db, rowid1);
+      insertTestEmbedding(db, rowid2);
+
+      const config: MemoryConfig = {
+        ...DEFAULT_CONFIG,
+        search: {
+          ...DEFAULT_SEARCH_CONFIG,
+          temporalDecay: { enabled: true, halfLifeDays: 30 },
+        },
+      };
+
+      const mockProvider = createMockProvider();
+      const deps = createDeps(db, {
+        sqliteVecAvailable: true,
+        config,
+        providerFactory: createMockFactory(mockProvider),
+      });
+      const service = new HybridSearchService(deps);
+      const query = SearchQuery.from("authentication");
+
+      const results = await service.search(query, { mode: "hybrid" });
+
+      expect(results.length).toBe(2);
+      // Newer message should score higher with decay
+      expect(results[0].messageId).toBe("msg-new");
+    });
+  });
 });

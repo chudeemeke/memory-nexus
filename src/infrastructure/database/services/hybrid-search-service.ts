@@ -36,7 +36,6 @@ import {
   type RankedCandidate,
   type FusedResult,
 } from "../../../application/services/rrf-fusion.js";
-import { applyTemporalDecay } from "../../../application/services/temporal-decay.js";
 
 /**
  * Dependencies injected via constructor.
@@ -187,6 +186,9 @@ export class HybridSearchService implements ISearchService {
       }
     }
 
+    // Apply temporal decay uniformly across all search modes
+    results = this.applyDecayToResults(results, options);
+
     const isDegraded = resolved.degraded || degradedDuring;
     const finalReason = degradationReason ?? (resolved.degraded ? resolved.reason : undefined);
     const effectiveMode = isDegraded && !resolved.degraded
@@ -257,6 +259,55 @@ export class HybridSearchService implements ISearchService {
       return { effectiveMode: "fts", degraded: false, reason: "no_embeddings" };
     }
     return { effectiveMode: "hybrid", degraded: false, reason: "auto_hybrid" };
+  }
+
+  /**
+   * Apply temporal decay to search results using their embedded timestamps.
+   *
+   * Builds decay by computing age from each result's timestamp,
+   * applying the standard half-life formula, and re-sorting by
+   * decayed score. This is the single point where temporal decay
+   * is applied, regardless of search mode (FTS, vector, hybrid).
+   */
+  private applyDecayToResults(
+    results: SearchResult[],
+    options?: HybridSearchOptions
+  ): SearchResult[] {
+    const decayEnabled =
+      this.config.search?.temporalDecay?.enabled !== false &&
+      !options?.noDecay;
+
+    if (!decayEnabled || results.length === 0) {
+      return results;
+    }
+
+    const halfLifeDays =
+      this.config.search?.temporalDecay?.halfLifeDays ?? 30;
+    const now = new Date();
+    const nowMs = now.getTime();
+    const msPerDay = 1000 * 60 * 60 * 24;
+
+    const decayed = results.map((r) => {
+      const ageDays = (nowMs - r.timestamp.getTime()) / msPerDay;
+      const decayFactor = Math.pow(0.5, ageDays / halfLifeDays);
+      const decayedScore = Math.max(0, Math.min(1, r.score * decayFactor));
+      return { result: r, decayedScore };
+    });
+
+    decayed.sort((a, b) => b.decayedScore - a.decayedScore);
+
+    return decayed.map(({ result, decayedScore }) =>
+      SearchResult.create({
+        sessionId: result.sessionId,
+        messageId: result.messageId,
+        snippet: result.snippet,
+        score: decayedScore,
+        timestamp: result.timestamp,
+        role: result.role,
+        source: result.source,
+        rawScores: result.rawScores,
+      })
+    );
   }
 
   /**
@@ -580,33 +631,11 @@ export class HybridSearchService implements ISearchService {
       }
     }
 
-    // Apply temporal decay if enabled
-    let scoredResults = fused.map((f) => ({
+    // Score from RRF normalizedScore -- decay applied uniformly by search()
+    const scoredResults = fused.map((f) => ({
       ...f,
       score: f.normalizedScore,
     }));
-
-    const decayEnabled =
-      this.config.search?.temporalDecay?.enabled !== false &&
-      !options?.noDecay;
-
-    if (decayEnabled && fused.length > 0) {
-      const timestamps = new Map<number, Date>();
-      for (const f of fused) {
-        const meta = metaMap.get(f.rowid);
-        if (meta) {
-          timestamps.set(f.rowid, new Date(meta.timestamp));
-        }
-      }
-
-      const halfLifeDays =
-        this.config.search?.temporalDecay?.halfLifeDays ?? 30;
-      const decayed = applyTemporalDecay(scoredResults, timestamps, halfLifeDays);
-      scoredResults = decayed.map((d) => ({
-        ...d,
-        score: d.decayedScore,
-      }));
-    }
 
     // Build SearchResult objects
     const results: SearchResult[] = [];
