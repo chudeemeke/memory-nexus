@@ -124,6 +124,36 @@ export class SqliteMemoryFileRepository implements IMemoryFileRepository {
         return rows.map((r) => this.toEntity(r));
     }
 
+    async findCrossProjectLearnings(
+        excludeProject?: string,
+        limit: number = 20
+    ): Promise<MemoryFile[]> {
+        if (excludeProject) {
+            const rows = this.db
+                .prepare<MemoryFileRow, [string, number]>(
+                    `SELECT * FROM memory_files
+                     WHERE file_type = 'learnings'
+                       AND content LIKE '%Applies to: cross-project%'
+                       AND (project_encoded IS NULL OR project_encoded != ?)
+                     ORDER BY last_indexed_at DESC
+                     LIMIT ?`
+                )
+                .all(excludeProject, limit);
+            return rows.map((r) => this.toEntity(r));
+        }
+
+        const rows = this.db
+            .prepare<MemoryFileRow, [number]>(
+                `SELECT * FROM memory_files
+                 WHERE file_type = 'learnings'
+                   AND content LIKE '%Applies to: cross-project%'
+                 ORDER BY last_indexed_at DESC
+                 LIMIT ?`
+            )
+            .all(limit);
+        return rows.map((r) => this.toEntity(r));
+    }
+
     private toEntity(row: MemoryFileRow): MemoryFile {
         return MemoryFile.create({
             id: row.id,

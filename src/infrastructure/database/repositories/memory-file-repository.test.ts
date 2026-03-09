@@ -252,4 +252,168 @@ describe("SqliteMemoryFileRepository", () => {
             expect(results).toEqual([]);
         });
     });
+
+    describe("findCrossProjectLearnings()", () => {
+        it("should return learnings files containing cross-project tag", async () => {
+            await repo.saveMany([
+                makeMemoryFile({
+                    filePath: "projects/C--foo/LEARNINGS.md",
+                    fileType: "learnings",
+                    projectEncoded: "C--foo",
+                    content: "## Pattern X\nApplies to: cross-project\nAlways validate input.",
+                    contentHash: "a".repeat(64),
+                    lastIndexedAt: new Date("2026-03-08T10:00:00Z"),
+                }),
+                makeMemoryFile({
+                    filePath: "projects/C--bar/LEARNINGS.md",
+                    fileType: "learnings",
+                    projectEncoded: "C--bar",
+                    content: "## Local learning\nProject-specific only.",
+                    contentHash: "b".repeat(64),
+                    lastIndexedAt: new Date("2026-03-07T10:00:00Z"),
+                }),
+            ]);
+
+            const results = await repo.findCrossProjectLearnings();
+            expect(results.length).toBe(1);
+            expect(results[0].projectEncoded).toBe("C--foo");
+        });
+
+        it("should exclude learnings from the specified project", async () => {
+            await repo.saveMany([
+                makeMemoryFile({
+                    filePath: "projects/C--foo/LEARNINGS.md",
+                    fileType: "learnings",
+                    projectEncoded: "C--foo",
+                    content: "Applies to: cross-project\nFoo learning.",
+                    contentHash: "a".repeat(64),
+                }),
+                makeMemoryFile({
+                    filePath: "projects/C--bar/LEARNINGS.md",
+                    fileType: "learnings",
+                    projectEncoded: "C--bar",
+                    content: "Applies to: cross-project\nBar learning.",
+                    contentHash: "b".repeat(64),
+                }),
+            ]);
+
+            const results = await repo.findCrossProjectLearnings("C--foo");
+            expect(results.length).toBe(1);
+            expect(results[0].projectEncoded).toBe("C--bar");
+        });
+
+        it("should return all cross-project learnings when no project excluded", async () => {
+            await repo.saveMany([
+                makeMemoryFile({
+                    filePath: "projects/C--foo/LEARNINGS.md",
+                    fileType: "learnings",
+                    projectEncoded: "C--foo",
+                    content: "Applies to: cross-project\nFoo.",
+                    contentHash: "a".repeat(64),
+                }),
+                makeMemoryFile({
+                    filePath: "projects/C--bar/LEARNINGS.md",
+                    fileType: "learnings",
+                    projectEncoded: "C--bar",
+                    content: "Applies to: cross-project\nBar.",
+                    contentHash: "b".repeat(64),
+                }),
+            ]);
+
+            const results = await repo.findCrossProjectLearnings();
+            expect(results.length).toBe(2);
+        });
+
+        it("should NOT return non-learnings files even with cross-project tag", async () => {
+            await repo.saveMany([
+                makeMemoryFile({
+                    filePath: "projects/C--foo/DECISIONS.md",
+                    fileType: "decisions",
+                    projectEncoded: "C--foo",
+                    content: "Applies to: cross-project\nDecision content.",
+                    contentHash: "a".repeat(64),
+                }),
+                makeMemoryFile({
+                    filePath: "projects/C--foo/daily/2026-03-08.md",
+                    fileType: "daily_log",
+                    projectEncoded: "C--foo",
+                    content: "Applies to: cross-project\nDaily log.",
+                    contentHash: "b".repeat(64),
+                }),
+            ]);
+
+            const results = await repo.findCrossProjectLearnings();
+            expect(results.length).toBe(0);
+        });
+
+        it("should return empty array when no learnings contain the tag", async () => {
+            await repo.saveMany([
+                makeMemoryFile({
+                    filePath: "projects/C--foo/LEARNINGS.md",
+                    fileType: "learnings",
+                    projectEncoded: "C--foo",
+                    content: "Local-only learning, no cross-project tag.",
+                    contentHash: "a".repeat(64),
+                }),
+            ]);
+
+            const results = await repo.findCrossProjectLearnings();
+            expect(results.length).toBe(0);
+        });
+
+        it("should respect the limit parameter", async () => {
+            await repo.saveMany([
+                makeMemoryFile({
+                    filePath: "projects/C--a/LEARNINGS.md",
+                    fileType: "learnings",
+                    projectEncoded: "C--a",
+                    content: "Applies to: cross-project\nA.",
+                    contentHash: "a".repeat(64),
+                }),
+                makeMemoryFile({
+                    filePath: "projects/C--b/LEARNINGS.md",
+                    fileType: "learnings",
+                    projectEncoded: "C--b",
+                    content: "Applies to: cross-project\nB.",
+                    contentHash: "b".repeat(64),
+                }),
+                makeMemoryFile({
+                    filePath: "projects/C--c/LEARNINGS.md",
+                    fileType: "learnings",
+                    projectEncoded: "C--c",
+                    content: "Applies to: cross-project\nC.",
+                    contentHash: "c".repeat(64),
+                }),
+            ]);
+
+            const results = await repo.findCrossProjectLearnings(undefined, 2);
+            expect(results.length).toBe(2);
+        });
+
+        it("should order results by last_indexed_at DESC", async () => {
+            await repo.saveMany([
+                makeMemoryFile({
+                    filePath: "projects/C--old/LEARNINGS.md",
+                    fileType: "learnings",
+                    projectEncoded: "C--old",
+                    content: "Applies to: cross-project\nOld.",
+                    contentHash: "a".repeat(64),
+                    lastIndexedAt: new Date("2026-03-01T10:00:00Z"),
+                }),
+                makeMemoryFile({
+                    filePath: "projects/C--new/LEARNINGS.md",
+                    fileType: "learnings",
+                    projectEncoded: "C--new",
+                    content: "Applies to: cross-project\nNew.",
+                    contentHash: "b".repeat(64),
+                    lastIndexedAt: new Date("2026-03-08T10:00:00Z"),
+                }),
+            ]);
+
+            const results = await repo.findCrossProjectLearnings();
+            expect(results.length).toBe(2);
+            expect(results[0].projectEncoded).toBe("C--new");
+            expect(results[1].projectEncoded).toBe("C--old");
+        });
+    });
 });

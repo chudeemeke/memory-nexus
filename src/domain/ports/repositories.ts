@@ -528,6 +528,18 @@ export interface IMemoryFileRepository {
    * @returns Array of matching memory files
    */
   searchContent(query: string, limit?: number): Promise<MemoryFile[]>;
+
+  /**
+   * Find learnings files tagged for cross-project sharing.
+   * Searches for content containing "Applies to: cross-project".
+   * @param excludeProject Optional encoded project path to exclude from results
+   * @param limit Maximum results (default: 20)
+   * @returns Array of matching learnings memory files
+   */
+  findCrossProjectLearnings(
+    excludeProject?: string,
+    limit?: number
+  ): Promise<MemoryFile[]>;
 }
 
 /**
