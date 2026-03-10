@@ -129,10 +129,53 @@ describe("Context Command --format Choices", () => {
     expect(formatOpt?.argChoices).toContain("detailed");
   });
 
+  it("should have ai as choice", () => {
+    const cmd = createContextCommand();
+    const formatOpt = cmd.options.find((o) => o.long === "--format");
+    expect(formatOpt?.argChoices).toContain("ai");
+  });
+
   it("should default to brief", () => {
     const cmd = createContextCommand();
     const formatOpt = cmd.options.find((o) => o.long === "--format");
     expect(formatOpt?.defaultValue).toBe("brief");
+  });
+});
+
+describe("Context Command --budget option", () => {
+  type OptionWithParseArg = { parseArg?: (value: string, previous: unknown) => unknown };
+
+  it("should have --budget option", () => {
+    const cmd = createContextCommand();
+    const option = cmd.options.find((o) => o.long === "--budget");
+    expect(option).toBeDefined();
+    expect(option?.flags).toContain("<tokens>");
+  });
+
+  it("should parse valid budget value", () => {
+    const cmd = createContextCommand();
+    const budgetOpt = cmd.options.find((o) => o.long === "--budget") as OptionWithParseArg | undefined;
+    const parser = budgetOpt?.parseArg;
+    expect(parser).toBeDefined();
+
+    const result = parser?.("1500", undefined);
+    expect(result).toBe(1500);
+  });
+
+  it("should reject non-numeric budget value", () => {
+    const cmd = createContextCommand();
+    const budgetOpt = cmd.options.find((o) => o.long === "--budget") as OptionWithParseArg | undefined;
+    const parser = budgetOpt?.parseArg;
+
+    expect(() => parser?.("abc", undefined)).toThrow("Budget must be a positive number");
+  });
+});
+
+describe("Context Command --cross-project option", () => {
+  it("should have --cross-project option", () => {
+    const cmd = createContextCommand();
+    const option = cmd.options.find((o) => o.long === "--cross-project");
+    expect(option).toBeDefined();
   });
 });
 
@@ -191,5 +234,41 @@ describe("executeContextCommand error handling", () => {
     expect(result.exitCode).toBe(1);
     // JSON errors go to console.log for structured output
     expect(consoleLogSpy).toHaveBeenCalled();
+  });
+
+  it("returns exit code 1 for nonexistent project with --format ai", async () => {
+    const result = await executeContextCommand("nonexistent-project-xyz", { format: "ai" });
+
+    expect(result.exitCode).toBe(1);
+    expect(consoleErrorSpy).toHaveBeenCalled();
+  });
+
+  it("returns exit code 1 for nonexistent project with --budget", async () => {
+    const result = await executeContextCommand("nonexistent-project-xyz", { budget: 1500 });
+
+    expect(result.exitCode).toBe(1);
+    expect(consoleErrorSpy).toHaveBeenCalled();
+  });
+
+  it("returns exit code 1 for nonexistent project with --cross-project", async () => {
+    const result = await executeContextCommand("nonexistent-project-xyz", { crossProject: true });
+
+    expect(result.exitCode).toBe(1);
+    expect(consoleErrorSpy).toHaveBeenCalled();
+  });
+
+  it("existing --format brief still works (no regression)", async () => {
+    const result = await executeContextCommand("nonexistent-project-xyz", { format: "brief" });
+
+    expect(result.exitCode).toBe(1);
+    // Brief format - project not found message goes to stderr
+    expect(consoleErrorSpy).toHaveBeenCalled();
+  });
+
+  it("existing --format detailed still works (no regression)", async () => {
+    const result = await executeContextCommand("nonexistent-project-xyz", { format: "detailed" });
+
+    expect(result.exitCode).toBe(1);
+    expect(consoleErrorSpy).toHaveBeenCalled();
   });
 });
