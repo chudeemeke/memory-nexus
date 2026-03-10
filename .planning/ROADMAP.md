@@ -306,6 +306,7 @@ Phase 13 (Package Rename)
 | 26 | v3.0 | 3/3 | Complete | 2026-03-08 |
 | 27 | v3.0 | -- | Discussed | -- |
 | 28 | v3.0 | -- | Discussed | -- |
+| 29 | v3.0 | -- | Discussed | -- |
 
 ---
 
@@ -442,6 +443,9 @@ Phase 23 (Foundation)
     +---> Phase 24 (Friction System)
     |         |
     |         +---> Phase 25 (Intelligence)
+    |         |         |
+    |         |         +---> Phase 29 (Ambient Context)
+    |         |               [parallel with Phase 27-28]
     |         |
     |         +---> Phase 28 (Friction Universalization)
     |
@@ -481,6 +485,20 @@ Success Criteria:
 7. `memory friction list` shows a "new" indicator on entries not yet reviewed (based on `last_reviewed_at` per tool)
 8. When 3+ open entries share the same tool+category, dashboard surfaces a "pattern detected" alert
 
+### Phase 29: Ambient Context
+
+**Goal:** Generate memory CLI context into Claude Code's auto memory directory so cross-project awareness is ambient at session start, not query-dependent. Two artifacts per project: a full `context.md` file owned by the CLI, and a demarcated summary block in the project's MEMORY.md.
+
+**Depends on:** Phase 25 (SmartContextService, --format ai, budget allocator)
+**Discussion context:** .planning/phases/29-ambient-context/CONTEXT.md
+
+Success Criteria:
+1. After `memory sync`, the current project's auto memory directory contains a `context.md` file with structured cross-project context
+2. The project's MEMORY.md contains a `<!-- memory-cli:start/end -->` demarcated block with a summary (decisions, friction, learnings counts)
+3. The MEMORY.md block is updated on each sync without touching content outside the markers
+4. `memory install` wires context generation into the sync hook
+5. `context.md` budget is configurable in `~/.config/memory/config.json` (default 800-1000 tokens)
+
 ---
 
-*Last updated: 2026-03-10 (Phase 25 complete: all 3 plans done)*
+*Last updated: 2026-03-10 (Phase 29 added: ambient context injection)*
