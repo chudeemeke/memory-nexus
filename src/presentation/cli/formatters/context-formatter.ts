@@ -6,13 +6,15 @@
  */
 
 import type { ProjectContext, ToolUsage } from "../../../infrastructure/database/services/context-service.js";
+import type { SmartContextResult } from "../../../application/services/smart-context-service.js";
 import { formatTimestamp, formatRelativeTime } from "./timestamp-formatter.js";
+import { formatForAi } from "./ai-formatter.js";
 import { dim, bold } from "./color.js";
 
 /**
  * Output mode for context formatter.
  */
-export type ContextOutputMode = "default" | "json" | "brief" | "detailed" | "quiet" | "verbose";
+export type ContextOutputMode = "default" | "json" | "brief" | "detailed" | "quiet" | "verbose" | "ai";
 
 /**
  * Options for formatting context.
@@ -32,6 +34,12 @@ export interface ContextFormatter {
    * Format project context for display.
    */
   formatContext(context: ProjectContext, options?: ContextFormatOptions): string;
+
+  /**
+   * Format smart context result with structured sections.
+   * Only implemented by AI formatter; other formatters may leave undefined.
+   */
+  formatSmartContext?(result: SmartContextResult): string;
 
   /**
    * Format an error message.
@@ -69,6 +77,8 @@ export function createContextFormatter(
       return new VerboseContextFormatter(useColor);
     case "detailed":
       return new DetailedContextFormatter(useColor);
+    case "ai":
+      return new AiContextFormatter();
     case "brief":
     case "default":
     default:
@@ -334,5 +344,49 @@ class VerboseContextFormatter implements ContextFormatter {
 
   formatNoTopics(): string {
     return this.detailed.formatNoTopics();
+  }
+}
+
+/**
+ * AI context formatter - clean, token-efficient text output.
+ *
+ * Strips ANSI codes and produces plain markdown suitable for
+ * AI consumption. Supports both legacy ProjectContext and
+ * SmartContextResult formats.
+ */
+class AiContextFormatter implements ContextFormatter {
+  formatContext(context: ProjectContext, _options?: ContextFormatOptions): string {
+    // Fallback: format legacy ProjectContext as clean text via brief formatter
+    const brief = new BriefContextFormatter(false);
+    return formatForAi(brief.formatContext(context, _options));
+  }
+
+  formatSmartContext(result: SmartContextResult): string {
+    let output = `## ${result.projectName} context\n\n`;
+    for (const section of result.sections) {
+      if (section.content.trim() === "") continue;
+      output += `### ${section.title}\n`;
+      output += section.content;
+      if (section.truncated) {
+        output += "\n[truncated]";
+      }
+      output += "\n\n";
+    }
+    if (result.truncated) {
+      output += `(budget: ~${result.totalTokensEstimate} tokens)\n`;
+    }
+    return output.trim();
+  }
+
+  formatError(error: Error): string {
+    return `Error: ${error instanceof Error ? error.message : String(error)}`;
+  }
+
+  formatEmpty(projectName: string): string {
+    return `No sessions found for project matching '${projectName}'`;
+  }
+
+  formatNoTopics(): string {
+    return "No topics extracted yet";
   }
 }

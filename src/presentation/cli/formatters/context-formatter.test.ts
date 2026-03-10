@@ -433,3 +433,136 @@ describe("Number Formatting", () => {
     expect(output).not.toContain("0,999");
   });
 });
+
+describe("AiContextFormatter", () => {
+  it("should be created by createContextFormatter with 'ai' mode", () => {
+    const formatter = createContextFormatter("ai", false);
+    expect(formatter).toBeDefined();
+  });
+
+  it("should format legacy ProjectContext as clean text without ANSI codes", () => {
+    const formatter = createContextFormatter("ai", false);
+    const context = createTestContext();
+
+    const output = formatter.formatContext(context);
+
+    // Should contain data
+    expect(output).toContain("test-project");
+    expect(output).toContain("Sessions: 15");
+    // Should have no ANSI codes
+    expect(output).not.toMatch(/\x1b\[/);
+  });
+
+  it("should format empty state as plain text", () => {
+    const formatter = createContextFormatter("ai", false);
+    const output = formatter.formatEmpty("unknown-project");
+
+    expect(output).toContain("No sessions found");
+    expect(output).toContain("unknown-project");
+    expect(output).not.toMatch(/\x1b\[/);
+  });
+
+  it("should format error message as plain text", () => {
+    const formatter = createContextFormatter("ai", false);
+    const output = formatter.formatError(new Error("Database connection failed"));
+
+    expect(output).toBe("Error: Database connection failed");
+  });
+
+  it("should format no topics as plain text", () => {
+    const formatter = createContextFormatter("ai", false);
+    const output = formatter.formatNoTopics();
+
+    expect(output).toBe("No topics extracted yet");
+    expect(output).not.toMatch(/\x1b\[/);
+  });
+
+  it("should format SmartContextResult with markdown headers", () => {
+    const formatter = createContextFormatter("ai", false);
+
+    const result = {
+      projectName: "kanbanflow",
+      projectEncoded: "encoded-path",
+      sections: [
+        { key: "decisions", title: "Active Decisions", priority: 1, content: "Use React for frontend", truncated: false, tokenEstimate: 10 },
+        { key: "learnings", title: "Recent Learnings", priority: 2, content: "Vitest is faster than Jest", truncated: false, tokenEstimate: 12 },
+      ],
+      totalTokensEstimate: 22,
+      truncated: false,
+    };
+
+    // formatSmartContext is an optional method on the formatter
+    const aiFormatter = formatter as { formatSmartContext?: (result: unknown) => string };
+    expect(aiFormatter.formatSmartContext).toBeDefined();
+
+    const output = aiFormatter.formatSmartContext!(result);
+
+    expect(output).toContain("## kanbanflow context");
+    expect(output).toContain("### Active Decisions");
+    expect(output).toContain("Use React for frontend");
+    expect(output).toContain("### Recent Learnings");
+    expect(output).toContain("Vitest is faster than Jest");
+    expect(output).not.toMatch(/\x1b\[/);
+  });
+
+  it("should omit empty sections from SmartContextResult", () => {
+    const formatter = createContextFormatter("ai", false);
+
+    const result = {
+      projectName: "test",
+      projectEncoded: "enc",
+      sections: [
+        { key: "decisions", title: "Active Decisions", priority: 1, content: "Some decisions", truncated: false, tokenEstimate: 5 },
+        { key: "learnings", title: "Recent Learnings", priority: 2, content: "", truncated: false, tokenEstimate: 0 },
+      ],
+      totalTokensEstimate: 5,
+      truncated: false,
+    };
+
+    const aiFormatter = formatter as { formatSmartContext?: (result: unknown) => string };
+    const output = aiFormatter.formatSmartContext!(result);
+
+    expect(output).toContain("### Active Decisions");
+    expect(output).not.toContain("### Recent Learnings");
+  });
+
+  it("should include truncated marker when section was truncated", () => {
+    const formatter = createContextFormatter("ai", false);
+
+    const result = {
+      projectName: "test",
+      projectEncoded: "enc",
+      sections: [
+        { key: "decisions", title: "Active Decisions", priority: 1, content: "Partial content", truncated: true, tokenEstimate: 10 },
+      ],
+      totalTokensEstimate: 10,
+      truncated: true,
+    };
+
+    const aiFormatter = formatter as { formatSmartContext?: (result: unknown) => string };
+    const output = aiFormatter.formatSmartContext!(result);
+
+    expect(output).toContain("[truncated]");
+    expect(output).toContain("(budget:");
+  });
+
+  it("should not include budget line when result is not truncated", () => {
+    const formatter = createContextFormatter("ai", false);
+
+    const result = {
+      projectName: "test",
+      projectEncoded: "enc",
+      sections: [
+        { key: "decisions", title: "Active Decisions", priority: 1, content: "Full content", truncated: false, tokenEstimate: 5 },
+      ],
+      totalTokensEstimate: 5,
+      truncated: false,
+    };
+
+    const aiFormatter = formatter as { formatSmartContext?: (result: unknown) => string };
+    const output = aiFormatter.formatSmartContext!(result);
+
+    expect(output).not.toContain("(budget:");
+    expect(output).not.toContain("[truncated]");
+  });
+});

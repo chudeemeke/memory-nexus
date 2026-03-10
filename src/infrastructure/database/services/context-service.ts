@@ -7,6 +7,7 @@
  */
 
 import type { Database } from "bun:sqlite";
+import type { IProjectResolver } from "../../../application/services/smart-context-service.js";
 
 /**
  * Tool usage summary with name and count.
@@ -241,5 +242,84 @@ export class SqliteContextService {
         ? new Date(aggregateRow.lastActivity)
         : null,
     };
+  }
+}
+
+/**
+ * SQLite implementation of IProjectResolver.
+ *
+ * Resolves project names to encoded paths and display names
+ * using the sessions table. Supports exact (case-insensitive)
+ * and substring matching, ranked by session count.
+ */
+export class SqliteProjectResolver implements IProjectResolver {
+  private readonly db: Database;
+
+  constructor(db: Database) {
+    this.db = db;
+  }
+
+  /**
+   * Resolve a project name or filter to its encoded path.
+   *
+   * @param projectFilter Project name or substring
+   * @returns Encoded path or null if not found
+   */
+  resolveProjectEncoded(projectFilter: string): string | null {
+    // Exact match first (case-insensitive)
+    const exact = this.db
+      .prepare<{ project_path_encoded: string }, [string]>(
+        `SELECT DISTINCT project_path_encoded
+         FROM sessions
+         WHERE LOWER(project_name) = LOWER(?)
+         LIMIT 1`
+      )
+      .get(projectFilter);
+    if (exact) return exact.project_path_encoded;
+
+    // Substring match ranked by session count
+    const fuzzy = this.db
+      .prepare<{ project_path_encoded: string }, [string]>(
+        `SELECT project_path_encoded
+         FROM sessions
+         WHERE project_name LIKE '%' || ? || '%'
+         GROUP BY project_path_encoded
+         ORDER BY COUNT(*) DESC
+         LIMIT 1`
+      )
+      .get(projectFilter);
+    return fuzzy?.project_path_encoded ?? null;
+  }
+
+  /**
+   * Resolve a project name or filter to its display name.
+   *
+   * @param projectFilter Project name or substring
+   * @returns Display name or null if not found
+   */
+  resolveProjectName(projectFilter: string): string | null {
+    // Exact match first (case-insensitive)
+    const exact = this.db
+      .prepare<{ project_name: string }, [string]>(
+        `SELECT DISTINCT project_name
+         FROM sessions
+         WHERE LOWER(project_name) = LOWER(?)
+         LIMIT 1`
+      )
+      .get(projectFilter);
+    if (exact) return exact.project_name;
+
+    // Substring match ranked by session count
+    const fuzzy = this.db
+      .prepare<{ project_name: string }, [string]>(
+        `SELECT project_name
+         FROM sessions
+         WHERE project_name LIKE '%' || ? || '%'
+         GROUP BY project_name
+         ORDER BY COUNT(*) DESC
+         LIMIT 1`
+      )
+      .get(projectFilter);
+    return fuzzy?.project_name ?? null;
   }
 }

@@ -13,7 +13,7 @@
 import { describe, it, expect, beforeEach, afterEach } from "bun:test";
 import { Database } from "bun:sqlite";
 import { initializeDatabase, closeDatabase } from "../connection.js";
-import { SqliteContextService } from "./context-service.js";
+import { SqliteContextService, SqliteProjectResolver } from "./context-service.js";
 
 // ============================================================================
 // Test Helpers
@@ -451,6 +451,69 @@ describe("SqliteContextService", () => {
 
       expect(context).not.toBeNull();
       expect(context!.recentToolUses).toHaveLength(10);
+    });
+  });
+});
+
+describe("SqliteProjectResolver", () => {
+  let db: Database;
+  let resolver: SqliteProjectResolver;
+
+  beforeEach(() => {
+    const result = initializeDatabase({ path: ":memory:" });
+    db = result.db;
+    resolver = new SqliteProjectResolver(db);
+  });
+
+  afterEach(() => {
+    closeDatabase(db);
+  });
+
+  describe("resolveProjectEncoded", () => {
+    it("returns encoded path for exact project name match (case-insensitive)", () => {
+      insertTestSession(db, "s1", "encoded-path-1", "/proj1", "MyProject");
+
+      const result = resolver.resolveProjectEncoded("myproject");
+      expect(result).toBe("encoded-path-1");
+    });
+
+    it("returns encoded path for substring match ranked by session count", () => {
+      // 1 session for mcp-nexus
+      insertTestSession(db, "s1", "encoded-mcp", "/mcp", "mcp-nexus");
+      // 3 sessions for memory-nexus (should win)
+      insertTestSession(db, "s2", "encoded-mem", "/mem", "memory-nexus");
+      insertTestSession(db, "s3", "encoded-mem", "/mem", "memory-nexus");
+      insertTestSession(db, "s4", "encoded-mem", "/mem", "memory-nexus");
+
+      const result = resolver.resolveProjectEncoded("nexus");
+      expect(result).toBe("encoded-mem");
+    });
+
+    it("returns null when no sessions match", () => {
+      const result = resolver.resolveProjectEncoded("nonexistent");
+      expect(result).toBeNull();
+    });
+  });
+
+  describe("resolveProjectName", () => {
+    it("returns display project name for exact match", () => {
+      insertTestSession(db, "s1", "encoded-1", "/proj1", "KanbanFlow");
+
+      const result = resolver.resolveProjectName("kanbanflow");
+      expect(result).toBe("KanbanFlow");
+    });
+
+    it("returns display project name for substring match", () => {
+      insertTestSession(db, "s1", "encoded-1", "/proj1", "memory-nexus");
+      insertTestSession(db, "s2", "encoded-1", "/proj1", "memory-nexus");
+
+      const result = resolver.resolveProjectName("nexus");
+      expect(result).toBe("memory-nexus");
+    });
+
+    it("returns null when no sessions match", () => {
+      const result = resolver.resolveProjectName("nonexistent");
+      expect(result).toBeNull();
     });
   });
 });

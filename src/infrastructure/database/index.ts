@@ -63,6 +63,7 @@ export {
   type SearchMeta,
   SqliteStatsService,
   SqliteContextService,
+  SqliteProjectResolver,
   type ProjectContext,
   type ContextOptions,
   type ToolUsage,

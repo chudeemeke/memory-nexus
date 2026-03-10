@@ -10,6 +10,7 @@ export type { HybridSearchDeps, SearchMeta } from "./hybrid-search-service.js";
 export { SqliteStatsService } from "./stats-service.js";
 export {
   SqliteContextService,
+  SqliteProjectResolver,
   type ProjectContext,
   type ContextOptions,
   type ToolUsage,
