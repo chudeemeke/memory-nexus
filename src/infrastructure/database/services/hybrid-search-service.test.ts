@@ -89,6 +89,23 @@ function insertTestEmbedding(
   );
 }
 
+function insertTestEmbeddingWithVector(
+  db: Database,
+  rowid: number,
+  embedding: Float32Array,
+  modelHash: string = "test-hash",
+  modelName: string = "test-model"
+): void {
+  db.run(
+    "INSERT INTO message_embeddings(rowid, embedding) VALUES (?, vec_f32(?))",
+    [rowid, embedding]
+  );
+  db.run(
+    "INSERT INTO embedding_state(message_id, embedded_at, model_hash, model_name) VALUES (?, ?, ?, ?)",
+    [rowid, new Date().toISOString(), modelHash, modelName]
+  );
+}
+
 function createMockEmbeddingResult(dimensions: number = 384): EmbeddingResult {
   const embedding = new Float32Array(dimensions);
   for (let i = 0; i < dimensions; i++) {
@@ -1112,8 +1129,26 @@ describe("HybridSearchService", () => {
       const rowid2 = insertTestMessage(
         db, "msg-new", "session-1", "user", "authentication new content", newDate
       );
-      insertTestEmbedding(db, rowid1);
-      insertTestEmbedding(db, rowid2);
+
+      // Controlled embeddings to force deterministic cosine similarity scores.
+      // Query embedding: unit vector along dimension 0 -> [1, 0, 0, ..., 0]
+      const queryEmbedding = new Float32Array(384);
+      queryEmbedding[0] = 1.0;
+
+      // msg-old: high similarity (~0.95) but 60+ days old -> decay crushes its score
+      // [0.95, 0.3122, 0, ..., 0] normalized: sqrt(0.95^2 + 0.3122^2) ~= 1.0
+      const oldEmbedding = new Float32Array(384);
+      oldEmbedding[0] = 0.95;
+      oldEmbedding[1] = 0.3122;
+
+      // msg-new: moderate similarity (~0.7) but recent -> decay barely affects it
+      // [0.7, 0.7141, 0, ..., 0] normalized: sqrt(0.7^2 + 0.7141^2) ~= 1.0
+      const newEmbedding = new Float32Array(384);
+      newEmbedding[0] = 0.7;
+      newEmbedding[1] = 0.7141;
+
+      insertTestEmbeddingWithVector(db, rowid1, oldEmbedding);
+      insertTestEmbeddingWithVector(db, rowid2, newEmbedding);
 
       const config: MemoryConfig = {
         ...DEFAULT_CONFIG,
@@ -1123,7 +1158,14 @@ describe("HybridSearchService", () => {
         },
       };
 
-      const mockProvider = createMockProvider();
+      // Override embed to return the controlled query embedding
+      const mockProvider = createMockProvider({
+        embed: mock(() => Promise.resolve({
+          embedding: queryEmbedding,
+          model: "test-model",
+          dimensions: 384,
+        } as EmbeddingResult)),
+      });
       const deps = createDeps(db, {
         sqliteVecAvailable: true,
         config,
@@ -1135,7 +1177,9 @@ describe("HybridSearchService", () => {
       const results = await service.search(query, { mode: "vector" });
 
       expect(results.length).toBe(2);
-      // Newer message should score higher with decay enabled
+      // Without decay: msg-old (0.95 similarity) > msg-new (0.7 similarity)
+      // With decay: msg-old (0.95 * ~0.25) = ~0.24 < msg-new (0.7 * ~1.0) = ~0.7
+      // This assertion can ONLY pass if decay is applied correctly.
       expect(results[0].messageId).toBe("msg-new");
     });
 
