@@ -1,7 +1,7 @@
 ---
 agent: gsd-executor
-updated: 2026-03-09
-entries: 62
+updated: 2026-03-10
+entries: 63
 ---
 
 - finding: "Bun test spyOn mock leakage: when mocking nodeFs.renameSync, must restore before assertions, not in afterEach. Mock affects subsequent tests in same file if not restored promptly."
@@ -375,3 +375,9 @@ entries: 62
   confidence: HIGH
   phase: "25-intelligence"
   date: "2026-03-09"
+
+- finding: "For flaky vector search tests where random embeddings cause indeterminate ordering (near-zero cosine similarity for both results), use insertTestEmbeddingWithVector with controlled Float32Array values and override mockProvider.embed to return a controlled query embedding. Set msg-old similarity higher than msg-new so that only temporal decay can invert the ordering -- proving decay works non-vacuously."
+  source: "Phase 25, Plan 04, Task 1"
+  confidence: HIGH
+  phase: "25-intelligence"
+  date: "2026-03-10"

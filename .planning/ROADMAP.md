@@ -302,7 +302,7 @@ Phase 13 (Package Rename)
 | 22 | v2.0 | ad-hoc | Complete | 2026-03-07 |
 | 23 | v3.0 | 4/4 | Complete | 2026-03-08 |
 | 24 | v3.0 | 3/3 | Complete | 2026-03-08 |
-| 25 | v3.0 | 3/3 | Complete | 2026-03-10 |
+| 25 | v3.0 | 4/4 | Complete | 2026-03-10 |
 | 26 | v3.0 | 3/3 | Complete | 2026-03-08 |
 | 27 | v3.0 | -- | Discussed | -- |
 | 28 | v3.0 | -- | Discussed | -- |
@@ -383,12 +383,13 @@ Success Criteria:
 
 **Depends on:** Phase 23 (memory file indexing), Phase 24 (friction in context)
 **Discussion context:** .planning/phases/25-intelligence/CONTEXT.md
-**Plans:** 3/3 plans complete
+**Plans:** 4/4 plans complete
 
 Plans:
 - [x] 25-01-PLAN.md -- AI formatter, temporal decay extension, cross-project query, uniform search decay
 - [x] 25-02-PLAN.md -- SmartContextService and budget allocator
 - [x] 25-03-PLAN.md -- CLI integration (--format ai, --budget, --cross-project)
+- [x] 25-04-PLAN.md -- Fix flaky vector-only temporal decay test (gap closure)
 
 Success Criteria:
 1. `memory context kanbanflow --format ai --budget 1500` returns structured briefing within token budget
@@ -501,4 +502,4 @@ Success Criteria:
 
 ---
 
-*Last updated: 2026-03-10 (Phase 29 added: ambient context injection)*
+*Last updated: 2026-03-10 (Phase 25 gap closure 25-04 complete: 4/4 plans)*

@@ -13,15 +13,15 @@ See: .planning/PROJECT.md (updated 2026-02-18)
 ## Current Position
 
 **Milestone:** v3.0 Knowledge Layer + Friction Logging
-**Phase:** 25 (Intelligence) -- gap closure pending
-**Status:** Gap closure plan 25-04 ready to execute
-**Current Plan:** 25-04 planned (fix flaky vector-only decay test)
+**Phase:** 25 (Intelligence) -- complete (including gap closure)
+**Status:** Phase 25 fully complete, ready for phases 27/28/29
+**Current Plan:** 25-04 complete (flaky vector-only decay test fixed)
 
 ```
-v3.0 Progress: [################        ] 4/7 phases (complete)
+v3.0 Progress: [####################    ] 5/7 phases (complete)
   Phase 23: Foundation                [x] Complete (4/4 plans)
   Phase 24: Friction System           [x] Complete (3/3 plans)
-  Phase 25: Intelligence              [~] Gap closure (25-04 planned, not executed)
+  Phase 25: Intelligence              [x] Complete (4/4 plans, including gap closure)
   Phase 26: Hooks + Backfill          [x] Complete (3/3 plans)
   Phase 27: qmd Integration           [ ] Discussed (CONTEXT.md ready)
   Phase 28: Friction Universalization  [ ] Discussed (no CONTEXT.md yet)
@@ -70,8 +70,8 @@ v3.0 Progress: [################        ] 4/7 phases (complete)
 ### Last Session
 
 **Date:** 2026-03-10
-**Completed:** Plan 25-03 (CLI integration: --format ai, --budget, --cross-project)
-**Stopped at:** Phase 25 complete (all 3 plans done)
+**Completed:** Plan 25-04 (gap closure: fix flaky vector-only decay test)
+**Stopped at:** Phase 25 fully complete (all 4 plans done, including gap closure)
 
 ### Decisions
 
@@ -104,15 +104,15 @@ v3.0 Progress: [################        ] 4/7 phases (complete)
 
 ### Context for Next Session
 
-1. **Execute 25-04 first** — gap closure: fix flaky vector-only decay test (1 task, 1 file, autonomous)
-2. Then plan+execute remaining phases (27, 28, 29 are all independent)
-3. Phase 29 (Ambient Context) CONTEXT.md is complete — skip discuss-phase, go straight to plan-phase
-4. Phase 28 (Friction Universalization) still needs discuss-phase (no CONTEXT.md)
-5. Safe parallel set: 25-04 + 27 + 29. Run 28 after those land (schema overlap risk with friction data)
+1. **25-04 complete** -- flaky vector-only decay test fixed with controlled embeddings
+2. Plan+execute remaining phases (27, 28, 29 are all independent)
+3. Phase 29 (Ambient Context) CONTEXT.md is complete -- skip discuss-phase, go straight to plan-phase
+4. Phase 28 (Friction Universalization) still needs discuss-phase (no CONTEXT.md yet)
+5. Safe parallel set: 27 + 29. Run 28 after those land (schema overlap risk with friction data)
 6. Pre-existing issues: error-codes.test.ts count assertion stale (expects 19, has 21)
 7. All 7 output-producing commands support --format ai
 8. SmartContextService fully wired with SqliteProjectResolver, memory file repo, friction repo
 
 ---
 
-*Last updated: 2026-03-10 (25-04 gap closure planned, phase 29 added)*
+*Last updated: 2026-03-10 (25-04 gap closure executed, phase 25 fully complete)*
