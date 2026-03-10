@@ -8,7 +8,7 @@
  * not inherit parent options to subcommands).
  */
 
-import { Command } from "commander";
+import { Command, Option } from "commander";
 import { exec } from "node:child_process";
 import { mkdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
@@ -25,6 +25,7 @@ import { FrictionService } from "../../../application/services/friction-service.
 import { formatError, formatErrorJson } from "../formatters/error-formatter.js";
 import { formatFrictionDashboard, generateFrictionHtml } from "../formatters/friction-dashboard.js";
 import { shouldUseColor } from "../formatters/color.js";
+import { formatForAi } from "../formatters/ai-formatter.js";
 import { getMemoryDir } from "../../../infrastructure/paths.js";
 
 /**
@@ -32,6 +33,8 @@ import { getMemoryDir } from "../../../infrastructure/paths.js";
  */
 export interface FrictionCommandOptions {
     json?: boolean;
+    /** Output format: default or ai */
+    format?: "default" | "ai";
 }
 
 /**
@@ -69,6 +72,8 @@ export interface FrictionExecuteOptions {
     description?: string;
     id?: string;
     json?: boolean;
+    /** Output format: default or ai */
+    format?: "default" | "ai";
     severity?: string;
     category?: string;
     source?: string;
@@ -86,9 +91,13 @@ export interface FrictionExecuteOptions {
  * @returns Configured Command instance with subcommands
  */
 export function createFrictionCommand(): Command {
-    const friction = new Command("friction").description(
-        "Log and track friction with memory tool"
-    );
+    const friction = new Command("friction")
+        .description("Log and track friction with memory tool")
+        .addOption(
+            new Option("--format <type>", "Output format")
+                .choices(["default", "ai"])
+                .default("default")
+        );
 
     // log subcommand
     friction.addCommand(
@@ -455,7 +464,10 @@ async function handleDashboard(
     } else if (options.json) {
         console.log(JSON.stringify({ stats, trends }, null, 2));
     } else {
-        const output = formatFrictionDashboard(stats, trends, openItems, shouldUseColor());
+        let output = formatFrictionDashboard(stats, trends, openItems, shouldUseColor());
+        if (options.format === "ai") {
+            output = formatForAi(output);
+        }
         console.log(output);
     }
 

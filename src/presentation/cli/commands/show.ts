@@ -22,6 +22,7 @@ import {
   type SessionDetail,
 } from "../formatters/show-formatter.js";
 import { shouldUseColor } from "../formatters/color.js";
+import { formatForAi } from "../formatters/ai-formatter.js";
 import { formatError, formatErrorJson } from "../formatters/error-formatter.js";
 import type { Session } from "../../../domain/entities/session.js";
 import type { ToolUse } from "../../../domain/entities/tool-use.js";
@@ -55,6 +56,8 @@ export interface ShowCommandOptions {
   quiet?: boolean;
   /** Show detailed tool inputs and outputs */
   tools?: boolean;
+  /** Output format: default or ai */
+  format?: "default" | "ai";
 }
 
 /**
@@ -67,6 +70,11 @@ export function createShowCommand(): Command {
     .description("Show session details")
     .argument("<session-id>", "Session ID to display")
     .option("--json", "Output as JSON")
+    .addOption(
+      new Option("--format <type>", "Output format")
+        .choices(["default", "ai"])
+        .default("default")
+    )
     .addOption(
       new Option("-v, --verbose", "Show detailed output").conflicts("quiet")
     )
@@ -172,9 +180,12 @@ export async function executeShowCommand(
     const mode = determineOutputMode(options);
     const formatter = createShowFormatter(mode, shouldUseColor());
     const endTime = performance.now();
-    const output = formatter.formatSession(detail, {
+    let output = formatter.formatSession(detail, {
       executionTimeMs: Math.round(endTime - startTime),
     });
+    if (options.format === "ai") {
+      output = formatForAi(output);
+    }
     console.log(output);
     return { exitCode: 0 };
   } catch (error) {

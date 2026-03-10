@@ -26,6 +26,7 @@ import {
   type RelatedSession,
 } from "../formatters/related-formatter.js";
 import { shouldUseColor } from "../formatters/color.js";
+import { formatForAi } from "../formatters/ai-formatter.js";
 import { formatError, formatErrorJson } from "../formatters/error-formatter.js";
 
 /**
@@ -38,8 +39,8 @@ export interface RelatedCommandOptions {
   hops?: number;
   /** Entity type of the ID: session, message, or topic */
   type?: "session" | "message" | "topic";
-  /** Output format: brief or detailed */
-  format?: "brief" | "detailed";
+  /** Output format: brief, detailed, or ai */
+  format?: "brief" | "detailed" | "ai";
   /** Output as JSON */
   json?: boolean;
   /** Show detailed output with timing */
@@ -82,7 +83,7 @@ export function createRelatedCommand(): Command {
     )
     .addOption(
       new Option("--format <type>", "Output format")
-        .choices(["brief", "detailed"])
+        .choices(["brief", "detailed", "ai"])
         .default("brief")
     )
     .option("--json", "Output as JSON")
@@ -209,7 +210,10 @@ export async function executeRelatedCommand(
       sourceId: id,
       executionTimeMs: Math.round(endTime - startTime),
     };
-    const output = formatter.formatRelated(relatedSessions, formatOptions);
+    let output = formatter.formatRelated(relatedSessions, formatOptions);
+    if (options.format === "ai") {
+      output = formatForAi(output);
+    }
     console.log(output);
     return { exitCode: 0 };
   } catch (error) {

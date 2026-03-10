@@ -58,13 +58,15 @@ describe("related command options", () => {
     expect(typeOpt?.defaultValue).toBe("session");
   });
 
-  it("should have --format option with choices", () => {
+  it("should have --format option with choices including ai", () => {
     const command = createRelatedCommand();
     const options = command.options;
 
     const formatOpt = options.find(o => o.long === "--format");
     expect(formatOpt).toBeDefined();
-    expect(formatOpt?.argChoices).toEqual(["brief", "detailed"]);
+    expect(formatOpt?.argChoices).toContain("brief");
+    expect(formatOpt?.argChoices).toContain("detailed");
+    expect(formatOpt?.argChoices).toContain("ai");
     expect(formatOpt?.defaultValue).toBe("brief");
   });
 

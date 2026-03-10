@@ -86,6 +86,17 @@ describe("createListCommand", () => {
     expect(quietOpt).toBeDefined();
     expect(quietOpt?.short).toBe("-q");
   });
+
+  it("should have --format option with default and ai choice", () => {
+    const command = createListCommand();
+    const options = command.options;
+
+    const formatOpt = options.find(o => o.long === "--format");
+    expect(formatOpt).toBeDefined();
+    expect(formatOpt?.argChoices).toContain("default");
+    expect(formatOpt?.argChoices).toContain("ai");
+    expect(formatOpt?.defaultValue).toBe("default");
+  });
 });
 
 describe("list command option conflicts", () => {

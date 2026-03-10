@@ -101,6 +101,17 @@ describe("Search Command", () => {
       );
       expect(quietOption).toBeDefined();
     });
+
+    it("has --format option with default and ai choice", () => {
+      const command = createSearchCommand();
+      const formatOption = command.options.find(
+        (o) => o.long === "--format"
+      );
+      expect(formatOption).toBeDefined();
+      expect(formatOption?.argChoices).toContain("default");
+      expect(formatOption?.argChoices).toContain("ai");
+      expect(formatOption?.defaultValue).toBe("default");
+    });
   });
 
   describe("option parsing", () => {

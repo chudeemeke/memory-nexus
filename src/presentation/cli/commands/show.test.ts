@@ -154,6 +154,15 @@ describe("Show Command", () => {
       expect(optionNames).toContain("--quiet");
       expect(optionNames).toContain("--tools");
     });
+
+    test("has --format option with default and ai choice", () => {
+      const cmd = createShowCommand();
+      const formatOpt = cmd.options.find(o => o.long === "--format");
+      expect(formatOpt).toBeDefined();
+      expect(formatOpt?.argChoices).toContain("default");
+      expect(formatOpt?.argChoices).toContain("ai");
+      expect(formatOpt?.defaultValue).toBe("default");
+    });
   });
 
   describe("executeShowCommand", () => {

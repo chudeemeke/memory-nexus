@@ -32,6 +32,7 @@ import {
   type FormatOptions,
 } from "../formatters/output-formatter.js";
 import { shouldUseColor } from "../formatters/color.js";
+import { formatForAi } from "../formatters/ai-formatter.js";
 import { parseDate, DateParseError } from "../parsers/date-parser.js";
 import { formatError, formatErrorJson } from "../formatters/error-formatter.js";
 
@@ -69,6 +70,8 @@ export interface SearchCommandOptions {
   vector?: boolean;
   /** Set to false via --no-decay to disable temporal decay scoring */
   decay?: boolean;
+  /** Output format: default or ai */
+  format?: "default" | "ai";
 }
 
 /**
@@ -141,6 +144,11 @@ export function createSearchCommand(): Command {
     )
     .addOption(
       new Option("--no-decay", "Disable temporal decay scoring")
+    )
+    .addOption(
+      new Option("--format <type>", "Output format")
+        .choices(["default", "ai"])
+        .default("default")
     )
     .addOption(
       new Option("-v, --verbose", "Show detailed output with execution info")
@@ -323,7 +331,10 @@ export async function executeSearchCommand(
     }
 
     // Output results using formatter
-    const output = formatter.formatResults(results, formatOptions);
+    let output = formatter.formatResults(results, formatOptions);
+    if (options.format === "ai") {
+      output = formatForAi(output);
+    }
     console.log(output);
 
     // One-time hint for zero embedding coverage

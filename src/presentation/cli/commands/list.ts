@@ -21,6 +21,7 @@ import {
   type ListFormatOptions,
 } from "../formatters/list-formatter.js";
 import { shouldUseColor } from "../formatters/color.js";
+import { formatForAi } from "../formatters/ai-formatter.js";
 import { parseDate, DateParseError } from "../parsers/date-parser.js";
 import { formatError, formatErrorJson } from "../formatters/error-formatter.js";
 
@@ -44,6 +45,8 @@ export interface ListCommandOptions {
   verbose?: boolean;
   /** Minimal output (session IDs only) */
   quiet?: boolean;
+  /** Output format: default or ai */
+  format?: "default" | "ai";
 }
 
 /**
@@ -73,6 +76,11 @@ export function createListCommand(): Command {
         .conflicts(["since", "before"])
     )
     .option("--json", "Output as JSON")
+    .addOption(
+      new Option("--format <type>", "Output format")
+        .choices(["default", "ai"])
+        .default("default")
+    )
     .addOption(
       new Option("-v, --verbose", "Show detailed output").conflicts("quiet")
     )
@@ -176,7 +184,10 @@ export async function executeListCommand(options: ListCommandOptions): Promise<C
       executionTimeMs: Math.round(endTime - startTime),
       filtersApplied: buildFiltersList(options),
     };
-    const output = formatter.formatSessions(sessions, formatOptions);
+    let output = formatter.formatSessions(sessions, formatOptions);
+    if (options.format === "ai") {
+      output = formatForAi(output);
+    }
     console.log(output);
     return { exitCode: 0 };
   } catch (error) {

@@ -137,6 +137,17 @@ describe("Friction Command", () => {
             expect(jsonOption).toBeDefined();
         });
 
+        it("has --format option on parent command with default and ai choice", () => {
+            const command = createFrictionCommand();
+            const formatOpt = command.options.find(
+                (o: { long?: string }) => o.long === "--format"
+            );
+            expect(formatOpt).toBeDefined();
+            expect(formatOpt?.argChoices).toContain("default");
+            expect(formatOpt?.argChoices).toContain("ai");
+            expect(formatOpt?.defaultValue).toBe("default");
+        });
+
         it("log subcommand has --severity option with default", () => {
             const command = createFrictionCommand();
             const sub = command.commands.find(

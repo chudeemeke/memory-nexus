@@ -22,6 +22,7 @@ import {
   type HooksSummary,
 } from "../formatters/stats-formatter.js";
 import { shouldUseColor } from "../formatters/color.js";
+import { formatForAi } from "../formatters/ai-formatter.js";
 import {
   checkHooksInstalled,
   loadConfig,
@@ -41,6 +42,8 @@ export interface StatsCommandOptions {
   quiet?: boolean;
   /** Number of projects to show in breakdown (as string, parsed to integer) */
   projects?: string;
+  /** Output format: default or ai */
+  format?: "default" | "ai";
 }
 
 /**
@@ -52,6 +55,11 @@ export function createStatsCommand(): Command {
   return new Command("stats")
     .description("Show database statistics")
     .option("--json", "Output as JSON")
+    .addOption(
+      new Option("--format <type>", "Output format")
+        .choices(["default", "ai"])
+        .default("default")
+    )
     .addOption(
       new Option("-v, --verbose", "Show detailed output with timing").conflicts(
         "quiet"
@@ -129,9 +137,12 @@ export async function executeStatsCommand(
 
     // Format and output
     const endTime = performance.now();
-    const output = formatter.formatStats(stats, {
+    let output = formatter.formatStats(stats, {
       executionTimeMs: Math.round(endTime - startTime),
     });
+    if (options.format === "ai") {
+      output = formatForAi(output);
+    }
     console.log(output);
     return { exitCode: 0 };
   } catch (error) {
