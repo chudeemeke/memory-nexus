@@ -1,7 +1,7 @@
 ---
 agent: gsd-verifier
-updated: 2026-03-08
-entries: 23
+updated: 2026-03-10
+entries: 27
 ---
 
 entries:
@@ -149,3 +149,23 @@ entries:
     confidence: HIGH
     phase: "23-foundation"
     date: "2026-03-08"
+
+  - finding: "Phase 25 vector-only decay test flakiness: hybrid-search-service.test.ts 'vector-only mode applies temporal decay' fails non-deterministically when both random embeddings produce near-zero cosine similarity with the random query embedding (score ~0 for both). After decay, 0 * factor = 0 for both, making sort order indeterminate. Passes in isolation (different test ordering, different random seeds). The test design needs controlled embeddings or explicit score assertions that don't depend on ordering when both scores approach 0. This is a genuine Phase 25 gap: the test is structurally flawed."
+    source: "Phase 25 verification"
+    confidence: HIGH
+    phase: "25-intelligence"
+    date: "2026-03-10"
+    status: superseded
+    superseded_by: "Phase 25 gap closed in Plan 25-04 -- controlled embeddings fix applied"
+
+  - finding: "Phase 25 gap closure pattern for non-deterministic cosine similarity tests: use insertTestEmbeddingWithVector helper to inject a pre-built Float32Array. The test should be designed so that WITHOUT decay the old message wins (higher raw similarity), and WITH decay the new message wins (lower raw similarity but recent). This makes the sort assertion non-vacuous -- it can only pass when decay is actually applied. The math: msg-old at [0.95, 0.31, ...] has ~0.95 cosine similarity to unit vector [1, 0, ...], decayed by ~0.25 (60-day half-life) = ~0.24. msg-new at [0.7, 0.71, ...] has ~0.7 similarity, decayed by ~1.0 (recent) = ~0.7. Deterministic 40/40, 5/5 runs."
+    source: "Phase 25, Plan 25-04 re-verification"
+    confidence: HIGH
+    phase: "25-intelligence"
+    date: "2026-03-10"
+
+  - finding: "Re-verification with status human_needed (vs gaps_found): when all automated gaps are closed but human verification items remain from the initial verification, the correct final status is human_needed, not passed. The distinction matters for the orchestrator -- passed means ready to proceed; human_needed means the code is correct but real-environment confirmation is pending."
+    source: "Phase 25 re-verification"
+    confidence: HIGH
+    phase: "25-intelligence"
+    date: "2026-03-10"

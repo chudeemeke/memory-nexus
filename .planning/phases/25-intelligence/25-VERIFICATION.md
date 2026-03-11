@@ -1,18 +1,15 @@
 ---
 phase: 25-intelligence
-verified: 2026-03-10T12:00:00Z
-status: gaps_found
-score: 3/4 must-haves verified
-re_verification: false
-gaps:
-  - truth: "Search results weighted by recency (30-day half-life); curated files exempt from decay"
-    status: partial
-    reason: "The implementation is correct but the test verifying vector-only decay is structurally flawed and fails non-deterministically. 'vector-only mode applies temporal decay' passes in isolation but fails ~2/3 of the time in the full suite because both random embeddings produce near-zero cosine similarity scores with a random query embedding, making post-decay sort order indeterminate."
-    artifacts:
-      - path: "src/infrastructure/database/services/hybrid-search-service.test.ts"
-        issue: "Test at line 1103 uses random Float32Array embeddings for both msg-old and msg-new. When cosine distances are approximately equal (both ~0 similarity), multiplying by decay factor gives 0 * factor = 0 for both, making sort non-deterministic. Isolation run passes; full-suite run fails ~2/3 of the time."
-    missing:
-      - "Refactor the vector-only decay test to use controlled embeddings or to insert the new message with a significantly higher explicit similarity score. One approach: embed the query text in both messages (identical strings ensure high cosine similarity for the newer message when the query embedding matches), or use spy on vectorKnnSearch to return controlled scores."
+verified: 2026-03-10T22:15:00Z
+status: human_needed
+score: 4/4 must-haves verified
+re_verification:
+  previous_status: gaps_found
+  previous_score: 3/4
+  gaps_closed:
+    - "Search results weighted by recency (30-day half-life); curated files exempt from decay -- flaky test fixed with controlled embeddings. 40/40 tests pass deterministically across 5 consecutive runs."
+  gaps_remaining: []
+  regressions: []
 human_verification:
   - test: "Run memory context kanbanflow --format ai --budget 1500 against a populated database"
     expected: "Returns a structured briefing with section headers (## Project context, ### Active Decisions, etc.) within the 1500-token budget. Sections truncated with [truncated] markers if over budget."
@@ -28,9 +25,9 @@ human_verification:
 # Phase 25: Intelligence Verification Report
 
 **Phase Goal:** Rewrite smart context to produce structured briefings from memory files, add temporal decay to search, implement AI-first output mode, and enable cross-project intelligence.
-**Verified:** 2026-03-10T12:00:00Z
-**Status:** gaps_found
-**Re-verification:** No -- initial verification
+**Verified:** 2026-03-10T22:15:00Z
+**Status:** human_needed
+**Re-verification:** Yes -- after gap closure (Plan 25-04)
 
 ## Goal Achievement
 
@@ -39,11 +36,32 @@ human_verification:
 | # | Truth | Status | Evidence |
 |---|-------|--------|----------|
 | 1 | `memory context kanbanflow --format ai --budget 1500` returns structured briefing within token budget | ? UNCERTAIN | SmartContextService, SqliteProjectResolver, AiContextFormatter, budget/cross-project flags all wired correctly. Integration requires real DB data -- flagged for human verification. |
-| 2 | Search results weighted by recency (30-day half-life); curated files exempt from decay | PARTIAL | `applyDecayToResults` in HybridSearchService.ts:272 correctly implements pipeline-exit decay for all modes. FTS and hybrid decay tests pass (39/40). The vector-only decay test is structurally flawed and fails non-deterministically (~2/3 full-suite runs). Core logic is correct but test coverage is insufficient. |
+| 2 | Search results weighted by recency (30-day half-life); curated files exempt from decay | VERIFIED | `applyDecayToResults` in HybridSearchService.ts:272 correctly implements pipeline-exit decay for all modes. All 40 decay tests pass deterministically. Vector-only decay test fixed in Plan 25-04: msg-old (0.95 similarity, 60+ days old) decays to ~0.24 and loses to msg-new (0.7 similarity, recent, ~0.7). 5/5 consecutive runs pass. |
 | 3 | `--format ai` available on all commands, outputs token-efficient text | VERIFIED | `--format ai` wired in context.ts, search.ts, list.ts, show.ts, stats.ts, friction.ts, related.ts. All 222 tests in those 6 non-context command files pass. 49 context-formatter tests pass. `formatForAi()` pipe pattern confirmed in each command. |
 | 4 | Learnings tagged "Applies to: cross-project" surfaced in `memory context --cross-project` | VERIFIED | `findCrossProjectLearnings()` defined in IMemoryFileRepository port (repositories.ts:539), implemented in SqliteMemoryFileRepository.ts:127 using SQL LIKE. SmartContextService queries this method when `crossProject: true` (smart-context-service.ts:211). Context command wires `--cross-project` flag (context.ts:93, :198). 7 repository tests and 29 SmartContextService tests pass. |
 
-**Score:** 2/4 truths fully verified (3/4 partially -- SC-2 partial due to flaky test, SC-1 needs human verification)
+**Score:** 4/4 truths verified (SC-1 verified at code level; end-to-end requires human confirmation)
+
+### Re-verification: Gap Closure Summary
+
+**Gap closed:** SC-2 "vector-only mode applies temporal decay" -- test was structurally flawed (random embeddings produced near-zero cosine similarity for both messages, making post-decay sort order indeterminate).
+
+**Fix applied in Plan 25-04 (commit 60f7d53):**
+- Added `insertTestEmbeddingWithVector` helper at line 92 of hybrid-search-service.test.ts
+- Test now inserts msg-old with embedding [0.95, 0.3122, 0, ...] (~0.95 cosine similarity to query unit vector [1, 0, 0, ...])
+- Test inserts msg-new with embedding [0.7, 0.7141, 0, ...] (~0.7 cosine similarity)
+- Mock provider `embed` returns the controlled unit vector query embedding
+- Without decay: msg-old (0.95) > msg-new (0.7) -- msg-old would rank first
+- With decay: msg-old (0.95 * ~0.25 = ~0.24) < msg-new (0.7 * ~1.0 = ~0.7) -- msg-new ranks first
+- Assertion `expect(results[0].messageId).toBe("msg-new")` can ONLY pass when decay is applied
+
+**Stability verified:** 40 tests, 0 failures across 5 consecutive runs.
+
+**No regressions:** Regression checks confirmed:
+- ai-formatter.test.ts: 16/16 pass
+- budget-allocator.test.ts: 19/19 pass
+- smart-context-service.test.ts: 29/29 pass
+- memory-file-repository.test.ts: 19/19 pass (includes cross-project learning tests)
 
 ### Required Artifacts
 
@@ -59,7 +77,7 @@ human_verification:
 | `src/domain/ports/repositories.ts` | findCrossProjectLearnings in IMemoryFileRepository | VERIFIED | Method at line 539 with full JSDoc |
 | `src/infrastructure/database/repositories/memory-file-repository.ts` | findCrossProjectLearnings implementation | VERIFIED | Lines 127-155, SQL LIKE with excludeProject |
 | `src/infrastructure/database/services/hybrid-search-service.ts` | applyDecayToResults, pipeline-exit decay | VERIFIED | Lines 272-311, called at line 190 for all modes |
-| `src/infrastructure/database/services/hybrid-search-service.test.ts` | 5 new uniform decay tests | PARTIAL | 39/40 pass. Test "vector-only mode applies temporal decay" flaky. |
+| `src/infrastructure/database/services/hybrid-search-service.test.ts` | 5 new uniform decay tests (all deterministic) | VERIFIED | 40/40 pass across 5 consecutive runs. Flaky test fixed in Plan 25-04. |
 | `src/infrastructure/database/services/context-service.ts` | SqliteProjectResolver class | VERIFIED | Lines 255-335, resolveProjectEncoded and resolveProjectName |
 | `src/presentation/cli/formatters/context-formatter.ts` | AiContextFormatter, "ai" ContextOutputMode | VERIFIED | Line 17 type union includes "ai"; AiContextFormatter at line 357 |
 | `src/presentation/cli/commands/context.ts` | --budget, --cross-project, --format ai flags | VERIFIED | All flags at lines 72-93; SmartContextService wired at lines 178-199 |
@@ -93,11 +111,7 @@ No requirement IDs specified for Phase 25 (plans declare `requirements: []`). Ph
 
 ### Anti-Patterns Found
 
-| File | Line | Pattern | Severity | Impact |
-|------|------|---------|----------|--------|
-| hybrid-search-service.test.ts | 1103-1140 | Non-deterministic test using random embeddings for decay ordering assertion | Warning | Test passes ~1/3 of full-suite runs; fails ~2/3. Decay implementation is correct but test cannot reliably verify it. |
-
-No placeholder implementations, TODO comments, or stub returns found in any Phase 25 source files.
+None. No placeholder implementations, TODO comments, stub returns, or non-deterministic test patterns found in any Phase 25 source files. The previously identified flaky test was resolved in Plan 25-04.
 
 ### Architecture Boundary Verification
 
@@ -131,17 +145,13 @@ Zero imports from infrastructure or presentation layers. Hexagonal boundary main
 
 ### Gaps Summary
 
-One gap blocking full verification: the test `HybridSearchService > uniform temporal decay > vector-only mode applies temporal decay` is structurally flawed. It uses random `Float32Array` embeddings for both the stored messages and the query. When both cosine distances are near-maximum (both vectors approximately orthogonal to query), the raw score is near 0 for both. Since `decayedScore = score * decayFactor` and `score ≈ 0`, the decay multiplication does not differentiate the results. The sort order becomes non-deterministic.
+No automated gaps remain. All 4 success criteria are verified at the code and test level.
 
-The decay implementation itself is correct -- verified by:
-1. The FTS-only decay test (line 1002) passes deterministically.
-2. The hybrid decay regression test (line 1142) passes.
-3. Code inspection confirms `applyDecayToResults` is called at line 190 for all modes.
-4. The test passes when run in isolation (different random seed correlation).
+SC-2 was the only gap from the initial verification. Plan 25-04 fixed it by replacing random embeddings with controlled cosine similarity vectors that make post-decay ordering deterministic. The fix is non-vacuous: the test proves decay inverts a natural ordering (msg-old had higher raw similarity but loses after decay). Commit `60f7d53` is verified in git history, authored by `Chude <chude@emeke.org>`.
 
-The fix requires controlled embeddings in the test: either spy on `vectorKnnSearch` to return deterministic distances, or construct the stored embeddings such that one clearly matches the query text better than the other.
+The three human verification items carry over from the initial verification. They are not gaps -- the code is correct -- but end-to-end confirmation requires real database state that the automated test environment cannot provide.
 
 ---
 
-_Verified: 2026-03-10T12:00:00Z_
+_Verified: 2026-03-10T22:15:00Z_
 _Verifier: Claude (gsd-verifier)_
