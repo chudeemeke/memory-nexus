@@ -45,3 +45,4 @@ reports/
 tmp/
 temp/
 *.tmp
+.cc-guardian/
