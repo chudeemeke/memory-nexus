@@ -13,19 +13,19 @@ See: .planning/PROJECT.md (updated 2026-02-18)
 ## Current Position
 
 **Milestone:** v3.0 Knowledge Layer + Friction Logging
-**Phase:** 27 (qmd Integration) -- complete
-**Status:** Plan 27-02 complete, phase 27 done (2/2 plans)
-**Current Plan:** 27-02 complete (search --files flag + doctor qmd status)
+**Phase:** 29 (Ambient Context) -- complete
+**Status:** Plan 29-02 complete, phase 29 done (2/2 plans)
+**Current Plan:** 29-02 complete (AmbientContextService + sync integration)
 
 ```
-v3.0 Progress: [########################] 6/7 phases (complete)
+v3.0 Progress: [########################] 7/7 phases (complete, excluding Phase 28)
   Phase 23: Foundation                [x] Complete (4/4 plans)
   Phase 24: Friction System           [x] Complete (3/3 plans)
   Phase 25: Intelligence              [x] Complete (4/4 plans, including gap closure)
   Phase 26: Hooks + Backfill          [x] Complete (3/3 plans)
   Phase 27: qmd Integration           [x] Complete (2/2 plans)
   Phase 28: Friction Universalization  [ ] Discussed (no CONTEXT.md yet)
-  Phase 29: Ambient Context            [~] In Progress (1/2 plans)
+  Phase 29: Ambient Context            [x] Complete (2/2 plans)
 ```
 
 ## Milestone History
@@ -70,8 +70,8 @@ v3.0 Progress: [########################] 6/7 phases (complete)
 ### Last Session
 
 **Date:** 2026-03-18
-**Completed:** Plan 27-02 (search --files flag + doctor qmd status check)
-**Stopped at:** Phase 27 complete (2/2 plans)
+**Completed:** Plan 29-02 (AmbientContextService application service + sync command integration)
+**Stopped at:** Phase 29 complete (2/2 plans)
 
 ### Decisions
 
@@ -111,16 +111,21 @@ v3.0 Progress: [########################] 6/7 phases (complete)
 - dim([INFO]) for qmd status in doctor (visually distinct from pass/fail checks)
 - qmd status does NOT affect doctor exit code or issue count (informational only)
 - --json with --files outputs raw qmd JSON array (not wrapped in metadata)
+- AmbientContextDeps DI interface for sync integration testing (matches EmbeddingPassDeps/BackgroundModeDeps pattern)
+- Formatter injected as structural type (duck typing) to avoid presentation-layer import in application service
+- Ambient context runs after memory file sync, before embedding pass in sync command
+- Non-fatal ambient context: errors caught and logged to stderr, never fail overall sync
+- Lazy dynamic imports for all ambient context dependencies (zero startup overhead when disabled)
 
 ### Context for Next Session
 
 1. **Phase 27 complete** -- qmd integration done (2/2 plans: port+adapter, CLI wiring)
-2. **29-01 complete** -- IAmbientContextWriter port + AutoMemoryWriter adapter with 16 tests + config extension
-3. Plan 29-02 next: AmbientContextService application service, sync command integration
-4. Phase 28 (Friction Universalization) still needs discuss-phase (no CONTEXT.md yet)
-5. Pre-existing issues: error-codes.test.ts count assertion stale (expects 19, has 21)
+2. **Phase 29 complete** -- Ambient context pipeline operational (2/2 plans: foundation + service/integration)
+3. Phase 28 (Friction Universalization) still needs discuss-phase (no CONTEXT.md yet)
+4. Pre-existing issues: error-codes.test.ts count assertion stale (expects 19, has 21)
+5. Pre-existing issue: smart-context-service.test.ts "daily logs filtered" test is time-sensitive
 6. infrastructure/external/ barrel exports used directly by search.ts and doctor.ts (not wired to infrastructure/index.ts -- intentional for lazy loading)
 
 ---
 
-*Last updated: 2026-03-18 (27-02 executed, search --files flag + doctor qmd status check)*
+*Last updated: 2026-03-18 (29-02 executed, AmbientContextService + sync integration)*

@@ -1,8 +1,32 @@
 ---
 agent: gsd-executor
-updated: 2026-03-10
-entries: 63
+updated: 2026-03-18
+entries: 67
 ---
+
+- finding: "When mocking infrastructure module exports for testing CLI commands (e.g., isQmdAvailable, QmdRunner), use spyOn on the imported module object rather than mock.module. The pattern: import the module, spyOn the export, mockReturnValue/mockImplementation, restore in test. Works cleanly for both function and constructor mocks."
+  source: "Phase 27, Plan 02, Task 1"
+  confidence: HIGH
+  phase: "27-qmd-integration"
+  date: "2026-03-18"
+
+- finding: "When git add stages only specific files but there are previously staged files from other agents (parallel execution), git commit will include both. Always git reset unstaged first or verify git status --short shows only green M for intended files before committing."
+  source: "Phase 27, Plan 02, Task 1"
+  confidence: HIGH
+  phase: "27-qmd-integration"
+  date: "2026-03-18"
+
+- finding: "Bun test --reporter=default is not a valid option. Use bare 'bun test' without reporter flag for standard output."
+  source: "Phase 27, Plan 01, Task 2"
+  confidence: HIGH
+  phase: "27-qmd-integration"
+  date: "2026-03-18"
+
+- finding: "For spawn-based CLI adapters (QmdRunner, ClaudeSummaryGenerator), the pattern is: spawn with stdio ['pipe','pipe','pipe'], collect stdout/stderr via on('data'), handle error event for ENOENT, handle close event for exit code. No stdin needed when args are passed via CLI flags."
+  source: "Phase 27, Plan 01, Task 2"
+  confidence: HIGH
+  phase: "27-qmd-integration"
+  date: "2026-03-18"
 
 - finding: "Bun test spyOn mock leakage: when mocking nodeFs.renameSync, must restore before assertions, not in afterEach. Mock affects subsequent tests in same file if not restored promptly."
   source: "Phase 13, Plan 01, Task 1"
@@ -381,3 +405,27 @@ entries: 63
   confidence: HIGH
   phase: "25-intelligence"
   date: "2026-03-10"
+
+- finding: "When adding a new nested config section (ambientContext) to MemoryConfig, the 'loads all config values correctly' test constructs a full MemoryConfig literal. It must include the new field or toEqual will fail. This is the same pattern as adding embedding and search config sections. Check for full-object assertions in config-manager.test.ts every time MemoryConfig changes."
+  source: "Phase 29, Plan 01, Task 1"
+  confidence: HIGH
+  phase: "29-ambient-context"
+  date: "2026-03-18"
+
+- finding: "Parallel plan execution (27-01 + 29-01) on shared files (services.ts, index.ts) works when each plan adds independent content. The key is using targeted Edit operations (not full file rewrites) so each agent's additions coexist. The first agent to commit establishes the baseline; the second agent sees the first's changes as part of the current file state."
+  source: "Phase 29, Plan 01, Task 1"
+  confidence: HIGH
+  phase: "29-ambient-context"
+  date: "2026-03-18"
+
+- finding: "For sync command integration functions with many lazy dynamic imports, the AmbientContextDeps DI pattern (matching EmbeddingPassDeps, BackgroundModeDeps) is cleaner than mock.module: production path uses lazy imports, test path receives injected deps. This avoids bun mock.module caching/leakage issues entirely."
+  source: "Phase 29, Plan 02, Task 2"
+  confidence: HIGH
+  phase: "29-ambient-context"
+  date: "2026-03-18"
+
+- finding: "When composing application-layer services that need a presentation-layer formatter, use structural typing (duck typing with an inline interface like { formatSmartContext(result): string }) rather than importing the ContextFormatter type from the presentation layer. This preserves the hexagonal architecture boundary."
+  source: "Phase 29, Plan 02, Task 1"
+  confidence: HIGH
+  phase: "29-ambient-context"
+  date: "2026-03-18"
