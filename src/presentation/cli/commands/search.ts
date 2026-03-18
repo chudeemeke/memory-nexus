@@ -31,10 +31,12 @@ import {
   type OutputMode,
   type FormatOptions,
 } from "../formatters/output-formatter.js";
-import { shouldUseColor } from "../formatters/color.js";
+import { shouldUseColor, green, dim } from "../formatters/color.js";
 import { formatForAi } from "../formatters/ai-formatter.js";
 import { parseDate, DateParseError } from "../parsers/date-parser.js";
 import { formatError, formatErrorJson } from "../formatters/error-formatter.js";
+import { QmdRunner, isQmdAvailable } from "../../../infrastructure/external/index.js";
+import type { QmdSearchResult } from "../../../domain/ports/services.js";
 
 /**
  * Options for the search command.
@@ -72,6 +74,8 @@ export interface SearchCommandOptions {
   decay?: boolean;
   /** Output format: default or ai */
   format?: "default" | "ai";
+  /** Search markdown files via qmd (requires qmd installed) */
+  files?: boolean;
 }
 
 /**
@@ -145,6 +149,7 @@ export function createSearchCommand(): Command {
     .addOption(
       new Option("--no-decay", "Disable temporal decay scoring")
     )
+    .option("--files", "Search markdown files via qmd (requires qmd installed)")
     .addOption(
       new Option("--format <type>", "Output format")
         .choices(["default", "ai"])
@@ -187,6 +192,12 @@ export async function executeSearchCommand(
   } catch (error) {
     console.error("Error: Query cannot be empty");
     return { exitCode: 1 };
+  }
+
+  // Short-circuit to file search when --files is specified
+  // File search does NOT need the memory database
+  if (options.files) {
+    return executeFileSearch(query, options);
   }
 
   // Initialize database
@@ -369,6 +380,95 @@ export async function executeSearchCommand(
     await providerFactory.dispose();
     closeDatabase(db);
   }
+}
+
+/**
+ * Execute a file search by delegating to the qmd external tool.
+ *
+ * Short-circuits the normal search flow. Does NOT initialize the memory
+ * database -- file search is entirely handled by qmd.
+ *
+ * @param query - Search query string
+ * @param options - Search command options
+ * @returns CommandResult with exitCode 0 (success) or 1 (error)
+ */
+async function executeFileSearch(
+  query: string,
+  options: SearchCommandOptions
+): Promise<CommandResult> {
+  // Check qmd availability
+  if (!isQmdAvailable()) {
+    console.error(
+      "Error: qmd is required for --files search. Install: bun add -g @tobilu/qmd"
+    );
+    return { exitCode: 1 };
+  }
+
+  try {
+    const runner = new QmdRunner();
+    const results = await runner.search(query);
+
+    if (results.length === 0) {
+      const message = `No file results for "${query}"`;
+      console.log(options.format === "ai" ? message : message);
+      return { exitCode: 0 };
+    }
+
+    // JSON output: raw qmd results
+    if (options.json) {
+      console.log(JSON.stringify(results, null, 2));
+      return { exitCode: 0 };
+    }
+
+    // Formatted text output
+    const useColor = shouldUseColor();
+    let output = formatFileResults(results, useColor);
+
+    if (options.format === "ai") {
+      output = formatForAi(output);
+    }
+
+    console.log(output);
+    return { exitCode: 0 };
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    console.error(`Error: qmd search failed: ${message}`);
+    return { exitCode: 1 };
+  }
+}
+
+/**
+ * Format qmd search results for display.
+ *
+ * @param results Array of qmd search results
+ * @param useColor Whether to apply ANSI colors
+ * @returns Formatted output string
+ */
+function formatFileResults(
+  results: QmdSearchResult[],
+  useColor: boolean
+): string {
+  const lines: string[] = [];
+
+  lines.push(`File results: ${results.length} match${results.length !== 1 ? "es" : ""}`);
+  lines.push("");
+
+  for (const result of results) {
+    // Strip qmd:// prefix from file path
+    const filePath = result.file.replace(/^qmd:\/\//, "");
+
+    lines.push(`  ${green(result.title, useColor)}`);
+    lines.push(`  ${dim(`${filePath} (score: ${result.score})`, useColor)}`);
+
+    const snippet = result.snippet || result.context;
+    if (snippet) {
+      lines.push(`  ${snippet}`);
+    }
+
+    lines.push("");
+  }
+
+  return lines.join("\n");
 }
 
 /**

@@ -5,7 +5,7 @@
  * Tests command structure, option parsing, and result formatting.
  */
 
-import { describe, expect, it, beforeEach, afterEach, spyOn } from "bun:test";
+import { describe, expect, it, beforeEach, afterEach, spyOn, mock } from "bun:test";
 import { Command, CommanderError } from "commander";
 import { createSearchCommand, executeSearchCommand, filterCaseSensitive, resolveSearchMode } from "./search.js";
 import {
@@ -1160,6 +1160,209 @@ describe("Search Command", () => {
     it("returns undefined when no mode specified", () => {
       const mode = resolveSearchMode({});
       expect(mode).toBeUndefined();
+    });
+  });
+
+  describe("--files flag", () => {
+    it("has --files option in command", () => {
+      const command = createSearchCommand();
+      const filesOption = command.options.find(
+        (o) => o.long === "--files"
+      );
+      expect(filesOption).toBeDefined();
+    });
+
+    it("parses --files flag", () => {
+      const command = createSearchCommand();
+      let capturedOptions: Record<string, unknown> | undefined;
+      command.action((_query: string, options: Record<string, unknown>) => {
+        capturedOptions = options;
+      });
+
+      command.parse(["test", "--files"], { from: "user" });
+
+      expect(capturedOptions?.files).toBe(true);
+    });
+
+    it("includes --files in help text", () => {
+      const command = createSearchCommand();
+      const helpInfo = command.helpInformation();
+      expect(helpInfo).toContain("--files");
+      expect(helpInfo).toContain("qmd");
+    });
+
+    it("delegates to QmdRunner.search when qmd available", async () => {
+      // This test uses executeSearchCommand with --files flag
+      // Mock the qmd infrastructure module to simulate availability
+      const mockQmdModule = await import("../../../infrastructure/external/index.js");
+      const isQmdSpy = spyOn(mockQmdModule, "isQmdAvailable" as never);
+      (isQmdSpy as unknown as { mockReturnValue: (v: boolean) => void }).mockReturnValue(true);
+
+      const mockRunner = {
+        search: async () => [
+          { title: "Test Doc", file: "path/to/doc.md", score: 0.85, snippet: "matched text" },
+        ],
+      };
+      const QmdRunnerSpy = spyOn(mockQmdModule, "QmdRunner" as never);
+      (QmdRunnerSpy as unknown as { mockImplementation: (fn: () => unknown) => void }).mockImplementation(() => mockRunner);
+
+      const result = await executeSearchCommand("test query", { files: true });
+
+      expect(result.exitCode).toBe(0);
+      expect(consoleLogSpy).toHaveBeenCalled();
+      const output = consoleLogSpy.mock.calls.map((c: unknown[]) => String(c[0])).join("\n");
+      expect(output).toContain("File results:");
+
+      isQmdSpy.mockRestore();
+      QmdRunnerSpy.mockRestore();
+    });
+
+    it("prints install instructions when qmd not available", async () => {
+      const mockQmdModule = await import("../../../infrastructure/external/index.js");
+      const isQmdSpy = spyOn(mockQmdModule, "isQmdAvailable" as never);
+      (isQmdSpy as unknown as { mockReturnValue: (v: boolean) => void }).mockReturnValue(false);
+
+      const result = await executeSearchCommand("test query", { files: true });
+
+      expect(result.exitCode).toBe(1);
+      expect(consoleErrorSpy).toHaveBeenCalled();
+      const errorOutput = consoleErrorSpy.mock.calls.map((c: unknown[]) => String(c[0])).join("\n");
+      expect(errorOutput).toContain("qmd");
+      expect(errorOutput).toContain("bun add -g @tobilu/qmd");
+
+      isQmdSpy.mockRestore();
+    });
+
+    it("formats results with file path, title, score, snippet", async () => {
+      const mockQmdModule = await import("../../../infrastructure/external/index.js");
+      const isQmdSpy = spyOn(mockQmdModule, "isQmdAvailable" as never);
+      (isQmdSpy as unknown as { mockReturnValue: (v: boolean) => void }).mockReturnValue(true);
+
+      const mockRunner = {
+        search: async () => [
+          { title: "First Doc", file: "path/to/first.md", score: 0.85, snippet: "first snippet" },
+          { title: "Second Doc", file: "qmd://path/to/second.md", score: 0.72, snippet: "second snippet" },
+        ],
+      };
+      const QmdRunnerSpy = spyOn(mockQmdModule, "QmdRunner" as never);
+      (QmdRunnerSpy as unknown as { mockImplementation: (fn: () => unknown) => void }).mockImplementation(() => mockRunner);
+
+      const result = await executeSearchCommand("test query", { files: true });
+
+      expect(result.exitCode).toBe(0);
+      const output = consoleLogSpy.mock.calls.map((c: unknown[]) => String(c[0])).join("\n");
+      expect(output).toContain("First Doc");
+      expect(output).toContain("path/to/first.md");
+      expect(output).toContain("0.85");
+      expect(output).toContain("first snippet");
+      expect(output).toContain("Second Doc");
+      // qmd:// prefix should be stripped
+      expect(output).toContain("path/to/second.md");
+      expect(output).toContain("0.72");
+
+      isQmdSpy.mockRestore();
+      QmdRunnerSpy.mockRestore();
+    });
+
+    it("applies --format ai to file results", async () => {
+      const mockQmdModule = await import("../../../infrastructure/external/index.js");
+      const isQmdSpy = spyOn(mockQmdModule, "isQmdAvailable" as never);
+      (isQmdSpy as unknown as { mockReturnValue: (v: boolean) => void }).mockReturnValue(true);
+
+      const mockRunner = {
+        search: async () => [
+          { title: "AI Test", file: "path/to/ai.md", score: 0.9, snippet: "ai content" },
+        ],
+      };
+      const QmdRunnerSpy = spyOn(mockQmdModule, "QmdRunner" as never);
+      (QmdRunnerSpy as unknown as { mockImplementation: (fn: () => unknown) => void }).mockImplementation(() => mockRunner);
+
+      const result = await executeSearchCommand("test query", { files: true, format: "ai" });
+
+      expect(result.exitCode).toBe(0);
+      // AI output should not contain ANSI codes
+      const output = consoleLogSpy.mock.calls.map((c: unknown[]) => String(c[0])).join("\n");
+      expect(output).not.toContain("\x1b[");
+
+      isQmdSpy.mockRestore();
+      QmdRunnerSpy.mockRestore();
+    });
+
+    it("handles qmd spawn errors gracefully", async () => {
+      const mockQmdModule = await import("../../../infrastructure/external/index.js");
+      const isQmdSpy = spyOn(mockQmdModule, "isQmdAvailable" as never);
+      (isQmdSpy as unknown as { mockReturnValue: (v: boolean) => void }).mockReturnValue(true);
+
+      const mockRunner = {
+        search: async () => { throw new Error("qmd spawn failed"); },
+      };
+      const QmdRunnerSpy = spyOn(mockQmdModule, "QmdRunner" as never);
+      (QmdRunnerSpy as unknown as { mockImplementation: (fn: () => unknown) => void }).mockImplementation(() => mockRunner);
+
+      const result = await executeSearchCommand("test query", { files: true });
+
+      expect(result.exitCode).toBe(1);
+      expect(consoleErrorSpy).toHaveBeenCalled();
+      const errorOutput = consoleErrorSpy.mock.calls.map((c: unknown[]) => String(c[0])).join("\n");
+      expect(errorOutput).toContain("qmd");
+
+      isQmdSpy.mockRestore();
+      QmdRunnerSpy.mockRestore();
+    });
+
+    it("handles empty results from qmd", async () => {
+      const mockQmdModule = await import("../../../infrastructure/external/index.js");
+      const isQmdSpy = spyOn(mockQmdModule, "isQmdAvailable" as never);
+      (isQmdSpy as unknown as { mockReturnValue: (v: boolean) => void }).mockReturnValue(true);
+
+      const mockRunner = {
+        search: async () => [],
+      };
+      const QmdRunnerSpy = spyOn(mockQmdModule, "QmdRunner" as never);
+      (QmdRunnerSpy as unknown as { mockImplementation: (fn: () => unknown) => void }).mockImplementation(() => mockRunner);
+
+      const result = await executeSearchCommand("test query", { files: true });
+
+      expect(result.exitCode).toBe(0);
+      const output = consoleLogSpy.mock.calls.map((c: unknown[]) => String(c[0])).join("\n");
+      expect(output).toContain("No file results");
+
+      isQmdSpy.mockRestore();
+      QmdRunnerSpy.mockRestore();
+    });
+
+    it("does not affect normal search flow when --files not specified", async () => {
+      // When files is not set, the normal search flow should execute
+      // This is a regression test -- empty query still errors normally
+      const result = await executeSearchCommand("", {});
+      expect(result.exitCode).toBe(1);
+      expect(consoleErrorSpy).toHaveBeenCalledWith("Error: Query cannot be empty");
+    });
+
+    it("outputs raw JSON when --json and --files used together", async () => {
+      const mockQmdModule = await import("../../../infrastructure/external/index.js");
+      const isQmdSpy = spyOn(mockQmdModule, "isQmdAvailable" as never);
+      (isQmdSpy as unknown as { mockReturnValue: (v: boolean) => void }).mockReturnValue(true);
+
+      const mockResults = [
+        { title: "JSON Doc", file: "path/to/json.md", score: 0.95, snippet: "json content" },
+      ];
+      const mockRunner = {
+        search: async () => mockResults,
+      };
+      const QmdRunnerSpy = spyOn(mockQmdModule, "QmdRunner" as never);
+      (QmdRunnerSpy as unknown as { mockImplementation: (fn: () => unknown) => void }).mockImplementation(() => mockRunner);
+
+      const result = await executeSearchCommand("test query", { files: true, json: true });
+
+      expect(result.exitCode).toBe(0);
+      const output = consoleLogSpy.mock.calls.map((c: unknown[]) => String(c[0])).join("\n");
+      const parsed = JSON.parse(output);
+      expect(Array.isArray(parsed)).toBe(true);
+      expect(parsed[0].title).toBe("JSON Doc");
+
+      isQmdSpy.mockRestore();
+      QmdRunnerSpy.mockRestore();
     });
   });
 
