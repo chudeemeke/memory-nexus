@@ -31,6 +31,7 @@ import {
     shouldUseColor,
 } from "../formatters/color.js";
 import { getMigrationStatus } from "../../../infrastructure/migration.js";
+import { getQmdInfo } from "../../../infrastructure/external/index.js";
 
 /**
  * Options for the doctor command.
@@ -216,6 +217,17 @@ export function formatHealthResult(result: HealthCheckResult, useColor: boolean)
 
     lines.push("");
 
+    // Optional Tools section
+    lines.push("Optional Tools");
+    const qmdInfo = getQmdInfo();
+    if (qmdInfo.available) {
+        lines.push(`  ${dim("[INFO]", useColor)} qmd: installed at ${qmdInfo.path} (enables --files search)`);
+    } else {
+        lines.push(`  ${dim("[INFO]", useColor)} qmd: not found (optional -- install with: bun add -g @tobilu/qmd)`);
+    }
+
+    lines.push("");
+
     // Summary
     const issueCount = countIssues(result);
     if (issueCount === 0) {
@@ -361,6 +373,7 @@ export async function executeDoctorCommand(options: DoctorOptions): Promise<Comm
     if (options.json) {
         // Convert dates to ISO strings for JSON serialization
         const migration = getMigrationStatus();
+        const qmdInfo = getQmdInfo();
         const jsonResult = {
             ...healthResult,
             hooks: {
@@ -368,6 +381,7 @@ export async function executeDoctorCommand(options: DoctorOptions): Promise<Comm
                 lastRun: healthResult.hooks.lastRun?.toISOString() ?? null,
             },
             migration,
+            qmd: qmdInfo,
         };
         console.log(JSON.stringify(jsonResult, null, 2));
         return { exitCode };

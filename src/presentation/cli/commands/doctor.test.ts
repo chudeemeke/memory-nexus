@@ -4,7 +4,7 @@
  * Tests for the doctor command that checks system health.
  */
 
-import { afterAll, afterEach, beforeAll, describe, expect, it } from "bun:test";
+import { afterAll, afterEach, beforeAll, describe, expect, it, spyOn } from "bun:test";
 import { mkdirSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { tmpdir } from "node:os";
@@ -738,6 +738,126 @@ describe("doctor command", () => {
                 logsDir: join(testDir, "logs"),
                 sourceDir: testDir,
             });
+        });
+    });
+
+    describe("qmd status in doctor output", () => {
+        it("shows qmd installed with path when available", () => {
+            const qmdModule = require("../../../infrastructure/external/index.js");
+            const spy = spyOn(qmdModule, "getQmdInfo").mockReturnValue({
+                available: true,
+                path: "/usr/bin/qmd",
+            });
+
+            const result: HealthCheckResult = {
+                database: { exists: true, readable: true, writable: true, integrity: "ok", size: 1000 },
+                permissions: { configDir: true, logsDir: true, sourceDir: true },
+                hooks: { installed: true, enabled: true, lastRun: null },
+                config: { valid: true, issues: [] },
+                embedding: {
+                    configured: true,
+                    provider: "local",
+                    model: "Xenova/all-MiniLM-L6-v2",
+                    dimensions: 384,
+                    enabled: true,
+                    ready: true,
+                },
+                sqliteVec: { available: true, version: "0.1.6" },
+                searchCapability: { fts5: true, sqliteVec: true, embeddedCount: 100, totalMessages: 100, coveragePercent: 100, defaultMode: "auto", vectorReady: true },
+            };
+
+            const output = formatHealthResult(result, false);
+            expect(output).toContain("Optional Tools");
+            expect(output).toContain("qmd");
+            expect(output).toContain("/usr/bin/qmd");
+            expect(output).toContain("[INFO]");
+
+            spy.mockRestore();
+        });
+
+        it("shows qmd not found with install hint when unavailable", () => {
+            const qmdModule = require("../../../infrastructure/external/index.js");
+            const spy = spyOn(qmdModule, "getQmdInfo").mockReturnValue({
+                available: false,
+                path: null,
+            });
+
+            const result: HealthCheckResult = {
+                database: { exists: true, readable: true, writable: true, integrity: "ok", size: 1000 },
+                permissions: { configDir: true, logsDir: true, sourceDir: true },
+                hooks: { installed: true, enabled: true, lastRun: null },
+                config: { valid: true, issues: [] },
+                embedding: {
+                    configured: true,
+                    provider: "local",
+                    model: "Xenova/all-MiniLM-L6-v2",
+                    dimensions: 384,
+                    enabled: true,
+                    ready: true,
+                },
+                sqliteVec: { available: true, version: "0.1.6" },
+                searchCapability: { fts5: true, sqliteVec: true, embeddedCount: 100, totalMessages: 100, coveragePercent: 100, defaultMode: "auto", vectorReady: true },
+            };
+
+            const output = formatHealthResult(result, false);
+            expect(output).toContain("qmd: not found");
+            expect(output).toContain("bun add -g @tobilu/qmd");
+
+            spy.mockRestore();
+        });
+
+        it("qmd status does NOT affect exit code", async () => {
+            const qmdModule = require("../../../infrastructure/external/index.js");
+            const spy = spyOn(qmdModule, "getQmdInfo").mockReturnValue({
+                available: false,
+                path: null,
+            });
+
+            // With a healthy system, qmd missing should NOT degrade exit code
+            const result: HealthCheckResult = {
+                database: { exists: true, readable: true, writable: true, integrity: "ok", size: 1000 },
+                permissions: { configDir: true, logsDir: true, sourceDir: true },
+                hooks: { installed: true, enabled: true, lastRun: null },
+                config: { valid: true, issues: [] },
+                embedding: {
+                    configured: true,
+                    provider: "local",
+                    model: "Xenova/all-MiniLM-L6-v2",
+                    dimensions: 384,
+                    enabled: true,
+                    ready: true,
+                },
+                sqliteVec: { available: true, version: "0.1.6" },
+                searchCapability: { fts5: true, sqliteVec: true, embeddedCount: 100, totalMessages: 100, coveragePercent: 100, defaultMode: "auto", vectorReady: true },
+            };
+
+            // The output should still say "All checks passed"
+            const output = formatHealthResult(result, false);
+            expect(output).toContain("All checks passed");
+
+            spy.mockRestore();
+        });
+
+        it("JSON output includes qmd field", async () => {
+            const qmdModule = require("../../../infrastructure/external/index.js");
+            const spy = spyOn(qmdModule, "getQmdInfo").mockReturnValue({
+                available: true,
+                path: "/usr/bin/qmd",
+            });
+
+            consoleOutput = [];
+            console.log = (msg: string) => consoleOutput.push(msg);
+
+            await executeDoctorCommand({ json: true });
+
+            const output = consoleOutput.join("\n");
+            const parsed = JSON.parse(output);
+
+            expect(parsed).toHaveProperty("qmd");
+            expect(parsed.qmd.available).toBe(true);
+            expect(parsed.qmd.path).toBe("/usr/bin/qmd");
+
+            spy.mockRestore();
         });
     });
 
