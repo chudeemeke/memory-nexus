@@ -13,17 +13,17 @@ See: .planning/PROJECT.md (updated 2026-02-18)
 ## Current Position
 
 **Milestone:** v3.0 Knowledge Layer + Friction Logging
-**Phase:** 27 (qmd Integration) -- in progress
-**Status:** Plan 27-01 complete, plan 27-02 remaining
-**Current Plan:** 27-01 complete (IExternalSearchProvider port + QmdRunner adapter)
+**Phase:** 27 (qmd Integration) -- complete
+**Status:** Plan 27-02 complete, phase 27 done (2/2 plans)
+**Current Plan:** 27-02 complete (search --files flag + doctor qmd status)
 
 ```
-v3.0 Progress: [####################    ] 5/7 phases (complete)
+v3.0 Progress: [########################] 6/7 phases (complete)
   Phase 23: Foundation                [x] Complete (4/4 plans)
   Phase 24: Friction System           [x] Complete (3/3 plans)
   Phase 25: Intelligence              [x] Complete (4/4 plans, including gap closure)
   Phase 26: Hooks + Backfill          [x] Complete (3/3 plans)
-  Phase 27: qmd Integration           [~] In Progress (1/2 plans)
+  Phase 27: qmd Integration           [x] Complete (2/2 plans)
   Phase 28: Friction Universalization  [ ] Discussed (no CONTEXT.md yet)
   Phase 29: Ambient Context            [~] In Progress (1/2 plans)
 ```
@@ -70,8 +70,8 @@ v3.0 Progress: [####################    ] 5/7 phases (complete)
 ### Last Session
 
 **Date:** 2026-03-18
-**Completed:** Plan 27-01 (IExternalSearchProvider port + QmdRunner adapter)
-**Stopped at:** Phase 27 plan 01 complete, plan 02 remaining
+**Completed:** Plan 27-02 (search --files flag + doctor qmd status check)
+**Stopped at:** Phase 27 complete (2/2 plans)
 
 ### Decisions
 
@@ -107,17 +107,20 @@ v3.0 Progress: [####################    ] 5/7 phases (complete)
 - Marker format uses HTML comments (<!-- memory-cli:start/end -->) for MEMORY.md block isolation
 - mergeMemoryBlock exported as pure function for direct testing without filesystem ops
 - AmbientContext config uses flat object (enabled + budget) matching existing config deep-merge pattern
+- executeFileSearch short-circuits before DB init (file search does not need memory database)
+- dim([INFO]) for qmd status in doctor (visually distinct from pass/fail checks)
+- qmd status does NOT affect doctor exit code or issue count (informational only)
+- --json with --files outputs raw qmd JSON array (not wrapped in metadata)
 
 ### Context for Next Session
 
-1. **27-01 complete** -- IExternalSearchProvider port + QmdRunner adapter with 15 tests
+1. **Phase 27 complete** -- qmd integration done (2/2 plans: port+adapter, CLI wiring)
 2. **29-01 complete** -- IAmbientContextWriter port + AutoMemoryWriter adapter with 16 tests + config extension
-3. Plan 27-02 next: wire QmdRunner to search --files flag and doctor qmd status check
-4. Plan 29-02 next: AmbientContextService application service, sync command integration
-5. Phase 28 (Friction Universalization) still needs discuss-phase (no CONTEXT.md yet)
-6. Pre-existing issues: error-codes.test.ts count assertion stale (expects 19, has 21)
-7. infrastructure/external/ barrel NOT yet wired to infrastructure/index.ts (deferred to 27-02)
+3. Plan 29-02 next: AmbientContextService application service, sync command integration
+4. Phase 28 (Friction Universalization) still needs discuss-phase (no CONTEXT.md yet)
+5. Pre-existing issues: error-codes.test.ts count assertion stale (expects 19, has 21)
+6. infrastructure/external/ barrel exports used directly by search.ts and doctor.ts (not wired to infrastructure/index.ts -- intentional for lazy loading)
 
 ---
 
-*Last updated: 2026-03-18 (29-01 executed, IAmbientContextWriter port + AutoMemoryWriter adapter)*
+*Last updated: 2026-03-18 (27-02 executed, search --files flag + doctor qmd status check)*
