@@ -85,6 +85,29 @@ export const DEFAULT_SEARCH_CONFIG: SearchConfigData = {
 };
 
 /**
+ * Ambient context configuration data interface
+ *
+ * Controls automatic context generation into Claude Code's
+ * auto memory directory during sync.
+ */
+export interface AmbientContextConfigData {
+    /** Whether ambient context generation is enabled */
+    enabled: boolean;
+    /** Token budget for context.md generation */
+    budget: number;
+}
+
+/**
+ * Default ambient context configuration
+ *
+ * Enabled by default with 800 token budget.
+ */
+export const DEFAULT_AMBIENT_CONTEXT_CONFIG: AmbientContextConfigData = {
+    enabled: true,
+    budget: 800,
+};
+
+/**
  * Memory configuration interface
  *
  * All options from CONTEXT.md:
@@ -97,6 +120,7 @@ export const DEFAULT_SEARCH_CONFIG: SearchConfigData = {
  * - showFailures: Show failure notifications to user
  * - embedding: Embedding provider configuration
  * - search: Hybrid search configuration
+ * - ambientContext: Ambient context generation configuration
  */
 export interface MemoryConfig {
     /** Enable automatic hook-based sync */
@@ -117,6 +141,8 @@ export interface MemoryConfig {
     embedding: EmbeddingConfigData;
     /** Hybrid search configuration */
     search: SearchConfigData;
+    /** Ambient context generation configuration */
+    ambientContext: AmbientContextConfigData;
 }
 
 /**
@@ -210,6 +236,7 @@ export const DEFAULT_CONFIG: MemoryConfig = {
     showFailures: false,
     embedding: DEFAULT_EMBEDDING_CONFIG,
     search: DEFAULT_SEARCH_CONFIG,
+    ambientContext: DEFAULT_AMBIENT_CONTEXT_CONFIG,
 };
 
 /**
@@ -269,6 +296,10 @@ export function loadConfig(): MemoryConfig {
                     ...DEFAULT_SEARCH_CONFIG.temporalDecay,
                     ...((loaded.search as Partial<SearchConfigData> | undefined)?.temporalDecay ?? {}),
                 },
+            },
+            ambientContext: {
+                ...DEFAULT_AMBIENT_CONTEXT_CONFIG,
+                ...((loaded.ambientContext as Partial<AmbientContextConfigData> | undefined) ?? {}),
             },
         };
     } catch {

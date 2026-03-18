@@ -43,6 +43,7 @@ export type {
   QmdSearchResult,
   QmdHealthInfo,
   IExternalSearchProvider,
+  IAmbientContextWriter,
 } from "./services.js";
 
 // Source interfaces

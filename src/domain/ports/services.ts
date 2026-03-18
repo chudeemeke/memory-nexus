@@ -176,3 +176,30 @@ export interface IExternalSearchProvider {
   /** Synchronous check returning availability and resolved binary path */
   getHealthInfo(): QmdHealthInfo;
 }
+
+/**
+ * Port for writing ambient context artifacts.
+ *
+ * Implementations handle filesystem operations to write context.md
+ * (complete overwrite) and update MEMORY.md (marker-based merge).
+ */
+export interface IAmbientContextWriter {
+  /**
+   * Write the full context file (complete overwrite).
+   *
+   * @param autoMemoryDir Directory path for the auto-memory artifacts
+   * @param content Content to write as context.md
+   */
+  writeContextFile(autoMemoryDir: string, content: string): Promise<void>;
+
+  /**
+   * Update the MEMORY.md block using marker-based merge.
+   *
+   * Content between `<!-- memory-cli:start -->` and `<!-- memory-cli:end -->`
+   * markers is replaced. Content outside markers is preserved.
+   *
+   * @param autoMemoryDir Directory path for the auto-memory artifacts
+   * @param blockContent Content to place between markers
+   */
+  updateMemoryBlock(autoMemoryDir: string, blockContent: string): Promise<void>;
+}

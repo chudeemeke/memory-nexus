@@ -19,11 +19,13 @@ import {
     DEFAULT_CONFIG,
     DEFAULT_EMBEDDING_CONFIG,
     DEFAULT_SEARCH_CONFIG,
+    DEFAULT_AMBIENT_CONTEXT_CONFIG,
     PROVIDER_DEFAULTS,
     resolveProviderDefaults,
     type MemoryConfig,
     type EmbeddingConfigData,
     type SearchConfigData,
+    type AmbientContextConfigData,
 } from "./config-manager.js";
 
 describe("config-manager", () => {
@@ -196,6 +198,10 @@ describe("config-manager", () => {
                         enabled: false,
                         halfLifeDays: 60,
                     },
+                },
+                ambientContext: {
+                    enabled: false,
+                    budget: 1200,
                 },
             };
 
@@ -672,6 +678,67 @@ describe("config-manager", () => {
 
             const config = loadConfig();
             expect(config.search).toEqual(DEFAULT_SEARCH_CONFIG);
+        });
+    });
+
+    describe("ambient context config", () => {
+        test("DEFAULT_AMBIENT_CONTEXT_CONFIG has expected defaults", () => {
+            expect(DEFAULT_AMBIENT_CONTEXT_CONFIG).toEqual({
+                enabled: true,
+                budget: 800,
+            });
+        });
+
+        test("DEFAULT_CONFIG has ambientContext property matching DEFAULT_AMBIENT_CONTEXT_CONFIG", () => {
+            expect(DEFAULT_CONFIG).toHaveProperty("ambientContext");
+            expect(DEFAULT_CONFIG.ambientContext).toEqual(DEFAULT_AMBIENT_CONTEXT_CONFIG);
+        });
+
+        test("loadConfig() returns default ambientContext when no config file", () => {
+            const config = loadConfig();
+            expect(config.ambientContext).toEqual(DEFAULT_AMBIENT_CONTEXT_CONFIG);
+        });
+
+        test("loadConfig() deep-merges partial ambientContext (only budget set, enabled uses default)", () => {
+            const configDir = join(testDir, ".config", "memory");
+            mkdirSync(configDir, { recursive: true });
+            writeFileSync(
+                join(configDir, "config.json"),
+                JSON.stringify({ ambientContext: { budget: 1500 } })
+            );
+
+            const config = loadConfig();
+
+            // Overridden value
+            expect(config.ambientContext.budget).toBe(1500);
+
+            // Default value preserved
+            expect(config.ambientContext.enabled).toBe(true);
+        });
+
+        test("loadConfig() preserves explicitly set ambientContext values", () => {
+            const configDir = join(testDir, ".config", "memory");
+            mkdirSync(configDir, { recursive: true });
+            writeFileSync(
+                join(configDir, "config.json"),
+                JSON.stringify({ ambientContext: { enabled: false, budget: 400 } })
+            );
+
+            const config = loadConfig();
+            expect(config.ambientContext.enabled).toBe(false);
+            expect(config.ambientContext.budget).toBe(400);
+        });
+
+        test("loadConfig() with no ambientContext key returns full defaults", () => {
+            const configDir = join(testDir, ".config", "memory");
+            mkdirSync(configDir, { recursive: true });
+            writeFileSync(
+                join(configDir, "config.json"),
+                JSON.stringify({ autoSync: false })
+            );
+
+            const config = loadConfig();
+            expect(config.ambientContext).toEqual(DEFAULT_AMBIENT_CONTEXT_CONFIG);
         });
     });
 });
