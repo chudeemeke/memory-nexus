@@ -13,9 +13,9 @@ See: .planning/PROJECT.md (updated 2026-02-18)
 ## Current Position
 
 **Milestone:** v3.0 Knowledge Layer + Friction Logging
-**Phase:** 25 (Intelligence) -- complete (including gap closure)
-**Status:** Phase 25 fully complete, ready for phases 27/28/29
-**Current Plan:** 25-04 complete (flaky vector-only decay test fixed)
+**Phase:** 27 (qmd Integration) -- in progress
+**Status:** Plan 27-01 complete, plan 27-02 remaining
+**Current Plan:** 27-01 complete (IExternalSearchProvider port + QmdRunner adapter)
 
 ```
 v3.0 Progress: [####################    ] 5/7 phases (complete)
@@ -23,9 +23,9 @@ v3.0 Progress: [####################    ] 5/7 phases (complete)
   Phase 24: Friction System           [x] Complete (3/3 plans)
   Phase 25: Intelligence              [x] Complete (4/4 plans, including gap closure)
   Phase 26: Hooks + Backfill          [x] Complete (3/3 plans)
-  Phase 27: qmd Integration           [ ] Discussed (CONTEXT.md ready)
+  Phase 27: qmd Integration           [~] In Progress (1/2 plans)
   Phase 28: Friction Universalization  [ ] Discussed (no CONTEXT.md yet)
-  Phase 29: Ambient Context            [ ] Discussed (CONTEXT.md ready)
+  Phase 29: Ambient Context            [~] In Progress (1/2 plans)
 ```
 
 ## Milestone History
@@ -69,9 +69,9 @@ v3.0 Progress: [####################    ] 5/7 phases (complete)
 
 ### Last Session
 
-**Date:** 2026-03-10
-**Completed:** Plan 25-04 (gap closure: fix flaky vector-only decay test)
-**Stopped at:** Phase 25 fully complete (all 4 plans done, including gap closure)
+**Date:** 2026-03-18
+**Completed:** Plan 27-01 (IExternalSearchProvider port + QmdRunner adapter)
+**Stopped at:** Phase 27 plan 01 complete, plan 02 remaining
 
 ### Decisions
 
@@ -101,18 +101,19 @@ v3.0 Progress: [####################    ] 5/7 phases (complete)
 - formatForAi pipe pattern over parallel AI formatter classes (simpler, same result)
 - Friction --format on parent command (Commander.js does not propagate parent options to subcommands)
 - useSmartContext() routing function separates smart/legacy context paths for backward compatibility
+- QmdRunner follows ClaudeSummaryGenerator spawn pattern for consistency across infrastructure adapters
+- Standalone isQmdAvailable/getQmdInfo functions duplicate class logic for non-DI contexts (doctor command)
+- infrastructure/external/ directory for external CLI tool adapters (new pattern)
 
 ### Context for Next Session
 
-1. **25-04 complete** -- flaky vector-only decay test fixed with controlled embeddings
-2. Plan+execute remaining phases (27, 28, 29 are all independent)
-3. Phase 29 (Ambient Context) CONTEXT.md is complete -- skip discuss-phase, go straight to plan-phase
+1. **27-01 complete** -- IExternalSearchProvider port + QmdRunner adapter with 15 tests
+2. Plan 27-02 next: wire QmdRunner to search --files flag and doctor qmd status check
+3. Phase 29 plan 01 also committed (IAmbientContextWriter port) -- parallel execution OK
 4. Phase 28 (Friction Universalization) still needs discuss-phase (no CONTEXT.md yet)
-5. Safe parallel set: 27 + 29. Run 28 after those land (schema overlap risk with friction data)
-6. Pre-existing issues: error-codes.test.ts count assertion stale (expects 19, has 21)
-7. All 7 output-producing commands support --format ai
-8. SmartContextService fully wired with SqliteProjectResolver, memory file repo, friction repo
+5. Pre-existing issues: error-codes.test.ts count assertion stale (expects 19, has 21)
+6. infrastructure/external/ barrel NOT yet wired to infrastructure/index.ts (deferred to 27-02)
 
 ---
 
-*Last updated: 2026-03-10 (25-04 gap closure executed, phase 25 fully complete)*
+*Last updated: 2026-03-18 (27-01 executed, IExternalSearchProvider port + QmdRunner adapter)*
