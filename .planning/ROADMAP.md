@@ -304,7 +304,7 @@ Phase 13 (Package Rename)
 | 24 | v3.0 | 3/3 | Complete | 2026-03-08 |
 | 25 | v3.0 | 4/4 | Complete | 2026-03-10 |
 | 26 | v3.0 | 3/3 | Complete | 2026-03-08 |
-| 27 | v3.0 | -- | Discussed | -- |
+| 27 | v3.0 | 0/2 | Planned | -- |
 | 28 | v3.0 | -- | Discussed | -- |
 | 29 | v3.0 | -- | Discussed | -- |
 
@@ -427,6 +427,13 @@ Success Criteria:
 
 **Depends on:** Phase 23 (files to search exist in ~/.memory/)
 **Discussion context:** .planning/phases/27-qmd-integration/CONTEXT.md
+**Plans:** 2 plans
+
+Plans:
+- [ ] 27-01-PLAN.md -- IExternalSearchProvider domain port, QmdRunner infrastructure adapter with detection utilities
+- [ ] 27-02-PLAN.md -- Search command --files flag with qmd delegation, doctor qmd status check
+
+Requirements: QUAL-01, QUAL-02, QUAL-03, QUAL-04
 
 Success Criteria:
 1. `memory search "query" --files` delegates to qmd when installed
@@ -502,4 +509,4 @@ Success Criteria:
 
 ---
 
-*Last updated: 2026-03-10 (Phase 25 gap closure 25-04 complete: 4/4 plans)*
+*Last updated: 2026-03-18 (Phase 27 planned: 2 plans in 2 waves)*
