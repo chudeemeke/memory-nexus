@@ -1,7 +1,7 @@
 ---
 agent: gsd-phase-researcher
-updated: 2026-03-08
-entries: 28
+updated: 2026-03-18
+entries: 30
 ---
 
 - finding: "When researching package renames, always read every infrastructure file that constructs paths -- path definitions are often scattered across multiple modules. Grep for the old name is not sufficient; you need to categorize each reference as (a) tool identity, (b) filesystem path, (c) test data."
@@ -173,3 +173,15 @@ entries: 28
   confidence: HIGH
   phase: "25-intelligence"
   date: "2026-03-08"
+
+- finding: "CONTEXT.md described qmd invocation as 'qmd search <query> --path ~/.memory/' but qmd v1.1.0 has NO --path flag. qmd uses collection-based indexing (qmd collection add/update/search). The actual search command accepts: positional query, -n (limit), --min-score, --json/--csv/--xml/--files (output format), -c (collection filter), --index (named index). This is the third instance of CONTEXT.md describing a technically inaccurate CLI interface. Pattern: always read the actual tool's source/help before committing to CONTEXT.md's invocation syntax."
+  source: "Phase 27, qmd Integration"
+  confidence: HIGH
+  phase: "27-qmd-integration"
+  date: "2026-03-18"
+
+- finding: "For external tool delegation phases, the most critical research is reading the actual CLI source of the tool being delegated to (not just its README or user's description). qmd's util.parseArgs at line 2237 of qmd.ts is the ground truth for what flags exist. README/docs can lag behind or describe aspirational features. The source parser is authoritative."
+  source: "Phase 27, qmd Integration"
+  confidence: HIGH
+  phase: "27-qmd-integration"
+  date: "2026-03-18"
