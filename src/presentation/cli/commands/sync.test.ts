@@ -1550,6 +1550,167 @@ describe("handleBackgroundMode", () => {
   });
 });
 
+describe("runAmbientContextGeneration", () => {
+  it("calls AmbientContextService when enabled", async () => {
+    const logSpy = spyOn(console, "log").mockImplementation(() => {});
+
+    let generateCalled = false;
+    let generateOptions: any = null;
+
+    const { runAmbientContextGeneration } = await import("./sync.js");
+
+    const result = await runAmbientContextGeneration(
+      {} as any, // db (unused with deps override)
+      {},        // options (not quiet, not dryRun)
+      {
+        loadConfig: () => ({
+          ambientContext: { enabled: true, budget: 800 },
+        }),
+        resolveAutoMemoryDir: () => "/tmp/test-auto-memory",
+        resolveProjectName: () => "test-project",
+        createAmbientService: () => ({
+          generateAmbientContext: async (opts: any) => {
+            generateCalled = true;
+            generateOptions = opts;
+            return { success: true, contextTokens: 500 };
+          },
+        }),
+      },
+    );
+
+    expect(generateCalled).toBe(true);
+    expect(generateOptions.projectName).toBe("test-project");
+    expect(generateOptions.budget).toBe(800);
+
+    logSpy.mockRestore();
+  });
+
+  it("skips when config.ambientContext.enabled is false", async () => {
+    let generateCalled = false;
+
+    const { runAmbientContextGeneration } = await import("./sync.js");
+
+    await runAmbientContextGeneration(
+      {} as any,
+      {},
+      {
+        loadConfig: () => ({
+          ambientContext: { enabled: false, budget: 800 },
+        }),
+        resolveAutoMemoryDir: () => "/tmp/test",
+        resolveProjectName: () => "test",
+        createAmbientService: () => ({
+          generateAmbientContext: async () => {
+            generateCalled = true;
+            return { success: true, contextTokens: 0 };
+          },
+        }),
+      },
+    );
+
+    expect(generateCalled).toBe(false);
+  });
+
+  it("does not throw on error (non-fatal)", async () => {
+    const errorSpy = spyOn(console, "error").mockImplementation(() => {});
+
+    const { runAmbientContextGeneration } = await import("./sync.js");
+
+    // Should not throw
+    await runAmbientContextGeneration(
+      {} as any,
+      {},
+      {
+        loadConfig: () => ({
+          ambientContext: { enabled: true, budget: 800 },
+        }),
+        resolveAutoMemoryDir: () => "/tmp/test",
+        resolveProjectName: () => "test",
+        createAmbientService: () => ({
+          generateAmbientContext: async () => {
+            throw new Error("test error");
+          },
+        }),
+      },
+    );
+
+    // Should have logged error to stderr
+    const errorCalls = errorSpy.mock.calls.map(c => c[0]);
+    const errorLine = errorCalls.find((s: string) =>
+      typeof s === "string" && s.includes("Ambient context: error")
+    );
+    expect(errorLine).toBeDefined();
+    expect(errorLine).toContain("test error");
+
+    errorSpy.mockRestore();
+  });
+
+  it("logs success message with token count when not quiet", async () => {
+    const logSpy = spyOn(console, "log").mockImplementation(() => {});
+
+    const { runAmbientContextGeneration } = await import("./sync.js");
+
+    await runAmbientContextGeneration(
+      {} as any,
+      {}, // not quiet
+      {
+        loadConfig: () => ({
+          ambientContext: { enabled: true, budget: 800 },
+        }),
+        resolveAutoMemoryDir: () => "/tmp/test",
+        resolveProjectName: () => "test",
+        createAmbientService: () => ({
+          generateAmbientContext: async () => ({
+            success: true,
+            contextTokens: 750,
+          }),
+        }),
+      },
+    );
+
+    const logCalls = logSpy.mock.calls.map(c => c[0]);
+    const successLine = logCalls.find((s: string) =>
+      typeof s === "string" && s.includes("Ambient context: updated")
+    );
+    expect(successLine).toBeDefined();
+    expect(successLine).toContain("750");
+
+    logSpy.mockRestore();
+  });
+
+  it("suppresses output when quiet option is set", async () => {
+    const logSpy = spyOn(console, "log").mockImplementation(() => {});
+
+    const { runAmbientContextGeneration } = await import("./sync.js");
+
+    await runAmbientContextGeneration(
+      {} as any,
+      { quiet: true },
+      {
+        loadConfig: () => ({
+          ambientContext: { enabled: true, budget: 800 },
+        }),
+        resolveAutoMemoryDir: () => "/tmp/test",
+        resolveProjectName: () => "test",
+        createAmbientService: () => ({
+          generateAmbientContext: async () => ({
+            success: true,
+            contextTokens: 500,
+          }),
+        }),
+      },
+    );
+
+    const logCalls = logSpy.mock.calls.map(c => c[0]);
+    const ambientLine = logCalls.find((s: string) =>
+      typeof s === "string" && s.includes("Ambient context")
+    );
+    expect(ambientLine).toBeUndefined();
+
+    logSpy.mockRestore();
+  });
+});
+
 // Note: "background process self-detection" tests (isBackgroundEmbedding) are
 // covered in background-embedder.test.ts. Removed from here to avoid mock.module
 // leakage when sync-lazy-loaders.test.ts runs in the same test process.
