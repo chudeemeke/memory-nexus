@@ -111,3 +111,9 @@ export type {
   IProjectResolver,
   SmartContextDeps,
 } from "./smart-context-service.js";
+
+export { AmbientContextService } from "./ambient-context-service.js";
+export type {
+  AmbientContextOptions,
+  AmbientContextResult,
+} from "./ambient-context-service.js";
