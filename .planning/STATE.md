@@ -104,16 +104,20 @@ v3.0 Progress: [####################    ] 5/7 phases (complete)
 - QmdRunner follows ClaudeSummaryGenerator spawn pattern for consistency across infrastructure adapters
 - Standalone isQmdAvailable/getQmdInfo functions duplicate class logic for non-DI contexts (doctor command)
 - infrastructure/external/ directory for external CLI tool adapters (new pattern)
+- Marker format uses HTML comments (<!-- memory-cli:start/end -->) for MEMORY.md block isolation
+- mergeMemoryBlock exported as pure function for direct testing without filesystem ops
+- AmbientContext config uses flat object (enabled + budget) matching existing config deep-merge pattern
 
 ### Context for Next Session
 
 1. **27-01 complete** -- IExternalSearchProvider port + QmdRunner adapter with 15 tests
-2. Plan 27-02 next: wire QmdRunner to search --files flag and doctor qmd status check
-3. Phase 29 plan 01 also committed (IAmbientContextWriter port) -- parallel execution OK
-4. Phase 28 (Friction Universalization) still needs discuss-phase (no CONTEXT.md yet)
-5. Pre-existing issues: error-codes.test.ts count assertion stale (expects 19, has 21)
-6. infrastructure/external/ barrel NOT yet wired to infrastructure/index.ts (deferred to 27-02)
+2. **29-01 complete** -- IAmbientContextWriter port + AutoMemoryWriter adapter with 16 tests + config extension
+3. Plan 27-02 next: wire QmdRunner to search --files flag and doctor qmd status check
+4. Plan 29-02 next: AmbientContextService application service, sync command integration
+5. Phase 28 (Friction Universalization) still needs discuss-phase (no CONTEXT.md yet)
+6. Pre-existing issues: error-codes.test.ts count assertion stale (expects 19, has 21)
+7. infrastructure/external/ barrel NOT yet wired to infrastructure/index.ts (deferred to 27-02)
 
 ---
 
-*Last updated: 2026-03-18 (27-01 executed, IExternalSearchProvider port + QmdRunner adapter)*
+*Last updated: 2026-03-18 (29-01 executed, IAmbientContextWriter port + AutoMemoryWriter adapter)*
