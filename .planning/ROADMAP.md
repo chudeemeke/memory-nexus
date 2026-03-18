@@ -304,9 +304,9 @@ Phase 13 (Package Rename)
 | 24 | v3.0 | 3/3 | Complete | 2026-03-08 |
 | 25 | v3.0 | 4/4 | Complete | 2026-03-10 |
 | 26 | v3.0 | 3/3 | Complete | 2026-03-08 |
-| 27 | v3.0 | 2/2 | Complete | 2026-03-18 |
+| 27 | v3.0 | Complete    | 2026-03-18 | 2026-03-18 |
 | 28 | v3.0 | -- | Discussed | -- |
-| 29 | v3.0 | 2/2 | Complete | 2026-03-18 |
+| 29 | v3.0 | Complete    | 2026-03-18 | 2026-03-18 |
 
 ---
 
@@ -427,7 +427,7 @@ Success Criteria:
 
 **Depends on:** Phase 23 (files to search exist in ~/.memory/)
 **Discussion context:** .planning/phases/27-qmd-integration/CONTEXT.md
-**Plans:** 2 plans
+**Plans:** 2/2 plans complete
 
 Plans:
 - [x] 27-01-PLAN.md -- IExternalSearchProvider domain port, QmdRunner infrastructure adapter with detection utilities
@@ -499,7 +499,7 @@ Success Criteria:
 
 **Depends on:** Phase 25 (SmartContextService, --format ai, budget allocator)
 **Discussion context:** .planning/phases/29-ambient-context/CONTEXT.md
-**Plans:** 2 plans
+**Plans:** 2/2 plans complete
 
 Plans:
 - [x] 29-01-PLAN.md -- IAmbientContextWriter domain port, config extension, AutoMemoryWriter infrastructure adapter

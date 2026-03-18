@@ -14,8 +14,8 @@ See: .planning/PROJECT.md (updated 2026-02-18)
 
 **Milestone:** v3.0 Knowledge Layer + Friction Logging
 **Phase:** 29 (Ambient Context) -- complete
-**Status:** Plan 29-02 complete, phase 29 done (2/2 plans)
-**Current Plan:** 29-02 complete (AmbientContextService + sync integration)
+**Status:** Milestone complete
+**Current Plan:** Not started
 
 ```
 v3.0 Progress: [########################] 7/7 phases (complete, excluding Phase 28)
