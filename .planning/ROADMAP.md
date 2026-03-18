@@ -306,7 +306,7 @@ Phase 13 (Package Rename)
 | 26 | v3.0 | 3/3 | Complete | 2026-03-08 |
 | 27 | v3.0 | 0/2 | Planned | -- |
 | 28 | v3.0 | -- | Discussed | -- |
-| 29 | v3.0 | -- | Discussed | -- |
+| 29 | v3.0 | 0/2 | Planned | -- |
 
 ---
 
@@ -499,6 +499,13 @@ Success Criteria:
 
 **Depends on:** Phase 25 (SmartContextService, --format ai, budget allocator)
 **Discussion context:** .planning/phases/29-ambient-context/CONTEXT.md
+**Plans:** 2 plans
+
+Plans:
+- [ ] 29-01-PLAN.md -- IAmbientContextWriter domain port, config extension, AutoMemoryWriter infrastructure adapter
+- [ ] 29-02-PLAN.md -- AmbientContextService application service, sync command integration
+
+Requirements: QUAL-01, QUAL-02, QUAL-03, QUAL-04
 
 Success Criteria:
 1. After `memory sync`, the current project's auto memory directory contains a `context.md` file with structured cross-project context
@@ -509,4 +516,4 @@ Success Criteria:
 
 ---
 
-*Last updated: 2026-03-18 (Phase 27 planned: 2 plans in 2 waves)*
+*Last updated: 2026-03-18 (Phase 29 planned: 2 plans in 2 waves)*
