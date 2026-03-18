@@ -224,18 +224,33 @@ describe("standalone functions", () => {
     execSyncSpy?.mockRestore();
   });
 
-  it("isQmdAvailable() delegates correctly", () => {
+  it("isQmdAvailable() returns true when qmd found", () => {
     execSyncSpy = spyOn(childProcess, "execSync").mockReturnValue(
       Buffer.from("/usr/bin/qmd\n"),
     );
     expect(isQmdAvailable()).toBe(true);
   });
 
-  it("getQmdInfo() delegates correctly", () => {
+  it("isQmdAvailable() returns false when qmd not found", () => {
+    execSyncSpy = spyOn(childProcess, "execSync").mockImplementation(() => {
+      throw new Error("Command not found");
+    });
+    expect(isQmdAvailable()).toBe(false);
+  });
+
+  it("getQmdInfo() returns available=true with path", () => {
     execSyncSpy = spyOn(childProcess, "execSync").mockReturnValue(
       "/usr/local/bin/qmd\n" as any,
     );
     const info = getQmdInfo();
     expect(info).toEqual({ available: true, path: "/usr/local/bin/qmd" });
+  });
+
+  it("getQmdInfo() returns available=false, path=null", () => {
+    execSyncSpy = spyOn(childProcess, "execSync").mockImplementation(() => {
+      throw new Error("Command not found");
+    });
+    const info = getQmdInfo();
+    expect(info).toEqual({ available: false, path: null });
   });
 });
