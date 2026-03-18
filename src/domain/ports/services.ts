@@ -128,3 +128,51 @@ export interface ISummaryGenerator {
     endTime: string,
   ): Promise<string>;
 }
+
+/**
+ * Result from an external markdown file search (e.g., qmd).
+ *
+ * Fields match qmd's --json output shape. Optional fields may not
+ * be present depending on the external tool's configuration and
+ * index state.
+ */
+export interface QmdSearchResult {
+  /** Document ID from the external tool's index */
+  docid?: string;
+  /** Relevance score */
+  score: number;
+  /** File path (may use tool-specific URI format, e.g., qmd://) */
+  file: string;
+  /** Document title extracted from markdown */
+  title: string;
+  /** Surrounding text context */
+  context?: string;
+  /** Highlighted match snippet */
+  snippet?: string;
+}
+
+/**
+ * Health information for an external search provider.
+ */
+export interface QmdHealthInfo {
+  /** Whether the external tool binary was found in PATH */
+  available: boolean;
+  /** Resolved binary path, null if not found */
+  path: string | null;
+}
+
+/**
+ * Port for delegating search to an external tool (e.g., qmd).
+ *
+ * Implementations invoke the tool as a subprocess and parse its
+ * output into typed results. The domain defines the contract;
+ * infrastructure implements the subprocess invocation.
+ */
+export interface IExternalSearchProvider {
+  /** Execute search against external tool, return parsed results */
+  search(query: string): Promise<QmdSearchResult[]>;
+  /** Synchronous check if the external tool is available in PATH */
+  isAvailable(): boolean;
+  /** Synchronous check returning availability and resolved binary path */
+  getHealthInfo(): QmdHealthInfo;
+}

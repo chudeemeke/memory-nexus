@@ -40,6 +40,9 @@ export type {
   StatsResult,
   ProjectStats,
   ISummaryGenerator,
+  QmdSearchResult,
+  QmdHealthInfo,
+  IExternalSearchProvider,
 } from "./services.js";
 
 // Source interfaces
