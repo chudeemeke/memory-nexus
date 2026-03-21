@@ -1,22 +1,42 @@
 ---
 phase: 28-friction-universalization
-verified: 2026-03-21T22:30:00Z
+verified: 2026-03-21T23:15:00Z
 status: gaps_found
 score: 7/8 success criteria verified
+re_verification: true
 gaps:
-  - truth: "All friction tests pass (including pre-existing src/ test files updated to include tool)"
+  - truth: "openInBrowser spawns real browser windows during test execution"
     status: failed
-    reason: "Three pre-existing test files in src/ were not updated to pass the now-required tool field to FrictionEntry.create(). Plan 01 Task 1 explicitly required updating existing tests in the REFACTOR phase, but these src/ co-located tests were missed."
+    reason: "friction.ts openInBrowser() calls exec('start ...') unconditionally. Tests that exercise the --html dashboard path spawn real cmd.exe windows. Violates test isolation (no side effects). Each test run during phase 28 execution opened ~15 browser windows."
     artifacts:
-      - path: "src/infrastructure/database/repositories/friction-repository.test.ts"
-        issue: "createEntry() helper does not include tool field -- 18 tests fail with 'Tool cannot be empty'"
-      - path: "src/presentation/cli/formatters/friction-dashboard.test.ts"
-        issue: "createEntry() helper does not include tool field -- 14 tests fail with 'Tool cannot be empty'"
-      - path: "src/presentation/cli/commands/friction.test.ts"
-        issue: "2 subprocess-based integration tests timeout (may need tool field in DB seeding or are hitting timeout from auto-ingest path)"
+      - path: "src/presentation/cli/commands/friction.ts"
+        issue: "openInBrowser() at line 525 calls exec() with no way to inject/mock. Function is module-private, not injectable."
     missing:
-      - "Add tool: 'memory' to createEntry() / helper functions in all three src/ test files"
-      - "Ensure subprocess-based CLI tests in src/presentation/cli/commands/friction.test.ts pass within 5000ms timeout"
+      - "Make openInBrowser injectable or suppressible during tests (DI or environment check)"
+  - truth: "ErrorCode frozen test expects stale count"
+    status: failed
+    reason: "error-codes.test.ts expects 19 error codes but 21 exist. Count drifted as new codes were added without updating the immutability test."
+    artifacts:
+      - path: "src/domain/errors/error-codes.test.ts"
+        issue: "toHaveLength(19) and toBe(19) assertions are stale"
+    missing:
+      - "Update count to match actual error codes, or make test count-agnostic"
+  - truth: "SmartContextService daily logs test is time-sensitive"
+    status: failed
+    reason: "Test uses real Date.now() for date calculations. When run near midnight or across day boundaries, the 'last N days' filter produces different results."
+    artifacts:
+      - path: "src/application/services/smart-context-service.test.ts"
+        issue: "daily logs filtered test creates dates relative to Date.now() without controlling the clock"
+    missing:
+      - "Inject a fixed clock/date or use deterministic dates in the test"
+  - truth: "Programmatic API subprocess tests timeout"
+    status: failed
+    reason: "executeDoctorCommand and executeSyncCommand tests exceed default timeout. Subprocess startup on Windows is slow, or the commands do real work during tests."
+    artifacts:
+      - path: "tests/presentation/cli/commands/programmatic-api.test.ts"
+        issue: "Tests timeout at default threshold (~5s-10s), pass intermittently"
+    missing:
+      - "Increase timeout or mock subprocess execution for unit-level tests"
 ---
 
 # Phase 28: Friction Universalization Verification Report
