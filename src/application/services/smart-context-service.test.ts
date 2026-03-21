@@ -583,6 +583,7 @@ describe("SmartContextService", () => {
                 projectResolver: mockResolver,
                 memoryFileRepo: mockMemoryRepo,
                 frictionRepo: mockFrictionRepo,
+                now: () => new Date("2026-03-10T12:00:00Z"),
             });
 
             const result = await service.getContext({

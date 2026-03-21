@@ -147,12 +147,14 @@ export class SmartContextService {
     private readonly memoryFileRepo: IMemoryFileRepository;
     private readonly frictionRepo: IFrictionRepository;
     private readonly getSessionSummary?: (projectFilter: string, days?: number) => Promise<string | null>;
+    private readonly now: () => Date;
 
     constructor(deps: SmartContextDeps) {
         this.projectResolver = deps.projectResolver;
         this.memoryFileRepo = deps.memoryFileRepo;
         this.frictionRepo = deps.frictionRepo;
         this.getSessionSummary = deps.getSessionSummary;
+        this.now = deps.now ?? (() => new Date());
     }
 
     /**
@@ -274,7 +276,7 @@ export class SmartContextService {
             return dailyLogs;
         }
 
-        const now = new Date();
+        const now = this.now();
         const cutoff = new Date(now.getTime() - days * 24 * 60 * 60 * 1000);
 
         return dailyLogs.filter((f) => {
