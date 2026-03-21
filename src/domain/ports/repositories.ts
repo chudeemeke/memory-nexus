@@ -551,9 +551,20 @@ export interface FrictionStats {
     resolved: number;
     wontFix: number;
     bySeverity: Record<FrictionSeverity, number>;
-    byCategory: Record<FrictionCategory, number>;
+    byCategory: Record<string, number>;
+    byTool: Record<string, number>;
     meanTimeToResolve: number | null;
     oldestOpen: { id: number; description: string; daysOpen: number } | null;
+}
+
+/**
+ * A recurring friction pattern grouped by tool and category.
+ */
+export interface FrictionPattern {
+    tool: string;
+    category: string;
+    count: number;
+    entries: FrictionEntry[];
 }
 
 /**
@@ -590,7 +601,9 @@ export interface IFrictionRepository {
      */
     findAll(options?: {
         status?: FrictionStatus;
-        category?: FrictionCategory;
+        category?: string;
+        tool?: string;
+        sourceProject?: string;
         limit?: number;
     }): Promise<FrictionEntry[]>;
 
@@ -624,6 +637,20 @@ export interface IFrictionRepository {
     getWeeklyTrends(
         weeks: number
     ): Promise<Array<{ week: string; newCount: number; resolvedCount: number }>>;
+
+    /**
+     * Mark all entries for a tool as reviewed at a given date.
+     * @param tool The tool name
+     * @param reviewedAt The review date
+     */
+    markReviewed(tool: string, reviewedAt: Date): Promise<void>;
+
+    /**
+     * Find recurring friction patterns above a threshold count.
+     * @param threshold Minimum entry count to qualify as a pattern
+     * @returns Array of patterns grouped by tool and category
+     */
+    findPatterns(threshold: number): Promise<FrictionPattern[]>;
 }
 
 /**

@@ -1,7 +1,7 @@
 /**
  * FrictionEntry Entity
  *
- * Represents a logged friction point with the memory tool.
+ * Represents a logged friction point with a tool.
  * Friction entries track tool-specific issues (search failures,
  * unhelpful output, missing features, workarounds needed) for
  * self-improvement feedback loops.
@@ -18,15 +18,14 @@
 export type FrictionSeverity = "low" | "medium" | "high" | "critical";
 
 /**
- * Categories of friction (tool-specific, not general development).
+ * Categories of friction. Any non-empty string is valid.
  */
-export type FrictionCategory =
-    | "search"
-    | "sync"
-    | "cli"
-    | "context"
-    | "integration"
-    | "ux";
+export type FrictionCategory = string;
+
+/**
+ * Common friction categories. Not enforced -- any non-empty string is valid.
+ */
+export const COMMON_CATEGORIES = ["search", "sync", "cli", "context", "integration", "ux"] as const;
 
 /**
  * Lifecycle status of a friction entry.
@@ -38,15 +37,6 @@ const VALID_SEVERITIES: readonly FrictionSeverity[] = [
     "medium",
     "high",
     "critical",
-];
-
-const VALID_CATEGORIES: readonly FrictionCategory[] = [
-    "search",
-    "sync",
-    "cli",
-    "context",
-    "integration",
-    "ux",
 ];
 
 const VALID_STATUSES: readonly FrictionStatus[] = [
@@ -61,6 +51,9 @@ interface FrictionEntryParams {
     severity: FrictionSeverity;
     category: FrictionCategory;
     status: FrictionStatus;
+    tool: string;
+    tags?: string[];
+    lastReviewedAt?: Date;
     context?: string;
     sourceProject?: string;
     loggedAt: Date;
@@ -74,6 +67,9 @@ export class FrictionEntry {
     private readonly _severity: FrictionSeverity;
     private readonly _category: FrictionCategory;
     private readonly _status: FrictionStatus;
+    private readonly _tool: string;
+    private readonly _tags?: string[];
+    private readonly _lastReviewedAt?: Date;
     private readonly _context?: string;
     private readonly _sourceProject?: string;
     private readonly _loggedAt: Date;
@@ -86,6 +82,11 @@ export class FrictionEntry {
         this._severity = params.severity;
         this._category = params.category;
         this._status = params.status;
+        this._tool = params.tool;
+        this._tags = params.tags ? [...params.tags] : undefined;
+        this._lastReviewedAt = params.lastReviewedAt
+            ? new Date(params.lastReviewedAt.getTime())
+            : undefined;
         this._context = params.context;
         this._sourceProject = params.sourceProject;
         this._loggedAt = new Date(params.loggedAt.getTime());
@@ -99,8 +100,9 @@ export class FrictionEntry {
      * Create a FrictionEntry entity.
      * @throws Error if description is empty or whitespace-only
      * @throws Error if severity is not a valid FrictionSeverity
-     * @throws Error if category is not a valid FrictionCategory
+     * @throws Error if category is empty or whitespace-only
      * @throws Error if status is not a valid FrictionStatus
+     * @throws Error if tool is empty or whitespace-only
      * @throws Error if status is "open" but resolvedAt is provided
      */
     static create(params: FrictionEntryParams): FrictionEntry {
@@ -114,16 +116,18 @@ export class FrictionEntry {
             );
         }
 
-        if (!VALID_CATEGORIES.includes(params.category)) {
-            throw new Error(
-                `Invalid category: "${params.category}". Must be one of: ${VALID_CATEGORIES.join(", ")}`
-            );
+        if (!params.category || params.category.trim() === "") {
+            throw new Error("Category cannot be empty");
         }
 
         if (!VALID_STATUSES.includes(params.status)) {
             throw new Error(
                 `Invalid status: "${params.status}". Must be one of: ${VALID_STATUSES.join(", ")}`
             );
+        }
+
+        if (!params.tool || params.tool.trim() === "") {
+            throw new Error("Tool cannot be empty");
         }
 
         if (params.status === "open" && params.resolvedAt) {
@@ -133,74 +137,58 @@ export class FrictionEntry {
         return new FrictionEntry(params);
     }
 
-    /**
-     * The database identifier (undefined until persisted).
-     */
     get id(): number | undefined {
         return this._id;
     }
 
-    /**
-     * Description of the friction point.
-     */
     get description(): string {
         return this._description;
     }
 
-    /**
-     * Severity level of the friction.
-     */
     get severity(): FrictionSeverity {
         return this._severity;
     }
 
-    /**
-     * Category of the friction.
-     */
     get category(): FrictionCategory {
         return this._category;
     }
 
-    /**
-     * Lifecycle status.
-     */
     get status(): FrictionStatus {
         return this._status;
     }
 
-    /**
-     * Additional context about the friction (project, session, task).
-     */
+    get tool(): string {
+        return this._tool;
+    }
+
+    get tags(): string[] | undefined {
+        return this._tags ? [...this._tags] : undefined;
+    }
+
+    get lastReviewedAt(): Date | undefined {
+        return this._lastReviewedAt
+            ? new Date(this._lastReviewedAt.getTime())
+            : undefined;
+    }
+
     get context(): string | undefined {
         return this._context;
     }
 
-    /**
-     * Which project this friction was logged from.
-     */
     get sourceProject(): string | undefined {
         return this._sourceProject;
     }
 
-    /**
-     * When this friction was logged (defensive copy).
-     */
     get loggedAt(): Date {
         return new Date(this._loggedAt.getTime());
     }
 
-    /**
-     * When this friction was resolved (defensive copy), or undefined if open.
-     */
     get resolvedAt(): Date | undefined {
         return this._resolvedAt
             ? new Date(this._resolvedAt.getTime())
             : undefined;
     }
 
-    /**
-     * How the friction was resolved, or undefined if open.
-     */
     get resolution(): string | undefined {
         return this._resolution;
     }
