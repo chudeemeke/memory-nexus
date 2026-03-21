@@ -13,9 +13,9 @@ See: .planning/PROJECT.md (updated 2026-02-18)
 ## Current Position
 
 **Milestone:** v3.0 Knowledge Layer + Friction Logging
-**Phase:** 29 (Ambient Context) -- complete
-**Status:** Milestone complete
-**Current Plan:** Not started
+**Phase:** 28 (Friction Universalization) -- in progress
+**Status:** Plan 01 complete, 3 remaining
+**Current Plan:** 28-02
 
 ```
 v3.0 Progress: [########################] 7/7 phases (complete, excluding Phase 28)
@@ -24,7 +24,7 @@ v3.0 Progress: [########################] 7/7 phases (complete, excluding Phase 
   Phase 25: Intelligence              [x] Complete (4/4 plans, including gap closure)
   Phase 26: Hooks + Backfill          [x] Complete (3/3 plans)
   Phase 27: qmd Integration           [x] Complete (2/2 plans)
-  Phase 28: Friction Universalization  [ ] Discussed (no CONTEXT.md yet)
+  Phase 28: Friction Universalization  [=.........] In Progress (1/4 plans)
   Phase 29: Ambient Context            [x] Complete (2/2 plans)
 ```
 
@@ -69,9 +69,9 @@ v3.0 Progress: [########################] 7/7 phases (complete, excluding Phase 
 
 ### Last Session
 
-**Date:** 2026-03-18
-**Completed:** Plan 29-02 (AmbientContextService application service + sync command integration)
-**Stopped at:** Phase 29 complete (2/2 plans)
+**Date:** 2026-03-21
+**Completed:** Plan 28-01 (Domain model and schema extension for friction universalization)
+**Stopped at:** Phase 28 in progress (1/4 plans complete)
 
 ### Decisions
 
@@ -117,11 +117,15 @@ v3.0 Progress: [########################] 7/7 phases (complete, excluding Phase 
 - Non-fatal ambient context: errors caught and logged to stderr, never fail overall sync
 - Lazy dynamic imports for all ambient context dependencies (zero startup overhead when disabled)
 
+- Pre-loop migration: friction_log migration runs before SCHEMA_SQL loop to avoid CREATE INDEX on missing tool column
+- COMMON_CATEGORIES as documentation-only export replacing enforced VALID_CATEGORIES array
+- Category CHECK constraint removed at both domain (type = string) and infrastructure (SQL) levels
+
 ### Context for Next Session
 
 1. **Phase 27 complete** -- qmd integration done (2/2 plans: port+adapter, CLI wiring)
 2. **Phase 29 complete** -- Ambient context pipeline operational (2/2 plans: foundation + service/integration)
-3. Phase 28 (Friction Universalization) still needs discuss-phase (no CONTEXT.md yet)
+3. **Phase 28 plan 01 complete** -- Domain model + schema extended. Downstream tests (friction-repository, friction-service, friction-cli) need updates for tool field and byTool stats
 4. Pre-existing issues: error-codes.test.ts count assertion stale (expects 19, has 21)
 5. Pre-existing issue: smart-context-service.test.ts "daily logs filtered" test is time-sensitive
 6. infrastructure/external/ barrel exports used directly by search.ts and doctor.ts (not wired to infrastructure/index.ts -- intentional for lazy loading)

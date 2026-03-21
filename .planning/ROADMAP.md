@@ -485,7 +485,7 @@ These are enforced in every phase, not assigned to a single phase:
 **Plans:** 4 plans
 
 Plans:
-- [ ] 28-01-PLAN.md -- Domain entity, port interface, and schema migration for universal friction
+- [x] 28-01-PLAN.md -- Domain entity, port interface, and schema migration for universal friction
 - [ ] 28-02-PLAN.md -- SqliteFrictionRepository tool filtering, markReviewed, findPatterns, byTool stats
 - [ ] 28-03-PLAN.md -- FrictionService auto-ingest, tool parameter threading, pattern detection
 - [ ] 28-04-PLAN.md -- CLI --tool flags, dashboard de-branding, By Tool chart, pattern alerts
