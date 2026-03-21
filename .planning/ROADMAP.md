@@ -305,7 +305,7 @@ Phase 13 (Package Rename)
 | 25 | v3.0 | 4/4 | Complete | 2026-03-10 |
 | 26 | v3.0 | 3/3 | Complete | 2026-03-08 |
 | 27 | v3.0 | Complete    | 2026-03-18 | 2026-03-18 |
-| 28 | v3.0 | -- | Discussed | -- |
+| 28 | v3.0 | Complete    | 2026-03-21 | -- |
 | 29 | v3.0 | Complete    | 2026-03-18 | 2026-03-18 |
 
 ---
@@ -482,7 +482,7 @@ These are enforced in every phase, not assigned to a single phase:
 
 **Depends on:** Phase 24 (friction system exists)
 **Discussion context:** .planning/phases/28-friction-universalization/CONTEXT.md
-**Plans:** 4 plans
+**Plans:** 4/4 plans complete
 
 Plans:
 - [x] 28-01-PLAN.md -- Domain entity, port interface, and schema migration for universal friction

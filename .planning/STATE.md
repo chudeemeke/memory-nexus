@@ -14,8 +14,8 @@ See: .planning/PROJECT.md (updated 2026-02-18)
 
 **Milestone:** v3.0 Knowledge Layer + Friction Logging
 **Phase:** 28 (Friction Universalization) -- complete
-**Status:** All 4 plans complete
-**Current Plan:** Done
+**Status:** Ready to plan
+**Current Plan:** Not started
 
 ```
 v3.0 Progress: [########################] 8/8 phases complete
