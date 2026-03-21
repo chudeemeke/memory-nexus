@@ -14,7 +14,7 @@ See: .planning/PROJECT.md (updated 2026-02-18)
 
 **Milestone:** v3.0 Knowledge Layer + Friction Logging
 **Phase:** 28 (Friction Universalization) -- in progress
-**Status:** Plan 01 complete, 3 remaining
+**Status:** Plans 01, 03 complete, 2 remaining
 **Current Plan:** 28-02
 
 ```
@@ -24,7 +24,7 @@ v3.0 Progress: [########################] 7/7 phases (complete, excluding Phase 
   Phase 25: Intelligence              [x] Complete (4/4 plans, including gap closure)
   Phase 26: Hooks + Backfill          [x] Complete (3/3 plans)
   Phase 27: qmd Integration           [x] Complete (2/2 plans)
-  Phase 28: Friction Universalization  [=.........] In Progress (1/4 plans)
+  Phase 28: Friction Universalization  [=====.....] In Progress (2/4 plans)
   Phase 29: Ambient Context            [x] Complete (2/2 plans)
 ```
 
@@ -70,8 +70,8 @@ v3.0 Progress: [########################] 7/7 phases (complete, excluding Phase 
 ### Last Session
 
 **Date:** 2026-03-21
-**Completed:** Plan 28-01 (Domain model and schema extension for friction universalization)
-**Stopped at:** Phase 28 in progress (1/4 plans complete)
+**Completed:** Plan 28-03 (FrictionService auto-ingest, tool threading, pattern detection)
+**Stopped at:** Phase 28 in progress (2/4 plans complete)
 
 ### Decisions
 
@@ -118,6 +118,10 @@ v3.0 Progress: [########################] 7/7 phases (complete, excluding Phase 
 - Lazy dynamic imports for all ambient context dependencies (zero startup overhead when disabled)
 
 - Pre-loop migration: friction_log migration runs before SCHEMA_SQL loop to avoid CREATE INDEX on missing tool column
+- Tool defaults to 'memory' at service level (the tool itself is the default friction source)
+- loggedAt parameter on LogFrictionParams enables backdated entries from fallback file ingest
+- Auto-ingest maps project->sourceProject and date->loggedAt with T00:00:00Z suffix for UTC parsing
+- File delete failure after auto-ingest is non-fatal (entries already saved to DB)
 - COMMON_CATEGORIES as documentation-only export replacing enforced VALID_CATEGORIES array
 - Category CHECK constraint removed at both domain (type = string) and infrastructure (SQL) levels
 
