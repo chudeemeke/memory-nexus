@@ -6,15 +6,18 @@
  * constructor-injected IFrictionRepository.
  *
  * Business rules enforced here (not in entity or repository):
- * - Default severity/category when logging
+ * - Default severity/category/tool when logging
  * - Entry existence validation before resolve/wontFix
  * - Status guard: cannot resolve/wontFix already-closed entries
  * - wontFix flow: resolve() then updateStatus() for correct final state
+ * - Auto-ingest: reads friction.jsonl fallback file, saves entries, deletes file
  */
 
+import { existsSync, readFileSync, unlinkSync } from "node:fs";
 import type {
     IFrictionRepository,
     FrictionStats,
+    FrictionPattern,
 } from "../../domain/ports/repositories.js";
 import {
     FrictionEntry,
@@ -30,8 +33,10 @@ export interface LogFrictionParams {
     description: string;
     severity?: FrictionSeverity;
     category?: FrictionCategory;
+    tool?: string;
     context?: string;
     sourceProject?: string;
+    loggedAt?: Date;
 }
 
 /**
@@ -41,6 +46,8 @@ export interface ListFrictionOptions {
     all?: boolean;
     status?: string;
     category?: string;
+    tool?: string;
+    sourceProject?: string;
     limit?: number;
 }
 
@@ -56,8 +63,8 @@ export class FrictionService {
     /**
      * Log a new friction entry.
      *
-     * Creates a FrictionEntry with status "open", loggedAt = now,
-     * severity defaults to "medium", category defaults to "cli".
+     * Creates a FrictionEntry with status "open", loggedAt = now (or provided),
+     * severity defaults to "medium", category defaults to "cli", tool defaults to "memory".
      *
      * @param params Friction entry parameters
      * @returns The saved entry with database id
@@ -67,10 +74,11 @@ export class FrictionService {
             description: params.description,
             severity: params.severity ?? "medium",
             category: params.category ?? "cli",
+            tool: params.tool ?? "memory",
             status: "open",
             context: params.context,
             sourceProject: params.sourceProject,
-            loggedAt: new Date(),
+            loggedAt: params.loggedAt ?? new Date(),
         });
 
         return this.repository.save(entry);
@@ -80,7 +88,7 @@ export class FrictionService {
      * List friction entries.
      *
      * By default returns only open entries. Pass `all: true` to include
-     * resolved and wont-fix entries. Optional status/category/limit filters.
+     * resolved and wont-fix entries. Optional status/category/tool/sourceProject/limit filters.
      *
      * @param options Listing options
      * @returns Array of matching friction entries
@@ -90,6 +98,8 @@ export class FrictionService {
             return this.repository.findAll({
                 status: options.status as FrictionEntry["status"] | undefined,
                 category: options.category as FrictionEntry["category"] | undefined,
+                tool: options.tool,
+                sourceProject: options.sourceProject,
                 limit: options.limit,
             });
         }
@@ -188,5 +198,79 @@ export class FrictionService {
         weeks: number = 4
     ): Promise<Array<{ week: string; newCount: number; resolvedCount: number }>> {
         return this.repository.getWeeklyTrends(weeks);
+    }
+
+    /**
+     * Ingest friction entries from a fallback JSONL file.
+     *
+     * Reads each line as JSON, maps fields to LogFrictionParams, saves via log(),
+     * then deletes the file. Malformed lines are skipped with a warning to stderr.
+     *
+     * Field mapping from fallback format:
+     * - project -> sourceProject
+     * - date -> loggedAt (as Date)
+     * - tool defaults to "unknown" if missing
+     * - category defaults to "cli" if missing
+     *
+     * @param fallbackPath Path to the friction.jsonl file
+     * @returns Number of entries successfully ingested
+     */
+    async ingestFallbackFile(fallbackPath: string): Promise<number> {
+        if (!existsSync(fallbackPath)) return 0;
+
+        const content = readFileSync(fallbackPath, "utf-8");
+        const lines = content.split("\n").filter(Boolean);
+        let count = 0;
+
+        for (const line of lines) {
+            try {
+                const raw = JSON.parse(line);
+                await this.log({
+                    description: raw.description,
+                    severity: raw.severity ?? "medium",
+                    category: raw.category ?? "cli",
+                    tool: raw.tool ?? "unknown",
+                    context: raw.context,
+                    sourceProject: raw.project,
+                    loggedAt: raw.date
+                        ? new Date(raw.date + "T00:00:00Z")
+                        : new Date(),
+                });
+                count++;
+            } catch {
+                process.stderr.write(
+                    `Warning: skipping malformed friction entry in ${fallbackPath}\n`
+                );
+            }
+        }
+
+        try {
+            unlinkSync(fallbackPath);
+        } catch {
+            process.stderr.write(
+                `Warning: could not delete ${fallbackPath} (entries already ingested)\n`
+            );
+        }
+
+        return count;
+    }
+
+    /**
+     * Detect recurring friction patterns above a threshold count.
+     *
+     * @param threshold Minimum entry count to qualify as a pattern (default 3)
+     * @returns Array of patterns grouped by tool and category
+     */
+    async detectPatterns(threshold: number = 3): Promise<FrictionPattern[]> {
+        return this.repository.findPatterns(threshold);
+    }
+
+    /**
+     * Mark all entries for a tool as reviewed at the current time.
+     *
+     * @param tool The tool name to mark as reviewed
+     */
+    async markReviewed(tool: string): Promise<void> {
+        await this.repository.markReviewed(tool, new Date());
     }
 }

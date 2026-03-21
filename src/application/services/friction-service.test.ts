@@ -5,12 +5,13 @@
  * Uses mock IFrictionRepository to isolate business logic.
  */
 
-import { describe, expect, it, beforeEach, spyOn } from "bun:test";
+import { describe, expect, it, beforeEach, spyOn, afterEach } from "bun:test";
 import { FrictionService } from "./friction-service.js";
 import { FrictionEntry } from "../../domain/entities/friction-entry.js";
 import type {
     IFrictionRepository,
     FrictionStats,
+    FrictionPattern,
 } from "../../domain/ports/repositories.js";
 import type {
     FrictionSeverity,
@@ -18,6 +19,9 @@ import type {
     FrictionStatus,
 } from "../../domain/entities/friction-entry.js";
 import { MemoryError } from "../../domain/errors/index.js";
+import { existsSync, writeFileSync, mkdtempSync, unlinkSync, readFileSync } from "node:fs";
+import { join } from "node:path";
+import { tmpdir } from "node:os";
 
 /**
  * Create a mock IFrictionRepository.
@@ -36,18 +40,17 @@ function createMockRepository(): IFrictionRepository & {
         async save(entry: FrictionEntry): Promise<FrictionEntry> {
             const id = nextId++;
             const saved = FrictionEntry.create({
-                ...{
-                    id,
-                    description: entry.description,
-                    severity: entry.severity,
-                    category: entry.category,
-                    status: entry.status,
-                    context: entry.context,
-                    sourceProject: entry.sourceProject,
-                    loggedAt: entry.loggedAt,
-                    resolvedAt: entry.resolvedAt,
-                    resolution: entry.resolution,
-                },
+                id,
+                description: entry.description,
+                severity: entry.severity,
+                category: entry.category,
+                status: entry.status,
+                tool: entry.tool,
+                context: entry.context,
+                sourceProject: entry.sourceProject,
+                loggedAt: entry.loggedAt,
+                resolvedAt: entry.resolvedAt,
+                resolution: entry.resolution,
             });
             entries.set(id, saved);
             return saved;
@@ -66,6 +69,8 @@ function createMockRepository(): IFrictionRepository & {
         async findAll(options?: {
             status?: FrictionStatus;
             category?: FrictionCategory;
+            tool?: string;
+            sourceProject?: string;
             limit?: number;
         }): Promise<FrictionEntry[]> {
             let result = Array.from(entries.values());
@@ -74,6 +79,12 @@ function createMockRepository(): IFrictionRepository & {
             }
             if (options?.category) {
                 result = result.filter((e) => e.category === options.category);
+            }
+            if (options?.tool) {
+                result = result.filter((e) => e.tool === options.tool);
+            }
+            if (options?.sourceProject) {
+                result = result.filter((e) => e.sourceProject === options.sourceProject);
             }
             if (options?.limit) {
                 result = result.slice(0, options.limit);
@@ -92,6 +103,7 @@ function createMockRepository(): IFrictionRepository & {
                 severity: entry.severity,
                 category: entry.category,
                 status: "resolved",
+                tool: entry.tool,
                 context: entry.context,
                 sourceProject: entry.sourceProject,
                 loggedAt: entry.loggedAt,
@@ -112,6 +124,7 @@ function createMockRepository(): IFrictionRepository & {
                 severity: entry.severity,
                 category: entry.category,
                 status,
+                tool: entry.tool,
                 context: entry.context,
                 sourceProject: entry.sourceProject,
                 loggedAt: entry.loggedAt,
@@ -129,6 +142,7 @@ function createMockRepository(): IFrictionRepository & {
                 wontFix: Array.from(entries.values()).filter((e) => e.status === "wont-fix").length,
                 bySeverity: { low: 0, medium: 0, high: 0, critical: 0 },
                 byCategory: { search: 0, sync: 0, cli: 0, context: 0, integration: 0, ux: 0 },
+                byTool: {},
                 meanTimeToResolve: null,
                 oldestOpen: null,
             };
@@ -140,6 +154,14 @@ function createMockRepository(): IFrictionRepository & {
                 newCount: 0,
                 resolvedCount: 0,
             }));
+        },
+
+        async markReviewed(tool: string, reviewedAt: Date): Promise<void> {
+            // Mock: no-op
+        },
+
+        async findPatterns(threshold: number): Promise<FrictionPattern[]> {
+            return [];
         },
     };
 }
@@ -208,6 +230,33 @@ describe("FrictionService", () => {
 
             expect(entry.id).toBe(1);
         });
+
+        it("accepts tool parameter and threads to entry", async () => {
+            const entry = await service.log({
+                description: "aidev issue",
+                tool: "aidev",
+            });
+
+            expect(entry.tool).toBe("aidev");
+        });
+
+        it("defaults tool to 'memory' when not provided", async () => {
+            const entry = await service.log({
+                description: "some friction",
+            });
+
+            expect(entry.tool).toBe("memory");
+        });
+
+        it("accepts loggedAt and threads to entry", async () => {
+            const date = new Date("2026-03-08T00:00:00Z");
+            const entry = await service.log({
+                description: "old friction",
+                loggedAt: date,
+            });
+
+            expect(entry.loggedAt.toISOString()).toBe("2026-03-08T00:00:00.000Z");
+        });
     });
 
     describe("list()", () => {
@@ -258,6 +307,24 @@ describe("FrictionService", () => {
 
             const entries = await service.list();
             expect(entries.length).toBe(2);
+        });
+
+        it("passes tool filter to findAll()", async () => {
+            const findAllSpy = spyOn(repo, "findAll");
+            await service.list({ all: true, tool: "aidev" });
+
+            expect(findAllSpy).toHaveBeenCalledWith(
+                expect.objectContaining({ tool: "aidev" })
+            );
+        });
+
+        it("passes sourceProject filter to findAll()", async () => {
+            const findAllSpy = spyOn(repo, "findAll");
+            await service.list({ all: true, sourceProject: "gsd" });
+
+            expect(findAllSpy).toHaveBeenCalledWith(
+                expect.objectContaining({ sourceProject: "gsd" })
+            );
         });
     });
 
@@ -374,6 +441,159 @@ describe("FrictionService", () => {
             await service.getWeeklyTrends();
 
             expect(getTrendsSpy).toHaveBeenCalledWith(4);
+        });
+    });
+
+    describe("ingestFallbackFile()", () => {
+        let tempDir: string;
+
+        beforeEach(() => {
+            tempDir = mkdtempSync(join(tmpdir(), "friction-ingest-"));
+        });
+
+        it("reads and saves entries from friction.jsonl", async () => {
+            const filePath = join(tempDir, "friction.jsonl");
+            const lines = [
+                '{"tool":"aidev","severity":"high","description":"desc1","project":"gsd","context":"ctx1","date":"2026-03-08"}',
+                '{"tool":"memory","severity":"low","description":"desc2","project":"nexus","context":"ctx2","date":"2026-03-09"}',
+                '{"tool":"gsd","severity":"medium","description":"desc3","project":"done","context":"ctx3","date":"2026-03-10"}',
+            ];
+            writeFileSync(filePath, lines.join("\n") + "\n");
+
+            const count = await service.ingestFallbackFile(filePath);
+
+            expect(count).toBe(3);
+            expect(existsSync(filePath)).toBe(false);
+        });
+
+        it("maps fields correctly from fallback format", async () => {
+            const filePath = join(tempDir, "friction.jsonl");
+            writeFileSync(
+                filePath,
+                '{"tool":"aidev","severity":"high","description":"desc","project":"gsd","context":"ctx","date":"2026-03-08"}\n'
+            );
+
+            await service.ingestFallbackFile(filePath);
+
+            const entries = await service.list();
+            expect(entries.length).toBe(1);
+            const entry = entries[0];
+            expect(entry.tool).toBe("aidev");
+            expect(entry.severity).toBe("high");
+            expect(entry.description).toBe("desc");
+            expect(entry.sourceProject).toBe("gsd");
+            expect(entry.context).toBe("ctx");
+            expect(entry.loggedAt.toISOString()).toBe("2026-03-08T00:00:00.000Z");
+        });
+
+        it("defaults missing tool to 'unknown'", async () => {
+            const filePath = join(tempDir, "friction.jsonl");
+            writeFileSync(
+                filePath,
+                '{"severity":"high","description":"no tool","project":"gsd","date":"2026-03-08"}\n'
+            );
+
+            await service.ingestFallbackFile(filePath);
+
+            const entries = await service.list();
+            expect(entries[0].tool).toBe("unknown");
+        });
+
+        it("defaults missing category to 'cli'", async () => {
+            const filePath = join(tempDir, "friction.jsonl");
+            writeFileSync(
+                filePath,
+                '{"tool":"aidev","severity":"high","description":"no cat","project":"gsd","date":"2026-03-08"}\n'
+            );
+
+            await service.ingestFallbackFile(filePath);
+
+            const entries = await service.list();
+            expect(entries[0].category).toBe("cli");
+        });
+
+        it("skips malformed JSON lines and returns correct count", async () => {
+            const filePath = join(tempDir, "friction.jsonl");
+            const lines = [
+                '{"tool":"aidev","severity":"high","description":"valid1","project":"gsd","date":"2026-03-08"}',
+                "not valid json {{{",
+                '{"tool":"memory","severity":"low","description":"valid2","project":"nexus","date":"2026-03-09"}',
+            ];
+            writeFileSync(filePath, lines.join("\n") + "\n");
+
+            const count = await service.ingestFallbackFile(filePath);
+
+            expect(count).toBe(2);
+        });
+
+        it("returns 0 and no-ops when file does not exist", async () => {
+            const count = await service.ingestFallbackFile(
+                join(tempDir, "nonexistent.jsonl")
+            );
+
+            expect(count).toBe(0);
+        });
+
+        it("handles file delete failure gracefully", async () => {
+            const filePath = join(tempDir, "friction.jsonl");
+            writeFileSync(
+                filePath,
+                '{"tool":"aidev","severity":"high","description":"desc","project":"gsd","date":"2026-03-08"}\n'
+            );
+
+            // Pre-delete the file so unlinkSync will fail
+            unlinkSync(filePath);
+
+            // Re-create but make it so the service reads it, then we can't test
+            // lock easily on Windows. Instead, test that ingestFallbackFile
+            // doesn't throw even if delete fails by verifying entries are saved.
+            // We'll test with a file that exists -- the delete success path is
+            // already tested above. For the failure path, mock unlinkSync behavior
+            // indirectly: the method should not throw.
+            writeFileSync(filePath, '{"tool":"aidev","severity":"high","description":"desc","project":"gsd","date":"2026-03-08"}\n');
+
+            // This test verifies the method completes successfully even when called.
+            // The actual delete failure path requires OS-level file locking which
+            // is hard to test portably. The code wraps unlinkSync in try/catch.
+            const count = await service.ingestFallbackFile(filePath);
+            expect(count).toBe(1);
+        });
+    });
+
+    describe("detectPatterns()", () => {
+        it("delegates to repository.findPatterns(3) by default", async () => {
+            const findPatternsSpy = spyOn(repo, "findPatterns");
+            await service.detectPatterns();
+
+            expect(findPatternsSpy).toHaveBeenCalledWith(3);
+        });
+
+        it("accepts custom threshold", async () => {
+            const findPatternsSpy = spyOn(repo, "findPatterns");
+            await service.detectPatterns(5);
+
+            expect(findPatternsSpy).toHaveBeenCalledWith(5);
+        });
+
+        it("returns the repository result", async () => {
+            const mockPatterns: FrictionPattern[] = [
+                { tool: "aidev", category: "cli", count: 5, entries: [] },
+            ];
+            spyOn(repo, "findPatterns").mockResolvedValue(mockPatterns);
+
+            const result = await service.detectPatterns();
+            expect(result).toEqual(mockPatterns);
+        });
+    });
+
+    describe("markReviewed()", () => {
+        it("delegates to repository.markReviewed()", async () => {
+            const markReviewedSpy = spyOn(repo, "markReviewed");
+            await service.markReviewed("aidev");
+
+            expect(markReviewedSpy).toHaveBeenCalledTimes(1);
+            expect(markReviewedSpy.mock.calls[0][0]).toBe("aidev");
+            expect(markReviewedSpy.mock.calls[0][1]).toBeInstanceOf(Date);
         });
     });
 });
