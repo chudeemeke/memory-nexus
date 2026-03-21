@@ -292,17 +292,55 @@ CREATE TABLE IF NOT EXISTS friction_log (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     description TEXT NOT NULL,
     severity TEXT NOT NULL DEFAULT 'medium' CHECK (severity IN ('low', 'medium', 'high', 'critical')),
-    category TEXT NOT NULL DEFAULT 'cli' CHECK (category IN ('search', 'sync', 'cli', 'context', 'integration', 'ux')),
+    category TEXT NOT NULL DEFAULT 'cli',
+    tool TEXT NOT NULL DEFAULT 'memory',
+    tags TEXT,
     status TEXT NOT NULL DEFAULT 'open' CHECK (status IN ('open', 'resolved', 'wont-fix')),
     context TEXT,
     source_project TEXT,
     logged_at TEXT NOT NULL,
     resolved_at TEXT,
-    resolution TEXT
+    resolution TEXT,
+    last_reviewed_at TEXT
 );
 CREATE INDEX IF NOT EXISTS idx_friction_status ON friction_log(status);
 CREATE INDEX IF NOT EXISTS idx_friction_severity ON friction_log(severity);
 CREATE INDEX IF NOT EXISTS idx_friction_category ON friction_log(category);
+CREATE INDEX IF NOT EXISTS idx_friction_tool ON friction_log(tool);
+`;
+
+/**
+ * Migration: Universalize friction_log table.
+ *
+ * Recreates friction_log with new columns (tool, tags, last_reviewed_at)
+ * and removes the category CHECK constraint. Preserves existing data
+ * with tool defaulting to 'memory'.
+ */
+export const FRICTION_LOG_UNIVERSALIZE_MIGRATION = `
+CREATE TABLE friction_log_new (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    description TEXT NOT NULL,
+    severity TEXT NOT NULL DEFAULT 'medium' CHECK (severity IN ('low', 'medium', 'high', 'critical')),
+    category TEXT NOT NULL DEFAULT 'cli',
+    tool TEXT NOT NULL DEFAULT 'memory',
+    tags TEXT,
+    status TEXT NOT NULL DEFAULT 'open' CHECK (status IN ('open', 'resolved', 'wont-fix')),
+    context TEXT,
+    source_project TEXT,
+    logged_at TEXT NOT NULL,
+    resolved_at TEXT,
+    resolution TEXT,
+    last_reviewed_at TEXT
+);
+INSERT INTO friction_log_new (id, description, severity, category, tool, tags, status, context, source_project, logged_at, resolved_at, resolution, last_reviewed_at)
+SELECT id, description, severity, category, 'memory', NULL, status, context, source_project, logged_at, resolved_at, resolution, NULL
+FROM friction_log;
+DROP TABLE friction_log;
+ALTER TABLE friction_log_new RENAME TO friction_log;
+CREATE INDEX IF NOT EXISTS idx_friction_status ON friction_log(status);
+CREATE INDEX IF NOT EXISTS idx_friction_severity ON friction_log(severity);
+CREATE INDEX IF NOT EXISTS idx_friction_category ON friction_log(category);
+CREATE INDEX IF NOT EXISTS idx_friction_tool ON friction_log(tool);
 `;
 
 /**
@@ -452,6 +490,19 @@ export function createSchema(db: Database, options?: SchemaOptions): void {
             "FTS5 extension is not available. " +
             "Ensure you are using Bun with FTS5 support enabled."
         );
+    }
+
+    // Pre-loop migration: universalize friction_log if old schema exists
+    // Must run before SCHEMA_SQL loop because FRICTION_LOG_TABLE includes
+    // idx_friction_tool index which requires the tool column to exist.
+    try {
+        const frictionColumns = db.prepare("PRAGMA table_info(friction_log)").all() as Array<{ name: string }>;
+        const hasTool = frictionColumns.some(c => c.name === "tool");
+        if (!hasTool && frictionColumns.length > 0) {
+            db.exec(FRICTION_LOG_UNIVERSALIZE_MIGRATION);
+        }
+    } catch {
+        // Table doesn't exist yet (fresh DB) -- will be created by SCHEMA_SQL loop
     }
 
     // Execute all schema statements in order

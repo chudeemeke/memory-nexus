@@ -29,6 +29,7 @@ import {
     MEMORY_FILES_FTS_TABLE,
     MEMORY_FILES_FTS_TRIGGERS,
     FRICTION_LOG_TABLE,
+    FRICTION_LOG_UNIVERSALIZE_MIGRATION,
     BACKFILL_STATE_TABLE,
     type SchemaOptions,
 } from "./schema.js";
@@ -1872,20 +1873,20 @@ describe("Database Schema", () => {
                 ).toThrow();
             });
 
-            it("CHECK constraints enforce valid category values", () => {
+            it("category column accepts any string value (no CHECK constraint)", () => {
                 createSchema(db);
 
-                // Valid category should work
+                // Standard category should work
                 expect(() =>
                     db.exec(`INSERT INTO friction_log (description, category, logged_at)
                              VALUES ('test', 'search', '2026-03-08T00:00:00Z')`)
                 ).not.toThrow();
 
-                // Invalid category should fail
+                // Custom category should also work (no CHECK constraint)
                 expect(() =>
                     db.exec(`INSERT INTO friction_log (description, category, logged_at)
-                             VALUES ('test', 'database', '2026-03-08T00:00:00Z')`)
-                ).toThrow();
+                             VALUES ('test2', 'database', '2026-03-08T00:00:00Z')`)
+                ).not.toThrow();
             });
 
             it("CHECK constraints enforce valid status values", () => {
@@ -1917,6 +1918,84 @@ describe("Database Schema", () => {
                 expect(indexNames).toContain("idx_friction_severity");
                 expect(indexNames).toContain("idx_friction_category");
             });
+        });
+    });
+
+    describe("Friction Log Universalization Migration", () => {
+        it("fresh database creates friction_log with tool, tags, last_reviewed_at columns", () => {
+            createSchema(db);
+            const columns = db.prepare("PRAGMA table_info(friction_log)").all() as Array<{ name: string }>;
+            const colNames = columns.map(c => c.name);
+            expect(colNames).toContain("tool");
+            expect(colNames).toContain("tags");
+            expect(colNames).toContain("last_reviewed_at");
+        });
+
+        it("fresh database has no category CHECK constraint (custom categories allowed)", () => {
+            createSchema(db);
+            // Insert a custom category -- should not throw
+            db.exec(`INSERT INTO friction_log (description, severity, category, tool, status, logged_at)
+                      VALUES ('test', 'medium', 'deployment', 'aidev', 'open', '2026-03-21T00:00:00Z')`);
+            const row = db.prepare("SELECT category FROM friction_log WHERE description = 'test'").get() as { category: string };
+            expect(row.category).toBe("deployment");
+        });
+
+        it("migrates old friction_log schema preserving data with tool defaulting to 'memory'", () => {
+            // Create old schema manually (with category CHECK constraint, no tool column)
+            db.exec(`
+                CREATE TABLE friction_log (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    description TEXT NOT NULL,
+                    severity TEXT NOT NULL DEFAULT 'medium' CHECK (severity IN ('low', 'medium', 'high', 'critical')),
+                    category TEXT NOT NULL DEFAULT 'cli' CHECK (category IN ('search', 'sync', 'cli', 'context', 'integration', 'ux')),
+                    status TEXT NOT NULL DEFAULT 'open' CHECK (status IN ('open', 'resolved', 'wont-fix')),
+                    context TEXT,
+                    source_project TEXT,
+                    logged_at TEXT NOT NULL,
+                    resolved_at TEXT,
+                    resolution TEXT
+                )
+            `);
+            // Insert old data
+            db.exec(`INSERT INTO friction_log (description, severity, category, status, logged_at, source_project)
+                      VALUES ('old entry', 'high', 'search', 'open', '2026-03-01T00:00:00Z', 'my-project')`);
+
+            // Run createSchema which should detect missing tool column and migrate
+            createSchema(db);
+
+            // Verify data preserved
+            const row = db.prepare("SELECT * FROM friction_log WHERE description = 'old entry'").get() as any;
+            expect(row.description).toBe("old entry");
+            expect(row.severity).toBe("high");
+            expect(row.category).toBe("search");
+            expect(row.tool).toBe("memory");
+            expect(row.tags).toBeNull();
+            expect(row.last_reviewed_at).toBeNull();
+            expect(row.source_project).toBe("my-project");
+        });
+
+        it("migration is idempotent (running createSchema twice does not error or lose data)", () => {
+            createSchema(db);
+            db.exec(`INSERT INTO friction_log (description, severity, category, tool, status, logged_at)
+                      VALUES ('test', 'low', 'cli', 'memory', 'open', '2026-03-21T00:00:00Z')`);
+
+            // Run again
+            createSchema(db);
+
+            const row = db.prepare("SELECT * FROM friction_log WHERE description = 'test'").get() as any;
+            expect(row).not.toBeNull();
+            expect(row.tool).toBe("memory");
+        });
+
+        it("has idx_friction_tool index after fresh create", () => {
+            createSchema(db);
+            const indexes = db
+                .query<{ name: string }, []>(
+                    "SELECT name FROM sqlite_master WHERE type='index' AND tbl_name='friction_log'"
+                )
+                .all();
+            const indexNames = indexes.map(i => i.name);
+            expect(indexNames).toContain("idx_friction_tool");
         });
     });
 });
