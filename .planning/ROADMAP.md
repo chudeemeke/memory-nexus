@@ -482,6 +482,16 @@ These are enforced in every phase, not assigned to a single phase:
 
 **Depends on:** Phase 24 (friction system exists)
 **Discussion context:** .planning/phases/28-friction-universalization/CONTEXT.md
+**Plans:** 4 plans
+
+Plans:
+- [ ] 28-01-PLAN.md -- Domain entity, port interface, and schema migration for universal friction
+- [ ] 28-02-PLAN.md -- SqliteFrictionRepository tool filtering, markReviewed, findPatterns, byTool stats
+- [ ] 28-03-PLAN.md -- FrictionService auto-ingest, tool parameter threading, pattern detection
+- [ ] 28-04-PLAN.md -- CLI --tool flags, dashboard de-branding, By Tool chart, pattern alerts
+
+Requirements: SC-01, SC-02, SC-03, SC-04, SC-05, SC-06, SC-07, SC-08
+
 
 Success Criteria:
 1. `memory friction log "desc" --tool aidev --severity high` stores friction with tool as a first-class field
