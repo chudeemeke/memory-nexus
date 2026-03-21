@@ -14,8 +14,8 @@ See: .planning/PROJECT.md (updated 2026-02-18)
 
 **Milestone:** v3.0 Knowledge Layer + Friction Logging
 **Phase:** 28 (Friction Universalization) -- in progress
-**Status:** Plans 01, 03 complete, 2 remaining
-**Current Plan:** 28-02
+**Status:** Plans 01, 02, 03 complete, 1 remaining
+**Current Plan:** 28-04
 
 ```
 v3.0 Progress: [########################] 7/7 phases (complete, excluding Phase 28)
@@ -24,7 +24,7 @@ v3.0 Progress: [########################] 7/7 phases (complete, excluding Phase 
   Phase 25: Intelligence              [x] Complete (4/4 plans, including gap closure)
   Phase 26: Hooks + Backfill          [x] Complete (3/3 plans)
   Phase 27: qmd Integration           [x] Complete (2/2 plans)
-  Phase 28: Friction Universalization  [=====.....] In Progress (2/4 plans)
+  Phase 28: Friction Universalization  [=======...] In Progress (3/4 plans)
   Phase 29: Ambient Context            [x] Complete (2/2 plans)
 ```
 
@@ -70,8 +70,8 @@ v3.0 Progress: [########################] 7/7 phases (complete, excluding Phase 
 ### Last Session
 
 **Date:** 2026-03-21
-**Completed:** Plan 28-03 (FrictionService auto-ingest, tool threading, pattern detection)
-**Stopped at:** Phase 28 in progress (2/4 plans complete)
+**Completed:** Plan 28-02 (SqliteFrictionRepository extensions for universal tool tracking)
+**Stopped at:** Phase 28 in progress (3/4 plans complete)
 
 ### Decisions
 
@@ -124,6 +124,8 @@ v3.0 Progress: [########################] 7/7 phases (complete, excluding Phase 
 - File delete failure after auto-ingest is non-fatal (entries already saved to DB)
 - COMMON_CATEGORIES as documentation-only export replacing enforced VALID_CATEGORIES array
 - Category CHECK constraint removed at both domain (type = string) and infrastructure (SQL) levels
+- Dynamic byCategory in getStats replaces hardcoded 6-key Record (presentation handles display)
+- findPatterns two-pass query: GROUP BY for threshold, then full SELECT per group for entries
 
 ### Context for Next Session
 
