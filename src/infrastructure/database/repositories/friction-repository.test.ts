@@ -29,7 +29,8 @@ describe("SqliteFrictionRepository", () => {
     function createEntry(overrides?: Partial<{
         description: string;
         severity: "low" | "medium" | "high" | "critical";
-        category: "search" | "sync" | "cli" | "context" | "integration" | "ux";
+        category: string;
+        tool: string;
         status: "open" | "resolved" | "wont-fix";
         context: string;
         sourceProject: string;
@@ -41,6 +42,7 @@ describe("SqliteFrictionRepository", () => {
             description: "Default friction",
             severity: "medium",
             category: "cli",
+            tool: "memory",
             status: "open",
             loggedAt: new Date("2026-03-08T10:00:00Z"),
             ...overrides,

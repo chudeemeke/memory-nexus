@@ -18,6 +18,7 @@ function makeStats(overrides?: Partial<FrictionStats>): FrictionStats {
         wontFix: 2,
         bySeverity: { low: 14, medium: 16, high: 8, critical: 4 },
         byCategory: { search: 12, sync: 8, cli: 10, context: 5, integration: 4, ux: 3 },
+        byTool: { memory: 42 },
         meanTimeToResolve: 3.2,
         oldestOpen: { id: 7, description: "Search fails on unicode", daysOpen: 14 },
         ...overrides,
@@ -39,6 +40,7 @@ function makeOpenItems() {
             description: "Search fails on unicode",
             severity: "high",
             category: "search",
+            tool: "memory",
             status: "open",
             loggedAt: new Date(Date.now() - 14 * 86400000),
         }),
@@ -47,6 +49,7 @@ function makeOpenItems() {
             description: "Context command too slow",
             severity: "medium",
             category: "context",
+            tool: "memory",
             status: "open",
             loggedAt: new Date(Date.now() - 3 * 86400000),
         }),
@@ -196,7 +199,7 @@ describe("generateFrictionHtml", () => {
         const html = generateFrictionHtml(emptyStats, [], []);
 
         expect(html).toContain("<!DOCTYPE html>");
-        expect(html).toContain("Memory Friction Dashboard");
+        expect(html).toContain("Friction Dashboard");
     });
 
     it("serializes stats as JSON in script tag", () => {
