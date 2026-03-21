@@ -11,7 +11,7 @@
 
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
-import type { FrictionStats } from "../../../domain/ports/repositories.js";
+import type { FrictionStats, FrictionPattern } from "../../../domain/ports/repositories.js";
 import type { FrictionEntry } from "../../../domain/entities/friction-entry.js";
 import { bold, green, red, yellow, cyan, dim } from "./color.js";
 
@@ -32,6 +32,7 @@ export function formatFrictionDashboard(
     trends: Array<{ week: string; newCount: number; resolvedCount: number }>,
     openItems: FrictionEntry[],
     useColor: boolean,
+    patterns?: FrictionPattern[],
 ): string {
     if (stats.total === 0) {
         return "No friction entries logged yet.";
@@ -92,22 +93,34 @@ export function formatFrictionDashboard(
     }
     lines.push("");
 
-    // Category breakdown
+    // Category breakdown (dynamic)
     lines.push(bold("  By Category", useColor));
     lines.push("  -----------");
-    const categories = [
-        "search",
-        "sync",
-        "cli",
-        "context",
-        "integration",
-        "ux",
-    ] as const;
-    for (const cat of categories) {
-        const count = stats.byCategory[cat];
+    for (const [cat, count] of Object.entries(stats.byCategory)) {
         lines.push(`  ${cyan(cat.padEnd(14), useColor)}${count}`);
     }
     lines.push("");
+
+    // By Tool breakdown
+    if (stats.byTool && Object.keys(stats.byTool).length > 0) {
+        lines.push(bold("  By Tool", useColor));
+        lines.push("  -------");
+        for (const [tool, count] of Object.entries(stats.byTool)) {
+            const bar = "=".repeat(Math.min(count, 40));
+            lines.push(`  ${tool.padEnd(15)} ${bar} ${count}`);
+        }
+        lines.push("");
+    }
+
+    // Pattern alerts
+    if (patterns && patterns.length > 0) {
+        lines.push(bold("  Pattern Alerts", useColor));
+        lines.push("  --------------");
+        for (const p of patterns) {
+            lines.push(`  [!] Pattern detected: ${p.count} open entries for ${p.tool}/${p.category}`);
+        }
+        lines.push("");
+    }
 
     // Trends
     if (trends.length === 0) {
@@ -185,6 +198,7 @@ export function generateFrictionHtml(
     stats: FrictionStats,
     trends: Array<{ week: string; newCount: number; resolvedCount: number }>,
     openItems: FrictionEntry[],
+    patterns?: FrictionPattern[],
 ): string {
     const chartJsSource = getChartJsSource();
     const serializedOpenItems = serializeOpenItems(openItems);
@@ -212,7 +226,7 @@ export function generateFrictionHtml(
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Memory Friction Dashboard</title>
+  <title>Friction Dashboard</title>
   <style>
     body { background: #1a1a2e; color: #e0e0e0; font-family: system-ui, -apple-system, sans-serif; margin: 0; padding: 24px; }
     h1 { color: #e0e0e0; border-bottom: 1px solid #333; padding-bottom: 12px; }
@@ -237,7 +251,7 @@ export function generateFrictionHtml(
   <script>${chartJsSource}</script>
 </head>
 <body>
-  <h1>Memory Friction Dashboard</h1>
+  <h1>Friction Dashboard</h1>
 
   <div class="stats-grid">
     <div class="stat-card">
@@ -277,6 +291,17 @@ export function generateFrictionHtml(
   <div class="chart-container">
     <canvas id="resolutionTrendChart"></canvas>
   </div>
+
+  <div class="chart-container">
+    <canvas id="byToolChart"></canvas>
+  </div>
+
+${patterns && patterns.length > 0 ? `  <div class="alerts">
+    <h2>Pattern Alerts</h2>
+    <ul>
+      ${patterns.map(p => `<li>Pattern detected: ${p.count} open entries for ${escapeHtml(p.tool)}/${escapeHtml(p.category)}</li>`).join("\n      ")}
+    </ul>
+  </div>` : ""}
 
   <h2>Open Items</h2>
   <table id="openItemsTable">
@@ -344,7 +369,22 @@ export function generateFrictionHtml(
       options: { indexAxis: 'y', responsive: true, plugins: { title: { display: true, text: 'By Severity', color: '#e0e0e0' }, legend: { display: false } }, scales: { x: { ticks: { color: '#888' }, grid: { color: '#333' }, beginAtZero: true }, y: { ticks: { color: '#888' }, grid: { color: '#333' } } } }
     });
 
-    // Chart 4: Resolution Trend (grouped bar)
+    // Chart 4: By Tool (doughnut)
+    if (stats.byTool && Object.keys(stats.byTool).length > 0) {
+      new Chart(document.getElementById('byToolChart'), {
+        type: 'doughnut',
+        data: {
+          labels: Object.keys(stats.byTool),
+          datasets: [{
+            data: Object.values(stats.byTool),
+            backgroundColor: ['#ff6384', '#36a2eb', '#ffce56', '#4bc0c0', '#9966ff', '#ff9f40', '#c9cbcf']
+          }]
+        },
+        options: { responsive: true, plugins: { title: { display: true, text: 'By Tool', color: '#e0e0e0' }, legend: { labels: { color: '#e0e0e0' } } } }
+      });
+    }
+
+    // Chart 5: Resolution Trend (grouped bar)
     if (trends.length > 0) {
       new Chart(document.getElementById('resolutionTrendChart'), {
         type: 'bar',
