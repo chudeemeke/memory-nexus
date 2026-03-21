@@ -12,7 +12,7 @@ import { Command, Option } from "commander";
 import { exec } from "node:child_process";
 import { mkdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
-import { platform } from "node:os";
+import { homedir, platform } from "node:os";
 import type { CommandResult } from "../command-result.js";
 import { ErrorCode, MemoryError } from "../../../domain/errors/index.js";
 import {
@@ -45,6 +45,7 @@ export interface FrictionLogOptions extends FrictionCommandOptions {
     category?: string;
     source?: string;
     context?: string;
+    tool?: string;
 }
 
 /**
@@ -54,6 +55,7 @@ export interface FrictionListOptions extends FrictionCommandOptions {
     all?: boolean;
     status?: string;
     category?: string;
+    tool?: string;
     limit?: string;
 }
 
@@ -82,6 +84,7 @@ export interface FrictionExecuteOptions {
     status?: string;
     limit?: string;
     resolution?: string;
+    tool?: string;
     html?: boolean;
 }
 
@@ -114,6 +117,7 @@ export function createFrictionCommand(): Command {
                 "search|sync|cli|context|integration|ux",
                 "cli"
             )
+            .option("--tool <name>", "Tool that had friction (e.g., aidev, memory, gsd)")
             .option("--source <project>", "Source project name")
             .option("--context <ctx>", "Additional context")
             .option("--json", "Output as JSON")
@@ -139,6 +143,7 @@ export function createFrictionCommand(): Command {
             .option("--all", "Include resolved and won't-fix entries")
             .option("--status <status>", "Filter by status")
             .option("--category <cat>", "Filter by category")
+            .option("--tool <name>", "Filter by tool name")
             .option("--limit <n>", "Maximum entries", "50")
             .option("--json", "Output as JSON")
             .action(async (options: FrictionListOptions) => {
@@ -196,8 +201,9 @@ export function createFrictionCommand(): Command {
         new Command("dashboard")
             .description("Show friction dashboard")
             .option("--html", "Generate HTML report")
+            .option("--tool <name>", "Filter by tool name")
             .option("--json", "Output as JSON")
-            .action(async (options: FrictionCommandOptions & { html?: boolean }) => {
+            .action(async (options: FrictionCommandOptions & { html?: boolean; tool?: string }) => {
                 const result = await executeFrictionCommand({
                     action: "dashboard",
                     ...options,
@@ -227,6 +233,13 @@ export async function executeFrictionCommand(
     try {
         const repository = new SqliteFrictionRepository(db);
         const service = new FrictionService(repository);
+
+        // Auto-ingest fallback file before any action
+        const fallbackPath = join(homedir(), ".claude", "friction.jsonl");
+        const ingested = await service.ingestFallbackFile(fallbackPath);
+        if (ingested > 0) {
+            process.stderr.write(`Ingested ${ingested} friction entries from fallback file\n`);
+        }
 
         switch (options.action) {
             case "log":
@@ -279,6 +292,7 @@ async function handleLog(
         description: options.description,
         severity: options.severity as "low" | "medium" | "high" | "critical" | undefined,
         category: options.category as "search" | "sync" | "cli" | "context" | "integration" | "ux" | undefined,
+        tool: options.tool,
         context: options.context,
         sourceProject: options.source,
     });
@@ -290,6 +304,7 @@ async function handleLog(
                 description: entry.description,
                 severity: entry.severity,
                 category: entry.category,
+                tool: entry.tool,
                 status: entry.status,
                 loggedAt: entry.loggedAt.toISOString(),
                 context: entry.context ?? null,
@@ -317,6 +332,7 @@ async function handleList(
         all: options.all,
         status: options.status,
         category: options.category,
+        tool: options.tool,
         limit,
     });
 
@@ -328,12 +344,14 @@ async function handleList(
                     description: e.description,
                     severity: e.severity,
                     category: e.category,
+                    tool: e.tool,
                     status: e.status,
                     loggedAt: e.loggedAt.toISOString(),
                     resolvedAt: e.resolvedAt?.toISOString() ?? null,
                     resolution: e.resolution ?? null,
                     context: e.context ?? null,
                     sourceProject: e.sourceProject ?? null,
+                    lastReviewedAt: e.lastReviewedAt?.toISOString() ?? null,
                 }))
             )
         );
@@ -347,11 +365,19 @@ async function handleList(
         } else {
             // Table header
             console.log(
-                `${"ID".padEnd(6)}${"Severity".padEnd(10)}${"Category".padEnd(14)}${"Description".padEnd(62)}Age`
+                `${"".padEnd(5)}${"ID".padEnd(6)}${"Severity".padEnd(10)}${"Category".padEnd(14)}${"Description".padEnd(62)}Age`
             );
-            console.log("-".repeat(96));
+            console.log("-".repeat(101));
+
+            let newCount = 0;
+            const severityCounts: Record<string, number> = {};
 
             for (const entry of entries) {
+                const isNew = !entry.lastReviewedAt || entry.lastReviewedAt < entry.loggedAt;
+                if (isNew) newCount++;
+                severityCounts[entry.severity] = (severityCounts[entry.severity] ?? 0) + 1;
+
+                const newMarker = isNew ? "[NEW]" : "     ";
                 const desc =
                     entry.description.length > 60
                         ? entry.description.slice(0, 57) + "..."
@@ -361,12 +387,25 @@ async function handleList(
                 const age = ageDays === 0 ? "today" : `${ageDays}d`;
 
                 console.log(
-                    `${String(entry.id).padEnd(6)}${entry.severity.padEnd(10)}${entry.category.padEnd(14)}${desc.padEnd(62)}${age}`
+                    `${newMarker}${String(entry.id).padEnd(6)}${entry.severity.padEnd(10)}${entry.category.padEnd(14)}${desc.padEnd(62)}${age}`
                 );
             }
 
-            console.log(`\n${entries.length} ${options.all ? "total" : "open"} entries`);
+            // Summary with severity breakdown and new count
+            const breakdown = Object.entries(severityCounts)
+                .map(([sev, count]) => `${count} ${sev}`)
+                .join(", ");
+            const toolLabel = options.tool ? ` for ${options.tool}` : "";
+            const newLabel = newCount > 0 ? ` -- ${newCount} new since last review` : "";
+            console.log(
+                `\n${entries.length} ${options.all ? "total" : "open"} entries${toolLabel} (${breakdown})${newLabel}`
+            );
         }
+    }
+
+    // Mark entries as reviewed when tool is specified
+    if (options.tool) {
+        await service.markReviewed(options.tool);
     }
 
     return { exitCode: 0 };
@@ -448,10 +487,11 @@ async function handleDashboard(
 ): Promise<CommandResult> {
     const stats = await service.getStats();
     const trends = await service.getWeeklyTrends(12);
-    const openItems = await service.list();
+    const openItems = await service.list({ tool: options.tool });
+    const patterns = await service.detectPatterns();
 
     if (options.html) {
-        const html = generateFrictionHtml(stats, trends, openItems);
+        const html = generateFrictionHtml(stats, trends, openItems, patterns);
         const memoryDir = getMemoryDir();
         mkdirSync(memoryDir, { recursive: true });
         const dashboardPath = join(memoryDir, "dashboard.html");
@@ -462,9 +502,9 @@ async function handleDashboard(
             openInBrowser(dashboardPath);
         }
     } else if (options.json) {
-        console.log(JSON.stringify({ stats, trends }, null, 2));
+        console.log(JSON.stringify({ stats, trends, patterns }, null, 2));
     } else {
-        let output = formatFrictionDashboard(stats, trends, openItems, shouldUseColor());
+        let output = formatFrictionDashboard(stats, trends, openItems, shouldUseColor(), patterns);
         if (options.format === "ai") {
             output = formatForAi(output);
         }

@@ -94,13 +94,17 @@ export class FrictionService {
      * @returns Array of matching friction entries
      */
     async list(options?: ListFrictionOptions): Promise<FrictionEntry[]> {
-        if (options?.all) {
+        // Use findAll when any filter is specified (tool, category, sourceProject)
+        // or when explicitly requesting all statuses
+        if (options?.all || options?.tool || options?.category || options?.sourceProject) {
             return this.repository.findAll({
-                status: options.status as FrictionEntry["status"] | undefined,
-                category: options.category as FrictionEntry["category"] | undefined,
-                tool: options.tool,
-                sourceProject: options.sourceProject,
-                limit: options.limit,
+                status: options?.all
+                    ? (options.status as FrictionEntry["status"] | undefined)
+                    : "open",
+                category: options?.category as FrictionEntry["category"] | undefined,
+                tool: options?.tool,
+                sourceProject: options?.sourceProject,
+                limit: options?.limit,
             });
         }
 
