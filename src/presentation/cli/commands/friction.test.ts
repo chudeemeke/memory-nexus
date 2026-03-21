@@ -396,7 +396,7 @@ describe("Friction Command", () => {
             const result = await executeFrictionCommand({
                 action: "dashboard",
                 html: true,
-            });
+            }, { openInBrowser: () => {} });
 
             expect(result.exitCode).toBe(0);
             expect(consoleLogSpy).toHaveBeenCalledWith(

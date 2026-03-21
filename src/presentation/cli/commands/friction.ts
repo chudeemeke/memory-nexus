@@ -29,6 +29,18 @@ import { formatForAi } from "../formatters/ai-formatter.js";
 import { getMemoryDir } from "../../../infrastructure/paths.js";
 
 /**
+ * Function type for opening a file in the system browser.
+ */
+export type BrowserOpener = (filePath: string) => void;
+
+/**
+ * Injectable dependencies for executeFrictionCommand.
+ */
+export interface FrictionCommandDeps {
+    openInBrowser?: BrowserOpener;
+}
+
+/**
  * Base options shared by all friction subcommands.
  */
 export interface FrictionCommandOptions {
@@ -225,7 +237,8 @@ export function createFrictionCommand(): Command {
  * @returns CommandResult with exitCode 0 (success) or 1 (error)
  */
 export async function executeFrictionCommand(
-    options: FrictionExecuteOptions
+    options: FrictionExecuteOptions,
+    deps: FrictionCommandDeps = {}
 ): Promise<CommandResult> {
     const dbPath = getDefaultDbPath();
     const { db } = initializeDatabase({ path: dbPath });
@@ -251,7 +264,7 @@ export async function executeFrictionCommand(
             case "wont-fix":
                 return await handleWontFix(service, options);
             case "dashboard":
-                return await handleDashboard(service, options);
+                return await handleDashboard(service, options, deps.openInBrowser ?? openInBrowser);
             default:
                 console.error(`Unknown friction action: ${options.action}`);
                 return { exitCode: 1 };
@@ -483,7 +496,8 @@ async function handleWontFix(
  */
 async function handleDashboard(
     service: FrictionService,
-    options: FrictionExecuteOptions
+    options: FrictionExecuteOptions,
+    openFn: BrowserOpener = openInBrowser
 ): Promise<CommandResult> {
     const stats = await service.getStats();
     const trends = await service.getWeeklyTrends(12);
@@ -499,7 +513,7 @@ async function handleDashboard(
 
         if (!options.json) {
             console.log(`Dashboard written to ${dashboardPath}`);
-            openInBrowser(dashboardPath);
+            openFn(dashboardPath);
         }
     } else if (options.json) {
         console.log(JSON.stringify({ stats, trends, patterns }, null, 2));
