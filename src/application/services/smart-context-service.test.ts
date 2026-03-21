@@ -47,7 +47,8 @@ function makeFrictionEntry(overrides: {
     id?: number;
     description: string;
     severity?: "low" | "medium" | "high" | "critical";
-    category?: "search" | "sync" | "cli" | "context" | "integration" | "ux";
+    category?: string;
+    tool?: string;
     context?: string;
     sourceProject?: string;
 }): FrictionEntry {
@@ -56,6 +57,7 @@ function makeFrictionEntry(overrides: {
         description: overrides.description,
         severity: overrides.severity ?? "medium",
         category: overrides.category ?? "cli",
+        tool: overrides.tool ?? "memory",
         status: "open",
         context: overrides.context,
         sourceProject: overrides.sourceProject,
@@ -131,11 +133,16 @@ function createMockFrictionRepo(entries: FrictionEntry[]): IFrictionRepository {
                 wontFix: 0,
                 bySeverity: { low: 0, medium: 0, high: 0, critical: 0 },
                 byCategory: { search: 0, sync: 0, cli: 0, context: 0, integration: 0, ux: 0 },
+                byTool: {},
                 meanTimeToResolve: null,
                 oldestOpen: null,
             };
         },
         async getWeeklyTrends(): Promise<Array<{ week: string; newCount: number; resolvedCount: number }>> {
+            return [];
+        },
+        async markReviewed(): Promise<void> {},
+        async findPatterns(): Promise<Array<{ tool: string; category: string; count: number; entries: FrictionEntry[] }>> {
             return [];
         },
     };

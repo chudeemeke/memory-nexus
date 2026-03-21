@@ -345,6 +345,7 @@ describe("Repository Port Interfaces", () => {
         description: "Search fails on hyphens",
         severity: "high",
         category: "search",
+        tool: "memory",
         status: "open",
         loggedAt: new Date("2026-03-08T10:00:00Z"),
       });
@@ -359,6 +360,7 @@ describe("Repository Port Interfaces", () => {
             description: e.description,
             severity: e.severity,
             category: e.category,
+            tool: e.tool,
             status: e.status,
             loggedAt: e.loggedAt,
           });
@@ -377,12 +379,15 @@ describe("Repository Port Interfaces", () => {
           wontFix: 0,
           bySeverity: { low: 0, medium: 0, high: 1, critical: 0 },
           byCategory: { search: 1, sync: 0, cli: 0, context: 0, integration: 0, ux: 0 },
+          byTool: { memory: 1 },
           meanTimeToResolve: null,
           oldestOpen: { id: 1, description: "Search fails on hyphens", daysOpen: 5 },
         }),
         getWeeklyTrends: async () => [
           { week: "2026-W10", newCount: 1, resolvedCount: 0 },
         ],
+        markReviewed: async () => {},
+        findPatterns: async () => [],
       };
 
       const found = await mockRepo.findById(1);
