@@ -6,7 +6,7 @@
  */
 
 import type { Database } from "bun:sqlite";
-import type { IFrictionRepository, FrictionStats } from "../../../domain/ports/repositories.js";
+import type { IFrictionRepository, FrictionStats, FrictionPattern } from "../../../domain/ports/repositories.js";
 import {
     FrictionEntry,
     type FrictionSeverity,
@@ -22,12 +22,15 @@ interface FrictionRow {
     description: string;
     severity: string;
     category: string;
+    tool: string;
+    tags: string | null;
     status: string;
     context: string | null;
     source_project: string | null;
     logged_at: string;
     resolved_at: string | null;
     resolution: string | null;
+    last_reviewed_at: string | null;
 }
 
 /**
@@ -45,18 +48,21 @@ export class SqliteFrictionRepository implements IFrictionRepository {
 
     async save(entry: FrictionEntry): Promise<FrictionEntry> {
         const result = this.db.prepare(`
-            INSERT INTO friction_log (description, severity, category, status, context, source_project, logged_at, resolved_at, resolution)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            INSERT INTO friction_log (description, severity, category, tool, tags, status, context, source_project, logged_at, resolved_at, resolution, last_reviewed_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         `).run(
             entry.description,
             entry.severity,
             entry.category,
+            entry.tool,
+            entry.tags ? JSON.stringify(entry.tags) : null,
             entry.status,
             entry.context ?? null,
             entry.sourceProject ?? null,
             entry.loggedAt.toISOString(),
             entry.resolvedAt?.toISOString() ?? null,
             entry.resolution ?? null,
+            entry.lastReviewedAt?.toISOString() ?? null,
         );
 
         return FrictionEntry.create({
@@ -65,6 +71,9 @@ export class SqliteFrictionRepository implements IFrictionRepository {
             severity: entry.severity,
             category: entry.category,
             status: entry.status,
+            tool: entry.tool,
+            tags: entry.tags,
+            lastReviewedAt: entry.lastReviewedAt,
             context: entry.context,
             sourceProject: entry.sourceProject,
             loggedAt: entry.loggedAt,
@@ -94,6 +103,8 @@ export class SqliteFrictionRepository implements IFrictionRepository {
     async findAll(options?: {
         status?: FrictionStatus;
         category?: FrictionCategory;
+        tool?: string;
+        sourceProject?: string;
         limit?: number;
     }): Promise<FrictionEntry[]> {
         const conditions: string[] = [];
@@ -106,6 +117,14 @@ export class SqliteFrictionRepository implements IFrictionRepository {
         if (options?.category) {
             conditions.push("category = ?");
             params.push(options.category);
+        }
+        if (options?.tool) {
+            conditions.push("tool = ?");
+            params.push(options.tool);
+        }
+        if (options?.sourceProject) {
+            conditions.push("source_project = ?");
+            params.push(options.sourceProject);
         }
 
         const whereClause = conditions.length > 0
@@ -172,16 +191,24 @@ export class SqliteFrictionRepository implements IFrictionRepository {
             bySeverity[row.severity as FrictionSeverity] = row.count;
         }
 
-        // Category breakdown
+        // Category breakdown (dynamic keys)
         const categoryRows = this.db.prepare<{ category: string; count: number }, []>(
             "SELECT category, COUNT(*) as count FROM friction_log GROUP BY category"
         ).all();
 
-        const byCategory: Record<FrictionCategory, number> = {
-            search: 0, sync: 0, cli: 0, context: 0, integration: 0, ux: 0,
-        };
+        const byCategory: Record<string, number> = {};
         for (const row of categoryRows) {
-            byCategory[row.category as FrictionCategory] = row.count;
+            byCategory[row.category] = row.count;
+        }
+
+        // Tool breakdown
+        const toolRows = this.db.prepare<{ tool: string; count: number }, []>(
+            "SELECT tool, COUNT(*) as count FROM friction_log GROUP BY tool"
+        ).all();
+
+        const byTool: Record<string, number> = {};
+        for (const row of toolRows) {
+            byTool[row.tool] = row.count;
         }
 
         // Oldest open entry
@@ -209,6 +236,7 @@ export class SqliteFrictionRepository implements IFrictionRepository {
             wontFix: summary.wont_fix_count,
             bySeverity,
             byCategory,
+            byTool,
             meanTimeToResolve: summary.avg_resolve_days ?? null,
             oldestOpen,
         };
@@ -263,6 +291,42 @@ export class SqliteFrictionRepository implements IFrictionRepository {
         }));
     }
 
+    async markReviewed(tool: string, reviewedAt: Date): Promise<void> {
+        this.db.prepare(
+            "UPDATE friction_log SET last_reviewed_at = ? WHERE tool = ? AND status = 'open'"
+        ).run(reviewedAt.toISOString(), tool);
+    }
+
+    async findPatterns(threshold: number): Promise<FrictionPattern[]> {
+        const groups = this.db.prepare<
+            { tool: string; category: string; count: number },
+            [number]
+        >(`
+            SELECT tool, category, COUNT(*) as count
+            FROM friction_log
+            WHERE status = 'open'
+            GROUP BY tool, category
+            HAVING COUNT(*) >= ?
+            ORDER BY count DESC
+        `).all(threshold);
+
+        const patterns: FrictionPattern[] = [];
+        for (const group of groups) {
+            const rows = this.db.prepare<FrictionRow, [string, string]>(
+                "SELECT * FROM friction_log WHERE tool = ? AND category = ? AND status = 'open'"
+            ).all(group.tool, group.category);
+
+            patterns.push({
+                tool: group.tool,
+                category: group.category,
+                count: group.count,
+                entries: rows.map((r) => this.toEntity(r)),
+            });
+        }
+
+        return patterns;
+    }
+
     private toEntity(row: FrictionRow): FrictionEntry {
         return FrictionEntry.create({
             id: row.id,
@@ -270,6 +334,9 @@ export class SqliteFrictionRepository implements IFrictionRepository {
             severity: row.severity as FrictionSeverity,
             category: row.category as FrictionCategory,
             status: row.status as FrictionStatus,
+            tool: row.tool,
+            tags: row.tags ? JSON.parse(row.tags) : undefined,
+            lastReviewedAt: row.last_reviewed_at ? new Date(row.last_reviewed_at) : undefined,
             context: row.context ?? undefined,
             sourceProject: row.source_project ?? undefined,
             loggedAt: new Date(row.logged_at),
