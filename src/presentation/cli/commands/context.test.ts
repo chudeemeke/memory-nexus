@@ -5,7 +5,11 @@
  */
 
 import { describe, it, expect, beforeEach, afterEach, spyOn } from "bun:test";
+import { mkdtempSync, rmSync } from "fs";
+import { tmpdir } from "os";
+import { join } from "path";
 import { createContextCommand, executeContextCommand } from "./context.js";
+import { initializeDatabase, closeDatabase } from "../../../infrastructure/database/index.js";
 import { ErrorCode } from "../../../domain/errors/index.js";
 
 describe("createContextCommand", () => {
@@ -203,33 +207,39 @@ describe("Context Command Registration", () => {
 describe("executeContextCommand error handling", () => {
   let consoleLogSpy: ReturnType<typeof spyOn>;
   let consoleErrorSpy: ReturnType<typeof spyOn>;
+  let tempDir: string;
+  let dbPath: string;
 
   beforeEach(() => {
     consoleLogSpy = spyOn(console, "log").mockImplementation(() => {});
     consoleErrorSpy = spyOn(console, "error").mockImplementation(() => {});
+    tempDir = mkdtempSync(join(tmpdir(), "context-test-"));
+    dbPath = join(tempDir, "test.db");
+    const { db } = initializeDatabase({ path: dbPath });
+    closeDatabase(db);
   });
 
   afterEach(() => {
     consoleLogSpy.mockRestore();
     consoleErrorSpy.mockRestore();
+    try { rmSync(tempDir, { recursive: true, force: true }); } catch {}
   });
 
   it("sets exit code 1 when project not found", async () => {
-    // Non-existent project should trigger not found
-    const result = await executeContextCommand("nonexistent-project-xyz", {});
+    const result = await executeContextCommand("nonexistent-project-xyz", { dbPath });
 
     expect(result.exitCode).toBe(1);
     expect(consoleErrorSpy).toHaveBeenCalled();
   });
 
   it("uses consistent exit code 1 for errors", async () => {
-    const result = await executeContextCommand("nonexistent-project", {});
+    const result = await executeContextCommand("nonexistent-project", { dbPath });
 
     expect(result.exitCode).toBe(1);
   });
 
   it("outputs JSON error when --json flag is set", async () => {
-    const result = await executeContextCommand("nonexistent-project", { json: true });
+    const result = await executeContextCommand("nonexistent-project", { json: true, dbPath });
 
     expect(result.exitCode).toBe(1);
     // JSON errors go to console.log for structured output
@@ -237,28 +247,28 @@ describe("executeContextCommand error handling", () => {
   });
 
   it("returns exit code 1 for nonexistent project with --format ai", async () => {
-    const result = await executeContextCommand("nonexistent-project-xyz", { format: "ai" });
+    const result = await executeContextCommand("nonexistent-project-xyz", { format: "ai", dbPath });
 
     expect(result.exitCode).toBe(1);
     expect(consoleErrorSpy).toHaveBeenCalled();
   });
 
   it("returns exit code 1 for nonexistent project with --budget", async () => {
-    const result = await executeContextCommand("nonexistent-project-xyz", { budget: 1500 });
+    const result = await executeContextCommand("nonexistent-project-xyz", { budget: 1500, dbPath });
 
     expect(result.exitCode).toBe(1);
     expect(consoleErrorSpy).toHaveBeenCalled();
   });
 
   it("returns exit code 1 for nonexistent project with --cross-project", async () => {
-    const result = await executeContextCommand("nonexistent-project-xyz", { crossProject: true });
+    const result = await executeContextCommand("nonexistent-project-xyz", { crossProject: true, dbPath });
 
     expect(result.exitCode).toBe(1);
     expect(consoleErrorSpy).toHaveBeenCalled();
   });
 
   it("existing --format brief still works (no regression)", async () => {
-    const result = await executeContextCommand("nonexistent-project-xyz", { format: "brief" });
+    const result = await executeContextCommand("nonexistent-project-xyz", { format: "brief", dbPath });
 
     expect(result.exitCode).toBe(1);
     // Brief format - project not found message goes to stderr
@@ -266,7 +276,7 @@ describe("executeContextCommand error handling", () => {
   });
 
   it("existing --format detailed still works (no regression)", async () => {
-    const result = await executeContextCommand("nonexistent-project-xyz", { format: "detailed" });
+    const result = await executeContextCommand("nonexistent-project-xyz", { format: "detailed", dbPath });
 
     expect(result.exitCode).toBe(1);
     expect(consoleErrorSpy).toHaveBeenCalled();

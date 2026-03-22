@@ -5,7 +5,11 @@
  */
 
 import { describe, it, expect, beforeEach, afterEach, spyOn } from "bun:test";
+import { mkdtempSync, rmSync } from "fs";
+import { tmpdir } from "os";
+import { join } from "path";
 import { createRelatedCommand, executeRelatedCommand } from "./related.js";
+import { initializeDatabase, closeDatabase } from "../../../infrastructure/database/index.js";
 import { ErrorCode } from "../../../domain/errors/index.js";
 
 describe("createRelatedCommand", () => {
@@ -210,33 +214,39 @@ describe("related command --hops validation", () => {
 describe("executeRelatedCommand error handling", () => {
   let consoleLogSpy: ReturnType<typeof spyOn>;
   let consoleErrorSpy: ReturnType<typeof spyOn>;
+  let tempDir: string;
+  let dbPath: string;
 
   beforeEach(() => {
     consoleLogSpy = spyOn(console, "log").mockImplementation(() => {});
     consoleErrorSpy = spyOn(console, "error").mockImplementation(() => {});
+    tempDir = mkdtempSync(join(tmpdir(), "related-test-"));
+    dbPath = join(tempDir, "test.db");
+    const { db } = initializeDatabase({ path: dbPath });
+    closeDatabase(db);
   });
 
   afterEach(() => {
     consoleLogSpy.mockRestore();
     consoleErrorSpy.mockRestore();
+    try { rmSync(tempDir, { recursive: true, force: true }); } catch {}
   });
 
   it("sets exit code 1 when session not found", async () => {
-    // Non-existent session ID should trigger not found
-    const result = await executeRelatedCommand("nonexistent-session-xyz", {});
+    const result = await executeRelatedCommand("nonexistent-session-xyz", { dbPath });
 
     expect(result.exitCode).toBe(1);
     expect(consoleErrorSpy).toHaveBeenCalled();
   });
 
   it("uses consistent exit code 1 for errors", async () => {
-    const result = await executeRelatedCommand("nonexistent-session", {});
+    const result = await executeRelatedCommand("nonexistent-session", { dbPath });
 
     expect(result.exitCode).toBe(1);
   });
 
   it("outputs JSON error when --json flag is set", async () => {
-    const result = await executeRelatedCommand("nonexistent-session", { json: true });
+    const result = await executeRelatedCommand("nonexistent-session", { json: true, dbPath });
 
     expect(result.exitCode).toBe(1);
     // JSON errors go to console.log for structured output

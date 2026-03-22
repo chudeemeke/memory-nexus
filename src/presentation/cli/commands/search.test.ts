@@ -6,6 +6,9 @@
  */
 
 import { describe, expect, it, beforeEach, afterEach, spyOn, mock } from "bun:test";
+import { mkdtempSync, rmSync } from "fs";
+import { tmpdir } from "os";
+import { join } from "path";
 import { Command, CommanderError } from "commander";
 import { createSearchCommand, executeSearchCommand, filterCaseSensitive, resolveSearchMode } from "./search.js";
 import {
@@ -325,6 +328,20 @@ describe("Search Command", () => {
   });
 
   describe("executeSearchCommand", () => {
+    let searchTempDir: string;
+    let searchDbPath: string;
+
+    beforeEach(() => {
+      searchTempDir = mkdtempSync(join(tmpdir(), "search-test-"));
+      searchDbPath = join(searchTempDir, "test.db");
+      const { db } = initializeDatabase({ path: searchDbPath });
+      closeDatabase(db);
+    });
+
+    afterEach(() => {
+      try { rmSync(searchTempDir, { recursive: true, force: true }); } catch {}
+    });
+
     it("sets exit code 1 for empty query", async () => {
       const result = await executeSearchCommand("", {});
 
@@ -340,21 +357,21 @@ describe("Search Command", () => {
     });
 
     it("sets exit code 1 for invalid limit", async () => {
-      const result = await executeSearchCommand("test", { limit: "invalid" });
+      const result = await executeSearchCommand("test", { limit: "invalid", dbPath: searchDbPath });
 
       expect(result.exitCode).toBe(1);
       expect(consoleErrorSpy).toHaveBeenCalledWith("Error: Limit must be a positive number");
     });
 
     it("sets exit code 1 for negative limit", async () => {
-      const result = await executeSearchCommand("test", { limit: "-5" });
+      const result = await executeSearchCommand("test", { limit: "-5", dbPath: searchDbPath });
 
       expect(result.exitCode).toBe(1);
       expect(consoleErrorSpy).toHaveBeenCalledWith("Error: Limit must be a positive number");
     });
 
     it("sets exit code 1 for zero limit", async () => {
-      const result = await executeSearchCommand("test", { limit: "0" });
+      const result = await executeSearchCommand("test", { limit: "0", dbPath: searchDbPath });
 
       expect(result.exitCode).toBe(1);
       expect(consoleErrorSpy).toHaveBeenCalledWith("Error: Limit must be a positive number");
@@ -1012,10 +1029,17 @@ describe("Search Command", () => {
     });
 
     it("uses consistent exit code 1 for all error types", async () => {
-      // Invalid limit should exit with code 1
-      const result = await executeSearchCommand("test", { limit: "-5" });
-
-      expect(result.exitCode).toBe(1);
+      // Invalid limit should exit with code 1 -- use temp DB to avoid hitting real DB
+      const errTempDir = mkdtempSync(join(tmpdir(), "search-err-test-"));
+      const errDbPath = join(errTempDir, "test.db");
+      const { db: errDb } = initializeDatabase({ path: errDbPath });
+      closeDatabase(errDb);
+      try {
+        const result = await executeSearchCommand("test", { limit: "-5", dbPath: errDbPath });
+        expect(result.exitCode).toBe(1);
+      } finally {
+        try { rmSync(errTempDir, { recursive: true, force: true }); } catch {}
+      }
     });
   });
 
