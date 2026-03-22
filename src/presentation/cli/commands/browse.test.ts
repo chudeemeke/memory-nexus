@@ -2,13 +2,44 @@
  * Browse Command Tests
  *
  * Tests for interactive browse command with session picker.
+ * Dispatch targets are mocked so tests verify dispatch logic only,
+ * without hitting real infrastructure (database, filesystem).
  */
 
 import { describe, it, expect, mock, beforeEach, afterEach } from "bun:test";
+
+// Mock dispatch targets BEFORE importing browse.ts
+// These prevent browse from calling real executeSearchCommand/executeContextCommand/executeRelatedCommand/executeShowCommand
+const mockExecuteShow = mock(() =>
+  Promise.resolve({ exitCode: 0, stdout: "", stderr: "" })
+);
+const mockExecuteSearch = mock(() =>
+  Promise.resolve({ exitCode: 0, stdout: "", stderr: "" })
+);
+const mockExecuteContext = mock(() =>
+  Promise.resolve({ exitCode: 0, stdout: "", stderr: "" })
+);
+const mockExecuteRelated = mock(() =>
+  Promise.resolve({ exitCode: 0, stdout: "", stderr: "" })
+);
+
+mock.module("./show.js", () => ({
+  executeShowCommand: mockExecuteShow,
+  setTestDbPath: mock(() => {}),
+}));
+mock.module("./search.js", () => ({
+  executeSearchCommand: mockExecuteSearch,
+}));
+mock.module("./context.js", () => ({
+  executeContextCommand: mockExecuteContext,
+}));
+mock.module("./related.js", () => ({
+  executeRelatedCommand: mockExecuteRelated,
+}));
+
 import { createBrowseCommand, executeBrowseCommand, setTestDbPath } from "./browse.js";
 import { setTtyOverride, setMocks } from "../pickers/session-picker.js";
 import { initializeDatabase, closeDatabase } from "../../../infrastructure/database/index.js";
-import { ErrorCode } from "../../../domain/errors/index.js";
 import { mkdtempSync, rmSync, existsSync } from "fs";
 import { tmpdir } from "os";
 import { join } from "path";
@@ -76,11 +107,29 @@ describe("executeBrowseCommand", () => {
       consoleErrors.push(args.map(String).join(" "));
     };
 
-    // Reset mocks
+    // Reset picker mocks
     mockSearch.mockReset();
     mockSelect.mockReset();
     mockSearch.mockImplementation(() => Promise.resolve("test-session-id"));
     mockSelect.mockImplementation(() => Promise.resolve("show"));
+
+    // Reset dispatch mocks
+    mockExecuteShow.mockReset();
+    mockExecuteSearch.mockReset();
+    mockExecuteContext.mockReset();
+    mockExecuteRelated.mockReset();
+    mockExecuteShow.mockImplementation(() =>
+      Promise.resolve({ exitCode: 0, stdout: "", stderr: "" })
+    );
+    mockExecuteSearch.mockImplementation(() =>
+      Promise.resolve({ exitCode: 0, stdout: "", stderr: "" })
+    );
+    mockExecuteContext.mockImplementation(() =>
+      Promise.resolve({ exitCode: 0, stdout: "", stderr: "" })
+    );
+    mockExecuteRelated.mockImplementation(() =>
+      Promise.resolve({ exitCode: 0, stdout: "", stderr: "" })
+    );
 
     // Setup temp directory and database
     tempDir = createTempDir();
@@ -172,9 +221,9 @@ describe("executeBrowseCommand", () => {
 
     await executeBrowseCommand({ limit: "100" });
 
-    // Both picker steps were called
     expect(mockSearch).toHaveBeenCalled();
     expect(mockSelect).toHaveBeenCalled();
+    expect(mockExecuteShow).toHaveBeenCalledWith("test-session-id", {});
   });
 
   it("dispatches to search command on search action", async () => {
@@ -187,6 +236,7 @@ describe("executeBrowseCommand", () => {
 
     expect(mockSearch).toHaveBeenCalled();
     expect(mockSelect).toHaveBeenCalled();
+    expect(mockExecuteSearch).toHaveBeenCalledWith("*", { session: "test-session-id" });
   });
 
   it("dispatches to context command on context action", async () => {
@@ -199,6 +249,8 @@ describe("executeBrowseCommand", () => {
 
     expect(mockSearch).toHaveBeenCalled();
     expect(mockSelect).toHaveBeenCalled();
+    // Context command receives the project name extracted from the session
+    expect(mockExecuteContext).toHaveBeenCalledWith("test-project", {});
   });
 
   it("dispatches to related command on related action", async () => {
@@ -211,6 +263,7 @@ describe("executeBrowseCommand", () => {
 
     expect(mockSearch).toHaveBeenCalled();
     expect(mockSelect).toHaveBeenCalled();
+    expect(mockExecuteRelated).toHaveBeenCalledWith("test-session-id", {});
   });
 
   it("handles edge cases gracefully", async () => {
