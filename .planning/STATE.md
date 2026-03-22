@@ -69,9 +69,9 @@ v3.0 Progress: [########################] 8/8 phases complete
 
 ### Last Session
 
-**Date:** 2026-03-21
-**Completed:** Plan 28-04 (CLI wiring and dashboard formatters for friction universalization)
-**Stopped at:** Phase 28 complete (4/4 plans)
+**Date:** 2026-03-22
+**Completed:** Plan 28-06 (gap closure: deterministic clock injection and test timeouts)
+**Stopped at:** Phase 28 gap closure complete
 
 ### Decisions
 
@@ -105,6 +105,8 @@ v3.0 Progress: [########################] 8/8 phases complete
 - Standalone isQmdAvailable/getQmdInfo functions duplicate class logic for non-DI contexts (doctor command)
 - infrastructure/external/ directory for external CLI tool adapters (new pattern)
 - Marker format uses HTML comments (<!-- memory-cli:start/end -->) for MEMORY.md block isolation
+- Clock DI as private field with default in constructor, not optional chaining on deps (constructor destructures deps)
+- 15s explicit timeouts on individual slow integration tests, not blanket describe-level timeout
 - mergeMemoryBlock exported as pure function for direct testing without filesystem ops
 - AmbientContext config uses flat object (enabled + budget) matching existing config deep-merge pattern
 - executeFileSearch short-circuits before DB init (file search does not need memory database)
