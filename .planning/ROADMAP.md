@@ -534,7 +534,7 @@ Success Criteria:
 
 Requirements: QUAL-01
 nPlans:
-- [ ] 29.1-01-PLAN.md -- DB path injection for context, search, related execute functions
+- [x] 29.1-01-PLAN.md -- DB path injection for context, search, related execute functions
 - [ ] 29.1-02-PLAN.md -- Browse dispatch test isolation via module mocking
 
 Success Criteria:
