@@ -530,9 +530,12 @@ Success Criteria:
 **Goal:** Eliminate all remaining test failures by addressing their root causes architecturally: inject database dependencies into programmatic API functions for test isolation, replace hardcoded Date.now() with injectable clocks, and ensure command dispatch tests don't hit real infrastructure. All fixes must follow existing DI patterns (ports, structural typing, constructor injection) and maintain SOLID compliance.
 
 **Depends on:** Phase 29 (all v3.0 feature work complete; this is stabilization)
-**Plans:** 0 plans
+**Plans:** 2 plans
 
 Requirements: QUAL-01
+nPlans:
+- [ ] 29.1-01-PLAN.md -- DB path injection for context, search, related execute functions
+- [ ] 29.1-02-PLAN.md -- Browse dispatch test isolation via module mocking
 
 Success Criteria:
 1. `bun test` passes all tests with 0 failures (currently 11 failures across browse, context, and programmatic API tests)
