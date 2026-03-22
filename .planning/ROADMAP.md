@@ -525,6 +525,23 @@ Success Criteria:
 4. `memory install` wires context generation into the sync hook
 5. `context.md` budget is configurable in `~/.config/memory/config.json` (default 800-1000 tokens)
 
+### Phase 29.1: Test Determinism and Environment Isolation (urgent)
+
+**Goal:** Eliminate all remaining test failures by addressing their root causes architecturally: inject database dependencies into programmatic API functions for test isolation, replace hardcoded Date.now() with injectable clocks, and ensure command dispatch tests don't hit real infrastructure. All fixes must follow existing DI patterns (ports, structural typing, constructor injection) and maintain SOLID compliance.
+
+**Depends on:** Phase 29 (all v3.0 feature work complete; this is stabilization)
+**Plans:** 0 plans
+
+Requirements: QUAL-01
+
+Success Criteria:
+1. `bun test` passes all tests with 0 failures (currently 11 failures across browse, context, and programmatic API tests)
+2. No test spawns real browser windows, real database syncs against user data, or depends on wall clock time
+3. All programmatic API execute*Command functions accept an optional injected database path or database instance via their options type
+4. Browse command dispatch tests use isolated temp databases, not the user's real database
+5. Context command error handling tests complete in under 5 seconds each (currently 30-65 seconds)
+6. Weekly trends and daily logs tests use deterministic dates (injectable clock or relative-to-now calculations)
+
 ---
 
-*Last updated: 2026-03-18 (Phase 29 complete: ambient context pipeline operational, 2/2 plans)*
+*Last updated: 2026-03-22 (Phase 29.1 inserted: test determinism and environment isolation)*

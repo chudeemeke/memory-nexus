@@ -13,7 +13,7 @@ See: .planning/PROJECT.md (updated 2026-02-18)
 ## Current Position
 
 **Milestone:** v3.0 Knowledge Layer + Friction Logging
-**Phase:** 28 (Friction Universalization) -- complete
+**Phase:** 29.1 (Test Determinism and Environment Isolation) -- ready to plan
 **Status:** Ready to plan
 **Current Plan:** Not started
 
@@ -131,6 +131,8 @@ v3.0 Progress: [########################] 8/8 phases complete
 - Category CHECK constraint removed at both domain (type = string) and infrastructure (SQL) levels
 - Dynamic byCategory in getStats replaces hardcoded 6-key Record (presentation handles display)
 - findPatterns two-pass query: GROUP BY for threshold, then full SELECT per group for entries
+
+- Inserted Phase 29.1: Test Determinism and Environment Isolation (urgent) (2026-03-22)
 
 ### Context for Next Session
 
