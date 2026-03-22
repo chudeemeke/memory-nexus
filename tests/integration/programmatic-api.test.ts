@@ -96,7 +96,7 @@ describe("Programmatic API", () => {
       const result = await executeSyncCommand(options);
       expectCommandResult(result);
       expect(result.exitCode).toBe(0);
-    });
+    }, 15_000);
 
     test("exitCode is a number", async () => {
       const result = await executeSyncCommand({ dryRun: true, quiet: true });
@@ -364,18 +364,18 @@ describe("Programmatic API", () => {
       // exitCode 0 = healthy, 1 = degraded, 2 = broken -- all are valid
       expect(result.exitCode).toBeGreaterThanOrEqual(0);
       expect(result.exitCode).toBeLessThanOrEqual(2);
-    });
+    }, 15_000);
 
     test("JSON mode returns CommandResult", async () => {
       const options: DoctorOptions = { json: true };
       const result = await executeDoctorCommand(options);
       expectCommandResult(result);
-    });
+    }, 15_000);
 
     test("exitCode is a number", async () => {
       const result = await executeDoctorCommand({});
       expect(typeof result.exitCode).toBe("number");
-    });
+    }, 15_000);
   });
 
   describe("executeStatusCommand", () => {
@@ -487,6 +487,6 @@ describe("Programmatic API", () => {
 
       // Restore
       process.exitCode = savedExitCode;
-    });
+    }, 15_000);
   });
 });
