@@ -76,6 +76,8 @@ export interface SearchCommandOptions {
   format?: "default" | "ai";
   /** Search markdown files via qmd (requires qmd installed) */
   files?: boolean;
+  /** Override database path (for testing) */
+  dbPath?: string;
 }
 
 /**
@@ -201,7 +203,7 @@ export async function executeSearchCommand(
   }
 
   // Initialize database
-  const dbPath = getDefaultDbPath();
+  const dbPath = options.dbPath ?? getDefaultDbPath();
   const { db, sqliteVecAvailable } = initializeDatabase({ path: dbPath });
 
   const providerFactory = new EmbeddingProviderFactory();

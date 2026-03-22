@@ -47,6 +47,8 @@ export interface RelatedCommandOptions {
   verbose?: boolean;
   /** Minimal output (session IDs only) */
   quiet?: boolean;
+  /** Override database path (for testing) */
+  dbPath?: string;
 }
 
 /**
@@ -117,7 +119,7 @@ export async function executeRelatedCommand(
 ): Promise<CommandResult> {
   const startTime = performance.now();
 
-  const dbPath = getDefaultDbPath();
+  const dbPath = options.dbPath ?? getDefaultDbPath();
   const { db } = initializeDatabase({ path: dbPath });
 
   try {
