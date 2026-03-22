@@ -13,9 +13,9 @@ See: .planning/PROJECT.md (updated 2026-02-18)
 ## Current Position
 
 **Milestone:** v3.0 Knowledge Layer + Friction Logging
-**Phase:** 29.1 (Test Determinism and Environment Isolation) -- ready to plan
-**Status:** Ready to plan
-**Current Plan:** Not started
+**Phase:** 29.1 (Test Determinism and Environment Isolation) -- executing
+**Status:** Executing
+**Current Plan:** 01 complete
 
 ```
 v3.0 Progress: [########################] 8/8 phases complete
@@ -70,8 +70,8 @@ v3.0 Progress: [########################] 8/8 phases complete
 ### Last Session
 
 **Date:** 2026-03-22
-**Completed:** Plan 28-06 (gap closure: deterministic clock injection and test timeouts)
-**Stopped at:** Phase 28 gap closure complete
+**Completed:** Plan 29.1-02 (browse dispatch mock isolation)
+**Stopped at:** Phase 29.1 plan 02 complete
 
 ### Decisions
 
@@ -133,6 +133,8 @@ v3.0 Progress: [########################] 8/8 phases complete
 - findPatterns two-pass query: GROUP BY for threshold, then full SELECT per group for entries
 
 - Inserted Phase 29.1: Test Determinism and Environment Isolation (urgent) (2026-03-22)
+- mock.module before browse import to intercept all four dispatch targets (show, search, context, related)
+- Browse dispatch tests assert correct function + args, not just that picker ran
 
 ### Context for Next Session
 
@@ -145,4 +147,4 @@ v3.0 Progress: [########################] 8/8 phases complete
 
 ---
 
-*Last updated: 2026-03-18 (29-02 executed, AmbientContextService + sync integration)*
+*Last updated: 2026-03-22 (29.1-02 executed, browse dispatch mock isolation)*
