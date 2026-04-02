@@ -138,15 +138,53 @@ v3.0 Progress: [########################] 9/9 phases complete
 
 ### Context for Next Session
 
-1. **v3.0 shipped** -- all 9 phases complete, UAT passed for Phase 29 (ambient context)
-2. **friction purge command added** -- `memory friction purge "pattern" --force` for bulk cleanup
-3. **ambient context skip message fixed** -- sync now logs "skipped (reason)" instead of silence
-4. **bun link install** -- v2.0.0 installed globally via bun link (symlink to source, not npm publish)
-5. Pre-existing issues: error-codes.test.ts count assertion stale (expects 19, has 21)
-6. Pre-existing issue: smart-context-service.test.ts "daily logs filtered" test is time-sensitive
-7. **God file review scheduled** -- calendar event 2026-04-06 for sync.ts (928 lines) and friction.ts (638 lines)
-8. Ready for `/gsd:new-milestone` to plan v4.0
+**WHERE WE ARE:** v4.0 milestone started, research phase complete (3/4 agents returned), ready for requirements definition.
+
+**NEXT STEP:** `/gsd:new-milestone` to continue from Step 9 (Define Requirements). Research is done. Skip research prompt and go straight to requirements scoping.
+
+**v4.0 scope (confirmed with user):**
+1. CLI surface audit -- labeled help groups, review overlaps (18 commands is fine per research)
+2. Knowledge extraction pipeline -- LLM-based (Agent SDK + Max subscription OAuth), Mem0-style ADD/UPDATE/DELETE/NOOP, Zep-style temporal superseding. Store in SQLite tables, not ~/.memory/ files
+3. Rewire `memory context` -- SmartContextService backend, smart output as default, `--global` for cross-project, kill old metadata output
+4. Deprecate `~/.memory/` directory -- SQLite-only knowledge storage
+5. Bug fixes -- unicode search (#14), CLI truncation (#15), download bar 0/0 MB (#163)
+6. npm publish @chude/memory to registry
+7. God file cleanup -- sync.ts (928 lines), friction.ts (638 lines)
+8. Cross-environment portability -- WSL migration readiness, dynamic path resolution
+
+**KEY DECISIONS FROM THIS SESSION:**
+- `memory context` streams to stdout (primary), ambient sync writes context.md (secondary). No dual write on interactive command.
+- Project-level scope by default, `--global` flag for cross-project. Same database, different filter.
+- Heuristic extraction abandoned per Mem0/Zep research -- LLM extraction is industry consensus, no viable heuristic-only approach
+- ~/.memory/ directory convention was wrong abstraction -- knowledge goes in SQLite tables populated by sync pipeline
+- SmartContextService reads from new SQLite knowledge tables instead of filesystem
+- Ambient context works mechanically but produces no useful intelligence (only friction entries) because knowledge tables don't exist yet
+
+**RESEARCH FILES (v4.0):**
+- `.planning/research/HONCHO-SUMMARY.md` + 5 supporting files -- Honcho comparison and adoptable patterns
+- `.planning/research/MEM0-ZEP-V4-RESEARCH.md` -- extraction pipelines, consolidation, storage patterns
+- `.planning/research/CLI-SURFACE-PATTERNS.md` -- command naming, grouping, progressive disclosure
+- `.planning/research/PORTABILITY-PITFALLS.md` -- WSL migration risks and mitigations
+- `.planning/research/OPENCLAW-RESEARCH.md` -- v2.0 era research (v4.0 agent timed out after 3h)
+
+**COMMITS THIS SESSION:**
+- `87d3eaa` fix(sync): ambient context skip message
+- `9f54f25` feat(friction): purge command
+- `90b18b5` chore(18): consolidate duplicate Phase 18 directories
+- `3d92859` docs: ship v3.0 milestone
+- `26f8e6f` docs: clean up PROJECT.md for v4.0
+- `306d8f9` docs: start milestone v4.0
+
+**FRICTION STATUS:** 5 open entries (#14, #15, #137, #146, #163). 8 entries resolved (Phase 28 fixes). 56 test entries purged.
+
+**OPEN ITEMS:**
+- error-codes.test.ts count assertion -- verified NOT stale (uses Object.keys, self-referencing)
+- smart-context-service.test.ts time-sensitive test -- still pre-existing
+- God file review calendar event set for 2026-04-06
+- bun link install active (symlink to source, not npm published yet)
+- Phase 29 UAT updated to "diagnosed" status (1 issue found and fixed)
+- User-level CLAUDE.md updated with Agent SDK + Max subscription OAuth fact
 
 ---
 
-*Last updated: 2026-04-02 (v3.0 milestone shipped, Phase 18 directories consolidated)*
+*Last updated: 2026-04-02 (v4.0 milestone started, research complete, ready for requirements)*
