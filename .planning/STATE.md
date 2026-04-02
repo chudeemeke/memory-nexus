@@ -6,33 +6,33 @@ See: .planning/PROJECT.md (updated 2026-02-18)
 
 **Core Value:** Knowledge gained in one Claude Code project becomes accessible from any other project. No more context silos.
 
-**Current Focus:** v3.0 Knowledge Layer + Friction Logging -- agent-written memory, smart context, friction capture, backfill, qmd integration.
+**Current Focus:** All three milestones shipped. Ready for v4.0 planning.
 
 **Tech Stack:** Bun, TypeScript 5.5+, bun:sqlite with FTS5 + sqlite-vec, Commander.js v14, @huggingface/transformers v3, cli-progress, chrono-node, Chart.js (HTML dashboard)
 
 ## Current Position
 
-**Milestone:** v3.0 Knowledge Layer + Friction Logging
-**Phase:** 29.1 (Test Determinism and Environment Isolation) -- executing
-**Status:** Executing
-**Current Plan:** 01 complete
+**Milestone:** v3.0 Knowledge Layer + Friction Logging -- SHIPPED
+**Phase:** All complete
+**Status:** Between milestones
 
 ```
-v3.0 Progress: [########################] 8/8 phases complete
-  Phase 23: Foundation                [x] Complete (4/4 plans)
-  Phase 24: Friction System           [x] Complete (3/3 plans)
-  Phase 25: Intelligence              [x] Complete (4/4 plans, including gap closure)
-  Phase 26: Hooks + Backfill          [x] Complete (3/3 plans)
-  Phase 27: qmd Integration           [x] Complete (2/2 plans)
-  Phase 28: Friction Universalization  [x] Complete (4/4 plans)
-  Phase 29: Ambient Context            [x] Complete (2/2 plans)
+v3.0 Progress: [########################] 9/9 phases complete
+  Phase 23: Foundation                 [x] Complete (4/4 plans)
+  Phase 24: Friction System            [x] Complete (3/3 plans)
+  Phase 25: Intelligence               [x] Complete (4/4 plans)
+  Phase 26: Hooks + Backfill           [x] Complete (3/3 plans)
+  Phase 27: qmd Integration            [x] Complete (2/2 plans)
+  Phase 28: Friction Universalization   [x] Complete (6/6 plans)
+  Phase 29: Ambient Context             [x] Complete (2/2 plans)
+  Phase 29.1: Test Determinism          [x] Complete (2/2 plans)
 ```
 
 ## Milestone History
 
 **v1.0 (shipped 2026-02-16):** 12 phases, 56 plans, full CLI with sync, search, context, hooks
-**v2.0 (shipped 2026-03-01):** 10 phases, package rename, hybrid search (FTS5 + sqlite-vec), embedding providers, API stabilization
-**Phase 22 (2026-03-07):** Ad-hoc gap closure -- sync domain ports, browse test, barrel deletion
+**v2.0 (shipped 2026-03-01):** 10 phases (13-22), package rename, hybrid search (FTS5 + sqlite-vec), embedding providers, API stabilization
+**v3.0 (shipped 2026-04-02):** 9 phases (23-29.1), agent-written memory, smart context, friction system, backfill, qmd, ambient context, test determinism
 
 ## Performance Metrics
 
@@ -138,13 +138,15 @@ v3.0 Progress: [########################] 8/8 phases complete
 
 ### Context for Next Session
 
-1. **Phase 27 complete** -- qmd integration done (2/2 plans: port+adapter, CLI wiring)
-2. **Phase 29 complete** -- Ambient context pipeline operational (2/2 plans: foundation + service/integration)
-3. **Phase 28 plan 01 complete** -- Domain model + schema extended. Downstream tests (friction-repository, friction-service, friction-cli) need updates for tool field and byTool stats
-4. Pre-existing issues: error-codes.test.ts count assertion stale (expects 19, has 21)
-5. Pre-existing issue: smart-context-service.test.ts "daily logs filtered" test is time-sensitive
-6. infrastructure/external/ barrel exports used directly by search.ts and doctor.ts (not wired to infrastructure/index.ts -- intentional for lazy loading)
+1. **v3.0 shipped** -- all 9 phases complete, UAT passed for Phase 29 (ambient context)
+2. **friction purge command added** -- `memory friction purge "pattern" --force` for bulk cleanup
+3. **ambient context skip message fixed** -- sync now logs "skipped (reason)" instead of silence
+4. **bun link install** -- v2.0.0 installed globally via bun link (symlink to source, not npm publish)
+5. Pre-existing issues: error-codes.test.ts count assertion stale (expects 19, has 21)
+6. Pre-existing issue: smart-context-service.test.ts "daily logs filtered" test is time-sensitive
+7. **God file review scheduled** -- calendar event 2026-04-06 for sync.ts (928 lines) and friction.ts (638 lines)
+8. Ready for `/gsd:new-milestone` to plan v4.0
 
 ---
 
-*Last updated: 2026-03-22 (29.1-02 executed, browse dispatch mock isolation)*
+*Last updated: 2026-04-02 (v3.0 milestone shipped, Phase 18 directories consolidated)*

@@ -3,8 +3,8 @@
 ## Milestones
 
 - SHIPPED **v1.0 Full Vision Implementation** -- Phases 1-12 (shipped 2026-02-16) -- [Archive](milestones/v1.0-ROADMAP.md)
-- SHIPPED **v2.0 Hybrid Search and Rebrand** -- Phases 13-21 (shipped 2026-03-01)
-- ACTIVE **v3.0 Knowledge Layer + Friction Logging** -- Phases 23-28
+- SHIPPED **v2.0 Hybrid Search and Rebrand** -- Phases 13-22 (shipped 2026-03-01)
+- SHIPPED **v3.0 Knowledge Layer + Friction Logging** -- Phases 23-29.1 (shipped 2026-04-02)
 
 ## Phases
 
@@ -327,7 +327,7 @@ Resolved:
 
 ---
 
-### v3.0 Knowledge Layer + Friction Logging (Phases 23-27)
+### v3.0 Knowledge Layer + Friction Logging (Phases 23-29.1)
 
 **Overview:** Ship the complete knowledge layer alongside a friction logging system. Agent-written memory (daily logs, decisions, learnings), smart context briefings, temporal decay, FTS5 reliability, friction capture with visual dashboards, session backfill via Agent SDK, and qmd markdown search integration.
 
@@ -535,7 +535,7 @@ Success Criteria:
 Requirements: QUAL-01
 nPlans:
 - [x] 29.1-01-PLAN.md -- DB path injection for context, search, related execute functions
-- [ ] 29.1-02-PLAN.md -- Browse dispatch test isolation via module mocking
+- [x] 29.1-02-PLAN.md -- Browse dispatch test isolation via module mocking
 
 Success Criteria:
 1. `bun test` passes all tests with 0 failures (currently 11 failures across browse, context, and programmatic API tests)
