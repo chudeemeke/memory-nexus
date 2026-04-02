@@ -327,6 +327,13 @@ export class SqliteFrictionRepository implements IFrictionRepository {
         return patterns;
     }
 
+    async deleteByPattern(pattern: string): Promise<number> {
+        const stmt = this.db.prepare("DELETE FROM friction_log WHERE description LIKE $pattern");
+        stmt.run({ $pattern: pattern });
+        const result = this.db.query("SELECT changes() as count").get() as { count: number };
+        return result.count;
+    }
+
     private toEntity(row: FrictionRow): FrictionEntry {
         return FrictionEntry.create({
             id: row.id,

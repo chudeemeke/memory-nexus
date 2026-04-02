@@ -81,9 +81,18 @@ export interface FrictionResolveOptions extends FrictionCommandOptions {
 /**
  * Options passed to executeFrictionCommand.
  */
+/**
+ * Options for the friction purge subcommand.
+ */
+export interface FrictionPurgeOptions extends FrictionCommandOptions {
+    dryRun?: boolean;
+    force?: boolean;
+}
+
 export interface FrictionExecuteOptions {
-    action: "log" | "list" | "resolve" | "wont-fix" | "dashboard";
+    action: "log" | "list" | "resolve" | "wont-fix" | "dashboard" | "purge";
     description?: string;
+    pattern?: string;
     id?: string;
     json?: boolean;
     /** Output format: default or ai */
@@ -98,6 +107,8 @@ export interface FrictionExecuteOptions {
     resolution?: string;
     tool?: string;
     html?: boolean;
+    dryRun?: boolean;
+    force?: boolean;
 }
 
 /**
@@ -224,6 +235,24 @@ export function createFrictionCommand(): Command {
             })
     );
 
+    // purge subcommand
+    friction.addCommand(
+        new Command("purge")
+            .description("Delete friction entries by description pattern")
+            .argument("<pattern>", "Description pattern (SQL LIKE: % for wildcard)")
+            .option("--dry-run", "Preview matches without deleting")
+            .option("-f, --force", "Skip confirmation")
+            .option("--json", "Output as JSON")
+            .action(async (pattern: string, options: FrictionPurgeOptions) => {
+                const result = await executeFrictionCommand({
+                    action: "purge",
+                    pattern,
+                    ...options,
+                });
+                process.exitCode = result.exitCode;
+            })
+    );
+
     return friction;
 }
 
@@ -265,6 +294,8 @@ export async function executeFrictionCommand(
                 return await handleWontFix(service, options);
             case "dashboard":
                 return await handleDashboard(service, options, deps.openInBrowser ?? openInBrowser);
+            case "purge":
+                return await handlePurge(service, options);
             default:
                 console.error(`Unknown friction action: ${options.action}`);
                 return { exitCode: 1 };
@@ -523,6 +554,70 @@ async function handleDashboard(
             output = formatForAi(output);
         }
         console.log(output);
+    }
+
+    return { exitCode: 0 };
+}
+
+/**
+ * Handle the purge action.
+ */
+async function handlePurge(
+    service: FrictionService,
+    options: FrictionExecuteOptions
+): Promise<CommandResult> {
+    if (!options.pattern) {
+        console.error("Error: pattern is required for purge action");
+        return { exitCode: 1 };
+    }
+
+    if (options.dryRun) {
+        // Preview mode: count matches via a dry purge
+        const matches = await service.list({ all: true });
+        const matching = matches.filter((e) => {
+            const regex = new RegExp(
+                "^" + options.pattern!.replace(/%/g, ".*").replace(/_/g, ".") + "$"
+            );
+            return regex.test(e.description);
+        });
+
+        if (matching.length === 0) {
+            if (options.json) {
+                console.log(JSON.stringify({ wouldDelete: 0, pattern: options.pattern }));
+            } else {
+                console.log(`No entries match pattern: "${options.pattern}"`);
+            }
+        } else if (options.json) {
+            console.log(JSON.stringify({ wouldDelete: matching.length, pattern: options.pattern }));
+        } else {
+            console.log(`Would delete ${matching.length} entries matching "${options.pattern}":`);
+            for (const entry of matching.slice(0, 10)) {
+                console.log(`  #${entry.id}: ${entry.description}`);
+            }
+            if (matching.length > 10) {
+                console.log(`  ... and ${matching.length - 10} more`);
+            }
+        }
+        return { exitCode: 0 };
+    }
+
+    if (!options.force) {
+        console.error(`Use --dry-run to preview or --force to delete entries matching "${options.pattern}".`);
+        return { exitCode: 1 };
+    }
+
+    const deleted = await service.purge(options.pattern);
+
+    if (deleted === 0) {
+        if (options.json) {
+            console.log(JSON.stringify({ deleted: 0, pattern: options.pattern }));
+        } else {
+            console.log(`No entries match pattern: "${options.pattern}"`);
+        }
+    } else if (options.json) {
+        console.log(JSON.stringify({ deleted, pattern: options.pattern }));
+    } else {
+        console.log(`Purged ${deleted} friction entries matching "${options.pattern}"`);
     }
 
     return { exitCode: 0 };

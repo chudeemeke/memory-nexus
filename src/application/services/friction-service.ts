@@ -277,4 +277,14 @@ export class FrictionService {
     async markReviewed(tool: string): Promise<void> {
         await this.repository.markReviewed(tool, new Date());
     }
+
+    /**
+     * Delete friction entries whose description matches a pattern.
+     * Uses SQL LIKE matching (% for wildcard).
+     * @param pattern Description pattern to match
+     * @returns Number of entries deleted
+     */
+    async purge(pattern: string): Promise<number> {
+        return this.repository.deleteByPattern(pattern);
+    }
 }

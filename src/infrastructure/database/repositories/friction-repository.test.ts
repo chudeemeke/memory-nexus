@@ -318,9 +318,12 @@ describe("SqliteFrictionRepository", () => {
         });
 
         it("includes zero-filled weeks with no activity", async () => {
+            // Use a date within the current week to avoid time-sensitivity
+            const today = new Date();
+            today.setUTCHours(10, 0, 0, 0);
             await repo.save(createEntry({
                 description: "Single entry",
-                loggedAt: new Date("2026-03-08T00:00:00Z"),
+                loggedAt: today,
             }));
 
             const trends = await repo.getWeeklyTrends(4);
@@ -328,6 +331,43 @@ describe("SqliteFrictionRepository", () => {
             // At least one week should have newCount > 0
             const hasActivity = trends.some((t) => t.newCount > 0);
             expect(hasActivity).toBe(true);
+        });
+    });
+
+    describe("deleteByPattern", () => {
+        it("deletes entries matching description pattern", async () => {
+            await repo.save(createEntry({ description: "Entry for list test" }));
+            await repo.save(createEntry({ description: "Entry for list test" }));
+            await repo.save(createEntry({ description: "Real friction" }));
+
+            const deleted = await repo.deleteByPattern("Entry for list test");
+            expect(deleted).toBe(2);
+
+            const remaining = await repo.findAll();
+            expect(remaining).toHaveLength(1);
+            expect(remaining[0].description).toBe("Real friction");
+        });
+
+        it("deletes entries matching partial pattern with LIKE wildcards", async () => {
+            await repo.save(createEntry({ description: "Test friction entry" }));
+            await repo.save(createEntry({ description: "Test friction cleanup" }));
+            await repo.save(createEntry({ description: "Real issue" }));
+
+            const deleted = await repo.deleteByPattern("Test friction%");
+            expect(deleted).toBe(2);
+
+            const remaining = await repo.findAll();
+            expect(remaining).toHaveLength(1);
+        });
+
+        it("returns 0 when no entries match", async () => {
+            await repo.save(createEntry({ description: "Real friction" }));
+
+            const deleted = await repo.deleteByPattern("nonexistent");
+            expect(deleted).toBe(0);
+
+            const remaining = await repo.findAll();
+            expect(remaining).toHaveLength(1);
         });
     });
 });

@@ -651,6 +651,14 @@ export interface IFrictionRepository {
      * @returns Array of patterns grouped by tool and category
      */
     findPatterns(threshold: number): Promise<FrictionPattern[]>;
+
+    /**
+     * Delete friction entries whose description matches a pattern.
+     * Uses SQL LIKE matching (% for wildcard).
+     * @param pattern Description pattern to match
+     * @returns Number of entries deleted
+     */
+    deleteByPattern(pattern: string): Promise<number>;
 }
 
 /**
