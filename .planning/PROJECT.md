@@ -10,11 +10,11 @@ Cross-project context persistence for Claude Code sessions. Extracts JSONL sessi
 
 - Not a cloud service - fully local, no network access
 - Not a replacement for Claude's context window - a complement to it
-- Not a semantic/vector search tool (v1 uses keyword-based FTS5; hybrid search shipping in v2)
+- Not a semantic/vector search tool -- OUTDATED: v2.0 shipped hybrid search (FTS5 + sqlite-vec)
 
 ## Current State
 
-Shipped v1.0 with 49,764 LOC TypeScript (17,073 source + 32,691 tests).
+Shipped v3.0. Three milestones complete (v1.0, v2.0, v3.0) with 29 phases and 104 plans.
 
 **Tech stack:** Bun, TypeScript 5.5+, bun:sqlite with FTS5 + sqlite-vec, Commander.js v14, cli-progress, chrono-node, @huggingface/transformers v3
 
@@ -67,27 +67,24 @@ Both Claude and humans use the same commands. No special formatting needed.
 - ERR-01 through ERR-05: Error handling, exit codes, signal handling -- v1.0
 - QUAL-02 through QUAL-05: Unit, integration, and concurrent tests -- v1.0
 - QUAL-01: Coverage threshold -- v1.0 (near-pass: 94.49% functions, Bun limitation)
+- Hybrid search (FTS5 + sqlite-vec + RRF), embedding providers, embedding pipeline -- v2.0
+- Package rename to @chude/memory, programmatic API, aidev integration readiness -- v2.0
+- Agent-written memory, smart context, friction system, backfill, qmd integration -- v3.0
+- Friction universalization (tool column, pattern detection, auto-ingest, de-branded dashboard) -- v3.0
+- Ambient context (context.md + MEMORY.md marker merge on sync) -- v3.0
+- Test determinism (DB path injection, dispatch mock isolation) -- v3.0
 
 ### Active
 
-- [ ] Hybrid search combining vector similarity (sqlite-vec) with BM25 (FTS5) using Reciprocal Rank Fusion
-- [ ] Pluggable embedding provider architecture (IEmbeddingProvider port) with local default (Transformers.js + all-MiniLM-L6-v2) and optional API providers (OpenAI, Ollama)
-- [ ] Embedding pipeline integrated into sync workflow with background processing, model-hash cache tracking, and progress reporting
-- [ ] sqlite-vec extension loading alongside existing FTS5 with schema migration from v1.0
-- [ ] Graceful degradation: falls back to FTS5-only when embeddings unavailable
-- [ ] aidev integration: memory-nexus as npm dependency in aidev's TypeScript CLI, exposed via MemoryCommand following AgentCommand pattern
-- [ ] Bash dispatcher wiring: `cmd_memory()` delegates to aidev's TS CLI for full memory functionality
-- [ ] Programmatic API surface: stable execute*Command exports for library consumption
+(None -- all v1-v3 requirements delivered. Ready for v4.0 scoping.)
 
 ### Out of Scope
 
 - Web UI -- CLI-only tool
-- MCP server integration -- May add after CLI validates
 - Cross-machine sync -- Local only; iCloud/git handles backup
 - Multi-user support -- Personal productivity tool
 - Session editing -- Read-only extraction
 - Real-time streaming -- Sessions are batch files
-- Pre-compaction memory flush -- Requires Claude Code hook event that doesn't exist yet
 
 ## Key Decisions
 
