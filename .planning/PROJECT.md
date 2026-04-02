@@ -76,7 +76,19 @@ Both Claude and humans use the same commands. No special formatting needed.
 
 ### Active
 
-(None -- all v1-v3 requirements delivered. Ready for v4.0 scoping.)
+## Current Milestone: v4.0 Intelligence Layer
+
+**Goal:** Transform memory from a data store into a knowledge system -- automated extraction of decisions/learnings/patterns from sessions, intelligent context delivery instead of raw retrieval, a clean CLI surface, and cross-environment portability.
+
+**Target features:**
+- CLI surface audit (review all commands for overlaps, gaps, rename/merge/kill)
+- Knowledge extraction pipeline (heuristic + LLM-based, into SQLite tables)
+- Rewire `memory context` to SmartContextService (kill old metadata, add `--global`)
+- Deprecate `~/.memory/` directory convention (SQLite-only knowledge storage)
+- Bug fixes (unicode search, CLI truncation, download bar 0/0 MB)
+- npm publish @chude/memory to registry
+- God file cleanup (sync.ts, friction.ts SRP violations)
+- Cross-environment portability audit (WSL migration readiness, dynamic path resolution)
 
 ### Out of Scope
 

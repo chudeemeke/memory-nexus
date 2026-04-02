@@ -6,15 +6,15 @@ See: .planning/PROJECT.md (updated 2026-02-18)
 
 **Core Value:** Knowledge gained in one Claude Code project becomes accessible from any other project. No more context silos.
 
-**Current Focus:** All three milestones shipped. Ready for v4.0 planning.
+**Current Focus:** v4.0 Intelligence Layer -- knowledge extraction, CLI audit, context intelligence, portability.
 
 **Tech Stack:** Bun, TypeScript 5.5+, bun:sqlite with FTS5 + sqlite-vec, Commander.js v14, @huggingface/transformers v3, cli-progress, chrono-node, Chart.js (HTML dashboard)
 
 ## Current Position
 
-**Milestone:** v3.0 Knowledge Layer + Friction Logging -- SHIPPED
-**Phase:** All complete
-**Status:** Between milestones
+**Milestone:** v4.0 Intelligence Layer
+**Phase:** Not started (researching and defining requirements)
+**Status:** Defining requirements
 
 ```
 v3.0 Progress: [########################] 9/9 phases complete
