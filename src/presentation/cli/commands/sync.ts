@@ -726,6 +726,8 @@ export async function runAmbientContextGeneration(
 
     if (result.success && !options.quiet) {
       console.log(`  Ambient context: updated (~${result.contextTokens} tokens)`);
+    } else if (!result.success && !options.quiet) {
+      console.log(`  Ambient context: skipped (${result.reason})`);
     }
   } catch (error) {
     // Non-fatal: ambient context generation should never fail the sync

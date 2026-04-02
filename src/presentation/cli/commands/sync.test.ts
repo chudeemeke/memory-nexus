@@ -1709,6 +1709,71 @@ describe("runAmbientContextGeneration", () => {
 
     logSpy.mockRestore();
   });
+
+  it("logs skip reason when generateAmbientContext returns success: false", async () => {
+    const logSpy = spyOn(console, "log").mockImplementation(() => {});
+
+    const { runAmbientContextGeneration } = await import("./sync.js");
+
+    await runAmbientContextGeneration(
+      {} as any,
+      {}, // not quiet
+      {
+        loadConfig: () => ({
+          ambientContext: { enabled: true, budget: 800 },
+        }),
+        resolveAutoMemoryDir: () => "/tmp/test",
+        resolveProjectName: () => "test-project",
+        createAmbientService: () => ({
+          generateAmbientContext: async () => ({
+            success: false,
+            reason: "project-not-found",
+          }),
+        }),
+      },
+    );
+
+    const logCalls = logSpy.mock.calls.map(c => c[0]);
+    const skipLine = logCalls.find((s: string) =>
+      typeof s === "string" && s.includes("Ambient context: skipped")
+    );
+    expect(skipLine).toBeDefined();
+    expect(skipLine).toContain("project-not-found");
+
+    logSpy.mockRestore();
+  });
+
+  it("suppresses skip message when quiet option is set", async () => {
+    const logSpy = spyOn(console, "log").mockImplementation(() => {});
+
+    const { runAmbientContextGeneration } = await import("./sync.js");
+
+    await runAmbientContextGeneration(
+      {} as any,
+      { quiet: true },
+      {
+        loadConfig: () => ({
+          ambientContext: { enabled: true, budget: 800 },
+        }),
+        resolveAutoMemoryDir: () => "/tmp/test",
+        resolveProjectName: () => "test-project",
+        createAmbientService: () => ({
+          generateAmbientContext: async () => ({
+            success: false,
+            reason: "no-context",
+          }),
+        }),
+      },
+    );
+
+    const logCalls = logSpy.mock.calls.map(c => c[0]);
+    const ambientLine = logCalls.find((s: string) =>
+      typeof s === "string" && s.includes("Ambient context")
+    );
+    expect(ambientLine).toBeUndefined();
+
+    logSpy.mockRestore();
+  });
 });
 
 // Note: "background process self-detection" tests (isBackgroundEmbedding) are
