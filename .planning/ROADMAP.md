@@ -86,10 +86,10 @@
   2. friction.ts is split into separate modules each handling one concern (CRUD operations, dashboard rendering, auto-ingest, pattern detection) with no module exceeding 200 lines
   3. All existing sync and friction tests pass without modification to test assertions (behavioral equivalence)
   4. `memory sync` and `memory friction *` commands produce identical output and behavior as before the refactor
-**Plans:** 2 plans
+**Plans:** 1/2 plans executed
 
 Plans:
-- [ ] 30-01-PLAN.md -- Split sync.ts into sync/ subdirectory (6 modules + tests)
+- [x] 30-01-PLAN.md -- Split sync.ts into sync/ subdirectory (6 modules + tests)
 - [ ] 30-02-PLAN.md -- Split friction.ts into friction/ subdirectory (7 modules + tests)
 
 ---
@@ -256,7 +256,7 @@ Phase 37 (Publishing)
 | 28 | v3.0 | 6/6 | Complete | 2026-03-22 |
 | 29 | v3.0 | 2/2 | Complete | 2026-03-18 |
 | 29.1 | v3.0 | 2/2 | Complete | 2026-03-22 |
-| 30. God File Cleanup | v4.0 | 0/2 | Not started | - |
+| 30. God File Cleanup | v4.0 | 1/2 | In Progress|  |
 | 31. Bug Fixes | v4.0 | TBD | Not started | - |
 | 32. CLI Surface | v4.0 | TBD | Not started | - |
 | 33. Knowledge Extraction Foundation | v4.0 | TBD | Not started | - |

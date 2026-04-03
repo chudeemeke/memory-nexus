@@ -1,3 +1,16 @@
+---
+gsd_state_version: 1.0
+milestone: v4.0
+milestone_name: Intelligence Layer
+status: executing
+last_updated: "2026-04-03T10:51:27.196Z"
+progress:
+  total_phases: 8
+  completed_phases: 0
+  total_plans: 2
+  completed_plans: 1
+---
+
 # State: @chude/memory (memory-nexus)
 
 ## Project Reference
@@ -6,15 +19,17 @@ See: .planning/PROJECT.md (updated 2026-02-18)
 
 **Core Value:** Knowledge gained in one Claude Code project becomes accessible from any other project. No more context silos.
 
-**Current Focus:** v4.0 Intelligence Layer -- knowledge extraction, CLI surface, context intelligence, portability, publishing.
+**Current Focus:** Phase 30 — god-file-cleanup
 
 **Tech Stack:** Bun, TypeScript 5.5+, bun:sqlite with FTS5 + sqlite-vec, Commander.js v14, @huggingface/transformers v3, cli-progress, chrono-node, Chart.js (HTML dashboard)
 
 ## Current Position
 
+Phase: 30 (god-file-cleanup) — EXECUTING
+Plan: 2 of 2
 **Milestone:** v4.0 Intelligence Layer
 **Phase:** 30 of 37 (God File Cleanup)
-**Status:** Ready to plan
+**Status:** Ready to execute
 
 ```
 v4.0 Progress: [________________________] 0/8 phases complete
@@ -37,6 +52,7 @@ v4.0 Progress: [________________________] 0/8 phases complete
 ## Performance Metrics
 
 **v3.0 final:**
+
 - 9 phases, 26 plans
 - All tests passing (0 failures after Phase 29.1 determinism fixes)
 
@@ -51,6 +67,7 @@ v4.0 Progress: [________________________] 0/8 phases complete
 - CLI help groups via Commander.js labeled categories (no command renames)
 - SmartContextService reads from SQLite fact tables, not ~/.memory/ files
 - ~/.memory/ directory deprecated (knowledge goes in SQLite)
+- [Phase 30]: Compressed JSDoc and consolidated imports to keep all sync modules under 200 lines
 
 ### Blockers/Concerns
 
