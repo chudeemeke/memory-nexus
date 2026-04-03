@@ -102,31 +102,31 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| KNOW-01 | - | Pending |
-| KNOW-02 | - | Pending |
-| KNOW-03 | - | Pending |
-| KNOW-04 | - | Pending |
-| KNOW-05 | - | Pending |
-| KNOW-06 | - | Pending |
-| KNOW-07 | - | Pending |
-| KNOW-08 | - | Pending |
-| CTXT-01 | - | Pending |
-| CTXT-02 | - | Pending |
-| CTXT-03 | - | Pending |
-| CTXT-04 | - | Pending |
-| CLI-01 | - | Pending |
-| CLI-02 | - | Pending |
-| CLI-03 | - | Pending |
-| PORT-01 | - | Pending |
-| PORT-02 | - | Pending |
-| PORT-03 | - | Pending |
-| FIX-01 | - | Pending |
-| FIX-02 | - | Pending |
-| FIX-03 | - | Pending |
-| PUB-01 | - | Pending |
-| PUB-02 | - | Pending |
-| REFAC-01 | - | Pending |
-| REFAC-02 | - | Pending |
+| KNOW-01 | Phase 33 | Pending |
+| KNOW-02 | Phase 34 | Pending |
+| KNOW-03 | Phase 33 | Pending |
+| KNOW-04 | Phase 34 | Pending |
+| KNOW-05 | Phase 33 | Pending |
+| KNOW-06 | Phase 33 | Pending |
+| KNOW-07 | Phase 34 | Pending |
+| KNOW-08 | Phase 34 | Pending |
+| CTXT-01 | Phase 35 | Pending |
+| CTXT-02 | Phase 35 | Pending |
+| CTXT-03 | Phase 35 | Pending |
+| CTXT-04 | Phase 35 | Pending |
+| CLI-01 | Phase 32 | Pending |
+| CLI-02 | Phase 32 | Pending |
+| CLI-03 | Phase 32 | Pending |
+| PORT-01 | Phase 36 | Pending |
+| PORT-02 | Phase 36 | Pending |
+| PORT-03 | Phase 36 | Pending |
+| FIX-01 | Phase 31 | Pending |
+| FIX-02 | Phase 31 | Pending |
+| FIX-03 | Phase 31 | Pending |
+| PUB-01 | Phase 37 | Pending |
+| PUB-02 | Phase 37 | Pending |
+| REFAC-01 | Phase 30 | Pending |
+| REFAC-02 | Phase 30 | Pending |
 | QUAL-01 | All | Pending |
 | QUAL-02 | All | Pending |
 | QUAL-03 | All | Pending |
@@ -136,9 +136,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 - v4.0 requirements: 25 total (excluding QUAL cross-cutting)
 - Cross-cutting: 4 QUAL requirements
 - Total: 29
-- Mapped to phases: 0
-- Unmapped: 25
+- Mapped to phases: 25/25
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-04-03*
-*Last updated: 2026-04-03 after initial definition*
+*Last updated: 2026-04-03 after roadmap creation (all requirements mapped)*
