@@ -2,6 +2,7 @@
 phase: 30
 reviewers: [gemini, codex]
 reviewed_at: 2026-04-03
+revised_at: 2026-04-03
 plans_reviewed: [30-01-PLAN.md, 30-02-PLAN.md]
 ---
 
@@ -36,43 +37,54 @@ The plans are well-structured, conservative, and strictly aligned with the archi
 
 ---
 
-## Codex Review (GPT-5.4)
+## Codex Review (GPT-5.4, revised with full source file access)
 
 ### Plan 30-01 Assessment
 
-**Summary:** Mostly sound refactor with clear module boundaries aligned to phase decisions. Biggest gaps: proving behavioral equivalence beyond compilation, protecting external import compatibility, and leaving size headroom for modules near the 200-line cap.
+**Summary:** The split direction is sound and matches the phase goal, but the plan is too rigid in places where the current code shape makes that risky. The biggest problems are feasibility of the 200-line cap for `sync/index.ts`, an incorrect assumption about moved test import paths, and a hard-coded test baseline that does not match the current repo.
 
 **Strengths:**
-- Module breakdown maps directly to approved concerns in D-01
-- Functions explicitly stay in presentation layer (D-07)
-- Barrel file update is the right compatibility move
-- Deleting original only after split keeps endpoint state clean
+- Module boundaries are sensible for sync: orchestration, embedding, background mode, memory files, ambient context, and helpers
+- Public API preservation is called out explicitly, including barrel updates
+- The plan respects D-07/D-13: pure split, no layer movement, no assertion rewrites
+- It preserves lazy-load behavior as an explicit verification target
 
 **Concerns:**
-- **HIGH:** Acceptance criteria do not prove success criterion 4 ("identical output and behavior"). `wc -l`, export checks, and compilation are structural, not behavioral.
-- **HIGH:** Deleting sync.ts can break direct imports elsewhere if commands/index.ts is not the only consumer. No repo-wide import audit included.
-- **MEDIUM:** helpers.ts (~200 lines) too close to hard limit -- import statements or comments can push it over.
-- **MEDIUM:** No specification for how shared test setup/fixtures will be preserved during split.
-- **MEDIUM:** Import path correctness only partially addressed -- .js specifiers for intra-folder imports not explicitly required.
+- **HIGH:** The 200-line cap for `sync/index.ts` is likely not feasible. `createSyncCommand()` and `executeSyncCommand()` already span lines 111-309 in sync.ts (~200 lines), before adding `SyncCommandOptions`, imports, and re-exports. The plan estimates ~135 lines, which is wrong.
+- **HIGH:** Task 2 says moved lazy-loader test can keep same relative `mock.module` paths, but moving from `commands/` to `commands/sync/` adds a directory level. Paths like `mock.module("../../../infrastructure/...")` need to become `"../../../../infrastructure/..."`. This statement is incorrect and will cause test failures.
+- **HIGH:** The plan hard-codes `109` tests, but the current visible suites are `119` tests: 71 in sync.test.ts, 6 in sync.integration.test.ts, 4 in sync-lazy-loaders.test.ts, and 38 in friction.test.ts.
+- **MEDIUM:** `memory-files.test.ts` and `helpers.test.ts` are listed as outputs but the task text does not identify existing tests to populate them. Ambiguity between "empty placeholder" and "write new tests."
+- **MEDIUM:** "Identical output and behavior" is not fully proven by the listed checks. Current sync integration coverage is mostly CLI help/smoke.
+- **LOW:** Verification snippets use Unix tooling (`wc`, `test`, `grep`, `tail`) on a Windows workspace.
 
-**Risk Assessment:** MEDIUM
+**Suggestions:**
+- Use the flexibility allowed in CONTEXT.md D-discretion: let function-to-module assignment vary for line-count compliance
+- Either relax the 200-line cap for the entrypoint module, or add one more module for command registration/types
+- Replace hard-coded `109` gate with "all pre-existing targeted tests pass" or compute baseline before split
+- Update Task 2 to explicitly require fixing all relative imports including `mock.module(...)` paths
+- Add a repo-wide search check that no internal `./sync.js` imports remain under `src/`
+
+**Risk Assessment:** HIGH -- architecture is fine, but execution details are brittle enough to cause avoidable failures.
 
 ### Plan 30-02 Assessment
 
-**Summary:** Directionally correct but more fragile than sync plan. Dispatch layer coupling and type-only import from ./index.js create maintainability hazard. Inherits same behavioral-verification gap.
+**Summary:** Closer to workable than 30-01 because friction handlers map cleanly to subcommands, but still has one major feasibility problem: `friction/index.ts` is too overloaded for the 200-line cap. Types + `createFrictionCommand()` + `executeFrictionCommand()` cover lines 34-321 (~287 lines).
 
 **Concerns:**
-- **HIGH:** friction/index.ts (~200 lines) at the limit with no margin.
-- **HIGH:** Handler modules importing shared type from ./index.js ties leaf modules back to orchestration module -- can become runtime cycle if type-only import accidentally becomes value import.
-- **HIGH:** No explicit verification that friction command output and side effects are identical.
-- **MEDIUM:** If Plan 01 leaves subtle regressions, Plan 02's final verification can mask which wave introduced them.
-- **MEDIUM:** Deleting friction.ts has same import-compatibility risk -- no audit of direct imports.
+- **HIGH:** friction/index.ts (~200 line estimate) won't hold. Lines 34-321 is ~287 lines of types + registration + dispatch before imports.
+- **HIGH:** The combined `109`-test acceptance gate is inconsistent with current repo baseline (119 tests).
+- **MEDIUM:** Plan disagrees with itself on `openInBrowser`: artifact list says exported from dashboard.ts, acceptance only requires `function openInBrowser`, Task 1 relies on it as default browser opener.
+- **MEDIUM:** Split tests exercise `executeFrictionCommand()` not handler exports -- fine for behavior but doesn't validate handler artifacts.
+- **LOW:** Verification commands assume Unix shell.
+- **LOW:** No repo-wide search for lingering `./friction.js` imports.
 
-**Risk Assessment:** MEDIUM-HIGH
+**Suggestions:**
+- Split `friction/index.ts` further: extract types to `types.ts` or command registration to `registration.ts`
+- Make `openInBrowser` contract consistent across task text, artifacts, and acceptance criteria
+- Replace fixed test-count assertions with zero-failure gating
+- Add search-based acceptance check for stale `./friction.js` and `./sync.js` imports
 
-### Cross-Plan Assessment
-
-**Overall Risk:** MEDIUM -- Refactor shape is good, but plans need tighter compatibility checks to satisfy "pure split only" and "identical behavior."
+**Risk Assessment:** MEDIUM -- intended split is cleaner than sync, but verification and contract issues justify revision.
 
 ---
 
@@ -85,16 +97,25 @@ The plans are well-structured, conservative, and strictly aligned with the archi
 - Pure split approach minimizes regression risk
 - Co-located tests improve maintainability
 
-### Agreed Concerns
-- **MEDIUM-HIGH:** Both `helpers.ts` and `friction/index.ts` are at or near the 200-line limit with no safety margin. Both reviewers flag this independently.
-- **MEDIUM:** Test splitting could change shared setup/fixture scope or teardown order. Neither plan specifies how shared test utilities will be handled.
-- **MEDIUM:** Behavioral equivalence not sufficiently proven by structural checks alone. Acceptance criteria focus on file shape (wc -l, grep for exports, tsc) but don't include runtime verification of command output.
+### Agreed Concerns (Action Required)
+- **HIGH:** Both `sync/index.ts` and `friction/index.ts` WILL NOT fit under 200 lines. Codex verified against actual line counts: sync lines 111-309 (~200 lines without interfaces/imports), friction lines 34-321 (~287 lines). Plans must either add a module (e.g., types.ts, registration.ts) or relax the cap for entrypoints.
+- **HIGH:** Test baseline is wrong. Plans say 109 tests, actual count is 119 (71+6+4+38). Hard-coded count will cause false failures.
+- **HIGH (Codex only):** mock.module paths will break when tests move from `commands/` to `commands/sync/`. Relative paths like `"../../../infrastructure/..."` need an extra `../` level.
+- **MEDIUM:** Behavioral equivalence not sufficiently proven by structural checks alone. Need runtime verification beyond compilation and test pass.
+- **MEDIUM:** No repo-wide import audit before deleting originals. Direct imports bypassing the barrel will break silently.
 
 ### Divergent Views
-- **Risk level:** Gemini rates overall LOW (trusts test suite as safety net), Codex rates MEDIUM-HIGH for friction plan (concerned about coupling and verification gaps). The truth is likely in between -- tests DO provide strong coverage, but explicit behavioral checks would increase confidence.
-- **Circular dependencies:** Gemini suggests introducing types.ts files to isolate shared types. Codex flags the ./index.js type import as a maintainability hazard. Both point to the same underlying concern but with different severity assessments.
-- **Import audit:** Codex specifically calls for repo-wide import audit before deleting originals. Gemini does not raise this concern. Codex's point is valid -- if any file imports directly from sync.ts or friction.ts (bypassing the barrel), deletion will break it silently.
+- **Risk level:** Gemini rates overall LOW (trusts test suite), Codex rates HIGH for Plan 30-01 and MEDIUM for Plan 30-02. Codex's concerns are more concrete because it read the actual source files and counted lines.
+- **Types isolation:** Gemini suggests types.ts for circular dependency avoidance. Codex suggests splitting entrypoint further (registration.ts or types.ts). Both arrive at the same structural solution.
+
+### Key Revisions Needed for Replanning
+1. Compute actual test baseline before split (don't hard-code 109)
+2. Add extra module to both sync/ and friction/ to keep index.ts under 200 lines
+3. Fix mock.module path depth in test migration instructions
+4. Add repo-wide import audit step before deleting originals
+5. Make openInBrowser export consistent in Plan 30-02
 
 ---
 
 *Reviewed: 2026-04-03 by Gemini CLI and Codex CLI (GPT-5.4)*
+*Codex review revised with full source file access*
