@@ -33,22 +33,28 @@ export function sanitizeFtsQuery(query: string): string {
     // Preserve balanced quotes (phrase search syntax)
     // Strip other operator chars but keep " intact
     sanitized = query
-      .replace(/[.:\-()[\]{}^~@/\\]/g, " ")
+      .replace(/[.:\-()[\]{}^~@/\\]/gu, " ")
       .replace(/\s+/g, " ")
       .trim();
   } else {
     // Strip all operator chars including unmatched quotes
     sanitized = query
-      .replace(/[.:\-()[\]{}^"~@/\\]/g, " ")
+      .replace(/[.:\-()[\]{}^"~@/\\]/gu, " ")
       .replace(/\s+/g, " ")
       .trim();
   }
 
   if (sanitized) return sanitized;
 
-  // Fallback: extract alphanumeric parts
+  // Fallback: strip FTS5 operators but preserve everything else (Unicode, symbols)
+  // Uses blacklist approach -- safer than whitelist for preserving user intent
+  const quoteCountFallback = (query.match(/"/g) || []).length;
+  const hasBalancedQuotesFallback = quoteCountFallback > 0 && quoteCountFallback % 2 === 0;
+  const operatorPattern = hasBalancedQuotesFallback
+    ? /[.:\-()[\]{}^~@/\\]/gu
+    : /[.:\-()[\]{}^"~@/\\]/gu;
   return query
-    .replace(/[^a-zA-Z0-9\s]/g, " ")
+    .replace(operatorPattern, " ")
     .replace(/\s+/g, " ")
     .trim();
 }

@@ -104,6 +104,46 @@ describe("sanitizeFtsQuery", () => {
     });
   });
 
+  describe("Unicode handling", () => {
+    it("should preserve CJK characters unchanged", () => {
+      expect(sanitizeFtsQuery("\u4f60\u597d\u4e16\u754c")).toBe("\u4f60\u597d\u4e16\u754c");
+    });
+
+    it("should preserve emoji characters", () => {
+      expect(sanitizeFtsQuery("\u{1F680} rocket")).toBe("\u{1F680} rocket");
+    });
+
+    it("should preserve accented Latin characters", () => {
+      expect(sanitizeFtsQuery("caf\u00e9 r\u00e9sum\u00e9")).toBe("caf\u00e9 r\u00e9sum\u00e9");
+    });
+
+    it("should preserve Cyrillic characters", () => {
+      expect(sanitizeFtsQuery("\u041f\u0440\u0438\u0432\u0435\u0442")).toBe("\u041f\u0440\u0438\u0432\u0435\u0442");
+    });
+
+    it("should preserve mixed-script input", () => {
+      expect(sanitizeFtsQuery("hello \u4e16\u754c \u{1F30D}")).toBe("hello \u4e16\u754c \u{1F30D}");
+    });
+
+    it("should strip FTS5 operators but preserve Unicode", () => {
+      expect(sanitizeFtsQuery("caf\u00e9:latte (mocha)")).toBe("caf\u00e9 latte mocha");
+    });
+
+    it("should preserve all-emoji input without falling back to empty", () => {
+      expect(sanitizeFtsQuery("\u{1F600}\u{1F601}\u{1F602}")).toBe("\u{1F600}\u{1F601}\u{1F602}");
+    });
+
+    it("should preserve balanced double-quoted Unicode phrase", () => {
+      expect(sanitizeFtsQuery('"caf\u00e9 latte"')).toBe('"caf\u00e9 latte"');
+    });
+
+    it("should preserve Unicode and balanced quotes in fallback path", () => {
+      // Input that produces empty after primary sanitization (all operator chars + Unicode)
+      // The dot-colon-parens are stripped, but Unicode must survive in fallback
+      expect(sanitizeFtsQuery('"\u4e16\u754c"')).toBe('"\u4e16\u754c"');
+    });
+  });
+
   describe("empty/edge cases", () => {
     it("should return empty string for all-dot input", () => {
       expect(sanitizeFtsQuery("...")).toBe("");
