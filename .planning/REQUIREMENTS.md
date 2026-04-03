@@ -39,9 +39,9 @@ Requirements for v4.0: Intelligence Layer -- automated knowledge extraction, int
 
 ### Bug Fixes
 
-- [ ] **FIX-01**: `memory search` handles Unicode characters in queries without FTS5 syntax errors (issue #14)
+- [x] **FIX-01**: `memory search` handles Unicode characters in queries without FTS5 syntax errors (issue #14)
 - [ ] **FIX-02**: CLI output respects terminal width and does not truncate content incorrectly (issue #15)
-- [ ] **FIX-03**: Download progress bar shows correct file size instead of 0/0 MB (issue #163)
+- [x] **FIX-03**: Download progress bar shows correct file size instead of 0/0 MB (issue #163)
 
 ### Publishing
 
@@ -120,9 +120,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 | PORT-01 | Phase 36 | Pending |
 | PORT-02 | Phase 36 | Pending |
 | PORT-03 | Phase 36 | Pending |
-| FIX-01 | Phase 31 | Pending |
+| FIX-01 | Phase 31 | Complete |
 | FIX-02 | Phase 31 | Pending |
-| FIX-03 | Phase 31 | Pending |
+| FIX-03 | Phase 31 | Complete |
 | PUB-01 | Phase 37 | Pending |
 | PUB-02 | Phase 37 | Pending |
 | REFAC-01 | Phase 30 | Complete |

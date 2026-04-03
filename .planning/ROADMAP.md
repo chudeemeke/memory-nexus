@@ -103,10 +103,10 @@ Plans:
   1. `memory search` with Unicode characters (CJK, emoji, accented) returns correct results without FTS5 syntax errors
   2. CLI output wraps or truncates cleanly at the terminal width boundary without cutting words or corrupting table alignment
   3. Download progress bar displays actual file sizes (e.g., "23/23 MB") instead of "0/0 MB" during model download
-**Plans:** 2 plans
+**Plans:** 1/2 plans executed
 
 Plans:
-- [ ] 31-01-PLAN.md -- Fix Unicode FTS5 sanitization (FIX-01) and download progress bar 0/0 MB (FIX-03)
+- [x] 31-01-PLAN.md -- Fix Unicode FTS5 sanitization (FIX-01) and download progress bar 0/0 MB (FIX-03)
 - [ ] 31-02-PLAN.md -- Fix CLI output width-aware truncation and column alignment (FIX-02)
 
 ---
@@ -261,7 +261,7 @@ Phase 37 (Publishing)
 | 29 | v3.0 | 2/2 | Complete | 2026-03-18 |
 | 29.1 | v3.0 | 2/2 | Complete | 2026-03-22 |
 | 30. God File Cleanup | v4.0 | 2/2 | Complete    | 2026-04-03 |
-| 31. Bug Fixes | v4.0 | 0/2 | Not started | - |
+| 31. Bug Fixes | v4.0 | 1/2 | In Progress|  |
 | 32. CLI Surface | v4.0 | TBD | Not started | - |
 | 33. Knowledge Extraction Foundation | v4.0 | TBD | Not started | - |
 | 34. Extraction Pipeline | v4.0 | TBD | Not started | - |

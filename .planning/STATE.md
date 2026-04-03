@@ -2,13 +2,13 @@
 gsd_state_version: 1.0
 milestone: v4.0
 milestone_name: Intelligence Layer
-status: planning
-last_updated: "2026-04-03T11:15:48.426Z"
+status: executing
+last_updated: "2026-04-03T18:25:35.581Z"
 progress:
   total_phases: 8
   completed_phases: 1
-  total_plans: 2
-  completed_plans: 2
+  total_plans: 4
+  completed_plans: 3
 ---
 
 # State: @chude/memory (memory-nexus)
@@ -19,17 +19,17 @@ See: .planning/PROJECT.md (updated 2026-02-18)
 
 **Core Value:** Knowledge gained in one Claude Code project becomes accessible from any other project. No more context silos.
 
-**Current Focus:** Phase 30 — god-file-cleanup
+**Current Focus:** Phase 31 — bug-fixes
 
 **Tech Stack:** Bun, TypeScript 5.5+, bun:sqlite with FTS5 + sqlite-vec, Commander.js v14, @huggingface/transformers v3, cli-progress, chrono-node, Chart.js (HTML dashboard)
 
 ## Current Position
 
-Phase: 30 (god-file-cleanup) — EXECUTING
-Plan: Not started
+Phase: 31 (bug-fixes) — EXECUTING
+Plan: 2 of 2
 **Milestone:** v4.0 Intelligence Layer
 **Phase:** 31 of 37 (bug fixes)
-**Status:** Ready to plan
+**Status:** Ready to execute
 
 ```
 v4.0 Progress: [________________________] 0/8 phases complete
@@ -69,6 +69,8 @@ v4.0 Progress: [________________________] 0/8 phases complete
 - ~/.memory/ directory deprecated (knowledge goes in SQLite)
 - [Phase 30]: Compressed JSDoc and consolidated imports to keep all sync modules under 200 lines
 - [Phase 30]: Compressed JSDoc and consolidated imports to keep friction/index.ts under 200-line cap
+- [Phase 31-bug-fixes]: Blacklist regex approach for FTS5 fallback (preserves symbols like C++, TCP/IP)
+- [Phase 31-bug-fixes]: maxTotal tracking for download progress bar to defer display until non-zero total
 
 ### Blockers/Concerns
 
