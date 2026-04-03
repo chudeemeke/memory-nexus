@@ -6,7 +6,7 @@
 
 export type { CommandResult } from "../command-result.js";
 
-export { createSyncCommand, executeSyncCommand } from "./sync.js";
+export { createSyncCommand, executeSyncCommand } from "./sync/index.js";
 export { createSearchCommand, executeSearchCommand } from "./search.js";
 export { createListCommand, executeListCommand } from "./list.js";
 export { createStatsCommand, executeStatsCommand } from "./stats.js";
@@ -40,8 +40,8 @@ export { createFrictionCommand, executeFrictionCommand } from "./friction.js";
 export { createBackfillCommand, executeBackfillCommand } from "./backfill.js";
 
 // Option types for programmatic API consumers
-export type { SyncCommandOptions } from "./sync.js";
-export type { EmbeddingPassDeps, BackgroundModeDeps } from "./sync.js";
+export type { SyncCommandOptions } from "./sync/index.js";
+export type { EmbeddingPassDeps, BackgroundModeDeps } from "./sync/index.js";
 export type { SearchCommandOptions } from "./search.js";
 export type { ListCommandOptions } from "./list.js";
 export type { StatsCommandOptions } from "./stats.js";
