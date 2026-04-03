@@ -1,16 +1,16 @@
 /**
  * Sync Lazy Loader Tests
  *
- * Tests for the lazy-loaded dynamic import functions in sync.ts (lines 492-520).
+ * Tests for the lazy-loaded dynamic import functions in sync modules.
  * Uses mock.module to avoid loading real embedding infrastructure (ONNX runtime)
  * in tests. Placed in a separate file to prevent mock.module leakage into
- * other sync.test.ts tests.
+ * other test files.
  */
 
-import { describe, expect, it, beforeEach, afterEach, spyOn, mock } from "bun:test";
-import type { SpawnResult } from "../../../infrastructure/embedding/background-embedder.js";
+import { describe, expect, it, beforeEach, spyOn, mock } from "bun:test";
+import type { SpawnResult } from "../../../../infrastructure/embedding/background-embedder.js";
 
-// --- Mock infrastructure modules before importing sync.ts ---
+// --- Mock infrastructure modules before importing sync modules ---
 
 // Mutable state for controlling mock behavior per test
 let mockSpawnResult: SpawnResult = { started: true, pid: 55555 };
@@ -27,7 +27,7 @@ let mockConfigResult: any = {
   },
 };
 
-mock.module("../../../infrastructure/embedding/background-embedder.js", () => ({
+mock.module("../../../../infrastructure/embedding/background-embedder.js", () => ({
   spawnBackgroundEmbedding: (options?: any) => mockSpawnResult,
   readLock: (dataDir?: string) => mockReadLockResult,
   isProcessAlive: (pid: number) => mockIsAlive,
@@ -38,7 +38,7 @@ mock.module("../../../infrastructure/embedding/background-embedder.js", () => ({
   isBackgroundEmbedding: () => false,
 }));
 
-mock.module("../../../infrastructure/embedding/embedding-provider-factory.js", () => ({
+mock.module("../../../../infrastructure/embedding/embedding-provider-factory.js", () => ({
   EmbeddingProviderFactory: class {
     createFromConfig() {
       return mockFactoryCreateResult;
@@ -47,7 +47,7 @@ mock.module("../../../infrastructure/embedding/embedding-provider-factory.js", (
   },
 }));
 
-mock.module("../../../infrastructure/hooks/config-manager.js", () => ({
+mock.module("../../../../infrastructure/hooks/config-manager.js", () => ({
   loadConfig: () => mockConfigResult,
   setTestConfigPath: () => {},
   DEFAULT_EMBEDDING_CONFIG: {
@@ -77,7 +77,7 @@ mock.module("../../../infrastructure/hooks/config-manager.js", () => ({
   saveConfig: () => {},
 }));
 
-mock.module("../../../infrastructure/database/repositories/embedding-repository.js", () => ({
+mock.module("../../../../infrastructure/database/repositories/embedding-repository.js", () => ({
   EmbeddingRepository: class {
     constructor(_db: any) {}
     getStoredModelHash() { return null; }
@@ -91,7 +91,8 @@ mock.module("../../../infrastructure/database/repositories/embedding-repository.
 }));
 
 // Import after mocks are registered
-const { handleBackgroundMode, runEmbeddingPass } = await import("./sync.js");
+const { handleBackgroundMode } = await import("./background.js");
+const { runEmbeddingPass } = await import("./embedding-pass.js");
 
 describe("lazy loaders via public API", () => {
   beforeEach(() => {
@@ -114,7 +115,7 @@ describe("lazy loaders via public API", () => {
   it("handleBackgroundMode loads background-embedder via dynamic import when no deps provided", async () => {
     const logSpy = spyOn(console, "log").mockImplementation(() => {});
 
-    // Call WITHOUT deps parameter -- forces loadBackgroundDeps() at line 462
+    // Call WITHOUT deps parameter -- forces loadBackgroundDeps()
     const result = await handleBackgroundMode({ background: true, embed: true });
 
     // The mocked spawnBackgroundEmbedding returns { started: true, pid: 55555 }
@@ -157,13 +158,11 @@ describe("lazy loaders via public API", () => {
   it("runEmbeddingPass loads factory, config, and repository via dynamic import when no deps provided", async () => {
     const errorSpy = spyOn(console, "error").mockImplementation(() => {});
 
-    // Factory returns null (embedding disabled) -- triggers early return at line 294
+    // Factory returns null (embedding disabled) -- triggers early return
     mockFactoryCreateResult = null;
 
     // Call runEmbeddingPass WITHOUT deps -- forces loadFactory(), loadConfig(),
     // and exercises the factory.createFromConfig() path.
-    // The repository is only loaded if factory returns non-null, but loadFactory
-    // and loadConfig are exercised.
     await runEmbeddingPass({} as any, {});
 
     // Should have printed disabled message

@@ -92,8 +92,6 @@ describe("CLI sync command", () => {
   });
 
   test("sync command with --force and --project options parses correctly", async () => {
-    // This tests option parsing without actually running sync
-    // We verify help output reflects the combined options
     const proc = spawn({
       cmd: [
         "bun",
@@ -109,7 +107,6 @@ describe("CLI sync command", () => {
     const output = await new Response(proc.stdout).text();
     await proc.exited;
 
-    // Verify option descriptions are present
     expect(output).toContain("Re-extract all sessions");
     expect(output).toContain("Sync only sessions from specific project");
     expect(output).toContain("Sync a specific session only");
