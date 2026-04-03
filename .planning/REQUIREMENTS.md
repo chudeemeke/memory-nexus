@@ -51,7 +51,7 @@ Requirements for v4.0: Intelligence Layer -- automated knowledge extraction, int
 ### Code Quality (Refactoring)
 
 - [x] **REFAC-01**: `sync.ts` (928 lines) split into focused modules following SRP -- each module handles one concern
-- [ ] **REFAC-02**: `friction.ts` (638 lines) split into focused modules following SRP -- each module handles one concern
+- [x] **REFAC-02**: `friction.ts` (638 lines) split into focused modules following SRP -- each module handles one concern
 
 ### Quality (Cross-Cutting)
 
@@ -126,7 +126,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | PUB-01 | Phase 37 | Pending |
 | PUB-02 | Phase 37 | Pending |
 | REFAC-01 | Phase 30 | Complete |
-| REFAC-02 | Phase 30 | Pending |
+| REFAC-02 | Phase 30 | Complete |
 | QUAL-01 | All | Pending |
 | QUAL-02 | All | Pending |
 | QUAL-03 | All | Pending |
