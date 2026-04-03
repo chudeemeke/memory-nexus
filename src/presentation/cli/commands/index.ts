@@ -34,7 +34,7 @@ export { createImportCommand, executeImportCommand } from "./import.js";
 export { createCompletionCommand, executeCompletionCommand } from "./completion.js";
 
 // Friction commands
-export { createFrictionCommand, executeFrictionCommand } from "./friction.js";
+export { createFrictionCommand, executeFrictionCommand } from "./friction/index.js";
 
 // Backfill commands
 export { createBackfillCommand, executeBackfillCommand } from "./backfill.js";
@@ -63,7 +63,7 @@ export type {
   FrictionListOptions,
   FrictionResolveOptions,
   FrictionExecuteOptions,
-} from "./friction.js";
+} from "./friction/index.js";
 export type {
   BackfillCommandOptions,
   BackfillServiceDeps,
