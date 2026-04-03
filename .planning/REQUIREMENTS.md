@@ -1,84 +1,73 @@
-# Requirements: @chude/memory v2.0
+# Requirements: @chude/memory v4.0
 
-**Defined:** 2026-02-18
+**Defined:** 2026-04-03
 **Core Value:** Knowledge gained in one Claude Code project becomes accessible from any other project. No more context silos.
 
-## v2.0 Requirements
+## v4.0 Requirements
 
-Requirements for v2.0: Hybrid Search, Package Rename, and API Stabilization.
+Requirements for v4.0: Intelligence Layer -- automated knowledge extraction, intelligent context delivery, clean CLI surface, portability, and npm publish.
 
-### Package Rename
+### Knowledge Extraction
 
-- [x] **RENAME-01**: Rename npm package from `memory-nexus` to `@chude/memory`
-- [x] **RENAME-02**: Change CLI binary name from `memory-nexus` to `memory` in package.json bin field
-- [x] **RENAME-03**: Update all internal references (config paths, database location, log directories, hook scripts) from `memory-nexus` to `memory`
-- [x] **RENAME-04**: Deprecate `memory-nexus` npm package with pointer to `@chude/memory`
-- [x] **RENAME-05**: Update CLAUDE.md, WoW rules, and hook configurations to reference `memory` binary
+- [ ] **KNOW-01**: `IExtractionProvider` port in domain layer with extract method; adapters for Claude API (Anthropic SDK, API key auth), Ollama (local), and OpenAI
+- [ ] **KNOW-02**: `memory extract <project>` extracts atomic facts from session messages via configured provider and stores them in a `facts` SQLite table
+- [ ] **KNOW-03**: Each extracted fact carries `observed_at` (when the fact was first seen) and optional `superseded_at` / `superseded_by` fields for temporal tracking
+- [ ] **KNOW-04**: Extraction pipeline compares new candidate facts against existing facts using embedding similarity and decides ADD, UPDATE, DELETE (supersede), or NOOP per fact
+- [ ] **KNOW-05**: `memory extract` is idempotent -- re-running on already-extracted sessions skips them (tracked via `extraction_log` table)
+- [ ] **KNOW-06**: `extraction_log` table records each extraction run: session ID, mode, facts added/updated/superseded/skipped, LLM provider/model, tokens consumed
+- [ ] **KNOW-07**: `memory extract --all --since 7d` batch-extracts facts from all sessions in the last N days with progress reporting
+- [ ] **KNOW-08**: `memory facts <project>` displays extracted facts for a project; `--superseded` includes historical/invalidated facts
 
-### Embedding Infrastructure
+### Context Intelligence
 
-- [x] **EMBED-01**: Define `IEmbeddingProvider` port in domain layer with embed, embedBatch, isReady, initialize, dispose methods
-- [x] **EMBED-02**: Implement `TransformersJsProvider` adapter using @huggingface/transformers v3 with all-MiniLM-L6-v2 default model (384 dimensions)
-- [x] **EMBED-03**: Load sqlite-vec extension alongside existing FTS5 extension in database initialization
-- [x] **EMBED-04**: Create `message_embeddings` virtual table (vec0, float[384]) and `embedding_state` tracking table via schema migration
-- [x] **EMBED-05**: Implement `EmbeddingProviderFactory` with config-driven provider selection and lazy loading (ONNX runtime loads only when semantic search invoked)
-- [x] **EMBED-06**: First-run model download with progress indicator ("Downloading embedding model (23 MB, one-time setup)...")
-- [x] **EMBED-07**: WASM fallback when onnxruntime-node initialization fails, with user warning
+- [ ] **CTXT-01**: `memory context <project>` default output is an AI-optimized structured briefing built from extracted facts, friction entries, and recent session summaries (SmartContextService)
+- [ ] **CTXT-02**: `memory context <project> --global` returns cross-project context by querying all projects, not just the specified one
+- [ ] **CTXT-03**: `memory context` reads knowledge from SQLite fact tables instead of `~/.memory/` filesystem files
+- [ ] **CTXT-04**: `~/.memory/` directory is no longer written to or read from by any command; a deprecation warning is shown if the directory exists
 
-### Embedding Pipeline
+### CLI Surface
 
-- [x] **PIPE-01**: Integrate embedding generation into sync pipeline (embed messages after extraction) with `--embed` flag
-- [x] **PIPE-02**: Implement embedding cache with model_hash tracking; model change triggers full re-embedding
-- [x] **PIPE-03**: Batch embedding with configurable batch size and progress reporting
-- [x] **PIPE-04**: Background embedding: sync completes immediately, embeddings generate asynchronously
-- [x] **PIPE-05**: Track embedding state per message (message_id, embedded_at, model_hash) for incremental embedding
+- [ ] **CLI-01**: Help output groups commands under labeled categories (Query, Data, System, Feedback) using Commander.js help customization
+- [ ] **CLI-02**: All query commands (`search`, `context`, `show`, `list`, `related`, `stats`) support `--json` for structured output
+- [ ] **CLI-03**: All query commands support `--format` flag with at least `brief` and `ai` modes where applicable
 
-### Hybrid Search
+### Portability
 
-- [x] **HSRCH-01**: Implement vector KNN query via sqlite-vec MATCH operator with configurable result limit
-- [x] **HSRCH-02**: Implement Reciprocal Rank Fusion (RRF) combining FTS5 BM25 ranks with vector similarity ranks (k=60)
-- [x] **HSRCH-03**: Extend search command with `--mode fts|vector|hybrid` flag (default: hybrid when embeddings available, fts when not)
-- [x] **HSRCH-04**: Candidate multiplier: fetch 4x candidates from each ranker before fusion
-- [x] **HSRCH-05**: Minimum score threshold to filter noise from hybrid results
-- [x] **HSRCH-06**: Embed query at search time via configured provider (sub-second for local model after first load)
+- [ ] **PORT-01**: `memory migrate --from-windows` command checkpoints WAL, verifies integrity, re-installs hooks, and prints session summary by project
+- [ ] **PORT-02**: `memory doctor --portability` reports mixed-environment data (Windows vs Unix paths), extraction state pointing to non-existent paths, and sqlite-vec availability
+- [ ] **PORT-03**: Migration protocol documented as a user-facing guide in project documentation
 
-### Graceful Degradation
+### Bug Fixes
 
-- [x] **DEGRADE-01**: Fall back to FTS5-only when embedding model not downloaded
-- [x] **DEGRADE-02**: Fall back to FTS5-only when sqlite-vec extension unavailable
-- [x] **DEGRADE-03**: Use FTS5 for unembedded messages, hybrid for embedded ones (partial coverage)
-- [x] **DEGRADE-04**: `--no-vector` flag to explicitly disable semantic search
+- [ ] **FIX-01**: `memory search` handles Unicode characters in queries without FTS5 syntax errors (issue #14)
+- [ ] **FIX-02**: CLI output respects terminal width and does not truncate content incorrectly (issue #15)
+- [ ] **FIX-03**: Download progress bar shows correct file size instead of 0/0 MB (issue #163)
 
-### Provider Ecosystem
+### Publishing
 
-- [x] **PROV-01**: Implement OpenAI embedding provider adapter (text-embedding-3-small)
-- [x] **PROV-02**: Implement Ollama embedding provider adapter (local server)
-- [x] **PROV-03**: Provider configuration via `~/.config/memory/config.json` (provider, model, dimensions, apiKey, batchSize)
-- [x] **PROV-04**: Model change detection: when configured model differs from embedded model_hash, trigger re-embedding with user confirmation
+- [ ] **PUB-01**: `@chude/memory` published to npm registry with correct bin, files, and dependency configuration
+- [ ] **PUB-02**: `bun add -g @chude/memory` installs successfully and the `memory` binary is available in PATH
 
-### aidev Integration
+### Code Quality (Refactoring)
 
-- [x] **INTEG-01**: Export stable programmatic API surface (execute*Command functions with typed options and return values)
-- [x] **INTEG-02**: Verify memory-nexus works correctly when installed as npm dependency (not just standalone)
-- [x] **INTEG-03**: Add integration tests calling execute*Command functions programmatically
-- [x] **INTEG-04**: Document API surface for aidev MemoryCommand consumption
+- [ ] **REFAC-01**: `sync.ts` (928 lines) split into focused modules following SRP -- each module handles one concern
+- [ ] **REFAC-02**: `friction.ts` (638 lines) split into focused modules following SRP -- each module handles one concern
 
-### Quality
+### Quality (Cross-Cutting)
 
-- [x] **QUAL-01**: 95%+ coverage at EACH metric (functions, lines) for all new code
-- [x] **QUAL-02**: Domain layer maintains zero external dependencies
-- [x] **QUAL-03**: All new infrastructure adapters follow existing port/adapter patterns
-- [x] **QUAL-04**: TDD workflow for all new features
+- [ ] **QUAL-01**: 95%+ coverage at EACH metric (functions, lines) for all new code
+- [ ] **QUAL-02**: Domain layer maintains zero external dependencies
+- [ ] **QUAL-03**: All new infrastructure adapters follow existing port/adapter patterns
+- [ ] **QUAL-04**: TDD workflow (RED-GREEN-REFACTOR) for all new features
 
-## v3.0 Considerations
+## Future Requirements
 
 Deferred. Tracked for context, not in current roadmap.
 
-### aidev-Side Integration
+### Consolidation
 
-- **AIDEV-01**: Create MemoryCommand in aidev's TS CLI (`cli/src/presentation/commands/memory/`)
-- **AIDEV-02**: Wire `cmd_memory()` in bash dispatcher to delegate to TS CLI
-- **AIDEV-03**: Register memory commands in aidev's help and command registry
+- **CONSOL-01**: `memory consolidate` background command merges near-duplicate facts (0.95 cosine threshold)
+- **CONSOL-02**: Periodic summary generation from fact clusters
 
 ### Optimization
 
@@ -86,109 +75,70 @@ Deferred. Tracked for context, not in current roadmap.
 - **OPT-02**: Matryoshka dimension reduction for nomic-embed-text-v1.5
 - **OPT-03**: Transformers.js v4 migration when stable (4x embedding speedup)
 
-### aidev Migration Foundation
+### aidev Integration
 
-- **MIGRATE-01**: Establish bash-to-TS-CLI delegation pattern in aidev
-- **MIGRATE-02**: Migrate release command from bash to TS CLI
-- **MIGRATE-03**: Migrate publish command from bash to TS CLI
+- **AIDEV-01**: Create MemoryCommand in aidev's TS CLI
+- **AIDEV-02**: Wire `cmd_memory()` in bash dispatcher to delegate to TS CLI
+
+### Advanced Portability
+
+- **PORT-04**: Project alias table mapping different encoded paths to same logical project across environments
 
 ## Out of Scope
 
 | Feature | Reason |
 |---------|--------|
-| ANN indexing (HNSW) | Brute-force is <75ms at 200K messages; unnecessary at current scale |
-| Dedicated code embedding models | Too large (1.5B+ params); hybrid search compensates with BM25 for exact code matches |
-| Transformers.js v4 | Preview only, no stable release; will migrate when stable |
-| Cross-machine embedding sync | Embeddings are derived data, regenerated locally from session text |
-| aidev bash dispatcher changes | v2.0 focuses on memory-nexus side; aidev-side wiring is v3.0 |
-| Full aidev TS migration | Incremental approach; memory is first feature, broader migration is separate milestones |
+| Graph database (Neo4j, etc.) | Overkill for single-developer tool; SQLite + foreign keys suffice per Mem0/Zep research |
+| Real-time extraction (per-message) | We extract retrospectively from completed JSONL sessions |
+| Entity-relationship triplets (Zep-style) | Natural language facts are simpler and sufficient for our use case |
+| Multi-user scoping | Single-user tool; project-level scoping is the equivalent |
+| Command restructuring/renaming | Research confirms current names follow industry conventions; labeled help groups solve discoverability |
+| Factory pattern for storage backends | Only target SQLite; indirection adds complexity without benefit |
+| Community detection / label propagation | Requires graph infrastructure we don't have |
 
 ## Traceability
 
+Which phases cover which requirements. Updated during roadmap creation.
+
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| RENAME-01 | Phase 13 | Complete |
-| RENAME-02 | Phase 13 | Complete |
-| RENAME-03 | Phase 13 | Complete |
-| RENAME-04 | Phase 13 | Complete |
-| RENAME-05 | Phase 13 | Complete |
-| EMBED-01 | Phase 14 | Complete |
-| EMBED-02 | Phase 14 | Complete |
-| EMBED-03 | Phase 14 | Complete |
-| EMBED-04 | Phase 14 | Complete |
-| EMBED-05 | Phase 14 | Complete |
-| EMBED-06 | Phase 14 | Complete |
-| EMBED-07 | Phase 14 | Complete |
-| PIPE-01 | Phase 15 | Complete |
-| PIPE-02 | Phase 15 | Complete |
-| PIPE-03 | Phase 15 | Complete |
-| PIPE-04 | Phase 15 | Complete |
-| PIPE-05 | Phase 15 | Complete |
-| HSRCH-01 | Phase 16 | Complete |
-| HSRCH-02 | Phase 16 | Complete |
-| HSRCH-03 | Phase 16 | Complete |
-| HSRCH-04 | Phase 16 | Complete |
-| HSRCH-05 | Phase 16 | Complete |
-| HSRCH-06 | Phase 16 | Complete |
-| DEGRADE-01 | Phase 16 | Complete |
-| DEGRADE-02 | Phase 16 | Complete |
-| DEGRADE-03 | Phase 16 | Complete |
-| DEGRADE-04 | Phase 16 | Complete |
-| PROV-01 | Phase 17 | Complete |
-| PROV-02 | Phase 17 | Complete |
-| PROV-03 | Phase 17 | Complete |
-| PROV-04 | Phase 17 | Complete |
-| INTEG-01 | Phase 18 | Complete |
-| INTEG-02 | Phase 18 | Complete |
-| INTEG-03 | Phase 18 | Complete |
-| INTEG-04 | Phase 18 | Complete |
-| QUAL-01 | Phase 19 (gap closure) | Complete |
-| QUAL-02 | Phase 19 (gap closure) | Complete |
-| QUAL-03 | Phase 19 + 21 (gap closure) | Complete (all adapters follow port/adapter pattern; BOUNDARY-01 closed in Phase 21) |
-| QUAL-04 | Phase 19 (gap closure) | Complete |
-
-### QUAL Evidence (Phase 19 Verification)
-
-**QUAL-01 (Coverage):** v2.0 new files coverage metrics from `bun test --coverage`:
-
-| File | Functions | Lines |
-|------|-----------|-------|
-| paths.ts | 100.00% | 100.00% |
-| migration.ts | 100.00% | 100.00% |
-| embedding-config.ts | 100.00% | 100.00% |
-| embedding-result.ts | 100.00% | 100.00% |
-| embedding-provider-factory.ts | 83.33% | 100.00% |
-| transformers-js-provider.ts | 100.00% | 100.00% |
-| openai-provider.ts | 100.00% | 100.00% |
-| ollama-provider.ts | 100.00% | 100.00% |
-| embedding-repository.ts | 100.00% | 100.00% |
-| background-embedder.ts | 100.00% | 100.00% |
-| hybrid-search-service.ts | 100.00% | 100.00% |
-| rrf-fusion.ts | 100.00% | 100.00% |
-| temporal-decay.ts | 100.00% | 100.00% |
-| search-query.ts | 100.00% | 100.00% |
-| search-result.ts | 100.00% | 100.00% |
-
-Note: embedding-provider-factory.ts shows 83.33% function coverage because `dispose()` is only exercised via integration paths (factory lifecycle), not in isolation. All Phase-specific code paths are covered. Tool limitation: Bun reports function% and line% (not separate statement% and branch%).
-
-**QUAL-02 (Domain zero deps):** `grep -rn "from \"[^.]" src/domain/ --include="*.ts" | grep -v ".test.ts"` returned 0 results. Domain layer has zero external dependencies.
-
-**QUAL-03 (Port/adapter):** TransformersJsProvider, OpenAiProvider, and OllamaProvider all implement the `IEmbeddingProvider` domain port. EmbeddingRepository implements `IEmbeddingRepository` domain port (BOUNDARY-01 closed in Phase 21). All infrastructure adapters now follow port/adapter pattern.
-
-**QUAL-04 (TDD):** Commit history shows test-first patterns across Phases 14-18. Examples:
-- Phase 16.1: `test(16.1-01): add failing tests` (2e5d1e1) before `feat(16.1-01): implement` (839fc83)
-- Phase 15: `test(15-03): add failing tests` (6ca88ce, 8338944) before `feat(15-03): implement` (ffc4c4a, 7d87e13)
-- Phase 15: `test(15-02): add failing tests` (cde443b, 2e34cb1) before `feat(15-02): implement` (cdc3f45, defa381)
-
-Full suite: 2598 pass, 1 fail (pre-existing flaky test), 5407 expect() calls.
+| KNOW-01 | - | Pending |
+| KNOW-02 | - | Pending |
+| KNOW-03 | - | Pending |
+| KNOW-04 | - | Pending |
+| KNOW-05 | - | Pending |
+| KNOW-06 | - | Pending |
+| KNOW-07 | - | Pending |
+| KNOW-08 | - | Pending |
+| CTXT-01 | - | Pending |
+| CTXT-02 | - | Pending |
+| CTXT-03 | - | Pending |
+| CTXT-04 | - | Pending |
+| CLI-01 | - | Pending |
+| CLI-02 | - | Pending |
+| CLI-03 | - | Pending |
+| PORT-01 | - | Pending |
+| PORT-02 | - | Pending |
+| PORT-03 | - | Pending |
+| FIX-01 | - | Pending |
+| FIX-02 | - | Pending |
+| FIX-03 | - | Pending |
+| PUB-01 | - | Pending |
+| PUB-02 | - | Pending |
+| REFAC-01 | - | Pending |
+| REFAC-02 | - | Pending |
+| QUAL-01 | All | Pending |
+| QUAL-02 | All | Pending |
+| QUAL-03 | All | Pending |
+| QUAL-04 | All | Pending |
 
 **Coverage:**
-- v2.0 requirements: 35 total (excluding QUAL cross-cutting)
+- v4.0 requirements: 25 total (excluding QUAL cross-cutting)
 - Cross-cutting: 4 QUAL requirements
-- Total: 39
-- Complete: 39
-- Pending: 0
+- Total: 29
+- Mapped to phases: 0
+- Unmapped: 25
 
 ---
-*Requirements defined: 2026-02-18*
-*Last updated: 2026-03-01 (QUAL-01 through QUAL-04 verified, all 39 requirements complete)*
+*Requirements defined: 2026-04-03*
+*Last updated: 2026-04-03 after initial definition*
