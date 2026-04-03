@@ -596,6 +596,47 @@ describe("createEmbeddingProgressReporter", () => {
   });
 });
 
+describe("trackDownloadTotal", () => {
+  let trackDownloadTotal: (currentMax: number, newTotalBytes: number) => number;
+
+  beforeEach(async () => {
+    const mod = await import("./progress-reporter.js");
+    trackDownloadTotal = mod.trackDownloadTotal;
+  });
+
+  it("returns 0 when both inputs are 0", () => {
+    expect(trackDownloadTotal(0, 0)).toBe(0);
+  });
+
+  it("returns new total in MB when larger than current max", () => {
+    // 47185920 bytes = ~45 MB
+    expect(trackDownloadTotal(0, 47185920)).toBe(45);
+  });
+
+  it("keeps current max when new total is smaller", () => {
+    // 1048576 bytes = 1 MB, current max is 45
+    expect(trackDownloadTotal(45, 1048576)).toBe(45);
+  });
+
+  it("updates to larger total", () => {
+    // 94371840 bytes = ~90 MB
+    expect(trackDownloadTotal(45, 94371840)).toBe(90);
+  });
+
+  it("ignores zero bytes after non-zero max", () => {
+    expect(trackDownloadTotal(90, 0)).toBe(90);
+  });
+
+  it("handles small file under 1 MB rounding to 0", () => {
+    // 500000 bytes rounds to 0 MB
+    expect(trackDownloadTotal(0, 500000)).toBe(0);
+  });
+
+  it("handles exact 1 MB boundary", () => {
+    expect(trackDownloadTotal(0, 1048576)).toBe(1);
+  });
+});
+
 describe("ModelDownloadReporter", () => {
   const originalIsTTY = process.stdout.isTTY;
 

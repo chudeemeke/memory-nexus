@@ -324,6 +324,23 @@ export function createEmbeddingProgressReporter(options: {
 import type { DownloadProgress } from "../../domain/ports/embedding.js";
 
 /**
+ * Track the largest download total across multiple progress events.
+ *
+ * Transformers.js emits progress events for multiple files (config.json,
+ * tokenizer.json, model.onnx). Small files may report total=0. This
+ * function keeps the largest total seen so the progress bar shows the
+ * model file size, not a config file's size.
+ *
+ * @param currentMax Current largest total in MB
+ * @param newTotalBytes New total from a progress event in bytes
+ * @returns The larger of currentMax or the new total converted to MB
+ */
+export function trackDownloadTotal(currentMax: number, newTotalBytes: number): number {
+  const newTotalMb = Math.round(newTotalBytes / 1048576);
+  return newTotalMb > currentMax ? newTotalMb : currentMax;
+}
+
+/**
  * Create a handler for model download progress events.
  *
  * On TTY: shows animated progress bar for download.
@@ -356,15 +373,26 @@ export function createModelDownloadHandler(options: {
     hideCursor: true,
   });
   let started = false;
+  let maxTotal = 0;
 
   return (progress: DownloadProgress) => {
     if (progress.status === "downloading") {
       const loadedMb = Math.round(progress.loaded / 1048576);
       const totalMb = Math.round(progress.total / 1048576);
-      if (!started) {
-        downloadBar.start(totalMb, loadedMb);
+
+      // Track the largest total seen (the model file is the big one)
+      if (totalMb > maxTotal) {
+        maxTotal = totalMb;
+      }
+
+      if (!started && maxTotal > 0) {
+        downloadBar.start(maxTotal, loadedMb);
         started = true;
-      } else {
+      } else if (started) {
+        // Only update total when it actually changed (prevents flicker)
+        if (totalMb > 0 && downloadBar.getTotal() !== maxTotal) {
+          downloadBar.setTotal(maxTotal);
+        }
         downloadBar.update(loadedMb);
       }
     } else if (progress.status === "ready" && started) {
