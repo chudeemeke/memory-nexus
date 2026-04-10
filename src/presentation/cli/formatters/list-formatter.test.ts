@@ -12,6 +12,7 @@ import {
 } from "./list-formatter.js";
 import { Session } from "../../../domain/entities/session.js";
 import { ProjectPath } from "../../../domain/value-objects/project-path.js";
+import { measureWidth } from "./text-width.js";
 
 /**
  * Helper to create a test session.
@@ -123,21 +124,23 @@ describe("DefaultListFormatter", () => {
   });
 
   it("should align columns correctly with CJK project names", () => {
+    const cjkName = "\u30d7\u30ed\u30b8\u30a7\u30af\u30c8";
+    const projectColumnWidth = 20;
     const formatter = createListFormatter("default", false);
     const sessions = [
       createTestSession({
         id: "abc12345-session",
-        projectPath: ProjectPath.fromDecoded("C:\\Projects\\\u30d7\u30ed\u30b8\u30a7\u30af\u30c8"),
+        projectPath: ProjectPath.fromDecoded(`C:\\Projects\\${cjkName}`),
       }),
     ];
 
     const output = formatter.formatSessions(sessions);
 
     // CJK project name should be present
-    expect(output).toContain("\u30d7\u30ed\u30b8\u30a7\u30af\u30c8");
-    // 6 katakana chars x 2 display width = 12; padToWidth(name, 20) adds 8 spaces
-    // With the old .padEnd(20), it would have added 14 spaces (counting codepoints)
-    expect(output).toContain("\u30d7\u30ed\u30b8\u30a7\u30af\u30c8" + " ".repeat(8));
+    expect(output).toContain(cjkName);
+    // Padding should fill to target visual width, not codepoint count
+    const expectedPadding = projectColumnWidth - measureWidth(cjkName);
+    expect(output).toContain(cjkName + " ".repeat(expectedPadding));
   });
 });
 
