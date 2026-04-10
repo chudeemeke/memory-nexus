@@ -463,6 +463,89 @@ describe("OutputFormatter", () => {
     });
   });
 
+  describe("snippet truncation at terminal width", () => {
+    it("truncates long snippets at terminal width boundary", () => {
+      const formatter = createOutputFormatter("default", false);
+      const longSnippet = "B".repeat(1000);
+      const results: SearchResult[] = [{
+        sessionId: "session-1234-abcd-efgh",
+        messageId: "msg-001",
+        role: "user",
+        score: 0.95,
+        timestamp: new Date("2026-01-27T14:30:00Z"),
+        snippet: longSnippet,
+      }];
+
+      const output = formatter.formatResults(results, { query: "test" });
+
+      // Full 1000-char snippet should not appear in output
+      expect(output).not.toContain("B".repeat(1000));
+      // Snippet line should contain truncation indicator
+      const snippetLine = output.split("\n").find(l => l.trimStart().startsWith("B"));
+      expect(snippetLine).toBeDefined();
+      expect(snippetLine!).toContain("...");
+    });
+
+    it("does not truncate short snippets", () => {
+      const formatter = createOutputFormatter("default", false);
+      const shortSnippet = "Short result";
+      const results: SearchResult[] = [{
+        sessionId: "session-1234-abcd-efgh",
+        messageId: "msg-001",
+        role: "user",
+        score: 0.95,
+        timestamp: new Date("2026-01-27T14:30:00Z"),
+        snippet: shortSnippet,
+      }];
+
+      const output = formatter.formatResults(results, { query: "test" });
+
+      expect(output).toContain("Short result");
+      // Snippet line should not have truncation ellipsis
+      const snippetLine = output.split("\n").find(l => l.includes("Short result"));
+      expect(snippetLine).toBeDefined();
+      expect(snippetLine!).not.toMatch(/Short result.*\.\.\./);
+    });
+
+    it("truncates long snippets in quiet mode", () => {
+      const formatter = createOutputFormatter("quiet", false);
+      const longSnippet = "C".repeat(1000);
+      const results: SearchResult[] = [{
+        sessionId: "session-1234-abcd-efgh",
+        messageId: "msg-001",
+        role: "user",
+        score: 0.95,
+        timestamp: new Date("2026-01-27T14:30:00Z"),
+        snippet: longSnippet,
+      }];
+
+      const output = formatter.formatResults(results, { query: "test" });
+
+      expect(output).not.toContain("C".repeat(1000));
+      expect(output).toContain("...");
+    });
+
+    it("truncates long snippets in verbose mode", () => {
+      const formatter = createOutputFormatter("verbose", false);
+      const longSnippet = "D".repeat(1000);
+      const results: SearchResult[] = [{
+        sessionId: "session-1234-abcd-efgh",
+        messageId: "msg-001",
+        role: "user",
+        score: 0.95,
+        timestamp: new Date("2026-01-27T14:30:00Z"),
+        snippet: longSnippet,
+      }];
+
+      const output = formatter.formatResults(results, { query: "test" });
+
+      expect(output).not.toContain("D".repeat(1000));
+      const snippetLine = output.split("\n").find(l => l.trimStart().startsWith("D"));
+      expect(snippetLine).toBeDefined();
+      expect(snippetLine!).toContain("...");
+    });
+  });
+
   describe("context budget", () => {
     it("exports CONTEXT_BUDGET constant", () => {
       expect(CONTEXT_BUDGET).toBe(50000);

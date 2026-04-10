@@ -62,3 +62,19 @@ export function padToWidth(text: string, targetWidth: number): string {
 export function getTerminalWidth(): number {
   return process.stdout.columns || 80;
 }
+
+/**
+ * Truncate text to fit within the terminal width minus a prefix.
+ * Derives the available width from the actual prefix string to avoid
+ * coupling between indent characters and a hardcoded number.
+ *
+ * @param text The text to potentially truncate
+ * @param prefix The literal prefix string (e.g., "   ") used to compute available width
+ * @param minWidth Minimum width to allow (prevents degenerate truncation on tiny terminals)
+ */
+export function truncateForTerminal(text: string, prefix: string, minWidth = 20): string {
+  const termWidth = getTerminalWidth();
+  const prefixWidth = measureWidth(prefix);
+  const maxWidth = termWidth - prefixWidth;
+  return truncateToWidth(text, maxWidth > minWidth ? maxWidth : minWidth);
+}

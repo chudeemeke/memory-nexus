@@ -9,6 +9,7 @@
 import type { SearchResult } from "../../../domain/value-objects/search-result.js";
 import { formatTimestamp } from "./timestamp-formatter.js";
 import { bold } from "./color.js";
+import { truncateToWidth, truncateForTerminal, getTerminalWidth } from "./text-width.js";
 
 /**
  * Context budget for Claude consumption (50K characters).
@@ -184,8 +185,9 @@ class DefaultOutputFormatter implements OutputFormatter {
     const scorePercent = (result.score * 100).toFixed(0);
     const sessionShort = result.sessionId.substring(0, 16);
     const timestamp = formatTimestamp(result.timestamp);
-    const snippet = highlightSnippet(result.snippet, this.useColor);
+    const rawSnippet = highlightSnippet(result.snippet, this.useColor);
     const role = result.role.charAt(0).toUpperCase() + result.role.slice(1);
+    const snippet = truncateForTerminal(rawSnippet, "   ");
 
     return `${index}. [${scorePercent}%] [${role}] ${sessionShort}...\n   ${timestamp}\n   ${snippet}\n\n`;
   }
@@ -310,13 +312,16 @@ class QuietOutputFormatter implements OutputFormatter {
       return "";
     }
 
+    const termWidth = getTerminalWidth();
+
     return results
       .map((r) => {
         const sessionShort = r.sessionId.substring(0, 16);
         const snippet = r.snippet
           .replace(/<mark>/g, "*")
           .replace(/<\/mark>/g, "*");
-        return `${sessionShort} ${snippet}`;
+        const line = `${sessionShort} ${snippet}`;
+        return truncateToWidth(line, termWidth);
       })
       .join("\n");
   }
@@ -396,8 +401,9 @@ class VerboseOutputFormatter implements OutputFormatter {
   private formatResult(result: SearchResult, index: number, showRankerBreakdown: boolean): string {
     const scorePercent = (result.score * 100).toFixed(0);
     const timestamp = formatTimestamp(result.timestamp);
-    const snippet = highlightSnippet(result.snippet, this.useColor);
+    const rawSnippet = highlightSnippet(result.snippet, this.useColor);
     const role = result.role.charAt(0).toUpperCase() + result.role.slice(1);
+    const snippet = truncateForTerminal(rawSnippet, "   ");
 
     let line = `${index}. [${scorePercent}%] [${role}] ${result.sessionId}\n   ${timestamp}\n   ${snippet}\n`;
 

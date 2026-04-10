@@ -11,6 +11,7 @@ import {
   truncateToWidth,
   padToWidth,
   getTerminalWidth,
+  truncateForTerminal,
 } from "./text-width.js";
 
 describe("measureWidth", () => {
@@ -92,6 +93,38 @@ describe("padToWidth", () => {
   it("should return string unchanged when beyond target width", () => {
     const result = padToWidth("hello world", 5);
     expect(result).toBe("hello world");
+  });
+});
+
+describe("truncateForTerminal", () => {
+  it("should truncate long text accounting for prefix width", () => {
+    // With prefix "   " (3 chars), available width = termWidth - 3
+    const longText = "A".repeat(1000);
+    const result = truncateForTerminal(longText, "   ");
+    expect(result).toContain("...");
+    // Result width should be at most termWidth - prefixWidth
+    const termWidth = getTerminalWidth();
+    expect(measureWidth(result)).toBeLessThanOrEqual(termWidth - 3);
+  });
+
+  it("should not truncate short text", () => {
+    expect(truncateForTerminal("hello", "   ")).toBe("hello");
+  });
+
+  it("should derive prefix width from the actual prefix string", () => {
+    // A wider prefix leaves less room for content
+    const text = "A".repeat(100);
+    const narrow = truncateForTerminal(text, "  ");
+    const wide = truncateForTerminal(text, "          "); // 10 spaces
+    expect(measureWidth(wide)).toBeLessThan(measureWidth(narrow));
+  });
+
+  it("should respect minWidth floor", () => {
+    // Even with a huge prefix, result width should be at least minWidth
+    const text = "A".repeat(100);
+    const result = truncateForTerminal(text, " ".repeat(200), 30);
+    expect(measureWidth(result)).toBeLessThanOrEqual(30);
+    expect(result).toContain("...");
   });
 });
 

@@ -8,6 +8,7 @@
 import type { Session } from "../../../domain/entities/session.js";
 import { formatTimestamp, formatRelativeTime } from "./timestamp-formatter.js";
 import { dim } from "./color.js";
+import { padToWidth } from "./text-width.js";
 
 /**
  * Output mode for list formatter.
@@ -98,10 +99,10 @@ class DefaultListFormatter implements ListFormatter {
     const messageCount = session.messageCount;
     const messageText = `${messageCount} ${pluralize(messageCount, "message", "messages")}`;
 
-    // Pad columns for alignment
-    const idCol = idShort.padEnd(10);
-    const projectCol = projectName.padEnd(20);
-    const timeCol = relative.padEnd(18);
+    // Pad columns for alignment (width-aware for CJK/emoji content)
+    const idCol = padToWidth(idShort, 10);
+    const projectCol = padToWidth(projectName, 20);
+    const timeCol = padToWidth(relative, 18);
 
     return `  ${idCol}${projectCol}${timeCol}${dim(messageText, this.useColor)}\n`;
   }

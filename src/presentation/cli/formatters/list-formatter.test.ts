@@ -121,6 +121,24 @@ describe("DefaultListFormatter", () => {
 
     expect(output).toContain("0 messages");
   });
+
+  it("should align columns correctly with CJK project names", () => {
+    const formatter = createListFormatter("default", false);
+    const sessions = [
+      createTestSession({
+        id: "abc12345-session",
+        projectPath: ProjectPath.fromDecoded("C:\\Projects\\\u30d7\u30ed\u30b8\u30a7\u30af\u30c8"),
+      }),
+    ];
+
+    const output = formatter.formatSessions(sessions);
+
+    // CJK project name should be present
+    expect(output).toContain("\u30d7\u30ed\u30b8\u30a7\u30af\u30c8");
+    // 6 katakana chars x 2 display width = 12; padToWidth(name, 20) adds 8 spaces
+    // With the old .padEnd(20), it would have added 14 spaces (counting codepoints)
+    expect(output).toContain("\u30d7\u30ed\u30b8\u30a7\u30af\u30c8" + " ".repeat(8));
+  });
 });
 
 describe("JsonListFormatter", () => {
