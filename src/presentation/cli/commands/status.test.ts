@@ -28,9 +28,8 @@ import {
 } from "../../../infrastructure/hooks/settings-manager.js";
 import { DEFAULT_CONFIG } from "../../../infrastructure/hooks/config-manager.js";
 import {
-    setTestPaths,
-    resetTestPaths,
-} from "../../../infrastructure/paths.js";
+    installEnvOverrides,
+} from "../../../../tests/helpers/env-overrides.js";
 import {
     writeLock,
     removeLock,
@@ -144,12 +143,16 @@ describe("status command", () => {
         });
 
         test("returns active embedding with DB counts when lock has alive PID", async () => {
-            // Use a separate temp dir for this test to avoid EBUSY on Windows
-            const isolatedDir = join(tmpdir(), `memory-status-embed-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`);
+            // Use a separate temp dir for this test to avoid EBUSY on Windows.
+            // Layout: ${parent}/memory/ — XDG_DATA_HOME=${parent} makes
+            // getDataDir() resolve to ${parent}/memory because paths.ts
+            // appends APP_NAME ("memory").
+            const parent = join(tmpdir(), `memory-status-embed-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`);
+            const isolatedDir = join(parent, "memory");
             mkdirSync(isolatedDir, { recursive: true });
 
-            // Set up data dir for the lock file
-            setTestPaths({ dataDir: isolatedDir });
+            const env = installEnvOverrides();
+            env.set("XDG_DATA_HOME", parent);
 
             // Write a lock file with the current process PID (always alive)
             writeLock({
@@ -195,9 +198,9 @@ describe("status command", () => {
             } finally {
                 // Clean up
                 removeLock(isolatedDir);
-                resetTestPaths();
+                env.cleanup();
                 try {
-                    rmSync(isolatedDir, { recursive: true, force: true });
+                    rmSync(parent, { recursive: true, force: true });
                 } catch {
                     // Best-effort cleanup on Windows
                 }
