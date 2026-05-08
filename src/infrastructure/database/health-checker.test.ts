@@ -18,7 +18,6 @@ import {
     checkSqliteVecAvailability,
     checkEmbeddingConfig,
     runHealthCheck,
-    setTestOverrides,
     type HealthCheckResult,
 } from "./health-checker.js";
 import { setTestConfigPath } from "../hooks/config-manager.js";
@@ -51,7 +50,6 @@ describe("health-checker", () => {
         setTestConfigPath(null);
         setTestLogPath(null);
         setTestPathOverrides(null);
-        setTestOverrides(null);
 
         // Clean up test directory
         try {
@@ -340,19 +338,15 @@ describe("health-checker", () => {
             closeDatabase(db);
         });
 
-        afterEach(() => {
-            setTestOverrides(null);
+        const overrides = () => ({
+            dbPath: testDbPath,
+            configDir: testDir,
+            logsDir: join(testDir, "logs"),
+            sourceDir: testDir,
         });
 
         it("returns complete HealthCheckResult", () => {
-            setTestOverrides({
-                dbPath: testDbPath,
-                configDir: testDir,
-                logsDir: join(testDir, "logs"),
-                sourceDir: testDir,
-            });
-
-            const result = runHealthCheck();
+            const result = runHealthCheck(overrides());
 
             // Verify structure
             expect(result).toHaveProperty("database");
@@ -374,14 +368,12 @@ describe("health-checker", () => {
         });
 
         it("handles missing database gracefully", () => {
-            setTestOverrides({
+            const result = runHealthCheck({
                 dbPath: join(testDir, "nonexistent.db"),
                 configDir: testDir,
                 logsDir: join(testDir, "logs"),
                 sourceDir: testDir,
             });
-
-            const result = runHealthCheck();
 
             expect(result.database.exists).toBe(false);
             expect(result.database.readable).toBe(false);
@@ -391,14 +383,12 @@ describe("health-checker", () => {
         });
 
         it("handles missing directories gracefully", () => {
-            setTestOverrides({
+            const result = runHealthCheck({
                 dbPath: testDbPath,
                 configDir: join(testDir, "nonexistent-config"),
                 logsDir: join(testDir, "nonexistent-logs"),
                 sourceDir: join(testDir, "nonexistent-source"),
             });
-
-            const result = runHealthCheck();
 
             expect(result.permissions.configDir).toBe(false);
             expect(result.permissions.logsDir).toBe(false);
@@ -416,12 +406,10 @@ describe("health-checker", () => {
             expect(result.database.exists).toBe(true);
         });
 
-        it("uses default paths when no overrides", () => {
-            // Reset test overrides but keep config/log/settings paths
-            // to avoid accessing real system files and timing out
-            setTestOverrides(null);
-
-            // runHealthCheck should use the testOverrides parameter
+        it("uses default paths when no overrides — verified via per-call overrides", () => {
+            // Verify overrides parameter is the canonical seam.
+            // Real default paths are tested via integration / smoke tests
+            // (XDG resolution lives in paths.ts and is tested there).
             const result = runHealthCheck({
                 dbPath: testDbPath,
                 configDir: testDir,
@@ -437,14 +425,7 @@ describe("health-checker", () => {
         });
 
         it("includes embedding field in result", () => {
-            setTestOverrides({
-                dbPath: testDbPath,
-                configDir: testDir,
-                logsDir: join(testDir, "logs"),
-                sourceDir: testDir,
-            });
-
-            const result = runHealthCheck();
+            const result = runHealthCheck(overrides());
             expect(result).toHaveProperty("embedding");
             expect(result.embedding).toHaveProperty("configured");
             expect(result.embedding).toHaveProperty("provider");
@@ -454,14 +435,7 @@ describe("health-checker", () => {
         });
 
         it("includes sqliteVec field in result", () => {
-            setTestOverrides({
-                dbPath: testDbPath,
-                configDir: testDir,
-                logsDir: join(testDir, "logs"),
-                sourceDir: testDir,
-            });
-
-            const result = runHealthCheck();
+            const result = runHealthCheck(overrides());
             expect(result).toHaveProperty("sqliteVec");
             expect(result.sqliteVec).toHaveProperty("available");
             expect(result.sqliteVec).toHaveProperty("version");

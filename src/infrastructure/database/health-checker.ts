@@ -160,17 +160,6 @@ export interface HealthCheckOverrides {
     sourceDir?: string;
 }
 
-let testOverrides: HealthCheckOverrides | null = null;
-
-/**
- * Set test path overrides
- *
- * @param overrides Path overrides, or null to reset to defaults
- */
-export function setTestOverrides(overrides: HealthCheckOverrides | null): void {
-    testOverrides = overrides;
-}
-
 /**
  * Check database integrity using PRAGMA integrity_check
  *
@@ -407,16 +396,14 @@ export function checkEmbeddingConfig(): EmbeddingHealth {
  * @returns Complete health check result
  */
 export function runHealthCheck(overrides?: HealthCheckOverrides): HealthCheckResult {
-    const effectiveOverrides = overrides ?? testOverrides;
-
     // Database health
-    const dbPath = effectiveOverrides?.dbPath ?? getDefaultDbPath();
+    const dbPath = overrides?.dbPath ?? getDefaultDbPath();
     const database = checkDatabaseHealth(dbPath);
 
     // Directory permissions
-    const configDirPath = effectiveOverrides?.configDir ?? getConfigDir();
-    const logsDirPath = effectiveOverrides?.logsDir ?? getLogDir();
-    const sourceDirPath = effectiveOverrides?.sourceDir ?? join(homedir(), ".claude", "projects");
+    const configDirPath = overrides?.configDir ?? getConfigDir();
+    const logsDirPath = overrides?.logsDir ?? getLogDir();
+    const sourceDirPath = overrides?.sourceDir ?? join(homedir(), ".claude", "projects");
 
     const configDirPerms = checkDirectoryPermissions(configDirPath);
     const logsDirPerms = checkDirectoryPermissions(logsDirPath);

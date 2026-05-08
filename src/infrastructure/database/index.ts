@@ -79,7 +79,6 @@ export {
   checkSqliteVecAvailability,
   checkEmbeddingConfig,
   runHealthCheck,
-  setTestOverrides,
   type DatabaseHealth,
   type PermissionsHealth,
   type HooksHealth,

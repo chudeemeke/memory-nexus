@@ -44,6 +44,25 @@ export interface DoctorOptions {
 }
 
 /**
+ * Runtime dependencies for executeDoctorCommand.
+ *
+ * Operational dependencies that tests substitute for isolation.
+ * Defaults to production resolution (XDG paths via paths.ts) when omitted.
+ */
+export interface DoctorCommandDeps {
+    /**
+     * Health-check overrides (db/config/logs/source paths). When omitted,
+     * runHealthCheck uses XDG-resolved production paths.
+     */
+    healthOverrides?: {
+        dbPath?: string;
+        configDir?: string;
+        logsDir?: string;
+        sourceDir?: string;
+    };
+}
+
+/**
  * Format a boolean value as a status indicator.
  *
  * @param value Boolean value
@@ -363,8 +382,11 @@ export function createDoctorCommand(): Command {
  * @param options - Doctor command options
  * @returns CommandResult with exitCode 0 (healthy), 1 (degraded), or 2 (broken)
  */
-export async function executeDoctorCommand(options: DoctorOptions): Promise<CommandResult> {
-    const healthResult = runHealthCheck();
+export async function executeDoctorCommand(
+    options: DoctorOptions,
+    deps: DoctorCommandDeps = {},
+): Promise<CommandResult> {
+    const healthResult = runHealthCheck(deps.healthOverrides);
     const useColor = shouldUseColor();
 
     // Determine exit code from health status

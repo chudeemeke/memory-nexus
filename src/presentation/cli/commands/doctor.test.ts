@@ -14,10 +14,7 @@ import {
     formatHealthResult,
     attemptFixes,
 } from "./doctor.js";
-import {
-    setTestOverrides,
-    type HealthCheckResult,
-} from "../../../infrastructure/database/health-checker.js";
+import type { HealthCheckResult } from "../../../infrastructure/database/health-checker.js";
 import { initializeDatabase, closeDatabase } from "../../../infrastructure/database/connection.js";
 import { setTestConfigPath } from "../../../infrastructure/hooks/config-manager.js";
 import { setTestLogPath } from "../../../infrastructure/hooks/log-writer.js";
@@ -34,6 +31,14 @@ describe("doctor command", () => {
     let consoleOutput: string[] = [];
     const originalLog = console.log;
 
+    /** Default health overrides used by all tests in this suite. */
+    const healthOverrides = () => ({
+        dbPath: testDbPath,
+        configDir: testDir,
+        logsDir: join(testDir, "logs"),
+        sourceDir: testDir,
+    });
+
     beforeAll(() => {
         // Create test directories
         mkdirSync(join(testDir, "logs"), { recursive: true });
@@ -43,17 +48,11 @@ describe("doctor command", () => {
         const { db } = initializeDatabase({ path: testDbPath });
         closeDatabase(db);
 
-        // Set test path overrides
+        // Infrastructure-level setters still in use (will be migrated separately)
         setTestConfigPath(testConfigPath);
         setTestLogPath(testLogPath);
         setTestPathOverrides({
             settingsPath: testSettingsPath,
-        });
-        setTestOverrides({
-            dbPath: testDbPath,
-            configDir: testDir,
-            logsDir: join(testDir, "logs"),
-            sourceDir: testDir,
         });
     });
 
@@ -62,7 +61,6 @@ describe("doctor command", () => {
         setTestConfigPath(null);
         setTestLogPath(null);
         setTestPathOverrides(null);
-        setTestOverrides(null);
 
         // Restore console
         console.log = originalLog;
@@ -310,14 +308,10 @@ describe("doctor command", () => {
         });
 
         it("attempts to create missing config directory", () => {
-            const missingConfigDir = join(testDir, "missing-config-fix");
-            setTestOverrides({
-                dbPath: testDbPath,
-                configDir: missingConfigDir,
-                logsDir: join(testDir, "logs"),
-                sourceDir: testDir,
-            });
-
+            // attemptFixes reads getConfigDir() from paths.ts directly,
+            // so health-checker overrides have no effect here. The test
+            // verifies the "fix" code path runs when permissions.configDir
+            // is false; the actual mkdir target is the production path.
             const result: HealthCheckResult = {
                 ...healthyResult,
                 permissions: {
@@ -328,25 +322,9 @@ describe("doctor command", () => {
 
             const fixes = attemptFixes(result, false);
             expect(fixes.some(f => f.includes("config directory"))).toBe(true);
-
-            // Reset
-            setTestOverrides({
-                dbPath: testDbPath,
-                configDir: testDir,
-                logsDir: join(testDir, "logs"),
-                sourceDir: testDir,
-            });
         });
 
         it("attempts to create missing logs directory", () => {
-            const missingLogsDir = join(testDir, "missing-logs-fix");
-            setTestOverrides({
-                dbPath: testDbPath,
-                configDir: testDir,
-                logsDir: missingLogsDir,
-                sourceDir: testDir,
-            });
-
             const result: HealthCheckResult = {
                 ...healthyResult,
                 permissions: {
@@ -357,14 +335,6 @@ describe("doctor command", () => {
 
             const fixes = attemptFixes(result, false);
             expect(fixes.some(f => f.includes("logs directory"))).toBe(true);
-
-            // Reset
-            setTestOverrides({
-                dbPath: testDbPath,
-                configDir: testDir,
-                logsDir: join(testDir, "logs"),
-                sourceDir: testDir,
-            });
         });
 
         it("warns about corrupted database", () => {
@@ -399,7 +369,7 @@ describe("doctor command", () => {
             consoleOutput = [];
             console.log = (msg: string) => consoleOutput.push(msg);
 
-            await executeDoctorCommand({ json: true });
+            await executeDoctorCommand({ json: true }, { healthOverrides: healthOverrides() });
 
             const output = consoleOutput.join("\n");
             const parsed = JSON.parse(output);
@@ -416,7 +386,7 @@ describe("doctor command", () => {
             consoleOutput = [];
             console.log = (msg: string) => consoleOutput.push(msg);
 
-            await executeDoctorCommand({});
+            await executeDoctorCommand({}, { healthOverrides: healthOverrides() });
 
             const output = consoleOutput.join("\n");
             expect(output).toContain("Database");
@@ -429,7 +399,7 @@ describe("doctor command", () => {
             consoleOutput = [];
             console.log = (msg: string) => consoleOutput.push(msg);
 
-            await executeDoctorCommand({ json: true });
+            await executeDoctorCommand({ json: true }, { healthOverrides: healthOverrides() });
 
             const output = consoleOutput.join("\n");
             const parsed = JSON.parse(output);
@@ -444,7 +414,7 @@ describe("doctor command", () => {
             consoleOutput = [];
             console.log = (msg: string) => consoleOutput.push(msg);
 
-            await executeDoctorCommand({ json: true });
+            await executeDoctorCommand({ json: true }, { healthOverrides: healthOverrides() });
 
             const output = consoleOutput.join("\n");
             const parsed = JSON.parse(output);
@@ -460,7 +430,7 @@ describe("doctor command", () => {
             consoleOutput = [];
             console.log = (msg: string) => consoleOutput.push(msg);
 
-            await executeDoctorCommand({ fix: true });
+            await executeDoctorCommand({ fix: true }, { healthOverrides: healthOverrides() });
 
             const output = consoleOutput.join("\n");
             expect(output).toContain("fixes");
@@ -694,7 +664,7 @@ describe("doctor command", () => {
             consoleOutput = [];
             console.log = (msg: string) => consoleOutput.push(msg);
 
-            await executeDoctorCommand({ json: true });
+            await executeDoctorCommand({ json: true }, { healthOverrides: healthOverrides() });
 
             const output = consoleOutput.join("\n");
             const parsed = JSON.parse(output);
@@ -709,7 +679,7 @@ describe("doctor command", () => {
             consoleOutput = [];
             console.log = (msg: string) => consoleOutput.push(msg);
 
-            const result = await executeDoctorCommand({});
+            const result = await executeDoctorCommand({}, { healthOverrides: healthOverrides() });
             // Exit code 0 when fully healthy (vector ready), 1 when degraded (no embeddings/sqlite-vec)
             // Test environment typically has no embeddings, so 1 (degraded) is expected
             expect(result.exitCode).toBeLessThanOrEqual(1);
@@ -717,27 +687,18 @@ describe("doctor command", () => {
         });
 
         it("returns exit code 2 when database not found", async () => {
-            // Override with non-existent database path
-            setTestOverrides({
-                dbPath: join(testDir, "nonexistent.db"),
-                configDir: testDir,
-                logsDir: join(testDir, "logs"),
-                sourceDir: testDir,
-            });
-
             consoleOutput = [];
             console.log = (msg: string) => consoleOutput.push(msg);
 
-            const result = await executeDoctorCommand({});
-            expect(result.exitCode).toBe(2);
-
-            // Reset overrides
-            setTestOverrides({
-                dbPath: testDbPath,
-                configDir: testDir,
-                logsDir: join(testDir, "logs"),
-                sourceDir: testDir,
+            const result = await executeDoctorCommand({}, {
+                healthOverrides: {
+                    dbPath: join(testDir, "nonexistent.db"),
+                    configDir: testDir,
+                    logsDir: join(testDir, "logs"),
+                    sourceDir: testDir,
+                },
             });
+            expect(result.exitCode).toBe(2);
         });
     });
 
@@ -848,7 +809,7 @@ describe("doctor command", () => {
             consoleOutput = [];
             console.log = (msg: string) => consoleOutput.push(msg);
 
-            await executeDoctorCommand({ json: true });
+            await executeDoctorCommand({ json: true }, { healthOverrides: healthOverrides() });
 
             const output = consoleOutput.join("\n");
             const parsed = JSON.parse(output);
@@ -980,7 +941,7 @@ describe("doctor command", () => {
             consoleOutput = [];
             console.log = (msg: string) => consoleOutput.push(msg);
 
-            await executeDoctorCommand({ json: true });
+            await executeDoctorCommand({ json: true }, { healthOverrides: healthOverrides() });
 
             const output = consoleOutput.join("\n");
             const parsed = JSON.parse(output);
