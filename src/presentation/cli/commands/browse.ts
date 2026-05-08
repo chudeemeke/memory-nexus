@@ -13,7 +13,7 @@ import {
   canUseInteractivePicker,
 } from "../pickers/session-picker.js";
 import { SqliteSessionRepository } from "../../../infrastructure/database/repositories/session-repository.js";
-import { executeShowCommand, setTestDbPath as setShowTestDbPath } from "./show.js";
+import { executeShowCommand } from "./show.js";
 import { executeSearchCommand } from "./search.js";
 import { executeContextCommand } from "./context.js";
 import { executeRelatedCommand } from "./related.js";
@@ -38,8 +38,6 @@ let testDbPath: string | null = null;
  */
 export function setTestDbPath(path: string | null): void {
   testDbPath = path;
-  // Also propagate to show command for dispatch
-  setShowTestDbPath(path);
 }
 
 /**
@@ -49,6 +47,30 @@ export interface BrowseCommandOptions {
   /** Maximum sessions to show in the picker (as string, parsed to integer) */
   limit?: string;
 }
+
+/**
+ * Dispatch targets for the browse command.
+ *
+ * Injected so tests can substitute mocks without `mock.module()`,
+ * which leaks across test files in Bun (see no-hidden-debt rule:
+ * any deviation from real implementations must come through this seam).
+ */
+export interface BrowseDispatchers {
+  show: typeof executeShowCommand;
+  search: typeof executeSearchCommand;
+  context: typeof executeContextCommand;
+  related: typeof executeRelatedCommand;
+}
+
+/**
+ * Default dispatchers wrap the real command implementations.
+ */
+const defaultDispatchers: BrowseDispatchers = {
+  show: executeShowCommand,
+  search: executeSearchCommand,
+  context: executeContextCommand,
+  related: executeRelatedCommand,
+};
 
 /**
  * Create the browse command for Commander.js.
@@ -76,7 +98,8 @@ export function createBrowseCommand(): Command {
  * @returns CommandResult with exitCode 0 (success) or 1 (not available/error)
  */
 export async function executeBrowseCommand(
-  options: BrowseCommandOptions
+  options: BrowseCommandOptions,
+  dispatchers: BrowseDispatchers = defaultDispatchers
 ): Promise<CommandResult> {
   // Check TTY availability
   if (!canUseInteractivePicker()) {
@@ -107,15 +130,15 @@ export async function executeBrowseCommand(
     // Close DB before dispatching (commands manage their own connections)
     closeDatabase(db);
 
-    // Dispatch to appropriate command
+    // Dispatch to appropriate command via injected dispatchers
     switch (result.action) {
       case "show":
-        await executeShowCommand(result.sessionId, {});
+        await dispatchers.show(result.sessionId, {});
         break;
 
       case "search":
         // Search within session - launch search with session filter
-        await executeSearchCommand("*", { session: result.sessionId });
+        await dispatchers.search("*", { session: result.sessionId });
         break;
 
       case "context": {
@@ -125,13 +148,13 @@ export async function executeBrowseCommand(
         const session = await repo.findById(result.sessionId);
         closeDatabase(db2);
         if (session) {
-          await executeContextCommand(session.projectPath.projectName, {});
+          await dispatchers.context(session.projectPath.projectName, {});
         }
         break;
       }
 
       case "related":
-        await executeRelatedCommand(result.sessionId, {});
+        await dispatchers.related(result.sessionId, {});
         break;
     }
 

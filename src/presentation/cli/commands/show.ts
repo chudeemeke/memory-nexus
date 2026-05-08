@@ -29,22 +29,6 @@ import type { ToolUse } from "../../../domain/entities/tool-use.js";
 import type { Database } from "bun:sqlite";
 
 /**
- * Test database path override.
- * When set, executeShowCommand uses this path instead of getDefaultDbPath().
- */
-let testDbPath: string | null = null;
-
-/**
- * Set test database path override.
- * Used by tests to point to an isolated test database.
- *
- * @param path Path to use, or null to reset to default behavior
- */
-export function setTestDbPath(path: string | null): void {
-  testDbPath = path;
-}
-
-/**
  * Options for the show command.
  */
 export interface ShowCommandOptions {
@@ -58,6 +42,19 @@ export interface ShowCommandOptions {
   tools?: boolean;
   /** Output format: default or ai */
   format?: "default" | "ai";
+}
+
+/**
+ * Runtime dependencies for executeShowCommand.
+ *
+ * Separated from ShowCommandOptions because these are not user-facing
+ * CLI flags — they are operational dependencies that tests substitute
+ * to achieve isolation. Defaults to production resolution
+ * (getDefaultDbPath()) when omitted.
+ */
+export interface ShowCommandDeps {
+  /** Database path. Defaults to getDefaultDbPath(). */
+  dbPath?: string;
 }
 
 /**
@@ -143,10 +140,11 @@ async function findSession(
  */
 export async function executeShowCommand(
   sessionId: string,
-  options: ShowCommandOptions
+  options: ShowCommandOptions,
+  deps: ShowCommandDeps = {}
 ): Promise<CommandResult> {
   const startTime = performance.now();
-  const dbPath = testDbPath ?? getDefaultDbPath();
+  const dbPath = deps.dbPath ?? getDefaultDbPath();
   const { db } = initializeDatabase({ path: dbPath });
 
   try {

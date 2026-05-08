@@ -5,7 +5,7 @@
  */
 
 import { describe, test, expect, beforeAll, afterAll, afterEach, beforeEach, spyOn } from "bun:test";
-import { createShowCommand, executeShowCommand, setTestDbPath } from "./show.js";
+import { createShowCommand, executeShowCommand } from "./show.js";
 import {
   initializeDatabase,
   closeDatabase,
@@ -101,9 +101,6 @@ describe("Show Command", () => {
       fs.mkdirSync(TEST_DIR, { recursive: true });
     }
 
-    // Override database path for executeShowCommand
-    setTestDbPath(TEST_DB_PATH);
-
     // Initialize database and repositories
     const dbResult = initializeDatabase({ path: TEST_DB_PATH });
     db = dbResult.db;
@@ -114,7 +111,6 @@ describe("Show Command", () => {
 
   afterAll(() => {
     closeDatabase(db);
-    setTestDbPath(null);
 
     // Clean up test directory
     try {
@@ -178,7 +174,7 @@ describe("Show Command", () => {
     test("finds session by full ID", async () => {
       setupConsoleMock();
 
-      await executeShowCommand(testSessionId, {});
+      await executeShowCommand(testSessionId, {}, { dbPath: TEST_DB_PATH });
 
       const output = consoleOutput.join("\n");
       expect(output).toContain("test-session-full-id-12345");
@@ -191,7 +187,7 @@ describe("Show Command", () => {
       setupConsoleMock();
       const partialId = testSessionId.substring(0, 8); // "test-ses"
 
-      await executeShowCommand(partialId, {});
+      await executeShowCommand(partialId, {}, { dbPath: TEST_DB_PATH });
 
       const output = consoleOutput.join("\n");
       expect(output).toContain("test-session-full-id-12345");
@@ -200,7 +196,7 @@ describe("Show Command", () => {
     test("shows not found for invalid ID", async () => {
       setupConsoleMock();
 
-      await executeShowCommand("nonexistent-session-id", {});
+      await executeShowCommand("nonexistent-session-id", {}, { dbPath: TEST_DB_PATH });
 
       const errors = consoleErrors.join("\n");
       const output = consoleOutput.join("\n");
@@ -211,7 +207,7 @@ describe("Show Command", () => {
     test("--json flag outputs JSON format", async () => {
       setupConsoleMock();
 
-      await executeShowCommand(testSessionId, { json: true });
+      await executeShowCommand(testSessionId, { json: true }, { dbPath: TEST_DB_PATH });
 
       const output = consoleOutput.join("\n");
       const parsed = JSON.parse(output);
@@ -224,7 +220,7 @@ describe("Show Command", () => {
     test("--tools flag shows detailed tool information", async () => {
       setupConsoleMock();
 
-      await executeShowCommand(testSessionId, { tools: true });
+      await executeShowCommand(testSessionId, { tools: true }, { dbPath: TEST_DB_PATH });
 
       const output = consoleOutput.join("\n");
       expect(output).toContain("[TOOL: Read]");
@@ -237,7 +233,7 @@ describe("Show Command", () => {
     test("--verbose flag shows execution details", async () => {
       setupConsoleMock();
 
-      await executeShowCommand(testSessionId, { verbose: true });
+      await executeShowCommand(testSessionId, { verbose: true }, { dbPath: TEST_DB_PATH });
 
       const output = consoleOutput.join("\n");
       expect(output).toContain("=== Execution Details ===");
@@ -248,7 +244,7 @@ describe("Show Command", () => {
     test("--quiet flag outputs minimal format", async () => {
       setupConsoleMock();
 
-      await executeShowCommand(testSessionId, { quiet: true });
+      await executeShowCommand(testSessionId, { quiet: true }, { dbPath: TEST_DB_PATH });
 
       const output = consoleOutput.join("\n");
       // Should have message content
@@ -262,7 +258,7 @@ describe("Show Command", () => {
     test("messages ordered by timestamp", async () => {
       setupConsoleMock();
 
-      await executeShowCommand(testSessionId, {});
+      await executeShowCommand(testSessionId, {}, { dbPath: TEST_DB_PATH });
 
       const output = consoleOutput.join("\n");
       const pos1 = output.indexOf("What is this file?");
@@ -276,7 +272,7 @@ describe("Show Command", () => {
     test("tool uses linked to correct messages", async () => {
       setupConsoleMock();
 
-      await executeShowCommand(testSessionId, {});
+      await executeShowCommand(testSessionId, {}, { dbPath: TEST_DB_PATH });
 
       const output = consoleOutput.join("\n");
       // The tool marker should appear after "Let me read it for you" message
@@ -307,7 +303,7 @@ describe("Show Command", () => {
       // "test-ses" should match both test-session-full-id-12345 and test-session-other-id-999
       const partialId = "test-ses";
 
-      await executeShowCommand(partialId, {});
+      await executeShowCommand(partialId, {}, { dbPath: TEST_DB_PATH });
 
       const output = consoleOutput.join("\n");
       const errors = consoleErrors.join("\n");
@@ -323,7 +319,7 @@ describe("Show Command", () => {
     test("sets exit code 1 for not found session", async () => {
       setupConsoleMock();
 
-      const result = await executeShowCommand("nonexistent-session-xyz", {});
+      const result = await executeShowCommand("nonexistent-session-xyz", {}, { dbPath: TEST_DB_PATH });
 
       expect(result.exitCode).toBe(1);
     });
@@ -331,7 +327,7 @@ describe("Show Command", () => {
     test("outputs JSON for not found when --json flag is set", async () => {
       setupConsoleMock();
 
-      const result = await executeShowCommand("nonexistent-session-xyz", { json: true });
+      const result = await executeShowCommand("nonexistent-session-xyz", { json: true }, { dbPath: TEST_DB_PATH });
 
       expect(result.exitCode).toBe(1);
       const output = consoleOutput.join("\n");
@@ -342,7 +338,7 @@ describe("Show Command", () => {
     test("uses consistent exit code 1 for all errors", async () => {
       setupConsoleMock();
 
-      const result = await executeShowCommand("nonexistent-id", {});
+      const result = await executeShowCommand("nonexistent-id", {}, { dbPath: TEST_DB_PATH });
 
       expect(result.exitCode).toBe(1);
     });
