@@ -20,6 +20,7 @@
     "test": "bun test",
     "test:coverage": "bun test --coverage",
     "test:smoke": "bun test tests/smoke",
+    "test:isolation": "bun run scripts/check-test-isolation.ts",
     "typecheck": "tsc --noEmit",
     "lint": "tsc --noEmit",
     "mutation": "stryker run",
