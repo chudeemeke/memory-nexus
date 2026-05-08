@@ -20,7 +20,7 @@ import {
     findHookScriptSource,
     type InstallCommandDeps,
 } from "./install.js";
-import { setTestPathOverrides } from "../../../infrastructure/hooks/settings-manager.js";
+import type { PathOverrides } from "../../../infrastructure/hooks/settings-manager.js";
 
 describe("install command", () => {
     // Use a test-specific directory to avoid modifying actual settings
@@ -32,6 +32,13 @@ describe("install command", () => {
     // Create a mock hook script source
     const mockHookScriptDir = join(testBaseDir, "dist");
     const mockHookScriptPath = join(mockHookScriptDir, "sync-hook.js");
+
+    /** Hook path overrides used throughout the suite. */
+    const hookOverrides: PathOverrides = {
+        settingsPath: testSettingsPath,
+        backupPath: testBackupPath,
+        hookScriptPath: testHookScriptPath,
+    };
 
     let consoleLogSpy: ReturnType<typeof spyOn>;
     let consoleErrorSpy: ReturnType<typeof spyOn>;
@@ -49,13 +56,6 @@ describe("install command", () => {
         mkdirSync(mockHookScriptDir, { recursive: true });
         writeFileSync(mockHookScriptPath, "// mock hook script");
 
-        // Set path overrides for testing
-        setTestPathOverrides({
-            settingsPath: testSettingsPath,
-            backupPath: testBackupPath,
-            hookScriptPath: testHookScriptPath,
-        });
-
         // Capture console output
         logOutput = [];
         errorOutput = [];
@@ -68,9 +68,6 @@ describe("install command", () => {
     });
 
     afterEach(() => {
-        // Reset path overrides
-        setTestPathOverrides(null);
-
         // Restore console
         consoleLogSpy.mockRestore();
         consoleErrorSpy.mockRestore();
@@ -83,7 +80,7 @@ describe("install command", () => {
 
     describe("executeInstallCommand", () => {
         test("installs hooks successfully when not already installed", async () => {
-            await executeInstallCommand({}, { hookScriptSourceOverride: mockHookScriptPath });
+            await executeInstallCommand({}, { hookScriptSourceOverride: mockHookScriptPath, hookOverrides });
 
             // Check settings.json was created with hooks
             expect(existsSync(testSettingsPath)).toBe(true);
@@ -102,11 +99,11 @@ describe("install command", () => {
 
         test("skips installation when hooks already installed", async () => {
             // First install
-            await executeInstallCommand({}, { hookScriptSourceOverride: mockHookScriptPath });
+            await executeInstallCommand({}, { hookScriptSourceOverride: mockHookScriptPath, hookOverrides });
             logOutput = []; // Clear output
 
             // Try to install again
-            await executeInstallCommand({}, { hookScriptSourceOverride: mockHookScriptPath });
+            await executeInstallCommand({}, { hookScriptSourceOverride: mockHookScriptPath, hookOverrides });
 
             expect(logOutput.join("\n")).toContain("Hooks are already installed");
             expect(logOutput.join("\n")).toContain("Use --force to reinstall");
@@ -114,11 +111,11 @@ describe("install command", () => {
 
         test("reinstalls when --force is used", async () => {
             // First install
-            await executeInstallCommand({}, { hookScriptSourceOverride: mockHookScriptPath });
+            await executeInstallCommand({}, { hookScriptSourceOverride: mockHookScriptPath, hookOverrides });
             logOutput = []; // Clear output
 
             // Force reinstall
-            await executeInstallCommand({ force: true }, { hookScriptSourceOverride: mockHookScriptPath });
+            await executeInstallCommand({ force: true }, { hookScriptSourceOverride: mockHookScriptPath, hookOverrides });
 
             expect(logOutput.join("\n")).toContain("Hooks already installed");
         });
@@ -131,7 +128,7 @@ describe("install command", () => {
                 JSON.stringify({ existingSetting: "value" })
             );
 
-            await executeInstallCommand({}, { hookScriptSourceOverride: mockHookScriptPath });
+            await executeInstallCommand({}, { hookScriptSourceOverride: mockHookScriptPath, hookOverrides });
 
             // Check backup was created
             expect(existsSync(testBackupPath)).toBe(true);
@@ -147,7 +144,7 @@ describe("install command", () => {
                 JSON.stringify({ keepThis: "preserved" })
             );
 
-            await executeInstallCommand({}, { hookScriptSourceOverride: mockHookScriptPath });
+            await executeInstallCommand({}, { hookScriptSourceOverride: mockHookScriptPath, hookOverrides });
 
             const settings = JSON.parse(readFileSync(testSettingsPath, "utf-8"));
             expect(settings.keepThis).toBe("preserved");
@@ -158,6 +155,7 @@ describe("install command", () => {
             // Pass a non-existent override path
             const result = await executeInstallCommand({}, {
                 hookScriptSourceOverride: join(testBaseDir, "nonexistent", "sync-hook.js"),
+                hookOverrides,
             });
 
             expect(errorOutput.join("\n")).toContain("Hook script not found");
@@ -188,7 +186,7 @@ describe("install command", () => {
                 })
             );
 
-            await executeInstallCommand({ force: true }, { hookScriptSourceOverride: mockHookScriptPath });
+            await executeInstallCommand({ force: true }, { hookScriptSourceOverride: mockHookScriptPath, hookOverrides });
 
             const allError = errorOutput.join("\n");
             expect(allError).toContain("Stale memory-nexus hook references detected");
@@ -198,7 +196,7 @@ describe("install command", () => {
 
         test("does not warn when settings contain only new memory hooks", async () => {
             // Install fresh hooks (uses new "memory" marker, not "memory-nexus")
-            await executeInstallCommand({}, { hookScriptSourceOverride: mockHookScriptPath });
+            await executeInstallCommand({}, { hookScriptSourceOverride: mockHookScriptPath, hookOverrides });
 
             const allError = errorOutput.join("\n");
             expect(allError).not.toContain("Stale memory-nexus hook references detected");
@@ -209,7 +207,7 @@ describe("install command", () => {
             mkdirSync(dirname(testSettingsPath), { recursive: true });
             writeFileSync(testSettingsPath, JSON.stringify({}));
 
-            await executeInstallCommand({}, { hookScriptSourceOverride: mockHookScriptPath });
+            await executeInstallCommand({}, { hookScriptSourceOverride: mockHookScriptPath, hookOverrides });
 
             const allError = errorOutput.join("\n");
             expect(allError).not.toContain("Stale memory-nexus hook references detected");

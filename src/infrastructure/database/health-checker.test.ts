@@ -20,7 +20,7 @@ import {
     runHealthCheck,
     type HealthCheckResult,
 } from "./health-checker.js";
-import { setTestPathOverrides } from "../hooks/settings-manager.js";
+import type { PathOverrides } from "../hooks/settings-manager.js";
 import { initializeDatabase, closeDatabase } from "./connection.js";
 
 describe("health-checker", () => {
@@ -30,21 +30,16 @@ describe("health-checker", () => {
     const testLogPath = join(testDir, "logs", "sync.log");
     const testSettingsPath = join(testDir, ".claude", "settings.json");
 
+    /** Hook path overrides used throughout the suite. */
+    const hookOverrides: PathOverrides = { settingsPath: testSettingsPath };
+
     beforeAll(() => {
         // Create test directories
         mkdirSync(join(testDir, "logs"), { recursive: true });
         mkdirSync(join(testDir, ".claude"), { recursive: true });
-
-        // Set test path overrides
-        setTestPathOverrides({
-            settingsPath: testSettingsPath,
-        });
     });
 
     afterAll(() => {
-        // Reset overrides
-        setTestPathOverrides(null);
-
         // Clean up test directory
         try {
             rmSync(testDir, { recursive: true, force: true });
@@ -287,26 +282,26 @@ describe("health-checker", () => {
         it("returns installed=false when no hooks configured", () => {
             writeFileSync(testSettingsPath, JSON.stringify({}));
 
-            const result = checkHookStatus(testLogPath, testConfigPath);
+            const result = checkHookStatus(testLogPath, testConfigPath, hookOverrides);
             expect(result.installed).toBe(false);
         });
 
         it("returns enabled based on config autoSync", () => {
             writeFileSync(testConfigPath, JSON.stringify({ autoSync: true }));
 
-            const result = checkHookStatus(testLogPath, testConfigPath);
+            const result = checkHookStatus(testLogPath, testConfigPath, hookOverrides);
             expect(result.enabled).toBe(true);
         });
 
         it("returns enabled=false when autoSync disabled", () => {
             writeFileSync(testConfigPath, JSON.stringify({ autoSync: false }));
 
-            const result = checkHookStatus(testLogPath, testConfigPath);
+            const result = checkHookStatus(testLogPath, testConfigPath, hookOverrides);
             expect(result.enabled).toBe(false);
         });
 
         it("returns lastRun=null when no logs", () => {
-            const result = checkHookStatus(testLogPath, testConfigPath);
+            const result = checkHookStatus(testLogPath, testConfigPath, hookOverrides);
             expect(result.lastRun).toBeNull();
         });
 
@@ -319,7 +314,7 @@ describe("health-checker", () => {
                 message: "Sync complete",
             }) + "\n");
 
-            const result = checkHookStatus(testLogPath, testConfigPath);
+            const result = checkHookStatus(testLogPath, testConfigPath, hookOverrides);
             expect(result.lastRun).toBeInstanceOf(Date);
             expect(result.lastRun?.toISOString()).toBe(timestamp);
         });
@@ -337,6 +332,7 @@ describe("health-checker", () => {
             configDir: testDir,
             logsDir: join(testDir, "logs"),
             sourceDir: testDir,
+            hookOverrides,
         });
 
         it("returns complete HealthCheckResult", () => {

@@ -51,14 +51,15 @@ export interface DoctorOptions {
  */
 export interface DoctorCommandDeps {
     /**
-     * Health-check overrides (db/config/logs/source paths). When omitted,
-     * runHealthCheck uses XDG-resolved production paths.
+     * Health-check overrides (db/config/logs/source paths + hook overrides).
+     * When omitted, runHealthCheck uses XDG-resolved production paths.
      */
     healthOverrides?: {
         dbPath?: string;
         configDir?: string;
         logsDir?: string;
         sourceDir?: string;
+        hookOverrides?: import("../../../infrastructure/hooks/settings-manager.js").PathOverrides;
     };
 }
 

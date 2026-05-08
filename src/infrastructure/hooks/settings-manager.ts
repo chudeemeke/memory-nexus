@@ -110,42 +110,34 @@ export interface PathOverrides {
     hookScriptPath?: string;
 }
 
-let testPathOverrides: PathOverrides | null = null;
-
 /**
- * Set path overrides for testing
+ * Get the path to Claude Code settings.json.
  *
- * @param overrides Path overrides, or null to reset to defaults
+ * @param overrides Optional path overrides (used by tests)
+ * @returns Path to ~/.claude/settings.json
  */
-export function setTestPathOverrides(overrides: PathOverrides | null): void {
-    testPathOverrides = overrides;
+export function getClaudeSettingsPath(overrides?: PathOverrides): string {
+    return overrides?.settingsPath ?? join(homedir(), ".claude", "settings.json");
 }
 
 /**
- * Get the path to Claude Code settings.json
+ * Get the path to the settings backup file.
  *
- * @returns Path to ~/.claude/settings.json (or test override)
+ * @param overrides Optional path overrides (used by tests)
+ * @returns Path to backups/settings.json.backup
  */
-export function getClaudeSettingsPath(): string {
-    return testPathOverrides?.settingsPath ?? join(homedir(), ".claude", "settings.json");
+export function getBackupPath(overrides?: PathOverrides): string {
+    return overrides?.backupPath ?? join(pathsGetBackupDir(), "settings.json.backup");
 }
 
 /**
- * Get the path to the settings backup file
+ * Get the path to the hook script.
  *
- * @returns Path to backups/settings.json.backup (or test override)
+ * @param overrides Optional path overrides (used by tests)
+ * @returns Path to hooks/sync-hook.js
  */
-export function getBackupPath(): string {
-    return testPathOverrides?.backupPath ?? join(pathsGetBackupDir(), "settings.json.backup");
-}
-
-/**
- * Get the path to the hook script
- *
- * @returns Path to hooks/sync-hook.js (or test override)
- */
-export function getHookScriptPath(): string {
-    return testPathOverrides?.hookScriptPath ?? join(pathsGetHookDir(), "sync-hook.js");
+export function getHookScriptPath(overrides?: PathOverrides): string {
+    return overrides?.hookScriptPath ?? join(pathsGetHookDir(), "sync-hook.js");
 }
 
 /**
@@ -155,8 +147,8 @@ export function getHookScriptPath(): string {
  *
  * @returns Parsed settings object
  */
-export function loadClaudeSettings(): ClaudeSettings {
-    const settingsPath = getClaudeSettingsPath();
+export function loadClaudeSettings(overrides?: PathOverrides): ClaudeSettings {
+    const settingsPath = getClaudeSettingsPath(overrides);
 
     if (!existsSync(settingsPath)) {
         return {};
@@ -178,9 +170,9 @@ export function loadClaudeSettings(): ClaudeSettings {
  *
  * @returns true if backup was created, false if no settings to backup
  */
-export function backupSettings(): boolean {
-    const settingsPath = getClaudeSettingsPath();
-    const backupPath = getBackupPath();
+export function backupSettings(overrides?: PathOverrides): boolean {
+    const settingsPath = getClaudeSettingsPath(overrides);
+    const backupPath = getBackupPath(overrides);
 
     if (!existsSync(settingsPath)) {
         return false;
@@ -203,9 +195,9 @@ export function backupSettings(): boolean {
  *
  * @returns true if restore was successful, false if no backup exists
  */
-export function restoreFromBackup(): boolean {
-    const settingsPath = getClaudeSettingsPath();
-    const backupPath = getBackupPath();
+export function restoreFromBackup(overrides?: PathOverrides): boolean {
+    const settingsPath = getClaudeSettingsPath(overrides);
+    const backupPath = getBackupPath(overrides);
 
     if (!existsSync(backupPath)) {
         return false;
@@ -229,15 +221,15 @@ export function restoreFromBackup(): boolean {
  *
  * @returns Operation result with success status and message
  */
-export function installHooks(): OperationResult {
-    const settingsPath = getClaudeSettingsPath();
-    const hookScriptPath = getHookScriptPath();
+export function installHooks(overrides?: PathOverrides): OperationResult {
+    const settingsPath = getClaudeSettingsPath(overrides);
+    const hookScriptPath = getHookScriptPath(overrides);
 
     // Backup existing settings
-    backupSettings();
+    backupSettings(overrides);
 
     // Load existing settings or create new
-    const settings = loadClaudeSettings();
+    const settings = loadClaudeSettings(overrides);
 
     // Build hook command (use forward slashes for JSON compatibility on Windows)
     const command = `bun run "${hookScriptPath.replace(/\\/g, "/")}"`;
@@ -294,11 +286,11 @@ export function installHooks(): OperationResult {
  *
  * @returns Operation result with success status and message
  */
-export function uninstallHooks(): OperationResult {
-    const settingsPath = getClaudeSettingsPath();
+export function uninstallHooks(overrides?: PathOverrides): OperationResult {
+    const settingsPath = getClaudeSettingsPath(overrides);
 
     // Load existing settings
-    const settings = loadClaudeSettings();
+    const settings = loadClaudeSettings(overrides);
 
     // No hooks to uninstall
     if (!settings.hooks) {
@@ -351,10 +343,10 @@ export function uninstallHooks(): OperationResult {
  *
  * @returns Hook installation status
  */
-export function checkHooksInstalled(): HookStatus {
-    const settings = loadClaudeSettings();
-    const hookScriptPath = getHookScriptPath();
-    const backupPath = getBackupPath();
+export function checkHooksInstalled(overrides?: PathOverrides): HookStatus {
+    const settings = loadClaudeSettings(overrides);
+    const hookScriptPath = getHookScriptPath(overrides);
+    const backupPath = getBackupPath(overrides);
 
     return {
         sessionEnd:

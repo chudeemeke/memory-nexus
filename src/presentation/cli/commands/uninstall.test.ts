@@ -17,8 +17,8 @@ import { dirname, join } from "node:path";
 import { homedir } from "node:os";
 import { executeUninstallCommand } from "./uninstall.js";
 import {
-    setTestPathOverrides,
     installHooks,
+    type PathOverrides,
 } from "../../../infrastructure/hooks/settings-manager.js";
 
 describe("uninstall command", () => {
@@ -27,6 +27,13 @@ describe("uninstall command", () => {
     const testSettingsPath = join(testBaseDir, ".claude", "settings.json");
     const testBackupPath = join(testBaseDir, ".memory-nexus", "backups", "settings.json.backup");
     const testHookScriptPath = join(testBaseDir, ".memory-nexus", "hooks", "sync-hook.js");
+
+    /** Hook path overrides used throughout the suite. */
+    const hookOverrides: PathOverrides = {
+        settingsPath: testSettingsPath,
+        backupPath: testBackupPath,
+        hookScriptPath: testHookScriptPath,
+    };
 
     let consoleLogSpy: ReturnType<typeof spyOn>;
     let logOutput: string[];
@@ -38,13 +45,6 @@ describe("uninstall command", () => {
         }
         mkdirSync(testBaseDir, { recursive: true });
 
-        // Set path overrides for testing
-        setTestPathOverrides({
-            settingsPath: testSettingsPath,
-            backupPath: testBackupPath,
-            hookScriptPath: testHookScriptPath,
-        });
-
         // Capture console output
         logOutput = [];
         consoleLogSpy = spyOn(console, "log").mockImplementation((...args) => {
@@ -53,9 +53,6 @@ describe("uninstall command", () => {
     });
 
     afterEach(() => {
-        // Reset path overrides
-        setTestPathOverrides(null);
-
         // Restore console
         consoleLogSpy.mockRestore();
 
@@ -67,14 +64,14 @@ describe("uninstall command", () => {
 
     describe("executeUninstallCommand", () => {
         test("reports when hooks not installed", async () => {
-            await executeUninstallCommand({});
+            await executeUninstallCommand({}, { hookOverrides });
 
             expect(logOutput.join("\n")).toContain("Hooks are not installed");
         });
 
         test("removes hooks from settings.json", async () => {
             // First install hooks
-            installHooks();
+            installHooks(hookOverrides);
 
             // Create hook script file
             mkdirSync(dirname(testHookScriptPath), { recursive: true });
@@ -86,7 +83,7 @@ describe("uninstall command", () => {
             expect(beforeSettings.hooks?.PreCompact).toBeDefined();
 
             // Uninstall
-            await executeUninstallCommand({});
+            await executeUninstallCommand({}, { hookOverrides });
 
             // Check hooks were removed
             const afterSettings = JSON.parse(readFileSync(testSettingsPath, "utf-8"));
@@ -98,14 +95,14 @@ describe("uninstall command", () => {
 
         test("removes hook script file", async () => {
             // Install hooks and create script
-            installHooks();
+            installHooks(hookOverrides);
             mkdirSync(dirname(testHookScriptPath), { recursive: true });
             writeFileSync(testHookScriptPath, "// hook script");
 
             expect(existsSync(testHookScriptPath)).toBe(true);
 
             // Uninstall
-            await executeUninstallCommand({});
+            await executeUninstallCommand({}, { hookOverrides });
 
             expect(existsSync(testHookScriptPath)).toBe(false);
             expect(logOutput.join("\n")).toContain("Removed hook script");
@@ -120,13 +117,13 @@ describe("uninstall command", () => {
             );
 
             // Install hooks (creates backup)
-            installHooks();
+            installHooks(hookOverrides);
 
             // Verify backup was created
             expect(existsSync(testBackupPath)).toBe(true);
 
             // Uninstall with restore
-            await executeUninstallCommand({ restore: true });
+            await executeUninstallCommand({ restore: true }, { hookOverrides });
 
             // Check original settings were restored
             const restored = JSON.parse(readFileSync(testSettingsPath, "utf-8"));
@@ -138,10 +135,10 @@ describe("uninstall command", () => {
 
         test("falls back to uninstall when backup missing with --restore", async () => {
             // Install hooks without existing settings (no backup created)
-            installHooks();
+            installHooks(hookOverrides);
 
             // Uninstall with restore (but no backup exists)
-            await executeUninstallCommand({ restore: true });
+            await executeUninstallCommand({ restore: true }, { hookOverrides });
 
             // Hooks should still be uninstalled
             const settings = JSON.parse(readFileSync(testSettingsPath, "utf-8"));
@@ -163,7 +160,7 @@ describe("uninstall command", () => {
             );
 
             // Install memory-nexus hooks
-            installHooks();
+            installHooks(hookOverrides);
 
             // Verify both are present
             const beforeSettings = JSON.parse(readFileSync(testSettingsPath, "utf-8"));
@@ -171,7 +168,7 @@ describe("uninstall command", () => {
             expect(beforeSettings.hooks.SessionEnd).toBeDefined();
 
             // Uninstall
-            await executeUninstallCommand({});
+            await executeUninstallCommand({}, { hookOverrides });
 
             // Check other hooks are preserved
             const afterSettings = JSON.parse(readFileSync(testSettingsPath, "utf-8"));
@@ -181,9 +178,9 @@ describe("uninstall command", () => {
         });
 
         test("shows help messages after uninstall", async () => {
-            installHooks();
+            installHooks(hookOverrides);
 
-            await executeUninstallCommand({});
+            await executeUninstallCommand({}, { hookOverrides });
 
             expect(logOutput.join("\n")).toContain("Sessions will no longer sync automatically");
             expect(logOutput.join("\n")).toContain("Manual sync still available");

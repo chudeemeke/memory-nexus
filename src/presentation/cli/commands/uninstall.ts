@@ -24,6 +24,19 @@ export interface UninstallOptions {
 }
 
 /**
+ * Runtime dependencies for executeUninstallCommand.
+ *
+ * Operational dependencies that tests substitute for isolation.
+ * Defaults to production resolution when omitted.
+ */
+export interface UninstallCommandDeps {
+    /**
+     * Override settings/backup/hook-script paths used by settings-manager.
+     */
+    hookOverrides?: import("../../../infrastructure/hooks/settings-manager.js").PathOverrides;
+}
+
+/**
  * Create the uninstall command for Commander.js.
  *
  * @returns Configured Command instance
@@ -48,8 +61,11 @@ export function createUninstallCommand(): Command {
  * @param options - Uninstall command options
  * @returns CommandResult with exitCode 0 (success/not installed)
  */
-export async function executeUninstallCommand(options: UninstallOptions): Promise<CommandResult> {
-    const status = checkHooksInstalled();
+export async function executeUninstallCommand(
+    options: UninstallOptions,
+    deps: UninstallCommandDeps = {},
+): Promise<CommandResult> {
+    const status = checkHooksInstalled(deps.hookOverrides);
 
     if (!status.sessionEnd && !status.preCompact) {
         console.log("Hooks are not installed.");
@@ -57,17 +73,17 @@ export async function executeUninstallCommand(options: UninstallOptions): Promis
     }
 
     if (options.restore && status.backupExists) {
-        const restored = restoreFromBackup();
+        const restored = restoreFromBackup(deps.hookOverrides);
         if (restored) {
             console.log("Restored settings.json from backup.");
         }
     } else {
-        const result = uninstallHooks();
+        const result = uninstallHooks(deps.hookOverrides);
         console.log(result.message);
     }
 
     // Remove hook script
-    const hookScriptPath = getHookScriptPath();
+    const hookScriptPath = getHookScriptPath(deps.hookOverrides);
     if (existsSync(hookScriptPath)) {
         unlinkSync(hookScriptPath);
         console.log("Removed hook script.");

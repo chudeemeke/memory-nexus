@@ -16,7 +16,7 @@ import {
 } from "./doctor.js";
 import type { HealthCheckResult } from "../../../infrastructure/database/health-checker.js";
 import { initializeDatabase, closeDatabase } from "../../../infrastructure/database/connection.js";
-import { setTestPathOverrides } from "../../../infrastructure/hooks/settings-manager.js";
+import type { PathOverrides } from "../../../infrastructure/hooks/settings-manager.js";
 
 describe("doctor command", () => {
     const testDir = join(tmpdir(), `doctor-test-${Date.now()}`);
@@ -29,12 +29,15 @@ describe("doctor command", () => {
     let consoleOutput: string[] = [];
     const originalLog = console.log;
 
+    const hookOverrides: PathOverrides = { settingsPath: testSettingsPath };
+
     /** Default health overrides used by all tests in this suite. */
     const healthOverrides = () => ({
         dbPath: testDbPath,
         configDir: testDir,
         logsDir: join(testDir, "logs"),
         sourceDir: testDir,
+        hookOverrides,
     });
 
     beforeAll(() => {
@@ -45,17 +48,9 @@ describe("doctor command", () => {
         // Create test database
         const { db } = initializeDatabase({ path: testDbPath });
         closeDatabase(db);
-
-        // Infrastructure-level setters still in use (will be migrated separately)
-        setTestPathOverrides({
-            settingsPath: testSettingsPath,
-        });
     });
 
     afterAll(() => {
-        // Reset overrides
-        setTestPathOverrides(null);
-
         // Restore console
         console.log = originalLog;
 
@@ -690,6 +685,7 @@ describe("doctor command", () => {
                     configDir: testDir,
                     logsDir: join(testDir, "logs"),
                     sourceDir: testDir,
+                    hookOverrides,
                 },
             });
             expect(result.exitCode).toBe(2);

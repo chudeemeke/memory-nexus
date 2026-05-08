@@ -26,7 +26,7 @@ import {
     installHooks,
     uninstallHooks,
     checkHooksInstalled,
-    setTestPathOverrides,
+    type PathOverrides,
 } from "./settings-manager.js";
 
 describe("settings-manager", () => {
@@ -36,25 +36,22 @@ describe("settings-manager", () => {
     const testBackupPath = join(testBaseDir, ".memory-nexus", "backups", "settings.json.backup");
     const testHookScriptPath = join(testBaseDir, ".memory-nexus", "hooks", "sync-hook.js");
 
+    /** Path overrides used by all tests in this suite. */
+    const overrides: PathOverrides = {
+        settingsPath: testSettingsPath,
+        backupPath: testBackupPath,
+        hookScriptPath: testHookScriptPath,
+    };
+
     beforeEach(() => {
         // Clean test directory
         if (existsSync(testBaseDir)) {
             rmSync(testBaseDir, { recursive: true, force: true });
         }
         mkdirSync(testBaseDir, { recursive: true });
-
-        // Set path overrides for testing
-        setTestPathOverrides({
-            settingsPath: testSettingsPath,
-            backupPath: testBackupPath,
-            hookScriptPath: testHookScriptPath,
-        });
     });
 
     afterEach(() => {
-        // Reset path overrides
-        setTestPathOverrides(null);
-
         // Clean up test directory
         if (existsSync(testBaseDir)) {
             rmSync(testBaseDir, { recursive: true, force: true });
@@ -63,42 +60,30 @@ describe("settings-manager", () => {
 
     describe("path helpers", () => {
         test("getClaudeSettingsPath returns correct path with override", () => {
-            const path = getClaudeSettingsPath();
-            expect(path).toBe(testSettingsPath);
+            expect(getClaudeSettingsPath(overrides)).toBe(testSettingsPath);
         });
 
         test("getBackupPath returns correct path with override", () => {
-            const path = getBackupPath();
-            expect(path).toBe(testBackupPath);
+            expect(getBackupPath(overrides)).toBe(testBackupPath);
         });
 
         test("getHookScriptPath returns correct path with override", () => {
-            const path = getHookScriptPath();
-            expect(path).toBe(testHookScriptPath);
+            expect(getHookScriptPath(overrides)).toBe(testHookScriptPath);
         });
 
         test("path helpers return default paths when no override", () => {
-            setTestPathOverrides(null);
-
             expect(getClaudeSettingsPath()).toContain(".claude");
             expect(getClaudeSettingsPath()).toContain("settings.json");
             expect(getBackupPath()).toContain("memory");
             expect(getBackupPath()).toContain("backups");
             expect(getHookScriptPath()).toContain("memory");
             expect(getHookScriptPath()).toContain("hooks");
-
-            // Restore for other tests
-            setTestPathOverrides({
-                settingsPath: testSettingsPath,
-                backupPath: testBackupPath,
-                hookScriptPath: testHookScriptPath,
-            });
         });
     });
 
     describe("loadClaudeSettings", () => {
         test("returns empty object when file does not exist", () => {
-            const settings = loadClaudeSettings();
+            const settings = loadClaudeSettings(overrides);
             expect(settings).toEqual({});
         });
 
@@ -109,7 +94,7 @@ describe("settings-manager", () => {
                 JSON.stringify({ testKey: "testValue" })
             );
 
-            const settings = loadClaudeSettings();
+            const settings = loadClaudeSettings(overrides);
             expect(settings).toHaveProperty("testKey", "testValue");
         });
 
@@ -117,14 +102,14 @@ describe("settings-manager", () => {
             mkdirSync(dirname(testSettingsPath), { recursive: true });
             writeFileSync(testSettingsPath, "not valid json");
 
-            const settings = loadClaudeSettings();
+            const settings = loadClaudeSettings(overrides);
             expect(settings).toEqual({});
         });
     });
 
     describe("backupSettings", () => {
         test("returns false when settings do not exist", () => {
-            const result = backupSettings();
+            const result = backupSettings(overrides);
             expect(result).toBe(false);
         });
 
@@ -135,7 +120,7 @@ describe("settings-manager", () => {
                 JSON.stringify({ original: true })
             );
 
-            const result = backupSettings();
+            const result = backupSettings(overrides);
 
             expect(result).toBe(true);
             expect(existsSync(testBackupPath)).toBe(true);
@@ -146,7 +131,7 @@ describe("settings-manager", () => {
             const originalSettings = { foo: "bar", hooks: {} };
             writeFileSync(testSettingsPath, JSON.stringify(originalSettings));
 
-            backupSettings();
+            backupSettings(overrides);
 
             const backupContent = JSON.parse(readFileSync(testBackupPath, "utf-8"));
             expect(backupContent).toEqual(originalSettings);
@@ -155,7 +140,7 @@ describe("settings-manager", () => {
 
     describe("restoreFromBackup", () => {
         test("returns false when backup does not exist", () => {
-            const result = restoreFromBackup();
+            const result = restoreFromBackup(overrides);
             expect(result).toBe(false);
         });
 
@@ -164,7 +149,7 @@ describe("settings-manager", () => {
             const backupData = { restored: true };
             writeFileSync(testBackupPath, JSON.stringify(backupData));
 
-            const result = restoreFromBackup();
+            const result = restoreFromBackup(overrides);
 
             expect(result).toBe(true);
             expect(existsSync(testSettingsPath)).toBe(true);
@@ -177,7 +162,7 @@ describe("settings-manager", () => {
             mkdirSync(dirname(testBackupPath), { recursive: true });
             writeFileSync(testBackupPath, JSON.stringify({ test: true }));
 
-            restoreFromBackup();
+            restoreFromBackup(overrides);
 
             expect(existsSync(dirname(testSettingsPath))).toBe(true);
         });
@@ -185,7 +170,7 @@ describe("settings-manager", () => {
 
     describe("installHooks", () => {
         test("creates hooks in empty settings", () => {
-            const result = installHooks();
+            const result = installHooks(overrides);
 
             expect(result.success).toBe(true);
             expect(result.message).toBe("Hooks installed successfully");
@@ -203,7 +188,7 @@ describe("settings-manager", () => {
                 JSON.stringify({ existing: "setting" })
             );
 
-            installHooks();
+            installHooks(overrides);
 
             expect(existsSync(testBackupPath)).toBe(true);
             const backup = JSON.parse(readFileSync(testBackupPath, "utf-8"));
@@ -217,7 +202,7 @@ describe("settings-manager", () => {
                 JSON.stringify({ keepThis: "value" })
             );
 
-            installHooks();
+            installHooks(overrides);
 
             const settings = JSON.parse(readFileSync(testSettingsPath, "utf-8"));
             expect(settings).toHaveProperty("keepThis", "value");
@@ -225,9 +210,9 @@ describe("settings-manager", () => {
         });
 
         test("is idempotent - does not duplicate hooks", () => {
-            installHooks();
-            installHooks();
-            const result = installHooks();
+            installHooks(overrides);
+            installHooks(overrides);
+            const result = installHooks(overrides);
 
             expect(result.message).toBe("Hooks already installed");
 
@@ -237,7 +222,7 @@ describe("settings-manager", () => {
         });
 
         test("adds SessionEnd hook with correct structure", () => {
-            installHooks();
+            installHooks(overrides);
 
             const settings = JSON.parse(readFileSync(testSettingsPath, "utf-8"));
             const sessionEndHook = settings.hooks.SessionEnd[0];
@@ -248,7 +233,7 @@ describe("settings-manager", () => {
         });
 
         test("adds PreCompact hook with matcher", () => {
-            installHooks();
+            installHooks(overrides);
 
             const settings = JSON.parse(readFileSync(testSettingsPath, "utf-8"));
             const preCompactHook = settings.hooks.PreCompact[0];
@@ -258,7 +243,7 @@ describe("settings-manager", () => {
         });
 
         test("uses forward slashes in hook command path", () => {
-            installHooks();
+            installHooks(overrides);
 
             const settings = JSON.parse(readFileSync(testSettingsPath, "utf-8"));
             const command = settings.hooks.SessionEnd[0].hooks[0].command;
@@ -280,7 +265,7 @@ describe("settings-manager", () => {
                 })
             );
 
-            installHooks();
+            installHooks(overrides);
 
             const settings = JSON.parse(readFileSync(testSettingsPath, "utf-8"));
             expect(settings.hooks.Stop).toBeDefined();
@@ -290,8 +275,8 @@ describe("settings-manager", () => {
 
     describe("uninstallHooks", () => {
         test("removes memory-nexus hooks", () => {
-            installHooks();
-            const result = uninstallHooks();
+            installHooks(overrides);
+            const result = uninstallHooks(overrides);
 
             expect(result.success).toBe(true);
             expect(result.message).toBe("Hooks uninstalled successfully");
@@ -315,7 +300,7 @@ describe("settings-manager", () => {
                 })
             );
 
-            uninstallHooks();
+            uninstallHooks(overrides);
 
             const settings = JSON.parse(readFileSync(testSettingsPath, "utf-8"));
             expect(settings.hooks.SessionEnd).toBeDefined();
@@ -327,15 +312,15 @@ describe("settings-manager", () => {
             mkdirSync(dirname(testSettingsPath), { recursive: true });
             writeFileSync(testSettingsPath, JSON.stringify({}));
 
-            const result = uninstallHooks();
+            const result = uninstallHooks(overrides);
 
             expect(result.success).toBe(true);
             expect(result.message).toBe("No hooks to uninstall");
         });
 
         test("removes empty hooks object after uninstall", () => {
-            installHooks();
-            uninstallHooks();
+            installHooks(overrides);
+            uninstallHooks(overrides);
 
             const settings = JSON.parse(readFileSync(testSettingsPath, "utf-8"));
             expect(settings.hooks).toBeUndefined();
@@ -344,7 +329,7 @@ describe("settings-manager", () => {
 
     describe("checkHooksInstalled", () => {
         test("returns all false when nothing installed", () => {
-            const status = checkHooksInstalled();
+            const status = checkHooksInstalled(overrides);
 
             expect(status.sessionEnd).toBe(false);
             expect(status.preCompact).toBe(false);
@@ -353,9 +338,9 @@ describe("settings-manager", () => {
         });
 
         test("detects installed hooks", () => {
-            installHooks();
+            installHooks(overrides);
 
-            const status = checkHooksInstalled();
+            const status = checkHooksInstalled(overrides);
 
             expect(status.sessionEnd).toBe(true);
             expect(status.preCompact).toBe(true);
@@ -365,7 +350,7 @@ describe("settings-manager", () => {
             mkdirSync(dirname(testHookScriptPath), { recursive: true });
             writeFileSync(testHookScriptPath, "// hook script");
 
-            const status = checkHooksInstalled();
+            const status = checkHooksInstalled(overrides);
 
             expect(status.hookScriptExists).toBe(true);
         });
@@ -374,7 +359,7 @@ describe("settings-manager", () => {
             mkdirSync(dirname(testBackupPath), { recursive: true });
             writeFileSync(testBackupPath, JSON.stringify({}));
 
-            const status = checkHooksInstalled();
+            const status = checkHooksInstalled(overrides);
 
             expect(status.backupExists).toBe(true);
         });
@@ -392,7 +377,7 @@ describe("settings-manager", () => {
                 })
             );
 
-            const status = checkHooksInstalled();
+            const status = checkHooksInstalled(overrides);
 
             expect(status.sessionEnd).toBe(false);
         });

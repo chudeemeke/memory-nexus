@@ -158,6 +158,8 @@ export interface HealthCheckOverrides {
     logsDir?: string;
     /** Override source directory */
     sourceDir?: string;
+    /** Override hook-related paths (settings.json, backup, hook script) */
+    hookOverrides?: import("../hooks/settings-manager.js").PathOverrides;
 }
 
 /**
@@ -425,7 +427,7 @@ export function runHealthCheck(overrides?: HealthCheckOverrides): HealthCheckRes
     };
 
     // Hook status
-    const hooks = checkHookStatus(logPath, configPath);
+    const hooks = checkHookStatus(logPath, configPath, overrides?.hookOverrides);
 
     // Config validity
     const config = checkConfigValidity(configPath);

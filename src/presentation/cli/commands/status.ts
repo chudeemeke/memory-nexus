@@ -44,6 +44,8 @@ export interface StatusCommandDeps {
     logPath?: string;
     /** Config file path. Defaults to XDG-resolved config.json. */
     configPath?: string;
+    /** Hook-related path overrides (settings.json, backup, hook script) */
+    hookOverrides?: import("../../../infrastructure/hooks/settings-manager.js").PathOverrides;
 }
 
 /**
@@ -112,6 +114,7 @@ export async function executeStatusCommand(
         dbPath: deps.dbPath,
         logPath: deps.logPath,
         configPath: deps.configPath,
+        hookOverrides: deps.hookOverrides,
     });
 
     if (options.json) {
@@ -133,6 +136,8 @@ export interface GatherStatusOptions {
     logPath?: string;
     /** Override config file path for testing */
     configPath?: string;
+    /** Hook-related path overrides */
+    hookOverrides?: import("../../../infrastructure/hooks/settings-manager.js").PathOverrides;
 }
 
 /**
@@ -142,7 +147,7 @@ export interface GatherStatusOptions {
  * @returns Aggregated status information
  */
 export async function gatherStatus(options: GatherStatusOptions = {}): Promise<StatusInfo> {
-    const hooks = checkHooksInstalled();
+    const hooks = checkHooksInstalled(options.hookOverrides);
     const config = loadConfig(options.configPath);
     const logs = readRecentLogs(1, options.logPath); // Get most recent log entry
 

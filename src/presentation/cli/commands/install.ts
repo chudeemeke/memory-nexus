@@ -36,6 +36,11 @@ export interface InstallCommandDeps {
      * checks only this path. Used by tests to point at a fixture file.
      */
     hookScriptSourceOverride?: string;
+    /**
+     * Override settings/backup/hook-script paths used by settings-manager.
+     * When set, all settings-manager calls use these paths.
+     */
+    hookOverrides?: import("../../../infrastructure/hooks/settings-manager.js").PathOverrides;
 }
 
 /**
@@ -67,7 +72,7 @@ export async function executeInstallCommand(
     options: InstallOptions,
     deps: InstallCommandDeps = {}
 ): Promise<CommandResult> {
-    const status = checkHooksInstalled();
+    const status = checkHooksInstalled(deps.hookOverrides);
 
     // Check if already installed
     if (status.sessionEnd && status.preCompact && !options.force) {
@@ -77,7 +82,7 @@ export async function executeInstallCommand(
     }
 
     // Copy hook script to hooks directory
-    const hookScriptDest = getHookScriptPath();
+    const hookScriptDest = getHookScriptPath(deps.hookOverrides);
     mkdirSync(dirname(hookScriptDest), { recursive: true });
 
     // Find built hook script (from package or relative path)
@@ -91,7 +96,7 @@ export async function executeInstallCommand(
     console.log(`Copied hook script to ${hookScriptDest}`);
 
     // Install hooks into settings.json
-    const result = installHooks();
+    const result = installHooks(deps.hookOverrides);
     console.log(result.message);
 
     if (result.success) {
@@ -101,7 +106,7 @@ export async function executeInstallCommand(
         console.log("To uninstall: memory uninstall");
 
         // Check for stale memory-nexus hook references
-        warnStaleHookReferences();
+        warnStaleHookReferences(deps.hookOverrides);
     } else {
         return { exitCode: 1 };
     }
@@ -115,8 +120,10 @@ export async function executeInstallCommand(
  * After hook installation, checks if any hook commands still reference
  * the old "memory-nexus" binary name. Prints a warning to stderr if found.
  */
-export function warnStaleHookReferences(): void {
-    const settings = loadClaudeSettings();
+export function warnStaleHookReferences(
+    overrides?: import("../../../infrastructure/hooks/settings-manager.js").PathOverrides,
+): void {
+    const settings = loadClaudeSettings(overrides);
     if (!settings.hooks) {
         return;
     }

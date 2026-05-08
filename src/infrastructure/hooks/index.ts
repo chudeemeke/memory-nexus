@@ -54,7 +54,6 @@ export {
     installHooks,
     uninstallHooks,
     checkHooksInstalled,
-    setTestPathOverrides,
     type HookEntry,
     type HookConfig,
     type ClaudeSettings,
