@@ -10,22 +10,24 @@ import { mkdtemp, mkdir, writeFile, rm } from "node:fs/promises";
 import { join } from "node:path";
 import { tmpdir } from "node:os";
 import { createHash } from "node:crypto";
-import { setTestPaths, resetTestPaths } from "../paths.js";
+import { installEnvOverrides, type EnvOverrides } from "../../../tests/helpers/env-overrides.js";
 import { MemoryFileScanner } from "./memory-file-scanner.js";
 import type { IMemoryFileScanner } from "../../domain/ports/sources.js";
 
 describe("MemoryFileScanner", () => {
     let tempDir: string;
     let scanner: MemoryFileScanner;
+    let env: EnvOverrides;
 
     beforeEach(async () => {
         tempDir = await mkdtemp(join(tmpdir(), "memory-scanner-test-"));
-        setTestPaths({ memoryDir: tempDir });
+        env = installEnvOverrides();
+        env.set("MEMORY_HOME", tempDir);
         scanner = new MemoryFileScanner();
     });
 
     afterEach(async () => {
-        resetTestPaths();
+        env.cleanup();
         await rm(tempDir, { recursive: true, force: true });
     });
 
@@ -195,7 +197,7 @@ describe("MemoryFileScanner", () => {
 
     describe("nonexistent directory", () => {
         it("should return empty array without error", async () => {
-            setTestPaths({ memoryDir: join(tempDir, "nonexistent") });
+            env.set("MEMORY_HOME", join(tempDir, "nonexistent"));
             const files = await scanner.discoverFiles();
             expect(files).toEqual([]);
         });
