@@ -25,22 +25,6 @@ import {
 import { formatError } from "../formatters/error-formatter.js";
 
 /**
- * Test database path override.
- * When set, executeBrowseCommand uses this path instead of getDefaultDbPath().
- */
-let testDbPath: string | null = null;
-
-/**
- * Set test database path override.
- * Used by tests to point to an isolated test database.
- *
- * @param path Path to use, or null to reset to default behavior
- */
-export function setTestDbPath(path: string | null): void {
-  testDbPath = path;
-}
-
-/**
  * Options for the browse command.
  */
 export interface BrowseCommandOptions {
@@ -49,28 +33,24 @@ export interface BrowseCommandOptions {
 }
 
 /**
- * Dispatch targets for the browse command.
+ * Runtime dependencies for executeBrowseCommand.
  *
- * Injected so tests can substitute mocks without `mock.module()`,
- * which leaks across test files in Bun (see no-hidden-debt rule:
- * any deviation from real implementations must come through this seam).
+ * Operational dependencies that tests substitute for isolation. Keeps
+ * dispatch targets injectable without `mock.module()` (which is
+ * process-wide in Bun and leaks across test files).
  */
-export interface BrowseDispatchers {
-  show: typeof executeShowCommand;
-  search: typeof executeSearchCommand;
-  context: typeof executeContextCommand;
-  related: typeof executeRelatedCommand;
+export interface BrowseCommandDeps {
+  /** Database path. Defaults to getDefaultDbPath(). */
+  dbPath?: string;
+  /** Show command dispatcher. Defaults to the real implementation. */
+  show?: typeof executeShowCommand;
+  /** Search command dispatcher. Defaults to the real implementation. */
+  search?: typeof executeSearchCommand;
+  /** Context command dispatcher. Defaults to the real implementation. */
+  context?: typeof executeContextCommand;
+  /** Related command dispatcher. Defaults to the real implementation. */
+  related?: typeof executeRelatedCommand;
 }
-
-/**
- * Default dispatchers wrap the real command implementations.
- */
-const defaultDispatchers: BrowseDispatchers = {
-  show: executeShowCommand,
-  search: executeSearchCommand,
-  context: executeContextCommand,
-  related: executeRelatedCommand,
-};
 
 /**
  * Create the browse command for Commander.js.
@@ -99,7 +79,7 @@ export function createBrowseCommand(): Command {
  */
 export async function executeBrowseCommand(
   options: BrowseCommandOptions,
-  dispatchers: BrowseDispatchers = defaultDispatchers
+  deps: BrowseCommandDeps = {}
 ): Promise<CommandResult> {
   // Check TTY availability
   if (!canUseInteractivePicker()) {
@@ -111,8 +91,13 @@ export async function executeBrowseCommand(
     return { exitCode: 1 };
   }
 
+  const showFn = deps.show ?? executeShowCommand;
+  const searchFn = deps.search ?? executeSearchCommand;
+  const contextFn = deps.context ?? executeContextCommand;
+  const relatedFn = deps.related ?? executeRelatedCommand;
+
   const limit = parseInt(options.limit ?? "100", 10);
-  const dbPath = testDbPath ?? getDefaultDbPath();
+  const dbPath = deps.dbPath ?? getDefaultDbPath();
   const { db } = initializeDatabase({ path: dbPath });
 
   try {
@@ -133,12 +118,12 @@ export async function executeBrowseCommand(
     // Dispatch to appropriate command via injected dispatchers
     switch (result.action) {
       case "show":
-        await dispatchers.show(result.sessionId, {});
+        await showFn(result.sessionId, {});
         break;
 
       case "search":
         // Search within session - launch search with session filter
-        await dispatchers.search("*", { session: result.sessionId });
+        await searchFn("*", { session: result.sessionId });
         break;
 
       case "context": {
@@ -148,13 +133,13 @@ export async function executeBrowseCommand(
         const session = await repo.findById(result.sessionId);
         closeDatabase(db2);
         if (session) {
-          await dispatchers.context(session.projectPath.projectName, {});
+          await contextFn(session.projectPath.projectName, {});
         }
         break;
       }
 
       case "related":
-        await dispatchers.related(result.sessionId, {});
+        await relatedFn(result.sessionId, {});
         break;
     }
 

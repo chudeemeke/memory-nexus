@@ -2,14 +2,22 @@
  * Browse Command Tests
  *
  * Tests for interactive browse command with session picker.
- * Dispatch targets are mocked so tests verify dispatch logic only,
- * without hitting real infrastructure (database, filesystem).
+ * Dispatch targets are injected via the dispatchers parameter so tests
+ * verify dispatch logic only, without hitting real infrastructure.
+ *
+ * Why DI instead of mock.module: Bun's mock.module() persists across
+ * test files in the same process, polluting tests for context/search/
+ * show/related commands. Dependency injection scopes mocks to this file.
  */
 
 import { describe, it, expect, mock, beforeEach, afterEach } from "bun:test";
+import {
+  createBrowseCommand,
+  executeBrowseCommand,
+  type BrowseCommandDeps,
+} from "./browse.js";
 
-// Mock dispatch targets BEFORE importing browse.ts
-// These prevent browse from calling real executeSearchCommand/executeContextCommand/executeRelatedCommand/executeShowCommand
+// Dispatch target mocks - injected per-test, never module-mocked
 const mockExecuteShow = mock(() =>
   Promise.resolve({ exitCode: 0, stdout: "", stderr: "" })
 );
@@ -22,22 +30,6 @@ const mockExecuteContext = mock(() =>
 const mockExecuteRelated = mock(() =>
   Promise.resolve({ exitCode: 0, stdout: "", stderr: "" })
 );
-
-mock.module("./show.js", () => ({
-  executeShowCommand: mockExecuteShow,
-  setTestDbPath: mock(() => {}),
-}));
-mock.module("./search.js", () => ({
-  executeSearchCommand: mockExecuteSearch,
-}));
-mock.module("./context.js", () => ({
-  executeContextCommand: mockExecuteContext,
-}));
-mock.module("./related.js", () => ({
-  executeRelatedCommand: mockExecuteRelated,
-}));
-
-import { createBrowseCommand, executeBrowseCommand, setTestDbPath } from "./browse.js";
 import { setTtyOverride, setMocks } from "../pickers/session-picker.js";
 import { initializeDatabase, closeDatabase } from "../../../infrastructure/database/index.js";
 import { mkdtempSync, rmSync, existsSync } from "fs";
@@ -96,6 +88,17 @@ describe("executeBrowseCommand", () => {
   let dbPath: string;
   let db: ReturnType<typeof initializeDatabase>["db"];
 
+  /** Build deps for executeBrowseCommand using current test state. */
+  function deps(): BrowseCommandDeps {
+    return {
+      dbPath,
+      show: mockExecuteShow as unknown as BrowseCommandDeps["show"],
+      search: mockExecuteSearch as unknown as BrowseCommandDeps["search"],
+      context: mockExecuteContext as unknown as BrowseCommandDeps["context"],
+      related: mockExecuteRelated as unknown as BrowseCommandDeps["related"],
+    };
+  }
+
   beforeEach(() => {
     // Capture console output
     consoleOutput = [];
@@ -134,7 +137,6 @@ describe("executeBrowseCommand", () => {
     // Setup temp directory and database
     tempDir = createTempDir();
     dbPath = join(tempDir, "test.db");
-    setTestDbPath(dbPath);
 
     // Initialize database with a test session
     const result = initializeDatabase({ path: dbPath });
@@ -157,7 +159,6 @@ describe("executeBrowseCommand", () => {
     // Reset TTY and mocks
     setTtyOverride(null);
     setMocks(null, null);
-    setTestDbPath(null);
 
     // Close database before cleanup
     if (db) {
@@ -176,7 +177,7 @@ describe("executeBrowseCommand", () => {
     setTtyOverride(false);
     closeDatabase(db);
 
-    await executeBrowseCommand({ limit: "100" });
+    await executeBrowseCommand({ limit: "100" }, deps());
 
     // Should show terminal error
     expect(consoleErrors.some((e) => e.includes("terminal"))).toBe(true);
@@ -192,7 +193,7 @@ describe("executeBrowseCommand", () => {
     setMocks(mockSearch, mockSelect);
     closeDatabase(db);
 
-    await executeBrowseCommand({ limit: "100" });
+    await executeBrowseCommand({ limit: "100" }, deps());
 
     // Picker was launched
     expect(mockSearch).toHaveBeenCalled();
@@ -207,7 +208,7 @@ describe("executeBrowseCommand", () => {
     setMocks(mockSearch, mockSelect);
     closeDatabase(db);
 
-    await executeBrowseCommand({ limit: "50" });
+    await executeBrowseCommand({ limit: "50" }, deps());
 
     // Verify picker was called (limit is passed internally to repo)
     expect(mockSearch).toHaveBeenCalled();
@@ -219,7 +220,7 @@ describe("executeBrowseCommand", () => {
     setMocks(mockSearch, mockSelect);
     closeDatabase(db);
 
-    await executeBrowseCommand({ limit: "100" });
+    await executeBrowseCommand({ limit: "100" }, deps());
 
     expect(mockSearch).toHaveBeenCalled();
     expect(mockSelect).toHaveBeenCalled();
@@ -232,7 +233,7 @@ describe("executeBrowseCommand", () => {
     setMocks(mockSearch, mockSelect);
     closeDatabase(db);
 
-    await executeBrowseCommand({ limit: "100" });
+    await executeBrowseCommand({ limit: "100" }, deps());
 
     expect(mockSearch).toHaveBeenCalled();
     expect(mockSelect).toHaveBeenCalled();
@@ -245,7 +246,7 @@ describe("executeBrowseCommand", () => {
     setMocks(mockSearch, mockSelect);
     closeDatabase(db);
 
-    await executeBrowseCommand({ limit: "100" });
+    await executeBrowseCommand({ limit: "100" }, deps());
 
     expect(mockSearch).toHaveBeenCalled();
     expect(mockSelect).toHaveBeenCalled();
@@ -259,7 +260,7 @@ describe("executeBrowseCommand", () => {
     setMocks(mockSearch, mockSelect);
     closeDatabase(db);
 
-    await executeBrowseCommand({ limit: "100" });
+    await executeBrowseCommand({ limit: "100" }, deps());
 
     expect(mockSearch).toHaveBeenCalled();
     expect(mockSelect).toHaveBeenCalled();
@@ -279,7 +280,7 @@ describe("executeBrowseCommand", () => {
     closeDatabase(db2);
 
     // Should handle empty session list without error
-    await executeBrowseCommand({ limit: "100" });
+    await executeBrowseCommand({ limit: "100" }, deps());
 
     // Picker should still be called even with no sessions
     expect(mockSearch).toHaveBeenCalled();
@@ -289,7 +290,7 @@ describe("executeBrowseCommand", () => {
     setTtyOverride(false);
     closeDatabase(db);
 
-    await executeBrowseCommand({ limit: "100" });
+    await executeBrowseCommand({ limit: "100" }, deps());
 
     // Should suggest alternatives in error message
     expect(consoleErrors.some((e) => e.includes("memory list"))).toBe(true);
@@ -301,7 +302,7 @@ describe("executeBrowseCommand", () => {
     setTtyOverride(false);
     closeDatabase(db);
 
-    const result = await executeBrowseCommand({});
+    const result = await executeBrowseCommand({}, deps());
 
     expect(result.exitCode).toBe(1);
   });
