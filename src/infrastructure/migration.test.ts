@@ -18,7 +18,7 @@ import * as nodeFs from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
-import { setTestPaths, resetTestPaths } from "./paths.js";
+import { installEnvOverrides, type EnvOverrides } from "../../tests/helpers/env-overrides.js";
 import {
     getMigrationStatus,
     isMigrationPending,
@@ -36,34 +36,33 @@ describe("migration", () => {
     let legacyDir: string;
     let configDir: string;
     let dataDir: string;
-
-    // Save original HOME
-    let originalHome: string | undefined;
+    let env: EnvOverrides;
 
     beforeEach(() => {
         // Create isolated temp directory for each test
         testDir = mkdtempSync(join(tmpdir(), "memory-migration-test-"));
         legacyDir = join(testDir, ".memory-nexus");
+        // XDG_*_HOME causes paths.ts to append APP_NAME ("memory"), so the
+        // resolved configDir/dataDir end with /memory. The test invariant is
+        // that legacy lives at testDir/.memory-nexus, config at
+        // testDir/config/memory, data at testDir/data/memory.
         configDir = join(testDir, "config", "memory");
         dataDir = join(testDir, "data", "memory");
 
-        // Override HOME so getLegacyDir() points to our test dir
-        originalHome = process.env.HOME;
-        process.env.HOME = testDir;
-        process.env.USERPROFILE = testDir;
-
-        // Override paths module for new paths
-        setTestPaths({ configDir, dataDir });
+        env = installEnvOverrides();
+        // Override HOME so getLegacyDir() (which uses homedir()) points to
+        // our test dir, AND so the implicit XDG defaults that key off HOME
+        // are also redirected.
+        env.set("HOME", testDir);
+        env.set("USERPROFILE", testDir);
+        // Point XDG bases so getConfigDir() and getDataDir() resolve under
+        // the test dir.
+        env.set("XDG_CONFIG_HOME", join(testDir, "config"));
+        env.set("XDG_DATA_HOME", join(testDir, "data"));
     });
 
     afterEach(() => {
-        // Restore HOME
-        if (originalHome !== undefined) {
-            process.env.HOME = originalHome;
-            process.env.USERPROFILE = originalHome;
-        }
-
-        resetTestPaths();
+        env.cleanup();
 
         // Clean up
         try {
