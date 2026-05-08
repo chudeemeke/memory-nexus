@@ -107,12 +107,25 @@ export function getLegacyDir(): string {
 /**
  * Get the memory directory path.
  *
- * Returns ~/.memory/ where agent-written markdown files are stored.
- * Not under XDG (uses home directory directly).
+ * Returns the directory where agent-written markdown files are stored
+ * (DECISIONS.md, LEARNINGS.md, USER-PREFS.md, daily logs, per-project notes).
+ * Not under XDG -- this is a content directory authored directly by the user
+ * and Claude, separate from the tool's own config/data.
  *
  * Resolution order:
- * 1. Test override (if set)
- * 2. ~/.memory (default)
+ * 1. Test override (if set; deprecated -- prefer $MEMORY_FILES_DIR)
+ * 2. $MEMORY_FILES_DIR (if set and non-empty)
+ * 3. ~/.memory (default)
+ *
+ * Env-var semantics (consistent with XDG_CONFIG_HOME / XDG_DATA_HOME):
+ *  - empty string is ignored (falls through to default)
+ *  - no `~` expansion -- pass an absolute or fully-resolved path
+ *  - relative paths are used as-is and resolved by the consuming syscall
+ *
+ * Use cases for $MEMORY_FILES_DIR (production, beyond tests):
+ *  - sandboxed runs where you don't want to touch the user's real ~/.memory
+ *  - container/CI workflows that need a writable location under a chosen mount
+ *  - multi-instance setups (e.g., per-profile development)
  *
  * @returns Absolute path to the memory directory
  */
@@ -120,6 +133,8 @@ export function getMemoryDir(): string {
     if (testOverrides?.memoryDir !== undefined) {
         return testOverrides.memoryDir;
     }
+    const env = process.env.MEMORY_FILES_DIR;
+    if (env) return env;
     return join(homedir(), ".memory");
 }
 

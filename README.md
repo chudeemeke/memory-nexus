@@ -64,13 +64,16 @@ memory browse
 
 ## Data Paths
 
-| Purpose | Path |
-|---------|------|
-| Config | `~/.config/memory/config.json` |
-| Database | `~/.local/share/memory/memory.db` |
-| Logs | `~/.local/share/memory/logs/` |
+| Purpose | Path | Override |
+|---------|------|----------|
+| Config | `~/.config/memory/config.json` | `XDG_CONFIG_HOME` |
+| Database | `~/.local/share/memory/memory.db` | `XDG_DATA_HOME` |
+| Logs | `~/.local/share/memory/logs/` | `XDG_DATA_HOME` |
+| Memory files | `~/.memory/` | `MEMORY_FILES_DIR` |
 
-Paths follow the XDG Base Directory Specification. Override with `XDG_CONFIG_HOME` and `XDG_DATA_HOME` environment variables.
+Tool-managed paths follow the XDG Base Directory Specification. Override with `XDG_CONFIG_HOME` and `XDG_DATA_HOME`.
+
+The memory-files directory holds agent-written markdown (decisions, learnings, daily logs, per-project notes). Override with `MEMORY_FILES_DIR` for sandboxed runs, container/CI workflows, or multi-instance setups. Empty string is ignored; the path is used as-is (no `~` expansion).
 
 ## AI-First Design
 

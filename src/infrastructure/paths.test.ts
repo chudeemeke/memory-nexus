@@ -26,15 +26,18 @@ import {
 describe("paths", () => {
     const home = homedir();
 
-    // Save and restore XDG env vars
+    // Save and restore env vars touched by these tests
     let savedXdgConfigHome: string | undefined;
     let savedXdgDataHome: string | undefined;
+    let savedMemoryFilesDir: string | undefined;
 
     beforeEach(() => {
         savedXdgConfigHome = process.env.XDG_CONFIG_HOME;
         savedXdgDataHome = process.env.XDG_DATA_HOME;
+        savedMemoryFilesDir = process.env.MEMORY_FILES_DIR;
         delete process.env.XDG_CONFIG_HOME;
         delete process.env.XDG_DATA_HOME;
+        delete process.env.MEMORY_FILES_DIR;
         resetTestPaths();
     });
 
@@ -48,6 +51,11 @@ describe("paths", () => {
             process.env.XDG_DATA_HOME = savedXdgDataHome;
         } else {
             delete process.env.XDG_DATA_HOME;
+        }
+        if (savedMemoryFilesDir !== undefined) {
+            process.env.MEMORY_FILES_DIR = savedMemoryFilesDir;
+        } else {
+            delete process.env.MEMORY_FILES_DIR;
         }
         resetTestPaths();
     });
@@ -240,6 +248,38 @@ describe("paths", () => {
         test("ignores XDG_DATA_HOME", () => {
             process.env.XDG_DATA_HOME = "/custom/data";
             expect(getMemoryDir()).toBe(join(home, ".memory"));
+        });
+
+        test("respects MEMORY_FILES_DIR when set", () => {
+            process.env.MEMORY_FILES_DIR = "/custom/memory";
+            expect(getMemoryDir()).toBe("/custom/memory");
+        });
+
+        test("ignores empty MEMORY_FILES_DIR (falls through to default)", () => {
+            process.env.MEMORY_FILES_DIR = "";
+            expect(getMemoryDir()).toBe(join(home, ".memory"));
+        });
+
+        test("falls back to ~/.memory when MEMORY_FILES_DIR is unset", () => {
+            delete process.env.MEMORY_FILES_DIR;
+            expect(getMemoryDir()).toBe(join(home, ".memory"));
+        });
+
+        test("MEMORY_FILES_DIR does not affect getConfigDir or getDataDir", () => {
+            process.env.MEMORY_FILES_DIR = "/custom/memory";
+            expect(getConfigDir()).toBe(join(home, ".config", "memory"));
+            expect(getDataDir()).toBe(join(home, ".local", "share", "memory"));
+        });
+
+        test("MEMORY_FILES_DIR uses value as-is (no ~ expansion, no APP_NAME suffix)", () => {
+            process.env.MEMORY_FILES_DIR = "/exact/path";
+            expect(getMemoryDir()).toBe("/exact/path");
+        });
+
+        test("test override takes precedence over MEMORY_FILES_DIR", () => {
+            process.env.MEMORY_FILES_DIR = "/env/memory";
+            setTestPaths({ memoryDir: "/test/memory" });
+            expect(getMemoryDir()).toBe("/test/memory");
         });
     });
 });
