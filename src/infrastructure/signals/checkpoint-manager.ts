@@ -5,26 +5,17 @@
  * Checkpoints stored in ~/.memory-nexus/sync-checkpoint.json
  *
  * Implements graceful handling of missing/invalid checkpoint files.
+ *
+ * Each function accepts an optional `path` argument. When omitted, the
+ * production XDG-resolved path is used. When provided, that path is used
+ * directly (used by tests to point at a temp file). This avoids
+ * module-level mutable state and the test-pollution risk that comes with
+ * it; see scripts/check-test-isolation.ts.
  */
 
 import { existsSync, mkdirSync, readFileSync, unlinkSync, writeFileSync } from "node:fs";
 import { dirname } from "node:path";
 import { getCheckpointPath as resolveCheckpointPath } from "../paths.js";
-
-/**
- * Test path override for checkpoint file
- * When set, all checkpoint operations use this path instead of the default
- */
-let testCheckpointPath: string | null = null;
-
-/**
- * Set test checkpoint path override
- *
- * @param path Path to use, or null to reset to default behavior
- */
-export function setTestCheckpointPath(path: string | null): void {
-    testCheckpointPath = path;
-}
 
 /**
  * Sync checkpoint interface
@@ -50,15 +41,14 @@ export interface SyncCheckpoint {
 }
 
 /**
- * Get the path to the checkpoint file
+ * Get the path to the checkpoint file.
  *
- * @returns Path to sync-checkpoint.json (or test override)
+ * @param override Optional explicit path (used by tests). When omitted,
+ *   resolves via the production paths module (XDG-respecting).
+ * @returns Path to sync-checkpoint.json
  */
-export function getCheckpointPath(): string {
-    if (testCheckpointPath !== null) {
-        return testCheckpointPath;
-    }
-    return resolveCheckpointPath();
+export function getCheckpointPath(override?: string): string {
+    return override ?? resolveCheckpointPath();
 }
 
 /**
@@ -68,9 +58,10 @@ export function getCheckpointPath(): string {
  * Handles errors gracefully (logs but doesn't throw).
  *
  * @param checkpoint Checkpoint data to save
+ * @param path Optional explicit path (used by tests)
  */
-export function saveCheckpoint(checkpoint: SyncCheckpoint): void {
-    const checkpointPath = getCheckpointPath();
+export function saveCheckpoint(checkpoint: SyncCheckpoint, path?: string): void {
+    const checkpointPath = getCheckpointPath(path);
     const checkpointDir = dirname(checkpointPath);
 
     try {
@@ -92,10 +83,11 @@ export function saveCheckpoint(checkpoint: SyncCheckpoint): void {
  * - Missing checkpoint file (returns null)
  * - Invalid JSON (returns null with warning)
  *
+ * @param path Optional explicit path (used by tests)
  * @returns Checkpoint data or null if not found/invalid
  */
-export function loadCheckpoint(): SyncCheckpoint | null {
-    const checkpointPath = getCheckpointPath();
+export function loadCheckpoint(path?: string): SyncCheckpoint | null {
+    const checkpointPath = getCheckpointPath(path);
 
     if (!existsSync(checkpointPath)) {
         return null;
@@ -128,9 +120,11 @@ export function loadCheckpoint(): SyncCheckpoint | null {
  *
  * Called on successful sync completion.
  * Silently ignores missing file.
+ *
+ * @param path Optional explicit path (used by tests)
  */
-export function clearCheckpoint(): void {
-    const checkpointPath = getCheckpointPath();
+export function clearCheckpoint(path?: string): void {
+    const checkpointPath = getCheckpointPath(path);
 
     if (existsSync(checkpointPath)) {
         try {
@@ -147,8 +141,9 @@ export function clearCheckpoint(): void {
  *
  * Quick existence check without loading the file.
  *
+ * @param path Optional explicit path (used by tests)
  * @returns true if checkpoint file exists
  */
-export function hasCheckpoint(): boolean {
-    return existsSync(getCheckpointPath());
+export function hasCheckpoint(path?: string): boolean {
+    return existsSync(getCheckpointPath(path));
 }

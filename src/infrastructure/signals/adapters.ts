@@ -28,17 +28,23 @@ export class ProcessAbortSignal implements ISyncAbortSignal {
 
 /**
  * Adapter wrapping the filesystem checkpoint manager functions.
+ *
+ * @param path Optional explicit checkpoint file path. When omitted, the
+ *   production XDG-resolved path is used. Tests construct with a temp
+ *   path to achieve isolation without process-wide state.
  */
 export class FileCheckpointManager implements ICheckpointManager {
+  constructor(private readonly path?: string) {}
+
   load(): SyncCheckpoint | null {
-    return loadCheckpoint();
+    return loadCheckpoint(this.path);
   }
 
   save(checkpoint: SyncCheckpoint): void {
-    saveCheckpoint(checkpoint);
+    saveCheckpoint(checkpoint, this.path);
   }
 
   clear(): void {
-    clearCheckpoint();
+    clearCheckpoint(this.path);
   }
 }

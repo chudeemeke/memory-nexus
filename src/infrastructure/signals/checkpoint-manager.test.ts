@@ -14,7 +14,6 @@ import {
     hasCheckpoint,
     loadCheckpoint,
     saveCheckpoint,
-    setTestCheckpointPath,
     type SyncCheckpoint,
 } from "./checkpoint-manager.js";
 
@@ -27,13 +26,9 @@ describe("checkpoint-manager", () => {
         testDir = join(tmpdir(), `memory-nexus-checkpoint-test-${Date.now()}-${Math.random().toString(36).slice(2)}`);
         mkdirSync(testDir, { recursive: true });
         testCheckpointFile = join(testDir, "sync-checkpoint.json");
-        setTestCheckpointPath(testCheckpointFile);
     });
 
     afterEach(() => {
-        // Reset test path
-        setTestCheckpointPath(null);
-
         // Clean up test directory
         try {
             rmSync(testDir, { recursive: true, force: true });
@@ -43,12 +38,11 @@ describe("checkpoint-manager", () => {
     });
 
     describe("getCheckpointPath", () => {
-        test("returns test path when override is set", () => {
-            expect(getCheckpointPath()).toBe(testCheckpointFile);
+        test("returns explicit path when override is provided", () => {
+            expect(getCheckpointPath(testCheckpointFile)).toBe(testCheckpointFile);
         });
 
         test("returns default path when no override", () => {
-            setTestCheckpointPath(null);
             const path = getCheckpointPath();
             expect(path).toContain("memory");
             expect(path).toContain("sync-checkpoint.json");
@@ -65,7 +59,7 @@ describe("checkpoint-manager", () => {
                 lastCompletedAt: "2026-02-05T14:05:00Z",
             };
 
-            saveCheckpoint(checkpoint);
+            saveCheckpoint(checkpoint, testCheckpointFile);
 
             expect(existsSync(testCheckpointFile)).toBe(true);
             const content = readFileSync(testCheckpointFile, "utf-8");
@@ -75,7 +69,6 @@ describe("checkpoint-manager", () => {
 
         test("creates parent directory if missing", () => {
             const nestedPath = join(testDir, "nested", "dir", "checkpoint.json");
-            setTestCheckpointPath(nestedPath);
 
             const checkpoint: SyncCheckpoint = {
                 startedAt: "2026-02-05T14:00:00Z",
@@ -85,7 +78,7 @@ describe("checkpoint-manager", () => {
                 lastCompletedAt: null,
             };
 
-            saveCheckpoint(checkpoint);
+            saveCheckpoint(checkpoint, nestedPath);
 
             expect(existsSync(nestedPath)).toBe(true);
         });
@@ -106,10 +99,10 @@ describe("checkpoint-manager", () => {
                 lastCompletedAt: "2026-02-05T14:10:00Z",
             };
 
-            saveCheckpoint(checkpoint1);
-            saveCheckpoint(checkpoint2);
+            saveCheckpoint(checkpoint1, testCheckpointFile);
+            saveCheckpoint(checkpoint2, testCheckpointFile);
 
-            const loaded = loadCheckpoint();
+            const loaded = loadCheckpoint(testCheckpointFile);
             expect(loaded?.completedSessions).toBe(50);
             expect(loaded?.completedSessionIds).toEqual(["s1", "s2", "s3"]);
         });
@@ -117,9 +110,8 @@ describe("checkpoint-manager", () => {
         test("logs warning on write error", () => {
             const warnSpy = spyOn(console, "warn").mockImplementation(() => {});
 
-            // Set to an invalid path (directory that can't be created)
-            // On Windows, null bytes in paths are invalid
-            setTestCheckpointPath("/\0invalid/path/checkpoint.json");
+            // Use an invalid path (null bytes are invalid on Windows)
+            const invalidPath = "/\0invalid/path/checkpoint.json";
 
             const checkpoint: SyncCheckpoint = {
                 startedAt: "2026-02-05T14:00:00Z",
@@ -129,7 +121,7 @@ describe("checkpoint-manager", () => {
                 lastCompletedAt: null,
             };
 
-            saveCheckpoint(checkpoint);
+            saveCheckpoint(checkpoint, invalidPath);
 
             expect(warnSpy).toHaveBeenCalled();
             const warningMsg = warnSpy.mock.calls[0]?.[0];
@@ -150,13 +142,13 @@ describe("checkpoint-manager", () => {
             };
             writeFileSync(testCheckpointFile, JSON.stringify(checkpoint));
 
-            const loaded = loadCheckpoint();
+            const loaded = loadCheckpoint(testCheckpointFile);
 
             expect(loaded).toEqual(checkpoint);
         });
 
         test("returns null for missing file", () => {
-            const loaded = loadCheckpoint();
+            const loaded = loadCheckpoint(testCheckpointFile);
             expect(loaded).toBeNull();
         });
 
@@ -165,7 +157,7 @@ describe("checkpoint-manager", () => {
 
             writeFileSync(testCheckpointFile, "not valid json {{{");
 
-            const loaded = loadCheckpoint();
+            const loaded = loadCheckpoint(testCheckpointFile);
 
             expect(loaded).toBeNull();
             expect(warnSpy).toHaveBeenCalledWith("Invalid checkpoint JSON, ignoring");
@@ -179,7 +171,7 @@ describe("checkpoint-manager", () => {
             // Valid JSON but missing required fields
             writeFileSync(testCheckpointFile, JSON.stringify({ foo: "bar" }));
 
-            const loaded = loadCheckpoint();
+            const loaded = loadCheckpoint(testCheckpointFile);
 
             expect(loaded).toBeNull();
             expect(warnSpy).toHaveBeenCalledWith("Invalid checkpoint format, ignoring");
@@ -201,7 +193,7 @@ describe("checkpoint-manager", () => {
                 })
             );
 
-            const loaded = loadCheckpoint();
+            const loaded = loadCheckpoint(testCheckpointFile);
 
             expect(loaded).toBeNull();
             expect(warnSpy).toHaveBeenCalledWith("Invalid checkpoint format, ignoring");
@@ -219,10 +211,10 @@ describe("checkpoint-manager", () => {
                 completedSessionIds: [],
                 lastCompletedAt: null,
             };
-            saveCheckpoint(checkpoint);
+            saveCheckpoint(checkpoint, testCheckpointFile);
             expect(existsSync(testCheckpointFile)).toBe(true);
 
-            clearCheckpoint();
+            clearCheckpoint(testCheckpointFile);
 
             expect(existsSync(testCheckpointFile)).toBe(false);
         });
@@ -231,7 +223,7 @@ describe("checkpoint-manager", () => {
             expect(existsSync(testCheckpointFile)).toBe(false);
 
             // Should not throw
-            clearCheckpoint();
+            clearCheckpoint(testCheckpointFile);
 
             expect(existsSync(testCheckpointFile)).toBe(false);
         });
@@ -245,13 +237,13 @@ describe("checkpoint-manager", () => {
                 completedSessions: 0,
                 completedSessionIds: [],
                 lastCompletedAt: null,
-            });
+            }, testCheckpointFile);
 
-            expect(hasCheckpoint()).toBe(true);
+            expect(hasCheckpoint(testCheckpointFile)).toBe(true);
         });
 
         test("returns false when checkpoint does not exist", () => {
-            expect(hasCheckpoint()).toBe(false);
+            expect(hasCheckpoint(testCheckpointFile)).toBe(false);
         });
 
         test("returns false after checkpoint is cleared", () => {
@@ -261,20 +253,20 @@ describe("checkpoint-manager", () => {
                 completedSessions: 0,
                 completedSessionIds: [],
                 lastCompletedAt: null,
-            });
-            expect(hasCheckpoint()).toBe(true);
+            }, testCheckpointFile);
+            expect(hasCheckpoint(testCheckpointFile)).toBe(true);
 
-            clearCheckpoint();
+            clearCheckpoint(testCheckpointFile);
 
-            expect(hasCheckpoint()).toBe(false);
+            expect(hasCheckpoint(testCheckpointFile)).toBe(false);
         });
     });
 
     describe("integration", () => {
         test("full save/load/clear cycle", () => {
             // Start with no checkpoint
-            expect(hasCheckpoint()).toBe(false);
-            expect(loadCheckpoint()).toBeNull();
+            expect(hasCheckpoint(testCheckpointFile)).toBe(false);
+            expect(loadCheckpoint(testCheckpointFile)).toBeNull();
 
             // Save initial checkpoint
             const checkpoint: SyncCheckpoint = {
@@ -284,24 +276,24 @@ describe("checkpoint-manager", () => {
                 completedSessionIds: [],
                 lastCompletedAt: null,
             };
-            saveCheckpoint(checkpoint);
-            expect(hasCheckpoint()).toBe(true);
+            saveCheckpoint(checkpoint, testCheckpointFile);
+            expect(hasCheckpoint(testCheckpointFile)).toBe(true);
 
             // Update checkpoint with progress
             checkpoint.completedSessions = 50;
             checkpoint.completedSessionIds = Array.from({ length: 50 }, (_, i) => `session-${i}`);
             checkpoint.lastCompletedAt = new Date().toISOString();
-            saveCheckpoint(checkpoint);
+            saveCheckpoint(checkpoint, testCheckpointFile);
 
             // Load and verify
-            const loaded = loadCheckpoint();
+            const loaded = loadCheckpoint(testCheckpointFile);
             expect(loaded?.completedSessions).toBe(50);
             expect(loaded?.completedSessionIds.length).toBe(50);
 
             // Clear on completion
-            clearCheckpoint();
-            expect(hasCheckpoint()).toBe(false);
-            expect(loadCheckpoint()).toBeNull();
+            clearCheckpoint(testCheckpointFile);
+            expect(hasCheckpoint(testCheckpointFile)).toBe(false);
+            expect(loadCheckpoint(testCheckpointFile)).toBeNull();
         });
     });
 });
