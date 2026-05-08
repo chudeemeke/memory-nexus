@@ -40,6 +40,8 @@ export interface StatusOptions {
 export interface StatusCommandDeps {
     /** Database path. Defaults to getDefaultDbPath(). */
     dbPath?: string;
+    /** Sync log file path. Defaults to XDG-resolved sync.log. */
+    logPath?: string;
 }
 
 /**
@@ -104,7 +106,7 @@ export async function executeStatusCommand(
     options: StatusOptions,
     deps: StatusCommandDeps = {}
 ): Promise<CommandResult> {
-    const status = await gatherStatus({ dbPath: deps.dbPath });
+    const status = await gatherStatus({ dbPath: deps.dbPath, logPath: deps.logPath });
 
     if (options.json) {
         console.log(JSON.stringify(status, null, 2));
@@ -121,18 +123,20 @@ export async function executeStatusCommand(
 export interface GatherStatusOptions {
     /** Override database path for testing */
     dbPath?: string;
+    /** Override log file path for testing */
+    logPath?: string;
 }
 
 /**
  * Gather all status information.
  *
- * @param options Optional configuration including database path
+ * @param options Optional configuration including database and log paths
  * @returns Aggregated status information
  */
 export async function gatherStatus(options: GatherStatusOptions = {}): Promise<StatusInfo> {
     const hooks = checkHooksInstalled();
     const config = loadConfig();
-    const logs = readRecentLogs(1); // Get most recent log entry
+    const logs = readRecentLogs(1, options.logPath); // Get most recent log entry
 
     // Get pending sessions count
     let pendingSessions = 0;
@@ -208,7 +212,7 @@ export async function gatherStatus(options: GatherStatusOptions = {}): Promise<S
         config,
         lastSync: logs.length > 0 ? logs[0].timestamp : null,
         pendingSessions,
-        recentLogs: readRecentLogs(100).length,
+        recentLogs: readRecentLogs(100, options.logPath).length,
         embedding: embeddingStatus,
     };
 }

@@ -240,12 +240,14 @@ export function checkDirectoryPermissions(path: string): { readable: boolean; wr
 /**
  * Check hook installation and configuration status
  *
+ * @param logPath Optional explicit log file path (used by tests to point
+ *   at a fixture; production reads from the XDG-resolved path)
  * @returns Hook status including installation, enabled state, and last run
  */
-export function checkHookStatus(): HooksHealth {
+export function checkHookStatus(logPath?: string): HooksHealth {
     const hookStatus = checkHooksInstalled();
     const config = loadConfig();
-    const logs = readRecentLogs(1);
+    const logs = readRecentLogs(1, logPath);
 
     return {
         installed: hookStatus.sessionEnd && hookStatus.preCompact,
@@ -405,6 +407,9 @@ export function runHealthCheck(overrides?: HealthCheckOverrides): HealthCheckRes
     const logsDirPath = overrides?.logsDir ?? getLogDir();
     const sourceDirPath = overrides?.sourceDir ?? join(homedir(), ".claude", "projects");
 
+    // Derive log file path from override (tests) or production path
+    const logPath = overrides?.logsDir ? join(overrides.logsDir, "sync.log") : undefined;
+
     const configDirPerms = checkDirectoryPermissions(configDirPath);
     const logsDirPerms = checkDirectoryPermissions(logsDirPath);
     const sourceDirPerms = checkDirectoryPermissions(sourceDirPath);
@@ -416,7 +421,7 @@ export function runHealthCheck(overrides?: HealthCheckOverrides): HealthCheckRes
     };
 
     // Hook status
-    const hooks = checkHookStatus();
+    const hooks = checkHookStatus(logPath);
 
     // Config validity
     const config = checkConfigValidity();

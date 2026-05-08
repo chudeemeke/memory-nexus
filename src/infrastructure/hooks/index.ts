@@ -25,7 +25,6 @@ export {
     readRecentLogs,
     getLogPath,
     getLogDir,
-    setTestLogPath,
     type LogEntry,
     type LogEntryInput,
 } from "./log-writer.js";

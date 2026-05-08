@@ -21,7 +21,6 @@ import {
     type HealthCheckResult,
 } from "./health-checker.js";
 import { setTestConfigPath } from "../hooks/config-manager.js";
-import { setTestLogPath } from "../hooks/log-writer.js";
 import { setTestPathOverrides } from "../hooks/settings-manager.js";
 import { initializeDatabase, closeDatabase } from "./connection.js";
 
@@ -39,7 +38,6 @@ describe("health-checker", () => {
 
         // Set test path overrides
         setTestConfigPath(testConfigPath);
-        setTestLogPath(testLogPath);
         setTestPathOverrides({
             settingsPath: testSettingsPath,
         });
@@ -48,7 +46,6 @@ describe("health-checker", () => {
     afterAll(() => {
         // Reset overrides
         setTestConfigPath(null);
-        setTestLogPath(null);
         setTestPathOverrides(null);
 
         // Clean up test directory
@@ -293,26 +290,26 @@ describe("health-checker", () => {
         it("returns installed=false when no hooks configured", () => {
             writeFileSync(testSettingsPath, JSON.stringify({}));
 
-            const result = checkHookStatus();
+            const result = checkHookStatus(testLogPath);
             expect(result.installed).toBe(false);
         });
 
         it("returns enabled based on config autoSync", () => {
             writeFileSync(testConfigPath, JSON.stringify({ autoSync: true }));
 
-            const result = checkHookStatus();
+            const result = checkHookStatus(testLogPath);
             expect(result.enabled).toBe(true);
         });
 
         it("returns enabled=false when autoSync disabled", () => {
             writeFileSync(testConfigPath, JSON.stringify({ autoSync: false }));
 
-            const result = checkHookStatus();
+            const result = checkHookStatus(testLogPath);
             expect(result.enabled).toBe(false);
         });
 
         it("returns lastRun=null when no logs", () => {
-            const result = checkHookStatus();
+            const result = checkHookStatus(testLogPath);
             expect(result.lastRun).toBeNull();
         });
 
@@ -325,7 +322,7 @@ describe("health-checker", () => {
                 message: "Sync complete",
             }) + "\n");
 
-            const result = checkHookStatus();
+            const result = checkHookStatus(testLogPath);
             expect(result.lastRun).toBeInstanceOf(Date);
             expect(result.lastRun?.toISOString()).toBe(timestamp);
         });

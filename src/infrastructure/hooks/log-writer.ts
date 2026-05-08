@@ -9,6 +9,12 @@
  * - Automatic directory creation
  * - Date-based log rotation
  * - Recent log reading for status display
+ *
+ * Each function accepts an optional `path` argument. When omitted, the
+ * production XDG-resolved path is used. When provided, that path is used
+ * directly (used by tests to point at a temp file). This avoids
+ * module-level mutable state and the test-pollution risk that comes with
+ * it; see scripts/check-test-isolation.ts.
  */
 
 import {
@@ -21,21 +27,6 @@ import {
 } from "node:fs";
 import { dirname, join } from "node:path";
 import { getLogDir as pathsGetLogDir } from "../paths.js";
-
-/**
- * Test path override for log file
- * When set, all log operations use this path instead of the default
- */
-let testLogPath: string | null = null;
-
-/**
- * Set test log path override
- *
- * @param path Path to use, or null to reset to default behavior
- */
-export function setTestLogPath(path: string | null): void {
-    testLogPath = path;
-}
 
 /**
  * Log entry structure for sync operations
@@ -72,27 +63,30 @@ export interface LogEntry {
 export type LogEntryInput = Omit<LogEntry, "timestamp">;
 
 /**
- * Get the path to the log directory
+ * Get the directory containing the log file.
  *
- * @returns Path to the logs directory (or test override directory)
+ * @param logPathOverride Optional explicit log file path. The directory
+ *   is derived from this path. Used by tests.
+ * @returns Path to the logs directory
  */
-export function getLogDir(): string {
-    if (testLogPath !== null) {
-        return dirname(testLogPath);
+export function getLogDir(logPathOverride?: string): string {
+    if (logPathOverride !== undefined) {
+        return dirname(logPathOverride);
     }
     return pathsGetLogDir();
 }
 
 /**
- * Get the path to the sync log file
+ * Get the path to the sync log file.
  *
- * @returns Path to sync.log (or test override)
+ * @param logPathOverride Optional explicit log file path. Used by tests.
+ * @returns Path to sync.log
  */
-export function getLogPath(): string {
-    if (testLogPath !== null) {
-        return testLogPath;
+export function getLogPath(logPathOverride?: string): string {
+    if (logPathOverride !== undefined) {
+        return logPathOverride;
     }
-    return join(getLogDir(), "sync.log");
+    return join(pathsGetLogDir(), "sync.log");
 }
 
 /**
@@ -105,13 +99,13 @@ export function getLogPath(): string {
  * Handles write errors gracefully to never break sync operations.
  *
  * @param entry Log entry data (without timestamp)
+ * @param logPathOverride Optional explicit log file path (used by tests)
  */
-export function logSync(entry: LogEntryInput): void {
+export function logSync(entry: LogEntryInput, logPathOverride?: string): void {
     try {
-        const logDir = getLogDir();
-        mkdirSync(logDir, { recursive: true });
+        const logPath = getLogPath(logPathOverride);
+        mkdirSync(dirname(logPath), { recursive: true });
 
-        const logPath = getLogPath();
         const logEntry: LogEntry = {
             timestamp: new Date().toISOString(),
             ...entry,
@@ -134,9 +128,10 @@ export function logSync(entry: LogEntryInput): void {
  * Handles missing file gracefully (no-op).
  *
  * @param retentionDays Number of days before rotation
+ * @param logPathOverride Optional explicit log file path (used by tests)
  */
-export function rotateLogsIfNeeded(retentionDays: number): void {
-    const logPath = getLogPath();
+export function rotateLogsIfNeeded(retentionDays: number, logPathOverride?: string): void {
+    const logPath = getLogPath(logPathOverride);
 
     if (!existsSync(logPath)) {
         return;
@@ -167,10 +162,11 @@ export function rotateLogsIfNeeded(retentionDays: number): void {
  * - Malformed lines (skips them)
  *
  * @param limit Maximum number of entries to return (default 100)
+ * @param logPathOverride Optional explicit log file path (used by tests)
  * @returns Array of parsed log entries
  */
-export function readRecentLogs(limit: number = 100): LogEntry[] {
-    const logPath = getLogPath();
+export function readRecentLogs(limit: number = 100, logPathOverride?: string): LogEntry[] {
+    const logPath = getLogPath(logPathOverride);
 
     if (!existsSync(logPath)) {
         return [];

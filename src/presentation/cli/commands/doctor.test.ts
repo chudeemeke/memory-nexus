@@ -17,7 +17,6 @@ import {
 import type { HealthCheckResult } from "../../../infrastructure/database/health-checker.js";
 import { initializeDatabase, closeDatabase } from "../../../infrastructure/database/connection.js";
 import { setTestConfigPath } from "../../../infrastructure/hooks/config-manager.js";
-import { setTestLogPath } from "../../../infrastructure/hooks/log-writer.js";
 import { setTestPathOverrides } from "../../../infrastructure/hooks/settings-manager.js";
 
 describe("doctor command", () => {
@@ -50,7 +49,6 @@ describe("doctor command", () => {
 
         // Infrastructure-level setters still in use (will be migrated separately)
         setTestConfigPath(testConfigPath);
-        setTestLogPath(testLogPath);
         setTestPathOverrides({
             settingsPath: testSettingsPath,
         });
@@ -59,7 +57,6 @@ describe("doctor command", () => {
     afterAll(() => {
         // Reset overrides
         setTestConfigPath(null);
-        setTestLogPath(null);
         setTestPathOverrides(null);
 
         // Restore console
