@@ -6,7 +6,8 @@
  *
  * Config paths: $XDG_CONFIG_HOME/memory (default: ~/.config/memory)
  * Data paths:   $XDG_DATA_HOME/memory  (default: ~/.local/share/memory)
- * Legacy path:  ~/.memory-nexus (for migration detection)
+ * Memory files: $MEMORY_HOME           (default: ~/.memory)
+ * Legacy path:  ~/.memory-nexus (for migration detection; not overridable)
  */
 
 import { homedir } from "node:os";
@@ -16,51 +17,15 @@ import { join } from "node:path";
 const APP_NAME = "memory";
 
 /**
- * Test override paths.
- * When set, these take precedence over all other path resolution.
- */
-interface TestPathOverrides {
-    configDir?: string;
-    dataDir?: string;
-    memoryDir?: string;
-}
-
-let testOverrides: TestPathOverrides | null = null;
-
-/**
- * Set test path overrides.
- *
- * Allows tests to isolate path resolution without touching real directories.
- * Config and data dirs can be overridden independently.
- *
- * @param overrides Partial overrides (configDir and/or dataDir)
- */
-export function setTestPaths(overrides: TestPathOverrides): void {
-    testOverrides = overrides;
-}
-
-/**
- * Reset test path overrides to default behavior.
- */
-export function resetTestPaths(): void {
-    testOverrides = null;
-}
-
-/**
  * Get the configuration directory.
  *
  * Resolution order:
- * 1. Test override (if set)
- * 2. $XDG_CONFIG_HOME/memory (if XDG_CONFIG_HOME set)
- * 3. ~/.config/memory (default)
+ * 1. $XDG_CONFIG_HOME/memory (if XDG_CONFIG_HOME set)
+ * 2. ~/.config/memory (default)
  *
  * @returns Absolute path to the config directory
  */
 export function getConfigDir(): string {
-    if (testOverrides?.configDir !== undefined) {
-        return testOverrides.configDir;
-    }
-
     const xdgConfig = process.env.XDG_CONFIG_HOME;
     if (xdgConfig) {
         return join(xdgConfig, APP_NAME);
@@ -73,17 +38,12 @@ export function getConfigDir(): string {
  * Get the data directory.
  *
  * Resolution order:
- * 1. Test override (if set)
- * 2. $XDG_DATA_HOME/memory (if XDG_DATA_HOME set)
- * 3. ~/.local/share/memory (default)
+ * 1. $XDG_DATA_HOME/memory (if XDG_DATA_HOME set)
+ * 2. ~/.local/share/memory (default)
  *
  * @returns Absolute path to the data directory
  */
 export function getDataDir(): string {
-    if (testOverrides?.dataDir !== undefined) {
-        return testOverrides.dataDir;
-    }
-
     const xdgData = process.env.XDG_DATA_HOME;
     if (xdgData) {
         return join(xdgData, APP_NAME);
@@ -113,9 +73,8 @@ export function getLegacyDir(): string {
  * and Claude, separate from the tool's own config/data.
  *
  * Resolution order:
- * 1. Test override (if set; deprecated -- prefer $MEMORY_HOME)
- * 2. $MEMORY_HOME (if set and non-empty)
- * 3. ~/.memory (default)
+ * 1. $MEMORY_HOME (if set and non-empty)
+ * 2. ~/.memory (default)
  *
  * Env-var semantics (GNUPGHOME / JAVA_HOME tradition: exact tool-root path,
  * NOT the XDG_*_HOME "base + APP_NAME" convention):
@@ -132,9 +91,6 @@ export function getLegacyDir(): string {
  * @returns Absolute path to the memory directory
  */
 export function getMemoryDir(): string {
-    if (testOverrides?.memoryDir !== undefined) {
-        return testOverrides.memoryDir;
-    }
     const env = process.env.MEMORY_HOME;
     if (env) return env;
     return join(homedir(), ".memory");
