@@ -10,9 +10,15 @@
 export type BrowserOpener = (filePath: string) => void;
 
 /**
- * Injectable dependencies for executeFrictionCommand.
+ * Runtime dependencies for executeFrictionCommand.
+ *
+ * Operational dependencies that tests substitute for isolation.
+ * Defaults to production resolution when omitted.
  */
 export interface FrictionCommandDeps {
+    /** Database path. Defaults to getDefaultDbPath(). */
+    dbPath?: string;
+    /** Browser opener for --html mode. Defaults to system default. */
     openInBrowser?: BrowserOpener;
 }
 

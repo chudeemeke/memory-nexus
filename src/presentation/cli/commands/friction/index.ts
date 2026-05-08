@@ -113,7 +113,7 @@ export async function executeFrictionCommand(
     options: FrictionExecuteOptions,
     deps: FrictionCommandDeps = {}
 ): Promise<CommandResult> {
-    const dbPath = getDefaultDbPath();
+    const dbPath = deps.dbPath ?? getDefaultDbPath();
     const { db } = initializeDatabase({ path: dbPath });
 
     try {
