@@ -24,26 +24,22 @@ import {
 import { FileSystemSessionSource } from "../../../infrastructure/sources/index.js";
 
 /**
- * Test database path override.
- * When set, all database operations use this path instead of the default.
- */
-let testDbPath: string | null = null;
-
-/**
- * Set test database path override.
- *
- * @param path Path to use, or null to reset to default behavior
- */
-export function setTestDbPath(path: string | null): void {
-    testDbPath = path;
-}
-
-/**
  * Options for the status command.
  */
 export interface StatusOptions {
     /** Output as JSON */
     json?: boolean;
+}
+
+/**
+ * Runtime dependencies for executeStatusCommand.
+ *
+ * Operational dependencies that tests substitute for isolation.
+ * Defaults to production resolution when omitted.
+ */
+export interface StatusCommandDeps {
+    /** Database path. Defaults to getDefaultDbPath(). */
+    dbPath?: string;
 }
 
 /**
@@ -104,8 +100,11 @@ export function createStatusCommand(): Command {
  * @param options - Status command options
  * @returns CommandResult with exitCode 0 (always succeeds)
  */
-export async function executeStatusCommand(options: StatusOptions): Promise<CommandResult> {
-    const status = await gatherStatus();
+export async function executeStatusCommand(
+    options: StatusOptions,
+    deps: StatusCommandDeps = {}
+): Promise<CommandResult> {
+    const status = await gatherStatus({ dbPath: deps.dbPath });
 
     if (options.json) {
         console.log(JSON.stringify(status, null, 2));
@@ -137,7 +136,7 @@ export async function gatherStatus(options: GatherStatusOptions = {}): Promise<S
 
     // Get pending sessions count
     let pendingSessions = 0;
-    const dbPath = options.dbPath ?? testDbPath ?? getDefaultDbPath();
+    const dbPath = options.dbPath ?? getDefaultDbPath();
 
     // Only query database if it exists (don't create new one for status)
     if (existsSync(dbPath)) {
