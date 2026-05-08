@@ -16,7 +16,7 @@ import { installEnvOverrides, type PathEnvKey } from "./env-overrides.js";
 const KEYS_UNDER_TEST: readonly PathEnvKey[] = [
     "XDG_CONFIG_HOME",
     "XDG_DATA_HOME",
-    "MEMORY_FILES_DIR",
+    "MEMORY_HOME",
 ];
 
 describe("installEnvOverrides", () => {
@@ -45,11 +45,11 @@ describe("installEnvOverrides", () => {
 
     test("set() then cleanup() restores prior unset state", () => {
         const env = installEnvOverrides();
-        env.set("MEMORY_FILES_DIR", "/tmp/x");
-        expect(process.env.MEMORY_FILES_DIR).toBe("/tmp/x");
+        env.set("MEMORY_HOME", "/tmp/x");
+        expect(process.env.MEMORY_HOME).toBe("/tmp/x");
 
         env.cleanup();
-        expect(process.env.MEMORY_FILES_DIR).toBeUndefined();
+        expect(process.env.MEMORY_HOME).toBeUndefined();
     });
 
     test("set() then cleanup() restores prior set value", () => {
@@ -75,15 +75,15 @@ describe("installEnvOverrides", () => {
     });
 
     test("repeated set() on same key snapshots only once (original preserved)", () => {
-        process.env.MEMORY_FILES_DIR = "/start";
+        process.env.MEMORY_HOME = "/start";
 
         const env = installEnvOverrides();
-        env.set("MEMORY_FILES_DIR", "/mid");
-        env.set("MEMORY_FILES_DIR", "/end");
-        expect(process.env.MEMORY_FILES_DIR).toBe("/end");
+        env.set("MEMORY_HOME", "/mid");
+        env.set("MEMORY_HOME", "/end");
+        expect(process.env.MEMORY_HOME).toBe("/end");
 
         env.cleanup();
-        expect(process.env.MEMORY_FILES_DIR).toBe("/start");
+        expect(process.env.MEMORY_HOME).toBe("/start");
     });
 
     test("cleanup() restores ONLY keys touched (untouched keys unaffected)", () => {
@@ -107,15 +107,15 @@ describe("installEnvOverrides", () => {
 
     test("cleanup() is idempotent (second call is no-op)", () => {
         const env = installEnvOverrides();
-        env.set("MEMORY_FILES_DIR", "/tmp/y");
+        env.set("MEMORY_HOME", "/tmp/y");
 
         env.cleanup();
-        expect(process.env.MEMORY_FILES_DIR).toBeUndefined();
+        expect(process.env.MEMORY_HOME).toBeUndefined();
 
         // Mutate after cleanup; second cleanup must not undo it.
-        process.env.MEMORY_FILES_DIR = "/tmp/z";
+        process.env.MEMORY_HOME = "/tmp/z";
         env.cleanup();
-        expect(process.env.MEMORY_FILES_DIR).toBe("/tmp/z");
+        expect(process.env.MEMORY_HOME).toBe("/tmp/z");
     });
 
     test("set() then unset() then cleanup() restores prior value", () => {
@@ -134,11 +134,11 @@ describe("installEnvOverrides", () => {
         const a = installEnvOverrides();
         const b = installEnvOverrides();
 
-        a.set("MEMORY_FILES_DIR", "/a");
+        a.set("MEMORY_HOME", "/a");
         b.set("XDG_DATA_HOME", "/b");
 
         a.cleanup();
-        expect(process.env.MEMORY_FILES_DIR).toBeUndefined();
+        expect(process.env.MEMORY_HOME).toBeUndefined();
         // b's mutations untouched.
         expect(process.env.XDG_DATA_HOME).toBe("/b");
 

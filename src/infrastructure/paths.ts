@@ -113,16 +113,18 @@ export function getLegacyDir(): string {
  * and Claude, separate from the tool's own config/data.
  *
  * Resolution order:
- * 1. Test override (if set; deprecated -- prefer $MEMORY_FILES_DIR)
- * 2. $MEMORY_FILES_DIR (if set and non-empty)
+ * 1. Test override (if set; deprecated -- prefer $MEMORY_HOME)
+ * 2. $MEMORY_HOME (if set and non-empty)
  * 3. ~/.memory (default)
  *
- * Env-var semantics (consistent with XDG_CONFIG_HOME / XDG_DATA_HOME):
+ * Env-var semantics (GNUPGHOME / JAVA_HOME tradition: exact tool-root path,
+ * NOT the XDG_*_HOME "base + APP_NAME" convention):
+ *  - $MEMORY_HOME=/foo means the memory dir IS /foo, not /foo/memory
  *  - empty string is ignored (falls through to default)
  *  - no `~` expansion -- pass an absolute or fully-resolved path
  *  - relative paths are used as-is and resolved by the consuming syscall
  *
- * Use cases for $MEMORY_FILES_DIR (production, beyond tests):
+ * Use cases for $MEMORY_HOME (production, beyond tests):
  *  - sandboxed runs where you don't want to touch the user's real ~/.memory
  *  - container/CI workflows that need a writable location under a chosen mount
  *  - multi-instance setups (e.g., per-profile development)
@@ -133,7 +135,7 @@ export function getMemoryDir(): string {
     if (testOverrides?.memoryDir !== undefined) {
         return testOverrides.memoryDir;
     }
-    const env = process.env.MEMORY_FILES_DIR;
+    const env = process.env.MEMORY_HOME;
     if (env) return env;
     return join(homedir(), ".memory");
 }

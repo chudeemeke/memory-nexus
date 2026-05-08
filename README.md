@@ -69,11 +69,11 @@ memory browse
 | Config | `~/.config/memory/config.json` | `XDG_CONFIG_HOME` |
 | Database | `~/.local/share/memory/memory.db` | `XDG_DATA_HOME` |
 | Logs | `~/.local/share/memory/logs/` | `XDG_DATA_HOME` |
-| Memory files | `~/.memory/` | `MEMORY_FILES_DIR` |
+| Memory files | `~/.memory/` | `MEMORY_HOME` |
 
 Tool-managed paths follow the XDG Base Directory Specification. Override with `XDG_CONFIG_HOME` and `XDG_DATA_HOME`.
 
-The memory-files directory holds agent-written markdown (decisions, learnings, daily logs, per-project notes). Override with `MEMORY_FILES_DIR` for sandboxed runs, container/CI workflows, or multi-instance setups. Empty string is ignored; the path is used as-is (no `~` expansion).
+The memory-files directory holds agent-written markdown (decisions, learnings, daily logs, per-project notes). Override with `MEMORY_HOME` for sandboxed runs, container/CI workflows, or multi-instance setups. `MEMORY_HOME` follows the `GNUPGHOME` / `JAVA_HOME` tradition: the value is the exact directory path, not a base directory under which a subdirectory is appended. Empty string is ignored; no `~` expansion.
 
 ## AI-First Design
 

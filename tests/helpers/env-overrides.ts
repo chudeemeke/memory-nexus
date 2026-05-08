@@ -16,7 +16,7 @@
  * Usage:
  *   const env = installEnvOverrides();
  *   beforeEach(() => {
- *     env.set("MEMORY_FILES_DIR", tempDir);
+ *     env.set("MEMORY_HOME", tempDir);
  *   });
  *   afterEach(() => {
  *     env.cleanup();
@@ -42,7 +42,7 @@
 export type PathEnvKey =
     | "XDG_CONFIG_HOME"
     | "XDG_DATA_HOME"
-    | "MEMORY_FILES_DIR"
+    | "MEMORY_HOME"
     | "HOME"
     | "USERPROFILE";
 
