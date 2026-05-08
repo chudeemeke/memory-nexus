@@ -14,23 +14,25 @@ import { mkdirSync, writeFileSync, rmSync, mkdtempSync } from "node:fs";
 import { join } from "node:path";
 import { tmpdir } from "node:os";
 import { createTestDatabase, type TestDatabase } from "../helpers/test-database.js";
+import { installEnvOverrides, type EnvOverrides } from "../helpers/env-overrides.js";
 import { MemoryFileSyncService } from "../../src/application/services/memory-file-sync-service.js";
 import { MemoryFileScanner } from "../../src/infrastructure/sources/memory-file-scanner.js";
 import { SqliteMemoryFileRepository } from "../../src/infrastructure/database/repositories/memory-file-repository.js";
-import { setTestPaths, resetTestPaths } from "../../src/infrastructure/paths.js";
 
 describe("sync with memory files (integration)", () => {
   let testDb: TestDatabase;
   let memoryDir: string;
+  let env: EnvOverrides;
 
   beforeEach(() => {
     testDb = createTestDatabase();
     memoryDir = mkdtempSync(join(tmpdir(), "memory-test-memdir-"));
-    setTestPaths({ memoryDir });
+    env = installEnvOverrides();
+    env.set("MEMORY_HOME", memoryDir);
   });
 
   afterEach(() => {
-    resetTestPaths();
+    env.cleanup();
     testDb.cleanup();
     try {
       rmSync(memoryDir, { recursive: true, force: true });
