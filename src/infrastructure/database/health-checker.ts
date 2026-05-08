@@ -242,11 +242,12 @@ export function checkDirectoryPermissions(path: string): { readable: boolean; wr
  *
  * @param logPath Optional explicit log file path (used by tests to point
  *   at a fixture; production reads from the XDG-resolved path)
+ * @param configPath Optional explicit config file path (used by tests)
  * @returns Hook status including installation, enabled state, and last run
  */
-export function checkHookStatus(logPath?: string): HooksHealth {
+export function checkHookStatus(logPath?: string, configPath?: string): HooksHealth {
     const hookStatus = checkHooksInstalled();
-    const config = loadConfig();
+    const config = loadConfig(configPath);
     const logs = readRecentLogs(1, logPath);
 
     return {
@@ -264,13 +265,14 @@ const VALID_LOG_LEVELS = ["debug", "info", "warn", "error"];
 /**
  * Validate configuration and collect issues
  *
+ * @param configPath Optional explicit config file path (used by tests)
  * @returns Validity status and list of issues
  */
-export function checkConfigValidity(): ConfigHealth {
+export function checkConfigValidity(configPath?: string): ConfigHealth {
     const issues: string[] = [];
 
     try {
-        const config = loadConfig();
+        const config = loadConfig(configPath);
 
         // Validate each field type
         if (typeof config.autoSync !== "boolean") {
@@ -344,10 +346,11 @@ export function checkSqliteVecAvailability(): SqliteVecHealth {
  *
  * Loads config and returns the embedding section values.
  *
+ * @param configPath Optional explicit config file path (used by tests)
  * @returns Embedding health status
  */
-export function checkEmbeddingConfig(): EmbeddingHealth {
-    const config = loadConfig();
+export function checkEmbeddingConfig(configPath?: string): EmbeddingHealth {
+    const config = loadConfig(configPath);
     const embedding = config.embedding;
 
     // Determine provider readiness
@@ -407,8 +410,9 @@ export function runHealthCheck(overrides?: HealthCheckOverrides): HealthCheckRes
     const logsDirPath = overrides?.logsDir ?? getLogDir();
     const sourceDirPath = overrides?.sourceDir ?? join(homedir(), ".claude", "projects");
 
-    // Derive log file path from override (tests) or production path
+    // Derive log/config file paths from overrides (tests) or production paths
     const logPath = overrides?.logsDir ? join(overrides.logsDir, "sync.log") : undefined;
+    const configPath = overrides?.configDir ? join(overrides.configDir, "config.json") : undefined;
 
     const configDirPerms = checkDirectoryPermissions(configDirPath);
     const logsDirPerms = checkDirectoryPermissions(logsDirPath);
@@ -421,16 +425,16 @@ export function runHealthCheck(overrides?: HealthCheckOverrides): HealthCheckRes
     };
 
     // Hook status
-    const hooks = checkHookStatus(logPath);
+    const hooks = checkHookStatus(logPath, configPath);
 
     // Config validity
-    const config = checkConfigValidity();
+    const config = checkConfigValidity(configPath);
 
     // Load config once for embedding and search capability
-    const loadedConfig = loadConfig();
+    const loadedConfig = loadConfig(configPath);
 
     // Embedding config
-    const embedding = checkEmbeddingConfig();
+    const embedding = checkEmbeddingConfig(configPath);
 
     // sqlite-vec availability
     const sqliteVec = checkSqliteVecAvailability();

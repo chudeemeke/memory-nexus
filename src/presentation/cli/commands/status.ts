@@ -42,6 +42,8 @@ export interface StatusCommandDeps {
     dbPath?: string;
     /** Sync log file path. Defaults to XDG-resolved sync.log. */
     logPath?: string;
+    /** Config file path. Defaults to XDG-resolved config.json. */
+    configPath?: string;
 }
 
 /**
@@ -106,7 +108,11 @@ export async function executeStatusCommand(
     options: StatusOptions,
     deps: StatusCommandDeps = {}
 ): Promise<CommandResult> {
-    const status = await gatherStatus({ dbPath: deps.dbPath, logPath: deps.logPath });
+    const status = await gatherStatus({
+        dbPath: deps.dbPath,
+        logPath: deps.logPath,
+        configPath: deps.configPath,
+    });
 
     if (options.json) {
         console.log(JSON.stringify(status, null, 2));
@@ -125,6 +131,8 @@ export interface GatherStatusOptions {
     dbPath?: string;
     /** Override log file path for testing */
     logPath?: string;
+    /** Override config file path for testing */
+    configPath?: string;
 }
 
 /**
@@ -135,7 +143,7 @@ export interface GatherStatusOptions {
  */
 export async function gatherStatus(options: GatherStatusOptions = {}): Promise<StatusInfo> {
     const hooks = checkHooksInstalled();
-    const config = loadConfig();
+    const config = loadConfig(options.configPath);
     const logs = readRecentLogs(1, options.logPath); // Get most recent log entry
 
     // Get pending sessions count

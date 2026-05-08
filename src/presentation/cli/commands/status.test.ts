@@ -26,10 +26,7 @@ import {
     setTestPathOverrides,
     installHooks,
 } from "../../../infrastructure/hooks/settings-manager.js";
-import {
-    setTestConfigPath,
-    DEFAULT_CONFIG,
-} from "../../../infrastructure/hooks/config-manager.js";
+import { DEFAULT_CONFIG } from "../../../infrastructure/hooks/config-manager.js";
 import {
     setTestPaths,
     resetTestPaths,
@@ -69,8 +66,6 @@ describe("status command", () => {
             backupPath: testBackupPath,
             hookScriptPath: testHookScriptPath,
         });
-        setTestConfigPath(testConfigPath);
-
         // Capture console output
         logOutput = [];
         consoleLogSpy = spyOn(console, "log").mockImplementation((...args) => {
@@ -81,7 +76,6 @@ describe("status command", () => {
     afterEach(() => {
         // Reset path overrides
         setTestPathOverrides(null);
-        setTestConfigPath(null);
 
         // Restore console
         consoleLogSpy.mockRestore();
@@ -98,7 +92,7 @@ describe("status command", () => {
 
     describe("gatherStatus", () => {
         test("returns hook status when not installed", async () => {
-            const status = await gatherStatus({ dbPath: testDbPath, logPath: testLogPath });
+            const status = await gatherStatus({ dbPath: testDbPath, logPath: testLogPath, configPath: testConfigPath });
 
             expect(status.hooks.sessionEnd).toBe(false);
             expect(status.hooks.preCompact).toBe(false);
@@ -111,7 +105,7 @@ describe("status command", () => {
             mkdirSync(dirname(testHookScriptPath), { recursive: true });
             writeFileSync(testHookScriptPath, "// hook script");
 
-            const status = await gatherStatus({ dbPath: testDbPath, logPath: testLogPath });
+            const status = await gatherStatus({ dbPath: testDbPath, logPath: testLogPath, configPath: testConfigPath });
 
             expect(status.hooks.sessionEnd).toBe(true);
             expect(status.hooks.preCompact).toBe(true);
@@ -119,7 +113,7 @@ describe("status command", () => {
         });
 
         test("returns default config when no config file", async () => {
-            const status = await gatherStatus({ dbPath: testDbPath, logPath: testLogPath });
+            const status = await gatherStatus({ dbPath: testDbPath, logPath: testLogPath, configPath: testConfigPath });
 
             expect(status.config).toEqual(DEFAULT_CONFIG);
         });
@@ -131,14 +125,14 @@ describe("status command", () => {
                 timeout: 10000,
             }));
 
-            const status = await gatherStatus({ dbPath: testDbPath, logPath: testLogPath });
+            const status = await gatherStatus({ dbPath: testDbPath, logPath: testLogPath, configPath: testConfigPath });
 
             expect(status.config.autoSync).toBe(false);
             expect(status.config.timeout).toBe(10000);
         });
 
         test("returns null lastSync when no logs", async () => {
-            const status = await gatherStatus({ dbPath: testDbPath, logPath: testLogPath });
+            const status = await gatherStatus({ dbPath: testDbPath, logPath: testLogPath, configPath: testConfigPath });
 
             expect(status.lastSync).toBeNull();
         });
@@ -146,7 +140,7 @@ describe("status command", () => {
         test("handles missing database gracefully", async () => {
             // No database created, should not throw
             // Uses test database path passed via deps
-            const status = await gatherStatus({ dbPath: testDbPath, logPath: testLogPath });
+            const status = await gatherStatus({ dbPath: testDbPath, logPath: testLogPath, configPath: testConfigPath });
 
             expect(status.pendingSessions).toBe(0);
         });
@@ -333,7 +327,7 @@ describe("status command", () => {
 
     describe("executeStatusCommand", () => {
         test("displays formatted output by default", async () => {
-            await executeStatusCommand({}, { dbPath: testDbPath, logPath: testLogPath });
+            await executeStatusCommand({}, { dbPath: testDbPath, logPath: testLogPath, configPath: testConfigPath });
 
             expect(logOutput.join("\n")).toContain("Memory Status");
             expect(logOutput.join("\n")).toContain("Hooks:");
@@ -342,7 +336,7 @@ describe("status command", () => {
         });
 
         test("outputs JSON with --json flag", async () => {
-            await executeStatusCommand({ json: true }, { dbPath: testDbPath, logPath: testLogPath });
+            await executeStatusCommand({ json: true }, { dbPath: testDbPath, logPath: testLogPath, configPath: testConfigPath });
 
             // Should be valid JSON
             const output = logOutput.join("\n");
@@ -358,7 +352,7 @@ describe("status command", () => {
         test("JSON output contains hook status", async () => {
             installHooks();
 
-            await executeStatusCommand({ json: true }, { dbPath: testDbPath, logPath: testLogPath });
+            await executeStatusCommand({ json: true }, { dbPath: testDbPath, logPath: testLogPath, configPath: testConfigPath });
 
             const output = logOutput.join("\n");
             const parsed = JSON.parse(output);
@@ -445,7 +439,7 @@ describe("status command", () => {
         });
 
         test("JSON output includes embedding field", async () => {
-            await executeStatusCommand({ json: true }, { dbPath: testDbPath, logPath: testLogPath });
+            await executeStatusCommand({ json: true }, { dbPath: testDbPath, logPath: testLogPath, configPath: testConfigPath });
 
             const output = logOutput.join("\n");
             const parsed = JSON.parse(output);

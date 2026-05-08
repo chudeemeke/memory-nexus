@@ -14,20 +14,6 @@ import {
     getConfigPath as pathsGetConfigPath,
 } from "../paths.js";
 
-/**
- * Test path override for config file
- * When set, all config operations use this path instead of the default
- */
-let testConfigPath: string | null = null;
-
-/**
- * Set test config path override
- *
- * @param path Path to use, or null to reset to default behavior
- */
-export function setTestConfigPath(path: string | null): void {
-    testConfigPath = path;
-}
 
 /**
  * Embedding configuration data interface
@@ -240,25 +226,28 @@ export const DEFAULT_CONFIG: MemoryConfig = {
 };
 
 /**
- * Get the path to the config directory
+ * Get the path to the config directory.
  *
- * @returns Path to the config directory (or test override directory)
+ * @param configPathOverride Optional explicit config file path (used by
+ *   tests). The directory is derived from this path.
+ * @returns Path to the config directory
  */
-export function getConfigDir(): string {
-    if (testConfigPath !== null) {
-        return dirname(testConfigPath);
+export function getConfigDir(configPathOverride?: string): string {
+    if (configPathOverride !== undefined) {
+        return dirname(configPathOverride);
     }
     return pathsGetConfigDir();
 }
 
 /**
- * Get the path to the config file
+ * Get the path to the config file.
  *
- * @returns Path to config.json (or test override)
+ * @param configPathOverride Optional explicit config file path (used by tests)
+ * @returns Path to config.json
  */
-export function getConfigPath(): string {
-    if (testConfigPath !== null) {
-        return testConfigPath;
+export function getConfigPath(configPathOverride?: string): string {
+    if (configPathOverride !== undefined) {
+        return configPathOverride;
     }
     return pathsGetConfigPath();
 }
@@ -273,8 +262,8 @@ export function getConfigPath(): string {
  *
  * @returns Complete configuration with defaults applied
  */
-export function loadConfig(): MemoryConfig {
-    const configPath = getConfigPath();
+export function loadConfig(configPathOverride?: string): MemoryConfig {
+    const configPath = getConfigPath(configPathOverride);
 
     if (!existsSync(configPath)) {
         return { ...DEFAULT_CONFIG };
@@ -319,8 +308,8 @@ export function loadConfig(): MemoryConfig {
  *
  * @param config Partial configuration to save (merged with existing)
  */
-export function saveConfig(config: Partial<MemoryConfig>): void {
-    const configPath = getConfigPath();
+export function saveConfig(config: Partial<MemoryConfig>, configPathOverride?: string): void {
+    const configPath = getConfigPath(configPathOverride);
     const configDir = dirname(configPath);
 
     // Create directory if missing

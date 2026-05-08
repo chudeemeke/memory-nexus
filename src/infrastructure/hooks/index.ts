@@ -13,7 +13,6 @@ export {
     getConfigDir,
     DEFAULT_CONFIG,
     DEFAULT_EMBEDDING_CONFIG,
-    setTestConfigPath,
     type MemoryConfig,
     type EmbeddingConfigData,
 } from "./config-manager.js";

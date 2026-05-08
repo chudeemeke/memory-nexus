@@ -20,7 +20,6 @@ import {
     runHealthCheck,
     type HealthCheckResult,
 } from "./health-checker.js";
-import { setTestConfigPath } from "../hooks/config-manager.js";
 import { setTestPathOverrides } from "../hooks/settings-manager.js";
 import { initializeDatabase, closeDatabase } from "./connection.js";
 
@@ -37,7 +36,6 @@ describe("health-checker", () => {
         mkdirSync(join(testDir, ".claude"), { recursive: true });
 
         // Set test path overrides
-        setTestConfigPath(testConfigPath);
         setTestPathOverrides({
             settingsPath: testSettingsPath,
         });
@@ -45,7 +43,6 @@ describe("health-checker", () => {
 
     afterAll(() => {
         // Reset overrides
-        setTestConfigPath(null);
         setTestPathOverrides(null);
 
         // Clean up test directory
@@ -181,7 +178,7 @@ describe("health-checker", () => {
         });
 
         it("returns valid for default config (no config file)", () => {
-            const result = checkConfigValidity();
+            const result = checkConfigValidity(testConfigPath);
             expect(result.valid).toBe(true);
             expect(result.issues).toHaveLength(0);
         });
@@ -197,7 +194,7 @@ describe("health-checker", () => {
                 showFailures: false,
             }));
 
-            const result = checkConfigValidity();
+            const result = checkConfigValidity(testConfigPath);
             expect(result.valid).toBe(true);
             expect(result.issues).toHaveLength(0);
         });
@@ -207,7 +204,7 @@ describe("health-checker", () => {
                 autoSync: "yes", // Should be boolean
             }));
 
-            const result = checkConfigValidity();
+            const result = checkConfigValidity(testConfigPath);
             expect(result.valid).toBe(false);
             expect(result.issues).toContain("autoSync is not a boolean");
         });
@@ -217,7 +214,7 @@ describe("health-checker", () => {
                 logLevel: "verbose", // Invalid level
             }));
 
-            const result = checkConfigValidity();
+            const result = checkConfigValidity(testConfigPath);
             expect(result.valid).toBe(false);
             expect(result.issues.some(i => i.includes("logLevel"))).toBe(true);
         });
@@ -227,7 +224,7 @@ describe("health-checker", () => {
                 timeout: -100, // Negative
             }));
 
-            const result = checkConfigValidity();
+            const result = checkConfigValidity(testConfigPath);
             expect(result.valid).toBe(false);
             expect(result.issues.some(i => i.includes("timeout"))).toBe(true);
         });
@@ -237,7 +234,7 @@ describe("health-checker", () => {
                 timeout: "fast", // Not a number
             }));
 
-            const result = checkConfigValidity();
+            const result = checkConfigValidity(testConfigPath);
             expect(result.valid).toBe(false);
             expect(result.issues.some(i => i.includes("timeout"))).toBe(true);
         });
@@ -247,7 +244,7 @@ describe("health-checker", () => {
                 logRetentionDays: "forever", // Not a number
             }));
 
-            const result = checkConfigValidity();
+            const result = checkConfigValidity(testConfigPath);
             expect(result.valid).toBe(false);
             expect(result.issues.some(i => i.includes("logRetentionDays"))).toBe(true);
         });
@@ -257,7 +254,7 @@ describe("health-checker", () => {
                 showFailures: 1, // Should be boolean
             }));
 
-            const result = checkConfigValidity();
+            const result = checkConfigValidity(testConfigPath);
             expect(result.valid).toBe(false);
             expect(result.issues).toContain("showFailures is not a boolean");
         });
@@ -269,7 +266,7 @@ describe("health-checker", () => {
                 logLevel: "verbose",
             }));
 
-            const result = checkConfigValidity();
+            const result = checkConfigValidity(testConfigPath);
             expect(result.valid).toBe(false);
             expect(result.issues.length).toBeGreaterThanOrEqual(3);
         });
@@ -290,26 +287,26 @@ describe("health-checker", () => {
         it("returns installed=false when no hooks configured", () => {
             writeFileSync(testSettingsPath, JSON.stringify({}));
 
-            const result = checkHookStatus(testLogPath);
+            const result = checkHookStatus(testLogPath, testConfigPath);
             expect(result.installed).toBe(false);
         });
 
         it("returns enabled based on config autoSync", () => {
             writeFileSync(testConfigPath, JSON.stringify({ autoSync: true }));
 
-            const result = checkHookStatus(testLogPath);
+            const result = checkHookStatus(testLogPath, testConfigPath);
             expect(result.enabled).toBe(true);
         });
 
         it("returns enabled=false when autoSync disabled", () => {
             writeFileSync(testConfigPath, JSON.stringify({ autoSync: false }));
 
-            const result = checkHookStatus(testLogPath);
+            const result = checkHookStatus(testLogPath, testConfigPath);
             expect(result.enabled).toBe(false);
         });
 
         it("returns lastRun=null when no logs", () => {
-            const result = checkHookStatus(testLogPath);
+            const result = checkHookStatus(testLogPath, testConfigPath);
             expect(result.lastRun).toBeNull();
         });
 
@@ -322,7 +319,7 @@ describe("health-checker", () => {
                 message: "Sync complete",
             }) + "\n");
 
-            const result = checkHookStatus(testLogPath);
+            const result = checkHookStatus(testLogPath, testConfigPath);
             expect(result.lastRun).toBeInstanceOf(Date);
             expect(result.lastRun?.toISOString()).toBe(timestamp);
         });
@@ -459,7 +456,7 @@ describe("health-checker", () => {
         });
 
         it("returns default embedding config when no config file", () => {
-            const result = checkEmbeddingConfig();
+            const result = checkEmbeddingConfig(testConfigPath);
             expect(result.configured).toBe(true);
             expect(result.provider).toBe("local");
             expect(result.model).toBe("Xenova/all-MiniLM-L6-v2");
@@ -477,7 +474,7 @@ describe("health-checker", () => {
                 },
             }));
 
-            const result = checkEmbeddingConfig();
+            const result = checkEmbeddingConfig(testConfigPath);
             expect(result.configured).toBe(true);
             expect(result.provider).toBe("openai");
             expect(result.model).toBe("text-embedding-3-small");
@@ -486,14 +483,14 @@ describe("health-checker", () => {
         });
 
         it("includes ready and readyReason fields", () => {
-            const result = checkEmbeddingConfig();
+            const result = checkEmbeddingConfig(testConfigPath);
             expect(result).toHaveProperty("ready");
             expect(typeof result.ready).toBe("boolean");
         });
 
         it("returns ready: true for local provider", () => {
             // Default config is local provider
-            const result = checkEmbeddingConfig();
+            const result = checkEmbeddingConfig(testConfigPath);
             expect(result.ready).toBe(true);
             expect(result.readyReason).toBeUndefined();
         });
@@ -507,7 +504,7 @@ describe("health-checker", () => {
                 },
             }));
 
-            const result = checkEmbeddingConfig();
+            const result = checkEmbeddingConfig(testConfigPath);
             expect(result.ready).toBe(false);
             expect(result.readyReason).toBe("API key not set");
         });
@@ -522,7 +519,7 @@ describe("health-checker", () => {
                 },
             }));
 
-            const result = checkEmbeddingConfig();
+            const result = checkEmbeddingConfig(testConfigPath);
             expect(result.ready).toBe(true);
             expect(result.readyReason).toBeUndefined();
         });
@@ -536,7 +533,7 @@ describe("health-checker", () => {
                 },
             }));
 
-            const result = checkEmbeddingConfig();
+            const result = checkEmbeddingConfig(testConfigPath);
             expect(result.ready).toBe(true);
             expect(result.readyReason).toBe("Server reachability verified at sync time");
         });
@@ -549,7 +546,7 @@ describe("health-checker", () => {
                 },
             }));
 
-            const result = checkEmbeddingConfig();
+            const result = checkEmbeddingConfig(testConfigPath);
             expect(result.provider).toBe("openai");
             expect(result.model).toBe("text-embedding-3-small");
             expect(result.dimensions).toBe(1536);
@@ -563,7 +560,7 @@ describe("health-checker", () => {
                 },
             }));
 
-            const result = checkEmbeddingConfig();
+            const result = checkEmbeddingConfig(testConfigPath);
             expect(result.provider).toBe("ollama");
             expect(result.model).toBe("nomic-embed-text");
             expect(result.dimensions).toBe(768);
