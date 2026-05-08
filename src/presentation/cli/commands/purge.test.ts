@@ -10,10 +10,8 @@ import {
   createPurgeCommand,
   executePurgeCommand,
   parseDuration,
-  setConfirmationMock,
-  resetConfirmationMock,
-  setTestDbPath,
   type PurgeCommandOptions,
+  type PurgeCommandDeps,
 } from "./purge.js";
 import { SqliteSessionRepository } from "../../../infrastructure/database/repositories/session-repository.js";
 import { Session } from "../../../domain/entities/session.js";
@@ -214,6 +212,12 @@ describe("parseDuration", () => {
 describe("executePurgeCommand integration", () => {
   let testDir: string;
   let testDbPath: string;
+  let askConfirmation: PurgeCommandDeps["askConfirmation"];
+
+  /** Build deps for executePurgeCommand using current test state. */
+  function deps(): PurgeCommandDeps {
+    return { dbPath: testDbPath, askConfirmation };
+  }
   let consoleOutput: string[];
   let consoleErrorOutput: string[];
   let originalLog: typeof console.log;
@@ -237,11 +241,13 @@ describe("executePurgeCommand integration", () => {
   }
 
   beforeEach(() => {
+    // Reset confirmation override
+    askConfirmation = undefined;
+
     // Create unique test directory
     testDir = path.join(os.tmpdir(), `purge-test-${Date.now()}-${Math.random().toString(36).slice(2)}`);
     fs.mkdirSync(testDir, { recursive: true });
     testDbPath = path.join(testDir, "memory.db");
-    setTestDbPath(testDbPath);
 
     // Initialize database with schema
     const { db } = initializeDatabase({ path: testDbPath });
@@ -259,17 +265,12 @@ describe("executePurgeCommand integration", () => {
       consoleErrorOutput.push(args.map(String).join(" "));
     };
 
-    // Reset confirmation mock
-    resetConfirmationMock();
   });
 
   afterEach(() => {
     // Restore console
     console.log = originalLog;
     console.error = originalError;
-
-    // Reset test path
-    setTestDbPath(null);
 
     // Clean up test directory
     try {
@@ -286,7 +287,7 @@ describe("executePurgeCommand integration", () => {
         force: true,
       };
 
-      const result = await executePurgeCommand(options);
+      const result = await executePurgeCommand(options, deps());
 
       expect(consoleOutput.join("\n")).toContain("No sessions older than");
       expect(result.exitCode).toBe(0);
@@ -298,7 +299,7 @@ describe("executePurgeCommand integration", () => {
         json: true,
       };
 
-      await executePurgeCommand(options);
+      await executePurgeCommand(options, deps());
 
       const output = JSON.parse(consoleOutput.join("\n"));
       expect(output.sessionsDeleted).toBe(0);
@@ -319,7 +320,7 @@ describe("executePurgeCommand integration", () => {
         dryRun: true,
       };
 
-      await executePurgeCommand(options);
+      await executePurgeCommand(options, deps());
 
       const output = consoleOutput.join("\n");
       expect(output).toContain("Would delete 2 session(s)");
@@ -348,7 +349,7 @@ describe("executePurgeCommand integration", () => {
         json: true,
       };
 
-      await executePurgeCommand(options);
+      await executePurgeCommand(options, deps());
 
       const output = JSON.parse(consoleOutput.join("\n"));
       expect(output.sessionsToDelete).toBe(1);
@@ -370,7 +371,7 @@ describe("executePurgeCommand integration", () => {
         quiet: true,
       };
 
-      await executePurgeCommand(options);
+      await executePurgeCommand(options, deps());
 
       expect(consoleOutput).toEqual(["2"]);
     });
@@ -383,7 +384,7 @@ describe("executePurgeCommand integration", () => {
       closeDatabase(db);
 
       let promptCalled = false;
-      setConfirmationMock(async (message: string) => {
+      askConfirmation = (async (message: string) => {
         promptCalled = true;
         expect(message).toContain("Delete 1 session(s)");
         expect(message).toContain("y/n");
@@ -394,7 +395,7 @@ describe("executePurgeCommand integration", () => {
         olderThan: "365d",
       };
 
-      await executePurgeCommand(options);
+      await executePurgeCommand(options, deps());
 
       expect(promptCalled).toBe(true);
       expect(consoleOutput.join("\n")).toContain("cancelled");
@@ -405,13 +406,13 @@ describe("executePurgeCommand integration", () => {
       createTestSession(db, "old-1", "project-a", "2025-01-10T10:00:00Z");
       closeDatabase(db);
 
-      setConfirmationMock(async () => true);
+      askConfirmation = (async () => true);
 
       const options: PurgeCommandOptions = {
         olderThan: "365d",
       };
 
-      await executePurgeCommand(options);
+      await executePurgeCommand(options, deps());
 
       expect(consoleOutput.join("\n")).toContain("Deleted 1 session(s)");
 
@@ -429,14 +430,14 @@ describe("executePurgeCommand integration", () => {
       createTestSession(db, "old-1", "project-a", "2025-01-10T10:00:00Z");
       closeDatabase(db);
 
-      setConfirmationMock(async () => false);
+      askConfirmation = (async () => false);
 
       const options: PurgeCommandOptions = {
         olderThan: "365d",
         json: true,
       };
 
-      await executePurgeCommand(options);
+      await executePurgeCommand(options, deps());
 
       const output = JSON.parse(consoleOutput.join("\n"));
       expect(output.cancelled).toBe(true);
@@ -450,7 +451,7 @@ describe("executePurgeCommand integration", () => {
       closeDatabase(db);
 
       let promptCalled = false;
-      setConfirmationMock(async () => {
+      askConfirmation = (async () => {
         promptCalled = true;
         return false;
       });
@@ -460,7 +461,7 @@ describe("executePurgeCommand integration", () => {
         force: true,
       };
 
-      await executePurgeCommand(options);
+      await executePurgeCommand(options, deps());
 
       expect(promptCalled).toBe(false);
       expect(consoleOutput.join("\n")).toContain("Deleted 1 session(s)");
@@ -480,7 +481,7 @@ describe("executePurgeCommand integration", () => {
         force: true,
       };
 
-      await executePurgeCommand(options);
+      await executePurgeCommand(options, deps());
 
       expect(consoleOutput.join("\n")).toContain("Deleted 2 session(s)");
 
@@ -504,7 +505,7 @@ describe("executePurgeCommand integration", () => {
         json: true,
       };
 
-      await executePurgeCommand(options);
+      await executePurgeCommand(options, deps());
 
       const output = JSON.parse(consoleOutput.join("\n"));
       expect(output.sessionsDeleted).toBe(1);
@@ -524,7 +525,7 @@ describe("executePurgeCommand integration", () => {
         quiet: true,
       };
 
-      await executePurgeCommand(options);
+      await executePurgeCommand(options, deps());
 
       expect(consoleOutput).toEqual(["2"]);
     });
@@ -537,7 +538,7 @@ describe("executePurgeCommand integration", () => {
         force: true,
       };
 
-      const result = await executePurgeCommand(options);
+      const result = await executePurgeCommand(options, deps());
 
       expect(consoleErrorOutput.join("\n")).toContain("Invalid duration format");
       expect(result.exitCode).toBe(1);
@@ -549,7 +550,7 @@ describe("executePurgeCommand integration", () => {
         json: true,
       };
 
-      const result = await executePurgeCommand(options);
+      const result = await executePurgeCommand(options, deps());
 
       const output = JSON.parse(consoleOutput.join("\n"));
       expect(output.error).toContain("Invalid duration format");

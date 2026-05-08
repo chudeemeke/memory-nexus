@@ -17,21 +17,6 @@ import {
 import { shouldUseColor } from "../formatters/color.js";
 
 /**
- * Test database path override.
- * When set, all database operations use this path instead of the default.
- */
-let testDbPath: string | null = null;
-
-/**
- * Set test database path override.
- *
- * @param path Path to use, or null to reset to default behavior
- */
-export function setTestDbPath(path: string | null): void {
-  testDbPath = path;
-}
-
-/**
  * Options for the purge command.
  */
 export interface PurgeCommandOptions {
@@ -136,23 +121,17 @@ async function askConfirmation(message: string): Promise<boolean> {
   });
 }
 
-// Allow mocking for tests
-let askConfirmationFn = askConfirmation;
-
 /**
- * Set mock confirmation function for testing.
+ * Runtime dependencies for executePurgeCommand.
  *
- * @param fn - Mock function to use for confirmation
+ * Operational dependencies that tests substitute for isolation.
+ * Defaults to production resolution when omitted.
  */
-export function setConfirmationMock(fn: (message: string) => Promise<boolean>): void {
-  askConfirmationFn = fn;
-}
-
-/**
- * Reset confirmation function to default.
- */
-export function resetConfirmationMock(): void {
-  askConfirmationFn = askConfirmation;
+export interface PurgeCommandDeps {
+  /** Database path. Defaults to getDefaultDbPath(). */
+  dbPath?: string;
+  /** Confirmation prompt. Defaults to readline-based askConfirmation. */
+  askConfirmation?: (message: string) => Promise<boolean>;
 }
 
 /**
@@ -189,7 +168,11 @@ export function createPurgeCommand(): Command {
  * @param options - Purge command options (olderThan is required)
  * @returns CommandResult with exitCode 0 (success) or 1 (error)
  */
-export async function executePurgeCommand(options: PurgeCommandOptions): Promise<CommandResult> {
+export async function executePurgeCommand(
+  options: PurgeCommandOptions,
+  deps: PurgeCommandDeps = {}
+): Promise<CommandResult> {
+  const askConfirmFn = deps.askConfirmation ?? askConfirmation;
   // Parse duration
   let cutoffDate: Date;
   try {
@@ -204,7 +187,7 @@ export async function executePurgeCommand(options: PurgeCommandOptions): Promise
     return { exitCode: 1 };
   }
 
-  const dbPath = testDbPath ?? getDefaultDbPath();
+  const dbPath = deps.dbPath ?? getDefaultDbPath();
   let db;
 
   try {
@@ -286,7 +269,7 @@ export async function executePurgeCommand(options: PurgeCommandOptions): Promise
     // If not force, prompt for confirmation
     if (!options.force) {
       const formattedDate = formatCutoffDate(cutoffDate);
-      const confirmed = await askConfirmationFn(
+      const confirmed = await askConfirmFn(
         `Delete ${count} session(s) older than ${formattedDate}? This cannot be undone. (y/n) `
       );
 
