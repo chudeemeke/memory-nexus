@@ -19,45 +19,24 @@ import {
     getHookDir,
     getBackupDir,
     getCheckpointPath,
-    setTestPaths,
-    resetTestPaths,
 } from "./paths.js";
+import { installEnvOverrides, type EnvOverrides } from "../../tests/helpers/env-overrides.js";
 
 describe("paths", () => {
     const home = homedir();
-
-    // Save and restore env vars touched by these tests
-    let savedXdgConfigHome: string | undefined;
-    let savedXdgDataHome: string | undefined;
-    let savedMemoryHome: string | undefined;
+    let env: EnvOverrides;
 
     beforeEach(() => {
-        savedXdgConfigHome = process.env.XDG_CONFIG_HOME;
-        savedXdgDataHome = process.env.XDG_DATA_HOME;
-        savedMemoryHome = process.env.MEMORY_HOME;
-        delete process.env.XDG_CONFIG_HOME;
-        delete process.env.XDG_DATA_HOME;
-        delete process.env.MEMORY_HOME;
-        resetTestPaths();
+        env = installEnvOverrides();
+        // Start each test with these env vars unset so the default branches
+        // are exercised. Tests that need a value use env.set() explicitly.
+        env.unset("XDG_CONFIG_HOME");
+        env.unset("XDG_DATA_HOME");
+        env.unset("MEMORY_HOME");
     });
 
     afterEach(() => {
-        if (savedXdgConfigHome !== undefined) {
-            process.env.XDG_CONFIG_HOME = savedXdgConfigHome;
-        } else {
-            delete process.env.XDG_CONFIG_HOME;
-        }
-        if (savedXdgDataHome !== undefined) {
-            process.env.XDG_DATA_HOME = savedXdgDataHome;
-        } else {
-            delete process.env.XDG_DATA_HOME;
-        }
-        if (savedMemoryHome !== undefined) {
-            process.env.MEMORY_HOME = savedMemoryHome;
-        } else {
-            delete process.env.MEMORY_HOME;
-        }
-        resetTestPaths();
+        env.cleanup();
     });
 
     describe("getConfigDir", () => {
@@ -170,70 +149,6 @@ describe("paths", () => {
         });
     });
 
-    describe("test override mechanism", () => {
-        test("setTestPaths overrides config dir", () => {
-            setTestPaths({ configDir: "/test/config" });
-            expect(getConfigDir()).toBe("/test/config");
-        });
-
-        test("setTestPaths overrides data dir", () => {
-            setTestPaths({ dataDir: "/test/data" });
-            expect(getDataDir()).toBe("/test/data");
-        });
-
-        test("setTestPaths overrides both independently", () => {
-            setTestPaths({ configDir: "/test/config", dataDir: "/test/data" });
-            expect(getConfigDir()).toBe("/test/config");
-            expect(getDataDir()).toBe("/test/data");
-        });
-
-        test("partial override: config only leaves data at default", () => {
-            setTestPaths({ configDir: "/test/config" });
-            expect(getDataDir()).toBe(join(home, ".local", "share", "memory"));
-        });
-
-        test("partial override: data only leaves config at default", () => {
-            setTestPaths({ dataDir: "/test/data" });
-            expect(getConfigDir()).toBe(join(home, ".config", "memory"));
-        });
-
-        test("derived paths use overridden dirs", () => {
-            setTestPaths({ configDir: "/test/config", dataDir: "/test/data" });
-            expect(getConfigPath()).toBe(join("/test/config", "config.json"));
-            expect(getDbPath()).toBe(join("/test/data", "memory.db"));
-            expect(getLogDir()).toBe(join("/test/data", "logs"));
-        });
-
-        test("resetTestPaths restores default behavior", () => {
-            setTestPaths({ configDir: "/test/config", dataDir: "/test/data" });
-            resetTestPaths();
-            expect(getConfigDir()).toBe(join(home, ".config", "memory"));
-            expect(getDataDir()).toBe(join(home, ".local", "share", "memory"));
-        });
-
-        test("test override takes precedence over XDG vars", () => {
-            process.env.XDG_CONFIG_HOME = "/xdg/config";
-            setTestPaths({ configDir: "/test/config" });
-            expect(getConfigDir()).toBe("/test/config");
-        });
-
-        test("getLegacyDir is not affected by test overrides", () => {
-            setTestPaths({ configDir: "/test/config", dataDir: "/test/data" });
-            expect(getLegacyDir()).toBe(join(home, ".memory-nexus"));
-        });
-
-        test("setTestPaths overrides memory dir", () => {
-            setTestPaths({ memoryDir: "/tmp/test-memory" });
-            expect(getMemoryDir()).toBe("/tmp/test-memory");
-        });
-
-        test("resetTestPaths restores getMemoryDir default", () => {
-            setTestPaths({ memoryDir: "/tmp/test-memory" });
-            resetTestPaths();
-            expect(getMemoryDir()).toBe(join(home, ".memory"));
-        });
-    });
-
     describe("getMemoryDir", () => {
         test("returns ~/.memory by default", () => {
             const memoryDir = getMemoryDir();
@@ -251,22 +166,22 @@ describe("paths", () => {
         });
 
         test("respects MEMORY_HOME when set", () => {
-            process.env.MEMORY_HOME = "/custom/memory";
+            env.set("MEMORY_HOME", "/custom/memory");
             expect(getMemoryDir()).toBe("/custom/memory");
         });
 
         test("ignores empty MEMORY_HOME (falls through to default)", () => {
-            process.env.MEMORY_HOME = "";
+            env.set("MEMORY_HOME", "");
             expect(getMemoryDir()).toBe(join(home, ".memory"));
         });
 
         test("falls back to ~/.memory when MEMORY_HOME is unset", () => {
-            delete process.env.MEMORY_HOME;
+            // unset already done in beforeEach; assert behaviour explicitly
             expect(getMemoryDir()).toBe(join(home, ".memory"));
         });
 
         test("MEMORY_HOME does not affect getConfigDir or getDataDir", () => {
-            process.env.MEMORY_HOME = "/custom/memory";
+            env.set("MEMORY_HOME", "/custom/memory");
             expect(getConfigDir()).toBe(join(home, ".config", "memory"));
             expect(getDataDir()).toBe(join(home, ".local", "share", "memory"));
         });
@@ -274,14 +189,13 @@ describe("paths", () => {
         test("MEMORY_HOME uses value as-is (no ~ expansion, no APP_NAME suffix)", () => {
             // GNUPGHOME-style: $MEMORY_HOME=/foo means the memory dir IS /foo,
             // not /foo/memory. Diverges from XDG_*_HOME base+APP_NAME convention.
-            process.env.MEMORY_HOME = "/exact/path";
+            env.set("MEMORY_HOME", "/exact/path");
             expect(getMemoryDir()).toBe("/exact/path");
         });
 
-        test("test override takes precedence over MEMORY_HOME", () => {
-            process.env.MEMORY_HOME = "/env/memory";
-            setTestPaths({ memoryDir: "/test/memory" });
-            expect(getMemoryDir()).toBe("/test/memory");
+        test("getLegacyDir ignores MEMORY_HOME", () => {
+            env.set("MEMORY_HOME", "/custom/memory");
+            expect(getLegacyDir()).toBe(join(home, ".memory-nexus"));
         });
     });
 });
