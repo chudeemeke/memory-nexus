@@ -18,7 +18,7 @@ import { homedir } from "node:os";
 import {
     executeInstallCommand,
     findHookScriptSource,
-    setTestHookScriptSourceOverride,
+    type InstallCommandDeps,
 } from "./install.js";
 import { setTestPathOverrides } from "../../../infrastructure/hooks/settings-manager.js";
 
@@ -56,9 +56,6 @@ describe("install command", () => {
             hookScriptPath: testHookScriptPath,
         });
 
-        // Set hook script source override
-        setTestHookScriptSourceOverride(mockHookScriptPath);
-
         // Capture console output
         logOutput = [];
         errorOutput = [];
@@ -73,7 +70,6 @@ describe("install command", () => {
     afterEach(() => {
         // Reset path overrides
         setTestPathOverrides(null);
-        setTestHookScriptSourceOverride(null);
 
         // Restore console
         consoleLogSpy.mockRestore();
@@ -87,7 +83,7 @@ describe("install command", () => {
 
     describe("executeInstallCommand", () => {
         test("installs hooks successfully when not already installed", async () => {
-            await executeInstallCommand({});
+            await executeInstallCommand({}, { hookScriptSourceOverride: mockHookScriptPath });
 
             // Check settings.json was created with hooks
             expect(existsSync(testSettingsPath)).toBe(true);
@@ -106,11 +102,11 @@ describe("install command", () => {
 
         test("skips installation when hooks already installed", async () => {
             // First install
-            await executeInstallCommand({});
+            await executeInstallCommand({}, { hookScriptSourceOverride: mockHookScriptPath });
             logOutput = []; // Clear output
 
             // Try to install again
-            await executeInstallCommand({});
+            await executeInstallCommand({}, { hookScriptSourceOverride: mockHookScriptPath });
 
             expect(logOutput.join("\n")).toContain("Hooks are already installed");
             expect(logOutput.join("\n")).toContain("Use --force to reinstall");
@@ -118,11 +114,11 @@ describe("install command", () => {
 
         test("reinstalls when --force is used", async () => {
             // First install
-            await executeInstallCommand({});
+            await executeInstallCommand({}, { hookScriptSourceOverride: mockHookScriptPath });
             logOutput = []; // Clear output
 
             // Force reinstall
-            await executeInstallCommand({ force: true });
+            await executeInstallCommand({ force: true }, { hookScriptSourceOverride: mockHookScriptPath });
 
             expect(logOutput.join("\n")).toContain("Hooks already installed");
         });
@@ -135,7 +131,7 @@ describe("install command", () => {
                 JSON.stringify({ existingSetting: "value" })
             );
 
-            await executeInstallCommand({});
+            await executeInstallCommand({}, { hookScriptSourceOverride: mockHookScriptPath });
 
             // Check backup was created
             expect(existsSync(testBackupPath)).toBe(true);
@@ -151,7 +147,7 @@ describe("install command", () => {
                 JSON.stringify({ keepThis: "preserved" })
             );
 
-            await executeInstallCommand({});
+            await executeInstallCommand({}, { hookScriptSourceOverride: mockHookScriptPath });
 
             const settings = JSON.parse(readFileSync(testSettingsPath, "utf-8"));
             expect(settings.keepThis).toBe("preserved");
@@ -159,10 +155,10 @@ describe("install command", () => {
         });
 
         test("reports error when hook script source not found", async () => {
-            // Set override to a non-existent path
-            setTestHookScriptSourceOverride(join(testBaseDir, "nonexistent", "sync-hook.js"));
-
-            const result = await executeInstallCommand({});
+            // Pass a non-existent override path
+            const result = await executeInstallCommand({}, {
+                hookScriptSourceOverride: join(testBaseDir, "nonexistent", "sync-hook.js"),
+            });
 
             expect(errorOutput.join("\n")).toContain("Hook script not found");
             expect(result.exitCode).toBe(1);
@@ -192,7 +188,7 @@ describe("install command", () => {
                 })
             );
 
-            await executeInstallCommand({ force: true });
+            await executeInstallCommand({ force: true }, { hookScriptSourceOverride: mockHookScriptPath });
 
             const allError = errorOutput.join("\n");
             expect(allError).toContain("Stale memory-nexus hook references detected");
@@ -202,7 +198,7 @@ describe("install command", () => {
 
         test("does not warn when settings contain only new memory hooks", async () => {
             // Install fresh hooks (uses new "memory" marker, not "memory-nexus")
-            await executeInstallCommand({});
+            await executeInstallCommand({}, { hookScriptSourceOverride: mockHookScriptPath });
 
             const allError = errorOutput.join("\n");
             expect(allError).not.toContain("Stale memory-nexus hook references detected");
@@ -213,7 +209,7 @@ describe("install command", () => {
             mkdirSync(dirname(testSettingsPath), { recursive: true });
             writeFileSync(testSettingsPath, JSON.stringify({}));
 
-            await executeInstallCommand({});
+            await executeInstallCommand({}, { hookScriptSourceOverride: mockHookScriptPath });
 
             const allError = errorOutput.join("\n");
             expect(allError).not.toContain("Stale memory-nexus hook references detected");
@@ -222,20 +218,16 @@ describe("install command", () => {
 
     describe("findHookScriptSource", () => {
         test("uses override when set", () => {
-            // Override is already set in beforeEach
-            const result = findHookScriptSource();
+            const result = findHookScriptSource(mockHookScriptPath);
             expect(result).toBe(mockHookScriptPath);
         });
 
         test("returns null when override path does not exist", () => {
-            setTestHookScriptSourceOverride(join(testBaseDir, "nonexistent", "sync-hook.js"));
-            const result = findHookScriptSource();
+            const result = findHookScriptSource(join(testBaseDir, "nonexistent", "sync-hook.js"));
             expect(result).toBeNull();
         });
 
-        test("checks default paths when no override set", () => {
-            setTestHookScriptSourceOverride(null);
-
+        test("checks default paths when no override provided", () => {
             // The actual project has dist/sync-hook.js, so this should find it
             const result = findHookScriptSource();
 

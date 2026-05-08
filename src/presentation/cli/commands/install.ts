@@ -25,18 +25,17 @@ export interface InstallOptions {
 }
 
 /**
- * Path override for testing.
- * When set, findHookScriptSource will only check this path.
- */
-let testHookScriptSourceOverride: string | null = null;
-
-/**
- * Set hook script source path override for testing.
+ * Runtime dependencies for executeInstallCommand.
  *
- * @param path Path to use, or null to reset to default behavior
+ * Operational dependencies that tests substitute for isolation.
+ * Defaults to production resolution (multi-path candidate search) when omitted.
  */
-export function setTestHookScriptSourceOverride(path: string | null): void {
-    testHookScriptSourceOverride = path;
+export interface InstallCommandDeps {
+    /**
+     * Override the hook script source path. When set, findHookScriptSource
+     * checks only this path. Used by tests to point at a fixture file.
+     */
+    hookScriptSourceOverride?: string;
 }
 
 /**
@@ -64,7 +63,10 @@ export function createInstallCommand(): Command {
  * @param options - Install command options
  * @returns CommandResult with exitCode 0 (success/already installed) or 1 (error)
  */
-export async function executeInstallCommand(options: InstallOptions): Promise<CommandResult> {
+export async function executeInstallCommand(
+    options: InstallOptions,
+    deps: InstallCommandDeps = {}
+): Promise<CommandResult> {
     const status = checkHooksInstalled();
 
     // Check if already installed
@@ -79,7 +81,7 @@ export async function executeInstallCommand(options: InstallOptions): Promise<Co
     mkdirSync(dirname(hookScriptDest), { recursive: true });
 
     // Find built hook script (from package or relative path)
-    const hookScriptSrc = findHookScriptSource();
+    const hookScriptSrc = findHookScriptSource(deps.hookScriptSourceOverride);
     if (!hookScriptSrc) {
         console.error("Error: Hook script not found. Run 'bun run build:hook' first.");
         return { exitCode: 1 };
@@ -150,17 +152,16 @@ export function warnStaleHookReferences(): void {
 /**
  * Find the hook script source file.
  *
- * Checks common locations for the built hook script.
- * Uses test override if set.
+ * Checks common locations for the built hook script. When `override` is
+ * provided, checks only that path (used by tests to point at a fixture).
  *
+ * @param override Optional explicit path to use instead of candidate search
  * @returns Path to hook script or null if not found
  */
-export function findHookScriptSource(): string | null {
-    // Use test override if set
-    if (testHookScriptSourceOverride !== null) {
-        return existsSync(testHookScriptSourceOverride)
-            ? testHookScriptSourceOverride
-            : null;
+export function findHookScriptSource(override?: string): string | null {
+    // Use override if provided
+    if (override !== undefined) {
+        return existsSync(override) ? override : null;
     }
 
     // When running from source, look relative to this file
