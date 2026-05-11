@@ -6,7 +6,8 @@ type: enhancement
 severity: medium
 fix_status: none
 affects_scope: this-project-only
-status: open
+status: triaged
+triaged_at: 2026-05-11
 closure_notify_to: conversations
 closure_notify_reason: The audit's recommendation determines which architecture (A specialized + agent-as-router / B federation router / C surgical consolidation) from the conversations memory architecture inventory becomes load-bearing for memory tooling decisions across all projects. Outcome shapes whether memory-nexus targets a v5.0 federation milestone, accepts narrow-scope steady state, or stops at v4.0.
 ---
@@ -117,5 +118,51 @@ Acceptance: audit document landed, cross-AI reviewed, recommendation explicit, c
 
 - **Source doc:** `~/Projects/conversations/docs/research/2026-05-08-memory-architecture-inventory.md` (full surface catalogue + three-architecture analysis with §8.5 correction log + §10 documentation-vs-reality drift insight)
 - **User worry origin:** conversations session 2026-05-07 → 2026-05-08
-- **Companion prompt (smaller scope, can ship first):** `2026-05-08-conversations-friction-primacy-decision.md`
+- **Companion prompt (smaller scope, shipped first):** `archived/2026-05-08-conversations-friction-primacy-decision.md` (MERGED 2026-05-11)
 - **Anti-bias rules to brief subagents on:** `~/.claude/rules/first-principles-before-options.md`, `~/.claude/rules/subagent-trust-calibration.md`, `~/.claude/rules/feedback_cross_ai_review.md` (project-scoped in conversations)
+
+---
+
+## Disposition (2026-05-11) — TRIAGED (audit scheduled, not yet run)
+
+**Status set to `triaged`. Schedule committed: audit runs as next major work item, before Phase 33 (Knowledge Extraction Foundation) and before Phase 37 (Publishing).**
+
+Codex-reviewed (gpt-5.5 high) via:
+- `~/Projects/memory-nexus/.planning/reviews/2026-05-11-architecture-audit-disposition-plan.md`
+- `~/Projects/memory-nexus/.planning/reviews/2026-05-11-architecture-audit-disposition-codex-review.md`
+
+Nine pushbacks integrated. Most important changes from initial draft:
+
+1. **Phase 32 trigger demoted to secondary.** Hard gates are Phase 33/34 (extraction model commitments) and Phase 37 (npm publishing). Phase 32 is between-phase scheduling support, not the architectural reason.
+2. **No counter-notification sent yet.** Per cross-project-issues v1.2 protocol, `closure_notify_to` fires only on terminal transition (`merged` or `rejected`). Triaged is not terminal.
+3. **Five candidate outcomes, not three.** Original A/B/C from the inbox item expanded to include D (freeze at v4.0) and E (deprecate / replace). Excluding deprecation biases the audit toward self-justification.
+4. **Cross-AI review capped at 2 calls.** Plan review before execution + final recommendation review before closing. NOT every intermediate subagent synthesis (process theater).
+5. **Durable plan artifact created** at `~/Projects/memory-nexus/.planning/audits/2026-05-11-architecture-first-principles-audit-plan.md`. The inbox file alone is not enough — open inbox files are WIP and the schedule must survive context loss. The durable plan restates the user's worry verbatim, the subagent brief framing verbatim, and the candidate outcomes.
+6. **Subagent brief framing restated verbatim in the plan**, not by reference. References rot under context loss.
+7. **Initial hypothesis quarantined.** A prior toward outcome C (consolidation) is recorded in the plan's §11, explicitly labeled "PRIOR, not recommendation" and held to a higher standard if the audit lands on C.
+
+### What happens next
+
+Next major work session in memory-nexus:
+1. Audit kicks off — inbox status transitions `triaged` → `in-progress`, plan artifact's `Status` field transitions `scheduled` → `in-progress`.
+2. Audit doc drafted at `docs/audits/2026-XX-XX-architecture-first-principles-audit.md` per the plan's §14.
+3. Cross-AI review #1 (audit plan).
+4. Subagents spawned per §7-8 of the plan, with verbatim briefs.
+5. Recommendation drafted.
+6. Cross-AI review #2 (recommendation).
+7. Inbox status `merged`, file moved to `archived/`, counter-notify sent to conversations with the recommendation + concrete next-phase plan.
+
+### Why this stays open (not archived)
+
+The inbox file documents the audit's TRIAGE, but the AUDIT ITSELF has not run. Per cross-project-issues protocol, terminal-state files move to `archived/`. This file moves only when the audit's recommendation lands and conversations is notified. Until then, it surfaces via the session-start inbox hook as a `triaged` item needing follow-through.
+
+### Durable schedule pointer
+
+See `~/Projects/memory-nexus/.planning/audits/2026-05-11-architecture-first-principles-audit-plan.md` for:
+- User worry verbatim (load-bearing)
+- Hard schedule gates (before Phase 33, before Phase 37)
+- All 5 candidate outcomes
+- Mandatory subagent brief framing (anti-bias, cross-session context, path-claim verification)
+- Cross-AI review cap (2 calls)
+- The initial hypothesis (quarantined prior)
+- The 10-step kickoff sequence
