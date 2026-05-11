@@ -1,9 +1,10 @@
 # First-Principles Architecture Audit of memory-nexus
 
-**Status:** in-progress (phase-level plan drafted; awaiting codex review #1 of 2)
+**Status:** in-progress (phase-level plan revised post codex review #1; ready for Stage 0)
 **Started:** 2026-05-11
 **Durable plan artifact:** `.planning/audits/2026-05-11-architecture-first-principles-audit-plan.md`
 **Source inbox item:** `docs/inbox/2026-05-08-conversations-first-principles-architecture-audit.md`
+**Codex review #1 of 2:** integrated 2026-05-11 (verdict was BLOCK; all 8 findings addressed below)
 
 ---
 
@@ -17,7 +18,7 @@ This is THE load-bearing signal. Any subagent brief, any internal disposition, a
 
 ---
 
-## 1. Acceptance criteria (carried from durable plan §3)
+## 1. Acceptance criteria
 
 1. This audit document landed with all sections filled
 2. Cross-AI adversarial review of the audit plan AND final recommendation recorded (capped at 2 calls per durable plan §9)
@@ -26,7 +27,7 @@ This is THE load-bearing signal. Any subagent brief, any internal disposition, a
 
 ---
 
-## 2. Five candidate outcomes (from durable plan §4)
+## 2. Five candidate outcomes
 
 | Outcome | Meaning |
 |---|---|
@@ -40,29 +41,66 @@ The audit MUST explicitly evaluate ALL FIVE before recommending.
 
 ---
 
-# PART I — Phase-level Audit Plan (drafted 2026-05-11, awaiting codex review)
+# PART I — Phase-level Audit Plan (revised 2026-05-11 post codex review #1)
 
-This is the plan that gets codex-reviewed before any subagent spawns. Once codex pushback is integrated and locked, execution begins.
+Codex review #1 returned BLOCK with 8 findings. Full review: `.planning/reviews/2026-05-11-architecture-audit-phase-plan-codex-review.md`.
 
-## 3. First-principles derivation framework
+Revisions integrated below:
 
-### 3.1 The discipline (mandatory)
+| # | Codex finding | Integrated in |
+|---|---|---|
+| 1 | Stage 0 missing — derivation order let CLI surface frame the audit | §3 Execution stages + §3.0 Stage 0 deliverable |
+| 2 | Adjacent-system research was memory-nexus-aware | §5 (independent per-system summaries; no incumbent comparison inside writeups) |
+| 3 | CLI subagents over-weighted; architecture-evidence pass missing | §6.5 architecture-evidence pass added |
+| 4 | Subagent vs main-session contradiction for reference research | §5.2 (main session owns it) |
+| 5 | Evidence standards under-specified | §8 evidence standards section |
+| 6 | Decision rubric lacks thresholds | §9 expanded with explicit decision tests |
+| 7 | MemPalace not pinned | §5.1 fallback rule defined |
+| 8 | State drift across inbox/STATE/durable plan | §12 state reconciliation note |
+
+## 3. Execution stages (per codex finding #1)
+
+The original plan let memory-nexus's command surface and adjacent systems' designs anchor the audit before any truths were derived. Revised order inverts this:
+
+| Stage | What | Owner | Anchoring risk |
+|---|---|---|---|
+| **Stage 0** | Derive PROVISIONAL irreducible truths + provisional minimum structure from user worry + general agent-memory requirements ONLY. No memory-nexus inspection, no adjacent-system research yet. | Main session | Lowest — no incumbent or external bias |
+| **Stage 1a** | Memory-nexus CLI surface verification (4 parallel subagents A-D, §6.1-6.4) — evaluate against Stage 0 truths | Subagents | Bounded — subagents see Stage 0 truths as lens |
+| **Stage 1b** | Architecture-evidence pass (§6.5) — storage model, taxonomy, capture-to-retrieval flow, consolidation/supersedence/deletion/export, AI-readability, cross-project/machine boundaries, doc/code/roadmap drift. **Produces evidence map, NOT verdict.** | 5th subagent OR main session | Bounded — separate from command surface |
+| **Stage 2** | Adjacent-system research (Hermes / OpenClaw / Mem0 / MemPalace). **Independent per-system summaries against Stage 0 truths.** No memory-nexus comparison inside per-system writeups. | Main session, with strict source citations | Independent of incumbent |
+| **Stage 3** | Synthesis (§7): refine truths against accumulated evidence, fill comparison matrix, gap analysis, apply §9 thresholds, recommend | Main session | Mitigated by §8 evidence standards |
+
+Provisional truths from Stage 0 are revised in Stage 3 ONLY when Stage 1/2 evidence disproves them. Each revision must cite the disproving evidence per §8 standards.
+
+### 3.0 Stage 0 deliverable (gate before any subagent spawn)
+
+Before Stage 1, the main session writes a Stage 0 output as §16.0 in PART II containing:
+
+1. **Provisional irreducible truths list (5-10 items)** — derived from §4.2 seed questions + user worry + general agent-memory requirements. NOT from memory-nexus inspection. NOT from adjacent-system research.
+2. **Provisional minimum structure** — what minimum design satisfies those truths? At least 2-3 wildly different design candidates considered (event log / triple store / vector-only / hybrid / knowledge graph / spatial-graph / etc.) before settling.
+3. **Anti-anchoring self-check (verbatim statement):** "These truths were derived without inspecting memory-nexus's schema, commands, or current code, and without reading Hermes/OpenClaw/Mem0/MemPalace docs. Stage 1 and Stage 2 evidence may revise them; the revision must cite the disproving evidence."
+
+Stage 0 is the gate. Stage 1 cannot begin until §16.0 exists.
+
+---
+
+## 4. First-principles derivation framework (used by Stage 0)
+
+### 4.1 The discipline (mandatory)
 
 Per `~/.claude/rules/first-principles-before-options.md`:
 
-1. **Strip every assumption about HOW memory-nexus is currently built.**
-2. **Derive irreducible truths** about what an agent-memory system MUST do, independent of memory-nexus's current shape.
-3. **Derive minimum structure** satisfying those truths.
-4. **Compare derived structure** against:
-   - Each reference system (Hermes, OpenClaw, Mem0, MemPalace) row by row
-   - Current memory-nexus row by row
-5. **Only THEN ask:** would we build memory-nexus this way today?
+1. Strip every assumption about HOW memory-nexus is currently built.
+2. Derive irreducible truths about what an agent-memory system MUST do, independent of memory-nexus's current shape.
+3. Derive minimum structure satisfying those truths.
+4. Compare derived structure against each reference system AND current memory-nexus.
+5. Only THEN ask: would we build memory-nexus this way today?
 
 The bias to watch: **anchoring on what memory-nexus already does and deriving "options" within that anchor.** If the derivation feels like working backwards from current code, restart.
 
-### 3.2 Seed questions for the derivation
+### 4.2 Seed questions for the derivation
 
-These questions seed §6's "Irreducible truths" output. They're not the answer — they're the prompt for thinking. The actual derivation must derive its OWN list of truths; these questions just make sure we don't miss obvious axes.
+These seed §16's "Irreducible truths" output. They prompt thinking; they're not the answer. The actual derivation must derive its OWN list of truths; these just make sure obvious axes aren't missed.
 
 - **What kinds of memory must an agent-memory system hold?** (Episodic / semantic / procedural / preference / friction / decisions / etc.)
 - **What operations must it support?** (Capture, retrieval, ranking, consolidation, deduplication, supersedence, deletion, export, cross-project portability)
@@ -75,66 +113,58 @@ These questions seed §6's "Irreducible truths" output. They're not the answer �
 - **Cross-project / cross-machine portability?** (One DB per project? One global? Synced? Backed up?)
 - **AI-readability constraint:** must a future model with no tooling be able to read accumulated state?
 
-### 3.3 Anti-anchoring discipline
+### 4.3 Anti-anchoring discipline
 
-When deriving truths, the agent doing the derivation MUST NOT:
-- Reach for "well memory-nexus does X, so X must be a truth"
+When deriving truths, the deriver MUST NOT:
+- Reach for "memory-nexus does X, so X must be a truth"
 - Use memory-nexus's existing schema as a starting point
 - Use memory-nexus's existing commands as the structure
 - Assume SQLite, JSONL, FTS5, or any specific tech is required
 
-The agent doing the derivation MUST:
+The deriver MUST:
 - Imagine designing from scratch, today, with only the user's worry as constraint
-- Consider 2-3 wildly different designs (event log / triple store / vector-only / hybrid / etc.) before settling on a derived structure
+- Consider 2-3 wildly different designs before settling
 - Document the alternatives considered, even if rejected
 
 ---
 
-## 4. Adjacent-systems comparison matrix template
+## 5. Adjacent-system research (Stage 2, per codex findings #2 + #4 + #7)
 
-### 4.1 Reference systems
+### 5.1 Reference systems
 
-| System | URL | Lens |
-|---|---|---|
-| Hermes | https://github.com/nousresearch/hermes-agent | Full architecture |
-| OpenClaw | https://github.com/openclaw/openclaw and https://openclaw.ai/ | Full architecture; OpenClaw's SOUL.md identity-tier rules already referenced in this project's prompting-claude doc |
-| Mem0 | https://github.com/mem0ai/mem0 | Already inspiration for Phase 34 ADD/UPDATE/DELETE/NOOP; revisit HOLISTICALLY |
-| MemPalace | (TBD — verify URL during research) | Spatial-memory metaphor; check applicability |
+| System | URL | Pin status | Fallback if no stable reference |
+|---|---|---|---|
+| Hermes | https://github.com/nousresearch/hermes-agent | Pinned (URL stable as of 2026-05-11) | N/A |
+| OpenClaw | https://github.com/openclaw/openclaw + https://openclaw.ai/ | Pinned | N/A |
+| Mem0 | https://github.com/mem0ai/mem0 | Pinned | N/A |
+| MemPalace | (TBD — main session must locate canonical source during Stage 2) | **Not pinned (per codex finding #7)** | If no stable project or documentation is found, record "MemPalace: no stable reference found" in §15.D. **Do not invent a comparison row from secondary summaries.** Either find a primary source or skip the system. |
 
-### 4.2 Matrix shape
+### 5.2 Research ownership (per codex finding #4)
 
-For each irreducible truth derived in §6, fill this row:
+**Main session owns adjacent-system research.** NOT subagents. Reason: the cap on cross-AI review (§11) is meant to avoid process theater; spawning 4+ subagents that each do an independent system writeup, then synthesizing them, then reviewing — that path inflates token cost without proportionate evidence gain. Main session does the research sequentially with strict source citations per §8.
 
-| Truth | Hermes | OpenClaw | Mem0 | MemPalace | memory-nexus (current) | Derived min-structure | Best fit? |
-|---|---|---|---|---|---|---|---|
+The internal contradiction in the original plan (§4.3 said subagents; §5.5 said main session) is resolved in favor of main session.
 
-The "Best fit?" column captures which system (if any) most closely satisfies that truth. This is the gap-analysis kernel.
+### 5.3 Per-system research protocol (per codex finding #2 — independence)
 
-### 4.3 Research protocol for each system
+For EACH reference system, write a per-system summary at `docs/audits/2026-05-11-comparison-<system>.md` that:
 
-For each reference system, the audit's verification subagents must (independent of memory-nexus comparison):
+1. Evaluates the system against the Stage 0 provisional truths (§16.0)
+2. Captures: storage model, memory taxonomy, retrieval surface, consolidation/dedup model, AI-readability story, stated non-goals
+3. Cites primary sources (URL + retrieval date) per §8 evidence standards
+4. **Does NOT reference memory-nexus.** No "memory-nexus does X; this system does Y" framing inside the per-system writeup. That comparison happens in the synthesis matrix (§17), not in the source-system summaries.
 
-1. Read the system's own architecture documentation (README, design docs, papers)
-2. Identify its **storage model** (DB, files, hybrid, event log, vector store, knowledge graph, etc.)
-3. Identify its **memory taxonomy** (episodic/semantic/etc. or its native equivalent)
-4. Identify its **retrieval surface** (search? ranked recall? agent-routed?)
-5. Identify its **consolidation/dedup model** (if any)
-6. Identify its **AI-readability story** (export? raw files? proprietary?)
-7. Identify what it **explicitly is NOT** (its stated non-goals)
-
-Output for each system: a 1-page summary at `docs/audits/2026-05-11-comparison-<system>.md` (4 separate files). These feed §7.
+The per-system summaries feed §17 (comparison matrix), not the synthesis itself.
 
 ---
 
-## 5. Subagent specs (4 parallel verifications)
+## 6. Memory-nexus verification (Stage 1a + 1b)
 
-Per durable plan §7 + §8. Each subagent gets a brief that includes the VERBATIM blocks below. References rot under context loss; restating them in the brief is mandatory.
-
-### 5.1 Subagent A — Memory-nexus CLI surface verification (friction subsystem)
+### 6.1 Subagent A — Friction subsystem
 
 **Brief includes verbatim:**
 
-**The user's worry** (from §0 above, quote exactly).
+**The user's worry** (from §0, quote exactly).
 
 **Anti-bias note:**
 > "memory-nexus is not your sunk cost. If you would build something different from scratch, say so. The audit's purpose is to surface that gap, not justify the existing architecture."
@@ -142,92 +172,137 @@ Per durable plan §7 + §8. Each subagent gets a brief that includes the VERBATI
 **Cross-session context discipline:**
 > "Per `~/.claude/rules/subagent-trust-calibration.md`: judgments returned by you about 'would we build this differently?' are context-dependent (medium-confidence). Path/file claims MUST be verified with `ls` / `grep` / `Read` before propagating into the audit document. The conversations inventory had three correction layers because subagent path claims were treated as high-confidence. Do not repeat that."
 
-**Scope:** verify `memory friction list/log/dashboard/resolve/wontfix`. End-to-end behavior matching documented intent. Help text matches actual behavior? Vestigial commands? Missing commands? Friction subsystem coherent or fragmented?
+**Stage 0 lens:** the brief will include the Stage 0 provisional truths (§16.0). The subagent evaluates the friction subsystem against those truths — does the subsystem help satisfy them, ignore them, or actively work against them?
 
-**Output:** `docs/audits/2026-05-11-subagent-A-friction-surface.md`. <600 words.
+**Scope:** verify `memory friction list/log/dashboard/resolve/wontfix`. End-to-end behavior matching documented intent. Help text matches actual behavior? Vestigial commands? Missing commands? Subsystem coherent or fragmented?
 
-### 5.2 Subagent B — Memory-nexus CLI surface verification (search/context subsystem)
+**Output:** `docs/audits/2026-05-11-subagent-A-friction-surface.md`. <600 words. Each claim cites file:line or command output per §8.
 
-**Same verbatim brief blocks as 5.1.**
+### 6.2 Subagent B — Search / context subsystem
 
-**Scope:** verify `memory search/context/related/list/show/browse`. Especially: do these compose with each other? Does `memory context` use semantic recall or just FTS? Is `related` actually used or vestigial? Is the search surface coherent?
+Same verbatim brief blocks as 6.1. Stage 0 lens applies.
+
+**Scope:** verify `memory search/context/related/list/show/browse`. Especially: do these compose? Does `memory context` use semantic recall or just FTS? Is `related` actually used or vestigial? Is the search surface coherent?
 
 **Output:** `docs/audits/2026-05-11-subagent-B-search-surface.md`. <600 words.
 
-### 5.3 Subagent C — Memory-nexus CLI surface verification (sync/ingestion subsystem)
+### 6.3 Subagent C — Sync / ingestion subsystem
 
-**Same verbatim brief blocks as 5.1.**
+Same verbatim brief blocks as 6.1. Stage 0 lens applies.
 
-**Scope:** verify `memory sync/extract/backfill/purge/export/import`. The data-flow: where does sync get sessions from, what happens to them, where do extracted facts land, when does the user run each command? Is the lifecycle coherent or accreted?
+**Scope:** verify `memory sync/extract/backfill/purge/export/import`. The data-flow: where does sync get sessions from, what happens to them, where do extracted facts land, when does the user run each command? Lifecycle coherent or accreted?
 
 **Output:** `docs/audits/2026-05-11-subagent-C-sync-surface.md`. <600 words.
 
-### 5.4 Subagent D — Memory-nexus CLI surface verification (admin subsystem)
+### 6.4 Subagent D — Admin subsystem
 
-**Same verbatim brief blocks as 5.1.**
+Same verbatim brief blocks as 6.1. Stage 0 lens applies.
 
-**Scope:** verify `memory install/uninstall/doctor/status/stats`. Are these operational scaffolding that grew organically, or designed system-management surface? Does `doctor` find real issues or just check existence? Is `stats` informative or noise?
+**Scope:** verify `memory install/uninstall/doctor/status/stats`. Operational scaffolding that grew organically, or designed system-management surface? Does `doctor` find real issues or just check existence? Is `stats` informative or noise?
 
 **Output:** `docs/audits/2026-05-11-subagent-D-admin-surface.md`. <600 words.
 
-### 5.5 (Sequential, not subagent — main session) Adjacent-systems research
+### 6.5 Architecture-evidence pass (NEW per codex finding #3)
 
-After subagents A-D return, the MAIN session (not parallel subagents) researches each reference system per §4.3. Reason for sequential: each system's research benefits from understanding what memory-nexus actually does (which subagents A-D verified). 4 outputs, one per system.
+CLI verification (A-D) shows whether commands work end-to-end. It does NOT show whether the system is the right shape. A command can work cleanly while the architecture is still wrong.
 
-This is a deliberate choice: parallelizing 4 system-research subagents would risk anchoring each on "memory-nexus does X, look for X in Hermes/OpenClaw" — which is anti-first-principles. Sequential research with internal-state-known-first reduces that anchor.
+This pass produces an EVIDENCE MAP, not a verdict. Inspected dimensions:
+
+| Dimension | What to evidence |
+|---|---|
+| **Storage model + source of truth** | What's canonical for each kind of memory? DB? JSONL? Both? Where do schema-enforced facts live vs free-form notes? |
+| **Memory taxonomy + lifecycle** | What kinds of memory exist? Where is each born → updated → superseded → deleted → exported? Where does the lifecycle break? |
+| **Capture-to-retrieval data flow** | When the user/agent writes memory at time T, what's the path to first retrieval? Latency? Indexing? Embedding pipeline? |
+| **Consolidation, supersedence, deletion, export guarantees** | When facts conflict, what wins? Can old facts be invalidated without erasure? Is the export round-trippable? |
+| **AI-readability + no-tool recovery** | If memory-nexus is uninstalled, can a future model read accumulated state? What's the cost? |
+| **Cross-project + cross-machine boundary model** | One DB per machine? Synced? How is state portable? |
+| **Doc/code/roadmap drift** | Where do CLAUDE.md, docs, code, and ROADMAP.md disagree? (This is the user's worry's likely fingerprint.) |
+
+**Owner:** main session OR 5th subagent in parallel with A-D, depending on session budget at Stage 1 start.
+
+**Output:** `docs/audits/2026-05-11-architecture-evidence-map.md`. ~1000-1500 words. Evidence-cited per §8. NO verdict, NO recommendation, NO outcome-mapping. Just the map.
 
 ---
 
-## 6. Synthesis methodology
+## 7. Synthesis methodology (Stage 3)
 
-After subagents A-D and the adjacent-systems research land:
+After Stage 1 (subagents A-D + architecture-evidence pass) and Stage 2 (adjacent-system summaries) return:
 
-### 6.1 Derive irreducible truths (independent of memory-nexus + adjacent systems)
+### 7.1 Refine truths
 
-The audit author (next session, possibly with codex-assisted derivation) sits with:
-- The seed questions from §3.2
-- The user's worry (§0)
-- The adjacent-systems research as STIMULUS (not anchor)
+Sit with:
+- Stage 0 provisional truths (§16.0)
+- Subagent outputs (§14)
+- Architecture-evidence map (§14.5)
+- Adjacent-system summaries (§15)
 
-And derives a list of 5-10 irreducible truths about agent-memory systems. NOT what current systems happen to do — what they MUST do, derived independently.
+Revise the truth set ONLY where evidence disproves a provisional truth. Each revision cites the disproving evidence. Lock the refined truths as §16.
 
-The output is a sub-section of this doc: §7 "Irreducible truths."
+### 7.2 Fill comparison matrix
 
-### 6.2 Fill the comparison matrix (§7.X)
+For each truth in §16, fill a row in §17 across: Hermes / OpenClaw / Mem0 / MemPalace / memory-nexus / derived min-structure. Cell evidence per §8.
 
-For each truth from §7, fill the row across all 4 reference systems + memory-nexus + derived min-structure.
+### 7.3 Gap analysis
 
-### 6.3 Gap analysis (§7.Y)
-
-For each truth where memory-nexus differs from the derived min-structure OR from adjacent best practices, document the gap:
-- What's the gap (specific, concrete)
+For each truth where memory-nexus differs from the derived min-structure OR from adjacent best practices, document the gap in §18:
+- What's the gap (specific, concrete, evidence-cited)
 - Severity (would the user notice? would it block a use case?)
-- Cost to close it (rewrite vs refactor vs config)
-- Cost to live with it (recurring confusion vs one-time learning vs invisible)
+- Cost to close (rewrite vs refactor vs config)
+- Cost to live with it
 
-### 6.4 Recommend (§7.Z)
+### 7.4 Apply decision thresholds + recommend
 
-Recommend exactly ONE outcome from §2. The recommendation MUST explicitly address why the other 4 outcomes were rejected.
+Apply §9 decision thresholds to map gap analysis to one of the 5 outcomes (§2). The recommendation in §19 MUST explicitly address why the other 4 outcomes were rejected.
 
 ---
 
-## 7. Five-outcome decision rubric
+## 8. Evidence standards (NEW per codex finding #5)
 
-Use this rubric to prevent the recommendation from being driven by the prior. Each outcome maps to specific gap-analysis signals.
+This audit is high-stakes — the recommendation decides whether to keep investing in memory-nexus. Every claim must be evidence-cited.
+
+**Matrix cells (§17):** each must cite ONE of —
+- Local file/line reference (`src/path/to/file.ts:123`)
+- Command output artifact (`bun run X` output captured at <path>)
+- Upstream source URL + retrieval date (`https://... retrieved 2026-05-11`)
+- Explicit "Not found in reviewed docs / source"
+
+**Gaps (§18):** each must cite the evidence that proves the gap. Severity claims must cite the user-visible impact.
+
+**Inferences:** any claim that is not directly verified is labeled `[inference]` inline. Inference chains > 2 hops are flagged as low-confidence.
+
+**Recommendation (§19):** each rejection of an outcome must cite specific gaps/evidence that make that outcome wrong.
+
+The reviewer (and codex review #2) should be able to trace every load-bearing claim to a citation.
+
+---
+
+## 9. Decision rubric with thresholds (expanded per codex finding #6)
+
+The 5-outcome rubric maps gap analysis to a recommendation. The original rubric was qualitative enough to be steered toward the prior. Codex required explicit decision tests:
 
 | If gap analysis shows... | Outcome |
 |---|---|
-| Few gaps; memory-nexus has the right shape; just incomplete | **A** Continue v4.0 |
-| memory-nexus has right shape AND there's a clear federation story across surfaces in the conversations inventory | **B** Scope v5.0 federation |
-| Multiple memory surfaces serve overlapping roles; consolidation is the real fix; federation is over-engineering | **C** Surgical consolidation |
-| memory-nexus is good enough but doesn't justify further investment; v4.0 is the ceiling | **D** Freeze at v4.0 |
-| memory-nexus is structurally wrong; an adjacent system fits the truths much better; rewrite-cost ≤ migrate-cost | **E** Deprecate / replace |
+| Few gaps; memory-nexus has right shape; just incomplete | **A** Continue v4.0 |
+| Right shape AND clear federation story across surfaces in conversations inventory | **B** Scope v5.0 federation |
+| Multiple memory surfaces serve overlapping roles; consolidation is real fix; federation is over-engineering | **C** Surgical consolidation |
+| memory-nexus good enough but doesn't justify further investment | **D** Freeze at v4.0 |
+| Structurally wrong; an adjacent system fits truths better; rewrite-cost ≤ migrate-cost | **E** Deprecate / replace |
 
-If none of these cleanly map, the rubric itself is wrong. Document why and propose a sixth outcome explicitly rather than forcing one of the five.
+**Explicit decision thresholds (codex finding #6):**
+
+Apply these tests after gap analysis (§18). Each test forces a yes/no with evidence:
+
+1. **High-severity truth gaps:** How many truths in §16 are seriously violated by memory-nexus? If >50% of truths have high-severity gaps → outcome shifts away from A toward C/E.
+2. **Closeability inside v4.0:** Can the high-severity gaps be closed in the remaining v4.0 phases (32-37) WITHOUT changing the architecture? If yes → A. If no → C/B/E.
+3. **Migration cost vs rewrite cost:** If E is on the table, evidence comparing migration cost (memory-nexus → adjacent system) vs rewrite cost (build new from scratch) is required. Migration > rewrite → bias against E.
+4. **Consolidation surface reduction:** If C is on the table, gap analysis must show that consolidation reduces the number of memory surfaces (not just hides them behind a router). If consolidation = router-over-fragmentation → B is wrong, C is wrong, lean toward A or E.
+5. **v4.0 publishing risk:** Would shipping Phase 37 (npm publish v4.0) cement a wrong source of truth that's hard to undo? If yes → D (freeze) is wrong; A/B/E ship first.
+
+If gap analysis doesn't cleanly map to ANY outcome through these tests, document why and propose a sixth outcome explicitly rather than forcing one of the five.
 
 ---
 
-## 8. Initial hypothesis (prior, quarantined per durable plan §11)
+## 10. Initial hypothesis (prior, quarantined per durable plan §11)
 
 **This is a PRIOR, not a recommendation.** Recorded for transparency only.
 
@@ -237,59 +312,108 @@ This prior MUST NOT shape the audit's first-principles derivation. If the audit 
 
 ---
 
-## 9. Cross-AI review constraints (capped at 2 calls, per durable plan §9)
+## 11. Cross-AI review constraints (capped at 2 calls per durable plan §9)
 
-- **Call #1 (THIS plan, before subagent spawn):** the phase-level audit plan above (sections 3-8). Codex pushback integrated into a "Plan revisions from codex review" sub-section below. Then execution begins.
-- **Call #2 (final recommendation, before close):** the recommendation in §7.Z with rejection rationale for the other 4 outcomes. Codex pushback integrated into a "Recommendation revisions from codex review" sub-section. Then audit doc locked.
+- **Call #1 (THIS plan, INTEGRATED 2026-05-11):** the original phase-level audit plan (sections 3-9). Codex returned BLOCK with 8 findings. Revisions integrated above and tagged at top of PART I. Execution begins after this commit.
+- **Call #2 (final recommendation, before close):** the recommendation in §19 with rejection rationale for the other 4 outcomes. Codex pushback integrated into §20 ("Recommendation revisions from codex review"). Then audit doc locked.
 
-**Intermediate subagent syntheses are NOT cross-AI reviewed.** Internal review only.
+**Intermediate subagent syntheses are NOT cross-AI reviewed.** Internal review only. This is the discipline against process theater.
+
+---
+
+## 12. State reconciliation (NEW per codex finding #8)
+
+Codex flagged drift across:
+- Source inbox item (`docs/inbox/2026-05-08-conversations-first-principles-architecture-audit.md`)
+- `.planning/audits/2026-05-11-architecture-first-principles-audit-plan.md` (the durable plan artifact)
+- `.planning/STATE.md`
+
+Resolved state (locked 2026-05-11 in this commit):
+
+| Artifact | Status field | Rationale |
+|---|---|---|
+| Source inbox item | `in-progress` | Audit kickoff has happened (commit `8711f92`); audit is actively running. |
+| Durable plan artifact | `in-progress` | Audit kickoff has happened; this plan is the audit's external spec. |
+| `.planning/STATE.md` | milestone `gated_on_audit`; current focus is the audit | Audit is the current focus; v4.0 Phase 32-37 paused. |
+| Audit doc itself | `in-progress (phase-level plan revised post codex review #1; ready for Stage 0)` | Codex review #1 integrated; Stage 0 is the next action. |
+
+The earlier disposition section in the source inbox item (titled "Disposition (2026-05-11) — TRIAGED") was written when status was `triaged`. That section is HISTORICAL — it captures the disposition AT TRIAGE TIME, not the current state. The current state lives in the frontmatter `status` field and in this audit doc.
 
 ---
 
 # PART II — Execution outputs (to be filled during audit)
 
-## 10. Plan revisions from codex review
+## 13. Plan revisions from codex review #1
 
-*[To be filled after codex review #1 returns. Capture deltas from §3-8.]*
+Codex review #1 at `.planning/reviews/2026-05-11-architecture-audit-phase-plan-codex-review.md`. Verdict was BLOCK. All 8 findings integrated in PART I above and summarized in the table at the top of PART I.
 
-## 11. Subagent outputs
+Key structural changes:
+- **§3 + §3.0 NEW:** Stage 0 (provisional truths) runs BEFORE any subagent or adjacent research.
+- **§5 RESTRUCTURED:** adjacent-system research is independent of memory-nexus, main-session-owned (resolved §4.3/§5.5 contradiction).
+- **§6.5 NEW:** architecture-evidence pass produces evidence map separate from CLI verification.
+- **§8 NEW:** evidence standards for matrix cells, gaps, inferences.
+- **§9 EXPANDED:** decision rubric now has 5 explicit threshold tests.
+- **§5.1 NEW:** MemPalace fallback rule defined (record "no stable reference found", don't invent).
+- **§12 NEW:** state reconciliation across inbox/STATE/durable plan.
 
-*[To be filled after subagents A-D return. Each subagent's <600-word output linked here.]*
+## 14. Subagent outputs (Stage 1a)
 
-- 11.A Friction surface: *(awaiting)*
-- 11.B Search/context surface: *(awaiting)*
-- 11.C Sync/ingestion surface: *(awaiting)*
-- 11.D Admin surface: *(awaiting)*
+*[To be filled after subagents A-D return.]*
 
-## 12. Adjacent-systems research
+- 14.A Friction surface: *(awaiting)*
+- 14.B Search/context surface: *(awaiting)*
+- 14.C Sync/ingestion surface: *(awaiting)*
+- 14.D Admin surface: *(awaiting)*
 
-*[To be filled per §4.3 protocol. One subsection per system.]*
+## 14.5 Architecture-evidence map (Stage 1b)
 
-- 12.A Hermes: *(awaiting)*
-- 12.B OpenClaw: *(awaiting)*
-- 12.C Mem0: *(awaiting)*
-- 12.D MemPalace: *(awaiting)*
+*[To be filled after Stage 1b. Per §6.5.]*
 
-## 13. Irreducible truths
+## 15. Adjacent-system research (Stage 2)
 
-*[To be filled per §6.1. 5-10 truths, derived independently.]*
+*[To be filled per §5 protocol. Per-system summaries, NO memory-nexus comparison inside.]*
 
-## 14. Comparison matrix
+- 15.A Hermes: *(awaiting)*
+- 15.B OpenClaw: *(awaiting)*
+- 15.C Mem0: *(awaiting)*
+- 15.D MemPalace: *(awaiting — apply §5.1 fallback if no stable reference found)*
 
-*[To be filled per §6.2 with the structure from §4.2.]*
+## 16. Irreducible truths
 
-## 15. Gap analysis
+### 16.0 Stage 0 provisional truths (GATE for Stage 1)
 
-*[To be filled per §6.3.]*
+*[To be filled BEFORE any subagent spawn or adjacent research. Per §3.0. Includes:]*
+- *Provisional truths list (5-10 items)*
+- *Provisional minimum structure (2-3 design candidates considered)*
+- *Anti-anchoring self-check (verbatim statement)*
 
-## 16. Recommendation
+### 16. Refined truths (after Stage 3)
 
-*[To be filled per §6.4. Single outcome from §2 with explicit rejection of the other 4.]*
+*[To be filled per §7.1. Revisions from §16.0 must cite disproving evidence.]*
 
-## 17. Recommendation revisions from codex review
+## 17. Comparison matrix
+
+*[To be filled per §7.2 with the structure from §17 below.]*
+
+For each refined truth in §16:
+
+| Truth | Hermes | OpenClaw | Mem0 | MemPalace | memory-nexus (current) | Derived min-structure | Best fit? |
+|---|---|---|---|---|---|---|---|
+
+Each cell per §8 evidence standards.
+
+## 18. Gap analysis
+
+*[To be filled per §7.3. Each gap evidence-cited per §8.]*
+
+## 19. Recommendation
+
+*[To be filled per §7.4 against §9 decision thresholds. Single outcome from §2 with explicit rejection of the other 4.]*
+
+## 20. Recommendation revisions from codex review #2
 
 *[To be filled after codex review #2 returns.]*
 
-## 18. Concrete next-phase plan
+## 21. Concrete next-phase plan
 
 *[If recommendation is A/B/C/D: phase numbering, deps, acceptance. If E: migration timeline.]*
