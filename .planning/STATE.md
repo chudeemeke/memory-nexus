@@ -19,7 +19,7 @@ See: .planning/PROJECT.md (updated 2026-02-18)
 
 **Core Value:** Knowledge gained in one Claude Code project becomes accessible from any other project. No more context silos.
 
-**Current Focus:** Architecture first-principles audit IN PROGRESS. Phase-level plan revised after codex review #1 (verdict was BLOCK; 8 findings integrated) — see `docs/audits/2026-05-11-architecture-first-principles-audit.md` PART I §3-12. **Next action: Stage 0 (derive provisional irreducible truths into §16.0) — gates Stage 1 subagent spawn.** Durable plan: `.planning/audits/2026-05-11-architecture-first-principles-audit-plan.md` (status: in-progress). v4.0 Phase 32-37 work paused. Inbox item `docs/inbox/2026-05-08-conversations-first-principles-architecture-audit.md` status: `in-progress`.
+**Current Focus:** Architecture first-principles audit IN PROGRESS. Stage 0 COMPLETE (commit pending) — 8 provisional truths + 3 constraints + provisional minimum structure (hybrid event-log + derived projection) recorded in `docs/audits/2026-05-11-architecture-first-principles-audit.md` §16.0. **Next action: Stage 1 — spawn 4 CLI verification subagents in parallel + architecture-evidence pass.** Durable plan: `.planning/audits/2026-05-11-architecture-first-principles-audit-plan.md` (status: in-progress). v4.0 Phase 32-37 work paused. Inbox item status: `in-progress`.
 
 **Tech Stack:** Bun, TypeScript 5.5+, bun:sqlite with FTS5 + sqlite-vec, Commander.js v14, @huggingface/transformers v3, cli-progress, chrono-node, Chart.js (HTML dashboard)
 

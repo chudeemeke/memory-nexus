@@ -382,10 +382,104 @@ Key structural changes:
 
 ### 16.0 Stage 0 provisional truths (GATE for Stage 1)
 
-*[To be filled BEFORE any subagent spawn or adjacent research. Per §3.0. Includes:]*
-- *Provisional truths list (5-10 items)*
-- *Provisional minimum structure (2-3 design candidates considered)*
-- *Anti-anchoring self-check (verbatim statement)*
+**Filled 2026-05-11 by main session, before any subagent spawn, before any adjacent-system research, without inspecting memory-nexus's schema or commands or current code.**
+
+#### 16.0.1 Anti-anchoring self-check (verbatim, per §3.0)
+
+> These truths were derived without inspecting memory-nexus's schema, commands, or current code, and without reading Hermes/OpenClaw/Mem0/MemPalace docs. Stage 1 and Stage 2 evidence may revise them; the revision must cite the disproving evidence.
+
+I (main session) commit to that statement. The derivation below was performed by imagining the problem space from scratch with only the user worry (§0), the seed questions (§4.2), and general agent-memory requirements as input. Any phrase below that sounds like a description of memory-nexus is coincidence, not derivation.
+
+#### 16.0.2 Design candidates considered (per §3.0 item 2)
+
+Before settling on the provisional minimum structure, I considered five wildly different designs:
+
+| # | Design | Storage shape | Retrieval | Failure mode | Scale |
+|---|---|---|---|---|---|
+| 1 | **Append-only event log** | JSONL files, date-prefixed | grep/scan | one corrupt line skipped | degrades >100k entries |
+| 2 | **Schema-enforced DB** | Relational tables, FK-constrained | SQL | corrupted DB = data loss | fast to millions |
+| 3 | **Knowledge graph** | Subject-predicate-object triples | Graph query | engine-dependent | engine-dependent |
+| 4 | **Vector-only store** | Embeddings of every observation | similarity | lossy retrieval | degrades >1M |
+| 5 | **Hybrid: event log SSOT + derived projection** | Append-only files (canonical) + DB/index (derived) | Read projection, write events | event corruption catastrophic; projection rebuildable | projections handle scale |
+
+These are not exhaustive — file-only-by-project + symlinks, content-addressable store, distributed CRDT log, log-structured merge tree, etc. are also possible. The five above span the design space well enough to identify which structural properties matter.
+
+#### 16.0.3 Provisional irreducible truths (8 items, derived independently)
+
+**T1. Distinguish memory kinds.**
+The system must distinguish distinct memory categories — decisions, learnings, preferences, friction, observations, episodes — and answer questions about each category separately. Not necessarily separate tables, but the recall surface must serve typed queries, not undifferentiated content dump.
+
+**T2. Context-driven recall.**
+Given current task context, the system must surface relevant prior memory without explicit user-typed query. Semantic similarity or equivalent — not just keyword match. The agent should not have to know what to search for.
+
+**T3. Project scope + cross-project rollup.**
+The user works across many projects. Some memory is project-specific ("we decided to use OAuth in this app"); some is cross-project ("user prefers terse commit messages globally"). Both must be queryable in their respective scopes, AND cross-project rollup must be possible without conflating scopes.
+
+**T4. Lifecycle semantics.**
+Facts change over time. Decisions get superseded. Friction gets resolved. Preferences evolve. The system must support invalidation / supersedence / temporal versioning — pure append-only without consolidation creates noise (old decisions return alongside current ones).
+
+**T5. Agent integration is part of the system.**
+A memory system the agent forgets to use is useless. There must be a mechanism for WHEN the agent queries memory — triggers, ambient context at session start, hooks on tool calls, or explicit query commands prompted by reasoning. The integration is not an afterthought; it is co-load-bearing with storage and recall.
+
+**T6. Scale to 10k-100k+ entries.**
+Cross-project accumulation reaches 10k-100k+ entries within a year of regular use. Retrieval must stay sub-second at that scale. This rules out plain text scans beyond a few thousand entries — indexing is required.
+
+**T7. Self-evident recovery.**
+If the tool dies, breaks, or is uninstalled, the user's accumulated knowledge must remain readable WITHOUT the tool. Either plain text (event log / JSONL / markdown) or a standardized exchange format (export-on-write, or scheduled snapshot). The user must not be locked in.
+
+**T8. Reconciliation across concurrent sessions.**
+Multiple Claude sessions in multiple projects can log overlapping observations. The system must dedupe or merge, not just accumulate duplicates. "Decided X" said in three sessions on the same day is one fact, not three.
+
+#### 16.0.4 Constraints (qualities the system must have, distinct from truths)
+
+These are not capabilities (verbs) — they're properties the system must hold:
+
+- **C1. Low-friction capture.** Writing memory must be one tool call or auto-extracted. If logging takes effort, the agent won't do it consistently.
+- **C2. Local-first storage.** The user's data does not require cloud sync. Local store, optional sync. (Inferred from the user's privacy/sovereignty stance per global rules.)
+- **C3. The system must not itself become another fragmented surface.** This is THE user's worry rephrased. If the solution adds a new memory surface to the pile rather than consolidating the layer, it fails by the user's own measure.
+
+#### 16.0.5 Provisional minimum structure
+
+Evaluating the 5 design candidates against T1-T8 + C1-C3:
+
+- **Candidate 1 (append-only event log alone):** fails T1 (no typed queries without parser), T2 (no semantic recall), T6 (scale degrades), T8 (no reconciliation primitive).
+- **Candidate 2 (schema-enforced DB alone):** fails T7 (recovery requires SQL knowledge and schema awareness), T5 (no inherent integration story).
+- **Candidate 3 (knowledge graph alone):** complex; T1-T8 are partially addressable but engine choice introduces lock-in conflict with T7.
+- **Candidate 4 (vector-only):** fails T1 (no categorization), T4 (no supersedence), T7 (embedding-recovery requires the same embedding model).
+- **Candidate 5 (hybrid event log + projection):** satisfies T1 (event types), T2 (projection includes vector index), T3 (project scope in event metadata), T4 (supersedence as event type), T5 (orthogonal to integration layer), T6 (projection scales), T7 (event log is the recovery layer), T8 (reconciliation as projection-build operation).
+
+**Provisional minimum structure: Hybrid event-log SSOT + derived projection.**
+
+- **Canonical layer:** append-only event log. Plain text (JSONL or similar). Each event has: type (decision / learning / preference / friction / observation / supersedence), project scope, timestamp, content, optional reference to prior event(s) it modifies.
+- **Projection layer:** structured DB + vector index, rebuildable from event log on demand. Used for typed queries (T1), fast retrieval (T6), semantic recall (T2), dedup (T8). Projection corruption is non-catastrophic (rebuild).
+- **Integration layer:** hooks that fire on session events, triggering auto-capture from session content AND ambient retrieval that surfaces relevant memory before the agent's own queries. (T5.)
+- **Scope model:** project IS a first-class event field. Cross-project queries are projection-level operations (filter / rollup). (T3.)
+- **Lifecycle:** supersedence is an event type, not a record-edit. Old facts remain in the event log; the projection's "current" view excludes superseded ones. (T4 + T7.)
+
+This structure is provisional. Stage 1/2 evidence may surface load-bearing properties not captured here, or may show that T1-T8 are wrong or incomplete. Revisions in Stage 3 must cite the disproving evidence per §8.
+
+#### 16.0.6 What the provisional structure deliberately does NOT specify
+
+To preserve first-principles framing, the structure above is silent on:
+
+- Storage tech (SQLite vs DuckDB vs Postgres vs SQLite-WASM vs raw files)
+- Vector backend (sqlite-vec vs Faiss vs Chroma vs none-yet)
+- Schema layer (per-event-type tables vs event-sourcing-replay vs JSON columns)
+- Process model (CLI vs daemon vs library vs MCP server vs hybrid)
+- Sync mechanism (none vs Git vs custom protocol vs CRDT)
+
+These are implementation choices that the synthesis stage (§7) will compare against adjacent systems and current memory-nexus. None of them is a TRUTH; all are options within the provisional structure.
+
+#### 16.0.7 Stage 1 spawn gate cleared
+
+Stage 0 deliverable complete:
+- ✅ Provisional truths (T1-T8) — 8 items
+- ✅ Constraints (C1-C3) — 3 items
+- ✅ Provisional minimum structure (hybrid event log + projection + integration)
+- ✅ Design candidates considered (5 wildly different)
+- ✅ Anti-anchoring self-check committed verbatim
+
+Stage 1 (CLI subagents A-D + architecture-evidence pass) is now spawnable per §3 execution table.
 
 ### 16. Refined truths (after Stage 3)
 
