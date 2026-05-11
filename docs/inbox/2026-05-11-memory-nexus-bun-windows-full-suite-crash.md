@@ -1,0 +1,101 @@
+---
+schema_version: "1.2"
+source_project: memory-nexus
+created: 2026-05-11
+type: bug
+severity: medium
+fix_status: none
+affects_scope: this-project-only
+status: open
+workaround_applied: run tests by subdirectory (bun test src/infrastructure/, src/presentation/, etc.) instead of bare `bun test`
+---
+
+# `bun test` (full suite) crashes on Windows with integer overflow
+
+## Symptom
+
+Running the full test suite on Windows produces:
+
+```
+RSS: 3.20GB | Peak: 6.80GB | Commit: 4.44GB | Faults: 5965445 | Machine: 16.51GB
+
+panic(main thread): integer overflow
+oh no: Bun has crashed. This indicates a bug in Bun, not your code.
+
+To send a redacted crash report to Bun's team,
+please file a GitHub issue using the link below:
+
+ https://bun.report/1.3.5/wt11e86cebijGukggCw2gkRsmx3M6lsqHsosvRynmwN2/72mB6t3oFu5o6FuvbgjMopvizDCYKERNEL32.DLLu10LCSntdll.dll4nhBA0eNrLzCtJTU8tUsgvSy1Ky8kvBwA2xQaD
+```
+
+The crash signature is identical across multiple attempts: integer overflow after Bun's memory grows past ~6.8GB peak. Stack: `KERNEL32.DLL` → `ntdll.dll`.
+
+Bun version: 1.3.5.
+OS: Windows 11 Pro 10.0.26200, 16GB RAM.
+
+## Repro
+
+```bash
+cd ~/Projects/memory-nexus
+bun test
+```
+
+Crashes consistently after running thousands of tests successfully.
+
+## Root cause
+
+Likely a Bun-on-Windows runtime bug — memory pressure from accumulating test coverage data, repeated module loads, and SQLite bindings exceeds an internal counter capacity. The integer overflow + KERNEL32 stack signature points to Bun's internals, not to test logic.
+
+Evidence the test code is fine:
+- Running by subdirectory works cleanly: `bun test src/infrastructure/` (1249 pass), `bun test src/presentation/` (1040 pass), `bun test src/application src/domain` (802 pass), `bun test tests/` (subset-by-subset passes).
+- Total pass count across all subsets: 3091+ tests.
+- The crash always happens at memory pressure, not on a specific test.
+
+## Proposed fix
+
+No fix on the project side. Two paths:
+
+**A. Wait for upstream Bun fix.** Track Bun changelog for memory/integer-overflow fixes. Bug seems likely to surface for any large Bun test suite on Windows; should attract upstream attention.
+
+**B. Report upstream.** File a Bun GitHub issue with:
+- The crash report URL above
+- Repo size + test count
+- Confirmation that splitting the suite by subdirectory works
+- Bun version + Windows version
+
+The bun.report URL above appears to be a redacted report builder — opening it should produce a draft GitHub issue body. We may need to confirm the URL is still active.
+
+## Test plan
+
+N/A — there's no project-side change to test. Workaround verification: confirm `bun test src/...` and `bun test tests/<subdir>/` continue to pass.
+
+## Suggested CHANGELOG entry
+
+N/A — workaround only, no code change. If we document the workaround, add to CONTRIBUTING.md or docs/development.md:
+
+```
+## Running tests
+
+`bun test` is known to crash on Windows during full-suite runs due to a
+Bun runtime memory issue (#<inbox-ref>). Workaround: run by subdirectory:
+
+    bun test src/infrastructure/
+    bun test src/presentation/
+    bun test src/application src/domain
+    bun test tests/helpers tests/generators tests/infrastructure tests/integration tests/smoke
+
+Or run a specific test file directly:
+
+    bun test src/path/to/file.test.ts
+```
+
+## Risks / things to verify before merging
+
+If documenting the workaround in CONTRIBUTING.md:
+- Confirm the subset commands are sufficient (no missed test files).
+- Check macOS/Linux contributors aren't affected — the workaround may sound onerous to them, so frame as Windows-specific.
+
+## Related
+
+- Surfaced during the test-isolation arc's closing verification (2026-05-11). Documented in `~/.claude/projects/.../memory/test_isolation_cleanup.md`.
+- Composes with `feedback_preexisting_ownership.md`: not silently dismissing a runtime issue even though it's not project code.
