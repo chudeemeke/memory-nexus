@@ -19,7 +19,7 @@ See: .planning/PROJECT.md (updated 2026-02-18)
 
 **Core Value:** Knowledge gained in one Claude Code project becomes accessible from any other project. No more context silos.
 
-**Current Focus:** Architecture first-principles audit scheduled as next major work item, gating Phase 33+. See `.planning/audits/2026-05-11-architecture-first-principles-audit-plan.md` for schedule + scope. v4.0 Phase 32-37 work paused until audit recommendation lands. Inbox item `docs/inbox/2026-05-08-conversations-first-principles-architecture-audit.md` status: `triaged`.
+**Current Focus:** Architecture first-principles audit KICKED OFF 2026-05-11. Phase-level plan drafted in `docs/audits/2026-05-11-architecture-first-principles-audit.md` (PART I, sections 3-9). Awaiting codex review #1 of 2 before subagent spawn. Durable plan: `.planning/audits/2026-05-11-architecture-first-principles-audit-plan.md` (status: in-progress). v4.0 Phase 32-37 work paused. Inbox item `docs/inbox/2026-05-08-conversations-first-principles-architecture-audit.md` status: `triaged` (will transition to `in-progress` on this session's first commit).
 
 **Tech Stack:** Bun, TypeScript 5.5+, bun:sqlite with FTS5 + sqlite-vec, Commander.js v14, @huggingface/transformers v3, cli-progress, chrono-node, Chart.js (HTML dashboard)
 
@@ -53,15 +53,19 @@ v4.0 Progress: [######__________________] 2/8 phases complete
 - `docs/inbox/2026-05-11-memory-nexus-friction-test-phase-30-orphan.md`
 - `docs/inbox/2026-05-11-memory-nexus-bun-windows-full-suite-crash.md`
 
-## Out-of-roadmap: Architecture First-Principles Audit (2026-05-11) — TRIAGED, scheduled
+## Out-of-roadmap: Architecture First-Principles Audit (2026-05-11) — IN PROGRESS
 
-Triaged from `docs/inbox/2026-05-08-conversations-first-principles-architecture-audit.md` (status: `triaged`). Durable plan: `.planning/audits/2026-05-11-architecture-first-principles-audit-plan.md`.
+**Kicked off:** 2026-05-11 (this session).
+- Audit doc: `docs/audits/2026-05-11-architecture-first-principles-audit.md` — phase-level plan drafted (PART I, §3-9)
+- Durable plan: `.planning/audits/2026-05-11-architecture-first-principles-audit-plan.md` — status: in-progress
+- Source inbox item: `docs/inbox/2026-05-08-conversations-first-principles-architecture-audit.md` (triaged → in-progress)
+- Codex review #1 of 2: pending (next step this session, gates subagent spawn)
 
-**Hard schedule gates:** audit MUST land before Phase 33 (Knowledge Extraction Foundation) and before Phase 37 (Publishing). Phase 32 is secondary support for "between-phase" scheduling.
+**Hard schedule gates:** audit MUST land before Phase 33 and before Phase 37. Phase 32 is secondary support.
 
 **Five candidate outcomes:** A continue v4.0 / B scope v5 federation / C surgical consolidation / D freeze at v4.0 / E deprecate-or-replace.
 
-Codex-reviewed (gpt-5.5 high). Cross-AI review of audit's own plan + recommendation capped at 2 calls. Subagent briefs include verbatim user worry + anti-bias + path-claim verification rules.
+Cross-AI review cap: 2 calls (plan + recommendation). Subagent briefs use verbatim user worry + anti-bias + path-claim verification per durable plan §8.
 
 ## Milestone History
 

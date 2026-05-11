@@ -6,7 +6,7 @@ type: enhancement
 severity: medium
 fix_status: none
 affects_scope: this-project-only
-status: triaged
+status: in-progress
 triaged_at: 2026-05-11
 closure_notify_to: conversations
 closure_notify_reason: The audit's recommendation determines which architecture (A specialized + agent-as-router / B federation router / C surgical consolidation) from the conversations memory architecture inventory becomes load-bearing for memory tooling decisions across all projects. Outcome shapes whether memory-nexus targets a v5.0 federation milestone, accepts narrow-scope steady state, or stops at v4.0.

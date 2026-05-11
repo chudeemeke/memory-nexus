@@ -1,8 +1,10 @@
 # First-Principles Architecture Audit — Plan Artifact
 
-**Status:** scheduled
+**Status:** in-progress
 **Triaged from:** `docs/inbox/2026-05-08-conversations-first-principles-architecture-audit.md`
 **Triaged on:** 2026-05-11
+**Kickoff:** 2026-05-11 (this session)
+**Audit doc:** `docs/audits/2026-05-11-architecture-first-principles-audit.md`
 **Codex-reviewed (gpt-5.5 high):**
   - Disposition plan: `.planning/reviews/2026-05-11-architecture-audit-disposition-plan.md`
   - Disposition review: `.planning/reviews/2026-05-11-architecture-audit-disposition-codex-review.md`
