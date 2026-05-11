@@ -7,9 +7,10 @@
 
 import { describe, test, expect, beforeEach, afterEach } from "bun:test";
 import { Database } from "bun:sqlite";
-import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { installEnvOverrides, type EnvOverrides } from "../helpers/env-overrides.js";
 import { SyncService } from "../../src/application/services/sync-service.js";
 import { Fts5SearchService } from "../../src/infrastructure/database/services/search-service.js";
 import { SearchQuery } from "../../src/domain/value-objects/search-query.js";
@@ -25,7 +26,6 @@ import { SqliteMessageRepository } from "../../src/infrastructure/database/repos
 import { SqliteToolUseRepository } from "../../src/infrastructure/database/repositories/tool-use-repository.js";
 import { SqliteExtractionStateRepository } from "../../src/infrastructure/database/repositories/extraction-state-repository.js";
 import {
-  setTestCheckpointPath,
   resetState,
   ProcessAbortSignal,
   FileCheckpointManager,
@@ -96,15 +96,24 @@ function createParser(): IEventParser {
 }
 
 describe("Concurrent Commands Integration Tests", () => {
+  let xdgParent: string;
   let testDir: string;
   let dbPath: string;
   let sessions: SessionFileInfo[];
+  let env: EnvOverrides;
 
   beforeEach(() => {
-    // Create isolated temp directory
-    testDir = mkdtempSync(join(tmpdir(), "concurrent-test-"));
+    // Layout: ${xdgParent}/memory/ — XDG_DATA_HOME=${xdgParent} makes
+    // getDataDir() resolve to ${xdgParent}/memory, so getCheckpointPath()
+    // returns ${xdgParent}/memory/sync-checkpoint.json. The bare
+    // new FileCheckpointManager() calls below pick it up automatically.
+    xdgParent = mkdtempSync(join(tmpdir(), "concurrent-test-"));
+    testDir = join(xdgParent, "memory");
+    mkdirSync(testDir, { recursive: true });
     dbPath = join(testDir, "test.db");
-    setTestCheckpointPath(join(testDir, "sync-checkpoint.json"));
+
+    env = installEnvOverrides();
+    env.set("XDG_DATA_HOME", xdgParent);
 
     // Create test session files
     sessions = [];
@@ -125,13 +134,12 @@ describe("Concurrent Commands Integration Tests", () => {
   });
 
   afterEach(() => {
-    // Reset checkpoint path and signals
-    setTestCheckpointPath(null);
+    env.cleanup();
     resetState();
 
-    // Clean up temp directory
+    // Clean up temp directory (rm the parent so the inner memory/ dir is also removed)
     try {
-      rmSync(testDir, { recursive: true, force: true });
+      rmSync(xdgParent, { recursive: true, force: true });
     } catch {
       // Ignore cleanup errors on Windows
     }

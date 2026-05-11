@@ -7,9 +7,10 @@
 
 import { describe, test, expect, beforeEach, afterEach } from "bun:test";
 import { Database } from "bun:sqlite";
-import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { installEnvOverrides, type EnvOverrides } from "../helpers/env-overrides.js";
 import { SyncService, type SyncOptions } from "../../src/application/services/sync-service.js";
 import type {
   ISessionSource,
@@ -24,7 +25,6 @@ import { SqliteMessageRepository } from "../../src/infrastructure/database/repos
 import { SqliteToolUseRepository } from "../../src/infrastructure/database/repositories/tool-use-repository.js";
 import { SqliteExtractionStateRepository } from "../../src/infrastructure/database/repositories/extraction-state-repository.js";
 import {
-  setTestCheckpointPath,
   saveCheckpoint,
   loadCheckpoint,
   clearCheckpoint,
@@ -86,6 +86,7 @@ function createFileBasedParser(): IEventParser {
 }
 
 describe("Interrupted Sync Integration Tests", () => {
+  let xdgParent: string;
   let testDir: string;
   let db: Database;
   let sessionSource: ISessionSource;
@@ -95,11 +96,20 @@ describe("Interrupted Sync Integration Tests", () => {
   let extractionStateRepo: SqliteExtractionStateRepository;
   let sessions: SessionFileInfo[];
   let sessionFiles: string[];
+  let env: EnvOverrides;
 
   beforeEach(() => {
-    // Create isolated temp directory
-    testDir = mkdtempSync(join(tmpdir(), "interrupted-sync-test-"));
-    setTestCheckpointPath(join(testDir, "sync-checkpoint.json"));
+    // Layout: ${xdgParent}/memory/ — XDG_DATA_HOME=${xdgParent} makes
+    // getDataDir() resolve to ${xdgParent}/memory, so getCheckpointPath()
+    // returns ${xdgParent}/memory/sync-checkpoint.json. The bare
+    // new FileCheckpointManager() / saveCheckpoint() / loadCheckpoint() /
+    // clearCheckpoint() calls below pick it up automatically.
+    xdgParent = mkdtempSync(join(tmpdir(), "interrupted-sync-test-"));
+    testDir = join(xdgParent, "memory");
+    mkdirSync(testDir, { recursive: true });
+
+    env = installEnvOverrides();
+    env.set("XDG_DATA_HOME", xdgParent);
 
     // Create test session files
     sessionFiles = [];
@@ -135,13 +145,12 @@ describe("Interrupted Sync Integration Tests", () => {
   });
 
   afterEach(() => {
-    // Reset checkpoint path and signals
-    setTestCheckpointPath(null);
+    env.cleanup();
     resetState();
 
-    // Clean up temp directory
+    // Clean up temp directory (rm the parent so the inner memory/ dir is also removed)
     try {
-      rmSync(testDir, { recursive: true, force: true });
+      rmSync(xdgParent, { recursive: true, force: true });
     } catch {
       // Ignore cleanup errors on Windows
     }
