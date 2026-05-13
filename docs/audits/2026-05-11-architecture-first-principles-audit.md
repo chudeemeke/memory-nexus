@@ -580,28 +580,113 @@ Stage 0 deliverable complete:
 
 Stage 1 (CLI subagents A-D + architecture-evidence pass) is now spawnable per §3 execution table.
 
-### 16. Refined truths (after Stage 3)
+### 16. Refined truths (after Stage 3 — locked 2026-05-13)
 
-*[To be filled per §7.1. Revisions from §16.0 must cite disproving evidence.]*
+Stage 1 (memory-nexus evidence) and Stage 2 (adjacent-system research) did NOT disprove any provisional truth in §16.0. T1-T8 and C1-C3 stand as written. The §16.0 derivation is therefore promoted to §16 as refined truths, unchanged.
+
+**Reinforcement evidence (NOT revisions):**
+
+- **T4 (lifecycle / supersedence)** is reinforced by Stage 2. All 4 adjacent systems (Mem0 conflict-detector, OpenClaw manual-curation-as-edit, Hermes trust-scoring, MemPalace temporal-validity-windows) have an explicit supersedence primitive. **The 2026 state-of-the-art treats supersedence as load-bearing**, not optional. memory-nexus has zero supersedence in production code (Stage 1b section 2 verified). Gap is critical.
+
+- **T7 (self-evident recovery)** is reinforced as a spectrum, not a binary. OpenClaw best-in-class (markdown-as-canonical). MemPalace partial (SQLite + framework schema). Mem0 weak (compression-engine lock-in). Hermes mixed (built-in tier OK, provider-dependent). memory-nexus partial (sessions and memory_files yes, entities/topics/friction no). The truth holds; the metric is "what fraction of memory is recoverable without the tool."
+
+- **C3 (not another fragmented surface)** is reinforced as a real engineering constraint, not just a user-worry rephrasing. OpenClaw and MemPalace satisfy C3 by being narrow-surface frameworks. Mem0 does not compose by design. Hermes explicitly accepts fragmentation as trade-off. memory-nexus Stage 1 evidence shows C3 violations at both top-level AND fractal-level — the worry is real and structural.
+
+**No new truths surfaced by Stage 1/2.** The single-machine constraint flagged in Stage 1b section 6 is a feature-variant question across adjacent systems, not a universal truth. Stage 0 was correct to be silent on it.
+
+**Anti-anchoring check (per section 3.0 self-check):** the Stage 0 truths derived without inspecting memory-nexus held up against memory-nexus inspection AND adjacent-system inspection. The framing discipline worked.
 
 ## 17. Comparison matrix
 
-*[To be filled per §7.2 with the structure from §17 below.]*
+For each refined truth, row across the 6 reference points: Mem0 / OpenClaw / Hermes / MemPalace / **memory-nexus (current)** / **derived min-structure** (Stage 0 section 16.0.5: hybrid event-log SSOT + projection).
 
-For each refined truth in §16:
+Cells use: **YES** (fully addressed), **PARTIAL** (partial), **NO** (not addressed). Citations are evidence-pointers; full evidence in Stage 1a/1b/2 output files.
 
-| Truth | Hermes | OpenClaw | Mem0 | MemPalace | memory-nexus (current) | Derived min-structure | Best fit? |
-|---|---|---|---|---|---|---|---|
+| | Mem0 | OpenClaw | Hermes | MemPalace | memory-nexus | derived min-structure |
+|---|---|---|---|---|---|---|
+| **T1 typed kinds** | PARTIAL (entities typed; facts not enum-typed) | PARTIAL (filename-convention) | YES (via provider taxonomies) | PARTIAL (Halls cross-Wing typing) | **NO (only friction; Stage 1a-A)** | YES (event types: decision/learning/preference/friction/observation/supersedence) |
+| **T2 context-driven recall** | YES (vector store) | PARTIAL (boot + on-demand search) | YES (mem0_search + holographic + FTS5) | YES (L0-L3 layered) | **NO in context cmd; YES in search only (Stage 1a-B)** | YES (projection has vector index; ambient retrieval at session-start) |
+| **T3 project + cross-project** | YES (4-dim scope keys) | n/a (per-workspace) | PARTIAL (USER.md global; provider-dependent) | YES (Wings + Halls) | PARTIAL (flag-gated, not first-class scope; Stage 1a-B) | YES (project as first-class event field) |
+| **T4 supersedence** | YES (conflict detector) | PARTIAL (manual curation only) | YES (trust-scoring decay) | YES (temporal validity windows) | **NO (zero in production code; Stage 1b section 2)** | YES (supersedence as event type) |
+| **T5 agent integration** | YES (SDK-first) | YES (workspace IS the agent) | YES (memory IS the agent) | YES (29 MCP tools) | PARTIAL (sync hook exists; ambient surface not boot-injected; Stage 1a-B, 1b section 3) | YES (hooks fire on session events) |
+| **T6 scale** | YES (claimed 100k+ per user) | PARTIAL (boot capped at 150k chars; indexed higher) | YES (provider-handled) | YES (SQLite + 96.6% search at scale claim) | YES (indexes per schema.ts:26-114; sub-second 100k plausible per Stage 1b inference) | YES (projection scales) |
+| **T7 self-evident recovery** | NO (compression lock-in) | YES (markdown SoT) | PARTIAL (built-in OK; providers vary) | PARTIAL (SQLite readable; framework schema) | PARTIAL (sessions/memory_files OK; entities/topics/friction DB-locked; Stage 1b section 5) | YES (event log is plain text) |
+| **T8 reconciliation** | YES (graph dedup) | PARTIAL (manual curation) | YES (trust scoring) | PARTIAL (verbatim — dedup at retrieval) | PARTIAL (no recall-time dedup; sync-stage unclear; Stage 1a-B) | YES (projection-build dedup) |
+| **C1 low-friction capture** | YES | YES | YES | YES (zero-LLM) | PARTIAL (sync auto + friction one-call; extraction unwired per 1b section 3) | YES |
+| **C2 local-first** | PARTIAL (cloud-first product) | YES | PARTIAL (built-in local; providers vary) | YES | YES | YES |
+| **C3 no new fragmented surface** | n/a (single product) | YES (narrow framework) | risk (acknowledged trade-off) | YES (one framework, 1 schema) | **NO (Stage 1a A/B/C/D + 1b cross-dimensional pattern)** | YES (one event log + one projection + one integration layer) |
 
-Each cell per §8 evidence standards.
+**Cells marked NO for memory-nexus identify load-bearing gaps. Cells marked PARTIAL identify partial gaps.**
 
 ## 18. Gap analysis
 
-*[To be filled per §7.3. Each gap evidence-cited per §8.]*
+For each truth where memory-nexus differs from the derived min-structure OR from adjacent best practices, severity + closeability + cost:
 
-## 19. Recommendation
+| # | Gap | Severity | Closeable inside v4.0? | Cost to close | Cost to live with |
+|---|---|---|---|---|---|
+| G1 | T1: only friction is first-class typed entity. No decision/learning/preference/observation peers. | **HIGH** | YES — Phase 33 plans facts schema + extraction_log + temporal tracking | Med (schema + extractor + migration of existing data) | High — undifferentiated message-content blob means agent cannot ask typed questions. |
+| G2 | T2: memory context has zero semantic-recall code paths despite HybridSearchService + sqlite-vec existing. | **HIGH** | YES — Phase 35 plans context rewire to fact tables + (implied) vector recall | Low (wiring change, no new infra) | High — the COMMAND named context does not deliver context; agent must know-what-to-search via search. |
+| G3 | T4: zero supersedence in production code. | **CRITICAL** | YES — Phase 33 plans temporal tracking; Phase 34 plans ADD/UPDATE/DELETE/NOOP operations | Med-High (schema + service layer + UI for see-superseded mode) | Critical — old decisions return alongside current ones; agent cannot trust current state. |
+| G4 | T7: entities/topics/friction are DB-locked; no plain-text counterpart for those kinds | MEDIUM | PARTIAL — memory export snapshots, but Phase 33 extraction_log adds another DB-only stream | Low-Med (export-on-write hooks or scheduled snapshot) | Med — user keeps source markdown + sessions; loses derived facts on uninstall. |
+| G5 | T8: no recall-time dedup; sync-stage dedup unclear. LlmExtractor exists but unwired (Stage 1b section 3). | MED-HIGH | YES — wiring LlmExtractor into sync + Phase 34 DELETE/NOOP semantics close this | Low (wiring) — infra already exists | Med — duplicate decided-X entries across sessions return as separate facts. |
+| G6 | C3 (top-level): friction is parallel journal, not event-stream row. ~/.memory/ is parallel surface; ROADMAP Phase 35 plans to deprecate ~/.memory/ — confirms intent. | **HIGH** | YES — Phase 35 deprecates ~/.memory/; ambient context becomes the projection-view, not parallel write | Med (data migration + service redirect) | High — IS the user worry verbatim. |
+| G7 | C3 (fractal): admin subsystem fragmentation (doctor/status/stats triplicate per Stage 1a-D); read-surface fragmentation (5 parallel surfaces per Stage 1a-B). | MEDIUM | YES BUT — Phase 32 currently scoped to labeled help groups, not consolidation. **Phase 32 rescope needed.** | Low (consolidation; no new infra) | Med — recurring fragmentation noise inside the surface. |
+| G8 | Doc/code/roadmap drift: friction/ambient/smart-context = 0 matches in canonical docs (Stage 1b section 7). | LOW (org) | YES — docs update during Phase 32-37 cycle | Trivial (doc writes) | Low — but compounds developer confusion; the docs say v1.0 vision. |
 
-*[To be filled per §7.4 against §9 decision thresholds. Single outcome from §2 with explicit rejection of the other 4.]*
+**Cumulative: 8 gaps. 3 HIGH+, 3 MEDIUM-HIGH/MEDIUM, 1 LOW. Per section 9 decision threshold #1, 3 HIGH-severity truth gaps (G1/G2/G3) is below the >50% threshold (3 of 8 = 38%). Threshold test does NOT force shift away from A.**
+
+Per section 9 decision threshold #2 (closeability inside v4.0): every HIGH gap maps to a planned v4.0 phase. **The v4.0 roadmap is the right shape for the gaps Stage 1/2 surfaced.**
+
+Per section 9 decision threshold #4 (consolidation surface reduction): G6 and G7 require consolidation, which Phase 35 partly handles (~/.memory/ deprecation). **Phase 32 RESCOPE from labeled help groups to labeled help groups plus surface consolidation is the missing piece.**
+
+Per section 9 decision threshold #5 (v4.0 publishing risk): shipping Phase 37 BEFORE Phase 33-35 would cement the wrong SoT. Shipping Phase 37 AFTER Phase 33-35 closes the gaps and is safe. **Phase 37 must NOT ship before 33-35.**
+
+## 19. Recommendation (DRAFT — pending audit-cap codex review #2)
+
+**Recommended outcome: A (Continue v4.0) with Phase 32 rescope.**
+
+### Specifics
+
+1. **Continue v4.0 (Phases 31-37) as the path.** Do not abandon. Do not federate. Do not freeze.
+
+2. **Phase 32 rescope (required).** Current scope: labeled help groups, uniform --json and --format flags. Expand to: labeled help groups + uniform flags + **surface consolidation pass** addressing the fractal C3 violations (G7) — merge doctor/status/stats into a single health surface with detail-flag selection; unify the read surfaces (search/context/related/list/show) behind one query primitive with shape flags per Stage 1a-B recommendation; document the unified surface in docs/04-ARCHITECTURE.md.
+
+3. **Execute Phase 33-34 faithfully.** Typed events + supersedence + temporal tracking + ADD/UPDATE/DELETE/NOOP semantics. These close G1, G3, G5.
+
+4. **Execute Phase 35 with the right framing.** Rewire SmartContextService to read from fact tables AND wire HybridSearch into the memory context command, so the command named context delivers semantic + structured context, not SQL aggregation only. Phase 35 also deprecates ~/.memory/ per current roadmap (closes G6).
+
+5. **Phase 36 (Portability) as planned.** Cross-machine sync remains out of scope per Stage 0; this is acceptable.
+
+6. **Phase 37 (Publishing) gated.** Do NOT publish until Phase 33-35 land. Gating prevents G3 (critical supersedence absence) from cementing as published v4.0 behavior.
+
+7. **Doc drift closure (G8).** During Phase 32-37, every phase commits a corresponding update to docs/01-VISION.md, 04-ARCHITECTURE.md, 05-IMPLEMENTATION.md. Convention: no Phase merges without docs-update commit.
+
+8. **Cross-cutting workstream — audit-output integration.** The 4 subagent outputs + architecture-evidence map + 4 adjacent-system summaries are kept as docs/audits/2026-05-11-*.md. Phase 33-37 PLAN.md files cite the relevant gap (G1-G8) as the requirement source.
+
+### Rejection rationale for B, C, D, E
+
+**B (Scope v5.0 federation):** REJECTED. Federation across already-fragmented surfaces compounds the worry (section 10 prior held this concern; Stage 1 evidence confirmed C3 violations at both top and fractal level). Federation would add a router OVER fragmentation, not consolidate it. Mem0/Hermes evidence shows federation is a wider-surface trade-off, not a narrower one.
+
+**C (Surgical consolidation alone):** REJECTED as standalone. Consolidation is the RIGHT move at the surface layer (Phase 32 rescope absorbs this) BUT does not close G1 (T1 typing), G3 (T4 supersedence), G5 (T8 reconciliation). These require Phase 33-34 infrastructure. Standalone-C leaves the critical-severity gap (G3) open. **Outcome A + Phase 32 rescope is functionally C-built-into-A; standalone-C is incomplete.**
+
+**D (Freeze at v4.0):** REJECTED. Would cement G3 (critical) — supersedence absent in published shape. T2 (G2) memory context would publish without semantic recall. Worst outcome relative to user worry.
+
+**E (Deprecate / replace):** REJECTED. Migration cost ~ rewrite cost; existing infrastructure (HybridSearchService, sqlite-vec, LlmExtractor, AmbientContextService, friction subsystem) would be discarded despite being directionally correct (Stage 1b cross-dimensional pattern: right things built, not wired through). The investment recovers value through Phase 33-35 wiring, not through replacement.
+
+### Prior reconciliation (per section 10)
+
+Section 10 prior was C (surgical consolidation). Actual recommendation is **A with Phase 32 rescope**. Per ~/.claude/rules/actions-not-promises.md mid-session-surprise broadening: name the wrong prediction.
+
+> Wrong prediction: standalone-C would close the user worry.
+> Reality: standalone-C closes the surface fragmentation but leaves G1/G3/G5 (typed events, supersedence, reconciliation) open. The v4.0 plan Phase 33-34 are THE primitives the adjacent 2026 state-of-the-art treats as load-bearing. Standalone-C without Phase 33-34 would publish a memory-nexus that is clean on the surface but still structurally behind the 2026 baseline.
+>
+> The prior under-weighted that v4.0 plan was already directionally correct on the structural gaps. Stage 2 evidence — every 2026 system has explicit supersedence — was the disproving evidence the section 10 prior did not have access to.
+
+This is a planned outcome under section 10 discipline: if it lands on anything else, that surprise is recorded as learning signal.
+
+### Status
+
+**DRAFT.** Section 11 hard-gates the final lock on codex review #2 (audit-cap call). Codex re-auth required. After codex review, integrate pushback into section 20, then lock section 19.
 
 ## 20. Recommendation revisions from codex review #2
 
