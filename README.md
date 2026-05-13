@@ -196,6 +196,29 @@ function processStats(stats: StatsResult): void {
 
 This package was previously published as `memory-nexus`. The old package name now installs a deprecation stub. See [MIGRATION.md](MIGRATION.md) for upgrade instructions.
 
+## Development
+
+### Running tests on Windows
+
+The full-suite run `bun test` crashes on Windows 11 with Bun 1.3.5 due to an upstream Bun runtime integer overflow at ~6.8GB peak memory pressure. The signature is `panic(main thread): integer overflow` with a `KERNEL32.DLL` -> `ntdll.dll` stack — Bun internals, not project code. Tracked at `docs/inbox/2026-05-11-memory-nexus-bun-windows-full-suite-crash.md`.
+
+Workaround: run the suite by subdirectory.
+
+```bash
+bun test src/infrastructure/
+bun test src/presentation/
+bun test src/application src/domain
+bun test tests/helpers tests/generators tests/infrastructure tests/integration tests/smoke
+```
+
+Or run a single file directly:
+
+```bash
+bun test src/path/to/file.test.ts
+```
+
+Linux and macOS contributors run the full suite normally — this is a Windows-specific Bun bug.
+
 ## License
 
 MIT
