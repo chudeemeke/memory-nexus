@@ -2,15 +2,40 @@
 schema_version: "1.2"
 source_project: conversations
 created: 2026-05-12
+triaged_at: 2026-05-13
 type: enhancement
 severity: low
 fix_status: none
 affects_scope: all-consumers
-status: open
-priority_rationale: Interface-contract note from conversations after the friction-primacy disposition (2026-05-11). Do NOT implement solely for conversations today — file this as future capacity. Status quo (JSONL scan) is acceptable for conversations' current use case.
+status: triaged
+priority_rationale: Sound proposal, accepted as future capacity. NOT actionable today (conversations explicitly said don't build for them). Conditional execution gated on architecture audit Stage 3 outcome — A/B consider, C revisit, D/E abandon.
 closure_notify_to: conversations
 closure_notify_reason: If memory-nexus extends `friction list` per this proposal, conversations' `friction_pattern_detected` reminder check has a path to durable signal (today it scans transient JSONL only).
 ---
+
+## Triage decision (2026-05-13)
+
+**Decision:** ACCEPT as future capacity. Triaged, not rejected.
+
+**Why accept (not reject):**
+- The proposal is sound, well-bounded (extend `list`, no new subcommand), and the 6 hard-requirements section in `## Hard requirements / open questions` are exactly the right questions to settle BEFORE implementation.
+- Conversations team explicitly flagged "do NOT build solely for conversations" but ALSO explicitly flagged this is useful design work IF a future durable-signal checker is needed.
+- Rejecting would lose the design work.
+
+**Why not build now:** explicit "no consumer is blocked" in the filing.
+
+**Conditional execution gates** (per architecture audit Stage 3 outcome):
+- **A (continue v4.0)** — schedule for v4.x post-audit roadmap; v4.x picks up "extend friction list" as a phase.
+- **B (federation v5.0)** — schedule for v5.0 federation design; friction's `list` becomes one surface in the federated query layer.
+- **C (surgical consolidation)** — REVISIT first principles: if consolidation removes friction-as-separate-stream and unifies it under a single event-log + projection (per Stage 0 §16.0.5), this filing becomes "extend the unified query surface," not "extend `friction list`." Status reopens for re-disposition.
+- **D (freeze at v4.0)** — ABANDON. No new features in a frozen release.
+- **E (deprecate / replace)** — ABANDON. memory-nexus is throwaway; the consumer (conversations' reminder check) keeps scanning JSONL or migrates to the replacement system.
+
+**Owner:** memory-nexus, post-audit roadmap planning (conditional on outcome).
+
+**Hidden-debt check:** the conditional gate is concrete (Stage 3 terminal transition). NOT vibe-defer. The audit IS the trigger and the audit is finite work with a known endpoint. No deferred reminder needed — Stage 3 closure of the audit inbox item triggers this item's re-disposition automatically as part of post-audit planning.
+
+**Why no closure counter-notification yet:** per cross-project-issues v1.2, `closure_notify_to` fires ONLY on terminal-state transition (`merged` or `rejected`). `triaged` is NOT terminal. Conversations' reminder check stays on JSONL until terminal disposition lands.
 
 # `memory friction list` — durable filter + count extensions
 

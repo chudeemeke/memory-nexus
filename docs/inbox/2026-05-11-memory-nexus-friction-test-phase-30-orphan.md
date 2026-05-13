@@ -2,12 +2,51 @@
 schema_version: "1.2"
 source_project: memory-nexus
 created: 2026-05-11
+triaged_at: 2026-05-13
 type: bug
 severity: medium
 fix_status: none
 affects_scope: this-project-only
-status: open
+status: triaged
+priority_rationale: Decision = MIGRATE (not delete); execution deferred until architecture audit Stage 3 recommends an outcome in {A, B, C, D}. Outcome E (deprecate memory-nexus) would abandon the fix entirely.
 ---
+
+## Triage decision (2026-05-13)
+
+**Decision:** MIGRATE, not delete.
+
+**Why migrate (not delete):** the orphan file at `tests/presentation/cli/commands/friction.test.ts` contains 8 integration-style test cases that cover behaviors spanning multiple modules of the Phase-30 split:
+
+- log + list interaction (write then filter by tool)
+- list + markReviewed (state change observable across two list calls)
+- list + NEW indicator + summary count (text-mode output formatting)
+- dashboard --tool flag (consistent filter behavior across subcommands)
+- auto-ingest (cross-cutting behavior that runs on any friction subcommand)
+
+Verified: the co-located unit tests at `src/presentation/cli/commands/friction/*.test.ts` total 38 cases (8 across 7 files plus 18 in `index.test.ts`), but each tests a single module in isolation. The cross-module integration coverage in the orphan is NOT a subset.
+
+Deleting would lose load-bearing integration coverage of the dispatcher seam. Migrating preserves it.
+
+**Why execution is deferred (not done now):**
+
+The migration is non-trivial — it's a full pattern arc, not an import-path rename:
+
+1. Update imports from monolithic `friction.js` to `friction/index.js` (mechanical).
+2. Replace `spyOn(dbModule, "getDefaultDbPath").mockReturnValue(dbPath)` with the canonical deps-injection pattern from the test-isolation arc — passing `{ dbPath: testDbPath }` through `executeFrictionCommand`. The current spy-on pattern was deprecated by that arc.
+3. Restructure test cases to match the new module boundaries where appropriate (e.g., integration tests at the dispatcher vs unit tests per module).
+4. Re-verify coverage (no lines drop in `src/presentation/cli/commands/friction/`).
+
+This is a focused arc of its own — 8 cases at ~5 min/case + verification = ~1 session of work. Doing it inside a triage window mid-audit burns main-session context that's needed for Stage 1 first-principles thinking.
+
+**Concrete trigger for execution:** architecture audit Stage 3 recommends an outcome in {A, B, C, D}. Specifically:
+
+- If A/B/C (continue / federate / consolidate) — execute migration during the post-audit cleanup phase.
+- If D (freeze at v4.0) — execute migration as part of the freeze hardening (test reliability matters for a frozen release).
+- If E (deprecate / replace) — abandon. The migration is throwaway work because memory-nexus itself becomes throwaway.
+
+**Owner:** memory-nexus, post-audit cleanup session.
+
+**Side-effect during triage execution:** none. The orphan file stays in place; subagent test runs in Stage 1a/1b will see it fail at import time — this is a KNOWN issue surfaced in `~/.claude/projects/.../memory/test_isolation_cleanup.md`, NOT a Stage 1 finding.
 
 # tests/presentation/cli/commands/friction.test.ts imports removed friction.js
 
