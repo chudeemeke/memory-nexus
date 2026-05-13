@@ -398,7 +398,28 @@ Stage 1b and Stage 2 must pressure-test whether this convergence reflects (a) a 
 
 ## 14.5 Architecture-evidence map (Stage 1b)
 
-*[To be filled after Stage 1b. Per §6.5.]*
+Stage 1b executed 2026-05-13. Owner: main session (rationale recorded in evidence-map preamble — A-D outputs converged on themes; single voice synthesizes across them; a 5th parallel subagent would re-derive in isolation without seeing A-D).
+
+Output: `docs/audits/2026-05-11-architecture-evidence-map.md` (1409 words, within §6.5 target of 1000-1500).
+
+**Dimensions covered per §6.5:**
+1. Storage model + source of truth (5 distinct canonicity stances — no unified SoT rule)
+2. Memory taxonomy + lifecycle (only friction is first-class typed entity; supersedence absent — Phase 33-34 plans to add)
+3. Capture-to-retrieval data flow (wiring gap: `LlmExtractor` and `HybridSearchService` exist but unwired from sync/context)
+4. Consolidation, supersedence, deletion, export guarantees (supersedence absent at data layer; export round-trip partial)
+5. AI-readability + no-tool recovery (friction is worst case — DB-locked, no plain-text persistence)
+6. Cross-project + cross-machine boundary model (no remote sync; single-machine; Phase 36 planned migration not replication)
+7. Doc/code/roadmap drift (friction/ambient/smart-context = 0 matches across `docs/01-VISION.md`, `04-ARCHITECTURE.md`, `05-IMPLEMENTATION.md`; canonical docs are v1.0-vintage)
+
+**Cross-dimensional pattern surfaced (NOT a verdict):**
+
+> "Capability infrastructure exists; capture/retrieval surfaces don't use it."
+
+Six concrete instances cited. This is the user-worry fingerprint at architecture-evidence level. **The right things ARE built; they are not coherently wired through to the surfaces the user actually touches.**
+
+The v4.0 roadmap (Phase 33-35) plans to close exactly these wiring gaps. Stage 3 must weigh whether Phase 33-35 close the gaps in the right shape (outcome A) or whether the gaps are structural enough that a different shape is required (outcomes C/E). Stage 2 adjacent-system research tests whether other systems face the same wiring gap or have closed it.
+
+**Internal review only** per audit §11 — Stage 1b is NOT cross-AI reviewed. The internal-review discipline applied: each finding is evidence-cited per §8; inferences are labeled inline; cross-subsystem judgments are flagged for Stage 3 cross-check.
 
 ## 15. Adjacent-system research (Stage 2)
 
