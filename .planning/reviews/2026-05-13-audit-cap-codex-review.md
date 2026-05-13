@@ -1,11 +1,26 @@
+Reading additional input from stdin...
+OpenAI Codex v0.130.0
+--------
+[1mworkdir:[0m C:\Users\Destiny\iCloudDrive\Documents\AI Tools\Anthropic Solution\Projects\memory-nexus\.claude\worktrees\triage-2026-05-13b
+[1mmodel:[0m gpt-5.5
+[1mprovider:[0m openai
+[1mapproval:[0m never
+[1msandbox:[0m workspace-write [workdir, /tmp, $TMPDIR, C:\Users\Destiny\.codex\memories]
+[1mreasoning effort:[0m high
+[1mreasoning summaries:[0m none
+[1msession id:[0m 019e2132-e3e3-7150-82e5-bc611d956127
+--------
+[36muser[0m
+This is the memory-nexus first-principles architecture audit doc. Stages 0-3 are complete. Your job is audit-cap codex review #2 of section 19 (the DRAFT recommendation). Per section 11 of this audit, this is the SECOND of 2 cross-AI review calls permitted; section 19 locks after your review. Be adversarial. Focus your push-back on: (1) anti-A bias check — am I rationalizing the existing v4.0 plan rather than evaluating it? (2) Phase 32 rescope realism — is widening Phase 32 to include surface consolidation smuggling Outcome C under Outcome A hat? Should the recommendation split into A-prime + new Phase 32.5? (3) G3 closeability claim — is Phase 33-34 sufficient for true supersedence or only on-paper? (4) E migration cost claim — is the existing infrastructure (HybridSearchService, sqlite-vec, LlmExtractor) actually salvageable, or right-things-wrongly-wired where wiring alone will not fix? (5) C rejection sharpness — if v4.0 did not exist, would standalone-C still be wrong? (6) B under-weighted — Hermes is a federation system in production; did I dismiss B too quickly given memory-nexus already has fragmentation that consolidation may not close? (7) Phase 37 gating — does gating publish on Phase 33-35 effectively pause v4.0 indefinitely if those slip? (8) anti-anchoring check — what would the audit have to find for E to win? If almost nothing realistic, I have an anti-anchoring failure. (9) recommendation atomicity — is section 19 one recommendation or several (rescope + gating + doc-convention)? (10) blind spots not in the above. Return findings as numbered list with severity (BLOCK / HIGH / MEDIUM / LOW / NIT). End with verdict: BLOCK / PROCEED-WITH-CHANGES / PROCEED-AS-IS.
+
+<stdin>
 # First-Principles Architecture Audit of memory-nexus
 
-**Status:** locked 2026-05-13 (all stages complete; codex reviews #1 and #2 integrated)
+**Status:** in-progress (phase-level plan revised post codex review #1; ready for Stage 0)
 **Started:** 2026-05-11
 **Durable plan artifact:** `.planning/audits/2026-05-11-architecture-first-principles-audit-plan.md`
 **Source inbox item:** `docs/inbox/2026-05-08-conversations-first-principles-architecture-audit.md`
-**Codex review #1 of 2:** integrated 2026-05-11 (verdict was BLOCK; all 8 findings addressed in PART I)
-**Codex review #2 of 2:** integrated 2026-05-13 (verdict was BLOCK; all 12 findings addressed in §20; §19 revised to A-prime)
+**Codex review #1 of 2:** integrated 2026-05-11 (verdict was BLOCK; all 8 findings addressed below)
 
 ---
 
@@ -642,201 +657,233 @@ Per section 9 decision threshold #4 (consolidation surface reduction): G6 and G7
 
 Per section 9 decision threshold #5 (v4.0 publishing risk): shipping Phase 37 BEFORE Phase 33-35 would cement the wrong SoT. Shipping Phase 37 AFTER Phase 33-35 closes the gaps and is safe. **Phase 37 must NOT ship before 33-35.**
 
-## 19. Recommendation (LOCKED 2026-05-13 post codex review #2)
+## 19. Recommendation (DRAFT — pending audit-cap codex review #2)
 
-**Recommended outcome: A-prime (Continue v4.0 with structural reinforcement and new Phase 32.5).**
-
-A-prime is a hybrid outcome explicitly added to the 5-candidate set per codex finding #1. It is not Outcome A (status quo Phase 32-37 as planned), not Outcome C standalone (consolidation only), not B (federation), not D (freeze), not E (deprecate). It is: continue v4.0 with the derived minimum structure (section 16.0.5) as enforceable architectural requirements, surface consolidation as a NEW Phase 32.5, and prerelease publishing instead of all-or-nothing publish gating.
+**Recommended outcome: A (Continue v4.0) with Phase 32 rescope.**
 
 ### Specifics
 
-1. **Continue v4.0 (Phases 31, 32, 33, 34, 35, 36, 37) as the path.** Do not abandon, federate, or freeze.
+1. **Continue v4.0 (Phases 31-37) as the path.** Do not abandon. Do not federate. Do not freeze.
 
-2. **Phase 32 (Existing scope, NOT rescoped).** Labeled help groups + uniform --json/--format flags. Stays small per codex finding #2.
+2. **Phase 32 rescope (required).** Current scope: labeled help groups, uniform --json and --format flags. Expand to: labeled help groups + uniform flags + **surface consolidation pass** addressing the fractal C3 violations (G7) — merge doctor/status/stats into a single health surface with detail-flag selection; unify the read surfaces (search/context/related/list/show) behind one query primitive with shape flags per Stage 1a-B recommendation; document the unified surface in docs/04-ARCHITECTURE.md.
 
-3. **Phase 32.5 (NEW phase — surface consolidation).** Per codex finding #2, surface consolidation is its own arc, not a Phase 32 widening. Phase 32.5 scope: (a) merge doctor / status / stats into a single health surface with detail-flag selection; (b) unify the 5 read surfaces (search / context / related / list / show) behind one query primitive with shape flags per Stage 1a-B recommendation; (c) document the unified surface in docs/04-ARCHITECTURE.md. Phase 32.5 lands BEFORE Phase 33 because Phase 33 wires fact-table queries into a surface that should already be unified.
+3. **Execute Phase 33-34 faithfully.** Typed events + supersedence + temporal tracking + ADD/UPDATE/DELETE/NOOP semantics. These close G1, G3, G5.
 
-4. **Phase 33 — event-log SSOT requirement (per codex finding #3).** Phase 33 facts schema + extraction_log + temporal tracking must include:
-   - **Plain-text canonical event log** (JSONL or equivalent) as the source of truth for typed events.
-   - **DB tables (facts schema, extraction_log) as DERIVED projection** rebuildable from the event log.
-   - **Event types matching Stage 0 section 16.0.5:** decision / learning / preference / friction / observation / supersedence.
-   - **Project scope as first-class event field.**
+4. **Execute Phase 35 with the right framing.** Rewire SmartContextService to read from fact tables AND wire HybridSearch into the memory context command, so the command named context delivers semantic + structured context, not SQL aggregation only. Phase 35 also deprecates ~/.memory/ per current roadmap (closes G6).
 
-   This is the audit load-bearing architectural enforcement. Without it, Phase 33 reproduces DB-first canonicity and the user worry fingerprint persists. With it, the derived min-structure becomes real.
+5. **Phase 36 (Portability) as planned.** Cross-machine sync remains out of scope per Stage 0; this is acceptable.
 
-5. **Phase 34 — supersedence-as-event-type (per codex finding #4).** Phase 34 ADD/UPDATE/DELETE/NOOP semantics must be encoded as event types in the canonical event log, NOT as in-place table mutations. Current-vs-superseded views are projection-level operations. G3 acceptance criteria moved to section 21 (8 measurable gates).
+6. **Phase 37 (Publishing) gated.** Do NOT publish until Phase 33-35 land. Gating prevents G3 (critical supersedence absence) from cementing as published v4.0 behavior.
 
-6. **Phase 35 — context rewire + T7 plain-text canonical (per codex finding #11).** Rewire SmartContextService to read from the projection; wire HybridSearch into memory context. Additionally: every new typed memory kind introduced in Phase 33-35 must have plain-text canonical representation OR export-on-write before becoming default. Phase 35 also deprecates ~/.memory/ per current roadmap (closes G6).
+7. **Doc drift closure (G8).** During Phase 32-37, every phase commits a corresponding update to docs/01-VISION.md, 04-ARCHITECTURE.md, 05-IMPLEMENTATION.md. Convention: no Phase merges without docs-update commit.
 
-7. **Phase 36 (Portability) as planned.** Cross-machine sync remains out of scope per Stage 0.
+8. **Cross-cutting workstream — audit-output integration.** The 4 subagent outputs + architecture-evidence map + 4 adjacent-system summaries are kept as docs/audits/2026-05-11-*.md. Phase 33-37 PLAN.md files cite the relevant gap (G1-G8) as the requirement source.
 
-8. **Phase 37 — prerelease, GA-gated (per codex finding #9).** Phase 37 publishes @chude/memory@4.0.0-pre.N (prerelease tags allowed). General Availability publish (@chude/memory@4.0.0) is gated on section 21 acceptance criteria for Phases 32.5, 33, 34, 35. This protects users without freezing v4.0 indefinitely.
+### Rejection rationale for B, C, D, E
 
-### Rejection rationale for original outcomes (B, C-architecture, D, E)
+**B (Scope v5.0 federation):** REJECTED. Federation across already-fragmented surfaces compounds the worry (section 10 prior held this concern; Stage 1 evidence confirmed C3 violations at both top and fractal level). Federation would add a router OVER fragmentation, not consolidate it. Mem0/Hermes evidence shows federation is a wider-surface trade-off, not a narrower one.
 
-**B (federation) — partial rejection per codex finding #8.** Federation across already-fragmented surfaces TODAY would compound the worry. BUT: after A-prime executes (memory-nexus internally consolidated with event-log SSOT), the question of cross-surface coordination — rules / markdown memory files / Claude Code sessions / docs/inbox / per-project memory directories — may have an honest federation answer. **B is deferred re-evaluation post-Phase-35, not preemptive rejection.** A reminder in ~/Projects/conversations/hooks/deferred-reminders.json fires after Phase 35 acceptance criteria pass, gating re-evaluate-B as a decision point.
+**C (Surgical consolidation alone):** REJECTED as standalone. Consolidation is the RIGHT move at the surface layer (Phase 32 rescope absorbs this) BUT does not close G1 (T1 typing), G3 (T4 supersedence), G5 (T8 reconciliation). These require Phase 33-34 infrastructure. Standalone-C leaves the critical-severity gap (G3) open. **Outcome A + Phase 32 rescope is functionally C-built-into-A; standalone-C is incomplete.**
 
-**C-as-architecture-consolidation (per codex finding #7) — rejected on COST not principle.** Codex correctly noted that a fair C-as-architecture-consolidation would include typed event-log SSOT + supersedence + surface consolidation. That IS a real outcome. It is rejected because: (a) v4.0 already plans Phase 33-35 with the architectural primitives — re-deriving them under outcome C banner is renaming work; (b) Phase 32.5 absorbs the surface consolidation explicitly; (c) the architectural enforcement (Phase 33 event-log SSOT) is integrated into A-prime, so C-architecture has no remaining content A-prime does not include. **C-as-architecture-consolidation is functionally identical to A-prime; the distinction is naming.**
+**D (Freeze at v4.0):** REJECTED. Would cement G3 (critical) — supersedence absent in published shape. T2 (G2) memory context would publish without semantic recall. Worst outcome relative to user worry.
 
-**D (freeze at v4.0) — REJECTED.** Would cement G3 (critical) — supersedence absent. G2 — memory context would publish without semantic recall. Worst outcome relative to the user worry.
+**E (Deprecate / replace):** REJECTED. Migration cost ~ rewrite cost; existing infrastructure (HybridSearchService, sqlite-vec, LlmExtractor, AmbientContextService, friction subsystem) would be discarded despite being directionally correct (Stage 1b cross-dimensional pattern: right things built, not wired through). The investment recovers value through Phase 33-35 wiring, not through replacement.
 
-**E (deprecate / replace) — REJECTED with explicit cost model (per codex finding #5):**
+### Prior reconciliation (per section 10)
 
-Component-by-component salvage analysis:
+Section 10 prior was C (surgical consolidation). Actual recommendation is **A with Phase 32 rescope**. Per ~/.claude/rules/actions-not-promises.md mid-session-surprise broadening: name the wrong prediction.
 
-| Component | Salvageable in A-prime? | Salvage cost | Migration cost to (Mem0 / OpenClaw / MemPalace / Hermes) |
-|---|---|---|---|
-| HybridSearchService | YES — already correctly designed; needs wiring | Low (wiring change) | Discard. Adjacent systems have their own search; would rebuild from scratch. |
-| sqlite-vec | YES — vector storage layer is industry-standard | Trivial (already deployed) | Discard or re-deploy in adjacent system. |
-| LlmExtractor | YES — exists at llm-extractor.ts:1-44; needs wiring to sync path | Low-Med (wiring + tests) | Discard (Mem0/Hermes have their own extractor; OpenClaw is agent-extracted) |
-| AmbientContextService | YES — application service, just unwired | Low (wiring) | Discard or rebuild against adjacent system API |
-| Friction subsystem (Phase 24-28) | YES — internally coherent per Stage 1a-A | None (already works) | Discard or rebuild — adjacent systems do not have a parallel-feature equivalent |
-| schema.ts (18 tables) | PARTIAL — Phase 33 introduces event-log canonical; legacy DB tables become derived projection. Schema migration needed. | Med (migration; data preserved) | Discard. Mem0/Hermes/MemPalace have their own schema. |
-| Hooks + sync pipeline | YES — Phase 33 wires LlmExtractor in; Phase 35 rewires context | Low-Med | Discard or rebuild as adjacent system glue |
-
-**Total A-prime cost:** roughly 4-6 weeks of focused wiring + event-log-SSOT introduction + Phase 32.5 consolidation + acceptance-gate testing.
-
-**Total E migration cost (e.g., to MemPalace):** discard existing subsystems; rebuild equivalent capability against MemPalace MCP-based interface (29 tools); migrate user data (sessions, memory_files, friction history) to MemPalace Wings/Rooms/Halls; rewire consumer projects (conversations deferred reminders, friction-primacy disposition contract); update docs; re-establish trust.
-
-**E migration is strictly more work than A-prime.** It is not "migration equals rewrite" (codex finding #5 was correct — that phrasing was lazy). It is "migration greater than A-prime cost AND loses already-correct components." E is rejected on demonstrated cost, not asserted equivalence.
-
-### E-win conditions (per codex finding #10)
-
-E would win if Stage 1-3 evidence had shown:
-
-1. HybridSearchService could NOT support typed current-fact recall after wiring (architecture limitation, not wiring gap). Stage 1a-B showed the opposite: infrastructure is correct, only wiring is missing.
-2. LlmExtractor produces unreliable event operations even when fed correct prompts. Stage 1b section 3 noted the extractor exists; integration test would reveal this. Currently unwired so unverified.
-3. Existing DB schemas could NOT accommodate event-log SSOT migration without rewrite. Stage 1b section 1 noted 18 tables with mixed canonicity — migration to event-log-canonical + DB-derived IS work but is not architectural impossibility.
-4. An adjacent system (MemPalace, Hermes, Mem0) satisfies T1 + T4 + T7 with LOWER total cost than A-prime. Stage 2 evidence shows adjacent systems satisfy T4 (supersedence) but lose T7 (recovery) or C2 (local-first) — partial wins, not strict dominance.
-
-**If during Phase 33 execution any of conditions 1-3 is empirically demonstrated, this audit recommendation re-opens and E is re-evaluated against then-current state.** This is the anti-anchoring guard rail.
-
-### Anti-anchoring re-check (per codex finding #6)
-
-Codex correctly flagged that "every HIGH gap maps to a planned v4.0 phase" is roadmap-fit not architecture-fit. Section 21 acceptance criteria fix this: each phase output must be empirically verified against the derived min-structure section 16.0.5, not just declared "in scope."
-
-The roadmap-fit-vs-architecture-fit distinction is the load-bearing anti-anchoring fix in this audit. Future audits should preserve it.
-
-### Prior reconciliation (TWO wrong predictions named)
-
-**Original section 10 prior:** C (standalone surgical consolidation).
-**Pre-codex-review-#2 prediction:** A with Phase 32 rescope.
-**Locked recommendation:** A-prime (hybrid; explicitly named as 6th outcome).
-
-Both wrong predictions are named per ~/.claude/rules/actions-not-promises.md broadened mid-session-surprise rule:
-
-> Wrong prediction 1 (Stage 0 prior): standalone-C would close the user worry. Disproved by Stage 2 evidence on supersedence primitives.
+> Wrong prediction: standalone-C would close the user worry.
+> Reality: standalone-C closes the surface fragmentation but leaves G1/G3/G5 (typed events, supersedence, reconciliation) open. The v4.0 plan Phase 33-34 are THE primitives the adjacent 2026 state-of-the-art treats as load-bearing. Standalone-C without Phase 33-34 would publish a memory-nexus that is clean on the surface but still structurally behind the 2026 baseline.
 >
-> Wrong prediction 2 (pre-codex-#2): A-with-Phase-32-rescope was Outcome A. Disproved by codex finding #2 — that recommendation is Outcome C smuggled under A hat. Compound: I also conflated v4.0 Phase 33 extraction_log (DB-first) with Stage 0 derived event-log SSOT (plain-text canonical). The conflation is finding #3.
+> The prior under-weighted that v4.0 plan was already directionally correct on the structural gaps. Stage 2 evidence — every 2026 system has explicit supersedence — was the disproving evidence the section 10 prior did not have access to.
 
-The disproving evidence for #2 was already in the audit doc (Stage 0 section 16.0.5 derived event-log SSOT; v4.0 Phase 33 plans an extraction_log table). I did not compare them carefully enough. Codex did. The discipline says: name the wrong prediction.
+This is a planned outcome under section 10 discipline: if it lands on anything else, that surprise is recorded as learning signal.
 
 ### Status
 
-**LOCKED 2026-05-13.** Codex review #2 verdict was BLOCK; all 12 findings integrated in section 20 with explicit disposition. Section 19 rewritten as A-prime per BLOCK findings 1 and 2. Section 21 added with acceptance criteria per HIGH findings 4 and 6 and MEDIUM findings 11 and 12. Per audit section 11, cross-AI review cap is consumed. No further codex calls.
-
-Audit doc transitions from in-progress to locked at this commit. Next-phase plan (section 22) follows.
+**DRAFT.** Section 11 hard-gates the final lock on codex review #2 (audit-cap call). Codex re-auth required. After codex review, integrate pushback into section 20, then lock section 19.
 
 ## 20. Recommendation revisions from codex review #2
 
-Codex review #2 verdict: **BLOCK** with 12 findings. Full review: `.planning/reviews/2026-05-13-audit-cap-codex-review.md`.
+*[To be filled after codex review #2 returns.]*
 
-Disposition table for each finding:
+## 21. Concrete next-phase plan
 
-| # | Sev | Finding (compressed) | Disposition | Where addressed |
-|---|---|---|---|---|
-| 1 | BLOCK | §19 is not one recommendation — Outcome A + Phase 32 rescope + gating + docs is hybrid; violates "exactly one of 5 outcomes" discipline | **ACCEPT** | §19 renamed to **A-prime** (hybrid outcome explicitly added as 6th option) |
-| 2 | BLOCK | Phase 32 rescope smuggles Outcome C under A — surface consolidation is C, not "continue v4.0" | **ACCEPT** | Phase 32 stays original scope; NEW Phase 32.5 created for surface consolidation |
-| 3 | HIGH | §19 does not enforce Stage 0 minimum structure (event-log SSOT). DB-first v4.0 accepted because roadmap exists. | **ACCEPT — load-bearing** | §19 adds event-log SSOT as architectural requirement for Phase 33; Phase 33 schema must include plain-text canonical layer with DB as derived projection |
-| 4 | HIGH | G3 closeability overclaimed — "true supersedence" needs migration of old facts, current-vs-superseded retrieval, conflict rules, export behavior, user-visible inspection, tests | **ACCEPT** | §21 G3 acceptance criteria added (8 measurable gates) |
-| 5 | HIGH | E rejection under-evidenced — "migration cost ~ rewrite cost" asserted not demonstrated | **ACCEPT** | §19 E rejection rewritten with explicit cost model (component-by-component salvage analysis) |
-| 6 | HIGH | Anti-A bias live — "every gap maps to planned v4.0 phase" = roadmap fit not architecture fit. Need acceptance gates proving phases converge on derived min structure. | **ACCEPT — load-bearing** | §21 architecture-convergence gates added per phase (not just "Phase X plans Y" but "Phase X output must demonstrate Y via measurable test") |
-| 7 | MEDIUM | Standalone C rejected too narrowly — defined as surface cleanup only; fair comparison is C-as-architecture-consolidation | **ACCEPT** | §19 C rejection rewritten with C-as-architecture-consolidation framing (typed event-log SSOT + supersedence + surface consolidation as one outcome) |
-| 8 | MEDIUM | B may be dismissed too quickly — Hermes is production federation; memory-nexus already coexists with rules / markdown / sessions / inbox / cross-project surfaces | **PARTIAL ACCEPT** | §19 B rejection adds: B may become honest answer AFTER A-prime executes; deferred re-evaluation post-Phase-35 not preemptive rejection |
-| 9 | MEDIUM | Phase 37 gating too blunt — "do not publish until 33-35" could pause v4.0 indefinitely | **ACCEPT** | §19 Phase 37 gating revised: prerelease (`@4.0.0-pre.X`) allowed; GA (`@4.0.0`) gated on §21 acceptance criteria |
-| 10 | MEDIUM | Audit lacks E-win test — what would have to be true for E to win? | **ACCEPT** | §19 adds explicit "E-win conditions" paragraph |
-| 11 | MEDIUM | T7 underweighted — Phase 33 may worsen recovery if it adds more DB-only derived facts | **ACCEPT** | §21 adds T7 requirement: every new typed memory needs plain-text canonical OR export-on-write before becoming default |
-| 12 | LOW | Docs convention is delivery control not architecture decision; belongs in §21 not §19 | **ACCEPT** | Docs convention moved from §19 item 7 to §21 acceptance criteria |
+*[If recommendation is A/B/C/D: phase numbering, deps, acceptance. If E: migration timeline.]*
+</stdin>
+[2m2026-05-13T11:57:28.853411Z[0m [31mERROR[0m [2mrmcp::transport::worker[0m[2m:[0m worker quit with fatal: Transport channel closed, when Auth(TokenRefreshFailed("Server returned error response: invalid_grant: Invalid refresh token"))
+[1mhook:[0m [2mSessionStart[0m
+[1mhook:[0m [2mSessionStart[0m
+[1mhook:[0m [2mSessionStart[0m
+[1mhook:[0m [2mSessionStart[0m
+[1mhook:[0m [2mSessionStart[0m
+[1mhook:[0m [2mSessionStart[0m Completed
+[1mhook:[0m [2mSessionStart[0m Failed
+[1mhook:[0m [2mSessionStart[0m Completed
+[1mhook:[0m [2mSessionStart[0m Failed
+[1mhook:[0m [2mSessionStart[0m Completed
+[35m[3mcodex[0m[0m
+I’ll treat this as the second capped recommendation review, not as implementation. I’m doing a quick memory pass for the memory-nexus audit context, then I’ll return only findings and a verdict.
+[1mhook:[0m [2mPreToolUse[0m
+[1mhook:[0m [2mPreToolUse[0m
+[1mhook:[0m [2mPreToolUse[0m Completed
+[1mhook:[0m [2mPreToolUse[0m Completed
+[35m[3mexec[0m[0m
+[1m"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command "rg -n \"memory-nexus|test-isolation|external-review|codex review|Phase 32|architecture audit\" C:\\Users\\Destiny\\.codex\\memories\\MEMORY.md"[0m in C:\Projects\memory-nexus
+[32m succeeded in 10156ms:[0m
+102:- aidev release minor, scripts/release-manager.sh, run_strategy_bash_suite, wait pid, buffered output, temp file, tests/run-all-tests.sh, first principles, codex review, timeout ceiling
+157:# Task Group: memory-nexus test-isolation cleanup and external-review gatekeeping
+158:scope: Use when test pollution, module-level seams, or architectural cleanup in `memory-nexus` need a staged refactor with a static gate and mandatory external review.
+159:applies_to: cwd=C:\Projects\memory-nexus; reuse_rule=Safe to reuse for this checkout and similar Bun/CLI cleanup work; exact file names and counts are repo-specific.
+161:## Task 1: Long-running test-isolation cleanup removed first-party pollution and reduced the remaining seam to `paths.ts`, success
+165:- rollout_summaries/2026-05-10T13-26-54-xSuJ-memory_nexus_test_isolation_cleanup_and_doc_for_clear.md (cwd=\\?\C:\Users\Destiny\iCloudDrive\Documents\AI Tools\Anthropic Solution\Projects\memory-nexus, rollout_path=C:\Users\Destiny\.codex\sessions\2026\05\10\rollout-2026-05-10T14-26-54-019e1211-c510-7933-aee8-dbe7ed665d11.jsonl, updated_at=2026-05-10T13:26:55+00:00, thread_id=019e1211-c510-7933-aee8-dbe7ed665d11, captures the broad cleanup arc and persistence)
+166:- rollout_summaries/2026-05-10T13-26-54-Z8cx-memory_nexus_test_isolation_codex_review_preference.md (cwd=\\?\C:\Users\Destiny\iCloudDrive\Documents\AI Tools\Anthropic Solution\Projects\memory-nexus, rollout_path=C:\Users\Destiny\.codex\sessions\2026\05\10\rollout-2026-05-10T14-26-54-019e1211-c311-79d2-ab5c-90d0070898b1.jsonl, updated_at=2026-05-10T13:26:54+00:00, thread_id=019e1211-c311-79d2-ab5c-90d0070898b1, captures the env-var migration finish and standing review preference)
+170:- test:isolation, scripts/check-test-isolation.ts, mock.module, deps parameters, env-overrides.ts, paths.ts, setTestPaths, resetTestPaths, 3096 pass, MEMORY_HOME
+176:- rollout_summaries/2026-05-10T13-26-54-Z8cx-memory_nexus_test_isolation_codex_review_preference.md (cwd=\\?\C:\Users\Destiny\iCloudDrive\Documents\AI Tools\Anthropic Solution\Projects\memory-nexus, rollout_path=C:\Users\Destiny\.codex\sessions\2026\05\10\rollout-2026-05-10T14-26-54-019e1211-c311-79d2-ab5c-90d0070898b1.jsonl, updated_at=2026-05-10T13:26:54+00:00, thread_id=019e1211-c311-79d2-ab5c-90d0070898b1, codifies the review-before-execution requirement)
+184:- The user said `Let's close out the test-isolation arc cleanly then inbox triage` -> finish the currently active cleanup arc before pivoting to a new queue. [Task 1]
+190:- `scripts/check-test-isolation.ts` is the authoritative static gate: it bans module-level mutable test seams and first-party `mock.module()` pollution, and the safe migration pattern is env/deps support first, test migration second, seam deletion last. [Task 1]
+873:- The working external-review invocation was `cat prompt | codex exec --skip-git-repo-check -c 'model=\"gpt-5.4\"' -c 'reasoning.effort=\"high\"' -`; `-p` was the wrong flag shape. [Task 2]
+880:- Symptom: an external-review CLI invocation fails or silently uses the wrong mode. Cause: flag semantics were assumed. Fix: check help and pass the prompt on stdin with explicit model/reasoning settings. [Task 2]
 
-**Verdict integration:** §19 below is rewritten as Outcome A-prime (hybrid: continue + new Phase 32.5 + structural enforcement + gated publish). All 12 findings addressed in §19-revised or §21-new. Per audit §11, codex review #2 cap is consumed; no further cross-AI call. Audit doc locks after this integration commit.
+[1mhook:[0m [2mPostToolUse[0m
+[1mhook:[0m [2mPostToolUse[0m Completed
+[1mhook:[0m [2mPreToolUse[0m
+[1mhook:[0m [2mPreToolUse[0m
+[1mhook:[0m [2mPreToolUse[0m Completed
+[1mhook:[0m [2mPreToolUse[0m Completed
+[35m[3mexec[0m[0m
+[1m"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command "Get-Content C:\\Users\\Destiny\\.codex\\memories\\MEMORY.md | Select-Object -Index 156..190"[0m in C:\Projects\memory-nexus
+[2m2026-05-13T12:00:57.383008Z[0m [31mERROR[0m [2mcodex_core::tools::router[0m[2m:[0m [3merror[0m[2m=[0mExit code: 1
+Wall time: 12.9 seconds
+Output:
+Get-Content : Cannot find path 'C:\Users\Destiny\.codex\skills\.system\doc-methodology\SKILL.md' because it does not 
+exist.
+At line:2 char:1
++ Get-Content C:\Users\Destiny\.codex\skills\.system\doc-methodology\SK ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : ObjectNotFound: (C:\Users\Destin...dology\SKILL.md:String) [Get-Content], ItemNotFoundEx 
+   ception
+    + FullyQualifiedErrorId : PathNotFound,Microsoft.PowerShell.Commands.GetContentCommand
+ 
 
-**Wrong-prediction naming (per `~/.claude/rules/actions-not-promises.md` mid-session-surprise broadening):**
+[2m2026-05-13T12:01:06.462681Z[0m [31mERROR[0m [2mcodex_core::exec[0m[2m:[0m exec error: windows sandbox: timed out after 15000ms waiting for runner spawn_ready
+[31m exited -1 in 0ms:[0m
+execution error: Io(Custom { kind: Other, error: "windows sandbox: timed out after 15000ms waiting for runner spawn_ready" })
+[2m2026-05-13T12:01:06.561534Z[0m [31mERROR[0m [2mcodex_core::tools::router[0m[2m:[0m [3merror[0m[2m=[0mexecution error: Io(Custom { kind: Other, error: "windows sandbox: timed out after 15000ms waiting for runner spawn_ready" })
+[35m[3mcodex[0m[0m
+The memory hit is only process context: this repo has a standing external-review gate and full-suite truth matters. I’m checking the nearby lines so the final memory citation can be precise, then I’ll stay inside the provided audit text.
+[1mhook:[0m [2mPreToolUse[0m
+[1mhook:[0m [2mPreToolUse[0m
+[1mhook:[0m [2mPreToolUse[0m Completed
+[1mhook:[0m [2mPreToolUse[0m Completed
+[35m[3mexec[0m[0m
+[1m"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command "rg -n -C 4 \"external-review gatekeeping|mandatory external review|full-suite truth|Full-suite truth\" C:\\Users\\Destiny\\.codex\\memories\\MEMORY.md"[0m in C:\Projects\memory-nexus
+[32m succeeded in 9146ms:[0m
+153-- Symptom: alias resets get blamed on iCloud sync. Cause: the working tree actually held a stripped fixture copy left by killed tests. Fix: compare HEAD vs working tree before anchoring on sync-conflict theories. [Task 2]
+154-- Symptom: command/help audits produce partial fixes but runtime still drifts. Cause: help text, registry state, and shell implementations diverge. Fix: verify advertised commands from the terminal and filter/manual-only commands out of help if they are not user-callable. [Task 3]
+155-- Symptom: large test redesign plans preserve the original bug. Cause: the first architecture pass is too soft on legacy defaults or hides tier logic. Fix: surface the real baseline/default rules, inventory orphaned buckets, and move to an explicit config model with migration. [Task 4]
+156-
+157:# Task Group: memory-nexus test-isolation cleanup and external-review gatekeeping
+158:scope: Use when test pollution, module-level seams, or architectural cleanup in `memory-nexus` need a staged refactor with a static gate and mandatory external review.
+159-applies_to: cwd=C:\Projects\memory-nexus; reuse_rule=Safe to reuse for this checkout and similar Bun/CLI cleanup work; exact file names and counts are repo-specific.
+160-
+161-## Task 1: Long-running test-isolation cleanup removed first-party pollution and reduced the remaining seam to `paths.ts`, success
+162-
 
-> Predicted: A-with-Phase-32-rescope was a clean Outcome-A recommendation.
-> Actual: codex correctly identified it as Outcome C smuggled under A's hat, plus a conflation of v4.0 roadmap fit with derived-architecture fit. The Stage 0 min-structure (§16.0.5) called for event-log SSOT + projection; v4.0's Phase 33 plans an `extraction_log` table which is DB-internal, not plain-text canonical. I treated those as equivalent. They are not.
->
-> The disproving evidence was already in the audit doc — I just didn't apply it to §19. Codex finding #3 and #6 forced the recognition.
+[1mhook:[0m [2mPostToolUse[0m
+[1mhook:[0m [2mPostToolUse[0m Completed
+[1mhook:[0m [2mPreToolUse[0m
+[1mhook:[0m [2mPreToolUse[0m
+[1mhook:[0m [2mPreToolUse[0m Completed
+[1mhook:[0m [2mPreToolUse[0m Completed
+[35m[3mexec[0m[0m
+[1m"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command "rg -n -C 3 \"Full-suite truth|full-suite|external review|review-before-execution|codifies the review\" C:\\Users\\Destiny\\.codex\\memories\\MEMORY.md"[0m in C:\Projects\memory-nexus
+[32m succeeded in 8212ms:[0m
+155-- Symptom: large test redesign plans preserve the original bug. Cause: the first architecture pass is too soft on legacy defaults or hides tier logic. Fix: surface the real baseline/default rules, inventory orphaned buckets, and move to an explicit config model with migration. [Task 4]
+156-
+157-# Task Group: memory-nexus test-isolation cleanup and external-review gatekeeping
+158:scope: Use when test pollution, module-level seams, or architectural cleanup in `memory-nexus` need a staged refactor with a static gate and mandatory external review.
+159-applies_to: cwd=C:\Projects\memory-nexus; reuse_rule=Safe to reuse for this checkout and similar Bun/CLI cleanup work; exact file names and counts are repo-specific.
+160-
+161-## Task 1: Long-running test-isolation cleanup removed first-party pollution and reduced the remaining seam to `paths.ts`, success
+--
+173-
+174-### rollout_summary_files
+175-
+176:- rollout_summaries/2026-05-10T13-26-54-Z8cx-memory_nexus_test_isolation_codex_review_preference.md (cwd=\\?\C:\Users\Destiny\iCloudDrive\Documents\AI Tools\Anthropic Solution\Projects\memory-nexus, rollout_path=C:\Users\Destiny\.codex\sessions\2026\05\10\rollout-2026-05-10T14-26-54-019e1211-c311-79d2-ab5c-90d0070898b1.jsonl, updated_at=2026-05-10T13:26:54+00:00, thread_id=019e1211-c311-79d2-ab5c-90d0070898b1, codifies the review-before-execution requirement)
+177-
+178-### keywords
+179-
+--
+190-- `scripts/check-test-isolation.ts` is the authoritative static gate: it bans module-level mutable test seams and first-party `mock.module()` pollution, and the safe migration pattern is env/deps support first, test migration second, seam deletion last. [Task 1]
+191-- Full-suite runs matter more than isolated-file green runs in this repo because Bun module mocks can leak across files; the cleanup only really proved out when the suite stayed green and the static violations collapsed toward `paths.ts`. [Task 1]
+192-- The preferred seam shape is `executeXCommand(options, deps = createDefaultCommandDeps())`, not ad hoc `options.dbPath` or module-state test overrides. [Task 1]
+193:- For this project, the external review path was a markdown plan piped to `codex exec -`; the user wants the first-principles framing included in that review payload, not just the implementation checklist. [Task 2]
+194-
+195-## Failures and how to do differently
+196-
 
-This is the SECOND prior reconciliation in this audit. The §10 prior was C; the actual recommendation is A-prime (hybrid, with explicit architectural enforcement). Naming both wrong-predictions is the discipline.
+[1mhook:[0m [2mPostToolUse[0m
+[1mhook:[0m [2mPostToolUse[0m Completed
+[35m[3mcodex[0m[0m
+1. **BLOCK — Section 19 is not one recommendation.** It is Outcome A plus Phase 32 rescope, publication gating, docs gating, and audit-output integration. That violates the audit’s own “exactly one of 5 outcomes” discipline unless you rename it honestly as **A-prime** or add a sixth hybrid outcome.
 
-## 21. Acceptance criteria (per codex finding #6 — architecture convergence gates)
+2. **BLOCK — Phase 32 rescope is smuggling Outcome C under Outcome A.** “Unify read surfaces” and “merge doctor/status/stats into one health surface” is surgical consolidation. That may be correct, but it is not ordinary “continue v4.0.” I would split this into **A-prime: continue v4.0 structural phases** plus **Phase 32.5: surface consolidation**, unless you can prove Phase 32 stays small.
 
-Each gate is empirically verifiable. Phase outputs must pass these BEFORE the phase merges and BEFORE Phase 37 ships GA (per codex finding #6 and finding #9).
+3. **HIGH — The recommendation does not enforce the Stage 0 minimum structure.** §16.0.5 says canonical event-log SSOT plus derived projection. §19 talks about fact tables, extraction logs, and context rewiring, but does not require plain-text canonical events. That is the biggest anti-A smell: you derived event-log SSOT, then accepted DB-first v4.0 because the roadmap already exists.
 
-### Phase 32.5 acceptance (surface consolidation)
+4. **HIGH — G3 closeability is overclaimed.** Phase 33-34 can introduce supersedence primitives, but “true supersedence” also requires migration of old facts, current-vs-superseded retrieval semantics, conflict rules, export behavior, user-visible inspection, and tests proving stale decisions do not return as current context. As written, Phase 33-34 could satisfy G3 on paper only.
 
-- [ ] doctor / status / stats are unified behind a single command with detail-flag selection. The 3 previously-independent checkHooksInstalled calls collapse to 1.
-- [ ] Read surfaces (search / context / related / list / show) are accessible via ONE query primitive with shape flags (--scope, --kind, --mode). Original commands either deprecate or become thin views.
-- [ ] docs/04-ARCHITECTURE.md describes the unified surface with concrete examples.
-- [ ] Stage 1a-B 5-surface fragmentation finding is empirically closed: regression test confirms one query primitive answers the use cases the 5 surfaces did.
+5. **HIGH — E rejection is under-evidenced.** “Migration cost ~ rewrite cost” is asserted, not demonstrated. Existing components being “directionally correct” does not prove salvageability; they may be right-things-wrongly-wired or wrong-abstraction-wrong-boundary. E needs a real cost model.
 
-### Phase 33 acceptance (event-log SSOT + typed events)
+6. **HIGH — Anti-A bias remains live.** The decisive argument is “every high gap maps to a planned v4.0 phase.” That is roadmap fit, not architecture fit. A biased audit can always say “the existing plan already planned to fix that.” You need acceptance gates that prove the phases actually converge on the derived minimum structure.
 
-- [ ] Plain-text canonical event log exists at a documented path (e.g., ~/.local/share/memory/events/*.jsonl). Schema-versioned. Append-only.
-- [ ] Event types include all six Stage 0 kinds: decision / learning / preference / friction / observation / supersedence.
-- [ ] Project scope is a first-class event field (not encoded in content body).
-- [ ] facts schema + extraction_log are DERIVED projections; integration test demonstrates: delete projection DBs, rebuild from event log, projection output matches pre-delete state.
-- [ ] LlmExtractor is wired into sync path; test demonstrates: synced session produces typed events in the event log.
-- [ ] LlmExtractor output reliability measured: at least 80% of extracted events are subjectively valid on a sample of 20 sessions. (If <80%, finding 2 of E-win conditions triggers; recommendation re-opens.)
+7. **MEDIUM — Standalone C is rejected too narrowly.** You define C as surface cleanup only, then reject it for not solving typing/supersedence/reconciliation. But if v4.0 did not exist, a standalone-C plan could consolidate around typed event-log SSOT and include supersedence. The fair comparison is C-as-architecture-consolidation, not C-as-CLI-tidying.
 
-### Phase 34 acceptance (supersedence-as-event-type)
+8. **MEDIUM — B may be dismissed too quickly.** Hermes shows federation is a serious production pattern, not just a router smell. If memory-nexus must coexist with rules, markdown memory files, session logs, docs/inbox, and cross-project surfaces that cannot realistically be collapsed, then B or B-lite may be the honest model after consolidation.
 
-- [ ] supersedence is an event TYPE in the canonical event log, not an in-place mutation of prior records.
-- [ ] Current-view query excludes superseded facts by default; --include-superseded flag includes them.
-- [ ] Conflict-resolution rule for two concurrent supersedence events is documented and tested.
-- [ ] memory export round-trips supersedence chains correctly (export → import to fresh DB → identical query results).
-- [ ] User-visible inspection: memory show or equivalent can display the supersedence chain for any fact.
-- [ ] Regression test: pre-supersedence "decided X" entries from before Phase 34 land are migrated; old decisions do NOT return as current after migration.
-- [ ] Phase 34 closes G3 only when ALL 6 sub-gates pass. Partial pass = Phase 34 does NOT merge.
+9. **MEDIUM — Phase 37 gating is correct but too blunt.** “Do not publish until 33-35 land” protects users, but it can also pause v4.0 indefinitely. Better: gate public claims and default behavior on 33-35, while allowing internal prerelease publishing or feature-flagged packages that do not advertise supersedence/context guarantees.
 
-### Phase 35 acceptance (context rewire + T7 plain-text canonical)
+10. **MEDIUM — The audit lacks an E-win test.** Add a paragraph: E wins if HybridSearch cannot support typed current-fact recall, LlmExtractor cannot produce reliable event operations, existing DB schemas resist event-log SSOT migration, or an adjacent system satisfies T1/T4/T7 with lower migration plus integration cost. If no realistic evidence could make E win, the audit is anchored.
 
-- [ ] memory context uses HybridSearchService (verified: grep finds wiring; integration test demonstrates vector recall).
-- [ ] SmartContextService reads from the facts projection (not from ~/.memory/).
-- [ ] ~/.memory/ deprecation path is documented; migration tool moves existing memory_files into event log + projection.
-- [ ] Every typed memory kind introduced in Phase 33-35 has plain-text canonical representation OR export-on-write before becoming default (per finding #11).
-- [ ] T7 recovery test: with memory-nexus binary deleted, a human or a future model can read accumulated facts from the plain-text event log without the framework.
+11. **MEDIUM — T7 is still underweighted.** Phase 33 may make recovery worse by adding more DB-only derived facts. If A-prime proceeds, every new typed memory should have plain-text canonical representation or export-on-write before it becomes default.
 
-### Phase 37 GA gate
+12. **LOW — The docs convention is useful but should not be framed as peer to the architecture decision.** “No phase merges without docs-update commit” is a delivery control, not part of the outcome recommendation. Keep it in §21 acceptance criteria, not as core §19 rationale.
 
-GA publish (@chude/memory@4.0.0) requires:
-- [ ] Phase 32.5, 33, 34, 35 all acceptance-passed per above.
-- [ ] CHANGELOG entry honestly describes the architectural shift (event-log SSOT, supersedence semantics, T7 recovery story).
-- [ ] Prerelease (@chude/memory@4.0.0-pre.N) has been deployed and used in real session work for at least one full conversations-project cycle.
+**Verdict: BLOCK.** Not because A-prime is wrong, but because §19 as written is too favorable to the existing v4.0 plan, under-specifies the event-log SSOT requirement, and hides consolidation inside “continue v4.0.” Locking it now would preserve exactly the ambiguity this audit was created to resolve.
 
-Prerelease publishes (@chude/memory@4.0.0-pre.N) are allowed at any time during Phase 32.5-35 without GA gating.
 
-### Cross-cutting acceptance: doc convention (per codex finding #12)
+[1mhook:[0m [2mStop[0m
+[1mhook:[0m [2mStop[0m
+[1mhook:[0m [2mStop[0m Completed
+[1mhook:[0m [2mStop[0m Failed
+[2mtokens used[0m
+47,805
+1. **BLOCK — Section 19 is not one recommendation.** It is Outcome A plus Phase 32 rescope, publication gating, docs gating, and audit-output integration. That violates the audit’s own “exactly one of 5 outcomes” discipline unless you rename it honestly as **A-prime** or add a sixth hybrid outcome.
 
-- [ ] Every phase merge includes a corresponding update to docs/01-VISION.md, docs/04-ARCHITECTURE.md, docs/05-IMPLEMENTATION.md as applicable. The convention IS that no phase merges without a docs-update commit.
-- [ ] At Phase 37 GA, the canonical doc set describes v4.0 architecture; v1.0 vision content is archived (not deleted) for historical reference.
+2. **BLOCK — Phase 32 rescope is smuggling Outcome C under Outcome A.** “Unify read surfaces” and “merge doctor/status/stats into one health surface” is surgical consolidation. That may be correct, but it is not ordinary “continue v4.0.” I would split this into **A-prime: continue v4.0 structural phases** plus **Phase 32.5: surface consolidation**, unless you can prove Phase 32 stays small.
 
-This convention is a delivery control (per finding #12), placed here in section 21 rather than section 19 where it had been smuggled into the recommendation as item 7.
+3. **HIGH — The recommendation does not enforce the Stage 0 minimum structure.** §16.0.5 says canonical event-log SSOT plus derived projection. §19 talks about fact tables, extraction logs, and context rewiring, but does not require plain-text canonical events. That is the biggest anti-A smell: you derived event-log SSOT, then accepted DB-first v4.0 because the roadmap already exists.
 
-### Re-evaluation gate for outcome B (federation)
+4. **HIGH — G3 closeability is overclaimed.** Phase 33-34 can introduce supersedence primitives, but “true supersedence” also requires migration of old facts, current-vs-superseded retrieval semantics, conflict rules, export behavior, user-visible inspection, and tests proving stale decisions do not return as current context. As written, Phase 33-34 could satisfy G3 on paper only.
 
-- [ ] After Phase 35 acceptance passes, the question "is memory-nexus the federation router across the rules / markdown / session / inbox surfaces, or is it one surface among them?" is re-opened as a follow-up audit. A reminder fires at that point per the deferred-reminders protocol.
+5. **HIGH — E rejection is under-evidenced.** “Migration cost ~ rewrite cost” is asserted, not demonstrated. Existing components being “directionally correct” does not prove salvageability; they may be right-things-wrongly-wired or wrong-abstraction-wrong-boundary. E needs a real cost model.
 
-This is the deferred-B-re-evaluation gate per codex finding #8.
+6. **HIGH — Anti-A bias remains live.** The decisive argument is “every high gap maps to a planned v4.0 phase.” That is roadmap fit, not architecture fit. A biased audit can always say “the existing plan already planned to fix that.” You need acceptance gates that prove the phases actually converge on the derived minimum structure.
 
-## 22. Concrete next-phase plan
+7. **MEDIUM — Standalone C is rejected too narrowly.** You define C as surface cleanup only, then reject it for not solving typing/supersedence/reconciliation. But if v4.0 did not exist, a standalone-C plan could consolidate around typed event-log SSOT and include supersedence. The fair comparison is C-as-architecture-consolidation, not C-as-CLI-tidying.
 
-Now that the audit is locked at A-prime:
+8. **MEDIUM — B may be dismissed too quickly.** Hermes shows federation is a serious production pattern, not just a router smell. If memory-nexus must coexist with rules, markdown memory files, session logs, docs/inbox, and cross-project surfaces that cannot realistically be collapsed, then B or B-lite may be the honest model after consolidation.
 
-1. **Update ROADMAP.md** to insert Phase 32.5 (Surface Consolidation) between Phase 32 and Phase 33. Update v4.0 Overview to reflect 8-phase structure (was 7).
-2. **Update .planning/STATE.md** to release the audit pause; current focus shifts to Phase 31 (existing bug-fix phase) → Phase 32 → Phase 32.5 → Phase 33 etc.
-3. **Phase 33 PLAN.md** must encode the event-log SSOT requirement from section 19 item 4 and section 21 acceptance gates BEFORE Phase 33 begins. /gsd-plan-phase 33 should be re-run if a PLAN already exists from earlier scoping.
-4. **Update inbox-archive trigger** for the 3 deferred inbox items (friction-test-phase-30-orphan, programmatic-api-real-db-pollution, friction-list-durable-filter): trigger fires at Phase 35 GA, since A-prime is in {A, B, C, D} outcome set. They are NOT abandoned.
-5. **Close audit inbox item** (~/Projects/memory-nexus/docs/inbox/2026-05-08-conversations-first-principles-architecture-audit.md): status = merged; counter-notify conversations via inbox-notify-closure.cjs.
+9. **MEDIUM — Phase 37 gating is correct but too blunt.** “Do not publish until 33-35 land” protects users, but it can also pause v4.0 indefinitely. Better: gate public claims and default behavior on 33-35, while allowing internal prerelease publishing or feature-flagged packages that do not advertise supersedence/context guarantees.
 
-Audit is LOCKED. The next session continues at Phase 31 or — once that closes — Phase 32 + 32.5 with event-log SSOT scoping.
+10. **MEDIUM — The audit lacks an E-win test.** Add a paragraph: E wins if HybridSearch cannot support typed current-fact recall, LlmExtractor cannot produce reliable event operations, existing DB schemas resist event-log SSOT migration, or an adjacent system satisfies T1/T4/T7 with lower migration plus integration cost. If no realistic evidence could make E win, the audit is anchored.
+
+11. **MEDIUM — T7 is still underweighted.** Phase 33 may make recovery worse by adding more DB-only derived facts. If A-prime proceeds, every new typed memory should have plain-text canonical representation or export-on-write before it becomes default.
+
+12. **LOW — The docs convention is useful but should not be framed as peer to the architecture decision.** “No phase merges without docs-update commit” is a delivery control, not part of the outcome recommendation. Keep it in §21 acceptance criteria, not as core §19 rationale.
+
+**Verdict: BLOCK.** Not because A-prime is wrong, but because §19 as written is too favorable to the existing v4.0 plan, under-specifies the event-log SSOT requirement, and hides consolidation inside “continue v4.0.” Locking it now would preserve exactly the ambiguity this audit was created to resolve.
+
+
