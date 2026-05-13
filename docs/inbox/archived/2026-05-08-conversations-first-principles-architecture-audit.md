@@ -6,8 +6,10 @@ type: enhancement
 severity: medium
 fix_status: none
 affects_scope: this-project-only
-status: in-progress
+status: merged
 triaged_at: 2026-05-11
+resolved_at: 2026-05-13
+pr_url: commit:e49e4b1 (audit locked on worktree-triage-2026-05-13b)
 closure_notify_to: conversations
 closure_notify_reason: The audit's recommendation determines which architecture (A specialized + agent-as-router / B federation router / C surgical consolidation) from the conversations memory architecture inventory becomes load-bearing for memory tooling decisions across all projects. Outcome shapes whether memory-nexus targets a v5.0 federation milestone, accepts narrow-scope steady state, or stops at v4.0.
 ---
@@ -166,3 +168,21 @@ See `~/Projects/memory-nexus/.planning/audits/2026-05-11-architecture-first-prin
 - Cross-AI review cap (2 calls)
 - The initial hypothesis (quarantined prior)
 - The 10-step kickoff sequence
+
+---
+
+## Closure (2026-05-13)
+
+Audit executed and locked 2026-05-13. Full audit at `docs/audits/2026-05-11-architecture-first-principles-audit.md` (LOCKED). All 5 stages complete:
+
+- Stage 0: 8 provisional truths + 3 constraints + provisional minimum structure (hybrid event-log SSOT + derived projection)
+- Stage 1a: 4 parallel subagent audits of friction / search-context / sync-ingestion / admin surfaces
+- Stage 1b: architecture-evidence map across 7 dimensions
+- Stage 2: 4 adjacent-system summaries (Mem0, OpenClaw, Hermes, MemPalace)
+- Stage 3: synthesis + comparison matrix + 8-gap analysis + LOCKED recommendation
+
+Cross-AI review: 2 codex calls per audit plan section 11 cap. Review #1 BLOCK (8 findings, integrated 2026-05-11). Review #2 BLOCK (12 findings, integrated 2026-05-13).
+
+**Recommended outcome: A-prime** (hybrid; 6th outcome explicitly added per codex review #2 finding #1). Continue v4.0 with NEW Phase 32.5 (surface consolidation) + Phase 33 event-log SSOT requirement + supersedence-as-event-type in Phase 34 + plain-text canonical T7 requirement in Phase 35 + prerelease publishing with GA gated on acceptance criteria. B/C-architecture/D/E all rejected with explicit reasoning. B is deferred re-evaluation post-Phase-35, not preemptive rejection.
+
+Counter-notification fires to conversations per closure_notify_to. The audit recommendation determines that memory-nexus internally consolidates first (A-prime) BEFORE the federation question (B) is meaningfully askable. Conversations memory architecture inventory Option B (federation router) is deferred re-evaluation — gating reminder fires after Phase 35 acceptance criteria pass.
