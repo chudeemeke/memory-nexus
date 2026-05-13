@@ -358,12 +358,43 @@ Key structural changes:
 
 ## 14. Subagent outputs (Stage 1a)
 
-*[To be filled after subagents A-D return.]*
+Stage 1a executed 2026-05-13. Four parallel `general-purpose` subagents per audit §6.1–6.4. Each output includes verbatim user worry, anti-bias note, cross-session context discipline, Stage 0 lens, scope, evidence-cited findings. Word counts exceeded the <600 target in 3 of 4 cases (A:1135, B:728, C:838, D:561) because §8 evidence density was prioritized.
 
-- 14.A Friction surface: *(awaiting)*
-- 14.B Search/context surface: *(awaiting)*
-- 14.C Sync/ingestion surface: *(awaiting)*
-- 14.D Admin surface: *(awaiting)*
+Trust calibration applied per `~/.claude/rules/subagent-trust-calibration.md`. File:line citations and grep-verified absences are local-confidence-high. Cross-subsystem judgments and "would you build differently" calls are context-dependent-medium — pressure-test against Stage 1b evidence map and Stage 2 adjacent-system research before locking into Stage 3 synthesis.
+
+### 14.A — Friction surface
+
+Output: `docs/audits/2026-05-11-subagent-A-friction-surface.md`
+
+**Load-bearing finding (high-confidence on local; medium on judgment):** friction is internally coherent (clean DDD layering post-Phase-30) but architecturally orphan. Zero mentions in `docs/01-VISION.md`, `docs/04-ARCHITECTURE.md`, `docs/05-IMPLEMENTATION.md`. Friction is the ONLY typed memory entity in `src/domain/entities/` — no decision / learning / preference / observation peers exist. The subsystem is a parallel journal, NOT one event type in a unified event stream (the provisional minimum structure shape). C3 fail. T2 / T4 / T7 / T8 violations evidence-cited.
+
+### 14.B — Search / context surface
+
+Output: `docs/audits/2026-05-11-subagent-B-search-surface.md`
+
+**Load-bearing finding (high-confidence local; high-confidence judgment):** `memory context` — the command whose intent is "what's relevant to this project now" — has ZERO semantic-recall code paths. Grep of `context-service.ts` and `smart-context-service.ts` for `embedding|vector|cosine|similarity|HybridSearch` returns nothing. `HybridSearchService` + `sqlite-vec` infrastructure exists (`src/infrastructure/search/...`, `schema.ts:54,217`) and IS wired into `memory search` only.
+
+This is the user-worry fingerprint at its sharpest: **"right thing built, not wired through."** T2 violation in the command whose name IS "context." C3 fragmentation also present internally — 5 parallel read surfaces (search/context/related/list/show) with overlapping flags, only composed by `browse` which is TTY-gated.
+
+### 14.C — Sync / ingestion surface
+
+Output: `docs/audits/2026-05-11-subagent-C-sync-surface.md`
+
+**Load-bearing finding (high-confidence):** typed `LlmExtractor` at `src/application/services/llm-extractor.ts:1-44` exists but is UNWIRED from the sync path (no caller in `extractSession`). Sync ingests at message/tool_use granularity, never extracts typed events (decisions, terms, supersedence). Five ingestion-adjacent commands (sync, backfill, purge, export, import) write three storage shapes with non-composing lifecycles.
+
+T4 (supersedence) absent at the data layer. T7 weakness: the SQLite DB's "canonical" status is accidentally dependent on Claude Code's 30-day JSONL retention — re-extract is only possible while JSONL still exists upstream. Same "right thing built, not wired" pattern.
+
+### 14.D — Admin surface
+
+Output: `docs/audits/2026-05-11-subagent-D-admin-surface.md`
+
+**Load-bearing finding (high-confidence local):** `doctor` / `status` / `stats` each independently implement `checkHooksInstalled` (3 copies). `status` and `stats` duplicate the pending-session loop verbatim. All three emit the same "Run install" recommendation. The C3 fragmentation worry recurs in miniature inside the admin subsystem. Consolidation (not federation, not freeze, not deprecation) is the local remedy at this level.
+
+### 14.5.1 Convergent theme across A-D (preliminary, for Stage 3 to weigh)
+
+All four subagents independently arrived at variants of "right things present, not coherently wired" plus "the user's fragmentation worry recurs at both top-level and fractal-level." This convergence is itself evidence — Stage 0 anti-bias self-check held; subagents reading the truths landed on the user-worry fingerprint without being told to look for it.
+
+Stage 1b and Stage 2 must pressure-test whether this convergence reflects (a) a real architectural pattern, (b) shared subagent reasoning bias on shared inputs, or (c) both. Stage 3 synthesis owns the final classification per §8.
 
 ## 14.5 Architecture-evidence map (Stage 1b)
 
