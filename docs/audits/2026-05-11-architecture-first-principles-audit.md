@@ -423,12 +423,59 @@ The v4.0 roadmap (Phase 33-35) plans to close exactly these wiring gaps. Stage 3
 
 ## 15. Adjacent-system research (Stage 2)
 
-*[To be filled per §5 protocol. Per-system summaries, NO memory-nexus comparison inside.]*
+Stage 2 executed 2026-05-13. Main session owner per §5.2. Per-system summaries written independently against Stage 0 truths; no memory-nexus comparison inside any per-system writeup per §5.3. Cross-system + memory-nexus comparison happens in Stage 3 §17 matrix.
 
-- 15.A Hermes: *(awaiting)*
-- 15.B OpenClaw: *(awaiting)*
-- 15.C Mem0: *(awaiting)*
-- 15.D MemPalace: *(awaiting — apply §5.1 fallback if no stable reference found)*
+Evidence standard per §8: URLs + retrieval date 2026-05-13 captured in each per-system file. Inferences labeled inline. §5.1 MemPalace fallback NOT triggered — multiple stable references located.
+
+### 15.A — Mem0
+
+Output: `docs/audits/2026-05-11-system-A-mem0.md` (691 words)
+
+**Distinctive primitives:** three parallel stores (vector + graph + key-value); 4-5 dim scope sharding (`user_id`, `agent_id`, `run_id`, `app_id`, optional `org_id`); LLM-driven extraction at write time with explicit Memory Compression Engine; conflict detector at graph layer for supersedence.
+
+**Strong-fit truths:** T2 (semantic recall as headline), T4 (conflict detector + self-correction), T5 (SDK-first), T8 (graph-layer dedup), C1 (one SDK call).
+
+**Gaps:** T7 weak (compression-engine lock-in), C2 partial (cloud-first), AI-readability low if Mem0 disappears.
+
+### 15.B — OpenClaw
+
+Output: `docs/audits/2026-05-11-system-B-openclaw.md` (728 words)
+
+**Distinctive primitives:** markdown-as-canonical (8 specific filenames + daily logs); optional indexing tier (ClawMem: SQLite + sqlite-vec + FTS5); identity-first (SOUL.md read before MEMORY.md); search-first-not-dump; bootstrap caps (20k/file, 150k aggregate).
+
+**Strong-fit truths:** T5 (workspace IS the agent), T7 (zero-cost recovery via plain markdown), C1 (agent writes markdown directly), C2 (filesystem-local).
+
+**Gaps:** T1 partial (filename-conventional types, not enforced enum), T2 partial (boot or on-demand search; no ambient surfacing), T4 weak (manual curation only, no formal supersedence event), T8 weak (manual dedup).
+
+### 15.C — Hermes Agent (Nous Research)
+
+Output: `docs/audits/2026-05-11-system-C-hermes.md` (700 words)
+
+**Distinctive primitives:** four-layer memory (built-in markdown + 8 external provider plugins + HRR holographic + FTS5); trust scoring as soft supersedence (weight decay); plugin-based provider architecture (Mem0, Hindsight, Honcho, OpenViking, RetainDB, ByteRover, Holographic, Supermemory).
+
+**Strong-fit truths:** T1 via providers, T2 (multi-modal recall), T4 (trust scoring), T5 (memory IS the agent), T8 (trust scoring as soft dedup).
+
+**Gaps:** C3 risk acknowledged — four-layer architecture IS fragmented by design (trade-off: capability vs surface coherence); T7 partial (built-in OK; providers vary).
+
+### 15.D — MemPalace
+
+Output: `docs/audits/2026-05-11-system-D-mempalace.md` (823 words)
+
+**Distinctive primitives:** spatial metaphor (Wings / Rooms / Halls / Closets / Drawers); token-budgeted boot (~170 tokens at L0+L1, on-demand L2/L3); verbatim storage (no summarization at write); zero-LLM ingestion; temporal entity-relationship graph with validity windows for supersedence; 29 MCP tools.
+
+**Strong-fit truths:** T2 (layered semantic + structured), T3 (Wings = project scope), T4 (validity windows), T6 (SQLite + L0-L3 layering), C1 (zero-LLM = deterministic + free), C2 (SQLite + offline), C3 (one framework, internally coherent).
+
+**Gaps:** T1 partial (Halls type cross-Wing but no enforced per-chunk taxonomy), T7 partial (SQLite plain-readable; spatial schema framework-specific), C3 internal risk (29 MCP tools is itself a surface-choice burden for the agent).
+
+### 15.E — Cross-system pattern (for Stage 3 to weigh)
+
+All four systems independently address T4 (supersedence/lifecycle) and T8 (reconciliation) at the data layer — Mem0 via conflict detector, OpenClaw via manual curation, Hermes via trust scoring, MemPalace via temporal validity windows. **The 2026 state-of-the-art treats supersedence as a load-bearing primitive, not an afterthought.**
+
+Two systems (OpenClaw, MemPalace) achieve C3 internally by being narrow surface frameworks. Two systems (Mem0, Hermes) take wider surface trade-offs — Mem0 by being cloud-first, Hermes by acknowledging four-layer fragmentation.
+
+T7 (no-tool recovery) splits cleanly: OpenClaw best-in-class (plain markdown); MemPalace partial (SQLite readable, schema framework-specific); Mem0 weak (compression-engine lock-in); Hermes mixed (built-in tier OK, providers vary).
+
+Stage 3 synthesis owns the comparison-to-memory-nexus.
 
 ## 16. Irreducible truths
 
