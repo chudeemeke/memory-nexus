@@ -5,7 +5,7 @@
 - SHIPPED **v1.0 Full Vision Implementation** -- Phases 1-12 (shipped 2026-02-16) -- [Archive](milestones/v1.0-ROADMAP.md)
 - SHIPPED **v2.0 Hybrid Search and Rebrand** -- Phases 13-22 (shipped 2026-03-01)
 - SHIPPED **v3.0 Knowledge Layer + Friction Logging** -- Phases 23-29.1 (shipped 2026-04-02)
-- **v4.0 Intelligence Layer** -- Phases 30-37 (in progress)
+- **v4.0 Intelligence Layer** -- Phases 30-37 plus 32.5 (in progress; architecture audit LOCKED 2026-05-13, recommendation A-prime — see `docs/audits/2026-05-11-architecture-first-principles-audit.md`)
 
 ## Phases
 
@@ -58,21 +58,24 @@
 
 </details>
 
-### v4.0 Intelligence Layer (Phases 30-37)
+### v4.0 Intelligence Layer (Phases 30-37, plus 32.5)
 
 **Overview:** Transform memory from a data store into a knowledge system. Automated extraction of decisions, learnings, and patterns from sessions via LLM-powered pipeline. Intelligent context delivery from SQLite fact tables instead of filesystem. Clean CLI surface with labeled help groups. Cross-environment portability for WSL migration. npm publish to registry.
 
-**Depth:** Fine (8 phases)
-**Total v4.0 Requirements:** 25 phase-mapped + 4 cross-cutting (QUAL) = 29
+**Architecture audit recommendation (LOCKED 2026-05-13): A-prime.** Continue v4.0 with: NEW Phase 32.5 (surface consolidation), event-log SSOT requirement for Phase 33 (plain-text canonical events; DB tables as derived projection), supersedence-as-event-type in Phase 34, T7 plain-text canonical requirement in Phase 35, prerelease publishing with GA gated on §21 acceptance criteria of the audit doc.
+
+**Depth:** Fine (9 phases)
+**Total v4.0 Requirements:** 25 phase-mapped + 4 cross-cutting (QUAL) = 29 (Phase 32.5 inherits surface-consolidation scope; no new requirements added)
 
 - [x] **Phase 30: God File Cleanup** - Split sync.ts and friction.ts into focused SRP-compliant modules (completed 2026-04-03)
 - [ ] **Phase 31: Bug Fixes** - Unicode search, CLI truncation, download bar issues
-- [ ] **Phase 32: CLI Surface** - Labeled help groups, uniform --json and --format flags
-- [ ] **Phase 33: Knowledge Extraction Foundation** - Extraction provider port, facts schema, extraction_log, temporal tracking
-- [ ] **Phase 34: Extraction Pipeline** - The `memory extract` command with ADD/UPDATE/DELETE/NOOP operations
-- [ ] **Phase 35: Context Intelligence** - Rewire SmartContextService to read from fact tables, deprecate ~/.memory/
+- [ ] **Phase 32: CLI Surface** - Labeled help groups, uniform --json and --format flags (scope unchanged per audit codex review #2 finding #2)
+- [ ] **Phase 32.5: Surface Consolidation** (NEW, per audit A-prime) - Merge doctor/status/stats into one health surface with detail-flag selection; unify search/context/related/list/show behind one query primitive with shape flags; document unified surface in docs/04-ARCHITECTURE.md. Acceptance criteria in audit §21.
+- [ ] **Phase 33: Knowledge Extraction Foundation** - Extraction provider port, facts schema, extraction_log, temporal tracking. **MUST include plain-text canonical event log (event-log SSOT) with DB tables as DERIVED projection per audit §19 item 4.** Event types: decision / learning / preference / friction / observation / supersedence.
+- [ ] **Phase 34: Extraction Pipeline** - The `memory extract` command with ADD/UPDATE/DELETE/NOOP operations. **Supersedence encoded as event type in canonical event log, not as in-place table mutation per audit §19 item 5.** G3 acceptance criteria: 6 sub-gates per audit §21.
+- [ ] **Phase 35: Context Intelligence** - Rewire SmartContextService to read from fact tables, deprecate ~/.memory/. **Every new typed memory kind in 33-35 must have plain-text canonical OR export-on-write before becoming default (T7) per audit §19 item 6.**
 - [ ] **Phase 36: Portability** - WSL migration command, doctor --portability, migration guide
-- [ ] **Phase 37: Publishing** - npm publish @chude/memory to registry
+- [ ] **Phase 37: Publishing** - Prerelease (`@chude/memory@4.0.0-pre.N`) allowed at any time; GA (`@chude/memory@4.0.0`) gated on §21 acceptance criteria for Phases 32.5/33/34/35 per audit §19 item 8.
 
 ## Phase Details
 

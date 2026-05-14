@@ -2,10 +2,10 @@
 gsd_state_version: 1.0
 milestone: v4.0
 milestone_name: Intelligence Layer
-status: gated_on_audit
-last_updated: "2026-05-11T00:00:00.000Z"
+status: in_progress
+last_updated: "2026-05-14T00:00:00.000Z"
 progress:
-  total_phases: 8
+  total_phases: 9
   completed_phases: 2
   total_plans: 6
   completed_plans: 5
@@ -19,7 +19,7 @@ See: .planning/PROJECT.md (updated 2026-02-18)
 
 **Core Value:** Knowledge gained in one Claude Code project becomes accessible from any other project. No more context silos.
 
-**Current Focus:** Architecture first-principles audit IN PROGRESS. Stage 0 COMPLETE (commit pending) — 8 provisional truths + 3 constraints + provisional minimum structure (hybrid event-log + derived projection) recorded in `docs/audits/2026-05-11-architecture-first-principles-audit.md` §16.0. **Next action: Stage 1 — spawn 4 CLI verification subagents in parallel + architecture-evidence pass.** Durable plan: `.planning/audits/2026-05-11-architecture-first-principles-audit-plan.md` (status: in-progress). v4.0 Phase 32-37 work paused. Inbox item status: `in-progress`.
+**Current Focus:** Architecture first-principles audit LOCKED 2026-05-13. Recommendation: **A-prime** (hybrid; continue v4.0 with NEW Phase 32.5 + event-log SSOT architectural enforcement + supersedence-as-event-type + plain-text canonical for new typed memory + prerelease publishing with GA gated on acceptance criteria). Audit doc at `docs/audits/2026-05-11-architecture-first-principles-audit.md`. **Next action: Phase 31 (existing bug-fixes) is complete; v4.0 resumes at Phase 32.** Inbox item status: `merged` (archived).
 
 **Tech Stack:** Bun, TypeScript 5.5+, bun:sqlite with FTS5 + sqlite-vec, Commander.js v14, @huggingface/transformers v3, cli-progress, chrono-node, Chart.js (HTML dashboard)
 
@@ -27,19 +27,21 @@ See: .planning/PROJECT.md (updated 2026-02-18)
 
 Phase: 31 (bug-fixes) — COMPLETE
 Test-isolation cleanup arc — COMPLETE (2026-05-11, gate at 0 violations)
-**Milestone:** v4.0 Intelligence Layer — paused at 2/8 phases done, gated on architecture audit
-**Status:** Architecture audit scheduled. Hard schedule gates: audit MUST land before Phase 33 (Knowledge Extraction Foundation) and before Phase 37 (Publishing). See audit plan at `.planning/audits/2026-05-11-architecture-first-principles-audit-plan.md`.
+Architecture first-principles audit — COMPLETE (LOCKED 2026-05-13, recommendation A-prime)
+**Milestone:** v4.0 Intelligence Layer — resumed 2026-05-14 at 2/9 phases done (Phase 32.5 added per audit)
+**Status:** v4.0 resumes at Phase 32. Phase 33 carries event-log SSOT architectural enforcement; Phase 37 GA gated on §21 acceptance criteria per audit recommendation.
 
 ```
-v4.0 Progress: [######__________________] 2/8 phases complete
-  Phase 30: God File Cleanup                [done]
-  Phase 31: Bug Fixes                       [done] (31-01 + 31-02)
-  Phase 32: CLI Surface                     [ ] Not started
-  Phase 33: Knowledge Extraction Foundation [ ] Not started
-  Phase 34: Extraction Pipeline             [ ] Not started
-  Phase 35: Context Intelligence            [ ] Not started
-  Phase 36: Portability                     [ ] Not started
-  Phase 37: Publishing                      [ ] Not started
+v4.0 Progress: [####________________________] 2/9 phases complete
+  Phase 30:   God File Cleanup                [done]
+  Phase 31:   Bug Fixes                       [done] (31-01 + 31-02)
+  Phase 32:   CLI Surface                     [ ] Not started
+  Phase 32.5: Surface Consolidation (NEW)     [ ] Not started — per audit A-prime
+  Phase 33:   Knowledge Extraction Foundation [ ] Not started — event-log SSOT requirement
+  Phase 34:   Extraction Pipeline             [ ] Not started — supersedence-as-event-type
+  Phase 35:   Context Intelligence            [ ] Not started — T7 plain-text canonical
+  Phase 36:   Portability                     [ ] Not started
+  Phase 37:   Publishing                      [ ] Not started — prerelease OK; GA-gated
 ```
 
 ## Out-of-roadmap: Test Isolation Cleanup (2026-05-08 → 2026-05-11) — CLOSED
@@ -53,19 +55,30 @@ v4.0 Progress: [######__________________] 2/8 phases complete
 - `docs/inbox/2026-05-11-memory-nexus-friction-test-phase-30-orphan.md`
 - `docs/inbox/2026-05-11-memory-nexus-bun-windows-full-suite-crash.md`
 
-## Out-of-roadmap: Architecture First-Principles Audit (2026-05-11) — IN PROGRESS
+## Out-of-roadmap: Architecture First-Principles Audit (2026-05-11 → 2026-05-13) — COMPLETE
 
-**Kicked off:** 2026-05-11 (this session).
-- Audit doc: `docs/audits/2026-05-11-architecture-first-principles-audit.md` — phase-level plan drafted (PART I, §3-9)
-- Durable plan: `.planning/audits/2026-05-11-architecture-first-principles-audit-plan.md` — status: in-progress
-- Source inbox item: `docs/inbox/2026-05-08-conversations-first-principles-architecture-audit.md` (triaged → in-progress)
-- Codex review #1 of 2: pending (next step this session, gates subagent spawn)
+**Locked:** 2026-05-13.
+- Audit doc: `docs/audits/2026-05-11-architecture-first-principles-audit.md` (LOCKED)
+- Both codex reviews integrated (§13 review #1, §20 review #2). Both BLOCK verdicts, all 20 findings addressed.
+- Source inbox item: `docs/inbox/archived/2026-05-08-conversations-first-principles-architecture-audit.md` (status: merged)
+- Counter-notification filed in conversations inbox: `~/Projects/conversations/docs/inbox/2026-05-13-memory-nexus-first-principles-architecture-audit-merged.md` (uncommitted; conversations session will handle)
 
-**Hard schedule gates:** audit MUST land before Phase 33 and before Phase 37. Phase 32 is secondary support.
+**Recommendation: A-prime.** Continue v4.0 with: NEW Phase 32.5 (surface consolidation) + Phase 33 event-log SSOT requirement + supersedence-as-event-type in Phase 34 + T7 plain-text canonical in Phase 35 + prerelease publishing with GA-gated on acceptance criteria.
 
-**Five candidate outcomes:** A continue v4.0 / B scope v5 federation / C surgical consolidation / D freeze at v4.0 / E deprecate-or-replace.
+**8 gaps identified.** 3 HIGH+ severity (G1 typed kinds, G2 context-recall wiring, G3 supersedence CRITICAL). All map to v4.0 phases. Closeability inside v4.0 confirmed.
 
-Cross-AI review cap: 2 calls (plan + recommendation). Subagent briefs use verbatim user worry + anti-bias + path-claim verification per durable plan §8.
+**B (federation) deferred re-evaluation post-Phase-35**, not preemptively rejected. Recommend adding deferred reminder when Phase 35 acceptance criteria pass.
+
+**Stage 1a output files (kept as reference for Phase 33-35 PLAN.md):**
+- `docs/audits/2026-05-11-subagent-A-friction-surface.md`
+- `docs/audits/2026-05-11-subagent-B-search-surface.md`
+- `docs/audits/2026-05-11-subagent-C-sync-surface.md`
+- `docs/audits/2026-05-11-subagent-D-admin-surface.md`
+- `docs/audits/2026-05-11-architecture-evidence-map.md`
+- `docs/audits/2026-05-11-system-A-mem0.md` (Mem0)
+- `docs/audits/2026-05-11-system-B-openclaw.md` (OpenClaw)
+- `docs/audits/2026-05-11-system-C-hermes.md` (Hermes Agent)
+- `docs/audits/2026-05-11-system-D-mempalace.md` (MemPalace)
 
 ## Milestone History
 
@@ -107,20 +120,25 @@ Cross-AI review cap: 2 calls (plan + recommendation). Subagent briefs use verbat
 
 ## Session Continuity
 
-### Last Session — 2026-05-11
+### Last Session — 2026-05-13 → 2026-05-14
 
 **Completed:**
-- Test-isolation cleanup arc CLOSED: paths.ts migrated to XDG + MEMORY_HOME env-var pattern; helper at `tests/helpers/env-overrides.ts`; 2 collateral integration tests migrated (concurrent-commands + interrupted-sync); 3 pre-existing issues filed to inbox.
-- Friction-primacy inbox decision MERGED (Option 1, status quo). Cross-repo doc fix to `~/.claude/rules/tool-friction.md` applied. Counter-notification filed in conversations.
-- Architecture-audit inbox item TRIAGED with durable plan at `.planning/audits/2026-05-11-architecture-first-principles-audit-plan.md`.
-- Both inbox triages codex-reviewed (gpt-5.5 high), pushbacks integrated.
+- 4 inbox items triaged (bun-windows-crash, friction-test-phase-30-orphan, programmatic-api-real-db-pollution, friction-list-durable-filter). Item 1 workaround documented in README. Items 2-4 deferred with concrete trigger = audit Stage 3 outcome in {A, B, C, D}; A-prime is in scope.
+- Architecture audit Stage 0 → Stage 3 completed: 4 parallel subagents (Stage 1a), architecture-evidence map (Stage 1b), 4 adjacent-system summaries (Stage 2), refined truths + comparison matrix + gap analysis + recommendation (Stage 3).
+- Both codex audit-cap reviews consumed. #1 (audit plan) BLOCK 8 findings integrated. #2 (recommendation) BLOCK 12 findings integrated. §19 rewritten to A-prime per codex review #2.
+- Audit inbox item closed (status: merged, archived). Counter-notification filed in conversations inbox.
+- ROADMAP.md updated to insert Phase 32.5 (NEW per audit A-prime) and architectural enforcement notes for Phase 33-37.
+- STATE.md updated to release audit pause; total phases now 9 (was 8).
 
 **Next step:**
-- Kick off the architecture first-principles audit per `.planning/audits/2026-05-11-architecture-first-principles-audit-plan.md` §14 (10-step sequence).
-- v4.0 Phase 32-37 work paused until audit recommendation lands.
+- v4.0 resumes at Phase 32 (CLI Surface). Phase 31 already complete.
+- When Phase 32 plans, scope stays as labeled help groups + uniform flags. Surface consolidation moves to NEW Phase 32.5.
+- Phase 33 PLAN.md must encode event-log SSOT requirement per audit §19 item 4 and §21 acceptance gates.
 
-**Per `feedback_validate_with_external_ai.md`:** the audit's own plan AND final recommendation each require ONE codex review (capped at 2 calls total, per codex pushback on the disposition).
+**Cross-project follow-up (uncommitted):**
+- Counter-notification file in conversations inbox needs commit/push from a conversations session.
+- Conversations memory architecture inventory should be updated to note A-prime landing (deferred B-revaluation path).
 
 ---
 
-*Last updated: 2026-05-11 (test-isolation arc closed; both inbox items triaged; architecture audit scheduled as next major work)*
+*Last updated: 2026-05-14 (architecture audit LOCKED at A-prime; v4.0 resumed; Phase 32.5 added)*
