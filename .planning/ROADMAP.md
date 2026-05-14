@@ -123,7 +123,12 @@ Plans:
   1. `memory --help` groups commands under labeled categories (Query, Data, System, Feedback) instead of a flat alphabetical list
   2. All query commands (`search`, `context`, `show`, `list`, `related`, `stats`) accept `--json` and produce valid JSON to stdout
   3. All query commands support `--format brief` and `--format ai` where applicable, producing condensed or AI-optimized output respectively
-**Plans**: TBD
+**Plans:** 3 plans
+
+Plans:
+- [ ] 32-01-PLAN.md -- Help-group registration (CLI-01) + QueryResultEnvelope contract (CLI-02 foundation)
+- [ ] 32-02-PLAN.md -- Apply QueryResultEnvelope --json output to all 6 query commands (CLI-02)
+- [ ] 32-03-PLAN.md -- Normalize --format brief|ai across all 6 query commands (CLI-03) + --format detailed deprecation alias
 
 ---
 
@@ -265,7 +270,7 @@ Phase 37 (Publishing)
 | 29.1 | v3.0 | 2/2 | Complete | 2026-03-22 |
 | 30. God File Cleanup | v4.0 | 2/2 | Complete    | 2026-04-03 |
 | 31. Bug Fixes | v4.0 | 1/2 | In Progress|  |
-| 32. CLI Surface | v4.0 | TBD | Not started | - |
+| 32. CLI Surface | v4.0 | 0/3 | Planned | - |
 | 33. Knowledge Extraction Foundation | v4.0 | TBD | Not started | - |
 | 34. Extraction Pipeline | v4.0 | TBD | Not started | - |
 | 35. Context Intelligence | v4.0 | TBD | Not started | - |
@@ -274,4 +279,4 @@ Phase 37 (Publishing)
 
 ---
 
-*Last updated: 2026-04-03 (Phase 31 planned: 2 plans)*
+*Last updated: 2026-05-14 (Phase 32 planned: 3 plans)*
