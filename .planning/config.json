@@ -1,6 +1,5 @@
 {
   "mode": "yolo",
-  "depth": "comprehensive",
   "parallelization": true,
   "commit_docs": true,
   "model_profile": "quality",
@@ -22,5 +21,6 @@
       }
     },
     "soft_cap": 8
-  }
+  },
+  "granularity": "fine"
 }
