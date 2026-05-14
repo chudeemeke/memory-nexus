@@ -1,60 +1,59 @@
 {
   "version": "1.0",
-  "timestamp": "2026-05-11T14:47:39Z",
-  "context": "audit",
+  "timestamp": "2026-05-14T00:00:00Z",
+  "context": "milestone",
   "phase": null,
   "phase_name": null,
   "phase_dir": null,
   "audit_doc": "docs/audits/2026-05-11-architecture-first-principles-audit.md",
-  "audit_plan_artifact": ".planning/audits/2026-05-11-architecture-first-principles-audit-plan.md",
-  "source_inbox_item": "docs/inbox/2026-05-08-conversations-first-principles-architecture-audit.md",
-  "stage_completed": "Stage 0 (provisional truths + minimum structure)",
-  "stage_next": "Stage 1 (4 CLI subagents A-D + architecture-evidence pass §6.5)",
-  "status": "paused",
-  "completed_this_session": [
-    {"step": "audit kickoff", "commit": "8711f92", "outputs": ["audit doc with initial phase-level plan", "STATE.md updated", "inbox status triaged -> in-progress"]},
-    {"step": "codex review #1 of 2", "commit": "2510cd1", "outputs": ["codex review captured at .planning/reviews/2026-05-11-architecture-audit-phase-plan-codex-review.md", "BLOCK verdict with 8 findings", "all 8 findings integrated into PART I"]},
-    {"step": "Stage 0", "commit": "74c6e10", "outputs": ["8 provisional truths (T1-T8)", "3 constraints (C1-C3)", "5 design candidates considered", "provisional minimum structure: hybrid event log + derived projection", "anti-anchoring self-check committed verbatim"]}
+  "audit_status": "LOCKED",
+  "audit_recommendation": "A-prime",
+  "status": "ready_to_resume",
+  "completed_since_last_handoff": [
+    {"step": "audit Stage 1a — 4 CLI subagents A-D", "commit": "c0039c5"},
+    {"step": "audit Stage 1a §14 integration", "commit": "1ae315e"},
+    {"step": "audit Stage 1b — architecture-evidence map (main session)", "commit": "d16f8db"},
+    {"step": "audit Stage 2 — 4 adjacent-system summaries (Mem0/OpenClaw/Hermes/MemPalace)", "commit": "823f61c"},
+    {"step": "audit Stage 3 — DRAFT recommendation", "commit": "affbfb0"},
+    {"step": "audit-cap codex review #2 (BLOCK, 12 findings)", "outputs": [".planning/reviews/2026-05-13-audit-cap-codex-review.md"]},
+    {"step": "audit LOCK — A-prime, §20 codex integration, §21 acceptance gates, §22 next-phase plan", "commit": "e49e4b1"},
+    {"step": "close audit inbox item — status merged, archived; counter-notify conversations", "commit": "14d986f"},
+    {"step": "ROADMAP+STATE update — release audit pause, insert Phase 32.5", "commit": "7d9ddd0"},
+    {"step": "triage 4 inbox items", "commits": ["e87e570", "7d78da0"]},
+    {"step": "push to origin/main (memory-nexus + conversations)"}
   ],
-  "remaining_in_audit": [
-    {"stage": "1a", "name": "CLI verification subagents A-D (parallel)", "status": "not_started", "estimated_cost": "4x ~50-100k tokens"},
-    {"stage": "1b", "name": "Architecture-evidence pass (§6.5)", "status": "not_started", "owner": "5th subagent OR main session"},
-    {"stage": "2", "name": "Adjacent-system research (Hermes / OpenClaw / Mem0 / MemPalace)", "status": "not_started", "owner": "main session sequential, no incumbent comparison inside per-system writeups"},
-    {"stage": "3.1", "name": "Refine truths against accumulated evidence", "status": "not_started"},
-    {"stage": "3.2", "name": "Fill comparison matrix §17", "status": "not_started"},
-    {"stage": "3.3", "name": "Gap analysis §18", "status": "not_started"},
-    {"stage": "3.4", "name": "Apply §9 decision thresholds, recommend §19", "status": "not_started"},
-    {"stage": "review", "name": "Codex review #2 of 2 (recommendation, before close)", "status": "not_started"},
-    {"stage": "close", "name": "Inbox status merged, move to archived/, counter-notify conversations", "status": "not_started"}
-  ],
-  "blockers": [],
-  "human_actions_pending": [
-    {"action": "Authorize Stage 1 subagent spawn at session resume", "context": "4 parallel subagents + architecture-evidence pass cost ~50-100k tokens each; deserves explicit go-ahead", "blocking": false}
-  ],
-  "decisions": [
-    {"decision": "Stage 0 first, before any subagent or adjacent research", "rationale": "Codex review #1 finding #1 — original execution order let CLI surface frame the audit; Stage 0 establishes provisional truths independent of any system inspection"},
-    {"decision": "Adjacent-system research is main-session sequential, NOT subagents", "rationale": "Codex review #1 finding #4 + cross-AI review cap from durable plan §9; per-system writeups must be independent (no memory-nexus comparison inside per finding #2)"},
-    {"decision": "Provisional minimum structure: hybrid event log + derived projection", "rationale": "Best satisfies T1-T8 + C1-C3 among 5 candidates considered; allows event log as SSOT for recovery (T7) while projection handles scale (T6) and typed queries (T1)"},
-    {"decision": "Stage 0 derived WITHOUT inspecting memory-nexus or reading adjacent docs", "rationale": "Verbatim anti-anchoring self-check committed in §16.0.1; Stage 1/2 evidence may revise truths, but revision must cite disproving evidence"}
-  ],
-  "uncommitted_files": [
-    {"path": "bun.lock", "status": "modified", "note": "pre-existing change unrelated to audit"},
-    {"path": "package.json", "status": "modified", "note": "pre-existing change unrelated to audit"},
-    {"path": ".planning/reviews/2026-05-08-paths-ts-test-isolation-plan.md", "status": "untracked", "note": "test-isolation arc planning doc; should be added in a separate cleanup commit"},
-    {"path": ".planning/reviews/2026-05-08-paths-ts-test-isolation-codex-review.md", "status": "untracked", "note": "test-isolation arc codex review doc; should be added in a separate cleanup commit"}
-  ],
-  "next_action": "Read docs/audits/2026-05-11-architecture-first-principles-audit.md §6 (subagent specs) and §16.0 (Stage 0 truths). Then spawn 4 CLI verification subagents in parallel using VERBATIM briefs from §6.1-6.4. Plus architecture-evidence pass (§6.5) as 5th subagent OR main-session pass.",
-  "context_notes": "Audit is the codex-reviewed canonical path for resolving the user's worry about memory tooling fragmentation. The provisional truths (T1-T8) and minimum structure (hybrid event log + projection) are the LENS through which Stage 1 subagents evaluate memory-nexus's surfaces. Critically: subagent briefs must include verbatim §0 user worry + anti-bias note + cross-session context discipline + Stage 0 truths. The 5 candidate outcomes (A-E) remain on the table until Stage 3 synthesis — no pre-commitment.",
-  "cross_ai_review_budget": {
-    "total_cap": 2,
-    "consumed": 1,
-    "remaining": 1,
-    "reserved_for": "final recommendation §19 review before close"
+  "next_session_pickup": {
+    "primary_path": "v4.0 milestone resumes",
+    "first_action": "Phase 32 planning — `/gsd-plan-phase 32`. Existing scope: labeled help groups + uniform --json/--format flags. DO NOT widen.",
+    "sequence_after_phase_32": [
+      "Phase 32.5 (NEW per audit A-prime): /gsd-plan-phase 32.5 — surface consolidation. Acceptance: audit §21 Phase 32.5 gates.",
+      "Phase 33: /gsd-plan-phase 33 — MUST encode event-log SSOT requirement (plain-text canonical events; DB tables as DERIVED projection) per audit §19 item 4. Acceptance: audit §21 Phase 33 gates.",
+      "Phase 34: /gsd-plan-phase 34 — supersedence-as-event-type. Acceptance: audit §21 Phase 34 (6 sub-gates).",
+      "Phase 35: /gsd-plan-phase 35 — context rewire + T7 plain-text canonical. Acceptance: audit §21 Phase 35 gates.",
+      "Phase 36: /gsd-plan-phase 36 — portability (unchanged).",
+      "Phase 37: /gsd-plan-phase 37 — prerelease (4.0.0-pre.N) allowed; GA gated on §21 acceptance criteria for 32.5/33/34/35."
+    ]
   },
-  "do_not_repeat": [
-    "Do NOT inspect memory-nexus code when deriving truths in Stage 3 refinement — refinement is evidence-driven, NOT inspection-driven",
-    "Do NOT compare adjacent systems against memory-nexus inside per-system writeups — that's synthesis matrix work only",
-    "Do NOT spawn cross-AI review for intermediate subagent syntheses — cap is 2 calls, both accounted for",
-    "Do NOT pre-commit to Outcome C (the recorded prior) — quarantined in §10, held to higher standard if recommended"
-  ]
+  "blockers": [],
+  "deferred_items": [
+    {"id": "memory-nexus inbox: friction-test-phase-30-orphan", "trigger": "Phase 35 GA (A-prime is in {A,B,C,D})", "action": "migrate via deps-injection pattern"},
+    {"id": "memory-nexus inbox: programmatic-api-real-db-pollution", "trigger": "Phase 35 GA", "action": "deps-injection migration for 13 timed-out tests"},
+    {"id": "memory-nexus inbox: friction-list-durable-filters (conversations-filed)", "trigger": "conditional on A-prime outcome — schedule for v4.x post-audit", "action": "extend friction list with --since/--severity/--project/--description-contains/--context-contains/--count/--min flags"},
+    {"id": "memory-nexus inbox: bun-windows-full-suite-crash", "trigger": "Bun version bump past 1.3.5", "action": "retry full-suite run; if fixed, archive"}
+  ],
+  "deferred_b_revaluation": {
+    "outcome": "B (federation router)",
+    "trigger": "Phase 35 acceptance criteria pass",
+    "action": "open re-evaluation: is memory-nexus the federation router across the 18 conversations-inventory memory surfaces, or one surface among them?",
+    "filing_recommendation": "add deferred reminder to ~/Projects/conversations/hooks/deferred-reminders.json keyed on Phase 35 GA"
+  },
+  "anti_anchoring_guard_rail": {
+    "summary": "E re-opens if any of 4 conditions met during Phase 33 execution",
+    "conditions": [
+      "HybridSearchService cannot support typed current-fact recall after wiring (architecture limitation, not wiring gap)",
+      "LlmExtractor produces unreliable event operations (<80% subjective validity on 20-session sample)",
+      "Existing DB schemas cannot accommodate event-log SSOT migration without rewrite",
+      "An adjacent system (MemPalace, Hermes, Mem0) satisfies T1 + T4 + T7 with LOWER total cost than A-prime"
+    ]
+  }
 }
