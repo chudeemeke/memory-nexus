@@ -1,11 +1,13 @@
 ---
 phase: 32
 slug: cli-surface
-status: draft
-nyquist_compliant: false
+status: approved
+nyquist_compliant: true
 wave_0_complete: false
 created: 2026-05-14
 updated: 2026-05-14
+approved: 2026-05-14
+approver: gsd-plan-checker (revision 2 PASS)
 ---
 
 # Phase 32 — Validation Strategy
