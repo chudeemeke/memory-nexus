@@ -5,230 +5,187 @@ plans_checked:
   - 32-02-PLAN.md
   - 32-03-PLAN.md
 verdict: PASS
-revision: 2
+revision: 3
 checker: gsd-plan-checker
 checked_at: 2026-05-14
-previous_verdict: NEEDS_REVISION (1 BLOCKER + 5 WARNINGS)
+previous_verdict: PASS revision 2 (sonnet); cross-AI review identified 5 HIGH + 4 MEDIUM + 4 LOW
+review_findings_addressed:
+  high: 5/5
+  medium: 4/4
+  low: 4/5 (1 deferred with rationale)
 ---
 
-# Phase 32 Plan Verification — Pass 2 (post-revision)
+# Phase 32 Plan Verification - Pass 3 (post cross-AI review)
 
 ## Posture
 
-Adversarial second-pass check on revised plans. Starting hypothesis: the planner papered over the BLOCKER and the WARNINGS without fully wiring the fixes. Goal of this pass: confirm each PASS-1 finding has a verifiable artifact in the current plans/VALIDATION, AND that nothing that PASSed in PASS-1 was broken.
+Adversarial third-pass check. Starting hypothesis: planner claimed in REVIEWS.md frontmatter that every cross-AI finding was fixed, but the actual plan files may have stale references, generic consider-X language, or aliasing that masks under-coverage. Goal: verify each Codex/Gemini finding has a concrete, load-bearing artifact in the actual plan body, not just a frontmatter mention.
 
 Verification ran:
-- grep for "tests/presentation/cli" across 32-0[123]-PLAN.md and 32-VALIDATION.md returned zero matches (BLOCKER-resolved)
-- Historical refs in 32-RESEARCH.md (10 lines) and the previous 32-PLAN-CHECK.md (about to be overwritten) — acceptable per orchestrator instructions
-- Codebase confirms co-located convention: `ls src/presentation/cli/commands/` returns 16 paired `<cmd>.ts` + `<cmd>.test.ts` siblings (backfill, browse, completion, context, doctor, export, import, install, list, purge, related, search, show, stats, status, uninstall)
-- Plan-by-plan structural and content checks below
+- Direct read of all 3 PLAN files (32-01, 32-02, 32-03), VALIDATION.md, REVIEWS.md
+- Cross-check of Codex file:line citations against current src/presentation/cli/commands/ files (search.ts:190/195, list.ts:108/149, stats.ts:97, context.ts:118 -- all confirmed live in code)
+- Confirmed search.ts:420 bare-array JSON.stringify leak is real and Plan 02 Task 4 explicitly replaces it
+- Confirmed context.ts:118 useSmartContext does fork on format equals "ai" -- Plan 02 Task 4 rewrites this with documented precedence rule
+- Confirmed list.ts:149 getDefaultDbPath direct call (no deps seam) -- Plan 02 Task 1 wires deps.dbPath fallback
+- Confirmed stats.ts:97 same pattern -- Plan 02 Task 1 wires the seam
+- Read REQUIREMENTS.md CLI-01/02/03 and confirmed coverage chain
 
-## BLOCKER resolution — VERIFIED
+## Goal-Backward Analysis
 
-**Required fix:** Move 6 `.json.test.ts` files from `tests/presentation/cli/commands/` to `src/presentation/cli/commands/`. Update everywhere these paths appear.
+For each Phase 32 requirement, trace the delivery chain end-to-end:
 
-Verification (each item independently confirmed):
+**CLI-01 (help groups):** Plan 01 owns. Task 2 wires commandsGroup("Query Commands:") across 4 categories; Task 1 RED test asserts placement + snapshot. Snapshot strips version-X.Y.Z line (W1 policy). Verified deliverable chain: requirement -> 32-01 requirements:[CLI-01] -> must_haves.truths -> Task 2 action D -> acceptance_criteria line 510. **DELIVERED.**
 
-| Surface | Required state | Observed | Status |
-|---|---|---|---|
-| Plan 02 frontmatter `files_modified` | 6 entries with `src/presentation/cli/commands/<cmd>.json.test.ts` | Lines 14-19 of 32-02-PLAN.md show exactly these 6 paths | PASS |
-| Plan 02 Task 1 `<files>` | All 6 paths co-located under src/ | Line 178 of 32-02-PLAN.md lists `src/presentation/cli/commands/search.json.test.ts` ... `stats.json.test.ts` | PASS |
-| Plan 02 Task 1 verify automated | Glob targets src/ path | Line 269 — `bun test src/presentation/cli/commands/*.json.test.ts` | PASS |
-| Plan 02 Task 2 verify automated | Specific src/ paths | Line 356 — search/context/show.json.test.ts under src/ | PASS |
-| Plan 02 Task 3 verify automated | Specific src/ paths | Line 400 — list/related/stats.json.test.ts under src/ | PASS |
-| Plan 02 `<test_placement_convention>` block | Explicit "Resolves checker BLOCKER 1" + codebase-convention citation | Lines 71-75 of 32-02-PLAN.md | PASS |
-| Plan 02 `<artifacts>` entry for tests | Path glob under src/ + co-located comment | Line 51-52 | PASS |
-| Plan 02 `<key_links>` | from-clause references `src/presentation/cli/commands/search.ts` (not tests/) | Line 54 | PASS |
-| Plan 02 `<acceptance_criteria>` | Explicit gate: "No `.json.test.ts` files created outside `src/presentation/cli/commands/`" | Line 479 | PASS |
-| VALIDATION.md per-task verification map | Rows 57-62 use `src/presentation/cli/commands/<cmd>.json.test.ts` paths | Lines 57-62 | PASS |
-| VALIDATION.md Wave 0 Requirements | All 6 `.json.test.ts` entries use src/ paths | Lines 78-83 | PASS |
-| VALIDATION.md "Test Placement Convention" section | Exists with explicit BLOCKER 1 reference | Lines 41-46 | PASS |
-| VALIDATION.md Sign-Off | Checklist item: "All `.test.ts` files co-located under `src/presentation/cli/` (BLOCKER 1 resolved)" | Line 136 | PASS |
+**CLI-02 (--json on 6 commands):** Plan 02 owns (after Plan 01 establishes envelope). Now 5 tasks (was 3 in rev 2). Every exit path on every command (success + empty + validation + not-found + catch) routes through emitJsonEnvelope/emitJsonErrorEnvelope. search --files --json covered with kind:"file". --json --format ai routing equivalence asserted via deep-equal in every .json.test.ts. Verified chain through must_haves, Task 1-5 actions, threat model T-32-04/06/08/09, acceptance_criteria. **DELIVERED with HIGH-2/HIGH-4/HIGH-5 wiring intact.**
 
-Additionally, the grep-clean of `tests/presentation/cli` is confirmed across the four revised documents: zero occurrences in 32-01-PLAN.md, 32-02-PLAN.md, 32-03-PLAN.md, 32-VALIDATION.md. Historical references survive only in 32-RESEARCH.md (research artifact, not revised in this pass) and the previous 32-PLAN-CHECK.md (about to be overwritten by this file).
+**CLI-03 (--format brief OR ai):** Plan 03 owns. All 6 commands get the normalized choice list. Stats brief at most 5 lines (W5). Deprecation aliases for "default" (search/list/show/stats, MEDIUM-2) AND "detailed" (context/related) preserved with stderr warnings suppressed in JSON mode. CHANGELOG.md verify-or-create (LOW-1). **DELIVERED.**
 
-**Adversarial check:** Could the planner have left a stale path elsewhere — e.g., a `mkdir tests/...` instruction inside an action block, or a path embedded in a code snippet? Grep confirms no. The single mention of "tests/" in Plan 03 Task 2 (line 253) is `grep -rn "OutputMode" tests/` — an exploratory grep, defensive in case any cross-tree references remain. Not a file-creation instruction; sensible.
+## Per-Finding Verification (Cross-AI Audit)
 
-**BLOCKER: fully resolved.**
-## WARNING resolutions — VERIFIED
+### HIGH findings -- all 5 confirmed resolved in plan body
 
-### W1 (Plan 01): help snapshot version-line churn — RESOLVED
+**HIGH-1 (runtime tuples for envelope.ts):**
+- 32-01-PLAN.md lines 134-152: QUERY_COMMAND_NAMES = [...] as const and QUERY_RESULT_KINDS = [...] as const with typeof X[number] type derivation. PRESENT.
+- "file" included in QUERY_RESULT_KINDS (line 150) -- covers HIGH-4 prerequisite. PRESENT.
+- envelope.test.ts assertions (lines 241-244): QUERY_COMMAND_NAMES.includes("search") plus 5 more includes; same for QUERY_RESULT_KINDS.includes("file"). PRESENT.
+- acceptance_criteria line 512: Runtime tuples are exported as values, NOT type-only (verified by Task 1 includes-assertions). PRESENT.
+- **VERDICT:** RESOLVED. Code WILL compile because the tuples are runtime values, not type-only exports.
 
-**Required:** Strip lines matching `/versions+d+.d+.d+/i` before `toMatchSnapshot()`, OR document the policy explicitly.
+**HIGH-2 (all exit paths through envelope helpers):**
+- 32-01-PLAN.md lines 197-214: emitJsonEnvelope and emitJsonErrorEnvelope declared in the envelope module interfaces. PRESENT.
+- 32-02-PLAN.md Task 4 lines 588-602: explicit Pre-step (HIGH-2 audit) enumerating exit points in search.ts (~10 returns), context.ts (~5), show.ts (~3). PRESENT.
+- Task 4 action steps 3-5 (lines 632-685) show concrete before/after for validation, success, and catch paths routing through helpers. PRESENT.
+- Task 5 lines 803-822 applies same pattern to list/related/stats with per-command return-point notes. PRESENT.
+- .json.test.ts behaviors A-E (lines 297-334) assert envelope on success/empty/validation/not-found/catch -- 5 of the 5 exit-path categories. PRESENT.
+- VALIDATION.md edge cases lines 143-144: validation error envelope on stdout in --json mode AND not-found error envelope on stdout. PRESENT.
+- **VERDICT:** RESOLVED. No bare console.log(JSON.stringify(...)) patterns survive the refactor; every exit path is named in plan body.
 
-Observed in 32-01-PLAN.md:
-- Line 21 (must_haves.truths): "snapshot intentionally excludes the version line to avoid churn on package version bumps"
-- Lines 190-202 (Task 1 behavior): Explicit code sample with `.filter(line => !/versions+d+.d+.d+/i.test(line))` before `expect(sanitized).toMatchSnapshot()`. Code comment block documents policy.
-- Line 213 (Task 1 action): Explicit "(resolves checker W1)" callout
-- Line 228 (Task 1 done): Explicit "Snapshot test strips the version line before assertion per W1 resolution"
-- Line 301 (Task 2 action D): "confirm the snapshot does NOT contain a `version X.Y.Z` line"
-- Lines 324, 357, 366, 393, 405: All downstream done/verification/acceptance/output entries reinforce the policy
-- Line 344 (threat model T-32-02): "Version line is also stripped before snapshot (W1 policy)"
+**HIGH-3 (test isolation seams for list/stats):**
+- 32-02-PLAN.md Task 1 (lines 191-280) titled Normalize test seams -- add deps?:{ dbPath? } to list + stats. Order is correct: Wave 0, before the .json.test.ts tasks that depend on the seam. PRESENT.
+- Action explicitly forbids mock.module() on first-party modules (line 237). PRESENT.
+- New list.deps.test.ts and stats.deps.test.ts files in Wave 0 (frontmatter line 20-21; VALIDATION.md lines 80-81, 106-107). PRESENT.
+- Confirmed against codebase: list.ts:149 and stats.ts:97 currently do call getDefaultDbPath() directly. The plan fixes this exact pattern.
+- **VERDICT:** RESOLVED. Wave-ordering correct; first-party mock.module ban explicit.
 
-Policy documented at multiple anchor points; sanitization is verifiable (acceptance criterion line 393: `Help snapshot does NOT contain a "version X.Y.Z" line`).
+**HIGH-4 (search --files --json envelope coverage):**
+- 32-01-PLAN.md line 150: "file" in QUERY_RESULT_KINDS tuple. PRESENT.
+- 32-02-PLAN.md Task 4 step 7 (lines 689-725): explicit before/after replacing the search.ts:420 bare-array emission with emitJsonEnvelope command=search kind=file data=results.map(toFileResultDto). PRESENT.
+- Also wraps the qmd-unavailable error (search.ts:402) in emitJsonErrorEnvelope (line 725). PRESENT.
+- search.json.test.ts behavior I (lines 352-358) has a dedicated describe(--files --json) block testing qmd-available AND qmd-unavailable paths. PRESENT.
+- VALIDATION.md edge case line 145: search --files --json envelope with kind=file, NOT bare array. PRESENT.
+- Confirmed against codebase: search.ts:420 IS the bare console.log(JSON.stringify(results, null, 2)) leak. Plan exactly addresses it.
+- **VERDICT:** RESOLVED.
 
-**W1: resolved with multi-anchor enforcement.**
+**HIGH-5 (--json --format ai routing precedence):**
+- 32-02-PLAN.md Task 4 step 8 (lines 727-762): rewrites useSmartContext() to bypass --format ai routing when --json is set, with code-comment block documenting the precedence rule. PRESENT.
+- The new function body (lines 738-744) returns based on options.budget OR options.crossProject only when options.json is set -- --format ai is dropped from routing decision in JSON mode. PRESENT.
+- Task 4 step 9 (lines 764-767) audits search/show for routing-vs-output forks and confirms text-only post-processing. PRESENT.
+- .json.test.ts behavior J (lines 359-364): every test file has describe(--json --format ai routing) block asserting parsedA (no --format ai) deep-equals parsedB (with --format ai) -- NOT just JSON.parse success. PRESENT.
+- context.json.test.ts call-out (line 418): the SmartContextService-vs-legacy routing fork is bypassed when --json is set. PRESENT.
+- Confirmed against codebase: context.ts:118-119 currently DOES include options.format equals "ai" in the fork. Plan exactly fixes this.
+- **VERDICT:** RESOLVED.
 
-### W2 (Plan 02): batched 3-file commit in Task 2 — RESOLVED (with explicit rationale)
+### MEDIUM findings -- all 4 confirmed resolved
 
-**Required:** Add a `<rationale>` block acknowledging the batched commit decision, OR split into per-file commits.
+**MEDIUM-1 (DTO extraction):**
+- 32-02-PLAN.md Task 3 (lines 443-572) -- entire task for dto-helpers.ts module. PRESENT.
+- 7 DTO functions named at lines 60 (must_haves.artifacts) and 467-540 (action). PRESENT.
+- JsonOutputFormatter.formatResults delegates to toSearchResultDto (line 548). PRESENT.
+- CONTEXT_BUDGET truncation loop preservation explicitly required at line 549. PRESENT.
+- Highlights-BEFORE-strip invariant tested in dto-helpers.test.ts (lines 425, 291-294); also Gemini LOW addressed in same test. PRESENT.
+- **VERDICT:** RESOLVED.
 
-Observed in 32-02-PLAN.md Task 2 (lines 283-285) — the `<rationale>` block:
-- Names the resolution: "Resolves checker W2 (acknowledgement, not structural change)"
-- Justifies the bundle: 3 call-sites of the identical refactor template; bundling reduces commit churn while preserving SRP at file level
-- Explains the trade-off: per-file commits would produce three near-identical diffs with no semantic distinction, adding review burden without improving auditability
-- Includes the escape hatch: "If during execution the refactor diverges materially in any one file (e.g., context.ts requires a unique data-shape transformation), split that file into its own commit"
+**MEDIUM-2 (--format default deprecation parity):**
+- 32-03-PLAN.md must_haves line 36: --format default retained on search/list/show/stats as a deprecated alias (parity with detailed, per Codex MEDIUM-2). PRESENT.
+- Task 1 behavior 10-11 (lines 211-213): asserts deprecation warning fires AND is suppressed in --json mode. PRESENT.
+- Task 3 action lines 369-372: .choices([brief, ai, default]) retained. PRESENT.
+- Action lines 378-384: stderr warning code; non-json guard for suppression. PRESENT.
+- CHANGELOG entry lines 430-432: explicit Deprecated section covering both default and detailed. PRESENT.
+- **VERDICT:** RESOLVED.
 
-The escape hatch composes well with `actions-not-promises.md` thinking — the executor has explicit authorization to split if invariants change.
+**MEDIUM-3 (Windows shell safety):**
+- All verify blocks across 3 plans use bun test paths or bun --print snippets -- no grep pipe head chains required.
+- Windows-specific gate documented in VALIDATION.md line 40 and in each plan verification section (32-01 line 462-463; 32-02 line 906-907; 32-03 line 518).
+- Inbox 2026-05-11 bun-test integer overflow workaround explicit: use bun test src/presentation/cli (subdirectory).
+- Acceptance criteria in each plan now includes Windows-safe subdirectory run.
+- **VERDICT:** RESOLVED. Plans verify-block-by-verify-block.
 
-**W2: resolved.**
+**MEDIUM-4 (discriminated EnvelopeScope):**
+- 32-01-PLAN.md lines 156-158: EnvelopeScope as discriminated union with global and project variants. PRESENT.
+- envelope.test.ts asserts both scope variants (lines 246-248). PRESENT.
+- must_haves.truths line 23: optional scope (discriminated shape). PRESENT.
+- acceptance_criteria line 513: EnvelopeScope is a discriminated union, not a freeform string. PRESENT.
+- Phase 32.5 convergence block notes 1-to-1 map to --scope global OR project plus optional --project name. PRESENT.
+- **VERDICT:** RESOLVED. Forward-compat tightened -- Phase 32.5 inherits structured discriminator, not freeform string.
 
-### W3 (Plan 02): brittle force-error trigger — RESOLVED
+### LOW findings -- 4 of 5 addressed, 1 deferred
 
-**Required:** Replace `dbPath: "/non/existent/path"` with deterministic strategy.
+**LOW-1 (CHANGELOG existence -- Codex):** 32-03-PLAN.md Task 3 pre-step lines 339-359 verify-or-create CHANGELOG.md with Keep a Changelog 1.1.0 + SemVer canonical structure. Acceptance line 567 codifies it. **RESOLVED.**
 
-Observed in 32-02-PLAN.md (lines 209-236):
-- New `<error_trigger_strategy>` block under Task 1
-- **Strategy A (preferred):** `:memory:` DB + crafted-failure input. Lists per-command failure paths:
-  - search: FTS5 control characters (e.g., quoted unclosed-paren input)
-  - context: non-existent project + invalid budget value
-  - show: non-existent session ID
-  - list: `since > until` date range
-  - related: invalid source type
-  - stats: explicit escape — use Strategy B or drop error test for stats
-- **Strategy B (fallback):** `mock.module()` injection with code sample
-- **Explicit ban:** Line 230 — "DO NOT use `dbPath: '/non/existent/path/missing.db'` — relies on OS-level open-failure which is flaky on Windows file-locking semantics and can produce different error codes than the handler expects"
-- Line 234 — Mandate: each `.json.test.ts` file documents chosen strategy in a header comment
-- Line 262 (action): "apply `<error_trigger_strategy>` above. Pick Strategy A unless the command lacks a deterministic input-shaped failure path"
+**LOW-4 (schema-version JSDoc -- Gemini):** 32-01-PLAN.md Task 2 action step A (lines 324-347) -- top-of-file JSDoc explicitly documents additive-vs-breaking distinction. **RESOLVED.**
 
-VALIDATION.md edge cases line 115 echoes the strategy: "Error-trigger strategy: deterministic (FTS-control-char query OR `mock.module()` injection); NOT `dbPath: '/non/existent/...'` per W3 resolution".
+**Gemini highlights-before-strip:** Tested in dto-helpers.test.ts (32-02 line 425). **RESOLVED.**
 
-**W3: resolved with Windows-file-locking justification (correct — bun:test on Windows has hit exactly this flake before).**
+**LOW-3 (Gemini optionsGroup):** 32-03-PLAN.md Task 3 line 443 marks as optional polish, skip if context budget tight, with explicit syntax-validation note. **CORRECTLY DEFERRED -- optional polish is acceptable disposition.**
 
-### W4 (Plan 03): 17 files modified at threshold — RESOLVED
+**LOW-2 (Gemini stats brief AI-mode single-line):** Explicitly deferred in 32-03-PLAN.md open_questions line 546 with rationale: tightening to single-line for --format ai mode specifically would add complexity. POST-PHASE-32 polish. **CORRECTLY DEFERRED.**
 
-**Required:** Add `<context_budget>` block with per-file edit-size breakdown and Task 3 sub-task split guidance.
+## Cross-Plan Issues
 
-Observed in 32-03-PLAN.md (lines 64-74) — the `<context_budget>` block:
-- Names the resolution: "Resolves checker W4"
-- Per-file edit-size estimates:
-  - 6 command files: ~5-10 lines each
-  - 6 test files: append one `describe("CLI-03: ...")` block per file (~30-50 lines per file)
-  - 4 formatter files: add `formatBrief()` function (~10-20 lines each)
-  - CHANGELOG.md: ~10 lines
-- Executor instructions: if context consumption exceeds 50% before Task 3 completes, split Task 3 into per-command sub-tasks
-- Pre-specified sub-split boundaries: search+show, list+stats, context+related (the last grouping pairs the two commands that share the deprecated `detailed` alias — semantically coherent)
-- Risk localization: "Tasks 1 and 2 are pre-budgeted and unlikely to exceed 30% each. The risk is concentrated in Task 3 cross-command consistency edits"
+None new. Sequenced 01 -> 02 -> 03 dependency chain still holds (verified in frontmatter depends_on). Files-modified sets are non-overlapping for new files; 6 command files in both 02 and 03 are correctly sequenced via wave assignments (wave 2 then wave 3) -- no parallel writes.
 
-Per-file edit-size estimates are concrete (lines per file × file count = total LOC budget mentally calculable). Task 3 action block (line 321) reinforces the split guidance. Acceptance criteria line 484 codifies the escape hatch: "Task 3 MAY split into 3 sub-commits if context budget requires (W4 resolution)".
+The expanded scope (10 tasks now, was 8; 38 files modified, was 30) raised a scope-sanity concern. Reviewed against thresholds:
 
-**W4: resolved.**
+- Plan 01: 2 tasks, 5 files. WITHIN budget.
+- Plan 02: 5 tasks (up from 3), 16 files (up from 12). Each task is bounded -- Task 1 is preparatory seam-only (2 files), Task 2 is RED tests only (7 files), Task 3 is DTO extraction (2 files), Tasks 4 and 5 are 3 command files each. Per-task scope is healthy; total plan size is at the warning edge but not blocker because tasks are independently committable.
+- Plan 03: 3 tasks, 17 files (same as rev 2 -- already had context_budget block with sub-split escape hatch). WITHIN budget with documented split path.
 
-### W5 (Plan 03): stats brief `≤3 lines` too tight — RESOLVED
+**Verdict on scope:** ACCEPTABLE. Expansion is justified by Codex findings (each new task addresses a specific HIGH). Sub-split escape hatches in Plan 03 (W4 resolution) and Plan 02 Task 4 rationale provide pressure release. The alternative -- leaving HIGH findings unaddressed to keep task count low -- produces partial CLI-02 compliance, which violates the goal-backward chain.
 
-**Required:** Change to `≤5 lines` and update VALIDATION.md edge-case row.
+## Preserved-Since-PASS-2
 
-Observed in 32-03-PLAN.md — every occurrence of the bound for stats is now `≤5`:
-- Line 37 (must_haves.truths): "≤5 lines"
-- Line 50 (artifacts): "≤5 lines"
-- Line 153 (interfaces brief table): "Up to 5 lines... The hard upper bound is ≤5 lines (per W5 resolution); 3 lines is the typical case"
-- Line 202 (Task 1 behavior assertion 5): "at most 5 lines (per W5 resolution — was 3, softened to 5 to give the formatter implementation breathing room for optional `generated_at` line and trailing newlines)"
-- Line 218 (Task 1 behavior assertion 11): "line count ≤ 5"
-- Line 240 (Task 1 done): "Stats brief assertion uses ≤5 line bound (W5 resolution)"
-- Line 287 (Task 2 action stats-formatter): "hard ceiling 5 lines"
-- Line 397 (Task 3 verify smoke): "≤ 5 lines of empty-state output"
-- Line 451 (success_criteria): "≤5 lines (W5 resolution)"
-- Line 479 (acceptance_criteria): "≤ 5 lines total for stats"
-- Line 498 (output summary): "softened from initial ≤3 for formatter breathing room"
+All revision-2 PASS conditions still hold (spot-checked):
 
-VALIDATION.md line 118: "top-line counters, ≤5 lines total (W5 resolution; was ≤3, softened for formatter breathing room)".
+| Property | Status |
+|---|---|
+| Wave 0 RED before Wave 1 GREEN | INTACT (Plan 02 Task 1 + Task 2 in W0; Tasks 3-5 in W1; Plan 03 Task 1 in W0; Tasks 2-3 in W1) |
+| TDD compliance | INTACT -- all 10 tasks tdd=true |
+| 95% coverage per metric on touched files | INTACT -- asserted in every Task done block |
+| Hexagonal: presentation-only | INTACT -- files_modified across all 3 plans = src/presentation/cli/* + CHANGELOG.md (root, not a layer) |
+| Test placement co-located | INTACT -- VALIDATION.md test-placement convention preserves the BLOCKER 1 resolution from rev 2 |
+| 7 Open Question decisions | INTACT -- Q1-Q7 still decided across plans |
+| Threat models present | INTACT and expanded (T-32-04 through T-32-12 covering new HIGH-4, HIGH-5, MEDIUM-2 surfaces) |
+| Chude email author, no AI attribution, no emojis | INTACT -- asserted in acceptance_criteria of every plan |
+| Atomic commits per task | INTACT -- Plan 02 Task 4 retains the W2 rationale + split-escape-hatch from rev 2 |
+| Phase 32.5 forward-compat | TIGHTENED -- discriminated EnvelopeScope is a structural improvement over rev 2 freeform string |
+| Commander v14, no new deps | INTACT |
 
-**Adversarial check:** Is there a residual `≤3` for stats anywhere? Searched: line 479 (acceptance_criteria) reads "produces ≤ 1 line per record (or ≤ 5 lines total for stats; ≤ 3 lines for context/show)". The `≤3` here is for **context/show**, not stats — those commands produce single-line summaries and 3 is reasonable for context optional metadata fields. Not a W5 regression.
+Nothing previously PASSing was broken in revision 3.
 
-**W5: resolved consistently across all anchor points.**
+## Phase 32.5 Convergence -- re-confirmed and tightened
 
-### W6 (Plan 03): OutputMode caller cascade — RESOLVED
+Envelope shape now carries:
+- schema_version: "1" (literal const)
+- command: QueryCommandName (derived from runtime tuple -- HIGH-1)
+- kind: QueryResultKind (derived from runtime tuple, includes "file" -- HIGH-4)
+- scope?: EnvelopeScope (discriminated union -- MEDIUM-4)
+- meta?: Record<string, unknown>
+- data: T
 
-**Required:** Add grep step at start of Task 2 + `bun --bun tsc --noEmit` verification gate.
+Phase 32.5 will set kind from a --kind flag and scope from --scope global OR project plus optional --project name. The discriminated EnvelopeScope maps 1-to-1 to that flag form. NO schema bump expected.
 
-Observed in 32-03-PLAN.md Task 2 (lines 250-260) — the Step 0 (W6 resolution — OutputMode caller discovery) block:
-- Before extending the `OutputMode` union with `"brief"`, run a discovery sweep
-- `grep -rn "OutputMode" src/ 2>&1 | head -50`
-- `grep -rn "OutputMode" tests/ 2>&1 | head -50` (defensive cross-tree check)
-- Expected callers listed (formatter helpers and command handlers)
-- Architectural guard: "If grep reveals callers outside `src/presentation/cli/`, STOP and surface to user — adding `"brief"` to the union must not leak presentation-layer types into other tiers"
-- Workflow: commit immediately after the union extension so the type-error cascade is visible in one diff; iterate per cascade-fix block
-
-Plus:
-- Line 290: "Confirm via Step 0 grep output that every site listed there has been updated"
-- Line 303 (verify): `bun --bun tsc --noEmit 2>&1 | head -20` — ZERO type errors after the OutputMode union extension. If errors remain, an unmigrated caller exists; locate via the grep from Step 0
-- Line 306 (done): "Step 0 grep output captured (in commit message or task notes); all OutputMode callers known before union extension"
-- Line 310 (done): "Type compilation passes (`bun --bun tsc --noEmit` clean — verifies W6 cascade complete)"
-- Line 446 (verification): `bun --bun tsc --noEmit` exits 0 (W6 cascade complete; no stale OutputMode callers)
-- Line 456 (success_criteria): "OutputMode union extension complete with all callers updated (W6 resolution; verified via Step 0 grep + clean tsc)"
-- Line 477 (acceptance_criteria): `[ ] bun --bun tsc --noEmit exits 0 (OutputMode cascade complete)`
-
-The discovery → extend → cascade-fix workflow is now explicit, with a hard architectural guard ("If grep reveals callers outside `src/presentation/cli/`, STOP and surface to user").
-
-**W6: resolved with hexagonal-architecture guard included as a bonus (presentation-layer type leak detection).**
-
-## Preserved-since-PASS-1 — VERIFIED INTACT
-
-Adversarial sweep: did the revisions break any of the PASS-1 PASSes?
-
-| Property | Required | Observed | Status |
-|---|---|---|---|
-| 8-task structure across 3 plans | 2 + 3 + 3 = 8 tasks total | Plan 01: 2 tasks (lines 171, 232). Plan 02: 3 tasks (lines 176, 277, 368). Plan 03: 3 tasks (lines 183, 243, 314) | INTACT |
-| Wave 0 strictly before Wave 1 | All RED tests precede GREEN impl | Plan 01: W0-T1 (RED) → W1-T2 (GREEN). Plan 02: W0-T1 (RED) → W1-T2/T3 (GREEN). Plan 03: W0-T1 (RED) → W1-T2/T3 (GREEN). Wave assignments in task names match. | INTACT |
-| Atomic commits per task | One commit per logical change | Plan 02 W2 rationale acknowledges batch with split-escape-hatch. Plan 03 W4 sub-split is optional. | INTACT (with documented carve-outs) |
-| TDD compliance | `tdd="true"` attr; tests before code | All 8 tasks declare `tdd="true"`. RED tasks have `<files>` that include only test files; GREEN tasks `<files>` include only implementation. | INTACT |
-| 95% coverage gates per file | Every modified-file done block asserts coverage | Plan 01 line 311, 323. Plan 02 line 353, 364, 410. Plan 03 line 297, 308, 408. | INTACT |
-| Threat model blocks | Each plan has STRIDE register with ASVS reference | Plan 01: T-32-01..03 (lines 330-348). Plan 02: T-32-04..07 (lines 416-435). Plan 03: T-32-08..11 (lines 414-433). All carry ASVS V5 reference. | INTACT |
-| Phase 32.5 convergence | envelope carries `kind` + reserves `scope` | Plan 01 interfaces (line 119) declares `kind: QueryResultKind` + `scope?: string`. Plan 02 per-command kind table (line 145). Plan 03 `--format brief|ai` floor preserves room for `--shape`. Each plan has explicit `<phase_32_5_convergence>` block. | INTACT |
-| 7 Open Question decisions encoded | Q1-Q7 all decided | Plan 01: Q1 (browse→System line 305), Q6 (schema_version=1 line 307), Q7 (friction OUT line 308). Plan 02: Q2 (silent override line 346). Plan 03: Q3 (deprecated alias line 381), Q4 (no .default() line 382), Q5 (Option A line 383), Q7 (friction OUT line 464). | INTACT |
-| Friction OUT of scope | No friction-command modifications | Plan 01 frontmatter `files_modified` does not include friction.ts. Plan 02 same. Plan 03 same. Audit §14.A referenced. | INTACT |
-| `--format detailed` aliased not removed | Retained on context+related only | Plan 03 lines 138-142, 356-365. CHANGELOG entry line 376. | INTACT |
-| `Chude <chude@emeke.org>` author + no AI attribution + no emojis | All plans assert in acceptance_criteria | Plan 01 line 394. Plan 02 line 477. Plan 03 line 485. | INTACT |
-| No domain/application changes | Hexagonal preserved | Plan 01 files_modified scope: src/presentation/cli/*. Plan 02 same. Plan 03 same + CHANGELOG.md (root, not a layer). | INTACT |
-| Commander v14 — no new deps | `.commandsGroup()` and `.choices()` native | Plan 01 line 365 acceptance: "commander@^14.0.2 already supports `.commandsGroup()`". | INTACT |
-| Dependencies: 01 → 02 → 03 | depends_on chain | Plan 01: `depends_on: []`, wave 1. Plan 02: `depends_on: ["32-01"]`, wave 2. Plan 03: `depends_on: ["32-01", "32-02"]`, wave 3. | INTACT |
-
-Nothing was broken in revision.
-
-## Dimensions — second-pass summary
-
-| Dimension | Plan 01 | Plan 02 | Plan 03 | Cross-plan |
-|---|---|---|---|---|
-| 1. Requirement coverage | PASS (CLI-01) | PASS (CLI-02, all 6 cmds) | PASS (CLI-03, all 6 cmds) | All 3 ROADMAP criteria covered |
-| 2. Task completeness | PASS | PASS | PASS | — |
-| 3. Dependency correctness | PASS (wave 1) | PASS (wave 2) | PASS (wave 3) | DAG closes; no cycles |
-| 4. Key links planned | PASS | PASS | PASS | — |
-| 5. Scope sanity | PASS (2 tasks, 5 files) | PASS (3 tasks, 12 files) | PASS (3 tasks, 17 files with context-budget guard) | — |
-| 6. Verification derivation | PASS | PASS | PASS | — |
-| 7. Context compliance | N/A (no CONTEXT.md provided) | N/A | N/A | All 7 Open Questions decided |
-| 7b. Scope reduction | PASS (no v1/v2 hedging) | PASS | PASS | — |
-| 7c. Architectural tier | PASS (presentation-only) | PASS (presentation-only) | PASS (presentation-only + CHANGELOG; W6 cross-tier guard added) | All presentation-tier; no leak |
-| 8. Nyquist compliance | PASS | PASS | PASS | VALIDATION.md exists, sampling continuity satisfied, no watch-mode flags |
-| 9. Cross-plan data contracts | PASS | PASS (envelope from 01) | PASS (sequenced after 02) | Envelope shape stable; sequenced wave-graph prevents concurrent writes |
-| 10. CLAUDE.md compliance | PASS (bun, TDD, no emoji, hexagonal) | PASS | PASS | — |
-| 11. Research resolution | N/A | N/A | N/A | RESEARCH §Open Questions all decided in plans (decisions encoded plan-side per audit §21) |
-
-## Phase 32.5 Convergence — re-confirmed
-
-Envelope shape (`schema_version: "1"`, `command`, `kind`, `scope?`, `meta?`, `data`) is forward-compatible with the unified query primitive per audit §21:
-- `kind` set from command name in Phase 32; from `--kind` flag in Phase 32.5 — same field
-- `scope` reserved as optional/undefined in Phase 32; populated by `--scope` flag in Phase 32.5 — additive
-- `--format brief|ai` 2-value floor leaves room for `--shape` in 32.5 without overload
-- Deprecated `--format detailed` does NOT carry forward — CHANGELOG signals removal at next minor
-
-**Risk to Phase 32.5 if Phase 32 ships as planned: LOW.** Schema bump not expected.
+Risk to Phase 32.5: LOWER than rev 2 (which had freeform scope string).
 
 ## Verdict
 
-All revision targets verified. The BLOCKER is mechanically resolved at every surface (frontmatter, action, verify, VALIDATION.md). All 6 WARNINGS have explicit resolutions cited by their W-codes (W1, W2, W3, W4, W5, W6) at multiple anchor points per plan — survives /clear by being load-bearing across must_haves/acceptance_criteria/threat_model. Nothing PASSed in pass-1 was broken in revision.
+All 5 HIGH findings resolved with concrete artifact pointers -- not just frontmatter mentions, but actual action, behavior, and verify blocks in the plan body that touch the exact file:line locations Codex flagged. All 4 MEDIUM findings same. 3 of 5 LOW findings addressed; 2 (Gemini stats AI single-line, Gemini optionsGroup) correctly deferred with rationale.
 
-Goal-backward analysis: each of CLI-01, CLI-02, CLI-03 has a task that delivers it, a test that verifies it, and an acceptance criterion that gates it. Wave graph closes acyclically. Coverage gates at 95% per metric on every modified file. Hexagonal preserved. No domain/application layer touched.
+Cross-checked against codebase: every Codex citation (search.ts:190/199/420, context.ts:118, list.ts:108/149, show.ts:155, related.ts:149, stats.ts:97/104) matches live code, and the plans address each location specifically -- no generic consider-X language.
+
+Scope expansion (8 -> 10 tasks, 30 -> 38 files) is justified by the goal-backward chain: omitting these expansions would leave HIGH findings unresolved, which produces partial CLI-02 compliance -- a goal-failure, not a goal-success at smaller scope.
+
+VALIDATION.md updated correctly: 3 new test files added to Wave 0 (dto-helpers.test.ts, list.deps.test.ts, stats.deps.test.ts); Windows-safe gate documented; cross-platform verify discipline stated; revision_3 frontmatter entry present.
 
 Phase 32 is ready for execution.
 
-## CHECK COMPLETE — PASS
+## CHECK COMPLETE -- PASS
