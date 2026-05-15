@@ -17,7 +17,27 @@ plans_reviewed:
   - 32-03-PLAN.md
 prior_internal_checker: gsd-plan-checker (sonnet) — PASS on revision 2
 gap_caught_by_external: yes (5 HIGH findings missed by sonnet)
-status: revised
+status: converged
+revision_4:
+  date: 2026-05-15
+  type: convergence_pass + targeted_fix
+  reviewers:
+    - id: gemini
+      model: gemini-3-pro-preview
+      verdict: CONVERGED (LOW risk; proceed to execution)
+      findings: 0 new
+    - id: codex
+      model: gpt-5.5 (reasoning_effort=high)
+      verdict: NEEDS_MORE_REVISION → resolved in-place
+      findings:
+        - id: MEDIUM-3-regression
+          title: "<verify> blocks still use <shell>bash</shell> + `| tail -N` (contradicts cross-platform claim)"
+          resolution: "Stripped all `2>&1 | tail -N` and `2>&1 | head -N` suffixes from <automated> blocks; removed all `<shell>bash</shell>` tags. bun test output is naturally finite — no pipe needed. Now genuinely cross-platform (PowerShell/cmd/bash)."
+          plans_affected: [32-01-PLAN.md, 32-02-PLAN.md, 32-03-PLAN.md]
+        - id: NEW-MEDIUM-frontmatter-omission
+          title: "Plan 02 frontmatter omits list.deps.test.ts + stats.deps.test.ts from files_modified"
+          resolution: "Added both test files to 32-02-PLAN.md frontmatter files_modified list. Now matches Task 1 creation + VALIDATION.md per-task verification map."
+          plans_affected: [32-02-PLAN.md]
 revision_3:
   date: 2026-05-14
   plans_revised:
@@ -97,9 +117,29 @@ revision_3:
 # Phase 32 — Cross-AI Reviews
 
 > External adversarial review of Phase 32 plans BEFORE `/gsd-execute-phase 32`.
-> Two reviewers — Codex (gpt-5.5 high) and Gemini Flash — produced independent findings.
-> Codex flagged 5 HIGH severity issues missed by the internal sonnet checker.
-> **Plans were revised via `/gsd-plan-phase 32 --reviews` (revision 3); all HIGH + MEDIUM findings addressed.**
+> Two reviewers — Codex (gpt-5.5 high) and Gemini (Pro / Flash) — produced independent findings across two rounds.
+> Round 1 (2026-05-14): Codex flagged 5 HIGH + 4 MEDIUM + LOW findings missed by internal sonnet checker.
+> Round 2 convergence (2026-05-15): Gemini Pro returned CONVERGED/LOW. Codex caught regressed MEDIUM-3 (verify-block bash tags) + new MEDIUM (frontmatter omission). Both fixed in-place.
+> **Final status: CONVERGED. Plans ready for `/gsd-execute-phase 32`.**
+
+---
+
+## Round 2 Convergence Pass (2026-05-15)
+
+**Gemini Pro (gemini-3-pro-preview):** CONVERGED — LOW risk; proceed to execution. All 5 HIGH + 4 MEDIUM + 3 LOW findings verified resolved with file:line citations. No new findings.
+
+**Codex (gpt-5.5 reasoning_effort=high):** NEEDS_MORE_REVISION → resolved in-place (no replan needed).
+
+Codex verified 7 of 9 prior findings PASS by file:line citation. Two issues caught Gemini missed:
+
+| Finding | Codex citation | Resolution |
+|---|---|---|
+| MEDIUM-3 regression | 32-01-PLAN.md:305-306, 32-02-PLAN.md:264-265, 32-03-PLAN.md:241-242 (all `<verify>` blocks tagged `<shell>bash</shell>` with `\| tail -N`) | sed-stripped all `2>&1 \| tail -N` and `2>&1 \| head -N` suffixes; removed all `<shell>bash</shell>` tags. Now genuinely cross-platform. |
+| NEW MEDIUM (frontmatter omission) | 32-02-PLAN.md:7-22 omits `list.deps.test.ts` + `stats.deps.test.ts` despite Task 1 creating them | Added both files to Plan 02 frontmatter `files_modified` list. |
+
+This is the canonical asymmetric-reviewer pattern: Gemini's PASS was accepting documented claims; Codex's NEEDS_MORE_REVISION was verifying claims against actual file content with grep. Cross-AI review surfaced an internal inconsistency the internal sonnet checker AND Gemini both missed.
+
+After fixes, both convergence concerns are resolved without a replan — surgical edits sufficient.
 
 ---
 
