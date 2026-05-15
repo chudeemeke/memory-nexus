@@ -17,7 +17,81 @@ plans_reviewed:
   - 32-03-PLAN.md
 prior_internal_checker: gsd-plan-checker (sonnet) — PASS on revision 2
 gap_caught_by_external: yes (5 HIGH findings missed by sonnet)
-status: needs_revision
+status: revised
+revision_3:
+  date: 2026-05-14
+  plans_revised:
+    - 32-01-PLAN.md
+    - 32-02-PLAN.md
+    - 32-03-PLAN.md
+  validation_updated: true
+  findings_addressed:
+    high:
+      - id: HIGH-1
+        title: "Plan 32-01 envelope.ts runtime constants"
+        resolution: "QUERY_COMMAND_NAMES and QUERY_RESULT_KINDS exported as `as const` tuples; types derived. `file` added to QUERY_RESULT_KINDS for HIGH-4."
+        plan: 32-01-PLAN.md
+        section: "<interfaces> + Task 1 behavior + Task 2 action step A"
+      - id: HIGH-2
+        title: "All early-return paths route through envelope helpers"
+        resolution: "Shared `emitJsonEnvelope` and `emitJsonErrorEnvelope` helpers added to envelope.ts (Plan 01). Plan 02 Tasks 4 and 5 mandate a pre-step audit enumerating every `return { exitCode }` site; every site routes through the appropriate helper. Per-command tests assert envelope on success, empty, validation, not-found, and catch paths (Task 2 behavior items A-E)."
+        plan: 32-01-PLAN.md (helpers) + 32-02-PLAN.md (wiring)
+      - id: HIGH-3
+        title: "Test isolation seams for list and stats"
+        resolution: "New Task 1 in Plan 02 normalizes `executeListCommand` and `executeStatsCommand` to accept `deps?: { dbPath?: string }` (parity with show/context/related/search). New `list.deps.test.ts` and `stats.deps.test.ts` verify the seam. NO mock.module() on first-party permitted."
+        plan: 32-02-PLAN.md (Task 1)
+      - id: HIGH-4
+        title: "search --files --json envelope coverage"
+        resolution: "Wrapped in envelope with `kind: 'file'` (added to QUERY_RESULT_KINDS in Plan 01). Plan 02 Task 4 action step 7 wires the --files branch. `search.json.test.ts` has a `describe('--files --json')` block (Task 2 behavior item I)."
+        plan: 32-01-PLAN.md (kind tuple) + 32-02-PLAN.md (Task 2 tests, Task 4 wiring)
+      - id: HIGH-5
+        title: "--json --format ai routing precedence (context.ts)"
+        resolution: "`useSmartContext()` in context.ts updated to bypass `--format ai` routing when `--json` is set. Precedence rule documented in code comment block. Every `.json.test.ts` has a `describe('--json --format ai routing')` block asserting `parsed_default` deep-equals `parsed_with_ai_format` (not just JSON.parse success). Plan 02 Task 4 action step 8."
+        plan: 32-02-PLAN.md (Task 2 tests, Task 4 wiring)
+    medium:
+      - id: MEDIUM-1
+        title: "Extract DTO helpers from JsonOutputFormatter"
+        resolution: "New `dto-helpers.ts` module with 7 DTO functions extracted from existing JsonOutputFormatter behavior. `JsonOutputFormatter.formatResults` delegates to `toSearchResultDto`. CONTEXT_BUDGET truncation loop preserved in formatter (boundary documented in code). Highlights computed BEFORE `<mark>` strip (Gemini LOW invariant tested in `dto-helpers.test.ts`)."
+        plan: 32-02-PLAN.md (Task 3)
+      - id: MEDIUM-2
+        title: "--format default deprecation parity"
+        resolution: "`--format default` retained on search/list/show/stats as deprecated alias (parity with --format detailed on context/related). One-shot stderr warning; suppressed in --json mode. CHANGELOG documents removal in next minor."
+        plan: 32-03-PLAN.md (Task 3 wiring; CHANGELOG entry)
+      - id: MEDIUM-3
+        title: "Windows shell safety in <verify> blocks"
+        resolution: "All `<verify>` blocks now use `bun test <paths>` (cross-platform; works in PowerShell/cmd/bash). Replaced `grep | head` chains with `bun --print` snippets. Windows-specific gate (subdirectory bun test) documented in VALIDATION.md and each PLAN's <verification> section. Per-task verify uses `bun test src/presentation/cli` to avoid the bun-test full-suite integer-overflow crash documented in inbox 2026-05-11."
+        plan: All three PLANs + 32-VALIDATION.md
+      - id: MEDIUM-4
+        title: "Tighten scope semantics for Phase 32.5"
+        resolution: "`EnvelopeScope` is now a discriminated union: `{ type: 'global' } | { type: 'project'; project: string }` — not a freeform string. Maps 1:1 to Phase 32.5's `--scope global|project [--project <name>]`. Tested in envelope.test.ts (scope variant assertions)."
+        plan: 32-01-PLAN.md (<interfaces> + Task 1/2)
+    low:
+      - id: LOW-1
+        title: "CHANGELOG.md existence"
+        resolution: "Plan 32-03 Task 3 has a pre-step that verifies CHANGELOG.md exists and creates it with canonical structure (Keep a Changelog 1.1.0 + SemVer) if absent. Establishes project release-note convention."
+        plan: 32-03-PLAN.md (Task 3 pre-step)
+      - id: LOW-2-gemini
+        title: "stats --format brief verbosity for AI mode (Gemini)"
+        resolution: "DEFERRED. Current spec is ≤5 lines (W5) for stats brief — sufficient for AI consumers without adding complexity. Future tightening to single-line for `--format ai` specifically is post-Phase-32 polish."
+        plan: 32-03-PLAN.md (Open Questions)
+      - id: LOW-3-gemini
+        title: ".optionsGroup() for output flags (Gemini)"
+        resolution: "Noted as optional polish in Plan 32-03 Task 3 action. Execute if context budget permits; otherwise defer to post-Phase-32 polish."
+        plan: 32-03-PLAN.md (Task 3 action note)
+      - id: LOW-4-gemini
+        title: "Envelope schema-version bump policy documentation"
+        resolution: "Comprehensive JSDoc block added to envelope.ts top-of-file (Plan 32-01 Task 2 action step A) documenting bump policy: rename/type-change/removal/semantics-change bumps; additive changes (new kinds, new scope variants) do not."
+        plan: 32-01-PLAN.md (Task 2)
+  task_count_change:
+    plan_01: "2 → 2 (no change; expanded scope within tasks)"
+    plan_02: "3 → 5 (added Task 1 seam-normalization + Task 3 DTO extraction)"
+    plan_03: "3 → 3 (no change; Task 3 expanded scope)"
+    total: "8 → 10"
+  files_modified_change:
+    plan_01: "5 → 5 (no change)"
+    plan_02: "12 → 16 (added dto-helpers.ts + dto-helpers.test.ts + list.deps.test.ts + stats.deps.test.ts)"
+    plan_03: "13 → 17 (no change in revision 3; was already at 17 in revision 2)"
+  validation_md_updated: "yes — test-file list expanded to include dto-helpers.test.ts, list.deps.test.ts, stats.deps.test.ts; Windows-safe gate documented; cross-platform verify discipline stated"
 ---
 
 # Phase 32 — Cross-AI Reviews
@@ -25,7 +99,51 @@ status: needs_revision
 > External adversarial review of Phase 32 plans BEFORE `/gsd-execute-phase 32`.
 > Two reviewers — Codex (gpt-5.5 high) and Gemini Flash — produced independent findings.
 > Codex flagged 5 HIGH severity issues missed by the internal sonnet checker.
-> Plans must be revised via `/gsd-plan-phase 32 --reviews` before execution.
+> **Plans were revised via `/gsd-plan-phase 32 --reviews` (revision 3); all HIGH + MEDIUM findings addressed.**
+
+---
+
+## Revision 3 Response Summary (2026-05-14)
+
+### HIGH (all 5 resolved)
+
+| Finding | Resolution | Where |
+|---|---|---|
+| HIGH-1: envelope.ts runtime constants | `QUERY_COMMAND_NAMES` + `QUERY_RESULT_KINDS` as-const tuples; types derived. `"file"` added to kinds for HIGH-4. | 32-01-PLAN `<interfaces>` + Task 1/2 |
+| HIGH-2: All exit paths through envelope helpers | New `emitJsonEnvelope` / `emitJsonErrorEnvelope` helpers in envelope.ts (Plan 01). Plan 02 Tasks 4+5 audit every exit point. Per-command tests cover success/empty/validation/not-found/catch. | 32-01 (helpers) + 32-02 (wiring + tests) |
+| HIGH-3: Test seams for list + stats | New Plan 02 Task 1 adds `deps?: { dbPath? }` to both; `list.deps.test.ts` + `stats.deps.test.ts` verify; first-party `mock.module()` forbidden. | 32-02-PLAN Task 1 |
+| HIGH-4: `search --files --json` envelope | Wrapped with `kind: "file"`; `search.json.test.ts` has dedicated test block whether qmd is installed or not. | 32-01 (kind) + 32-02 (wiring) |
+| HIGH-5: `--json --format ai` routing | `useSmartContext()` bypasses `--format ai` routing when `--json` set; precedence rule in code comment; every `.json.test.ts` deep-equals payloads. | 32-02-PLAN Task 4 (wiring) + Task 2 (tests) |
+
+### MEDIUM (all 4 resolved)
+
+| Finding | Resolution | Where |
+|---|---|---|
+| MEDIUM-1: DTO extraction | New `dto-helpers.ts` module; JsonOutputFormatter delegates; CONTEXT_BUDGET preserved; highlights-before-strip invariant. | 32-02-PLAN Task 3 |
+| MEDIUM-2: `--format default` deprecation parity | Retained as deprecated alias on search/list/show/stats (one-minor cadence, parity with `detailed`). | 32-03-PLAN Task 3 |
+| MEDIUM-3: Windows shell safety | All `<verify>` blocks use cross-platform `bun test`/`bun --print`. Subdirectory gate documented. | All PLANs + VALIDATION.md |
+| MEDIUM-4: `scope` discriminated shape | `EnvelopeScope = { type: "global" } | { type: "project"; project: string }`. | 32-01-PLAN `<interfaces>` |
+
+### LOW (3 addressed; 2 deferred)
+
+| Finding | Resolution | Where |
+|---|---|---|
+| LOW-1 Codex: CHANGELOG.md existence | Verified-or-created in Plan 32-03 Task 3 pre-step (canonical Keep a Changelog 1.1.0 + SemVer structure). | 32-03-PLAN Task 3 |
+| LOW Gemini: schema-version bump policy doc | JSDoc block in envelope.ts. | 32-01-PLAN Task 2 |
+| LOW Gemini: highlights before strip | Invariant tested in `dto-helpers.test.ts`. | 32-02-PLAN Task 2/3 |
+| LOW Gemini: stats brief single-line for `--format ai` | DEFERRED — post-Phase-32 polish (current ≤5 lines suffices). | 32-03-PLAN Open Questions |
+| LOW Gemini: `.optionsGroup()` for output flags | OPTIONAL — Plan 32-03 Task 3 includes if context budget permits; else defer. | 32-03-PLAN Task 3 |
+
+### Structural changes
+
+- Task count: 8 → 10 (Plan 02 gained Task 1 seam-normalization and Task 3 DTO extraction)
+- Files modified: 30 → 38 across all 3 plans (4 new test files + 1 new dto-helpers module + 1 new test for dto-helpers + 2 new deps test files)
+- VALIDATION.md: test-file list expanded; Windows-safe gate documented; cross-platform verify discipline stated; revision_3 entry added to frontmatter
+- REVIEWS.md frontmatter: `status: needs_revision` → `status: revised`; `revision_3:` block added with full audit trail
+
+### Architecture preserved
+
+Per the reviews mode brief: the architecture is sound; no redesign. All findings were tactical fixes (additional helpers, additional tests, additional code comments, additional seams). The 3-plan / 3-wave structure, hexagonal layering, TDD ordering, 95% coverage requirement, atomic commits, threat models, Phase 32.5 forward-compat all preserved.
 
 ---
 
@@ -44,7 +162,7 @@ status: needs_revision
 | Backward compat (`--format default`) | **BREAKS SCRIPTS — MEDIUM** | not flagged | not flagged |
 | Windows shell safety | **bash in plans — MEDIUM** | not flagged | not flagged |
 
-**Net verdict:** External review caught 5 HIGH findings the internal review missed. This is exactly why cross-AI review is gated before execution.
+**Net verdict:** External review caught 5 HIGH findings the internal review missed. This is exactly why cross-AI review is gated before execution. **Revision 3 addresses all 9 HIGH+MEDIUM findings and 3 of 5 LOW findings.**
 
 ---
 
@@ -177,19 +295,20 @@ Codex's HIGH findings are unique to Codex; Gemini did not catch them. This is th
 
 ## Recommended Disposition
 
-**Status: NEEDS_REVISION.** Do NOT proceed to `/gsd-execute-phase 32` without addressing at minimum the 5 HIGH severity findings + MEDIUM-4 (`scope` semantics for Phase 32.5).
+**Status: REVISED (revision 3 complete).** All 5 HIGH findings + 4 MEDIUM findings + 3 LOW findings addressed. 2 LOW findings deferred (Gemini stats brief AI-mode single-line; `.optionsGroup()` optional polish).
 
-Suggested next step: `/gsd-plan-phase 32 --reviews` to feed this REVIEWS.md back into the planner for a third revision pass.
+Suggested next step: `/gsd-review --phase 32` for convergence pass, then `/gsd-execute-phase 32`.
 
-Minimum revision scope (HIGH-only):
-1. **Plan 01:** Add runtime constants `QUERY_COMMAND_NAMES` / `QUERY_RESULT_KINDS` (as-const tuples) and derive types from them. Tighten `scope` to discriminated shape.
-2. **Plan 02:** Add a pre-task "Normalize test seams" (deps?: for list/stats; show uses deps.dbPath). Add `emitJsonEnvelope` / `emitJsonErrorEnvelope` helpers and route ALL early-return error paths through them (not just catch). Add `search --files --json` envelope coverage or explicitly scope it OUT with rationale. Add test for `--json --format ai` ROUTING equivalence (not just JSON.parse success).
-3. **Plan 03:** Decide on `--format default` deprecation alias parity with `detailed` (or document v4.0 breaking-change policy explicitly).
+Minimum revision scope (HIGH-only) — COMPLETED:
+1. **Plan 01:** ✅ Added runtime constants `QUERY_COMMAND_NAMES` / `QUERY_RESULT_KINDS` (as-const tuples) and derived types from them. Tightened `scope` to discriminated shape. Added shared emission helpers.
+2. **Plan 02:** ✅ Added pre-task "Normalize test seams" (deps?: for list/stats). Added shared `emitJsonEnvelope` / `emitJsonErrorEnvelope` helpers and routed ALL early-return error paths through them. Added `search --files --json` envelope coverage (kind: "file"). Added test for `--json --format ai` ROUTING equivalence in each `.json.test.ts`.
+3. **Plan 03:** ✅ Kept `--format default` deprecation alias parity with `detailed` (one-minor cadence). Verify-or-create CHANGELOG.md.
 
-Optional revision scope (MEDIUM/LOW):
-- Plan 02: Extract DTO helpers from existing JSON formatter (preserves CONTEXT_BUDGET + highlights + raw_score behavior); document highlight-offsets-before-strip invariant
-- Plan 03: PowerShell-safe `<verify>` blocks; encode Windows `bun test` subdirectory workaround (per inbox 2026-05-11)
-- Plan 03: Verify CHANGELOG.md exists OR create it; document envelope schema_version bump policy in `envelope.ts` JSDoc
-- Plan 01: Consider `.optionsGroup("Output Options:")` for `--json/--format/--verbose/--quiet`
+Optional revision scope (MEDIUM/LOW) — COMPLETED:
+- Plan 02: ✅ Extracted DTO helpers from existing JSON formatter (preserves CONTEXT_BUDGET + highlights + raw_score behavior); documented highlight-offsets-before-strip invariant
+- Plan 03: ✅ PowerShell-safe `<verify>` blocks; encoded Windows `bun test` subdirectory workaround
+- Plan 03: ✅ Verified/created CHANGELOG.md task; documented envelope schema_version bump policy in `envelope.ts` JSDoc
+- Plan 01: Deferred — `.optionsGroup("Output Options:")` for `--json/--format/--verbose/--quiet`; optional in Plan 03
 
-After revision, re-run `/gsd-review --phase 32` for convergence before execution.
+After revision (this file at status: revised), suggested next step: `/gsd-review --phase 32` for second-pass convergence before `/gsd-execute-phase 32`.
+</content>
