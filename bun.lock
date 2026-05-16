@@ -29,6 +29,10 @@
       },
     },
   },
+  "trustedDependencies": [
+    "onnxruntime-node",
+    "protobufjs",
+  ],
   "packages": {
     "@anthropic-ai/claude-code": ["@anthropic-ai/claude-code@2.1.58", "", { "optionalDependencies": { "@img/sharp-darwin-arm64": "^0.34.2", "@img/sharp-darwin-x64": "^0.34.2", "@img/sharp-linux-arm": "^0.34.2", "@img/sharp-linux-arm64": "^0.34.2", "@img/sharp-linux-x64": "^0.34.2", "@img/sharp-linuxmusl-arm64": "^0.34.2", "@img/sharp-linuxmusl-x64": "^0.34.2", "@img/sharp-win32-arm64": "^0.34.2", "@img/sharp-win32-x64": "^0.34.2" }, "bin": { "claude": "cli.js" } }, "sha512-NWTMNg6jIVtzUKkYj3qAqHXsD1clgVtKgJGmf1p2IXc5jhP1jOlCezSRvztuDH5omabVfkcrFVIMkZDX+Oe+6g=="],
 
