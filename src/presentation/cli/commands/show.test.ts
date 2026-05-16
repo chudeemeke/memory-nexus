@@ -347,4 +347,103 @@ describe("Show Command", () => {
       expect(result.exitCode).toBe(1);
     });
   });
+
+  describe("CLI-03: --format normalization (Phase 32)", () => {
+    afterEach(() => {
+      restoreConsoleMock();
+    });
+
+    // 1, 2, 3: choices include brief, ai, default (deprecated alias parity per MEDIUM-2)
+    test("accepts 'brief' in --format choices", () => {
+      const cmd = createShowCommand();
+      const formatOpt = cmd.options.find((o) => o.long === "--format");
+      expect(formatOpt?.argChoices).toContain("brief");
+    });
+
+    test("accepts 'ai' in --format choices", () => {
+      const cmd = createShowCommand();
+      const formatOpt = cmd.options.find((o) => o.long === "--format");
+      expect(formatOpt?.argChoices).toContain("ai");
+    });
+
+    test("retains 'default' as deprecated alias in --format choices (MEDIUM-2)", () => {
+      const cmd = createShowCommand();
+      const formatOpt = cmd.options.find((o) => o.long === "--format");
+      expect(formatOpt?.argChoices).toContain("default");
+    });
+
+    test("does not set defaultValue on --format (undefined = no-flag default)", () => {
+      const cmd = createShowCommand();
+      const formatOpt = cmd.options.find((o) => o.long === "--format");
+      expect(formatOpt?.defaultValue).toBeUndefined();
+    });
+
+    // 6: --format brief produces single-line summary for show
+    test("--format brief produces single-line summary", async () => {
+      setupConsoleMock();
+      await executeShowCommand(testSessionId, {
+        format: "brief" as unknown as "default" | "ai",
+      }, { dbPath: TEST_DB_PATH });
+      const out = consoleOutput.join("\n");
+      // Brief = single line containing session ID + project + message count
+      expect(out).toContain(testSessionId);
+      // No conversation thread headers
+      expect(out).not.toContain("[USER]");
+      expect(out).not.toContain("[ASSISTANT]");
+    });
+
+    // 7: no flag = backward-compat default text output
+    test("no --format flag preserves existing default text output", async () => {
+      setupConsoleMock();
+      await executeShowCommand(testSessionId, {}, { dbPath: TEST_DB_PATH });
+      const out = consoleOutput.join("\n");
+      // Default shows conversation thread header
+      expect(out).toContain("Session:");
+    });
+
+    // 8: --format ai = no ANSI codes
+    test("--format ai emits ANSI-stripped output", async () => {
+      setupConsoleMock();
+      await executeShowCommand(testSessionId, {
+        format: "ai",
+      }, { dbPath: TEST_DB_PATH });
+      const out = consoleOutput.join("\n");
+      expect(/\x1b\[/.test(out)).toBe(false);
+    });
+
+    // 9: --json --format ai precedence
+    test("--json --format ai emits envelope (formatForAi NOT applied)", async () => {
+      setupConsoleMock();
+      await executeShowCommand(testSessionId, {
+        json: true,
+        format: "ai",
+      }, { dbPath: TEST_DB_PATH });
+      const out = consoleOutput.join("\n");
+      const parsed = JSON.parse(out);
+      expect(parsed.schema_version).toBe("1");
+      expect(parsed.command).toBe("show");
+      expect(parsed.kind).toBe("session");
+    });
+
+    // 10: --format default emits deprecation warning to stderr
+    test("--format default emits deprecation warning to stderr", async () => {
+      setupConsoleMock();
+      await executeShowCommand(testSessionId, {
+        format: "default" as unknown as "default" | "ai",
+      }, { dbPath: TEST_DB_PATH });
+      const err = consoleErrors.join("\n");
+      expect(err).toContain("deprecated");
+    });
+
+    // 11: --format default --json suppresses deprecation warning
+    test("--format default --json suppresses deprecation warning", async () => {
+      setupConsoleMock();
+      await executeShowCommand(testSessionId, {
+        format: "default" as unknown as "default" | "ai",
+        json: true,
+      }, { dbPath: TEST_DB_PATH });
+      const err = consoleErrors.join("\n");
+      expect(err).not.toContain("deprecated");
+    });
+  });
 });

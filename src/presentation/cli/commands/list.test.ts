@@ -5,7 +5,14 @@
  */
 
 import { describe, it, expect, beforeEach, afterEach, spyOn } from "bun:test";
+import { mkdtempSync, rmSync } from "fs";
+import { tmpdir } from "os";
+import { join } from "path";
 import { createListCommand, executeListCommand } from "./list.js";
+import {
+  initializeDatabase,
+  closeDatabase,
+} from "../../../infrastructure/database/index.js";
 import { ErrorCode } from "../../../domain/errors/index.js";
 
 describe("createListCommand", () => {
@@ -263,5 +270,111 @@ describe("executeListCommand date parsing", () => {
 
     expect(result.exitCode).toBe(1);
     expect(consoleErrorSpy).toHaveBeenCalled();
+  });
+});
+
+describe("list: CLI-03: --format normalization (Phase 32)", () => {
+  let consoleLogSpy: ReturnType<typeof spyOn>;
+  let consoleErrorSpy: ReturnType<typeof spyOn>;
+  let cli03TempDir: string;
+  let cli03DbPath: string;
+
+  beforeEach(() => {
+    consoleLogSpy = spyOn(console, "log").mockImplementation(() => {});
+    consoleErrorSpy = spyOn(console, "error").mockImplementation(() => {});
+    cli03TempDir = mkdtempSync(join(tmpdir(), "list-cli03-"));
+    cli03DbPath = join(cli03TempDir, "test.db");
+    const { db } = initializeDatabase({ path: cli03DbPath });
+    closeDatabase(db);
+  });
+
+  afterEach(() => {
+    consoleLogSpy?.mockRestore();
+    consoleErrorSpy?.mockRestore();
+    try { rmSync(cli03TempDir, { recursive: true, force: true }); } catch {}
+  });
+
+  // 1, 2, 3: choices include brief, ai, default (deprecated alias parity per MEDIUM-2)
+  it("accepts 'brief' in --format choices", () => {
+    const cmd = createListCommand();
+    const formatOpt = cmd.options.find((o) => o.long === "--format");
+    expect(formatOpt?.argChoices).toContain("brief");
+  });
+
+  it("accepts 'ai' in --format choices", () => {
+    const cmd = createListCommand();
+    const formatOpt = cmd.options.find((o) => o.long === "--format");
+    expect(formatOpt?.argChoices).toContain("ai");
+  });
+
+  it("retains 'default' as deprecated alias in --format choices (MEDIUM-2)", () => {
+    const cmd = createListCommand();
+    const formatOpt = cmd.options.find((o) => o.long === "--format");
+    expect(formatOpt?.argChoices).toContain("default");
+  });
+
+  it("does not set defaultValue on --format (undefined = no-flag default)", () => {
+    const cmd = createListCommand();
+    const formatOpt = cmd.options.find((o) => o.long === "--format");
+    expect(formatOpt?.defaultValue).toBeUndefined();
+  });
+
+  // 6: --format brief produces empty-state for empty DB (no headers)
+  it("emits condensed brief output (empty DB)", async () => {
+    await executeListCommand(
+      { format: "brief" as unknown as "default" | "ai" },
+      { dbPath: cli03DbPath }
+    );
+    const out = consoleLogSpy.mock.calls.map((c: unknown[]) => String(c[0])).join("\n");
+    // Brief output: empty-state message (no "Sessions (N results):" header)
+    expect(out).not.toContain("Sessions (");
+  });
+
+  // 7: no flag = backward-compat
+  it("no --format flag preserves existing default text output", async () => {
+    await executeListCommand({}, { dbPath: cli03DbPath });
+    const out = consoleLogSpy.mock.calls.map((c: unknown[]) => String(c[0])).join("\n");
+    // Default mode shows empty-state hint
+    expect(out).toContain("No sessions found");
+  });
+
+  // 8: --format ai = no ANSI codes
+  it("--format ai emits ANSI-stripped output", async () => {
+    await executeListCommand({ format: "ai" }, { dbPath: cli03DbPath });
+    const out = consoleLogSpy.mock.calls.map((c: unknown[]) => String(c[0])).join("\n");
+    expect(/\x1b\[/.test(out)).toBe(false);
+  });
+
+  // 9: --json --format ai precedence regression
+  it("--json --format ai emits envelope (formatForAi NOT applied)", async () => {
+    await executeListCommand(
+      { json: true, format: "ai" },
+      { dbPath: cli03DbPath }
+    );
+    const out = consoleLogSpy.mock.calls.map((c: unknown[]) => String(c[0])).join("\n");
+    const parsed = JSON.parse(out);
+    expect(parsed.schema_version).toBe("1");
+    expect(parsed.command).toBe("list");
+    expect(parsed.kind).toBe("session");
+  });
+
+  // 10: --format default emits deprecation warning to stderr
+  it("--format default emits deprecation warning to stderr", async () => {
+    await executeListCommand(
+      { format: "default" as unknown as "default" | "ai" },
+      { dbPath: cli03DbPath }
+    );
+    const err = consoleErrorSpy.mock.calls.map((c: unknown[]) => String(c[0])).join("\n");
+    expect(err).toContain("deprecated");
+  });
+
+  // 11: --format default --json suppresses deprecation warning
+  it("--format default --json suppresses deprecation warning", async () => {
+    await executeListCommand(
+      { format: "default" as unknown as "default" | "ai", json: true },
+      { dbPath: cli03DbPath }
+    );
+    const err = consoleErrorSpy.mock.calls.map((c: unknown[]) => String(c[0])).join("\n");
+    expect(err).not.toContain("deprecated");
   });
 });
