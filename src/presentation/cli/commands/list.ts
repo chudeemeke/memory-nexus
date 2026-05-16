@@ -50,6 +50,21 @@ export interface ListCommandOptions {
 }
 
 /**
+ * Runtime dependencies for executeListCommand.
+ *
+ * Separated from ListCommandOptions because these are not user-facing
+ * CLI flags — they are operational dependencies that tests substitute
+ * to achieve isolation. Defaults to production resolution
+ * (getDefaultDbPath()) when omitted.
+ *
+ * Parity with executeShowCommand (added Plan 32-02 per Codex HIGH-3).
+ */
+export interface ListCommandDeps {
+  /** Database path. Defaults to getDefaultDbPath(). */
+  dbPath?: string;
+}
+
+/**
  * Create the list command for Commander.js.
  *
  * @returns Configured Command instance
@@ -102,8 +117,15 @@ export function createListCommand(): Command {
  * @param options - List command options
  * @returns CommandResult with exitCode 0 (success) or 1 (error)
  */
-export async function executeListCommand(options: ListCommandOptions): Promise<CommandResult> {
+export async function executeListCommand(
+  options: ListCommandOptions,
+  deps: ListCommandDeps = {}
+): Promise<CommandResult> {
   const startTime = performance.now();
+
+  // Resolve DB path (deps seam takes precedence over production default).
+  // Parity with show/context/related/search (per Codex HIGH-3).
+  const dbPath = deps.dbPath ?? getDefaultDbPath();
 
   // Parse limit
   const limit = parseInt(options.limit ?? "20", 10);
@@ -146,7 +168,6 @@ export async function executeListCommand(options: ListCommandOptions): Promise<C
     }
   }
 
-  const dbPath = getDefaultDbPath();
   const { db } = initializeDatabase({ path: dbPath });
 
   try {

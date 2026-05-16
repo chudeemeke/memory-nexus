@@ -47,6 +47,21 @@ export interface StatsCommandOptions {
 }
 
 /**
+ * Runtime dependencies for executeStatsCommand.
+ *
+ * Separated from StatsCommandOptions because these are not user-facing
+ * CLI flags — they are operational dependencies that tests substitute
+ * to achieve isolation. Defaults to production resolution
+ * (getDefaultDbPath()) when omitted.
+ *
+ * Parity with executeShowCommand (added Plan 32-02 per Codex HIGH-3).
+ */
+export interface StatsCommandDeps {
+  /** Database path. Defaults to getDefaultDbPath(). */
+  dbPath?: string;
+}
+
+/**
  * Create the stats command for Commander.js.
  *
  * @returns Configured Command instance
@@ -89,12 +104,14 @@ export function createStatsCommand(): Command {
  * @returns CommandResult with exitCode 0 (success) or 1 (error)
  */
 export async function executeStatsCommand(
-  options: StatsCommandOptions
+  options: StatsCommandOptions,
+  deps: StatsCommandDeps = {}
 ): Promise<CommandResult> {
   const startTime = performance.now();
 
-  // Initialize database
-  const dbPath = getDefaultDbPath();
+  // Resolve DB path (deps seam takes precedence over production default).
+  // Parity with show/context/related/search (per Codex HIGH-3).
+  const dbPath = deps.dbPath ?? getDefaultDbPath();
   const { db } = initializeDatabase({ path: dbPath });
 
   try {
