@@ -33,7 +33,7 @@ After reject: `status: rejected`, append rationale → move to `rejected/`.
 
 - Filename: `YYYY-MM-DD-<reporting-project>-<slug>.md`
 - One issue per file
-- Frontmatter schema: see `~/.claude/rules/cross-project-issues.md` (currently v1.1)
+- Frontmatter schema: see `~/.claude/rules/cross-project-issues.md` (currently v1.2)
 
 ## Why this directory exists (not a rule restatement)
 
