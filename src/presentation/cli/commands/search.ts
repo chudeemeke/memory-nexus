@@ -19,7 +19,6 @@ import {
   Fts5SearchService,
   HybridSearchService,
   EmbeddingRepository,
-  type SearchMeta,
 } from "../../../infrastructure/database/index.js";
 import { EmbeddingProviderFactory } from "../../../infrastructure/embedding/embedding-provider-factory.js";
 import {
@@ -34,7 +33,15 @@ import {
 import { shouldUseColor, green, dim } from "../formatters/color.js";
 import { formatForAi } from "../formatters/ai-formatter.js";
 import { parseDate, DateParseError } from "../parsers/date-parser.js";
-import { formatError, formatErrorJson } from "../formatters/error-formatter.js";
+import { formatError } from "../formatters/error-formatter.js";
+import {
+  emitJsonEnvelope,
+  emitJsonErrorEnvelope,
+} from "../formatters/envelope.js";
+import {
+  toSearchResultDto,
+  toFileResultDto,
+} from "../formatters/dto-helpers.js";
 import { QmdRunner, isQmdAvailable } from "../../../infrastructure/external/index.js";
 import type { QmdSearchResult } from "../../../domain/ports/services.js";
 
@@ -191,8 +198,16 @@ export async function executeSearchCommand(
   let searchQuery: SearchQuery;
   try {
     searchQuery = SearchQuery.from(query);
-  } catch (error) {
-    console.error("Error: Query cannot be empty");
+  } catch (_error) {
+    if (options.json) {
+      emitJsonErrorEnvelope({
+        command: "search",
+        code: "INVALID_QUERY",
+        message: "Query cannot be empty",
+      });
+    } else {
+      console.error("Error: Query cannot be empty");
+    }
     return { exitCode: 1 };
   }
 
@@ -228,7 +243,15 @@ export async function executeSearchCommand(
     // Parse limit option
     const limit = parseInt(options.limit ?? "10", 10);
     if (isNaN(limit) || limit < 1) {
-      console.error("Error: Limit must be a positive number");
+      if (options.json) {
+        emitJsonErrorEnvelope({
+          command: "search",
+          code: "INVALID_ARGUMENT",
+          message: "Limit must be a positive number",
+        });
+      } else {
+        console.error("Error: Limit must be a positive number");
+      }
       return { exitCode: 1 };
     }
 
@@ -258,7 +281,16 @@ export async function executeSearchCommand(
           sinceDate = parseDate(options.since);
         } catch (err) {
           if (err instanceof DateParseError) {
-            console.error(`Error: ${err.message}`);
+            if (options.json) {
+              emitJsonErrorEnvelope({
+                command: "search",
+                code: "INVALID_ARGUMENT",
+                message: err.message,
+                context: { flag: "since", value: options.since },
+              });
+            } else {
+              console.error(`Error: ${err.message}`);
+            }
             return { exitCode: 1 };
           }
           throw err;
@@ -269,7 +301,16 @@ export async function executeSearchCommand(
           beforeDate = parseDate(options.before);
         } catch (err) {
           if (err instanceof DateParseError) {
-            console.error(`Error: ${err.message}`);
+            if (options.json) {
+              emitJsonErrorEnvelope({
+                command: "search",
+                code: "INVALID_ARGUMENT",
+                message: err.message,
+                context: { flag: "before", value: options.before },
+              });
+            } else {
+              console.error(`Error: ${err.message}`);
+            }
             return { exitCode: 1 };
           }
           throw err;
@@ -332,18 +373,60 @@ export async function executeSearchCommand(
       searchMeta: searchMeta ?? undefined,
     };
 
-    // Handle empty results with mode-specific messages
-    if (results.length === 0 && searchMeta?.mode === "vector") {
-      if (options.json) {
-        const output = formatter.formatResults(results, formatOptions);
-        console.log(output);
-      } else {
-        console.log(`No semantic matches for "${query}"`);
+    const endMs = Math.round(performance.now() - startTime);
+    const buildSearchMeta = (): Record<string, unknown> => {
+      const meta: Record<string, unknown> = {
+        query,
+        total_results: results.length,
+        timing_ms: endMs,
+      };
+      if (searchMeta) {
+        meta.mode = searchMeta.mode;
+        meta.mode_reason = searchMeta.modeReason;
+        meta.embedding_coverage = searchMeta.embeddingCoverage;
+        meta.degraded = searchMeta.degraded;
+        if (searchMeta.degradationReason) {
+          meta.degradation_reason = searchMeta.degradationReason;
+        }
+      }
+      return meta;
+    };
+
+    // Precedence rule (Codex HIGH-5): --json takes the envelope path
+    // regardless of --format ai. For search, --format ai is text-only
+    // post-processing (not a routing fork), but the precedence is the
+    // same: --json wins.
+    if (options.json) {
+      emitJsonEnvelope({
+        command: "search",
+        kind: "message",
+        data: results.map((r, i) =>
+          toSearchResultDto(r, {
+            rank: i + 1,
+            includeSearchMetaFields: !!searchMeta,
+          }),
+        ),
+        meta: buildSearchMeta(),
+      });
+      // One-time hint for zero embedding coverage (stderr, advisory only).
+      if (
+        searchMeta &&
+        searchMeta.embeddingCoverage === 0 &&
+        !config.search?.hintShown
+      ) {
+        console.error("Tip: run 'memory sync --embed' to enable semantic search");
+        saveConfig({ search: { ...config.search, hintShown: true } });
       }
       return { exitCode: 0 };
     }
 
-    // Output results using formatter
+    // Handle empty results with mode-specific messages (text mode)
+    if (results.length === 0 && searchMeta?.mode === "vector") {
+      console.log(`No semantic matches for "${query}"`);
+      return { exitCode: 0 };
+    }
+
+    // Output results using formatter (text mode)
     let output = formatter.formatResults(results, formatOptions);
     if (options.format === "ai") {
       output = formatForAi(output);
@@ -373,7 +456,14 @@ export async function executeSearchCommand(
 
     // Format error based on output mode
     if (options.json) {
-      console.log(formatErrorJson(nexusError));
+      emitJsonErrorEnvelope({
+        command: "search",
+        code: nexusError.code,
+        message: nexusError.message,
+        ...(nexusError.context !== undefined
+          ? { context: nexusError.context }
+          : {}),
+      });
     } else {
       console.error(formatError(nexusError));
     }
@@ -400,9 +490,19 @@ async function executeFileSearch(
 ): Promise<CommandResult> {
   // Check qmd availability
   if (!isQmdAvailable()) {
-    console.error(
-      "Error: qmd is required for --files search. Install: bun add -g @tobilu/qmd"
-    );
+    if (options.json) {
+      // HIGH-4: qmd-unavailable must emit envelope shape, not plain text.
+      emitJsonErrorEnvelope({
+        command: "search",
+        code: "QMD_UNAVAILABLE",
+        message:
+          "qmd is required for --files search. Install: bun add -g @tobilu/qmd",
+      });
+    } else {
+      console.error(
+        "Error: qmd is required for --files search. Install: bun add -g @tobilu/qmd"
+      );
+    }
     return { exitCode: 1 };
   }
 
@@ -410,15 +510,22 @@ async function executeFileSearch(
     const runner = new QmdRunner();
     const results = await runner.search(query);
 
-    if (results.length === 0) {
-      const message = `No file results for "${query}"`;
-      console.log(options.format === "ai" ? message : message);
+    // HIGH-4: --files --json emits envelope with kind: "file" on every
+    // path (success / empty), not the bespoke bare-array that leaked
+    // pre-Plan-32-02.
+    if (options.json) {
+      emitJsonEnvelope({
+        command: "search",
+        kind: "file",
+        data: results.map(toFileResultDto),
+        meta: { query, files: true, total_results: results.length },
+      });
       return { exitCode: 0 };
     }
 
-    // JSON output: raw qmd results
-    if (options.json) {
-      console.log(JSON.stringify(results, null, 2));
+    if (results.length === 0) {
+      const message = `No file results for "${query}"`;
+      console.log(options.format === "ai" ? message : message);
       return { exitCode: 0 };
     }
 
@@ -434,7 +541,15 @@ async function executeFileSearch(
     return { exitCode: 0 };
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
-    console.error(`Error: qmd search failed: ${message}`);
+    if (options.json) {
+      emitJsonErrorEnvelope({
+        command: "search",
+        code: "QMD_FAILED",
+        message: `qmd search failed: ${message}`,
+      });
+    } else {
+      console.error(`Error: qmd search failed: ${message}`);
+    }
     return { exitCode: 1 };
   }
 }

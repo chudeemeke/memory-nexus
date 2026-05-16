@@ -204,17 +204,21 @@ describe("Show Command", () => {
       expect(fullOutput).toContain("not found");
     });
 
-    test("--json flag outputs JSON format", async () => {
+    test("--json flag outputs envelope-shaped JSON (Plan 32-02 CLI-02)", async () => {
       setupConsoleMock();
 
       await executeShowCommand(testSessionId, { json: true }, { dbPath: TEST_DB_PATH });
 
       const output = consoleOutput.join("\n");
       const parsed = JSON.parse(output);
-      expect(parsed).toHaveProperty("session");
-      expect(parsed.session.id).toBe(testSessionId);
-      expect(parsed).toHaveProperty("messages");
-      expect(parsed.messages).toHaveLength(3);
+      // Envelope shape per Plan 32-02 (CLI-02)
+      expect(parsed.schema_version).toBe("1");
+      expect(parsed.command).toBe("show");
+      expect(parsed.kind).toBe("session");
+      expect(parsed.data).toHaveProperty("session");
+      expect(parsed.data.session.id).toBe(testSessionId);
+      expect(parsed.data).toHaveProperty("messages");
+      expect(parsed.data.messages).toHaveLength(3);
     });
 
     test("--tools flag shows detailed tool information", async () => {

@@ -23,7 +23,12 @@ import {
 } from "../formatters/show-formatter.js";
 import { shouldUseColor } from "../formatters/color.js";
 import { formatForAi } from "../formatters/ai-formatter.js";
-import { formatError, formatErrorJson } from "../formatters/error-formatter.js";
+import { formatError } from "../formatters/error-formatter.js";
+import {
+  emitJsonEnvelope,
+  emitJsonErrorEnvelope,
+} from "../formatters/envelope.js";
+import { toShowSessionDto } from "../formatters/dto-helpers.js";
 import type { Session } from "../../../domain/entities/session.js";
 import type { ToolUse } from "../../../domain/entities/tool-use.js";
 import type { Database } from "bun:sqlite";
@@ -155,9 +160,18 @@ export async function executeShowCommand(
     // Find session
     const session = await findSession(sessionRepo, sessionId, db);
     if (!session) {
-      const mode = determineOutputMode(options);
-      const formatter = createShowFormatter(mode, shouldUseColor());
-      console.log(formatter.formatNotFound(sessionId));
+      if (options.json) {
+        emitJsonErrorEnvelope({
+          command: "show",
+          code: "NOT_FOUND",
+          message: `Session not found: ${sessionId}`,
+          context: { session_id: sessionId },
+        });
+      } else {
+        const mode = determineOutputMode(options);
+        const formatter = createShowFormatter(mode, shouldUseColor());
+        console.log(formatter.formatNotFound(sessionId));
+      }
       return { exitCode: 1 };
     }
 
@@ -174,7 +188,26 @@ export async function executeShowCommand(
     // Create session detail
     const detail: SessionDetail = { session, messages, toolUses };
 
-    // Format and output
+    // Precedence rule (Codex HIGH-5): --json takes the deterministic
+    // envelope path. --format ai is a text-only post-processor on the
+    // formatter output below; it does NOT change routing for show.
+    // When --json is set, --format ai is ignored (no formatForAi pass).
+    if (options.json) {
+      const endTime = performance.now();
+      emitJsonEnvelope({
+        command: "show",
+        kind: "session",
+        data: toShowSessionDto(detail),
+        meta: {
+          session_id: session.id,
+          message_count: messages.length,
+          timing_ms: Math.round(endTime - startTime),
+        },
+      });
+      return { exitCode: 0 };
+    }
+
+    // Format and output (text mode)
     const mode = determineOutputMode(options);
     const formatter = createShowFormatter(mode, shouldUseColor());
     const endTime = performance.now();
@@ -198,7 +231,14 @@ export async function executeShowCommand(
 
     // Format error based on output mode
     if (options.json) {
-      console.log(formatErrorJson(nexusError));
+      emitJsonErrorEnvelope({
+        command: "show",
+        code: nexusError.code,
+        message: nexusError.message,
+        ...(nexusError.context !== undefined
+          ? { context: nexusError.context }
+          : {}),
+      });
     } else {
       console.error(formatError(nexusError));
     }

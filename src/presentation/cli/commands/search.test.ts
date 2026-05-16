@@ -1004,13 +1004,18 @@ describe("Search Command", () => {
   });
 
   describe("error handling", () => {
-    it("outputs JSON error when --json flag is set with empty query", async () => {
-      // Empty query should trigger an error
+    it("outputs JSON error envelope when --json flag is set with empty query (Plan 32-02 HIGH-2)", async () => {
+      // Plan 32-02: in --json mode, validation errors emit a QueryErrorEnvelope
+      // to stdout (not text via console.error). CLI-02 industry pattern.
       const result = await executeSearchCommand("", { json: true });
 
       expect(result.exitCode).toBe(1);
-      // Error is output via console.error for validation errors
-      expect(consoleErrorSpy).toHaveBeenCalled();
+      const output = consoleLogSpy.mock.calls.map((c: unknown[]) => String(c[0])).join("\n");
+      const parsed = JSON.parse(output);
+      expect(parsed.schema_version).toBe("1");
+      expect(parsed.command).toBe("search");
+      expect(parsed.error).toBeDefined();
+      expect(typeof parsed.error.code).toBe("string");
     });
 
     it("exits with code 1 on empty query error", async () => {
@@ -1382,8 +1387,13 @@ describe("Search Command", () => {
       expect(result.exitCode).toBe(0);
       const output = consoleLogSpy.mock.calls.map((c: unknown[]) => String(c[0])).join("\n");
       const parsed = JSON.parse(output);
-      expect(Array.isArray(parsed)).toBe(true);
-      expect(parsed[0].title).toBe("JSON Doc");
+      // Plan 32-02 HIGH-4: --files --json emits envelope with kind: "file".
+      // Bare-array leak was the bug this plan fixes.
+      expect(parsed.schema_version).toBe("1");
+      expect(parsed.command).toBe("search");
+      expect(parsed.kind).toBe("file");
+      expect(Array.isArray(parsed.data)).toBe(true);
+      expect(parsed.data[0].title).toBe("JSON Doc");
 
       isQmdSpy.mockRestore();
       QmdRunnerSpy.mockRestore();
