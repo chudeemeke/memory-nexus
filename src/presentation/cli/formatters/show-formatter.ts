@@ -13,8 +13,11 @@ import { dim, bold } from "./color.js";
 
 /**
  * Output mode for show formatter.
+ *
+ * Phase 32 (CLI-03) extension: `brief` produces single-line session
+ * header for AI/script consumption. See {@link BriefShowFormatter}.
  */
-export type ShowOutputMode = "default" | "json" | "quiet" | "verbose" | "tools";
+export type ShowOutputMode = "default" | "json" | "quiet" | "verbose" | "tools" | "brief";
 
 /**
  * Session detail containing session, messages, and tool uses.
@@ -73,6 +76,8 @@ export function createShowFormatter(
       return new VerboseShowFormatter(useColor);
     case "tools":
       return new ToolsShowFormatter(useColor);
+    case "brief":
+      return new BriefShowFormatter();
     default:
       return new DefaultShowFormatter(useColor);
   }
@@ -212,6 +217,32 @@ function formatMessage(
   }
 
   return output;
+}
+
+/**
+ * Brief show formatter — single-line session header, no message thread.
+ *
+ * Phase 32 (CLI-03) addition. Produces a single pipe-separated line:
+ *   <sessionId> | <projectName> | <N> messages | <startTime>
+ *
+ * No conversation thread. No color. Suitable for AI/script consumers
+ * that only need session identification, not message bodies.
+ */
+class BriefShowFormatter implements ShowFormatter {
+  formatSession(detail: SessionDetail, _options?: ShowFormatOptions): string {
+    const { session, messages } = detail;
+    const start = formatAbsoluteTime(session.startTime);
+    return `${session.id} | ${session.projectPath.projectName} | ${messages.length} messages | ${start}`;
+  }
+
+  formatError(error: Error): string {
+    const message = error instanceof Error ? error.message : String(error);
+    return `Error: ${message}`;
+  }
+
+  formatNotFound(sessionId: string): string {
+    return `Session not found: ${sessionId}`;
+  }
 }
 
 /**

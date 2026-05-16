@@ -19,8 +19,11 @@ export const CONTEXT_BUDGET = 50000;
 
 /**
  * Output mode enum.
+ *
+ * Phase 32 (CLI-03) extension: `brief` produces single-line-per-record
+ * output for AI/script consumption. See {@link BriefOutputFormatter}.
  */
-export type OutputMode = "default" | "json" | "quiet" | "verbose";
+export type OutputMode = "default" | "json" | "quiet" | "verbose" | "brief";
 
 /**
  * Execution details for verbose mode.
@@ -96,6 +99,8 @@ export function createOutputFormatter(mode: OutputMode, useColor: boolean): Outp
       return new QuietOutputFormatter();
     case "verbose":
       return new VerboseOutputFormatter(useColor);
+    case "brief":
+      return new BriefOutputFormatter();
     default:
       return new DefaultOutputFormatter(useColor);
   }
@@ -204,6 +209,44 @@ class DefaultOutputFormatter implements OutputFormatter {
       summary += " - truncated";
     }
     return summary;
+  }
+}
+
+/**
+ * Brief output formatter — single-line-per-record, AI/script-optimized.
+ *
+ * Phase 32 (CLI-03) addition. Produces:
+ *   <sessionId> [<score>%] <snippet truncated to 80 chars, no markup>
+ *
+ * No headers, no execution-details block. Snippets have `<mark>` tags
+ * stripped (brief is for plain text consumers, not for re-highlighting).
+ */
+class BriefOutputFormatter implements OutputFormatter {
+  formatResults(results: SearchResult[], options?: FormatOptions): string {
+    if (results.length === 0) {
+      return `No results for "${options?.query ?? ""}"`;
+    }
+    return results
+      .map((r) => {
+        const snippet = r.snippet
+          .replace(/<\/?mark>/g, "")
+          .replace(/\s+/g, " ")
+          .trim()
+          .slice(0, 80);
+        const scorePct = Math.round(r.score * 100);
+        return `${r.sessionId} [${scorePct}%] ${snippet}`;
+      })
+      .join("\n");
+  }
+
+  formatError(error: Error): string {
+    const message = error instanceof Error ? error.message : String(error);
+    return `Error: ${message}`;
+  }
+
+  formatSummary(_stats: SummaryStats): string {
+    // Brief mode: summary is implicit in the per-record lines.
+    return "";
   }
 }
 
