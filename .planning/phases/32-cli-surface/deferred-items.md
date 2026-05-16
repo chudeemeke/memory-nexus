@@ -49,3 +49,5 @@ NEW Phase-32-authored files (`envelope.ts`, `formatters/index.ts` re-export, `he
 **Owner / trigger:** **Phase 32 close-out (this commit cycle).** User disposition: FIX coverage now before merge (not defer). Resolved by adding tests to bring each modified file to 95%+ per metric.
 
 **Verification:** `bun test --coverage src/presentation/cli/...` confirms each touched file ≥95% per metric. PASS on re-verification = item resolved.
+
+**Status:** **RESOLVED 2026-05-16.** See `32-COVERAGE-CLOSURE.md` for the closure summary. All 8 files at ≥95% per metric (7 at 100/100, related.ts 100/99.48, list.ts 100/98.98, search.ts 100/99.01). Resolved by commits `a3e80e6` + `c50a38e` (147 new test cases, test-only, no production code changes). Two files have 4 residual unreachable lines (`throw err;` after non-DateParseError from named-import `parseDate`) — documented in COVERAGE-CLOSURE.md with rationale.
