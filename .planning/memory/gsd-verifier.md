@@ -1,7 +1,7 @@
 ---
 agent: gsd-verifier
-updated: 2026-03-10
-entries: 27
+updated: 2026-03-21
+entries: 36
 ---
 
 entries:
@@ -169,3 +169,57 @@ entries:
     confidence: HIGH
     phase: "25-intelligence"
     date: "2026-03-10"
+
+  - finding: "Phase 26 executeBackfillCommand separation pattern: CLI commands that need infrastructure DI (database, repositories, file I/O) should separate the action handler into createXCommand() (composition root with lazy imports) and executeXCommand() (testable function accepting a service deps interface). Tests mock the deps interface; the lazy-import composition root is NOT unit-tested but is covered by integration/manual testing. This matches the existing executeFrictionCommand and executeSyncCommand patterns."
+    source: "Phase 26, Plan 26-03 SUMMARY"
+    confidence: HIGH
+    phase: "26-hooks-and-backfill"
+    date: "2026-03-18"
+
+  - finding: "Phase 26 CLAUDECODE env var stripping pattern: when shelling out to claude -p from within a Claude Code session, the CLAUDECODE environment variable must be deleted from the child process env to prevent 'Cannot be launched inside another Claude Code session' errors. Pattern: const env = { ...process.env }; delete env.CLAUDECODE; spawn('claude', args, { env }). This is tested by setting process.env.CLAUDECODE in beforeEach and verifying spawn options don't contain it."
+    source: "Phase 26, Plan 26-03 Task A"
+    confidence: HIGH
+    phase: "26-hooks-and-backfill"
+    date: "2026-03-18"
+
+  - finding: "Bun v1.3.5 segfault on full test suite: when running the entire test suite (500+ tests), Bun can crash with a segfault at RSS 3.35GB. This is a known Bun bug, not a code issue. Workaround: run phase-specific tests in targeted batches. The segfault does not indicate test failures -- it is a memory pressure issue in the test runner."
+    source: "Phase 26 verification"
+    confidence: HIGH
+    phase: "26-hooks-and-backfill"
+    date: "2026-03-18"
+
+  - finding: "Phase 27 optional tool short-circuit pattern: when a CLI command flag delegates entirely to an external optional tool, place the short-circuit AFTER argument validation but BEFORE any infrastructure initialization (DB, config, providers). This prevents unnecessary DB opens and keeps the external tool path self-contained. Pattern: validate args -> check if external flag set -> short-circuit to executeExternalTool() -> normal flow. Search --files implements this correctly (lines 190-201 of search.ts: validate query, check options.files, short-circuit before initializeDatabase)."
+    source: "Phase 27 verification"
+    confidence: HIGH
+    phase: "27-qmd-integration"
+    date: "2026-03-18"
+
+  - finding: "Phase 27 informational-only doctor check pattern: when adding an optional tool status to doctor, use dim('[INFO]') NOT formatStatus() to visually distinguish from pass/fail checks. Do NOT add the check to countIssues() or determineExitCode(). The Optional Tools section in formatHealthResult() is separate from the issue count summary. This ensures optional tool absence never degrades doctor exit code."
+    source: "Phase 27 verification"
+    confidence: HIGH
+    phase: "27-qmd-integration"
+    date: "2026-03-18"
+
+  - finding: "Phase 29 ambient context AmbientContextDeps DI pattern: sync integration tests for runAmbientContextGeneration use an AmbientContextDeps interface (not mock.module) to inject loadConfig, resolveAutoMemoryDir, resolveProjectName, and createAmbientService. This matches the existing EmbeddingPassDeps and BackgroundModeDeps patterns in sync.ts and avoids bun module caching issues."
+    source: "Phase 29, Plan 29-02 SUMMARY key-decisions"
+    confidence: HIGH
+    phase: "29-ambient-context"
+    date: "2026-03-18"
+
+  - finding: "Phase 29 structural formatter typing pattern: AmbientContextService accepts a formatter as a structural type { formatSmartContext(result): string } rather than importing ContextFormatter from the presentation layer. This maintains the hexagonal boundary (application layer must not import from presentation). The cast at the call site in sync.ts uses `as { formatSmartContext(result: any): string }` to satisfy TypeScript without the import."
+    source: "Phase 29, Plan 29-02"
+    confidence: HIGH
+    phase: "29-ambient-context"
+    date: "2026-03-18"
+
+  - finding: "Phase 29 QUAL-01 83.33% function coverage on auto-memory-writer.ts: 100% line coverage but 83.33% function coverage is a recurring bun V8 counting artifact where the class body or module scope declaration is counted as a function unit not covered by test execution. Identical pattern to Phase 14 embedding-provider-factory.ts (QUAL-01 exception documented in Phase 19). Not a blocking coverage gap when line coverage is 100% and all logical paths are exercised."
+    source: "Phase 29 verification"
+    confidence: HIGH
+    phase: "29-ambient-context"
+    date: "2026-03-18"
+
+  - finding: "Phase 28 dual-test-file gap pattern: when a phase creates new test files in tests/ directory as replacements for co-located src/ test files, the plan REFACTOR step must explicitly list the OLD src/ test files to update. If only new tests/ files are created without updating old src/ co-located tests, the old tests will fail because entity constructors (like FrictionEntry.create()) may now require new mandatory fields (like tool). Always grep for ALL test files matching the entity name, not just the new ones, before marking REFACTOR complete."
+    source: "Phase 28 verification"
+    confidence: HIGH
+    phase: "28-friction-universalization"
+    date: "2026-03-21"

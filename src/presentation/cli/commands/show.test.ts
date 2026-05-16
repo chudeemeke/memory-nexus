@@ -151,13 +151,16 @@ describe("Show Command", () => {
       expect(optionNames).toContain("--tools");
     });
 
-    test("has --format option with default and ai choice", () => {
+    // Phase 32 (CLI-03): normalization — choices include brief + ai;
+    // 'default' retained as deprecated alias. defaultValue is undefined.
+    test("has --format option with brief/ai/default choices and no defaultValue", () => {
       const cmd = createShowCommand();
       const formatOpt = cmd.options.find(o => o.long === "--format");
       expect(formatOpt).toBeDefined();
-      expect(formatOpt?.argChoices).toContain("default");
+      expect(formatOpt?.argChoices).toContain("brief");
       expect(formatOpt?.argChoices).toContain("ai");
-      expect(formatOpt?.defaultValue).toBe("default");
+      expect(formatOpt?.argChoices).toContain("default");
+      expect(formatOpt?.defaultValue).toBeUndefined();
     });
   });
 
@@ -204,17 +207,21 @@ describe("Show Command", () => {
       expect(fullOutput).toContain("not found");
     });
 
-    test("--json flag outputs JSON format", async () => {
+    test("--json flag outputs envelope-shaped JSON (Plan 32-02 CLI-02)", async () => {
       setupConsoleMock();
 
       await executeShowCommand(testSessionId, { json: true }, { dbPath: TEST_DB_PATH });
 
       const output = consoleOutput.join("\n");
       const parsed = JSON.parse(output);
-      expect(parsed).toHaveProperty("session");
-      expect(parsed.session.id).toBe(testSessionId);
-      expect(parsed).toHaveProperty("messages");
-      expect(parsed.messages).toHaveLength(3);
+      // Envelope shape per Plan 32-02 (CLI-02)
+      expect(parsed.schema_version).toBe("1");
+      expect(parsed.command).toBe("show");
+      expect(parsed.kind).toBe("session");
+      expect(parsed.data).toHaveProperty("session");
+      expect(parsed.data.session.id).toBe(testSessionId);
+      expect(parsed.data).toHaveProperty("messages");
+      expect(parsed.data.messages).toHaveLength(3);
     });
 
     test("--tools flag shows detailed tool information", async () => {
@@ -341,6 +348,111 @@ describe("Show Command", () => {
       const result = await executeShowCommand("nonexistent-id", {}, { dbPath: TEST_DB_PATH });
 
       expect(result.exitCode).toBe(1);
+    });
+  });
+
+  describe("CLI-03: --format normalization (Phase 32)", () => {
+    beforeEach(async () => {
+      // Reset deprecation-warning once-keys for per-test isolation.
+      const helper = await import("./_helpers/deprecation-warning.js");
+      helper.resetFormatDeprecationWarningsForTesting();
+    });
+
+    afterEach(() => {
+      restoreConsoleMock();
+    });
+
+    // 1, 2, 3: choices include brief, ai, default (deprecated alias parity per MEDIUM-2)
+    test("accepts 'brief' in --format choices", () => {
+      const cmd = createShowCommand();
+      const formatOpt = cmd.options.find((o) => o.long === "--format");
+      expect(formatOpt?.argChoices).toContain("brief");
+    });
+
+    test("accepts 'ai' in --format choices", () => {
+      const cmd = createShowCommand();
+      const formatOpt = cmd.options.find((o) => o.long === "--format");
+      expect(formatOpt?.argChoices).toContain("ai");
+    });
+
+    test("retains 'default' as deprecated alias in --format choices (MEDIUM-2)", () => {
+      const cmd = createShowCommand();
+      const formatOpt = cmd.options.find((o) => o.long === "--format");
+      expect(formatOpt?.argChoices).toContain("default");
+    });
+
+    test("does not set defaultValue on --format (undefined = no-flag default)", () => {
+      const cmd = createShowCommand();
+      const formatOpt = cmd.options.find((o) => o.long === "--format");
+      expect(formatOpt?.defaultValue).toBeUndefined();
+    });
+
+    // 6: --format brief produces single-line summary for show
+    test("--format brief produces single-line summary", async () => {
+      setupConsoleMock();
+      await executeShowCommand(testSessionId, {
+        format: "brief" as unknown as "default" | "ai",
+      }, { dbPath: TEST_DB_PATH });
+      const out = consoleOutput.join("\n");
+      // Brief = single line containing session ID + project + message count
+      expect(out).toContain(testSessionId);
+      // No conversation thread headers
+      expect(out).not.toContain("[USER]");
+      expect(out).not.toContain("[ASSISTANT]");
+    });
+
+    // 7: no flag = backward-compat default text output
+    test("no --format flag preserves existing default text output", async () => {
+      setupConsoleMock();
+      await executeShowCommand(testSessionId, {}, { dbPath: TEST_DB_PATH });
+      const out = consoleOutput.join("\n");
+      // Default shows conversation thread header
+      expect(out).toContain("Session:");
+    });
+
+    // 8: --format ai = no ANSI codes
+    test("--format ai emits ANSI-stripped output", async () => {
+      setupConsoleMock();
+      await executeShowCommand(testSessionId, {
+        format: "ai",
+      }, { dbPath: TEST_DB_PATH });
+      const out = consoleOutput.join("\n");
+      expect(/\x1b\[/.test(out)).toBe(false);
+    });
+
+    // 9: --json --format ai precedence
+    test("--json --format ai emits envelope (formatForAi NOT applied)", async () => {
+      setupConsoleMock();
+      await executeShowCommand(testSessionId, {
+        json: true,
+        format: "ai",
+      }, { dbPath: TEST_DB_PATH });
+      const out = consoleOutput.join("\n");
+      const parsed = JSON.parse(out);
+      expect(parsed.schema_version).toBe("1");
+      expect(parsed.command).toBe("show");
+      expect(parsed.kind).toBe("session");
+    });
+
+    // 10: --format default emits deprecation warning to stderr
+    test("--format default emits deprecation warning to stderr", async () => {
+      setupConsoleMock();
+      await executeShowCommand(testSessionId, {
+        format: "default" as unknown as "default" | "ai",
+      }, { dbPath: TEST_DB_PATH });
+      const err = consoleErrors.join("\n");
+      expect(err).toContain("deprecated");
+    });
+
+    // 11: --format default --json suppresses deprecation warning
+    test("--format default --json suppresses deprecation warning", async () => {
+      setupConsoleMock();
+      await executeShowCommand(testSessionId, {
+        format: "default" as unknown as "default" | "ai",
+        json: true,
+      }, { dbPath: TEST_DB_PATH });
+      const err = consoleErrors.join("\n");
+      expect(err).not.toContain("deprecated");
     });
   });
 });

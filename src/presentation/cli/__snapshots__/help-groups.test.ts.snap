@@ -1,0 +1,48 @@
+// Bun Snapshot v1, https://bun.sh/docs/test/snapshots
+
+exports[`help groups (CLI-01) snapshot (version-line stripped) help output structure is stable across package version bumps 1`] = `
+"Usage: memory [options] [command]
+
+Cross-project context persistence for Claude Code sessions
+
+Options:
+  -V, --version                   output the version number
+  -h, --help                      display help for command
+
+Query Commands:
+  search [options] <query>        Search across all sessions (keyword, semantic,
+                                  or hybrid)
+  context [options] <project>     Show aggregated context for a project
+  show [options] <session-id>     Show session details
+  list [options]                  List sessions
+  related [options] <id>          Find sessions related through shared
+                                  topics/entities
+  stats [options]                 Show database statistics
+
+Data Commands:
+  sync [options]                  Sync sessions from ~/.claude/projects/ to
+                                  database
+  backfill [options]              Generate daily log entries from historical
+                                  sessions via claude -p
+  export [options] <output-file>  Export database to JSON file for backup
+  import [options] <input-file>   Import database from JSON backup file
+  purge [options]                 Remove old sessions from database
+
+System Commands:
+  install [options]               Install Claude Code hooks for automatic
+                                  session sync
+  uninstall [options]             Remove Claude Code hooks for automatic session
+                                  sync
+  status [options]                Show hook installation status and
+                                  configuration
+  doctor [options]                Check system health and diagnose issues
+  completion <shell>              Generate shell completion script
+  browse [options]                Interactive session browser
+
+Feedback Commands:
+  friction [options]              Log and track friction with memory tool
+
+Commands:
+  help [command]                  display help for command
+"
+`;

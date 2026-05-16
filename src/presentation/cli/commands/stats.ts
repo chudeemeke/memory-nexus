@@ -28,7 +28,13 @@ import {
   loadConfig,
 } from "../../../infrastructure/hooks/index.js";
 import { FileSystemSessionSource } from "../../../infrastructure/sources/index.js";
-import { formatError, formatErrorJson } from "../formatters/error-formatter.js";
+import { formatError } from "../formatters/error-formatter.js";
+import {
+  emitJsonEnvelope,
+  emitJsonErrorEnvelope,
+} from "../formatters/envelope.js";
+import { toStatsDto } from "../formatters/dto-helpers.js";
+import { emitFormatDeprecationWarning } from "./_helpers/deprecation-warning.js";
 
 /**
  * Options for the stats command.
@@ -42,8 +48,29 @@ export interface StatsCommandOptions {
   quiet?: boolean;
   /** Number of projects to show in breakdown (as string, parsed to integer) */
   projects?: string;
-  /** Output format: default or ai */
-  format?: "default" | "ai";
+  /**
+   * Output format. Phase 32 (CLI-03) normalized choices: `brief`,
+   * `ai`. `default` retained as deprecated alias (one-minor cadence;
+   * CHANGELOG documents removal). Undefined = no-flag default
+   * (backward compatible). `brief` produces top-line counters only
+   * (Pitfall 4 Option A, <=5 lines per W5).
+   */
+  format?: "brief" | "ai" | "default";
+}
+
+/**
+ * Runtime dependencies for executeStatsCommand.
+ *
+ * Separated from StatsCommandOptions because these are not user-facing
+ * CLI flags — they are operational dependencies that tests substitute
+ * to achieve isolation. Defaults to production resolution
+ * (getDefaultDbPath()) when omitted.
+ *
+ * Parity with executeShowCommand (added Plan 32-02 per Codex HIGH-3).
+ */
+export interface StatsCommandDeps {
+  /** Database path. Defaults to getDefaultDbPath(). */
+  dbPath?: string;
 }
 
 /**
@@ -56,9 +83,11 @@ export function createStatsCommand(): Command {
     .description("Show database statistics")
     .option("--json", "Output as JSON")
     .addOption(
-      new Option("--format <type>", "Output format")
-        .choices(["default", "ai"])
-        .default("default")
+      new Option(
+        "--format <type>",
+        "Output format: brief (top-line counters) or ai (AI-optimized text). 'default' accepted as deprecated alias.",
+      ).choices(["brief", "ai", "default"]),
+      // No .default() — undefined = current text default (backward compatible).
     )
     .addOption(
       new Option("-v, --verbose", "Show detailed output with timing").conflicts(
@@ -89,12 +118,25 @@ export function createStatsCommand(): Command {
  * @returns CommandResult with exitCode 0 (success) or 1 (error)
  */
 export async function executeStatsCommand(
-  options: StatsCommandOptions
+  options: StatsCommandOptions,
+  deps: StatsCommandDeps = {}
 ): Promise<CommandResult> {
   const startTime = performance.now();
 
-  // Initialize database
-  const dbPath = getDefaultDbPath();
+  // Phase 32 (CLI-03): deprecation warning for --format default
+  // (alias retained for one-minor cadence; behavior preserved).
+  if (options.format === "default") {
+    emitFormatDeprecationWarning({
+      command: "stats",
+      alias: "default",
+      replacement: "Omit --format for default behavior, or use --format brief / --format ai.",
+      json: options.json,
+    });
+  }
+
+  // Resolve DB path (deps seam takes precedence over production default).
+  // Parity with show/context/related/search (per Codex HIGH-3).
+  const dbPath = deps.dbPath ?? getDefaultDbPath();
   const { db } = initializeDatabase({ path: dbPath });
 
   try {
@@ -104,7 +146,15 @@ export async function executeStatsCommand(
     // Parse project limit
     const projectLimit = parseInt(options.projects ?? "10", 10);
     if (isNaN(projectLimit) || projectLimit < 1) {
-      console.error("Error: Projects count must be a positive number");
+      if (options.json) {
+        emitJsonErrorEnvelope({
+          command: "stats",
+          code: "INVALID_ARGUMENT",
+          message: "Projects count must be a positive number",
+        });
+      } else {
+        console.error("Error: Projects count must be a positive number");
+      }
       return { exitCode: 1 };
     }
 
@@ -120,22 +170,41 @@ export async function executeStatsCommand(
       hooks: hooksSummary,
     };
 
-    // Determine output mode
+    // --json: envelope path (Codex HIGH-2). Precedence: --json wins
+    // over --format ai (text-only post-processing has no effect on
+    // envelope shape).
+    if (options.json) {
+      const endTime = performance.now();
+      emitJsonEnvelope({
+        command: "stats",
+        kind: "stats",
+        data: toStatsDto(stats),
+        meta: {
+          generated_at: new Date().toISOString(),
+          timing_ms: Math.round(endTime - startTime),
+        },
+      });
+      return { exitCode: 0 };
+    }
+
+    // Determine output mode (text mode).
+    // Precedence (Phase 32 CLI-03): --quiet > --verbose > --format brief > default.
+    // 'default' alias falls through to the text default path.
     let outputMode: StatsOutputMode = "default";
-    if (options.json) outputMode = "json";
+    if (options.quiet) outputMode = "quiet";
     else if (options.verbose) outputMode = "verbose";
-    else if (options.quiet) outputMode = "quiet";
+    else if (options.format === "brief") outputMode = "brief";
 
     const useColor = shouldUseColor();
     const formatter = createStatsFormatter(outputMode, useColor);
 
-    // Check for empty database
+    // Check for empty database (text mode)
     if (stats.totalSessions === 0) {
       console.log(formatter.formatEmpty());
       return { exitCode: 0 };
     }
 
-    // Format and output
+    // Format and output (text mode)
     const endTime = performance.now();
     let output = formatter.formatStats(stats, {
       executionTimeMs: Math.round(endTime - startTime),
@@ -157,7 +226,14 @@ export async function executeStatsCommand(
 
     // Format error based on output mode
     if (options.json) {
-      console.log(formatErrorJson(nexusError));
+      emitJsonErrorEnvelope({
+        command: "stats",
+        code: nexusError.code,
+        message: nexusError.message,
+        ...(nexusError.context !== undefined
+          ? { context: nexusError.context }
+          : {}),
+      });
     } else {
       console.error(formatError(nexusError));
     }

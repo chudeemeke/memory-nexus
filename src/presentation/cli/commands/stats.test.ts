@@ -6,6 +6,9 @@
  */
 
 import { describe, expect, it, beforeEach, afterEach, spyOn } from "bun:test";
+import { mkdtempSync, rmSync } from "fs";
+import { tmpdir } from "os";
+import { join } from "path";
 import { Command } from "commander";
 import { createStatsCommand, executeStatsCommand } from "./stats.js";
 import {
@@ -86,15 +89,18 @@ describe("Stats Command", () => {
       expect(projectsOption?.defaultValue).toBe("10");
     });
 
-    it("has --format option with default and ai choice", () => {
+    // Phase 32 (CLI-03): normalization — choices include brief + ai;
+    // 'default' retained as deprecated alias. defaultValue is undefined.
+    it("has --format option with brief/ai/default choices and no defaultValue", () => {
       const command = createStatsCommand();
       const formatOption = command.options.find(
         (o) => o.long === "--format"
       );
       expect(formatOption).toBeDefined();
-      expect(formatOption?.argChoices).toContain("default");
+      expect(formatOption?.argChoices).toContain("brief");
       expect(formatOption?.argChoices).toContain("ai");
-      expect(formatOption?.defaultValue).toBe("default");
+      expect(formatOption?.argChoices).toContain("default");
+      expect(formatOption?.defaultValue).toBeUndefined();
     });
   });
 
@@ -267,12 +273,20 @@ describe("Stats Command", () => {
       );
     });
 
-    it("outputs JSON error when --json flag is set with invalid projects", async () => {
+    it("outputs JSON error envelope when --json flag is set with invalid projects (Plan 32-02 HIGH-2)", async () => {
+      // Plan 32-02: validation errors in --json mode emit envelope to stdout
+      // (not text to stderr). CLI-02 industry pattern (gh, kubectl).
       const result = await executeStatsCommand({ projects: "invalid", json: true });
 
       expect(result.exitCode).toBe(1);
-      // Validation errors still use console.error
-      expect(consoleErrorSpy).toHaveBeenCalled();
+      expect(consoleLogSpy).toHaveBeenCalled();
+      const output = (consoleLogSpy.mock.calls as unknown[][])
+        .map((c) => String(c[0]))
+        .join("\n");
+      const parsed = JSON.parse(output);
+      expect(parsed.schema_version).toBe("1");
+      expect(parsed.command).toBe("stats");
+      expect(parsed.error).toBeDefined();
     });
 
     it("exits with code 1 consistently for errors", async () => {
@@ -323,6 +337,114 @@ describe("Stats Command", () => {
       } finally {
         closeDatabase(db);
       }
+    });
+  });
+
+  describe("CLI-03: --format normalization (Phase 32)", () => {
+    let cli03TempDir: string;
+    let cli03DbPath: string;
+
+    beforeEach(async () => {
+      cli03TempDir = mkdtempSync(join(tmpdir(), "stats-cli03-"));
+      cli03DbPath = join(cli03TempDir, "test.db");
+      const { db } = initializeDatabase({ path: cli03DbPath });
+      closeDatabase(db);
+      // Reset deprecation-warning once-keys for per-test isolation.
+      const helper = await import("./_helpers/deprecation-warning.js");
+      helper.resetFormatDeprecationWarningsForTesting();
+    });
+
+    afterEach(() => {
+      try { rmSync(cli03TempDir, { recursive: true, force: true }); } catch {}
+    });
+
+    // 1, 2, 3: choices include brief, ai, default (deprecated alias parity per MEDIUM-2)
+    it("accepts 'brief' in --format choices", () => {
+      const cmd = createStatsCommand();
+      const formatOpt = cmd.options.find((o) => o.long === "--format");
+      expect(formatOpt?.argChoices).toContain("brief");
+    });
+
+    it("accepts 'ai' in --format choices", () => {
+      const cmd = createStatsCommand();
+      const formatOpt = cmd.options.find((o) => o.long === "--format");
+      expect(formatOpt?.argChoices).toContain("ai");
+    });
+
+    it("retains 'default' as deprecated alias in --format choices (MEDIUM-2)", () => {
+      const cmd = createStatsCommand();
+      const formatOpt = cmd.options.find((o) => o.long === "--format");
+      expect(formatOpt?.argChoices).toContain("default");
+    });
+
+    it("does not set defaultValue on --format (undefined = no-flag default)", () => {
+      const cmd = createStatsCommand();
+      const formatOpt = cmd.options.find((o) => o.long === "--format");
+      expect(formatOpt?.defaultValue).toBeUndefined();
+    });
+
+    // Pitfall 4 Option A: stats --format brief = top-line counters, ≤5 lines
+    it("--format brief produces top-line counters (≤5 lines, W5)", async () => {
+      await executeStatsCommand(
+        { format: "brief" as unknown as "default" | "ai" },
+        { dbPath: cli03DbPath }
+      );
+      const out = consoleLogSpy.mock.calls.map((c: unknown[]) => String(c[0])).join("\n");
+      const trimmed = out.trim();
+      if (trimmed.length > 0) {
+        const lineCount = trimmed.split("\n").length;
+        expect(lineCount).toBeLessThanOrEqual(5);
+      }
+      // No "=== Database Statistics ===" header in brief
+      expect(out).not.toContain("=== Database Statistics ===");
+    });
+
+    // 7: no flag = backward-compat default text output
+    it("no --format flag preserves existing default text output", async () => {
+      await executeStatsCommand({}, { dbPath: cli03DbPath });
+      const out = consoleLogSpy.mock.calls.map((c: unknown[]) => String(c[0])).join("\n");
+      // Default mode shows empty-state hint or header
+      expect(out.length).toBeGreaterThan(0);
+    });
+
+    // 8: --format ai = no ANSI codes
+    it("--format ai emits ANSI-stripped output", async () => {
+      await executeStatsCommand({ format: "ai" }, { dbPath: cli03DbPath });
+      const out = consoleLogSpy.mock.calls.map((c: unknown[]) => String(c[0])).join("\n");
+      expect(/\x1b\[/.test(out)).toBe(false);
+    });
+
+    // 9: --json --format ai precedence regression
+    it("--json --format ai emits envelope (formatForAi NOT applied)", async () => {
+      await executeStatsCommand(
+        { json: true, format: "ai" },
+        { dbPath: cli03DbPath }
+      );
+      const out = consoleLogSpy.mock.calls.map((c: unknown[]) => String(c[0])).join("\n");
+      const parsed = JSON.parse(out);
+      expect(parsed.schema_version).toBe("1");
+      expect(parsed.command).toBe("stats");
+      expect(parsed.kind).toBe("stats");
+    });
+
+    // 10: --format default emits deprecation warning to stderr
+    it("--format default emits deprecation warning to stderr", async () => {
+      await executeStatsCommand(
+        { format: "default" as unknown as "default" | "ai" },
+        { dbPath: cli03DbPath }
+      );
+      const err = consoleErrorSpy.mock.calls.map((c: unknown[]) => String(c[0])).join("\n");
+      expect(err).toContain("deprecated");
+    });
+
+    // 11: --format default --json suppresses deprecation warning
+    it("--format default --json suppresses deprecation warning", async () => {
+      await executeStatsCommand(
+        { format: "default" as unknown as "default" | "ai", json: true },
+        { dbPath: cli03DbPath }
+      );
+      const err = consoleErrorSpy.mock.calls.map((c: unknown[]) => String(c[0])).join("\n");
+      expect(err).not.toContain("deprecated");
     });
   });
 });

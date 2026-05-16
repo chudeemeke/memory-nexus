@@ -105,15 +105,19 @@ describe("Search Command", () => {
       expect(quietOption).toBeDefined();
     });
 
-    it("has --format option with default and ai choice", () => {
+    // Phase 32 (CLI-03): normalization — choices include brief + ai;
+    // 'default' retained as deprecated alias. defaultValue is undefined
+    // (no .default() call) so the no-flag state means "current text default".
+    it("has --format option with brief/ai/default choices and no defaultValue", () => {
       const command = createSearchCommand();
       const formatOption = command.options.find(
         (o) => o.long === "--format"
       );
       expect(formatOption).toBeDefined();
-      expect(formatOption?.argChoices).toContain("default");
+      expect(formatOption?.argChoices).toContain("brief");
       expect(formatOption?.argChoices).toContain("ai");
-      expect(formatOption?.defaultValue).toBe("default");
+      expect(formatOption?.argChoices).toContain("default");
+      expect(formatOption?.defaultValue).toBeUndefined();
     });
   });
 
@@ -1004,13 +1008,18 @@ describe("Search Command", () => {
   });
 
   describe("error handling", () => {
-    it("outputs JSON error when --json flag is set with empty query", async () => {
-      // Empty query should trigger an error
+    it("outputs JSON error envelope when --json flag is set with empty query (Plan 32-02 HIGH-2)", async () => {
+      // Plan 32-02: in --json mode, validation errors emit a QueryErrorEnvelope
+      // to stdout (not text via console.error). CLI-02 industry pattern.
       const result = await executeSearchCommand("", { json: true });
 
       expect(result.exitCode).toBe(1);
-      // Error is output via console.error for validation errors
-      expect(consoleErrorSpy).toHaveBeenCalled();
+      const output = consoleLogSpy.mock.calls.map((c: unknown[]) => String(c[0])).join("\n");
+      const parsed = JSON.parse(output);
+      expect(parsed.schema_version).toBe("1");
+      expect(parsed.command).toBe("search");
+      expect(parsed.error).toBeDefined();
+      expect(typeof parsed.error.code).toBe("string");
     });
 
     it("exits with code 1 on empty query error", async () => {
@@ -1382,8 +1391,13 @@ describe("Search Command", () => {
       expect(result.exitCode).toBe(0);
       const output = consoleLogSpy.mock.calls.map((c: unknown[]) => String(c[0])).join("\n");
       const parsed = JSON.parse(output);
-      expect(Array.isArray(parsed)).toBe(true);
-      expect(parsed[0].title).toBe("JSON Doc");
+      // Plan 32-02 HIGH-4: --files --json emits envelope with kind: "file".
+      // Bare-array leak was the bug this plan fixes.
+      expect(parsed.schema_version).toBe("1");
+      expect(parsed.command).toBe("search");
+      expect(parsed.kind).toBe("file");
+      expect(Array.isArray(parsed.data)).toBe(true);
+      expect(parsed.data[0].title).toBe("JSON Doc");
 
       isQmdSpy.mockRestore();
       QmdRunnerSpy.mockRestore();
@@ -1445,6 +1459,123 @@ describe("Search Command", () => {
       } finally {
         closeDatabase(db);
       }
+    });
+  });
+
+  describe("CLI-03: --format normalization (Phase 32)", () => {
+    let cli03TempDir: string;
+    let cli03DbPath: string;
+
+    beforeEach(async () => {
+      cli03TempDir = mkdtempSync(join(tmpdir(), "search-cli03-"));
+      cli03DbPath = join(cli03TempDir, "test.db");
+      const { db } = initializeDatabase({ path: cli03DbPath });
+      closeDatabase(db);
+      // Reset deprecation-warning once-keys for per-test isolation.
+      const helper = await import("./_helpers/deprecation-warning.js");
+      helper.resetFormatDeprecationWarningsForTesting();
+    });
+
+    afterEach(() => {
+      try { rmSync(cli03TempDir, { recursive: true, force: true }); } catch {}
+    });
+
+    // 1, 2, 3: choices include brief, ai, default (deprecated alias parity per MEDIUM-2)
+    it("accepts 'brief' in --format choices", () => {
+      const cmd = createSearchCommand();
+      const formatOpt = cmd.options.find((o) => o.long === "--format");
+      expect(formatOpt?.argChoices).toContain("brief");
+    });
+
+    it("accepts 'ai' in --format choices", () => {
+      const cmd = createSearchCommand();
+      const formatOpt = cmd.options.find((o) => o.long === "--format");
+      expect(formatOpt?.argChoices).toContain("ai");
+    });
+
+    it("retains 'default' as deprecated alias in --format choices (MEDIUM-2)", () => {
+      const cmd = createSearchCommand();
+      const formatOpt = cmd.options.find((o) => o.long === "--format");
+      expect(formatOpt?.argChoices).toContain("default");
+    });
+
+    // 5: defaultValue is undefined (no .default() call)
+    it("does not set defaultValue on --format (undefined = no-flag default)", () => {
+      const cmd = createSearchCommand();
+      const formatOpt = cmd.options.find((o) => o.long === "--format");
+      expect(formatOpt?.defaultValue).toBeUndefined();
+    });
+
+    // 6: --format brief output (list-returning, one line per record)
+    it("emits condensed brief output (empty DB produces no-results message)", async () => {
+      const result = await executeSearchCommand("nonexistent", {
+        format: "brief",
+        dbPath: cli03DbPath,
+      });
+      expect(result.exitCode).toBe(0);
+      const out = consoleLogSpy.mock.calls.map((c: unknown[]) => String(c[0])).join("\n");
+      // Brief output: single line per record (or empty-state message), no headers
+      expect(out).not.toContain("Found ");
+      expect(out).not.toContain("=== Execution Details ===");
+    });
+
+    // 7: backward-compat (no flag = unchanged default text output)
+    it("no --format flag preserves existing default text output", async () => {
+      const result = await executeSearchCommand("nonexistent", {
+        dbPath: cli03DbPath,
+      });
+      expect(result.exitCode).toBe(0);
+      const out = consoleLogSpy.mock.calls.map((c: unknown[]) => String(c[0])).join("\n");
+      // Default text mode shows "No results found for:" message
+      expect(out).toContain("No results");
+    });
+
+    // 8: --format ai = no ANSI codes
+    it("emits ANSI-stripped output with --format ai", async () => {
+      const result = await executeSearchCommand("nonexistent", {
+        format: "ai",
+        dbPath: cli03DbPath,
+      });
+      expect(result.exitCode).toBe(0);
+      const out = consoleLogSpy.mock.calls.map((c: unknown[]) => String(c[0])).join("\n");
+      // No ANSI escape sequences (CSI - ESC [)
+      expect(/\x1b\[/.test(out)).toBe(false);
+    });
+
+    // 9: --json --format ai precedence regression (Plan 32-02 contract holds)
+    it("--json --format ai emits envelope (formatForAi NOT applied)", async () => {
+      const result = await executeSearchCommand("nonexistent", {
+        json: true,
+        format: "ai",
+        dbPath: cli03DbPath,
+      });
+      expect(result.exitCode).toBe(0);
+      const out = consoleLogSpy.mock.calls.map((c: unknown[]) => String(c[0])).join("\n");
+      const parsed = JSON.parse(out);
+      expect(parsed.schema_version).toBe("1");
+      expect(parsed.command).toBe("search");
+      expect(parsed.kind).toBe("message");
+    });
+
+    // 10: --format default emits deprecation warning to stderr
+    it("--format default emits deprecation warning to stderr", async () => {
+      await executeSearchCommand("nonexistent", {
+        format: "default" as unknown as "default" | "ai",
+        dbPath: cli03DbPath,
+      });
+      const err = consoleErrorSpy.mock.calls.map((c: unknown[]) => String(c[0])).join("\n");
+      expect(err).toContain("deprecated");
+    });
+
+    // 11: --format default --json suppresses deprecation warning
+    it("--format default --json suppresses deprecation warning", async () => {
+      await executeSearchCommand("nonexistent", {
+        format: "default" as unknown as "default" | "ai",
+        json: true,
+        dbPath: cli03DbPath,
+      });
+      const err = consoleErrorSpy.mock.calls.map((c: unknown[]) => String(c[0])).join("\n");
+      expect(err).not.toContain("deprecated");
     });
   });
 });

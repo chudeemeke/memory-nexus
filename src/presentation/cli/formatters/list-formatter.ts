@@ -12,8 +12,11 @@ import { padToWidth } from "./text-width.js";
 
 /**
  * Output mode for list formatter.
+ *
+ * Phase 32 (CLI-03) extension: `brief` produces single-line-per-session
+ * output for AI/script consumption. See {@link BriefListFormatter}.
  */
-export type ListOutputMode = "default" | "json" | "quiet" | "verbose";
+export type ListOutputMode = "default" | "json" | "quiet" | "verbose" | "brief";
 
 /**
  * Options for formatting session list.
@@ -63,6 +66,8 @@ export function createListFormatter(
       return new QuietListFormatter();
     case "verbose":
       return new VerboseListFormatter(useColor);
+    case "brief":
+      return new BriefListFormatter();
     default:
       return new DefaultListFormatter(useColor);
   }
@@ -114,6 +119,41 @@ class DefaultListFormatter implements ListFormatter {
 
   formatEmpty(): string {
     return "No sessions found. Run 'memory sync' to import sessions.";
+  }
+}
+
+/**
+ * Brief list formatter — single-line-per-session, AI/script-optimized.
+ *
+ * Phase 32 (CLI-03) addition. Produces:
+ *   <sessionId-short> <projectName> <messageCount> <relativeTime>
+ *
+ * No headers, no execution-details block. No color (brief is for
+ * plain text consumers).
+ */
+class BriefListFormatter implements ListFormatter {
+  formatSessions(sessions: Session[], _options?: ListFormatOptions): string {
+    if (sessions.length === 0) {
+      return this.formatEmpty();
+    }
+    return sessions
+      .map((s) => {
+        const idShort = s.id.substring(0, 8);
+        const project = s.projectPath.projectName;
+        const msgs = s.messageCount;
+        const time = formatRelativeTime(s.startTime);
+        return `${idShort} ${project} ${msgs} ${time}`;
+      })
+      .join("\n");
+  }
+
+  formatError(error: Error): string {
+    const message = error instanceof Error ? error.message : String(error);
+    return `Error: ${message}`;
+  }
+
+  formatEmpty(): string {
+    return "No sessions found.";
   }
 }
 

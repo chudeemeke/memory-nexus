@@ -139,10 +139,12 @@ describe("Context Command --format Choices", () => {
     expect(formatOpt?.argChoices).toContain("ai");
   });
 
-  it("should default to brief", () => {
+  // Phase 32 (CLI-03): normalization removed .default("brief"). Undefined
+  // preserves existing implicit brief behavior via the action handler.
+  it("should not set defaultValue (Phase 32 CLI-03 normalization)", () => {
     const cmd = createContextCommand();
     const formatOpt = cmd.options.find((o) => o.long === "--format");
-    expect(formatOpt?.defaultValue).toBe("brief");
+    expect(formatOpt?.defaultValue).toBeUndefined();
   });
 });
 
@@ -280,5 +282,101 @@ describe("executeContextCommand error handling", () => {
 
     expect(result.exitCode).toBe(1);
     expect(consoleErrorSpy).toHaveBeenCalled();
+  });
+});
+
+describe("context: CLI-03: --format normalization (Phase 32)", () => {
+  let consoleLogSpy: ReturnType<typeof spyOn>;
+  let consoleErrorSpy: ReturnType<typeof spyOn>;
+  let cli03TempDir: string;
+  let cli03DbPath: string;
+
+  beforeEach(async () => {
+    consoleLogSpy = spyOn(console, "log").mockImplementation(() => {});
+    consoleErrorSpy = spyOn(console, "error").mockImplementation(() => {});
+    cli03TempDir = mkdtempSync(join(tmpdir(), "context-cli03-"));
+    cli03DbPath = join(cli03TempDir, "test.db");
+    const { db } = initializeDatabase({ path: cli03DbPath });
+    closeDatabase(db);
+    // Reset deprecation-warning once-keys for per-test isolation.
+    const helper = await import("./_helpers/deprecation-warning.js");
+    helper.resetFormatDeprecationWarningsForTesting();
+  });
+
+  afterEach(() => {
+    consoleLogSpy.mockRestore();
+    consoleErrorSpy.mockRestore();
+    try { rmSync(cli03TempDir, { recursive: true, force: true }); } catch {}
+  });
+
+  // 1, 2: choices include brief, ai
+  it("accepts 'brief' in --format choices", () => {
+    const cmd = createContextCommand();
+    const formatOpt = cmd.options.find((o) => o.long === "--format");
+    expect(formatOpt?.argChoices).toContain("brief");
+  });
+
+  it("accepts 'ai' in --format choices", () => {
+    const cmd = createContextCommand();
+    const formatOpt = cmd.options.find((o) => o.long === "--format");
+    expect(formatOpt?.argChoices).toContain("ai");
+  });
+
+  // 4: detailed retained as deprecated alias
+  it("retains 'detailed' as deprecated alias in --format choices", () => {
+    const cmd = createContextCommand();
+    const formatOpt = cmd.options.find((o) => o.long === "--format");
+    expect(formatOpt?.argChoices).toContain("detailed");
+  });
+
+  // 5: defaultValue is undefined (no .default("brief") call after Phase 32 normalization)
+  it("does not set defaultValue on --format (undefined = no-flag default)", () => {
+    const cmd = createContextCommand();
+    const formatOpt = cmd.options.find((o) => o.long === "--format");
+    expect(formatOpt?.defaultValue).toBeUndefined();
+  });
+
+  // 6: no flag = backward-compat behavior (existing implicit brief)
+  it("no --format flag preserves existing default text output", async () => {
+    const result = await executeContextCommand("nonexistent-project-xyz", { dbPath: cli03DbPath });
+    expect(result.exitCode).toBe(1);
+    // Existing behavior: error message to stderr
+    expect(consoleErrorSpy).toHaveBeenCalled();
+  });
+
+  // 9: --json --format ai precedence regression
+  it("--json --format ai emits envelope (formatForAi NOT applied)", async () => {
+    await executeContextCommand("nonexistent-project-xyz", {
+      json: true,
+      format: "ai",
+      dbPath: cli03DbPath,
+    });
+    const out = consoleLogSpy.mock.calls.map((c: unknown[]) => String(c[0])).join("\n");
+    const parsed = JSON.parse(out);
+    expect(parsed.schema_version).toBe("1");
+    expect(parsed.command).toBe("context");
+    // not-found case: error envelope shape
+    expect(parsed.error).toBeDefined();
+  });
+
+  // 12: --format detailed emits deprecation warning to stderr
+  it("--format detailed emits deprecation warning to stderr", async () => {
+    await executeContextCommand("nonexistent-project-xyz", {
+      format: "detailed",
+      dbPath: cli03DbPath,
+    });
+    const err = consoleErrorSpy.mock.calls.map((c: unknown[]) => String(c[0])).join("\n");
+    expect(err).toContain("deprecated");
+  });
+
+  // 13: --format detailed --json suppresses deprecation warning
+  it("--format detailed --json suppresses deprecation warning", async () => {
+    await executeContextCommand("nonexistent-project-xyz", {
+      format: "detailed",
+      json: true,
+      dbPath: cli03DbPath,
+    });
+    const err = consoleErrorSpy.mock.calls.map((c: unknown[]) => String(c[0])).join("\n");
+    expect(err).not.toContain("deprecated");
   });
 });

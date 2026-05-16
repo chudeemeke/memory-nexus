@@ -9,8 +9,12 @@ import type { StatsResult, ProjectStats } from "../../../domain/ports/services.j
 
 /**
  * Output mode for stats formatting.
+ *
+ * Phase 32 (CLI-03) extension: `brief` produces top-line counters only,
+ * bounded to <=5 lines (W5 / Pitfall 4 Option A). See
+ * {@link BriefStatsFormatter}.
  */
-export type StatsOutputMode = "default" | "json" | "quiet" | "verbose";
+export type StatsOutputMode = "default" | "json" | "quiet" | "verbose" | "brief";
 
 /**
  * Hook status summary for stats display.
@@ -93,8 +97,39 @@ export function createStatsFormatter(
       return new QuietStatsFormatter();
     case "verbose":
       return new VerboseStatsFormatter(useColor);
+    case "brief":
+      return new BriefStatsFormatter();
     default:
       return new DefaultStatsFormatter(useColor);
+  }
+}
+
+/**
+ * Brief stats formatter — top-line counters only, <=5 lines.
+ *
+ * Phase 32 (CLI-03) addition. Implements Pitfall 4 Option A from the
+ * research (top-line counters; <=5 lines per W5). No headers, no
+ * per-project breakdown, no hooks section. Suitable for AI/script
+ * consumers that only need totals.
+ */
+class BriefStatsFormatter implements StatsFormatter {
+  formatStats(stats: ExtendedStatsResult, _options?: StatsFormatOptions): string {
+    return [
+      `${formatNumber(stats.totalSessions)} sessions`,
+      `${formatNumber(stats.totalMessages)} messages`,
+      `${formatNumber(stats.totalToolUses)} tool uses`,
+      `${formatNumber(stats.projectBreakdown.length)} projects`,
+      `${formatBytes(stats.databaseSizeBytes)}`,
+    ].join("\n");
+  }
+
+  formatError(error: Error): string {
+    const message = error instanceof Error ? error.message : String(error);
+    return `Error: ${message}`;
+  }
+
+  formatEmpty(): string {
+    return "0 sessions\n0 messages\n0 tool uses\n0 projects\n0 B";
   }
 }
 

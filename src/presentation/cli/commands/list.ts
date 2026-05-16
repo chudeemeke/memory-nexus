@@ -23,7 +23,13 @@ import {
 import { shouldUseColor } from "../formatters/color.js";
 import { formatForAi } from "../formatters/ai-formatter.js";
 import { parseDate, DateParseError } from "../parsers/date-parser.js";
-import { formatError, formatErrorJson } from "../formatters/error-formatter.js";
+import { formatError } from "../formatters/error-formatter.js";
+import {
+  emitJsonEnvelope,
+  emitJsonErrorEnvelope,
+} from "../formatters/envelope.js";
+import { toSessionListDto } from "../formatters/dto-helpers.js";
+import { emitFormatDeprecationWarning } from "./_helpers/deprecation-warning.js";
 
 /**
  * Options for the list command.
@@ -45,8 +51,28 @@ export interface ListCommandOptions {
   verbose?: boolean;
   /** Minimal output (session IDs only) */
   quiet?: boolean;
-  /** Output format: default or ai */
-  format?: "default" | "ai";
+  /**
+   * Output format. Phase 32 (CLI-03) normalized choices: `brief`,
+   * `ai`. `default` retained as deprecated alias (one-minor cadence;
+   * CHANGELOG documents removal). Undefined = no-flag default
+   * (backward compatible).
+   */
+  format?: "brief" | "ai" | "default";
+}
+
+/**
+ * Runtime dependencies for executeListCommand.
+ *
+ * Separated from ListCommandOptions because these are not user-facing
+ * CLI flags — they are operational dependencies that tests substitute
+ * to achieve isolation. Defaults to production resolution
+ * (getDefaultDbPath()) when omitted.
+ *
+ * Parity with executeShowCommand (added Plan 32-02 per Codex HIGH-3).
+ */
+export interface ListCommandDeps {
+  /** Database path. Defaults to getDefaultDbPath(). */
+  dbPath?: string;
 }
 
 /**
@@ -77,9 +103,11 @@ export function createListCommand(): Command {
     )
     .option("--json", "Output as JSON")
     .addOption(
-      new Option("--format <type>", "Output format")
-        .choices(["default", "ai"])
-        .default("default")
+      new Option(
+        "--format <type>",
+        "Output format: brief (single-line per session) or ai (AI-optimized text). 'default' accepted as deprecated alias.",
+      ).choices(["brief", "ai", "default"]),
+      // No .default() — undefined = current text default (backward compatible).
     )
     .addOption(
       new Option("-v, --verbose", "Show detailed output").conflicts("quiet")
@@ -102,13 +130,39 @@ export function createListCommand(): Command {
  * @param options - List command options
  * @returns CommandResult with exitCode 0 (success) or 1 (error)
  */
-export async function executeListCommand(options: ListCommandOptions): Promise<CommandResult> {
+export async function executeListCommand(
+  options: ListCommandOptions,
+  deps: ListCommandDeps = {}
+): Promise<CommandResult> {
   const startTime = performance.now();
+
+  // Phase 32 (CLI-03): deprecation warning for --format default
+  // (alias retained for one-minor cadence; behavior preserved).
+  if (options.format === "default") {
+    emitFormatDeprecationWarning({
+      command: "list",
+      alias: "default",
+      replacement: "Omit --format for default behavior, or use --format brief / --format ai.",
+      json: options.json,
+    });
+  }
+
+  // Resolve DB path (deps seam takes precedence over production default).
+  // Parity with show/context/related/search (per Codex HIGH-3).
+  const dbPath = deps.dbPath ?? getDefaultDbPath();
 
   // Parse limit
   const limit = parseInt(options.limit ?? "20", 10);
   if (isNaN(limit) || limit < 1) {
-    console.error("Error: Limit must be a positive number");
+    if (options.json) {
+      emitJsonErrorEnvelope({
+        command: "list",
+        code: "INVALID_ARGUMENT",
+        message: "Limit must be a positive number",
+      });
+    } else {
+      console.error("Error: Limit must be a positive number");
+    }
     return { exitCode: 1 };
   }
 
@@ -127,7 +181,16 @@ export async function executeListCommand(options: ListCommandOptions): Promise<C
         sinceDate = parseDate(options.since);
       } catch (err) {
         if (err instanceof DateParseError) {
-          console.error(`Error: ${err.message}`);
+          if (options.json) {
+            emitJsonErrorEnvelope({
+              command: "list",
+              code: "INVALID_ARGUMENT",
+              message: err.message,
+              context: { flag: "since", value: options.since },
+            });
+          } else {
+            console.error(`Error: ${err.message}`);
+          }
           return { exitCode: 1 };
         }
         throw err;
@@ -138,7 +201,16 @@ export async function executeListCommand(options: ListCommandOptions): Promise<C
         beforeDate = parseDate(options.before);
       } catch (err) {
         if (err instanceof DateParseError) {
-          console.error(`Error: ${err.message}`);
+          if (options.json) {
+            emitJsonErrorEnvelope({
+              command: "list",
+              code: "INVALID_ARGUMENT",
+              message: err.message,
+              context: { flag: "before", value: options.before },
+            });
+          } else {
+            console.error(`Error: ${err.message}`);
+          }
           return { exitCode: 1 };
         }
         throw err;
@@ -146,7 +218,6 @@ export async function executeListCommand(options: ListCommandOptions): Promise<C
     }
   }
 
-  const dbPath = getDefaultDbPath();
   const { db } = initializeDatabase({ path: dbPath });
 
   try {
@@ -163,26 +234,49 @@ export async function executeListCommand(options: ListCommandOptions): Promise<C
     // Get sessions
     const sessions = await sessionRepo.findFiltered(listOptions);
 
-    // Determine output mode
+    const filtersApplied = buildFiltersList(options);
+
+    // --json: envelope path (Codex HIGH-2 — every exit point routes here).
+    // Precedence: --json wins over --format ai (text-only post-processing
+    // has no effect on envelope shape).
+    if (options.json) {
+      const endTime = performance.now();
+      const data = sessions.map(toSessionListDto);
+      emitJsonEnvelope({
+        command: "list",
+        kind: "session",
+        data,
+        meta: {
+          filters_applied: filtersApplied,
+          count: data.length,
+          timing_ms: Math.round(endTime - startTime),
+        },
+      });
+      return { exitCode: 0 };
+    }
+
+    // Determine output mode (text mode).
+    // Precedence (Phase 32 CLI-03): --quiet > --verbose > --format brief > default.
+    // 'default' alias falls through to the text default path.
     let outputMode: ListOutputMode = "default";
-    if (options.json) outputMode = "json";
+    if (options.quiet) outputMode = "quiet";
     else if (options.verbose) outputMode = "verbose";
-    else if (options.quiet) outputMode = "quiet";
+    else if (options.format === "brief") outputMode = "brief";
 
     const useColor = shouldUseColor();
     const formatter = createListFormatter(outputMode, useColor);
 
-    // Check for empty result
+    // Check for empty result (text mode)
     if (sessions.length === 0) {
       console.log(formatter.formatEmpty());
       return { exitCode: 0 };
     }
 
-    // Format and output
+    // Format and output (text mode)
     const endTime = performance.now();
     const formatOptions: ListFormatOptions = {
       executionTimeMs: Math.round(endTime - startTime),
-      filtersApplied: buildFiltersList(options),
+      filtersApplied,
     };
     let output = formatter.formatSessions(sessions, formatOptions);
     if (options.format === "ai") {
@@ -202,7 +296,14 @@ export async function executeListCommand(options: ListCommandOptions): Promise<C
 
     // Format error based on output mode
     if (options.json) {
-      console.log(formatErrorJson(nexusError));
+      emitJsonErrorEnvelope({
+        command: "list",
+        code: nexusError.code,
+        message: nexusError.message,
+        ...(nexusError.context !== undefined
+          ? { context: nexusError.context }
+          : {}),
+      });
     } else {
       console.error(formatError(nexusError));
     }

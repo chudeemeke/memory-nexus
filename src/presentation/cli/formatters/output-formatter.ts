@@ -10,6 +10,7 @@ import type { SearchResult } from "../../../domain/value-objects/search-result.j
 import { formatTimestamp } from "./timestamp-formatter.js";
 import { bold } from "./color.js";
 import { truncateToWidth, truncateForTerminal, getTerminalWidth } from "./text-width.js";
+import { toSearchResultDto } from "./dto-helpers.js";
 
 /**
  * Context budget for Claude consumption (50K characters).
@@ -18,8 +19,11 @@ export const CONTEXT_BUDGET = 50000;
 
 /**
  * Output mode enum.
+ *
+ * Phase 32 (CLI-03) extension: `brief` produces single-line-per-record
+ * output for AI/script consumption. See {@link BriefOutputFormatter}.
  */
-export type OutputMode = "default" | "json" | "quiet" | "verbose";
+export type OutputMode = "default" | "json" | "quiet" | "verbose" | "brief";
 
 /**
  * Execution details for verbose mode.
@@ -95,6 +99,8 @@ export function createOutputFormatter(mode: OutputMode, useColor: boolean): Outp
       return new QuietOutputFormatter();
     case "verbose":
       return new VerboseOutputFormatter(useColor);
+    case "brief":
+      return new BriefOutputFormatter();
     default:
       return new DefaultOutputFormatter(useColor);
   }
@@ -207,6 +213,44 @@ class DefaultOutputFormatter implements OutputFormatter {
 }
 
 /**
+ * Brief output formatter — single-line-per-record, AI/script-optimized.
+ *
+ * Phase 32 (CLI-03) addition. Produces:
+ *   <sessionId> [<score>%] <snippet truncated to 80 chars, no markup>
+ *
+ * No headers, no execution-details block. Snippets have `<mark>` tags
+ * stripped (brief is for plain text consumers, not for re-highlighting).
+ */
+class BriefOutputFormatter implements OutputFormatter {
+  formatResults(results: SearchResult[], options?: FormatOptions): string {
+    if (results.length === 0) {
+      return `No results for "${options?.query ?? ""}"`;
+    }
+    return results
+      .map((r) => {
+        const snippet = r.snippet
+          .replace(/<\/?mark>/g, "")
+          .replace(/\s+/g, " ")
+          .trim()
+          .slice(0, 80);
+        const scorePct = Math.round(r.score * 100);
+        return `${r.sessionId} [${scorePct}%] ${snippet}`;
+      })
+      .join("\n");
+  }
+
+  formatError(error: Error): string {
+    const message = error instanceof Error ? error.message : String(error);
+    return `Error: ${message}`;
+  }
+
+  formatSummary(_stats: SummaryStats): string {
+    // Brief mode: summary is implicit in the per-record lines.
+    return "";
+  }
+}
+
+/**
  * JSON output formatter.
  *
  * When searchMeta is provided, wraps output in a metadata envelope:
@@ -218,35 +262,16 @@ class JsonOutputFormatter implements OutputFormatter {
   formatResults(results: SearchResult[], options?: FormatOptions): string {
     const budget = options?.contextBudget ?? CONTEXT_BUDGET;
 
-    // Build per-result JSON objects
-    const jsonResults = results.map((r, i) => {
-      const base: Record<string, unknown> = {
-        sessionId: r.sessionId,
-        messageId: r.messageId,
-        role: r.role,
-        score: r.score,
-        timestamp: r.timestamp.toISOString(),
-        snippet: r.snippet.replace(/<\/?mark>/g, ""), // Remove HTML tags
-      };
-
-      // Add hybrid-specific fields when present (additive)
-      if (options?.searchMeta) {
-        base.rank = i + 1;
-        if (r.rawScores) {
-          base.raw_scores = r.rawScores;
-        }
-        if (r.source) {
-          base.source = r.source;
-        }
-        // Extract highlights from original snippet
-        const highlights = extractHighlights(r.snippet);
-        if (highlights.length > 0) {
-          base.highlights = highlights;
-        }
-      }
-
-      return base;
-    });
+    // Build per-result JSON objects via the canonical DTO helper.
+    // CONTEXT_BUDGET BOUNDARY (Codex MEDIUM-1): truncation logic stays
+    // in this formatter; the DTO is shape-only.
+    const jsonResults = results.map(
+      (r, i) =>
+        toSearchResultDto(r, {
+          rank: i + 1,
+          includeSearchMetaFields: !!options?.searchMeta,
+        }) as unknown as Record<string, unknown>,
+    );
 
     // If searchMeta provided, wrap in metadata envelope
     if (options?.searchMeta) {

@@ -71,6 +71,8 @@
 - [ ] **Phase 31: Bug Fixes** - Unicode search, CLI truncation, download bar issues
 - [ ] **Phase 32: CLI Surface** - Labeled help groups, uniform --json and --format flags (scope unchanged per audit codex review #2 finding #2)
 - [ ] **Phase 32.5: Surface Consolidation** (NEW, per audit A-prime) - Merge doctor/status/stats into one health surface with detail-flag selection; unify search/context/related/list/show behind one query primitive with shape flags; document unified surface in docs/04-ARCHITECTURE.md. Acceptance criteria in audit §21.
+- [ ] **Phase 32.6: TS Error Cleanup** (NEW, surfaced by Phase 32 verifier) - Resolve the ~181 pre-existing TypeScript errors in CLI files (db-startup, context-formatter, friction-dashboard, output-formatter, related-formatter, stats-formatter, etc.) so `bun --bun tsc --noEmit` exits 0. Pre-dates v4.0; trigger fired at Phase 32 close-out.
+- [ ] **Phase 32.7: Friction Dashboard Test Cleanup + Envelope Adoption** (NEW, surfaced by Phase 32 verifier) - Resolve the 8 pre-existing failing tests in `friction-dashboard.test.ts` covering `generateFrictionHtml` rendering and the `--html` action path. Pair with adoption of `QueryResultEnvelope` for `friction list` (deferred from Phase 32 per audit §14.A and 32-01-PLAN.md Open Q7). Removes hidden-debt warning from Phase 32 close-out.
 - [ ] **Phase 33: Knowledge Extraction Foundation** - Extraction provider port, facts schema, extraction_log, temporal tracking. **MUST include plain-text canonical event log (event-log SSOT) with DB tables as DERIVED projection per audit §19 item 4.** Event types: decision / learning / preference / friction / observation / supersedence.
 - [ ] **Phase 34: Extraction Pipeline** - The `memory extract` command with ADD/UPDATE/DELETE/NOOP operations. **Supersedence encoded as event type in canonical event log, not as in-place table mutation per audit §19 item 5.** G3 acceptance criteria: 6 sub-gates per audit §21.
 - [ ] **Phase 35: Context Intelligence** - Rewire SmartContextService to read from fact tables, deprecate ~/.memory/. **Every new typed memory kind in 33-35 must have plain-text canonical OR export-on-write before becoming default (T7) per audit §19 item 6.**
@@ -123,7 +125,42 @@ Plans:
   1. `memory --help` groups commands under labeled categories (Query, Data, System, Feedback) instead of a flat alphabetical list
   2. All query commands (`search`, `context`, `show`, `list`, `related`, `stats`) accept `--json` and produce valid JSON to stdout
   3. All query commands support `--format brief` and `--format ai` where applicable, producing condensed or AI-optimized output respectively
+**Plans:** 3 plans
+
+Plans:
+- [ ] 32-01-PLAN.md -- Help-group registration (CLI-01) + QueryResultEnvelope contract (CLI-02 foundation)
+- [ ] 32-02-PLAN.md -- Apply QueryResultEnvelope --json output to all 6 query commands (CLI-02)
+- [ ] 32-03-PLAN.md -- Normalize --format brief|ai across all 6 query commands (CLI-03) + --format detailed deprecation alias
+
+---
+
+### Phase 32.6: TS Error Cleanup
+
+**Goal**: All TypeScript errors in the CLI presentation layer are resolved so `bun --bun tsc --noEmit` exits 0 cleanly.
+**Depends on**: Phase 32 (CLI Surface) — coverage and structure of the touched files affect what to clean up
+**Requirements**: QUAL-04 (cleanup-aligned; no new functional reqs)
+**Success Criteria** (what must be TRUE):
+  1. `bun --bun tsc --noEmit` exits 0 with 0 errors (down from ~181 baseline carried forward from pre-v4.0 code)
+  2. Coverage on touched files maintained at or above the value before the cleanup (no regression)
+  3. No behavioral change to any command output (refactor-only)
 **Plans**: TBD
+
+Pre-existing scope: db-startup.ts, context-formatter.ts, friction-dashboard.ts, output-formatter.ts, related-formatter.ts, stats-formatter.ts, and adjacent files surfaced during Phase 32 verification. The 181 errors all pre-date v4.0; Phase 32 confirmed via stash baseline that none were introduced by the CLI surface work.
+
+---
+
+### Phase 32.7: Friction Dashboard Tests + Envelope Adoption
+
+**Goal**: The friction subsystem is brought into the `QueryResultEnvelope` contract and the 8 pre-existing friction-dashboard test failures are resolved.
+**Depends on**: Phase 32 (CLI Surface) — the envelope contract from 32-01 is consumed here
+**Requirements**: QUAL-04, QUAL-02 (cleanup-aligned)
+**Success Criteria** (what must be TRUE):
+  1. The 8 failing tests in `src/presentation/cli/formatters/friction-dashboard.test.ts` pass cleanly (`generateFrictionHtml` rendering + `--html` action path)
+  2. `memory friction list --json` produces a `QueryResultEnvelope`-shaped document on stdout, consistent with the 6 query commands from Phase 32
+  3. The deferred Open Q7 from Plan 32-01 is closed (friction adoption no longer deferred)
+**Plans**: TBD
+
+Rationale: Phase 32 explicitly deferred friction envelope adoption per audit §14.A. The dashboard test failures co-locate with that decision because the underlying surface changes when friction joins the envelope contract.
 
 ---
 
@@ -265,7 +302,7 @@ Phase 37 (Publishing)
 | 29.1 | v3.0 | 2/2 | Complete | 2026-03-22 |
 | 30. God File Cleanup | v4.0 | 2/2 | Complete    | 2026-04-03 |
 | 31. Bug Fixes | v4.0 | 1/2 | In Progress|  |
-| 32. CLI Surface | v4.0 | TBD | Not started | - |
+| 32. CLI Surface | v4.0 | 0/3 | Planned | - |
 | 33. Knowledge Extraction Foundation | v4.0 | TBD | Not started | - |
 | 34. Extraction Pipeline | v4.0 | TBD | Not started | - |
 | 35. Context Intelligence | v4.0 | TBD | Not started | - |
@@ -274,4 +311,4 @@ Phase 37 (Publishing)
 
 ---
 
-*Last updated: 2026-04-03 (Phase 31 planned: 2 plans)*
+*Last updated: 2026-05-14 (Phase 32 planned: 3 plans)*

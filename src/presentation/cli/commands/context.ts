@@ -38,7 +38,13 @@ import {
   type ContextFormatOptions,
 } from "../formatters/context-formatter.js";
 import { shouldUseColor } from "../formatters/color.js";
-import { formatError, formatErrorJson } from "../formatters/error-formatter.js";
+import { formatError } from "../formatters/error-formatter.js";
+import {
+  emitJsonEnvelope,
+  emitJsonErrorEnvelope,
+} from "../formatters/envelope.js";
+import { toContextDto } from "../formatters/dto-helpers.js";
+import { emitFormatDeprecationWarning } from "./_helpers/deprecation-warning.js";
 
 /**
  * Options for the context command.
@@ -46,8 +52,13 @@ import { formatError, formatErrorJson } from "../formatters/error-formatter.js";
 export interface ContextCommandOptions {
   /** Sessions from last N days (includes today) */
   days?: number;
-  /** Output format: brief, detailed, or ai */
-  format?: "brief" | "detailed" | "ai";
+  /**
+   * Output format. Phase 32 (CLI-03) normalized choices: `brief`,
+   * `ai`. `detailed` retained as deprecated alias (one-minor cadence;
+   * CHANGELOG documents removal). Undefined = no-flag default
+   * (existing brief behavior preserved for backward compatibility).
+   */
+  format?: "brief" | "ai" | "detailed";
   /** Maximum token budget for smart context */
   budget?: number;
   /** Include cross-project learnings and decisions */
@@ -80,9 +91,12 @@ export function createContextCommand(): Command {
         })
     )
     .addOption(
-      new Option("--format <type>", "Output format")
-        .choices(["brief", "detailed", "ai"])
-        .default("brief")
+      new Option(
+        "--format <type>",
+        "Output format: brief, ai. 'detailed' accepted as deprecated alias.",
+      ).choices(["brief", "ai", "detailed"]),
+      // No .default() — undefined preserves existing implicit brief behavior
+      // via the action handler. Phase 32 (CLI-03) normalization.
     )
     .addOption(
       new Option("--budget <tokens>", "Maximum token budget for context")
@@ -109,13 +123,28 @@ export function createContextCommand(): Command {
 }
 
 /**
- * Check whether the command should use SmartContextService.
+ * Precedence rule for context command output (per Codex HIGH-5):
  *
- * SmartContextService is used when any of: --format ai, --budget, or
- * --cross-project flags are set. Otherwise the legacy path is used
- * for full backward compatibility.
+ *   --json wins routing AND output formatting. When --json is set:
+ *     - --format ai is IGNORED (no formatForAi() post-processing)
+ *     - The routing decision (Smart vs Legacy) depends on --budget /
+ *       --cross-project flags ONLY, not on --format ai.
+ *
+ *   When --json is NOT set:
+ *     - --format ai routes to SmartContextService and post-processes
+ *       text output via formatForAi().
+ *
+ * Plan 32-02's context.json.test.ts deep-equals the JSON output of
+ * `--json` and `--json --format ai`. That assertion is the
+ * verification that this precedence rule holds at the routing layer,
+ * not just at the output-formatting layer.
  */
 function useSmartContext(options: ContextCommandOptions): boolean {
+  // --json mode: ignore --format ai; routing depends only on smart
+  // context flags (budget / cross-project).
+  if (options.json) {
+    return !!options.budget || !!options.crossProject;
+  }
   return options.format === "ai" || !!options.budget || !!options.crossProject;
 }
 
@@ -136,6 +165,17 @@ export async function executeContextCommand(
   options: ContextCommandOptions
 ): Promise<CommandResult> {
   const startTime = performance.now();
+
+  // Phase 32 (CLI-03): deprecation warning for --format detailed
+  // (alias retained for one-minor cadence; behavior preserved).
+  if (options.format === "detailed") {
+    emitFormatDeprecationWarning({
+      command: "context",
+      alias: "detailed",
+      replacement: "Use --format brief or --format ai.",
+      json: options.json,
+    });
+  }
 
   const dbPath = options.dbPath ?? getDefaultDbPath();
   const { db } = initializeDatabase({ path: dbPath });
@@ -158,7 +198,14 @@ export async function executeContextCommand(
 
     // Format error based on output mode
     if (options.json) {
-      console.log(formatErrorJson(nexusError));
+      emitJsonErrorEnvelope({
+        command: "context",
+        code: nexusError.code,
+        message: nexusError.message,
+        ...(nexusError.context !== undefined
+          ? { context: nexusError.context }
+          : {}),
+      });
     } else {
       console.error(formatError(nexusError));
     }
@@ -175,18 +222,22 @@ async function executeSmartContext(
   db: ReturnType<typeof initializeDatabase>["db"],
   project: string,
   options: ContextCommandOptions,
-  startTime: number,
+  _startTime: number,
 ): Promise<CommandResult> {
   const projectResolver = new SqliteProjectResolver(db);
   const memoryFileRepo = new SqliteMemoryFileRepository(db);
   const frictionRepo = new SqliteFrictionRepository(db);
+
+  // We need a captured legacy context if --json is set so we can build
+  // the envelope's data field (toContextDto). The smart-context summary
+  // text is for human formatters; envelope consumers want structured DTO.
+  const legacy = new SqliteContextService(db);
 
   const smartContext = new SmartContextService({
     projectResolver,
     memoryFileRepo,
     frictionRepo,
     getSessionSummary: async (filter, days) => {
-      const legacy = new SqliteContextService(db);
       const ctx = await legacy.getProjectContext(filter, { days });
       if (!ctx) return null;
       return `Sessions: ${ctx.sessionCount} | Messages: ${ctx.totalMessages} | Last active: ${ctx.lastActivity?.toISOString() ?? "never"}`;
@@ -200,9 +251,40 @@ async function executeSmartContext(
     crossProject: options.crossProject,
   });
 
-  // Determine output mode
+  // --json takes the envelope path (Codex HIGH-5: same shape regardless
+  // of --format ai). Note: smart-context returns a sections array, but
+  // envelope consumers also want structured ProjectContext DTO data —
+  // so we re-fetch the legacy context shape for the data payload and
+  // attach smart-context sections in meta.
+  if (options.json) {
+    if (!result) {
+      emitJsonErrorEnvelope({
+        command: "context",
+        code: "NOT_FOUND",
+        message: `Project not found: ${project}`,
+        context: { project },
+      });
+      return { exitCode: 1 };
+    }
+    const ctx = await legacy.getProjectContext(project, { days: options.days });
+    emitJsonEnvelope({
+      command: "context",
+      kind: "context",
+      data: ctx ? toContextDto(ctx) : null,
+      meta: {
+        project,
+        days: options.days,
+        budget: options.budget,
+        cross_project: !!options.crossProject,
+        mode: "smart",
+        sections: result.sections.map((s) => ({ key: s.key, title: s.title })),
+      },
+    });
+    return { exitCode: 0 };
+  }
+
+  // Determine output mode (text mode)
   const outputMode: ContextOutputMode = options.format === "ai" ? "ai" :
-    options.json ? "json" :
     options.verbose ? "verbose" :
     options.quiet ? "quiet" :
     options.format === "detailed" ? "detailed" : "brief";
@@ -213,9 +295,7 @@ async function executeSmartContext(
   // Handle null result (project not found)
   if (!result) {
     const message = formatter.formatEmpty(project);
-    if (outputMode === "json") {
-      console.log(message);
-    } else if (outputMode !== "quiet" || message) {
+    if (outputMode !== "quiet" || message) {
       console.error(message);
     }
     return { exitCode: 1 };
@@ -260,22 +340,44 @@ async function executeLegacyContext(
   // Get project context
   const context = await contextService.getProjectContext(project, contextOptions);
 
-  // Determine output mode
+  // --json: envelope path (Codex HIGH-2 — every exit point routes here)
+  if (options.json) {
+    if (!context) {
+      emitJsonErrorEnvelope({
+        command: "context",
+        code: "NOT_FOUND",
+        message: `Project not found: ${project}`,
+        context: { project },
+      });
+      return { exitCode: 1 };
+    }
+    emitJsonEnvelope({
+      command: "context",
+      kind: "context",
+      data: toContextDto(context),
+      meta: {
+        project,
+        days: options.days,
+        cross_project: !!options.crossProject,
+        mode: "legacy",
+      },
+    });
+    return { exitCode: 0 };
+  }
+
+  // Determine output mode (text mode)
   let outputMode: ContextOutputMode = "brief";
-  if (options.json) outputMode = "json";
-  else if (options.verbose) outputMode = "verbose";
+  if (options.verbose) outputMode = "verbose";
   else if (options.quiet) outputMode = "quiet";
   else if (options.format === "detailed") outputMode = "detailed";
 
   const useColor = shouldUseColor();
   const formatter = createContextFormatter(outputMode, useColor);
 
-  // Handle null result (project not found)
+  // Handle null result (project not found) — text mode
   if (!context) {
     const message = formatter.formatEmpty(project);
-    if (outputMode === "json") {
-      console.log(message);
-    } else if (outputMode !== "quiet" || message) {
+    if (outputMode !== "quiet" || message) {
       console.error(message);
     }
     return { exitCode: 1 };
