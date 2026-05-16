@@ -1,7 +1,7 @@
 ---
 agent: gsd-planner
-updated: 2026-03-08
-entries: 45
+updated: 2026-03-21
+entries: 51
 ---
 
 - finding: "Large rename phases (375 occurrences across 59 files) need 3 sequential plans, not 2. Split by: (1) infrastructure foundation/paths, (2) identity rename, (3) external docs/stub."
@@ -273,3 +273,39 @@ entries: 45
   confidence: HIGH
   phase: "25-intelligence"
   date: "2026-03-08"
+
+- finding: "Thin delegation phases (external CLI tool integration) decompose into 2 plans: (1) domain port + infrastructure adapter with tests (Wave 1), (2) presentation wiring into existing commands (Wave 2). The key insight is that the --files flag short-circuits the entire normal search flow -- it does NOT initialize the memory database, does NOT call HybridSearchService. This means the delegation logic belongs BEFORE any database setup in the search command. Plan 1 is the hexagonal foundation (port + adapter), Plan 2 is the wiring (CLI flags + doctor check). No application layer service is needed because the delegation is thin enough to live in the presentation layer (just 'if --files, call QmdRunner, format output')."
+  source: "Phase 27, planning (external tool delegation decomposition)"
+  confidence: HIGH
+  phase: "27-qmd-integration"
+  date: "2026-03-18"
+
+- finding: "ALWAYS cross-reference CONTEXT.md assumptions against actual tool source code during research. Phase 27 CONTEXT.md assumed qmd has a --path flag, but qmd v1.1.0 uses collection-based indexing with no --path flag. Research discovered this by reading qmd's CLI parser source. The research corrected the invocation to 'qmd search <query> --json' (search all collections). Without this verification, the plan would have instructed the executor to use a nonexistent flag."
+  source: "Phase 27, planning (CONTEXT.md assumption verification)"
+  confidence: HIGH
+  phase: "27-qmd-integration"
+  date: "2026-03-18"
+
+- finding: "Ambient context / file-generation phases where all building blocks exist decompose into 2 plans: (1) domain port + config extension + infrastructure adapter (foundation -- port defines contract, config adds settings, adapter handles filesystem), (2) application orchestration service + sync command integration (wiring -- service composes existing SmartContextService with the new adapter, sync command calls it after memory file sync). The key insight is that the adapter (AutoMemoryWriter) belongs in Wave 1 alongside the port because it is pure filesystem operations with no dependencies beyond the port itself. The application service goes in Wave 2 because it needs both the port AND the SmartContextService (already available from Phase 25). This avoids the 3-wave decomposition used in composition phases -- the adapter is simple enough to bundle with the port."
+  source: "Phase 29, planning (ambient context decomposition)"
+  confidence: HIGH
+  phase: "29-ambient-context"
+  date: "2026-03-18"
+
+- finding: "When integrating a new post-sync step (like ambient context generation), use the same lazy dynamic import pattern used by the embedding pass in sync.ts. ALL dependencies (SmartContextService, SqliteProjectResolver, SqliteMemoryFileRepository, SqliteFrictionRepository, AutoMemoryWriter, AmbientContextService, createContextFormatter) are dynamically imported inside the function to avoid startup overhead for sync commands that don't generate context. The formatter is passed as a structural type (duck typing with formatSmartContext method) to maintain the hexagonal boundary -- the application service accepts a { formatSmartContext(result): string } dependency rather than importing AiContextFormatter from the presentation layer."
+  source: "Phase 29, planning (sync integration lazy import pattern)"
+  confidence: HIGH
+  phase: "29-ambient-context"
+  date: "2026-03-18"
+
+- finding: "Gap closure plans for test fixes decompose well into 2 plans by independence: (1) production code DI fixes + deterministic test fixes that touch src/ files, (2) integration test timeout/infrastructure fixes that touch tests/ files. Both can run in Wave 1 since they modify disjoint file sets. The key is that DI fixes (like making openInBrowser injectable) require both production code changes AND test updates in the same plan, while pure test fixes (timeouts, stale counts) are self-contained."
+  source: "Phase 28, gap closure planning"
+  confidence: HIGH
+  phase: "28-friction-universalization"
+  date: "2026-03-21"
+
+- finding: "For hardcoded count assertions in immutability tests (e.g., ErrorCode count), replace with Object.keys(X).length or Object.values(X) to make tests resilient to future additions. The test's purpose is verifying immutability/completeness, not a specific count. Dynamic counts test the same property without maintenance burden."
+  source: "Phase 28, gap closure planning (ErrorCode test resilience)"
+  confidence: HIGH
+  phase: "28-friction-universalization"
+  date: "2026-03-21"

@@ -1,7 +1,7 @@
 ---
 agent: gsd-phase-researcher
-updated: 2026-03-18
-entries: 30
+updated: 2026-03-19
+entries: 34
 ---
 
 - finding: "When researching package renames, always read every infrastructure file that constructs paths -- path definitions are often scattered across multiple modules. Grep for the old name is not sufficient; you need to categorize each reference as (a) tool identity, (b) filesystem path, (c) test data."
@@ -185,3 +185,27 @@ entries: 30
   confidence: HIGH
   phase: "27-qmd-integration"
   date: "2026-03-18"
+
+- finding: "For ambient context (Phase 29) -- Claude Code encodes project paths by replacing :\\ with --, \\ with -, / with -, and spaces with -. Case is preserved from the original path. However, Claude Code directories show inconsistent drive letter case (both C-- and c--). On case-insensitive Windows filesystems this is invisible, but tests or Linux CI environments would need case-insensitive matching. The existing ProjectPath value object already handles encoding but does not normalize case."
+  source: "Phase 29, Ambient Context"
+  confidence: HIGH
+  phase: "29-ambient-context"
+  date: "2026-03-18"
+
+- finding: "For phases that integrate into the sync pipeline (Phase 29 ambient context generation), the integration point is in sync.ts's executeSyncCommand() between memory file sync and embedding pass. The hook infrastructure (settings-manager, install command) does NOT need modification -- context generation runs inside the sync process, which the existing hook already triggers. The CONTEXT.md's architecture mapping suggesting changes to 'memory install' and 'sync hook integration' overstates the scope -- the hook already spawns sync, and sync is where the new code goes."
+  source: "Phase 29, Ambient Context"
+  confidence: HIGH
+  phase: "29-ambient-context"
+  date: "2026-03-18"
+
+- finding: "When a phase requires removing a SQL CHECK constraint from an existing SQLite table, ALTER TABLE cannot do it -- table recreation is required (CREATE new, INSERT...SELECT, DROP old, RENAME new). This is the standard SQLite pattern. Use explicit column lists in INSERT...SELECT to avoid column ordering mismatches when new columns are added. Combine all column additions with the constraint removal in a single table recreation to minimize migration complexity."
+  source: "Phase 28, Friction Universalization"
+  confidence: HIGH
+  phase: "28-friction-universalization"
+  date: "2026-03-19"
+
+- finding: "When generalizing a domain entity from a fixed union type to a dynamic string (FrictionCategory), the ripple effects extend to: (1) the Record<UnionType, number> stats aggregation type becomes Record<string, number>, (2) the dashboard formatter must iterate Object.keys() instead of hardcoded arrays, (3) the repository getStats() pre-populates from DB data only (no zero-fill of expected keys), (4) tests relying on fixed key presence must update. Map all four before implementing."
+  source: "Phase 28, Friction Universalization"
+  confidence: HIGH
+  phase: "28-friction-universalization"
+  date: "2026-03-19"

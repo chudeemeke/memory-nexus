@@ -1,7 +1,7 @@
 ---
 agent: gsd-plan-checker
-updated: 2026-03-08
-entries: 28
+updated: 2026-03-18
+entries: 6
 ---
 
 - finding: "Auto-migration on first run requires wiring in CLI entry point."
@@ -27,3 +27,15 @@ entries: 28
   confidence: HIGH
   phase: "25-intelligence"
   date: "2026-03-08"
+
+- finding: "When CONTEXT.md locked decision specifies a CLI flag invocation that research proves factually impossible (e.g., --path flag that does not exist in the target tool), plans that omit the impossible flag while honoring the design intent are compliant. The research doc must explicitly document the override to pass context compliance."
+  source: "Phase 27, Plans 27-01/27-02"
+  confidence: HIGH
+  phase: "27-qmd-integration"
+  date: "2026-03-18"
+
+- finding: "When plan action code omits an optional constructor dependency (e.g., getSessionSummary? in SmartContextDeps), verify the TypeScript signature before flagging as a blocker. Optional fields (?) are not compilation errors."
+  source: "Phase 29, Plan 29-02 Task 2"
+  confidence: HIGH
+  phase: "29-ambient-context"
+  date: "2026-03-18"

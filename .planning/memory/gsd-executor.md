@@ -1,8 +1,38 @@
 ---
 agent: gsd-executor
-updated: 2026-03-18
-entries: 67
+updated: 2026-03-22
+entries: 73
 ---
+
+- finding: "search.test.ts has multiple independent describe blocks with their own beforeEach/afterEach scopes. When adding temp DB setup, each describe that calls executeSearchCommand with a valid query needs its own temp DB variables. The 'error handling' describe at line ~1006 is separate from the 'executeSearchCommand' describe at line ~327."
+  source: "Phase 29.1, Plan 01, Task 2"
+  confidence: HIGH
+  phase: "29.1-test-determinism"
+  date: "2026-03-22"
+
+- finding: "SmartContextService constructor destructures deps into individual fields (projectResolver, memoryFileRepo, etc.), so this.deps does not exist. When adding optional deps like now?: () => Date, store as a private field with default in the constructor body, not via optional chaining on deps."
+  source: "Phase 28, Plan 06, Task 1"
+  confidence: HIGH
+  phase: "28-friction-universalization"
+  date: "2026-03-22"
+
+- finding: "FrictionService.list() calls findOpen() when no filters specified, but findOpen() has no filter params. When tool/category/sourceProject is specified without --all, must use findAll({ status: 'open', tool }) instead. This is a blocking issue (Rule 3) that surfaces when wiring CLI --tool to service."
+  source: "Phase 28, Plan 04, Task 1"
+  confidence: HIGH
+  phase: "28-friction-universalization"
+  date: "2026-03-21"
+
+- finding: "When adding optional parameters to formatter functions (e.g., patterns?: FrictionPattern[]), callers that don't pass the param still work due to TypeScript optional params. No existing tests break. The dashboard CLI handler must be updated to call detectPatterns() and pass results to both formatters."
+  source: "Phase 28, Plan 04, Task 2"
+  confidence: HIGH
+  phase: "28-friction-universalization"
+  date: "2026-03-21"
+
+- finding: "When changing getStats() byCategory from hardcoded Record to dynamic Record (only keys with data), downstream presentation code that iterates a hardcoded categories list still works but will not show zero-count categories. This is a presentation concern, not a repository bug."
+  source: "Phase 28, Plan 02, Task 1"
+  confidence: HIGH
+  phase: "28-friction-universalization"
+  date: "2026-03-21"
 
 - finding: "When mocking infrastructure module exports for testing CLI commands (e.g., isQmdAvailable, QmdRunner), use spyOn on the imported module object rather than mock.module. The pattern: import the module, spyOn the export, mockReturnValue/mockImplementation, restore in test. Works cleanly for both function and constructor mocks."
   source: "Phase 27, Plan 02, Task 1"
@@ -429,3 +459,9 @@ entries: 67
   confidence: HIGH
   phase: "29-ambient-context"
   date: "2026-03-18"
+
+- finding: "When adding new columns to an existing table via migration AND updating the CREATE TABLE constant with new indexes referencing those columns, the migration must run BEFORE the SCHEMA_SQL loop. Otherwise CREATE INDEX IF NOT EXISTS on the new column fails with 'no such column' on old databases where CREATE TABLE IF NOT EXISTS was skipped."
+  source: "Phase 28, Plan 01, Task 2"
+  confidence: HIGH
+  phase: "28-friction-universalization"
+  date: "2026-03-21"
