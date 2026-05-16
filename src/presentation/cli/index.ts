@@ -37,53 +37,40 @@ program
   .description("Cross-project context persistence for Claude Code sessions")
   .version(pkg.version);
 
-// Add sync command from module
-program.addCommand(createSyncCommand());
+// CLI-01: labeled help groups via Commander.js v14 .commandsGroup().
+// Do NOT enable program.configureHelp({ sortSubcommands: true }) — would
+// defeat the deliberate group ordering below.
 
-// Add search command from module
+// Query Commands — read surfaces (CLI-02 envelope consumers in Plan 02).
+program.commandsGroup("Query Commands:");
 program.addCommand(createSearchCommand());
-
-// Add list command from module
+program.addCommand(createContextCommand());
+program.addCommand(createShowCommand());
 program.addCommand(createListCommand());
-
-// Add stats command from module
+program.addCommand(createRelatedCommand());
 program.addCommand(createStatsCommand());
 
-// Add context command from module
-program.addCommand(createContextCommand());
+// Data Commands — sync, backfill, backup, maintenance.
+program.commandsGroup("Data Commands:");
+program.addCommand(createSyncCommand());
+program.addCommand(createBackfillCommand());
+program.addCommand(createExportCommand());
+program.addCommand(createImportCommand());
+program.addCommand(createPurgeCommand());
 
-// Add show command from module
-program.addCommand(createShowCommand());
-
-// Add browse command from module
-program.addCommand(createBrowseCommand());
-
-// Add related command from module
-program.addCommand(createRelatedCommand());
-
-// Hook management commands
+// System Commands — hooks, diagnostics, completion. `browse` lives here
+// per research §Open Q1 (interactive launcher, not a query surface).
+program.commandsGroup("System Commands:");
 program.addCommand(createInstallCommand());
 program.addCommand(createUninstallCommand());
 program.addCommand(createStatusCommand());
-
-// Diagnostic commands
 program.addCommand(createDoctorCommand());
-
-// Maintenance commands
-program.addCommand(createPurgeCommand());
-
-// Backup commands
-program.addCommand(createExportCommand());
-program.addCommand(createImportCommand());
-
-// Shell completion
 program.addCommand(createCompletionCommand());
+program.addCommand(createBrowseCommand());
 
-// Friction logging
+// Feedback Commands — friction logging.
+program.commandsGroup("Feedback Commands:");
 program.addCommand(createFrictionCommand());
-
-// Backfill (daily log generation from historical sessions)
-program.addCommand(createBackfillCommand());
 
 export { program };
 

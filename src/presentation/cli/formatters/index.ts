@@ -85,3 +85,20 @@ export {
   estimateTokens,
   formatForAi,
 } from "./ai-formatter.js";
+
+// CLI-02 foundation: shared envelope contract + emission helpers.
+// Re-exported here so per-command files import from the formatters barrel.
+export {
+  ENVELOPE_SCHEMA_VERSION,
+  QUERY_COMMAND_NAMES,
+  QUERY_RESULT_KINDS,
+  buildEnvelope,
+  buildErrorEnvelope,
+  emitJsonEnvelope,
+  emitJsonErrorEnvelope,
+  type QueryCommandName,
+  type QueryResultKind,
+  type EnvelopeScope,
+  type QueryResultEnvelope,
+  type QueryErrorEnvelope,
+} from "./envelope.js";
