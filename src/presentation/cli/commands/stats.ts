@@ -28,7 +28,12 @@ import {
   loadConfig,
 } from "../../../infrastructure/hooks/index.js";
 import { FileSystemSessionSource } from "../../../infrastructure/sources/index.js";
-import { formatError, formatErrorJson } from "../formatters/error-formatter.js";
+import { formatError } from "../formatters/error-formatter.js";
+import {
+  emitJsonEnvelope,
+  emitJsonErrorEnvelope,
+} from "../formatters/envelope.js";
+import { toStatsDto } from "../formatters/dto-helpers.js";
 
 /**
  * Options for the stats command.
@@ -121,7 +126,15 @@ export async function executeStatsCommand(
     // Parse project limit
     const projectLimit = parseInt(options.projects ?? "10", 10);
     if (isNaN(projectLimit) || projectLimit < 1) {
-      console.error("Error: Projects count must be a positive number");
+      if (options.json) {
+        emitJsonErrorEnvelope({
+          command: "stats",
+          code: "INVALID_ARGUMENT",
+          message: "Projects count must be a positive number",
+        });
+      } else {
+        console.error("Error: Projects count must be a positive number");
+      }
       return { exitCode: 1 };
     }
 
@@ -137,22 +150,38 @@ export async function executeStatsCommand(
       hooks: hooksSummary,
     };
 
-    // Determine output mode
+    // --json: envelope path (Codex HIGH-2). Precedence: --json wins
+    // over --format ai (text-only post-processing has no effect on
+    // envelope shape).
+    if (options.json) {
+      const endTime = performance.now();
+      emitJsonEnvelope({
+        command: "stats",
+        kind: "stats",
+        data: toStatsDto(stats),
+        meta: {
+          generated_at: new Date().toISOString(),
+          timing_ms: Math.round(endTime - startTime),
+        },
+      });
+      return { exitCode: 0 };
+    }
+
+    // Determine output mode (text mode)
     let outputMode: StatsOutputMode = "default";
-    if (options.json) outputMode = "json";
-    else if (options.verbose) outputMode = "verbose";
+    if (options.verbose) outputMode = "verbose";
     else if (options.quiet) outputMode = "quiet";
 
     const useColor = shouldUseColor();
     const formatter = createStatsFormatter(outputMode, useColor);
 
-    // Check for empty database
+    // Check for empty database (text mode)
     if (stats.totalSessions === 0) {
       console.log(formatter.formatEmpty());
       return { exitCode: 0 };
     }
 
-    // Format and output
+    // Format and output (text mode)
     const endTime = performance.now();
     let output = formatter.formatStats(stats, {
       executionTimeMs: Math.round(endTime - startTime),
@@ -174,7 +203,14 @@ export async function executeStatsCommand(
 
     // Format error based on output mode
     if (options.json) {
-      console.log(formatErrorJson(nexusError));
+      emitJsonErrorEnvelope({
+        command: "stats",
+        code: nexusError.code,
+        message: nexusError.message,
+        ...(nexusError.context !== undefined
+          ? { context: nexusError.context }
+          : {}),
+      });
     } else {
       console.error(formatError(nexusError));
     }

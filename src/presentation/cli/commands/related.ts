@@ -27,7 +27,12 @@ import {
 } from "../formatters/related-formatter.js";
 import { shouldUseColor } from "../formatters/color.js";
 import { formatForAi } from "../formatters/ai-formatter.js";
-import { formatError, formatErrorJson } from "../formatters/error-formatter.js";
+import { formatError } from "../formatters/error-formatter.js";
+import {
+  emitJsonEnvelope,
+  emitJsonErrorEnvelope,
+} from "../formatters/envelope.js";
+import { toRelatedDto } from "../formatters/dto-helpers.js";
 
 /**
  * Options for the related command.
@@ -153,12 +158,20 @@ export async function executeRelatedCommand(
       const anyTargetLinks = await linkRepo.findByTarget(entityType, id);
 
       if (anyLinks.length === 0 && anyTargetLinks.length === 0) {
-        // Could be empty table or just no links for this entity
-        const message = formatter.formatEmpty(id);
-        if (outputMode === "json") {
-          console.log(message);
-        } else if (outputMode !== "quiet" || message) {
-          console.error(message);
+        // Per Plan 32-02 Task 5: "no links" path emits error envelope
+        // with code NOT_FOUND for clearer semantics (vs data: [] + exit 1).
+        if (options.json) {
+          emitJsonErrorEnvelope({
+            command: "related",
+            code: "NOT_FOUND",
+            message: `No related items found for ${id}`,
+            context: { source_id: id, source_type: entityType },
+          });
+        } else {
+          const message = formatter.formatEmpty(id);
+          if (outputMode !== "quiet" || message) {
+            console.error(message);
+          }
         }
         return { exitCode: 1 };
       }
@@ -197,16 +210,41 @@ export async function executeRelatedCommand(
 
     // Handle empty result after filtering
     if (relatedSessions.length === 0) {
-      const message = formatter.formatEmpty(id);
-      if (outputMode === "json") {
-        console.log(message);
-      } else if (outputMode !== "quiet" || message) {
-        console.error(message);
+      if (options.json) {
+        emitJsonErrorEnvelope({
+          command: "related",
+          code: "NOT_FOUND",
+          message: `No related items found for ${id}`,
+          context: { source_id: id, source_type: entityType },
+        });
+      } else {
+        const message = formatter.formatEmpty(id);
+        if (outputMode !== "quiet" || message) {
+          console.error(message);
+        }
       }
       return { exitCode: 1 };
     }
 
-    // Format and output
+    // --json: envelope path (Codex HIGH-2). Precedence: --json wins
+    // over --format ai.
+    if (options.json) {
+      const endTime = performance.now();
+      emitJsonEnvelope({
+        command: "related",
+        kind: "related",
+        data: relatedSessions.map(toRelatedDto),
+        meta: {
+          source_id: id,
+          source_type: entityType,
+          count: relatedSessions.length,
+          timing_ms: Math.round(endTime - startTime),
+        },
+      });
+      return { exitCode: 0 };
+    }
+
+    // Format and output (text mode)
     const endTime = performance.now();
     const formatOptions: RelatedFormatOptions = {
       sourceId: id,
@@ -230,7 +268,14 @@ export async function executeRelatedCommand(
 
     // Format error based on output mode
     if (options.json) {
-      console.log(formatErrorJson(nexusError));
+      emitJsonErrorEnvelope({
+        command: "related",
+        code: nexusError.code,
+        message: nexusError.message,
+        ...(nexusError.context !== undefined
+          ? { context: nexusError.context }
+          : {}),
+      });
     } else {
       console.error(formatError(nexusError));
     }

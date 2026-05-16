@@ -102,9 +102,12 @@ describe("show --json envelope (Plan 32-02 CLI-02)", () => {
           { dbPath }
         )
       );
-      const parsedA = JSON.parse(stdoutA);
-      const parsedB = JSON.parse(stdoutB);
-      expect(parsedA).toEqual(parsedB);
+      const stripTiming = (s: string): unknown => {
+        const obj = JSON.parse(s);
+        if (obj.meta && "timing_ms" in obj.meta) delete obj.meta.timing_ms;
+        return obj;
+      };
+      expect(stripTiming(stdoutA)).toEqual(stripTiming(stdoutB));
     });
   });
 });

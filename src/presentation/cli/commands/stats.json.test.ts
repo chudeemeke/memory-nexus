@@ -100,7 +100,22 @@ describe("stats --json envelope (Plan 32-02 CLI-02)", () => {
       const { stdout: stdoutB } = await captureStreams(() =>
         executeStatsCommand({ json: true, format: "ai" }, { dbPath })
       );
-      expect(JSON.parse(stdoutA)).toEqual(JSON.parse(stdoutB));
+      // Strip non-deterministic fields:
+      //  - meta.timing_ms / meta.generated_at (per-call wall clock)
+      //  - data.databaseSizeBytes (SQLite checkpoints between calls
+      //    can grow the file size even with no schema changes)
+      const stripVolatile = (s: string): unknown => {
+        const obj = JSON.parse(s);
+        if (obj.meta) {
+          delete obj.meta.timing_ms;
+          delete obj.meta.generated_at;
+        }
+        if (obj.data) {
+          delete obj.data.databaseSizeBytes;
+        }
+        return obj;
+      };
+      expect(stripVolatile(stdoutA)).toEqual(stripVolatile(stdoutB));
     });
   });
 });

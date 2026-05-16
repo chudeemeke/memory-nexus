@@ -23,7 +23,12 @@ import {
 import { shouldUseColor } from "../formatters/color.js";
 import { formatForAi } from "../formatters/ai-formatter.js";
 import { parseDate, DateParseError } from "../parsers/date-parser.js";
-import { formatError, formatErrorJson } from "../formatters/error-formatter.js";
+import { formatError } from "../formatters/error-formatter.js";
+import {
+  emitJsonEnvelope,
+  emitJsonErrorEnvelope,
+} from "../formatters/envelope.js";
+import { toSessionListDto } from "../formatters/dto-helpers.js";
 
 /**
  * Options for the list command.
@@ -130,7 +135,15 @@ export async function executeListCommand(
   // Parse limit
   const limit = parseInt(options.limit ?? "20", 10);
   if (isNaN(limit) || limit < 1) {
-    console.error("Error: Limit must be a positive number");
+    if (options.json) {
+      emitJsonErrorEnvelope({
+        command: "list",
+        code: "INVALID_ARGUMENT",
+        message: "Limit must be a positive number",
+      });
+    } else {
+      console.error("Error: Limit must be a positive number");
+    }
     return { exitCode: 1 };
   }
 
@@ -149,7 +162,16 @@ export async function executeListCommand(
         sinceDate = parseDate(options.since);
       } catch (err) {
         if (err instanceof DateParseError) {
-          console.error(`Error: ${err.message}`);
+          if (options.json) {
+            emitJsonErrorEnvelope({
+              command: "list",
+              code: "INVALID_ARGUMENT",
+              message: err.message,
+              context: { flag: "since", value: options.since },
+            });
+          } else {
+            console.error(`Error: ${err.message}`);
+          }
           return { exitCode: 1 };
         }
         throw err;
@@ -160,7 +182,16 @@ export async function executeListCommand(
         beforeDate = parseDate(options.before);
       } catch (err) {
         if (err instanceof DateParseError) {
-          console.error(`Error: ${err.message}`);
+          if (options.json) {
+            emitJsonErrorEnvelope({
+              command: "list",
+              code: "INVALID_ARGUMENT",
+              message: err.message,
+              context: { flag: "before", value: options.before },
+            });
+          } else {
+            console.error(`Error: ${err.message}`);
+          }
           return { exitCode: 1 };
         }
         throw err;
@@ -184,26 +215,46 @@ export async function executeListCommand(
     // Get sessions
     const sessions = await sessionRepo.findFiltered(listOptions);
 
-    // Determine output mode
+    const filtersApplied = buildFiltersList(options);
+
+    // --json: envelope path (Codex HIGH-2 — every exit point routes here).
+    // Precedence: --json wins over --format ai (text-only post-processing
+    // has no effect on envelope shape).
+    if (options.json) {
+      const endTime = performance.now();
+      const data = sessions.map(toSessionListDto);
+      emitJsonEnvelope({
+        command: "list",
+        kind: "session",
+        data,
+        meta: {
+          filters_applied: filtersApplied,
+          count: data.length,
+          timing_ms: Math.round(endTime - startTime),
+        },
+      });
+      return { exitCode: 0 };
+    }
+
+    // Determine output mode (text mode)
     let outputMode: ListOutputMode = "default";
-    if (options.json) outputMode = "json";
-    else if (options.verbose) outputMode = "verbose";
+    if (options.verbose) outputMode = "verbose";
     else if (options.quiet) outputMode = "quiet";
 
     const useColor = shouldUseColor();
     const formatter = createListFormatter(outputMode, useColor);
 
-    // Check for empty result
+    // Check for empty result (text mode)
     if (sessions.length === 0) {
       console.log(formatter.formatEmpty());
       return { exitCode: 0 };
     }
 
-    // Format and output
+    // Format and output (text mode)
     const endTime = performance.now();
     const formatOptions: ListFormatOptions = {
       executionTimeMs: Math.round(endTime - startTime),
-      filtersApplied: buildFiltersList(options),
+      filtersApplied,
     };
     let output = formatter.formatSessions(sessions, formatOptions);
     if (options.format === "ai") {
@@ -223,7 +274,14 @@ export async function executeListCommand(
 
     // Format error based on output mode
     if (options.json) {
-      console.log(formatErrorJson(nexusError));
+      emitJsonErrorEnvelope({
+        command: "list",
+        code: nexusError.code,
+        message: nexusError.message,
+        ...(nexusError.context !== undefined
+          ? { context: nexusError.context }
+          : {}),
+      });
     } else {
       console.error(formatError(nexusError));
     }

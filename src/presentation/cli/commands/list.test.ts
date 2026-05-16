@@ -171,12 +171,20 @@ describe("executeListCommand error handling", () => {
     );
   });
 
-  it("outputs JSON error when --json flag is set with invalid limit", async () => {
+  it("outputs JSON error envelope when --json flag is set with invalid limit (Plan 32-02 HIGH-2)", async () => {
+    // Plan 32-02: validation errors in --json mode emit envelope to stdout
+    // (not text to stderr). CLI-02 industry pattern (gh, kubectl).
     const result = await executeListCommand({ limit: "invalid", json: true });
 
     expect(result.exitCode).toBe(1);
-    // Validation errors still use console.error
-    expect(consoleErrorSpy).toHaveBeenCalled();
+    expect(consoleLogSpy).toHaveBeenCalled();
+    const output = (consoleLogSpy.mock.calls as unknown[][])
+      .map((c) => String(c[0]))
+      .join("\n");
+    const parsed = JSON.parse(output);
+    expect(parsed.schema_version).toBe("1");
+    expect(parsed.command).toBe("list");
+    expect(parsed.error).toBeDefined();
   });
 
   it("returns consistent exit code 1 for all error types", async () => {
