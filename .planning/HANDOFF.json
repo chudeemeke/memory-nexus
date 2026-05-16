@@ -1,6 +1,6 @@
 {
   "version": "1.0",
-  "timestamp": "2026-05-14T00:00:00Z",
+  "timestamp": "2026-05-16T00:00:00Z",
   "context": "milestone",
   "phase": null,
   "phase_name": null,
@@ -24,7 +24,7 @@
   ],
   "next_session_pickup": {
     "primary_path": "v4.0 milestone resumes",
-    "first_action": "Phase 32 planning — `/gsd-plan-phase 32`. Existing scope: labeled help groups + uniform --json/--format flags. DO NOT widen.",
+    "first_action": "Phase 32 SHIPPED 2026-05-16. Next: pick Phase 32.5 (audit-recommended Surface Consolidation) OR 32.6 (TS Error Cleanup) OR 32.7 (Friction Dashboard + Envelope Adoption) via /gsd-plan-phase. See .planning/STATE.md notice block + memory/project_state.md for full state.",
     "sequence_after_phase_32": [
       "Phase 32.5 (NEW per audit A-prime): /gsd-plan-phase 32.5 — surface consolidation. Acceptance: audit §21 Phase 32.5 gates.",
       "Phase 33: /gsd-plan-phase 33 — MUST encode event-log SSOT requirement (plain-text canonical events; DB tables as DERIVED projection) per audit §19 item 4. Acceptance: audit §21 Phase 33 gates.",

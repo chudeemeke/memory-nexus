@@ -3,14 +3,15 @@ gsd_state_version: 1.0
 milestone: v4.0
 milestone_name: Intelligence Layer
 status: in_progress
-last_updated: "2026-05-14T00:00:00.000Z"
+last_updated: "2026-05-16T00:00:00.000Z"
 progress:
-  total_phases: 9
-  completed_phases: 2
-  total_plans: 6
-  completed_plans: 5
+  total_phases: 11
+  completed_phases: 3
+  total_plans: 9
+  completed_plans: 8
 ---
 
+> **PHASE 32 SHIPPED 2026-05-16** — merge commit `c844847` pushed to `origin/main` at `1b0bbc9`. The 'Current Position' section below was last edited 2026-05-14 (pre-Phase-32) and remains stale on Phase 32 details. For current state see `~/.claude/projects/...memory/project_state.md` or `SESSION_LOG.md`. Frontmatter counts updated 2026-05-16 (3/11 phases done; Phase 32.6 + 32.7 added by Phase 32 verifier).
 # State: @chude/memory (memory-nexus)
 
 ## Project Reference
