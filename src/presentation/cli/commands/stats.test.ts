@@ -89,15 +89,18 @@ describe("Stats Command", () => {
       expect(projectsOption?.defaultValue).toBe("10");
     });
 
-    it("has --format option with default and ai choice", () => {
+    // Phase 32 (CLI-03): normalization — choices include brief + ai;
+    // 'default' retained as deprecated alias. defaultValue is undefined.
+    it("has --format option with brief/ai/default choices and no defaultValue", () => {
       const command = createStatsCommand();
       const formatOption = command.options.find(
         (o) => o.long === "--format"
       );
       expect(formatOption).toBeDefined();
-      expect(formatOption?.argChoices).toContain("default");
+      expect(formatOption?.argChoices).toContain("brief");
       expect(formatOption?.argChoices).toContain("ai");
-      expect(formatOption?.defaultValue).toBe("default");
+      expect(formatOption?.argChoices).toContain("default");
+      expect(formatOption?.defaultValue).toBeUndefined();
     });
   });
 
@@ -341,11 +344,14 @@ describe("Stats Command", () => {
     let cli03TempDir: string;
     let cli03DbPath: string;
 
-    beforeEach(() => {
+    beforeEach(async () => {
       cli03TempDir = mkdtempSync(join(tmpdir(), "stats-cli03-"));
       cli03DbPath = join(cli03TempDir, "test.db");
       const { db } = initializeDatabase({ path: cli03DbPath });
       closeDatabase(db);
+      // Reset deprecation-warning once-keys for per-test isolation.
+      const helper = await import("./_helpers/deprecation-warning.js");
+      helper.resetFormatDeprecationWarningsForTesting();
     });
 
     afterEach(() => {

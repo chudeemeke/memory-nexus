@@ -105,15 +105,19 @@ describe("Search Command", () => {
       expect(quietOption).toBeDefined();
     });
 
-    it("has --format option with default and ai choice", () => {
+    // Phase 32 (CLI-03): normalization — choices include brief + ai;
+    // 'default' retained as deprecated alias. defaultValue is undefined
+    // (no .default() call) so the no-flag state means "current text default".
+    it("has --format option with brief/ai/default choices and no defaultValue", () => {
       const command = createSearchCommand();
       const formatOption = command.options.find(
         (o) => o.long === "--format"
       );
       expect(formatOption).toBeDefined();
-      expect(formatOption?.argChoices).toContain("default");
+      expect(formatOption?.argChoices).toContain("brief");
       expect(formatOption?.argChoices).toContain("ai");
-      expect(formatOption?.defaultValue).toBe("default");
+      expect(formatOption?.argChoices).toContain("default");
+      expect(formatOption?.defaultValue).toBeUndefined();
     });
   });
 
@@ -1462,11 +1466,14 @@ describe("Search Command", () => {
     let cli03TempDir: string;
     let cli03DbPath: string;
 
-    beforeEach(() => {
+    beforeEach(async () => {
       cli03TempDir = mkdtempSync(join(tmpdir(), "search-cli03-"));
       cli03DbPath = join(cli03TempDir, "test.db");
       const { db } = initializeDatabase({ path: cli03DbPath });
       closeDatabase(db);
+      // Reset deprecation-warning once-keys for per-test isolation.
+      const helper = await import("./_helpers/deprecation-warning.js");
+      helper.resetFormatDeprecationWarningsForTesting();
     });
 
     afterEach(() => {

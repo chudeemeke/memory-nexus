@@ -29,6 +29,7 @@ import {
   emitJsonErrorEnvelope,
 } from "../formatters/envelope.js";
 import { toShowSessionDto } from "../formatters/dto-helpers.js";
+import { emitFormatDeprecationWarning } from "./_helpers/deprecation-warning.js";
 import type { Session } from "../../../domain/entities/session.js";
 import type { ToolUse } from "../../../domain/entities/tool-use.js";
 import type { Database } from "bun:sqlite";
@@ -45,8 +46,13 @@ export interface ShowCommandOptions {
   quiet?: boolean;
   /** Show detailed tool inputs and outputs */
   tools?: boolean;
-  /** Output format: default or ai */
-  format?: "default" | "ai";
+  /**
+   * Output format. Phase 32 (CLI-03) normalized choices: `brief`,
+   * `ai`. `default` retained as deprecated alias (one-minor cadence;
+   * CHANGELOG documents removal). Undefined = no-flag default
+   * (backward compatible).
+   */
+  format?: "brief" | "ai" | "default";
 }
 
 /**
@@ -73,9 +79,11 @@ export function createShowCommand(): Command {
     .argument("<session-id>", "Session ID to display")
     .option("--json", "Output as JSON")
     .addOption(
-      new Option("--format <type>", "Output format")
-        .choices(["default", "ai"])
-        .default("default")
+      new Option(
+        "--format <type>",
+        "Output format: brief (single-line summary) or ai (AI-optimized text). 'default' accepted as deprecated alias.",
+      ).choices(["brief", "ai", "default"]),
+      // No .default() — undefined = current text default (backward compatible).
     )
     .addOption(
       new Option("-v, --verbose", "Show detailed output").conflicts("quiet")
@@ -92,12 +100,17 @@ export function createShowCommand(): Command {
 
 /**
  * Determine output mode from command options.
+ *
+ * Precedence (Phase 32 CLI-03):
+ *   --json > --tools > --quiet > --verbose > --format brief > default.
+ * 'default' alias falls through to the text default path.
  */
 function determineOutputMode(options: ShowCommandOptions): ShowOutputMode {
   if (options.json) return "json";
   if (options.tools) return "tools";
-  if (options.verbose) return "verbose";
   if (options.quiet) return "quiet";
+  if (options.verbose) return "verbose";
+  if (options.format === "brief") return "brief";
   return "default";
 }
 
@@ -149,6 +162,18 @@ export async function executeShowCommand(
   deps: ShowCommandDeps = {}
 ): Promise<CommandResult> {
   const startTime = performance.now();
+
+  // Phase 32 (CLI-03): deprecation warning for --format default
+  // (alias retained for one-minor cadence; behavior preserved).
+  if (options.format === "default") {
+    emitFormatDeprecationWarning({
+      command: "show",
+      alias: "default",
+      replacement: "Omit --format for default behavior, or use --format brief / --format ai.",
+      json: options.json,
+    });
+  }
+
   const dbPath = deps.dbPath ?? getDefaultDbPath();
   const { db } = initializeDatabase({ path: dbPath });
 

@@ -33,6 +33,7 @@ import {
   emitJsonErrorEnvelope,
 } from "../formatters/envelope.js";
 import { toRelatedDto } from "../formatters/dto-helpers.js";
+import { emitFormatDeprecationWarning } from "./_helpers/deprecation-warning.js";
 
 /**
  * Options for the related command.
@@ -44,8 +45,13 @@ export interface RelatedCommandOptions {
   hops?: number;
   /** Entity type of the ID: session, message, or topic */
   type?: "session" | "message" | "topic";
-  /** Output format: brief, detailed, or ai */
-  format?: "brief" | "detailed" | "ai";
+  /**
+   * Output format. Phase 32 (CLI-03) normalized choices: `brief`,
+   * `ai`. `detailed` retained as deprecated alias (one-minor cadence;
+   * CHANGELOG documents removal). Undefined = no-flag default
+   * (existing brief behavior preserved for backward compatibility).
+   */
+  format?: "brief" | "ai" | "detailed";
   /** Output as JSON */
   json?: boolean;
   /** Show detailed output with timing */
@@ -89,9 +95,12 @@ export function createRelatedCommand(): Command {
         .default("session")
     )
     .addOption(
-      new Option("--format <type>", "Output format")
-        .choices(["brief", "detailed", "ai"])
-        .default("brief")
+      new Option(
+        "--format <type>",
+        "Output format: brief, ai. 'detailed' accepted as deprecated alias.",
+      ).choices(["brief", "ai", "detailed"]),
+      // No .default() — undefined preserves existing implicit brief behavior
+      // via the action handler; explicit brief routes to BriefRelatedFormatter.
     )
     .option("--json", "Output as JSON")
     .addOption(
@@ -123,6 +132,17 @@ export async function executeRelatedCommand(
   options: RelatedCommandOptions
 ): Promise<CommandResult> {
   const startTime = performance.now();
+
+  // Phase 32 (CLI-03): deprecation warning for --format detailed
+  // (alias retained for one-minor cadence; behavior preserved).
+  if (options.format === "detailed") {
+    emitFormatDeprecationWarning({
+      command: "related",
+      alias: "detailed",
+      replacement: "Use --format brief or --format ai.",
+      json: options.json,
+    });
+  }
 
   const dbPath = options.dbPath ?? getDefaultDbPath();
   const { db } = initializeDatabase({ path: dbPath });

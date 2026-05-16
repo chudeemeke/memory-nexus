@@ -44,6 +44,7 @@ import {
   emitJsonErrorEnvelope,
 } from "../formatters/envelope.js";
 import { toContextDto } from "../formatters/dto-helpers.js";
+import { emitFormatDeprecationWarning } from "./_helpers/deprecation-warning.js";
 
 /**
  * Options for the context command.
@@ -51,8 +52,13 @@ import { toContextDto } from "../formatters/dto-helpers.js";
 export interface ContextCommandOptions {
   /** Sessions from last N days (includes today) */
   days?: number;
-  /** Output format: brief, detailed, or ai */
-  format?: "brief" | "detailed" | "ai";
+  /**
+   * Output format. Phase 32 (CLI-03) normalized choices: `brief`,
+   * `ai`. `detailed` retained as deprecated alias (one-minor cadence;
+   * CHANGELOG documents removal). Undefined = no-flag default
+   * (existing brief behavior preserved for backward compatibility).
+   */
+  format?: "brief" | "ai" | "detailed";
   /** Maximum token budget for smart context */
   budget?: number;
   /** Include cross-project learnings and decisions */
@@ -85,9 +91,12 @@ export function createContextCommand(): Command {
         })
     )
     .addOption(
-      new Option("--format <type>", "Output format")
-        .choices(["brief", "detailed", "ai"])
-        .default("brief")
+      new Option(
+        "--format <type>",
+        "Output format: brief, ai. 'detailed' accepted as deprecated alias.",
+      ).choices(["brief", "ai", "detailed"]),
+      // No .default() — undefined preserves existing implicit brief behavior
+      // via the action handler. Phase 32 (CLI-03) normalization.
     )
     .addOption(
       new Option("--budget <tokens>", "Maximum token budget for context")
@@ -156,6 +165,17 @@ export async function executeContextCommand(
   options: ContextCommandOptions
 ): Promise<CommandResult> {
   const startTime = performance.now();
+
+  // Phase 32 (CLI-03): deprecation warning for --format detailed
+  // (alias retained for one-minor cadence; behavior preserved).
+  if (options.format === "detailed") {
+    emitFormatDeprecationWarning({
+      command: "context",
+      alias: "detailed",
+      replacement: "Use --format brief or --format ai.",
+      json: options.json,
+    });
+  }
 
   const dbPath = options.dbPath ?? getDefaultDbPath();
   const { db } = initializeDatabase({ path: dbPath });

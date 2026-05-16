@@ -151,13 +151,16 @@ describe("Show Command", () => {
       expect(optionNames).toContain("--tools");
     });
 
-    test("has --format option with default and ai choice", () => {
+    // Phase 32 (CLI-03): normalization — choices include brief + ai;
+    // 'default' retained as deprecated alias. defaultValue is undefined.
+    test("has --format option with brief/ai/default choices and no defaultValue", () => {
       const cmd = createShowCommand();
       const formatOpt = cmd.options.find(o => o.long === "--format");
       expect(formatOpt).toBeDefined();
-      expect(formatOpt?.argChoices).toContain("default");
+      expect(formatOpt?.argChoices).toContain("brief");
       expect(formatOpt?.argChoices).toContain("ai");
-      expect(formatOpt?.defaultValue).toBe("default");
+      expect(formatOpt?.argChoices).toContain("default");
+      expect(formatOpt?.defaultValue).toBeUndefined();
     });
   });
 
@@ -349,6 +352,12 @@ describe("Show Command", () => {
   });
 
   describe("CLI-03: --format normalization (Phase 32)", () => {
+    beforeEach(async () => {
+      // Reset deprecation-warning once-keys for per-test isolation.
+      const helper = await import("./_helpers/deprecation-warning.js");
+      helper.resetFormatDeprecationWarningsForTesting();
+    });
+
     afterEach(() => {
       restoreConsoleMock();
     });

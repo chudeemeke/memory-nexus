@@ -42,6 +42,7 @@ import {
   toSearchResultDto,
   toFileResultDto,
 } from "../formatters/dto-helpers.js";
+import { emitFormatDeprecationWarning } from "./_helpers/deprecation-warning.js";
 import { QmdRunner, isQmdAvailable } from "../../../infrastructure/external/index.js";
 import type { QmdSearchResult } from "../../../domain/ports/services.js";
 
@@ -79,8 +80,13 @@ export interface SearchCommandOptions {
   vector?: boolean;
   /** Set to false via --no-decay to disable temporal decay scoring */
   decay?: boolean;
-  /** Output format: default or ai */
-  format?: "default" | "ai";
+  /**
+   * Output format. Phase 32 (CLI-03) normalized choices: `brief`,
+   * `ai`. `default` retained as deprecated alias (one-minor cadence;
+   * CHANGELOG documents removal). Undefined = no-flag default text
+   * output (backward compatible).
+   */
+  format?: "brief" | "ai" | "default";
   /** Search markdown files via qmd (requires qmd installed) */
   files?: boolean;
   /** Override database path (for testing) */
@@ -160,9 +166,12 @@ export function createSearchCommand(): Command {
     )
     .option("--files", "Search markdown files via qmd (requires qmd installed)")
     .addOption(
-      new Option("--format <type>", "Output format")
-        .choices(["default", "ai"])
-        .default("default")
+      new Option(
+        "--format <type>",
+        "Output format: brief (single-line per record) or ai (AI-optimized text). 'default' accepted as deprecated alias.",
+      ).choices(["brief", "ai", "default"]),
+      // No .default() — undefined = current text default (backward compatible).
+      // 'default' is retained as a deprecated alias for one minor; CHANGELOG documents removal.
     )
     .addOption(
       new Option("-v, --verbose", "Show detailed output with execution info")
@@ -193,6 +202,18 @@ export async function executeSearchCommand(
   options: SearchCommandOptions
 ): Promise<CommandResult> {
   const startTime = performance.now();
+
+  // Phase 32 (CLI-03): emit one-shot stderr deprecation warning for
+  // --format default. Suppressed in --json mode. Behavior is
+  // preserved (alias falls through to the default text path below).
+  if (options.format === "default") {
+    emitFormatDeprecationWarning({
+      command: "search",
+      alias: "default",
+      replacement: "Omit --format for default behavior, or use --format brief / --format ai.",
+      json: options.json,
+    });
+  }
 
   // Validate query
   let searchQuery: SearchQuery;
@@ -352,11 +373,14 @@ export async function executeSearchCommand(
     // Get search metadata for output formatting
     const searchMeta = searchService.getLastSearchMeta();
 
-    // Determine output mode
+    // Determine output mode.
+    // Precedence (Phase 32 CLI-03): --json > --quiet > --verbose > --format brief > default.
+    // 'default' alias falls through to text default path (Phase 32 deprecation).
     let outputMode: OutputMode = "default";
     if (options.json) outputMode = "json";
-    else if (options.verbose) outputMode = "verbose";
     else if (options.quiet) outputMode = "quiet";
+    else if (options.verbose) outputMode = "verbose";
+    else if (options.format === "brief") outputMode = "brief";
 
     const useColor = shouldUseColor();
     const formatter = createOutputFormatter(outputMode, useColor);

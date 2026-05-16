@@ -139,10 +139,12 @@ describe("Context Command --format Choices", () => {
     expect(formatOpt?.argChoices).toContain("ai");
   });
 
-  it("should default to brief", () => {
+  // Phase 32 (CLI-03): normalization removed .default("brief"). Undefined
+  // preserves existing implicit brief behavior via the action handler.
+  it("should not set defaultValue (Phase 32 CLI-03 normalization)", () => {
     const cmd = createContextCommand();
     const formatOpt = cmd.options.find((o) => o.long === "--format");
-    expect(formatOpt?.defaultValue).toBe("brief");
+    expect(formatOpt?.defaultValue).toBeUndefined();
   });
 });
 
@@ -289,13 +291,16 @@ describe("context: CLI-03: --format normalization (Phase 32)", () => {
   let cli03TempDir: string;
   let cli03DbPath: string;
 
-  beforeEach(() => {
+  beforeEach(async () => {
     consoleLogSpy = spyOn(console, "log").mockImplementation(() => {});
     consoleErrorSpy = spyOn(console, "error").mockImplementation(() => {});
     cli03TempDir = mkdtempSync(join(tmpdir(), "context-cli03-"));
     cli03DbPath = join(cli03TempDir, "test.db");
     const { db } = initializeDatabase({ path: cli03DbPath });
     closeDatabase(db);
+    // Reset deprecation-warning once-keys for per-test isolation.
+    const helper = await import("./_helpers/deprecation-warning.js");
+    helper.resetFormatDeprecationWarningsForTesting();
   });
 
   afterEach(() => {

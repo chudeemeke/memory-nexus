@@ -62,16 +62,18 @@ describe("related command options", () => {
     expect(typeOpt?.defaultValue).toBe("session");
   });
 
-  it("should have --format option with choices including ai", () => {
+  // Phase 32 (CLI-03): normalization — choices include brief + ai;
+  // 'detailed' retained as deprecated alias. defaultValue is undefined.
+  it("should have --format option with brief/ai/detailed choices and no defaultValue", () => {
     const command = createRelatedCommand();
     const options = command.options;
 
     const formatOpt = options.find(o => o.long === "--format");
     expect(formatOpt).toBeDefined();
     expect(formatOpt?.argChoices).toContain("brief");
-    expect(formatOpt?.argChoices).toContain("detailed");
     expect(formatOpt?.argChoices).toContain("ai");
-    expect(formatOpt?.defaultValue).toBe("brief");
+    expect(formatOpt?.argChoices).toContain("detailed");
+    expect(formatOpt?.defaultValue).toBeUndefined();
   });
 
   it("should have --json option", () => {
@@ -260,13 +262,16 @@ describe("related: CLI-03: --format normalization (Phase 32)", () => {
   let cli03TempDir: string;
   let cli03DbPath: string;
 
-  beforeEach(() => {
+  beforeEach(async () => {
     consoleLogSpy = spyOn(console, "log").mockImplementation(() => {});
     consoleErrorSpy = spyOn(console, "error").mockImplementation(() => {});
     cli03TempDir = mkdtempSync(join(tmpdir(), "related-cli03-"));
     cli03DbPath = join(cli03TempDir, "test.db");
     const { db } = initializeDatabase({ path: cli03DbPath });
     closeDatabase(db);
+    // Reset deprecation-warning once-keys for per-test isolation.
+    const helper = await import("./_helpers/deprecation-warning.js");
+    helper.resetFormatDeprecationWarningsForTesting();
   });
 
   afterEach(() => {

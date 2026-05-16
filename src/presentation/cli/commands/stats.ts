@@ -34,6 +34,7 @@ import {
   emitJsonErrorEnvelope,
 } from "../formatters/envelope.js";
 import { toStatsDto } from "../formatters/dto-helpers.js";
+import { emitFormatDeprecationWarning } from "./_helpers/deprecation-warning.js";
 
 /**
  * Options for the stats command.
@@ -47,8 +48,14 @@ export interface StatsCommandOptions {
   quiet?: boolean;
   /** Number of projects to show in breakdown (as string, parsed to integer) */
   projects?: string;
-  /** Output format: default or ai */
-  format?: "default" | "ai";
+  /**
+   * Output format. Phase 32 (CLI-03) normalized choices: `brief`,
+   * `ai`. `default` retained as deprecated alias (one-minor cadence;
+   * CHANGELOG documents removal). Undefined = no-flag default
+   * (backward compatible). `brief` produces top-line counters only
+   * (Pitfall 4 Option A, <=5 lines per W5).
+   */
+  format?: "brief" | "ai" | "default";
 }
 
 /**
@@ -76,9 +83,11 @@ export function createStatsCommand(): Command {
     .description("Show database statistics")
     .option("--json", "Output as JSON")
     .addOption(
-      new Option("--format <type>", "Output format")
-        .choices(["default", "ai"])
-        .default("default")
+      new Option(
+        "--format <type>",
+        "Output format: brief (top-line counters) or ai (AI-optimized text). 'default' accepted as deprecated alias.",
+      ).choices(["brief", "ai", "default"]),
+      // No .default() — undefined = current text default (backward compatible).
     )
     .addOption(
       new Option("-v, --verbose", "Show detailed output with timing").conflicts(
@@ -113,6 +122,17 @@ export async function executeStatsCommand(
   deps: StatsCommandDeps = {}
 ): Promise<CommandResult> {
   const startTime = performance.now();
+
+  // Phase 32 (CLI-03): deprecation warning for --format default
+  // (alias retained for one-minor cadence; behavior preserved).
+  if (options.format === "default") {
+    emitFormatDeprecationWarning({
+      command: "stats",
+      alias: "default",
+      replacement: "Omit --format for default behavior, or use --format brief / --format ai.",
+      json: options.json,
+    });
+  }
 
   // Resolve DB path (deps seam takes precedence over production default).
   // Parity with show/context/related/search (per Codex HIGH-3).
@@ -167,10 +187,13 @@ export async function executeStatsCommand(
       return { exitCode: 0 };
     }
 
-    // Determine output mode (text mode)
+    // Determine output mode (text mode).
+    // Precedence (Phase 32 CLI-03): --quiet > --verbose > --format brief > default.
+    // 'default' alias falls through to the text default path.
     let outputMode: StatsOutputMode = "default";
-    if (options.verbose) outputMode = "verbose";
-    else if (options.quiet) outputMode = "quiet";
+    if (options.quiet) outputMode = "quiet";
+    else if (options.verbose) outputMode = "verbose";
+    else if (options.format === "brief") outputMode = "brief";
 
     const useColor = shouldUseColor();
     const formatter = createStatsFormatter(outputMode, useColor);
