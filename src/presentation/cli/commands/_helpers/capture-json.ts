@@ -41,11 +41,12 @@ export async function captureStreams<R extends { exitCode?: number } | undefined
     stderrChunks.push(args.map((a) => (typeof a === "string" ? a : String(a))).join(" "));
   try {
     const result = await fn();
-    return {
+    const out: CapturedStreams = {
       stdout: stdoutChunks.join("\n"),
       stderr: stderrChunks.join("\n"),
-      exitCode: result?.exitCode,
     };
+    if (result?.exitCode !== undefined) out.exitCode = result.exitCode;
+    return out;
   } finally {
     console.log = log;
     console.error = err;
