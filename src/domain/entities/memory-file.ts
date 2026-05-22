@@ -30,21 +30,21 @@ const VALID_FILE_TYPES: readonly MemoryFileType[] = [
 const CONTENT_HASH_PATTERN = /^[a-f0-9]{64}$/;
 
 interface MemoryFileParams {
-  id?: number;
+  id?: number | undefined;
   filePath: string;
   fileType: MemoryFileType;
-  projectEncoded?: string;
+  projectEncoded?: string | undefined;
   content: string;
   contentHash: string;
   lastIndexedAt: Date;
-  createdAt?: Date;
+  createdAt?: Date | undefined;
 }
 
 export class MemoryFile {
-  private readonly _id?: number;
+  private readonly _id?: number | undefined;
   private readonly _filePath: string;
   private readonly _fileType: MemoryFileType;
-  private readonly _projectEncoded?: string;
+  private readonly _projectEncoded?: string | undefined;
   private readonly _content: string;
   private readonly _contentHash: string;
   private readonly _lastIndexedAt: Date;

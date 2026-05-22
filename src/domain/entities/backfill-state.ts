@@ -14,8 +14,8 @@ interface BackfillStateParams {
     sessionId: string;
     backfilledAt: Date;
     dailyLogPath: string;
-    success?: boolean;
-    errorMessage?: string;
+    success?: boolean | undefined;
+    errorMessage?: string | undefined;
 }
 
 export class BackfillState {
@@ -23,7 +23,7 @@ export class BackfillState {
     private readonly _backfilledAt: Date;
     private readonly _dailyLogPath: string;
     private readonly _success: boolean;
-    private readonly _errorMessage?: string;
+    private readonly _errorMessage?: string | undefined;
 
     private constructor(params: BackfillStateParams) {
         this._sessionId = params.sessionId;

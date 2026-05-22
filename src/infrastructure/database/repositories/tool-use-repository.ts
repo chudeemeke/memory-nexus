@@ -51,15 +51,7 @@ export class SqliteToolUseRepository implements IToolUseRepository {
     private readonly db: Database;
     private readonly findByIdStmt: Statement<ToolUseRow, [string]>;
     private readonly findBySessionStmt: Statement<ToolUseRow, [string]>;
-    private readonly insertStmt: Statement<unknown, {
-        $id: string;
-        $session_id: string;
-        $name: string;
-        $input: string;
-        $timestamp: string;
-        $status: string;
-        $result: string | null;
-    }>;
+    private readonly insertStmt: Statement;
 
     constructor(db: Database) {
         this.db = db;

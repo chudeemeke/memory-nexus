@@ -183,7 +183,7 @@ export class EmbeddingService {
             // Store results with both hash and human-readable model name
             const items: EmbeddingBatchItem[] = batch.map((msg, i) => ({
                 rowid: msg.rowid,
-                embedding: results[i].embedding,
+                embedding: results[i]!.embedding,
             }));
             this.repository.storeBatch(items, this.modelHash, this.modelName);
 

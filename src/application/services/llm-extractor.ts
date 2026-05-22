@@ -118,7 +118,7 @@ export class LlmExtractor {
     // The actual LLM call is made by the hook runner's context.
 
     // The prompt is available for use by the calling context
-    const _prompt = LlmExtractor.createExtractionPrompt(messages);
+    LlmExtractor.createExtractionPrompt(messages);
 
     // Return empty result - actual extraction happens in hook context
     // where Claude can process the prompt
@@ -193,12 +193,12 @@ Extract the entities and summary from the session above. Output only valid JSON.
    * Validates and clamps confidence scores to 0-1 range.
    *
    * @param response Raw LLM response text
-   * @param sessionId Session ID for context (not used in entity creation)
+   * @param _sessionId Session ID for context (not used in entity creation)
    * @returns Extraction result with parsed entities
    */
   static parseExtractionResponse(
     response: string,
-    sessionId: string
+    _sessionId: string
   ): ExtractionResult {
     const emptyResult: ExtractionResult = {
       topics: [],
@@ -216,7 +216,7 @@ Extract the entities and summary from the session above. Output only valid JSON.
 
     // Check for markdown code block
     const codeBlockMatch = jsonStr.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
-    if (codeBlockMatch) {
+    if (codeBlockMatch && codeBlockMatch[1]) {
       jsonStr = codeBlockMatch[1].trim();
     }
 

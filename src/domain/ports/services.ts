@@ -19,22 +19,22 @@ import type { MessageRole } from "../entities/message.js";
  */
 export interface SearchOptions {
   /** Maximum number of results to return */
-  limit?: number;
+  limit?: number | undefined;
 
   /** Filter results to a specific project name (case-insensitive substring match) */
-  projectFilter?: string;
+  projectFilter?: string | undefined;
 
   /** Filter by message role (user or assistant). Can be single role or array of roles. */
-  roleFilter?: MessageRole | MessageRole[];
+  roleFilter?: MessageRole | MessageRole[] | undefined;
 
   /** Only include results after this date */
-  sinceDate?: Date;
+  sinceDate?: Date | undefined;
 
   /** Only include results before this date */
-  beforeDate?: Date;
+  beforeDate?: Date | undefined;
 
   /** Filter results to a specific session ID */
-  sessionFilter?: string;
+  sessionFilter?: string | undefined;
 }
 
 /** Search mode for hybrid search */
@@ -45,9 +45,9 @@ export type SearchMode = "auto" | "fts" | "vector" | "hybrid";
  */
 export interface HybridSearchOptions extends SearchOptions {
   /** Search mode selection. Default: 'auto' */
-  mode?: SearchMode;
+  mode?: SearchMode | undefined;
   /** Disable temporal decay scoring for this search */
-  noDecay?: boolean;
+  noDecay?: boolean | undefined;
 }
 
 /**

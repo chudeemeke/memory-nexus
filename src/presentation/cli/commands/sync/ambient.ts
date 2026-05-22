@@ -31,7 +31,7 @@ export async function runAmbientContextGeneration(
     let config: { ambientContext: { enabled: boolean; budget: number } };
     let autoMemoryDir: string;
     let projectName: string;
-    let ambientService: { generateAmbientContext: (opts: any) => Promise<{ success: boolean; contextTokens?: number }> };
+    let ambientService: { generateAmbientContext: (opts: any) => Promise<{ success: boolean; contextTokens?: number; reason?: string }> };
 
     if (deps) {
       // Testing path: use injected deps

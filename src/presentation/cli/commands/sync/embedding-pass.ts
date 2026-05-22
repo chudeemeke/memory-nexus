@@ -79,7 +79,7 @@ export async function runEmbeddingPass(
   }
 
   // Initialize provider (triggers model download on first run)
-  const downloadHandler = createModelDownloadHandler({ quiet: options.quiet });
+  const downloadHandler = createModelDownloadHandler({ quiet: !!options.quiet });
   await provider.initialize(downloadHandler);
 
   // Calculate how many messages need embedding
@@ -94,7 +94,7 @@ export async function runEmbeddingPass(
   }
 
   // Run embedding pass with progress
-  const embeddingReporter = createEmbeddingProgressReporter({ quiet: options.quiet });
+  const embeddingReporter = createEmbeddingProgressReporter({ quiet: !!options.quiet });
   embeddingReporter.start(totalToEmbed);
 
   try {

@@ -11,10 +11,14 @@
  */
 
 import type { Database } from "bun:sqlite";
-import type { IEmbeddingRepository } from "../../../domain/ports/repositories.js";
+import type {
+    IEmbeddingRepository,
+    UnembeddedMessage,
+    EmbeddingBatchItem,
+} from "../../../domain/ports/repositories.js";
 
 // Re-export domain types so existing infrastructure consumers don't break
-export type { UnembeddedMessage, EmbeddingBatchItem } from "../../../domain/ports/repositories.js";
+export type { UnembeddedMessage, EmbeddingBatchItem };
 
 /**
  * A vector KNN search result row.

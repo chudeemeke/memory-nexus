@@ -39,7 +39,7 @@ export class MemoryError extends Error {
   /**
    * Optional context with additional error details.
    */
-  readonly context?: ErrorContext;
+  readonly context?: ErrorContext | undefined;
 
   /**
    * Create a new MemoryError.
@@ -48,7 +48,7 @@ export class MemoryError extends Error {
    * @param message Human-readable error message
    * @param context Optional additional context (file paths, line numbers, etc.)
    */
-  constructor(code: ErrorCodeType, message: string, context?: ErrorContext) {
+  constructor(code: ErrorCodeType, message: string, context?: ErrorContext | undefined) {
     super(message);
     this.name = "MemoryError";
     this.code = code;

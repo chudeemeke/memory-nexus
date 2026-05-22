@@ -55,7 +55,7 @@ export class SqliteMessageRepository implements IMessageRepository {
     private readonly findByIdStmt: Statement<MessageRow, [string]>;
     private readonly findBySessionStmt: Statement<MessageRow, [string]>;
     private readonly existsStmt: Statement<{ id: string } | null, [string]>;
-    private readonly insertStmt: Statement<unknown, Record<string, unknown>>;
+    private readonly insertStmt: Statement<any, any>;
 
     /**
      * Create a new SqliteMessageRepository

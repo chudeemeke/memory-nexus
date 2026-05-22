@@ -109,7 +109,7 @@ export interface MemoryFileInfo {
   /** Classified file type */
   fileType: MemoryFileType;
   /** Encoded project path, or undefined for global files */
-  projectEncoded?: string;
+  projectEncoded?: string | undefined;
   /** SHA-256 hash of file content */
   contentHash: string;
   /** Full file content */

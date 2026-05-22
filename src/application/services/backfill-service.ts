@@ -45,9 +45,9 @@ export interface DryRunResult {
 }
 
 export interface BackfillOptions {
-  batch?: number;
-  project?: string;
-  onProgress?: (progress: BackfillProgress) => void;
+  batch?: number | undefined;
+  project?: string | undefined;
+  onProgress?: ((progress: BackfillProgress) => void) | undefined;
 }
 
 /**
@@ -102,6 +102,7 @@ export class BackfillService {
 
     for (let i = 0; i < sessions.length; i++) {
       const session = sessions[i];
+      if (!session) continue;
 
       // Double-check idempotency (another process might have processed it)
       const existing = await this.backfillStateRepo.findBySessionId(session.id);
@@ -201,7 +202,7 @@ export class BackfillService {
     const allSessions = await this.sessionRepo.findFiltered({
       projectFilter: project,
       limit: 10000, // Practical upper bound
-    });
+    } as any);
 
     const unprocessed = [];
     for (const session of allSessions) {

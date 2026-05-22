@@ -23,7 +23,7 @@ import {
 import {
     executeFrictionCommand,
     type FrictionExecuteOptions,
-} from "../../../../src/presentation/cli/commands/friction.js";
+} from "../../../../src/presentation/cli/commands/friction/index.js";
 
 // Capture console output
 let capturedStdout: string[] = [];

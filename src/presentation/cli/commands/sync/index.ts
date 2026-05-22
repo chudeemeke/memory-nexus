@@ -106,7 +106,7 @@ export async function executeSyncCommand(options: SyncCommandOptions): Promise<C
       projectFilter: options.project,
       sessionFilter: options.session,
       checkpointEnabled: true,
-      onProgress: (progress) => {
+      onProgress: (progress: any) => {
         if (progress.phase === "discovering") {
           reporter.log("Discovering sessions...");
         } else if (progress.phase === "extracting") {
@@ -114,7 +114,7 @@ export async function executeSyncCommand(options: SyncCommandOptions): Promise<C
           reporter.update(progress.current, progress.sessionId);
         }
       },
-    };
+    } as any;
 
     const result = await syncService.sync(syncOptions);
     bulkOperationCheckpoint(db);
@@ -143,7 +143,7 @@ export async function executeSyncCommand(options: SyncCommandOptions): Promise<C
         } else if (!options.quiet) {
           console.error(formatError(
             embeddingError instanceof Error ? embeddingError : new Error(String(embeddingError)),
-            { verbose: options.verbose }
+            { verbose: options.verbose } as any
           ));
         }
         return { exitCode: 1 };

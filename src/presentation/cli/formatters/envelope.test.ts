@@ -22,9 +22,9 @@ import {
 
 describe("envelope (CLI-02 foundation)", () => {
   describe("runtime tuples (HIGH-1)", () => {
-    test("QUERY_COMMAND_NAMES is an array of strings with 6 entries", () => {
+    test("QUERY_COMMAND_NAMES is an array of strings with 7 entries", () => {
       expect(Array.isArray(QUERY_COMMAND_NAMES)).toBe(true);
-      expect(QUERY_COMMAND_NAMES.length).toBe(6);
+      expect(QUERY_COMMAND_NAMES.length).toBe(7);
       for (const name of QUERY_COMMAND_NAMES) {
         expect(typeof name).toBe("string");
       }
@@ -52,6 +52,10 @@ describe("envelope (CLI-02 foundation)", () => {
 
     test("QUERY_COMMAND_NAMES includes stats", () => {
       expect(QUERY_COMMAND_NAMES.includes("stats" as QueryCommandName)).toBe(true);
+    });
+
+    test("QUERY_COMMAND_NAMES includes query", () => {
+      expect(QUERY_COMMAND_NAMES.includes("query" as QueryCommandName)).toBe(true);
     });
 
     test("QUERY_RESULT_KINDS is an array with at least 5 string entries", () => {

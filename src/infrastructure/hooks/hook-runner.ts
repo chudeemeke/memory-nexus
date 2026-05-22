@@ -19,11 +19,17 @@ import { openSync, mkdirSync } from "node:fs";
 import { join } from "node:path";
 import { getLogDir as pathsGetLogDir } from "../paths.js";
 import type { Database } from "bun:sqlite";
-import type { Message } from "../../domain/entities/message.js";
-import { LlmExtractor, type ExtractionResult } from "../../application/services/llm-extractor.js";
+import { LlmExtractor } from "../../application/services/llm-extractor.js";
 import { SqliteEntityRepository } from "../database/repositories/entity-repository.js";
 import { SqliteMessageRepository } from "../database/repositories/message-repository.js";
-import { LogWriter } from "../config/log-writer.js";
+
+/**
+ * LogWriter interface for hook execution logging.
+ */
+export interface LogWriter {
+    debug(message: string): void;
+    warn(message: string): void;
+}
 
 /**
  * Options for spawnBackgroundSync
@@ -131,9 +137,9 @@ export interface EntityExtractionResult {
     /** Whether extraction succeeded */
     success: boolean;
     /** Error message if extraction failed */
-    error?: string;
+    error?: string | undefined;
     /** Session summary text (if extracted) */
-    summary?: string;
+    summary?: string | undefined;
 }
 
 /**

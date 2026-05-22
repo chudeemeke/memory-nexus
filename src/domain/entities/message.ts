@@ -19,7 +19,7 @@ interface MessageParams {
   role: MessageRole;
   content: string;
   timestamp: Date;
-  toolUseIds?: string[];
+  toolUseIds?: string[] | undefined;
 }
 
 export class Message {

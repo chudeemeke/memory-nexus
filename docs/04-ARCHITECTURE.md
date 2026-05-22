@@ -44,13 +44,16 @@ Technical architecture for memory-nexus, the Claude Code session extraction and 
                                 |
                                 v
 +---------------------------------------------------------------+
-|                      Query Interface                           |
+|                      Query & Status Interface                 |
 |                                                                |
-|  CLI Commands (via aidev memory):                              |
-|  - aidev memory search "query"    # Full-text search           |
-|  - aidev memory context <project> # Get project context        |
-|  - aidev memory sync              # Manual extraction          |
-|  - aidev memory stats             # Database statistics        |
+|  CLI Commands (via memory):                                    |
+|  - memory query [arg] --kind <k>  # Unified query primitive    |
+|  - memory status                  # Unified status & health    |
+|  - memory sync                    # Manual extraction          |
+|                                                                |
+|  Legacy Compatibility Wrappers:                                |
+|  - memory search | context | show | list | related             |
+|  - memory doctor | stats                                       |
 |                                                                |
 |  Hook Integration:                                             |
 |  - Claude Code SessionStop hook for automatic extraction       |
@@ -733,11 +736,31 @@ WHERE l2.source_id = s2.id AND s2.id != ?;
 ### CLI Commands
 
 ```bash
-aidev memory sync              # Extract sessions to database
-aidev memory search "query"    # Full-text search
-aidev memory context <project> # Get context for project
-aidev memory related <id>      # Find related sessions/topics
-aidev memory search "q" --json # JSON output (standard CLI option)
+# Data Sync
+memory sync                        # Extract sessions incrementally
+
+# Unified Query Primitive (Phase 32.5)
+memory query "search term"         # Default kind: message (fts/hybrid search)
+memory query --kind file "query"   # Search markdown files via qmd
+memory query --kind session        # List sessions (replaces 'list')
+memory query --kind session <id>   # Show session details (replaces 'show')
+memory query --kind stats          # Show database stats (replaces 'stats')
+memory query --kind context <p>    # Get project context (replaces 'context')
+memory query --kind related <id>   # Find related sessions (replaces 'related')
+
+# Unified Status & Diagnostics
+memory status                      # Full system status (config, sync, embedding)
+memory status --doctor             # Runs diagnostics and checks hooks
+memory status --stats              # Shows stats counters & project breakdowns
+
+# Legacy Compatibility CLI Wrappers (maintained for backwards compatibility)
+memory search "term"
+memory context <project>
+memory related <session-id>
+memory list
+memory show <session-id>
+memory stats
+memory doctor
 ```
 
 ### Future: Vector Embeddings (Phase 4)

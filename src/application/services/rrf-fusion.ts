@@ -107,7 +107,7 @@ export function reciprocalRankFusion(
 
     // Normalize scores to 0-1 range
     if (results.length > 0) {
-        const maxScore = results[0].rrfScore;
+        const maxScore = results[0]!.rrfScore;
         if (maxScore > 0) {
             for (const r of results) {
                 r.normalizedScore = r.rrfScore / maxScore;

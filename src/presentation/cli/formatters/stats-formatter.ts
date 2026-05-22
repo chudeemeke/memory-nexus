@@ -5,7 +5,7 @@
  * Supports default, JSON, quiet, and verbose output modes.
  */
 
-import type { StatsResult, ProjectStats } from "../../../domain/ports/services.js";
+import type { StatsResult } from "../../../domain/ports/services.js";
 
 /**
  * Output mode for stats formatting.
@@ -137,7 +137,7 @@ class BriefStatsFormatter implements StatsFormatter {
  * Default stats formatter with headers and sections.
  */
 class DefaultStatsFormatter implements StatsFormatter {
-  constructor(private useColor: boolean) {}
+  constructor(_useColor: boolean) {}
 
   formatStats(stats: ExtendedStatsResult, _options?: StatsFormatOptions): string {
     let output = "";
@@ -265,7 +265,7 @@ class QuietStatsFormatter implements StatsFormatter {
  * Verbose stats formatter - full details.
  */
 class VerboseStatsFormatter implements StatsFormatter {
-  constructor(private useColor: boolean) {}
+  constructor(_useColor: boolean) {}
 
   formatStats(stats: ExtendedStatsResult, options?: StatsFormatOptions): string {
     let output = "";

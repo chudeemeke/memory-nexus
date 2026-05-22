@@ -22,7 +22,6 @@ import {
     getLogDir,
     checkHooksInstalled,
     readRecentLogs,
-    DEFAULT_CONFIG,
     type MemoryConfig,
 } from "../hooks/index.js";
 
@@ -93,7 +92,7 @@ export interface EmbeddingHealth {
     /** Whether the provider is ready to generate embeddings */
     ready: boolean;
     /** Reason for readiness status (e.g., "API key not set") */
-    readyReason?: string;
+    readyReason?: string | undefined;
 }
 
 /**
@@ -151,15 +150,15 @@ export interface HealthCheckResult {
  */
 export interface HealthCheckOverrides {
     /** Override database path */
-    dbPath?: string;
+    dbPath?: string | undefined;
     /** Override config directory */
-    configDir?: string;
+    configDir?: string | undefined;
     /** Override logs directory */
-    logsDir?: string;
+    logsDir?: string | undefined;
     /** Override source directory */
-    sourceDir?: string;
+    sourceDir?: string | undefined;
     /** Override hook-related paths (settings.json, backup, hook script) */
-    hookOverrides?: import("../hooks/settings-manager.js").PathOverrides;
+    hookOverrides?: import("../hooks/settings-manager.js").PathOverrides | undefined;
 }
 
 /**
@@ -247,15 +246,20 @@ export function checkDirectoryPermissions(path: string): { readable: boolean; wr
  * @param configPath Optional explicit config file path (used by tests)
  * @returns Hook status including installation, enabled state, and last run
  */
-export function checkHookStatus(logPath?: string, configPath?: string): HooksHealth {
-    const hookStatus = checkHooksInstalled();
+export function checkHookStatus(
+    logPath?: string | undefined,
+    configPath?: string | undefined,
+    hookOverrides?: import("../hooks/settings-manager.js").PathOverrides | undefined
+): HooksHealth {
+    const hookStatus = checkHooksInstalled(hookOverrides);
     const config = loadConfig(configPath);
     const logs = readRecentLogs(1, logPath);
 
+    const firstLog = logs[0];
     return {
         installed: hookStatus.sessionEnd && hookStatus.preCompact,
         enabled: config.autoSync,
-        lastRun: logs.length > 0 ? new Date(logs[0].timestamp) : null,
+        lastRun: firstLog ? new Date(firstLog.timestamp) : null,
     };
 }
 

@@ -253,33 +253,43 @@ describe("createRelatedCommand action callback (coverage)", () => {
 
   it("runs the action callback and sets process.exitCode", async () => {
     const cmd = createRelatedCommand();
-    // Use parseAsync so commander invokes the registered action handler.
-    // With { from: "user" }, args are the positional/option list only —
-    // no executable / script entries.
-    // This exercises the inline action callback (lines 114-117).
-    // Pass --db-path to use a fresh temp DB so we don't touch the global default.
     const argTempDir = mkdtempSync(join(tmpdir(), "related-action-"));
-    const argDbPath = join(argTempDir, "test.db");
-    const { db } = initializeDatabase({ path: argDbPath });
+    const oldXdgData = process.env.XDG_DATA_HOME;
+    const oldXdgConfig = process.env.XDG_CONFIG_HOME;
+    const oldMemoryHome = process.env.MEMORY_HOME;
+
+    process.env.XDG_DATA_HOME = join(argTempDir, "data");
+    process.env.XDG_CONFIG_HOME = join(argTempDir, "config");
+    process.env.MEMORY_HOME = join(argTempDir, "memory");
+
+    // Initialize an empty database at the sandboxed default path
+    const { getDbPath } = await import("../../../infrastructure/paths.js");
+    const sandboxedDbPath = getDbPath();
+    const { db } = initializeDatabase({ path: sandboxedDbPath });
     closeDatabase(db);
 
-    // The createRelatedCommand command doesn't expose --db-path; the
-    // executable command path goes through getDefaultDbPath(). To keep
-    // this test side-effect-free, we override the default path via a
-    // patched env var only if available. As a pragmatic alternative,
-    // simply call parseAsync with a clearly nonexistent ID; the action
-    // calls executeRelatedCommand(id, options) where options has no
-    // dbPath → falls back to the real default DB. That's a side-effect
-    // production-default read; acceptable for an integration-style line.
-    //
-    // Alternative: just verify the command structure invoked the
-    // action by spying on executeRelatedCommand via a separate test.
-    // For coverage of the lines 114-117 callback body, we let the real
-    // path run and accept whichever exitCode results.
     try {
       await cmd.parseAsync(["some-id"], { from: "user" });
       expect([0, 1]).toContain(process.exitCode ?? 0);
     } finally {
+      if (oldXdgData) {
+        process.env.XDG_DATA_HOME = oldXdgData;
+      } else {
+        delete process.env.XDG_DATA_HOME;
+      }
+
+      if (oldXdgConfig) {
+        process.env.XDG_CONFIG_HOME = oldXdgConfig;
+      } else {
+        delete process.env.XDG_CONFIG_HOME;
+      }
+
+      if (oldMemoryHome) {
+        process.env.MEMORY_HOME = oldMemoryHome;
+      } else {
+        delete process.env.MEMORY_HOME;
+      }
+
       try { rmSync(argTempDir, { recursive: true, force: true }); } catch {}
     }
   });

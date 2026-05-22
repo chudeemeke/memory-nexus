@@ -36,6 +36,7 @@ export const QUERY_COMMAND_NAMES = [
   "list",
   "related",
   "stats",
+  "query",
 ] as const;
 
 /**
@@ -159,7 +160,8 @@ export function emitJsonEnvelope<T>(args: {
   scope?: EnvelopeScope;
   meta?: Record<string, unknown>;
 }): void {
-  console.log(JSON.stringify(buildEnvelope(args), null, 2));
+  const command = (process.env.MEMORY_JSON_COMMAND_OVERRIDE as QueryCommandName) || args.command;
+  console.log(JSON.stringify(buildEnvelope({ ...args, command }), null, 2));
 }
 
 /**
@@ -178,5 +180,6 @@ export function emitJsonErrorEnvelope(args: {
   message: string;
   context?: Record<string, unknown>;
 }): void {
-  console.log(JSON.stringify(buildErrorEnvelope(args), null, 2));
+  const command = (process.env.MEMORY_JSON_COMMAND_OVERRIDE as QueryCommandName) || args.command;
+  console.log(JSON.stringify(buildErrorEnvelope({ ...args, command }), null, 2));
 }

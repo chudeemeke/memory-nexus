@@ -18,6 +18,7 @@ import {
   createRelatedCommand,
   createShowCommand,
   createBrowseCommand,
+  createQueryCommand,
   createInstallCommand,
   createUninstallCommand,
   createStatusCommand,
@@ -43,6 +44,7 @@ program
 
 // Query Commands — read surfaces (CLI-02 envelope consumers in Plan 02).
 program.commandsGroup("Query Commands:");
+program.addCommand(createQueryCommand());
 program.addCommand(createSearchCommand());
 program.addCommand(createContextCommand());
 program.addCommand(createShowCommand());

@@ -5,7 +5,7 @@
  * Uses BM25 ranking algorithm for relevance scoring and snippet extraction.
  */
 
-import type { Database, Statement } from "bun:sqlite";
+import type { Database } from "bun:sqlite";
 import type { ISearchService, SearchOptions } from "../../../domain/ports/services.js";
 import type { SearchQuery } from "../../../domain/value-objects/search-query.js";
 import { SearchResult } from "../../../domain/value-objects/search-result.js";
@@ -38,7 +38,6 @@ interface SearchRow {
  */
 export class Fts5SearchService implements ISearchService {
   private readonly db: Database;
-  private readonly baseSearchStmt: Statement<SearchRow, [string, number]>;
 
   /**
    * Create a new Fts5SearchService
@@ -47,25 +46,6 @@ export class Fts5SearchService implements ISearchService {
    */
   constructor(db: Database) {
     this.db = db;
-
-    // Base search query - additional filters applied dynamically
-    // Uses MATCH for FTS5 query (never =)
-    // ORDER BY score ASC because BM25 returns negative values (more negative = better)
-    this.baseSearchStmt = db.prepare<SearchRow, [string, number]>(`
-      SELECT
-        m.id,
-        m.session_id,
-        m.role,
-        m.content,
-        m.timestamp,
-        bm25(messages_fts) as score,
-        snippet(messages_fts, 0, '<mark>', '</mark>', '...', 64) as snippet
-      FROM messages_fts f
-      JOIN messages_meta m ON f.rowid = m.rowid
-      WHERE messages_fts MATCH ?
-      ORDER BY score
-      LIMIT ?
-    `);
   }
 
   /**
@@ -90,8 +70,8 @@ export class Fts5SearchService implements ISearchService {
     const { sql, params } = this.buildSearchQuery(queryValue, limit, options);
 
     // Execute query
-    const stmt = this.db.prepare<SearchRow, unknown[]>(sql);
-    const rows = stmt.all(...params);
+    const stmt = this.db.prepare<SearchRow, any[]>(sql);
+    const rows = stmt.all(...params) as SearchRow[];
 
     if (rows.length === 0) {
       return [];
@@ -203,9 +183,10 @@ export class Fts5SearchService implements ISearchService {
       return [];
     }
 
-    if (rows.length === 1) {
+    const firstRow = rows[0];
+    if (rows.length === 1 && firstRow) {
       // Single result gets maximum score
-      return [{ ...rows[0], normalizedScore: 1.0 }];
+      return [{ ...firstRow, normalizedScore: 1.0 }];
     }
 
     // Find min and max BM25 scores

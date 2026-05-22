@@ -1,40 +1,13 @@
 /**
- * Stats Command Handler
+ * Stats Command Handler (Wrapper)
  *
- * CLI command for database statistics overview.
- * Includes hook status summary for visibility into auto-sync state.
+ * Thin view that delegates database stats overview to executeStatusCommand.
+ * Maintained for backwards compatibility.
  */
 
 import { Command, Option } from "commander";
 import type { CommandResult } from "../command-result.js";
-import { ErrorCode, MemoryError } from "../../../domain/errors/index.js";
-import {
-  initializeDatabase,
-  closeDatabase,
-  getDefaultDbPath,
-  SqliteStatsService,
-  SqliteExtractionStateRepository,
-} from "../../../infrastructure/database/index.js";
-import {
-  createStatsFormatter,
-  type StatsOutputMode,
-  type ExtendedStatsResult,
-  type HooksSummary,
-} from "../formatters/stats-formatter.js";
-import { shouldUseColor } from "../formatters/color.js";
-import { formatForAi } from "../formatters/ai-formatter.js";
-import {
-  checkHooksInstalled,
-  loadConfig,
-} from "../../../infrastructure/hooks/index.js";
-import { FileSystemSessionSource } from "../../../infrastructure/sources/index.js";
-import { formatError } from "../formatters/error-formatter.js";
-import {
-  emitJsonEnvelope,
-  emitJsonErrorEnvelope,
-} from "../formatters/envelope.js";
-import { toStatsDto } from "../formatters/dto-helpers.js";
-import { emitFormatDeprecationWarning } from "./_helpers/deprecation-warning.js";
+import { executeStatusCommand } from "./status.js";
 
 /**
  * Options for the stats command.
@@ -46,27 +19,14 @@ export interface StatsCommandOptions {
   verbose?: boolean;
   /** Minimal output */
   quiet?: boolean;
-  /** Number of projects to show in breakdown (as string, parsed to integer) */
+  /** Number of projects to show in breakdown */
   projects?: string;
-  /**
-   * Output format. Phase 32 (CLI-03) normalized choices: `brief`,
-   * `ai`. `default` retained as deprecated alias (one-minor cadence;
-   * CHANGELOG documents removal). Undefined = no-flag default
-   * (backward compatible). `brief` produces top-line counters only
-   * (Pitfall 4 Option A, <=5 lines per W5).
-   */
+  /** Output format */
   format?: "brief" | "ai" | "default";
 }
 
 /**
  * Runtime dependencies for executeStatsCommand.
- *
- * Separated from StatsCommandOptions because these are not user-facing
- * CLI flags — they are operational dependencies that tests substitute
- * to achieve isolation. Defaults to production resolution
- * (getDefaultDbPath()) when omitted.
- *
- * Parity with executeShowCommand (added Plan 32-02 per Codex HIGH-3).
  */
 export interface StatsCommandDeps {
   /** Database path. Defaults to getDefaultDbPath(). */
@@ -75,8 +35,6 @@ export interface StatsCommandDeps {
 
 /**
  * Create the stats command for Commander.js.
- *
- * @returns Configured Command instance
  */
 export function createStatsCommand(): Command {
   return new Command("stats")
@@ -86,8 +44,7 @@ export function createStatsCommand(): Command {
       new Option(
         "--format <type>",
         "Output format: brief (top-line counters) or ai (AI-optimized text). 'default' accepted as deprecated alias.",
-      ).choices(["brief", "ai", "default"]),
-      // No .default() — undefined = current text default (backward compatible).
+      ).choices(["brief", "ai", "default"])
     )
     .addOption(
       new Option("-v, --verbose", "Show detailed output with timing").conflicts(
@@ -109,171 +66,23 @@ export function createStatsCommand(): Command {
 }
 
 /**
- * Execute the stats command programmatically.
- *
- * Shows database statistics including session count, message count, and
- * storage size. Handles its own database initialization and teardown.
- *
- * @param options - Stats command options
- * @returns CommandResult with exitCode 0 (success) or 1 (error)
+ * Execute the stats command programmatically by wrapping executeStatusCommand.
  */
 export async function executeStatsCommand(
   options: StatsCommandOptions,
   deps: StatsCommandDeps = {}
 ): Promise<CommandResult> {
-  const startTime = performance.now();
-
-  // Phase 32 (CLI-03): deprecation warning for --format default
-  // (alias retained for one-minor cadence; behavior preserved).
-  if (options.format === "default") {
-    emitFormatDeprecationWarning({
-      command: "stats",
-      alias: "default",
-      replacement: "Omit --format for default behavior, or use --format brief / --format ai.",
+  return executeStatusCommand(
+    {
+      stats: true,
+      projects: options.projects,
+      format: options.format,
+      verbose: options.verbose,
+      quiet: options.quiet,
       json: options.json,
-    });
-  }
-
-  // Resolve DB path (deps seam takes precedence over production default).
-  // Parity with show/context/related/search (per Codex HIGH-3).
-  const dbPath = deps.dbPath ?? getDefaultDbPath();
-  const { db } = initializeDatabase({ path: dbPath });
-
-  try {
-    // Create stats service
-    const statsService = new SqliteStatsService(db);
-
-    // Parse project limit
-    const projectLimit = parseInt(options.projects ?? "10", 10);
-    if (isNaN(projectLimit) || projectLimit < 1) {
-      if (options.json) {
-        emitJsonErrorEnvelope({
-          command: "stats",
-          code: "INVALID_ARGUMENT",
-          message: "Projects count must be a positive number",
-        });
-      } else {
-        console.error("Error: Projects count must be a positive number");
-      }
-      return { exitCode: 1 };
+    },
+    {
+      dbPath: deps.dbPath,
     }
-
-    // Get stats
-    const baseStats = await statsService.getStats(projectLimit);
-
-    // Get hook status
-    const hooksSummary = await gatherHooksSummary(db);
-
-    // Build extended stats
-    const stats: ExtendedStatsResult = {
-      ...baseStats,
-      hooks: hooksSummary,
-    };
-
-    // --json: envelope path (Codex HIGH-2). Precedence: --json wins
-    // over --format ai (text-only post-processing has no effect on
-    // envelope shape).
-    if (options.json) {
-      const endTime = performance.now();
-      emitJsonEnvelope({
-        command: "stats",
-        kind: "stats",
-        data: toStatsDto(stats),
-        meta: {
-          generated_at: new Date().toISOString(),
-          timing_ms: Math.round(endTime - startTime),
-        },
-      });
-      return { exitCode: 0 };
-    }
-
-    // Determine output mode (text mode).
-    // Precedence (Phase 32 CLI-03): --quiet > --verbose > --format brief > default.
-    // 'default' alias falls through to the text default path.
-    let outputMode: StatsOutputMode = "default";
-    if (options.quiet) outputMode = "quiet";
-    else if (options.verbose) outputMode = "verbose";
-    else if (options.format === "brief") outputMode = "brief";
-
-    const useColor = shouldUseColor();
-    const formatter = createStatsFormatter(outputMode, useColor);
-
-    // Check for empty database (text mode)
-    if (stats.totalSessions === 0) {
-      console.log(formatter.formatEmpty());
-      return { exitCode: 0 };
-    }
-
-    // Format and output (text mode)
-    const endTime = performance.now();
-    let output = formatter.formatStats(stats, {
-      executionTimeMs: Math.round(endTime - startTime),
-    });
-    if (options.format === "ai") {
-      output = formatForAi(output);
-    }
-    console.log(output);
-    return { exitCode: 0 };
-  } catch (error) {
-    // Wrap in MemoryError for consistent formatting
-    const nexusError =
-      error instanceof MemoryError
-        ? error
-        : new MemoryError(
-            ErrorCode.DB_CONNECTION_FAILED,
-            error instanceof Error ? error.message : String(error)
-          );
-
-    // Format error based on output mode
-    if (options.json) {
-      emitJsonErrorEnvelope({
-        command: "stats",
-        code: nexusError.code,
-        message: nexusError.message,
-        ...(nexusError.context !== undefined
-          ? { context: nexusError.context }
-          : {}),
-      });
-    } else {
-      console.error(formatError(nexusError));
-    }
-    return { exitCode: 1 };
-  } finally {
-    closeDatabase(db);
-  }
-}
-
-/**
- * Gather hook status summary.
- *
- * @param db Database instance for extraction state queries
- * @returns Hook summary with installation state and pending count
- */
-async function gatherHooksSummary(db: ReturnType<typeof initializeDatabase>["db"]): Promise<HooksSummary> {
-  // Check hook installation status
-  const hookStatus = checkHooksInstalled();
-  const config = loadConfig();
-
-  // Count pending sessions
-  let pendingSessions = 0;
-  try {
-    const sessionSource = new FileSystemSessionSource();
-    const extractionStateRepo = new SqliteExtractionStateRepository(db);
-
-    const allSessions = await sessionSource.discoverSessions();
-    for (const session of allSessions) {
-      const state = await extractionStateRepo.findBySessionPath(session.path);
-      if (!state || state.status !== "complete") {
-        pendingSessions++;
-      }
-    }
-  } catch {
-    // Ignore errors - pending count is informational
-  }
-
-  return {
-    installed: hookStatus.sessionEnd && hookStatus.preCompact,
-    autoSync: config.autoSync,
-    pendingSessions,
-  };
+  );
 }

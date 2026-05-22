@@ -37,11 +37,11 @@ export interface ProjectContext {
  */
 export interface ContextOptions {
   /** Filter to last N days (includes today) */
-  days?: number;
+  days?: number | undefined;
   /** Maximum topics to return (default 10) */
-  topicsLimit?: number;
+  topicsLimit?: number | undefined;
   /** Maximum tools to return (default 10) */
-  toolsLimit?: number;
+  toolsLimit?: number | undefined;
 }
 
 /**

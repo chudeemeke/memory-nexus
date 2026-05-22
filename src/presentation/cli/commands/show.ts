@@ -145,18 +145,28 @@ async function findSession(
   return null;
 }
 
-/**
- * Execute the show command programmatically.
- *
- * Shows detailed information about a specific session including messages
- * and optionally tool uses. Supports partial session ID matching.
- * Handles its own database initialization and teardown.
- *
- * @param sessionId - Full or partial session ID to display
- * @param options - Show command options
- * @returns CommandResult with exitCode 0 (success) or 1 (not found/error)
- */
 export async function executeShowCommand(
+  sessionId: string,
+  options: ShowCommandOptions,
+  deps: ShowCommandDeps = {}
+): Promise<CommandResult> {
+  const { executeQueryCommand } = await import("./query.js");
+  process.env.MEMORY_JSON_COMMAND_OVERRIDE = "show";
+  try {
+    return await executeQueryCommand(sessionId, {
+      ...(options as any),
+      kind: "session",
+      dbPath: deps.dbPath,
+    });
+  } finally {
+    delete process.env.MEMORY_JSON_COMMAND_OVERRIDE;
+  }
+}
+
+/**
+ * Internal implementation of the show query execution.
+ */
+export async function runShowInternal(
   sessionId: string,
   options: ShowCommandOptions,
   deps: ShowCommandDeps = {}

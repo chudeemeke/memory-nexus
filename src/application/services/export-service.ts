@@ -175,7 +175,7 @@ export interface ValidationResult {
  */
 export interface ImportOptions {
   /** Clear existing data before import. Default: false */
-  clearExisting?: boolean;
+  clearExisting?: boolean | undefined;
 }
 
 // ============================================================================

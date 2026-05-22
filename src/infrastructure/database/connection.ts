@@ -227,7 +227,7 @@ export function initializeDatabase(config: DatabaseConfig): DatabaseInitResult {
         if (error instanceof MemoryError) {
             throw error;
         }
-        handleDbError(error);
+        throw handleDbError(error);
     }
 }
 

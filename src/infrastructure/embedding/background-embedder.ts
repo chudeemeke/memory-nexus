@@ -39,9 +39,9 @@ export interface LockData {
  */
 export interface AcquireResult {
   acquired: boolean;
-  staleRemoved?: boolean;
-  existingPid?: number;
-  startedAt?: string;
+  staleRemoved?: boolean | undefined;
+  existingPid?: number | undefined;
+  startedAt?: string | undefined;
 }
 
 /**
@@ -49,8 +49,8 @@ export interface AcquireResult {
  */
 export interface SpawnResult {
   started: boolean;
-  pid?: number;
-  reason?: "already_running" | "spawn_failed";
+  pid?: number | undefined;
+  reason?: "already_running" | "spawn_failed" | undefined;
 }
 
 /**
@@ -220,7 +220,7 @@ export function spawnBackgroundEmbedding(options?: SpawnBackgroundOptions): Spaw
   const err = openSync(logPath, "a");
 
   // Build args: re-invoke the memory CLI with --embed --quiet
-  const entryPoint = process.argv[1];
+  const entryPoint = process.argv[1] ?? "";
   const args = [entryPoint, "sync", "--embed", "--quiet"];
 
   const subprocess = spawn(command, args, {
@@ -230,7 +230,7 @@ export function spawnBackgroundEmbedding(options?: SpawnBackgroundOptions): Spaw
       ...process.env,
       MEMORY_EMBED_BACKGROUND: "1",
     },
-  });
+  } as any) as any;
   subprocess.unref();
 
   if (subprocess.pid === undefined) {

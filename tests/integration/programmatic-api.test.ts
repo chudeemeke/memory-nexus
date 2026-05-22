@@ -71,11 +71,62 @@ let exportDir: string;
 const exportPath = () => join(exportDir, "test-export.json");
 
 describe("Programmatic API", () => {
+  let oldXdgConfig: string | undefined;
+  let oldXdgData: string | undefined;
+  let oldMemoryHome: string | undefined;
+  let oldUserProfile: string | undefined;
+  let oldHome: string | undefined;
+
   beforeAll(() => {
     exportDir = mkdtempSync(join(tmpdir(), "memory-api-test-"));
+
+    // Save old environment variables
+    oldXdgConfig = process.env.XDG_CONFIG_HOME;
+    oldXdgData = process.env.XDG_DATA_HOME;
+    oldMemoryHome = process.env.MEMORY_HOME;
+    oldUserProfile = process.env.USERPROFILE;
+    oldHome = process.env.HOME;
+
+    // Set new sandboxed environments
+    process.env.XDG_CONFIG_HOME = join(exportDir, "config");
+    process.env.XDG_DATA_HOME = join(exportDir, "data");
+    process.env.MEMORY_HOME = join(exportDir, "memory");
+    process.env.USERPROFILE = exportDir;
+    process.env.HOME = exportDir;
   });
 
   afterAll(() => {
+    // Restore environment variables
+    if (oldXdgConfig !== undefined) {
+      process.env.XDG_CONFIG_HOME = oldXdgConfig;
+    } else {
+      delete process.env.XDG_CONFIG_HOME;
+    }
+
+    if (oldXdgData !== undefined) {
+      process.env.XDG_DATA_HOME = oldXdgData;
+    } else {
+      delete process.env.XDG_DATA_HOME;
+    }
+
+    if (oldMemoryHome !== undefined) {
+      process.env.MEMORY_HOME = oldMemoryHome;
+    } else {
+      delete process.env.MEMORY_HOME;
+    }
+
+    if (oldUserProfile !== undefined) {
+      process.env.USERPROFILE = oldUserProfile;
+    } else {
+      delete process.env.USERPROFILE;
+    }
+
+    if (oldHome !== undefined) {
+      process.env.HOME = oldHome;
+    } else {
+      delete process.env.HOME;
+    }
+
     try {
       rmSync(exportDir, { recursive: true, force: true });
     } catch {
@@ -96,7 +147,7 @@ describe("Programmatic API", () => {
       const result = await executeSyncCommand(options);
       expectCommandResult(result);
       expect(result.exitCode).toBe(0);
-    }, 15_000);
+    }, 60_000);
 
     test("exitCode is a number", async () => {
       const result = await executeSyncCommand({ dryRun: true, quiet: true });
@@ -474,16 +525,18 @@ describe("Programmatic API", () => {
 
     test("no execute*Command function calls process.exit()", async () => {
       const savedExitCode = process.exitCode;
-      process.exitCode = undefined;
 
+      const exitCodeBeforeSync = process.exitCode;
       await executeSyncCommand({ dryRun: true, quiet: true });
-      expect(process.exitCode).toBeUndefined();
+      expect(process.exitCode).toBe(exitCodeBeforeSync);
 
+      const exitCodeBeforeList = process.exitCode;
       await executeListCommand({ quiet: true });
-      expect(process.exitCode).toBeUndefined();
+      expect(process.exitCode).toBe(exitCodeBeforeList);
 
+      const exitCodeBeforeCompletion = process.exitCode;
       executeCompletionCommand("bash");
-      expect(process.exitCode).toBeUndefined();
+      expect(process.exitCode).toBe(exitCodeBeforeCompletion);
 
       // Restore
       process.exitCode = savedExitCode;

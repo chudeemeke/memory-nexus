@@ -32,7 +32,7 @@ export interface BackfillCommandOptions {
  * Service interface for dependency injection in tests.
  */
 export interface BackfillServiceDeps {
-  dryRun(options?: { project?: string }): Promise<DryRunResult>;
+  dryRun(options?: { project?: string | undefined }): Promise<DryRunResult>;
   backfill(options?: BackfillOptions): Promise<BackfillResult>;
 }
 

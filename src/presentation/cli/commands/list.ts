@@ -121,16 +121,29 @@ export function createListCommand(): Command {
     });
 }
 
-/**
- * Execute the list command programmatically.
- *
- * Lists sessions with optional filtering by project, date range, or limit.
- * Handles its own database initialization and teardown.
- *
- * @param options - List command options
- * @returns CommandResult with exitCode 0 (success) or 1 (error)
- */
 export async function executeListCommand(
+  options: ListCommandOptions,
+  deps: ListCommandDeps = {}
+): Promise<CommandResult> {
+  const { executeQueryCommand } = await import("./query.js");
+  const scope = options.project ? "project" : "global";
+  process.env.MEMORY_JSON_COMMAND_OVERRIDE = "list";
+  try {
+    return await executeQueryCommand(undefined, {
+      ...options,
+      kind: "session",
+      scope,
+      dbPath: deps.dbPath,
+    });
+  } finally {
+    delete process.env.MEMORY_JSON_COMMAND_OVERRIDE;
+  }
+}
+
+/**
+ * Internal implementation of the list query execution.
+ */
+export async function runListInternal(
   options: ListCommandOptions,
   deps: ListCommandDeps = {}
 ): Promise<CommandResult> {

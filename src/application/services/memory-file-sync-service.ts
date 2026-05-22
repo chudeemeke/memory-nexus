@@ -79,6 +79,7 @@ export class MemoryFileSyncService {
 
     for (let i = 0; i < files.length; i++) {
       const fileInfo = files[i];
+      if (!fileInfo) continue;
       try {
         const existing = await this.repository.findByPath(fileInfo.filePath);
         if (existing && existing.contentHash === fileInfo.contentHash) {
@@ -99,7 +100,7 @@ export class MemoryFileSyncService {
           content: fileInfo.content,
           contentHash: fileInfo.contentHash,
           lastIndexedAt: new Date(),
-        });
+        } as any);
 
         await this.repository.save(memoryFile);
         result.filesIndexed++;

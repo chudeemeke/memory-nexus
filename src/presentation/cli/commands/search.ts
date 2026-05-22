@@ -201,6 +201,28 @@ export async function executeSearchCommand(
   query: string,
   options: SearchCommandOptions
 ): Promise<CommandResult> {
+  const { executeQueryCommand } = await import("./query.js");
+  const kind = options.files ? "file" : "message";
+  const scope = options.project ? "project" : "global";
+  process.env.MEMORY_JSON_COMMAND_OVERRIDE = "search";
+  try {
+    return await executeQueryCommand(query, {
+      ...(options as any),
+      kind,
+      scope,
+    });
+  } finally {
+    delete process.env.MEMORY_JSON_COMMAND_OVERRIDE;
+  }
+}
+
+/**
+ * Internal implementation of the search query execution.
+ */
+export async function runSearchInternal(
+  query: string,
+  options: SearchCommandOptions
+): Promise<CommandResult> {
   const startTime = performance.now();
 
   // Phase 32 (CLI-03): emit one-shot stderr deprecation warning for

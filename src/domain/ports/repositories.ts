@@ -20,7 +20,6 @@ import type { MemoryFile, MemoryFileType } from "../entities/memory-file.js";
 import type {
     FrictionEntry,
     FrictionSeverity,
-    FrictionCategory,
     FrictionStatus,
 } from "../entities/friction-entry.js";
 import type { BackfillState } from "../entities/backfill-state.js";
@@ -31,13 +30,13 @@ import type { ProjectPath } from "../value-objects/project-path.js";
  */
 export interface SessionListOptions {
   /** Maximum sessions to return */
-  limit?: number;
+  limit?: number | undefined;
   /** Filter by project name (substring match) */
-  projectFilter?: string;
+  projectFilter?: string | undefined;
   /** Only sessions after this date */
-  sinceDate?: Date;
+  sinceDate?: Date | undefined;
   /** Only sessions before this date */
-  beforeDate?: Date;
+  beforeDate?: Date | undefined;
 }
 
 /**
@@ -149,7 +148,7 @@ export interface IMessageRepository {
    */
   saveMany(
     messages: Array<{ message: Message; sessionId: string }>
-  ): Promise<void>;
+  ): Promise<any>;
 }
 
 /**
@@ -187,7 +186,7 @@ export interface IToolUseRepository {
    */
   saveMany(
     toolUses: Array<{ toolUse: ToolUse; sessionId: string }>
-  ): Promise<void>;
+  ): Promise<any>;
 }
 
 /**

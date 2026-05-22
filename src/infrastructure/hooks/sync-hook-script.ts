@@ -153,7 +153,7 @@ async function main(): Promise<void> {
     }
 
     // Spawn background sync
-    const result = spawnBackgroundSync(sessionId);
+    spawnBackgroundSync(sessionId);
 
     logSync({
         level: "info",

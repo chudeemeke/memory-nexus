@@ -39,36 +39,14 @@ interface EntityRow {
  */
 export class SqliteEntityRepository implements IEntityRepository {
   private readonly db: Database;
-  private readonly findByIdStmt: Statement<EntityRow, [number]>;
-  private readonly findByNameStmt: Statement<EntityRow, [string, string]>;
-  private readonly findBySessionStmt: Statement<EntityRow, [string]>;
-  private readonly insertStmt: Statement<
-    unknown,
-    {
-      $type: string;
-      $name: string;
-      $metadata: string | null;
-      $confidence: number;
-    }
-  >;
-  private readonly existsStmt: Statement<
-    { id: number; confidence: number } | null,
-    [string, string]
-  >;
-  private readonly updateConfidenceStmt: Statement<unknown, [number, number]>;
-  private readonly linkSessionStmt: Statement<
-    unknown,
-    { $entity_id: number; $session_id: string; $frequency: number }
-  >;
-  private readonly linkEntityStmt: Statement<
-    unknown,
-    {
-      $source_id: number;
-      $target_id: number;
-      $relationship: string;
-      $weight: number;
-    }
-  >;
+  private readonly findByIdStmt: Statement<any, any>;
+  private readonly findByNameStmt: Statement<any, any>;
+  private readonly findBySessionStmt: Statement<any, any>;
+  private readonly insertStmt: Statement<any, any>;
+  private readonly existsStmt: Statement<any, any>;
+  private readonly updateConfidenceStmt: Statement<any, any>;
+  private readonly linkSessionStmt: Statement<any, any>;
+  private readonly linkEntityStmt: Statement<any, any>;
 
   constructor(db: Database) {
     this.db = db;
@@ -188,7 +166,7 @@ export class SqliteEntityRepository implements IEntityRepository {
     `;
 
     const stmt = this.db.prepare(sql);
-    const rows = stmt.all(params) as EntityRow[];
+    const rows = stmt.all(params as any) as EntityRow[];
     return rows.map((row) => this.rowToEntity(row));
   }
 

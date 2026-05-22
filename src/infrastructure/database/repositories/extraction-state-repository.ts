@@ -40,15 +40,12 @@ interface ExtractionStateRow {
 export class SqliteExtractionStateRepository
   implements IExtractionStateRepository
 {
-  private readonly db: Database;
   private readonly findByIdStmt: Statement;
   private readonly findBySessionPathStmt: Statement;
   private readonly findPendingStmt: Statement;
   private readonly saveStmt: Statement;
 
   constructor(db: Database) {
-    this.db = db;
-
     // Prepare all statements once for reuse
     this.findByIdStmt = db.prepare(`
       SELECT id, session_path, started_at, status, completed_at,

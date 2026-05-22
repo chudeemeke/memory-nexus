@@ -18,9 +18,9 @@ interface SearchResultParams {
   timestamp: Date;
   role: string;
   /** Source ranker(s) that produced this result */
-  source?: "fts" | "vector" | "both";
+  source?: "fts" | "vector" | "both" | undefined;
   /** Raw scores from individual rankers before normalization */
-  rawScores?: { bm25?: number; cosine?: number; rrf?: number };
+  rawScores?: { bm25?: number | undefined; cosine?: number | undefined; rrf?: number | undefined } | undefined;
 }
 
 export class SearchResult {
@@ -30,8 +30,8 @@ export class SearchResult {
   private readonly _score: number;
   private readonly _timestamp: Date;
   private readonly _role: string;
-  private readonly _source?: "fts" | "vector" | "both";
-  private readonly _rawScores?: { bm25?: number; cosine?: number; rrf?: number };
+  private readonly _source?: "fts" | "vector" | "both" | undefined;
+  private readonly _rawScores?: { bm25?: number | undefined; cosine?: number | undefined; rrf?: number | undefined } | undefined;
 
   private constructor(params: SearchResultParams) {
     this._sessionId = params.sessionId;
@@ -123,7 +123,7 @@ export class SearchResult {
    * Raw scores from individual rankers before normalization.
    * Undefined for legacy FTS-only results.
    */
-  get rawScores(): { bm25?: number; cosine?: number; rrf?: number } | undefined {
+  get rawScores(): { bm25?: number | undefined; cosine?: number | undefined; rrf?: number | undefined } | undefined {
     return this._rawScores ? { ...this._rawScores } : undefined;
   }
 

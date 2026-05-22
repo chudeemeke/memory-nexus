@@ -10,6 +10,8 @@ Options:
   -h, --help                      display help for command
 
 Query Commands:
+  query [options] [argument]      Execute unified query across sessions, files,
+                                  stats, or context
   search [options] <query>        Search across all sessions (keyword, semantic,
                                   or hybrid)
   context [options] <project>     Show aggregated context for a project
@@ -33,8 +35,7 @@ System Commands:
                                   session sync
   uninstall [options]             Remove Claude Code hooks for automatic session
                                   sync
-  status [options]                Show hook installation status and
-                                  configuration
+  status [options]                Show system status, health, and statistics
   doctor [options]                Check system health and diagnose issues
   completion <shell>              Generate shell completion script
   browse [options]                Interactive session browser

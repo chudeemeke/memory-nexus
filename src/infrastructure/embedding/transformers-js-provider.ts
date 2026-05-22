@@ -73,7 +73,9 @@ export class TransformersJsProvider implements IEmbeddingProvider {
       );
       console.warn("Falling back to WASM backend (slower but universal)");
 
-      env.backends.onnx.wasm.numThreads = 1;
+      if (env.backends?.onnx?.wasm) {
+        env.backends.onnx.wasm.numThreads = 1;
+      }
 
       try {
         this._pipeline = await pipeline("feature-extraction", this.model, {

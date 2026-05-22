@@ -113,7 +113,7 @@ export function handleError(error: unknown, options: SyncCommandOptions): void {
     console.error(formatErrorJson(error instanceof Error ? error : new Error(String(error))));
   } else {
     console.error(formatError(error instanceof Error ? error : new Error(String(error)), {
-      verbose: options.verbose,
+      verbose: !!options.verbose,
     }));
   }
 }

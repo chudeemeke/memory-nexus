@@ -6,19 +6,46 @@
 
 import { describe, expect, it, beforeEach, afterEach, spyOn } from "bun:test";
 import { executeFrictionCommand } from "./index.js";
+import { mkdtempSync, rmSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 
 describe("friction resolve action", () => {
     let consoleLogSpy: ReturnType<typeof spyOn>;
     let consoleErrorSpy: ReturnType<typeof spyOn>;
+    let tempDir: string;
+    let oldXdgData: string | undefined;
+    let oldXdgConfig: string | undefined;
 
     beforeEach(() => {
         consoleLogSpy = spyOn(console, "log").mockImplementation(() => {});
         consoleErrorSpy = spyOn(console, "error").mockImplementation(() => {});
+
+        tempDir = mkdtempSync(join(tmpdir(), "memory-status-resolve-test-"));
+        oldXdgData = process.env.XDG_DATA_HOME;
+        oldXdgConfig = process.env.XDG_CONFIG_HOME;
+        process.env.XDG_DATA_HOME = join(tempDir, "data");
+        process.env.XDG_CONFIG_HOME = join(tempDir, "config");
     });
 
     afterEach(() => {
         consoleLogSpy.mockRestore();
         consoleErrorSpy.mockRestore();
+
+        if (oldXdgData !== undefined) {
+            process.env.XDG_DATA_HOME = oldXdgData;
+        } else {
+            delete process.env.XDG_DATA_HOME;
+        }
+        if (oldXdgConfig !== undefined) {
+            process.env.XDG_CONFIG_HOME = oldXdgConfig;
+        } else {
+            delete process.env.XDG_CONFIG_HOME;
+        }
+
+        try {
+            rmSync(tempDir, { recursive: true, force: true });
+        } catch {}
     });
 
     it("resolve action returns exitCode 0 after logging", async () => {

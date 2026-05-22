@@ -48,13 +48,13 @@ export interface LogEntry {
     /** Human-readable message */
     message: string;
     /** Session identifier (if applicable) */
-    sessionId?: string;
+    sessionId?: string | undefined;
     /** Operation duration in milliseconds */
-    durationMs?: number;
+    durationMs?: number | undefined;
     /** Error message (if applicable) */
-    error?: string;
+    error?: string | undefined;
     /** Hook event that triggered this (SessionEnd or PreCompact) */
-    hookEvent?: string;
+    hookEvent?: string | undefined;
 }
 
 /**

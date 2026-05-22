@@ -12,7 +12,7 @@ import {
   SqliteLinkRepository,
   SqliteSessionRepository,
 } from "../../../infrastructure/database/repositories/index.js";
-import type { RelatedLink } from "../../../infrastructure/database/repositories/link-repository.js";
+
 import type { EntityType } from "../../../domain/entities/link.js";
 import {
   initializeDatabase,
@@ -117,19 +117,29 @@ export function createRelatedCommand(): Command {
     });
 }
 
-/**
- * Execute the related command programmatically.
- *
- * Finds sessions related to a given session by shared topics and entities.
- * Handles its own database initialization and teardown.
- *
- * @param id - Session ID, message ID, or topic name to find related sessions for
- * @param options - Related command options
- * @returns CommandResult with exitCode 0 (success) or 1 (not found/error)
- */
 export async function executeRelatedCommand(
   id: string,
   options: RelatedCommandOptions
+): Promise<CommandResult> {
+  const { executeQueryCommand } = await import("./query.js");
+  process.env.MEMORY_JSON_COMMAND_OVERRIDE = "related";
+  try {
+    return await executeQueryCommand(id, {
+      ...(options as any),
+      kind: "related",
+    });
+  } finally {
+    delete process.env.MEMORY_JSON_COMMAND_OVERRIDE;
+  }
+}
+
+/**
+ * Internal implementation of the related query execution.
+ */
+export async function runRelatedInternal(
+  id: string,
+  options: RelatedCommandOptions,
+  deps?: { dbPath?: string }
 ): Promise<CommandResult> {
   const startTime = performance.now();
 
@@ -144,7 +154,7 @@ export async function executeRelatedCommand(
     });
   }
 
-  const dbPath = options.dbPath ?? getDefaultDbPath();
+  const dbPath = deps?.dbPath ?? options.dbPath ?? getDefaultDbPath();
   const { db } = initializeDatabase({ path: dbPath });
 
   try {

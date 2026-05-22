@@ -46,7 +46,7 @@ export interface SearchResultDto {
   timestamp: string;
   snippet: string;
   rank?: number;
-  raw_scores?: { bm25?: number; cosine?: number; rrf?: number };
+  raw_scores?: { bm25?: number | undefined; cosine?: number | undefined; rrf?: number | undefined } | undefined;
   source?: "fts" | "vector" | "both";
   highlights?: Array<{ offset: number; length: number }>;
 }

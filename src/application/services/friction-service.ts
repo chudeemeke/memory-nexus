@@ -31,24 +31,24 @@ import { ErrorCode, MemoryError } from "../../domain/errors/index.js";
  */
 export interface LogFrictionParams {
     description: string;
-    severity?: FrictionSeverity;
-    category?: FrictionCategory;
-    tool?: string;
-    context?: string;
-    sourceProject?: string;
-    loggedAt?: Date;
+    severity?: FrictionSeverity | undefined;
+    category?: FrictionCategory | undefined;
+    tool?: string | undefined;
+    context?: string | undefined;
+    sourceProject?: string | undefined;
+    loggedAt?: Date | undefined;
 }
 
 /**
  * Options for listing friction entries.
  */
 export interface ListFrictionOptions {
-    all?: boolean;
-    status?: string;
-    category?: string;
-    tool?: string;
-    sourceProject?: string;
-    limit?: number;
+    all?: boolean | undefined;
+    status?: string | undefined;
+    category?: string | undefined;
+    tool?: string | undefined;
+    sourceProject?: string | undefined;
+    limit?: number | undefined;
 }
 
 /**
@@ -79,7 +79,7 @@ export class FrictionService {
             context: params.context,
             sourceProject: params.sourceProject,
             loggedAt: params.loggedAt ?? new Date(),
-        });
+        } as any);
 
         return this.repository.save(entry);
     }
@@ -105,7 +105,7 @@ export class FrictionService {
                 tool: options?.tool,
                 sourceProject: options?.sourceProject,
                 limit: options?.limit,
-            });
+            } as any);
         }
 
         return this.repository.findOpen();

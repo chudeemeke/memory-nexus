@@ -34,7 +34,6 @@ import type { MemoryConfig } from "../../hooks/config-manager.js";
 import {
   reciprocalRankFusion,
   type RankedCandidate,
-  type FusedResult,
 } from "../../../application/services/rrf-fusion.js";
 
 /**
@@ -69,7 +68,7 @@ export interface SearchMeta {
   /** Whether the search degraded from requested mode */
   degraded: boolean;
   /** Reason for degradation, if any */
-  degradationReason?: string;
+  degradationReason?: string | undefined;
   /** Fraction of messages with embeddings (0-1) */
   embeddingCoverage: number;
   /** System capabilities for this search */
@@ -427,13 +426,14 @@ export class HybridSearchService implements ISearchService {
         )
         .get();
       if (!row || !row.embedding) return null;
+      const emb = row.embedding as any;
       // Float32Array gives us the dimension count directly
-      if (row.embedding instanceof Float32Array) {
-        return row.embedding.length;
+      if (emb instanceof Float32Array) {
+        return emb.length;
       }
       // If returned as buffer, compute from byte length
-      if (row.embedding instanceof ArrayBuffer || (row.embedding as unknown as Buffer).byteLength !== undefined) {
-        return (row.embedding as unknown as ArrayBuffer).byteLength / 4;
+      if (emb instanceof ArrayBuffer || emb.byteLength !== undefined) {
+        return emb.byteLength / 4;
       }
       return null;
     } catch {
@@ -486,6 +486,7 @@ export class HybridSearchService implements ISearchService {
     const results: SearchResult[] = [];
     for (let i = 0; i < vectorRows.length && results.length < limit; i++) {
       const vr = vectorRows[i];
+      if (!vr) continue;
       const meta = metaMap.get(vr.rowid);
       if (!meta) continue;
 
@@ -521,7 +522,7 @@ export class HybridSearchService implements ISearchService {
   private async hybridSearch(
     query: SearchQuery,
     options?: HybridSearchOptions
-  ): Promise<{ results: SearchResult[]; degraded: boolean; degradationReason?: string }> {
+  ): Promise<{ results: SearchResult[]; degraded: boolean; degradationReason?: string | undefined }> {
     const limit = options?.limit ?? 20;
     const candidateLimit = limit * CANDIDATE_MULTIPLIER;
 

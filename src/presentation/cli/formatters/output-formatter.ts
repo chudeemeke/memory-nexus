@@ -8,7 +8,6 @@
 
 import type { SearchResult } from "../../../domain/value-objects/search-result.js";
 import { formatTimestamp } from "./timestamp-formatter.js";
-import { bold } from "./color.js";
 import { truncateToWidth, truncateForTerminal, getTerminalWidth } from "./text-width.js";
 import { toSearchResultDto } from "./dto-helpers.js";
 
@@ -46,7 +45,7 @@ export interface SearchMetaInfo {
   /** Whether the search degraded from requested mode */
   degraded: boolean;
   /** Reason for degradation, if any */
-  degradationReason?: string;
+  degradationReason?: string | undefined;
   /** Fraction of messages with embeddings (0-1) */
   embeddingCoverage: number;
   /** System capabilities for this search */
@@ -59,11 +58,11 @@ export interface SearchMetaInfo {
  * Options for formatting results.
  */
 export interface FormatOptions {
-  query?: string;
-  executionDetails?: ExecutionDetails;
-  contextBudget?: number;
+  query?: string | undefined;
+  executionDetails?: ExecutionDetails | undefined;
+  contextBudget?: number | undefined;
   /** Hybrid search metadata (additive: when absent, output is backward-compatible) */
-  searchMeta?: SearchMetaInfo;
+  searchMeta?: SearchMetaInfo | undefined;
 }
 
 /**
@@ -169,14 +168,13 @@ class DefaultOutputFormatter implements OutputFormatter {
     }
 
     let output = `Found ${results.length} result(s):\n\n`;
-    let truncated = false;
 
     for (let i = 0; i < results.length; i++) {
       const result = results[i];
+      if (!result) continue;
       const line = this.formatResult(result, i + 1);
 
       if (output.length + line.length > budget) {
-        truncated = true;
         output += `\n(Output truncated - ${CONTEXT_BUDGET.toLocaleString()} char limit)\n`;
         break;
       }
@@ -405,14 +403,13 @@ class VerboseOutputFormatter implements OutputFormatter {
     }
 
     output += `Found ${results.length} result(s):\n\n`;
-    let truncated = false;
 
     for (let i = 0; i < results.length; i++) {
       const result = results[i];
+      if (!result) continue;
       const line = this.formatResult(result, i + 1, !!options?.searchMeta);
 
       if (output.length + line.length > budget) {
-        truncated = true;
         output += `\n(Output truncated - ${CONTEXT_BUDGET.toLocaleString()} char limit)\n`;
         break;
       }

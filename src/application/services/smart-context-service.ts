@@ -30,11 +30,11 @@ export interface SmartContextOptions {
     /** Project name or filter string */
     projectFilter: string;
     /** Maximum token budget (0 or undefined = no limit) */
-    budget?: number;
+    budget?: number | undefined;
     /** Limit daily logs to last N days */
-    days?: number;
+    days?: number | undefined;
     /** Include cross-project sections (default: false) */
-    crossProject?: boolean;
+    crossProject?: boolean | undefined;
 }
 
 /**
@@ -96,6 +96,7 @@ export interface SmartContextDeps {
     frictionRepo: IFrictionRepository;
     /** Optional legacy session summary provider */
     getSessionSummary?: (projectFilter: string, days?: number) => Promise<string | null>;
+    now?: () => Date;
 }
 
 /**
@@ -153,7 +154,9 @@ export class SmartContextService {
         this.projectResolver = deps.projectResolver;
         this.memoryFileRepo = deps.memoryFileRepo;
         this.frictionRepo = deps.frictionRepo;
-        this.getSessionSummary = deps.getSessionSummary;
+        if (deps.getSessionSummary) {
+            this.getSessionSummary = deps.getSessionSummary;
+        }
         this.now = deps.now ?? (() => new Date());
     }
 

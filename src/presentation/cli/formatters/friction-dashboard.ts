@@ -30,7 +30,7 @@ import { bold, green, red, yellow, cyan, dim } from "./color.js";
 export function formatFrictionDashboard(
     stats: FrictionStats,
     trends: Array<{ week: string; newCount: number; resolvedCount: number }>,
-    openItems: FrictionEntry[],
+    _openItems: FrictionEntry[],
     useColor: boolean,
     patterns?: FrictionPattern[],
 ): string {

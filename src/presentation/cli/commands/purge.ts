@@ -64,8 +64,8 @@ export function parseDuration(duration: string): Date {
     );
   }
 
-  const value = parseInt(match[1], 10);
-  const unit = match[2].toLowerCase();
+  const value = parseInt(match[1] as string, 10);
+  const unit = (match[2] as string).toLowerCase();
 
   if (value <= 0) {
     throw new Error("Duration value must be a positive number.");
@@ -98,7 +98,7 @@ export function parseDuration(duration: string): Date {
  * @returns Formatted date string
  */
 function formatCutoffDate(date: Date): string {
-  return date.toISOString().split("T")[0];
+  return date.toISOString().split("T")[0] as string;
 }
 
 /**

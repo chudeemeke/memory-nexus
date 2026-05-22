@@ -307,7 +307,7 @@ class QuietContextFormatter implements ContextFormatter {
 class VerboseContextFormatter implements ContextFormatter {
   private detailed: DetailedContextFormatter;
 
-  constructor(private useColor: boolean) {
+  constructor(useColor: boolean) {
     this.detailed = new DetailedContextFormatter(useColor);
   }
 

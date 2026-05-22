@@ -46,35 +46,35 @@ const VALID_STATUSES: readonly FrictionStatus[] = [
 ];
 
 interface FrictionEntryParams {
-    id?: number;
+    id?: number | undefined;
     description: string;
     severity: FrictionSeverity;
     category: FrictionCategory;
     status: FrictionStatus;
     tool: string;
-    tags?: string[];
-    lastReviewedAt?: Date;
-    context?: string;
-    sourceProject?: string;
+    tags?: string[] | undefined;
+    lastReviewedAt?: Date | undefined;
+    context?: string | undefined;
+    sourceProject?: string | undefined;
     loggedAt: Date;
-    resolvedAt?: Date;
-    resolution?: string;
+    resolvedAt?: Date | undefined;
+    resolution?: string | undefined;
 }
 
 export class FrictionEntry {
-    private readonly _id?: number;
+    private readonly _id?: number | undefined;
     private readonly _description: string;
     private readonly _severity: FrictionSeverity;
     private readonly _category: FrictionCategory;
     private readonly _status: FrictionStatus;
     private readonly _tool: string;
-    private readonly _tags?: string[];
-    private readonly _lastReviewedAt?: Date;
-    private readonly _context?: string;
-    private readonly _sourceProject?: string;
+    private readonly _tags?: string[] | undefined;
+    private readonly _lastReviewedAt?: Date | undefined;
+    private readonly _context?: string | undefined;
+    private readonly _sourceProject?: string | undefined;
     private readonly _loggedAt: Date;
-    private readonly _resolvedAt?: Date;
-    private readonly _resolution?: string;
+    private readonly _resolvedAt?: Date | undefined;
+    private readonly _resolution?: string | undefined;
 
     private constructor(params: FrictionEntryParams) {
         this._id = params.id;

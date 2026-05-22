@@ -206,7 +206,7 @@ export class SyncService {
       totalSessions: totalToProcess,
       completedSessions: completedSessionIds.size,
       completedSessionIds: [...completedSessionIds],
-      lastCompletedAt: checkpoint?.lastCompletedAt ?? null,
+      lastCompletedAt: null,
     };
 
     // Process each session
@@ -221,6 +221,7 @@ export class SyncService {
       }
 
       const session = sessionsToProcess[i];
+      if (!session) continue;
 
       options.onProgress?.({
         current: i + 1 + completedSessionIds.size,
@@ -515,7 +516,7 @@ export class SyncService {
       }
 
       // Update timestamps
-      if (event.type !== "skipped" && "data" in event && event.data.timestamp) {
+      if ("data" in event && event.data.timestamp) {
         const timestamp = new Date(event.data.timestamp);
         if (!firstTimestamp || timestamp < firstTimestamp) {
           firstTimestamp = timestamp;

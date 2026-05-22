@@ -10,6 +10,10 @@
  * Legacy path:  ~/.memory-nexus (for migration detection; not overridable)
  */
 
+if (process.platform === "win32" && !process.env.HOME) {
+    process.env.HOME = process.env.USERPROFILE;
+}
+
 import { homedir } from "node:os";
 import { join } from "node:path";
 

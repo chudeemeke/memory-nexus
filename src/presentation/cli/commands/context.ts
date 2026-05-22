@@ -148,21 +148,30 @@ function useSmartContext(options: ContextCommandOptions): boolean {
   return options.format === "ai" || !!options.budget || !!options.crossProject;
 }
 
-/**
- * Execute the context command programmatically.
- *
- * Shows aggregated context for a project including recent topics,
- * entities, and session summaries. When smart context flags are set,
- * produces structured briefings from memory files. Handles its own
- * database initialization and teardown.
- *
- * @param project - Project name or substring to filter by
- * @param options - Context command options
- * @returns CommandResult with exitCode 0 (success) or 1 (not found/error)
- */
 export async function executeContextCommand(
   project: string,
   options: ContextCommandOptions
+): Promise<CommandResult> {
+  const { executeQueryCommand } = await import("./query.js");
+  process.env.MEMORY_JSON_COMMAND_OVERRIDE = "context";
+  try {
+    return await executeQueryCommand(project, {
+      ...options,
+      kind: "context",
+      scope: "project",
+    });
+  } finally {
+    delete process.env.MEMORY_JSON_COMMAND_OVERRIDE;
+  }
+}
+
+/**
+ * Internal implementation of the context query execution.
+ */
+export async function runContextInternal(
+  project: string,
+  options: ContextCommandOptions,
+  deps?: { dbPath?: string }
 ): Promise<CommandResult> {
   const startTime = performance.now();
 
@@ -177,7 +186,7 @@ export async function executeContextCommand(
     });
   }
 
-  const dbPath = options.dbPath ?? getDefaultDbPath();
+  const dbPath = deps?.dbPath ?? options.dbPath ?? getDefaultDbPath();
   const { db } = initializeDatabase({ path: dbPath });
 
   try {

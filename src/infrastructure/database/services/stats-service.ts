@@ -9,7 +9,6 @@ import type { Database } from "bun:sqlite";
 import type {
   IStatsService,
   StatsResult,
-  ProjectStats,
 } from "../../../domain/ports/services.js";
 
 /**

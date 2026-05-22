@@ -69,21 +69,21 @@ export type EntityMetadata =
   | TermMetadata;
 
 interface EntityParams {
-  id?: number;
+  id?: number | undefined;
   type: ExtractedEntityType;
   name: string;
   confidence: number;
-  metadata?: EntityMetadata;
-  createdAt?: Date;
+  metadata?: EntityMetadata | undefined;
+  createdAt?: Date | undefined;
 }
 
 export class Entity {
-  private readonly _id?: number;
+  private readonly _id?: number | undefined;
   private readonly _type: ExtractedEntityType;
   private readonly _name: string;
   private readonly _confidence: number;
-  private readonly _metadata?: EntityMetadata;
-  private readonly _createdAt?: Date;
+  private readonly _metadata?: EntityMetadata | undefined;
+  private readonly _createdAt?: Date | undefined;
 
   private constructor(params: EntityParams) {
     this._id = params.id;

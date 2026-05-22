@@ -336,7 +336,7 @@ export class SqliteSessionRepository implements ISessionRepository {
     `;
 
     const stmt = this.db.prepare(sql);
-    const rows = stmt.all(params) as SessionRow[];
+    const rows = stmt.all(params as any) as SessionRow[];
     return rows.map((row) => this.rowToSession(row));
   }
 

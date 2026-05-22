@@ -175,6 +175,6 @@ export class RecoveryService {
  */
 export function extractSessionId(sessionPath: string): string {
   const parts = sessionPath.split(/[/\\]/);
-  const filename = parts[parts.length - 1];
+  const filename = parts[parts.length - 1]!;
   return filename.replace(/\.jsonl$/, "");
 }

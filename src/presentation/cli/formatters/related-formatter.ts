@@ -7,7 +7,7 @@
 
 import type { Session } from "../../../domain/entities/session.js";
 import { formatTimestamp, formatRelativeTime } from "./timestamp-formatter.js";
-import { dim, green, yellow } from "./color.js";
+import { green, yellow } from "./color.js";
 
 /**
  * Output mode for related formatter.
@@ -289,7 +289,7 @@ class QuietRelatedFormatter implements RelatedFormatter {
 class VerboseRelatedFormatter implements RelatedFormatter {
   private detailed: DetailedRelatedFormatter;
 
-  constructor(private useColor: boolean) {
+  constructor(useColor: boolean) {
     this.detailed = new DetailedRelatedFormatter(useColor);
   }
 

@@ -21,9 +21,9 @@ import { EmbeddingResult } from "../../domain/value-objects/embedding-result.js"
 
 interface OpenAiProviderOptions {
     apiKey: string;
-    model?: string;
-    dimensions?: number;
-    baseUrl?: string;
+    model?: string | undefined;
+    dimensions?: number | undefined;
+    baseUrl?: string | undefined;
 }
 
 export class OpenAiProvider implements IEmbeddingProvider {
@@ -82,7 +82,12 @@ export class OpenAiProvider implements IEmbeddingProvider {
             model: string;
         };
 
-        const embedding = new Float32Array(json.data[0].embedding);
+        const firstData = json.data?.[0];
+        if (!firstData) {
+            throw new Error("OpenAI returned empty embeddings response");
+        }
+
+        const embedding = new Float32Array(firstData.embedding);
         return EmbeddingResult.create({
             embedding,
             model: this.model,

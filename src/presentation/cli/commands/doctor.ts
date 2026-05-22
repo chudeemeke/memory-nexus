@@ -1,37 +1,29 @@
 /**
- * Doctor Command Handler
+ * Doctor Command Handler (Wrapper)
  *
- * CLI command for checking system health and diagnosing issues.
- * Provides comprehensive diagnostic output for database, permissions,
- * hooks, configuration, and search capability.
- *
- * Exit codes:
- * - 0: All checks passed
- * - 1: Degraded but functional (e.g., sqlite-vec unavailable)
- * - 2: Broken (database inaccessible)
+ * Thin view that delegates health checks and diagnostics to executeStatusCommand.
+ * Maintained for backwards compatibility.
  */
 
 import { Command } from "commander";
+import { mkdirSync } from "node:fs";
 import type { CommandResult } from "../command-result.js";
-import { mkdirSync, existsSync } from "node:fs";
-import {
-    runHealthCheck,
-    getDefaultDbPath,
-    type HealthCheckResult,
-} from "../../../infrastructure/database/index.js";
+import { executeStatusCommand } from "./status.js";
 import {
     getConfigDir,
     getLogDir,
-} from "../../../infrastructure/hooks/index.js";
+} from "../../../infrastructure/paths.js";
+import {
+    getDefaultDbPath,
+} from "../../../infrastructure/database/index.js";
 import {
     green,
     red,
     yellow,
     dim,
-    shouldUseColor,
 } from "../formatters/color.js";
-import { getMigrationStatus } from "../../../infrastructure/migration.js";
 import { getQmdInfo } from "../../../infrastructure/external/index.js";
+import type { HealthCheckResult } from "../../../infrastructure/database/health-checker.js";
 
 /**
  * Options for the doctor command.
@@ -45,15 +37,8 @@ export interface DoctorOptions {
 
 /**
  * Runtime dependencies for executeDoctorCommand.
- *
- * Operational dependencies that tests substitute for isolation.
- * Defaults to production resolution (XDG paths via paths.ts) when omitted.
  */
 export interface DoctorCommandDeps {
-    /**
-     * Health-check overrides (db/config/logs/source paths + hook overrides).
-     * When omitted, runHealthCheck uses XDG-resolved production paths.
-     */
     healthOverrides?: {
         dbPath?: string;
         configDir?: string;
@@ -65,10 +50,6 @@ export interface DoctorCommandDeps {
 
 /**
  * Format a boolean value as a status indicator.
- *
- * @param value Boolean value
- * @param useColor Whether to apply colors
- * @returns Formatted status string
  */
 function formatStatus(value: boolean, useColor: boolean): string {
     if (value) {
@@ -79,9 +60,6 @@ function formatStatus(value: boolean, useColor: boolean): string {
 
 /**
  * Format bytes as human-readable size.
- *
- * @param bytes Number of bytes
- * @returns Formatted size string (e.g., "2.4 MB")
  */
 function formatSize(bytes: number): string {
     if (bytes === 0) return "0 B";
@@ -96,10 +74,6 @@ function formatSize(bytes: number): string {
 
 /**
  * Format integrity status with appropriate color.
- *
- * @param integrity Integrity status
- * @param useColor Whether to apply colors
- * @returns Formatted integrity string
  */
 function formatIntegrity(integrity: "ok" | "corrupted" | "unknown", useColor: boolean): string {
     switch (integrity) {
@@ -114,9 +88,6 @@ function formatIntegrity(integrity: "ok" | "corrupted" | "unknown", useColor: bo
 
 /**
  * Format relative time from a date.
- *
- * @param date Date to format
- * @returns Human-readable relative time (e.g., "2 hours ago")
  */
 function formatRelativeTime(date: Date): string {
     const now = Date.now();
@@ -141,10 +112,6 @@ function formatRelativeTime(date: Date): string {
 
 /**
  * Format health check result as readable output.
- *
- * @param result Health check result
- * @param useColor Whether to apply colors
- * @returns Formatted output string
  */
 export function formatHealthResult(result: HealthCheckResult, useColor: boolean): string {
     const lines: string[] = [];
@@ -261,9 +228,6 @@ export function formatHealthResult(result: HealthCheckResult, useColor: boolean)
 
 /**
  * Count total issues in health check result.
- *
- * @param result Health check result
- * @returns Number of issues found
  */
 function countIssues(result: HealthCheckResult): number {
     let count = 0;
@@ -279,8 +243,6 @@ function countIssues(result: HealthCheckResult): number {
     if (!result.permissions.logsDir) count++;
     if (!result.permissions.sourceDir) count++;
 
-    // Hook issues (not counted as issues - just info)
-
     // Config issues
     count += result.config.issues.length;
 
@@ -288,33 +250,7 @@ function countIssues(result: HealthCheckResult): number {
 }
 
 /**
- * Determine doctor exit code from health check result.
- *
- * @param result Health check result
- * @returns Exit code: 0=OK, 1=degraded, 2=broken
- */
-function determineExitCode(result: HealthCheckResult): number {
-    // Broken: database not accessible or corrupted
-    if (!result.database.exists || result.database.integrity === "corrupted") {
-        return 2;
-    }
-
-    // Degraded: issues found or vector not ready
-    const issueCount = countIssues(result);
-    if (issueCount > 0 || !result.searchCapability.vectorReady) {
-        return 1;
-    }
-
-    // All OK
-    return 0;
-}
-
-/**
  * Attempt automatic fixes for common issues.
- *
- * @param result Health check result
- * @param useColor Whether to apply colors
- * @returns Array of fix messages
  */
 export function attemptFixes(result: HealthCheckResult, useColor: boolean): string[] {
     const messages: string[] = [];
@@ -360,8 +296,6 @@ export function attemptFixes(result: HealthCheckResult, useColor: boolean): stri
 
 /**
  * Create the doctor command for Commander.js.
- *
- * @returns Configured Command instance
  */
 export function createDoctorCommand(): Command {
     return new Command("doctor")
@@ -375,68 +309,74 @@ export function createDoctorCommand(): Command {
 }
 
 /**
- * Execute the doctor command programmatically.
- *
- * Runs health checks on the database, hooks, FTS5, sqlite-vec, and
- * embedding provider. Handles its own database initialization.
- *
- * @param options - Doctor command options
- * @returns CommandResult with exitCode 0 (healthy), 1 (degraded), or 2 (broken)
+ * Execute the doctor command programmatically by wrapping executeStatusCommand.
  */
 export async function executeDoctorCommand(
     options: DoctorOptions,
     deps: DoctorCommandDeps = {},
 ): Promise<CommandResult> {
-    const healthResult = runHealthCheck(deps.healthOverrides);
-    const useColor = shouldUseColor();
-
-    // Determine exit code from health status
-    const exitCode = determineExitCode(healthResult);
-
     if (options.json) {
-        // Convert dates to ISO strings for JSON serialization
-        const migration = getMigrationStatus();
-        const qmdInfo = getQmdInfo();
+        const { gatherStatus } = await import("./status.js");
+        const status = await gatherStatus({
+            dbPath: deps.healthOverrides?.dbPath,
+            logPath: deps.healthOverrides?.logsDir ? join(deps.healthOverrides.logsDir, "sync.log") : undefined,
+            configPath: deps.healthOverrides?.configDir ? join(deps.healthOverrides.configDir, "config.json") : undefined,
+            hookOverrides: deps.healthOverrides?.hookOverrides,
+            fix: options.fix,
+            stats: false,
+        });
+
         const jsonResult = {
-            ...healthResult,
+            database: status.health.database,
+            permissions: status.health.permissions,
             hooks: {
-                ...healthResult.hooks,
-                lastRun: healthResult.hooks.lastRun?.toISOString() ?? null,
+                ...status.health.hooks,
+                lastRun: status.health.hooks.lastRun?.toISOString() ?? null,
             },
-            migration,
-            qmd: qmdInfo,
+            config: status.health.config,
+            embedding: status.health.embedding,
+            sqliteVec: status.health.sqliteVec,
+            searchCapability: status.health.searchCapability,
+            migration: status.migration,
+            qmd: status.qmd,
         };
+
         console.log(JSON.stringify(jsonResult, null, 2));
+
+        let exitCode = 0;
+        if (!status.health.database.exists || status.health.database.integrity === "corrupted") {
+            exitCode = 2;
+        } else {
+            const issueCount = countIssues(status.health);
+            if (issueCount > 0 || !status.health.searchCapability.vectorReady) {
+                exitCode = 1;
+            }
+        }
         return { exitCode };
     }
 
-    // Default output
-    console.log(formatHealthResult(healthResult, useColor));
-
-    // Migration status check
-    const migration = getMigrationStatus();
-    if (migration.status === "pending") {
-        console.log("");
-        console.log(yellow("Legacy data found at ~/.memory-nexus/. Run any memory command to auto-migrate.", useColor));
-    } else if (migration.status === "partial") {
-        console.log("");
-        console.log(yellow("Partial migration detected. Some data in ~/.memory-nexus/ and some in new paths. Re-run migration or check manually.", useColor));
-    }
-
-    // Attempt fixes if requested
-    if (options.fix) {
-        console.log("");
-        console.log("Attempting fixes...");
-        const fixes = attemptFixes(healthResult, useColor);
-
-        if (fixes.length === 0) {
-            console.log(dim("No automatic fixes available.", useColor));
-        } else {
-            for (const msg of fixes) {
-                console.log(msg);
-            }
+    // Map doctor options to consolidated status options for text-mode execution
+    return executeStatusCommand(
+        {
+            db: true,
+            hooks: true,
+            config: true,
+            embedding: true,
+            all: true,
+            fix: options.fix,
+            json: options.json,
+        },
+        {
+            dbPath: deps.healthOverrides?.dbPath,
+            logPath: deps.healthOverrides?.logsDir ? join(deps.healthOverrides.logsDir, "sync.log") : undefined,
+            configPath: deps.healthOverrides?.configDir ? join(deps.healthOverrides.configDir, "config.json") : undefined,
+            hookOverrides: deps.healthOverrides?.hookOverrides,
         }
-    }
+    );
+}
 
-    return { exitCode };
+// Inline helper for path resolution inside the wrapper
+function join(...parts: (string | undefined)[]): string | undefined {
+    if (parts.some(p => p === undefined)) return undefined;
+    return parts.join("/"); // Simple fallback for wrapper
 }

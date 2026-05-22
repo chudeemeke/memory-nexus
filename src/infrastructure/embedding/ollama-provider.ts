@@ -22,9 +22,9 @@ import type {
 import { EmbeddingResult } from "../../domain/value-objects/embedding-result.js";
 
 interface OllamaProviderOptions {
-    model?: string;
-    dimensions?: number;
-    baseUrl?: string;
+    model?: string | undefined;
+    dimensions?: number | undefined;
+    baseUrl?: string | undefined;
 }
 
 export class OllamaProvider implements IEmbeddingProvider {
@@ -95,7 +95,12 @@ export class OllamaProvider implements IEmbeddingProvider {
             embeddings: number[][];
         };
 
-        const embedding = new Float32Array(json.embeddings[0]);
+        const firstEmbedding = json.embeddings?.[0];
+        if (!firstEmbedding) {
+            throw new Error("Ollama returned empty embeddings response");
+        }
+
+        const embedding = new Float32Array(firstEmbedding);
         return EmbeddingResult.create({
             embedding,
             model: this.model,

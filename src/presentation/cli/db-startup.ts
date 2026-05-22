@@ -100,7 +100,7 @@ async function handleCorruptedDatabase(
   if (options.json) {
     console.error(formatErrorJson(error));
   } else {
-    console.error(formatError(error, { verbose: options.verbose }));
+    console.error(formatError(error, { verbose: options.verbose } as any));
   }
 
   // Non-TTY: can't prompt, just fail
@@ -200,7 +200,7 @@ export async function initializeDatabaseForCli(
     if (options.json) {
       console.error(formatErrorJson(nexusError));
     } else {
-      console.error(formatError(nexusError, { verbose: options.verbose }));
+      console.error(formatError(nexusError, { verbose: options.verbose } as any));
     }
     return { success: false, error: nexusError };
   }

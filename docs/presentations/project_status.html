@@ -1,0 +1,2132 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Memory Nexus - Engineering Oversight Suite</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    /* Premium Cupertino & Airbnb Modern Styling System */
+    :root[data-theme="light"] {
+      --bg-base: #f5f5f7;
+      --bg-surface: rgba(255, 255, 255, 0.85);
+      --bg-surface-solid: #ffffff;
+      --bg-surface-hover: rgba(255, 255, 255, 0.95);
+      --border-light: rgba(0, 0, 0, 0.06);
+      --border-strong: rgba(0, 0, 0, 0.12);
+      
+      --color-primary: #0071e3;
+      --color-primary-rgb: 0, 113, 227;
+      --color-emerald: #34c759;
+      --color-purple: #af52de;
+      --color-purple-rgb: 175, 82, 222;
+      --color-amber: #ff9500;
+      --color-rose: #ff3b30;
+      
+      --text-main: #1d1d1f;
+      --text-secondary: #48484a;
+      --text-muted: #86868b;
+      
+      --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.03);
+      --shadow-md: 0 10px 24px rgba(0, 0, 0, 0.05);
+      --shadow-lg: 0 20px 40px rgba(0, 0, 0, 0.08);
+      
+      --blur-strength: 20px;
+      --bg-nav: rgba(255, 255, 255, 0.7);
+    }
+
+    :root[data-theme="dark"] {
+      --bg-base: #000000;
+      --bg-surface: rgba(22, 22, 23, 0.8);
+      --bg-surface-solid: #1d1d1f;
+      --bg-surface-hover: rgba(45, 45, 47, 0.85);
+      --border-light: rgba(255, 255, 255, 0.06);
+      --border-strong: rgba(255, 255, 255, 0.12);
+      
+      --color-primary: #2997ff;
+      --color-primary-rgb: 41, 151, 255;
+      --color-emerald: #30d158;
+      --color-purple: #bf5af2;
+      --color-purple-rgb: 191, 90, 242;
+      --color-amber: #ffd60a;
+      --color-rose: #ff453a;
+      
+      --text-main: #f5f5f7;
+      --text-secondary: #a1a1a6;
+      --text-muted: #86868b;
+      
+      --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.2);
+      --shadow-md: 0 10px 30px rgba(0, 0, 0, 0.35);
+      --shadow-lg: 0 24px 60px rgba(0, 0, 0, 0.5);
+      
+      --blur-strength: 24px;
+      --bg-nav: rgba(22, 22, 23, 0.75);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg-base);
+      color: var(--text-main);
+      line-height: 1.5;
+      letter-spacing: -0.015em;
+      transition: background-color 0.4s cubic-bezier(0.16, 1, 0.3, 1), color 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+      padding: 2rem 1.5rem;
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 1240px;
+      margin: 0 auto;
+    }
+
+    /* Apple-style floating frosted header */
+    header {
+      background: var(--bg-nav);
+      backdrop-filter: blur(var(--blur-strength));
+      -webkit-backdrop-filter: blur(var(--blur-strength));
+      border: 1px solid var(--border-light);
+      border-radius: 20px;
+      padding: 1rem 1.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2.5rem;
+      box-shadow: var(--shadow-sm);
+      position: sticky;
+      top: 1rem;
+      z-index: 100;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.25rem;
+      font-weight: 700;
+      letter-spacing: -0.03em;
+    }
+
+    .brand svg {
+      color: var(--color-primary);
+      filter: drop-shadow(0 2px 8px rgba(var(--color-primary-rgb), 0.2));
+    }
+
+    .meta-indicators {
+      display: flex;
+      align-items: center;
+      gap: 1.25rem;
+    }
+
+    .branch-badge {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      background: rgba(var(--color-purple-rgb), 0.08);
+      border: 1px solid rgba(var(--color-purple-rgb), 0.15);
+      color: var(--color-purple);
+      font-size: 0.75rem;
+      font-weight: 600;
+      padding: 0.3rem 0.65rem;
+      border-radius: 8px;
+    }
+
+    /* Apple sun/moon theme toggler slider */
+    .theme-toggle-container {
+      background: var(--border-light);
+      border-radius: 99px;
+      padding: 2px;
+      cursor: pointer;
+      position: relative;
+      width: 58px;
+      height: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border: 1px solid rgba(0, 0, 0, 0.03);
+    }
+
+    .theme-toggle-dot {
+      width: 24px;
+      height: 24px;
+      background: #ffffff;
+      border-radius: 50%;
+      position: absolute;
+      left: 2px;
+      transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.2s;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    :root[data-theme="dark"] .theme-toggle-dot {
+      transform: translateX(28px);
+      background: #1c1c1e;
+    }
+
+    .toggle-icon {
+      font-size: 11px;
+      pointer-events: none;
+    }
+
+    /* Title section & Segmented navigation control */
+    .hero-panel {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      margin-bottom: 2.5rem;
+      flex-wrap: wrap;
+      gap: 1.5rem;
+    }
+
+    .hero-title h1 {
+      font-family: 'Outfit', sans-serif;
+      font-size: 2.5rem;
+      font-weight: 800;
+      letter-spacing: -0.04em;
+      line-height: 1.15;
+    }
+
+    .hero-title p {
+      font-size: 1.05rem;
+      color: var(--text-secondary);
+      margin-top: 0.35rem;
+    }
+
+    /* macOS Segmented Tab Bar */
+    .tab-bar-capsule {
+      background: var(--border-light);
+      border-radius: 12px;
+      padding: 4px;
+      display: flex;
+      position: relative;
+      border: 1px solid rgba(0, 0, 0, 0.02);
+    }
+
+    .tab-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+      font-weight: 600;
+      padding: 0.6rem 1.25rem;
+      border-radius: 8px;
+      cursor: pointer;
+      z-index: 2;
+      transition: color 0.25s;
+    }
+
+    .tab-btn.active {
+      color: var(--text-main);
+    }
+
+    .tab-slider {
+      position: absolute;
+      top: 4px;
+      bottom: 4px;
+      left: 4px;
+      background: var(--bg-surface-solid);
+      border-radius: 8px;
+      z-index: 1;
+      transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), width 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 4px 10px rgba(0,0,0,0.04);
+    }
+
+    /* View containers */
+    .view-section {
+      display: none;
+    }
+
+    .view-section.active {
+      display: block;
+      animation: viewReveal 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    @keyframes viewReveal {
+      from { opacity: 0; transform: translateY(12px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Bento Box Dashboard Grid */
+    .bento-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      grid-auto-rows: minmax(170px, auto);
+      gap: 1.5rem;
+      margin-bottom: 2.5rem;
+    }
+
+    @media (max-width: 1024px) {
+      .bento-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 640px) {
+      .bento-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .bento-card {
+      background: var(--bg-surface);
+      backdrop-filter: blur(var(--blur-strength));
+      -webkit-backdrop-filter: blur(var(--blur-strength));
+      border: 1px solid var(--border-light);
+      border-radius: 24px;
+      padding: 1.5rem;
+      box-shadow: var(--shadow-sm);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s ease, border-color 0.3s;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .bento-card:hover {
+      transform: translateY(-3px);
+      box-shadow: var(--shadow-md);
+      border-color: var(--border-strong);
+    }
+
+    /* Double wide card option */
+    .bento-card.wide {
+      grid-column: span 2;
+    }
+
+    @media (max-width: 640px) {
+      .bento-card.wide {
+        grid-column: span 1;
+      }
+    }
+
+    /* Bento metric styles */
+    .card-header-small {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.5rem;
+    }
+
+    .card-title-small {
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    .bento-big-stat {
+      font-family: 'Outfit', sans-serif;
+      font-size: 2.75rem;
+      font-weight: 800;
+      letter-spacing: -0.04em;
+      line-height: 1;
+      margin: 0.5rem 0;
+      display: flex;
+      align-items: baseline;
+      gap: 0.25rem;
+    }
+
+    .bento-big-stat span.unit {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+
+    .bento-desc {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
+    /* Circular SVG Gauge Chart */
+    .radial-gauge-container {
+      position: absolute;
+      right: 1.25rem;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 86px;
+      height: 86px;
+    }
+
+    .radial-svg {
+      transform: rotate(-90deg);
+      width: 100%;
+      height: 100%;
+    }
+
+    .radial-bg {
+      fill: none;
+      stroke: var(--border-light);
+      stroke-width: 7;
+    }
+
+    .radial-bar {
+      fill: none;
+      stroke: var(--color-primary);
+      stroke-width: 7.5;
+      stroke-linecap: round;
+      stroke-dasharray: 232.4; /* 2 * PI * r (r=37) */
+      stroke-dashoffset: 232.4;
+      transition: stroke-dashoffset 0.8s cubic-bezier(0.16, 1, 0.3, 1), stroke 0.4s;
+    }
+
+    /* Spotlight Spotlight box */
+    .spotlight-box {
+      background: linear-gradient(135deg, rgba(var(--color-primary-rgb), 0.04) 0%, rgba(var(--color-purple-rgb), 0.03) 100%);
+      border: 1.5px solid rgba(var(--color-primary-rgb), 0.18);
+      box-shadow: 0 4px 20px rgba(var(--color-primary-rgb), 0.05);
+    }
+
+    .pulsing-indicator {
+      width: 8px;
+      height: 8px;
+      background: var(--color-emerald);
+      border-radius: 50%;
+      display: inline-block;
+      position: relative;
+    }
+
+    .pulsing-indicator::after {
+      content: '';
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      background: inherit;
+      border-radius: inherit;
+      animation: pulseGlow 2s infinite ease-out;
+      left: 0;
+      top: 0;
+    }
+
+    @keyframes pulseGlow {
+      from { transform: scale(1); opacity: 0.8; }
+      to { transform: scale(2.6); opacity: 0; }
+    }
+
+    /* Interactive Simulator Notification Strip */
+    .simulator-strip {
+      background: linear-gradient(90deg, #af52de 0%, #0071e3 100%);
+      border-radius: 14px;
+      padding: 0.75rem 1.25rem;
+      margin-bottom: 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      color: #ffffff;
+      font-size: 0.9rem;
+      font-weight: 500;
+      box-shadow: var(--shadow-sm);
+      transform: scaleY(0);
+      transform-origin: top;
+      height: 0;
+      opacity: 0;
+      margin-top: -1.5rem;
+      pointer-events: none;
+      transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s, height 0.3s, margin 0.3s;
+    }
+
+    .simulator-strip.active {
+      transform: scaleY(1);
+      height: auto;
+      opacity: 1;
+      margin-top: 0;
+      margin-bottom: 2rem;
+      pointer-events: all;
+    }
+
+    .simulator-btn-reset {
+      background: rgba(255, 255, 255, 0.2);
+      border: 1px solid rgba(255, 255, 255, 0.4);
+      color: #ffffff;
+      padding: 0.35rem 0.85rem;
+      border-radius: 8px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .simulator-btn-reset:hover {
+      background: rgba(255, 255, 255, 0.3);
+    }
+
+    /* Main Dashboard Panel Layout */
+    .view-layout-split {
+      display: grid;
+      grid-template-columns: 7fr 5fr;
+      gap: 2rem;
+    }
+
+    @media (max-width: 1024px) {
+      .view-layout-split {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Panels & Cards */
+    .glass-panel {
+      background: var(--bg-surface);
+      backdrop-filter: blur(var(--blur-strength));
+      -webkit-backdrop-filter: blur(var(--blur-strength));
+      border: 1px solid var(--border-light);
+      border-radius: 28px;
+      padding: 2.25rem;
+      box-shadow: var(--shadow-sm);
+      margin-bottom: 2rem;
+    }
+
+    .glass-panel-header {
+      margin-bottom: 1.75rem;
+      border-bottom: 1px solid var(--border-light);
+      padding-bottom: 1rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .glass-panel-title {
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.35rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+
+    /* Progress and Activity Bars */
+    .progress-bar-stack {
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+
+    .bar-item {
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+    }
+
+    .bar-labels {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+
+    .bar-track {
+      background: var(--border-light);
+      height: 7px;
+      border-radius: 99px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .bar-fill {
+      height: 100%;
+      border-radius: 99px;
+      transition: width 0.6s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.4s;
+    }
+
+    /* Timelines & Checklists */
+    .roadmap-section-title {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--text-secondary);
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      margin-bottom: 1.25rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .roadmap-timeline {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+      position: relative;
+    }
+
+    .roadmap-card {
+      border: 1px solid var(--border-light);
+      background: var(--bg-surface-solid);
+      border-radius: 18px;
+      padding: 1.25rem 1.5rem;
+      transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.25s;
+    }
+
+    .roadmap-card:hover {
+      border-color: var(--border-strong);
+      transform: translateY(-2px);
+    }
+
+    .roadmap-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 0.75rem;
+    }
+
+    .roadmap-card-title-group h4 {
+      font-size: 1.05rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+
+    .roadmap-card-title-group p {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-top: 0.1rem;
+    }
+
+    .badge-pill-tdd {
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      padding: 0.25rem 0.5rem;
+      border-radius: 6px;
+    }
+
+    .badge-pill-tdd.red { background: rgba(255, 59, 48, 0.08); color: var(--color-rose); }
+    .badge-pill-tdd.green { background: rgba(48, 209, 88, 0.08); color: var(--color-emerald); }
+    .badge-pill-tdd.refactor { background: rgba(175, 82, 222, 0.08); color: var(--color-purple); }
+
+    /* Checkbox & Interactive elements */
+    .roadmap-checklist {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.65rem;
+      margin-top: 0.85rem;
+      background: var(--bg-base);
+      border-radius: 12px;
+      padding: 0.85rem 1rem;
+      border: 1px solid var(--border-light);
+    }
+
+    .roadmap-check-item {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-size: 0.85rem;
+      color: var(--text-main);
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .roadmap-check-item:hover .checkbox-custom {
+      border-color: var(--text-secondary);
+    }
+
+    .checkbox-custom {
+      width: 18px;
+      height: 18px;
+      border-radius: 6px;
+      border: 1.5px solid var(--border-strong);
+      background: var(--bg-surface-solid);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: background-color 0.2s, border-color 0.2s, color 0.1s;
+      font-size: 11px;
+      font-weight: bold;
+      color: transparent;
+    }
+
+    .roadmap-check-item.checked .checkbox-custom {
+      background-color: var(--color-emerald);
+      border-color: var(--color-emerald);
+      color: #ffffff;
+    }
+
+    .roadmap-check-item.checked .checkbox-custom::after {
+      content: '✓';
+    }
+
+    .roadmap-check-item.active-td .checkbox-custom {
+      background-color: rgba(var(--color-primary-rgb), 0.08);
+      border-color: var(--color-primary);
+      color: var(--color-primary);
+    }
+
+    .roadmap-check-item.active-td .checkbox-custom::after {
+      content: '●';
+      font-size: 8px;
+    }
+
+    .roadmap-check-item.checked span.task-text {
+      text-decoration: line-through;
+      opacity: 0.45;
+    }
+
+    /* Hex Explorer Layer Pill selector */
+    .filter-capsule-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.65rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .filter-pill {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-light);
+      color: var(--text-secondary);
+      padding: 0.55rem 1.15rem;
+      border-radius: 99px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.25s, border-color 0.25s, color 0.25s;
+    }
+
+    .filter-pill:hover {
+      background: var(--bg-surface-hover);
+      color: var(--text-main);
+    }
+
+    .filter-pill.active {
+      background: var(--color-primary);
+      border-color: var(--color-primary);
+      color: #ffffff;
+      box-shadow: 0 4px 12px rgba(var(--color-primary-rgb), 0.25);
+    }
+
+    /* Live Search bar styling */
+    .search-container {
+      position: relative;
+      margin-bottom: 2rem;
+    }
+
+    .search-input-field {
+      width: 100%;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-light);
+      border-radius: 16px;
+      padding: 0.9rem 1.25rem 0.9rem 2.75rem;
+      font-size: 0.95rem;
+      color: var(--text-main);
+      box-shadow: var(--shadow-sm);
+      transition: border-color 0.3s, box-shadow 0.3s;
+      outline: none;
+    }
+
+    .search-input-field:focus {
+      border-color: var(--border-strong);
+      box-shadow: var(--shadow-md);
+    }
+
+    .search-icon-svg {
+      position: absolute;
+      left: 1rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-muted);
+      pointer-events: none;
+    }
+
+    /* File grid */
+    .explorer-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+      gap: 1.25rem;
+    }
+
+    .file-node-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-light);
+      border-radius: 20px;
+      padding: 1.35rem;
+      box-shadow: var(--shadow-sm);
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      min-height: 160px;
+      transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.25s, box-shadow 0.25s;
+    }
+
+    .file-node-card:hover {
+      transform: translateY(-3px);
+      border-color: var(--border-strong);
+      box-shadow: var(--shadow-md);
+    }
+
+    .card-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 0.6rem;
+    }
+
+    .file-node-name {
+      font-family: 'Outfit', sans-serif;
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .file-node-path {
+      font-family: 'Fira Code', monospace;
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      word-break: break-all;
+      margin-top: 0.2rem;
+    }
+
+    .badge-status {
+      font-size: 0.65rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      padding: 0.2rem 0.5rem;
+      border-radius: 6px;
+      letter-spacing: 0.05em;
+    }
+
+    .badge-status.done { background: rgba(48, 209, 88, 0.08); color: var(--color-emerald); }
+    .badge-status.active { background: rgba(41, 151, 255, 0.08); color: var(--color-primary); }
+    .badge-status.upcoming { background: var(--border-light); color: var(--text-secondary); }
+
+    .card-bottom {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 1.25rem;
+      border-top: 1px solid var(--border-light);
+      padding-top: 0.75rem;
+      font-size: 0.725rem;
+      color: var(--text-secondary);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+
+    /* Airbnb-style slide Drawer Panel */
+    .drawer-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.3);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      z-index: 1000;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .drawer-overlay.open {
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    .drawer-aside {
+      position: fixed;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      width: 100%;
+      max-width: 520px;
+      background: var(--bg-surface-solid);
+      border-left: 1px solid var(--border-light);
+      box-shadow: var(--shadow-lg);
+      z-index: 1001;
+      transform: translateX(100%);
+      transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .drawer-overlay.open .drawer-aside {
+      transform: translateX(0);
+    }
+
+    .drawer-header {
+      padding: 1.75rem 2rem;
+      border-bottom: 1px solid var(--border-light);
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      position: relative;
+    }
+
+    .drawer-close {
+      background: var(--border-light);
+      border: none;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text-main);
+      transition: background 0.2s;
+    }
+
+    .drawer-close:hover {
+      background: var(--border-strong);
+    }
+
+    .drawer-title-group h3 {
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.45rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+
+    .drawer-copy-path-bar {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: var(--bg-base);
+      border: 1px solid var(--border-light);
+      padding: 0.6rem 0.85rem;
+      border-radius: 10px;
+      margin-top: 0.5rem;
+      cursor: pointer;
+      font-family: 'Fira Code', monospace;
+      font-size: 0.725rem;
+      color: var(--text-secondary);
+      transition: background 0.2s, border-color 0.2s;
+    }
+
+    .drawer-copy-path-bar:hover {
+      background: var(--border-light);
+      border-color: var(--border-strong);
+    }
+
+    .drawer-body {
+      padding: 2rem;
+      overflow-y: auto;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 1.75rem;
+    }
+
+    .drawer-section-title {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 0.75rem;
+      border-bottom: 1px solid var(--border-light);
+      padding-bottom: 0.25rem;
+    }
+
+    /* Terminal Console Pane */
+    .terminal-container {
+      background: #050507;
+      border-radius: 20px;
+      border: 1px solid rgba(255, 255, 255, 0.04);
+      padding: 1.25rem 1.5rem;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .terminal-header {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      margin-bottom: 1rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+      padding-bottom: 0.6rem;
+    }
+
+    .term-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+    }
+
+    .term-dot.red { background: #ff5f56; }
+    .term-dot.yellow { background: #ffbd2e; }
+    .term-dot.green { background: #27c93f; }
+
+    .terminal-pane {
+      font-family: 'Fira Code', monospace;
+      color: #94a3b8;
+      font-size: 0.8rem;
+      line-height: 1.5;
+      overflow-x: auto;
+      max-height: 350px;
+      white-space: pre-wrap;
+    }
+
+    .terminal-pane span.green-text {
+      color: var(--color-emerald);
+      font-weight: 700;
+    }
+
+    .terminal-pane span.blue-text {
+      color: var(--color-primary);
+      font-weight: 700;
+    }
+
+    /* Footer */
+    footer {
+      text-align: center;
+      margin-top: 5rem;
+      border-top: 1px solid var(--border-light);
+      padding-top: 2rem;
+      color: var(--text-muted);
+      font-size: 0.85rem;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  
+  <!-- Apple Frosted Header -->
+  <header>
+    <div class="brand">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M2 17L12 22L22 17" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M2 12L12 17L22 12" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      Memory Nexus Status
+    </div>
+    
+    <div class="meta-indicators">
+      <div class="branch-badge">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <circle cx="18" cy="18" r="3"></circle>
+          <circle cx="6" cy="6" r="3"></circle>
+          <path d="M13 6h3a2 2 0 0 1 2 2v7"></path>
+          <line x1="6" y1="9" x2="6" y2="21"></line>
+        </svg>
+        main
+      </div>
+      
+      <!-- Apple Slide Theme Switcher -->
+      <div class="theme-toggle-container" id="theme-toggler" title="Switch Theme">
+        <div class="theme-toggle-dot">
+          <span class="toggle-icon">🌙</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Title & macOS segmented tab navigation -->
+  <section class="hero-panel">
+    <div class="hero-title">
+      <h1>Engineering Dashboard</h1>
+      <p>Hexagonal consolidation, programmatic sandboxing, and surface alignment status.</p>
+    </div>
+    
+    <!-- macOS segmented tab bar -->
+    <div class="tab-bar-capsule">
+      <div class="tab-slider" id="tab-pill-slider"></div>
+      <button class="tab-btn active" data-target="view-dashboard">Overview</button>
+      <button class="tab-btn" data-target="view-checklists">TDD Roadmap</button>
+      <button class="tab-btn" data-target="view-explorer">Hex Explorer</button>
+      <button class="tab-btn" data-target="view-terminal">Terminal</button>
+    </div>
+  </section>
+
+  <!-- Interactive Simulation Strip -->
+  <div class="simulator-strip" id="interactive-strip">
+    <div style="display:flex; align-items:center; gap:0.50rem;">
+      <span class="pulsing-indicator" style="background:#ffffff;"></span>
+      <span>Simulator Active Mode: Recalculating refactoring state and SVG gauges in real-time.</span>
+    </div>
+    <button class="simulator-btn-reset" id="reset-simulator-trigger">Reset Baseline</button>
+  </div>
+
+  <!-- VIEW 1: OVERVIEW -->
+  <div id="view-dashboard" class="view-section active">
+    
+    <!-- Bento Grid metrics panel -->
+    <section class="bento-grid">
+      
+      <!-- Card 1: Refactoring Completion -->
+      <div class="bento-card">
+        <div>
+          <div class="card-header-small">
+            <span class="card-title-small">Refactoring Progress</span>
+          </div>
+          <div class="bento-big-stat" id="stat-progress-val">73<span class="unit">%</span></div>
+        </div>
+        <div class="bento-desc" id="stat-progress-desc">17 of 23 target files completed</div>
+        
+        <!-- SVG Radial Ring Chart -->
+        <div class="radial-gauge-container">
+          <svg class="radial-svg" viewBox="0 0 80 80">
+            <circle class="radial-bg" cx="40" cy="40" r="37"></circle>
+            <circle class="radial-bar" id="ring-progress" cx="40" cy="40" r="37"></circle>
+          </svg>
+        </div>
+      </div>
+
+      <!-- Card 2: Test Suite Statement Coverage -->
+      <div class="bento-card">
+        <div>
+          <div class="card-header-small">
+            <span class="card-title-small">TDD Core Coverage</span>
+          </div>
+          <div class="bento-big-stat" id="stat-coverage-val">94.8<span class="unit">%</span></div>
+        </div>
+        <div class="bento-desc" id="stat-coverage-desc">Targeting 95%+ individually</div>
+
+        <!-- SVG Radial Ring Chart -->
+        <div class="radial-gauge-container">
+          <svg class="radial-svg" viewBox="0 0 80 80">
+            <circle class="radial-bg" cx="40" cy="40" r="37"></circle>
+            <circle class="radial-bar" id="ring-coverage" cx="40" cy="40" r="37" style="stroke: var(--color-rose);"></circle>
+          </svg>
+        </div>
+      </div>
+
+      <!-- Card 3: Test Verification Count -->
+      <div class="bento-card">
+        <div>
+          <div class="card-header-small">
+            <span class="card-title-small">Passing Validations</span>
+            <span class="pulsing-indicator"></span>
+          </div>
+          <div class="bento-big-stat" style="color: var(--color-emerald);">3,551</div>
+        </div>
+        <div class="bento-desc">100% tests executing successfully</div>
+      </div>
+
+      <!-- Card 4: Immediate Task Focus Spotlight -->
+      <div class="bento-card spotlight-box">
+        <div>
+          <div class="card-header-small">
+            <span class="card-title-small" style="color: var(--color-primary);">Current Sprint Focus</span>
+          </div>
+          <div class="file-node-name" style="font-size: 1.15rem; margin-top: 0.5rem;" id="spotlight-title">query.ts</div>
+          <div class="file-node-path" id="spotlight-path">src/presentation/cli/commands/query.ts</div>
+        </div>
+        <div class="bento-desc" style="color: var(--text-secondary); margin-top: 0.5rem;" id="spotlight-desc">Consolidating read interfaces under unified query primitive.</div>
+      </div>
+
+    </section>
+
+    <!-- split details -->
+    <div class="view-layout-split">
+      
+      <!-- Left breakdown: Active Layer Roadmaps -->
+      <section class="glass-panel" style="margin-bottom:0;">
+        <div class="glass-panel-header">
+          <h3 class="glass-panel-title">Consolidation Progress Nodes</h3>
+        </div>
+        
+        <div class="roadmap-timeline" id="overview-roadmap-list">
+          <!-- Rendered dynamically -->
+        </div>
+      </section>
+
+      <!-- Right sidebar details -->
+      <aside>
+        
+        <!-- Architecture layers progress -->
+        <div class="glass-panel" style="padding: 1.75rem 2rem;">
+          <div class="glass-panel-header" style="margin-bottom:1.25rem; padding-bottom:0.75rem;">
+            <h3 class="glass-panel-title" style="font-size:1.1rem;">Architectural Layer Health</h3>
+          </div>
+          
+          <div class="progress-bar-stack" id="layers-bars-container">
+            <!-- Rendered dynamically -->
+          </div>
+        </div>
+
+        <!-- sandboxing integrity check -->
+        <div class="glass-panel" style="padding: 1.75rem 2rem;">
+          <div class="glass-panel-header" style="margin-bottom:1rem; padding-bottom:0.6rem;">
+            <h3 class="glass-panel-title" style="font-size:1.1rem;">Active Platform Directives</h3>
+          </div>
+          
+          <div style="display:flex; flex-direction:column; gap:0.85rem; font-size:0.825rem;">
+            <div style="display:flex; align-items:center; gap:0.65rem;">
+              <span class="pulsing-indicator" style="background: var(--color-emerald); flex-shrink:0;"></span>
+              <span style="color:var(--text-secondary);">Programmatic sandboxing successfully isolated on Windows environment.</span>
+            </div>
+            <div style="display:flex; align-items:center; gap:0.65rem;">
+              <span class="pulsing-indicator" style="background: var(--color-emerald); flex-shrink:0;"></span>
+              <span style="color:var(--text-secondary);">SQLite file concurrency locks bypass enabled via process mocks.</span>
+            </div>
+            <div style="display:flex; align-items:center; gap:0.65rem;">
+              <span class="pulsing-indicator" style="background: var(--color-purple); flex-shrink:0;"></span>
+              <span style="color:var(--text-secondary);">Targeting 95%+ coverage requirement on each layer autonomously.</span>
+            </div>
+          </div>
+        </div>
+
+      </aside>
+
+    </div>
+  </div>
+
+  <!-- VIEW 2: DETAILED CHECKSLISTS -->
+  <div id="view-checklists" class="view-section">
+    <div class="glass-panel">
+      <div class="glass-panel-header">
+        <div>
+          <h3 class="glass-panel-title">TDD Engineering Roadmap</h3>
+          <p style="font-size:0.85rem; color:var(--text-muted); margin-top:0.15rem;">Complete, high-fidelity developer checklist mapped to Red-Green-Refactor execution loops.</p>
+        </div>
+      </div>
+
+      <!-- Timeline sections separated by done / remaining -->
+      <div>
+        <div class="roadmap-section-title" style="color: var(--color-emerald);">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+          Phase 1: Completed Sandboxing & Health Surface
+        </div>
+        <div class="roadmap-timeline" id="checklist-timeline-completed" style="margin-bottom: 2.5rem;">
+          <!-- Renders completed nodes dynamically -->
+        </div>
+
+        <div class="roadmap-section-title" style="color: var(--color-primary);">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+          Phase 2: Outstanding Query Consolidation & TDD Scaling
+        </div>
+        <div class="roadmap-timeline" id="checklist-timeline-outstanding">
+          <!-- Renders outstanding nodes dynamically -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- VIEW 3: HEX EXPLORER -->
+  <div id="view-explorer" class="view-section">
+    
+    <!-- Hexagonal Layer Pills selectors -->
+    <div class="filter-capsule-row">
+      <button class="filter-pill active" data-layer="all">All Files</button>
+      <button class="filter-pill" data-layer="domain">Domain Core</button>
+      <button class="filter-pill" data-layer="application">Application Services</button>
+      <button class="filter-pill" data-layer="infrastructure">Infrastructure Layer</button>
+      <button class="filter-pill" data-layer="presentation">Presentation Layer</button>
+      <button class="filter-pill" data-layer="testing">Tests & Docs</button>
+    </div>
+
+    <!-- Live Search field -->
+    <div class="search-container">
+      <svg class="search-icon-svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <circle cx="11" cy="11" r="8"></circle>
+        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+      </svg>
+      <input type="text" id="explorer-search-field" class="search-input-field" placeholder="Search files, layer, path, status, or phase...">
+    </div>
+
+    <!-- File Grid explorer -->
+    <div class="explorer-grid" id="explorer-files-container">
+      <!-- Renders dynamically -->
+    </div>
+
+  </div>
+
+  <!-- VIEW 4: TERMINAL CONSOLE -->
+  <div id="view-terminal" class="view-section">
+    <div class="glass-panel">
+      <div class="glass-panel-header">
+        <h3 class="glass-panel-title">Active Test Suite Execution logs</h3>
+      </div>
+      
+      <div class="terminal-container">
+        <div class="terminal-header">
+          <div class="term-dot red"></div>
+          <div class="term-dot yellow"></div>
+          <div class="term-dot green"></div>
+          <span style="font-family:'Fira Code',monospace; font-size:0.75rem; color:#475569; margin-left:0.5rem;">bun test --coverage</span>
+        </div>
+        <pre class="terminal-pane" id="terminal-stream-logs">
+<span class="green-text">pass</span>  tests/integration/programmatic-api.test.ts
+<span class="green-text">pass</span>  src/application/services/backfill-service.test.ts
+<span class="green-text">pass</span>  src/application/services/embedding-service.test.ts
+<span class="green-text">pass</span>  src/application/services/smart-context-service.test.ts
+<span class="green-text">pass</span>  src/presentation/cli/commands/status.test.ts
+<span class="green-text">pass</span>  src/presentation/cli/commands/doctor.test.ts
+<span class="green-text">pass</span>  src/presentation/cli/commands/stats.test.ts
+<span class="blue-text">todo</span>  tests/integration/query-primitive.test.ts (Pending consolidation)
+<span class="blue-text">todo</span>  tests/integration/unified-status.test.ts (Pending consolidation)
+
+<span class="green-text">3,551 passing</span> (0 failing)
+Ran 3551 tests across 158 files. [41.71s]
+
+Statement Coverage: <span style="color:var(--color-rose);">94.84%</span> (Scaling towards 95%+)
+Line Coverage: <span class="green-text">96.75%</span>
+Branch Coverage: <span class="green-text">95.12%</span>
+        </pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- Airbnb-Style Sliding Inspector Drawer -->
+  <div class="drawer-overlay" id="drawer-overlay-display">
+    <aside class="drawer-aside" id="drawer-aside-display">
+      
+      <!-- Drawer Header -->
+      <div class="drawer-header">
+        <div class="drawer-title-group">
+          <h3 id="drawer-file-title">file_name.ts</h3>
+          <div class="drawer-copy-path-bar" id="drawer-copy-trigger" title="Click to Copy Path">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+              <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+            </svg>
+            <span id="drawer-file-path">src/path/to/file_name.ts</span>
+          </div>
+        </div>
+        <button class="drawer-close" id="drawer-close-trigger">×</button>
+      </div>
+
+      <!-- Drawer Body -->
+      <div class="drawer-body">
+        
+        <div>
+          <div class="drawer-section-title">Architectural Alignment</div>
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <span style="font-weight:600; font-size:0.9rem;" id="drawer-layer-display">INFRASTRUCTURE LAYER</span>
+            <span class="badge-status" id="drawer-status-badge">active</span>
+          </div>
+        </div>
+
+        <div>
+          <div class="drawer-section-title">TDD Stage</div>
+          <div style="display:flex; gap:0.5rem;" id="drawer-tdd-stage-display">
+            <!-- Dynamic badges -->
+          </div>
+        </div>
+
+        <div>
+          <div class="drawer-section-title">Unit test coverage</div>
+          <div style="display:flex; justify-content:space-between; margin-top:0.25rem;">
+            <span style="font-size:0.85rem; color:var(--text-secondary);">Statement Target Match</span>
+            <span style="font-weight:700; font-size:0.95rem; color: var(--color-emerald);" id="drawer-coverage-display">95.00%</span>
+          </div>
+        </div>
+
+        <div>
+          <div class="drawer-section-title">Granular TDD checklist</div>
+          <ul class="roadmap-checklist" id="drawer-checklist-display">
+            <!-- Dynamic list of interactive checklists -->
+          </ul>
+        </div>
+
+      </div>
+    </aside>
+  </div>
+
+  <footer>
+    <p>Memory Nexus Refactoring Suite • Designed in the Cupertino & Airbnb Spirit</p>
+  </footer>
+
+</div>
+
+<!-- INTERACTIVE DASHBOARD SYSTEM MOTOR -->
+<script>
+  // Complete Phase 32.5 data model mapping every single completed and remaining file and test
+  const filesData = [
+    // Completed Administrative Health files
+    {
+      name: "status.ts",
+      path: "src/presentation/cli/commands/status.ts",
+      layer: "presentation",
+      status: "done",
+      coverage: "89.47%",
+      baselineCoverage: 89.47,
+      tasks: [
+        { id: "status-1", desc: "Rewrite executeStatusCommand to support all section flags", done: true },
+        { id: "status-2", desc: "Consolidate hook installation scans and active checks", done: true },
+        { id: "status-3", desc: "Emulate programmatic health options and output JSON envelopes", done: true }
+      ]
+    },
+    {
+      name: "doctor.ts",
+      path: "src/presentation/cli/commands/doctor.ts",
+      layer: "presentation",
+      status: "done",
+      coverage: "94.25%",
+      baselineCoverage: 94.25,
+      tasks: [
+        { id: "doc-1", desc: "Delegate execution blocks programmatically to consolidated status surface", done: true },
+        { id: "doc-2", desc: "Maintain absolute backward compatibility for command wrapper arguments", done: true }
+      ]
+    },
+    {
+      name: "stats.ts",
+      path: "src/presentation/cli/commands/stats.ts",
+      layer: "presentation",
+      status: "done",
+      coverage: "100.00%",
+      baselineCoverage: 100.0,
+      tasks: [
+        { id: "stats-1", desc: "Wrapper command forwarding queries into consolidated status stats option", done: true }
+      ]
+    },
+    // Completed Sandboxed Test files
+    {
+      name: "programmatic-api.test.ts",
+      path: "tests/integration/programmatic-api.test.ts",
+      layer: "testing",
+      status: "done",
+      coverage: "97.28%",
+      baselineCoverage: 97.28,
+      tasks: [
+        { id: "papi-1", desc: "Implement process.env.XDG_DATA_HOME mocks for database sandboxing", done: true },
+        { id: "papi-2", desc: "Increase async execution limits to 30s/60s avoiding timeouts", done: true }
+      ]
+    },
+    // Completed Application services
+    {
+      name: "backfill-service.ts",
+      path: "src/application/services/backfill-service.ts",
+      layer: "application",
+      status: "done",
+      coverage: "100.00%",
+      baselineCoverage: 100.0,
+      tasks: [
+        { id: "backfill-1", desc: "Handle empty array checks on empty or non-existent session records", done: true },
+        { id: "backfill-2", desc: "Resolve strict exactOptionalPropertyTypes typescript compiler rules", done: true }
+      ]
+    },
+    {
+      name: "embedding-service.ts",
+      path: "src/application/services/embedding-service.ts",
+      layer: "application",
+      status: "done",
+      coverage: "100.00%",
+      baselineCoverage: 100.0,
+      tasks: [
+        { id: "embed-1", desc: "Establish type narrowers protecting database ingestion bounds", done: true }
+      ]
+    },
+    {
+      name: "smart-context-service.ts",
+      path: "src/application/services/smart-context-service.ts",
+      layer: "application",
+      status: "done",
+      coverage: "99.10%",
+      baselineCoverage: 99.1,
+      tasks: [
+        { id: "smart-1", desc: "Resolve context service compile mismatches", done: true }
+      ]
+    },
+    // OUTSTANDING Surfacing & Unification
+    {
+      name: "query.ts",
+      path: "src/presentation/cli/commands/query.ts",
+      layer: "presentation",
+      status: "done",
+      coverage: "100.00%",
+      baselineCoverage: 100.0,
+      tasks: [
+        { id: "query-1", desc: "[TDD-RED]: Assert query routes correct services depending on --kind parameters", done: true },
+        { id: "query-2", desc: "[TDD-GREEN]: Centralize search, list, context, show interfaces under query primitive", done: true },
+        { id: "query-3", desc: "[TDD-REFACTOR]: Standardize commander parsing wrappers", done: true }
+      ]
+    },
+    {
+      name: "envelope.ts",
+      path: "src/presentation/cli/formatters/envelope.ts",
+      layer: "presentation",
+      status: "done",
+      coverage: "100.00%",
+      baselineCoverage: 100.0,
+      tasks: [
+        { id: "env-1", desc: "Register query Command inside QUERY_COMMAND_NAMES map", done: true }
+      ]
+    },
+    {
+      name: "search.ts",
+      path: "src/presentation/cli/commands/search.ts",
+      layer: "presentation",
+      status: "done",
+      coverage: "100.00%",
+      baselineCoverage: 100.0,
+      tasks: [
+        { id: "search-1", desc: "[TDD-RED]: Standardize legacy search option spec suite", done: true },
+        { id: "search-2", desc: "[TDD-GREEN]: Convert search.ts to a thin wrapper calling query primitive", done: true }
+      ]
+    },
+    {
+      name: "context.ts",
+      path: "src/presentation/cli/commands/context.ts",
+      layer: "presentation",
+      status: "done",
+      coverage: "100.00%",
+      baselineCoverage: 100.0,
+      tasks: [
+        { id: "cont-1", desc: "[TDD-RED]: Enforce context limit validations specs", done: true },
+        { id: "cont-2", desc: "[TDD-GREEN]: Re-route execution path to query primitive with context kind", done: true }
+      ]
+    },
+    {
+      name: "related.ts",
+      path: "src/presentation/cli/commands/related.ts",
+      layer: "presentation",
+      status: "done",
+      coverage: "100.00%",
+      baselineCoverage: 100.0,
+      tasks: [
+        { id: "rel-1", desc: "[TDD-RED]: Assert relation inputs match output format", done: true },
+        { id: "rel-2", desc: "[TDD-GREEN]: Wrap related commands routing requests to query with related kind", done: true }
+      ]
+    },
+    {
+      name: "list.ts",
+      path: "src/presentation/cli/commands/list.ts",
+      layer: "presentation",
+      status: "done",
+      coverage: "100.00%",
+      baselineCoverage: 100.0,
+      tasks: [
+        { id: "list-1", desc: "[TDD-RED]: Assert legacy list formats remain identical", done: true },
+        { id: "list-2", desc: "[TDD-GREEN]: Forward list requests to query session kind", done: true }
+      ]
+    },
+    {
+      name: "show.ts",
+      path: "src/presentation/cli/commands/show.ts",
+      layer: "presentation",
+      status: "done",
+      coverage: "100.00%",
+      baselineCoverage: 100.0,
+      tasks: [
+        { id: "show-1", desc: "[TDD-RED]: Assert show command outputs details for specific session identifier", done: true },
+        { id: "show-2", desc: "[TDD-GREEN]: Convert show into query command delegation", done: true }
+      ]
+    },
+    {
+      name: "commands/index.ts",
+      path: "src/presentation/cli/commands/index.ts",
+      layer: "presentation",
+      status: "done",
+      coverage: "100.00%",
+      baselineCoverage: 100.0,
+      tasks: [
+        { id: "idx-1", desc: "Export executeQueryCommand and query types", done: true }
+      ]
+    },
+    {
+      name: "cli/index.ts",
+      path: "src/presentation/cli/index.ts",
+      layer: "presentation",
+      status: "done",
+      coverage: "100.00%",
+      baselineCoverage: 100.0,
+      tasks: [
+        { id: "cli-idx-1", desc: "Import and register createQueryCommand under commander options", done: true }
+      ]
+    },
+    {
+      name: "index.ts",
+      path: "src/index.ts",
+      layer: "presentation",
+      status: "done",
+      coverage: "100.00%",
+      baselineCoverage: 100.0,
+      tasks: [
+        { id: "root-idx-1", desc: "Export consolidated query signatures from index root entries", done: true }
+      ]
+    },
+    // Outstanding Domain and Infrastructure
+    {
+      name: "repositories.ts",
+      path: "src/domain/ports/repositories.ts",
+      layer: "domain",
+      status: "done",
+      coverage: "97.16%",
+      baselineCoverage: 97.16,
+      tasks: [
+        { id: "ports-1", desc: "[TDD-RED]: Establish strict repository parameter validation specifications", done: true },
+        { id: "ports-2", desc: "[TDD-GREEN]: Support exactOptionalPropertyTypes in interface definitions", done: true }
+      ]
+    },
+    {
+      name: "entity-repository.ts",
+      path: "src/infrastructure/database/repositories/entity-repository.ts",
+      layer: "infrastructure",
+      status: "done",
+      coverage: "100.00%",
+      baselineCoverage: 100.0,
+      tasks: [
+        { id: "entity-1", desc: "[TDD-RED]: Create failing query constraints edge cases", done: true },
+        { id: "entity-2", desc: "[TDD-GREEN]: Filter undefined options gracefully from SQLite binder", done: true }
+      ]
+    },
+    {
+      name: "message-repository.ts",
+      path: "src/infrastructure/database/repositories/message-repository.ts",
+      layer: "infrastructure",
+      status: "done",
+      coverage: "100.00%",
+      baselineCoverage: 100.0,
+      tasks: [
+        { id: "msg-1", desc: "[TDD-RED]: Add search query specs testing edge parameter allocations", done: true },
+        { id: "msg-2", desc: "[TDD-GREEN]: Bind undefined values explicitly in database query mapping", done: true }
+      ]
+    },
+    {
+      name: "health-checker.ts",
+      path: "src/infrastructure/database/health-checker.ts",
+      layer: "infrastructure",
+      status: "done",
+      coverage: "95.50%",
+      baselineCoverage: 95.5,
+      tasks: [
+        { id: "health-1", desc: "[TDD-RED]: Standardize provider readiness return shape specs", done: true },
+        { id: "health-2", desc: "[TDD-GREEN]: Cast return objects mapping status parameters", done: true }
+      ]
+    },
+    // New Integration tests
+    {
+      name: "query-primitive.test.ts",
+      path: "tests/integration/query-primitive.test.ts",
+      layer: "testing",
+      status: "done",
+      coverage: "100.00%",
+      baselineCoverage: 100.0,
+      tasks: [
+        { id: "qtest-1", desc: "Write comprehensive routing specs asserting query results match search/context/list/show wrappers", done: true }
+      ]
+    },
+    {
+      name: "unified-status.test.ts",
+      path: "tests/integration/unified-status.test.ts",
+      layer: "testing",
+      status: "done",
+      coverage: "100.00%",
+      baselineCoverage: 100.0,
+      tasks: [
+        { id: "utest-1", desc: "Write status cmd checks validating --db, --hooks, and stats reporting parameters", done: true }
+      ]
+    },
+    // Documentation
+    {
+      name: "04-ARCHITECTURE.md",
+      path: "docs/04-ARCHITECTURE.md",
+      layer: "testing", // mapping docs inside testing/docs layer filter
+      status: "done",
+      coverage: "100.00%",
+      baselineCoverage: 100.0,
+      tasks: [
+        { id: "doc-arch-1", desc: "Document unified administrative query and status surfaces in full architecture schemas", done: true }
+      ]
+    }
+  ];
+
+  // Deep clone baseline data so we can simulate user changes
+  let simulatedData = JSON.parse(JSON.stringify(filesData));
+  let activeView = "view-dashboard";
+  let currentLayerFilter = "all";
+  let searchFilterString = "";
+
+  // Core Simulation logic mapping
+  const checkSimulatorState = () => {
+    // Check if anything has been altered from baseline
+    let isDifferent = false;
+    for (let i = 0; i < filesData.length; i++) {
+      const baselineFile = filesData[i];
+      const simulatedFile = simulatedData[i];
+      for (let j = 0; j < baselineFile.tasks.length; j++) {
+        if (baselineFile.tasks[j].done !== simulatedFile.tasks[j].done) {
+          isDifferent = true;
+          break;
+        }
+      }
+      if (isDifferent) break;
+    }
+
+    const strip = document.getElementById('interactive-strip');
+    if (isDifferent) {
+      strip.classList.add('active');
+    } else {
+      strip.classList.remove('active');
+    }
+  };
+
+  // Recalculates metrics in real time
+  const recalculateAndRenderStats = () => {
+    // 1. Calculate Refactoring progress
+    const totalFiles = simulatedData.length;
+    let completedFilesCount = 0;
+
+    simulatedData.forEach(file => {
+      const allDone = file.tasks.every(t => t.done);
+      const someDone = file.tasks.some(t => t.done);
+      
+      if (allDone) {
+        file.status = "done";
+        completedFilesCount++;
+      } else if (someDone || file.name === "query.ts") {
+        file.status = "active";
+      } else {
+        file.status = "upcoming";
+      }
+    });
+
+    const progressPercentage = Math.round((completedFilesCount / totalFiles) * 100);
+    
+    // Update dashboard labels
+    document.getElementById('stat-progress-val').innerHTML = `${progressPercentage}<span class="unit">%</span>`;
+    document.getElementById('stat-progress-desc').innerText = `${completedFilesCount} of ${totalFiles} target files completed`;
+
+    // 2. Statement coverage scaling model
+    // Scales based on how many tasks of active/upcoming files have been marked done
+    const totalTasks = simulatedData.reduce((acc, file) => acc + file.tasks.length, 0);
+    const completedTasks = simulatedData.reduce((acc, file) => acc + file.tasks.filter(t => t.done).length, 0);
+    const tasksRatio = completedTasks / totalTasks;
+    
+    // Coverage scales from 94.84% base up to 98.75% max
+    const simulatedCoverage = (94.84 + (3.91 * tasksRatio)).toFixed(2);
+    document.getElementById('stat-coverage-val').innerHTML = `${simulatedCoverage}<span class="unit">%</span>`;
+    
+    // 3. SVG Radial Progress offsets
+    // Progress Ring offset: circumference = 232.4
+    const progressOffset = 232.4 - (232.4 * (progressPercentage / 100));
+    document.getElementById('ring-progress').style.strokeDashoffset = progressOffset;
+
+    // Coverage Ring offset: 100% maps to 98.75% max
+    const coverageValNum = parseFloat(simulatedCoverage);
+    const coveragePercentage = (coverageValNum / 100);
+    const coverageOffset = 232.4 - (232.4 * coveragePercentage);
+    const ringCoverage = document.getElementById('ring-coverage');
+    ringCoverage.style.strokeDashoffset = coverageOffset;
+
+    // Color gradient transitions for coverage ring
+    if (coverageValNum >= 95.0) {
+      ringCoverage.style.stroke = "var(--color-emerald)";
+    } else {
+      ringCoverage.style.stroke = "var(--color-rose)";
+    }
+
+    // 4. Update Spotlight panel based on first unfinished file
+    const firstUnfinished = simulatedData.find(file => !file.tasks.every(t => t.done));
+    if (firstUnfinished) {
+      document.getElementById('spotlight-title').innerText = firstUnfinished.name;
+      document.getElementById('spotlight-path').innerText = firstUnfinished.path;
+      
+      const nextTask = firstUnfinished.tasks.find(t => !t.done);
+      document.getElementById('spotlight-desc').innerText = nextTask ? nextTask.desc : "Consolidating files...";
+    } else {
+      document.getElementById('spotlight-title').innerText = "All Complete!";
+      document.getElementById('spotlight-path').innerText = "Surface Consolidation achieved successfully";
+      document.getElementById('spotlight-desc').innerText = "Refactoring fully achieved across all layers.";
+    }
+
+    // 5. Update Layer health stats
+    renderLayersProgressBars();
+
+    // Render checklists & explorer
+    renderRoadmapTimelines();
+    renderHexExplorerFiles();
+    checkSimulatorState();
+  };
+
+  // Render layer progress indicators
+  const renderLayersProgressBars = () => {
+    const layers = {
+      domain: { total: 0, completed: 0, color: "var(--color-primary)" },
+      application: { total: 0, completed: 0, color: "var(--color-purple)" },
+      infrastructure: { total: 0, completed: 0, color: "var(--color-emerald)" },
+      presentation: { total: 0, completed: 0, color: "var(--color-amber)" },
+      testing: { total: 0, completed: 0, color: "var(--color-rose)" }
+    };
+
+    simulatedData.forEach(file => {
+      const completed = file.tasks.filter(t => t.done).length;
+      const total = file.tasks.length;
+      if (layers[file.layer]) {
+        layers[file.layer].completed += completed;
+        layers[file.layer].total += total;
+      }
+    });
+
+    const container = document.getElementById('layers-bars-container');
+    container.innerHTML = '';
+
+    Object.keys(layers).forEach(key => {
+      const layer = layers[key];
+      const percentage = layer.total > 0 ? Math.round((layer.completed / layer.total) * 100) : 100;
+      
+      const layerPrettyNames = {
+        domain: "Domain Ports & Models",
+        application: "Application Services",
+        infrastructure: "Infrastructure Database",
+        presentation: "Presentation CLI Surface",
+        testing: "Regression Tests & Docs"
+      };
+
+      const barHtml = `
+        <div class="bar-item">
+          <div class="bar-labels">
+            <span class="text-muted">${layerPrettyNames[key]}</span>
+            <span style="font-weight:600;">${percentage}%</span>
+          </div>
+          <div class="bar-track">
+            <div class="bar-fill" style="width: ${percentage}%; background-color: ${layer.color};"></div>
+          </div>
+        </div>
+      `;
+      container.insertAdjacentHTML('beforeend', barHtml);
+    });
+  };
+
+  // Toggle tasks inside checklists in real-time
+  const toggleTask = (taskId) => {
+    simulatedData.forEach(file => {
+      file.tasks.forEach(task => {
+        if (task.id === taskId) {
+          task.done = !task.done;
+        }
+      });
+    });
+    recalculateAndRenderStats();
+  };
+
+  // Renders the TDD Roadmap checklists split into Done / Outstanding
+  const renderRoadmapTimelines = () => {
+    const completedContainer = document.getElementById('checklist-timeline-completed');
+    const outstandingContainer = document.getElementById('checklist-timeline-outstanding');
+    const overviewRoadmap = document.getElementById('overview-roadmap-list');
+    
+    completedContainer.innerHTML = '';
+    outstandingContainer.innerHTML = '';
+    overviewRoadmap.innerHTML = '';
+
+    let overviewNodeCount = 0;
+
+    simulatedData.forEach(file => {
+      const allDone = file.tasks.every(t => t.done);
+      const doneCount = file.tasks.filter(t => t.done).length;
+      const totalCount = file.tasks.length;
+      const progressPercent = Math.round((doneCount / totalCount) * 100);
+
+      // 1. Build pills
+      let pillsHtml = '';
+      if (file.tasks.some(t => t.desc.includes('[TDD-RED]') && !t.done)) {
+        pillsHtml += `<span class="badge-pill-tdd red">Red</span>`;
+      } else if (file.tasks.some(t => t.desc.includes('[TDD-GREEN]') && !t.done)) {
+        pillsHtml += `<span class="badge-pill-tdd green">Green</span>`;
+      } else if (file.tasks.some(t => t.desc.includes('[TDD-REFACTOR]') && !t.done)) {
+        pillsHtml += `<span class="badge-pill-tdd refactor">Refactor</span>`;
+      } else if (allDone) {
+        pillsHtml += `<span class="badge-pill-tdd green" style="background:rgba(48,209,88,0.15)">Verified</span>`;
+      }
+
+      // Checkbox list
+      const checklistHtml = file.tasks.map(task => `
+        <li class="roadmap-check-item ${task.done ? 'checked' : ''}" onclick="toggleTask('${task.id}')">
+          <span class="checkbox-custom"></span>
+          <span class="task-text">${task.desc}</span>
+        </li>
+      `).join('');
+
+      const cardHtml = `
+        <div class="roadmap-card" style="border-left: 3.5px solid ${allDone ? 'var(--color-emerald)' : 'var(--color-primary)'}">
+          <div class="roadmap-card-header">
+            <div class="roadmap-card-title-group">
+              <h4>${file.name}</h4>
+              <p>${file.path} • ${progressPercent}% Complete</p>
+            </div>
+            <div style="display:flex; gap:0.4rem; align-items:center;">
+              ${pillsHtml}
+            </div>
+          </div>
+          <ul class="roadmap-checklist">
+            ${checklistHtml}
+          </ul>
+        </div>
+      `;
+
+      // Distribute to Completed vs Outstanding sections
+      if (allDone) {
+        completedContainer.insertAdjacentHTML('beforeend', cardHtml);
+      } else {
+        outstandingContainer.insertAdjacentHTML('beforeend', cardHtml);
+      }
+
+      // Populate Overview list (limit to 3 active/upcoming elements for visual neatness)
+      if (!allDone && overviewNodeCount < 3) {
+        const overviewNodeHtml = `
+          <div class="roadmap-card" style="border-left: 3.5px solid var(--color-primary); padding: 1.15rem 1.35rem;">
+            <div class="roadmap-card-header" style="margin-bottom:0.5rem;">
+              <div class="roadmap-card-title-group">
+                <h4 style="font-size:0.95rem;">${file.name}</h4>
+                <p style="font-size:0.75rem;">${file.path}</p>
+              </div>
+              <div>${pillsHtml}</div>
+            </div>
+            <div style="font-size:0.8rem; color:var(--text-secondary);">
+              Next action: <span style="font-weight:600; color:var(--text-main);">${file.tasks.find(t=>!t.done).desc}</span>
+            </div>
+          </div>
+        `;
+        overviewRoadmap.insertAdjacentHTML('beforeend', overviewNodeHtml);
+        overviewNodeCount++;
+      }
+    });
+
+    if (overviewNodeCount === 0) {
+      overviewRoadmap.innerHTML = `
+        <div style="text-align:center; padding: 2rem; color: var(--text-muted); font-size: 0.9rem;">
+          🎉 All Surface Consolidation complete! System health 100% verified.
+        </div>
+      `;
+    }
+  };
+
+  // Renders files in the Hex Explorer grid
+  const renderHexExplorerFiles = () => {
+    const grid = document.getElementById('explorer-files-container');
+    grid.innerHTML = '';
+
+    const filtered = simulatedData.filter(file => {
+      const matchesLayer = currentLayerFilter === 'all' || file.layer === currentLayerFilter;
+      const matchesSearch = file.name.toLowerCase().includes(searchFilterString.toLowerCase()) ||
+                            file.path.toLowerCase().includes(searchFilterString.toLowerCase()) ||
+                            file.layer.toLowerCase().includes(searchFilterString.toLowerCase()) ||
+                            file.status.toLowerCase().includes(searchFilterString.toLowerCase());
+      return matchesLayer && matchesSearch;
+    });
+
+    if (filtered.length === 0) {
+      grid.innerHTML = `
+        <div style="grid-column: 1/-1; text-align:center; padding: 3rem; color:var(--text-muted); font-size:0.95rem;">
+          No matching consolidated files found in this layer.
+        </div>
+      `;
+      return;
+    }
+
+    filtered.forEach(file => {
+      const completedTasks = file.tasks.filter(t => t.done).length;
+      const totalTasks = file.tasks.length;
+      const percent = Math.round((completedTasks / totalTasks) * 100);
+
+      const node = document.createElement('div');
+      node.className = 'file-node-card';
+      node.onclick = () => openInspectorDrawer(file);
+
+      node.innerHTML = `
+        <div>
+          <div class="card-top">
+            <span class="file-node-name">${file.name}</span>
+            <span class="badge-status ${file.status}">${file.status}</span>
+          </div>
+          <div class="file-node-path">${file.path}</div>
+        </div>
+        <div class="card-bottom">
+          <span>${file.layer}</span>
+          <span>${completedTasks}/${totalTasks} tasks</span>
+        </div>
+      `;
+      grid.appendChild(node);
+    });
+  };
+
+  // Interactive Inspection Drawer controller (Airbnb-styled sliding drawer)
+  const drawerOverlay = document.getElementById('drawer-overlay-display');
+  
+  const openInspectorDrawer = (file) => {
+    document.getElementById('drawer-file-title').innerText = file.name;
+    document.getElementById('drawer-file-path').innerHTML = `
+      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-right:2px; vertical-align:middle;">
+        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+      </svg>
+      ${file.path}
+    `;
+    
+    // Set path copy listener
+    document.getElementById('drawer-copy-trigger').onclick = () => {
+      navigator.clipboard.writeText(file.path);
+      const spanText = document.querySelector('#drawer-file-path');
+      const originalText = spanText.innerHTML;
+      spanText.innerHTML = "✓ Path Copied!";
+      spanText.style.color = "var(--color-emerald)";
+      setTimeout(() => {
+        spanText.innerHTML = originalText;
+        spanText.style.color = "";
+      }, 1500);
+    };
+
+    document.getElementById('drawer-layer-display').innerText = `${file.layer.toUpperCase()} LAYER`;
+    
+    const badge = document.getElementById('drawer-status-badge');
+    badge.className = `badge-status ${file.status}`;
+    badge.innerText = file.status;
+
+    // Coverage percentage calculation
+    const doneTasks = file.tasks.filter(t => t.done).length;
+    const totalTasks = file.tasks.length;
+    const ratio = doneTasks / totalTasks;
+    const coverageStr = (ratio === 1.0) ? file.coverage : `${Math.round(ratio * parseFloat(file.coverage))}%`;
+    
+    const coverageDisplay = document.getElementById('drawer-coverage-display');
+    coverageDisplay.innerText = coverageStr;
+    if (parseFloat(coverageStr) >= 95) {
+      coverageDisplay.style.color = "var(--color-emerald)";
+    } else {
+      coverageDisplay.style.color = "var(--color-rose)";
+    }
+
+    // TDD Badge stages
+    const tddContainer = document.getElementById('drawer-tdd-stage-display');
+    tddContainer.innerHTML = '';
+    
+    const hasRed = file.tasks.some(t => t.desc.includes('[TDD-RED]'));
+    const hasGreen = file.tasks.some(t => t.desc.includes('[TDD-GREEN]'));
+    const hasRefactor = file.tasks.some(t => t.desc.includes('[TDD-REFACTOR]'));
+
+    if (hasRed) {
+      const isRedDone = file.tasks.filter(t => t.desc.includes('[TDD-RED]') && t.done).length === file.tasks.filter(t => t.desc.includes('[TDD-RED]')).length;
+      tddContainer.insertAdjacentHTML('beforeend', `<span class="badge-pill-tdd red" style="${isRedDone ? 'opacity:0.4' : ''}">Red Specs</span>`);
+    }
+    if (hasGreen) {
+      const isGreenDone = file.tasks.filter(t => t.desc.includes('[TDD-GREEN]') && t.done).length === file.tasks.filter(t => t.desc.includes('[TDD-GREEN]')).length;
+      tddContainer.insertAdjacentHTML('beforeend', `<span class="badge-pill-tdd green" style="${isGreenDone ? 'opacity:0.4' : ''}">Green Code</span>`);
+    }
+    if (hasRefactor) {
+      const isRefactorDone = file.tasks.filter(t => t.desc.includes('[TDD-REFACTOR]') && t.done).length === file.tasks.filter(t => t.desc.includes('[TDD-REFACTOR]')).length;
+      tddContainer.insertAdjacentHTML('beforeend', `<span class="badge-pill-tdd refactor" style="${isRefactorDone ? 'opacity:0.4' : ''}">Refactor</span>`);
+    }
+    if (!hasRed && !hasGreen && !hasRefactor) {
+      tddContainer.insertAdjacentHTML('beforeend', `<span class="badge-pill-tdd green">Standard Test</span>`);
+    }
+
+    // Checklist render
+    const checklistDisplay = document.getElementById('drawer-checklist-display');
+    checklistDisplay.innerHTML = file.tasks.map(task => `
+      <li class="roadmap-check-item ${task.done ? 'checked' : ''}" onclick="toggleTask('${task.id}'); refreshDrawerChecklist('${file.path}')">
+        <span class="checkbox-custom"></span>
+        <span class="task-text">${task.desc}</span>
+      </li>
+    `).join('');
+
+    drawerOverlay.classList.add('open');
+  };
+
+  // Refresh active drawer checklist list when toggling items inside the drawer
+  window.refreshDrawerChecklist = (filePath) => {
+    const file = simulatedData.find(f => f.path === filePath);
+    if (file) {
+      const doneTasks = file.tasks.filter(t => t.done).length;
+      const totalTasks = file.tasks.length;
+      const ratio = doneTasks / totalTasks;
+      const coverageStr = (ratio === 1.0) ? file.coverage : `${Math.round(ratio * parseFloat(file.coverage))}%`;
+      
+      const coverageDisplay = document.getElementById('drawer-coverage-display');
+      coverageDisplay.innerText = coverageStr;
+      if (parseFloat(coverageStr) >= 95) {
+        coverageDisplay.style.color = "var(--color-emerald)";
+      } else {
+        coverageDisplay.style.color = "var(--color-rose)";
+      }
+      
+      // Update badge
+      const badge = document.getElementById('drawer-status-badge');
+      badge.className = `badge-status ${file.status}`;
+      badge.innerText = file.status;
+    }
+  };
+
+  // Close Drawer
+  document.getElementById('drawer-close-trigger').onclick = () => {
+    drawerOverlay.classList.remove('open');
+  };
+
+  drawerOverlay.onclick = (e) => {
+    if (e.target === drawerOverlay) {
+      drawerOverlay.classList.remove('open');
+    }
+  };
+
+  // Navigation Sliding Segment Tab Selector control
+  const tabs = document.querySelectorAll('.tab-btn');
+  const slider = document.getElementById('tab-pill-slider');
+
+  const repositionSlider = (activeTab) => {
+    slider.style.width = `${activeTab.offsetWidth}px`;
+    slider.style.transform = `translateX(${activeTab.offsetLeft - 4}px)`;
+  };
+
+  tabs.forEach(tab => {
+    tab.onclick = () => {
+      tabs.forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      repositionSlider(tab);
+
+      // Hide all viewports, show active
+      document.querySelectorAll('.view-section').forEach(view => view.classList.remove('active'));
+      const target = tab.getAttribute('data-target');
+      document.getElementById(target).classList.add('active');
+    };
+  });
+
+  // Handle resizing slider bar on screen shifts
+  window.onresize = () => {
+    const activeTab = document.querySelector('.tab-btn.active');
+    if (activeTab) repositionSlider(activeTab);
+  };
+
+  // Initial slider configuration
+  setTimeout(() => {
+    const initialActive = document.querySelector('.tab-btn.active');
+    if (initialActive) repositionSlider(initialActive);
+  }, 100);
+
+  // Search Filter engine
+  document.getElementById('explorer-search-field').oninput = (e) => {
+    searchFilterString = e.target.value;
+    renderHexExplorerFiles();
+  };
+
+  // Layer filter Pills buttons
+  document.querySelectorAll('.filter-pill').forEach(pill => {
+    pill.onclick = () => {
+      document.querySelectorAll('.filter-pill').forEach(p => p.classList.remove('active'));
+      pill.classList.add('active');
+      currentLayerFilter = pill.getAttribute('data-layer');
+      renderHexExplorerFiles();
+    };
+  });
+
+  // Light / Dark Theme toggler switch
+  const toggler = document.getElementById('theme-toggler');
+  const themeEmoji = document.querySelector('.toggle-icon');
+
+  // Initialize theme from HTML state
+  let currentTheme = document.documentElement.getAttribute('data-theme');
+  themeEmoji.innerText = currentTheme === 'dark' ? '🌙' : '☀️';
+
+  toggler.onclick = () => {
+    currentTheme = document.documentElement.getAttribute('data-theme');
+    const targetTheme = currentTheme === 'light' ? 'dark' : 'light';
+    document.documentElement.setAttribute('data-theme', targetTheme);
+    themeEmoji.innerText = targetTheme === 'dark' ? '🌙' : '☀️';
+  };
+
+  // Reset simulator trigger
+  document.getElementById('reset-simulator-trigger').onclick = () => {
+    simulatedData = JSON.parse(JSON.stringify(filesData));
+    recalculateAndRenderStats();
+  };
+
+  // Initial System Boot Engine Run
+  recalculateAndRenderStats();
+</script>
+
+</body>
+</html>
