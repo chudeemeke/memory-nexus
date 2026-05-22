@@ -445,7 +445,7 @@
       opacity: 1;
       margin-top: 0;
       margin-bottom: 2rem;
-      pointer-events: all;
+      pointer-events: auto;
     }
 
     .simulator-btn-reset {
@@ -832,7 +832,7 @@
 
     .drawer-overlay.open {
       opacity: 1;
-      pointer-events: all;
+      pointer-events: auto;
     }
 
     .drawer-aside {
@@ -2136,21 +2136,38 @@ Type 'help' to view available commands.
     }
   ];
 
-  // Deep clone baseline data so we can simulate user changes
+  // Programmatically inject static phases to keep TDD roadmap list positions stable
+  filesData.forEach(file => {
+    if (
+      file.name === "status.ts" ||
+      file.name === "doctor.ts" ||
+      file.name === "stats.ts" ||
+      file.name === "programmatic-api.test.ts" ||
+      file.name === "backfill-service.ts" ||
+      file.name === "embedding-service.ts" ||
+      file.name === "smart-context-service.ts"
+    ) {
+      file.phase = 1;
+    } else {
+      file.phase = 2;
+    }
+  });
+
+  // Deep clone baseline data for runtime simulations and git baseline tracking
+  let committedRef = JSON.parse(JSON.stringify(filesData));
   let simulatedData = JSON.parse(JSON.stringify(filesData));
   let activeView = "view-dashboard";
   let currentLayerFilter = "all";
   let searchFilterString = "";
 
-  // Core Simulation logic mapping
+  // Core Simulation logic mapping (compares live checklist to committed git reference)
   const checkSimulatorState = () => {
-    // Check if anything has been altered from baseline
     let isDifferent = false;
-    for (let i = 0; i < filesData.length; i++) {
-      const baselineFile = filesData[i];
+    for (let i = 0; i < committedRef.length; i++) {
+      const refFile = committedRef[i];
       const simulatedFile = simulatedData[i];
-      for (let j = 0; j < baselineFile.tasks.length; j++) {
-        if (baselineFile.tasks[j].done !== simulatedFile.tasks[j].done) {
+      for (let j = 0; j < refFile.tasks.length; j++) {
+        if (refFile.tasks[j].done !== simulatedFile.tasks[j].done) {
           isDifferent = true;
           break;
         }
@@ -2166,8 +2183,21 @@ Type 'help' to view available commands.
     }
   };
 
+  // Wire simulator Reset Baseline button handler to restore state to last committed baseline
+  const resetSimulator = () => {
+    simulatedData = JSON.parse(JSON.stringify(committedRef));
+    recalculateAndRenderStats();
+  };
+
+  const resetBtn = document.getElementById('reset-simulator-trigger');
+  if (resetBtn) {
+    resetBtn.onclick = () => {
+      resetSimulator();
+    };
+  }
+
   // Recalculates metrics in real time
-  const recalculateAndRenderStats = () => {
+  const recalculateAndRenderStats = (reRenderLists = true) => {
     // 1. Calculate Refactoring progress
     const totalFiles = simulatedData.length;
     let completedFilesCount = 0;
@@ -2238,9 +2268,11 @@ Type 'help' to view available commands.
     // 5. Update Layer health stats
     renderLayersProgressBars();
 
-    // Render checklists & explorer
-    renderRoadmapTimelines();
-    renderHexExplorerFiles();
+    // Render checklists & explorer conditionally
+    if (reRenderLists) {
+      renderRoadmapTimelines();
+      renderHexExplorerFiles();
+    }
     checkSimulatorState();
   };
 
@@ -2293,16 +2325,103 @@ Type 'help' to view available commands.
     });
   };
 
+  // Update a card's visual state directly in the DOM to avoid aggressive re-rendering and layout shifts during checklists interaction
+  const updateCardVisuals = (file) => {
+    const cardId = file.name.replace(/\./g, '-');
+    
+    // 1. Update Roadmap card
+    const cardEl = document.getElementById(`card-${cardId}`);
+    if (cardEl) {
+      const allDone = file.tasks.every(t => t.done);
+      const doneCount = file.tasks.filter(t => t.done).length;
+      const totalCount = file.tasks.length;
+      const progressPercent = Math.round((doneCount / totalCount) * 100);
+
+      // Update border left style
+      cardEl.style.borderLeft = `3.5px solid ${allDone ? 'var(--color-emerald)' : 'var(--color-primary)'}`;
+
+      // Update percent text
+      const pctEl = cardEl.querySelector('.pct-val');
+      if (pctEl) {
+        pctEl.innerText = progressPercent;
+      }
+
+      // Update badge pill
+      let pillsHtml = '';
+      if (file.tasks.some(t => t.desc.includes('[TDD-RED]') && !t.done)) {
+        pillsHtml += `<span class="badge-pill-tdd red">Red</span>`;
+      } else if (file.tasks.some(t => t.desc.includes('[TDD-GREEN]') && !t.done)) {
+        pillsHtml += `<span class="badge-pill-tdd green">Green</span>`;
+      } else if (file.tasks.some(t => t.desc.includes('[TDD-REFACTOR]') && !t.done)) {
+        pillsHtml += `<span class="badge-pill-tdd refactor">Refactor</span>`;
+      } else if (allDone) {
+        pillsHtml += `<span class="badge-pill-tdd green" style="background:rgba(48,209,88,0.15)">Verified</span>`;
+      }
+      const badgeGroup = cardEl.querySelector('.badge-pill-group');
+      if (badgeGroup) {
+        badgeGroup.innerHTML = pillsHtml;
+      }
+    }
+
+    // 2. Update Hex Explorer node
+    const expEl = document.getElementById(`explorer-${cardId}`);
+    if (expEl) {
+      const completedTasks = file.tasks.filter(t => t.done).length;
+      const totalTasks = file.tasks.length;
+
+      // Update badge status
+      const badge = expEl.querySelector('.badge-status');
+      if (badge) {
+        badge.className = `badge-status ${file.status}`;
+        badge.innerText = file.status;
+      }
+
+      // Update task counter text
+      const counterSpan = expEl.querySelector('.card-bottom span:last-child');
+      if (counterSpan) {
+        counterSpan.innerText = `${completedTasks}/${totalTasks} tasks`;
+      }
+    }
+  };
+
   // Toggle tasks inside checklists in real-time
-  const toggleTask = (taskId) => {
+  const toggleTask = (taskId, el) => {
+    let toggledFile = null;
+    let toggledTaskObj = null;
+
     simulatedData.forEach(file => {
       file.tasks.forEach(task => {
         if (task.id === taskId) {
           task.done = !task.done;
+          toggledFile = file;
+          toggledTaskObj = task;
         }
       });
     });
-    recalculateAndRenderStats();
+
+    // Sync checkboxes across TDD Roadmap card and drawer checklist if they exist
+    const roadmapLi = document.getElementById(`li-task-${taskId}`);
+    const drawerLi = document.getElementById(`drawer-li-task-${taskId}`);
+    
+    if (toggledTaskObj) {
+      [roadmapLi, drawerLi].forEach(li => {
+        if (li) {
+          if (toggledTaskObj.done) {
+            li.classList.add('checked');
+          } else {
+            li.classList.remove('checked');
+          }
+        }
+      });
+    }
+
+    // Recalculate stats/gauges, but do NOT re-render full HTML lists during click interactions
+    recalculateAndRenderStats(false);
+
+    // Dynamic visual update in-place without sorting-jumps
+    if (toggledFile) {
+      updateCardVisuals(toggledFile);
+    }
   };
 
   // Renders the TDD Roadmap checklists split into Done / Outstanding
@@ -2335,22 +2454,22 @@ Type 'help' to view available commands.
         pillsHtml += `<span class="badge-pill-tdd green" style="background:rgba(48,209,88,0.15)">Verified</span>`;
       }
 
-      // Checkbox list
+      // Checkbox list with ID for direct sync and toggles
       const checklistHtml = file.tasks.map(task => `
-        <li class="roadmap-check-item ${task.done ? 'checked' : ''}" onclick="toggleTask('${task.id}')">
+        <li id="li-task-${task.id}" class="roadmap-check-item ${task.done ? 'checked' : ''}" onclick="toggleTask('${task.id}', this)">
           <span class="checkbox-custom"></span>
           <span class="task-text">${task.desc}</span>
         </li>
       `).join('');
 
       const cardHtml = `
-        <div class="roadmap-card" style="border-left: 3.5px solid ${allDone ? 'var(--color-emerald)' : 'var(--color-primary)'}">
+        <div class="roadmap-card" id="card-${file.name.replace(/\./g, '-')}" style="border-left: 3.5px solid ${allDone ? 'var(--color-emerald)' : 'var(--color-primary)'}">
           <div class="roadmap-card-header">
             <div class="roadmap-card-title-group">
               <h4>${file.name}</h4>
-              <p>${file.path} • ${progressPercent}% Complete</p>
+              <p>${file.path} • <span class="pct-val">${progressPercent}</span>% Complete</p>
             </div>
-            <div style="display:flex; gap:0.4rem; align-items:center;">
+            <div style="display:flex; gap:0.4rem; align-items:center;" class="badge-pill-group">
               ${pillsHtml}
             </div>
           </div>
@@ -2360,7 +2479,7 @@ Type 'help' to view available commands.
         </div>
       `;
 
-      // Distribute to Completed vs Outstanding sections
+      // Distribute dynamically based on actual completion status (prevents card jumping UX papercut when stable)
       if (allDone) {
         completedContainer.insertAdjacentHTML('beforeend', cardHtml);
       } else {
@@ -2426,6 +2545,7 @@ Type 'help' to view available commands.
       const percent = Math.round((completedTasks / totalTasks) * 100);
 
       const node = document.createElement('div');
+      node.id = `explorer-${file.name.replace(/\./g, '-')}`;
       node.className = 'file-node-card';
       node.onclick = () => openInspectorDrawer(file);
 
@@ -2519,7 +2639,7 @@ Type 'help' to view available commands.
     // Checklist render
     const checklistDisplay = document.getElementById('drawer-checklist-display');
     checklistDisplay.innerHTML = file.tasks.map(task => `
-      <li class="roadmap-check-item ${task.done ? 'checked' : ''}" onclick="toggleTask('${task.id}'); refreshDrawerChecklist('${file.path}')">
+      <li id="drawer-li-task-${task.id}" class="roadmap-check-item ${task.done ? 'checked' : ''}" onclick="toggleTask('${task.id}', this); refreshDrawerChecklist('${file.path}')">
         <span class="checkbox-custom"></span>
         <span class="task-text">${task.desc}</span>
       </li>
@@ -2552,14 +2672,17 @@ Type 'help' to view available commands.
     }
   };
 
-  // Close Drawer
-  document.getElementById('drawer-close-trigger').onclick = () => {
+  // Close Drawer and trigger dynamic sorting
+  const closeInspectorDrawer = () => {
     drawerOverlay.classList.remove('open');
+    recalculateAndRenderStats(true);
   };
+
+  document.getElementById('drawer-close-trigger').onclick = closeInspectorDrawer;
 
   drawerOverlay.onclick = (e) => {
     if (e.target === drawerOverlay) {
-      drawerOverlay.classList.remove('open');
+      closeInspectorDrawer();
     }
   };
 
@@ -2582,6 +2705,9 @@ Type 'help' to view available commands.
       document.querySelectorAll('.view-section').forEach(view => view.classList.remove('active'));
       const target = tab.getAttribute('data-target');
       document.getElementById(target).classList.add('active');
+      
+      // Dynamic sorting re-render when switching tabs
+      recalculateAndRenderStats(true);
     };
   });
 
@@ -2636,10 +2762,26 @@ Type 'help' to view available commands.
     }
   };
 
-  // Interactive Terminal console logic
+  // Interactive Terminal console logic with state-bound zsh micro-shell
   const termHiddenInput = document.getElementById('terminal-hidden-input');
   const termInputBuffer = document.getElementById('term-input-buffer');
   const termStreamLogs = document.getElementById('terminal-stream-logs');
+
+  let currentDir = ""; // Simulated relative path tracking
+
+  const getDirectories = () => {
+    const dirs = new Set();
+    simulatedData.forEach(file => {
+      const parts = file.path.split('/');
+      parts.pop(); // remove file name
+      let current = [];
+      parts.forEach(p => {
+        current.push(p);
+        dirs.add(current.join('/'));
+      });
+    });
+    return Array.from(dirs);
+  };
 
   if (termHiddenInput && termStreamLogs) {
     termHiddenInput.addEventListener('input', (e) => {
@@ -2669,17 +2811,18 @@ Type 'help' to view available commands.
                           .replace(/<span id="term-input-buffer">.*?<\/span>/g, '');
     
     let newContent = cleanLogs;
+    const currentFolder = currentDir ? currentDir.split('/').pop() : "memory-nexus";
     if (newContent.endsWith('% ')) {
       newContent += cmd + '\n';
     } else {
-      newContent += `<span class="prompt-user">chude@emeke-mac</span> <span class="prompt-dir">memory-nexus</span> % ${cmd}\n`;
+      newContent += `<span class="prompt-user">chude@emeke-mac</span> <span class="prompt-dir">${currentFolder}</span> % ${cmd}\n`;
     }
     
     termStreamLogs.innerHTML = newContent;
     termStreamLogs.scrollTop = termStreamLogs.scrollHeight;
 
-    const parts = cmd.toLowerCase().split(/\s+/);
-    const baseCmd = parts[0];
+    const parts = cmd.trim().split(/\s+/);
+    const baseCmd = parts[0].toLowerCase();
     
     if (baseCmd === '') {
       printPrompt();
@@ -2687,22 +2830,397 @@ Type 'help' to view available commands.
     }
 
     if (baseCmd === 'clear') {
-      termStreamLogs.innerHTML = `<span class="prompt-user">chude@emeke-mac</span> <span class="prompt-dir">memory-nexus</span> % <span id="term-input-buffer"></span><span class="term-cursor"></span>`;
+      const currentFolder = currentDir ? currentDir.split('/').pop() : "memory-nexus";
+      termStreamLogs.innerHTML = `<span class="prompt-user">chude@emeke-mac</span> <span class="prompt-dir">${currentFolder}</span> % <span id="term-input-buffer"></span><span class="term-cursor"></span>`;
       termHiddenInput.value = '';
       return;
     }
 
     if (baseCmd === 'help') {
       const helpText = `Available commands:
-  <span class="green-text">bun test</span>               - Runs unit & integration test suites
-  <span class="green-text">bun test --coverage</span>    - Runs tests and evaluates TDD coverage
+  <span class="green-text">pwd</span>                     - Print simulated current working directory
+  <span class="green-text">cd [dir]</span>                - Traverse simulated directory tree
+  <span class="green-text">ls [-la] [dir]</span>          - List simulated dynamic files and folders
+  <span class="green-text">cat [file]</span>              - View simulated typescript or markdown source code
+  <span class="green-text">bun test</span>               - Runs interactive unit/integration TDD specs
+  <span class="green-text">bun test --coverage</span>    - Evaluates live coverage percentage
+  <span class="green-text">git status</span>             - Audit live uncommitted status modifications
+  <span class="green-text">git diff</span>               - Render unified color differences of your toggles
+  <span class="green-text">git commit -m "[msg]"</span>  - Commit visual toggles to new baseline state
+  <span class="green-text">verify [file]</span>          - Force complete all tasks for specific file card
+  <span class="green-text">unverify [file]</span>        - Force uncheck all tasks for specific file card
+  <span class="green-text">theme [light|dark]</span>     - Toggle dashboard visual theme accents
   <span class="green-text">memory status</span>          - Renders database and sandboxing health table
-  <span class="green-text">memory doctor</span>          - Performs engineering diagnostic verification
-  <span class="green-text">memory stats</span>           - Retrieves vector index volumes and volumes
+  <span class="green-text">memory doctor</span>          - Performs diagnostic checks
+  <span class="green-text">memory stats</span>           - Retrieves vector volumes and metadata
   <span class="green-text">help</span>                   - Displays this help index
   <span class="green-text">clear</span>                  - Clears the terminal screen
 \n`;
       printOutput(helpText);
+      return;
+    }
+
+    if (baseCmd === 'pwd') {
+      const fullPath = `~/Projects/memory-nexus${currentDir ? '/' + currentDir : ''}`;
+      printOutput(`${fullPath}\n`);
+      return;
+    }
+
+    if (baseCmd === 'cd') {
+      const target = parts[1] || "";
+      if (target === "" || target === "~" || target === "/") {
+        currentDir = "";
+        printOutput("");
+        return;
+      }
+      
+      let newDir = currentDir;
+      if (target === "..") {
+        if (currentDir !== "") {
+          const p = currentDir.split('/');
+          p.pop();
+          newDir = p.join('/');
+        }
+      } else {
+        if (target.startsWith('/')) {
+          newDir = target.slice(1);
+        } else {
+          newDir = currentDir ? `${currentDir}/${target}` : target;
+        }
+      }
+
+      if (newDir.endsWith('/')) newDir = newDir.slice(0, -1);
+
+      const allDirs = getDirectories();
+      if (newDir === "" || allDirs.includes(newDir)) {
+        currentDir = newDir;
+        printOutput("");
+      } else {
+        const isFile = simulatedData.some(f => f.path === newDir || (currentDir ? `${currentDir}/${target}` : target) === f.path);
+        if (isFile) {
+          printOutput(`cd: not a directory: ${target}\n`);
+        } else {
+          printOutput(`cd: no such file or directory: ${target}\n`);
+        }
+      }
+      return;
+    }
+
+    if (baseCmd === 'ls') {
+      const isLong = parts.includes('-la') || parts.includes('-l') || parts.includes('-a');
+      const targetArg = parts.filter(p => !p.startsWith('-') && p.toLowerCase() !== 'ls')[0];
+      let scanDir = currentDir;
+      if (targetArg) {
+        if (targetArg === '..') {
+          const p = currentDir.split('/');
+          p.pop();
+          scanDir = p.join('/');
+        } else if (targetArg.startsWith('/')) {
+          scanDir = targetArg.slice(1);
+        } else {
+          scanDir = currentDir ? `${currentDir}/${targetArg}` : targetArg;
+        }
+        if (scanDir.endsWith('/')) scanDir = scanDir.slice(0, -1);
+      }
+
+      const allDirs = getDirectories();
+      if (scanDir !== "" && !allDirs.includes(scanDir)) {
+        const fileMatch = simulatedData.find(f => f.path === scanDir || (currentDir ? `${currentDir}/${targetArg}` : targetArg) === f.path);
+        if (fileMatch) {
+          printOutput(`${fileMatch.name}\n`);
+          return;
+        }
+        printOutput(`ls: ${targetArg || scanDir}: No such file or directory\n`);
+        return;
+      }
+
+      const subdirs = new Set();
+      allDirs.forEach(d => {
+        if (scanDir === "") {
+          if (!d.includes('/')) subdirs.add(d);
+        } else {
+          if (d.startsWith(scanDir + '/') && d.split('/').length === scanDir.split('/').length + 1) {
+            subdirs.add(d.split('/').pop());
+          }
+        }
+      });
+
+      const files = [];
+      simulatedData.forEach(f => {
+        const p = f.path.split('/');
+        const fileName = p.pop();
+        const fileParent = p.join('/');
+        if (fileParent === scanDir) {
+          files.push(f);
+        }
+      });
+
+      if (isLong) {
+        let outText = `total ${subdirs.size + files.length * 8}\n`;
+        subdirs.forEach(sd => {
+          outText += `drwxr-xr-x   - chude  22 May 11:20 <span class="blue-text">${sd}/</span>\n`;
+        });
+        files.forEach(f => {
+          const size = f.tasks.length * 124;
+          const verified = f.tasks.every(t => t.done);
+          const colorClass = verified ? 'green-text' : 'white-text';
+          outText += `-rw-r--r-- ${size} chude  22 May 11:20 <span class="${colorClass}">${f.name}</span>\n`;
+        });
+        if (scanDir === "") {
+          outText += `-rw-r--r-- 24K chude  22 May 11:20 README.md\n`;
+          outText += `-rw-r--r-- 980 chude  22 May 11:20 package.json\n`;
+          outText += `-rw-r--r-- 84K chude  22 May 11:20 bun.lockb\n`;
+        }
+        printOutput(outText);
+      } else {
+        let items = [];
+        subdirs.forEach(sd => items.push(`<span class="blue-text">${sd}/</span>`));
+        files.forEach(f => {
+          const verified = f.tasks.every(t => t.done);
+          const colorClass = verified ? 'green-text' : 'white-text';
+          items.push(`<span class="${colorClass}">${f.name}</span>`);
+        });
+        if (scanDir === "") {
+          items.push("README.md", "package.json", "bun.lockb");
+        }
+        let outText = "";
+        for (let i = 0; i < items.length; i += 3) {
+          const chunk = items.slice(i, i + 3);
+          outText += chunk.join('\t\t') + '\n';
+        }
+        printOutput(outText);
+      }
+      return;
+    }
+
+    if (baseCmd === 'cat') {
+      const target = parts[1] || "";
+      if (!target) {
+        printOutput("cat: missing file operand\n");
+        return;
+      }
+      let filePath = currentDir ? `${currentDir}/${target}` : target;
+      
+      const allDirs = getDirectories();
+      if (allDirs.includes(filePath)) {
+        printOutput(`cat: ${target}: Is a directory\n`);
+        return;
+      }
+
+      const file = simulatedData.find(f => f.path === filePath || f.name.toLowerCase() === target.toLowerCase());
+      if (file) {
+        const verified = file.tasks.every(t => t.done);
+        let fileContent = "";
+        if (file.name.endsWith('.test.ts')) {
+          fileContent = `// ${file.name} - Dynamic Verification Suite
+import { expect, test, describe } from "bun:test";
+import { HealthChecker } from "@/infrastructure/database/health-checker";
+
+describe("${file.name.split('.')[0]}", () => {
+  test("assert environmental integrity", () => {
+    const active = process.env.XDG_DATA_HOME;
+    expect(active).toBeDefined();
+  });
+
+  ${file.tasks.map(t => `test("${t.desc}", () => {
+    // Status: ${t.done ? 'PASSED (Verified)' : 'PENDING (Unverified)'}
+    expect(${t.done ? 'true' : 'false'}).toBe(true);
+  });`).join('\n\n  ')}
+});
+`;
+        } else if (file.name.endsWith('.md')) {
+          fileContent = `# Memory Nexus - ${file.name}
+Reference Engineering Architecture & Specifications.
+
+- Layer: ${file.layer.toUpperCase()}
+- Status: ${verified ? 'FULLY VERIFIED (100%)' : 'ACTIVE DRAFT'}
+- Tasks Completed: ${file.tasks.filter(t=>t.done).length}/${file.tasks.length}
+
+${file.tasks.map(t => `* [${t.done ? 'x' : ' '}] ${t.desc}`).join('\n')}
+`;
+        } else {
+          fileContent = `// ${file.name} - Memory Nexus Consolidated Core
+// Layer: ${file.layer} | Coverage: ${file.coverage}
+
+import { SQLiteDatabase } from "bun:sqlite";
+
+export class ${file.name.split('.')[0].charAt(0).toUpperCase() + file.name.split('.')[0].slice(1)}Service {
+  constructor(private db: SQLiteDatabase) {}
+
+  ${file.tasks.map(t => `// Task: ${t.desc}
+  public async executeTask_${t.id.replace(/-/g, '_')}() {
+    // Current State: ${t.done ? 'VERIFIED' : 'OUTSTANDING'}
+    if (${t.done ? 'true' : 'false'}) {
+      return { ok: true, msg: "Task completed successfully" };
+    }
+    throw new Error("Task '${t.desc}' not implemented");
+  }`).join('\n\n  ')}
+}
+`;
+        }
+        
+        const coloredContent = fileContent.replace(/\/\/.*/g, (m) => `<span style="color:var(--text-muted);">${m}</span>`)
+                                          .replace(/(import|export|class|const|let|public|private|async|await|return|throw|new|Error)/g, (m) => `<span style="color:#ff7b72;">${m}</span>`)
+                                          .replace(/("[^"]*")/g, (m) => `<span style="color:#a5d6ff;">${m}</span>`);
+        
+        printOutput(`<pre style="font-family:monospace; background:rgba(0,0,0,0.25); padding:1rem; border-radius:8px; border:1px solid var(--border-light); margin:0.5rem 0; overflow-x:auto; max-width:100%; white-space:pre-wrap; color:var(--text-main); text-shadow:none; text-align:left;">${coloredContent}</pre>\n`);
+      } else {
+        if (target.toLowerCase() === 'package.json') {
+          printOutput(`{\n  "name": "memory-nexus",\n  "version": "4.0.0",\n  "scripts": {\n    "test": "bun test",\n    "test:coverage": "bun test --coverage"\n  }\n}\n\n`);
+        } else if (target.toLowerCase() === 'readme.md') {
+          printOutput(`# Memory Nexus CLI\nPremium engineering oversight console & autonomous TDD coverage suite.\n\n`);
+        } else {
+          printOutput(`cat: ${target}: No such file or directory\n`);
+        }
+      }
+      return;
+    }
+
+    if (baseCmd === 'theme') {
+      const mode = parts[1] || "";
+      const current = document.documentElement.getAttribute('data-theme');
+      let targetTheme = current;
+      if (mode === 'light') {
+        targetTheme = 'light';
+      } else if (mode === 'dark') {
+        targetTheme = 'dark';
+      } else if (mode === 'toggle' || mode === '') {
+        targetTheme = current === 'light' ? 'dark' : 'light';
+      }
+      document.documentElement.setAttribute('data-theme', targetTheme);
+      const themeEmoji = document.querySelector('.toggle-icon');
+      if (themeEmoji) {
+        themeEmoji.innerText = targetTheme === 'dark' ? '🌙' : '☀️';
+      }
+      printOutput(`Theme successfully set to ${targetTheme} mode\n`);
+      return;
+    }
+
+    if (baseCmd === 'verify' || baseCmd === 'unverify') {
+      const target = parts[1] || "";
+      if (!target) {
+        printOutput(`${baseCmd}: missing target filename (e.g. 'verify status.ts')\n`);
+        return;
+      }
+      const file = simulatedData.find(f => f.name.toLowerCase() === target.toLowerCase() || f.path.toLowerCase().endsWith(target.toLowerCase()));
+      if (file) {
+        const state = baseCmd === 'verify';
+        file.tasks.forEach(t => t.done = state);
+        recalculateAndRenderStats();
+        printOutput(`Successfully ${state ? 'verified' : 'unverified'} all tasks inside ${file.name}! Dashboard updated.\n`);
+      } else {
+        printOutput(`${baseCmd}: target file '${target}' not found in active dataset\n`);
+      }
+      return;
+    }
+
+    if (baseCmd === 'git') {
+      const sub = parts[1] || "";
+      
+      if (sub === 'status') {
+        let modifiedFiles = [];
+        for (let i = 0; i < committedRef.length; i++) {
+          const refFile = committedRef[i];
+          const simFile = simulatedData[i];
+          let hasChanges = false;
+          for (let j = 0; j < refFile.tasks.length; j++) {
+            if (refFile.tasks[j].done !== simFile.tasks[j].done) {
+              hasChanges = true;
+              break;
+            }
+          }
+          if (hasChanges) {
+            modifiedFiles.push(simFile);
+          }
+        }
+
+        let outText = `On branch main\nYour branch is up to date with 'origin/main'.\n\n`;
+        if (modifiedFiles.length === 0) {
+          outText += `nothing to commit, working tree clean\n`;
+        } else {
+          outText += `Changes not staged for commit:\n  (use "git add &lt;file&gt;..." to update what will be committed)\n  (use "git restore &lt;file&gt;..." to discard changes in working directory)\n\n`;
+          modifiedFiles.forEach(f => {
+            outText += `\t<span style="color:var(--color-rose);">modified:   ${f.path}</span>\n`;
+          });
+          outText += `\nno changes added to commit (use "git add" and/or "git commit -a")\n`;
+        }
+        printOutput(outText);
+        return;
+      }
+
+      if (sub === 'diff') {
+        let diffText = "";
+        for (let i = 0; i < committedRef.length; i++) {
+          const refFile = committedRef[i];
+          const simFile = simulatedData[i];
+          let changes = [];
+          for (let j = 0; j < refFile.tasks.length; j++) {
+            if (refFile.tasks[j].done !== simFile.tasks[j].done) {
+              changes.push({ ref: refFile.tasks[j], sim: simFile.tasks[j] });
+            }
+          }
+          
+          if (changes.length > 0) {
+            diffText += `<span style="font-weight:600; color:#ae81ff;">diff --git a/${simFile.path} b/${simFile.path}</span>\n`;
+            diffText += `<span style="color:var(--text-muted);">--- a/${simFile.path}\n+++ b/${simFile.path}</span>\n`;
+            diffText += `<span style="color:#66d9ef;">@@ -1,4 +1,4 @@</span>\n`;
+            changes.forEach(ch => {
+              diffText += `<span style="color:var(--color-rose); background:rgba(255,69,58,0.15);">- [${ch.ref.done ? 'x' : ' '}] ${ch.ref.desc}</span>\n`;
+              diffText += `<span style="color:var(--color-emerald); background:rgba(48,209,88,0.15);">+ [${ch.sim.done ? 'x' : ' '}] ${ch.sim.desc}</span>\n`;
+            });
+            diffText += `\n`;
+          }
+        }
+        if (!diffText) {
+          printOutput("git: no uncommitted modifications in working directory\n");
+        } else {
+          printOutput(diffText);
+        }
+        return;
+      }
+
+      if (sub === 'commit') {
+        let changesCount = 0;
+        let insertions = 0;
+        let deletions = 0;
+        
+        for (let i = 0; i < committedRef.length; i++) {
+          const refFile = committedRef[i];
+          const simFile = simulatedData[i];
+          let fileChanged = false;
+          for (let j = 0; j < refFile.tasks.length; j++) {
+            if (refFile.tasks[j].done !== simFile.tasks[j].done) {
+              fileChanged = true;
+              if (simFile.tasks[j].done) insertions++; else deletions++;
+            }
+          }
+          if (fileChanged) changesCount++;
+        }
+
+        if (changesCount === 0) {
+          printOutput("On branch main\nnothing to commit, working tree clean\n");
+          return;
+        }
+
+        const msgArgIdx = parts.indexOf('-m');
+        let commitMsg = "Consolidate active refactoring status";
+        if (msgArgIdx !== -1 && parts[msgArgIdx + 1]) {
+          const match = cmd.match(/-m\s+["']?([^"']+)["']?/i);
+          if (match) commitMsg = match[1];
+        }
+
+        committedRef = JSON.parse(JSON.stringify(simulatedData));
+        recalculateAndRenderStats();
+
+        const randomCommitHash = Math.random().toString(16).substring(2, 9);
+        const commitResult = `[main ${randomCommitHash}] ${commitMsg}
+ ${changesCount} file${changesCount > 1 ? 's' : ''} changed, ${insertions} insertion${insertions !== 1 ? 's' : ''}(+), ${deletions} deletion${deletions !== 1 ? 's' : ''}(-)
+\n`;
+        printOutput(commitResult);
+        return;
+      }
+
+      printOutput(`git: unknown command: ${sub}. Supported: status, diff, commit\n`);
       return;
     }
 
@@ -2713,7 +3231,7 @@ Type 'help' to view available commands.
     }
 
     if (baseCmd === 'memory') {
-      const sub = parts[1];
+      const sub = parts[1] || "";
       if (sub === 'status') {
         runMemoryStatus();
         return;
@@ -2724,7 +3242,7 @@ Type 'help' to view available commands.
         runMemoryStats();
         return;
       } else {
-        printOutput(`memory: command not found: ${sub || ''}. Type 'help' for suggestions.\n`);
+        printOutput(`memory: command not found: ${sub}. Type 'help' for suggestions.\n`);
         return;
       }
     }
@@ -2733,7 +3251,8 @@ Type 'help' to view available commands.
   };
 
   const printPrompt = () => {
-    termStreamLogs.innerHTML += `\n<span class="prompt-user">chude@emeke-mac</span> <span class="prompt-dir">memory-nexus</span> % <span id="term-input-buffer"></span><span class="term-cursor"></span>`;
+    const currentFolder = currentDir ? currentDir.split('/').pop() : "memory-nexus";
+    termStreamLogs.innerHTML += `\n<span class="prompt-user">chude@emeke-mac</span> <span class="prompt-dir">${currentFolder}</span> % <span id="term-input-buffer"></span><span class="term-cursor"></span>`;
     termStreamLogs.scrollTop = termStreamLogs.scrollHeight;
     setTimeout(() => {
       const newBuffer = document.getElementById('term-input-buffer');
@@ -2750,53 +3269,100 @@ Type 'help' to view available commands.
 
   const runBunTestSimulation = (showCoverage) => {
     termHiddenInput.disabled = true;
-    
-    const suites = [
-      { path: "tests/integration/programmatic-api.test.ts", tests: 42 },
-      { path: "src/application/services/backfill-service.test.ts", tests: 118 },
-      { path: "src/application/services/embedding-service.test.ts", tests: 85 },
-      { path: "src/application/services/smart-context-service.test.ts", tests: 92 },
-      { path: "src/presentation/cli/commands/status.test.ts", tests: 64 },
-      { path: "src/presentation/cli/commands/doctor.test.ts", tests: 37 },
-      { path: "src/presentation/cli/commands/stats.test.ts", tests: 29 },
-      { path: "tests/integration/query-primitive.test.ts", tests: 110 },
-      { path: "tests/integration/unified-status.test.ts", tests: 95 }
-    ];
+    termStreamLogs.innerHTML += `\n<span style="color:#a1a1a6;">$ bun test ${showCoverage ? '--coverage' : ''}</span>\n`;
+    termStreamLogs.scrollTop = termStreamLogs.scrollHeight;
+
+    const suites = [];
+    simulatedData.forEach(file => {
+      let testPath = "";
+      if (file.path.endsWith('.test.ts')) {
+        testPath = file.path;
+      } else {
+        const dir = file.path.substring(0, file.path.lastIndexOf('/'));
+        testPath = `${dir}/${file.name.replace('.ts', '.test.ts')}`;
+      }
+
+      const totalTests = file.tasks.length;
+      const passingTests = file.tasks.filter(t => t.done).length;
+      const failingTasks = file.tasks.filter(t => !t.done);
+
+      suites.push({
+        path: testPath,
+        total: totalTests,
+        passing: passingTests,
+        failures: failingTasks,
+        file: file
+      });
+    });
 
     let suiteIdx = 0;
+    let totalPassingAccum = 0;
+    let totalFailingAccum = 0;
 
     const printNextSuite = () => {
       if (suiteIdx < suites.length) {
         const suite = suites[suiteIdx];
-        termStreamLogs.innerHTML += `<span class="green-text">pass</span>  ${suite.path} (${suite.tests} tests)\n`;
+        if (suite.failures.length === 0) {
+          termStreamLogs.innerHTML += `<span class="green-text">pass</span>  ${suite.path} (${suite.total} tests passed)\n`;
+          totalPassingAccum += suite.total;
+        } else {
+          termStreamLogs.innerHTML += `<span class="red-text">fail</span>  ${suite.path} (${suite.passing} passed, ${suite.failures.length} failed)\n`;
+          suite.failures.forEach(f => {
+            termStreamLogs.innerHTML += `  <span class="red-text">✗ [TDD Spec Failure]</span> ${f.desc}\n`;
+            termStreamLogs.innerHTML += `    <span style="color:var(--text-muted);">at ${suite.path}:L${12 + Math.floor(Math.random() * 50)}</span>\n`;
+          });
+          totalPassingAccum += suite.passing;
+          totalFailingAccum += suite.failures.length;
+        }
         termStreamLogs.scrollTop = termStreamLogs.scrollHeight;
         suiteIdx++;
-        setTimeout(printNextSuite, 150 + Math.random() * 150);
+        setTimeout(printNextSuite, 80 + Math.random() * 100);
       } else {
-        let summaryText = `\n<span class="green-text">3,567 passing</span> (0 failing)
-Ran 3567 tests across 160 files. [4.28s]
-
-`;
-        if (showCoverage) {
-          summaryText += `----------------------|---------|---------|---------|---------|
-File                  | % Stmts | % Branch| % Funcs | % Lines |
-----------------------|---------|---------|---------|---------|
-All files             |   95.12 |   95.08 |   98.24 |   96.84 |
- src/domain           |   97.16 |   96.00 |  100.00 |   97.16 |
- src/application      |   99.50 |   98.50 |  100.00 |   99.50 |
- src/infrastructure   |   96.42 |   95.00 |   96.50 |   96.42 |
- src/presentation     |   94.85 |   95.12 |   98.00 |   95.10 |
-----------------------|---------|---------|---------|---------|
-
-Statement Coverage: <span class="green-text">95.12%</span> (Target 95%+ Achieved!)
-Line Coverage: <span class="green-text">96.84%</span>
-Branch Coverage: <span class="green-text">95.08%</span>
-`;
+        let summaryText = "";
+        if (totalFailingAccum === 0) {
+          summaryText += `\n<span class="green-text">${totalPassingAccum} passing</span> (0 failing)\n`;
+          summaryText += `Ran ${totalPassingAccum} tests across ${suites.length} files. [2.12s]\n\n`;
         } else {
-          summaryText += `Statement Coverage: <span class="green-text">95.12%</span>
-`;
+          summaryText += `\n<span class="red-text">${totalFailingAccum} failing</span>, <span class="green-text">${totalPassingAccum} passing</span>\n`;
+          summaryText += `Ran ${totalPassingAccum + totalFailingAccum} tests across ${suites.length} files. [2.45s]\n\n`;
         }
-        
+
+        if (showCoverage) {
+          const totalTasks = simulatedData.reduce((acc, f) => acc + f.tasks.length, 0);
+          const completedTasks = simulatedData.reduce((acc, f) => acc + f.tasks.filter(t => t.done).length, 0);
+          const ratio = completedTasks / totalTasks;
+
+          const stmtCov = (92.12 + 6.88 * ratio).toFixed(2);
+          const branchCov = (90.08 + 8.92 * ratio).toFixed(2);
+          const funcCov = (94.24 + 5.76 * ratio).toFixed(2);
+          const lineCov = (93.84 + 5.16 * ratio).toFixed(2);
+
+          summaryText += `----------------------|---------|---------|---------|---------|\n`;
+          summaryText += `File                  | % Stmts | % Branch| % Funcs | % Lines |\n`;
+          summaryText += `----------------------|---------|---------|---------|---------|\n`;
+          summaryText += `All files             |   ${stmtCov} |   ${branchCov} |   ${funcCov} |   ${lineCov} |\n`;
+          
+          const layers = ['domain', 'application', 'infrastructure', 'presentation', 'testing'];
+          layers.forEach(layer => {
+            const layerFiles = simulatedData.filter(f => f.layer === layer);
+            const layerTasks = layerFiles.reduce((acc, f) => acc + f.tasks.length, 0);
+            const layerDone = layerFiles.reduce((acc, f) => acc + f.tasks.filter(t => t.done).length, 0);
+            const layerRatio = layerTasks > 0 ? (layerDone / layerTasks) : 1.0;
+            const lstmt = (92.50 + 7.50 * layerRatio).toFixed(2);
+            const lbranch = (90.00 + 10.00 * layerRatio).toFixed(2);
+            const lfunc = (95.00 + 5.00 * layerRatio).toFixed(2);
+            const llines = (93.00 + 7.00 * layerRatio).toFixed(2);
+
+            const displayLayer = (layer.charAt(0).toUpperCase() + layer.slice(1)).padEnd(20);
+            summaryText += ` ${displayLayer} |   ${lstmt} |   ${lbranch} |   ${lfunc} |   ${llines} |\n`;
+          });
+          summaryText += `----------------------|---------|---------|---------|---------|\n\n`;
+          
+          summaryText += `Statement Coverage: <span class="${parseFloat(stmtCov) >= 95 ? 'green-text' : 'red-text'}">${stmtCov}%</span> (Target: 95%+)\n`;
+          summaryText += `Line Coverage: ${lineCov}%\n`;
+          summaryText += `Branch Coverage: ${branchCov}%\n`;
+        }
+
         termStreamLogs.innerHTML += summaryText;
         termHiddenInput.disabled = false;
         printPrompt();
@@ -2804,11 +3370,12 @@ Branch Coverage: <span class="green-text">95.08%</span>
       }
     };
 
-    termStreamLogs.innerHTML += `\n<span style="color:#a1a1a6;">$ bun test ${showCoverage ? '--coverage' : ''}</span>\n`;
-    setTimeout(printNextSuite, 200);
+    setTimeout(printNextSuite, 150);
   };
 
   const runMemoryStatus = () => {
+    const totalFiles = simulatedData.length;
+    const completedFiles = simulatedData.filter(f => f.tasks.every(t => t.done)).length;
     const statusTable = `
 ┌──────────────────────────────┬────────────┬─────────────┐
 │ Component                    │ Status     │ Target      │
@@ -2817,7 +3384,7 @@ Branch Coverage: <span class="green-text">95.08%</span>
 │ Git hook scanner             │ <span class="green-text">🟢 ENABLED</span>  │ post-commit │
 │ Environment sandboxing (XDG) │ <span class="green-text">🟢 ACTIVE</span>  │ sandboxed   │
 └──────────────────────────────┴────────────┴─────────────┘
-All services configured via Hexagonal Interface architecture.
+Oversight Metrics: ${completedFiles}/${totalFiles} consolidated elements fully verified.
 `;
     printOutput(statusTable);
   };
@@ -2827,11 +3394,15 @@ All services configured via Hexagonal Interface architecture.
     termStreamLogs.innerHTML += `\n<span style="color:#a1a1a6;">[doctor] Running comprehensive diagnostic verification...</span>\n`;
     termStreamLogs.scrollTop = termStreamLogs.scrollHeight;
     
+    const totalTasks = simulatedData.reduce((acc, f) => acc + f.tasks.length, 0);
+    const completedTasks = simulatedData.reduce((acc, f) => acc + f.tasks.filter(t => t.done).length, 0);
+    const stmtCov = (92.12 + 6.88 * (completedTasks / totalTasks)).toFixed(2);
+
     const steps = [
       "Checking SQLite database integrity... OK",
       "Scanning post-commit git hooks... ENABLED",
       "Verifying commander input wrappers... OK",
-      "Evaluating statement coverage metrics... 95.12% (PASSED)",
+      `Evaluating statement coverage metrics... ${stmtCov}% (${parseFloat(stmtCov) >= 95.0 ? 'PASSED' : 'DEGRADED'})`,
       "Checking hexagonal layer coupling... ZERO ILLEGAL IMPORTS",
       "Diagnostics complete: System is fully healthy! 🚀"
     ];
@@ -2853,9 +3424,10 @@ All services configured via Hexagonal Interface architecture.
   };
 
   const runMemoryStats = () => {
+    const totalEmbeds = 1500 + Math.floor(simulatedData.reduce((acc, f) => acc + f.tasks.filter(t => t.done).length, 0) * 15.3);
     const statsText = `
 Memory Volume & Index Metadata:
-  Total Vector Embeddings : 1,847
+  Total Vector Embeddings : ${totalEmbeds.toLocaleString()}
   Vector Engine Model     : openai/text-embedding-ada-002
   Dimensions              : 1536
   Consolidated Sessions   : 142
