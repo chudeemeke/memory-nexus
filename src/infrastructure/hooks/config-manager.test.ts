@@ -9,6 +9,8 @@ import { mkdirSync, writeFileSync, rmSync, existsSync, readFileSync } from "node
 import { join } from "node:path";
 import { tmpdir } from "node:os";
 
+import { installEnvOverrides, type EnvOverrides } from "../../../tests/helpers/env-overrides.js";
+
 // We need to mock homedir for testing
 // Import the module and test with actual temp directories
 import {
@@ -30,7 +32,7 @@ import {
 
 describe("config-manager", () => {
     let testDir: string;
-    let originalHome: string;
+    let env: EnvOverrides;
 
     beforeEach(() => {
         // Create unique temp directory for each test
@@ -40,17 +42,15 @@ describe("config-manager", () => {
         );
         mkdirSync(testDir, { recursive: true });
 
-        // Store original HOME and override for testing
-        originalHome = process.env.HOME ?? "";
-        process.env.HOME = testDir;
-        // Also set USERPROFILE for Windows
-        process.env.USERPROFILE = testDir;
+        env = installEnvOverrides();
+        env.set("HOME", testDir);
+        env.set("USERPROFILE", testDir);
+        env.set("XDG_CONFIG_HOME", join(testDir, ".config"));
+        env.set("XDG_DATA_HOME", join(testDir, ".local", "share"));
     });
 
     afterEach(() => {
-        // Restore original HOME
-        process.env.HOME = originalHome;
-        process.env.USERPROFILE = originalHome;
+        env.cleanup();
 
         // Clean up test directory
         if (existsSync(testDir)) {
