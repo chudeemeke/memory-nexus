@@ -1219,18 +1219,99 @@
       font-weight: 500;
     }
 
-    /* Footer */
-    footer {
-      text-align: center;
-      margin-top: 5rem;
-      border-top: 1px solid var(--border-light);
-      padding-top: 2rem;
-      color: var(--text-muted);
+    /* Sonoma/Cupertino Toast Notification System Subsystem */
+    #toast-container {
+      position: fixed;
+      top: 1.5rem;
+      right: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      z-index: 9999;
+      pointer-events: none;
+    }
+    
+    .toast {
+      pointer-events: auto;
+      width: 340px;
+      background: rgba(25, 25, 28, 0.65);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      backdrop-filter: blur(25px);
+      -webkit-backdrop-filter: blur(25px);
+      border-radius: 12px;
+      padding: 0.95rem 1.15rem;
+      color: var(--text-main);
+      box-shadow: var(--shadow-lg);
+      display: flex;
+      gap: 0.8rem;
+      align-items: flex-start;
+      transform: translateX(120%);
+      opacity: 0;
+      transition: transform 0.45s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s;
+    }
+    
+    .toast.show {
+      transform: translateX(0);
+      opacity: 1;
+    }
+    
+    .toast.hide {
+      transform: translateY(-20px);
+      opacity: 0;
+    }
+    
+    .toast-icon {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      font-size: 11px;
+      font-weight: 700;
+    }
+    
+    .toast.success .toast-icon {
+      background: rgba(48, 209, 88, 0.15);
+      color: var(--color-emerald);
+      border: 1px solid rgba(48, 209, 88, 0.3);
+    }
+    
+    .toast.error .toast-icon {
+      background: rgba(255, 69, 58, 0.15);
+      color: var(--color-rose);
+      border: 1px solid rgba(255, 69, 58, 0.3);
+    }
+    
+    .toast.info .toast-icon {
+      background: rgba(10, 132, 255, 0.15);
+      color: var(--color-primary);
+      border: 1px solid rgba(10, 132, 255, 0.3);
+    }
+    
+    .toast-content {
+      flex-grow: 1;
+    }
+    
+    .toast-title {
       font-size: 0.85rem;
+      font-weight: 600;
+      margin-bottom: 0.15rem;
+      letter-spacing: -0.01em;
+    }
+    
+    .toast-msg {
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+      line-height: 1.35;
     }
   </style>
 </head>
 <body>
+
+  <!-- Sonoma frosted glass Toast Container -->
+  <div id="toast-container"></div>
 
 <div class="container">
   
@@ -3503,15 +3584,89 @@ Memory Volume & Index Metadata:
   let isLiveCliMode = false;
   let projectName = "Memory Nexus";
 
+  // Unified Telemetry, Logging & Toast Notification Subsystem
+  class TelemetryLogger {
+    static logBuffer = [];
+
+    // Visual Toast Display
+    static showToast(type, title, msg, duration = 4500) {
+      const container = document.getElementById('toast-container');
+      if (!container) return;
+
+      const toast = document.createElement('div');
+      toast.className = `toast ${type}`;
+      
+      let icon = 'ℹ';
+      if (type === 'success') icon = '✔';
+      if (type === 'error') icon = '✗';
+
+      toast.innerHTML = `
+        <div class="toast-icon">${icon}</div>
+        <div class="toast-content">
+          <div class="toast-title">${title}</div>
+          <div class="toast-msg">${msg}</div>
+        </div>
+      `;
+
+      container.appendChild(toast);
+      
+      // Force reflow for animation
+      toast.offsetHeight;
+      toast.classList.add('show');
+
+      // Add to internal logging buffer as telemetric record
+      this.logRecord(type, `${title}: ${msg}`);
+
+      // Auto dismiss
+      setTimeout(() => {
+        toast.classList.remove('show');
+        toast.classList.add('hide');
+        setTimeout(() => {
+          toast.remove();
+        }, 400);
+      }, duration);
+    }
+
+    // Data Telemetry Log Recording
+    static logRecord(level, message) {
+      const record = {
+        timestamp: new Date().toISOString(),
+        level: level.toUpperCase(),
+        message: message.replace(/<[^>]*>/g, '')
+      };
+      this.logBuffer.push(record);
+      
+      // Print detailed diagnostic log trace directly inside developer terminal tab
+      const termLogs = document.getElementById('terminal-stream-logs');
+      if (termLogs) {
+        console.log(`[Telemetry ${record.level}] ${record.message}`);
+      }
+    }
+    
+    static success(title, msg) { this.showToast('success', title, msg); }
+    static error(title, msg) { this.showToast('error', title, msg); }
+    static info(title, msg) { this.showToast('info', title, msg); }
+  }
+
   const connectProject = async () => {
+    // Rationale: showDirectoryPicker requires secure origin contexts (https or localhost)
+    if (!window.showDirectoryPicker) {
+      TelemetryLogger.error(
+        "Secure Context Required", 
+        "FileSystem access is disabled under insecure <b>file:///</b> loaders.<br>Please start the server using:<br><code style='background:rgba(0,0,0,0.25);padding:2px 4px;border-radius:4px;'>bun run companion</code><br>and open <b>http://localhost:8080</b>."
+      );
+      return;
+    }
+
     try {
       dirHandle = await window.showDirectoryPicker();
       await scanProjectFolder(dirHandle);
+      TelemetryLogger.success("Workspace Connected", `Mounting project "${dirHandle.name}" directories recursively`);
     } catch (err) {
       console.error("FileSystem Connection error:", err);
       // Suppress alert on cancellation (standard user behavior)
       if (err.name !== 'AbortError') {
-        alert("Folder connection failed: " + err.message);
+        TelemetryLogger.error("Folder Connection Failed", err.message);
       }
     }
   };
@@ -3695,6 +3850,7 @@ Memory Volume & Index Metadata:
     socket.onopen = () => {
       isLiveCliMode = true;
       console.log("WebSocket Companion connected! Live CLI Mode unlocked.");
+      TelemetryLogger.success("Live Shell Unlocked", "WebSocket companion active on port 8080");
       
       const title = document.querySelector('.terminal-title');
       if (title) {
@@ -3737,6 +3893,7 @@ Memory Volume & Index Metadata:
       if (isLiveCliMode) {
         isLiveCliMode = false;
         console.log("WebSocket Companion disconnected. Reverting to emulated sandbox mode.");
+        TelemetryLogger.info("Emulation Mode Restored", "WebSocket connection closed");
         
         const title = document.querySelector('.terminal-title');
         if (title) {

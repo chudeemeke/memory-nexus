@@ -6,24 +6,40 @@
 
 import { spawn } from "child_process";
 import * as path from "path";
+import * as fs from "fs";
 
 const PORT = 8080;
 
 console.log(`\n======================================================`);
-console.log(`🚀 Universal Cockpit WebSocket Companion Server booting...`);
-console.log(`   Address: ws://localhost:${PORT}`);
+console.log(`🚀 Universal Cockpit WebSocket & HTTP Server booting...`);
+console.log(`   Local Server URL: http://localhost:${PORT}`);
+console.log(`   WebSocket URL:    ws://localhost:${PORT}`);
 console.log(`======================================================\n`);
 
 const server = Bun.serve({
   port: PORT,
   fetch(req, server) {
-    // Upgrade HTTP request to WebSocket connection
+    // 1. Upgrade HTTP request to WebSocket connection if applicable
     if (server.upgrade(req)) {
       return;
     }
-    return new Response("Universal Cockpit Companion is running!", {
-      headers: { "Content-Type": "text/plain" }
-    });
+    
+    // 2. Serve static HTML/JS/CSS cockpit files
+    const url = new URL(req.url);
+    let pathname = url.pathname;
+    
+    if (pathname === "/" || pathname === "") {
+      pathname = "/docs/presentations/dev-cockpit/index.html";
+    }
+    
+    // Resolve absolute path to workspace root
+    const fullPath = path.resolve(process.cwd(), pathname.substring(1));
+    
+    if (fs.existsSync(fullPath) && fs.statSync(fullPath).isFile()) {
+      return new Response(Bun.file(fullPath));
+    }
+    
+    return new Response("Not Found", { status: 404 });
   },
   websocket: {
     open(ws) {
@@ -32,7 +48,7 @@ const server = Bun.serve({
       // Auto-extract and send project information
       try {
         const pkgPath = path.resolve(process.cwd(), "package.json");
-        const pkg = require(pkgPath);
+        const pkg = JSON.parse(fs.readFileSync(pkgPath, "utf-8"));
         ws.send(JSON.stringify({
           type: "projectInfo",
           name: pkg.name || "Local Project"
