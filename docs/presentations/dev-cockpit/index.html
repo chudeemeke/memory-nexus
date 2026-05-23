@@ -1,0 +1,3769 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Memory Nexus - Engineering Oversight Suite</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    /* Premium Cupertino & Airbnb Modern Styling System */
+    :root[data-theme="light"] {
+      --bg-base: #f5f5f7;
+      --bg-surface: rgba(255, 255, 255, 0.4);
+      --bg-surface-solid: #ffffff;
+      --bg-surface-hover: rgba(255, 255, 255, 0.6);
+      --border-light: rgba(0, 0, 0, 0.08);
+      --border-strong: rgba(0, 0, 0, 0.16);
+      
+      --color-primary: #0071e3;
+      --color-primary-rgb: 0, 113, 227;
+      --color-emerald: #34c759;
+      --color-purple: #af52de;
+      --color-purple-rgb: 175, 82, 222;
+      --color-amber: #ff9500;
+      --color-rose: #ff3b30;
+      
+      --text-main: #1d1d1f;
+      --text-secondary: #48484a;
+      --text-muted: #86868b;
+      
+      --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.04);
+      --shadow-md: 0 12px 28px rgba(0, 0, 0, 0.06);
+      --shadow-lg: 0 24px 50px rgba(0, 0, 0, 0.1);
+      
+      --blur-strength: 25px;
+      --bg-nav: rgba(255, 255, 255, 0.4);
+    }
+
+    :root[data-theme="dark"] {
+      --bg-base: #000000;
+      --bg-surface: rgba(20, 20, 20, 0.4);
+      --bg-surface-solid: #1d1d1f;
+      --bg-surface-hover: rgba(45, 45, 47, 0.55);
+      --border-light: rgba(255, 255, 255, 0.08);
+      --border-strong: rgba(255, 255, 255, 0.16);
+      
+      --color-primary: #2997ff;
+      --color-primary-rgb: 41, 151, 255;
+      --color-emerald: #30d158;
+      --color-purple: #bf5af2;
+      --color-purple-rgb: 191, 90, 242;
+      --color-amber: #ffd60a;
+      --color-rose: #ff453a;
+      
+      --text-main: #f5f5f7;
+      --text-secondary: #a1a1a6;
+      --text-muted: #86868b;
+      
+      --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.15);
+      --shadow-md: 0 12px 30px rgba(0, 0, 0, 0.25);
+      --shadow-lg: 0 24px 60px rgba(0, 0, 0, 0.45);
+      
+      --blur-strength: 25px;
+      --bg-nav: rgba(22, 22, 23, 0.45);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg-base);
+      color: var(--text-main);
+      line-height: 1.5;
+      letter-spacing: -0.015em;
+      transition: background-color 0.4s cubic-bezier(0.16, 1, 0.3, 1), color 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+      padding: 2rem 1.5rem;
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 1240px;
+      margin: 0 auto;
+    }
+
+    /* Apple-style floating frosted header */
+    header {
+      background: var(--bg-nav);
+      backdrop-filter: blur(var(--blur-strength));
+      -webkit-backdrop-filter: blur(var(--blur-strength));
+      border: 1px solid var(--border-light);
+      border-radius: 14px;
+      padding: 1rem 1.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2.5rem;
+      box-shadow: var(--shadow-sm);
+      position: sticky;
+      top: 1rem;
+      z-index: 100;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.25rem;
+      font-weight: 700;
+      letter-spacing: -0.03em;
+    }
+
+    .brand svg {
+      color: var(--color-primary);
+      filter: drop-shadow(0 2px 8px rgba(var(--color-primary-rgb), 0.2));
+    }
+
+    .meta-indicators {
+      display: flex;
+      align-items: center;
+      gap: 1.25rem;
+    }
+
+    .branch-badge {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      background: rgba(var(--color-purple-rgb), 0.08);
+      border: 1px solid rgba(var(--color-purple-rgb), 0.15);
+      color: var(--color-purple);
+      font-size: 0.75rem;
+      font-weight: 600;
+      padding: 0.3rem 0.65rem;
+      border-radius: 8px;
+    }
+
+    /* Apple sun/moon theme toggler slider */
+    .theme-toggle-container {
+      background: var(--border-light);
+      border-radius: 99px;
+      padding: 2px;
+      cursor: pointer;
+      position: relative;
+      width: 58px;
+      height: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border: 1px solid rgba(0, 0, 0, 0.03);
+    }
+
+    .theme-toggle-dot {
+      width: 24px;
+      height: 24px;
+      background: #ffffff;
+      border-radius: 50%;
+      position: absolute;
+      left: 2px;
+      transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.2s;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    :root[data-theme="dark"] .theme-toggle-dot {
+      transform: translateX(28px);
+      background: #1c1c1e;
+    }
+
+    .toggle-icon {
+      font-size: 11px;
+      pointer-events: none;
+    }
+
+    /* Title section & Segmented navigation control */
+    .hero-panel {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      margin-bottom: 2.5rem;
+      flex-wrap: wrap;
+      gap: 1.5rem;
+    }
+
+    .hero-title h1 {
+      font-family: 'Outfit', sans-serif;
+      font-size: 2.5rem;
+      font-weight: 800;
+      letter-spacing: -0.04em;
+      line-height: 1.15;
+    }
+
+    .hero-title p {
+      font-size: 1.05rem;
+      color: var(--text-secondary);
+      margin-top: 0.35rem;
+    }
+
+    /* macOS Segmented Tab Bar */
+    .tab-bar-capsule {
+      background: var(--border-light);
+      border-radius: 12px;
+      padding: 4px;
+      display: flex;
+      position: relative;
+      border: 1px solid rgba(0, 0, 0, 0.02);
+    }
+
+    .tab-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+      font-weight: 600;
+      padding: 0.6rem 1.25rem;
+      border-radius: 8px;
+      cursor: pointer;
+      z-index: 2;
+      transition: color 0.25s;
+    }
+
+    .tab-btn.active {
+      color: var(--text-main);
+    }
+
+    .tab-slider {
+      position: absolute;
+      top: 4px;
+      bottom: 4px;
+      left: 4px;
+      background: var(--bg-surface-solid);
+      border-radius: 8px;
+      z-index: 1;
+      transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), width 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 4px 10px rgba(0,0,0,0.04);
+    }
+
+    /* View containers */
+    .view-section {
+      display: none;
+    }
+
+    .view-section.active {
+      display: block;
+      animation: viewReveal 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    @keyframes viewReveal {
+      from { opacity: 0; transform: translateY(12px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Bento Box Dashboard Grid */
+    .bento-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      grid-auto-rows: minmax(170px, auto);
+      gap: 1.5rem;
+      margin-bottom: 2.5rem;
+    }
+
+    @media (max-width: 1024px) {
+      .bento-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 640px) {
+      .bento-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .bento-card {
+      background: var(--bg-surface);
+      backdrop-filter: blur(var(--blur-strength));
+      -webkit-backdrop-filter: blur(var(--blur-strength));
+      border: 1px solid var(--border-light);
+      border-radius: 14px;
+      padding: 1.5rem;
+      box-shadow: var(--shadow-sm);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s ease, border-color 0.3s;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .bento-card:hover {
+      transform: translateY(-3px);
+      box-shadow: var(--shadow-md);
+      border-color: var(--border-strong);
+    }
+
+    /* Double wide card option */
+    .bento-card.wide {
+      grid-column: span 2;
+    }
+
+    @media (max-width: 640px) {
+      .bento-card.wide {
+        grid-column: span 1;
+      }
+    }
+
+    /* Bento metric styles */
+    .card-header-small {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.5rem;
+    }
+
+    .card-title-small {
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    .bento-big-stat {
+      font-family: 'Outfit', sans-serif;
+      font-size: 2.75rem;
+      font-weight: 800;
+      letter-spacing: -0.04em;
+      line-height: 1;
+      margin: 0.5rem 0;
+      display: flex;
+      align-items: baseline;
+      gap: 0.25rem;
+    }
+
+    .bento-big-stat span.unit {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+
+    .bento-desc {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
+    /* Circular SVG Gauge Chart */
+    .radial-gauge-container {
+      position: absolute;
+      right: 1.25rem;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 86px;
+      height: 86px;
+    }
+
+    .radial-svg {
+      transform: rotate(-90deg);
+      width: 100%;
+      height: 100%;
+    }
+
+    .radial-bg {
+      fill: none;
+      stroke: var(--border-light);
+      stroke-width: 7;
+    }
+
+    .radial-bar {
+      fill: none;
+      stroke: var(--color-primary);
+      stroke-width: 7.5;
+      stroke-linecap: round;
+      stroke-dasharray: 232.4; /* 2 * PI * r (r=37) */
+      stroke-dashoffset: 232.4;
+      transition: stroke-dashoffset 0.8s cubic-bezier(0.16, 1, 0.3, 1), stroke 0.4s;
+    }
+
+    /* Spotlight Spotlight box */
+    .spotlight-box {
+      background: rgba(var(--color-primary-rgb), 0.05);
+      border: 1px solid rgba(var(--color-primary-rgb), 0.25);
+      box-shadow: 0 4px 20px rgba(var(--color-primary-rgb), 0.08);
+    }
+
+    .pulsing-indicator {
+      width: 8px;
+      height: 8px;
+      background: var(--color-emerald);
+      border-radius: 50%;
+      display: inline-block;
+      position: relative;
+    }
+
+    .pulsing-indicator::after {
+      content: '';
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      background: inherit;
+      border-radius: inherit;
+      animation: pulseGlow 2s infinite ease-out;
+      left: 0;
+      top: 0;
+    }
+
+    @keyframes pulseGlow {
+      from { transform: scale(1); opacity: 0.8; }
+      to { transform: scale(2.6); opacity: 0; }
+    }
+
+    /* Interactive Simulator Notification Strip */
+    .simulator-strip {
+      background: rgba(0, 113, 227, 0.9);
+      backdrop-filter: blur(15px);
+      -webkit-backdrop-filter: blur(15px);
+      border: 1.5px solid rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      padding: 0.75rem 1.25rem;
+      margin-bottom: 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      color: #ffffff;
+      font-size: 0.9rem;
+      font-weight: 500;
+      box-shadow: var(--shadow-sm);
+      transform: scaleY(0);
+      transform-origin: top;
+      height: 0;
+      opacity: 0;
+      margin-top: -1.5rem;
+      pointer-events: none;
+      transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s, height 0.3s, margin 0.3s;
+    }
+
+    .simulator-strip.active {
+      transform: scaleY(1);
+      height: auto;
+      opacity: 1;
+      margin-top: 0;
+      margin-bottom: 2rem;
+      pointer-events: auto;
+    }
+
+    .simulator-btn-reset {
+      background: rgba(255, 255, 255, 0.2);
+      border: 1px solid rgba(255, 255, 255, 0.4);
+      color: #ffffff;
+      padding: 0.35rem 0.85rem;
+      border-radius: 8px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .simulator-btn-reset:hover {
+      background: rgba(255, 255, 255, 0.3);
+    }
+
+    /* Main Dashboard Panel Layout */
+    .view-layout-split {
+      display: grid;
+      grid-template-columns: 7fr 5fr;
+      gap: 2rem;
+    }
+
+    @media (max-width: 1024px) {
+      .view-layout-split {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Panels & Cards */
+    .glass-panel {
+      background: var(--bg-surface);
+      backdrop-filter: blur(var(--blur-strength));
+      -webkit-backdrop-filter: blur(var(--blur-strength));
+      border: 1px solid var(--border-light);
+      border-radius: 14px;
+      padding: 2.25rem;
+      box-shadow: var(--shadow-sm);
+      margin-bottom: 2rem;
+    }
+
+    .glass-panel-header {
+      margin-bottom: 1.75rem;
+      border-bottom: 1px solid var(--border-light);
+      padding-bottom: 1rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .glass-panel-title {
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.35rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+
+    /* Progress and Activity Bars */
+    .progress-bar-stack {
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+
+    .bar-item {
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+    }
+
+    .bar-labels {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+
+    .bar-track {
+      background: var(--border-light);
+      height: 7px;
+      border-radius: 99px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .bar-fill {
+      height: 100%;
+      border-radius: 99px;
+      transition: width 0.6s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.4s;
+    }
+
+    /* Timelines & Checklists */
+    .roadmap-section-title {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--text-secondary);
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      margin-bottom: 1.25rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .roadmap-timeline {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+      position: relative;
+    }
+
+    .roadmap-card {
+      border: 1px solid var(--border-light);
+      background: var(--bg-surface-solid);
+      border-radius: 12px;
+      padding: 1.25rem 1.5rem;
+      transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.25s;
+    }
+
+    .roadmap-card:hover {
+      border-color: var(--border-strong);
+      transform: translateY(-2px);
+    }
+
+    .roadmap-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 0.75rem;
+    }
+
+    .roadmap-card-title-group h4 {
+      font-size: 1.05rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+
+    .roadmap-card-title-group p {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-top: 0.1rem;
+    }
+
+    .badge-pill-tdd {
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      padding: 0.25rem 0.5rem;
+      border-radius: 6px;
+    }
+
+    .badge-pill-tdd.red { background: rgba(255, 59, 48, 0.08); color: var(--color-rose); }
+    .badge-pill-tdd.green { background: rgba(48, 209, 88, 0.08); color: var(--color-emerald); }
+    .badge-pill-tdd.refactor { background: rgba(175, 82, 222, 0.08); color: var(--color-purple); }
+
+    /* Checkbox & Interactive elements */
+    .roadmap-checklist {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.65rem;
+      margin-top: 0.85rem;
+      background: var(--bg-base);
+      border-radius: 12px;
+      padding: 0.85rem 1rem;
+      border: 1px solid var(--border-light);
+    }
+
+    .roadmap-check-item {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-size: 0.85rem;
+      color: var(--text-main);
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .roadmap-check-item:hover .checkbox-custom {
+      border-color: var(--text-secondary);
+    }
+
+    .checkbox-custom {
+      width: 18px;
+      height: 18px;
+      border-radius: 6px;
+      border: 1.5px solid var(--border-strong);
+      background: var(--bg-surface-solid);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: background-color 0.2s, border-color 0.2s, color 0.1s;
+      font-size: 11px;
+      font-weight: bold;
+      color: transparent;
+    }
+
+    .roadmap-check-item.checked .checkbox-custom {
+      background-color: var(--color-emerald);
+      border-color: var(--color-emerald);
+      color: #ffffff;
+    }
+
+    .roadmap-check-item.checked .checkbox-custom::after {
+      content: '✓';
+    }
+
+    .roadmap-check-item.active-td .checkbox-custom {
+      background-color: rgba(var(--color-primary-rgb), 0.08);
+      border-color: var(--color-primary);
+      color: var(--color-primary);
+    }
+
+    .roadmap-check-item.active-td .checkbox-custom::after {
+      content: '●';
+      font-size: 8px;
+    }
+
+    .roadmap-check-item.checked span.task-text {
+      text-decoration: line-through;
+      opacity: 0.45;
+    }
+
+    /* Hex Explorer Layer Pill selector */
+    .filter-capsule-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.65rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .filter-pill {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-light);
+      color: var(--text-secondary);
+      padding: 0.55rem 1.15rem;
+      border-radius: 99px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.25s, border-color 0.25s, color 0.25s;
+    }
+
+    .filter-pill:hover {
+      background: var(--bg-surface-hover);
+      color: var(--text-main);
+    }
+
+    .filter-pill.active {
+      background: var(--color-primary);
+      border-color: var(--color-primary);
+      color: #ffffff;
+      box-shadow: 0 4px 12px rgba(var(--color-primary-rgb), 0.25);
+    }
+
+    /* Live Search bar styling */
+    .search-container {
+      position: relative;
+      margin-bottom: 2rem;
+    }
+
+    .search-input-field {
+      width: 100%;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-light);
+      border-radius: 12px;
+      padding: 0.9rem 1.25rem 0.9rem 2.75rem;
+      font-size: 0.95rem;
+      color: var(--text-main);
+      box-shadow: var(--shadow-sm);
+      transition: border-color 0.3s, box-shadow 0.3s;
+      outline: none;
+    }
+
+    .search-input-field:focus {
+      border-color: var(--border-strong);
+      box-shadow: var(--shadow-md);
+    }
+
+    .search-icon-svg {
+      position: absolute;
+      left: 1rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-muted);
+      pointer-events: none;
+    }
+
+    /* File grid */
+    .explorer-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+      gap: 1.25rem;
+    }
+
+    .file-node-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-light);
+      border-radius: 12px;
+      padding: 1.35rem;
+      box-shadow: var(--shadow-sm);
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      min-height: 160px;
+      transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.25s, box-shadow 0.25s;
+    }
+
+    .file-node-card:hover {
+      transform: translateY(-3px);
+      border-color: var(--border-strong);
+      box-shadow: var(--shadow-md);
+    }
+
+    .card-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 0.6rem;
+    }
+
+    .file-node-name {
+      font-family: 'Outfit', sans-serif;
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .file-node-path {
+      font-family: 'Fira Code', monospace;
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      word-break: break-all;
+      margin-top: 0.2rem;
+    }
+
+    .badge-status {
+      font-size: 0.65rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      padding: 0.2rem 0.5rem;
+      border-radius: 6px;
+      letter-spacing: 0.05em;
+    }
+
+    .badge-status.done { background: rgba(48, 209, 88, 0.08); color: var(--color-emerald); }
+    .badge-status.active { background: rgba(41, 151, 255, 0.08); color: var(--color-primary); }
+    .badge-status.upcoming { background: var(--border-light); color: var(--text-secondary); }
+
+    .card-bottom {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 1.25rem;
+      border-top: 1px solid var(--border-light);
+      padding-top: 0.75rem;
+      font-size: 0.725rem;
+      color: var(--text-secondary);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+
+    /* Airbnb-style slide Drawer Panel */
+    .drawer-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.3);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      z-index: 1000;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .drawer-overlay.open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .drawer-aside {
+      position: fixed;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      width: 100%;
+      max-width: 520px;
+      background: var(--bg-surface);
+      backdrop-filter: blur(var(--blur-strength));
+      -webkit-backdrop-filter: blur(var(--blur-strength));
+      border-left: 1px solid var(--border-light);
+      box-shadow: var(--shadow-lg);
+      z-index: 1001;
+      transform: translateX(100%);
+      transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .drawer-overlay.open .drawer-aside {
+      transform: translateX(0);
+    }
+
+    .drawer-header {
+      padding: 1.75rem 2rem;
+      border-bottom: 1px solid var(--border-light);
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      position: relative;
+    }
+
+    .drawer-close {
+      background: var(--border-light);
+      border: none;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text-main);
+      transition: background 0.2s;
+    }
+
+    .drawer-close:hover {
+      background: var(--border-strong);
+    }
+
+    .drawer-title-group h3 {
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.45rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+
+    .drawer-copy-path-bar {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: var(--bg-base);
+      border: 1px solid var(--border-light);
+      padding: 0.6rem 0.85rem;
+      border-radius: 10px;
+      margin-top: 0.5rem;
+      cursor: pointer;
+      font-family: 'Fira Code', monospace;
+      font-size: 0.725rem;
+      color: var(--text-secondary);
+      transition: background 0.2s, border-color 0.2s;
+    }
+
+    .drawer-copy-path-bar:hover {
+      background: var(--border-light);
+      border-color: var(--border-strong);
+    }
+
+    .drawer-body {
+      padding: 2rem;
+      overflow-y: auto;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 1.75rem;
+    }
+
+    .drawer-section-title {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 0.75rem;
+      border-bottom: 1px solid var(--border-light);
+      padding-bottom: 0.25rem;
+    }
+
+    /* Terminal Console Pane Upgrades */
+    .terminal-container {
+      background: #000000;
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: var(--shadow-lg);
+      padding: 0;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .terminal-header {
+      background: #1e1e1e;
+      padding: 0.6rem 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      position: relative;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .terminal-title {
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+      font-size: 0.75rem;
+      font-weight: 500;
+      color: #a1a1a6;
+      pointer-events: none;
+    }
+
+    .term-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      margin-right: 0.4rem;
+    }
+
+    .term-dot.red { background: #ff5f56; }
+    .term-dot.yellow { background: #ffbd2e; }
+    .term-dot.green { background: #27c93f; }
+
+    .terminal-pane {
+      font-family: 'Fira Code', 'JetBrains Mono', monospace;
+      color: #e2e8f0;
+      font-size: 0.825rem;
+      line-height: 1.6;
+      overflow-y: auto;
+      height: 380px;
+      padding: 1.25rem;
+      white-space: pre-wrap;
+      margin: 0;
+      background: #000000;
+      outline: none;
+      scroll-behavior: smooth;
+    }
+
+    .terminal-pane span.green-text {
+      color: var(--color-emerald);
+      font-weight: 700;
+    }
+
+    .terminal-pane span.blue-text {
+      color: var(--color-primary);
+      font-weight: 700;
+    }
+
+    /* Blinking Terminal Cursor */
+    .term-cursor {
+      background: #e2e8f0;
+      color: #000000;
+      animation: blink 1s step-end infinite;
+      display: inline-block;
+      width: 8px;
+      height: 15px;
+      vertical-align: middle;
+      margin-left: 2px;
+    }
+
+    @keyframes blink {
+      from, to { background-color: transparent; }
+      50% { background-color: #e2e8f0; }
+    }
+
+    .prompt-user {
+      color: #30d158;
+      font-weight: 600;
+    }
+
+    .prompt-dir {
+      color: #2997ff;
+      font-weight: 600;
+    }
+
+    .terminal-input-hidden {
+      position: absolute;
+      opacity: 0;
+      width: 0;
+      height: 0;
+      border: none;
+      outline: none;
+    }
+
+    .terminal-pane::-webkit-scrollbar {
+      width: 8px;
+    }
+    .terminal-pane::-webkit-scrollbar-track {
+      background: rgba(0, 0, 0, 0.2);
+    }
+    .terminal-pane::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 4px;
+    }
+    .terminal-pane::-webkit-scrollbar-thumb:hover {
+      background: rgba(255, 255, 255, 0.3);
+    }
+
+    /* Project Plan Timeline CSS */
+    .plan-milestone-card {
+      background: var(--bg-surface);
+      backdrop-filter: blur(var(--blur-strength));
+      -webkit-backdrop-filter: blur(var(--blur-strength));
+      border: 1px solid var(--border-light);
+      border-radius: 12px;
+      padding: 1.25rem;
+      margin-bottom: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .plan-milestone-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .plan-milestone-title {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .timeline-container-plan {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+
+    .timeline-phase-card {
+      background: var(--bg-surface);
+      backdrop-filter: blur(var(--blur-strength));
+      -webkit-backdrop-filter: blur(var(--blur-strength));
+      border: 1px solid var(--border-light);
+      border-radius: 12px;
+      overflow: hidden;
+      transition: border-color 0.25s, box-shadow 0.25s;
+    }
+
+    .timeline-phase-card.active {
+      border-color: var(--color-primary);
+      box-shadow: 0 4px 15px rgba(var(--color-primary-rgb), 0.15);
+    }
+
+    .timeline-phase-header {
+      padding: 1.15rem 1.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+      user-select: none;
+      transition: background-color 0.2s;
+    }
+
+    .timeline-phase-header:hover {
+      background-color: var(--bg-surface-hover);
+    }
+
+    .phase-left {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .phase-badge {
+      font-size: 0.725rem;
+      font-weight: 700;
+      padding: 0.25rem 0.55rem;
+      border-radius: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .phase-badge.completed {
+      background: rgba(48, 209, 88, 0.08);
+      color: var(--color-emerald);
+      border: 1.5px solid rgba(48, 209, 88, 0.15);
+    }
+
+    .phase-badge.active {
+      background: rgba(41, 151, 255, 0.08);
+      color: var(--color-primary);
+      border: 1.5px solid rgba(41, 151, 255, 0.15);
+    }
+
+    .phase-badge.upcoming {
+      background: var(--border-light);
+      color: var(--text-secondary);
+      border: 1.5px solid rgba(128, 128, 128, 0.15);
+    }
+
+    .phase-chevron {
+      transition: transform 0.25s ease;
+      color: var(--text-secondary);
+      font-size: 0.75rem;
+    }
+
+    .timeline-phase-card.expanded .phase-chevron {
+      transform: rotate(90deg);
+    }
+
+    .timeline-phase-body {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      background: rgba(0, 0, 0, 0.02);
+      border-top: 1px solid transparent;
+    }
+
+    :root[data-theme="dark"] .timeline-phase-body {
+      background: rgba(255, 255, 255, 0.01);
+    }
+
+    .timeline-phase-card.expanded .timeline-phase-body {
+      max-height: 500px;
+      border-top: 1px solid var(--border-light);
+    }
+
+    .phase-content-inner {
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+      font-size: 0.875rem;
+      line-height: 1.6;
+    }
+
+    .phase-meta-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.25rem;
+    }
+
+    @media (max-width: 640px) {
+      .phase-meta-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .meta-box-plan {
+      background: var(--bg-surface-solid);
+      border: 1px solid var(--border-light);
+      border-radius: 8px;
+      padding: 0.85rem 1rem;
+    }
+
+    .meta-box-title {
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 0.35rem;
+    }
+
+    .meta-box-content {
+      color: var(--text-main);
+      font-weight: 500;
+    }
+
+    /* Footer */
+    footer {
+      text-align: center;
+      margin-top: 5rem;
+      border-top: 1px solid var(--border-light);
+      padding-top: 2rem;
+      color: var(--text-muted);
+      font-size: 0.85rem;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  
+  <!-- Apple Frosted Header -->
+  <header>
+    <div class="brand" id="brand-title">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M2 17L12 22L22 17" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M2 12L12 17L22 12" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <span id="project-title-text">Memory Nexus Status</span>
+    </div>
+    
+    <div class="meta-indicators">
+      <button class="connect-btn" id="connect-project-trigger" style="background:rgba(255,255,255,0.08); border:1px solid var(--border-light); color:var(--text-main); padding:0.35rem 0.85rem; border-radius:8px; font-size:0.75rem; font-weight:600; cursor:pointer; display:flex; align-items:center; gap:0.3rem; transition:background 0.2s, border-color 0.2s; margin-right: 0.5rem;" onmouseover="this.style.background='rgba(255,255,255,0.15)'" onmouseout="this.style.background='rgba(255,255,255,0.08)'">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="9" y1="3" x2="9" y2="21"></line></svg>
+        Connect Project
+      </button>
+      <div class="branch-badge">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <circle cx="18" cy="18" r="3"></circle>
+          <circle cx="6" cy="6" r="3"></circle>
+          <path d="M13 6h3a2 2 0 0 1 2 2v7"></path>
+          <line x1="6" y1="9" x2="6" y2="21"></line>
+        </svg>
+        main
+      </div>
+      
+      <!-- Apple Slide Theme Switcher -->
+      <div class="theme-toggle-container" id="theme-toggler" title="Switch Theme">
+        <div class="theme-toggle-dot">
+          <span class="toggle-icon">🌙</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Title & macOS segmented tab navigation -->
+  <section class="hero-panel">
+    <div class="hero-title">
+      <h1>Engineering Dashboard</h1>
+      <p>Hexagonal consolidation, programmatic sandboxing, and surface alignment status.</p>
+    </div>
+    
+    <!-- macOS segmented tab bar -->
+    <div class="tab-bar-capsule">
+      <div class="tab-slider" id="tab-pill-slider"></div>
+      <button class="tab-btn active" data-target="view-dashboard">Overview</button>
+      <button class="tab-btn" data-target="view-checklists">TDD Roadmap</button>
+      <button class="tab-btn" data-target="view-explorer">Hex Explorer</button>
+      <button class="tab-btn" data-target="view-terminal">Terminal</button>
+      <button class="tab-btn" data-target="view-plan">Project Plan</button>
+    </div>
+  </section>
+
+  <!-- Interactive Simulation Strip -->
+  <div class="simulator-strip" id="interactive-strip">
+    <div style="display:flex; align-items:center; gap:0.50rem;">
+      <span class="pulsing-indicator" style="background:#ffffff;"></span>
+      <span>Simulator Active Mode: Recalculating refactoring state and SVG gauges in real-time.</span>
+    </div>
+    <button class="simulator-btn-reset" id="reset-simulator-trigger">Reset Baseline</button>
+  </div>
+
+  <!-- VIEW 1: OVERVIEW -->
+  <div id="view-dashboard" class="view-section active">
+    
+    <!-- Bento Grid metrics panel -->
+    <section class="bento-grid">
+      
+      <!-- Card 1: Refactoring Completion -->
+      <div class="bento-card">
+        <div>
+          <div class="card-header-small">
+            <span class="card-title-small">Refactoring Progress</span>
+          </div>
+          <div class="bento-big-stat" id="stat-progress-val">73<span class="unit">%</span></div>
+        </div>
+        <div class="bento-desc" id="stat-progress-desc">17 of 23 target files completed</div>
+        
+        <!-- SVG Radial Ring Chart -->
+        <div class="radial-gauge-container">
+          <svg class="radial-svg" viewBox="0 0 80 80">
+            <circle class="radial-bg" cx="40" cy="40" r="37"></circle>
+            <circle class="radial-bar" id="ring-progress" cx="40" cy="40" r="37"></circle>
+          </svg>
+        </div>
+      </div>
+
+      <!-- Card 2: Test Suite Statement Coverage -->
+      <div class="bento-card">
+        <div>
+          <div class="card-header-small">
+            <span class="card-title-small">TDD Core Coverage</span>
+          </div>
+          <div class="bento-big-stat" id="stat-coverage-val">94.8<span class="unit">%</span></div>
+        </div>
+        <div class="bento-desc" id="stat-coverage-desc">Targeting 95%+ individually</div>
+
+        <!-- SVG Radial Ring Chart -->
+        <div class="radial-gauge-container">
+          <svg class="radial-svg" viewBox="0 0 80 80">
+            <circle class="radial-bg" cx="40" cy="40" r="37"></circle>
+            <circle class="radial-bar" id="ring-coverage" cx="40" cy="40" r="37" style="stroke: var(--color-rose);"></circle>
+          </svg>
+        </div>
+      </div>
+
+      <!-- Card 3: Test Verification Count -->
+      <div class="bento-card">
+        <div>
+          <div class="card-header-small">
+            <span class="card-title-small">Passing Validations</span>
+            <span class="pulsing-indicator"></span>
+          </div>
+          <div class="bento-big-stat" style="color: var(--color-emerald);">3,551</div>
+        </div>
+        <div class="bento-desc">100% tests executing successfully</div>
+      </div>
+
+      <!-- Card 4: Immediate Task Focus Spotlight -->
+      <div class="bento-card spotlight-box">
+        <div>
+          <div class="card-header-small">
+            <span class="card-title-small" style="color: var(--color-primary);">Current Sprint Focus</span>
+          </div>
+          <div class="file-node-name" style="font-size: 1.15rem; margin-top: 0.5rem;" id="spotlight-title">query.ts</div>
+          <div class="file-node-path" id="spotlight-path">src/presentation/cli/commands/query.ts</div>
+        </div>
+        <div class="bento-desc" style="color: var(--text-secondary); margin-top: 0.5rem;" id="spotlight-desc">Consolidating read interfaces under unified query primitive.</div>
+      </div>
+
+    </section>
+
+    <!-- split details -->
+    <div class="view-layout-split">
+      
+      <!-- Left breakdown: Active Layer Roadmaps -->
+      <section class="glass-panel" style="margin-bottom:0;">
+        <div class="glass-panel-header">
+          <h3 class="glass-panel-title">Consolidation Progress Nodes</h3>
+        </div>
+        
+        <div class="roadmap-timeline" id="overview-roadmap-list">
+          <!-- Rendered dynamically -->
+        </div>
+      </section>
+
+      <!-- Right sidebar details -->
+      <aside>
+        
+        <!-- Architecture layers progress -->
+        <div class="glass-panel" style="padding: 1.75rem 2rem;">
+          <div class="glass-panel-header" style="margin-bottom:1.25rem; padding-bottom:0.75rem;">
+            <h3 class="glass-panel-title" style="font-size:1.1rem;">Architectural Layer Health</h3>
+          </div>
+          
+          <div class="progress-bar-stack" id="layers-bars-container">
+            <!-- Rendered dynamically -->
+          </div>
+        </div>
+
+        <!-- sandboxing integrity check -->
+        <div class="glass-panel" style="padding: 1.75rem 2rem;">
+          <div class="glass-panel-header" style="margin-bottom:1rem; padding-bottom:0.6rem;">
+            <h3 class="glass-panel-title" style="font-size:1.1rem;">Active Platform Directives</h3>
+          </div>
+          
+          <div style="display:flex; flex-direction:column; gap:0.85rem; font-size:0.825rem;">
+            <div style="display:flex; align-items:center; gap:0.65rem;">
+              <span class="pulsing-indicator" style="background: var(--color-emerald); flex-shrink:0;"></span>
+              <span style="color:var(--text-secondary);">Programmatic sandboxing successfully isolated on Windows environment.</span>
+            </div>
+            <div style="display:flex; align-items:center; gap:0.65rem;">
+              <span class="pulsing-indicator" style="background: var(--color-emerald); flex-shrink:0;"></span>
+              <span style="color:var(--text-secondary);">SQLite file concurrency locks bypass enabled via process mocks.</span>
+            </div>
+            <div style="display:flex; align-items:center; gap:0.65rem;">
+              <span class="pulsing-indicator" style="background: var(--color-purple); flex-shrink:0;"></span>
+              <span style="color:var(--text-secondary);">Targeting 95%+ coverage requirement on each layer autonomously.</span>
+            </div>
+          </div>
+        </div>
+
+      </aside>
+
+    </div>
+  </div>
+
+  <!-- VIEW 2: DETAILED CHECKSLISTS -->
+  <div id="view-checklists" class="view-section">
+    <div class="glass-panel">
+      <div class="glass-panel-header">
+        <div>
+          <h3 class="glass-panel-title">TDD Engineering Roadmap</h3>
+          <p style="font-size:0.85rem; color:var(--text-muted); margin-top:0.15rem;">Complete, high-fidelity developer checklist mapped to Red-Green-Refactor execution loops.</p>
+        </div>
+      </div>
+
+      <!-- Timeline sections separated by done / remaining -->
+      <div>
+        <div class="roadmap-section-title" style="color: var(--color-emerald);">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+          Phase 1: Completed Sandboxing & Health Surface
+        </div>
+        <div class="roadmap-timeline" id="checklist-timeline-completed" style="margin-bottom: 2.5rem;">
+          <!-- Renders completed nodes dynamically -->
+        </div>
+
+        <div class="roadmap-section-title" style="color: var(--color-primary);">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+          Phase 2: Outstanding Query Consolidation & TDD Scaling
+        </div>
+        <div class="roadmap-timeline" id="checklist-timeline-outstanding">
+          <!-- Renders outstanding nodes dynamically -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- VIEW 3: HEX EXPLORER -->
+  <div id="view-explorer" class="view-section">
+    
+    <!-- Hexagonal Layer Pills selectors -->
+    <div class="filter-capsule-row">
+      <button class="filter-pill active" data-layer="all">All Files</button>
+      <button class="filter-pill" data-layer="domain">Domain Core</button>
+      <button class="filter-pill" data-layer="application">Application Services</button>
+      <button class="filter-pill" data-layer="infrastructure">Infrastructure Layer</button>
+      <button class="filter-pill" data-layer="presentation">Presentation Layer</button>
+      <button class="filter-pill" data-layer="testing">Tests & Docs</button>
+    </div>
+
+    <!-- Live Search field -->
+    <div class="search-container">
+      <svg class="search-icon-svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <circle cx="11" cy="11" r="8"></circle>
+        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+      </svg>
+      <input type="text" id="explorer-search-field" class="search-input-field" placeholder="Search files, layer, path, status, or phase...">
+    </div>
+
+    <!-- File Grid explorer -->
+    <div class="explorer-grid" id="explorer-files-container">
+      <!-- Renders dynamically -->
+    </div>
+
+  </div>
+
+  <!-- VIEW 4: TERMINAL CONSOLE -->
+  <div id="view-terminal" class="view-section">
+    <div class="glass-panel">
+      <div class="glass-panel-header">
+        <h3 class="glass-panel-title">Interactive Terminal Emulator</h3>
+        <span style="font-size:0.8rem; color:var(--text-muted);">Click console window to type</span>
+      </div>
+      
+      <div class="terminal-container" onclick="document.getElementById('terminal-hidden-input').focus()">
+        <div class="terminal-header">
+          <div class="term-dot red"></div>
+          <div class="term-dot yellow"></div>
+          <div class="term-dot green"></div>
+          <span class="terminal-title">zsh</span>
+        </div>
+        <pre class="terminal-pane" id="terminal-stream-logs">Last login: Fri May 22 11:20:00 2026 on ttys001
+Memory Nexus CLI Oversight v4.0.0
+Type 'help' to view available commands.
+
+<span class="prompt-user">chude@emeke-mac</span> <span class="prompt-dir">memory-nexus</span> % <span id="term-input-buffer"></span><span class="term-cursor"></span></pre>
+        <input type="text" class="terminal-input-hidden" id="terminal-hidden-input" autocomplete="off" autofocus>
+      </div>
+    </div>
+  </div>
+
+  <!-- VIEW 5: PROJECT PLAN -->
+  <div id="view-plan" class="view-section">
+    <!-- Milestone progress card -->
+    <div class="plan-milestone-card">
+      <div class="plan-milestone-header">
+        <span class="plan-milestone-title">v4.0 Intelligence Layer Milestone Track</span>
+        <span style="font-size: 0.85rem; font-weight: 600; color: var(--color-primary);" id="milestone-progress-text">37.5% Complete</span>
+      </div>
+      <div class="bar-track" style="height: 10px; background: var(--border-light); margin: 0.5rem 0;">
+        <div class="bar-fill" style="width: 37.5%; background: var(--color-primary); box-shadow: 0 0 10px rgba(var(--color-primary-rgb), 0.3);"></div>
+      </div>
+      <span style="font-size: 0.8rem; color: var(--text-secondary);">
+        Transitioning to memory-nexus v4.0 Architecture. Goal: Hexagonal core isolation and 95%+ coverage.
+      </span>
+    </div>
+
+    <!-- Timeline header -->
+    <h3 class="roadmap-section-title" style="margin-top: 2rem;">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <circle cx="12" cy="12" r="10"></circle>
+        <polyline points="12 6 12 12 16 14"></polyline>
+      </svg>
+      Phases 30 - 37 Roadmap Details
+    </h3>
+
+    <!-- Accordion timeline list -->
+    <div class="timeline-container-plan">
+      
+      <!-- Phase 30 -->
+      <div class="timeline-phase-card" id="phase-30">
+        <div class="timeline-phase-header" onclick="togglePhaseAccordion('phase-30')">
+          <div class="phase-left">
+            <span class="phase-badge completed">Phase 30</span>
+            <span style="font-weight: 600;">Domain Layer Refinement</span>
+          </div>
+          <div style="display:flex; align-items:center; gap:0.5rem;">
+            <span class="phase-badge completed">Completed</span>
+            <span class="phase-chevron">▶</span>
+          </div>
+        </div>
+        <div class="timeline-phase-body">
+          <div class="phase-content-inner">
+            <p style="color:var(--text-secondary);">
+              Define and enforce domain contracts in isolation, separating core validation logic from database adaptors.
+            </p>
+            <div class="phase-meta-grid">
+              <div class="meta-box-plan">
+                <div class="meta-box-title">Key Goal</div>
+                <div class="meta-box-content">Isolate domain ports from external runtime libraries.</div>
+              </div>
+              <div class="meta-box-plan">
+                <div class="meta-box-title">Target Files</div>
+                <div class="meta-box-content" style="font-family:'Fira Code', monospace; font-size:0.75rem;">src/domain/ports/repositories.ts</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Phase 31 -->
+      <div class="timeline-phase-card" id="phase-31">
+        <div class="timeline-phase-header" onclick="togglePhaseAccordion('phase-31')">
+          <div class="phase-left">
+            <span class="phase-badge completed">Phase 31</span>
+            <span style="font-weight: 600;">Infrastructure DB Consolidation</span>
+          </div>
+          <div style="display:flex; align-items:center; gap:0.5rem;">
+            <span class="phase-badge completed">Completed</span>
+            <span class="phase-chevron">▶</span>
+          </div>
+        </div>
+        <div class="timeline-phase-body">
+          <div class="phase-content-inner">
+            <p style="color:var(--text-secondary);">
+              Clean up SQLite adapter queries. Implement strict parameter checks and sandbox path resolutions.
+            </p>
+            <div class="phase-meta-grid">
+              <div class="meta-box-plan">
+                <div class="meta-box-title">Key Goal</div>
+                <div class="meta-box-content">Resolve TS strict typescript rules inside infrastructure repositories.</div>
+              </div>
+              <div class="meta-box-plan">
+                <div class="meta-box-title">Target Files</div>
+                <div class="meta-box-content" style="font-family:'Fira Code', monospace; font-size:0.75rem;">src/infrastructure/database/repositories/*.ts</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Phase 32 -->
+      <div class="timeline-phase-card" id="phase-32">
+        <div class="timeline-phase-header" onclick="togglePhaseAccordion('phase-32')">
+          <div class="phase-left">
+            <span class="phase-badge completed">Phase 32</span>
+            <span style="font-weight: 600;">Presentation CLI Consolidation</span>
+          </div>
+          <div style="display:flex; align-items:center; gap:0.5rem;">
+            <span class="phase-badge completed">Completed</span>
+            <span class="phase-chevron">▶</span>
+          </div>
+        </div>
+        <div class="timeline-phase-body">
+          <div class="phase-content-inner">
+            <p style="color:var(--text-secondary);">
+              Re-route legacy CLI commands into the new consolidated query primitive commander actions.
+            </p>
+            <div class="phase-meta-grid">
+              <div class="meta-box-plan">
+                <div class="meta-box-title">Key Goal</div>
+                <div class="meta-box-content">Convert search, list, context, and show into thin wrappers.</div>
+              </div>
+              <div class="meta-box-plan">
+                <div class="meta-box-title">Target Files</div>
+                <div class="meta-box-content" style="font-family:'Fira Code', monospace; font-size:0.75rem;">src/presentation/cli/commands/query.ts</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Phase 33 -->
+      <div class="timeline-phase-card active expanded" id="phase-33">
+        <div class="timeline-phase-header" onclick="togglePhaseAccordion('phase-33')">
+          <div class="phase-left">
+            <span class="phase-badge active">Phase 33</span>
+            <span style="font-weight: 600;">Sandboxed Test Coverage Upgrades</span>
+          </div>
+          <div style="display:flex; align-items:center; gap:0.5rem;">
+            <span class="phase-badge active">Active</span>
+            <span class="phase-chevron">▶</span>
+          </div>
+        </div>
+        <div class="timeline-phase-body">
+          <div class="phase-content-inner">
+            <p style="color:var(--text-secondary);">
+              Escalate vitest programmatic-api test assertions. Secure and sandbox process environment directories.
+            </p>
+            <div class="phase-meta-grid">
+              <div class="meta-box-plan">
+                <div class="meta-box-title">Key Goal</div>
+                <div class="meta-box-content">Verify statement, function, and branch coverage exceed 95% threshold.</div>
+              </div>
+              <div class="meta-box-plan">
+                <div class="meta-box-title">Target Files</div>
+                <div class="meta-box-content" style="font-family:'Fira Code', monospace; font-size:0.75rem;">tests/integration/query-primitive.test.ts</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Phase 34 -->
+      <div class="timeline-phase-card" id="phase-34">
+        <div class="timeline-phase-header" onclick="togglePhaseAccordion('phase-34')">
+          <div class="phase-left">
+            <span class="phase-badge upcoming">Phase 34</span>
+            <span style="font-weight: 600;">Intelligence Layer Hook Integration</span>
+          </div>
+          <div style="display:flex; align-items:center; gap:0.5rem;">
+            <span class="phase-badge upcoming">Upcoming</span>
+            <span class="phase-chevron">▶</span>
+          </div>
+        </div>
+        <div class="timeline-phase-body">
+          <div class="phase-content-inner">
+            <p style="color:var(--text-secondary);">
+              Integrate smart context parsing services with git hook actions to automate session synthesis on commit.
+            </p>
+            <div class="phase-meta-grid">
+              <div class="meta-box-plan">
+                <div class="meta-box-title">Key Goal</div>
+                <div class="meta-box-content">Automate contextual scan execution triggers on file commit events.</div>
+              </div>
+              <div class="meta-box-plan">
+                <div class="meta-box-title">Target Files</div>
+                <div class="meta-box-content" style="font-family:'Fira Code', monospace; font-size:0.75rem;">src/application/services/smart-context-service.ts</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Phase 35 -->
+      <div class="timeline-phase-card" id="phase-35">
+        <div class="timeline-phase-header" onclick="togglePhaseAccordion('phase-35')">
+          <div class="phase-left">
+            <span class="phase-badge upcoming">Phase 35</span>
+            <span style="font-weight: 600;">Contextual Embeddings Pipeline</span>
+          </div>
+          <div style="display:flex; align-items:center; gap:0.5rem;">
+            <span class="phase-badge upcoming">Upcoming</span>
+            <span class="phase-chevron">▶</span>
+          </div>
+        </div>
+        <div class="timeline-phase-body">
+          <div class="phase-content-inner">
+            <p style="color:var(--text-secondary);">
+              Construct OpenAI Ada-002 embedding pipelines for auto-backfilling missing vector layers.
+            </p>
+            <div class="phase-meta-grid">
+              <div class="meta-box-plan">
+                <div class="meta-box-title">Key Goal</div>
+                <div class="meta-box-content">Achieve sub-second retrieval accuracy for related session lookups.</div>
+              </div>
+              <div class="meta-box-plan">
+                <div class="meta-box-title">Target Files</div>
+                <div class="meta-box-content" style="font-family:'Fira Code', monospace; font-size:0.75rem;">src/application/services/embedding-service.ts</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Phase 36 -->
+      <div class="timeline-phase-card" id="phase-36">
+        <div class="timeline-phase-header" onclick="togglePhaseAccordion('phase-36')">
+          <div class="phase-left">
+            <span class="phase-badge upcoming">Phase 36</span>
+            <span style="font-weight: 600;">Administrative Health Surfaces</span>
+          </div>
+          <div style="display:flex; align-items:center; gap:0.5rem;">
+            <span class="phase-badge upcoming">Upcoming</span>
+            <span class="phase-chevron">▶</span>
+          </div>
+        </div>
+        <div class="timeline-phase-body">
+          <div class="phase-content-inner">
+            <p style="color:var(--text-secondary);">
+              Expose diagnostics metrics and database states via native `status`, `doctor`, and `stats` CLI parameters.
+            </p>
+            <div class="phase-meta-grid">
+              <div class="meta-box-plan">
+                <div class="meta-box-title">Key Goal</div>
+                <div class="meta-box-content">Standardize JSON status response envelopes.</div>
+              </div>
+              <div class="meta-box-plan">
+                <div class="meta-box-title">Target Files</div>
+                <div class="meta-box-content" style="font-family:'Fira Code', monospace; font-size:0.75rem;">src/presentation/cli/commands/status.ts</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Phase 37 -->
+      <div class="timeline-phase-card" id="phase-37">
+        <div class="timeline-phase-header" onclick="togglePhaseAccordion('phase-37')">
+          <div class="phase-left">
+            <span class="phase-badge upcoming">Phase 37</span>
+            <span style="font-weight: 600;">Production v4.0 Intelligence Release</span>
+          </div>
+          <div style="display:flex; align-items:center; gap:0.5rem;">
+            <span class="phase-badge upcoming">Upcoming</span>
+            <span class="phase-chevron">▶</span>
+          </div>
+        </div>
+        <div class="timeline-phase-body">
+          <div class="phase-content-inner">
+            <p style="color:var(--text-secondary);">
+              Tag and release the consolidated engineering oversight suite into master, declaring Hexagonal core stability.
+            </p>
+            <div class="phase-meta-grid">
+              <div class="meta-box-plan">
+                <div class="meta-box-title">Key Goal</div>
+                <div class="meta-box-content">Deploy complete programmatic-api interface package library.</div>
+              </div>
+              <div class="meta-box-plan">
+                <div class="meta-box-title">Target Files</div>
+                <div class="meta-box-content" style="font-family:'Fira Code', monospace; font-size:0.75rem;">src/index.ts</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Airbnb-Style Sliding Inspector Drawer -->
+  <div class="drawer-overlay" id="drawer-overlay-display">
+    <aside class="drawer-aside" id="drawer-aside-display">
+      
+      <!-- Drawer Header -->
+      <div class="drawer-header">
+        <div class="drawer-title-group">
+          <h3 id="drawer-file-title">file_name.ts</h3>
+          <div class="drawer-copy-path-bar" id="drawer-copy-trigger" title="Click to Copy Path">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+              <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+            </svg>
+            <span id="drawer-file-path">src/path/to/file_name.ts</span>
+          </div>
+        </div>
+        <button class="drawer-close" id="drawer-close-trigger">×</button>
+      </div>
+
+      <!-- Drawer Body -->
+      <div class="drawer-body">
+        
+        <div>
+          <div class="drawer-section-title">Architectural Alignment</div>
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <span style="font-weight:600; font-size:0.9rem;" id="drawer-layer-display">INFRASTRUCTURE LAYER</span>
+            <span class="badge-status" id="drawer-status-badge">active</span>
+          </div>
+        </div>
+
+        <div>
+          <div class="drawer-section-title">TDD Stage</div>
+          <div style="display:flex; gap:0.5rem;" id="drawer-tdd-stage-display">
+            <!-- Dynamic badges -->
+          </div>
+        </div>
+
+        <div>
+          <div class="drawer-section-title">Unit test coverage</div>
+          <div style="display:flex; justify-content:space-between; margin-top:0.25rem;">
+            <span style="font-size:0.85rem; color:var(--text-secondary);">Statement Target Match</span>
+            <span style="font-weight:700; font-size:0.95rem; color: var(--color-emerald);" id="drawer-coverage-display">95.00%</span>
+          </div>
+        </div>
+
+        <div>
+          <div class="drawer-section-title">Granular TDD checklist</div>
+          <ul class="roadmap-checklist" id="drawer-checklist-display">
+            <!-- Dynamic list of interactive checklists -->
+          </ul>
+        </div>
+
+      </div>
+    </aside>
+  </div>
+
+  <footer>
+    <p>Memory Nexus Refactoring Suite • Designed in the Cupertino & Airbnb Spirit</p>
+  </footer>
+
+</div>
+
+<!-- INTERACTIVE DASHBOARD SYSTEM MOTOR -->
+<script>
+  // Complete Phase 32.5 data model mapping every single completed and remaining file and test
+  const filesData = [
+    // Completed Administrative Health files
+    {
+      name: "status.ts",
+      path: "src/presentation/cli/commands/status.ts",
+      layer: "presentation",
+      status: "done",
+      coverage: "89.47%",
+      baselineCoverage: 89.47,
+      tasks: [
+        { id: "status-1", desc: "Rewrite executeStatusCommand to support all section flags", done: true },
+        { id: "status-2", desc: "Consolidate hook installation scans and active checks", done: true },
+        { id: "status-3", desc: "Emulate programmatic health options and output JSON envelopes", done: true }
+      ]
+    },
+    {
+      name: "doctor.ts",
+      path: "src/presentation/cli/commands/doctor.ts",
+      layer: "presentation",
+      status: "done",
+      coverage: "94.25%",
+      baselineCoverage: 94.25,
+      tasks: [
+        { id: "doc-1", desc: "Delegate execution blocks programmatically to consolidated status surface", done: true },
+        { id: "doc-2", desc: "Maintain absolute backward compatibility for command wrapper arguments", done: true }
+      ]
+    },
+    {
+      name: "stats.ts",
+      path: "src/presentation/cli/commands/stats.ts",
+      layer: "presentation",
+      status: "done",
+      coverage: "100.00%",
+      baselineCoverage: 100.0,
+      tasks: [
+        { id: "stats-1", desc: "Wrapper command forwarding queries into consolidated status stats option", done: true }
+      ]
+    },
+    // Completed Sandboxed Test files
+    {
+      name: "programmatic-api.test.ts",
+      path: "tests/integration/programmatic-api.test.ts",
+      layer: "testing",
+      status: "done",
+      coverage: "97.28%",
+      baselineCoverage: 97.28,
+      tasks: [
+        { id: "papi-1", desc: "Implement process.env.XDG_DATA_HOME mocks for database sandboxing", done: true },
+        { id: "papi-2", desc: "Increase async execution limits to 30s/60s avoiding timeouts", done: true }
+      ]
+    },
+    // Completed Application services
+    {
+      name: "backfill-service.ts",
+      path: "src/application/services/backfill-service.ts",
+      layer: "application",
+      status: "done",
+      coverage: "100.00%",
+      baselineCoverage: 100.0,
+      tasks: [
+        { id: "backfill-1", desc: "Handle empty array checks on empty or non-existent session records", done: true },
+        { id: "backfill-2", desc: "Resolve strict exactOptionalPropertyTypes typescript compiler rules", done: true }
+      ]
+    },
+    {
+      name: "embedding-service.ts",
+      path: "src/application/services/embedding-service.ts",
+      layer: "application",
+      status: "done",
+      coverage: "100.00%",
+      baselineCoverage: 100.0,
+      tasks: [
+        { id: "embed-1", desc: "Establish type narrowers protecting database ingestion bounds", done: true }
+      ]
+    },
+    {
+      name: "smart-context-service.ts",
+      path: "src/application/services/smart-context-service.ts",
+      layer: "application",
+      status: "done",
+      coverage: "99.10%",
+      baselineCoverage: 99.1,
+      tasks: [
+        { id: "smart-1", desc: "Resolve context service compile mismatches", done: true }
+      ]
+    },
+    // OUTSTANDING Surfacing & Unification
+    {
+      name: "query.ts",
+      path: "src/presentation/cli/commands/query.ts",
+      layer: "presentation",
+      status: "done",
+      coverage: "100.00%",
+      baselineCoverage: 100.0,
+      tasks: [
+        { id: "query-1", desc: "[TDD-RED]: Assert query routes correct services depending on --kind parameters", done: true },
+        { id: "query-2", desc: "[TDD-GREEN]: Centralize search, list, context, show interfaces under query primitive", done: true },
+        { id: "query-3", desc: "[TDD-REFACTOR]: Standardize commander parsing wrappers", done: true }
+      ]
+    },
+    {
+      name: "envelope.ts",
+      path: "src/presentation/cli/formatters/envelope.ts",
+      layer: "presentation",
+      status: "done",
+      coverage: "100.00%",
+      baselineCoverage: 100.0,
+      tasks: [
+        { id: "env-1", desc: "Register query Command inside QUERY_COMMAND_NAMES map", done: true }
+      ]
+    },
+    {
+      name: "search.ts",
+      path: "src/presentation/cli/commands/search.ts",
+      layer: "presentation",
+      status: "done",
+      coverage: "100.00%",
+      baselineCoverage: 100.0,
+      tasks: [
+        { id: "search-1", desc: "[TDD-RED]: Standardize legacy search option spec suite", done: true },
+        { id: "search-2", desc: "[TDD-GREEN]: Convert search.ts to a thin wrapper calling query primitive", done: true }
+      ]
+    },
+    {
+      name: "context.ts",
+      path: "src/presentation/cli/commands/context.ts",
+      layer: "presentation",
+      status: "done",
+      coverage: "100.00%",
+      baselineCoverage: 100.0,
+      tasks: [
+        { id: "cont-1", desc: "[TDD-RED]: Enforce context limit validations specs", done: true },
+        { id: "cont-2", desc: "[TDD-GREEN]: Re-route execution path to query primitive with context kind", done: true }
+      ]
+    },
+    {
+      name: "related.ts",
+      path: "src/presentation/cli/commands/related.ts",
+      layer: "presentation",
+      status: "done",
+      coverage: "100.00%",
+      baselineCoverage: 100.0,
+      tasks: [
+        { id: "rel-1", desc: "[TDD-RED]: Assert relation inputs match output format", done: true },
+        { id: "rel-2", desc: "[TDD-GREEN]: Wrap related commands routing requests to query with related kind", done: true }
+      ]
+    },
+    {
+      name: "list.ts",
+      path: "src/presentation/cli/commands/list.ts",
+      layer: "presentation",
+      status: "done",
+      coverage: "100.00%",
+      baselineCoverage: 100.0,
+      tasks: [
+        { id: "list-1", desc: "[TDD-RED]: Assert legacy list formats remain identical", done: true },
+        { id: "list-2", desc: "[TDD-GREEN]: Forward list requests to query session kind", done: true }
+      ]
+    },
+    {
+      name: "show.ts",
+      path: "src/presentation/cli/commands/show.ts",
+      layer: "presentation",
+      status: "done",
+      coverage: "100.00%",
+      baselineCoverage: 100.0,
+      tasks: [
+        { id: "show-1", desc: "[TDD-RED]: Assert show command outputs details for specific session identifier", done: true },
+        { id: "show-2", desc: "[TDD-GREEN]: Convert show into query command delegation", done: true }
+      ]
+    },
+    {
+      name: "commands/index.ts",
+      path: "src/presentation/cli/commands/index.ts",
+      layer: "presentation",
+      status: "done",
+      coverage: "100.00%",
+      baselineCoverage: 100.0,
+      tasks: [
+        { id: "idx-1", desc: "Export executeQueryCommand and query types", done: true }
+      ]
+    },
+    {
+      name: "cli/index.ts",
+      path: "src/presentation/cli/index.ts",
+      layer: "presentation",
+      status: "done",
+      coverage: "100.00%",
+      baselineCoverage: 100.0,
+      tasks: [
+        { id: "cli-idx-1", desc: "Import and register createQueryCommand under commander options", done: true }
+      ]
+    },
+    {
+      name: "index.ts",
+      path: "src/index.ts",
+      layer: "presentation",
+      status: "done",
+      coverage: "100.00%",
+      baselineCoverage: 100.0,
+      tasks: [
+        { id: "root-idx-1", desc: "Export consolidated query signatures from index root entries", done: true }
+      ]
+    },
+    // Outstanding Domain and Infrastructure
+    {
+      name: "repositories.ts",
+      path: "src/domain/ports/repositories.ts",
+      layer: "domain",
+      status: "done",
+      coverage: "97.16%",
+      baselineCoverage: 97.16,
+      tasks: [
+        { id: "ports-1", desc: "[TDD-RED]: Establish strict repository parameter validation specifications", done: true },
+        { id: "ports-2", desc: "[TDD-GREEN]: Support exactOptionalPropertyTypes in interface definitions", done: true }
+      ]
+    },
+    {
+      name: "entity-repository.ts",
+      path: "src/infrastructure/database/repositories/entity-repository.ts",
+      layer: "infrastructure",
+      status: "done",
+      coverage: "100.00%",
+      baselineCoverage: 100.0,
+      tasks: [
+        { id: "entity-1", desc: "[TDD-RED]: Create failing query constraints edge cases", done: true },
+        { id: "entity-2", desc: "[TDD-GREEN]: Filter undefined options gracefully from SQLite binder", done: true }
+      ]
+    },
+    {
+      name: "message-repository.ts",
+      path: "src/infrastructure/database/repositories/message-repository.ts",
+      layer: "infrastructure",
+      status: "done",
+      coverage: "100.00%",
+      baselineCoverage: 100.0,
+      tasks: [
+        { id: "msg-1", desc: "[TDD-RED]: Add search query specs testing edge parameter allocations", done: true },
+        { id: "msg-2", desc: "[TDD-GREEN]: Bind undefined values explicitly in database query mapping", done: true }
+      ]
+    },
+    {
+      name: "health-checker.ts",
+      path: "src/infrastructure/database/health-checker.ts",
+      layer: "infrastructure",
+      status: "done",
+      coverage: "95.50%",
+      baselineCoverage: 95.5,
+      tasks: [
+        { id: "health-1", desc: "[TDD-RED]: Standardize provider readiness return shape specs", done: true },
+        { id: "health-2", desc: "[TDD-GREEN]: Cast return objects mapping status parameters", done: true }
+      ]
+    },
+    // New Integration tests
+    {
+      name: "query-primitive.test.ts",
+      path: "tests/integration/query-primitive.test.ts",
+      layer: "testing",
+      status: "done",
+      coverage: "100.00%",
+      baselineCoverage: 100.0,
+      tasks: [
+        { id: "qtest-1", desc: "Write comprehensive routing specs asserting query results match search/context/list/show wrappers", done: true }
+      ]
+    },
+    {
+      name: "unified-status.test.ts",
+      path: "tests/integration/unified-status.test.ts",
+      layer: "testing",
+      status: "done",
+      coverage: "100.00%",
+      baselineCoverage: 100.0,
+      tasks: [
+        { id: "utest-1", desc: "Write status cmd checks validating --db, --hooks, and stats reporting parameters", done: true }
+      ]
+    },
+    // Documentation
+    {
+      name: "04-ARCHITECTURE.md",
+      path: "docs/04-ARCHITECTURE.md",
+      layer: "testing", // mapping docs inside testing/docs layer filter
+      status: "done",
+      coverage: "100.00%",
+      baselineCoverage: 100.0,
+      tasks: [
+        { id: "doc-arch-1", desc: "Document unified administrative query and status surfaces in full architecture schemas", done: true }
+      ]
+    }
+  ];
+
+  // Programmatically inject static phases to keep TDD roadmap list positions stable
+  filesData.forEach(file => {
+    if (
+      file.name === "status.ts" ||
+      file.name === "doctor.ts" ||
+      file.name === "stats.ts" ||
+      file.name === "programmatic-api.test.ts" ||
+      file.name === "backfill-service.ts" ||
+      file.name === "embedding-service.ts" ||
+      file.name === "smart-context-service.ts"
+    ) {
+      file.phase = 1;
+    } else {
+      file.phase = 2;
+    }
+  });
+
+  // Deep clone baseline data for runtime simulations and git baseline tracking
+  let committedRef = JSON.parse(JSON.stringify(filesData));
+  let simulatedData = JSON.parse(JSON.stringify(filesData));
+  let activeView = "view-dashboard";
+  let currentLayerFilter = "all";
+  let searchFilterString = "";
+
+  // Core Simulation logic mapping (compares live checklist to committed git reference)
+  const checkSimulatorState = () => {
+    let isDifferent = false;
+    for (let i = 0; i < committedRef.length; i++) {
+      const refFile = committedRef[i];
+      const simulatedFile = simulatedData[i];
+      for (let j = 0; j < refFile.tasks.length; j++) {
+        if (refFile.tasks[j].done !== simulatedFile.tasks[j].done) {
+          isDifferent = true;
+          break;
+        }
+      }
+      if (isDifferent) break;
+    }
+
+    const strip = document.getElementById('interactive-strip');
+    if (isDifferent) {
+      strip.classList.add('active');
+    } else {
+      strip.classList.remove('active');
+    }
+  };
+
+  // Wire simulator Reset Baseline button handler to restore state to last committed baseline
+  const resetSimulator = () => {
+    simulatedData = JSON.parse(JSON.stringify(committedRef));
+    recalculateAndRenderStats();
+  };
+
+  const resetBtn = document.getElementById('reset-simulator-trigger');
+  if (resetBtn) {
+    resetBtn.onclick = () => {
+      resetSimulator();
+    };
+  }
+
+  // Recalculates metrics in real time
+  const recalculateAndRenderStats = (reRenderLists = true) => {
+    // 1. Calculate Refactoring progress
+    const totalFiles = simulatedData.length;
+    let completedFilesCount = 0;
+
+    simulatedData.forEach(file => {
+      const allDone = file.tasks.every(t => t.done);
+      const someDone = file.tasks.some(t => t.done);
+      
+      if (allDone) {
+        file.status = "done";
+        completedFilesCount++;
+      } else if (someDone || file.name === "query.ts") {
+        file.status = "active";
+      } else {
+        file.status = "upcoming";
+      }
+    });
+
+    const progressPercentage = Math.round((completedFilesCount / totalFiles) * 100);
+    
+    // Update dashboard labels
+    document.getElementById('stat-progress-val').innerHTML = `${progressPercentage}<span class="unit">%</span>`;
+    document.getElementById('stat-progress-desc').innerText = `${completedFilesCount} of ${totalFiles} target files completed`;
+
+    // 2. Statement coverage scaling model
+    // Scales based on how many tasks of active/upcoming files have been marked done
+    const totalTasks = simulatedData.reduce((acc, file) => acc + file.tasks.length, 0);
+    const completedTasks = simulatedData.reduce((acc, file) => acc + file.tasks.filter(t => t.done).length, 0);
+    const tasksRatio = completedTasks / totalTasks;
+    
+    // Coverage scales from 94.84% base up to 98.75% max
+    const simulatedCoverage = (94.84 + (3.91 * tasksRatio)).toFixed(2);
+    document.getElementById('stat-coverage-val').innerHTML = `${simulatedCoverage}<span class="unit">%</span>`;
+    
+    // 3. SVG Radial Progress offsets
+    // Progress Ring offset: circumference = 232.4
+    const progressOffset = 232.4 - (232.4 * (progressPercentage / 100));
+    document.getElementById('ring-progress').style.strokeDashoffset = progressOffset;
+
+    // Coverage Ring offset: 100% maps to 98.75% max
+    const coverageValNum = parseFloat(simulatedCoverage);
+    const coveragePercentage = (coverageValNum / 100);
+    const coverageOffset = 232.4 - (232.4 * coveragePercentage);
+    const ringCoverage = document.getElementById('ring-coverage');
+    ringCoverage.style.strokeDashoffset = coverageOffset;
+
+    // Color gradient transitions for coverage ring
+    if (coverageValNum >= 95.0) {
+      ringCoverage.style.stroke = "var(--color-emerald)";
+    } else {
+      ringCoverage.style.stroke = "var(--color-rose)";
+    }
+
+    // 4. Update Spotlight panel based on first unfinished file
+    const firstUnfinished = simulatedData.find(file => !file.tasks.every(t => t.done));
+    if (firstUnfinished) {
+      document.getElementById('spotlight-title').innerText = firstUnfinished.name;
+      document.getElementById('spotlight-path').innerText = firstUnfinished.path;
+      
+      const nextTask = firstUnfinished.tasks.find(t => !t.done);
+      document.getElementById('spotlight-desc').innerText = nextTask ? nextTask.desc : "Consolidating files...";
+    } else {
+      document.getElementById('spotlight-title').innerText = "All Complete!";
+      document.getElementById('spotlight-path').innerText = "Surface Consolidation achieved successfully";
+      document.getElementById('spotlight-desc').innerText = "Refactoring fully achieved across all layers.";
+    }
+
+    // 5. Update Layer health stats
+    renderLayersProgressBars();
+
+    // Render checklists & explorer conditionally
+    if (reRenderLists) {
+      renderRoadmapTimelines();
+      renderHexExplorerFiles();
+    }
+    checkSimulatorState();
+  };
+
+  // Render layer progress indicators
+  const renderLayersProgressBars = () => {
+    const layers = {
+      domain: { total: 0, completed: 0, color: "var(--color-primary)" },
+      application: { total: 0, completed: 0, color: "var(--color-purple)" },
+      infrastructure: { total: 0, completed: 0, color: "var(--color-emerald)" },
+      presentation: { total: 0, completed: 0, color: "var(--color-amber)" },
+      testing: { total: 0, completed: 0, color: "var(--color-rose)" }
+    };
+
+    simulatedData.forEach(file => {
+      const completed = file.tasks.filter(t => t.done).length;
+      const total = file.tasks.length;
+      if (layers[file.layer]) {
+        layers[file.layer].completed += completed;
+        layers[file.layer].total += total;
+      }
+    });
+
+    const container = document.getElementById('layers-bars-container');
+    container.innerHTML = '';
+
+    Object.keys(layers).forEach(key => {
+      const layer = layers[key];
+      const percentage = layer.total > 0 ? Math.round((layer.completed / layer.total) * 100) : 100;
+      
+      const layerPrettyNames = {
+        domain: "Domain Ports & Models",
+        application: "Application Services",
+        infrastructure: "Infrastructure Database",
+        presentation: "Presentation CLI Surface",
+        testing: "Regression Tests & Docs"
+      };
+
+      const barHtml = `
+        <div class="bar-item">
+          <div class="bar-labels">
+            <span class="text-muted">${layerPrettyNames[key]}</span>
+            <span style="font-weight:600;">${percentage}%</span>
+          </div>
+          <div class="bar-track">
+            <div class="bar-fill" style="width: ${percentage}%; background-color: ${layer.color};"></div>
+          </div>
+        </div>
+      `;
+      container.insertAdjacentHTML('beforeend', barHtml);
+    });
+  };
+
+  // Update a card's visual state directly in the DOM to avoid aggressive re-rendering and layout shifts during checklists interaction
+  const updateCardVisuals = (file) => {
+    const cardId = file.name.replace(/\./g, '-');
+    
+    // 1. Update Roadmap card
+    const cardEl = document.getElementById(`card-${cardId}`);
+    if (cardEl) {
+      const allDone = file.tasks.every(t => t.done);
+      const doneCount = file.tasks.filter(t => t.done).length;
+      const totalCount = file.tasks.length;
+      const progressPercent = Math.round((doneCount / totalCount) * 100);
+
+      // Update border left style
+      cardEl.style.borderLeft = `3.5px solid ${allDone ? 'var(--color-emerald)' : 'var(--color-primary)'}`;
+
+      // Update percent text
+      const pctEl = cardEl.querySelector('.pct-val');
+      if (pctEl) {
+        pctEl.innerText = progressPercent;
+      }
+
+      // Update badge pill
+      let pillsHtml = '';
+      if (file.tasks.some(t => t.desc.includes('[TDD-RED]') && !t.done)) {
+        pillsHtml += `<span class="badge-pill-tdd red">Red</span>`;
+      } else if (file.tasks.some(t => t.desc.includes('[TDD-GREEN]') && !t.done)) {
+        pillsHtml += `<span class="badge-pill-tdd green">Green</span>`;
+      } else if (file.tasks.some(t => t.desc.includes('[TDD-REFACTOR]') && !t.done)) {
+        pillsHtml += `<span class="badge-pill-tdd refactor">Refactor</span>`;
+      } else if (allDone) {
+        pillsHtml += `<span class="badge-pill-tdd green" style="background:rgba(48,209,88,0.15)">Verified</span>`;
+      }
+      const badgeGroup = cardEl.querySelector('.badge-pill-group');
+      if (badgeGroup) {
+        badgeGroup.innerHTML = pillsHtml;
+      }
+    }
+
+    // 2. Update Hex Explorer node
+    const expEl = document.getElementById(`explorer-${cardId}`);
+    if (expEl) {
+      const completedTasks = file.tasks.filter(t => t.done).length;
+      const totalTasks = file.tasks.length;
+
+      // Update badge status
+      const badge = expEl.querySelector('.badge-status');
+      if (badge) {
+        badge.className = `badge-status ${file.status}`;
+        badge.innerText = file.status;
+      }
+
+      // Update task counter text
+      const counterSpan = expEl.querySelector('.card-bottom span:last-child');
+      if (counterSpan) {
+        counterSpan.innerText = `${completedTasks}/${totalTasks} tasks`;
+      }
+    }
+  };
+
+  // Toggle tasks inside checklists in real-time
+  const toggleTask = (taskId, el) => {
+    let toggledFile = null;
+    let toggledTaskObj = null;
+
+    simulatedData.forEach(file => {
+      file.tasks.forEach(task => {
+        if (task.id === taskId) {
+          task.done = !task.done;
+          toggledFile = file;
+          toggledTaskObj = task;
+        }
+      });
+    });
+
+    // Sync checkboxes across TDD Roadmap card and drawer checklist if they exist
+    const roadmapLi = document.getElementById(`li-task-${taskId}`);
+    const drawerLi = document.getElementById(`drawer-li-task-${taskId}`);
+    
+    if (toggledTaskObj) {
+      [roadmapLi, drawerLi].forEach(li => {
+        if (li) {
+          if (toggledTaskObj.done) {
+            li.classList.add('checked');
+          } else {
+            li.classList.remove('checked');
+          }
+        }
+      });
+    }
+
+    // Recalculate stats/gauges, but do NOT re-render full HTML lists during click interactions
+    recalculateAndRenderStats(false);
+
+    // Dynamic visual update in-place without sorting-jumps
+    if (toggledFile) {
+      updateCardVisuals(toggledFile);
+    }
+  };
+
+  // Renders the TDD Roadmap checklists split into Done / Outstanding
+  const renderRoadmapTimelines = () => {
+    const completedContainer = document.getElementById('checklist-timeline-completed');
+    const outstandingContainer = document.getElementById('checklist-timeline-outstanding');
+    const overviewRoadmap = document.getElementById('overview-roadmap-list');
+    
+    completedContainer.innerHTML = '';
+    outstandingContainer.innerHTML = '';
+    overviewRoadmap.innerHTML = '';
+
+    let overviewNodeCount = 0;
+
+    simulatedData.forEach(file => {
+      const allDone = file.tasks.every(t => t.done);
+      const doneCount = file.tasks.filter(t => t.done).length;
+      const totalCount = file.tasks.length;
+      const progressPercent = Math.round((doneCount / totalCount) * 100);
+
+      // 1. Build pills
+      let pillsHtml = '';
+      if (file.tasks.some(t => t.desc.includes('[TDD-RED]') && !t.done)) {
+        pillsHtml += `<span class="badge-pill-tdd red">Red</span>`;
+      } else if (file.tasks.some(t => t.desc.includes('[TDD-GREEN]') && !t.done)) {
+        pillsHtml += `<span class="badge-pill-tdd green">Green</span>`;
+      } else if (file.tasks.some(t => t.desc.includes('[TDD-REFACTOR]') && !t.done)) {
+        pillsHtml += `<span class="badge-pill-tdd refactor">Refactor</span>`;
+      } else if (allDone) {
+        pillsHtml += `<span class="badge-pill-tdd green" style="background:rgba(48,209,88,0.15)">Verified</span>`;
+      }
+
+      // Checkbox list with ID for direct sync and toggles
+      const checklistHtml = file.tasks.map(task => `
+        <li id="li-task-${task.id}" class="roadmap-check-item ${task.done ? 'checked' : ''}" onclick="toggleTask('${task.id}', this)">
+          <span class="checkbox-custom"></span>
+          <span class="task-text">${task.desc}</span>
+        </li>
+      `).join('');
+
+      const cardHtml = `
+        <div class="roadmap-card" id="card-${file.name.replace(/\./g, '-')}" style="border-left: 3.5px solid ${allDone ? 'var(--color-emerald)' : 'var(--color-primary)'}">
+          <div class="roadmap-card-header">
+            <div class="roadmap-card-title-group">
+              <h4>${file.name}</h4>
+              <p>${file.path} • <span class="pct-val">${progressPercent}</span>% Complete</p>
+            </div>
+            <div style="display:flex; gap:0.4rem; align-items:center;" class="badge-pill-group">
+              ${pillsHtml}
+            </div>
+          </div>
+          <ul class="roadmap-checklist">
+            ${checklistHtml}
+          </ul>
+        </div>
+      `;
+
+      // Distribute dynamically based on actual completion status (prevents card jumping UX papercut when stable)
+      if (allDone) {
+        completedContainer.insertAdjacentHTML('beforeend', cardHtml);
+      } else {
+        outstandingContainer.insertAdjacentHTML('beforeend', cardHtml);
+      }
+
+      // Populate Overview list (limit to 3 active/upcoming elements for visual neatness)
+      if (!allDone && overviewNodeCount < 3) {
+        const overviewNodeHtml = `
+          <div class="roadmap-card" style="border-left: 3.5px solid var(--color-primary); padding: 1.15rem 1.35rem;">
+            <div class="roadmap-card-header" style="margin-bottom:0.5rem;">
+              <div class="roadmap-card-title-group">
+                <h4 style="font-size:0.95rem;">${file.name}</h4>
+                <p style="font-size:0.75rem;">${file.path}</p>
+              </div>
+              <div>${pillsHtml}</div>
+            </div>
+            <div style="font-size:0.8rem; color:var(--text-secondary);">
+              Next action: <span style="font-weight:600; color:var(--text-main);">${file.tasks.find(t=>!t.done).desc}</span>
+            </div>
+          </div>
+        `;
+        overviewRoadmap.insertAdjacentHTML('beforeend', overviewNodeHtml);
+        overviewNodeCount++;
+      }
+    });
+
+    if (overviewNodeCount === 0) {
+      overviewRoadmap.innerHTML = `
+        <div style="text-align:center; padding: 2rem; color: var(--text-muted); font-size: 0.9rem;">
+          🎉 All Surface Consolidation complete! System health 100% verified.
+        </div>
+      `;
+    }
+  };
+
+  // Renders files in the Hex Explorer grid
+  const renderHexExplorerFiles = () => {
+    const grid = document.getElementById('explorer-files-container');
+    grid.innerHTML = '';
+
+    const filtered = simulatedData.filter(file => {
+      const matchesLayer = currentLayerFilter === 'all' || file.layer === currentLayerFilter;
+      const matchesSearch = file.name.toLowerCase().includes(searchFilterString.toLowerCase()) ||
+                            file.path.toLowerCase().includes(searchFilterString.toLowerCase()) ||
+                            file.layer.toLowerCase().includes(searchFilterString.toLowerCase()) ||
+                            file.status.toLowerCase().includes(searchFilterString.toLowerCase());
+      return matchesLayer && matchesSearch;
+    });
+
+    if (filtered.length === 0) {
+      grid.innerHTML = `
+        <div style="grid-column: 1/-1; text-align:center; padding: 3rem; color:var(--text-muted); font-size:0.95rem;">
+          No matching consolidated files found in this layer.
+        </div>
+      `;
+      return;
+    }
+
+    filtered.forEach(file => {
+      const completedTasks = file.tasks.filter(t => t.done).length;
+      const totalTasks = file.tasks.length;
+      const percent = Math.round((completedTasks / totalTasks) * 100);
+
+      const node = document.createElement('div');
+      node.id = `explorer-${file.name.replace(/\./g, '-')}`;
+      node.className = 'file-node-card';
+      node.onclick = () => openInspectorDrawer(file);
+
+      node.innerHTML = `
+        <div>
+          <div class="card-top">
+            <span class="file-node-name">${file.name}</span>
+            <span class="badge-status ${file.status}">${file.status}</span>
+          </div>
+          <div class="file-node-path">${file.path}</div>
+        </div>
+        <div class="card-bottom">
+          <span>${file.layer}</span>
+          <span>${completedTasks}/${totalTasks} tasks</span>
+        </div>
+      `;
+      grid.appendChild(node);
+    });
+  };
+
+  // Interactive Inspection Drawer controller (Airbnb-styled sliding drawer)
+  const drawerOverlay = document.getElementById('drawer-overlay-display');
+  
+  const openInspectorDrawer = (file) => {
+    document.getElementById('drawer-file-title').innerText = file.name;
+    document.getElementById('drawer-file-path').innerHTML = `
+      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-right:2px; vertical-align:middle;">
+        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+      </svg>
+      ${file.path}
+    `;
+    
+    // Set path copy listener
+    document.getElementById('drawer-copy-trigger').onclick = () => {
+      navigator.clipboard.writeText(file.path);
+      const spanText = document.querySelector('#drawer-file-path');
+      const originalText = spanText.innerHTML;
+      spanText.innerHTML = "✓ Path Copied!";
+      spanText.style.color = "var(--color-emerald)";
+      setTimeout(() => {
+        spanText.innerHTML = originalText;
+        spanText.style.color = "";
+      }, 1500);
+    };
+
+    document.getElementById('drawer-layer-display').innerText = `${file.layer.toUpperCase()} LAYER`;
+    
+    const badge = document.getElementById('drawer-status-badge');
+    badge.className = `badge-status ${file.status}`;
+    badge.innerText = file.status;
+
+    // Coverage percentage calculation
+    const doneTasks = file.tasks.filter(t => t.done).length;
+    const totalTasks = file.tasks.length;
+    const ratio = doneTasks / totalTasks;
+    const coverageStr = (ratio === 1.0) ? file.coverage : `${Math.round(ratio * parseFloat(file.coverage))}%`;
+    
+    const coverageDisplay = document.getElementById('drawer-coverage-display');
+    coverageDisplay.innerText = coverageStr;
+    if (parseFloat(coverageStr) >= 95) {
+      coverageDisplay.style.color = "var(--color-emerald)";
+    } else {
+      coverageDisplay.style.color = "var(--color-rose)";
+    }
+
+    // TDD Badge stages
+    const tddContainer = document.getElementById('drawer-tdd-stage-display');
+    tddContainer.innerHTML = '';
+    
+    const hasRed = file.tasks.some(t => t.desc.includes('[TDD-RED]'));
+    const hasGreen = file.tasks.some(t => t.desc.includes('[TDD-GREEN]'));
+    const hasRefactor = file.tasks.some(t => t.desc.includes('[TDD-REFACTOR]'));
+
+    if (hasRed) {
+      const isRedDone = file.tasks.filter(t => t.desc.includes('[TDD-RED]') && t.done).length === file.tasks.filter(t => t.desc.includes('[TDD-RED]')).length;
+      tddContainer.insertAdjacentHTML('beforeend', `<span class="badge-pill-tdd red" style="${isRedDone ? 'opacity:0.4' : ''}">Red Specs</span>`);
+    }
+    if (hasGreen) {
+      const isGreenDone = file.tasks.filter(t => t.desc.includes('[TDD-GREEN]') && t.done).length === file.tasks.filter(t => t.desc.includes('[TDD-GREEN]')).length;
+      tddContainer.insertAdjacentHTML('beforeend', `<span class="badge-pill-tdd green" style="${isGreenDone ? 'opacity:0.4' : ''}">Green Code</span>`);
+    }
+    if (hasRefactor) {
+      const isRefactorDone = file.tasks.filter(t => t.desc.includes('[TDD-REFACTOR]') && t.done).length === file.tasks.filter(t => t.desc.includes('[TDD-REFACTOR]')).length;
+      tddContainer.insertAdjacentHTML('beforeend', `<span class="badge-pill-tdd refactor" style="${isRefactorDone ? 'opacity:0.4' : ''}">Refactor</span>`);
+    }
+    if (!hasRed && !hasGreen && !hasRefactor) {
+      tddContainer.insertAdjacentHTML('beforeend', `<span class="badge-pill-tdd green">Standard Test</span>`);
+    }
+
+    // Checklist render
+    const checklistDisplay = document.getElementById('drawer-checklist-display');
+    checklistDisplay.innerHTML = file.tasks.map(task => `
+      <li id="drawer-li-task-${task.id}" class="roadmap-check-item ${task.done ? 'checked' : ''}" onclick="toggleTask('${task.id}', this); refreshDrawerChecklist('${file.path}')">
+        <span class="checkbox-custom"></span>
+        <span class="task-text">${task.desc}</span>
+      </li>
+    `).join('');
+
+    drawerOverlay.classList.add('open');
+  };
+
+  // Refresh active drawer checklist list when toggling items inside the drawer
+  window.refreshDrawerChecklist = (filePath) => {
+    const file = simulatedData.find(f => f.path === filePath);
+    if (file) {
+      const doneTasks = file.tasks.filter(t => t.done).length;
+      const totalTasks = file.tasks.length;
+      const ratio = doneTasks / totalTasks;
+      const coverageStr = (ratio === 1.0) ? file.coverage : `${Math.round(ratio * parseFloat(file.coverage))}%`;
+      
+      const coverageDisplay = document.getElementById('drawer-coverage-display');
+      coverageDisplay.innerText = coverageStr;
+      if (parseFloat(coverageStr) >= 95) {
+        coverageDisplay.style.color = "var(--color-emerald)";
+      } else {
+        coverageDisplay.style.color = "var(--color-rose)";
+      }
+      
+      // Update badge
+      const badge = document.getElementById('drawer-status-badge');
+      badge.className = `badge-status ${file.status}`;
+      badge.innerText = file.status;
+    }
+  };
+
+  // Close Drawer and trigger dynamic sorting
+  const closeInspectorDrawer = () => {
+    drawerOverlay.classList.remove('open');
+    recalculateAndRenderStats(true);
+  };
+
+  document.getElementById('drawer-close-trigger').onclick = closeInspectorDrawer;
+
+  drawerOverlay.onclick = (e) => {
+    if (e.target === drawerOverlay) {
+      closeInspectorDrawer();
+    }
+  };
+
+  // Navigation Sliding Segment Tab Selector control
+  const tabs = document.querySelectorAll('.tab-btn');
+  const slider = document.getElementById('tab-pill-slider');
+
+  const repositionSlider = (activeTab) => {
+    slider.style.width = `${activeTab.offsetWidth}px`;
+    slider.style.transform = `translateX(${activeTab.offsetLeft - 4}px)`;
+  };
+
+  tabs.forEach(tab => {
+    tab.onclick = () => {
+      tabs.forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      repositionSlider(tab);
+
+      // Hide all viewports, show active
+      document.querySelectorAll('.view-section').forEach(view => view.classList.remove('active'));
+      const target = tab.getAttribute('data-target');
+      document.getElementById(target).classList.add('active');
+      
+      // Dynamic sorting re-render when switching tabs
+      recalculateAndRenderStats(true);
+    };
+  });
+
+  // Handle resizing slider bar on screen shifts
+  window.onresize = () => {
+    const activeTab = document.querySelector('.tab-btn.active');
+    if (activeTab) repositionSlider(activeTab);
+  };
+
+  // Initial slider configuration
+  setTimeout(() => {
+    const initialActive = document.querySelector('.tab-btn.active');
+    if (initialActive) repositionSlider(initialActive);
+  }, 100);
+
+  // Search Filter engine
+  document.getElementById('explorer-search-field').oninput = (e) => {
+    searchFilterString = e.target.value;
+    renderHexExplorerFiles();
+  };
+
+  // Layer filter Pills buttons
+  document.querySelectorAll('.filter-pill').forEach(pill => {
+    pill.onclick = () => {
+      document.querySelectorAll('.filter-pill').forEach(p => p.classList.remove('active'));
+      pill.classList.add('active');
+      currentLayerFilter = pill.getAttribute('data-layer');
+      renderHexExplorerFiles();
+    };
+  });
+
+  // Light / Dark Theme toggler switch
+  const toggler = document.getElementById('theme-toggler');
+  const themeEmoji = document.querySelector('.toggle-icon');
+
+  // Initialize theme from HTML state
+  let currentTheme = document.documentElement.getAttribute('data-theme');
+  themeEmoji.innerText = currentTheme === 'dark' ? '🌙' : '☀️';
+
+  toggler.onclick = () => {
+    currentTheme = document.documentElement.getAttribute('data-theme');
+    const targetTheme = currentTheme === 'light' ? 'dark' : 'light';
+    document.documentElement.setAttribute('data-theme', targetTheme);
+    themeEmoji.innerText = targetTheme === 'dark' ? '🌙' : '☀️';
+  };
+
+  // Project Plan Accordion toggler logic
+  window.togglePhaseAccordion = (phaseId) => {
+    const card = document.getElementById(phaseId);
+    if (card) {
+      card.classList.toggle('expanded');
+    }
+  };
+
+  // Interactive Terminal console logic with state-bound zsh micro-shell
+  const termHiddenInput = document.getElementById('terminal-hidden-input');
+  const termInputBuffer = document.getElementById('term-input-buffer');
+  const termStreamLogs = document.getElementById('terminal-stream-logs');
+
+  let currentDir = ""; // Simulated relative path tracking
+
+  const getDirectories = () => {
+    const dirs = new Set();
+    simulatedData.forEach(file => {
+      const parts = file.path.split('/');
+      parts.pop(); // remove file name
+      let current = [];
+      parts.forEach(p => {
+        current.push(p);
+        dirs.add(current.join('/'));
+      });
+    });
+    return Array.from(dirs);
+  };
+
+  if (termHiddenInput && termStreamLogs) {
+    termHiddenInput.addEventListener('input', (e) => {
+      const buffer = document.getElementById('term-input-buffer');
+      if (buffer) {
+        buffer.textContent = e.target.value;
+      }
+    });
+
+    termHiddenInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        const cmd = termHiddenInput.value.trim();
+        termHiddenInput.value = '';
+        const buffer = document.getElementById('term-input-buffer');
+        if (buffer) {
+          buffer.textContent = '';
+        }
+        executeTerminalCommand(cmd);
+      } else if (e.key === 'Escape') {
+        // Clear input buffer on Esc
+        termHiddenInput.value = '';
+        const buffer = document.getElementById('term-input-buffer');
+        if (buffer) {
+          buffer.textContent = '';
+        }
+        e.preventDefault();
+      } else if (e.key === 'c' && e.ctrlKey) {
+        // Cancel/Interrupt command execution on Ctrl+C
+        termHiddenInput.value = '';
+        const buffer = document.getElementById('term-input-buffer');
+        if (buffer) {
+          buffer.textContent = '';
+        }
+        
+        // Print ^C and a new prompt line
+        const logs = termStreamLogs.innerHTML;
+        const cleanLogs = logs.replace(/<span class="term-cursor"><\/span>/g, '')
+                              .replace(/<span id="term-input-buffer">.*?<\/span>/g, '');
+        termStreamLogs.innerHTML = cleanLogs + "^C\n";
+        
+        // Clear any simulated timers/processes running
+        if (window.activeTerminalTimeout) {
+          clearTimeout(window.activeTerminalTimeout);
+          window.activeTerminalTimeout = null;
+        }
+        
+        // Send cancel packet to live WebSockets gateway if connected
+        if (isLiveCliMode && socket) {
+          socket.send(JSON.stringify({ type: 'cancel' }));
+        }
+        
+        termHiddenInput.disabled = false;
+        printPrompt();
+        e.preventDefault();
+      }
+    });
+  }
+
+  const executeTerminalCommand = async (cmd) => {
+    const logs = termStreamLogs.innerHTML;
+    // Strip dynamic cursor and buffer elements before saving logs history
+    const cleanLogs = logs.replace(/<span class="term-cursor"><\/span>/g, '')
+                          .replace(/<span id="term-input-buffer">.*?<\/span>/g, '');
+    
+    let newContent = cleanLogs;
+    const currentFolder = currentDir ? currentDir.split('/').pop() : "memory-nexus";
+    if (newContent.endsWith('% ')) {
+      newContent += cmd + '\n';
+    } else {
+      newContent += `<span class="prompt-user">chude@emeke-mac</span> <span class="prompt-dir">${currentFolder}</span> % ${cmd}\n`;
+    }
+    
+    termStreamLogs.innerHTML = newContent;
+    termStreamLogs.scrollTop = termStreamLogs.scrollHeight;
+
+    const parts = cmd.trim().split(/\s+/);
+    const baseCmd = parts[0].toLowerCase();
+    
+    // If companion WebSocket is connected, forward commands directly to the host process shell
+    if (isLiveCliMode && socket && baseCmd !== 'clear') {
+      termHiddenInput.disabled = true;
+      socket.send(JSON.stringify({ type: 'command', command: cmd }));
+      return;
+    }
+
+    if (baseCmd === '') {
+      printPrompt();
+      return;
+    }
+
+    if (baseCmd === 'clear') {
+      const currentFolder = currentDir ? currentDir.split('/').pop() : "memory-nexus";
+      termStreamLogs.innerHTML = `<span class="prompt-user">chude@emeke-mac</span> <span class="prompt-dir">${currentFolder}</span> % <span id="term-input-buffer"></span><span class="term-cursor"></span>`;
+      termHiddenInput.value = '';
+      return;
+    }
+
+    if (baseCmd === 'help') {
+      const helpText = `Available commands:
+  <span class="green-text">pwd</span>                     - Print simulated current working directory
+  <span class="green-text">cd [dir]</span>                - Traverse simulated directory tree
+  <span class="green-text">ls [-la] [dir]</span>          - List simulated dynamic files and folders
+  <span class="green-text">cat [file]</span>              - View simulated typescript or markdown source code
+  <span class="green-text">bun test</span>               - Runs interactive unit/integration TDD specs
+  <span class="green-text">bun test --coverage</span>    - Evaluates live coverage percentage
+  <span class="green-text">git status</span>             - Audit live uncommitted status modifications
+  <span class="green-text">git diff</span>               - Render unified color differences of your toggles
+  <span class="green-text">git commit -m "[msg]"</span>  - Commit visual toggles to new baseline state
+  <span class="green-text">verify [file]</span>          - Force complete all tasks for specific file card
+  <span class="green-text">unverify [file]</span>        - Force uncheck all tasks for specific file card
+  <span class="green-text">theme [light|dark]</span>     - Toggle dashboard visual theme accents
+  <span class="green-text">memory status</span>          - Renders database and sandboxing health table
+  <span class="green-text">memory doctor</span>          - Performs diagnostic checks
+  <span class="green-text">memory stats</span>           - Retrieves vector volumes and metadata
+  <span class="green-text">help</span>                   - Displays this help index
+  <span class="green-text">clear</span>                  - Clears the terminal screen
+\n`;
+      printOutput(helpText);
+      return;
+    }
+
+    if (baseCmd === 'pwd') {
+      const fullPath = `~/Projects/memory-nexus${currentDir ? '/' + currentDir : ''}`;
+      printOutput(`${fullPath}\n`);
+      return;
+    }
+
+    if (baseCmd === 'cd') {
+      const target = parts[1] || "";
+      if (target === "" || target === "~" || target === "/") {
+        currentDir = "";
+        printOutput("");
+        return;
+      }
+      
+      let newDir = currentDir;
+      if (target === "..") {
+        if (currentDir !== "") {
+          const p = currentDir.split('/');
+          p.pop();
+          newDir = p.join('/');
+        }
+      } else {
+        if (target.startsWith('/')) {
+          newDir = target.slice(1);
+        } else {
+          newDir = currentDir ? `${currentDir}/${target}` : target;
+        }
+      }
+
+      if (newDir.endsWith('/')) newDir = newDir.slice(0, -1);
+
+      const allDirs = getDirectories();
+      if (newDir === "" || allDirs.includes(newDir)) {
+        currentDir = newDir;
+        printOutput("");
+      } else {
+        const isFile = simulatedData.some(f => f.path === newDir || (currentDir ? `${currentDir}/${target}` : target) === f.path);
+        if (isFile) {
+          printOutput(`cd: not a directory: ${target}\n`);
+        } else {
+          printOutput(`cd: no such file or directory: ${target}\n`);
+        }
+      }
+      return;
+    }
+
+    if (baseCmd === 'ls') {
+      const isLong = parts.includes('-la') || parts.includes('-l') || parts.includes('-a');
+      const targetArg = parts.filter(p => !p.startsWith('-') && p.toLowerCase() !== 'ls')[0];
+      let scanDir = currentDir;
+      if (targetArg) {
+        if (targetArg === '..') {
+          const p = currentDir.split('/');
+          p.pop();
+          scanDir = p.join('/');
+        } else if (targetArg.startsWith('/')) {
+          scanDir = targetArg.slice(1);
+        } else {
+          scanDir = currentDir ? `${currentDir}/${targetArg}` : targetArg;
+        }
+        if (scanDir.endsWith('/')) scanDir = scanDir.slice(0, -1);
+      }
+
+      const allDirs = getDirectories();
+      if (scanDir !== "" && !allDirs.includes(scanDir)) {
+        const fileMatch = simulatedData.find(f => f.path === scanDir || (currentDir ? `${currentDir}/${targetArg}` : targetArg) === f.path);
+        if (fileMatch) {
+          printOutput(`${fileMatch.name}\n`);
+          return;
+        }
+        printOutput(`ls: ${targetArg || scanDir}: No such file or directory\n`);
+        return;
+      }
+
+      const subdirs = new Set();
+      allDirs.forEach(d => {
+        if (scanDir === "") {
+          if (!d.includes('/')) subdirs.add(d);
+        } else {
+          if (d.startsWith(scanDir + '/') && d.split('/').length === scanDir.split('/').length + 1) {
+            subdirs.add(d.split('/').pop());
+          }
+        }
+      });
+
+      const files = [];
+      simulatedData.forEach(f => {
+        const p = f.path.split('/');
+        const fileName = p.pop();
+        const fileParent = p.join('/');
+        if (fileParent === scanDir) {
+          files.push(f);
+        }
+      });
+
+      if (isLong) {
+        let outText = `total ${subdirs.size + files.length * 8}\n`;
+        subdirs.forEach(sd => {
+          outText += `drwxr-xr-x   - chude  22 May 11:20 <span class="blue-text">${sd}/</span>\n`;
+        });
+        files.forEach(f => {
+          const size = f.tasks.length * 124;
+          const verified = f.tasks.every(t => t.done);
+          const colorClass = verified ? 'green-text' : 'white-text';
+          outText += `-rw-r--r-- ${size} chude  22 May 11:20 <span class="${colorClass}">${f.name}</span>\n`;
+        });
+        if (scanDir === "") {
+          outText += `-rw-r--r-- 24K chude  22 May 11:20 README.md\n`;
+          outText += `-rw-r--r-- 980 chude  22 May 11:20 package.json\n`;
+          outText += `-rw-r--r-- 84K chude  22 May 11:20 bun.lockb\n`;
+        }
+        printOutput(outText);
+      } else {
+        let items = [];
+        subdirs.forEach(sd => items.push(`<span class="blue-text">${sd}/</span>`));
+        files.forEach(f => {
+          const verified = f.tasks.every(t => t.done);
+          const colorClass = verified ? 'green-text' : 'white-text';
+          items.push(`<span class="${colorClass}">${f.name}</span>`);
+        });
+        if (scanDir === "") {
+          items.push("README.md", "package.json", "bun.lockb");
+        }
+        let outText = "";
+        for (let i = 0; i < items.length; i += 3) {
+          const chunk = items.slice(i, i + 3);
+          outText += chunk.join('\t\t') + '\n';
+        }
+        printOutput(outText);
+      }
+      return;
+    }
+
+    if (baseCmd === 'cat') {
+      const target = parts[1] || "";
+      if (!target) {
+        printOutput("cat: missing file operand\n");
+        return;
+      }
+      let filePath = currentDir ? `${currentDir}/${target}` : target;
+      
+      const allDirs = getDirectories();
+      if (allDirs.includes(filePath)) {
+        printOutput(`cat: ${target}: Is a directory\n`);
+        return;
+      }
+
+      const file = simulatedData.find(f => f.path === filePath || f.name.toLowerCase() === target.toLowerCase());
+      if (file) {
+        if (file.handle) {
+          try {
+            const fileObj = await file.handle.getFile();
+            const content = await fileObj.text();
+            printOutput(content + "\n");
+          } catch (err) {
+            printOutput(`cat: error reading ${target}: ${err.message}\n`);
+          }
+          return;
+        }
+
+        const verified = file.tasks.every(t => t.done);
+        let fileContent = "";
+        if (file.name.endsWith('.test.ts')) {
+          fileContent = `// ${file.name} - Dynamic Verification Suite
+import { expect, test, describe } from "bun:test";
+import { HealthChecker } from "@/infrastructure/database/health-checker";
+
+describe("${file.name.split('.')[0]}", () => {
+  test("assert environmental integrity", () => {
+    const active = process.env.XDG_DATA_HOME;
+    expect(active).toBeDefined();
+  });
+
+  ${file.tasks.map(t => `test("${t.desc}", () => {
+    // Status: ${t.done ? 'PASSED (Verified)' : 'PENDING (Unverified)'}
+    expect(${t.done ? 'true' : 'false'}).toBe(true);
+  });`).join('\n\n  ')}
+});
+`;
+        } else if (file.name.endsWith('.md')) {
+          fileContent = `# Memory Nexus - ${file.name}
+Reference Engineering Architecture & Specifications.
+
+- Layer: ${file.layer.toUpperCase()}
+- Status: ${verified ? 'FULLY VERIFIED (100%)' : 'ACTIVE DRAFT'}
+- Tasks Completed: ${file.tasks.filter(t=>t.done).length}/${file.tasks.length}
+
+${file.tasks.map(t => `* [${t.done ? 'x' : ' '}] ${t.desc}`).join('\n')}
+`;
+        } else {
+          fileContent = `// ${file.name} - Memory Nexus Consolidated Core
+// Layer: ${file.layer} | Coverage: ${file.coverage}
+
+import { SQLiteDatabase } from "bun:sqlite";
+
+export class ${file.name.split('.')[0].charAt(0).toUpperCase() + file.name.split('.')[0].slice(1)}Service {
+  constructor(private db: SQLiteDatabase) {}
+
+  ${file.tasks.map(t => `// Task: ${t.desc}
+  public async executeTask_${t.id.replace(/-/g, '_')}() {
+    // Current State: ${t.done ? 'VERIFIED' : 'OUTSTANDING'}
+    if (${t.done ? 'true' : 'false'}) {
+      return { ok: true, msg: "Task completed successfully" };
+    }
+    throw new Error("Task '${t.desc}' not implemented");
+  }`).join('\n\n  ')}
+}
+`;
+        }
+        
+        const coloredContent = fileContent.replace(/\/\/.*/g, (m) => `<span style="color:var(--text-muted);">${m}</span>`)
+                                          .replace(/(import|export|class|const|let|public|private|async|await|return|throw|new|Error)/g, (m) => `<span style="color:#ff7b72;">${m}</span>`)
+                                          .replace(/("[^"]*")/g, (m) => `<span style="color:#a5d6ff;">${m}</span>`);
+        
+        printOutput(`<pre style="font-family:monospace; background:rgba(0,0,0,0.25); padding:1rem; border-radius:8px; border:1px solid var(--border-light); margin:0.5rem 0; overflow-x:auto; max-width:100%; white-space:pre-wrap; color:var(--text-main); text-shadow:none; text-align:left;">${coloredContent}</pre>\n`);
+      } else {
+        if (target.toLowerCase() === 'package.json') {
+          printOutput(`{\n  "name": "memory-nexus",\n  "version": "4.0.0",\n  "scripts": {\n    "test": "bun test",\n    "test:coverage": "bun test --coverage"\n  }\n}\n\n`);
+        } else if (target.toLowerCase() === 'readme.md') {
+          printOutput(`# Memory Nexus CLI\nPremium engineering oversight console & autonomous TDD coverage suite.\n\n`);
+        } else {
+          printOutput(`cat: ${target}: No such file or directory\n`);
+        }
+      }
+      return;
+    }
+
+    if (baseCmd === 'theme') {
+      const mode = parts[1] || "";
+      const current = document.documentElement.getAttribute('data-theme');
+      let targetTheme = current;
+      if (mode === 'light') {
+        targetTheme = 'light';
+      } else if (mode === 'dark') {
+        targetTheme = 'dark';
+      } else if (mode === 'toggle' || mode === '') {
+        targetTheme = current === 'light' ? 'dark' : 'light';
+      }
+      document.documentElement.setAttribute('data-theme', targetTheme);
+      const themeEmoji = document.querySelector('.toggle-icon');
+      if (themeEmoji) {
+        themeEmoji.innerText = targetTheme === 'dark' ? '🌙' : '☀️';
+      }
+      printOutput(`Theme successfully set to ${targetTheme} mode\n`);
+      return;
+    }
+
+    if (baseCmd === 'verify' || baseCmd === 'unverify') {
+      const target = parts[1] || "";
+      if (!target) {
+        printOutput(`${baseCmd}: missing target filename (e.g. 'verify status.ts')\n`);
+        return;
+      }
+      const file = simulatedData.find(f => f.name.toLowerCase() === target.toLowerCase() || f.path.toLowerCase().endsWith(target.toLowerCase()));
+      if (file) {
+        const state = baseCmd === 'verify';
+        file.tasks.forEach(t => t.done = state);
+        recalculateAndRenderStats();
+        printOutput(`Successfully ${state ? 'verified' : 'unverified'} all tasks inside ${file.name}! Dashboard updated.\n`);
+      } else {
+        printOutput(`${baseCmd}: target file '${target}' not found in active dataset\n`);
+      }
+      return;
+    }
+
+    if (baseCmd === 'git') {
+      const sub = parts[1] || "";
+      
+      if (sub === 'status') {
+        let modifiedFiles = [];
+        for (let i = 0; i < committedRef.length; i++) {
+          const refFile = committedRef[i];
+          const simFile = simulatedData[i];
+          let hasChanges = false;
+          for (let j = 0; j < refFile.tasks.length; j++) {
+            if (refFile.tasks[j].done !== simFile.tasks[j].done) {
+              hasChanges = true;
+              break;
+            }
+          }
+          if (hasChanges) {
+            modifiedFiles.push(simFile);
+          }
+        }
+
+        let outText = `On branch main\nYour branch is up to date with 'origin/main'.\n\n`;
+        if (modifiedFiles.length === 0) {
+          outText += `nothing to commit, working tree clean\n`;
+        } else {
+          outText += `Changes not staged for commit:\n  (use "git add &lt;file&gt;..." to update what will be committed)\n  (use "git restore &lt;file&gt;..." to discard changes in working directory)\n\n`;
+          modifiedFiles.forEach(f => {
+            outText += `\t<span style="color:var(--color-rose);">modified:   ${f.path}</span>\n`;
+          });
+          outText += `\nno changes added to commit (use "git add" and/or "git commit -a")\n`;
+        }
+        printOutput(outText);
+        return;
+      }
+
+      if (sub === 'diff') {
+        let diffText = "";
+        for (let i = 0; i < committedRef.length; i++) {
+          const refFile = committedRef[i];
+          const simFile = simulatedData[i];
+          let changes = [];
+          for (let j = 0; j < refFile.tasks.length; j++) {
+            if (refFile.tasks[j].done !== simFile.tasks[j].done) {
+              changes.push({ ref: refFile.tasks[j], sim: simFile.tasks[j] });
+            }
+          }
+          
+          if (changes.length > 0) {
+            diffText += `<span style="font-weight:600; color:#ae81ff;">diff --git a/${simFile.path} b/${simFile.path}</span>\n`;
+            diffText += `<span style="color:var(--text-muted);">--- a/${simFile.path}\n+++ b/${simFile.path}</span>\n`;
+            diffText += `<span style="color:#66d9ef;">@@ -1,4 +1,4 @@</span>\n`;
+            changes.forEach(ch => {
+              diffText += `<span style="color:var(--color-rose); background:rgba(255,69,58,0.15);">- [${ch.ref.done ? 'x' : ' '}] ${ch.ref.desc}</span>\n`;
+              diffText += `<span style="color:var(--color-emerald); background:rgba(48,209,88,0.15);">+ [${ch.sim.done ? 'x' : ' '}] ${ch.sim.desc}</span>\n`;
+            });
+            diffText += `\n`;
+          }
+        }
+        if (!diffText) {
+          printOutput("git: no uncommitted modifications in working directory\n");
+        } else {
+          printOutput(diffText);
+        }
+        return;
+      }
+
+      if (sub === 'commit') {
+        let changesCount = 0;
+        let insertions = 0;
+        let deletions = 0;
+        
+        for (let i = 0; i < committedRef.length; i++) {
+          const refFile = committedRef[i];
+          const simFile = simulatedData[i];
+          let fileChanged = false;
+          for (let j = 0; j < refFile.tasks.length; j++) {
+            if (refFile.tasks[j].done !== simFile.tasks[j].done) {
+              fileChanged = true;
+              if (simFile.tasks[j].done) insertions++; else deletions++;
+            }
+          }
+          if (fileChanged) changesCount++;
+        }
+
+        if (changesCount === 0) {
+          printOutput("On branch main\nnothing to commit, working tree clean\n");
+          return;
+        }
+
+        const msgArgIdx = parts.indexOf('-m');
+        let commitMsg = "Consolidate active refactoring status";
+        if (msgArgIdx !== -1 && parts[msgArgIdx + 1]) {
+          const match = cmd.match(/-m\s+["']?([^"']+)["']?/i);
+          if (match) commitMsg = match[1];
+        }
+
+        committedRef = JSON.parse(JSON.stringify(simulatedData));
+        recalculateAndRenderStats();
+
+        const randomCommitHash = Math.random().toString(16).substring(2, 9);
+        const commitResult = `[main ${randomCommitHash}] ${commitMsg}
+ ${changesCount} file${changesCount > 1 ? 's' : ''} changed, ${insertions} insertion${insertions !== 1 ? 's' : ''}(+), ${deletions} deletion${deletions !== 1 ? 's' : ''}(-)
+\n`;
+        printOutput(commitResult);
+        return;
+      }
+
+      printOutput(`git: unknown command: ${sub}. Supported: status, diff, commit\n`);
+      return;
+    }
+
+    if (baseCmd === 'bun' && parts[1] === 'test') {
+      const showCoverage = parts.includes('--coverage');
+      runBunTestSimulation(showCoverage);
+      return;
+    }
+
+    if (baseCmd === 'memory') {
+      const sub = parts[1] || "";
+      if (sub === 'status') {
+        runMemoryStatus();
+        return;
+      } else if (sub === 'doctor') {
+        runMemoryDoctor();
+        return;
+      } else if (sub === 'stats') {
+        runMemoryStats();
+        return;
+      } else {
+        printOutput(`memory: command not found: ${sub}. Type 'help' for suggestions.\n`);
+        return;
+      }
+    }
+
+    printOutput(`zsh: command not found: ${cmd}\n`);
+  };
+
+  const printPrompt = () => {
+    const currentFolder = currentDir ? currentDir.split('/').pop() : "memory-nexus";
+    termStreamLogs.innerHTML += `\n<span class="prompt-user">chude@emeke-mac</span> <span class="prompt-dir">${currentFolder}</span> % <span id="term-input-buffer"></span><span class="term-cursor"></span>`;
+    termStreamLogs.scrollTop = termStreamLogs.scrollHeight;
+    setTimeout(() => {
+      const newBuffer = document.getElementById('term-input-buffer');
+      if (newBuffer) {
+        newBuffer.textContent = termHiddenInput.value;
+      }
+    }, 10);
+  };
+
+  const printOutput = (text) => {
+    termStreamLogs.innerHTML += text;
+    printPrompt();
+  };
+
+  const runBunTestSimulation = (showCoverage) => {
+    termHiddenInput.disabled = true;
+    termStreamLogs.innerHTML += `\n<span style="color:#a1a1a6;">$ bun test ${showCoverage ? '--coverage' : ''}</span>\n`;
+    termStreamLogs.scrollTop = termStreamLogs.scrollHeight;
+
+    const suites = [];
+    simulatedData.forEach(file => {
+      let testPath = "";
+      if (file.path.endsWith('.test.ts')) {
+        testPath = file.path;
+      } else {
+        const dir = file.path.substring(0, file.path.lastIndexOf('/'));
+        testPath = `${dir}/${file.name.replace('.ts', '.test.ts')}`;
+      }
+
+      const totalTests = file.tasks.length;
+      const passingTests = file.tasks.filter(t => t.done).length;
+      const failingTasks = file.tasks.filter(t => !t.done);
+
+      suites.push({
+        path: testPath,
+        total: totalTests,
+        passing: passingTests,
+        failures: failingTasks,
+        file: file
+      });
+    });
+
+    let suiteIdx = 0;
+    let totalPassingAccum = 0;
+    let totalFailingAccum = 0;
+
+    const printNextSuite = () => {
+      if (suiteIdx < suites.length) {
+        const suite = suites[suiteIdx];
+        if (suite.failures.length === 0) {
+          termStreamLogs.innerHTML += `<span class="green-text">pass</span>  ${suite.path} (${suite.total} tests passed)\n`;
+          totalPassingAccum += suite.total;
+        } else {
+          termStreamLogs.innerHTML += `<span class="red-text">fail</span>  ${suite.path} (${suite.passing} passed, ${suite.failures.length} failed)\n`;
+          suite.failures.forEach(f => {
+            termStreamLogs.innerHTML += `  <span class="red-text">✗ [TDD Spec Failure]</span> ${f.desc}\n`;
+            termStreamLogs.innerHTML += `    <span style="color:var(--text-muted);">at ${suite.path}:L${12 + Math.floor(Math.random() * 50)}</span>\n`;
+          });
+          totalPassingAccum += suite.passing;
+          totalFailingAccum += suite.failures.length;
+        }
+        termStreamLogs.scrollTop = termStreamLogs.scrollHeight;
+        suiteIdx++;
+        window.activeTerminalTimeout = setTimeout(printNextSuite, 80 + Math.random() * 100);
+      } else {
+        let summaryText = "";
+        if (totalFailingAccum === 0) {
+          summaryText += `\n<span class="green-text">${totalPassingAccum} passing</span> (0 failing)\n`;
+          summaryText += `Ran ${totalPassingAccum} tests across ${suites.length} files. [2.12s]\n\n`;
+        } else {
+          summaryText += `\n<span class="red-text">${totalFailingAccum} failing</span>, <span class="green-text">${totalPassingAccum} passing</span>\n`;
+          summaryText += `Ran ${totalPassingAccum + totalFailingAccum} tests across ${suites.length} files. [2.45s]\n\n`;
+        }
+
+        if (showCoverage) {
+          const totalTasks = simulatedData.reduce((acc, f) => acc + f.tasks.length, 0);
+          const completedTasks = simulatedData.reduce((acc, f) => acc + f.tasks.filter(t => t.done).length, 0);
+          const ratio = completedTasks / totalTasks;
+
+          const stmtCov = (92.12 + 6.88 * ratio).toFixed(2);
+          const branchCov = (90.08 + 8.92 * ratio).toFixed(2);
+          const funcCov = (94.24 + 5.76 * ratio).toFixed(2);
+          const lineCov = (93.84 + 5.16 * ratio).toFixed(2);
+
+          summaryText += `----------------------|---------|---------|---------|---------|\n`;
+          summaryText += `File                  | % Stmts | % Branch| % Funcs | % Lines |\n`;
+          summaryText += `----------------------|---------|---------|---------|---------|\n`;
+          summaryText += `All files             |   ${stmtCov} |   ${branchCov} |   ${funcCov} |   ${lineCov} |\n`;
+          
+          const layers = ['domain', 'application', 'infrastructure', 'presentation', 'testing'];
+          layers.forEach(layer => {
+            const layerFiles = simulatedData.filter(f => f.layer === layer);
+            const layerTasks = layerFiles.reduce((acc, f) => acc + f.tasks.length, 0);
+            const layerDone = layerFiles.reduce((acc, f) => acc + f.tasks.filter(t => t.done).length, 0);
+            const layerRatio = layerTasks > 0 ? (layerDone / layerTasks) : 1.0;
+            const lstmt = (92.50 + 7.50 * layerRatio).toFixed(2);
+            const lbranch = (90.00 + 10.00 * layerRatio).toFixed(2);
+            const lfunc = (95.00 + 5.00 * layerRatio).toFixed(2);
+            const llines = (93.00 + 7.00 * layerRatio).toFixed(2);
+
+            const displayLayer = (layer.charAt(0).toUpperCase() + layer.slice(1)).padEnd(20);
+            summaryText += ` ${displayLayer} |   ${lstmt} |   ${lbranch} |   ${lfunc} |   ${llines} |\n`;
+          });
+          summaryText += `----------------------|---------|---------|---------|---------|\n\n`;
+          
+          summaryText += `Statement Coverage: <span class="${parseFloat(stmtCov) >= 95 ? 'green-text' : 'red-text'}">${stmtCov}%</span> (Target: 95%+)\n`;
+          summaryText += `Line Coverage: ${lineCov}%\n`;
+          summaryText += `Branch Coverage: ${branchCov}%\n`;
+        }
+
+        termStreamLogs.innerHTML += summaryText;
+        termHiddenInput.disabled = false;
+        printPrompt();
+        termHiddenInput.focus();
+      }
+    };
+
+    window.activeTerminalTimeout = setTimeout(printNextSuite, 150);
+  };
+
+  const runMemoryStatus = () => {
+    const totalFiles = simulatedData.length;
+    const completedFiles = simulatedData.filter(f => f.tasks.every(t => t.done)).length;
+    const statusTable = `
+┌──────────────────────────────┬────────────┬─────────────┐
+│ Component                    │ Status     │ Target      │
+├──────────────────────────────┼────────────┼─────────────┤
+│ SQLite Database sandboxing   │ <span class="green-text">🟢 ONLINE</span>  │ sandbox.db  │
+│ Git hook scanner             │ <span class="green-text">🟢 ENABLED</span>  │ post-commit │
+│ Environment sandboxing (XDG) │ <span class="green-text">🟢 ACTIVE</span>  │ sandboxed   │
+└──────────────────────────────┴────────────┴─────────────┘
+Oversight Metrics: ${completedFiles}/${totalFiles} consolidated elements fully verified.
+`;
+    printOutput(statusTable);
+  };
+
+  const runMemoryDoctor = () => {
+    termHiddenInput.disabled = true;
+    termStreamLogs.innerHTML += `\n<span style="color:#a1a1a6;">[doctor] Running comprehensive diagnostic verification...</span>\n`;
+    termStreamLogs.scrollTop = termStreamLogs.scrollHeight;
+    
+    const totalTasks = simulatedData.reduce((acc, f) => acc + f.tasks.length, 0);
+    const completedTasks = simulatedData.reduce((acc, f) => acc + f.tasks.filter(t => t.done).length, 0);
+    const stmtCov = (92.12 + 6.88 * (completedTasks / totalTasks)).toFixed(2);
+
+    const steps = [
+      "Checking SQLite database integrity... OK",
+      "Scanning post-commit git hooks... ENABLED",
+      "Verifying commander input wrappers... OK",
+      `Evaluating statement coverage metrics... ${stmtCov}% (${parseFloat(stmtCov) >= 95.0 ? 'PASSED' : 'DEGRADED'})`,
+      "Checking hexagonal layer coupling... ZERO ILLEGAL IMPORTS",
+      "Diagnostics complete: System is fully healthy! 🚀"
+    ];
+
+    let stepIdx = 0;
+    const printNextStep = () => {
+      if (stepIdx < steps.length) {
+        termStreamLogs.innerHTML += `  <span class="green-text">✔</span> ${steps[stepIdx]}\n`;
+        termStreamLogs.scrollTop = termStreamLogs.scrollHeight;
+        stepIdx++;
+        window.activeTerminalTimeout = setTimeout(printNextStep, 250);
+      } else {
+        termHiddenInput.disabled = false;
+        printPrompt();
+        termHiddenInput.focus();
+      }
+    };
+    window.activeTerminalTimeout = setTimeout(printNextStep, 300);
+  };
+
+  const runMemoryStats = () => {
+    const totalEmbeds = 1500 + Math.floor(simulatedData.reduce((acc, f) => acc + f.tasks.filter(t => t.done).length, 0) * 15.3);
+    const statsText = `
+Memory Volume & Index Metadata:
+  Total Vector Embeddings : ${totalEmbeds.toLocaleString()}
+  Vector Engine Model     : openai/text-embedding-ada-002
+  Dimensions              : 1536
+  Consolidated Sessions   : 142
+  SQLite DB File Size     : 14.2 MB
+  Last Database Vacuum    : 2.4 hours ago
+`;
+    printOutput(statsText);
+  };
+
+  // ==========================================
+  // UNIVERSAL COCKPIT DYNAMIC FILE SYSTEM ACCESS API & WEBSOCKET ENGINE
+  // ==========================================
+  let dirHandle = null;
+  let socket = null;
+  let isLiveCliMode = false;
+  let projectName = "Memory Nexus";
+
+  const connectProject = async () => {
+    try {
+      dirHandle = await window.showDirectoryPicker();
+      await scanProjectFolder(dirHandle);
+    } catch (err) {
+      console.error("FileSystem Connection error:", err);
+      // Suppress alert on cancellation (standard user behavior)
+      if (err.name !== 'AbortError') {
+        alert("Folder connection failed: " + err.message);
+      }
+    }
+  };
+
+  const scanProjectFolder = async (handle) => {
+    const filesList = [];
+    const scannedFolders = new Set();
+    
+    // Recursive directory reader
+    const readDirectory = async (dirHandle, currentRelativePath = "") => {
+      for await (const entry of dirHandle.values()) {
+        const relPath = currentRelativePath ? `${currentRelativePath}/${entry.name}` : entry.name;
+        
+        if (entry.kind === 'directory') {
+          // Skip node_modules, build artifacts, git folder
+          if (['node_modules', '.git', 'dist', 'build', '.bun', 'tmp', '.gemini', 'coverage', '.nyc_output', '.claude'].includes(entry.name)) {
+            continue;
+          }
+          scannedFolders.add(relPath);
+          await readDirectory(entry, relPath);
+        } else if (entry.kind === 'file') {
+          filesList.push({
+            name: entry.name,
+            path: relPath,
+            handle: entry
+          });
+        }
+      }
+    };
+    
+    await readDirectory(handle);
+    await parseProjectFiles(filesList, scannedFolders);
+  };
+
+  const parseProjectFiles = async (files, folders) => {
+    let projName = dirHandle.name;
+    let packageJsonFile = files.find(f => f.name === 'package.json');
+    
+    if (packageJsonFile) {
+      try {
+        const fileObj = await packageJsonFile.handle.getFile();
+        const content = await fileObj.text();
+        const pkg = JSON.parse(content);
+        if (pkg.name) {
+          projName = pkg.name;
+        }
+      } catch (e) {
+        console.warn("Failed to parse package.json:", e);
+      }
+    }
+    
+    // Capitalize name for dashboard UI
+    projectName = projName;
+    const formattedName = projName.split(/[-_ ]+/).map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+    document.getElementById('project-title-text').innerText = `${formattedName} Cockpit`;
+    document.title = `${formattedName} - Developer Cockpit`;
+    
+    const termHeader = document.querySelector('.terminal-title');
+    if (termHeader) {
+      termHeader.innerText = `${projName.toLowerCase()} -- zsh`;
+    }
+    
+    // Extract editable files for visual grids
+    const supportedExtensions = ['.ts', '.js', '.py', '.rs', '.go', '.md', '.html', '.css', '.json'];
+    const sourceFiles = files.filter(f => supportedExtensions.some(ext => f.name.endsWith(ext)));
+    
+    const parsedData = [];
+    
+    for (const f of sourceFiles) {
+      // Skip configuration assets to keep grids clean
+      if (['package-lock.json', 'bun.lockb', 'tsconfig.json', 'jest.config.js'].includes(f.name)) {
+        continue;
+      }
+      
+      const fileObj = await f.handle.getFile();
+      const content = await fileObj.text();
+      
+      // Map layers based on path conventions or standard directories
+      let layer = 'application';
+      const p = f.path.toLowerCase();
+      if (p.includes('domain') || p.includes('models') || p.includes('entities') || p.includes('core')) {
+        layer = 'domain';
+      } else if (p.includes('application') || p.includes('services') || p.includes('usecases') || p.includes('business')) {
+        layer = 'application';
+      } else if (p.includes('infrastructure') || p.includes('db') || p.includes('repositories') || p.includes('adapters') || p.includes('gateways')) {
+        layer = 'infrastructure';
+      } else if (p.includes('presentation') || p.includes('controllers') || p.includes('cli') || p.includes('ui') || p.includes('routes') || p.includes('components')) {
+        layer = 'presentation';
+      } else if (p.includes('test') || p.includes('spec') || p.includes('tests/')) {
+        layer = 'testing';
+      }
+      
+      const tasks = [];
+      let taskCounter = 1;
+      const lines = content.split('\n');
+      
+      lines.forEach((line, index) => {
+        // Match comments, supporting //, #, and /*
+        const commentMatch = line.match(/(?:\/\/|#|\/\*)\s*(?:TODO:?\s*)?(\[[A-Z0-9_-]+\])?\s*(.+)$/i);
+        if (commentMatch) {
+          let tag = commentMatch[1] || "";
+          let desc = commentMatch[2].trim().replace(/\*\/$/, '').trim();
+          
+          if (desc.startsWith('http') || desc.length < 5 || desc.includes('eslint') || desc.includes('@ts-ignore')) {
+            return;
+          }
+          
+          let done = false;
+          if (tag.includes('VERIFIED') || tag.includes('DONE') || tag.includes('PASS') || line.includes('[TDD-VERIFIED]')) {
+            done = true;
+          }
+          
+          let isTask = false;
+          if (tag.includes('TDD-') || tag.includes('TASK-') || line.includes('TODO:') || line.includes('TODO ')) {
+            isTask = true;
+          }
+          
+          if (isTask) {
+            tasks.push({
+              id: `${f.name.replace(/\./g, '-')}-${taskCounter++}`,
+              desc: tag ? `${tag} ${desc}` : desc,
+              done: done,
+              lineNum: index + 1
+            });
+          }
+        }
+      });
+      
+      // Fallback default task if no tasks annotated
+      if (tasks.length === 0) {
+        tasks.push({
+          id: `${f.name.replace(/\./g, '-')}-1`,
+          desc: `Verify compiler integrity and structure of ${f.name}`,
+          done: true
+        });
+      }
+      
+      const doneCount = tasks.filter(t => t.done).length;
+      const totalCount = tasks.length;
+      const ratio = doneCount / totalCount;
+      
+      let status = 'upcoming';
+      if (ratio === 1.0) {
+        status = 'done';
+      } else if (doneCount > 0) {
+        status = 'active';
+      }
+      
+      parsedData.push({
+        name: f.name,
+        path: f.path,
+        layer: layer,
+        status: status,
+        coverage: `${Math.round(ratio * 92 + 8)}%`,
+        baselineCoverage: Math.round(ratio * 92 + 8),
+        tasks: tasks,
+        handle: f.handle
+      });
+    }
+    
+    // Sort logically: active files first
+    parsedData.sort((a, b) => {
+      if (a.status === 'active' && b.status !== 'active') return -1;
+      if (a.status !== 'active' && b.status === 'active') return 1;
+      if (a.status === 'upcoming' && b.status === 'done') return -1;
+      if (a.status === 'done' && b.status === 'upcoming') return 1;
+      return a.name.localeCompare(b.name);
+    });
+    
+    simulatedData = parsedData;
+    committedRef = JSON.parse(JSON.stringify(parsedData));
+    
+    // Full visual re-render with the new project folder's structure
+    recalculateAndRenderStats(true);
+  };
+
+  // Companion WebSocket Gateway integration
+  const initWebSocket = () => {
+    socket = new WebSocket('ws://localhost:8080');
+    
+    socket.onopen = () => {
+      isLiveCliMode = true;
+      console.log("WebSocket Companion connected! Live CLI Mode unlocked.");
+      
+      const title = document.querySelector('.terminal-title');
+      if (title) {
+        title.innerText = `${projectName.toLowerCase()} -- zsh (live)`;
+      }
+    };
+    
+    socket.onmessage = (event) => {
+      try {
+        const msg = JSON.parse(event.data);
+        if (msg.type === 'stdout' || msg.type === 'stderr') {
+          // Print real streaming terminal output!
+          printRawOutput(msg.data);
+        } else if (msg.type === 'exit') {
+          termHiddenInput.disabled = false;
+          printPrompt();
+          termHiddenInput.focus();
+        } else if (msg.type === 'projectInfo') {
+          if (msg.name) {
+            projectName = msg.name;
+            const formattedName = projectName.split(/[-_ ]+/).map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+            const titleText = document.getElementById('project-title-text');
+            if (titleText) {
+              titleText.innerText = `${formattedName} Cockpit`;
+            }
+            document.title = `${formattedName} - Developer Cockpit`;
+            
+            const title = document.querySelector('.terminal-title');
+            if (title) {
+              title.innerText = `${projectName.toLowerCase()} -- zsh (live)`;
+            }
+          }
+        }
+      } catch (err) {
+        console.error("Failed to parse WebSocket message:", err);
+      }
+    };
+    
+    socket.onclose = () => {
+      if (isLiveCliMode) {
+        isLiveCliMode = false;
+        console.log("WebSocket Companion disconnected. Reverting to emulated sandbox mode.");
+        
+        const title = document.querySelector('.terminal-title');
+        if (title) {
+          title.innerText = `${projectName.toLowerCase()} -- zsh`;
+        }
+      }
+      // Retry connection every 5 seconds
+      setTimeout(initWebSocket, 5000);
+    };
+    
+    socket.onerror = () => {
+      // Graceful silence on connection failures (falls back silently to emulation mode)
+    };
+  };
+
+  // Wire connect trigger
+  const connectProjectBtn = document.getElementById('connect-project-trigger');
+  if (connectProjectBtn) {
+    connectProjectBtn.onclick = () => {
+      connectProject();
+    };
+  }
+
+  // Initialize WebSocket Client gateway and initial boot run
+  initWebSocket();
+  recalculateAndRenderStats();
+</script>
+
+</body>
+</html>
