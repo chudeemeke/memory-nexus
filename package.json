@@ -54,6 +54,7 @@
   },
   "dependencies": {
     "@anthropic-ai/claude-code": "^2.1.58",
+    "@anthropic-ai/sdk": "^0.98.0",
     "@gutenye/commander-completion-carapace": "^1.0.9",
     "@huggingface/transformers": "^3.8.1",
     "@inquirer/search": "^4.1.0",

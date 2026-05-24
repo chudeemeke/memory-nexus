@@ -360,8 +360,80 @@ CREATE TABLE IF NOT EXISTS backfill_state (
 `;
 
 /**
+ * Facts table - derived projection of the plain-text event log.
+ */
+export const FACTS_TABLE = `
+CREATE TABLE IF NOT EXISTS facts (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    uuid TEXT UNIQUE NOT NULL,
+    type TEXT NOT NULL CHECK (type IN ('decision', 'learning', 'preference', 'friction', 'observation', 'supersedence')),
+    project TEXT NOT NULL,
+    content TEXT NOT NULL,
+    metadata TEXT,
+    observed_at TEXT NOT NULL,
+    superseded_at TEXT,
+    superseded_by TEXT,
+    created_at TEXT DEFAULT (datetime('now')),
+    updated_at TEXT DEFAULT (datetime('now'))
+);
+CREATE INDEX IF NOT EXISTS idx_facts_uuid ON facts(uuid);
+CREATE INDEX IF NOT EXISTS idx_facts_project ON facts(project);
+CREATE INDEX IF NOT EXISTS idx_facts_type ON facts(type);
+`;
+
+/**
+ * Facts FTS5 virtual table - external content pattern.
+ * References facts table for content storage.
+ */
+export const FACTS_FTS_TABLE = `
+CREATE VIRTUAL TABLE IF NOT EXISTS facts_fts USING fts5(
+    content,
+    content=facts,
+    content_rowid=id,
+    tokenize='porter unicode61'
+);
+`;
+
+/**
+ * Facts FTS5 synchronization triggers.
+ */
+export const FACTS_FTS_TRIGGERS = `
+CREATE TRIGGER IF NOT EXISTS facts_fts_insert AFTER INSERT ON facts BEGIN
+    INSERT INTO facts_fts(rowid, content) VALUES (new.id, new.content);
+END;
+
+CREATE TRIGGER IF NOT EXISTS facts_fts_delete AFTER DELETE ON facts BEGIN
+    INSERT INTO facts_fts(facts_fts, rowid, content) VALUES('delete', old.id, old.content);
+END;
+
+CREATE TRIGGER IF NOT EXISTS facts_fts_update AFTER UPDATE ON facts BEGIN
+    INSERT INTO facts_fts(facts_fts, rowid, content) VALUES('delete', old.id, old.content);
+    INSERT INTO facts_fts(rowid, content) VALUES (new.id, new.content);
+END;
+`;
+
+/**
+ * Extraction log table - tracks run logs of LLM fact extraction.
+ */
+export const EXTRACTION_LOG_TABLE = `
+CREATE TABLE IF NOT EXISTS extraction_log (
+    session_id TEXT PRIMARY KEY,
+    mode TEXT NOT NULL,
+    facts_added INTEGER DEFAULT 0,
+    facts_updated INTEGER DEFAULT 0,
+    facts_superseded INTEGER DEFAULT 0,
+    facts_skipped INTEGER DEFAULT 0,
+    provider TEXT NOT NULL,
+    model TEXT NOT NULL,
+    tokens_consumed INTEGER DEFAULT 0,
+    extracted_at TEXT NOT NULL
+);
+`;
+
+/**
  * Schema options for conditional table creation
  */
+
 export interface SchemaOptions {
     /** Whether sqlite-vec extension is loaded and vec0 tables can be created. Default: false */
     sqliteVecAvailable?: boolean;
@@ -449,7 +521,12 @@ export const SCHEMA_SQL: readonly string[] = [
     MEMORY_FILES_FTS_TRIGGERS,
     FRICTION_LOG_TABLE,
     BACKFILL_STATE_TABLE,
+    FACTS_TABLE,
+    FACTS_FTS_TABLE,
+    FACTS_FTS_TRIGGERS,
+    EXTRACTION_LOG_TABLE,
 ];
+
 
 /**
  * Check if FTS5 extension is available in the database

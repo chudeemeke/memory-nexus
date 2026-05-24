@@ -29,6 +29,8 @@ import {
   createImportCommand,
   createFrictionCommand,
   createBackfillCommand,
+  createExtractCommand,
+  createFactsCommand,
 } from "./commands/index.js";
 
 const program = new Command();
@@ -51,6 +53,7 @@ program.addCommand(createShowCommand());
 program.addCommand(createListCommand());
 program.addCommand(createRelatedCommand());
 program.addCommand(createStatsCommand());
+program.addCommand(createFactsCommand());
 
 // Data Commands — sync, backfill, backup, maintenance.
 program.commandsGroup("Data Commands:");
@@ -59,6 +62,7 @@ program.addCommand(createBackfillCommand());
 program.addCommand(createExportCommand());
 program.addCommand(createImportCommand());
 program.addCommand(createPurgeCommand());
+program.addCommand(createExtractCommand());
 
 // System Commands — hooks, diagnostics, completion. `browse` lives here
 // per research §Open Q1 (interactive launcher, not a query surface).

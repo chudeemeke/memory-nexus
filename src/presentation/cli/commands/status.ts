@@ -217,6 +217,7 @@ export async function gatherStatus(options: GatherStatusOptions = {}): Promise<S
         configDir: options.configPath ? dirname(options.configPath) : undefined,
         logsDir: options.logPath ? dirname(options.logPath) : undefined,
         hookOverrides: options.hookOverrides,
+        preCalculatedHookStatus: hookStatus,
     });
 
     // Singular database connection session to gather pending session counts, embedded stats, and DB statistics
@@ -462,7 +463,9 @@ export async function executeStatusCommand(
 
     if (options.embedding || options.all) {
         outputSections.push(formatEmbeddingSection(status, useColor));
+        outputSections.push(formatLlmExtractionSection(status, useColor));
     }
+
 
     // 4. Statistics breakdown
     if (options.stats || options.all) {
@@ -648,6 +651,26 @@ function formatEmbeddingSection(status: StatusInfo, useColor: boolean): string {
     }
     return lines.join("\n");
 }
+
+/**
+ * Format LLM Fact Extraction diagnostics status block.
+ */
+function formatLlmExtractionSection(status: StatusInfo, useColor: boolean): string {
+    const lines: string[] = [];
+    lines.push("LLM Fact Extraction");
+    lines.push(`  ${formatStatus(status.health.llmExtraction.ready, useColor)} Ready: ${status.health.llmExtraction.ready ? "yes" : "no"}`);
+    lines.push(`  ${dim(`Provider: ${status.health.llmExtraction.provider}`, useColor)}`);
+    lines.push(`  ${dim(`Model: ${status.health.llmExtraction.model}`, useColor)}`);
+    if (status.health.llmExtraction.readyReason) {
+        if (status.health.llmExtraction.ready) {
+            lines.push(`  ${dim(`Note: ${status.health.llmExtraction.readyReason}`, useColor)}`);
+        } else {
+            lines.push(`  ${red(`Reason: ${status.health.llmExtraction.readyReason}`, useColor)}`);
+        }
+    }
+    return lines.join("\n");
+}
+
 
 /**
  * Format a boolean value as a status indicator.

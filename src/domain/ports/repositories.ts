@@ -24,6 +24,8 @@ import type {
 } from "../entities/friction-entry.js";
 import type { BackfillState } from "../entities/backfill-state.js";
 import type { ProjectPath } from "../value-objects/project-path.js";
+import type { Fact } from "../entities/fact.js";
+
 
 /**
  * Options for filtering session list.
@@ -701,3 +703,48 @@ export interface IBackfillStateRepository {
      */
     countByStatus(): Promise<BackfillStatusCounts>;
 }
+
+/**
+ * Extraction log entry representing metadata of an LLM extraction session.
+ */
+export interface ExtractionLogEntry {
+  sessionId: string;
+  mode: string;
+  factsAdded: number;
+  factsUpdated: number;
+  factsSuperseded: number;
+  factsSkipped: number;
+  provider: string;
+  model: string;
+  tokensConsumed: number;
+  extractedAt: Date;
+}
+
+/**
+ * Repository for Fact entities.
+ *
+ * Handles persistence of derived Fact projections.
+ */
+export interface IFactRepository {
+  findById(id: number): Promise<Fact | null>;
+  findByUuid(uuid: string): Promise<Fact | null>;
+  findByProject(project: string): Promise<Fact[]>;
+  findRecent(limit: number): Promise<Fact[]>;
+  save(fact: Fact): Promise<Fact>;
+  saveMany(facts: Fact[]): Promise<Fact[]>;
+  search(query: string, limit?: number): Promise<Fact[]>;
+  supersede(uuid: string, supersededAt: Date, supersededByUuid: string): Promise<void>;
+  findAll(): Promise<Fact[]>;
+  clearAll(): Promise<void>;
+}
+
+/**
+ * Repository for tracking run logs of LLM fact extraction.
+ */
+export interface IExtractionLogRepository {
+  findById(sessionId: string): Promise<ExtractionLogEntry | null>;
+  save(entry: ExtractionLogEntry): Promise<void>;
+  findAll(): Promise<ExtractionLogEntry[]>;
+  clearAll(): Promise<void>;
+}
+

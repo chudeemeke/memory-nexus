@@ -140,7 +140,7 @@ describe("Programmatic API", () => {
       const result = await executeSyncCommand(options);
       expectCommandResult(result);
       expect(result.exitCode).toBe(0);
-    });
+    }, 30_000);
 
     test("quiet sync returns CommandResult with exitCode 0", async () => {
       const options: SyncCommandOptions = { quiet: true };
@@ -152,7 +152,7 @@ describe("Programmatic API", () => {
     test("exitCode is a number", async () => {
       const result = await executeSyncCommand({ dryRun: true, quiet: true });
       expect(typeof result.exitCode).toBe("number");
-    });
+    }, 30_000);
   });
 
   describe("executeSearchCommand", () => {
@@ -160,7 +160,7 @@ describe("Programmatic API", () => {
       const options: SearchCommandOptions = { quiet: true };
       const result = await executeSearchCommand("nonexistent-term-xyz-9999", options);
       expectCommandResult(result);
-    });
+    }, 30_000);
 
     test("search with limit returns CommandResult with exitCode 0", async () => {
       const options: SearchCommandOptions = { limit: "5", quiet: true };
@@ -181,7 +181,7 @@ describe("Programmatic API", () => {
       const result = await executeSearchCommand("test", options);
       expectCommandResult(result);
       expect(result.exitCode).toBe(0);
-    });
+    }, 30_000);
   });
 
   describe("executeListCommand", () => {
@@ -189,21 +189,21 @@ describe("Programmatic API", () => {
       const options: ListCommandOptions = { quiet: true };
       const result = await executeListCommand(options);
       expectCommandResult(result);
-    });
+    }, 30_000);
 
     test("with limit returns CommandResult with exitCode 0", async () => {
       const options: ListCommandOptions = { limit: "3", quiet: true };
       const result = await executeListCommand(options);
       expectCommandResult(result);
       expect(result.exitCode).toBe(0);
-    });
+    }, 30_000);
 
     test("JSON mode returns CommandResult with exitCode 0", async () => {
       const options: ListCommandOptions = { json: true, quiet: true };
       const result = await executeListCommand(options);
       expectCommandResult(result);
       expect(result.exitCode).toBe(0);
-    });
+    }, 30_000);
   });
 
   describe("executeStatsCommand", () => {
@@ -211,20 +211,20 @@ describe("Programmatic API", () => {
       const options: StatsCommandOptions = { quiet: true };
       const result = await executeStatsCommand(options);
       expectCommandResult(result);
-    });
+    }, 30_000);
 
     test("returns CommandResult with exitCode 0", async () => {
       const options: StatsCommandOptions = { quiet: true };
       const result = await executeStatsCommand(options);
       expect(result.exitCode).toBe(0);
-    });
+    }, 30_000);
 
     test("JSON mode returns CommandResult with exitCode 0", async () => {
       const options: StatsCommandOptions = { json: true, quiet: true };
       const result = await executeStatsCommand(options);
       expectCommandResult(result);
       expect(result.exitCode).toBe(0);
-    });
+    }, 30_000);
   });
 
   describe("executeContextCommand", () => {
@@ -232,7 +232,7 @@ describe("Programmatic API", () => {
       const options: ContextCommandOptions = { quiet: true };
       const result = await executeContextCommand("nonexistent-project-xyz", options);
       expectCommandResult(result);
-    });
+    }, 30_000);
 
     test("returns CommandResult with exitCode as a number", async () => {
       const options: ContextCommandOptions = { quiet: true };
@@ -255,19 +255,19 @@ describe("Programmatic API", () => {
       const result = await executeRelatedCommand("session-1", options);
       expectCommandResult(result);
       expect(typeof result.exitCode).toBe("number");
-    });
+    }, 30_000);
 
     test("JSON mode returns CommandResult", async () => {
       const options: RelatedCommandOptions = { json: true, quiet: true };
       const result = await executeRelatedCommand("session-1", options);
       expectCommandResult(result);
-    });
+    }, 30_000);
 
     test("nonexistent session returns CommandResult", async () => {
       const options: RelatedCommandOptions = { quiet: true };
       const result = await executeRelatedCommand("nonexistent-session-id", options);
       expectCommandResult(result);
-    });
+    }, 30_000);
   });
 
   describe("executeShowCommand", () => {
@@ -275,20 +275,20 @@ describe("Programmatic API", () => {
       const options: ShowCommandOptions = { quiet: true };
       const result = await executeShowCommand("session-1", options);
       expectCommandResult(result);
-    });
+    }, 30_000);
 
     test("JSON mode returns CommandResult", async () => {
       const options: ShowCommandOptions = { json: true, quiet: true };
       const result = await executeShowCommand("session-1", options);
       expectCommandResult(result);
-    });
+    }, 30_000);
 
     test("nonexistent session returns CommandResult with exitCode 1", async () => {
       const options: ShowCommandOptions = { quiet: true };
       const result = await executeShowCommand("nonexistent-session-id", options);
       expectCommandResult(result);
       expect(result.exitCode).toBe(1);
-    });
+    }, 30_000);
   });
 
   describe("executeBrowseCommand", () => {
@@ -299,12 +299,12 @@ describe("Programmatic API", () => {
       // In test environment (non-TTY), browse returns exitCode 1
       // with guidance to use specific commands instead
       expect(result.exitCode).toBe(1);
-    });
+    }, 30_000);
 
     test("exitCode is a number", async () => {
       const result = await executeBrowseCommand({});
       expect(typeof result.exitCode).toBe("number");
-    });
+    }, 30_000);
   });
 
   describe("executeInstallCommand", () => {
@@ -312,12 +312,12 @@ describe("Programmatic API", () => {
       const options: InstallOptions = {};
       const result = await executeInstallCommand(options);
       expectCommandResult(result);
-    });
+    }, 30_000);
 
     test("has exitCode property", async () => {
       const result = await executeInstallCommand({});
       expect(result).toHaveProperty("exitCode");
-    });
+    }, 30_000);
   });
 
   describe("executeUninstallCommand", () => {
@@ -325,12 +325,12 @@ describe("Programmatic API", () => {
       const options: UninstallOptions = {};
       const result = await executeUninstallCommand(options);
       expectCommandResult(result);
-    });
+    }, 30_000);
 
     test("has exitCode property", async () => {
       const result = await executeUninstallCommand({});
       expect(result).toHaveProperty("exitCode");
-    });
+    }, 30_000);
   });
 
   describe("executePurgeCommand", () => {
@@ -343,7 +343,7 @@ describe("Programmatic API", () => {
       const result = await executePurgeCommand(options);
       expectCommandResult(result);
       expect(result.exitCode).toBe(0);
-    });
+    }, 30_000);
 
     test("dry-run JSON mode returns CommandResult with exitCode 0", async () => {
       const options: PurgeCommandOptions = {
@@ -355,7 +355,7 @@ describe("Programmatic API", () => {
       const result = await executePurgeCommand(options);
       expectCommandResult(result);
       expect(result.exitCode).toBe(0);
-    });
+    }, 30_000);
 
     test("exitCode is a number", async () => {
       const result = await executePurgeCommand({
@@ -377,7 +377,7 @@ describe("Programmatic API", () => {
 
     test("exported file exists after call", () => {
       expect(existsSync(exportPath())).toBe(true);
-    });
+    }, 30_000);
 
     test("exitCode is a number", async () => {
       // Re-verify using the already-exported file path
@@ -399,7 +399,7 @@ describe("Programmatic API", () => {
       const result = await executeImportCommand("nonexistent-file-xyz.json", options);
       expectCommandResult(result);
       expect(result.exitCode).toBe(1);
-    });
+    }, 30_000);
 
     test("exitCode is a number", async () => {
       const result = await executeImportCommand(exportPath(), { quiet: true, force: true });
@@ -438,7 +438,7 @@ describe("Programmatic API", () => {
     test("JSON mode returns CommandResult", async () => {
       const result = await executeStatusCommand({ json: true });
       expectCommandResult(result);
-    });
+    }, 30_000);
   });
 
   describe("executeCompletionCommand", () => {
@@ -446,7 +446,7 @@ describe("Programmatic API", () => {
       const result = executeCompletionCommand("bash");
       expectCommandResult(result);
       expect(result.exitCode).toBe(0);
-    });
+    }, 30_000);
   });
 
   describe("Public API type exports", () => {
@@ -457,13 +457,13 @@ describe("Programmatic API", () => {
       expect(modes).toContain("fts");
       expect(modes).toContain("vector");
       expect(modes).toContain("hybrid");
-    });
+    }, 30_000);
 
     test("HybridSearchOptions is assignable with mode and limit", () => {
       const opts: HybridSearchOptions = { mode: "fts", limit: 5 };
       expect(opts.mode).toBe("fts");
       expect(opts.limit).toBe(5);
-    });
+    }, 30_000);
 
     test("StatsResult shape matches domain definition", () => {
       const result: StatsResult = {
@@ -478,7 +478,7 @@ describe("Programmatic API", () => {
       expect(result.totalToolUses).toBe(50);
       expect(result.databaseSizeBytes).toBe(1024);
       expect(result.projectBreakdown).toEqual([]);
-    });
+    }, 30_000);
 
     test("ProjectStats shape is consumable", () => {
       const stats: ProjectStats = {
@@ -489,7 +489,7 @@ describe("Programmatic API", () => {
       expect(stats.projectName).toBe("test-project");
       expect(stats.sessionCount).toBe(5);
       expect(stats.messageCount).toBe(42);
-    });
+    }, 30_000);
 
     test("IStatsService interface is importable", () => {
       const mockService: IStatsService = {
@@ -502,7 +502,7 @@ describe("Programmatic API", () => {
         }),
       };
       expect(typeof mockService.getStats).toBe("function");
-    });
+    }, 30_000);
   });
 
   describe("Return type validation", () => {

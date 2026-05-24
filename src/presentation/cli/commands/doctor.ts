@@ -194,6 +194,24 @@ export function formatHealthResult(result: HealthCheckResult, useColor: boolean)
 
     lines.push("");
 
+    // LLM Fact Extraction section
+    if (result.llmExtraction) {
+        lines.push("LLM Fact Extraction");
+        lines.push(`  ${formatStatus(result.llmExtraction.ready, useColor)} Ready: ${result.llmExtraction.ready ? "yes" : "no"}`);
+        lines.push(`  ${dim(`Provider: ${result.llmExtraction.provider}`, useColor)}`);
+        lines.push(`  ${dim(`Model: ${result.llmExtraction.model}`, useColor)}`);
+        if (result.llmExtraction.readyReason) {
+            if (result.llmExtraction.ready) {
+                lines.push(`  ${dim(`Note: ${result.llmExtraction.readyReason}`, useColor)}`);
+            } else {
+                lines.push(`  ${red(`Reason: ${result.llmExtraction.readyReason}`, useColor)}`);
+            }
+        }
+        lines.push("");
+    }
+
+
+
     // Search Capability section
     lines.push("Search Capability");
     lines.push(`  ${formatStatus(result.searchCapability.fts5, useColor)} FTS5: available`);
@@ -246,8 +264,13 @@ function countIssues(result: HealthCheckResult): number {
     // Config issues
     count += result.config.issues.length;
 
+    // LLM extraction issues
+    if (result.llmExtraction && !result.llmExtraction.ready) count++;
+
     return count;
 }
+
+
 
 /**
  * Attempt automatic fixes for common issues.
@@ -337,9 +360,11 @@ export async function executeDoctorCommand(
             embedding: status.health.embedding,
             sqliteVec: status.health.sqliteVec,
             searchCapability: status.health.searchCapability,
+            llmExtraction: status.health.llmExtraction,
             migration: status.migration,
             qmd: status.qmd,
         };
+
 
         console.log(JSON.stringify(jsonResult, null, 2));
 

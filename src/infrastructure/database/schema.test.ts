@@ -31,8 +31,13 @@ import {
     FRICTION_LOG_TABLE,
     FRICTION_LOG_UNIVERSALIZE_MIGRATION,
     BACKFILL_STATE_TABLE,
+    FACTS_TABLE,
+    FACTS_FTS_TABLE,
+    FACTS_FTS_TRIGGERS,
+    EXTRACTION_LOG_TABLE,
     type SchemaOptions,
 } from "./schema.js";
+
 import * as sqliteVec from "sqlite-vec";
 
 describe("Database Schema", () => {
@@ -62,11 +67,16 @@ describe("Database Schema", () => {
             expect(ENTITY_LINKS_TABLE).toBeDefined();
             expect(SESSIONS_FTS_TABLE).toBeDefined();
             expect(SESSIONS_FTS_TRIGGERS).toBeDefined();
+            expect(FACTS_TABLE).toBeDefined();
+            expect(FACTS_FTS_TABLE).toBeDefined();
+            expect(FACTS_FTS_TRIGGERS).toBeDefined();
+            expect(EXTRACTION_LOG_TABLE).toBeDefined();
         });
+
 
         it("should have SCHEMA_SQL as an array with correct order", () => {
             expect(Array.isArray(SCHEMA_SQL)).toBe(true);
-            expect(SCHEMA_SQL.length).toBe(19);
+            expect(SCHEMA_SQL.length).toBe(23);
             expect(SCHEMA_SQL[0]).toBe(SESSIONS_TABLE);
             expect(SCHEMA_SQL[1]).toBe(MESSAGES_META_TABLE);
             expect(SCHEMA_SQL[2]).toBe(MESSAGES_FTS_TABLE);
@@ -81,7 +91,17 @@ describe("Database Schema", () => {
             expect(SCHEMA_SQL[11]).toBe(SESSIONS_FTS_TABLE);
             expect(SCHEMA_SQL[12]).toBe(SESSIONS_FTS_TRIGGERS);
             expect(SCHEMA_SQL[13]).toBe(EMBEDDING_STATE_TABLE);
+            expect(SCHEMA_SQL[14]).toBe(MEMORY_FILES_TABLE);
+            expect(SCHEMA_SQL[15]).toBe(MEMORY_FILES_FTS_TABLE);
+            expect(SCHEMA_SQL[16]).toBe(MEMORY_FILES_FTS_TRIGGERS);
+            expect(SCHEMA_SQL[17]).toBe(FRICTION_LOG_TABLE);
+            expect(SCHEMA_SQL[18]).toBe(BACKFILL_STATE_TABLE);
+            expect(SCHEMA_SQL[19]).toBe(FACTS_TABLE);
+            expect(SCHEMA_SQL[20]).toBe(FACTS_FTS_TABLE);
+            expect(SCHEMA_SQL[21]).toBe(FACTS_FTS_TRIGGERS);
+            expect(SCHEMA_SQL[22]).toBe(EXTRACTION_LOG_TABLE);
         });
+
     });
 
     describe("FTS5 Support Check", () => {

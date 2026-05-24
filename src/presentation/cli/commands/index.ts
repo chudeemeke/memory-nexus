@@ -40,6 +40,10 @@ export { createFrictionCommand, executeFrictionCommand } from "./friction/index.
 // Backfill commands
 export { createBackfillCommand, executeBackfillCommand } from "./backfill.js";
 
+// Fact extraction commands
+export { createExtractCommand, executeExtractCommand } from "./extract.js";
+export { createFactsCommand, executeFactsCommand } from "./facts.js";
+
 // Option types for programmatic API consumers
 export type { SyncCommandOptions } from "./sync/index.js";
 export type { EmbeddingPassDeps, BackgroundModeDeps } from "./sync/index.js";

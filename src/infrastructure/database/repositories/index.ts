@@ -44,3 +44,10 @@ export { SqliteFrictionRepository } from "./friction-repository.js";
 
 // Backfill State Repository
 export { SqliteBackfillStateRepository } from "./backfill-state-repository.js";
+
+// Fact Repository
+export { SqliteFactRepository } from "./fact-repository.js";
+
+// Extraction Log Repository
+export { SqliteExtractionLogRepository } from "./extraction-log-repository.js";
+

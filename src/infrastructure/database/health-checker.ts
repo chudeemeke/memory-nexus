@@ -23,6 +23,7 @@ import {
     checkHooksInstalled,
     readRecentLogs,
     type MemoryConfig,
+    type HookStatus,
 } from "../hooks/index.js";
 
 /**
@@ -126,6 +127,20 @@ export interface SearchCapability {
 }
 
 /**
+ * LLM Extraction health status
+ */
+export interface LlmExtractionHealth {
+    /** The active LLM provider */
+    provider: string;
+    /** The active LLM model */
+    model: string;
+    /** Whether extraction is configured and ready */
+    ready: boolean;
+    /** Reason for readiness status */
+    readyReason?: string | undefined;
+}
+
+/**
  * Complete health check result
  */
 export interface HealthCheckResult {
@@ -143,7 +158,10 @@ export interface HealthCheckResult {
     sqliteVec: SqliteVecHealth;
     /** Search capability status */
     searchCapability: SearchCapability;
+    /** LLM extraction provider status */
+    llmExtraction: LlmExtractionHealth;
 }
+
 
 /**
  * Test path overrides for testing
@@ -159,6 +177,8 @@ export interface HealthCheckOverrides {
     sourceDir?: string | undefined;
     /** Override hook-related paths (settings.json, backup, hook script) */
     hookOverrides?: import("../hooks/settings-manager.js").PathOverrides | undefined;
+    /** Optional pre-calculated hook status to avoid redundant file reads */
+    preCalculatedHookStatus?: HookStatus | undefined;
 }
 
 /**
@@ -249,9 +269,10 @@ export function checkDirectoryPermissions(path: string): { readable: boolean; wr
 export function checkHookStatus(
     logPath?: string | undefined,
     configPath?: string | undefined,
-    hookOverrides?: import("../hooks/settings-manager.js").PathOverrides | undefined
+    hookOverrides?: import("../hooks/settings-manager.js").PathOverrides | undefined,
+    preCalculatedHookStatus?: HookStatus | undefined
 ): HooksHealth {
-    const hookStatus = checkHooksInstalled(hookOverrides);
+    const hookStatus = preCalculatedHookStatus ?? checkHooksInstalled(hookOverrides);
     const config = loadConfig(configPath);
     const logs = readRecentLogs(1, logPath);
 
@@ -393,6 +414,58 @@ export function checkEmbeddingConfig(configPath?: string): EmbeddingHealth {
 }
 
 /**
+ * Check LLM Fact Extraction provider health status
+ *
+ * @param configPath Optional explicit config file path
+ * @returns LLM extraction health status
+ */
+export function checkLlmExtractionHealth(configPath?: string): LlmExtractionHealth {
+    const config = loadConfig(configPath);
+    let provider = process.env.LLM_PROVIDER || config.embedding?.provider || "claude-cli";
+    if (provider === "local") {
+        provider = "claude-cli";
+    }
+    
+    let model = "";
+    let ready = true;
+    let readyReason: string | undefined;
+
+    switch (provider) {
+        case "anthropic":
+            model = config.embedding?.model || "claude-3-5-sonnet-20241022";
+            const anthropicKey = process.env.ANTHROPIC_API_KEY || config.embedding?.apiKey;
+            if (!anthropicKey) {
+                ready = false;
+                readyReason = "API key not set (set ANTHROPIC_API_KEY or config.embedding.apiKey)";
+            }
+            break;
+        case "openai":
+            model = config.embedding?.model || "gpt-4o";
+            const openaiKey = process.env.OPENAI_API_KEY || config.embedding?.apiKey;
+            if (!openaiKey) {
+                ready = false;
+                readyReason = "API key not set (set OPENAI_API_KEY or config.embedding.apiKey)";
+            }
+            break;
+        case "ollama":
+            model = config.embedding?.model || "llama3";
+            break;
+        case "claude-cli":
+        default:
+            model = "claude-cli-print";
+            break;
+    }
+
+    return {
+        provider,
+        model,
+        ready,
+        readyReason
+    };
+}
+
+
+/**
  * Run comprehensive health check
  *
  * Orchestrates all health checks:
@@ -431,7 +504,7 @@ export function runHealthCheck(overrides?: HealthCheckOverrides): HealthCheckRes
     };
 
     // Hook status
-    const hooks = checkHookStatus(logPath, configPath, overrides?.hookOverrides);
+    const hooks = checkHookStatus(logPath, configPath, overrides?.hookOverrides, overrides?.preCalculatedHookStatus);
 
     // Config validity
     const config = checkConfigValidity(configPath);
@@ -448,6 +521,9 @@ export function runHealthCheck(overrides?: HealthCheckOverrides): HealthCheckRes
     // Search capability
     const searchCapability = checkSearchCapability(dbPath, sqliteVec, loadedConfig);
 
+    // LLM Fact Extraction health
+    const llmExtraction = checkLlmExtractionHealth(configPath);
+
     return {
         database,
         permissions,
@@ -456,8 +532,10 @@ export function runHealthCheck(overrides?: HealthCheckOverrides): HealthCheckRes
         embedding,
         sqliteVec,
         searchCapability,
+        llmExtraction,
     };
 }
+
 
 /**
  * Check search capability

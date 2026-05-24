@@ -68,13 +68,13 @@
 **Total v4.0 Requirements:** 25 phase-mapped + 4 cross-cutting (QUAL) = 29 (Phase 32.5 inherits surface-consolidation scope; no new requirements added)
 
 - [x] **Phase 30: God File Cleanup** - Split sync.ts and friction.ts into focused SRP-compliant modules (completed 2026-04-03)
-- [ ] **Phase 31: Bug Fixes** - Unicode search, CLI truncation, download bar issues
-- [ ] **Phase 32: CLI Surface** - Labeled help groups, uniform --json and --format flags (scope unchanged per audit codex review #2 finding #2)
-- [ ] **Phase 32.5: Surface Consolidation** (NEW, per audit A-prime) - Merge doctor/status/stats into one health surface with detail-flag selection; unify search/context/related/list/show behind one query primitive with shape flags; document unified surface in docs/04-ARCHITECTURE.md. Acceptance criteria in audit §21.
-- [ ] **Phase 32.6: TS Error Cleanup** (NEW, surfaced by Phase 32 verifier) - Resolve the ~181 pre-existing TypeScript errors in CLI files (db-startup, context-formatter, friction-dashboard, output-formatter, related-formatter, stats-formatter, etc.) so `bun --bun tsc --noEmit` exits 0. Pre-dates v4.0; trigger fired at Phase 32 close-out.
-- [ ] **Phase 32.7: Friction Dashboard Test Cleanup + Envelope Adoption** (NEW, surfaced by Phase 32 verifier) - Resolve the 8 pre-existing failing tests in `friction-dashboard.test.ts` covering `generateFrictionHtml` rendering and the `--html` action path. Pair with adoption of `QueryResultEnvelope` for `friction list` (deferred from Phase 32 per audit §14.A and 32-01-PLAN.md Open Q7). Removes hidden-debt warning from Phase 32 close-out.
-- [ ] **Phase 33: Knowledge Extraction Foundation** - Extraction provider port, facts schema, extraction_log, temporal tracking. **MUST include plain-text canonical event log (event-log SSOT) with DB tables as DERIVED projection per audit §19 item 4.** Event types: decision / learning / preference / friction / observation / supersedence.
-- [ ] **Phase 34: Extraction Pipeline** - The `memory extract` command with ADD/UPDATE/DELETE/NOOP operations. **Supersedence encoded as event type in canonical event log, not as in-place table mutation per audit §19 item 5.** G3 acceptance criteria: 6 sub-gates per audit §21.
+- [x] **Phase 31: Bug Fixes** - Unicode search, CLI truncation, download bar issues (completed 2026-05-14)
+- [x] **Phase 32: CLI Surface** - Labeled help groups, uniform --json and --format flags (completed 2026-05-16)
+- [x] **Phase 32.5: Surface Consolidation** (NEW, per audit A-prime) - Merge doctor/status/stats into one health surface with detail-flag selection; unify search/context/related/list/show behind one query primitive with shape flags; document unified surface in docs/04-ARCHITECTURE.md. (Completed 2026-05-23)
+- [x] **Phase 32.6: TS Error Cleanup** (completed 2026-05-23)
+- [x] **Phase 32.7: Friction Dashboard Test Cleanup + Envelope Adoption** (completed 2026-05-23)
+- [x] **Phase 33: Knowledge Extraction Foundation** - Extraction provider port, facts schema, extraction_log, temporal tracking. Plain-text canonical event log (event-log SSOT) with DB tables as DERIVED projection. Event types: decision / learning / preference / friction / observation / supersedence. (Completed 2026-05-24)
+- [x] **Phase 34: Extraction Pipeline** - The `memory extract` command with ADD/UPDATE/DELETE/NOOP operations. (Completed 2026-05-24)
 - [ ] **Phase 35: Context Intelligence** - Rewire SmartContextService to read from fact tables, deprecate ~/.memory/. **Every new typed memory kind in 33-35 must have plain-text canonical OR export-on-write before becoming default (T7) per audit §19 item 6.**
 - [ ] **Phase 36: Portability** - WSL migration command, doctor --portability, migration guide
 - [ ] **Phase 37: Publishing** - Prerelease (`@chude/memory@4.0.0-pre.N`) allowed at any time; GA (`@chude/memory@4.0.0`) gated on §21 acceptance criteria for Phases 32.5/33/34/35 per audit §19 item 8.
@@ -301,14 +301,17 @@ Phase 37 (Publishing)
 | 29 | v3.0 | 2/2 | Complete | 2026-03-18 |
 | 29.1 | v3.0 | 2/2 | Complete | 2026-03-22 |
 | 30. God File Cleanup | v4.0 | 2/2 | Complete    | 2026-04-03 |
-| 31. Bug Fixes | v4.0 | 1/2 | In Progress|  |
-| 32. CLI Surface | v4.0 | 0/3 | Planned | - |
-| 33. Knowledge Extraction Foundation | v4.0 | TBD | Not started | - |
-| 34. Extraction Pipeline | v4.0 | TBD | Not started | - |
-| 35. Context Intelligence | v4.0 | TBD | Not started | - |
-| 36. Portability | v4.0 | TBD | Not started | - |
-| 37. Publishing | v4.0 | TBD | Not started | - |
+| 31. Bug Fixes | v4.0 | 2/2 | Complete | 2026-05-14 |
+| 32. CLI Surface | v4.0 | 3/3 | Complete | 2026-05-16 |
+| 32.5. Surface Consolidation | v4.0 | 1/1 | Complete | 2026-05-23 |
+| 32.6. TS Error Cleanup | v4.0 | 1/1 | Complete | 2026-05-23 |
+| 32.7. Friction Dashboard Tests | v4.0 | 1/1 | Complete | 2026-05-23 |
+| 33. Knowledge Extraction Foundation | v4.0 | 1/1 | Complete | 2026-05-24 |
+| 34. Extraction Pipeline | v4.0 | 1/1 | Complete | 2026-05-24 |
+| 35. Context Intelligence | v4.0 | TBD | In Progress | - |
+| 36. Portability | v4.0 | TBD | Planned | - |
+| 37. Publishing | v4.0 | TBD | Planned | - |
 
 ---
 
-*Last updated: 2026-05-14 (Phase 32 planned: 3 plans)*
+*Last updated: 2026-05-24 (Phase 34 completed)*

@@ -29,3 +29,5 @@ export {
     type FrictionStatus,
 } from "./friction-entry.js";
 export { BackfillState } from "./backfill-state.js";
+export { Fact, type FactType, type FactParams, type CandidateFact } from "./fact.js";
+

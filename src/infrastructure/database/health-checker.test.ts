@@ -17,9 +17,11 @@ import {
     checkHookStatus,
     checkSqliteVecAvailability,
     checkEmbeddingConfig,
+    checkLlmExtractionHealth,
     runHealthCheck,
     type HealthCheckResult,
 } from "./health-checker.js";
+
 import type { PathOverrides } from "../hooks/settings-manager.js";
 import { initializeDatabase, closeDatabase } from "./connection.js";
 
@@ -562,4 +564,50 @@ describe("health-checker", () => {
             expect(result.dimensions).toBe(768);
         });
     });
+
+    describe("checkLlmExtractionHealth", () => {
+        const originalEnv = { ...process.env };
+
+        afterEach(() => {
+            process.env = { ...originalEnv };
+        });
+
+        it("returns claude-cli as default provider when no environment or config override is present", () => {
+            delete process.env.LLM_PROVIDER;
+            const result = checkLlmExtractionHealth(testConfigPath);
+            expect(result.provider).toBe("claude-cli");
+            expect(result.model).toBe("claude-cli-print");
+            expect(result.ready).toBe(true);
+        });
+
+        it("returns ready: false for anthropic provider when no key is set", () => {
+            process.env.LLM_PROVIDER = "anthropic";
+            delete process.env.ANTHROPIC_API_KEY;
+
+            // Ensure no apiKey is in config
+            writeFileSync(testConfigPath, JSON.stringify({}));
+
+            const result = checkLlmExtractionHealth(testConfigPath);
+            expect(result.provider).toBe("anthropic");
+            expect(result.ready).toBe(false);
+            expect(result.readyReason).toContain("API key not set");
+        });
+
+        it("returns ready: true for anthropic provider when environment ANTHROPIC_API_KEY is present", () => {
+            process.env.LLM_PROVIDER = "anthropic";
+            process.env.ANTHROPIC_API_KEY = "sk-ant-test";
+
+            const result = checkLlmExtractionHealth(testConfigPath);
+            expect(result.provider).toBe("anthropic");
+            expect(result.ready).toBe(true);
+        });
+
+        it("returns ready: true for ollama provider", () => {
+            process.env.LLM_PROVIDER = "ollama";
+            const result = checkLlmExtractionHealth(testConfigPath);
+            expect(result.provider).toBe("ollama");
+            expect(result.ready).toBe(true);
+        });
+    });
 });
+

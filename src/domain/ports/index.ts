@@ -21,6 +21,9 @@ export type {
   UnembeddedMessage,
   EmbeddingBatchItem,
   EmbeddingServiceConfig,
+  IFactRepository,
+  IExtractionLogRepository,
+  ExtractionLogEntry,
 } from "./repositories.js";
 
 // Embedding provider port
@@ -29,6 +32,12 @@ export type {
   DownloadProgress,
   EmbeddingModelInfo,
 } from "./embedding.js";
+
+// Extraction provider port
+export type {
+  IExtractionProvider,
+} from "./extraction.js";
+
 
 // Service interfaces
 export type {

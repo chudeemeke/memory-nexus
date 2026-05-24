@@ -153,3 +153,22 @@ export function getBackupDir(): string {
 export function getCheckpointPath(): string {
     return join(getDataDir(), "sync-checkpoint.json");
 }
+
+/**
+ * Get the path to the events directory.
+ *
+ * @returns Absolute path to the events directory
+ */
+export function getEventsDir(): string {
+    return join(getDataDir(), "events");
+}
+
+/**
+ * Get the path to the event log file.
+ *
+ * @returns Absolute path to events.jsonl
+ */
+export function getEventLogPath(): string {
+    return join(getEventsDir(), "events.jsonl");
+}
+
