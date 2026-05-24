@@ -18,8 +18,8 @@
  * Zero imports from infrastructure layer.
  */
 
-import type { IMemoryFileRepository, IFrictionRepository } from "../../domain/ports/repositories.js";
-import type { MemoryFile } from "../../domain/entities/memory-file.js";
+import type { IFactRepository, IFrictionRepository } from "../../domain/ports/repositories.js";
+import type { Fact } from "../../domain/entities/fact.js";
 import type { FrictionEntry } from "../../domain/entities/friction-entry.js";
 import { allocateBudget, type BudgetSection } from "./budget-allocator.js";
 
@@ -92,7 +92,7 @@ export interface IProjectResolver {
  */
 export interface SmartContextDeps {
     projectResolver: IProjectResolver;
-    memoryFileRepo: IMemoryFileRepository;
+    factRepo: IFactRepository;
     frictionRepo: IFrictionRepository;
     /** Optional legacy session summary provider */
     getSessionSummary?: (projectFilter: string, days?: number) => Promise<string | null>;
@@ -115,22 +115,6 @@ function estimateTokens(text: string): number {
 }
 
 /**
- * Date regex for daily log file paths: daily/YYYY-MM-DD.md
- */
-const DAILY_LOG_DATE_REGEX = /daily\/(\d{4}-\d{2}-\d{2})\.md$/;
-
-/**
- * Parse a date from a daily log file path.
- * Returns null if the path does not match the expected pattern.
- */
-function parseDailyLogDate(filePath: string): Date | null {
-    const match = DAILY_LOG_DATE_REGEX.exec(filePath);
-    if (!match) return null;
-    const date = new Date(match[1] + "T00:00:00Z");
-    return isNaN(date.getTime()) ? null : date;
-}
-
-/**
  * Format a friction entry as a single line.
  */
 function formatFrictionLine(entry: FrictionEntry): string {
@@ -140,19 +124,19 @@ function formatFrictionLine(entry: FrictionEntry): string {
 /**
  * Smart Context Service.
  *
- * Composes data from memory files, friction entries, and legacy session
+ * Composes data from facts, friction entries, and legacy session
  * data into structured briefings with optional token budget allocation.
  */
 export class SmartContextService {
     private readonly projectResolver: IProjectResolver;
-    private readonly memoryFileRepo: IMemoryFileRepository;
+    private readonly factRepo: IFactRepository;
     private readonly frictionRepo: IFrictionRepository;
     private readonly getSessionSummary?: (projectFilter: string, days?: number) => Promise<string | null>;
     private readonly now: () => Date;
 
     constructor(deps: SmartContextDeps) {
         this.projectResolver = deps.projectResolver;
-        this.memoryFileRepo = deps.memoryFileRepo;
+        this.factRepo = deps.factRepo;
         this.frictionRepo = deps.frictionRepo;
         if (deps.getSessionSummary) {
             this.getSessionSummary = deps.getSessionSummary;
@@ -177,60 +161,93 @@ export class SmartContextService {
             return null;
         }
 
-        // Gather all project memory files
-        const projectFiles = await this.memoryFileRepo.findByProject(projectEncoded);
+        // Gather all active facts matching the project
+        const allFacts = await this.factRepo.findByProject(projectName);
+        const activeFacts = allFacts.filter((f) => f.supersededAt === null);
+
+        const formatFactList = (factsList: Fact[]) => {
+            return factsList.map((f) => `- ${f.content}`).join("\n");
+        };
 
         // Build sections from data sources
         const sections: ContextSection[] = [];
 
         // Section 1: Active Decisions (priority 1)
-        const decisionsFile = projectFiles.find((f) => f.fileType === "decisions");
-        if (decisionsFile) {
-            sections.push(this.buildSection("decisions", "Active Decisions", 1, decisionsFile.content));
+        const activeDecisions = activeFacts.filter((f) => f.type === "decision");
+        if (activeDecisions.length > 0) {
+            sections.push(this.buildSection("decisions", "Active Decisions", 1, formatFactList(activeDecisions)));
         }
 
         // Section 2: Recent Learnings (priority 2)
-        const learningsFile = projectFiles.find((f) => f.fileType === "learnings");
-        if (learningsFile) {
-            sections.push(this.buildSection("learnings", "Recent Learnings", 2, learningsFile.content));
+        const activeLearnings = activeFacts.filter((f) => f.type === "learning");
+        if (activeLearnings.length > 0) {
+            sections.push(this.buildSection("learnings", "Recent Learnings", 2, formatFactList(activeLearnings)));
         }
 
-        // Section 3: Recent Activity from daily logs (priority 3)
-        const dailyLogs = this.filterDailyLogs(projectFiles, options.days);
-        if (dailyLogs.length > 0) {
-            const dailyContent = dailyLogs.map((f) => f.content).join("\n\n---\n\n");
-            sections.push(this.buildSection("daily_logs", "Recent Activity", 3, dailyContent));
+        // Section 3: User Preferences (priority 3)
+        const activePreferences = activeFacts.filter((f) => f.type === "preference");
+        if (activePreferences.length > 0) {
+            sections.push(this.buildSection("preferences", "User Preferences", 3, formatFactList(activePreferences)));
         }
 
-        // Section 4: Cross-Project Decisions (priority 4, only when crossProject=true)
+        // Section 4: Observations (priority 4)
+        const activeObservations = activeFacts.filter((f) => f.type === "observation");
+        if (activeObservations.length > 0) {
+            sections.push(this.buildSection("observations", "Observations", 4, formatFactList(activeObservations)));
+        }
+
+        // Section 5: Global/Cross-Project Sections (only when crossProject=true)
         if (options.crossProject) {
-            const globalDecisions = await this.findGlobalDecisions(projectEncoded);
+            const allFactsGlobal = await this.factRepo.findAll();
+            const globalActive = allFactsGlobal.filter(
+                (f) => f.supersededAt === null && f.project !== projectName
+            );
+
+            // Cross-Project Preferences (priority 5)
+            const globalPreferences = globalActive.filter((f) => f.type === "preference");
+            if (globalPreferences.length > 0) {
+                sections.push(this.buildSection(
+                    "cross_project_preferences",
+                    "Global/Cross-Project User Preferences",
+                    5,
+                    formatFactList(globalPreferences)
+                ));
+            }
+
+            // Cross-Project Decisions (priority 6)
+            const globalDecisions = globalActive.filter((f) => f.type === "decision");
             if (globalDecisions.length > 0) {
-                const content = globalDecisions.map((f) => f.content).join("\n\n---\n\n");
-                sections.push(this.buildSection("cross_project_decisions", "Cross-Project Decisions", 4, content));
+                sections.push(this.buildSection(
+                    "cross_project_decisions",
+                    "Cross-Project Decisions",
+                    6,
+                    formatFactList(globalDecisions)
+                ));
+            }
+
+            // Cross-Project Learnings (priority 7)
+            const globalLearnings = globalActive.filter((f) => f.type === "learning");
+            if (globalLearnings.length > 0) {
+                sections.push(this.buildSection(
+                    "cross_project_learnings",
+                    "Cross-Project Learnings",
+                    7,
+                    formatFactList(globalLearnings)
+                ));
             }
         }
 
-        // Section 5: Cross-Project Learnings (priority 5, only when crossProject=true)
-        if (options.crossProject) {
-            const crossLearnings = await this.memoryFileRepo.findCrossProjectLearnings(projectEncoded);
-            if (crossLearnings.length > 0) {
-                const content = crossLearnings.map((f) => f.content).join("\n\n---\n\n");
-                sections.push(this.buildSection("cross_project_learnings", "Cross-Project Learnings", 5, content));
-            }
-        }
-
-        // Section 6: Open Friction (priority 6)
+        // Section 8: Open Friction (priority 8)
         const frictionContent = await this.buildFrictionContent(options.projectFilter);
         if (frictionContent) {
-            sections.push(this.buildSection("friction", "Open Friction", 6, frictionContent));
+            sections.push(this.buildSection("friction", "Open Friction", 8, frictionContent));
         }
 
-        // Section 7: Session Summary fallback (priority 7)
+        // Section 9: Session Summary fallback (priority 9)
         if (this.getSessionSummary) {
             const summary = await this.getSessionSummary(options.projectFilter, options.days);
             if (summary) {
-                sections.push(this.buildSection("session_summary", "Session Summary", 7, summary));
+                sections.push(this.buildSection("session_summary", "Session Summary", 9, summary));
             }
         }
 
@@ -267,37 +284,6 @@ export class SmartContextService {
             truncated: false,
             tokenEstimate: estimateTokens(content),
         };
-    }
-
-    /**
-     * Filter daily log files by date window.
-     */
-    private filterDailyLogs(files: MemoryFile[], days?: number): MemoryFile[] {
-        const dailyLogs = files.filter((f) => f.fileType === "daily_log");
-
-        if (!days) {
-            return dailyLogs;
-        }
-
-        const now = this.now();
-        const cutoff = new Date(now.getTime() - days * 24 * 60 * 60 * 1000);
-
-        return dailyLogs.filter((f) => {
-            const logDate = parseDailyLogDate(f.filePath);
-            if (!logDate) return true; // Include files without parseable dates
-            return logDate >= cutoff;
-        });
-    }
-
-    /**
-     * Find global (non-project) decision files.
-     * These are decisions files without a project_encoded matching the current project.
-     */
-    private async findGlobalDecisions(excludeProject: string): Promise<MemoryFile[]> {
-        const allDecisions = await this.memoryFileRepo.findByType("decisions");
-        return allDecisions.filter(
-            (f) => f.projectEncoded !== excludeProject
-        );
     }
 
     /**

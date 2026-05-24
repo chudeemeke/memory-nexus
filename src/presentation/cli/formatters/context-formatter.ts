@@ -362,18 +362,18 @@ class AiContextFormatter implements ContextFormatter {
   }
 
   formatSmartContext(result: SmartContextResult): string {
-    let output = `## ${result.projectName} context\n\n`;
+    const formattedSections = [];
     for (const section of result.sections) {
       if (section.content.trim() === "") continue;
-      output += `### ${section.title}\n`;
-      output += section.content;
+      let sectionOutput = `### ${section.title}\n${section.content}`;
       if (section.truncated) {
-        output += "\n[truncated]";
+        sectionOutput += "\n[truncated]";
       }
-      output += "\n\n";
+      formattedSections.push(sectionOutput);
     }
+    let output = `## ${result.projectName} context\n\n` + formattedSections.join("\n\n---\n\n");
     if (result.truncated) {
-      output += `(budget: ~${result.totalTokensEstimate} tokens)\n`;
+      output += `\n\n(budget: ~${result.totalTokensEstimate} tokens)`;
     }
     return output.trim();
   }

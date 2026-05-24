@@ -126,7 +126,7 @@ describe("executeContextCommand legacy path — success", () => {
     expect(parsed.command).toBe("context");
     expect(parsed.kind).toBe("context");
     expect(parsed.data).toBeDefined();
-    expect(parsed.meta?.mode).toBe("legacy");
+    expect(parsed.meta?.mode).toBe("smart");
     expect(parsed.meta?.project).toBe("TestProj");
   });
 
@@ -312,6 +312,9 @@ describe("executeContextCommand catch branch", () => {
     consoleErrorSpy = spyOn(console, "error").mockImplementation(() => {});
     tempDir = mkdtempSync(join(tmpdir(), "context-catch-"));
     dbPath = join(tempDir, "test.db");
+    const { db } = initializeDatabase({ path: dbPath });
+    seedSession(db, "session-any", "AnyProj");
+    closeDatabase(db);
   });
 
   afterEach(() => {

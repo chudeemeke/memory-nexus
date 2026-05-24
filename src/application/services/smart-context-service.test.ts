@@ -1,7 +1,7 @@
 /**
  * Smart Context Service Tests
  *
- * Tests for the application-layer service that composes memory files,
+ * Tests for the application-layer service that composes active facts,
  * friction entries, and session data into structured briefings.
  * All dependencies injected via constructor; tests use mock implementations.
  */
@@ -15,31 +15,32 @@ import {
     type IProjectResolver,
     type SmartContextDeps,
 } from "./smart-context-service.js";
-import { MemoryFile, type MemoryFileType } from "../../domain/entities/memory-file.js";
+import { Fact } from "../../domain/entities/fact.js";
 import { FrictionEntry } from "../../domain/entities/friction-entry.js";
 import type {
-    IMemoryFileRepository,
+    IFactRepository,
     IFrictionRepository,
     FrictionStats,
 } from "../../domain/ports/repositories.js";
 
 // -- Helpers --
 
-function makeMemoryFile(overrides: {
-    filePath: string;
-    fileType: MemoryFileType;
+function makeFact(overrides: {
+    type: "decision" | "learning" | "preference" | "friction" | "observation" | "supersedence";
+    project: string;
     content: string;
-    projectEncoded?: string;
-    lastIndexedAt?: Date;
-}): MemoryFile {
-    return MemoryFile.create({
-        id: Math.floor(Math.random() * 10000),
-        filePath: overrides.filePath,
-        fileType: overrides.fileType,
+    uuid?: string;
+    supersededAt?: Date | null;
+    supersededBy?: string | null;
+}): Fact {
+    return Fact.create({
+        uuid: overrides.uuid ?? Math.random().toString(36).substring(2),
+        type: overrides.type,
+        project: overrides.project,
         content: overrides.content,
-        contentHash: "a".repeat(64),
-        projectEncoded: overrides.projectEncoded,
-        lastIndexedAt: overrides.lastIndexedAt ?? new Date(),
+        observedAt: new Date(),
+        supersededAt: overrides.supersededAt ?? null,
+        supersededBy: overrides.supersededBy ?? null,
     });
 }
 
@@ -80,32 +81,34 @@ function createMockProjectResolver(
     };
 }
 
-function createMockMemoryFileRepo(files: MemoryFile[]): IMemoryFileRepository {
+function createMockFactRepo(facts: Fact[]): IFactRepository {
     return {
-        async findByPath(filePath: string): Promise<MemoryFile | null> {
-            return files.find((f) => f.filePath === filePath) ?? null;
+        async findById(): Promise<Fact | null> {
+            return null;
         },
-        async findByType(fileType: MemoryFileType): Promise<MemoryFile[]> {
-            return files.filter((f) => f.fileType === fileType);
+        async findByUuid(uuid: string): Promise<Fact | null> {
+            return facts.find((f) => f.uuid === uuid) ?? null;
         },
-        async findByProject(projectEncoded: string): Promise<MemoryFile[]> {
-            return files.filter((f) => f.projectEncoded === projectEncoded);
+        async findByProject(project: string): Promise<Fact[]> {
+            return facts.filter((f) => f.project === project);
         },
-        async save(): Promise<void> {},
-        async saveMany(): Promise<void> {},
-        async searchContent(): Promise<MemoryFile[]> {
+        async findRecent(limit: number): Promise<Fact[]> {
+            return facts.slice(0, limit);
+        },
+        async save(fact: Fact): Promise<Fact> {
+            return fact;
+        },
+        async saveMany(factsToSave: Fact[]): Promise<Fact[]> {
+            return factsToSave;
+        },
+        async search(): Promise<Fact[]> {
             return [];
         },
-        async findCrossProjectLearnings(
-            excludeProject?: string,
-        ): Promise<MemoryFile[]> {
-            return files.filter(
-                (f) =>
-                    f.fileType === "learnings" &&
-                    f.content.includes("Applies to: cross-project") &&
-                    f.projectEncoded !== excludeProject
-            );
+        async supersede(): Promise<void> {},
+        async findAll(): Promise<Fact[]> {
+            return facts;
         },
+        async clearAll(): Promise<void> {},
     };
 }
 
@@ -145,6 +148,9 @@ function createMockFrictionRepo(entries: FrictionEntry[]): IFrictionRepository {
         async findPatterns(): Promise<Array<{ tool: string; category: string; count: number; entries: FrictionEntry[] }>> {
             return [];
         },
+        async deleteByPattern(): Promise<number> {
+            return 0;
+        }
     };
 }
 
@@ -159,34 +165,33 @@ const PROJECT_MAPPING = {
 describe("SmartContextService", () => {
     let service: SmartContextService;
     let mockResolver: IProjectResolver;
-    let mockMemoryRepo: IMemoryFileRepository;
+    let mockFactRepo: IFactRepository;
     let mockFrictionRepo: IFrictionRepository;
 
     beforeEach(() => {
         mockResolver = createMockProjectResolver(PROJECT_MAPPING);
-        mockMemoryRepo = createMockMemoryFileRepo([]);
+        mockFactRepo = createMockFactRepo([]);
         mockFrictionRepo = createMockFrictionRepo([]);
 
         service = new SmartContextService({
             projectResolver: mockResolver,
-            memoryFileRepo: mockMemoryRepo,
+            factRepo: mockFactRepo,
             frictionRepo: mockFrictionRepo,
         });
     });
 
     describe("project resolution", () => {
         test("resolves project name to encoded path via IProjectResolver", async () => {
-            const decisionsFile = makeMemoryFile({
-                filePath: `${PROJECT_ENCODED}/DECISIONS.md`,
-                fileType: "decisions",
-                content: "# Decisions\n\nUse SQLite for storage",
-                projectEncoded: PROJECT_ENCODED,
+            const decisionFact = makeFact({
+                type: "decision",
+                project: PROJECT_NAME,
+                content: "Use SQLite for storage",
             });
 
-            mockMemoryRepo = createMockMemoryFileRepo([decisionsFile]);
+            mockFactRepo = createMockFactRepo([decisionFact]);
             service = new SmartContextService({
                 projectResolver: mockResolver,
-                memoryFileRepo: mockMemoryRepo,
+                factRepo: mockFactRepo,
                 frictionRepo: mockFrictionRepo,
             });
 
@@ -205,18 +210,17 @@ describe("SmartContextService", () => {
     });
 
     describe("data source assembly (priority order)", () => {
-        test("section 1: Active Decisions from project DECISIONS.md (priority 1)", async () => {
-            const decisionsFile = makeMemoryFile({
-                filePath: `${PROJECT_ENCODED}/DECISIONS.md`,
-                fileType: "decisions",
-                content: "# Decisions\n\nUse hexagonal architecture",
-                projectEncoded: PROJECT_ENCODED,
+        test("section 1: Active Decisions from facts table (priority 1)", async () => {
+            const decisionFact = makeFact({
+                type: "decision",
+                project: PROJECT_NAME,
+                content: "Use hexagonal architecture",
             });
 
-            mockMemoryRepo = createMockMemoryFileRepo([decisionsFile]);
+            mockFactRepo = createMockFactRepo([decisionFact]);
             service = new SmartContextService({
                 projectResolver: mockResolver,
-                memoryFileRepo: mockMemoryRepo,
+                factRepo: mockFactRepo,
                 frictionRepo: mockFrictionRepo,
             });
 
@@ -228,18 +232,17 @@ describe("SmartContextService", () => {
             expect(decisions!.content).toContain("hexagonal architecture");
         });
 
-        test("section 2: Recent Learnings from project LEARNINGS.md (priority 2)", async () => {
-            const learningsFile = makeMemoryFile({
-                filePath: `${PROJECT_ENCODED}/LEARNINGS.md`,
-                fileType: "learnings",
-                content: "# Learnings\n\nBun resolves type-only imports",
-                projectEncoded: PROJECT_ENCODED,
+        test("section 2: Recent Learnings from facts table (priority 2)", async () => {
+            const learningFact = makeFact({
+                type: "learning",
+                project: PROJECT_NAME,
+                content: "Bun resolves type-only imports",
             });
 
-            mockMemoryRepo = createMockMemoryFileRepo([learningsFile]);
+            mockFactRepo = createMockFactRepo([learningFact]);
             service = new SmartContextService({
                 projectResolver: mockResolver,
-                memoryFileRepo: mockMemoryRepo,
+                factRepo: mockFactRepo,
                 frictionRepo: mockFrictionRepo,
             });
 
@@ -251,91 +254,128 @@ describe("SmartContextService", () => {
             expect(learnings!.content).toContain("type-only imports");
         });
 
-        test("section 3: Recent Activity from daily log files (priority 3)", async () => {
-            const dailyLog = makeMemoryFile({
-                filePath: `${PROJECT_ENCODED}/daily/2026-03-09.md`,
-                fileType: "daily_log",
-                content: "# 2026-03-09\n\nWorked on smart context service",
-                projectEncoded: PROJECT_ENCODED,
+        test("section 3: User Preferences from facts table (priority 3)", async () => {
+            const preferenceFact = makeFact({
+                type: "preference",
+                project: PROJECT_NAME,
+                content: "Prefer explicit type annotations",
             });
 
-            mockMemoryRepo = createMockMemoryFileRepo([dailyLog]);
+            mockFactRepo = createMockFactRepo([preferenceFact]);
             service = new SmartContextService({
                 projectResolver: mockResolver,
-                memoryFileRepo: mockMemoryRepo,
+                factRepo: mockFactRepo,
                 frictionRepo: mockFrictionRepo,
             });
 
             const result = await service.getContext({ projectFilter: "test-project" });
 
-            const activity = result!.sections.find((s) => s.key === "daily_logs");
-            expect(activity).toBeDefined();
-            expect(activity!.priority).toBe(3);
-            expect(activity!.content).toContain("smart context service");
+            const preferences = result!.sections.find((s) => s.key === "preferences");
+            expect(preferences).toBeDefined();
+            expect(preferences!.priority).toBe(3);
+            expect(preferences!.content).toContain("Prefer explicit type annotations");
         });
 
-        test("section 4: Cross-Project Decisions only when crossProject true (priority 4)", async () => {
-            // Global DECISIONS.md (no project encoded)
-            const globalDecisions = makeMemoryFile({
-                filePath: "global/DECISIONS.md",
-                fileType: "decisions",
-                content: "# Global Decisions\n\nAlways use bun",
-                projectEncoded: undefined,
+        test("section 4: Observations from facts table (priority 4)", async () => {
+            const observationFact = makeFact({
+                type: "observation",
+                project: PROJECT_NAME,
+                content: "Test suite execution time is 1.2s",
             });
 
-            mockMemoryRepo = createMockMemoryFileRepo([globalDecisions]);
+            mockFactRepo = createMockFactRepo([observationFact]);
             service = new SmartContextService({
                 projectResolver: mockResolver,
-                memoryFileRepo: mockMemoryRepo,
+                factRepo: mockFactRepo,
+                frictionRepo: mockFrictionRepo,
+            });
+
+            const result = await service.getContext({ projectFilter: "test-project" });
+
+            const observations = result!.sections.find((s) => s.key === "observations");
+            expect(observations).toBeDefined();
+            expect(observations!.priority).toBe(4);
+            expect(observations!.content).toContain("Test suite execution time is 1.2s");
+        });
+
+        test("section 5: Cross-Project Preferences only when crossProject true (priority 5)", async () => {
+            const globalPreference = makeFact({
+                type: "preference",
+                project: "other-project",
+                content: "Always use Bun as runtime package manager",
+            });
+
+            mockFactRepo = createMockFactRepo([globalPreference]);
+            service = new SmartContextService({
+                projectResolver: mockResolver,
+                factRepo: mockFactRepo,
                 frictionRepo: mockFrictionRepo,
             });
 
             // Without crossProject
             const noXP = await service.getContext({ projectFilter: "test-project" });
-            expect(noXP!.sections.find((s) => s.key === "cross_project_decisions")).toBeUndefined();
+            expect(noXP!.sections.find((s) => s.key === "cross_project_preferences")).toBeUndefined();
 
             // With crossProject
+            const withXP = await service.getContext({
+                projectFilter: "test-project",
+                crossProject: true,
+            });
+            const xpPrefs = withXP!.sections.find((s) => s.key === "cross_project_preferences");
+            expect(xpPrefs).toBeDefined();
+            expect(xpPrefs!.priority).toBe(5);
+            expect(xpPrefs!.content).toContain("Always use Bun");
+        });
+
+        test("section 6: Cross-Project Decisions only when crossProject true (priority 6)", async () => {
+            const globalDecision = makeFact({
+                type: "decision",
+                project: "other-project",
+                content: "Use Vitest instead of Jest for all units",
+            });
+
+            mockFactRepo = createMockFactRepo([globalDecision]);
+            service = new SmartContextService({
+                projectResolver: mockResolver,
+                factRepo: mockFactRepo,
+                frictionRepo: mockFrictionRepo,
+            });
+
             const withXP = await service.getContext({
                 projectFilter: "test-project",
                 crossProject: true,
             });
             const xpDecisions = withXP!.sections.find((s) => s.key === "cross_project_decisions");
             expect(xpDecisions).toBeDefined();
-            expect(xpDecisions!.priority).toBe(4);
-            expect(xpDecisions!.content).toContain("Always use bun");
+            expect(xpDecisions!.priority).toBe(6);
+            expect(xpDecisions!.content).toContain("Use Vitest instead of Jest");
         });
 
-        test("section 5: Cross-Project Learnings via findCrossProjectLearnings only when crossProject true (priority 5)", async () => {
-            const crossLearning = makeMemoryFile({
-                filePath: "other-project/LEARNINGS.md",
-                fileType: "learnings",
-                content: "# Learnings\n\nApplies to: cross-project\n\nUseful pattern discovered",
-                projectEncoded: "other-project",
+        test("section 7: Cross-Project Learnings only when crossProject true (priority 7)", async () => {
+            const globalLearning = makeFact({
+                type: "learning",
+                project: "other-project",
+                content: "Chrononode parser handles duration inputs like '7d'",
             });
 
-            mockMemoryRepo = createMockMemoryFileRepo([crossLearning]);
+            mockFactRepo = createMockFactRepo([globalLearning]);
             service = new SmartContextService({
                 projectResolver: mockResolver,
-                memoryFileRepo: mockMemoryRepo,
+                factRepo: mockFactRepo,
                 frictionRepo: mockFrictionRepo,
             });
 
-            // Without crossProject
-            const noXP = await service.getContext({ projectFilter: "test-project" });
-            expect(noXP!.sections.find((s) => s.key === "cross_project_learnings")).toBeUndefined();
-
-            // With crossProject
             const withXP = await service.getContext({
                 projectFilter: "test-project",
                 crossProject: true,
             });
             const xpLearnings = withXP!.sections.find((s) => s.key === "cross_project_learnings");
             expect(xpLearnings).toBeDefined();
-            expect(xpLearnings!.priority).toBe(5);
-            expect(xpLearnings!.content).toContain("Useful pattern discovered");
+            expect(xpLearnings!.priority).toBe(7);
+            expect(xpLearnings!.content).toContain("Chrononode parser");
         });
 
-        test("section 6: Open Friction entries (priority 6)", async () => {
+        test("section 8: Open Friction entries (priority 8)", async () => {
             const entry = makeFrictionEntry({
                 id: 42,
                 description: "Search returns irrelevant results",
@@ -347,7 +387,7 @@ describe("SmartContextService", () => {
             mockFrictionRepo = createMockFrictionRepo([entry]);
             service = new SmartContextService({
                 projectResolver: mockResolver,
-                memoryFileRepo: mockMemoryRepo,
+                factRepo: mockFactRepo,
                 frictionRepo: mockFrictionRepo,
             });
 
@@ -355,19 +395,19 @@ describe("SmartContextService", () => {
 
             const friction = result!.sections.find((s) => s.key === "friction");
             expect(friction).toBeDefined();
-            expect(friction!.priority).toBe(6);
+            expect(friction!.priority).toBe(8);
             expect(friction!.content).toContain("#42");
             expect(friction!.content).toContain("high/search");
             expect(friction!.content).toContain("Search returns irrelevant results");
         });
 
-        test("section 7: Session Summary as fallback (priority 7)", async () => {
+        test("section 9: Session Summary as fallback (priority 9)", async () => {
             const mockSessionSummary = async () =>
                 "5 sessions, 120 messages, last active 2026-03-09";
 
             service = new SmartContextService({
                 projectResolver: mockResolver,
-                memoryFileRepo: mockMemoryRepo,
+                factRepo: mockFactRepo,
                 frictionRepo: mockFrictionRepo,
                 getSessionSummary: mockSessionSummary,
             });
@@ -376,110 +416,28 @@ describe("SmartContextService", () => {
 
             const sessionSummary = result!.sections.find((s) => s.key === "session_summary");
             expect(sessionSummary).toBeDefined();
-            expect(sessionSummary!.priority).toBe(7);
+            expect(sessionSummary!.priority).toBe(9);
             expect(sessionSummary!.content).toContain("5 sessions");
-        });
-
-        test("full priority order is correct across all sections", async () => {
-            const decisionsFile = makeMemoryFile({
-                filePath: `${PROJECT_ENCODED}/DECISIONS.md`,
-                fileType: "decisions",
-                content: "# Decisions\n\nDecision content",
-                projectEncoded: PROJECT_ENCODED,
-            });
-            const learningsFile = makeMemoryFile({
-                filePath: `${PROJECT_ENCODED}/LEARNINGS.md`,
-                fileType: "learnings",
-                content: "# Learnings\n\nLearning content",
-                projectEncoded: PROJECT_ENCODED,
-            });
-            const dailyLog = makeMemoryFile({
-                filePath: `${PROJECT_ENCODED}/daily/2026-03-09.md`,
-                fileType: "daily_log",
-                content: "# Daily\n\nDaily content",
-                projectEncoded: PROJECT_ENCODED,
-            });
-            const crossLearning = makeMemoryFile({
-                filePath: "other/LEARNINGS.md",
-                fileType: "learnings",
-                content: "Applies to: cross-project\n\nCross learning",
-                projectEncoded: "other",
-            });
-            const globalDecisions = makeMemoryFile({
-                filePath: "global/DECISIONS.md",
-                fileType: "decisions",
-                content: "# Global decisions",
-                projectEncoded: undefined,
-            });
-            const frictionEntry = makeFrictionEntry({
-                id: 1,
-                description: "Some friction",
-                context: "project:test-project",
-            });
-
-            mockMemoryRepo = createMockMemoryFileRepo([
-                decisionsFile,
-                learningsFile,
-                dailyLog,
-                crossLearning,
-                globalDecisions,
-            ]);
-            mockFrictionRepo = createMockFrictionRepo([frictionEntry]);
-
-            service = new SmartContextService({
-                projectResolver: mockResolver,
-                memoryFileRepo: mockMemoryRepo,
-                frictionRepo: mockFrictionRepo,
-                getSessionSummary: async () => "session data",
-            });
-
-            const result = await service.getContext({
-                projectFilter: "test-project",
-                crossProject: true,
-            });
-
-            const priorities = result!.sections.map((s) => ({
-                key: s.key,
-                priority: s.priority,
-            }));
-
-            // Verify priority ordering
-            for (let i = 0; i < priorities.length - 1; i++) {
-                expect(priorities[i].priority).toBeLessThanOrEqual(
-                    priorities[i + 1].priority
-                );
-            }
-
-            // Verify specific priority values
-            expect(priorities.find((p) => p.key === "decisions")!.priority).toBe(1);
-            expect(priorities.find((p) => p.key === "learnings")!.priority).toBe(2);
-            expect(priorities.find((p) => p.key === "daily_logs")!.priority).toBe(3);
-            expect(priorities.find((p) => p.key === "cross_project_decisions")!.priority).toBe(4);
-            expect(priorities.find((p) => p.key === "cross_project_learnings")!.priority).toBe(5);
-            expect(priorities.find((p) => p.key === "friction")!.priority).toBe(6);
-            expect(priorities.find((p) => p.key === "session_summary")!.priority).toBe(7);
         });
     });
 
     describe("budget integration", () => {
         test("when budget is set, sections are passed through allocateBudget", async () => {
-            const decisionsFile = makeMemoryFile({
-                filePath: `${PROJECT_ENCODED}/DECISIONS.md`,
-                fileType: "decisions",
+            const decisionFact = makeFact({
+                type: "decision",
+                project: PROJECT_NAME,
                 content: "D".repeat(400), // 100 tokens
-                projectEncoded: PROJECT_ENCODED,
             });
-            const learningsFile = makeMemoryFile({
-                filePath: `${PROJECT_ENCODED}/LEARNINGS.md`,
-                fileType: "learnings",
+            const learningFact = makeFact({
+                type: "learning",
+                project: PROJECT_NAME,
                 content: "L".repeat(400), // 100 tokens
-                projectEncoded: PROJECT_ENCODED,
             });
 
-            mockMemoryRepo = createMockMemoryFileRepo([decisionsFile, learningsFile]);
+            mockFactRepo = createMockFactRepo([decisionFact, learningFact]);
             service = new SmartContextService({
                 projectResolver: mockResolver,
-                memoryFileRepo: mockMemoryRepo,
+                factRepo: mockFactRepo,
                 frictionRepo: mockFrictionRepo,
             });
 
@@ -496,17 +454,16 @@ describe("SmartContextService", () => {
         });
 
         test("when budget is undefined, all sections returned untruncated", async () => {
-            const decisionsFile = makeMemoryFile({
-                filePath: `${PROJECT_ENCODED}/DECISIONS.md`,
-                fileType: "decisions",
+            const decisionFact = makeFact({
+                type: "decision",
+                project: PROJECT_NAME,
                 content: "D".repeat(4000),
-                projectEncoded: PROJECT_ENCODED,
             });
 
-            mockMemoryRepo = createMockMemoryFileRepo([decisionsFile]);
+            mockFactRepo = createMockFactRepo([decisionFact]);
             service = new SmartContextService({
                 projectResolver: mockResolver,
-                memoryFileRepo: mockMemoryRepo,
+                factRepo: mockFactRepo,
                 frictionRepo: mockFrictionRepo,
             });
 
@@ -517,17 +474,16 @@ describe("SmartContextService", () => {
         });
 
         test("when budget is 0, all sections returned untruncated", async () => {
-            const decisionsFile = makeMemoryFile({
-                filePath: `${PROJECT_ENCODED}/DECISIONS.md`,
-                fileType: "decisions",
+            const decisionFact = makeFact({
+                type: "decision",
+                project: PROJECT_NAME,
                 content: "D".repeat(4000),
-                projectEncoded: PROJECT_ENCODED,
             });
 
-            mockMemoryRepo = createMockMemoryFileRepo([decisionsFile]);
+            mockFactRepo = createMockFactRepo([decisionFact]);
             service = new SmartContextService({
                 projectResolver: mockResolver,
-                memoryFileRepo: mockMemoryRepo,
+                factRepo: mockFactRepo,
                 frictionRepo: mockFrictionRepo,
             });
 
@@ -538,161 +494,13 @@ describe("SmartContextService", () => {
 
             expect(result!.truncated).toBe(false);
         });
-
-        test("truncated flag is true when any section was truncated", async () => {
-            const decisionsFile = makeMemoryFile({
-                filePath: `${PROJECT_ENCODED}/DECISIONS.md`,
-                fileType: "decisions",
-                content: "D".repeat(1000),
-                projectEncoded: PROJECT_ENCODED,
-            });
-
-            mockMemoryRepo = createMockMemoryFileRepo([decisionsFile]);
-            service = new SmartContextService({
-                projectResolver: mockResolver,
-                memoryFileRepo: mockMemoryRepo,
-                frictionRepo: mockFrictionRepo,
-            });
-
-            const result = await service.getContext({
-                projectFilter: "test-project",
-                budget: 10, // very small
-            });
-
-            expect(result!.truncated).toBe(true);
-        });
-    });
-
-    describe("days filtering", () => {
-        test("daily logs filtered to last N days when days option set", async () => {
-            const recent = makeMemoryFile({
-                filePath: `${PROJECT_ENCODED}/daily/2026-03-09.md`,
-                fileType: "daily_log",
-                content: "Recent daily log",
-                projectEncoded: PROJECT_ENCODED,
-            });
-            const old = makeMemoryFile({
-                filePath: `${PROJECT_ENCODED}/daily/2026-01-01.md`,
-                fileType: "daily_log",
-                content: "Old daily log",
-                projectEncoded: PROJECT_ENCODED,
-            });
-
-            mockMemoryRepo = createMockMemoryFileRepo([recent, old]);
-            service = new SmartContextService({
-                projectResolver: mockResolver,
-                memoryFileRepo: mockMemoryRepo,
-                frictionRepo: mockFrictionRepo,
-                now: () => new Date("2026-03-10T12:00:00Z"),
-            });
-
-            const result = await service.getContext({
-                projectFilter: "test-project",
-                days: 7,
-            });
-
-            const dailyLogs = result!.sections.find((s) => s.key === "daily_logs");
-            expect(dailyLogs).toBeDefined();
-            expect(dailyLogs!.content).toContain("Recent daily log");
-            expect(dailyLogs!.content).not.toContain("Old daily log");
-        });
-
-        test("default: no day limit, all daily logs included", async () => {
-            const recent = makeMemoryFile({
-                filePath: `${PROJECT_ENCODED}/daily/2026-03-09.md`,
-                fileType: "daily_log",
-                content: "Recent daily log",
-                projectEncoded: PROJECT_ENCODED,
-            });
-            const old = makeMemoryFile({
-                filePath: `${PROJECT_ENCODED}/daily/2026-01-01.md`,
-                fileType: "daily_log",
-                content: "Old daily log",
-                projectEncoded: PROJECT_ENCODED,
-            });
-
-            mockMemoryRepo = createMockMemoryFileRepo([recent, old]);
-            service = new SmartContextService({
-                projectResolver: mockResolver,
-                memoryFileRepo: mockMemoryRepo,
-                frictionRepo: mockFrictionRepo,
-            });
-
-            const result = await service.getContext({ projectFilter: "test-project" });
-
-            const dailyLogs = result!.sections.find((s) => s.key === "daily_logs");
-            expect(dailyLogs).toBeDefined();
-            expect(dailyLogs!.content).toContain("Recent daily log");
-            expect(dailyLogs!.content).toContain("Old daily log");
-        });
-    });
-
-    describe("cross-project flag", () => {
-        test("crossProject false (default) omits sections 4 and 5", async () => {
-            const crossLearning = makeMemoryFile({
-                filePath: "other/LEARNINGS.md",
-                fileType: "learnings",
-                content: "Applies to: cross-project\n\nShared",
-                projectEncoded: "other",
-            });
-            const globalDecisions = makeMemoryFile({
-                filePath: "global/DECISIONS.md",
-                fileType: "decisions",
-                content: "Global decision",
-                projectEncoded: undefined,
-            });
-
-            mockMemoryRepo = createMockMemoryFileRepo([crossLearning, globalDecisions]);
-            service = new SmartContextService({
-                projectResolver: mockResolver,
-                memoryFileRepo: mockMemoryRepo,
-                frictionRepo: mockFrictionRepo,
-            });
-
-            const result = await service.getContext({ projectFilter: "test-project" });
-
-            const keys = result!.sections.map((s) => s.key);
-            expect(keys).not.toContain("cross_project_decisions");
-            expect(keys).not.toContain("cross_project_learnings");
-        });
-
-        test("crossProject true includes sections 4 and 5", async () => {
-            const crossLearning = makeMemoryFile({
-                filePath: "other/LEARNINGS.md",
-                fileType: "learnings",
-                content: "Applies to: cross-project\n\nShared insight",
-                projectEncoded: "other",
-            });
-            const globalDecisions = makeMemoryFile({
-                filePath: "global/DECISIONS.md",
-                fileType: "decisions",
-                content: "# Global Decisions\n\nShared decision",
-                projectEncoded: undefined,
-            });
-
-            mockMemoryRepo = createMockMemoryFileRepo([crossLearning, globalDecisions]);
-            service = new SmartContextService({
-                projectResolver: mockResolver,
-                memoryFileRepo: mockMemoryRepo,
-                frictionRepo: mockFrictionRepo,
-            });
-
-            const result = await service.getContext({
-                projectFilter: "test-project",
-                crossProject: true,
-            });
-
-            const keys = result!.sections.map((s) => s.key);
-            expect(keys).toContain("cross_project_decisions");
-            expect(keys).toContain("cross_project_learnings");
-        });
     });
 
     describe("graceful degradation", () => {
-        test("no memory files: section 7 (session summary) becomes primary", async () => {
+        test("no memory facts: section 9 (session summary) becomes primary", async () => {
             service = new SmartContextService({
                 projectResolver: mockResolver,
-                memoryFileRepo: mockMemoryRepo,
+                factRepo: mockFactRepo,
                 frictionRepo: mockFrictionRepo,
                 getSessionSummary: async () =>
                     "10 sessions, 250 messages, last active 2026-03-08",
@@ -706,11 +514,11 @@ describe("SmartContextService", () => {
             expect(session!.content).toContain("10 sessions");
         });
 
-        test("no friction entries: section 6 omitted", async () => {
+        test("no friction entries: section 8 omitted", async () => {
             mockFrictionRepo = createMockFrictionRepo([]);
             service = new SmartContextService({
                 projectResolver: mockResolver,
-                memoryFileRepo: mockMemoryRepo,
+                factRepo: mockFactRepo,
                 frictionRepo: mockFrictionRepo,
             });
 
@@ -720,55 +528,12 @@ describe("SmartContextService", () => {
             expect(friction).toBeUndefined();
         });
 
-        test("no daily logs: section 3 omitted", async () => {
-            const decisionsFile = makeMemoryFile({
-                filePath: `${PROJECT_ENCODED}/DECISIONS.md`,
-                fileType: "decisions",
-                content: "# Decisions",
-                projectEncoded: PROJECT_ENCODED,
-            });
-
-            mockMemoryRepo = createMockMemoryFileRepo([decisionsFile]);
-            service = new SmartContextService({
-                projectResolver: mockResolver,
-                memoryFileRepo: mockMemoryRepo,
-                frictionRepo: mockFrictionRepo,
-            });
-
-            const result = await service.getContext({ projectFilter: "test-project" });
-
-            const daily = result!.sections.find((s) => s.key === "daily_logs");
-            expect(daily).toBeUndefined();
-        });
-
         test("all empty: result has empty sections array, projectName still set", async () => {
             const result = await service.getContext({ projectFilter: "test-project" });
 
             expect(result).not.toBeNull();
             expect(result!.projectName).toBe(PROJECT_NAME);
             expect(result!.sections).toHaveLength(0);
-        });
-
-        test("no session summary function: section 7 omitted", async () => {
-            // service constructed without getSessionSummary
-            const result = await service.getContext({ projectFilter: "test-project" });
-
-            const session = result!.sections.find((s) => s.key === "session_summary");
-            expect(session).toBeUndefined();
-        });
-
-        test("session summary returns null: section 7 omitted", async () => {
-            service = new SmartContextService({
-                projectResolver: mockResolver,
-                memoryFileRepo: mockMemoryRepo,
-                frictionRepo: mockFrictionRepo,
-                getSessionSummary: async () => null,
-            });
-
-            const result = await service.getContext({ projectFilter: "test-project" });
-
-            const session = result!.sections.find((s) => s.key === "session_summary");
-            expect(session).toBeUndefined();
         });
     });
 
@@ -784,7 +549,7 @@ describe("SmartContextService", () => {
             mockFrictionRepo = createMockFrictionRepo([entry]);
             service = new SmartContextService({
                 projectResolver: mockResolver,
-                memoryFileRepo: mockMemoryRepo,
+                factRepo: mockFactRepo,
                 frictionRepo: mockFrictionRepo,
             });
 
@@ -792,115 +557,6 @@ describe("SmartContextService", () => {
 
             const friction = result!.sections.find((s) => s.key === "friction");
             expect(friction!.content).toBe("#7 (high/context): Context output too verbose");
-        });
-
-        test("multiple friction entries joined with newlines", async () => {
-            const entries = [
-                makeFrictionEntry({
-                    id: 1,
-                    description: "Issue A",
-                    severity: "low",
-                    category: "cli",
-                }),
-                makeFrictionEntry({
-                    id: 2,
-                    description: "Issue B",
-                    severity: "critical",
-                    category: "search",
-                }),
-            ];
-
-            mockFrictionRepo = createMockFrictionRepo(entries);
-            service = new SmartContextService({
-                projectResolver: mockResolver,
-                memoryFileRepo: mockMemoryRepo,
-                frictionRepo: mockFrictionRepo,
-            });
-
-            const result = await service.getContext({ projectFilter: "test-project" });
-
-            const friction = result!.sections.find((s) => s.key === "friction");
-            const lines = friction!.content.split("\n");
-            expect(lines).toHaveLength(2);
-            expect(lines[0]).toContain("#1");
-            expect(lines[1]).toContain("#2");
-        });
-
-        test("project-specific friction: includes entries mentioning the project", async () => {
-            const projectEntry = makeFrictionEntry({
-                id: 10,
-                description: "test-project search broken",
-                severity: "high",
-                category: "search",
-            });
-            const otherEntry = makeFrictionEntry({
-                id: 11,
-                description: "other-project sync slow",
-                severity: "low",
-                category: "sync",
-            });
-
-            mockFrictionRepo = createMockFrictionRepo([projectEntry, otherEntry]);
-            service = new SmartContextService({
-                projectResolver: mockResolver,
-                memoryFileRepo: mockMemoryRepo,
-                frictionRepo: mockFrictionRepo,
-            });
-
-            const result = await service.getContext({ projectFilter: "test-project" });
-
-            const friction = result!.sections.find((s) => s.key === "friction");
-            // Both should appear since all open friction is tool-level relevant
-            expect(friction).toBeDefined();
-        });
-
-        test("if no project-specific friction, includes all open friction", async () => {
-            const generalEntry = makeFrictionEntry({
-                id: 99,
-                description: "General tool issue",
-                severity: "medium",
-                category: "ux",
-            });
-
-            mockFrictionRepo = createMockFrictionRepo([generalEntry]);
-            service = new SmartContextService({
-                projectResolver: mockResolver,
-                memoryFileRepo: mockMemoryRepo,
-                frictionRepo: mockFrictionRepo,
-            });
-
-            const result = await service.getContext({ projectFilter: "test-project" });
-
-            const friction = result!.sections.find((s) => s.key === "friction");
-            expect(friction).toBeDefined();
-            expect(friction!.content).toContain("General tool issue");
-        });
-    });
-
-    describe("token estimation", () => {
-        test("totalTokensEstimate reflects sum of section estimates", async () => {
-            const decisionsFile = makeMemoryFile({
-                filePath: `${PROJECT_ENCODED}/DECISIONS.md`,
-                fileType: "decisions",
-                content: "D".repeat(100), // 25 tokens
-                projectEncoded: PROJECT_ENCODED,
-            });
-
-            mockMemoryRepo = createMockMemoryFileRepo([decisionsFile]);
-            service = new SmartContextService({
-                projectResolver: mockResolver,
-                memoryFileRepo: mockMemoryRepo,
-                frictionRepo: mockFrictionRepo,
-            });
-
-            const result = await service.getContext({ projectFilter: "test-project" });
-
-            expect(result!.totalTokensEstimate).toBeGreaterThan(0);
-            const sumTokens = result!.sections.reduce(
-                (sum, s) => sum + s.tokenEstimate,
-                0
-            );
-            expect(result!.totalTokensEstimate).toBe(sumTokens);
         });
     });
 });

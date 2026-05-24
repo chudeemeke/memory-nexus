@@ -11,6 +11,9 @@
  * compatibility.
  */
 
+import * as fs from "node:fs";
+import * as os from "node:os";
+import { join } from "node:path";
 import { Command, Option } from "commander";
 import type { CommandResult } from "../command-result.js";
 import { ErrorCode, MemoryError } from "../../../domain/errors/index.js";
@@ -19,8 +22,8 @@ import {
   SqliteProjectResolver,
 } from "../../../infrastructure/database/services/context-service.js";
 import {
-  SqliteMemoryFileRepository,
-} from "../../../infrastructure/database/repositories/memory-file-repository.js";
+  SqliteFactRepository,
+} from "../../../infrastructure/database/repositories/fact-repository.js";
 import {
   SqliteFrictionRepository,
 } from "../../../infrastructure/database/repositories/friction-repository.js";
@@ -140,12 +143,7 @@ export function createContextCommand(): Command {
  * not just at the output-formatting layer.
  */
 function useSmartContext(options: ContextCommandOptions): boolean {
-  // --json mode: ignore --format ai; routing depends only on smart
-  // context flags (budget / cross-project).
-  if (options.json) {
-    return !!options.budget || !!options.crossProject;
-  }
-  return options.format === "ai" || !!options.budget || !!options.crossProject;
+  return true;
 }
 
 export async function executeContextCommand(
@@ -184,6 +182,14 @@ export async function runContextInternal(
       replacement: "Use --format brief or --format ai.",
       json: options.json,
     });
+  }
+
+  // Check for legacy ~/.memory/ directory
+  const legacyDir = join(os.homedir(), ".memory");
+  if (fs.existsSync(legacyDir) && !options.quiet && !options.json) {
+    console.error(
+      "[DEPRECATION WARNING] Legacy memory directory ~/.memory/ is deprecated. Your knowledge and decisions are now stored safely in the SQLite database."
+    );
   }
 
   const dbPath = deps?.dbPath ?? options.dbPath ?? getDefaultDbPath();
@@ -234,7 +240,7 @@ async function executeSmartContext(
   _startTime: number,
 ): Promise<CommandResult> {
   const projectResolver = new SqliteProjectResolver(db);
-  const memoryFileRepo = new SqliteMemoryFileRepository(db);
+  const factRepo = new SqliteFactRepository(db);
   const frictionRepo = new SqliteFrictionRepository(db);
 
   // We need a captured legacy context if --json is set so we can build
@@ -244,7 +250,7 @@ async function executeSmartContext(
 
   const smartContext = new SmartContextService({
     projectResolver,
-    memoryFileRepo,
+    factRepo,
     frictionRepo,
     getSessionSummary: async (filter, days) => {
       const ctx = await legacy.getProjectContext(filter, { days });

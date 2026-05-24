@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v4.0
 milestone_name: Intelligence Layer
 status: in_progress
-last_updated: "2026-05-16T00:00:00.000Z"
+last_updated: "2026-05-24T17:20:00.000Z"
 progress:
   total_phases: 11
-  completed_phases: 6
+  completed_phases: 7
   total_plans: 9
-  completed_plans: 8
+  completed_plans: 9
 ---
 
-> **PHASE 34 SHIPPED 2026-05-24** — Phases 33 and 34 implemented on disk with Event-Log SSOT, extract/facts CLI commands, and 100% passing tests.
+> **PHASE 35 SHIPPED 2026-05-24** — Phase 35 implemented on disk with facts-based context briefings rewired to SQLite fact tables, standard markdown dividers, and legacy ~/.memory folder deprecation warning.
 # State: @chude/memory (memory-nexus)
 
 ## Project Reference
@@ -20,27 +20,27 @@ See: .planning/PROJECT.md (updated 2026-02-18)
 
 **Core Value:** Knowledge gained in one Claude Code project becomes accessible from any other project. No more context silos.
 
-**Current Focus:** Architecture first-principles audit LOCKED 2026-05-13. Recommendation: **A-prime** (hybrid; continue v4.0 with NEW Phase 32.5 + event-log SSOT architectural enforcement + supersedence-as-event-type + plain-text canonical for new typed memory + prerelease publishing with GA gated on acceptance criteria). Audit doc at `docs/audits/2026-05-11-architecture-first-principles-audit.md`. **Next action: Phase 35 (Context Intelligence).** Inbox item status: `merged` (archived).
+**Current Focus:** Architecture first-principles audit LOCKED 2026-05-13. Recommendation: **A-prime** (hybrid; continue v4.0 with NEW Phase 32.5 + event-log SSOT architectural enforcement + supersedence-as-event-type + plain-text canonical for new typed memory + prerelease publishing with GA gated on acceptance criteria). Audit doc at `docs/audits/2026-05-11-architecture-first-principles-audit.md`. **Next action: Phase 36 (Portability).** Inbox item status: `merged` (archived).
 
 **Tech Stack:** Bun, TypeScript 5.5+, bun:sqlite with FTS5 + sqlite-vec, Commander.js v14, @huggingface/transformers v3, cli-progress, chrono-node, Chart.js (HTML dashboard)
 
 ## Current Position
 
-Phase: 34 (Extraction Pipeline) — COMPLETE
+Phase: 35 (Context Intelligence) — COMPLETE
 Test-isolation cleanup arc — COMPLETE (2026-05-11, gate at 0 violations)
 Architecture first-principles audit — COMPLETE (LOCKED 2026-05-13, recommendation A-prime)
-**Milestone:** v4.0 Intelligence Layer — resumed 2026-05-14 at 6/9 phases done
-**Status:** v4.0 resumes at Phase 35. Phase 33 carries event-log SSOT architectural enforcement; Phase 37 GA gated on §21 acceptance criteria per audit recommendation.
+**Milestone:** v4.0 Intelligence Layer — resumed 2026-05-14 at 7/9 phases done
+**Status:** v4.0 resumes at Phase 36. Phase 33 carries event-log SSOT architectural enforcement; Phase 37 GA gated on §21 acceptance criteria per audit recommendation.
 
 ```
-v4.0 Progress: [############________________] 6/9 phases complete
+v4.0 Progress: [#############_______________] 7/9 phases complete
   Phase 30:   God File Cleanup                [done]
   Phase 31:   Bug Fixes                       [done] (31-01 + 31-02)
   Phase 32:   CLI Surface                     [done]
   Phase 32.5: Surface Consolidation (NEW)     [done] — per audit A-prime
   Phase 33:   Knowledge Extraction Foundation [done] — event-log SSOT requirement
   Phase 34:   Extraction Pipeline             [done] — supersedence-as-event-type
-  Phase 35:   Context Intelligence            [ ] Not started — T7 plain-text canonical
+  Phase 35:   Context Intelligence            [done] — T7 plain-text canonical
   Phase 36:   Portability                     [ ] Not started
   Phase 37:   Publishing                      [ ] Not started — prerelease OK; GA-gated
 ```
