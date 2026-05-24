@@ -4,6 +4,21 @@ Append-only log of work sessions on memory-nexus. Most recent entries first.
 
 ---
 
+## 2026-05-24 — Phase 33 & 34 Shipped & Phase 35 Scoped
+
+**Resumed from:** uncommitted on-disk implementation of comparative fact extraction. 
+
+**Arc:** Purged WatchTower junction and dev-cockpit remnants. Commited all on-disk modifications and untracked files for Phase 33 and 34 after setting the user config to `Chude <chude@emeke.org>`. Updated `STATE.md` and `ROADMAP.md` checkmarks. Scoped Phase 35 Context Intelligence with a focus on tool-for-agents design constraints.
+
+**Decisions captured:**
+- Phase 33 and 34 are fully code-complete and all 3,626 tests pass with 100% success.
+- Scoped memory tool-for-agents considerations: token budgeting window limits, standardized Markdown briefings with `---` dividers, programmatic `--json` QueryResultEnvelope output, and grace-period warning/migration triggers for legacy `~/.memory/` files.
+- Formulated the Phase 35 Context Intelligence design and updated `35-CONTEXT.md` and `35-01-PLAN.md` to govern future execution.
+
+**Test suite:** 3626/3626 passing in full suite.
+
+---
+
 ## 2026-05-08 — Test Isolation Cleanup (out-of-roadmap)
 
 **Resumed from:** parking-time baseline (last commit 2026-04-10) where `bun test` showed 41 failures in full suite but 0 in isolation.
