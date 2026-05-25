@@ -109,6 +109,20 @@ export interface ExtractionStateExport {
 }
 
 /**
+ * Exported fact data structure.
+ */
+export interface FactExport {
+  uuid: string;
+  type: string;
+  project: string;
+  content: string;
+  metadata: string | null;
+  observedAt: string;
+  supersededAt: string | null;
+  supersededBy: string | null;
+}
+
+/**
  * Complete export data structure with version and statistics.
  */
 export interface ExportData {
@@ -123,6 +137,7 @@ export interface ExportData {
     sessionEntities: number;
     entityLinks: number;
     extractionStates: number;
+    facts?: number;
   };
   sessions: SessionExport[];
   messages: MessageExport[];
@@ -132,6 +147,7 @@ export interface ExportData {
   sessionEntities: SessionEntityExport[];
   entityLinks: EntityLinkExport[];
   extractionStates: ExtractionStateExport[];
+  facts?: FactExport[];
 }
 
 /**
@@ -144,6 +160,7 @@ export interface ExportStats {
   entities: number;
   links: number;
   bytes: number;
+  facts?: number;
 }
 
 /**
@@ -155,6 +172,7 @@ export interface ImportStats {
   toolUses: number;
   entities: number;
   links: number;
+  facts?: number;
 }
 
 /**
@@ -271,6 +289,16 @@ export async function exportToJson(
     )
     .all();
 
+  // Query all facts
+  const facts = db
+    .query<FactExport, []>(
+      `SELECT uuid, type, project, content, metadata,
+              observed_at as observedAt, superseded_at as supersededAt,
+              superseded_by as supersededBy
+       FROM facts`
+    )
+    .all();
+
   // Build export data structure
   const exportData: ExportData = {
     version: "1.0",
@@ -284,6 +312,7 @@ export async function exportToJson(
       sessionEntities: sessionEntities.length,
       entityLinks: entityLinks.length,
       extractionStates: extractionStates.length,
+      facts: facts.length,
     },
     sessions,
     messages,
@@ -293,6 +322,7 @@ export async function exportToJson(
     sessionEntities,
     entityLinks,
     extractionStates,
+    facts,
   };
 
   // Write to file
@@ -306,6 +336,7 @@ export async function exportToJson(
     entities: entities.length,
     links: links.length,
     bytes: jsonContent.length,
+    facts: facts.length,
   };
 }
 
@@ -549,12 +580,35 @@ export async function importFromJson(
       }
     }
 
+    // Import facts (if present)
+    if (data.facts && data.facts.length > 0) {
+      const insertFact = db.prepare(`
+        INSERT OR IGNORE INTO facts
+          (uuid, type, project, content, metadata, observed_at, superseded_at, superseded_by)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+      `);
+
+      for (const f of data.facts) {
+        insertFact.run(
+          f.uuid,
+          f.type,
+          f.project,
+          f.content,
+          f.metadata,
+          f.observedAt,
+          f.supersededAt,
+          f.supersededBy
+        );
+      }
+    }
+
     return {
       sessions: data.sessions.length,
       messages: data.messages.length,
       toolUses: data.toolUses.length,
       entities: data.entities.length,
       links: data.links.length,
+      facts: data.facts ? data.facts.length : 0,
     };
   });
 
@@ -591,6 +645,7 @@ function clearAllTables(db: Database): void {
     db.exec("DELETE FROM sessions_fts;");
 
     // Clear remaining main tables
+    db.exec("DELETE FROM facts;");
     db.exec("DELETE FROM tool_uses;");
     db.exec("DELETE FROM sessions;");
     db.exec("DELETE FROM entities;");
