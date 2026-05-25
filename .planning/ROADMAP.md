@@ -79,6 +79,16 @@
 - [x] **Phase 36: Portability** - WSL migration command, doctor --portability, migration guide (completed 2026-05-25)
 - [ ] **Phase 37: Publishing** - Prerelease (`@chude/memory@4.0.0-pre.N`) allowed at any time; GA (`@chude/memory@4.0.0`) gated on §21 acceptance criteria for Phases 32.5/33/34/35 per audit §19 item 8.
 
+### v5.0 Autonomous & Synchronized Memory Layer (Phases 38-42)
+
+**Overview:** Transition `@chude/memory` into a world-class, multi-device, highly competitive agentic memory platform. Adds Git-backed remote database synchronization, user/developer persona aggregation, semantic graph relations mapping, half-life importance decay algorithms, and biological "Dreaming" asynchronous background consolidation.
+
+- [ ] **Phase 38: Remote Sync** - Private-Git-backed remote event log synchronization (multi-device consolidation)
+- [ ] **Phase 39: Persona Profiling** - Centralized developer/agent style persona profile aggregation
+- [ ] **Phase 40: Semantic Graph** - Entity-Relationship extraction and graph-traversal queries in the links table
+- [ ] **Phase 41: Importance Decay** - Utility weighting and half-life temporal relevance decay in search ranking
+- [ ] **Phase 42: Dreaming Consolidation** - Asynchronous background reflection, pruning, and fact promotion cycles
+
 ## Phase Details
 
 ### Phase 30: God File Cleanup
@@ -234,6 +244,65 @@ Rationale: Phase 32 explicitly deferred friction envelope adoption per audit §1
 
 ---
 
+### Phase 38: Remote Sync (Multi-Device Replication)
+
+**Goal**: Synchronize the Plain-Text Event Log securely across multiple developer devices using private Git repositories.
+**Depends on**: Phase 37
+**Requirements**: SYNC-05, SYNC-06
+**Success Criteria** (what must be TRUE):
+  1. `memory sync --remote` commits local event-log diffs, pulls remote event logs, merges them deterministically, and pushes changes to a configured private Git repository.
+  2. Conflict resolution rules merge event logs safely without losing past entries.
+  3. Encryption or access credentials utilize standard SSH/Git configurations transparently.
+
+---
+
+### Phase 39: Persona Profiling
+
+**Goal**: Aggregates developer preferences and friction facts into a high-density, version-controlled developer style profile briefing.
+**Depends on**: Phase 38
+**Requirements**: CTXT-05, CTXT-06
+**Success Criteria** (what must be TRUE):
+  1. Background compiler aggregates facts to generate a clean, versioned `developer-profile.md` profile sheet.
+  2. Briefings automatically inject this profile at startup to maintain style and architectural alignment.
+
+---
+
+### Phase 40: Semantic Graph Extraction
+
+**Goal**: Build semantic links and Entity-Relationship maps between database entities to allow graph-traversal queries.
+**Depends on**: Phase 39
+**Requirements**: KNOW-09, KNOW-10
+**Success Criteria** (what must be TRUE):
+  1. LLM-extraction pulls named entities and structural relationships from sessions.
+  2. Relational mappings are stored inside the `links` table.
+  3. Search results traverse links to return relevant memories even when keyword or direct semantic overlap is absent.
+
+---
+
+### Phase 41: Importance Decay
+
+**Goal**: Model facts utility decay over time using a mathematical half-life relevance scoring model.
+**Depends on**: Phase 40
+**Requirements**: RANK-01, RANK-02
+**Success Criteria** (what must be TRUE):
+  1. Facts schema tracks access metrics (frequency, age, last accessed stamp).
+  2. Relevance scoring applies half-life decay function during hybrid search ranking.
+
+---
+
+### Phase 42: Dreaming Consolidation
+
+**Goal**: Asynchronously review new logs, build consolidated "Dream Diaries", deduplicate/supersede records, and promote high-utility facts.
+**Depends on**: Phase 41
+**Requirements**: DREAM-01, DREAM-02
+**Success Criteria** (what must be TRUE):
+  1. Standalone `memory dream` subcommand aggregates raw transcripts and prompts a structured consolidated reflection.
+  2. Writes reflects to `dreams.jsonl` audit log.
+  3. Promotes or supersedes events in the canonical Event-Log SSOT and rebuilds database projections.
+  4. Detached background hooks trigger dreaming during post-session idle states safely.
+
+---
+
 ### Cross-Cutting: Quality (All v4.0 Phases)
 
 Requirements: QUAL-01, QUAL-02, QUAL-03, QUAL-04
@@ -311,6 +380,11 @@ Phase 37 (Publishing)
 | 35. Context Intelligence | v4.0 | 1/1 | Complete | 2026-05-24 |
 | 36. Portability | v4.0 | 1/1 | Complete | 2026-05-25 |
 | 37. Publishing | v4.0 | TBD | Planned | - |
+| 38. Remote Sync | v5.0 | TBD | Planned | - |
+| 39. Persona Profiling | v5.0 | TBD | Planned | - |
+| 40. Semantic Graph | v5.0 | TBD | Planned | - |
+| 41. Importance Decay | v5.0 | TBD | Planned | - |
+| 42. Dreaming Consolidation | v5.0 | TBD | Planned | - |
 
 ---
 
