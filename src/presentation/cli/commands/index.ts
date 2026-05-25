@@ -26,6 +26,7 @@ export { createDoctorCommand, executeDoctorCommand } from "./doctor.js";
 
 // Maintenance commands
 export { createPurgeCommand, executePurgeCommand } from "./purge.js";
+export { createMigrateCommand, executeMigrateCommand } from "./migrate.js";
 
 // Backup commands
 export { createExportCommand, executeExportCommand } from "./export.js";
@@ -74,3 +75,4 @@ export type {
   BackfillCommandOptions,
   BackfillServiceDeps,
 } from "./backfill.js";
+export type { MigrateCommandOptions } from "./migrate.js";

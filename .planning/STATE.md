@@ -3,10 +3,10 @@ gsd_state_version: 1.0
 milestone: v4.0
 milestone_name: Intelligence Layer
 status: in_progress
-last_updated: "2026-05-24T17:20:00.000Z"
+last_updated: "2026-05-25T07:00:00.000Z"
 progress:
   total_phases: 11
-  completed_phases: 7
+  completed_phases: 8
   total_plans: 9
   completed_plans: 9
 ---
@@ -33,7 +33,7 @@ Architecture first-principles audit — COMPLETE (LOCKED 2026-05-13, recommendat
 **Status:** v4.0 resumes at Phase 36. Phase 33 carries event-log SSOT architectural enforcement; Phase 37 GA gated on §21 acceptance criteria per audit recommendation.
 
 ```
-v4.0 Progress: [#############_______________] 7/9 phases complete
+v4.0 Progress: [###############_____________] 8/9 phases complete
   Phase 30:   God File Cleanup                [done]
   Phase 31:   Bug Fixes                       [done] (31-01 + 31-02)
   Phase 32:   CLI Surface                     [done]
@@ -41,7 +41,7 @@ v4.0 Progress: [#############_______________] 7/9 phases complete
   Phase 33:   Knowledge Extraction Foundation [done] — event-log SSOT requirement
   Phase 34:   Extraction Pipeline             [done] — supersedence-as-event-type
   Phase 35:   Context Intelligence            [done] — T7 plain-text canonical
-  Phase 36:   Portability                     [ ] Not started
+  Phase 36:   Portability                     [done] — WSL migration + doctor portability
   Phase 37:   Publishing                      [ ] Not started — prerelease OK; GA-gated
 ```
 
@@ -142,4 +142,4 @@ v4.0 Progress: [#############_______________] 7/9 phases complete
 
 ---
 
-*Last updated: 2026-05-14 (architecture audit LOCKED at A-prime; v4.0 resumed; Phase 32.5 added)*
+*Last updated: 2026-05-25 (Phase 36 completed)*

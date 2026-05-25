@@ -24,6 +24,7 @@ import {
   createStatusCommand,
   createDoctorCommand,
   createPurgeCommand,
+  createMigrateCommand,
   createCompletionCommand,
   createExportCommand,
   createImportCommand,
@@ -62,6 +63,7 @@ program.addCommand(createBackfillCommand());
 program.addCommand(createExportCommand());
 program.addCommand(createImportCommand());
 program.addCommand(createPurgeCommand());
+program.addCommand(createMigrateCommand());
 program.addCommand(createExtractCommand());
 
 // System Commands — hooks, diagnostics, completion. `browse` lives here

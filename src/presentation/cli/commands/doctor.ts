@@ -21,7 +21,14 @@ import {
     red,
     yellow,
     dim,
+    shouldUseColor,
 } from "../formatters/color.js";
+import { existsSync, readFileSync, unlinkSync } from "node:fs";
+import { join as joinPath } from "node:path";
+import { PathDecoder } from "../../../domain/services/path-decoder.js";
+import { SqliteSessionRepository } from "../../../infrastructure/database/repositories/session-repository.js";
+import { initializeDatabase, closeDatabase } from "../../../infrastructure/database/index.js";
+import { getDataDir } from "../../../infrastructure/paths.js";
 import { getQmdInfo } from "../../../infrastructure/external/index.js";
 import type { HealthCheckResult } from "../../../infrastructure/database/health-checker.js";
 
@@ -33,6 +40,8 @@ export interface DoctorOptions {
     json?: boolean;
     /** Attempt to fix common issues automatically */
     fix?: boolean;
+    /** Perform portability diagnostics */
+    portability?: boolean;
 }
 
 /**
@@ -325,6 +334,7 @@ export function createDoctorCommand(): Command {
         .description("Check system health and diagnose issues")
         .option("--json", "Output as JSON")
         .option("--fix", "Attempt to fix common issues")
+        .option("--portability", "Perform portability and path-dialect migration checks")
         .action(async (options: DoctorOptions) => {
             const result = await executeDoctorCommand(options);
             process.exitCode = result.exitCode;
@@ -338,6 +348,10 @@ export async function executeDoctorCommand(
     options: DoctorOptions,
     deps: DoctorCommandDeps = {},
 ): Promise<CommandResult> {
+    if (options.portability) {
+        return runPortabilityDiagnostics(options, deps);
+    }
+
     if (options.json) {
         const { gatherStatus } = await import("./status.js");
         const status = await gatherStatus({
@@ -398,6 +412,203 @@ export async function executeDoctorCommand(
             hookOverrides: deps.healthOverrides?.hookOverrides,
         }
     );
+}
+
+/**
+ * Execute portability diagnostics for environment transitions.
+ */
+export async function runPortabilityDiagnostics(
+    options: DoctorOptions,
+    deps: DoctorCommandDeps = {}
+): Promise<CommandResult> {
+    const fsExistsSync = existsSync;
+    const dbPath = deps.healthOverrides?.dbPath ?? getDefaultDbPath();
+    const dataDir = deps.healthOverrides?.sourceDir ?? getDataDir();
+
+    const useColor = options.json ? false : shouldUseColor();
+
+    let db;
+    const mixedDialects: string[] = [];
+    const orphanedPaths: string[] = [];
+    const staleLocks: string[] = [];
+
+    // Check database path
+    if (!existsSync(dbPath)) {
+        const errorMsg = "Database does not exist. Run 'memory sync' first.";
+        if (options.json) {
+            console.log(JSON.stringify({ error: errorMsg }, null, 2));
+        } else {
+            console.error(red(`Error: ${errorMsg}`, useColor));
+        }
+        return { exitCode: 1 };
+    }
+
+    try {
+        const initResult = initializeDatabase({ path: dbPath });
+        db = initResult.db;
+        const sessionRepo = new SqliteSessionRepository(db);
+
+        const allSessions = await sessionRepo.findFiltered({ limit: 100000 });
+        for (const session of allSessions) {
+            const decoded = session.projectPath.decoded;
+
+            // 1. Path Dialect Scan
+            const isWin = process.platform === "win32";
+            let isMixed = false;
+            if (isWin) {
+                if (decoded.includes("/") && (decoded.startsWith("/home") || decoded.startsWith("/mnt") || decoded.startsWith("/var") || decoded.startsWith("/usr") || decoded.startsWith("/"))) {
+                    isMixed = true;
+                }
+            } else {
+                if (decoded.includes("\\") || /^[a-zA-Z]:/.test(decoded)) {
+                    isMixed = true;
+                }
+            }
+
+            if (isMixed && !mixedDialects.includes(decoded)) {
+                mixedDialects.push(decoded);
+            }
+
+            // 2. Orphaned Paths Scan
+            const resolvedPath = PathDecoder.resolveExistingPath(decoded, fsExistsSync);
+            if (!fsExistsSync(resolvedPath)) {
+                if (!orphanedPaths.includes(decoded)) {
+                    orphanedPaths.push(decoded);
+                }
+            }
+        }
+    } catch (err) {
+        const msg = err instanceof Error ? err.message : String(err);
+        if (options.json) {
+            console.log(JSON.stringify({ error: `Portability scan failed: ${msg}` }, null, 2));
+        } else {
+            console.error(red(`Portability scan failed: ${msg}`, useColor));
+        }
+        return { exitCode: 2 };
+    } finally {
+        if (db) {
+            closeDatabase(db);
+        }
+    }
+
+    // 3. Stale Lock Scan
+    const embeddingLockPath = joinPath(dataDir, "embedding.lock");
+    let lockExists = false;
+    let lockStale = false;
+
+    if (existsSync(embeddingLockPath)) {
+        lockExists = true;
+        try {
+            const lockContent = readFileSync(embeddingLockPath, "utf-8");
+            const lockData = JSON.parse(lockContent);
+            if (lockData.pid) {
+                process.kill(lockData.pid, 0);
+            } else {
+                lockStale = true;
+            }
+        } catch (err) {
+            lockStale = true;
+        }
+    }
+
+    if (lockExists && lockStale) {
+        staleLocks.push(embeddingLockPath);
+        if (options.fix) {
+            try {
+                unlinkSync(embeddingLockPath);
+            } catch (e) {
+                // Ignore unlink errors
+            }
+        }
+    }
+
+    // 4. sqlite-vec health
+    const { gatherStatus } = await import("./status.js");
+    const status = await gatherStatus({
+        dbPath,
+        fix: false,
+        stats: false,
+    });
+    const vecAvailable = status.health.sqliteVec.available;
+    const vecVersion = status.health.sqliteVec.version;
+
+    if (options.json) {
+        console.log(
+            JSON.stringify(
+                {
+                    portability: {
+                        mixedDialectPaths: mixedDialects,
+                        orphanedPaths: orphanedPaths,
+                        staleLocks: staleLocks,
+                        sqliteVecAvailable: vecAvailable,
+                        sqliteVecVersion: vecVersion,
+                        fixedStaleLocks: options.fix && staleLocks.length > 0,
+                    },
+                },
+                null,
+                2
+            )
+        );
+        const hasFailures = orphanedPaths.length > 0 || mixedDialects.length > 0 || (staleLocks.length > 0 && !options.fix);
+        return { exitCode: hasFailures ? 1 : 0 };
+    }
+
+    // Print text report
+    console.log("Portability & Migration Diagnostics");
+    console.log("==================================");
+    console.log("");
+
+    // Path Dialect Check
+    if (mixedDialects.length === 0) {
+        console.log(`  ${green("[OK]", useColor)} Path Dialects: No mixed path slashes/drive dialects detected.`);
+    } else {
+        console.log(`  ${yellow("[WARN]", useColor)} Path Dialects: ${mixedDialects.length} mixed slash/drive formats detected.`);
+        for (const p of mixedDialects) {
+            console.log(`    - ${p}`);
+        }
+    }
+
+    // Orphaned Workspaces Check
+    if (orphanedPaths.length === 0) {
+        console.log(`  ${green("[OK]", useColor)} Orphaned Workspaces: All session folders exist physically on disk.`);
+    } else {
+        console.log(`  ${yellow("[WARN]", useColor)} Orphaned Workspaces: ${orphanedPaths.length} project folder(s) not found on active filesystem.`);
+        for (const p of orphanedPaths) {
+            console.log(`    - ${p}`);
+        }
+    }
+
+    // Active Locks Check
+    if (staleLocks.length === 0) {
+        console.log(`  ${green("[OK]", useColor)} Active Locks: No stale sync/embedding lock files detected.`);
+    } else {
+        if (options.fix) {
+            console.log(`  ${green("[FIXED]", useColor)} Active Locks: Cleaned up ${staleLocks.length} stale lock file(s).`);
+        } else {
+            console.log(`  ${yellow("[WARN]", useColor)} Active Locks: ${staleLocks.length} stale sync/embedding lock file(s) found.`);
+            for (const lock of staleLocks) {
+                console.log(`    - ${lock}`);
+            }
+        }
+    }
+
+    // sqlite-vec Capability
+    if (vecAvailable) {
+        console.log(`  ${green("[OK]", useColor)} sqlite-vec: Loadable (v${vecVersion}) for active architecture.`);
+    } else {
+        console.log(`  ${red("[FAIL]", useColor)} sqlite-vec: Not loadable on this system architecture.`);
+    }
+
+    console.log("");
+
+    // Print Tip Box if orphaned paths found
+    if (orphanedPaths.length > 0) {
+        console.log(`💡 [TIP] Orphaned project paths detected. You can safely prune these stale database records by running: memory purge --orphans`);
+        console.log("");
+    }
+
+    const hasFailures = orphanedPaths.length > 0 || mixedDialects.length > 0 || (staleLocks.length > 0 && !options.fix);
+    return { exitCode: hasFailures ? 1 : 0 };
 }
 
 // Inline helper for path resolution inside the wrapper

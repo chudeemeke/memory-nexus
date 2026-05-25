@@ -121,4 +121,66 @@ describe("PathDecoder domain service", () => {
       expect(paths).toHaveLength(2);
     });
   });
+
+  describe("translatePath", () => {
+    it("translates Windows absolute paths to WSL mount paths on Unix systems", () => {
+      const winPath = "C:\\Users\\Destiny\\Projects\\foo";
+      const result = PathDecoder.translatePath(winPath, "linux");
+      expect(result).toBe("/mnt/c/Users/Destiny/Projects/foo");
+    });
+
+    it("translates Windows absolute paths with forward slashes on Unix systems", () => {
+      const winPath = "D:/Projects/bar";
+      const result = PathDecoder.translatePath(winPath, "linux");
+      expect(result).toBe("/mnt/d/Projects/bar");
+    });
+
+    it("translates Unix/WSL mount paths to Windows absolute paths on Windows systems", () => {
+      const wslPath = "/mnt/c/Users/Destiny/Projects/foo";
+      const result = PathDecoder.translatePath(wslPath, "win32");
+      expect(result).toBe("C:\\Users\\Destiny\\Projects\\foo");
+    });
+
+    it("returns the original path if target platform does not require translation", () => {
+      const linuxPath = "/home/user/projects/bar";
+      expect(PathDecoder.translatePath(linuxPath, "linux")).toBe("/home/user/projects/bar");
+
+      const winPath = "C:\\Users\\Destiny";
+      expect(PathDecoder.translatePath(winPath, "win32")).toBe("C:\\Users\\Destiny");
+    });
+
+    it("handles empty or whitespace strings gracefully", () => {
+      expect(PathDecoder.translatePath("")).toBe("");
+      expect(PathDecoder.translatePath("   ")).toBe("   ");
+    });
+  });
+
+  describe("resolveExistingPath", () => {
+    it("returns original path if it exists", () => {
+      const path = "/home/user/exists";
+      const existsMock = (p: string) => p === path;
+      const result = PathDecoder.resolveExistingPath(path, existsMock, "linux");
+      expect(result).toBe(path);
+    });
+
+    it("returns translated path if original does not exist but translated does", () => {
+      const original = "C:\\Users\\Destiny\\exists";
+      const translated = "/mnt/c/Users/Destiny/exists";
+      const existsMock = (p: string) => p === translated;
+      const result = PathDecoder.resolveExistingPath(original, existsMock, "linux");
+      expect(result).toBe(translated);
+    });
+
+    it("returns original path if neither exists", () => {
+      const original = "C:\\Users\\Destiny\\doesnotexist";
+      const existsMock = () => false;
+      const result = PathDecoder.resolveExistingPath(original, existsMock, "linux");
+      expect(result).toBe(original);
+    });
+
+    it("handles falsy paths gracefully", () => {
+      expect(PathDecoder.resolveExistingPath("")).toBe("");
+    });
+  });
 });
+

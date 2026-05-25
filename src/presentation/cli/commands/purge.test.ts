@@ -36,14 +36,26 @@ describe("createPurgeCommand", () => {
     expect(command.description()).toBe("Remove old sessions from database");
   });
 
-  it("should have required --older-than option", () => {
+  it("should have optional --older-than option", () => {
     const command = createPurgeCommand();
     const options = command.options;
 
     const olderThanOpt = options.find((o) => o.long === "--older-than");
     expect(olderThanOpt).toBeDefined();
     expect(olderThanOpt?.required).toBe(true);
+    expect(olderThanOpt?.mandatory).not.toBe(true);
   });
+
+
+
+  it("should have --orphans option", () => {
+    const command = createPurgeCommand();
+    const options = command.options;
+
+    const orphansOpt = options.find((o) => o.long === "--orphans");
+    expect(orphansOpt).toBeDefined();
+  });
+
 
   it("should have --force option with short -f", () => {
     const command = createPurgeCommand();
@@ -557,4 +569,107 @@ describe("executePurgeCommand integration", () => {
       expect(result.exitCode).toBe(1);
     });
   });
+
+  describe("orphans and option validation", () => {
+    it("should show error if neither --older-than nor --orphans is provided", async () => {
+      const options: PurgeCommandOptions = {};
+      const result = await executePurgeCommand(options, deps());
+
+      expect(consoleErrorOutput.join("\n")).toContain("Please specify either --older-than <duration> or --orphans");
+      expect(result.exitCode).toBe(1);
+    });
+
+    it("should output JSON error if neither option provided with --json", async () => {
+      const options: PurgeCommandOptions = { json: true };
+      const result = await executePurgeCommand(options, deps());
+
+      const output = JSON.parse(consoleOutput.join("\n"));
+      expect(output.error).toContain("Please specify either --older-than <duration> or --orphans");
+      expect(result.exitCode).toBe(1);
+    });
+
+    it("should delete orphaned sessions whose paths do not exist", async () => {
+      const { db } = initializeDatabase({ path: testDbPath });
+      createTestSession(db, "orphan-1", "dead-project", "2026-01-20T10:00:00Z");
+      createTestSession(db, "active-1", "live-project", "2026-01-22T10:00:00Z");
+      closeDatabase(db);
+
+      const customExistsSync = (p: string) => {
+        if (p.includes("dead-project")) return false;
+        if (p.includes("live-project")) return true;
+        return false;
+      };
+
+      const options: PurgeCommandOptions = {
+        orphans: true,
+        force: true,
+      };
+
+      const result = await executePurgeCommand(options, {
+        ...deps(),
+        existsSync: customExistsSync,
+      });
+
+      expect(result.exitCode).toBe(0);
+      expect(consoleOutput.join("\n")).toContain("Deleted 1 session(s)");
+
+      const { db: db2 } = initializeDatabase({ path: testDbPath });
+      const repo = new SqliteSessionRepository(db2);
+      expect(await repo.findById("orphan-1")).toBeNull();
+      expect(await repo.findById("active-1")).not.toBeNull();
+      closeDatabase(db2);
+    });
+
+    it("should use resolveExistingPath translation fallback during orphan scanning", async () => {
+      const { db } = initializeDatabase({ path: testDbPath });
+      
+      const isWin = process.platform === "win32";
+      const sessionPath = isWin 
+        ? "/mnt/c/Users/Test/Projects/translated-proj" 
+        : "C:\\Users\\Test\\Projects\\translated-proj";
+      
+      const projectPath = ProjectPath.fromDecoded(sessionPath);
+      const session = Session.create({
+        id: "trans-1",
+        projectPath,
+        startTime: new Date("2026-01-20T10:00:00Z"),
+      });
+      const repo = new SqliteSessionRepository(db);
+      repo.save(session);
+      db.run("UPDATE sessions SET updated_at = '2026-01-20T10:00:00Z' WHERE id = 'trans-1'");
+      closeDatabase(db);
+
+      const checkedPaths: string[] = [];
+      const expectedCheck = isWin 
+        ? "C:\\Users\\Test\\Projects\\translated-proj" 
+        : "/mnt/c/Users/Test/Projects/translated-proj";
+
+      const customExistsSync = (p: string) => {
+        checkedPaths.push(p);
+        if (p === expectedCheck) return true;
+        return false;
+      };
+
+      const options: PurgeCommandOptions = {
+        orphans: true,
+        force: true,
+      };
+
+      const result = await executePurgeCommand(options, {
+        ...deps(),
+        existsSync: customExistsSync,
+      });
+
+      expect(result.exitCode).toBe(0);
+      expect(consoleOutput.join("\n")).toContain("No sessions matched the purge criteria");
+      expect(checkedPaths.some(p => p === expectedCheck)).toBe(true);
+
+      const { db: db2 } = initializeDatabase({ path: testDbPath });
+      const repo2 = new SqliteSessionRepository(db2);
+      expect(await repo2.findById("trans-1")).not.toBeNull();
+      closeDatabase(db2);
+    });
+  });
 });
+
+

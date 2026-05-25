@@ -77,4 +77,66 @@ export class PathDecoder {
   static filterEncodedPaths(items: string[]): string[] {
     return items.filter((item) => PathDecoder.isEncodedPath(item));
   }
+
+  /**
+   * Translates absolute paths between Windows (e.g. C:\foo\bar) and WSL Unix mount (/mnt/c/foo/bar) styles.
+   * @param path The path to translate
+   * @param targetPlatform The target platform to translate for (defaults to process.platform)
+   * @returns The translated path string
+   */
+  static translatePath(path: string, targetPlatform: string = process.platform): string {
+    if (!path || path.trim() === "") {
+      return path;
+    }
+
+    if (targetPlatform === "win32") {
+      // Unix/WSL to Windows: /mnt/c/Users/Destiny -> C:\Users\Destiny
+      const wslMatch = path.match(/^\/mnt\/([a-zA-Z])([\/]?)(.*)$/);
+      if (wslMatch) {
+        const drive = wslMatch[1].toUpperCase();
+        const rest = wslMatch[3].replace(/\//g, "\\");
+        return `${drive}:\\${rest}`;
+      }
+      return path;
+    } else {
+      // Windows to Unix/WSL: C:\Users\Destiny -> /mnt/c/Users/Destiny
+      const winMatch = path.match(/^([a-zA-Z]):([\\/]?)(.*)$/);
+      if (winMatch) {
+        const drive = winMatch[1].toLowerCase();
+        const rest = winMatch[3].replace(/\\/g, "/");
+        return `/mnt/${drive}/${rest}`;
+      }
+      return path;
+    }
+  }
+
+  /**
+   * Resolves a path, optionally translating it if the target file/directory
+   * does not exist at the original path but exists at the translated path.
+   * @param path The path to resolve
+   * @param existsSyncFn Function to check file existence (optional)
+   * @param targetPlatform The target platform (defaults to process.platform)
+   * @returns The resolved or translated path string
+   */
+  static resolveExistingPath(
+    path: string,
+    existsSyncFn?: (p: string) => boolean,
+    targetPlatform: string = process.platform
+  ): string {
+    if (!path) return path;
+
+    const exists = existsSyncFn ?? (() => false);
+
+    if (exists(path)) {
+      return path;
+    }
+
+    const translated = PathDecoder.translatePath(path, targetPlatform);
+    if (exists(translated)) {
+      return translated;
+    }
+
+    return path;
+  }
 }
+
