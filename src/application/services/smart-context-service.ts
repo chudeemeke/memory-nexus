@@ -132,7 +132,6 @@ export class SmartContextService {
     private readonly factRepo: IFactRepository;
     private readonly frictionRepo: IFrictionRepository;
     private readonly getSessionSummary?: (projectFilter: string, days?: number) => Promise<string | null>;
-    private readonly now: () => Date;
 
     constructor(deps: SmartContextDeps) {
         this.projectResolver = deps.projectResolver;
@@ -141,7 +140,6 @@ export class SmartContextService {
         if (deps.getSessionSummary) {
             this.getSessionSummary = deps.getSessionSummary;
         }
-        this.now = deps.now ?? (() => new Date());
     }
 
     /**

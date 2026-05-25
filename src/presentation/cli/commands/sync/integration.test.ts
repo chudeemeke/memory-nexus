@@ -74,7 +74,7 @@ describe("CLI sync command", () => {
     const exitCode = await proc.exited;
 
     expect(exitCode).toBe(0);
-    expect(output.trim()).toMatch(/^\d+\.\d+\.\d+$/);
+    expect(output.trim()).toMatch(/^\d+\.\d+\.\d+(-[a-zA-Z0-9.]+)?$/);
   });
 
   test("invalid command shows error and help", async () => {

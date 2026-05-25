@@ -66,7 +66,7 @@ export function createMigrateCommand(): Command {
  * Execute the migrate command programmatically.
  */
 export async function executeMigrateCommand(
-  options: MigrateCommandOptions,
+  _options: MigrateCommandOptions,
   deps: MigrateCommandDeps = {}
 ): Promise<CommandResult> {
   const useColor = shouldUseColor();

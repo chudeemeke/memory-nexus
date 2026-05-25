@@ -93,8 +93,8 @@ export class PathDecoder {
       // Unix/WSL to Windows: /mnt/c/Users/Destiny -> C:\Users\Destiny
       const wslMatch = path.match(/^\/mnt\/([a-zA-Z])([\/]?)(.*)$/);
       if (wslMatch) {
-        const drive = wslMatch[1].toUpperCase();
-        const rest = wslMatch[3].replace(/\//g, "\\");
+        const drive = wslMatch[1]!.toUpperCase();
+        const rest = wslMatch[3]!.replace(/\//g, "\\");
         return `${drive}:\\${rest}`;
       }
       return path;
@@ -102,8 +102,8 @@ export class PathDecoder {
       // Windows to Unix/WSL: C:\Users\Destiny -> /mnt/c/Users/Destiny
       const winMatch = path.match(/^([a-zA-Z]):([\\/]?)(.*)$/);
       if (winMatch) {
-        const drive = winMatch[1].toLowerCase();
-        const rest = winMatch[3].replace(/\\/g, "/");
+        const drive = winMatch[1]!.toLowerCase();
+        const rest = winMatch[3]!.replace(/\\/g, "/");
         return `/mnt/${drive}/${rest}`;
       }
       return path;

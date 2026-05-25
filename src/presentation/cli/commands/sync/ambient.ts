@@ -64,8 +64,8 @@ export async function runAmbientContextGeneration(
       const { SqliteProjectResolver } = await import(
         "../../../../infrastructure/database/services/context-service.js"
       );
-      const { SqliteMemoryFileRepository } = await import(
-        "../../../../infrastructure/database/repositories/memory-file-repository.js"
+      const { SqliteFactRepository } = await import(
+        "../../../../infrastructure/database/repositories/fact-repository.js"
       );
       const { SqliteFrictionRepository } = await import(
         "../../../../infrastructure/database/repositories/friction-repository.js"
@@ -84,13 +84,13 @@ export async function runAmbientContextGeneration(
       );
 
       const projectResolver = new SqliteProjectResolver(db);
-      const memoryFileRepo = new SqliteMemoryFileRepository(db);
+      const factRepo = new SqliteFactRepository(db);
       const frictionRepo = new SqliteFrictionRepository(db);
       const formatter = createContextFormatter("ai", false);
 
       const smartContext = new SmartContextService({
         projectResolver,
-        memoryFileRepo,
+        factRepo,
         frictionRepo,
       });
 

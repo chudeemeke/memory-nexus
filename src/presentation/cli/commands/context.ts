@@ -142,7 +142,7 @@ export function createContextCommand(): Command {
  * verification that this precedence rule holds at the routing layer,
  * not just at the output-formatting layer.
  */
-function useSmartContext(options: ContextCommandOptions): boolean {
+function useSmartContext(_options: ContextCommandOptions): boolean {
   return true;
 }
 
