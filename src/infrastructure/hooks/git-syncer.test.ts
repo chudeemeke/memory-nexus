@@ -9,7 +9,39 @@ import { describe, expect, test, beforeEach, afterEach } from "bun:test";
 import { mkdirSync, writeFileSync, rmSync, existsSync } from "node:fs";
 import { join } from "node:path";
 import { tmpdir } from "node:os";
-import { GitSyncer, runGit } from "./git-syncer.js";
+import { GitSyncer, runGit, type GitCommandResult, type GitSyncerDeps } from "./git-syncer.js";
+
+function gitOk(stdout = ""): GitCommandResult {
+    return { success: true, stdout, stderr: "", exitCode: 0 };
+}
+
+function gitFail(stderr = "failed"): GitCommandResult {
+    return { success: false, stdout: "", stderr, exitCode: 1 };
+}
+
+function createMockSyncer(options: {
+    gitResults?: GitCommandResult[];
+    exists?: (path: string) => boolean;
+    files?: string[][];
+    read?: (path: string) => string;
+    now?: Date;
+} = {}): { syncer: GitSyncer; calls: string[][] } {
+    const calls: string[][] = [];
+    const gitResults = [...(options.gitResults ?? [])];
+    const fileResults = [...(options.files ?? [[]])];
+    const deps: GitSyncerDeps = {
+        runGit: async (args) => {
+            calls.push(args);
+            return gitResults.shift() ?? gitOk();
+        },
+        existsSync: options.exists ?? ((path) => path.endsWith(".git")),
+        getAllLogFiles: () => fileResults.shift() ?? fileResults[fileResults.length - 1] ?? [],
+        readFileSync: (path) => options.read?.(path) ?? "content",
+        now: () => options.now ?? new Date("2026-05-28T12:00:00.000Z"),
+    };
+
+    return { syncer: new GitSyncer("C:\\events", deps), calls };
+}
 
 async function removeDirWithRetry(path: string): Promise<void> {
     for (let attempt = 0; attempt < 5; attempt++) {
@@ -126,4 +158,210 @@ describe("git-syncer", () => {
             await removeDirWithRetry(device2Dir);
         }
     }, 45000);
+});
+
+describe("git-syncer dependency seams", () => {
+    test("initRepo returns false when git init fails", async () => {
+        const { syncer, calls } = createMockSyncer({
+            gitResults: [gitFail("init failed")],
+        });
+
+        await expect(syncer.initRepo()).resolves.toBe(false);
+        expect(calls).toEqual([["init"]]);
+    });
+
+    test("initRepo skips local user configuration when user.name already exists", async () => {
+        const { syncer, calls } = createMockSyncer({
+            gitResults: [gitOk(), gitOk("Chude"), gitOk()],
+        });
+
+        await expect(syncer.initRepo()).resolves.toBe(true);
+        expect(calls).toEqual([
+            ["init"],
+            ["config", "user.name"],
+            ["checkout", "-b", "main"],
+        ]);
+    });
+
+    test("configureRemote rejects blank remote URLs", async () => {
+        const { syncer, calls } = createMockSyncer();
+
+        await expect(syncer.configureRemote("   ")).resolves.toBe(false);
+        expect(calls).toEqual([]);
+    });
+
+    test("removeRemote treats missing origin as already removed", async () => {
+        const { syncer } = createMockSyncer({
+            gitResults: [gitFail("No such remote: 'origin'")],
+        });
+
+        await expect(syncer.removeRemote()).resolves.toBe(true);
+    });
+
+    test("getRemoteUrl returns null when origin is not configured", async () => {
+        const { syncer } = createMockSyncer({
+            gitResults: [gitFail("missing")],
+        });
+
+        await expect(syncer.getRemoteUrl()).resolves.toBeNull();
+    });
+
+    test("sync reports init failure when events directory is not a git repo", async () => {
+        const { syncer } = createMockSyncer({
+            exists: () => false,
+            gitResults: [gitFail("init failed")],
+        });
+
+        const result = await syncer.sync("machine1", "git@example/repo.git");
+
+        expect(result).toEqual({
+            success: false,
+            rebuildNeeded: false,
+            error: "Failed to initialize Git repository in events directory",
+        });
+    });
+
+    test("sync reports remote configuration failure", async () => {
+        const { syncer, calls } = createMockSyncer({
+            gitResults: [
+                gitOk("git@example/old.git"),
+                gitOk(),
+                gitFail("remote add failed"),
+            ],
+        });
+
+        const result = await syncer.sync("machine1", "git@example/new.git");
+
+        expect(result).toEqual({
+            success: false,
+            rebuildNeeded: false,
+            error: "Failed to configure Git remote repository URL",
+        });
+        expect(calls).toEqual([
+            ["remote", "get-url", "origin"],
+            ["remote", "remove", "origin"],
+            ["remote", "add", "origin", "git@example/new.git"],
+        ]);
+    });
+
+    test("sync skips pull and push when both automation flags are disabled", async () => {
+        const { syncer, calls } = createMockSyncer({
+            exists: (path) => path.endsWith(".git"),
+            gitResults: [gitOk("git@example/repo.git")],
+            files: [["C:\\events\\events-machine1.jsonl"], ["C:\\events\\events-machine1.jsonl"]],
+        });
+
+        const result = await syncer.sync("machine1", "git@example/repo.git", false, false);
+
+        expect(result).toEqual({ success: true, rebuildNeeded: false });
+        expect(calls).toEqual([["remote", "get-url", "origin"]]);
+    });
+
+    test("sync fetches but skips pull when origin main does not exist yet", async () => {
+        const { syncer, calls } = createMockSyncer({
+            exists: (path) => path.endsWith(".git"),
+            gitResults: [
+                gitOk("git@example/repo.git"),
+                gitOk(),
+                gitFail("missing origin/main"),
+                gitOk(),
+            ],
+        });
+
+        const result = await syncer.sync("machine1", "git@example/repo.git");
+
+        expect(result).toEqual({ success: true, rebuildNeeded: false });
+        expect(calls).toContainEqual(["fetch", "origin"]);
+        expect(calls).toContainEqual(["rev-parse", "--verify", "origin/main"]);
+        expect(calls).not.toContainEqual(["pull", "--rebase", "origin", "main"]);
+    });
+
+    test("sync aborts rebase and reports pull failures", async () => {
+        const { syncer, calls } = createMockSyncer({
+            exists: (path) => path.endsWith(".git"),
+            gitResults: [
+                gitOk("git@example/repo.git"),
+                gitOk(),
+                gitOk("origin/main"),
+                gitFail("conflict"),
+                gitOk(),
+            ],
+        });
+
+        const result = await syncer.sync("machine1", "git@example/repo.git");
+
+        expect(result).toEqual({
+            success: false,
+            rebuildNeeded: false,
+            error: "Git pull failed: conflict",
+        });
+        expect(calls).toContainEqual(["rebase", "--abort"]);
+    });
+
+    test("sync reports push failures", async () => {
+        const { syncer } = createMockSyncer({
+            exists: (path) => path.endsWith(".git"),
+            gitResults: [
+                gitOk("git@example/repo.git"),
+                gitOk(),
+                gitFail("missing origin/main"),
+                gitFail("push rejected"),
+            ],
+        });
+
+        const result = await syncer.sync("machine1", "git@example/repo.git");
+
+        expect(result).toEqual({
+            success: false,
+            rebuildNeeded: false,
+            error: "Git push failed: push rejected",
+        });
+    });
+
+    test("sync marks rebuild needed when remote adds log files", async () => {
+        const { syncer } = createMockSyncer({
+            exists: (path) => path.endsWith(".git"),
+            gitResults: [gitOk("git@example/repo.git")],
+            files: [["C:\\events\\events-machine1.jsonl"], ["C:\\events\\events-machine1.jsonl", "C:\\events\\events-machine2.jsonl"]],
+        });
+
+        const result = await syncer.sync("machine1", "git@example/repo.git", false, false);
+
+        expect(result).toEqual({ success: true, rebuildNeeded: true });
+    });
+
+    test("sync marks rebuild needed when log file content changes", async () => {
+        let readCount = 0;
+        const { syncer } = createMockSyncer({
+            exists: (path) => path.endsWith(".git") || path.endsWith(".jsonl"),
+            gitResults: [gitOk("git@example/repo.git")],
+            files: [["C:\\events\\events-machine1.jsonl"], ["C:\\events\\events-machine1.jsonl"]],
+            read: () => readCount++ === 0 ? "before" : "after",
+        });
+
+        const result = await syncer.sync("machine1", "git@example/repo.git", false, false);
+
+        expect(result).toEqual({ success: true, rebuildNeeded: true });
+    });
+
+    test("sync reports thrown transport errors without leaking exceptions", async () => {
+        const deps: GitSyncerDeps = {
+            existsSync: () => true,
+            runGit: async () => {
+                throw new Error("transport exploded");
+            },
+            getAllLogFiles: () => [],
+            readFileSync: () => "",
+            now: () => new Date("2026-05-28T12:00:00.000Z"),
+        };
+        const syncer = new GitSyncer("C:\\events", deps);
+
+        const result = await syncer.sync("machine1", "git@example/repo.git");
+
+        expect(result).toEqual({
+            success: false,
+            rebuildNeeded: false,
+            error: "transport exploded",
+        });
+    });
 });

@@ -17,12 +17,27 @@ export interface SyncResult {
     error?: string;
 }
 
+export interface GitCommandResult {
+    success: boolean;
+    stdout: string;
+    stderr: string;
+    exitCode: number;
+}
+
+export interface GitSyncerDeps {
+    runGit?: (args: string[], cwd: string) => Promise<GitCommandResult>;
+    existsSync?: (path: string) => boolean;
+    readFileSync?: (path: string, encoding: BufferEncoding) => string;
+    getAllLogFiles?: (eventsDir?: string) => string[];
+    now?: () => Date;
+}
+
 const ORIGINAL_ENV = { ...process.env };
 
 /**
  * Runs a git command securely using Bun's shell-less spawner.
  */
-export async function runGit(args: string[], cwd: string) {
+export async function runGit(args: string[], cwd: string): Promise<GitCommandResult> {
     const proc = spawn(["git", ...args], {
         cwd,
         stdout: "pipe",
@@ -45,12 +60,15 @@ export async function runGit(args: string[], cwd: string) {
 /**
  * Computes simple hashes of all log files to detect changes.
  */
-function getLogFilesState(files: string[]): Record<string, string> {
+function getLogFilesState(
+    files: string[],
+    deps: Required<Pick<GitSyncerDeps, "existsSync" | "readFileSync">>,
+): Record<string, string> {
     const state: Record<string, string> = {};
     for (const file of files) {
-        if (existsSync(file)) {
+        if (deps.existsSync(file)) {
             try {
-                const content = readFileSync(file, "utf-8");
+                const content = deps.readFileSync(file, "utf-8");
                 state[file] = Bun.hash(content).toString();
             } catch {
                 state[file] = "error";
@@ -66,29 +84,38 @@ function getLogFilesState(files: string[]): Record<string, string> {
  */
 export class GitSyncer {
     private readonly eventsDir: string;
+    private readonly deps: Required<GitSyncerDeps>;
 
-    constructor(eventsDir?: string) {
+    constructor(eventsDir?: string, deps: GitSyncerDeps = {}) {
         this.eventsDir = eventsDir ?? getEventsDir();
+        this.deps = {
+            runGit,
+            existsSync,
+            readFileSync,
+            getAllLogFiles,
+            now: () => new Date(),
+            ...deps,
+        };
     }
 
     async isGitRepo(): Promise<boolean> {
         const gitDir = join(this.eventsDir, ".git");
-        return existsSync(gitDir);
+        return this.deps.existsSync(gitDir);
     }
 
     async initRepo(): Promise<boolean> {
-        const result = await runGit(["init"], this.eventsDir);
+        const result = await this.deps.runGit(["init"], this.eventsDir);
         if (!result.success) return false;
         
         // Configure local git user if none exists (prevents commits from failing in sandbox/CI environments)
-        const hasUser = await runGit(["config", "user.name"], this.eventsDir);
+        const hasUser = await this.deps.runGit(["config", "user.name"], this.eventsDir);
         if (!hasUser.success || !hasUser.stdout) {
-            await runGit(["config", "user.name", "Memory Nexus"], this.eventsDir);
-            await runGit(["config", "user.email", "sync@memory-nexus.local"], this.eventsDir);
+            await this.deps.runGit(["config", "user.name", "Memory Nexus"], this.eventsDir);
+            await this.deps.runGit(["config", "user.email", "sync@memory-nexus.local"], this.eventsDir);
         }
 
         // Set default branch to main
-        await runGit(["checkout", "-b", "main"], this.eventsDir);
+        await this.deps.runGit(["checkout", "-b", "main"], this.eventsDir);
 
         return true;
     }
@@ -99,18 +126,18 @@ export class GitSyncer {
         }
 
         // Remove origin if it already exists
-        await runGit(["remote", "remove", "origin"], this.eventsDir);
-        const result = await runGit(["remote", "add", "origin", remoteUrl], this.eventsDir);
+        await this.deps.runGit(["remote", "remove", "origin"], this.eventsDir);
+        const result = await this.deps.runGit(["remote", "add", "origin", remoteUrl], this.eventsDir);
         return result.success;
     }
 
     async removeRemote(): Promise<boolean> {
-        const result = await runGit(["remote", "remove", "origin"], this.eventsDir);
+        const result = await this.deps.runGit(["remote", "remove", "origin"], this.eventsDir);
         return result.success || result.stderr.includes("No such remote");
     }
 
     async getRemoteUrl(): Promise<string | null> {
-        const result = await runGit(["remote", "get-url", "origin"], this.eventsDir);
+        const result = await this.deps.runGit(["remote", "get-url", "origin"], this.eventsDir);
         return result.success ? result.stdout : null;
     }
 
@@ -135,37 +162,37 @@ export class GitSyncer {
             }
 
             // Record initial state of all log files
-            const initialFiles = getAllLogFiles(this.eventsDir);
-            const initialState = getLogFilesState(initialFiles);
+            const initialFiles = this.deps.getAllLogFiles(this.eventsDir);
+            const initialState = getLogFilesState(initialFiles, this.deps);
 
             // 3. Stage and commit local machine's log file
             const localLogName = `events-${machineId}.jsonl`;
             const localLogPath = join(this.eventsDir, localLogName);
             
-            if (existsSync(localLogPath)) {
-                await runGit(["add", localLogName], this.eventsDir);
+            if (this.deps.existsSync(localLogPath)) {
+                await this.deps.runGit(["add", localLogName], this.eventsDir);
                 // Commit (ignore exit code since it might have no changes)
-                await runGit(["commit", "-m", `sync: ${machineId} observed at ${new Date().toISOString()}`], this.eventsDir);
+                await this.deps.runGit(["commit", "-m", `sync: ${machineId} observed at ${this.deps.now().toISOString()}`], this.eventsDir);
             }
 
             let pullSuccess = true;
             // 4. Pull remote changes (rebase to keep linear history)
             if (autoPull) {
                 // Fetch first to see what's on the remote
-                await runGit(["fetch", "origin"], this.eventsDir);
+                await this.deps.runGit(["fetch", "origin"], this.eventsDir);
                 
                 // Check if origin/main remote branch exists
-                const remoteBranchExists = await runGit(["rev-parse", "--verify", "origin/main"], this.eventsDir);
+                const remoteBranchExists = await this.deps.runGit(["rev-parse", "--verify", "origin/main"], this.eventsDir);
                 
                 if (remoteBranchExists.success) {
-                    const pullResult = await runGit(["pull", "--rebase", "origin", "main"], this.eventsDir);
+                    const pullResult = await this.deps.runGit(["pull", "--rebase", "origin", "main"], this.eventsDir);
                     if (!pullResult.success) {
                         pullSuccess = false;
                         // Rebasing might leave git in a conflict state.
                         // Since multiple devices ONLY write to their own events-<machineId>.jsonl,
                         // conflicts should be 0%. But if a rebase failure happens (e.g. user manually changed something),
                         // abort the rebase to leave the worktree clean.
-                        await runGit(["rebase", "--abort"], this.eventsDir);
+                        await this.deps.runGit(["rebase", "--abort"], this.eventsDir);
                         return {
                             success: false,
                             rebuildNeeded: false,
@@ -178,7 +205,7 @@ export class GitSyncer {
 
             // 5. Push local changes
             if (autoPush && pullSuccess) {
-                const pushResult = await runGit(["push", "-u", "origin", "main"], this.eventsDir);
+                const pushResult = await this.deps.runGit(["push", "-u", "origin", "main"], this.eventsDir);
                 if (!pushResult.success) {
                     return {
                         success: false,
@@ -189,8 +216,8 @@ export class GitSyncer {
             }
 
             // Record post-sync state of all log files
-            const finalFiles = getAllLogFiles(this.eventsDir);
-            const finalState = getLogFilesState(finalFiles);
+            const finalFiles = this.deps.getAllLogFiles(this.eventsDir);
+            const finalState = getLogFilesState(finalFiles, this.deps);
 
             // Detect if anything changed or if new files appeared
             let rebuildNeeded = false;
