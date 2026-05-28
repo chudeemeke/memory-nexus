@@ -32,6 +32,7 @@ const mockExecuteRelated = mock(() =>
 );
 import { setTtyOverride, setMocks } from "../pickers/session-picker.js";
 import { initializeDatabase, closeDatabase } from "../../../infrastructure/database/index.js";
+import { ErrorCode, MemoryError } from "../../../domain/errors/index.js";
 import { mkdtempSync, rmSync, existsSync } from "fs";
 import { tmpdir } from "os";
 import { join } from "path";
@@ -254,6 +255,19 @@ describe("executeBrowseCommand", () => {
     expect(mockExecuteContext).toHaveBeenCalledWith("test-project", {});
   });
 
+  it("does not dispatch context when the selected session no longer exists", async () => {
+    setTtyOverride(true);
+    mockSearch.mockImplementation(() => Promise.resolve("missing-session-id"));
+    mockSelect.mockImplementation(() => Promise.resolve("context"));
+    setMocks(mockSearch, mockSelect);
+    closeDatabase(db);
+
+    const result = await executeBrowseCommand({ limit: "100" }, deps());
+
+    expect(result.exitCode).toBe(0);
+    expect(mockExecuteContext).not.toHaveBeenCalled();
+  });
+
   it("dispatches to related command on related action", async () => {
     setTtyOverride(true);
     mockSelect.mockImplementation(() => Promise.resolve("related"));
@@ -284,6 +298,20 @@ describe("executeBrowseCommand", () => {
 
     // Picker should still be called even with no sessions
     expect(mockSearch).toHaveBeenCalled();
+  });
+
+  it("formats MemoryError failures without wrapping them again", async () => {
+    setTtyOverride(true);
+    mockSearch.mockImplementation(() => {
+      throw new MemoryError(ErrorCode.DB_CONNECTION_FAILED, "picker storage failed");
+    });
+    setMocks(mockSearch, mockSelect);
+    closeDatabase(db);
+
+    const result = await executeBrowseCommand({ limit: "100" }, deps());
+
+    expect(result.exitCode).toBe(1);
+    expect(consoleErrors.join("\n")).toContain("picker storage failed");
   });
 
   it("shows terminal warning with helpful suggestions in non-TTY", async () => {
