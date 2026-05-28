@@ -270,6 +270,29 @@ describe("status command", () => {
             expect(status.lastSync).toBeNull();
         });
 
+        test("returns lastSync and hook-installed stats from real log and database inputs", async () => {
+            const timestamp = "2026-05-28T12:34:56.000Z";
+            mkdirSync(dirname(testLogPath), { recursive: true });
+            writeFileSync(testLogPath, JSON.stringify({
+                timestamp,
+                level: "info",
+                message: "sync complete",
+            }) + "\n");
+            installHooks(hookOverrides);
+
+            const status = await gatherStatus({
+                dbPath: ":memory:",
+                logPath: testLogPath,
+                configPath: testConfigPath,
+                hookOverrides,
+                stats: true,
+            });
+
+            expect(status.lastSync).toBe(timestamp);
+            expect(status.recentLogs).toBe(1);
+            expect(status.stats?.hooks.installed).toBe(true);
+        });
+
         test("handles missing database gracefully", async () => {
             // No database created, should not throw
             // Uses test database path passed via deps
@@ -773,6 +796,47 @@ describe("status command", () => {
             expect(output).toContain("Partial migration detected");
         });
 
+        test("database section renders unknown integrity, byte-sized databases, disabled hooks, and config-dir warnings", async () => {
+            const status = withHealth({
+                database: {
+                    exists: true,
+                    readable: true,
+                    writable: true,
+                    integrity: "unknown",
+                    size: 512,
+                },
+                permissions: {
+                    configDir: false,
+                    logsDir: true,
+                    sourceDir: true,
+                },
+                hooks: {
+                    installed: true,
+                    enabled: false,
+                    lastRun: null,
+                },
+                searchCapability: {
+                    fts5: true,
+                    sqliteVec: true,
+                    embeddedCount: 2,
+                    totalMessages: 2,
+                    coveragePercent: 100,
+                    defaultMode: "auto",
+                    vectorReady: true,
+                },
+            });
+
+            const result = await executeStatusCommand({ db: true, hooks: true }, {
+                gatherStatus: async () => status,
+            });
+
+            const output = logOutput.join("\n");
+            expect(result.exitCode).toBe(1);
+            expect(output).toContain("Integrity: unknown");
+            expect(output).toContain("Size: 512 B");
+            expect(output).toContain("Enabled (autoSync): no");
+        });
+
         test("embedding and LLM sections render ready notes and failure reasons", async () => {
             const readyStatus = withHealth({
                 embedding: {
@@ -828,8 +892,10 @@ describe("status command", () => {
         test("hook section renders all relative time buckets", async () => {
             const cases = [
                 { ageMs: 2 * 24 * 60 * 60 * 1000, expected: "2 days ago" },
+                { ageMs: 1 * 24 * 60 * 60 * 1000, expected: "1 day ago" },
                 { ageMs: 2 * 60 * 60 * 1000, expected: "2 hours ago" },
                 { ageMs: 2 * 60 * 1000, expected: "2 minutes ago" },
+                { ageMs: 1 * 60 * 1000, expected: "1 minute ago" },
                 { ageMs: 5 * 1000, expected: "just now" },
             ];
 
