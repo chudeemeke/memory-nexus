@@ -2,16 +2,18 @@
 # Coverage configuration
 coverage = true
 coverageDir = "coverage"
+coverageSkipTestFiles = true
 
 # Exclude specific directories or files from coverage reports
 coveragePathIgnorePatterns = [
-  "dist/**",
-  "node_modules/**",
-  "tests/**"
+  "**/dist/**",
+  "**/node_modules/**",
+  "**/tests/**",
+  "**/*.test.ts",
+  "**/*.coverage.test.ts"
 ]
 
 preload = ["./tests/test-setup.ts"]
 
 # Test timeout
 timeout = 30000
-
