@@ -36,6 +36,11 @@ export interface BackfillServiceDeps {
   backfill(options?: BackfillOptions): Promise<BackfillResult>;
 }
 
+export interface BackfillExecutionDeps {
+  confirm?: (message: string) => Promise<boolean>;
+  createProgressBar?: (total: number) => Promise<{ start: Function; update: Function; stop: Function } | null>;
+}
+
 /**
  * Daily log writer implementation.
  *
@@ -69,6 +74,7 @@ export class FileDailyLogWriter implements IDailyLogWriter {
 export async function executeBackfillCommand(
   options: BackfillCommandOptions,
   service: BackfillServiceDeps,
+  deps: BackfillExecutionDeps = {},
 ): Promise<CommandResult> {
   const batch = parseInt(options.batch, 10);
   const project = options.project;
@@ -97,7 +103,8 @@ export async function executeBackfillCommand(
 
   // Confirmation prompt
   if (!options.force) {
-    const confirmed = await promptConfirmation(
+    const confirm = deps.confirm ?? promptConfirmation;
+    const confirmed = await confirm(
       `Process ${count} sessions? Estimated cost: ~$${(count * 0.001).toFixed(2)} [y/N] `
     );
     if (!confirmed) {
@@ -109,7 +116,9 @@ export async function executeBackfillCommand(
   // Progress bar (only in TTY environments)
   let progressBar: { start: Function; update: Function; stop: Function } | null = null;
   try {
-    if (process.stderr.isTTY) {
+    if (deps.createProgressBar) {
+      progressBar = await deps.createProgressBar(count);
+    } else if (process.stderr.isTTY) {
       const cliProgress = await import("cli-progress");
       const bar = new cliProgress.default.SingleBar(
         {

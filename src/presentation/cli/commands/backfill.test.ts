@@ -6,7 +6,7 @@
  * programmatic API with mocked BackfillService.
  */
 
-import { describe, expect, it, beforeEach, afterEach, spyOn } from "bun:test";
+import { describe, expect, it, beforeEach, afterEach, spyOn, mock } from "bun:test";
 import { mkdtempSync, readFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -245,6 +245,71 @@ describe("Backfill Command", () => {
       expect(result.exitCode).toBe(0);
       const output = consoleLogSpy.mock.calls.map((c: any) => c[0]).join(" ");
       expect(output).toContain("No sessions");
+    });
+
+    it("cancels non-forced runs when confirmation is declined", async () => {
+      const backfill = mock(async () => ({
+        sessionsProcessed: 1,
+        sessionsFailed: 0,
+        sessionsSkipped: 0,
+        dailyLogsCreated: 0,
+        dailyLogsUpdated: 0,
+        errors: [],
+      }));
+      const confirm = mock(async () => false);
+
+      const result = await executeBackfillCommand(
+        { batch: "10" },
+        {
+          dryRun: async () => ({ unprocessedCount: 5, estimatedCost: 0.005 }),
+          backfill,
+        },
+        { confirm },
+      );
+
+      expect(result.exitCode).toBe(0);
+      expect(confirm).toHaveBeenCalledTimes(1);
+      expect(backfill).not.toHaveBeenCalled();
+      expect(consoleErrorSpy.mock.calls.map((c: any) => c[0]).join(" ")).toContain("Cancelled");
+    });
+
+    it("runs confirmed non-forced backfill with progress updates and no daily-log summary when unchanged", async () => {
+      const progressBar = {
+        start: mock(() => {}),
+        update: mock(() => {}),
+        stop: mock(() => {}),
+      };
+      const confirm = mock(async () => true);
+      const createProgressBar = mock(async () => progressBar);
+
+      const result = await executeBackfillCommand(
+        { batch: "2" },
+        {
+          dryRun: async () => ({ unprocessedCount: 5, estimatedCost: 0.005 }),
+          backfill: async (opts) => {
+            opts?.onProgress?.({ current: 1, total: 2, sessionId: "session-alpha" });
+            opts?.onProgress?.({ current: 2, total: 2, sessionId: "session-beta" });
+            return {
+              sessionsProcessed: 2,
+              sessionsFailed: 0,
+              sessionsSkipped: 0,
+              dailyLogsCreated: 0,
+              dailyLogsUpdated: 0,
+              errors: [],
+            };
+          },
+        },
+        { confirm, createProgressBar },
+      );
+
+      const output = consoleLogSpy.mock.calls.map((c: any) => c[0]).join(" ");
+      expect(result.exitCode).toBe(0);
+      expect(createProgressBar).toHaveBeenCalledWith(2);
+      expect(progressBar.update).toHaveBeenCalledWith(1, { sessionId: "session-" });
+      expect(progressBar.update).toHaveBeenCalledWith(2, { sessionId: "session-" });
+      expect(progressBar.stop).toHaveBeenCalledTimes(1);
+      expect(output).toContain("2 processed");
+      expect(output).not.toContain("Daily logs:");
     });
 
     it("displays daily log stats", async () => {
