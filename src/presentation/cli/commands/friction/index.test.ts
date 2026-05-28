@@ -4,11 +4,26 @@
  * Tests the createFrictionCommand Commander.js command registration.
  */
 
-import { describe, expect, it } from "bun:test";
+import { afterEach, describe, expect, it, spyOn } from "bun:test";
 import { Command } from "commander";
-import { createFrictionCommand } from "./index.js";
+import { mkdtempSync, rmSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+import { createFrictionCommand, executeFrictionCommand } from "./index.js";
 
 describe("createFrictionCommand", () => {
+    const tempDirs: string[] = [];
+
+    afterEach(() => {
+        for (const dir of tempDirs.splice(0)) {
+            try {
+                rmSync(dir, { recursive: true, force: true, maxRetries: 10, retryDelay: 50 });
+            } catch {
+                // Best-effort cleanup for Windows SQLite handles.
+            }
+        }
+    });
+
     it("returns a Command instance", () => {
         const command = createFrictionCommand();
         expect(command).toBeInstanceOf(Command);
@@ -175,5 +190,44 @@ describe("createFrictionCommand", () => {
         );
         expect(opt).toBeDefined();
         expect(opt?.required).toBe(true);
+    });
+
+    it("executeFrictionCommand reports unknown actions through command result", async () => {
+        const tempDir = mkdtempSync(join(tmpdir(), "memory-friction-index-"));
+        tempDirs.push(tempDir);
+        const consoleSpy = spyOn(console, "error").mockImplementation(() => {});
+
+        try {
+            const result = await executeFrictionCommand(
+                { action: "unknown" } as any,
+                { dbPath: join(tempDir, "memory.db") },
+            );
+
+            expect(result.exitCode).toBe(1);
+            expect(consoleSpy.mock.calls.map((call: unknown[]) => String(call[0])).join("\n"))
+                .toContain("Unknown friction action: unknown");
+        } finally {
+            consoleSpy.mockRestore();
+        }
+    });
+
+    it("executeFrictionCommand formats database initialization failures as JSON", async () => {
+        const consoleSpy = spyOn(console, "log").mockImplementation(() => {});
+        const invalidPath = process.platform === "win32"
+            ? "NUL/cannot/create/friction.db"
+            : "/dev/null/cannot/create/friction.db";
+
+        try {
+            const result = await executeFrictionCommand(
+                { action: "list", json: true } as any,
+                { dbPath: invalidPath },
+            );
+
+            expect(result.exitCode).toBe(1);
+            const output = JSON.parse(consoleSpy.mock.calls.map((call: unknown[]) => String(call[0])).join("\n"));
+            expect(output.error.code).toBe("DB_CONNECTION_FAILED");
+        } finally {
+            consoleSpy.mockRestore();
+        }
     });
 });

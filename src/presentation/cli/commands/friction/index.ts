@@ -113,10 +113,11 @@ export async function executeFrictionCommand(
     options: FrictionExecuteOptions,
     deps: FrictionCommandDeps = {}
 ): Promise<CommandResult> {
-    const dbPath = deps.dbPath ?? getDefaultDbPath();
-    const { db } = initializeDatabase({ path: dbPath });
+    let db: ReturnType<typeof initializeDatabase>["db"] | undefined;
 
     try {
+        const dbPath = deps.dbPath ?? getDefaultDbPath();
+        db = initializeDatabase({ path: dbPath }).db;
         const repository = new SqliteFrictionRepository(db);
         const service = new FrictionService(repository);
 
@@ -150,7 +151,9 @@ export async function executeFrictionCommand(
         }
         return { exitCode: 1 };
     } finally {
-        closeDatabase(db);
+        if (db) {
+            closeDatabase(db);
+        }
     }
 }
 
