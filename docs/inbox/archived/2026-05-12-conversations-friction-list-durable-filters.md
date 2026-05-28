@@ -5,13 +5,34 @@ created: 2026-05-12
 triaged_at: 2026-05-13
 type: enhancement
 severity: low
-fix_status: none
+fix_status: planned
 affects_scope: all-consumers
-status: triaged
-priority_rationale: Sound proposal, accepted as future capacity. NOT actionable today (conversations explicitly said don't build for them). Conditional execution gated on architecture audit Stage 3 outcome — A/B consider, C revisit, D/E abandon.
+status: merged
+resolved_at: 2026-05-28
+resolution_ref: .planning/ROADMAP.md#post-v4-accepted-capacity-durable-friction-query-contract
+priority_rationale: Sound proposal, accepted as future capacity. Architecture audit outcome A-prime means schedule for post-v4 roadmap capacity; do not build inside Phase 37 because release remains blocked on coverage truth.
 closure_notify_to: conversations
 closure_notify_reason: If memory-nexus extends `friction list` per this proposal, conversations' `friction_pattern_detected` reminder check has a path to durable signal (today it scans transient JSONL only).
 ---
+
+## Resolution (2026-05-28)
+
+Merged into the roadmap as accepted post-v4 capacity, not implemented in Phase 37.
+
+Source of truth:
+- `.planning/ROADMAP.md` now includes **Post-v4 accepted capacity: Durable Friction Query Contract**.
+- `.planning/STATE.md` records that this is not a Phase 37 release blocker.
+
+No command behavior changed in this closure. Conversations should continue using the existing JSONL checker until memory-nexus intentionally implements the durable friction query contract.
+
+## Re-disposition (2026-05-28)
+
+Architecture audit outcome is A-prime / continue. This remains accepted, but it is not a Phase 37 release blocker and should not be smuggled into publish hardening.
+
+Disposition:
+- Keep as future roadmap capacity for the post-v4 track.
+- Implementation must be planned as a CLI contract change with tests for filter semantics, count/min exit codes, JSON schema stability, timezone handling, and privacy/redaction of query strings.
+- Do not build it solely for conversations; the consumer-side JSONL checker remains acceptable until memory-nexus intentionally extends the durable friction query surface.
 
 ## Triage decision (2026-05-13)
 

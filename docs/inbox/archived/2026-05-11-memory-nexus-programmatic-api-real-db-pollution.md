@@ -5,12 +5,23 @@ created: 2026-05-11
 triaged_at: 2026-05-13
 type: bug
 severity: medium
-fix_status: none
+fix_status: merged
 affects_scope: this-project-only
-status: triaged
+status: merged
 workaround_applied: file excluded from test-isolation arc's "all green" claim; surfaced for separate triage
+resolved_at: 2026-05-28
+resolution_ref: local-worktree-verification
 priority_rationale: Fix pattern is canonical deps-injection (from test-isolation arc). Execution deferred until architecture audit Stage 3 recommends an outcome in {A, B, C, D}. Outcome E would abandon the fix.
 ---
+
+## Resolution (2026-05-28)
+
+Archived as resolved/stale against the current implementation.
+
+Validation:
+- `bun test tests/integration/programmatic-api.test.ts --timeout 15000` passes: 50 tests, 0 failures.
+- The test output uses a temp database path under `AppData\Local\Temp\memory-api-test-*`, not the user's real memory database.
+- The old 5-39 second timeout pattern no longer reproduces; current runtime was ~7 seconds for the whole file.
 
 ## Triage decision (2026-05-13)
 

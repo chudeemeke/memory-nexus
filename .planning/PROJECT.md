@@ -10,11 +10,11 @@ Cross-project context persistence for Claude Code sessions. Extracts JSONL sessi
 
 - Not a cloud service - fully local, no network access
 - Not a replacement for Claude's context window - a complement to it
-- Not a semantic/vector search tool -- OUTDATED: v2.0 shipped hybrid search (FTS5 + sqlite-vec)
+- Not a cloud memory SaaS, remote vector service, or hosted analytics product
 
 ## Current State
 
-Shipped v3.0. Three milestones complete (v1.0, v2.0, v3.0) with 29 phases and 104 plans.
+Shipped v3.0. v4.0 Intelligence Layer is in foundation hardening, with Phase 36.8 implemented and Phase 37 publish execution blocked until the release coverage gate can measure and pass all four WoW metrics.
 
 **Tech stack:** Bun, TypeScript 5.5+, bun:sqlite with FTS5 + sqlite-vec, Commander.js v14, cli-progress, chrono-node, @huggingface/transformers v3
 
@@ -22,7 +22,7 @@ Shipped v3.0. Three milestones complete (v1.0, v2.0, v3.0) with 29 phases and 10
 
 **Commands:** sync, search, list, stats, context, related, show, browse, install, uninstall, status, doctor, purge, export, import, completion
 
-**Test suite:** ~1,966 tests, 95.67% line coverage, 94.49% function coverage, 85.46% mutation score (domain)
+**Test suite:** 3,762 tests currently pass under the Istanbul-backed `bun run test:coverage` harness. The release gate now measures all four metrics and fails honestly at statements 91.05%, branches 82.30%, functions 94.70%, and lines 91.55%; remediation is required before publish.
 
 ## Problem Statement
 
@@ -66,7 +66,7 @@ Both Claude and humans use the same commands. No special formatting needed.
 - EXTR-01 through EXTR-04: Entity extraction, tool tracking -- v1.0
 - ERR-01 through ERR-05: Error handling, exit codes, signal handling -- v1.0
 - QUAL-02 through QUAL-05: Unit, integration, and concurrent tests -- v1.0
-- QUAL-01: Coverage threshold -- v1.0 (near-pass: 94.49% functions, Bun limitation)
+- QUAL-01: Coverage threshold -- v1.0 initially near-pass; current all-four-metric gate is measurable but below threshold and blocks release
 - Hybrid search (FTS5 + sqlite-vec + RRF), embedding providers, embedding pipeline -- v2.0
 - Package rename to @chude/memory, programmatic API, aidev integration readiness -- v2.0
 - Agent-written memory, smart context, friction system, backfill, qmd integration -- v3.0

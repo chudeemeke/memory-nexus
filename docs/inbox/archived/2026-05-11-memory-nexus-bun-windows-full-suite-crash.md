@@ -5,12 +5,23 @@ created: 2026-05-11
 triaged_at: 2026-05-13
 type: bug
 severity: medium
-fix_status: none
+fix_status: merged
 affects_scope: this-project-only
-status: triaged
+status: merged
 workaround_applied: run tests by subdirectory; workaround documented in README.md Development section
-priority_rationale: Upstream Bun bug, not memory-nexus code. Workaround documented for contributors in README.md; fix deferred to upstream. Concrete trigger for revisit = Bun version bump past 1.3.5.
+resolved_at: 2026-05-28
+resolution_ref: local-worktree-verification
+priority_rationale: Current Windows verification on Bun 1.3.5 has the full-suite command passing with `bun test --timeout 15000`; README now keeps the historical workaround only as fallback if the upstream crash returns.
 ---
+
+## Resolution (2026-05-28)
+
+Archived as resolved/stale against the current implementation and runtime behavior.
+
+Validation:
+- `bun --version` reports `1.3.5`.
+- Prior 2026-05-28 release-gate verification passed `bun test --timeout 15000` on Windows with 3718 tests passing, 0 failing.
+- README now records the current passing command and keeps the subdirectory commands as a fallback, not as the primary expected path.
 
 ## Triage decision (2026-05-13)
 

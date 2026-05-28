@@ -5,7 +5,7 @@
 - SHIPPED **v1.0 Full Vision Implementation** -- Phases 1-12 (shipped 2026-02-16) -- [Archive](milestones/v1.0-ROADMAP.md)
 - SHIPPED **v2.0 Hybrid Search and Rebrand** -- Phases 13-22 (shipped 2026-03-01)
 - SHIPPED **v3.0 Knowledge Layer + Friction Logging** -- Phases 23-29.1 (shipped 2026-04-02)
-- **v4.0 Intelligence Layer** -- Phases 30-37 plus 32.5 (in progress; architecture audit LOCKED 2026-05-13, recommendation A-prime — see `docs/audits/2026-05-11-architecture-first-principles-audit.md`)
+- **v4.0 Intelligence Layer** -- Phases 30-37 plus 32.5 and 36.8 (in progress; architecture audit LOCKED 2026-05-13, recommendation A-prime; 2026-05-27 foundation review added pre-publish security hardening before GA)
 
 ## Phases
 
@@ -58,14 +58,14 @@
 
 </details>
 
-### v4.0 Intelligence Layer (Phases 30-37, plus 32.5)
+### v4.0 Intelligence Layer (Phases 30-37, plus 32.5, 36.8, and 36.9)
 
 **Overview:** Transform memory from a data store into a knowledge system. Automated extraction of decisions, learnings, and patterns from sessions via LLM-powered pipeline. Intelligent context delivery from SQLite fact tables instead of filesystem. Clean CLI surface with labeled help groups. Cross-environment portability for WSL migration. npm publish to registry.
 
 **Architecture audit recommendation (LOCKED 2026-05-13): A-prime.** Continue v4.0 with: NEW Phase 32.5 (surface consolidation), event-log SSOT requirement for Phase 33 (plain-text canonical events; DB tables as derived projection), supersedence-as-event-type in Phase 34, T7 plain-text canonical requirement in Phase 35, prerelease publishing with GA gated on §21 acceptance criteria of the audit doc.
 
-**Depth:** Fine (9 phases)
-**Total v4.0 Requirements:** 25 phase-mapped + 4 cross-cutting (QUAL) = 29 (Phase 32.5 inherits surface-consolidation scope; no new requirements added)
+**Depth:** Fine (10 phases)
+**Total v4.0 Requirements:** 25 phase-mapped + 4 cross-cutting (QUAL) + 4 secret-boundary requirements = 33 (Phase 36.8 adds pre-publish security hardening; authkey remains optional interop, not a dependency)
 
 - [x] **Phase 30: God File Cleanup** - Split sync.ts and friction.ts into focused SRP-compliant modules (completed 2026-04-03)
 - [x] **Phase 31: Bug Fixes** - Unicode search, CLI truncation, download bar issues (completed 2026-05-14)
@@ -77,13 +77,17 @@
 - [x] **Phase 34: Extraction Pipeline** - The `memory extract` command with ADD/UPDATE/DELETE/NOOP operations. (Completed 2026-05-24)
 - [x] **Phase 35: Context Intelligence** - Rewire SmartContextService to read from fact tables, deprecate ~/.memory/. **Every new typed memory kind in 33-35 must have plain-text canonical OR export-on-write before becoming default (T7) per audit §19 item 6.** (Completed 2026-05-24)
 - [x] **Phase 36: Portability** - WSL migration command, doctor --portability, migration guide (completed 2026-05-25)
-- [ ] **Phase 37: Publishing** - Prerelease (`@chude/memory@4.0.0-pre.N`) allowed at any time; GA (`@chude/memory@4.0.0`) gated on §21 acceptance criteria for Phases 32.5/33/34/35 per audit §19 item 8.
+- [x] **Phase 36.8: Secret Boundary and Optional Provider Interop** (NEW, pre-publish hardening) - Redaction before persistence/provider egress; config stores env/ref metadata instead of plaintext API keys; authkey is supported as an optional `authkey run --env memory -- ...` execution path, never as a required dependency or raw-secret resolver. (Completed 2026-05-28)
+- [ ] **Phase 36.9: Coverage Runner Migration** (NEW, pre-publish hardening) - Replace the current Bun-only coverage gate with an honest runner/instrumentation path that reports statements, branches, functions, and lines for the release surface; no aliasing unmeasured metrics to measured ones.
+- [ ] **Phase 37: Publishing** - Prerelease (`@chude/memory@4.0.0-pre.N`) allowed only after release gates are restored; GA (`@chude/memory@4.0.0`) gated on prior audit criteria plus Phase 36.8 secret-boundary hardening and Phase 36.9 four-metric coverage enforcement.
 
-### v5.0 Autonomous & Synchronized Memory Layer (Phases 38-42)
+### v5.0 Autonomous & Synchronized Memory Layer (Phases 38-42, plus 38.5)
 
-**Overview:** Transition `@chude/memory` into a world-class, multi-device, highly competitive agentic memory platform. Adds Git-backed remote database synchronization, user/developer persona aggregation, semantic graph relations mapping, half-life importance decay algorithms, and biological "Dreaming" asynchronous background consolidation.
+**Overview:** Transition `@chude/memory` into a world-class, multi-device, highly competitive agentic memory platform. Adds Git-backed remote database synchronization, optional secure capability interop, user/developer persona aggregation, semantic graph relations mapping, half-life importance decay algorithms, and biological "Dreaming" asynchronous background consolidation.
 
 - [ ] **Phase 38: Remote Sync** - Private-Git-backed remote event log synchronization (multi-device consolidation)
+- [ ] **Phase 38.5: Secure Capability Interop** - Optional authkey readiness/status/fingerprint interop using handles, masked metadata, or proofs; no hard dependency and no plaintext secret resolution inside memory-nexus.
+- [ ] **Post-v4 accepted capacity: Durable Friction Query Contract** - Extend the existing `memory friction list` surface only if/when roadmap capacity allows. Required contract work: stable JSON schema, `--since`, exact severity/project filters, privacy-safe contains filters, `--count`, `--min`, explicit exit codes, timezone semantics, and tests. Source: `docs/inbox/2026-05-12-conversations-friction-list-durable-filters.md`.
 - [ ] **Phase 39: Persona Profiling** - Centralized developer/agent style persona profile aggregation
 - [ ] **Phase 40: Semantic Graph** - Entity-Relationship extraction and graph-traversal queries in the links table
 - [ ] **Phase 41: Importance Decay** - Utility weighting and half-life temporal relevance decay in search ranking
@@ -168,7 +172,7 @@ Pre-existing scope: db-startup.ts, context-formatter.ts, friction-dashboard.ts, 
   1. The 8 failing tests in `src/presentation/cli/formatters/friction-dashboard.test.ts` pass cleanly (`generateFrictionHtml` rendering + `--html` action path)
   2. `memory friction list --json` produces a `QueryResultEnvelope`-shaped document on stdout, consistent with the 6 query commands from Phase 32
   3. The deferred Open Q7 from Plan 32-01 is closed (friction adoption no longer deferred)
-**Plans**: TBD
+**Plans**: `.planning/phases/36.9-coverage-runner-migration/36.9-01-PLAN.md` (in progress)
 
 Rationale: Phase 32 explicitly deferred friction envelope adoption per audit §14.A. The dashboard test failures co-locate with that decision because the underlying surface changes when friction joins the envelope contract.
 
@@ -185,7 +189,7 @@ Rationale: Phase 32 explicitly deferred friction envelope adoption per audit §1
   3. `extraction_log` table records each extraction run with session ID, mode, fact counts (added/updated/superseded/skipped), provider/model, and tokens consumed
   4. Re-running extraction on an already-extracted session is a no-op (idempotency tracked via extraction_log)
   5. `memory doctor` reports extraction provider configuration and readiness
-**Plans**: TBD
+**Plans**: `.planning/phases/36.9-coverage-runner-migration/36.9-01-PLAN.md` (in progress)
 
 ---
 
@@ -231,10 +235,40 @@ Rationale: Phase 32 explicitly deferred friction envelope adoption per audit §1
 
 ---
 
+### Phase 36.8: Secret Boundary and Optional Provider Interop
+
+**Goal**: memory-nexus no longer stores or encourages plaintext provider secrets, and secret-bearing provider workflows can be run through optional environment injection without making authkey a required dependency.
+**Depends on**: Phase 36; blocks Phase 37 GA
+**Requirements**: SEC-01, SEC-02, SEC-03, QUAL-04
+**Success Criteria** (what must be TRUE):
+  1. Redaction/classification runs before durable storage, FTS indexing, embeddings, extraction, export, and future remote sync.
+  2. Plaintext `embedding.apiKey` config is deprecated or migrated; supported config uses environment-variable references or non-resolving metadata references such as `apiKeyRef`.
+  3. `memory doctor` / `memory status` report secret-source readiness without printing secret values.
+  4. Docs include optional dogfood commands such as `authkey run --env memory -- memory sync --embed` and explicitly forbid `authkey get` integration.
+  5. memory-nexus passes all local workflows with no authkey installed.
+**Plans**: `.planning/phases/36.8-secret-boundary-optional-provider-interop/36.8-01-PLAN.md` (complete; summary in `36.8-01-SUMMARY.md`)
+
+---
+
+### Phase 36.9: Coverage Runner Migration
+
+**Goal**: the release gate measures and enforces all four WoW coverage metrics honestly: statements, branches, functions, and lines.
+**Depends on**: Phase 36.8; blocks Phase 37 GA
+**Requirements**: QUAL-01, QUAL-04
+**Success Criteria** (what must be TRUE):
+  1. `bun run test:coverage` or its replacement emits statements, branches, functions, and lines for production source.
+  2. The coverage checker fails if any metric is unavailable or below 95%; it does not map statements to lines, branches to functions, or otherwise synthesize false confidence.
+  3. Test files, generated `dist`, dependency folders, and pure type/barrel files are excluded by explicit, reviewable rules only.
+  4. The normal Bun test suite still runs successfully; any Node/Vitest path must either cover the same release surface or be documented as insufficient and rejected.
+  5. `bun run typecheck`, `bun run build`, `bun run test:isolation`, `bun audit`, and the final coverage gate all pass before Phase 37 starts.
+**Plans**: `.planning/phases/36.9-coverage-runner-migration/36.9-01-PLAN.md` (in progress)
+
+---
+
 ### Phase 37: Publishing
 
 **Goal**: `@chude/memory` is published to npm and installable globally by any user
-**Depends on**: Phase 35 (all features complete before publishing)
+**Depends on**: Phase 35 (all features complete before publishing), Phase 36.8 (secret boundary and provider interop hardening), Phase 36.9 (four-metric coverage enforcement)
 **Requirements**: PUB-01, PUB-02
 **Success Criteria** (what must be TRUE):
   1. `@chude/memory` is published to the npm registry with correct `bin`, `files`, and dependency configuration
@@ -256,10 +290,24 @@ Rationale: Phase 32 explicitly deferred friction envelope adoption per audit §1
 
 ---
 
+### Phase 38.5: Secure Capability Interop
+
+**Goal**: memory-nexus can optionally consume safe authkey capability metadata while preserving standalone operation and never resolving raw secrets inside memory-nexus.
+**Depends on**: Phase 36.8 and Phase 38; authkey readiness remains an optional enhancement, not a hard prerequisite
+**Requirements**: SEC-04, INTEG-01
+**Success Criteria** (what must be TRUE):
+  1. authkey absence is handled as "optional provider unavailable", never as a memory-nexus failure.
+  2. authkey readiness/status checks return only masked metadata, handles, or proofs.
+  3. `authkey://...` references are treated as references for diagnostics and documentation, not as raw-secret resolver inputs.
+  4. A future authkey fingerprint inventory can help detect known leaked values without memory-nexus receiving those raw values.
+  5. Tests prove no AI-facing command path can print or return a secret value through this integration.
+
+---
+
 ### Phase 39: Persona Profiling
 
 **Goal**: Aggregates developer preferences and friction facts into a high-density, version-controlled developer style profile briefing.
-**Depends on**: Phase 38
+**Depends on**: Phase 38.5
 **Requirements**: CTXT-05, CTXT-06
 **Success Criteria** (what must be TRUE):
   1. Background compiler aggregates facts to generate a clean, versioned `developer-profile.md` profile sheet.
@@ -312,6 +360,7 @@ These are enforced in every phase, not assigned to a single phase:
 - Domain layer maintains zero external dependencies
 - All new infrastructure adapters follow existing port/adapter patterns
 - TDD workflow (RED-GREEN-REFACTOR) for all new features
+- Secret-bearing provider workflows use environment injection or references; memory-nexus must not store plaintext API keys or call another tool for raw secret values inside AI-visible command paths
 
 ---
 
@@ -328,7 +377,11 @@ Phase 30 (God File Cleanup)
                         |
                         +---> Phase 35 (Context Intelligence)
                                   |
-                                  +---> Phase 37 (Publishing)
+                                  +---> Phase 36.8 (Secret Boundary)
+                                            |
+                                            +---> Phase 36.9 (Coverage Runner)
+                                                  |
+                                                  +---> Phase 37 (Publishing)
 
 Phase 32 (CLI Surface)
     [independent, parallel with Phases 30-35]
@@ -336,11 +389,28 @@ Phase 32 (CLI Surface)
 Phase 36 (Portability)
     [independent, parallel with Phases 33-35]
 
+Phase 36.8 (Secret Boundary and Optional Provider Interop)
+    depends on Phase 36
+    blocks Phase 36.9 and Phase 37 GA
+    does not require authkey to be installed
+
+Phase 36.9 (Coverage Runner Migration)
+    depends on Phase 36.8
+    blocks Phase 37 GA
+    must prove statements, branches, functions, and lines independently
+
 Phase 37 (Publishing)
     depends on Phase 35 (all features in before publish)
     depends on Phase 31 (bugs fixed before publish)
     depends on Phase 32 (CLI surface clean before publish)
     depends on Phase 36 (portability in before publish)
+    depends on Phase 36.8 (secret boundary before publish)
+    depends on Phase 36.9 (coverage runner before publish)
+
+v5.0
+    Phase 38 (Remote Sync) depends on Phase 37
+    Phase 38.5 (Secure Capability Interop) depends on Phase 36.8 and Phase 38
+    Phase 39 (Persona Profiling) depends on Phase 38.5
 ```
 
 ---
@@ -379,8 +449,12 @@ Phase 37 (Publishing)
 | 34. Extraction Pipeline | v4.0 | 1/1 | Complete | 2026-05-24 |
 | 35. Context Intelligence | v4.0 | 1/1 | Complete | 2026-05-24 |
 | 36. Portability | v4.0 | 1/1 | Complete | 2026-05-25 |
+| 36.8. Secret Boundary and Optional Provider Interop | v4.0 | 1/1 | Complete | 2026-05-28 |
+| 36.9. Coverage Runner Migration | v4.0 | 1/1 | In progress | - |
 | 37. Publishing | v4.0 | TBD | Planned | - |
 | 38. Remote Sync | v5.0 | TBD | Planned | - |
+| 38.5. Secure Capability Interop | v5.0 | TBD | Planned | - |
+| Durable Friction Query Contract | post-v4 | TBD | Accepted backlog | - |
 | 39. Persona Profiling | v5.0 | TBD | Planned | - |
 | 40. Semantic Graph | v5.0 | TBD | Planned | - |
 | 41. Importance Decay | v5.0 | TBD | Planned | - |
@@ -388,4 +462,4 @@ Phase 37 (Publishing)
 
 ---
 
-*Last updated: 2026-05-25 (Phase 36 completed)*
+*Last updated: 2026-05-28 (Phase 36.9 coverage remediation in progress; durable friction query contract retained as accepted post-v4 capacity)*

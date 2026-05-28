@@ -3,15 +3,17 @@ gsd_state_version: 1.0
 milestone: v4.0
 milestone_name: Intelligence Layer
 status: in_progress
-last_updated: "2026-05-25T07:00:00.000Z"
+last_updated: "2026-05-28T05:05:00.000Z"
 progress:
-  total_phases: 11
-  completed_phases: 8
-  total_plans: 9
-  completed_plans: 9
+  total_phases: 12
+  completed_phases: 11
+  total_plans: 12
+  completed_plans: 12
 ---
 
-> **PHASE 35 SHIPPED 2026-05-24** — Phase 35 implemented on disk with facts-based context briefings rewired to SQLite fact tables, standard markdown dividers, and legacy ~/.memory folder deprecation warning.
+> **FOUNDATION HARDENING VERIFIED 2026-05-28** - Phase 36.8 is implemented. Typecheck, build, full tests, test-isolation, dependency audit, and gitleaks pass. Provider support now routes through an internal provider registry instead of presentation/health/factory switch drift. Phase 36.9 replaced the missing-metric Bun LCOV gate with an Istanbul-backed Bun coverage harness; release still correctly FAILS because true coverage is below WoW thresholds.
+> **INBOX RECONCILED 2026-05-28** - Stale bug reports for the Windows full-suite crash, orphaned friction test, and programmatic API real-DB pollution were validated against the current code and archived. The durable-friction-list filing was accepted into ROADMAP as post-v4 capacity, archived as planned, and counter-notified to conversations. No active memory-nexus inbox items remain.
+> **FIRST-PARTY INFRASTRUCTURE BROADCAST 2026-05-28** - User clarified that `memory` is a first-class first-party tool used by most/all projects. Canonical tool/package naming is `memory` / `@chude/memory`; the repository remains `memory-nexus`, and `nexus` is a legacy alias. Updated Codex/Claude rules and document-for-clear skills, added a Codex memory note, and filed notification inbox items to opted-in projects so consumers know about provider-secret, redaction/export, registry, and authkey-optional contract changes.
 # State: @chude/memory (memory-nexus)
 
 ## Project Reference
@@ -20,20 +22,20 @@ See: .planning/PROJECT.md (updated 2026-02-18)
 
 **Core Value:** Knowledge gained in one Claude Code project becomes accessible from any other project. No more context silos.
 
-**Current Focus:** Architecture first-principles audit LOCKED 2026-05-13. Recommendation: **A-prime** (hybrid; continue v4.0 with NEW Phase 32.5 + event-log SSOT architectural enforcement + supersedence-as-event-type + plain-text canonical for new typed memory + prerelease publishing with GA gated on acceptance criteria). Audit doc at `docs/audits/2026-05-11-architecture-first-principles-audit.md`. **Next action: Phase 36 (Portability).** Inbox item status: `merged` (archived).
+**Current Focus:** 2026-05-27 foundation reviews supersede any publish-ready assumption. Phase 36.8 (Secret Boundary and Optional Provider Interop) is implemented and verified. Relevant docs: `docs/audits/2026-05-27-v4-foundation-architecture-security-quality-review.md`, `docs/audits/2026-05-27-remote-sync-architecture-security-quality-review.md`, `docs/plans/2026-05-27-authkey-optional-integration.md`, and `.planning/phases/36.8-secret-boundary-optional-provider-interop/36.8-01-SUMMARY.md`.
 
 **Tech Stack:** Bun, TypeScript 5.5+, bun:sqlite with FTS5 + sqlite-vec, Commander.js v14, @huggingface/transformers v3, cli-progress, chrono-node, Chart.js (HTML dashboard)
 
 ## Current Position
 
-Phase: 35 (Context Intelligence) — COMPLETE
-Test-isolation cleanup arc — COMPLETE (2026-05-11, gate at 0 violations)
+Phase: 36.9 (Coverage Runner Migration) - IN PROGRESS
+Test-isolation cleanup arc - RESTORED as of 2026-05-27 (`bun run test:isolation` passes)
 Architecture first-principles audit — COMPLETE (LOCKED 2026-05-13, recommendation A-prime)
-**Milestone:** v4.0 Intelligence Layer — resumed 2026-05-14 at 7/9 phases done
-**Status:** v4.0 resumes at Phase 36. Phase 33 carries event-log SSOT architectural enforcement; Phase 37 GA gated on §21 acceptance criteria per audit recommendation.
+**Milestone:** v4.0 Intelligence Layer - foundation hardening inserted before publish
+**Status:** v4.0 cannot proceed to Phase 37 publish execution yet. Phase 36.8 removed the immediate security/gate blockers: release gates are honest, redaction runs before new storage/provider egress/export, `embedding.apiKey` is deprecated, `apiKeyEnv`/`apiKeyRef` are supported, authkey remains optional, and provider support is centralized through an internal registry with explicit unsupported-provider failures. The active release blocker is now Phase 36.9 Coverage Remediation: `bun run test:coverage` runs all 3,762 tests successfully under an Istanbul-backed Bun harness, then fails the honest gate at statements 91.05%, branches 82.30%, functions 94.70%, and lines 91.55%.
 
 ```
-v4.0 Progress: [###############_____________] 8/9 phases complete
+v4.0 Progress: [##########################__] 11/12 phases complete
   Phase 30:   God File Cleanup                [done]
   Phase 31:   Bug Fixes                       [done] (31-01 + 31-02)
   Phase 32:   CLI Surface                     [done]
@@ -42,14 +44,16 @@ v4.0 Progress: [###############_____________] 8/9 phases complete
   Phase 34:   Extraction Pipeline             [done] — supersedence-as-event-type
   Phase 35:   Context Intelligence            [done] — T7 plain-text canonical
   Phase 36:   Portability                     [done] — WSL migration + doctor portability
-  Phase 37:   Publishing                      [ ] Not started — prerelease OK; GA-gated
+  Phase 36.8: Secret Boundary + Optional Interop [done] - redaction + env/ref secrets + optional authkey run path
+  Phase 36.9: Coverage Runner Migration       [~] In progress - runner implemented; remediation needed to reach 95% on all metrics
+  Phase 37:   Publishing                      [ ] Not started - blocked until coverage gate passes all four metrics
 ```
 
 ## Out-of-roadmap: Test Isolation Cleanup (2026-05-08 → 2026-05-11) — CLOSED
 
 41 → 0 test failures, 28 → 0 gate violations across two arcs (18 atomic commits). Established the deps-parameter pattern as canonical seam for CLI commands and infrastructure; env-var pattern (XDG + new `MEMORY_HOME`) for paths.ts. Latest closing commit: 3ac29dc (concurrent-commands + interrupted-sync migration).
 
-**CI gate:** `bun run test:isolation` (script: `scripts/check-test-isolation.ts`) — PASS at 0 violations.
+**Historical CI gate:** `bun run test:isolation` passed at closure. **Current 2026-05-27 truth:** gate passes again after replacing first-party remote-sync module mocks with dependency injection.
 
 **Pre-existing issues surfaced during verification (filed to inbox, NOT arc-scoped):**
 - `docs/inbox/2026-05-11-memory-nexus-programmatic-api-real-db-pollution.md`
@@ -117,9 +121,30 @@ v4.0 Progress: [###############_____________] 8/9 phases complete
 
 - sync.ts (928 lines) and friction.ts (638 lines): RESOLVED via Phase 30 SRP splits
 - bun link install active (symlink to source, not npm published yet)
-- paths.ts is the last test-isolation gate violator (3 of 3 remaining)
+- Release gates restored as of 2026-05-27: `bun test --timeout 15000`, `bun run typecheck`, `bun run build`, `bun run test:isolation`, `bun audit`, and `gitleaks detect --no-banner --redact --source .` pass.
+- Secret boundary hardening is implemented for new sync persistence, extraction payloads, embedding payloads, CLI export, health readiness, and status JSON config output.
+- Optional authkey interop is documented in `docs/plans/2026-05-27-authkey-optional-integration.md`; authkey must remain optional and must not be used as a raw secret resolver.
+- Phase 38 remote-sync prototype code exists in the tree but is parked behind `MEMORY_EXPERIMENTAL_REMOTE_SYNC=1`. The public CLI does not register `memory remote` and `memory sync` will not push/pull remote event logs unless that explicit prototype flag is set. It remains non-release-ready until the Phase 38 threat model, event envelope, conflict semantics, redaction/privacy controls, and application-port architecture are implemented.
+- Residual release-quality gap: the coverage runner now measures statements, branches, functions, and lines independently, but current true coverage is below the 95%-each WoW threshold.
 
 ## Session Continuity
+
+### Current Resume Point - 2026-05-27
+
+**Completed this review/update pass:**
+- Added `docs/audits/2026-05-27-v4-foundation-architecture-security-quality-review.md` with the conclusion that v4 is not publication-grade until foundation hardening lands.
+- Added `docs/audits/2026-05-27-remote-sync-architecture-security-quality-review.md` with the conclusion that dirty remote-sync work must not ship as-is.
+- Added `docs/plans/2026-05-27-authkey-optional-integration.md` to capture optional authkey interop without hard dependency.
+- Updated `.planning/ROADMAP.md` with Phase 36.8 and Phase 38.5.
+- Added an ad-hoc memory note at `C:\Users\Destiny\.codex\memories\extensions\ad_hoc\notes\2026-05-27T20-00-16-authkey-memory-nexus-optional-integration.md` so the docs/plans artifact is not forgotten.
+- Completed Phase 36.8 implementation: restored release gates, removed masked build/type failures, restored test isolation, added redaction, added env/ref provider secret handling, sanitized status JSON, made export redacted by default, documented optional authkey run usage, and verified with full gates.
+
+**Next step:**
+- Continue Phase 36.9 Coverage Remediation. Start with the highest branch-miss files listed in `.planning/phases/36.9-coverage-runner-migration/36.9-01-PLAN.md`; Phase 37 prepublish work must not start until the coverage gate proves statements, branches, functions, and lines at 95% each.
+- Current inbox truth: zero active memory-nexus inbox items; only `docs/inbox/README.md` remains outside `docs/inbox/archived/`.
+- Cross-project notification filed at `C:\Projects\conversations\docs\inbox\2026-05-28-memory-nexus-friction-list-durable-filters-roadmapped.md`.
+- First-party infrastructure broadcast filed to opted-in project inboxes: ai-dev-environment, authkey, conversations, docTruth, ez-deploy, get-stuff-done, klakson, later, medesine-rx, prompter, tailscale, and watchtower. Frontmatter lint passed via `node C:\Projects\conversations\scripts\inbox-lint.cjs <files>`.
+- Latest verification after coverage-runner migration: `bun run test:coverage` runs 3,762 tests successfully, then fails the honest coverage gate at statements 91.05%, branches 82.30%, functions 94.70%, and lines 91.55%. Re-run typecheck/build/isolation/audit after remediation changes.
 
 ### Last Session — 2026-05-13 → 2026-05-14
 
@@ -142,4 +167,4 @@ v4.0 Progress: [###############_____________] 8/9 phases complete
 
 ---
 
-*Last updated: 2026-05-25 (Phase 36 completed)*
+*Last updated: 2026-05-28 (foundation hardening verified; inbox reconciled; first-party infrastructure broadcast filed; coverage gate remains release blocker)*

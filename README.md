@@ -75,6 +75,63 @@ Tool-managed paths follow the XDG Base Directory Specification. Override with `X
 
 The memory-files directory holds agent-written markdown (decisions, learnings, daily logs, per-project notes). Override with `MEMORY_HOME` for sandboxed runs, container/CI workflows, or multi-instance setups. `MEMORY_HOME` follows the `GNUPGHOME` / `JAVA_HOME` tradition: the value is the exact directory path, not a base directory under which a subdirectory is appended. Empty string is ignored; no `~` expansion.
 
+## Secret Handling
+
+Remote provider credentials should come from environment injection, not plaintext config files. `embedding.apiKey` is retained only as deprecated compatibility input.
+
+Use `apiKeyEnv` when a provider needs a runtime key:
+
+```json
+{
+  "embedding": {
+    "provider": "openai",
+    "apiKeyEnv": "OPENAI_API_KEY"
+  }
+}
+```
+
+Use `apiKeyRef` only as opaque metadata for an external secret manager:
+
+```json
+{
+  "embedding": {
+    "provider": "openai",
+    "apiKeyRef": "authkey://memory/openai-api-key"
+  }
+}
+```
+
+`memory` never resolves `apiKeyRef` to a raw secret and never calls `authkey get`. If you use authkey, inject secrets into the child process:
+
+```bash
+authkey run --env memory -- memory sync --embed
+authkey run --env memory -- memory extract memory-nexus
+```
+
+Known secret patterns in newly synced transcript content, tool inputs/results, extraction payloads, embeddings, and CLI JSON exports are redacted before storage or provider egress. Raw JSON backups require explicit opt-in:
+
+```bash
+memory export backup.json --include-sensitive
+```
+
+## Provider Support
+
+Provider support is explicit and registry-backed. Built-in embedding providers are `local`, `openai`, `ollama`, and `openai-compatible`. Built-in extraction providers are `claude-cli`, `anthropic`, `openai`, `ollama`, and `openai-compatible`.
+
+Use `openai-compatible` for gateways or providers that expose OpenAI-compatible APIs:
+
+```json
+{
+  "embedding": {
+    "provider": "openai-compatible",
+    "baseUrl": "https://gateway.example.com/v1",
+    "apiKeyEnv": "MEMORY_GATEWAY_API_KEY"
+  }
+}
+```
+
+`LLM_PROVIDER` selects the extraction provider. `LLM_MODEL` overrides the extraction model without changing embedding configuration.
+
 ## AI-First Design
 
 This tool is designed for Claude to use via the Bash tool:
@@ -198,11 +255,24 @@ This package was previously published as `memory-nexus`. The old package name no
 
 ## Development
 
+### Quality gates
+
+```bash
+bun run typecheck
+bun run build
+bun test --timeout 15000
+bun run test:isolation
+bun run test:coverage
+bun audit
+```
+
+`bun run quality` runs the release gate sequence. `bun run test:coverage` uses an Istanbul-backed Bun harness and is intentionally strict: statements, branches, functions, and lines must each be available and at least 95%. Missing metrics fail the gate.
+
 ### Running tests on Windows
 
-The full-suite run `bun test` crashes on Windows 11 with Bun 1.3.5 due to an upstream Bun runtime integer overflow at ~6.8GB peak memory pressure. The signature is `panic(main thread): integer overflow` with a `KERNEL32.DLL` -> `ntdll.dll` stack — Bun internals, not project code. Tracked at `docs/inbox/2026-05-11-memory-nexus-bun-windows-full-suite-crash.md`.
+Current 2026-05-28 verification has `bun test --timeout 15000` passing on Windows 11 with Bun 1.3.5. A previous full-suite run crashed with Bun's `panic(main thread): integer overflow` signature at ~6.8GB peak memory pressure; keep the subdirectory workaround available if that upstream runtime crash returns.
 
-Workaround: run the suite by subdirectory.
+Fallback workaround: run the suite by subdirectory.
 
 ```bash
 bun test src/infrastructure/
@@ -217,7 +287,7 @@ Or run a single file directly:
 bun test src/path/to/file.test.ts
 ```
 
-Linux and macOS contributors run the full suite normally — this is a Windows-specific Bun bug.
+Linux and macOS contributors should run the full suite normally.
 
 ## License
 

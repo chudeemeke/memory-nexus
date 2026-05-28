@@ -5,11 +5,22 @@ created: 2026-05-11
 triaged_at: 2026-05-13
 type: bug
 severity: medium
-fix_status: none
+fix_status: merged
 affects_scope: this-project-only
-status: triaged
+status: merged
+resolved_at: 2026-05-28
+resolution_ref: local-worktree-verification
 priority_rationale: Decision = MIGRATE (not delete); execution deferred until architecture audit Stage 3 recommends an outcome in {A, B, C, D}. Outcome E (deprecate memory-nexus) would abandon the fix entirely.
 ---
+
+## Resolution (2026-05-28)
+
+Archived as resolved/stale against the current implementation.
+
+Validation:
+- `tests/presentation/cli/commands/friction.test.ts` exists.
+- `bun test tests/presentation/cli/commands/friction.test.ts --timeout 15000` passes: 8 tests, 0 failures.
+- The old import-path failure no longer reproduces; the file now exercises the dispatcher-style integration cases that the triage wanted preserved.
 
 ## Triage decision (2026-05-13)
 
