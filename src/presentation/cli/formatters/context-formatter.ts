@@ -10,6 +10,7 @@ import type { SmartContextResult } from "../../../application/services/smart-con
 import { formatTimestamp, formatRelativeTime } from "./timestamp-formatter.js";
 import { formatForAi } from "./ai-formatter.js";
 import { dim, bold } from "./color.js";
+import { unknownErrorMessage } from "../../../domain/errors/unknown-error.js";
 
 /**
  * Output mode for context formatter.
@@ -169,7 +170,7 @@ class BriefContextFormatter implements ContextFormatter {
   }
 
   formatError(error: Error): string {
-    const message = error instanceof Error ? error.message : String(error);
+    const message = unknownErrorMessage(error);
     return `Error: ${message}`;
   }
 
@@ -232,7 +233,7 @@ class DetailedContextFormatter implements ContextFormatter {
   }
 
   formatError(error: Error): string {
-    const message = error instanceof Error ? error.message : String(error);
+    const message = unknownErrorMessage(error);
     return `Error: ${message}`;
   }
 
@@ -266,7 +267,7 @@ class JsonContextFormatter implements ContextFormatter {
   }
 
   formatError(error: Error): string {
-    const message = error instanceof Error ? error.message : String(error);
+    const message = unknownErrorMessage(error);
     return JSON.stringify({ error: message });
   }
 
@@ -288,7 +289,7 @@ class QuietContextFormatter implements ContextFormatter {
   }
 
   formatError(error: Error): string {
-    const message = error instanceof Error ? error.message : String(error);
+    const message = unknownErrorMessage(error);
     return `Error: ${message}`;
   }
 
@@ -333,7 +334,7 @@ class VerboseContextFormatter implements ContextFormatter {
   }
 
   formatError(error: Error): string {
-    const message = error instanceof Error ? error.message : String(error);
+    const message = unknownErrorMessage(error);
     const stack = error instanceof Error ? error.stack : "";
     return `Error: ${message}\n${stack ?? ""}`;
   }
@@ -379,7 +380,7 @@ class AiContextFormatter implements ContextFormatter {
   }
 
   formatError(error: Error): string {
-    return `Error: ${error instanceof Error ? error.message : String(error)}`;
+    return `Error: ${unknownErrorMessage(error)}`;
   }
 
   formatEmpty(projectName: string): string {

@@ -23,6 +23,7 @@ import {
   getDefaultDbPath,
 } from "../../../infrastructure/database/index.js";
 import { formatError } from "../formatters/error-formatter.js";
+import { unknownErrorMessage } from "../../../domain/errors/unknown-error.js";
 
 /**
  * Options for the browse command.
@@ -151,7 +152,7 @@ export async function executeBrowseCommand(
         ? error
         : new MemoryError(
             ErrorCode.DB_CONNECTION_FAILED,
-            error instanceof Error ? error.message : String(error)
+            unknownErrorMessage(error)
           );
 
     console.error(formatError(nexusError));

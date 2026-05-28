@@ -6,6 +6,7 @@
  */
 
 import type { StatsResult } from "../../../domain/ports/services.js";
+import { unknownErrorMessage } from "../../../domain/errors/unknown-error.js";
 
 /**
  * Output mode for stats formatting.
@@ -124,7 +125,7 @@ class BriefStatsFormatter implements StatsFormatter {
   }
 
   formatError(error: Error): string {
-    const message = error instanceof Error ? error.message : String(error);
+    const message = unknownErrorMessage(error);
     return `Error: ${message}`;
   }
 
@@ -178,7 +179,7 @@ class DefaultStatsFormatter implements StatsFormatter {
   }
 
   formatError(error: Error): string {
-    const message = error instanceof Error ? error.message : String(error);
+    const message = unknownErrorMessage(error);
     return `Error: ${message}`;
   }
 
@@ -220,7 +221,7 @@ class JsonStatsFormatter implements StatsFormatter {
   }
 
   formatError(error: Error): string {
-    const message = error instanceof Error ? error.message : String(error);
+    const message = unknownErrorMessage(error);
     return JSON.stringify({ error: message });
   }
 
@@ -252,7 +253,7 @@ class QuietStatsFormatter implements StatsFormatter {
   }
 
   formatError(error: Error): string {
-    const message = error instanceof Error ? error.message : String(error);
+    const message = unknownErrorMessage(error);
     return `Error: ${message}`;
   }
 
@@ -317,7 +318,7 @@ class VerboseStatsFormatter implements StatsFormatter {
   }
 
   formatError(error: Error): string {
-    const message = error instanceof Error ? error.message : String(error);
+    const message = unknownErrorMessage(error);
     const stack = error instanceof Error ? error.stack : "";
     return `Error: ${message}\n${stack ?? ""}`;
   }

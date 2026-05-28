@@ -16,6 +16,7 @@ import {
 } from "../../../infrastructure/database/index.js";
 import { getDataDir } from "../../../infrastructure/paths.js";
 import { SqliteStatsService } from "../../../infrastructure/database/services/stats-service.js";
+import { unknownErrorMessage } from "../../../domain/errors/unknown-error.js";
 import {
   uninstallHooks,
   installHooks,
@@ -96,7 +97,7 @@ export async function executeMigrateCommand(
     // 2. Commit and Truncate WAL sidecars
     db.prepare("PRAGMA wal_checkpoint(TRUNCATE)").run();
   } catch (err) {
-    const msg = err instanceof Error ? err.message : String(err);
+    const msg = unknownErrorMessage(err);
     console.error(red(`Error during migration: ${msg}`, useColor));
     if (db) {
       closeDatabase(db);
@@ -121,7 +122,7 @@ export async function executeMigrateCommand(
     installFn();
     console.log(green("Successfully re-installed Git hooks natively.", useColor));
   } catch (err) {
-    const msg = err instanceof Error ? err.message : String(err);
+    const msg = unknownErrorMessage(err);
     console.log(yellow(`Warning: Failed to re-install Git hooks: ${msg}`, useColor));
   }
 

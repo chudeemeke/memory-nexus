@@ -31,6 +31,7 @@ import { Message } from "../../domain/entities/message.js";
 import { ToolUse } from "../../domain/entities/tool-use.js";
 import { ExtractionState } from "../../domain/entities/extraction-state.js";
 import { MemoryError, ErrorCode } from "../../domain/errors/index.js";
+import { unknownErrorMessage } from "../../domain/errors/unknown-error.js";
 
 const NOOP_REDACTOR: IRedactor = {
   redactText: (input) => ({ text: input, findings: [] }),
@@ -182,7 +183,7 @@ export class SyncService {
       throw new MemoryError(
         ErrorCode.SOURCE_INACCESSIBLE,
         "Failed to discover sessions",
-        { reason: error instanceof Error ? error.message : String(error) }
+        { reason: unknownErrorMessage(error) }
       );
     }
     result.sessionsDiscovered = allSessions.length;
@@ -310,7 +311,7 @@ export class SyncService {
       return error;
     }
 
-    const message = error instanceof Error ? error.message : String(error);
+    const message = unknownErrorMessage(error);
 
     // Detect specific error types from message
     if (message.includes("ENOENT") || message.includes("no such file")) {
@@ -492,7 +493,7 @@ export class SyncService {
     } catch (error) {
       // Save error state (separate transaction)
       const errorState = state.fail(
-        error instanceof Error ? error.message : String(error)
+        unknownErrorMessage(error)
       );
       await this.extractionStateRepo.save(errorState);
       throw error;

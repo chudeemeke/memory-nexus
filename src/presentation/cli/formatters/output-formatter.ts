@@ -10,6 +10,7 @@ import type { SearchResult } from "../../../domain/value-objects/search-result.j
 import { formatTimestamp } from "./timestamp-formatter.js";
 import { truncateToWidth, truncateForTerminal, getTerminalWidth } from "./text-width.js";
 import { toSearchResultDto } from "./dto-helpers.js";
+import { unknownErrorMessage } from "../../../domain/errors/unknown-error.js";
 
 /**
  * Context budget for Claude consumption (50K characters).
@@ -197,7 +198,7 @@ class DefaultOutputFormatter implements OutputFormatter {
   }
 
   formatError(error: Error): string {
-    const message = error instanceof Error ? error.message : String(error);
+    const message = unknownErrorMessage(error);
     return `Error: ${message}`;
   }
 
@@ -238,7 +239,7 @@ class BriefOutputFormatter implements OutputFormatter {
   }
 
   formatError(error: Error): string {
-    const message = error instanceof Error ? error.message : String(error);
+    const message = unknownErrorMessage(error);
     return `Error: ${message}`;
   }
 
@@ -316,7 +317,7 @@ class JsonOutputFormatter implements OutputFormatter {
   }
 
   formatError(error: Error): string {
-    const message = error instanceof Error ? error.message : String(error);
+    const message = unknownErrorMessage(error);
     return JSON.stringify({ error: message });
   }
 
@@ -350,7 +351,7 @@ class QuietOutputFormatter implements OutputFormatter {
   }
 
   formatError(error: Error): string {
-    const message = error instanceof Error ? error.message : String(error);
+    const message = unknownErrorMessage(error);
     return `Error: ${message}`;
   }
 
@@ -454,7 +455,7 @@ class VerboseOutputFormatter implements OutputFormatter {
   }
 
   formatError(error: Error): string {
-    const message = error instanceof Error ? error.message : String(error);
+    const message = unknownErrorMessage(error);
     const stack = error instanceof Error ? error.stack : "";
     return `Error: ${message}\n${stack ?? ""}`;
   }

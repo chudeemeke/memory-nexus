@@ -34,6 +34,7 @@ import {
 } from "../formatters/envelope.js";
 import { toRelatedDto } from "../formatters/dto-helpers.js";
 import { emitFormatDeprecationWarning } from "./_helpers/deprecation-warning.js";
+import { unknownErrorMessage } from "../../../domain/errors/unknown-error.js";
 
 /**
  * Options for the related command.
@@ -293,7 +294,7 @@ export async function runRelatedInternal(
         ? error
         : new MemoryError(
             ErrorCode.DB_CONNECTION_FAILED,
-            error instanceof Error ? error.message : String(error)
+            unknownErrorMessage(error)
           );
 
     // Format error based on output mode

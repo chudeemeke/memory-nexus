@@ -8,6 +8,7 @@
 import type { Database, Statement } from "bun:sqlite";
 import { Message, type MessageRole } from "../../../domain/entities/message.js";
 import type { IMessageRepository } from "../../../domain/ports/repositories.js";
+import { unknownErrorMessage } from "../../../domain/errors/unknown-error.js";
 
 /**
  * Result of a batch save operation
@@ -170,7 +171,7 @@ export class SqliteMessageRepository implements IMessageRepository {
                         result.skipped++;
                         result.errors.push({
                             id: message.id,
-                            reason: err instanceof Error ? err.message : String(err),
+                            reason: unknownErrorMessage(err),
                         });
                     }
                 }

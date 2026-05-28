@@ -31,6 +31,7 @@ import type { EmbeddingRepository, VectorSearchRow } from "../repositories/embed
 import type { EmbeddingProviderFactory } from "../../embedding/embedding-provider-factory.js";
 import type { IEmbeddingProvider } from "../../../domain/ports/embedding.js";
 import type { MemoryConfig } from "../../hooks/config-manager.js";
+import { unknownErrorMessage } from "../../../domain/errors/unknown-error.js";
 import {
   reciprocalRankFusion,
   type RankedCandidate,
@@ -363,7 +364,7 @@ export class HybridSearchService implements ISearchService {
         if (error instanceof MemoryError) throw error;
         throw new MemoryError(
           ErrorCode.VECTOR_UNAVAILABLE,
-          `Embedding provider failed to initialize: ${error instanceof Error ? error.message : String(error)}`
+          `Embedding provider failed to initialize: ${unknownErrorMessage(error)}`
         );
       }
       return null;
@@ -560,7 +561,7 @@ export class HybridSearchService implements ISearchService {
       // Vector leg failed -- continue with FTS only
       vectorRows = [];
       vectorDegraded = true;
-      vectorDegradationReason = `provider_failure: ${error instanceof Error ? error.message : String(error)}`;
+      vectorDegradationReason = `provider_failure: ${unknownErrorMessage(error)}`;
     }
 
     // If vector leg produced nothing, return FTS results directly

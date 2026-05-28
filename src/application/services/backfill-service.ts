@@ -16,6 +16,7 @@ import type { IBackfillStateRepository } from "../../domain/ports/repositories.j
 import type { IMessageRepository } from "../../domain/ports/repositories.js";
 import type { ISummaryGenerator } from "../../domain/ports/index.js";
 import { BackfillState } from "../../domain/entities/backfill-state.js";
+import { unknownErrorMessage } from "../../domain/errors/unknown-error.js";
 
 /** Approximate cost per session for claude -p summarization */
 const COST_PER_SESSION = 0.001;
@@ -169,7 +170,7 @@ export class BackfillService {
 
         result.sessionsProcessed++;
       } catch (err) {
-        const errorMessage = err instanceof Error ? err.message : String(err);
+        const errorMessage = unknownErrorMessage(err);
         result.sessionsFailed++;
         result.errors.push({ sessionId: session.id, error: errorMessage });
 

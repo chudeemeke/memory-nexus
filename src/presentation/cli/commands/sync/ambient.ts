@@ -8,6 +8,7 @@
 
 import type { initializeDatabase } from "../../../../infrastructure/database/index.js";
 import type { SyncCommandOptions, AmbientContextDeps } from "./types.js";
+import { unknownErrorMessage } from "../../../../domain/errors/unknown-error.js";
 
 /**
  * Generate ambient context files for the current project.
@@ -116,7 +117,7 @@ export async function runAmbientContextGeneration(
     // Non-fatal: ambient context generation should never fail the sync
     if (!options.quiet) {
       console.error(
-        `  Ambient context: error (${error instanceof Error ? error.message : String(error)})`
+        `  Ambient context: error (${unknownErrorMessage(error)})`
       );
     }
   }

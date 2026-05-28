@@ -10,6 +10,7 @@ import type { Message } from "../../../domain/entities/message.js";
 import type { ToolUse } from "../../../domain/entities/tool-use.js";
 import { formatAbsoluteTime } from "./timestamp-formatter.js";
 import { dim, bold } from "./color.js";
+import { unknownErrorMessage } from "../../../domain/errors/unknown-error.js";
 
 /**
  * Output mode for show formatter.
@@ -236,7 +237,7 @@ class BriefShowFormatter implements ShowFormatter {
   }
 
   formatError(error: Error): string {
-    const message = error instanceof Error ? error.message : String(error);
+    const message = unknownErrorMessage(error);
     return `Error: ${message}`;
   }
 
@@ -268,7 +269,7 @@ class DefaultShowFormatter implements ShowFormatter {
   }
 
   formatError(error: Error): string {
-    const message = error instanceof Error ? error.message : String(error);
+    const message = unknownErrorMessage(error);
     return `Error: ${message}`;
   }
 
@@ -319,7 +320,7 @@ class JsonShowFormatter implements ShowFormatter {
   }
 
   formatError(error: Error): string {
-    const message = error instanceof Error ? error.message : String(error);
+    const message = unknownErrorMessage(error);
     return JSON.stringify({ error: message });
   }
 
@@ -344,7 +345,7 @@ class QuietShowFormatter implements ShowFormatter {
   }
 
   formatError(error: Error): string {
-    const message = error instanceof Error ? error.message : String(error);
+    const message = unknownErrorMessage(error);
     return `Error: ${message}`;
   }
 
@@ -401,7 +402,7 @@ class VerboseShowFormatter implements ShowFormatter {
   }
 
   formatError(error: Error): string {
-    const message = error instanceof Error ? error.message : String(error);
+    const message = unknownErrorMessage(error);
     const stack = error instanceof Error ? error.stack : "";
     return `Error: ${message}\n${stack ?? ""}`;
   }
@@ -456,7 +457,7 @@ class ToolsShowFormatter implements ShowFormatter {
   }
 
   formatError(error: Error): string {
-    const message = error instanceof Error ? error.message : String(error);
+    const message = unknownErrorMessage(error);
     return `Error: ${message}`;
   }
 

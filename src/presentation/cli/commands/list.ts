@@ -30,6 +30,7 @@ import {
 } from "../formatters/envelope.js";
 import { toSessionListDto } from "../formatters/dto-helpers.js";
 import { emitFormatDeprecationWarning } from "./_helpers/deprecation-warning.js";
+import { unknownErrorMessage } from "../../../domain/errors/unknown-error.js";
 
 /**
  * Options for the list command.
@@ -304,7 +305,7 @@ export async function runListInternal(
         ? error
         : new MemoryError(
             ErrorCode.DB_CONNECTION_FAILED,
-            error instanceof Error ? error.message : String(error)
+            unknownErrorMessage(error)
           );
 
     // Format error based on output mode

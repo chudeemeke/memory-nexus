@@ -19,6 +19,7 @@ import type {
   DownloadProgress,
 } from "../../domain/ports/embedding.js";
 import { EmbeddingResult } from "../../domain/value-objects/embedding-result.js";
+import { unknownErrorMessage } from "../../domain/errors/unknown-error.js";
 
 interface TransformersJsProviderOptions {
   model?: string;
@@ -69,7 +70,7 @@ export class TransformersJsProvider implements IEmbeddingProvider {
     } catch (nativeError: unknown) {
       // WASM fallback (EMBED-07)
       console.warn(
-        `Native ONNX runtime failed: ${nativeError instanceof Error ? nativeError.message : String(nativeError)}`,
+        `Native ONNX runtime failed: ${unknownErrorMessage(nativeError)}`,
       );
       console.warn("Falling back to WASM backend (slower but universal)");
 
@@ -85,8 +86,8 @@ export class TransformersJsProvider implements IEmbeddingProvider {
       } catch (wasmError: unknown) {
         throw new Error(
           `Embedding initialization failed. ` +
-            `Native: ${nativeError instanceof Error ? nativeError.message : String(nativeError)}. ` +
-            `WASM: ${wasmError instanceof Error ? wasmError.message : String(wasmError)}`,
+            `Native: ${unknownErrorMessage(nativeError)}. ` +
+            `WASM: ${unknownErrorMessage(wasmError)}`,
         );
       }
     }

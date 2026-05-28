@@ -19,6 +19,7 @@ import {
   type ImportStats,
 } from "../../../application/services/index.js";
 import { existsSync } from "node:fs";
+import { unknownErrorMessage } from "../../../domain/errors/unknown-error.js";
 
 /**
  * Options for the import command.
@@ -143,7 +144,7 @@ export async function executeImportCommand(
 
     return { exitCode: 0 };
   } catch (error) {
-    const message = error instanceof Error ? error.message : String(error);
+    const message = unknownErrorMessage(error);
     outputError(message, inputFile, options);
     return { exitCode: 1 };
   } finally {

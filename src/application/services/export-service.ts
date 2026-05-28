@@ -8,6 +8,7 @@
 import type { Database } from "bun:sqlite";
 import { existsSync } from "node:fs";
 import type { IRedactor } from "../../domain/ports/redactor.js";
+import { unknownErrorMessage } from "../../domain/errors/unknown-error.js";
 
 // ============================================================================
 // Export Data Types
@@ -450,7 +451,7 @@ export async function validateExportFile(
 
     return { valid: true, version: data.version };
   } catch (error) {
-    const message = error instanceof Error ? error.message : String(error);
+    const message = unknownErrorMessage(error);
     return { valid: false, error: `Failed to parse file: ${message}` };
   }
 }

@@ -20,6 +20,7 @@ import type {
     DownloadProgress,
 } from "../../domain/ports/embedding.js";
 import { EmbeddingResult } from "../../domain/value-objects/embedding-result.js";
+import { unknownErrorMessage } from "../../domain/errors/unknown-error.js";
 
 interface OllamaProviderOptions {
     model?: string | undefined;
@@ -52,7 +53,7 @@ export class OllamaProvider implements IEmbeddingProvider {
             });
         } catch (error: unknown) {
             const msg =
-                error instanceof Error ? error.message : String(error);
+                unknownErrorMessage(error);
             throw new Error(
                 `Cannot reach Ollama server at ${this.baseUrl}. ` +
                     `Ensure Ollama is running: ollama serve (${msg})`,

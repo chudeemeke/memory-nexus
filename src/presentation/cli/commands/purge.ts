@@ -17,6 +17,7 @@ import {
 } from "../../../infrastructure/database/index.js";
 import { shouldUseColor } from "../formatters/color.js";
 import { PathDecoder } from "../../../domain/services/path-decoder.js";
+import { unknownErrorMessage } from "../../../domain/errors/unknown-error.js";
 
 /**
  * Options for the purge command.
@@ -218,7 +219,7 @@ export async function executePurgeCommand(
     try {
       cutoffDate = parseDuration(options.olderThan);
     } catch (err) {
-      const message = err instanceof Error ? err.message : String(err);
+      const message = unknownErrorMessage(err);
       if (options.json) {
         console.log(JSON.stringify({ error: message }, null, 2));
       } else {
@@ -235,7 +236,7 @@ export async function executePurgeCommand(
     const result = initializeDb({ path: dbPath });
     db = result.db;
   } catch (err) {
-    const message = err instanceof Error ? err.message : String(err);
+    const message = unknownErrorMessage(err);
     if (options.json) {
       console.log(JSON.stringify({ error: `Database error: ${message}` }, null, 2));
     } else {
@@ -381,7 +382,7 @@ export async function executePurgeCommand(
     }
     return { exitCode: 0 };
   } catch (error) {
-    const message = error instanceof Error ? error.message : String(error);
+    const message = unknownErrorMessage(error);
     if (options.json) {
       console.log(JSON.stringify({ error: message }, null, 2));
     } else {

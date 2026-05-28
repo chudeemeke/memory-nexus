@@ -21,6 +21,7 @@ import {
     unlinkSync,
 } from "node:fs";
 import { join } from "node:path";
+import { unknownErrorMessage } from "../domain/errors/unknown-error.js";
 
 import {
     getConfigDir,
@@ -286,7 +287,7 @@ export function migrateFromLegacy(): MigrationResult {
         mkdirSync(getConfigDir(), { recursive: true });
         mkdirSync(getDataDir(), { recursive: true });
     } catch (error) {
-        const msg = error instanceof Error ? error.message : String(error);
+        const msg = unknownErrorMessage(error);
         return { migrated: false, itemsMoved: [], errors: [`Failed to create target directories: ${msg}`] };
     }
 
@@ -342,7 +343,7 @@ export function migrateFromLegacy(): MigrationResult {
             }
         } catch (error) {
             // Move failed: roll back all completed moves in reverse order
-            const msg = error instanceof Error ? error.message : String(error);
+            const msg = unknownErrorMessage(error);
             const errors = [`Failed to move ${item.name}: ${msg}`];
 
             for (let i = completedMoves.length - 1; i >= 0; i--) {
@@ -351,7 +352,7 @@ export function migrateFromLegacy(): MigrationResult {
                     moveFileOrDir(completed.item.dest, completed.item.source, completed.item.isDir);
                     completed.rolledBack = true;
                 } catch (rollbackError) {
-                    const rollbackMsg = rollbackError instanceof Error ? rollbackError.message : String(rollbackError);
+                    const rollbackMsg = unknownErrorMessage(rollbackError);
                     errors.push(`Rollback failed for ${completed.item.name}: ${rollbackMsg}`);
                 }
             }
@@ -371,7 +372,7 @@ export function migrateFromLegacy(): MigrationResult {
         uninstallHooks();
         installHooks();
     } catch (error) {
-        const msg = error instanceof Error ? error.message : String(error);
+        const msg = unknownErrorMessage(error);
         errors.push(`hook re-install failed: ${msg}`);
     }
 

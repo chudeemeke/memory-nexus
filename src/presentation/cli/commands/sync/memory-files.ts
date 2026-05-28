@@ -10,6 +10,7 @@ import { MemoryFileSyncService } from "../../../../application/services/index.js
 import { SqliteMemoryFileRepository } from "../../../../infrastructure/database/repositories/memory-file-repository.js";
 import { MemoryFileScanner } from "../../../../infrastructure/sources/index.js";
 import type { SyncCommandOptions } from "./types.js";
+import { unknownErrorMessage } from "../../../../domain/errors/unknown-error.js";
 
 /**
  * Run memory file sync: discover and index ~/.memory/ markdown files.
@@ -41,7 +42,7 @@ export async function runMemoryFileSync(
     // Memory file sync failure should not fail the overall sync
     if (!options.quiet) {
       console.error(
-        `  Memory files: error (${error instanceof Error ? error.message : String(error)})`
+        `  Memory files: error (${unknownErrorMessage(error)})`
       );
     }
     return null;

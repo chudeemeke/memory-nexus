@@ -45,6 +45,7 @@ import {
 import { emitFormatDeprecationWarning } from "./_helpers/deprecation-warning.js";
 import { QmdRunner, isQmdAvailable } from "../../../infrastructure/external/index.js";
 import type { QmdSearchResult } from "../../../domain/ports/services.js";
+import { unknownErrorMessage } from "../../../domain/errors/unknown-error.js";
 
 /**
  * Options for the search command.
@@ -497,7 +498,7 @@ export async function runSearchInternal(
         ? error
         : new MemoryError(
             ErrorCode.DB_CONNECTION_FAILED,
-            error instanceof Error ? error.message : String(error)
+            unknownErrorMessage(error)
           );
 
     // Format error based on output mode
@@ -586,7 +587,7 @@ async function executeFileSearch(
     console.log(output);
     return { exitCode: 0 };
   } catch (error) {
-    const message = error instanceof Error ? error.message : String(error);
+    const message = unknownErrorMessage(error);
     if (options.json) {
       emitJsonErrorEnvelope({
         command: "search",

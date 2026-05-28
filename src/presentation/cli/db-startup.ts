@@ -15,6 +15,7 @@ import {
 } from "../../infrastructure/database/index.js";
 import { ErrorCode, MemoryError } from "../../domain/index.js";
 import { formatError, formatErrorJson } from "./formatters/index.js";
+import { unknownErrorMessage } from "../../domain/errors/unknown-error.js";
 
 /**
  * Options for database startup.
@@ -159,7 +160,7 @@ async function handleCorruptedDatabase(
         ? recreateError
         : new MemoryError(
             ErrorCode.DB_CONNECTION_FAILED,
-            `Failed to create new database: ${recreateError instanceof Error ? recreateError.message : String(recreateError)}`
+            `Failed to create new database: ${unknownErrorMessage(recreateError)}`
           );
     if (options.json) {
       console.error(formatErrorJson(newError));
@@ -203,7 +204,7 @@ export async function initializeDatabaseForCli(
         ? error
         : new MemoryError(
             ErrorCode.DB_CONNECTION_FAILED,
-            error instanceof Error ? error.message : String(error)
+            unknownErrorMessage(error)
           );
 
     // Handle corrupted database specially

@@ -16,6 +16,7 @@ import { accessSync, constants, existsSync, statSync } from "node:fs";
 import { homedir } from "node:os";
 import { join } from "node:path";
 import { getDefaultDbPath } from "./connection.js";
+import { unknownErrorMessage } from "../../domain/errors/unknown-error.js";
 import {
     loadConfig,
     getConfigDir,
@@ -341,7 +342,7 @@ export function checkConfigValidity(configPath?: string): ConfigHealth {
             issues,
         };
     } catch (error) {
-        const message = error instanceof Error ? error.message : String(error);
+        const message = unknownErrorMessage(error);
         issues.push(`Failed to load config: ${message}`);
         return {
             valid: false,

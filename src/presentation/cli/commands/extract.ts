@@ -24,6 +24,7 @@ import { emitJsonErrorEnvelope } from "../formatters/envelope.js";
 import { shouldUseColor, green, dim } from "../formatters/color.js";
 import { PatternRedactor } from "../../../infrastructure/security/pattern-redactor.js";
 import { createExtractionProvider } from "../../../infrastructure/providers/provider-registry.js";
+import { unknownErrorMessage } from "../../../domain/errors/unknown-error.js";
 
 export interface ExtractCommandOptions {
   project: string;
@@ -120,7 +121,7 @@ export async function executeExtractCommand(
     try {
       extractor = createExtractionProvider(config);
     } catch (err) {
-      const message = err instanceof Error ? err.message : String(err);
+      const message = unknownErrorMessage(err);
       if (options.json) {
         emitJsonErrorEnvelope({
           command: "extract" as any,

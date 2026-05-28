@@ -8,6 +8,7 @@
 import type { Database, Statement } from "bun:sqlite";
 import type { IToolUseRepository } from "../../../domain/ports/repositories.js";
 import { ToolUse, type ToolUseStatus } from "../../../domain/entities/tool-use.js";
+import { unknownErrorMessage } from "../../../domain/errors/unknown-error.js";
 
 /**
  * Row type for tool_uses table
@@ -150,7 +151,7 @@ export class SqliteToolUseRepository implements IToolUseRepository {
                             result.skipped++;
                             result.errors.push({
                                 id: toolUse.id,
-                                reason: err instanceof Error ? err.message : String(err),
+                                reason: unknownErrorMessage(err),
                             });
                         }
                     }

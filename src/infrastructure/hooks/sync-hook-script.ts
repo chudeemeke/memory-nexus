@@ -33,6 +33,7 @@ import { loadConfig } from "./config-manager.js";
 import type { MemoryConfig } from "./config-manager.js";
 import { logSync } from "./log-writer.js";
 import { spawnBackgroundSync } from "./hook-runner.js";
+import { unknownErrorMessage } from "../../domain/errors/unknown-error.js";
 
 /**
  * Hook input from Claude Code
@@ -135,7 +136,7 @@ export async function executeSyncHook(deps: SyncHookDeps): Promise<void> {
     try {
         hookInput = await deps.readInput();
     } catch (err) {
-        const message = err instanceof Error ? err.message : String(err);
+        const message = unknownErrorMessage(err);
         deps.log({
             level: "error",
             message: `Failed to read hook input: ${message}`,
@@ -194,7 +195,7 @@ export async function runSyncHookMain(
     try {
         await executeSyncHook(deps);
     } catch (err) {
-        const message = err instanceof Error ? err.message : String(err);
+        const message = unknownErrorMessage(err);
         const stack = err instanceof Error ? err.stack : undefined;
         onFatal({
             level: "error",

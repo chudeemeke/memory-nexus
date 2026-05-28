@@ -18,6 +18,7 @@ import { handleResolve } from "./resolve.js";
 import { handleWontFix } from "./wontfix.js";
 import { handleDashboard } from "./dashboard.js";
 import { handlePurge } from "./purge.js";
+import { unknownErrorMessage } from "../../../../domain/errors/unknown-error.js";
 
 /** Create the friction command group for Commander.js. */
 export function createFrictionCommand(): Command {
@@ -142,7 +143,7 @@ export async function executeFrictionCommand(
     } catch (error) {
         const nexusError = error instanceof MemoryError
             ? error
-            : new MemoryError(ErrorCode.UNKNOWN, error instanceof Error ? error.message : String(error));
+            : new MemoryError(ErrorCode.UNKNOWN, unknownErrorMessage(error));
 
         if (options.json) {
             console.log(formatErrorJson(nexusError));

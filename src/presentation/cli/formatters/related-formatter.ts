@@ -8,6 +8,7 @@
 import type { Session } from "../../../domain/entities/session.js";
 import { formatTimestamp, formatRelativeTime } from "./timestamp-formatter.js";
 import { green, yellow } from "./color.js";
+import { unknownErrorMessage } from "../../../domain/errors/unknown-error.js";
 
 /**
  * Output mode for related formatter.
@@ -160,7 +161,7 @@ class BriefRelatedFormatter implements RelatedFormatter {
   }
 
   formatError(error: Error): string {
-    const message = error instanceof Error ? error.message : String(error);
+    const message = unknownErrorMessage(error);
     return `Error: ${message}`;
   }
 
@@ -208,7 +209,7 @@ class DetailedRelatedFormatter implements RelatedFormatter {
   }
 
   formatError(error: Error): string {
-    const message = error instanceof Error ? error.message : String(error);
+    const message = unknownErrorMessage(error);
     return `Error: ${message}`;
   }
 
@@ -244,7 +245,7 @@ class JsonRelatedFormatter implements RelatedFormatter {
   }
 
   formatError(error: Error): string {
-    const message = error instanceof Error ? error.message : String(error);
+    const message = unknownErrorMessage(error);
     return JSON.stringify({ error: message });
   }
 
@@ -270,7 +271,7 @@ class QuietRelatedFormatter implements RelatedFormatter {
   }
 
   formatError(error: Error): string {
-    const message = error instanceof Error ? error.message : String(error);
+    const message = unknownErrorMessage(error);
     return `Error: ${message}`;
   }
 
@@ -310,7 +311,7 @@ class VerboseRelatedFormatter implements RelatedFormatter {
   }
 
   formatError(error: Error): string {
-    const message = error instanceof Error ? error.message : String(error);
+    const message = unknownErrorMessage(error);
     const stack = error instanceof Error ? error.stack : "";
     return `Error: ${message}\n${stack ?? ""}`;
   }

@@ -10,3 +10,4 @@ export {
   type ErrorContext,
   type ErrorJson,
 } from "./memory-error.js";
+export { unknownErrorMessage } from "./unknown-error.js";

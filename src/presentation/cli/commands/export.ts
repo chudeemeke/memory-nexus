@@ -19,6 +19,7 @@ import {
 import { PatternRedactor } from "../../../infrastructure/security/pattern-redactor.js";
 import { existsSync } from "node:fs";
 import { dirname } from "node:path";
+import { unknownErrorMessage } from "../../../domain/errors/unknown-error.js";
 
 /**
  * Options for the export command.
@@ -112,7 +113,7 @@ export async function executeExportCommand(
 
     return { exitCode: 0 };
   } catch (error) {
-    const message = error instanceof Error ? error.message : String(error);
+    const message = unknownErrorMessage(error);
     if (options.json) {
       console.log(JSON.stringify({ success: false, error: message }, null, 2));
     } else {

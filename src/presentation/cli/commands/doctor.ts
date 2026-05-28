@@ -32,6 +32,7 @@ import { initializeDatabase, closeDatabase } from "../../../infrastructure/datab
 import { getDataDir } from "../../../infrastructure/paths.js";
 import { getQmdInfo } from "../../../infrastructure/external/index.js";
 import type { HealthCheckResult } from "../../../infrastructure/database/health-checker.js";
+import { unknownErrorMessage } from "../../../domain/errors/unknown-error.js";
 
 /**
  * Options for the doctor command.
@@ -296,7 +297,7 @@ export function attemptFixes(result: HealthCheckResult, useColor: boolean): stri
             mkdirSync(configDir, { recursive: true });
             messages.push(green(`Created config directory: ${configDir}`, useColor));
         } catch (error) {
-            const msg = error instanceof Error ? error.message : String(error);
+            const msg = unknownErrorMessage(error);
             messages.push(red(`Failed to create config directory: ${msg}`, useColor));
         }
     }
@@ -308,7 +309,7 @@ export function attemptFixes(result: HealthCheckResult, useColor: boolean): stri
             mkdirSync(logsDir, { recursive: true });
             messages.push(green(`Created logs directory: ${logsDir}`, useColor));
         } catch (error) {
-            const msg = error instanceof Error ? error.message : String(error);
+            const msg = unknownErrorMessage(error);
             messages.push(red(`Failed to create logs directory: ${msg}`, useColor));
         }
     }
@@ -480,7 +481,7 @@ export async function runPortabilityDiagnostics(
             }
         }
     } catch (err) {
-        const msg = err instanceof Error ? err.message : String(err);
+        const msg = unknownErrorMessage(err);
         if (options.json) {
             console.log(JSON.stringify({ error: `Portability scan failed: ${msg}` }, null, 2));
         } else {

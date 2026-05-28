@@ -33,6 +33,7 @@ import { emitFormatDeprecationWarning } from "./_helpers/deprecation-warning.js"
 import type { Session } from "../../../domain/entities/session.js";
 import type { ToolUse } from "../../../domain/entities/tool-use.js";
 import type { Database } from "bun:sqlite";
+import { unknownErrorMessage } from "../../../domain/errors/unknown-error.js";
 
 /**
  * Options for the show command.
@@ -261,7 +262,7 @@ export async function runShowInternal(
         ? error
         : new MemoryError(
             ErrorCode.DB_CONNECTION_FAILED,
-            error instanceof Error ? error.message : String(error)
+            unknownErrorMessage(error)
           );
 
     // Format error based on output mode

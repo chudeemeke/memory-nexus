@@ -9,6 +9,7 @@ import { createReadStream } from "fs";
 import { createInterface } from "readline";
 import type { IEventParser, ParsedEvent } from "../../domain/ports/index.js";
 import { classifyEvent } from "./event-classifier.js";
+import { unknownErrorMessage } from "../../domain/errors/unknown-error.js";
 
 /**
  * Streaming JSONL parser for Claude Code session files.
@@ -53,7 +54,7 @@ export class JsonlEventParser implements IEventParser {
         const parsedEvent = classifyEvent(event);
         yield parsedEvent;
       } catch (err) {
-        const message = err instanceof Error ? err.message : String(err);
+        const message = unknownErrorMessage(err);
         yield {
           type: "skipped",
           reason: `Malformed JSON at line ${lineNum}: ${message}`,

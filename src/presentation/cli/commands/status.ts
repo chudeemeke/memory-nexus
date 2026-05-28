@@ -51,6 +51,7 @@ import {
     emitJsonErrorEnvelope,
 } from "../formatters/envelope.js";
 import { toStatsDto } from "../formatters/dto-helpers.js";
+import { unknownErrorMessage } from "../../../domain/errors/unknown-error.js";
 
 /**
  * Options for the status command.
@@ -773,7 +774,7 @@ export function attemptFixes(result: HealthCheckResult, useColor: boolean): stri
             mkdirSync(configDir, { recursive: true });
             messages.push(green(`Created config directory: ${configDir}`, useColor));
         } catch (error) {
-            const msg = error instanceof Error ? error.message : String(error);
+            const msg = unknownErrorMessage(error);
             messages.push(red(`Failed to create config directory: ${msg}`, useColor));
         }
     }
@@ -785,7 +786,7 @@ export function attemptFixes(result: HealthCheckResult, useColor: boolean): stri
             mkdirSync(logsDir, { recursive: true });
             messages.push(green(`Created logs directory: ${logsDir}`, useColor));
         } catch (error) {
-            const msg = error instanceof Error ? error.message : String(error);
+            const msg = unknownErrorMessage(error);
             messages.push(red(`Failed to create logs directory: ${msg}`, useColor));
         }
     }

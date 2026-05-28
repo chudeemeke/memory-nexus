@@ -15,6 +15,7 @@ import type { ISessionSource } from "../../domain/ports/sources.js";
 import type { IExtractionStateRepository } from "../../domain/ports/repositories.js";
 import type { ISyncLogger } from "../../domain/ports/signals.js";
 import type { SyncService } from "./sync-service.js";
+import { unknownErrorMessage } from "../../domain/errors/unknown-error.js";
 
 /**
  * Result of a recovery operation
@@ -125,7 +126,7 @@ export class RecoveryService {
           sessionId,
         });
       } catch (err) {
-        const error = err instanceof Error ? err.message : String(err);
+        const error = unknownErrorMessage(err);
         errors.push({ sessionPath, error });
 
         this.syncLogger.log({

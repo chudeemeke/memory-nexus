@@ -14,6 +14,7 @@
 import type { IMemoryFileRepository } from "../../domain/ports/repositories.js";
 import type { IMemoryFileScanner } from "../../domain/ports/sources.js";
 import { MemoryFile } from "../../domain/entities/memory-file.js";
+import { unknownErrorMessage } from "../../domain/errors/unknown-error.js";
 
 /**
  * Progress callback for memory file sync.
@@ -72,7 +73,7 @@ export class MemoryFileSyncService {
     } catch (err) {
       result.errors.push({
         filePath: "~/.memory/",
-        error: err instanceof Error ? err.message : String(err),
+        error: unknownErrorMessage(err),
       });
       return result;
     }
@@ -114,7 +115,7 @@ export class MemoryFileSyncService {
       } catch (err) {
         result.errors.push({
           filePath: fileInfo.filePath,
-          error: err instanceof Error ? err.message : String(err),
+          error: unknownErrorMessage(err),
         });
       }
     }

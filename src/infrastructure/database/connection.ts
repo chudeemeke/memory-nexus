@@ -11,6 +11,7 @@ import { dirname } from "node:path";
 import { createSchema, checkFts5Support } from "./schema.js";
 import { ErrorCode, MemoryError } from "../../domain/index.js";
 import { getDbPath as pathsGetDbPath } from "../paths.js";
+import { unknownErrorMessage } from "../../domain/errors/unknown-error.js";
 
 /**
  * Database configuration options
@@ -123,7 +124,7 @@ export function initializeDatabase(config: DatabaseConfig): DatabaseInitResult {
         try {
             mkdirSync(dirname(path), { recursive: true });
         } catch (error) {
-            const message = error instanceof Error ? error.message : String(error);
+            const message = unknownErrorMessage(error);
             throw new MemoryError(
                 ErrorCode.DB_CONNECTION_FAILED,
                 `Failed to create database directory: ${message}`,
@@ -137,7 +138,7 @@ export function initializeDatabase(config: DatabaseConfig): DatabaseInitResult {
     try {
         db = new Database(path, { create });
     } catch (error) {
-        const message = error instanceof Error ? error.message : String(error);
+        const message = unknownErrorMessage(error);
         const errno = (error as NodeJS.ErrnoException).code;
         throw new MemoryError(
             ErrorCode.DB_CONNECTION_FAILED,
@@ -149,7 +150,7 @@ export function initializeDatabase(config: DatabaseConfig): DatabaseInitResult {
     // Helper to handle corrupted file errors
     const handleDbError = (error: unknown): never => {
         db.close();
-        const message = error instanceof Error ? error.message : String(error);
+        const message = unknownErrorMessage(error);
         // "file is not a database" or similar indicates corruption
         if (message.includes("not a database") || message.includes("SQLITE_NOTADB")) {
             throw new MemoryError(
@@ -344,7 +345,7 @@ export function initializeDatabaseSafe(config: DatabaseConfig): DatabaseInitResu
         }
 
         // Wrap generic errors
-        const message = error instanceof Error ? error.message : String(error);
+        const message = unknownErrorMessage(error);
         const errno = (error as NodeJS.ErrnoException).code;
         throw new MemoryError(
             ErrorCode.DB_CONNECTION_FAILED,

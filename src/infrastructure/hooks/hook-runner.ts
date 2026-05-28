@@ -22,6 +22,7 @@ import type { Database } from "bun:sqlite";
 import { LlmExtractor } from "../../application/services/llm-extractor.js";
 import { SqliteEntityRepository } from "../database/repositories/entity-repository.js";
 import { SqliteMessageRepository } from "../database/repositories/message-repository.js";
+import { unknownErrorMessage } from "../../domain/errors/unknown-error.js";
 
 /**
  * LogWriter interface for hook execution logging.
@@ -228,7 +229,7 @@ export async function extractEntitiesFromSession(
         };
     } catch (error) {
         // LLM extraction failure should not block sync
-        const errorMessage = error instanceof Error ? error.message : String(error);
+        const errorMessage = unknownErrorMessage(error);
         logWriter?.warn(`LLM extraction failed for ${sessionId}: ${errorMessage}`);
 
         return {

@@ -9,6 +9,7 @@ import type { Session } from "../../../domain/entities/session.js";
 import { formatTimestamp, formatRelativeTime } from "./timestamp-formatter.js";
 import { dim } from "./color.js";
 import { padToWidth } from "./text-width.js";
+import { unknownErrorMessage } from "../../../domain/errors/unknown-error.js";
 
 /**
  * Output mode for list formatter.
@@ -113,7 +114,7 @@ class DefaultListFormatter implements ListFormatter {
   }
 
   formatError(error: Error): string {
-    const message = error instanceof Error ? error.message : String(error);
+    const message = unknownErrorMessage(error);
     return `Error: ${message}`;
   }
 
@@ -148,7 +149,7 @@ class BriefListFormatter implements ListFormatter {
   }
 
   formatError(error: Error): string {
-    const message = error instanceof Error ? error.message : String(error);
+    const message = unknownErrorMessage(error);
     return `Error: ${message}`;
   }
 
@@ -175,7 +176,7 @@ class JsonListFormatter implements ListFormatter {
   }
 
   formatError(error: Error): string {
-    const message = error instanceof Error ? error.message : String(error);
+    const message = unknownErrorMessage(error);
     return JSON.stringify({ error: message });
   }
 
@@ -197,7 +198,7 @@ class QuietListFormatter implements ListFormatter {
   }
 
   formatError(error: Error): string {
-    const message = error instanceof Error ? error.message : String(error);
+    const message = unknownErrorMessage(error);
     return `Error: ${message}`;
   }
 
@@ -254,7 +255,7 @@ class VerboseListFormatter implements ListFormatter {
   }
 
   formatError(error: Error): string {
-    const message = error instanceof Error ? error.message : String(error);
+    const message = unknownErrorMessage(error);
     const stack = error instanceof Error ? error.stack : "";
     return `Error: ${message}\n${stack ?? ""}`;
   }
