@@ -75,17 +75,19 @@ export interface SyncHookDeps {
  * @returns Parsed hook input
  * @throws Error if stdin is empty or JSON is invalid
  */
-export async function readStdinJson(): Promise<HookInput> {
+type HookInputStream = Pick<NodeJS.ReadStream, "setEncoding" | "on">;
+
+export async function readJsonFromStream(stream: HookInputStream): Promise<HookInput> {
     return new Promise((resolve, reject) => {
         let input = "";
 
-        process.stdin.setEncoding("utf-8");
+        stream.setEncoding("utf-8");
 
-        process.stdin.on("data", (chunk) => {
+        stream.on("data", (chunk) => {
             input += chunk;
         });
 
-        process.stdin.on("end", () => {
+        stream.on("end", () => {
             if (!input.trim()) {
                 reject(new Error("Empty stdin"));
                 return;
@@ -98,10 +100,14 @@ export async function readStdinJson(): Promise<HookInput> {
             }
         });
 
-        process.stdin.on("error", (err) => {
+        stream.on("error", (err) => {
             reject(err);
         });
     });
+}
+
+export async function readStdinJson(): Promise<HookInput> {
+    return readJsonFromStream(process.stdin);
 }
 
 export async function executeSyncHook(deps: SyncHookDeps): Promise<void> {

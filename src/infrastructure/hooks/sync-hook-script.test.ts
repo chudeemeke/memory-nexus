@@ -16,8 +16,9 @@ import { mkdirSync, writeFileSync, rmSync, existsSync } from "node:fs";
 import { join } from "node:path";
 import { tmpdir } from "node:os";
 import { spawn } from "node:child_process";
+import { EventEmitter } from "node:events";
 import { DEFAULT_CONFIG } from "./config-manager.js";
-import { executeSyncHook, type HookInput } from "./sync-hook-script.js";
+import { executeSyncHook, readJsonFromStream, type HookInput } from "./sync-hook-script.js";
 
 /** Path to the hook script under test */
 const HOOK_SCRIPT = join(
@@ -90,6 +91,66 @@ describe("sync-hook-script", () => {
                 // Ignore Windows cleanup failures
             }
         }
+    });
+
+    describe("readJsonFromStream", () => {
+        function createStream(): EventEmitter & {
+            encoding?: BufferEncoding;
+            setEncoding: (encoding: BufferEncoding) => void;
+        } {
+            const stream = new EventEmitter() as EventEmitter & {
+                encoding?: BufferEncoding;
+                setEncoding: (encoding: BufferEncoding) => void;
+            };
+            stream.setEncoding = (encoding) => {
+                stream.encoding = encoding;
+            };
+            return stream;
+        }
+
+        test("parses hook input JSON from multiple chunks", async () => {
+            const stream = createStream();
+            const parsed = readJsonFromStream(stream);
+
+            stream.emit("data", "{\"hook_event_name\":\"SessionEnd\",");
+            stream.emit("data", "\"session_id\":\"session-abc\"}");
+            stream.emit("end");
+
+            await expect(parsed).resolves.toEqual({
+                hook_event_name: "SessionEnd",
+                session_id: "session-abc",
+            });
+            expect(stream.encoding).toBe("utf-8");
+        });
+
+        test("rejects empty hook input", async () => {
+            const stream = createStream();
+            const parsed = readJsonFromStream(stream);
+
+            stream.emit("data", "  ");
+            stream.emit("end");
+
+            await expect(parsed).rejects.toThrow("Empty stdin");
+        });
+
+        test("rejects invalid hook input JSON with a stable error", async () => {
+            const stream = createStream();
+            const parsed = readJsonFromStream(stream);
+
+            stream.emit("data", "{not json");
+            stream.emit("end");
+
+            await expect(parsed).rejects.toThrow("Failed to parse hook input JSON");
+        });
+
+        test("propagates stream read errors", async () => {
+            const stream = createStream();
+            const parsed = readJsonFromStream(stream);
+
+            stream.emit("error", new Error("stdin failed"));
+
+            await expect(parsed).rejects.toThrow("stdin failed");
+        });
     });
 
     /**
