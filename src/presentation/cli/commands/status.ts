@@ -728,11 +728,9 @@ function formatIntegrity(integrity: "ok" | "corrupted" | "unknown", useColor: bo
 function countIssues(result: HealthCheckResult): number {
     let count = 0;
 
-    // Database issues
-    if (!result.database.exists) count++;
-    if (result.database.exists && !result.database.readable) count++;
-    if (result.database.exists && !result.database.writable) count++;
-    if (result.database.integrity === "corrupted") count++;
+    // Fatal database states are handled by determineExitCode before this helper.
+    if (!result.database.readable) count++;
+    if (!result.database.writable) count++;
 
     // Permission issues
     if (!result.permissions.configDir) count++;

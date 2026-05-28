@@ -1256,6 +1256,92 @@ describe("HybridSearchService", () => {
     });
   });
 
+  describe("database hydration helpers", () => {
+    it("returns null when stored embedding metadata is unavailable or unrecognized", () => {
+      const noRowDb = {
+        prepare: () => ({
+          get: () => undefined,
+        }),
+      } as unknown as Database;
+      const noEmbeddingDb = {
+        prepare: () => ({
+          get: () => ({ embedding: undefined }),
+        }),
+      } as unknown as Database;
+      const unsupportedEmbeddingDb = {
+        prepare: () => ({
+          get: () => ({ embedding: { length: 384 } }),
+        }),
+      } as unknown as Database;
+      const throwingDb = {
+        prepare: () => {
+          throw new Error("vec table missing");
+        },
+      } as unknown as Database;
+
+      expect((new HybridSearchService(createDeps(noRowDb)) as any).getStoredEmbeddingDimensions()).toBeNull();
+      expect((new HybridSearchService(createDeps(noEmbeddingDb)) as any).getStoredEmbeddingDimensions()).toBeNull();
+      expect((new HybridSearchService(createDeps(unsupportedEmbeddingDb)) as any).getStoredEmbeddingDimensions()).toBeNull();
+      expect((new HybridSearchService(createDeps(throwingDb)) as any).getStoredEmbeddingDimensions()).toBeNull();
+    });
+
+    it("derives stored dimensions from ArrayBuffer-like embeddings", () => {
+      const buffer = new ArrayBuffer(1536);
+      const fakeDb = {
+        prepare: () => ({
+          get: () => ({ embedding: buffer }),
+        }),
+      } as unknown as Database;
+
+      expect((new HybridSearchService(createDeps(fakeDb)) as any).getStoredEmbeddingDimensions()).toBe(384);
+    });
+
+    it("short-circuits empty FTS rowid maps and empty hydration requests", () => {
+      const service = new HybridSearchService(createDeps(db)) as any;
+
+      expect(service.buildFtsRowidMap([]).size).toBe(0);
+      expect(service.hydrateByRowids([]).size).toBe(0);
+    });
+
+    it("falls back to vector snippets and default source when fused metadata has no FTS match", async () => {
+      const fakeDb = {
+        prepare: (sql: string) => ({
+          get: () => ({ embedding: new Float32Array(384) }),
+          all: (...args: unknown[]) => {
+            if (sql.includes("messages_meta") && sql.includes("rowid IN")) {
+              return [{
+                rowid: 42,
+                id: "msg-vector-only",
+                session_id: "session-1",
+                content: "x".repeat(220),
+                timestamp: "2026-01-01T00:00:00.000Z",
+                role: "assistant",
+              }];
+            }
+            return [];
+          },
+        }),
+      } as unknown as Database;
+      const vectorRepo = createEmbeddingRepoStub([{ rowid: 42, distance: 0.25 }], { embedded: 1, total: 1 });
+      const service = new HybridSearchService(createDeps(fakeDb, {
+        sqliteVecAvailable: true,
+        fts5Service: createFtsServiceStub([]),
+        embeddingRepo: vectorRepo,
+        providerFactory: createMockFactory(createMockProvider()),
+      }));
+
+      const results = await service.search(SearchQuery.from("vector only"), {
+        mode: "hybrid",
+        noDecay: true,
+      });
+
+      expect(results).toHaveLength(1);
+      expect(results[0].messageId).toBe("msg-vector-only");
+      expect(results[0].source).toBe("vector");
+      expect(results[0].snippet.endsWith("...")).toBe(true);
+    });
+  });
+
   describe("uniform temporal decay", () => {
     it("FTS-only mode applies temporal decay when enabled", async () => {
       const oldDate = new Date("2020-01-01T00:00:00Z");
