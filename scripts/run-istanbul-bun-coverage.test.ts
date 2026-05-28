@@ -8,6 +8,7 @@ import {
   instrumentTypeScript,
   instrumentTypeScriptWithCoverage,
   isCoverageIgnored,
+  parseRunnerArgs,
   writeCoverageReports,
 } from "./run-istanbul-bun-coverage";
 
@@ -43,6 +44,19 @@ describe("run-istanbul-bun-coverage", () => {
     expect(Object.values(output.coverageData.s)).toEqual([0]);
     expect(Object.values(output.coverageData.f)).toEqual([0]);
     expect(Object.values(output.coverageData.b)).toEqual([[0, 0]]);
+  });
+
+  test("adds the release-suite timeout to instrumented test runs by default", () => {
+    const options = parseRunnerArgs(["--coverage-dir", "coverage-custom", "--", "src/example.test.ts"]);
+
+    expect(options.coverageDir.endsWith("coverage-custom")).toBe(true);
+    expect(options.testArgs).toEqual(["--timeout", "15000", "src/example.test.ts"]);
+  });
+
+  test("preserves an explicit instrumented test timeout", () => {
+    const options = parseRunnerArgs(["--", "--timeout", "30000", "src/example.test.ts"]);
+
+    expect(options.testArgs).toEqual(["--timeout", "30000", "src/example.test.ts"]);
   });
 
   test("writes Istanbul reports with all four coverage totals", () => {
