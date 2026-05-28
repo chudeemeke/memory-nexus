@@ -16,6 +16,9 @@ import { GitSyncer } from "../../../infrastructure/hooks/git-syncer.js";
 export interface RemoteCommandOptions {
     configPathOverride?: string;
     eventsDirOverride?: string;
+    loadConfig?: typeof loadConfig;
+    saveConfig?: typeof saveConfig;
+    createGitSyncer?: (eventsDir?: string) => Pick<GitSyncer, "isGitRepo" | "initRepo" | "configureRemote" | "removeRemote" | "getRemoteUrl">;
 }
 
 /**
@@ -57,19 +60,12 @@ export async function executeRemoteSetCommand(
     opts: RemoteCommandOptions = {},
 ): Promise<CommandResult> {
     try {
-        const config = loadConfig(opts.configPathOverride);
+        const load = opts.loadConfig ?? loadConfig;
+        const save = opts.saveConfig ?? saveConfig;
+        const createSyncer = opts.createGitSyncer ?? ((eventsDir?: string) => new GitSyncer(eventsDir));
+        const config = load(opts.configPathOverride);
         
-        // Save remote configurations
-        saveConfig({
-            remoteSync: {
-                enabled: true,
-                repositoryUrl,
-                autoPush: config.remoteSync?.autoPush ?? true,
-                autoPull: config.remoteSync?.autoPull ?? true,
-            }
-        }, opts.configPathOverride);
-
-        const syncer = new GitSyncer(opts.eventsDirOverride);
+        const syncer = createSyncer(opts.eventsDirOverride);
         const isRepo = await syncer.isGitRepo();
         if (!isRepo) {
             console.log("Initializing local Git repository in events directory...");
@@ -86,6 +82,16 @@ export async function executeRemoteSetCommand(
             console.error("Error: Failed to configure Git remote repository origin.");
             return { exitCode: 1 };
         }
+
+        // Save remote configuration only after Git setup succeeds.
+        save({
+            remoteSync: {
+                enabled: true,
+                repositoryUrl,
+                autoPush: config.remoteSync?.autoPush ?? true,
+                autoPull: config.remoteSync?.autoPull ?? true,
+            }
+        }, opts.configPathOverride);
 
         console.log("\nSuccess: Remote synchronization configured successfully!");
         console.log("To synchronize your local facts with the remote repository, run: memory sync");
@@ -104,10 +110,13 @@ export async function executeRemoteRemoveCommand(
     opts: RemoteCommandOptions = {},
 ): Promise<CommandResult> {
     try {
-        const config = loadConfig(opts.configPathOverride);
+        const load = opts.loadConfig ?? loadConfig;
+        const save = opts.saveConfig ?? saveConfig;
+        const createSyncer = opts.createGitSyncer ?? ((eventsDir?: string) => new GitSyncer(eventsDir));
+        const config = load(opts.configPathOverride);
         
         // Save config with remote sync disabled
-        saveConfig({
+        save({
             remoteSync: {
                 enabled: false,
                 autoPush: config.remoteSync?.autoPush ?? true,
@@ -115,7 +124,7 @@ export async function executeRemoteRemoveCommand(
             }
         }, opts.configPathOverride);
 
-        const syncer = new GitSyncer(opts.eventsDirOverride);
+        const syncer = createSyncer(opts.eventsDirOverride);
         const isRepo = await syncer.isGitRepo();
         if (isRepo) {
             console.log("Removing Git remote origin URL...");
@@ -137,7 +146,9 @@ export async function executeRemoteStatusCommand(
     opts: RemoteCommandOptions = {},
 ): Promise<CommandResult> {
     try {
-        const config = loadConfig(opts.configPathOverride);
+        const load = opts.loadConfig ?? loadConfig;
+        const createSyncer = opts.createGitSyncer ?? ((eventsDir?: string) => new GitSyncer(eventsDir));
+        const config = load(opts.configPathOverride);
         const remoteSync = config.remoteSync;
 
         console.log("Remote Sync Status");
@@ -148,7 +159,7 @@ export async function executeRemoteStatusCommand(
         console.log(`Auto-Pull:         ${remoteSync?.autoPull ? "enabled" : "disabled"}`);
         console.log(`Auto-Push:         ${remoteSync?.autoPush ? "enabled" : "disabled"}`);
 
-        const syncer = new GitSyncer(opts.eventsDirOverride);
+        const syncer = createSyncer(opts.eventsDirOverride);
         const isRepo = await syncer.isGitRepo();
         console.log(`Git Repository:    ${isRepo ? "initialized" : "not initialized"}`);
         

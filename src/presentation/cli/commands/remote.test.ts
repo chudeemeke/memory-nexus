@@ -125,6 +125,69 @@ describe("remote command", () => {
         expect(output).toContain("Failed to configure Git remote");
     });
 
+    test("executeRemoteSetCommand does not save config when local git initialization fails", async () => {
+        let saveCalled = false;
+        const result = await executeRemoteSetCommand("git@example/repo.git", {
+            loadConfig: () => ({
+                remoteSync: { autoPush: false, autoPull: false },
+            }) as any,
+            saveConfig: () => {
+                saveCalled = true;
+            },
+            createGitSyncer: () => ({
+                isGitRepo: async () => false,
+                initRepo: async () => false,
+                configureRemote: async () => true,
+                removeRemote: async () => true,
+                getRemoteUrl: async () => null,
+            }),
+        });
+
+        expect(result.exitCode).toBe(1);
+        expect(saveCalled).toBe(false);
+        expect(consoleErrorSpy.mock.calls.map((call: unknown[]) => String(call[0])).join("\n"))
+            .toContain("Failed to initialize Git repository");
+    });
+
+    test("executeRemoteSetCommand preserves existing auto flags after successful setup", async () => {
+        let saved: any;
+        const result = await executeRemoteSetCommand("git@example/repo.git", {
+            loadConfig: () => ({
+                remoteSync: { autoPush: false, autoPull: false },
+            }) as any,
+            saveConfig: (config) => {
+                saved = config;
+            },
+            createGitSyncer: () => ({
+                isGitRepo: async () => true,
+                initRepo: async () => false,
+                configureRemote: async () => true,
+                removeRemote: async () => true,
+                getRemoteUrl: async () => null,
+            }),
+        });
+
+        expect(result.exitCode).toBe(0);
+        expect(saved.remoteSync).toEqual({
+            enabled: true,
+            repositoryUrl: "git@example/repo.git",
+            autoPush: false,
+            autoPull: false,
+        });
+    });
+
+    test("executeRemoteSetCommand reports config read failures", async () => {
+        const result = await executeRemoteSetCommand("git@example/repo.git", {
+            loadConfig: () => {
+                throw new Error("config unreadable");
+            },
+        });
+
+        expect(result.exitCode).toBe(1);
+        expect(consoleErrorSpy.mock.calls.map((call: unknown[]) => String(call[0])).join("\n"))
+            .toContain("Error setting remote:");
+    });
+
     test("executeRemoteRemoveCommand disables sync and clears configuration", async () => {
         // Set first
         await executeRemoteSetCommand(mockRemoteDir, {
@@ -183,6 +246,18 @@ describe("remote command", () => {
         expect(output).toContain("Error removing remote:");
     });
 
+    test("executeRemoteRemoveCommand reports config read failures", async () => {
+        const result = await executeRemoteRemoveCommand({
+            loadConfig: () => {
+                throw new Error("config unreadable");
+            },
+        });
+
+        expect(result.exitCode).toBe(1);
+        expect(consoleErrorSpy.mock.calls.map((call: unknown[]) => String(call[0])).join("\n"))
+            .toContain("Error removing remote:");
+    });
+
     test("executeRemoteStatusCommand renders status values correctly", async () => {
         // Set first
         await executeRemoteSetCommand(mockRemoteDir, {
@@ -216,5 +291,44 @@ describe("remote command", () => {
         expect(output).toContain("Enabled:           no");
         expect(output).toContain("Repository URL:    none configured");
         expect(output).toContain("Git Repository:    not initialized");
+    });
+
+    test("executeRemoteStatusCommand renders initialized repo with no actual origin", async () => {
+        const result = await executeRemoteStatusCommand({
+            loadConfig: () => ({
+                machineId: "machine-1",
+                remoteSync: {
+                    enabled: true,
+                    repositoryUrl: "git@example/repo.git",
+                    autoPull: false,
+                    autoPush: true,
+                },
+            }) as any,
+            createGitSyncer: () => ({
+                isGitRepo: async () => true,
+                getRemoteUrl: async () => null,
+                initRepo: async () => true,
+                configureRemote: async () => true,
+                removeRemote: async () => true,
+            }),
+        });
+
+        expect(result.exitCode).toBe(0);
+        const output = consoleLogSpy.mock.calls.map((call: unknown[]) => String(call[0])).join("\n");
+        expect(output).toContain("Auto-Pull:         disabled");
+        expect(output).toContain("Auto-Push:         enabled");
+        expect(output).toContain("Actual Git Remote: none");
+    });
+
+    test("executeRemoteStatusCommand reports config read failures", async () => {
+        const result = await executeRemoteStatusCommand({
+            loadConfig: () => {
+                throw new Error("config unreadable");
+            },
+        });
+
+        expect(result.exitCode).toBe(1);
+        expect(consoleErrorSpy.mock.calls.map((call: unknown[]) => String(call[0])).join("\n"))
+            .toContain("Error gathering remote status:");
     });
 });
