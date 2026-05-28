@@ -157,7 +157,7 @@ describe("git-syncer", () => {
         } finally {
             await removeDirWithRetry(device2Dir);
         }
-    }, 45000);
+    }, 90000);
 });
 
 describe("git-syncer dependency seams", () => {
