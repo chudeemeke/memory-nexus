@@ -18,7 +18,13 @@ import { tmpdir } from "node:os";
 import { spawn } from "node:child_process";
 import { EventEmitter } from "node:events";
 import { DEFAULT_CONFIG } from "./config-manager.js";
-import { executeSyncHook, readJsonFromStream, type HookInput } from "./sync-hook-script.js";
+import {
+    createDefaultSyncHookDeps,
+    executeSyncHook,
+    readJsonFromStream,
+    runSyncHookMain,
+    type HookInput,
+} from "./sync-hook-script.js";
 
 /** Path to the hook script under test */
 const HOOK_SCRIPT = join(
@@ -390,6 +396,72 @@ describe("sync-hook-script", () => {
                     message: "Triggered sync for session session-123",
                     sessionId: "session-123",
                     hookEvent: "SessionEnd",
+                },
+            ]);
+        });
+    });
+
+    describe("runSyncHookMain", () => {
+        test("creates production dependencies without executing them", () => {
+            const deps = createDefaultSyncHookDeps();
+
+            expect(deps.loadConfig).toBeFunction();
+            expect(deps.readInput).toBeFunction();
+            expect(deps.log).toBeFunction();
+            expect(deps.spawnSync).toBeFunction();
+            expect(deps.writeStdout).toBeFunction();
+            expect(deps.exit).toBeFunction();
+        });
+
+        test("converts unexpected failures into non-blocking fatal hook logs", async () => {
+            const fatal: Array<Record<string, unknown>> = [];
+
+            await runSyncHookMain(
+                {
+                    loadConfig: () => {
+                        throw new Error("config unavailable");
+                    },
+                    readInput: async () => ({ hook_event_name: "SessionEnd", session_id: "session-1" }),
+                    log: () => undefined,
+                    spawnSync: () => ({ pid: 1 }),
+                    writeStdout: () => undefined,
+                    exit: () => undefined,
+                },
+                (entry) => {
+                    fatal.push(entry);
+                },
+            );
+
+            expect(fatal).toHaveLength(1);
+            expect(fatal[0].level).toBe("error");
+            expect(fatal[0].message).toBe("Hook error: config unavailable");
+            expect(typeof fatal[0].error).toBe("string");
+        });
+
+        test("passes non-Error fatal values through the same non-blocking surface", async () => {
+            const fatal: Array<Record<string, unknown>> = [];
+
+            await runSyncHookMain(
+                {
+                    loadConfig: () => {
+                        throw "string failure";
+                    },
+                    readInput: async () => ({ hook_event_name: "SessionEnd", session_id: "session-1" }),
+                    log: () => undefined,
+                    spawnSync: () => ({ pid: 1 }),
+                    writeStdout: () => undefined,
+                    exit: () => undefined,
+                },
+                (entry) => {
+                    fatal.push(entry);
+                },
+            );
+
+            expect(fatal).toEqual([
+                {
+                    level: "error",
+                    message: "Hook error: string failure",
+                    error: undefined,
                 },
             ]);
         });

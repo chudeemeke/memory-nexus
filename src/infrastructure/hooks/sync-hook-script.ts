@@ -110,6 +110,17 @@ export async function readStdinJson(): Promise<HookInput> {
     return readJsonFromStream(process.stdin);
 }
 
+export function createDefaultSyncHookDeps(): SyncHookDeps {
+    return {
+        loadConfig,
+        readInput: readStdinJson,
+        log: logSync,
+        spawnSync: spawnBackgroundSync,
+        writeStdout: console.log,
+        exit: process.exit,
+    };
+}
+
 export async function executeSyncHook(deps: SyncHookDeps): Promise<void> {
     const config = deps.loadConfig();
 
@@ -173,6 +184,26 @@ export async function executeSyncHook(deps: SyncHookDeps): Promise<void> {
     deps.exit(0);
 }
 
+export async function runSyncHookMain(
+    deps: SyncHookDeps = createDefaultSyncHookDeps(),
+    onFatal: (entry: { level: "error"; message: string; error?: string | undefined }) => void = (entry) => {
+        logSync(entry);
+        process.exit(0);
+    },
+): Promise<void> {
+    try {
+        await executeSyncHook(deps);
+    } catch (err) {
+        const message = err instanceof Error ? err.message : String(err);
+        const stack = err instanceof Error ? err.stack : undefined;
+        onFatal({
+            level: "error",
+            message: `Hook error: ${message}`,
+            error: stack,
+        });
+    }
+}
+
 /**
  * Main entry point
  *
@@ -186,26 +217,10 @@ export async function executeSyncHook(deps: SyncHookDeps): Promise<void> {
  * 7. Log and exit
  */
 async function main(): Promise<void> {
-    await executeSyncHook({
-        loadConfig,
-        readInput: readStdinJson,
-        log: logSync,
-        spawnSync: spawnBackgroundSync,
-        writeStdout: console.log,
-        exit: process.exit,
-    });
+    await runSyncHookMain();
 }
 
 // Run only when executed directly
 if (import.meta.main) {
-    main().catch((err) => {
-        const message = err instanceof Error ? err.message : String(err);
-        const stack = err instanceof Error ? err.stack : undefined;
-        logSync({
-            level: "error",
-            message: `Hook error: ${message}`,
-            error: stack,
-        });
-        process.exit(0); // Never block user
-    });
+    void main();
 }
