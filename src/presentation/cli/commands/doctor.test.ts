@@ -13,6 +13,7 @@ import {
     executeDoctorCommand,
     formatHealthResult,
     attemptFixes,
+    runPortabilityDiagnostics,
 } from "./doctor.js";
 import type { HealthCheckResult } from "../../../infrastructure/database/health-checker.js";
 import type { StatusInfo } from "./status.js";
@@ -1001,6 +1002,148 @@ describe("doctor command", () => {
                 },
             });
             expect(result.exitCode).toBe(2);
+        });
+    });
+
+    describe("portability diagnostics", () => {
+        it("reports missing database as JSON without attempting a scan", async () => {
+            consoleOutput = [];
+            console.log = (msg: string) => consoleOutput.push(msg);
+
+            const result = await runPortabilityDiagnostics({ portability: true, json: true }, {
+                healthOverrides: {
+                    dbPath: join(testDir, "missing-portability.db"),
+                    sourceDir: testDir,
+                },
+            });
+
+            const parsed = JSON.parse(consoleOutput.join("\n"));
+            expect(result.exitCode).toBe(1);
+            expect(parsed.error).toContain("Database does not exist");
+        });
+
+        it("reports mixed dialects, orphaned paths, stale locks, and sqlite-vec failures in JSON", async () => {
+            const portabilityDir = join(tmpdir(), `doctor-portability-${Date.now()}-${Math.random().toString(36).slice(2)}`);
+            const portabilityDb = join(portabilityDir, "memory.db");
+            mkdirSync(portabilityDir, { recursive: true });
+            const { db } = initializeDatabase({ path: portabilityDb });
+            try {
+                db.run(
+                    `INSERT INTO sessions (id, project_path_encoded, project_path_decoded, project_name, start_time)
+                     VALUES (?, ?, ?, ?, ?)`,
+                    ["portable-1", "encoded", "/home/destiny/missing-project", "missing-project", new Date().toISOString()]
+                );
+            } finally {
+                closeDatabase(db);
+            }
+            writeFileSync(join(portabilityDir, "embedding.lock"), "{not json");
+
+            consoleOutput = [];
+            console.log = (msg: string) => consoleOutput.push(msg);
+
+            try {
+                const result = await runPortabilityDiagnostics({ portability: true, json: true, fix: true }, {
+                    healthOverrides: {
+                        dbPath: portabilityDb,
+                        sourceDir: portabilityDir,
+                    },
+                    gatherStatus: async () => createStatusInfo({
+                        database: { exists: true, readable: true, writable: true, integrity: "ok", size: 1 },
+                        permissions: { configDir: true, logsDir: true, sourceDir: true },
+                        hooks: { installed: true, enabled: true, lastRun: null },
+                        config: { valid: true, issues: [] },
+                        embedding: {
+                            configured: true,
+                            provider: "local",
+                            model: "test",
+                            dimensions: 384,
+                            enabled: true,
+                            ready: true,
+                        },
+                        sqliteVec: { available: false, version: null },
+                        searchCapability: {
+                            fts5: true,
+                            sqliteVec: false,
+                            embeddedCount: 0,
+                            totalMessages: 0,
+                            coveragePercent: 0,
+                            defaultMode: "auto",
+                            vectorReady: false,
+                        },
+                    }),
+                });
+
+                const parsed = JSON.parse(consoleOutput.join("\n"));
+                expect(result.exitCode).toBe(1);
+                expect(parsed.portability.mixedDialectPaths).toContain("/home/destiny/missing-project");
+                expect(parsed.portability.orphanedPaths).toContain("/home/destiny/missing-project");
+                expect(parsed.portability.staleLocks).toContain(join(portabilityDir, "embedding.lock"));
+                expect(parsed.portability.sqliteVecAvailable).toBe(false);
+                expect(parsed.portability.fixedStaleLocks).toBe(true);
+            } finally {
+                try {
+                    rmSync(portabilityDir, { recursive: true, force: true, maxRetries: 10, retryDelay: 50 });
+                } catch {
+                    // Best-effort cleanup on Windows; SQLite can release handles late.
+                }
+            }
+        });
+
+        it("renders text success diagnostics when no portability issues are found", async () => {
+            const portabilityDir = join(tmpdir(), `doctor-portability-ok-${Date.now()}-${Math.random().toString(36).slice(2)}`);
+            const portabilityDb = join(portabilityDir, "memory.db");
+            mkdirSync(portabilityDir, { recursive: true });
+            const { db } = initializeDatabase({ path: portabilityDb });
+            closeDatabase(db);
+
+            consoleOutput = [];
+            console.log = (msg: string) => consoleOutput.push(msg);
+
+            try {
+                const result = await runPortabilityDiagnostics({ portability: true }, {
+                    healthOverrides: {
+                        dbPath: portabilityDb,
+                        sourceDir: portabilityDir,
+                    },
+                    gatherStatus: async () => createStatusInfo({
+                        database: { exists: true, readable: true, writable: true, integrity: "ok", size: 1 },
+                        permissions: { configDir: true, logsDir: true, sourceDir: true },
+                        hooks: { installed: true, enabled: true, lastRun: null },
+                        config: { valid: true, issues: [] },
+                        embedding: {
+                            configured: true,
+                            provider: "local",
+                            model: "test",
+                            dimensions: 384,
+                            enabled: true,
+                            ready: true,
+                        },
+                        sqliteVec: { available: true, version: "v0.1.9" },
+                        searchCapability: {
+                            fts5: true,
+                            sqliteVec: true,
+                            embeddedCount: 0,
+                            totalMessages: 0,
+                            coveragePercent: 0,
+                            defaultMode: "auto",
+                            vectorReady: false,
+                        },
+                    }),
+                });
+
+                const output = consoleOutput.join("\n");
+                expect(result.exitCode).toBe(0);
+                expect(output).toContain("Path Dialects: No mixed");
+                expect(output).toContain("Orphaned Workspaces: All session folders exist");
+                expect(output).toContain("Active Locks: No stale");
+                expect(output).toContain("sqlite-vec: Loadable");
+            } finally {
+                try {
+                    rmSync(portabilityDir, { recursive: true, force: true, maxRetries: 10, retryDelay: 50 });
+                } catch {
+                    // Best-effort cleanup on Windows; SQLite can release handles late.
+                }
+            }
         });
     });
 
