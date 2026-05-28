@@ -445,7 +445,10 @@ describe("health-checker", () => {
     });
 
     describe("checkEmbeddingConfig", () => {
+        const originalEnv = { ...process.env };
+
         afterEach(() => {
+            process.env = { ...originalEnv };
             try {
                 rmSync(testConfigPath, { force: true });
             } catch {
@@ -493,7 +496,8 @@ describe("health-checker", () => {
             expect(result.readyReason).toBeUndefined();
         });
 
-        it("returns ready: false with reason when openai provider has no apiKey", () => {
+        it("returns ready: false with reason when openai provider has no runtime key", () => {
+            delete process.env.OPENAI_API_KEY;
             writeFileSync(testConfigPath, JSON.stringify({
                 embedding: {
                     provider: "openai",
@@ -504,10 +508,27 @@ describe("health-checker", () => {
 
             const result = checkEmbeddingConfig(testConfigPath);
             expect(result.ready).toBe(false);
-            expect(result.readyReason).toBe("API key not set");
+            expect(result.readyReason).toBe("API key not available at runtime; set OPENAI_API_KEY or embedding.apiKeyEnv");
         });
 
-        it("returns ready: true when openai provider has apiKey", () => {
+        it("returns ready: true when openai provider uses configured apiKeyEnv", () => {
+            process.env.MEMORY_NEXUS_TEST_OPENAI_KEY = "sk-test-key";
+            writeFileSync(testConfigPath, JSON.stringify({
+                embedding: {
+                    provider: "openai",
+                    model: "text-embedding-3-small",
+                    dimensions: 1536,
+                    apiKeyEnv: "MEMORY_NEXUS_TEST_OPENAI_KEY",
+                },
+            }));
+
+            const result = checkEmbeddingConfig(testConfigPath);
+            expect(result.ready).toBe(true);
+            expect(result.readyReason).toBeUndefined();
+        });
+
+        it("reports plaintext apiKey as deprecated rather than recommending it", () => {
+            delete process.env.OPENAI_API_KEY;
             writeFileSync(testConfigPath, JSON.stringify({
                 embedding: {
                     provider: "openai",
@@ -519,7 +540,23 @@ describe("health-checker", () => {
 
             const result = checkEmbeddingConfig(testConfigPath);
             expect(result.ready).toBe(true);
-            expect(result.readyReason).toBeUndefined();
+            expect(result.readyReason).toBe("Using deprecated plaintext config; prefer environment injection or embedding.apiKeyEnv");
+        });
+
+        it("treats apiKeyRef as opaque metadata and not a resolved key", () => {
+            delete process.env.OPENAI_API_KEY;
+            writeFileSync(testConfigPath, JSON.stringify({
+                embedding: {
+                    provider: "openai",
+                    model: "text-embedding-3-small",
+                    dimensions: 1536,
+                    apiKeyRef: "authkey://memory/openai-api-key",
+                },
+            }));
+
+            const result = checkEmbeddingConfig(testConfigPath);
+            expect(result.ready).toBe(false);
+            expect(result.readyReason).toBe("API key reference configured but not available at runtime; run through a secret injector or set embedding.apiKeyEnv");
         });
 
         it("returns ready: true with deferred-check reason for ollama provider", () => {
@@ -537,10 +574,11 @@ describe("health-checker", () => {
         });
 
         it("returns openai-specific model and dimensions when provider is openai without explicit model", () => {
+            process.env.MEMORY_NEXUS_TEST_OPENAI_KEY = "sk-test-key";
             writeFileSync(testConfigPath, JSON.stringify({
                 embedding: {
                     provider: "openai",
-                    apiKey: "sk-test-key",
+                    apiKeyEnv: "MEMORY_NEXUS_TEST_OPENAI_KEY",
                 },
             }));
 
@@ -562,6 +600,39 @@ describe("health-checker", () => {
             expect(result.provider).toBe("ollama");
             expect(result.model).toBe("nomic-embed-text");
             expect(result.dimensions).toBe(768);
+        });
+
+        it("returns unsupported readiness for unknown embedding provider", () => {
+            writeFileSync(testConfigPath, JSON.stringify({
+                embedding: {
+                    provider: "unknown-provider",
+                    model: "some-model",
+                    dimensions: 768,
+                },
+            }));
+
+            const result = checkEmbeddingConfig(testConfigPath);
+            expect(result.provider).toBe("unknown-provider");
+            expect(result.ready).toBe(false);
+            expect(result.readyReason).toBe('Unsupported embedding provider: "unknown-provider". Supported: local, openai, ollama, openai-compatible');
+        });
+
+        it("supports openai-compatible embedding readiness through apiKeyEnv and baseUrl", () => {
+            process.env.MEMORY_NEXUS_COMPAT_KEY = "compat-test-key";
+            writeFileSync(testConfigPath, JSON.stringify({
+                embedding: {
+                    provider: "openai-compatible",
+                    baseUrl: "https://gateway.example.test/v1",
+                    apiKeyEnv: "MEMORY_NEXUS_COMPAT_KEY",
+                },
+            }));
+
+            const result = checkEmbeddingConfig(testConfigPath);
+            expect(result.provider).toBe("openai-compatible");
+            expect(result.model).toBe("text-embedding-3-small");
+            expect(result.dimensions).toBe(1536);
+            expect(result.ready).toBe(true);
+            expect(result.readyReason).toBeUndefined();
         });
     });
 
@@ -590,7 +661,7 @@ describe("health-checker", () => {
             const result = checkLlmExtractionHealth(testConfigPath);
             expect(result.provider).toBe("anthropic");
             expect(result.ready).toBe(false);
-            expect(result.readyReason).toContain("API key not set");
+            expect(result.readyReason).toBe("API key not available at runtime; set ANTHROPIC_API_KEY or embedding.apiKeyEnv");
         });
 
         it("returns ready: true for anthropic provider when environment ANTHROPIC_API_KEY is present", () => {
@@ -608,6 +679,59 @@ describe("health-checker", () => {
             expect(result.provider).toBe("ollama");
             expect(result.ready).toBe(true);
         });
+
+        it("returns unsupported readiness for unknown LLM provider instead of falling back", () => {
+            process.env.LLM_PROVIDER = "unknown-provider";
+
+            const result = checkLlmExtractionHealth(testConfigPath);
+            expect(result.provider).toBe("unknown-provider");
+            expect(result.ready).toBe(false);
+            expect(result.readyReason).toBe('Unsupported extraction provider: "unknown-provider". Supported: anthropic, openai, ollama, claude-cli, openai-compatible');
+        });
+
+        it("supports openai-compatible extraction readiness through apiKeyEnv and baseUrl", () => {
+            process.env.LLM_PROVIDER = "openai-compatible";
+            process.env.MEMORY_NEXUS_COMPAT_KEY = "compat-test-key";
+            writeFileSync(testConfigPath, JSON.stringify({
+                embedding: {
+                    provider: "local",
+                    apiKeyEnv: "MEMORY_NEXUS_COMPAT_KEY",
+                    baseUrl: "https://gateway.example.test/v1",
+                },
+            }));
+
+            const result = checkLlmExtractionHealth(testConfigPath);
+            expect(result.provider).toBe("openai-compatible");
+            expect(result.model).toBe("gpt-4o");
+            expect(result.ready).toBe(true);
+            expect(result.readyReason).toBeUndefined();
+        });
+
+        it("uses extraction model defaults instead of embedding model defaults", () => {
+            process.env.LLM_PROVIDER = "openai";
+            process.env.OPENAI_API_KEY = "sk-test";
+            writeFileSync(testConfigPath, JSON.stringify({
+                embedding: {
+                    provider: "local",
+                    model: "Xenova/all-MiniLM-L6-v2",
+                },
+            }));
+
+            const result = checkLlmExtractionHealth(testConfigPath);
+            expect(result.provider).toBe("openai");
+            expect(result.model).toBe("gpt-4o");
+            expect(result.ready).toBe(true);
+        });
+
+        it("allows LLM_MODEL to override extraction model without touching embedding config", () => {
+            process.env.LLM_PROVIDER = "openai";
+            process.env.LLM_MODEL = "gpt-4.1-mini";
+            process.env.OPENAI_API_KEY = "sk-test";
+
+            const result = checkLlmExtractionHealth(testConfigPath);
+            expect(result.provider).toBe("openai");
+            expect(result.model).toBe("gpt-4.1-mini");
+            expect(result.ready).toBe(true);
+        });
     });
 });
-

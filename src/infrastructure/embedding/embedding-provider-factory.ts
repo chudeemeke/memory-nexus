@@ -13,10 +13,9 @@
 
 import type { IEmbeddingProvider } from "../../domain/ports/embedding.js";
 import type { EmbeddingConfigData } from "../hooks/config-manager.js";
+import { createHash } from "node:crypto";
 import { DEFAULT_EMBEDDING_CONFIG } from "../hooks/config-manager.js";
-import { TransformersJsProvider } from "./transformers-js-provider.js";
-import { OpenAiProvider } from "./openai-provider.js";
-import { OllamaProvider } from "./ollama-provider.js";
+import { createEmbeddingProvider } from "../providers/provider-registry.js";
 
 export class EmbeddingProviderFactory {
     private cache = new Map<string, IEmbeddingProvider>();
@@ -25,7 +24,18 @@ export class EmbeddingProviderFactory {
      * Generate a cache key from embedding config.
      */
     private cacheKey(config: EmbeddingConfigData): string {
-        return `${config.provider}:${config.model}:${config.dimensions}`;
+        const apiKeyFingerprint = config.apiKey
+            ? createHash("sha256").update(config.apiKey).digest("hex").slice(0, 16)
+            : "";
+        return [
+            config.provider,
+            config.model,
+            String(config.dimensions),
+            config.baseUrl ?? "",
+            config.apiKeyEnv ?? "",
+            config.apiKeyRef ?? "",
+            apiKeyFingerprint,
+        ].join(":");
     }
 
     /**
@@ -42,34 +52,7 @@ export class EmbeddingProviderFactory {
         const cached = this.cache.get(key);
         if (cached) return cached;
 
-        let provider: IEmbeddingProvider;
-        switch (config.provider) {
-            case "local":
-                provider = new TransformersJsProvider({
-                    model: config.model,
-                    dimensions: config.dimensions,
-                });
-                break;
-            case "openai":
-                provider = new OpenAiProvider({
-                    apiKey: config.apiKey ?? "",
-                    model: config.model,
-                    dimensions: config.dimensions,
-                    baseUrl: config.baseUrl,
-                });
-                break;
-            case "ollama":
-                provider = new OllamaProvider({
-                    model: config.model,
-                    dimensions: config.dimensions,
-                    baseUrl: config.baseUrl,
-                });
-                break;
-            default:
-                throw new Error(
-                    `Unsupported embedding provider: "${config.provider}". Supported: local, openai, ollama`
-                );
-        }
+        const provider = createEmbeddingProvider(config);
 
         this.cache.set(key, provider);
         return provider;

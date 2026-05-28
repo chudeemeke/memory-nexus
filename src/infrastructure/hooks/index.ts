@@ -11,10 +11,12 @@ export {
     saveConfig,
     getConfigPath,
     getConfigDir,
+    resolveEmbeddingApiKey,
     DEFAULT_CONFIG,
     DEFAULT_EMBEDDING_CONFIG,
     type MemoryConfig,
     type EmbeddingConfigData,
+    type ApiKeyResolution,
 } from "./config-manager.js";
 
 // Log exports

@@ -5,6 +5,7 @@
  */
 
 import { describe, test, expect, beforeEach, afterEach, spyOn } from "bun:test";
+import { Database } from "bun:sqlite";
 import { existsSync } from "node:fs";
 import { join } from "node:path";
 import { Command } from "commander";
@@ -79,6 +80,12 @@ describe("Export Command", () => {
       const cmd = createExportCommand();
       const jsonOpt = cmd.options.find((o) => o.long === "--json");
       expect(jsonOpt).toBeDefined();
+    });
+
+    test("has --include-sensitive option", () => {
+      const cmd = createExportCommand();
+      const sensitiveOpt = cmd.options.find((o) => o.long === "--include-sensitive");
+      expect(sensitiveOpt).toBeDefined();
     });
   });
 
@@ -160,6 +167,45 @@ describe("Export Command", () => {
 
       const output = JSON.parse(consoleLogs.join(""));
       expect(output.stats.bytes).toBeGreaterThan(0);
+    });
+
+    test("redacts secret-shaped content by default", async () => {
+      const secret = ["sk", "ant", "123456789012345678901234567890"].join("-");
+      const db = new Database(testDb.path);
+      try {
+        db.exec(`
+          INSERT INTO messages_meta (id, session_id, role, content, timestamp)
+          VALUES ('msg-secret', 'test-session-1', 'user', '${secret}', '2024-01-01T00:02:00Z')
+        `);
+      } finally {
+        db.close();
+      }
+
+      const outputPath = join(testDb.dir, "export.json");
+      await executeExportCommand(outputPath);
+
+      const content = await Bun.file(outputPath).text();
+      expect(content).not.toContain(secret);
+      expect(content).toContain("[REDACTED:api_key]");
+    });
+
+    test("--include-sensitive writes raw content explicitly", async () => {
+      const secret = ["sk", "ant", "123456789012345678901234567890"].join("-");
+      const db = new Database(testDb.path);
+      try {
+        db.exec(`
+          INSERT INTO messages_meta (id, session_id, role, content, timestamp)
+          VALUES ('msg-secret', 'test-session-1', 'user', '${secret}', '2024-01-01T00:02:00Z')
+        `);
+      } finally {
+        db.close();
+      }
+
+      const outputPath = join(testDb.dir, "export.json");
+      await executeExportCommand(outputPath, { includeSensitive: true });
+
+      const content = await Bun.file(outputPath).text();
+      expect(content).toContain(secret);
     });
   });
 });

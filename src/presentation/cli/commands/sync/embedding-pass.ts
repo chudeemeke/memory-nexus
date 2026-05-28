@@ -44,6 +44,9 @@ export async function runEmbeddingPass(
   const { EmbeddingService } = await import(
     "../../../../application/services/embedding-service.js"
   );
+  const { PatternRedactor } = await import(
+    "../../../../infrastructure/security/pattern-redactor.js"
+  );
   const { createEmbeddingProgressReporter, createModelDownloadHandler } = await import(
     "../../progress-reporter.js"
   );
@@ -52,6 +55,7 @@ export async function runEmbeddingPass(
     repository,
     provider,
     config: config.embedding,
+    redactor: new PatternRedactor(),
   });
 
   // Check for model change

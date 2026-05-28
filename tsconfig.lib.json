@@ -2,19 +2,19 @@
   "extends": "./tsconfig.json",
   "compilerOptions": {
     "noEmit": false,
-    "noEmitOnError": false,
+    "noEmitOnError": true,
     "emitDeclarationOnly": true,
     "declaration": true,
     "declarationMap": true,
     "outDir": "dist",
     "rootDir": "src",
-    "strict": false,
-    "noUnusedLocals": false,
-    "noUnusedParameters": false,
-    "exactOptionalPropertyTypes": false,
-    "noUncheckedIndexedAccess": false,
-    "noImplicitReturns": false,
-    "noFallthroughCasesInSwitch": false
+    "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "exactOptionalPropertyTypes": true,
+    "noUncheckedIndexedAccess": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist", "**/*.test.ts", "tests/**/*"]

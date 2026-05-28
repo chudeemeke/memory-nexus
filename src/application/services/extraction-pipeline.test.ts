@@ -23,6 +23,7 @@ import { ExtractionPipeline } from "./extraction-pipeline.js";
 import type { IExtractionProvider } from "../../domain/ports/extraction.js";
 import type { IEmbeddingProvider } from "../../domain/ports/embedding.js";
 import { EmbeddingResult } from "../../domain/value-objects/embedding-result.js";
+import { PatternRedactor } from "../../infrastructure/security/pattern-redactor.js";
 
 describe("ExtractionPipeline", () => {
   let db: Database;
@@ -438,6 +439,59 @@ describe("ExtractionPipeline", () => {
     const logs = await logRepo.findById("session-abc");
     expect(logs).not.toBeNull();
     expect(logs!.factsAdded).toBe(0);
+  });
+
+  test("redacts secrets before extraction provider payloads and fact event writes", async () => {
+    const rawSecret = ["sk", "proj_abcdefghijklmnopqrstuvwxyz1234567890"].join("-");
+    const session = Session.create({
+      id: "session-redact",
+      projectPath: ProjectPath.fromDecoded("C:\\Projects\\nexus"),
+      startTime: new Date()
+    });
+    await sessionRepo.save(session);
+
+    const msg = Message.create({
+      id: "msg-secret",
+      role: "user",
+      content: `The key is ${rawSecret}`,
+      timestamp: new Date()
+    });
+    await messageRepo.save(msg, "session-redact");
+
+    let providerPayload = "";
+    const extractor: IExtractionProvider = {
+      providerId: "mock-llm",
+      modelName: "mock-model",
+      extract: async (messages) => {
+        providerPayload = messages.map((message) => message.content).join("\n");
+        return [{
+          type: "learning",
+          content: `Never store ${rawSecret}`,
+          confidence: 0.95,
+        }];
+      },
+    };
+
+    const pipeline = new ExtractionPipeline(
+      db,
+      factRepo,
+      logRepo,
+      messageRepo,
+      extractor,
+      undefined,
+      testLogPath,
+      new PatternRedactor(),
+    );
+
+    const result = await pipeline.extractFromSession("session-redact", "nexus");
+
+    expect(result.added).toBe(1);
+    expect(providerPayload).toContain("[REDACTED:api_key]");
+    expect(providerPayload).not.toContain(rawSecret);
+
+    const eventLogContent = require("fs").readFileSync(testLogPath, "utf-8");
+    expect(eventLogContent).toContain("[REDACTED:api_key]");
+    expect(eventLogContent).not.toContain(rawSecret);
   });
 
   test("falls back to Jaccard if embedding provider throws an error during embedBatch", async () => {

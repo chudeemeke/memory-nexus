@@ -22,6 +22,8 @@ import type { IExtractionProvider } from "../../../domain/ports/extraction.js";
 import type { IEmbeddingProvider } from "../../../domain/ports/embedding.js";
 import { emitJsonErrorEnvelope } from "../formatters/envelope.js";
 import { shouldUseColor, green, dim } from "../formatters/color.js";
+import { PatternRedactor } from "../../../infrastructure/security/pattern-redactor.js";
+import { createExtractionProvider } from "../../../infrastructure/providers/provider-registry.js";
 
 export interface ExtractCommandOptions {
   project: string;
@@ -115,46 +117,18 @@ export async function executeExtractCommand(
   if (deps.mockExtractor) {
     extractor = deps.mockExtractor;
   } else {
-    const providerName = process.env.LLM_PROVIDER || config.embedding?.provider || "claude-cli";
-    const apiKey = config.embedding?.apiKey || "";
-
     try {
-      switch (providerName === "local" ? "claude-cli" : providerName) {
-        case "anthropic": {
-          const token = process.env.ANTHROPIC_API_KEY || apiKey;
-          if (!token) throw new Error("Anthropic API key is required but not set (use ANTHROPIC_API_KEY or config.embedding.apiKey).");
-          const { AnthropicExtractionProvider } = await import("../../../infrastructure/llm/anthropic-extractor.js");
-          extractor = new AnthropicExtractionProvider({ apiKey: token, model: config.embedding?.model });
-          break;
-        }
-        case "openai": {
-          const token = process.env.OPENAI_API_KEY || apiKey;
-          if (!token) throw new Error("OpenAI API key is required but not set (use OPENAI_API_KEY or config.embedding.apiKey).");
-          const { OpenAiExtractionProvider } = await import("../../../infrastructure/llm/openai-extractor.js");
-          extractor = new OpenAiExtractionProvider({ apiKey: token, model: config.embedding?.model });
-          break;
-        }
-        case "ollama": {
-          const { OllamaExtractionProvider } = await import("../../../infrastructure/llm/ollama-extractor.js");
-          extractor = new OllamaExtractionProvider({ baseUrl: config.embedding?.baseUrl, model: config.embedding?.model });
-          break;
-        }
-        case "claude-cli":
-        default: {
-          const { ClaudeCliExtractionProvider } = await import("../../../infrastructure/llm/claude-cli-extractor.js");
-          extractor = new ClaudeCliExtractionProvider();
-          break;
-        }
-      }
-    } catch (err: any) {
+      extractor = createExtractionProvider(config);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
       if (options.json) {
         emitJsonErrorEnvelope({
           command: "extract" as any,
           code: "PROVIDER_INIT_FAILED",
-          message: err.message
+          message,
         });
       } else {
-        console.error(`Error: Provider initialization failed: ${err.message}`);
+        console.error(`Error: Provider initialization failed: ${message}`);
       }
       return { exitCode: 1 };
     }
@@ -225,7 +199,16 @@ export async function executeExtractCommand(
     }
 
     // 5. Run Extraction sequentially
-    const pipeline = new ExtractionPipeline(db, factRepo, logRepo, messageRepo, extractor, embedder, deps.eventLogPath);
+    const pipeline = new ExtractionPipeline(
+      db,
+      factRepo,
+      logRepo,
+      messageRepo,
+      extractor,
+      embedder,
+      deps.eventLogPath,
+      new PatternRedactor(),
+    );
     const sessionsToProcess = [];
 
     for (const session of filteredSessions) {

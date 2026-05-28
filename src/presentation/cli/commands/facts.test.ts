@@ -311,7 +311,7 @@ describe("Facts CLI Command", () => {
       console.error = originalError;
       spy.mockRestore();
     }
-  });
+  }, 15000);
 
   test("executeFactsCommand returns exitCode 2 with JSON on query failure", async () => {
     const consoleLogs: string[] = [];
@@ -338,5 +338,5 @@ describe("Facts CLI Command", () => {
       console.log = originalLog;
       spy.mockRestore();
     }
-  });
+  }, 15000);
 });

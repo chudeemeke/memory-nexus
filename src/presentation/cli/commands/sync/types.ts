@@ -30,6 +30,32 @@ export interface SyncCommandOptions {
   background?: boolean;
 }
 
+export interface RemoteSyncer {
+  sync(
+    machineId: string,
+    remoteUrl: string,
+    autoPull?: boolean,
+    autoPush?: boolean,
+  ): Promise<{ success: boolean; rebuildNeeded: boolean; error?: string }>;
+}
+
+/**
+ * Dependency overrides for executeSyncCommand.
+ *
+ * Keep user options separate from operational dependencies. This is the
+ * canonical test-isolation seam for command orchestration.
+ */
+export interface SyncCommandDeps {
+  /** Override config loading */
+  loadConfig?: () => import("../../../../infrastructure/hooks/config-manager.js").MemoryConfig;
+  /** Override remote syncer construction */
+  createGitSyncer?: () => RemoteSyncer | Promise<RemoteSyncer>;
+  /** Override projection rebuild after remote pulls */
+  rebuildProjections?: (db: import("bun:sqlite").Database) => Promise<void>;
+  /** Explicitly enable the unfinished Phase 38 remote-sync prototype */
+  experimentalRemoteSync?: boolean;
+}
+
 /**
  * Dependency overrides for runEmbeddingPass (testing support).
  *

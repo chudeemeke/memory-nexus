@@ -13,16 +13,21 @@ import { buildExtractionPrompt, parseLlmResponse } from "./extraction-helper.js"
 export interface OpenAiExtractorConfig {
   apiKey: string;
   model?: string | undefined;
+  baseUrl?: string | undefined;
+  providerId?: string | undefined;
 }
 
 export class OpenAiExtractionProvider implements IExtractionProvider {
-  readonly providerId = "openai";
+  readonly providerId: string;
   readonly modelName: string;
   private readonly apiKey: string;
+  private readonly baseUrl: string;
 
   constructor(config: OpenAiExtractorConfig) {
     this.apiKey = config.apiKey;
+    this.providerId = config.providerId ?? "openai";
     this.modelName = config.model ?? "gpt-4o";
+    this.baseUrl = config.baseUrl ?? "https://api.openai.com/v1";
   }
 
   async extract(messages: Message[]): Promise<CandidateFact[]> {
@@ -31,7 +36,7 @@ export class OpenAiExtractionProvider implements IExtractionProvider {
     const prompt = buildExtractionPrompt(messages);
 
     try {
-      const response = await fetch("https://api.openai.com/v1/chat/completions", {
+      const response = await fetch(`${this.baseUrl}/chat/completions`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

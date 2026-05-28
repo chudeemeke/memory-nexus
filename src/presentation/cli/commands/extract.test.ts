@@ -29,8 +29,36 @@ describe("Extract CLI Command", () => {
   let testDbPath: string;
   let testLogPath: string;
 
+  let oldConfigHome: string | undefined;
+  let oldDataHome: string | undefined;
+  let tempDir: string;
+
   beforeEach(() => {
-    testDbPath = join(tmpdir(), `memory-nexus-cli-extract-db-${Math.random().toString(36).slice(2)}.db`);
+    oldConfigHome = process.env.XDG_CONFIG_HOME;
+    oldDataHome = process.env.XDG_DATA_HOME;
+
+    tempDir = join(tmpdir(), `memory-nexus-extract-test-xdg-${Math.random().toString(36).slice(2)}`);
+    const configDir = join(tempDir, "config", "memory");
+    const dataDir = join(tempDir, "data", "memory");
+
+    const fs = require("fs");
+    fs.mkdirSync(configDir, { recursive: true });
+    fs.mkdirSync(dataDir, { recursive: true });
+
+    // Write a dummy config file with embedding disabled to prevent network calls to remote hosts
+    fs.writeFileSync(
+      join(configDir, "config.json"),
+      JSON.stringify({
+        embedding: {
+          enabled: false
+        }
+      })
+    );
+
+    process.env.XDG_CONFIG_HOME = join(tempDir, "config");
+    process.env.XDG_DATA_HOME = join(tempDir, "data");
+
+    testDbPath = join(dataDir, "memory.db");
     db = new Database(testDbPath);
     db.exec("PRAGMA foreign_keys = ON;");
     createSchema(db);
@@ -38,18 +66,31 @@ describe("Extract CLI Command", () => {
     sessionRepo = new SqliteSessionRepository(db);
     messageRepo = new SqliteMessageRepository(db);
 
-    testLogPath = join(tmpdir(), `memory-nexus-cli-extract-events-${Math.random().toString(36).slice(2)}.jsonl`);
+    testLogPath = join(dataDir, "events.jsonl");
   });
 
   afterEach(() => {
     try {
       db.close();
     } catch {}
+
+    if (oldConfigHome !== undefined) {
+      process.env.XDG_CONFIG_HOME = oldConfigHome;
+    } else {
+      delete process.env.XDG_CONFIG_HOME;
+    }
+
+    if (oldDataHome !== undefined) {
+      process.env.XDG_DATA_HOME = oldDataHome;
+    } else {
+      delete process.env.XDG_DATA_HOME;
+    }
+
     try {
-      if (existsSync(testDbPath)) unlinkSync(testDbPath);
-    } catch {}
-    try {
-      if (existsSync(testLogPath)) unlinkSync(testLogPath);
+      if (existsSync(tempDir)) {
+        const fs = require("fs");
+        fs.rmSync(tempDir, { recursive: true, force: true });
+      }
     } catch {}
   });
 
@@ -232,6 +273,33 @@ describe("Extract CLI Command", () => {
       expect(consoleLogs[0]).toBe("added: 1, updated: 0, superseded: 0, skipped: 0");
     } finally {
       console.log = originalLog;
+    }
+  });
+
+  test("executeExtractCommand rejects unsupported LLM provider instead of falling back", async () => {
+    const oldProvider = process.env.LLM_PROVIDER;
+    process.env.LLM_PROVIDER = "unknown-provider";
+    const consoleErrors: string[] = [];
+    const originalError = console.error;
+    console.error = (msg) => consoleErrors.push(String(msg));
+
+    try {
+      const result = await executeExtractCommand({
+        project: "nexus",
+      }, {
+        dbPath: testDbPath,
+        eventLogPath: testLogPath,
+      });
+
+      expect(result.exitCode).toBe(1);
+      expect(consoleErrors.some((line) => line.includes('Unsupported extraction provider: "unknown-provider"'))).toBe(true);
+    } finally {
+      console.error = originalError;
+      if (oldProvider === undefined) {
+        delete process.env.LLM_PROVIDER;
+      } else {
+        process.env.LLM_PROVIDER = oldProvider;
+      }
     }
   });
 

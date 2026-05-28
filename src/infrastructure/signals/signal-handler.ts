@@ -317,3 +317,30 @@ export function incrementInterruptCount(): void {
 export function getCleanupCount(): number {
     return state.cleanupFunctions.length;
 }
+
+/**
+ * Trigger signal handling directly.
+ *
+ * For testing purposes only.
+ */
+export async function handleSignalForTesting(): Promise<void> {
+    await handleSignal();
+}
+
+/**
+ * Trigger choice handling directly.
+ *
+ * For testing purposes only.
+ */
+export async function handleChoiceForTesting(choice: 1 | 2 | 3): Promise<void> {
+    await handleChoice(choice);
+}
+
+/**
+ * Run registered cleanups directly.
+ *
+ * For testing purposes only.
+ */
+export async function runCleanupsForTesting(): Promise<void> {
+    await runCleanups();
+}

@@ -156,6 +156,31 @@ describe("StatsFormatter", () => {
       const output = formatter.formatStats(mockStats);
       expect(output).not.toContain("ProjectAlpha");
     });
+
+    it("formats errors with Error prefix", () => {
+      expect(formatter.formatError(new Error("quiet stats failure"))).toContain("quiet stats failure");
+    });
+  });
+
+  describe("brief mode", () => {
+    const formatter = createStatsFormatter("brief", false);
+
+    it("outputs top-line counters only", () => {
+      const output = formatter.formatStats(mockStats);
+      const lines = output.split("\n");
+
+      expect(lines).toHaveLength(5);
+      expect(lines[0]).toBe("42 sessions");
+      expect(lines[1]).toBe("1,234 messages");
+      expect(lines[2]).toBe("567 tool uses");
+      expect(lines[3]).toBe("2 projects");
+      expect(lines[4]).toBe("1.5 MB");
+    });
+
+    it("formats errors and empty state", () => {
+      expect(formatter.formatError(new Error("brief stats failure"))).toContain("brief stats failure");
+      expect(formatter.formatEmpty()).toBe("0 sessions\n0 messages\n0 tool uses\n0 projects\n0 B");
+    });
   });
 
   describe("verbose mode", () => {

@@ -5,13 +5,17 @@
  * Note: Interactive prompt testing is complex; focus on state management.
  */
 
-import { afterEach, beforeEach, describe, expect, test } from "bun:test";
+import { afterEach, beforeEach, describe, expect, spyOn, test } from "bun:test";
+import * as readline from "node:readline";
 import {
     getCleanupCount,
+    handleChoiceForTesting,
+    handleSignalForTesting,
     getInterruptCount,
     incrementInterruptCount,
     registerCleanup,
     resetState,
+    runCleanupsForTesting,
     setExitOverride,
     setShuttingDown,
     setTtyOverride,
@@ -182,6 +186,161 @@ describe("signal-handler", () => {
             expect(exitCode).toBeNull(); // Not called yet
 
             resetState();
+        });
+    });
+
+    describe("signal state machine", () => {
+        test("non-TTY first signal requests graceful shutdown", async () => {
+            const messages: string[] = [];
+            const originalLog = console.log;
+            console.log = (...args: unknown[]) => {
+                messages.push(args.map(String).join(" "));
+            };
+
+            try {
+                setTtyOverride(false);
+
+                await handleSignalForTesting();
+
+                expect(getInterruptCount()).toBe(1);
+                expect(shouldAbort()).toBe(true);
+                expect(messages.join("\n")).toContain("shutting down after current operation");
+            } finally {
+                console.log = originalLog;
+            }
+        });
+
+        test("TTY first signal prompts and applies the selected graceful shutdown choice", async () => {
+            const messages: string[] = [];
+            const originalLog = console.log;
+            console.log = (...args: unknown[]) => {
+                messages.push(args.map(String).join(" "));
+            };
+            const createInterfaceSpy = spyOn(readline, "createInterface").mockReturnValue({
+                question: (_prompt: string, callback: (answer: string) => void) => {
+                    callback("2");
+                },
+                close: () => {},
+            } as any);
+
+            try {
+                setTtyOverride(true);
+
+                await handleSignalForTesting();
+
+                expect(shouldAbort()).toBe(true);
+                expect(messages.join("\n")).toContain("Interrupt received. Choose action:");
+                expect(createInterfaceSpy).toHaveBeenCalled();
+            } finally {
+                createInterfaceSpy.mockRestore();
+                console.log = originalLog;
+            }
+        });
+
+        test("second signal runs cleanups and exits with ctrl-c code", async () => {
+            const calls: string[] = [];
+            const exits: number[] = [];
+            const originalLog = console.log;
+            console.log = (...args: unknown[]) => {
+                calls.push(args.map(String).join(" "));
+            };
+
+            try {
+                setExitOverride((code) => {
+                    exits.push(code);
+                });
+                incrementInterruptCount();
+                registerCleanup(async () => {
+                    calls.push("cleanup");
+                });
+
+                await handleSignalForTesting();
+
+                expect(calls).toContain("cleanup");
+                expect(calls.join("\n")).toContain("Force exiting");
+                expect(exits).toEqual([130]);
+            } finally {
+                console.log = originalLog;
+            }
+        });
+
+        test("cleanup errors are warned but do not stop later cleanups", async () => {
+            const warnings: string[] = [];
+            const calls: string[] = [];
+            const originalWarn = console.warn;
+            console.warn = (...args: unknown[]) => {
+                warnings.push(args.map(String).join(" "));
+            };
+
+            try {
+                registerCleanup(async () => {
+                    throw new Error("close failed");
+                });
+                registerCleanup(async () => {
+                    calls.push("second cleanup");
+                });
+
+                await runCleanupsForTesting();
+
+                expect(warnings.join("\n")).toContain("close failed");
+                expect(calls).toEqual(["second cleanup"]);
+            } finally {
+                console.warn = originalWarn;
+            }
+        });
+
+        test("choice 1 aborts immediately after cleanup", async () => {
+            const exits: number[] = [];
+            const calls: string[] = [];
+            const originalLog = console.log;
+            console.log = (...args: unknown[]) => {
+                calls.push(args.map(String).join(" "));
+            };
+
+            try {
+                setExitOverride((code) => {
+                    exits.push(code);
+                });
+                registerCleanup(async () => {
+                    calls.push("cleanup");
+                });
+
+                await handleChoiceForTesting(1);
+
+                expect(calls).toContain("Aborting immediately...");
+                expect(calls).toContain("cleanup");
+                expect(exits).toEqual([130]);
+            } finally {
+                console.log = originalLog;
+            }
+        });
+
+        test("choice 2 marks shutdown requested", async () => {
+            const originalLog = console.log;
+            console.log = () => {};
+
+            try {
+                await handleChoiceForTesting(2);
+
+                expect(shouldAbort()).toBe(true);
+            } finally {
+                console.log = originalLog;
+            }
+        });
+
+        test("choice 3 cancels abort and resets interrupt count", async () => {
+            const originalLog = console.log;
+            console.log = () => {};
+
+            try {
+                incrementInterruptCount();
+                await handleChoiceForTesting(3);
+
+                expect(getInterruptCount()).toBe(0);
+                expect(shouldAbort()).toBe(false);
+            } finally {
+                console.log = originalLog;
+            }
         });
     });
 

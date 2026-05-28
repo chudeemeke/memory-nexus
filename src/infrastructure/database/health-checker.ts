@@ -25,6 +25,12 @@ import {
     type MemoryConfig,
     type HookStatus,
 } from "../hooks/index.js";
+import {
+    checkEmbeddingProviderReadiness,
+    checkExtractionProviderReadiness,
+    getExtractionModel,
+    resolveExtractionProviderId,
+} from "../providers/provider-registry.js";
 
 /**
  * Database health status
@@ -380,27 +386,7 @@ export function checkEmbeddingConfig(configPath?: string): EmbeddingHealth {
     const config = loadConfig(configPath);
     const embedding = config.embedding;
 
-    // Determine provider readiness
-    let ready = true;
-    let readyReason: string | undefined;
-
-    switch (embedding.provider) {
-        case "openai":
-            if (!embedding.apiKey) {
-                ready = false;
-                readyReason = "API key not set";
-            }
-            break;
-        case "ollama":
-            // Ollama server reachability is verified during initialize(),
-            // not during doctor. Report ready with a clarifying reason.
-            readyReason = "Server reachability verified at sync time";
-            break;
-        case "local":
-        default:
-            // Local provider is always ready (no external deps)
-            break;
-    }
+    const readiness = checkEmbeddingProviderReadiness(embedding);
 
     return {
         configured: true,
@@ -408,8 +394,8 @@ export function checkEmbeddingConfig(configPath?: string): EmbeddingHealth {
         model: embedding.model,
         dimensions: embedding.dimensions,
         enabled: embedding.enabled,
-        ready,
-        readyReason,
+        ready: readiness.ready,
+        readyReason: readiness.readyReason,
     };
 }
 
@@ -421,46 +407,14 @@ export function checkEmbeddingConfig(configPath?: string): EmbeddingHealth {
  */
 export function checkLlmExtractionHealth(configPath?: string): LlmExtractionHealth {
     const config = loadConfig(configPath);
-    let provider = process.env.LLM_PROVIDER || config.embedding?.provider || "claude-cli";
-    if (provider === "local") {
-        provider = "claude-cli";
-    }
-    
-    let model = "";
-    let ready = true;
-    let readyReason: string | undefined;
-
-    switch (provider) {
-        case "anthropic":
-            model = config.embedding?.model || "claude-3-5-sonnet-20241022";
-            const anthropicKey = process.env.ANTHROPIC_API_KEY || config.embedding?.apiKey;
-            if (!anthropicKey) {
-                ready = false;
-                readyReason = "API key not set (set ANTHROPIC_API_KEY or config.embedding.apiKey)";
-            }
-            break;
-        case "openai":
-            model = config.embedding?.model || "gpt-4o";
-            const openaiKey = process.env.OPENAI_API_KEY || config.embedding?.apiKey;
-            if (!openaiKey) {
-                ready = false;
-                readyReason = "API key not set (set OPENAI_API_KEY or config.embedding.apiKey)";
-            }
-            break;
-        case "ollama":
-            model = config.embedding?.model || "llama3";
-            break;
-        case "claude-cli":
-        default:
-            model = "claude-cli-print";
-            break;
-    }
+    const provider = resolveExtractionProviderId(config);
+    const readiness = checkExtractionProviderReadiness(config, provider);
 
     return {
         provider,
-        model,
-        ready,
-        readyReason
+        model: getExtractionModel(config, provider),
+        ready: readiness.ready,
+        readyReason: readiness.readyReason,
     };
 }
 

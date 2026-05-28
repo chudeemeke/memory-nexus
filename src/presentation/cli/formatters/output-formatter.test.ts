@@ -150,6 +150,13 @@ describe("OutputFormatter", () => {
       const output = formatter.formatResults(mockResults, { query: "test" });
       expect(output).not.toContain("\x1b[");
     });
+
+    it("formats errors as JSON and keeps summary empty", () => {
+      const error = JSON.parse(formatter.formatError(new Error("json failure")));
+
+      expect(error).toEqual({ error: "json failure" });
+      expect(formatter.formatSummary({ found: 2, shown: 2 })).toBe("");
+    });
   });
 
   describe("quiet mode", () => {
@@ -174,6 +181,31 @@ describe("OutputFormatter", () => {
     it("returns empty string when no results", () => {
       const output = formatter.formatResults([], { query: "test" });
       expect(output).toBe("");
+    });
+
+    it("formats errors with Error prefix", () => {
+      expect(formatter.formatError(new Error("quiet failure"))).toContain("quiet failure");
+    });
+  });
+
+  describe("brief mode", () => {
+    const formatter = createOutputFormatter("brief", false);
+
+    it("formats each result as one plain-text line", () => {
+      const output = formatter.formatResults(mockResults, { query: "test" });
+
+      expect(output.split("\n")).toHaveLength(2);
+      expect(output).toContain("session-1234-abcd-efgh [95%] This is a test snippet");
+      expect(output).not.toContain("<mark>");
+    });
+
+    it("returns query-aware empty message", () => {
+      expect(formatter.formatResults([], { query: "missing" })).toBe('No results for "missing"');
+    });
+
+    it("formats errors and keeps summary empty", () => {
+      expect(formatter.formatError(new Error("brief failure"))).toContain("brief failure");
+      expect(formatter.formatSummary({ found: 2, shown: 2 })).toBe("");
     });
   });
 
@@ -251,6 +283,14 @@ describe("OutputFormatter", () => {
       const quietFormatter = createOutputFormatter("quiet", false);
       const output = quietFormatter.formatSummary({ found: 100, shown: 10 });
       expect(output).toBe("");
+    });
+
+    it("uses verbose summary wording for truncation", () => {
+      const verboseFormatter = createOutputFormatter("verbose", false);
+      const output = verboseFormatter.formatSummary({ found: 100, shown: 10, truncated: true });
+
+      expect(output).toContain("=== Summary ===");
+      expect(output).toContain("truncated due to context budget");
     });
   });
 
@@ -418,6 +458,19 @@ describe("OutputFormatter", () => {
       });
       expect(output).toContain("degraded");
       expect(output).toContain("provider_unavailable");
+    });
+
+    it("uses unknown degradation reason when one is not provided", () => {
+      const degradedMeta: SearchMetaInfo = {
+        ...mockMeta,
+        degraded: true,
+        degradationReason: undefined,
+      };
+      const output = formatter.formatResults(hybridResults, {
+        query: "test",
+        searchMeta: degradedMeta,
+      });
+      expect(output).toContain("degraded: unknown");
     });
 
     it("includes per-ranker breakdown for results with rawScores", () => {

@@ -204,7 +204,7 @@ describe("error-formatter", () => {
         const result = formatError(error, { verbose: true, useColor: false });
 
         expect(result).toContain("Stack trace:");
-        expect(result).toContain("MemoryError");
+        expect(result).toContain("Database corrupted");
       });
 
       test("omits stack trace when not verbose", () => {

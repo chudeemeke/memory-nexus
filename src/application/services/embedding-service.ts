@@ -13,7 +13,13 @@
 
 import { createHash } from "node:crypto";
 import type { IEmbeddingProvider } from "../../domain/ports/embedding.js";
+import type { IRedactor } from "../../domain/ports/redactor.js";
 import type { IEmbeddingRepository, EmbeddingBatchItem, EmbeddingServiceConfig } from "../../domain/ports/repositories.js";
+
+const NOOP_REDACTOR: IRedactor = {
+    redactText: (input) => ({ text: input, findings: [] }),
+    redactJson: (input) => ({ value: input, findings: [] }),
+};
 
 /**
  * Options for embedding operations.
@@ -102,17 +108,20 @@ export class EmbeddingService {
     private readonly batchSize: number;
     private readonly modelHash: string;
     private readonly modelName: string;
+    private readonly redactor: IRedactor;
 
     constructor(deps: {
         repository: IEmbeddingRepository;
         provider: IEmbeddingProvider;
         config: EmbeddingServiceConfig;
+        redactor?: IRedactor;
     }) {
         this.repository = deps.repository;
         this.provider = deps.provider;
         this.batchSize = deps.config.batchSize;
         this.modelHash = computeModelHash(deps.config);
         this.modelName = deps.config.model;
+        this.redactor = deps.redactor ?? NOOP_REDACTOR;
     }
 
     /**
@@ -177,7 +186,7 @@ export class EmbeddingService {
         let batch = this.repository.findUnembedded(this.batchSize);
         while (batch.length > 0) {
             // Embed the batch via provider
-            const texts = batch.map((m) => m.content);
+            const texts = batch.map((m) => this.redactor.redactText(m.content).text);
             const results = await this.provider.embedBatch(texts);
 
             // Store results with both hash and human-readable model name

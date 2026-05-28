@@ -18,6 +18,7 @@ import type {
   SyncCheckpoint,
   ISyncAbortSignal,
   ICheckpointManager,
+  IRedactor,
 } from "../../domain/ports/index.js";
 import type {
   ISessionRepository,
@@ -30,6 +31,11 @@ import { Message } from "../../domain/entities/message.js";
 import { ToolUse } from "../../domain/entities/tool-use.js";
 import { ExtractionState } from "../../domain/entities/extraction-state.js";
 import { MemoryError, ErrorCode } from "../../domain/errors/index.js";
+
+const NOOP_REDACTOR: IRedactor = {
+  redactText: (input) => ({ text: input, findings: [] }),
+  redactJson: (input) => ({ value: input, findings: [] }),
+};
 
 /**
  * Options for controlling sync behavior
@@ -116,6 +122,7 @@ export class SyncService {
     private readonly db: Database,
     private readonly abortSignal: ISyncAbortSignal,
     private readonly checkpointManager: ICheckpointManager,
+    private readonly redactor: IRedactor = NOOP_REDACTOR,
   ) {}
 
   /**
@@ -531,7 +538,7 @@ export class SyncService {
           const msg = Message.create({
             id: event.data.uuid,
             role: "user",
-            content: event.data.message.content,
+            content: this.redactor.redactText(event.data.message.content).text,
             timestamp: new Date(event.data.timestamp),
           });
           messages.push(msg);
@@ -547,6 +554,7 @@ export class SyncService {
             )
             .map((block) => block.text)
             .join("\n");
+          const redactedTextContent = this.redactor.redactText(textContent).text;
 
           // Extract tool use IDs from content blocks
           const toolUseIds = event.data.message.content
@@ -568,7 +576,7 @@ export class SyncService {
               const toolUse = ToolUse.create({
                 id: block.id,
                 name: block.name,
-                input: block.input,
+                input: this.redactor.redactJson(block.input).value,
                 timestamp: new Date(event.data.timestamp),
                 status: "pending",
               });
@@ -579,7 +587,7 @@ export class SyncService {
           const msg = Message.create({
             id: event.data.uuid,
             role: "assistant",
-            content: textContent,
+            content: redactedTextContent,
             timestamp: new Date(event.data.timestamp),
             toolUseIds,
           });
@@ -591,7 +599,7 @@ export class SyncService {
           const toolUse = ToolUse.create({
             id: event.data.uuid,
             name: event.data.name,
-            input: event.data.input,
+            input: this.redactor.redactJson(event.data.input).value,
             timestamp: new Date(event.data.timestamp),
             status: "pending",
           });
@@ -604,8 +612,8 @@ export class SyncService {
           const existingToolUse = toolUseMap.get(event.data.toolUseId);
           if (existingToolUse) {
             const updatedToolUse = event.data.isError
-              ? existingToolUse.completeError(event.data.content)
-              : existingToolUse.completeSuccess(event.data.content);
+              ? existingToolUse.completeError(this.redactor.redactText(event.data.content).text)
+              : existingToolUse.completeSuccess(this.redactor.redactText(event.data.content).text);
             toolUseMap.set(event.data.toolUseId, updatedToolUse);
           }
           break;

@@ -11,13 +11,18 @@ import { existsSync, createReadStream } from "node:fs";
 import * as readline from "node:readline";
 import type { Database } from "bun:sqlite";
 import { Fact } from "../../domain/entities/fact.js";
-import { getEventLogPath } from "../paths.js";
+import { getMachineLogPath, getAllLogFiles } from "../paths.js";
+import { loadConfig } from "../hooks/config-manager.js";
 
 /**
  * Append a serialized Fact entity into the plain-text event log.
  */
 export async function appendEvent(fact: Fact, logPath?: string): Promise<void> {
-  const activeLogPath = logPath ?? getEventLogPath();
+  let activeLogPath = logPath;
+  if (!activeLogPath) {
+    const config = loadConfig();
+    activeLogPath = getMachineLogPath(config.machineId);
+  }
   const dir = dirname(activeLogPath);
   await mkdir(dir, { recursive: true });
 
@@ -41,13 +46,41 @@ export async function appendEvent(fact: Fact, logPath?: string): Promise<void> {
  * Read all Fact events sequentially from the plain-text event log.
  * Yields Fact entities.
  */
-export async function* readEvents(logPath?: string): AsyncGenerator<Fact, void, unknown> {
-  const activeLogPath = logPath ?? getEventLogPath();
-  if (!existsSync(activeLogPath)) {
+export async function* readEvents(logPath?: string, eventsDir?: string): AsyncGenerator<Fact, void, unknown> {
+  if (logPath) {
+    yield* readSingleLogFile(logPath);
     return;
   }
 
-  const fileStream = createReadStream(activeLogPath, "utf-8");
+  const files = getAllLogFiles(eventsDir);
+  const allEvents: Fact[] = [];
+  for (const file of files) {
+    for await (const fact of readSingleLogFile(file)) {
+      allEvents.push(fact);
+    }
+  }
+
+  // Sort events chronologically by observedAt, fallback to UUID for deterministic order
+  allEvents.sort((a, b) => {
+    const timeDiff = a.observedAt.getTime() - b.observedAt.getTime();
+    if (timeDiff !== 0) return timeDiff;
+    return a.uuid.localeCompare(b.uuid);
+  });
+
+  for (const fact of allEvents) {
+    yield fact;
+  }
+}
+
+/**
+ * Read a single log file and yield Fact entities.
+ */
+async function* readSingleLogFile(filePath: string): AsyncGenerator<Fact, void, unknown> {
+  if (!existsSync(filePath)) {
+    return;
+  }
+
+  const fileStream = createReadStream(filePath, "utf-8");
   const rl = readline.createInterface({
     input: fileStream,
     crlfDelay: Infinity,
@@ -80,11 +113,12 @@ export async function* readEvents(logPath?: string): AsyncGenerator<Fact, void, 
  * Completely wipe the derived database projections and play back the entire
  * plain-text events.jsonl timeline sequentially to rebuild the SQLite database.
  */
-export async function rebuildProjections(db: Database, logPath?: string): Promise<void> {
+export async function rebuildProjections(db: Database, logPath?: string, eventsDir?: string): Promise<void> {
   const facts: Fact[] = [];
-  for await (const fact of readEvents(logPath)) {
+  for await (const fact of readEvents(logPath, eventsDir)) {
     facts.push(fact);
   }
+
 
   const transaction = db.transaction(() => {
     // 1. Wipe the derived facts table

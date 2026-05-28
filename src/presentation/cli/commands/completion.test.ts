@@ -337,5 +337,11 @@ describe("completion command", () => {
             const script = generateFishCompletion();
             expect(script).toContain('-a "recent oldest largest"');
         });
+
+        it("includes export raw-backup opt-in option in all shells", () => {
+            expect(generateBashCompletion()).toContain("--include-sensitive");
+            expect(generateZshCompletion()).toContain("--include-sensitive[Export raw sensitive");
+            expect(generateFishCompletion()).toContain("-l include-sensitive");
+        });
     });
 });

@@ -16,12 +16,19 @@ import type { Database } from "bun:sqlite";
 import { Fact } from "../../domain/entities/fact.js";
 import type { IExtractionProvider } from "../../domain/ports/extraction.js";
 import type { IEmbeddingProvider } from "../../domain/ports/embedding.js";
+import type { IRedactor } from "../../domain/ports/redactor.js";
 import type {
   IFactRepository,
   IExtractionLogRepository,
   IMessageRepository,
 } from "../../domain/ports/repositories.js";
 import { appendEvent, rebuildProjections } from "../../infrastructure/database/event-log.js";
+import { Message } from "../../domain/entities/message.js";
+
+const NOOP_REDACTOR: IRedactor = {
+  redactText: (input) => ({ text: input, findings: [] }),
+  redactJson: (input) => ({ value: input, findings: [] }),
+};
 
 export interface ExtractionPipelineResult {
   skippedSession: boolean;
@@ -39,7 +46,8 @@ export class ExtractionPipeline {
     private readonly messageRepo: IMessageRepository,
     private readonly extractionProvider: IExtractionProvider,
     private readonly embeddingProvider?: IEmbeddingProvider,
-    private readonly eventLogPath?: string
+    private readonly eventLogPath?: string,
+    private readonly redactor: IRedactor = NOOP_REDACTOR,
   ) {}
 
   /**
@@ -75,7 +83,18 @@ export class ExtractionPipeline {
     }
 
     // 3. Extract candidate facts via LLM
-    const candidates = await this.extractionProvider.extract(messages);
+    const providerMessages = messages.map((message) => Message.create({
+      id: message.id,
+      role: message.role,
+      content: this.redactor.redactText(message.content).text,
+      timestamp: message.timestamp,
+      toolUseIds: message.toolUses,
+    }));
+    const candidates = (await this.extractionProvider.extract(providerMessages)).map((candidate) => ({
+      ...candidate,
+      content: this.redactor.redactText(candidate.content).text,
+      metadata: this.redactor.redactJson(candidate.metadata).value,
+    }));
     if (candidates.length === 0) {
       // Log empty run
       await this.logRepo.save({

@@ -113,6 +113,23 @@ describe("BriefContextFormatter", () => {
     expect(output).toContain("(+3 more)");
   });
 
+  it("should show (+N more) when tools exceed limit", () => {
+    const formatter = createContextFormatter("brief", false);
+    const context = createTestContext({
+      recentToolUses: [
+        { name: "Read", count: 45 },
+        { name: "Write", count: 23 },
+        { name: "Bash", count: 12 },
+        { name: "Edit", count: 7 },
+        { name: "Grep", count: 5 },
+      ],
+    });
+
+    const output = formatter.formatContext(context);
+
+    expect(output).toContain("Read (45), Write (23), Bash (12) (+2 more)");
+  });
+
   it("should omit topics section when empty", () => {
     const formatter = createContextFormatter("brief", false);
     const context = createTestContext({ recentTopics: [] });
@@ -148,6 +165,12 @@ describe("BriefContextFormatter", () => {
     expect(output).toContain("No sessions found");
     expect(output).toContain("unknown-project");
   });
+
+  it("should format no topics message", () => {
+    const formatter = createContextFormatter("brief", false);
+
+    expect(formatter.formatNoTopics()).toBe("No topics extracted yet");
+  });
 });
 
 describe("DetailedContextFormatter", () => {
@@ -180,6 +203,15 @@ describe("DetailedContextFormatter", () => {
 
     expect(output).toContain("Last active:");
     expect(output).toContain("2026-01-30");
+  });
+
+  it("should show never when last activity is absent", () => {
+    const formatter = createContextFormatter("detailed", false);
+    const context = createTestContext({ lastActivity: null });
+
+    const output = formatter.formatContext(context);
+
+    expect(output).toContain("Last active: never");
   });
 
   it("should list all topics", () => {
@@ -295,6 +327,13 @@ describe("JsonContextFormatter", () => {
     expect(parsed.error).toBe("Test error");
   });
 
+  it("should format no topics as JSON", () => {
+    const formatter = createContextFormatter("json", false);
+    const parsed = JSON.parse(formatter.formatNoTopics());
+
+    expect(parsed).toEqual({ topics: [] });
+  });
+
   it("should format empty as JSON error", () => {
     const formatter = createContextFormatter("json", false);
 
@@ -378,6 +417,13 @@ describe("VerboseContextFormatter", () => {
 
     expect(output).toContain("Error: Test error with stack");
     expect(output).toContain("at"); // Stack trace contains "at"
+  });
+
+  it("should format empty and no topics through detailed formatter", () => {
+    const formatter = createContextFormatter("verbose", false);
+
+    expect(formatter.formatEmpty("missing-context")).toContain("missing-context");
+    expect(formatter.formatNoTopics()).toContain("no topics extracted yet");
   });
 });
 

@@ -298,7 +298,7 @@ export async function gatherStatus(options: GatherStatusOptions = {}): Promise<S
 
     return {
         hooks: hookStatus,
-        config,
+        config: sanitizeConfigForOutput(config),
         lastSync: logs.length > 0 ? logs[0]?.timestamp ?? null : null,
         pendingSessions,
         recentLogs: readRecentLogs(100, options.logPath).length,
@@ -309,6 +309,14 @@ export async function gatherStatus(options: GatherStatusOptions = {}): Promise<S
         qmd,
         fixes,
     };
+}
+
+function sanitizeConfigForOutput(config: MemoryConfig): MemoryConfig {
+    const embedding = { ...config.embedding };
+    if (embedding.apiKey) {
+        embedding.apiKey = "[REDACTED:api_key]";
+    }
+    return { ...config, embedding };
 }
 
 /**

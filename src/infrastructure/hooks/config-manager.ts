@@ -7,12 +7,15 @@
  * Implements graceful handling of missing/invalid config files.
  */
 
+import { randomUUID } from "node:crypto";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname } from "node:path";
 import {
     getConfigDir as pathsGetConfigDir,
     getConfigPath as pathsGetConfigPath,
 } from "../paths.js";
+import { EMBEDDING_PROVIDER_DEFAULTS } from "../providers/provider-defaults.js";
+
 
 
 /**
@@ -32,10 +35,22 @@ export interface EmbeddingConfigData {
     dimensions: number;
     /** Number of messages to embed per batch */
     batchSize: number;
-    /** API key for remote providers (e.g., OpenAI) */
+    /** @deprecated Prefer apiKeyEnv or runtime environment injection. */
     apiKey?: string;
+    /** Environment variable name that contains the provider API key */
+    apiKeyEnv?: string;
+    /** Opaque secret reference for external secret managers; never resolved here */
+    apiKeyRef?: string;
     /** Base URL override for provider API endpoint */
     baseUrl?: string;
+}
+
+export interface ApiKeyResolution {
+    apiKey?: string;
+    source: "environment" | "plaintext-config" | "missing";
+    envVar?: string;
+    ref?: string;
+    deprecatedPlaintext: boolean;
 }
 
 /**
@@ -94,6 +109,31 @@ export const DEFAULT_AMBIENT_CONTEXT_CONFIG: AmbientContextConfigData = {
 };
 
 /**
+ * Remote sync configuration data interface
+ *
+ * Plain object shape for remote sync config stored in JSON.
+ */
+export interface RemoteSyncConfigData {
+    /** Whether remote synchronization is enabled */
+    enabled: boolean;
+    /** Git repository URL for synchronization */
+    repositoryUrl?: string;
+    /** Whether to automatically push on sync */
+    autoPush: boolean;
+    /** Whether to automatically pull on sync */
+    autoPull: boolean;
+}
+
+/**
+ * Default remote sync configuration
+ */
+export const DEFAULT_REMOTE_SYNC_CONFIG: RemoteSyncConfigData = {
+    enabled: false,
+    autoPush: true,
+    autoPull: true,
+};
+
+/**
  * Memory configuration interface
  *
  * All options from CONTEXT.md:
@@ -107,8 +147,11 @@ export const DEFAULT_AMBIENT_CONTEXT_CONFIG: AmbientContextConfigData = {
  * - embedding: Embedding provider configuration
  * - search: Hybrid search configuration
  * - ambientContext: Ambient context generation configuration
+ * - machineId: Unique identifier for the local machine
+ * - remoteSync: Remote sync configuration
  */
 export interface MemoryConfig {
+
     /** Enable automatic hook-based sync */
     autoSync: boolean;
     /** Scan for unsaved sessions on first command */
@@ -129,7 +172,12 @@ export interface MemoryConfig {
     search: SearchConfigData;
     /** Ambient context generation configuration */
     ambientContext: AmbientContextConfigData;
+    /** Unique identifier for the local machine */
+    machineId: string;
+    /** Remote sync configuration */
+    remoteSync: RemoteSyncConfigData;
 }
+
 
 /**
  * Provider-specific default model and dimensions
@@ -139,9 +187,7 @@ export interface MemoryConfig {
  * when a user sets provider without explicit model/dimensions.
  */
 export const PROVIDER_DEFAULTS: Record<string, { model: string; dimensions: number }> = {
-    local: { model: "Xenova/all-MiniLM-L6-v2", dimensions: 384 },
-    openai: { model: "text-embedding-3-small", dimensions: 1536 },
-    ollama: { model: "nomic-embed-text", dimensions: 768 },
+    ...EMBEDDING_PROVIDER_DEFAULTS,
 };
 
 /**
@@ -187,6 +233,53 @@ export function resolveProviderDefaults(
     return result;
 }
 
+export function resolveEmbeddingApiKey(
+    config: Pick<EmbeddingConfigData, "apiKey" | "apiKeyEnv" | "apiKeyRef">,
+    providerEnvVars: string[],
+): ApiKeyResolution {
+    const envCandidates = [
+        config.apiKeyEnv,
+        ...providerEnvVars,
+    ].filter((value): value is string => Boolean(value));
+
+    for (const envVar of envCandidates) {
+        const apiKey = process.env[envVar];
+        if (apiKey) {
+            const resolution: ApiKeyResolution = {
+                apiKey,
+                source: "environment",
+                envVar,
+                deprecatedPlaintext: false,
+            };
+            if (config.apiKeyRef) {
+                resolution.ref = config.apiKeyRef;
+            }
+            return resolution;
+        }
+    }
+
+    if (config.apiKey) {
+        const resolution: ApiKeyResolution = {
+            apiKey: config.apiKey,
+            source: "plaintext-config",
+            deprecatedPlaintext: true,
+        };
+        if (config.apiKeyRef) {
+            resolution.ref = config.apiKeyRef;
+        }
+        return resolution;
+    }
+
+    const resolution: ApiKeyResolution = {
+        source: "missing",
+        deprecatedPlaintext: false,
+    };
+    if (config.apiKeyRef) {
+        resolution.ref = config.apiKeyRef;
+    }
+    return resolution;
+}
+
 /**
  * Default embedding configuration
  *
@@ -223,7 +316,10 @@ export const DEFAULT_CONFIG: MemoryConfig = {
     embedding: DEFAULT_EMBEDDING_CONFIG,
     search: DEFAULT_SEARCH_CONFIG,
     ambientContext: DEFAULT_AMBIENT_CONTEXT_CONFIG,
+    machineId: "",
+    remoteSync: DEFAULT_REMOTE_SYNC_CONFIG,
 };
+
 
 /**
  * Get the path to the config directory.
@@ -266,17 +362,43 @@ export function loadConfig(configPathOverride?: string): MemoryConfig {
     const configPath = getConfigPath(configPathOverride);
 
     if (!existsSync(configPath)) {
-        return { ...DEFAULT_CONFIG };
+        const newMachineId = process.env.MEMORY_TEST_MACHINE_ID ?? randomUUID();
+        const configWithId = {
+            ...DEFAULT_CONFIG,
+            machineId: newMachineId,
+        };
+        try {
+            saveConfig(configWithId, configPathOverride);
+        } catch {
+            // Ignore write failures in read-only environments
+        }
+        return configWithId;
     }
 
     try {
         const content = readFileSync(configPath, "utf-8");
         const loaded = JSON.parse(content) as Partial<MemoryConfig>;
+        
+        let machineId = loaded.machineId;
+        let needsSave = false;
+        if (!machineId) {
+            machineId = process.env.MEMORY_TEST_MACHINE_ID ?? randomUUID();
+            needsSave = true;
+        }
+
         const userEmbedding = loaded.embedding as Partial<EmbeddingConfigData> | undefined;
         const mergedEmbedding = { ...DEFAULT_EMBEDDING_CONFIG, ...(userEmbedding ?? {}) };
-        return {
+        
+        const mergedRemoteSync = {
+            ...DEFAULT_REMOTE_SYNC_CONFIG,
+            ...(loaded.remoteSync ?? {}),
+        };
+
+        const config: MemoryConfig = {
             ...DEFAULT_CONFIG,
             ...loaded,
+            machineId,
+            remoteSync: mergedRemoteSync,
             embedding: resolveProviderDefaults(mergedEmbedding, userEmbedding),
             search: {
                 ...DEFAULT_SEARCH_CONFIG,
@@ -291,13 +413,28 @@ export function loadConfig(configPathOverride?: string): MemoryConfig {
                 ...((loaded.ambientContext as Partial<AmbientContextConfigData> | undefined) ?? {}),
             },
         };
+
+        if (needsSave) {
+            try {
+                saveConfig(config, configPathOverride);
+            } catch {
+                // Ignore write failures in read-only environments
+            }
+        }
+
+        return config;
     } catch {
         // Invalid config: fall back to defaults with warning
         // Note: Using console.warn to avoid circular dependency with log-writer
         console.warn("Invalid config.json, using defaults");
-        return { ...DEFAULT_CONFIG };
+        const newMachineId = process.env.MEMORY_TEST_MACHINE_ID ?? randomUUID();
+        return {
+            ...DEFAULT_CONFIG,
+            machineId: newMachineId,
+        };
     }
 }
+
 
 /**
  * Save configuration to disk

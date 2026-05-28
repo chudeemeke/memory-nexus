@@ -1,13 +1,7 @@
-/**
- * Sync Command Tests
- *
- * Tests the createSyncCommand CLI command handler.
- * Tests option parsing, conflict detection, and help output.
- */
-
-import { describe, expect, it } from "bun:test";
+import { describe, expect, it, mock } from "bun:test";
 import { Command } from "commander";
-import { createSyncCommand } from "./index.js";
+
+import { createSyncCommand, executeSyncCommand } from "./index.js";
 
 describe("Sync Command", () => {
 
@@ -423,5 +417,152 @@ describe("Sync Command", () => {
       expect(capturedOptions?.embed).toBeUndefined();
       expect(capturedOptions?.background).toBeUndefined();
     });
+  });
+
+  describe("executeSyncCommand with remote sync", () => {
+    const { mkdirSync, rmSync, existsSync } = require("node:fs");
+    const { join } = require("node:path");
+    const { tmpdir } = require("node:os");
+
+    function remoteSyncConfig() {
+      return {
+        machineId: "test-machine-id",
+        remoteSync: {
+          enabled: true,
+          repositoryUrl: "https://github.com/example/repo.git",
+          autoPull: true,
+          autoPush: true,
+        },
+        embedding: {
+          enabled: false,
+          provider: "local" as const,
+          model: "Xenova/all-MiniLM-L6-v2",
+          dimensions: 384,
+          batchSize: 100,
+        },
+        ambientContext: {
+          enabled: false,
+          budget: 800,
+        },
+        autoSync: true,
+        recoveryOnStartup: true,
+        syncOnCompaction: true,
+        timeout: 5000,
+        logLevel: "info",
+        logRetentionDays: 7,
+        showFailures: false,
+        search: {
+          defaultMode: "auto" as const,
+          temporalDecay: {
+            enabled: true,
+            halfLifeDays: 30,
+          },
+        },
+      };
+    }
+
+    it("calls GitSyncer.sync when remoteSync is enabled and configured", async () => {
+      const mockGitSync = mock(async () => ({ success: true, rebuildNeeded: false }));
+      const testDir = join(
+        tmpdir(),
+        `execute-sync-remote-test-${Date.now()}-${Math.random().toString(36).slice(2)}`
+      );
+      mkdirSync(testDir, { recursive: true });
+
+      const oldConfigHome = process.env.XDG_CONFIG_HOME;
+      const oldDataHome = process.env.XDG_DATA_HOME;
+
+      process.env.XDG_CONFIG_HOME = join(testDir, ".config");
+      process.env.XDG_DATA_HOME = join(testDir, ".local", "share");
+
+      try {
+        const result = await executeSyncCommand(
+          { quiet: true, project: "nonexistent-project-xyz" },
+          {
+            loadConfig: remoteSyncConfig,
+            createGitSyncer: () => ({ sync: mockGitSync }),
+            experimentalRemoteSync: true,
+          }
+        );
+
+        expect(result.exitCode).toBe(0);
+        expect(mockGitSync).toHaveBeenCalledTimes(1);
+        expect(mockGitSync.mock.calls[0]).toEqual([
+          "test-machine-id",
+          "https://github.com/example/repo.git",
+          true,
+          true
+        ]);
+      } finally {
+        if (oldConfigHome !== undefined) {
+          process.env.XDG_CONFIG_HOME = oldConfigHome;
+        } else {
+          delete process.env.XDG_CONFIG_HOME;
+        }
+
+        if (oldDataHome !== undefined) {
+          process.env.XDG_DATA_HOME = oldDataHome;
+        } else {
+          delete process.env.XDG_DATA_HOME;
+        }
+
+        if (existsSync(testDir)) {
+          try {
+            rmSync(testDir, { recursive: true, force: true });
+          } catch {
+            // Ignore best-effort cleanup on Windows
+          }
+        }
+      }
+    }, 30000);
+
+    it("does not call GitSyncer.sync when remoteSync is configured but the prototype flag is disabled", async () => {
+      const mockGitSync = mock(async () => ({ success: true, rebuildNeeded: false }));
+      const testDir = join(
+        tmpdir(),
+        `execute-sync-remote-disabled-test-${Date.now()}-${Math.random().toString(36).slice(2)}`
+      );
+      mkdirSync(testDir, { recursive: true });
+
+      const oldConfigHome = process.env.XDG_CONFIG_HOME;
+      const oldDataHome = process.env.XDG_DATA_HOME;
+
+      process.env.XDG_CONFIG_HOME = join(testDir, ".config");
+      process.env.XDG_DATA_HOME = join(testDir, ".local", "share");
+
+      try {
+        const result = await executeSyncCommand(
+          { quiet: true, project: "nonexistent-project-xyz" },
+          {
+            loadConfig: remoteSyncConfig,
+            createGitSyncer: () => ({ sync: mockGitSync }),
+            experimentalRemoteSync: false,
+          }
+        );
+
+        expect(result.exitCode).toBe(0);
+        expect(mockGitSync).toHaveBeenCalledTimes(0);
+      } finally {
+        if (oldConfigHome !== undefined) {
+          process.env.XDG_CONFIG_HOME = oldConfigHome;
+        } else {
+          delete process.env.XDG_CONFIG_HOME;
+        }
+
+        if (oldDataHome !== undefined) {
+          process.env.XDG_DATA_HOME = oldDataHome;
+        } else {
+          delete process.env.XDG_DATA_HOME;
+        }
+
+        if (existsSync(testDir)) {
+          try {
+            rmSync(testDir, { recursive: true, force: true });
+          } catch {
+            // Ignore best-effort cleanup on Windows
+          }
+        }
+      }
+    }, 30000);
   });
 });

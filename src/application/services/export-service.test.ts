@@ -11,6 +11,7 @@ import { mkdirSync, rmSync, existsSync } from "node:fs";
 import { join } from "node:path";
 import { tmpdir } from "node:os";
 import { createSchema } from "../../infrastructure/database/schema.js";
+import { PatternRedactor } from "../../infrastructure/security/pattern-redactor.js";
 import {
   exportToJson,
   validateExportFile,
@@ -145,6 +146,61 @@ describe("Export Service", () => {
       const content = await Bun.file(exportPath).text();
       const data = JSON.parse(content) as ExportData;
       expect(data.version).toBe("1.0");
+    });
+
+    test("redacts secret-shaped values when a redactor is provided", async () => {
+      const secret = ["sk", "ant", "123456789012345678901234567890"].join("-");
+      db.exec(`
+        INSERT INTO sessions (id, project_path_encoded, project_path_decoded,
+          project_name, start_time, end_time, message_count, summary)
+        VALUES ('session-secret', 'secret-project', '/test/project', 'project',
+          '2024-01-01T00:00:00Z', NULL, 1, 'Summary contains OPENAI_API_KEY=${secret}')
+      `);
+      db.exec(`
+        INSERT INTO messages_meta (id, session_id, role, content, timestamp)
+        VALUES ('msg-secret', 'session-secret', 'user', 'Use token ${secret}', '2024-01-01T00:00:00Z')
+      `);
+      db.exec(`
+        INSERT INTO tool_uses (id, session_id, name, input, timestamp, status, result)
+        VALUES ('tool-secret', 'session-secret', 'Read',
+          '{"token":"${secret}"}', '2024-01-01T00:00:01Z', 'success',
+          'Bearer abcdefghijklmnopqrstuvwxyz')
+      `);
+      db.exec(`
+        INSERT INTO facts (uuid, type, project, content, metadata, observed_at)
+        VALUES ('fact-secret', 'observation', 'project',
+          'Captured ${secret}', '{"apiKey":"${secret}"}', '2024-01-01T00:00:02Z')
+      `);
+
+      await exportToJson(db, exportPath, { redactor: new PatternRedactor() });
+
+      const content = await Bun.file(exportPath).text();
+      expect(content).not.toContain(secret);
+      expect(content).not.toContain("abcdefghijklmnopqrstuvwxyz");
+      expect(content).toContain("[REDACTED:api_key]");
+      expect(content).toContain("[REDACTED:bearer_token]");
+    });
+
+    test("can explicitly include sensitive values for raw backup workflows", async () => {
+      const secret = ["sk", "ant", "123456789012345678901234567890"].join("-");
+      db.exec(`
+        INSERT INTO sessions (id, project_path_encoded, project_path_decoded,
+          project_name, start_time, message_count)
+        VALUES ('session-secret', 'secret-project', '/test/project', 'project',
+          '2024-01-01T00:00:00Z', 1)
+      `);
+      db.exec(`
+        INSERT INTO messages_meta (id, session_id, role, content, timestamp)
+        VALUES ('msg-secret', 'session-secret', 'user', '${secret}', '2024-01-01T00:00:00Z')
+      `);
+
+      await exportToJson(db, exportPath, {
+        includeSensitive: true,
+        redactor: new PatternRedactor(),
+      });
+
+      const content = await Bun.file(exportPath).text();
+      expect(content).toContain(secret);
     });
   });
 

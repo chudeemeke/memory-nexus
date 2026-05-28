@@ -7,6 +7,7 @@
 
 import type { Database } from "bun:sqlite";
 import { existsSync } from "node:fs";
+import type { IRedactor } from "../../domain/ports/redactor.js";
 
 // ============================================================================
 // Export Data Types
@@ -196,6 +197,29 @@ export interface ImportOptions {
   clearExisting?: boolean | undefined;
 }
 
+/**
+ * Options for export operations.
+ */
+export interface ExportToJsonOptions {
+  /** Redactor to apply before writing exported content. */
+  redactor?: IRedactor | undefined;
+  /** Write raw sensitive values. Requires explicit opt-in at the CLI boundary. */
+  includeSensitive?: boolean | undefined;
+}
+
+const NOOP_REDACTOR: IRedactor = {
+  redactText: (input) => ({ text: input, findings: [] }),
+  redactJson: (input) => ({ value: input, findings: [] }),
+};
+
+function redactText(redactor: IRedactor, value: string): string {
+  return redactor.redactText(value).text;
+}
+
+function redactNullableText(redactor: IRedactor, value: string | null): string | null {
+  return value === null ? null : redactText(redactor, value);
+}
+
 // ============================================================================
 // Export Function
 // ============================================================================
@@ -212,8 +236,13 @@ export interface ImportOptions {
  */
 export async function exportToJson(
   db: Database,
-  outputPath: string
+  outputPath: string,
+  options: ExportToJsonOptions = {}
 ): Promise<ExportStats> {
+  const redactor = options.includeSensitive
+    ? NOOP_REDACTOR
+    : options.redactor ?? NOOP_REDACTOR;
+
   // Query all sessions
   const sessions = db
     .query<SessionExport, []>(
@@ -224,7 +253,11 @@ export async function exportToJson(
               message_count as messageCount, summary
        FROM sessions`
     )
-    .all();
+    .all()
+    .map((session) => ({
+      ...session,
+      summary: redactNullableText(redactor, session.summary),
+    }));
 
   // Query all messages
   const messages = db
@@ -233,7 +266,11 @@ export async function exportToJson(
               tool_use_ids as toolUseIds
        FROM messages_meta`
     )
-    .all();
+    .all()
+    .map((message) => ({
+      ...message,
+      content: redactText(redactor, message.content),
+    }));
 
   // Query all tool uses
   const toolUses = db
@@ -241,7 +278,12 @@ export async function exportToJson(
       `SELECT id, session_id as sessionId, name, input, timestamp, status, result
        FROM tool_uses`
     )
-    .all();
+    .all()
+    .map((toolUse) => ({
+      ...toolUse,
+      input: redactText(redactor, toolUse.input),
+      result: redactNullableText(redactor, toolUse.result),
+    }));
 
   // Query all entities
   const entities = db
@@ -249,7 +291,12 @@ export async function exportToJson(
       `SELECT id, type, name, metadata, confidence
        FROM entities`
     )
-    .all();
+    .all()
+    .map((entity) => ({
+      ...entity,
+      name: redactText(redactor, entity.name),
+      metadata: redactNullableText(redactor, entity.metadata),
+    }));
 
   // Query all links
   const links = db
@@ -287,7 +334,12 @@ export async function exportToJson(
               file_mtime as fileMtime, file_size as fileSize
        FROM extraction_state`
     )
-    .all();
+    .all()
+    .map((state) => ({
+      ...state,
+      sessionPath: redactText(redactor, state.sessionPath),
+      errorMessage: redactNullableText(redactor, state.errorMessage),
+    }));
 
   // Query all facts
   const facts = db
@@ -297,7 +349,12 @@ export async function exportToJson(
               superseded_by as supersededBy
        FROM facts`
     )
-    .all();
+    .all()
+    .map((fact) => ({
+      ...fact,
+      content: redactText(redactor, fact.content),
+      metadata: redactNullableText(redactor, fact.metadata),
+    }));
 
   // Build export data structure
   const exportData: ExportData = {

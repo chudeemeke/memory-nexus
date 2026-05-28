@@ -18,6 +18,7 @@ import {
     type EmbedResult,
     type ModelState,
 } from "./embedding-service.js";
+import { PatternRedactor } from "../../infrastructure/security/pattern-redactor.js";
 
 /**
  * Create a mock EmbeddingRepository with all methods stubbed.
@@ -345,6 +346,39 @@ describe("EmbeddingService", () => {
             await service.embedUnembedded();
 
             expect(embedBatchMock).toHaveBeenCalledWith(["hello world", "foo bar"]);
+        });
+
+        test("redacts secret-shaped content before provider egress", async () => {
+            const rawSecret = ["sk", "proj_abcdefghijklmnopqrstuvwxyz1234567890"].join("-");
+            const findUnembeddedMock = mock<(limit: number) => UnembeddedMessage[]>();
+            findUnembeddedMock.mockReturnValueOnce([
+                { rowid: 1, content: `embed this ${rawSecret}` },
+            ]);
+            findUnembeddedMock.mockReturnValueOnce([]);
+
+            const repo = createMockRepository({
+                findUnembedded: findUnembeddedMock,
+                getTotalMessageCount: mock(() => 1),
+                getEmbeddedCount: mock(() => 0),
+            });
+
+            const embedBatchMock = mock(() =>
+                Promise.resolve([createFakeEmbeddingResult(1)])
+            );
+            const provider = createMockProvider({ embedBatch: embedBatchMock });
+
+            const service = new EmbeddingService({
+                repository: repo,
+                provider,
+                config: { ...DEFAULT_CONFIG, batchSize: 100 },
+                redactor: new PatternRedactor(),
+            });
+
+            await service.embedUnembedded();
+
+            const [texts] = embedBatchMock.mock.calls[0];
+            expect(texts[0]).toContain("[REDACTED:api_key]");
+            expect(texts[0]).not.toContain(rawSecret);
         });
 
         test("calls storeBatch with correct rowids, embeddings, modelHash, and modelName", async () => {

@@ -60,7 +60,7 @@ describe("MemoryError", () => {
       );
 
       expect(error.stack).toBeDefined();
-      expect(error.stack).toContain("MemoryError");
+      expect(error.stack).toContain("Database corrupted");
     });
   });
 

@@ -23,6 +23,7 @@ import {
     DEFAULT_SEARCH_CONFIG,
     DEFAULT_AMBIENT_CONTEXT_CONFIG,
     PROVIDER_DEFAULTS,
+    resolveEmbeddingApiKey,
     resolveProviderDefaults,
     type MemoryConfig,
     type EmbeddingConfigData,
@@ -110,7 +111,10 @@ describe("config-manager", () => {
     describe("loadConfig", () => {
         test("returns defaults when config file missing", () => {
             const config = loadConfig();
-            expect(config).toEqual(DEFAULT_CONFIG);
+            expect(config.machineId).not.toBe("");
+            const { machineId, ...rest } = config;
+            const { machineId: _, ...expectedRest } = DEFAULT_CONFIG;
+            expect(rest).toEqual(expectedRest);
         });
 
         test("merges partial config with defaults", () => {
@@ -143,7 +147,10 @@ describe("config-manager", () => {
             writeFileSync(join(configDir, "config.json"), "{ invalid json }");
 
             const config = loadConfig();
-            expect(config).toEqual(DEFAULT_CONFIG);
+            expect(config.machineId).not.toBe("");
+            const { machineId, ...rest } = config;
+            const { machineId: _, ...expectedRest } = DEFAULT_CONFIG;
+            expect(rest).toEqual(expectedRest);
         });
 
         test("handles malformed JSON (syntax error)", () => {
@@ -153,7 +160,10 @@ describe("config-manager", () => {
             writeFileSync(join(configDir, "config.json"), "not json at all");
 
             const config = loadConfig();
-            expect(config).toEqual(DEFAULT_CONFIG);
+            expect(config.machineId).not.toBe("");
+            const { machineId, ...rest } = config;
+            const { machineId: _, ...expectedRest } = DEFAULT_CONFIG;
+            expect(rest).toEqual(expectedRest);
         });
 
         test("handles empty config file", () => {
@@ -163,7 +173,10 @@ describe("config-manager", () => {
             writeFileSync(join(configDir, "config.json"), "");
 
             const config = loadConfig();
-            expect(config).toEqual(DEFAULT_CONFIG);
+            expect(config.machineId).not.toBe("");
+            const { machineId, ...rest } = config;
+            const { machineId: _, ...expectedRest } = DEFAULT_CONFIG;
+            expect(rest).toEqual(expectedRest);
         });
 
         test("handles empty JSON object", () => {
@@ -173,7 +186,10 @@ describe("config-manager", () => {
             writeFileSync(join(configDir, "config.json"), "{}");
 
             const config = loadConfig();
-            expect(config).toEqual(DEFAULT_CONFIG);
+            expect(config.machineId).not.toBe("");
+            const { machineId, ...rest } = config;
+            const { machineId: _, ...expectedRest } = DEFAULT_CONFIG;
+            expect(rest).toEqual(expectedRest);
         });
 
         test("loads all config values correctly", () => {
@@ -202,6 +218,12 @@ describe("config-manager", () => {
                 ambientContext: {
                     enabled: false,
                     budget: 1200,
+                },
+                machineId: "custom-machine-id",
+                remoteSync: {
+                    enabled: false,
+                    autoPush: true,
+                    autoPull: true,
                 },
             };
 
@@ -416,12 +438,18 @@ describe("config-manager", () => {
             expect(config.embedding.apiKey).toBeUndefined();
         });
 
+        test("EmbeddingConfigData accepts optional apiKeyEnv and apiKeyRef fields", () => {
+            const config = loadConfig();
+            expect(config.embedding.apiKeyEnv).toBeUndefined();
+            expect(config.embedding.apiKeyRef).toBeUndefined();
+        });
+
         test("EmbeddingConfigData accepts optional baseUrl field (undefined by default)", () => {
             const config = loadConfig();
             expect(config.embedding.baseUrl).toBeUndefined();
         });
 
-        test("loadConfig() preserves apiKey from config file", () => {
+        test("loadConfig() preserves deprecated apiKey from config file for compatibility", () => {
             const configDir = join(testDir, ".config", "memory");
             mkdirSync(configDir, { recursive: true });
             writeFileSync(
@@ -431,6 +459,24 @@ describe("config-manager", () => {
 
             const config = loadConfig();
             expect(config.embedding.apiKey).toBe("sk-test-key");
+        });
+
+        test("loadConfig() preserves apiKeyEnv and apiKeyRef from config file", () => {
+            const configDir = join(testDir, ".config", "memory");
+            mkdirSync(configDir, { recursive: true });
+            writeFileSync(
+                join(configDir, "config.json"),
+                JSON.stringify({
+                    embedding: {
+                        apiKeyEnv: "MEMORY_OPENAI_API_KEY",
+                        apiKeyRef: "authkey://memory/openai-api-key",
+                    },
+                })
+            );
+
+            const config = loadConfig();
+            expect(config.embedding.apiKeyEnv).toBe("MEMORY_OPENAI_API_KEY");
+            expect(config.embedding.apiKeyRef).toBe("authkey://memory/openai-api-key");
         });
 
         test("loadConfig() preserves baseUrl from config file", () => {
@@ -455,12 +501,65 @@ describe("config-manager", () => {
 
             const config = loadConfig();
             expect(config.embedding.apiKey).toBeUndefined();
+            expect(config.embedding.apiKeyEnv).toBeUndefined();
+            expect(config.embedding.apiKeyRef).toBeUndefined();
             expect(config.embedding.baseUrl).toBeUndefined();
         });
 
-        test("DEFAULT_EMBEDDING_CONFIG does NOT include apiKey or baseUrl", () => {
+        test("DEFAULT_EMBEDDING_CONFIG does NOT include secret or endpoint overrides", () => {
             expect(DEFAULT_EMBEDDING_CONFIG).not.toHaveProperty("apiKey");
+            expect(DEFAULT_EMBEDDING_CONFIG).not.toHaveProperty("apiKeyEnv");
+            expect(DEFAULT_EMBEDDING_CONFIG).not.toHaveProperty("apiKeyRef");
             expect(DEFAULT_EMBEDDING_CONFIG).not.toHaveProperty("baseUrl");
+        });
+
+        test("resolveEmbeddingApiKey prefers explicit apiKeyEnv over provider defaults", () => {
+            env.set("MEMORY_OPENAI_API_KEY", "env-key");
+            env.set("OPENAI_API_KEY", "default-key");
+
+            const resolution = resolveEmbeddingApiKey(
+                { apiKeyEnv: "MEMORY_OPENAI_API_KEY", apiKey: "plaintext-key" },
+                ["OPENAI_API_KEY"],
+            );
+
+            expect(resolution.apiKey).toBe("env-key");
+            expect(resolution.source).toBe("environment");
+            expect(resolution.envVar).toBe("MEMORY_OPENAI_API_KEY");
+            expect(resolution.ref).toBeUndefined();
+            expect(resolution.deprecatedPlaintext).toBe(false);
+        });
+
+        test("resolveEmbeddingApiKey falls back to provider environment variables", () => {
+            env.set("OPENAI_API_KEY", "default-key");
+
+            const resolution = resolveEmbeddingApiKey({}, ["OPENAI_API_KEY"]);
+
+            expect(resolution.apiKey).toBe("default-key");
+            expect(resolution.source).toBe("environment");
+            expect(resolution.envVar).toBe("OPENAI_API_KEY");
+        });
+
+        test("resolveEmbeddingApiKey marks plaintext config as deprecated", () => {
+            const resolution = resolveEmbeddingApiKey(
+                { apiKey: "plaintext-key", apiKeyRef: "authkey://memory/openai-api-key" },
+                ["OPENAI_API_KEY"],
+            );
+
+            expect(resolution.apiKey).toBe("plaintext-key");
+            expect(resolution.source).toBe("plaintext-config");
+            expect(resolution.ref).toBe("authkey://memory/openai-api-key");
+            expect(resolution.deprecatedPlaintext).toBe(true);
+        });
+
+        test("resolveEmbeddingApiKey does not resolve opaque apiKeyRef", () => {
+            const resolution = resolveEmbeddingApiKey(
+                { apiKeyRef: "authkey://memory/openai-api-key" },
+                ["OPENAI_API_KEY"],
+            );
+
+            expect(resolution.apiKey).toBeUndefined();
+            expect(resolution.source).toBe("missing");
+            expect(resolution.ref).toBe("authkey://memory/openai-api-key");
         });
     });
 
@@ -739,6 +838,59 @@ describe("config-manager", () => {
 
             const config = loadConfig();
             expect(config.ambientContext).toEqual(DEFAULT_AMBIENT_CONTEXT_CONFIG);
+        });
+    });
+
+    describe("machineId and remoteSync config", () => {
+        test("generates and saves a stable machineId if missing in newly loaded config", () => {
+            const configPath = join(testDir, ".config", "memory", "config.json");
+            expect(existsSync(configPath)).toBe(false);
+
+            const config = loadConfig(configPath);
+            expect(config.machineId).toBeDefined();
+            expect(config.machineId.length).toBeGreaterThan(0);
+            
+            // Check that it saved it to disk
+            expect(existsSync(configPath)).toBe(true);
+            const content = readFileSync(configPath, "utf-8");
+            const parsed = JSON.parse(content);
+            expect(parsed.machineId).toBe(config.machineId);
+        });
+
+        test("preserves existing machineId when loading", () => {
+            const configDir = join(testDir, ".config", "memory");
+            mkdirSync(configDir, { recursive: true });
+            const configPath = join(configDir, "config.json");
+            writeFileSync(
+                configPath,
+                JSON.stringify({ machineId: "existing-machine-id-xyz" })
+            );
+
+            const config = loadConfig(configPath);
+            expect(config.machineId).toBe("existing-machine-id-xyz");
+        });
+
+        test("loads remoteSync defaults correctly", () => {
+            const config = loadConfig();
+            expect(config.remoteSync.enabled).toBe(false);
+            expect(config.remoteSync.autoPush).toBe(true);
+            expect(config.remoteSync.autoPull).toBe(true);
+        });
+
+        test("merges custom remoteSync config correctly", () => {
+            const configDir = join(testDir, ".config", "memory");
+            mkdirSync(configDir, { recursive: true });
+            const configPath = join(configDir, "config.json");
+            writeFileSync(
+                configPath,
+                JSON.stringify({ remoteSync: { enabled: true, repositoryUrl: "git@github.com:user/repo.git" } })
+            );
+
+            const config = loadConfig(configPath);
+            expect(config.remoteSync.enabled).toBe(true);
+            expect(config.remoteSync.repositoryUrl).toBe("git@github.com:user/repo.git");
+            expect(config.remoteSync.autoPush).toBe(true); // default preserved
+            expect(config.remoteSync.autoPull).toBe(true); // default preserved
         });
     });
 });

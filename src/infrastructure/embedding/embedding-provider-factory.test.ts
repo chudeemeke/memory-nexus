@@ -101,7 +101,7 @@ describe("EmbeddingProviderFactory", () => {
             };
 
             expect(() => factory.create(config)).toThrow(
-                'Unsupported embedding provider: "unknown". Supported: local, openai, ollama'
+                'Unsupported embedding provider: "unknown". Supported: local, openai, ollama, openai-compatible'
             );
         });
 
@@ -120,6 +120,51 @@ describe("EmbeddingProviderFactory", () => {
             expect(provider.name).toBe("openai");
             expect(provider.model).toBe("text-embedding-3-small");
             expect(provider.dimensions).toBe(1536);
+        });
+
+        test("uses apiKeyEnv when creating OpenAI provider", () => {
+            const oldValue = process.env.MEMORY_OPENAI_API_KEY;
+            process.env.MEMORY_OPENAI_API_KEY = "sk-env-key";
+            try {
+                const config: EmbeddingConfigData = {
+                    enabled: true,
+                    provider: "openai",
+                    model: "text-embedding-3-small",
+                    dimensions: 1536,
+                    batchSize: 100,
+                    apiKeyEnv: "MEMORY_OPENAI_API_KEY",
+                };
+
+                const provider = factory.create(config);
+                expect(provider).toBeInstanceOf(OpenAiProvider);
+            } finally {
+                if (oldValue === undefined) {
+                    delete process.env.MEMORY_OPENAI_API_KEY;
+                } else {
+                    process.env.MEMORY_OPENAI_API_KEY = oldValue;
+                }
+            }
+        });
+
+        test("throws for OpenAI provider when no runtime API key is available", () => {
+            const oldValue = process.env.OPENAI_API_KEY;
+            delete process.env.OPENAI_API_KEY;
+            try {
+                const config: EmbeddingConfigData = {
+                    enabled: true,
+                    provider: "openai",
+                    model: "text-embedding-3-small",
+                    dimensions: 1536,
+                    batchSize: 100,
+                    apiKeyRef: "authkey://memory/openai-api-key",
+                };
+
+                expect(() => factory.create(config)).toThrow("OpenAI embedding API key is required");
+            } finally {
+                if (oldValue !== undefined) {
+                    process.env.OPENAI_API_KEY = oldValue;
+                }
+            }
         });
 
         test("passes apiKey, model, dimensions, baseUrl to OpenAiProvider constructor", () => {
@@ -169,6 +214,47 @@ describe("EmbeddingProviderFactory", () => {
             expect(provider).toBeInstanceOf(OllamaProvider);
             expect(provider.model).toBe("mxbai-embed-large");
             expect(provider.dimensions).toBe(1024);
+        });
+
+        test("returns an OpenAiProvider for openai-compatible provider config", () => {
+            const oldValue = process.env.MEMORY_COMPAT_API_KEY;
+            process.env.MEMORY_COMPAT_API_KEY = "compat-test-key";
+            try {
+                const config: EmbeddingConfigData = {
+                    enabled: true,
+                    provider: "openai-compatible",
+                    model: "text-embedding-3-small",
+                    dimensions: 1536,
+                    batchSize: 100,
+                    apiKeyEnv: "MEMORY_COMPAT_API_KEY",
+                    baseUrl: "https://gateway.example.test/v1",
+                };
+
+                const provider = factory.create(config);
+                expect(provider).toBeInstanceOf(OpenAiProvider);
+                expect(provider.name).toBe("openai-compatible");
+                expect(provider.model).toBe("text-embedding-3-small");
+                expect(provider.dimensions).toBe(1536);
+            } finally {
+                if (oldValue === undefined) {
+                    delete process.env.MEMORY_COMPAT_API_KEY;
+                } else {
+                    process.env.MEMORY_COMPAT_API_KEY = oldValue;
+                }
+            }
+        });
+
+        test("throws for openai-compatible provider without baseUrl", () => {
+            const config: EmbeddingConfigData = {
+                enabled: true,
+                provider: "openai-compatible",
+                model: "text-embedding-3-small",
+                dimensions: 1536,
+                batchSize: 100,
+                apiKey: "compat-test-key",
+            };
+
+            expect(() => factory.create(config)).toThrow("openai-compatible embedding provider requires embedding.baseUrl");
         });
 
         test("caches OpenAI provider instances", () => {

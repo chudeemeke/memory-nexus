@@ -7,7 +7,7 @@
 
 import { Command, Option } from "commander";
 import type { CommandResult } from "../../command-result.js";
-import type { SyncCommandOptions } from "./types.js";
+import type { SyncCommandDeps, SyncCommandOptions } from "./types.js";
 import { SyncService, type SyncOptions } from "../../../../application/services/index.js";
 import { createProgressReporter } from "../../progress-reporter.js";
 import { initializeDatabase, closeDatabase, bulkOperationCheckpoint, getDefaultDbPath, SqliteSessionRepository, SqliteMessageRepository, SqliteToolUseRepository, SqliteExtractionStateRepository } from "../../../../infrastructure/database/index.js";
@@ -20,6 +20,9 @@ import { runEmbeddingPass } from "./embedding-pass.js";
 import { runMemoryFileSync, reportMemoryFileResults } from "./memory-files.js";
 import { runAmbientContextGeneration } from "./ambient.js";
 import { executeDryRun, handleError, reportResults, createDriveResolver } from "./helpers.js";
+import { loadConfig } from "../../../../infrastructure/hooks/config-manager.js";
+import { PatternRedactor } from "../../../../infrastructure/security/pattern-redactor.js";
+
 
 /** Create the sync command for Commander.js. */
 export function createSyncCommand(): Command {
@@ -42,7 +45,10 @@ export function createSyncCommand(): Command {
 }
 
 /** Execute the sync command programmatically. */
-export async function executeSyncCommand(options: SyncCommandOptions): Promise<CommandResult> {
+export async function executeSyncCommand(
+  options: SyncCommandOptions,
+  deps: SyncCommandDeps = {},
+): Promise<CommandResult> {
   if (options.background) {
     return await handleBackgroundMode(options);
   }
@@ -91,6 +97,7 @@ export async function executeSyncCommand(options: SyncCommandOptions): Promise<C
       sessionSource, eventParser, sessionRepo, messageRepo,
       toolUseRepo, extractionStateRepo, db,
       new ProcessAbortSignal(), new FileCheckpointManager(),
+      new PatternRedactor(),
     );
 
     if (options.fixNames) {
@@ -121,7 +128,53 @@ export async function executeSyncCommand(options: SyncCommandOptions): Promise<C
     reporter.stop();
     reportResults(result, startTime, options);
 
+    // Git Remote Sync is Phase 38 work. Keep it opt-in until its threat model,
+    // event envelope, conflict semantics, and privacy gates are finished.
+    const config = (deps.loadConfig ?? loadConfig)();
+    const remoteUrl = config.remoteSync?.repositoryUrl;
+    const remoteConfigured =
+      config.remoteSync?.enabled === true &&
+      typeof remoteUrl === "string" &&
+      remoteUrl.trim().length > 0;
+    const remoteEnabled = deps.experimentalRemoteSync ?? process.env.MEMORY_EXPERIMENTAL_REMOTE_SYNC === "1";
+    if (remoteConfigured && remoteEnabled) {
+      if (!options.quiet) {
+        console.log("Synchronizing events with remote Git repository...");
+      }
+      try {
+        const syncer = await (deps.createGitSyncer?.() ?? createDefaultGitSyncer());
+        
+        const syncResult = await syncer.sync(
+          config.machineId,
+          remoteUrl,
+          config.remoteSync.autoPull,
+          config.remoteSync.autoPush
+        );
+
+        if (syncResult.success) {
+          if (syncResult.rebuildNeeded) {
+            if (!options.quiet) {
+              console.log("Remote events pulled. Rebuilding database projections...");
+            }
+            const rebuild = deps.rebuildProjections ?? await loadDefaultRebuildProjections();
+            await rebuild(db);
+          } else {
+            if (!options.quiet) {
+              console.log("Git events are already up to date.");
+            }
+          }
+        } else {
+          console.error(`Warning: Remote synchronization failed: ${syncResult.error}`);
+        }
+      } catch (err: any) {
+        console.error(`Warning: Remote synchronization failed to execute: ${err?.message || String(err)}`);
+      }
+    } else if (remoteConfigured && !options.quiet) {
+      console.warn("Remote synchronization is configured but disabled until Phase 38 readiness. Set MEMORY_EXPERIMENTAL_REMOTE_SYNC=1 only for explicit prototype testing.");
+    }
+
     // Memory file sync (after session extraction)
+
     const memoryResult = await runMemoryFileSync(db, options);
     if (memoryResult) reportMemoryFileResults(memoryResult, options);
 
@@ -171,3 +224,13 @@ export type { SyncCommandOptions, EmbeddingPassDeps, BackgroundModeDeps, Ambient
 export { runEmbeddingPass, handleModelChange } from "./embedding-pass.js";
 export { handleBackgroundMode } from "./background.js";
 export { runAmbientContextGeneration } from "./ambient.js";
+
+async function createDefaultGitSyncer() {
+  const { GitSyncer } = await import("../../../../infrastructure/hooks/git-syncer.js");
+  return new GitSyncer();
+}
+
+async function loadDefaultRebuildProjections() {
+  const { rebuildProjections } = await import("../../../../infrastructure/database/event-log.js");
+  return rebuildProjections;
+}

@@ -16,6 +16,7 @@ import {
   exportToJson,
   type ExportStats,
 } from "../../../application/services/index.js";
+import { PatternRedactor } from "../../../infrastructure/security/pattern-redactor.js";
 import { existsSync } from "node:fs";
 import { dirname } from "node:path";
 
@@ -27,6 +28,8 @@ export interface ExportOptions {
   quiet?: boolean;
   /** Output stats as JSON */
   json?: boolean;
+  /** Export raw sensitive values instead of redacting known secret patterns */
+  includeSensitive?: boolean;
 }
 
 /**
@@ -45,6 +48,9 @@ export function createExportCommand(): Command {
     )
     .addOption(
       new Option("--json", "Output stats as JSON").conflicts("quiet")
+    )
+    .addOption(
+      new Option("--include-sensitive", "Export raw sensitive values without redaction")
     )
     .action(async (outputFile: string, options: ExportOptions) => {
       const result = await executeExportCommand(outputFile, options);
@@ -85,7 +91,10 @@ export async function executeExportCommand(
 
   try {
     // Perform export
-    const stats = await exportToJson(db, outputFile);
+    const stats = await exportToJson(db, outputFile, {
+      includeSensitive: options.includeSensitive,
+      redactor: new PatternRedactor(),
+    });
 
     // Format output
     if (options.json) {

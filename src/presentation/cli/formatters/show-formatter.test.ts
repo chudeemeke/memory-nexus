@@ -197,6 +197,26 @@ describe("ShowFormatter", () => {
 
       expect(output).toContain("ongoing");
     });
+
+    test("formats sub-minute and minute durations", () => {
+      const formatter = createShowFormatter("default", false);
+
+      const shortOutput = formatter.formatSession(createSessionDetail({
+        session: createTestSession({
+          startTime: new Date("2026-01-15T10:00:00Z"),
+          endTime: new Date("2026-01-15T10:00:30Z"),
+        }),
+      }));
+      const minuteOutput = formatter.formatSession(createSessionDetail({
+        session: createTestSession({
+          startTime: new Date("2026-01-15T10:00:00Z"),
+          endTime: new Date("2026-01-15T10:05:00Z"),
+        }),
+      }));
+
+      expect(shortOutput).toContain("< 1m");
+      expect(minuteOutput).toContain("5m");
+    });
   });
 
   describe("summarizeToolResult", () => {
@@ -445,6 +465,13 @@ describe("ShowFormatter", () => {
       expect(parsed.toolUses).toHaveProperty("tool-json-1");
       expect(parsed.toolUses["tool-json-1"].name).toBe("Read");
     });
+
+    test("formats error and not-found as JSON", () => {
+      const formatter = createShowFormatter("json", false);
+
+      expect(JSON.parse(formatter.formatError(new Error("bad")))).toEqual({ error: "bad" });
+      expect(JSON.parse(formatter.formatNotFound("missing")).error).toContain("missing");
+    });
   });
 
   describe("VerboseShowFormatter", () => {
@@ -494,6 +521,15 @@ describe("ShowFormatter", () => {
       const xCount = (output.match(/x/g) || []).length;
       expect(xCount).toBe(1000);
     });
+
+    test("formats errors with stack and not-found messages", () => {
+      const formatter = createShowFormatter("verbose", false);
+      const errorOutput = formatter.formatError(new Error("verbose failure"));
+
+      expect(errorOutput).toContain("verbose failure");
+      expect(errorOutput).toContain("at");
+      expect(formatter.formatNotFound("missing-verbose")).toContain("missing-verbose");
+    });
   });
 
   describe("QuietShowFormatter", () => {
@@ -514,6 +550,47 @@ describe("ShowFormatter", () => {
       expect(output).not.toContain("Session:");
       expect(output).not.toContain("Project:");
       expect(output).not.toContain("Duration:");
+    });
+
+    test("formats errors and not-found messages", () => {
+      const formatter = createShowFormatter("quiet", false);
+
+      expect(formatter.formatError(new Error("quiet failure"))).toContain("quiet failure");
+      expect(formatter.formatNotFound("missing-quiet")).toContain("missing-quiet");
+    });
+  });
+
+  describe("BriefShowFormatter", () => {
+    test("outputs a single-line session summary", () => {
+      const formatter = createShowFormatter("brief", false);
+      const detail = createSessionDetail({
+        session: createTestSession({ id: "brief-session", projectName: "brief-project" }),
+        messages: [
+          createTestMessage({ id: "msg-1" }),
+          createTestMessage({ id: "msg-2" }),
+        ],
+      });
+
+      const output = formatter.formatSession(detail);
+
+      expect(output).toContain("brief-session | brief-project | 2 messages");
+      expect(output).not.toContain("\n");
+    });
+
+    test("formats errors and not-found messages", () => {
+      const formatter = createShowFormatter("brief", false);
+
+      expect(formatter.formatError(new Error("brief failure"))).toContain("brief failure");
+      expect(formatter.formatNotFound("missing-brief")).toContain("missing-brief");
+    });
+  });
+
+  describe("ToolsShowFormatter errors", () => {
+    test("formats errors and not-found messages", () => {
+      const formatter = createShowFormatter("tools", false);
+
+      expect(formatter.formatError(new Error("tools failure"))).toContain("tools failure");
+      expect(formatter.formatNotFound("missing-tools")).toContain("missing-tools");
     });
   });
 

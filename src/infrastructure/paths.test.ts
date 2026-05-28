@@ -19,7 +19,12 @@ import {
     getHookDir,
     getBackupDir,
     getCheckpointPath,
+    getEventsDir,
+    getEventLogPath,
+    getMachineLogPath,
+    getAllLogFiles,
 } from "./paths.js";
+
 import { installEnvOverrides, type EnvOverrides } from "../../tests/helpers/env-overrides.js";
 
 describe("paths", () => {
@@ -198,4 +203,41 @@ describe("paths", () => {
             expect(getLegacyDir()).toBe(join(home, ".memory-nexus"));
         });
     });
+
+    describe("multi-writer paths", () => {
+        test("getMachineLogPath derives machine-specific path correctly", () => {
+            const machineId = "test-machine-123";
+            expect(getMachineLogPath(machineId)).toBe(join(getEventsDir(), `events-${machineId}.jsonl`));
+        });
+
+        test("getAllLogFiles returns empty array when directory does not exist", () => {
+            env.set("XDG_DATA_HOME", join("/nonexistent", "data"));
+            expect(getAllLogFiles()).toEqual([]);
+        });
+
+        test("getAllLogFiles returns all machine files and legacy file correctly", () => {
+            const fs = require("node:fs");
+            const tempDir = join(home, ".local", "share", "memory-test-temp-" + Math.random().toString(36).substring(7));
+            env.set("XDG_DATA_HOME", tempDir);
+
+            const eventsDir = getEventsDir();
+            fs.mkdirSync(eventsDir, { recursive: true });
+
+            // Create some files
+            fs.writeFileSync(join(eventsDir, "events.jsonl"), "legacy content");
+            fs.writeFileSync(join(eventsDir, "events-machine1.jsonl"), "machine1 content");
+            fs.writeFileSync(join(eventsDir, "events-machine2.jsonl"), "machine2 content");
+            fs.writeFileSync(join(eventsDir, "other.txt"), "other content");
+
+            const allFiles = getAllLogFiles();
+            expect(allFiles).toContain(join(eventsDir, "events.jsonl"));
+            expect(allFiles).toContain(join(eventsDir, "events-machine1.jsonl"));
+            expect(allFiles).toContain(join(eventsDir, "events-machine2.jsonl"));
+            expect(allFiles.length).toBe(3);
+
+            // Clean up
+            fs.rmSync(tempDir, { recursive: true, force: true });
+        });
+    });
 });
+

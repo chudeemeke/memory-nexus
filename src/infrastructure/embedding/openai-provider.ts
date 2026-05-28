@@ -24,10 +24,11 @@ interface OpenAiProviderOptions {
     model?: string | undefined;
     dimensions?: number | undefined;
     baseUrl?: string | undefined;
+    providerId?: string | undefined;
 }
 
 export class OpenAiProvider implements IEmbeddingProvider {
-    readonly name = "openai";
+    readonly name: string;
     readonly model: string;
     readonly dimensions: number;
 
@@ -37,6 +38,7 @@ export class OpenAiProvider implements IEmbeddingProvider {
 
     constructor(options: OpenAiProviderOptions) {
         this.apiKey = options.apiKey;
+        this.name = options.providerId ?? "openai";
         this.model = options.model ?? "text-embedding-3-small";
         this.dimensions = options.dimensions ?? 1536;
         this.baseUrl = options.baseUrl ?? "https://api.openai.com/v1";

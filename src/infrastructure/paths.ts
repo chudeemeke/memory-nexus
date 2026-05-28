@@ -14,8 +14,10 @@ if (process.platform === "win32" && !process.env.HOME) {
     process.env.HOME = process.env.USERPROFILE;
 }
 
+import { existsSync, readdirSync } from "node:fs";
 import { homedir } from "node:os";
 import { join } from "node:path";
+
 
 /** Application name used in path construction (internal only) */
 const APP_NAME = "memory";
@@ -171,4 +173,44 @@ export function getEventsDir(): string {
 export function getEventLogPath(): string {
     return join(getEventsDir(), "events.jsonl");
 }
+
+/**
+ * Get the path to a machine-specific event log file.
+ *
+ * @param machineId The unique identifier of the machine
+ * @returns Absolute path to events-<machineId>.jsonl
+ */
+export function getMachineLogPath(machineId: string): string {
+    return join(getEventsDir(), `events-${machineId}.jsonl`);
+}
+
+/**
+ * Get all event log files (both machine-specific events-*.jsonl and legacy events.jsonl).
+ *
+ * @param eventsDir Optional directory override (primarily for test isolation)
+ * @returns Array of absolute paths to event log files
+ */
+export function getAllLogFiles(eventsDir?: string): string[] {
+    const dir = eventsDir ?? getEventsDir();
+    if (!existsSync(dir)) {
+        return [];
+    }
+    const files = readdirSync(dir);
+    const logFiles: string[] = [];
+
+    // Include legacy events.jsonl if it exists
+    const legacyPath = join(dir, "events.jsonl");
+    if (existsSync(legacyPath)) {
+        logFiles.push(legacyPath);
+    }
+
+    for (const file of files) {
+        if (file.startsWith("events-") && file.endsWith(".jsonl")) {
+            logFiles.push(join(dir, file));
+        }
+    }
+
+    return logFiles;
+}
+
 

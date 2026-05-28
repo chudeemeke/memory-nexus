@@ -203,4 +203,101 @@ describe("Event-Log SSOT Manager", () => {
     expect(replacementDb.superseded_at).toBeNull();
     expect(replacementDb.superseded_by).toBeNull();
   });
+
+  test("readEvents streams and chronologically sorts records across multiple different simulated machine logs", async () => {
+    const fs = require("fs");
+    const paths = require("../../../../src/infrastructure/paths.js");
+    
+    const originalXdg = process.env.XDG_DATA_HOME;
+    process.env.XDG_DATA_HOME = testLogDir;
+
+    try {
+      const eventsDir = paths.getEventsDir();
+      if (!fs.existsSync(eventsDir)) {
+        fs.mkdirSync(eventsDir, { recursive: true });
+      }
+
+      // Write two machine logs and a legacy log with events that are not in chronological order
+      const factEarly = Fact.create({
+        type: "decision",
+        project: "memory-nexus",
+        content: "Early event",
+        observedAt: new Date("2026-05-23T07:00:00Z")
+      });
+
+      const factMid = Fact.create({
+        type: "learning",
+        project: "memory-nexus",
+        content: "Mid event",
+        observedAt: new Date("2026-05-23T08:00:00Z")
+      });
+
+      const factLate = Fact.create({
+        type: "preference",
+        project: "memory-nexus",
+        content: "Late event",
+        observedAt: new Date("2026-05-23T09:00:00Z")
+      });
+
+      // Write factMid to events-machine1.jsonl
+      fs.writeFileSync(
+        join(eventsDir, "events-machine1.jsonl"),
+        JSON.stringify({
+          uuid: factMid.uuid,
+          type: factMid.type,
+          project: factMid.project,
+          content: factMid.content,
+          observedAt: factMid.observedAt.toISOString(),
+          version: 1
+        }) + "\n"
+      );
+
+      // Write factEarly to events-machine2.jsonl
+      fs.writeFileSync(
+        join(eventsDir, "events-machine2.jsonl"),
+        JSON.stringify({
+          uuid: factEarly.uuid,
+          type: factEarly.type,
+          project: factEarly.project,
+          content: factEarly.content,
+          observedAt: factEarly.observedAt.toISOString(),
+          version: 1
+        }) + "\n"
+      );
+
+      // Write factLate to events.jsonl (legacy)
+      fs.writeFileSync(
+        join(eventsDir, "events.jsonl"),
+        JSON.stringify({
+          uuid: factLate.uuid,
+          type: factLate.type,
+          project: factLate.project,
+          content: factLate.content,
+          observedAt: factLate.observedAt.toISOString(),
+          version: 1
+        }) + "\n"
+      );
+
+      // Call readEvents with no logPath parameter, but pass eventsDir override to isolate it!
+      const events: Fact[] = [];
+      for await (const fact of readEvents(undefined, eventsDir)) {
+        events.push(fact);
+      }
+
+
+      // Assert they are sorted: Early, Mid, Late
+      expect(events.length).toBe(3);
+      expect(events[0].content).toBe("Early event");
+      expect(events[1].content).toBe("Mid event");
+      expect(events[2].content).toBe("Late event");
+
+    } finally {
+      if (originalXdg) {
+        process.env.XDG_DATA_HOME = originalXdg;
+      } else {
+        delete process.env.XDG_DATA_HOME;
+      }
+    }
+  });
 });
+

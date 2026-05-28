@@ -24,8 +24,11 @@ import type {
   IExtractionStateRepository,
 } from "../../domain/ports/repositories.js";
 import { ExtractionState } from "../../domain/entities/extraction-state.js";
+import type { Message } from "../../domain/entities/message.js";
+import type { ToolUse } from "../../domain/entities/tool-use.js";
 import { ProjectPath } from "../../domain/value-objects/project-path.js";
 import { createSchema } from "../../infrastructure/database/schema.js";
+import { PatternRedactor } from "../../infrastructure/security/pattern-redactor.js";
 
 /**
  * Create a mock session file info
@@ -104,6 +107,8 @@ describe("SyncService", () => {
   let saveSessionCalls: { id: string }[];
   let saveMessagesCalls: { count: number; sessionId: string }[];
   let saveToolUsesCalls: { count: number; sessionId: string }[];
+  let savedMessages: Array<{ message: Message; sessionId: string }>;
+  let savedToolUses: Array<{ toolUse: ToolUse; sessionId: string }>;
   let saveStateCalls: ExtractionState[];
   let findBySessionPathResults: Map<string, ExtractionState | null>;
 
@@ -125,6 +130,8 @@ describe("SyncService", () => {
     saveSessionCalls = [];
     saveMessagesCalls = [];
     saveToolUsesCalls = [];
+    savedMessages = [];
+    savedToolUses = [];
     saveStateCalls = [];
     findBySessionPathResults = new Map();
 
@@ -160,6 +167,7 @@ describe("SyncService", () => {
       findBySession: mock(async () => []),
       save: mock(async () => {}),
       saveMany: mock(async (messages) => {
+        savedMessages.push(...messages);
         if (messages.length > 0) {
           saveMessagesCalls.push({
             count: messages.length,
@@ -175,6 +183,7 @@ describe("SyncService", () => {
       findBySession: mock(async () => []),
       save: mock(async () => {}),
       saveMany: mock(async (toolUses) => {
+        savedToolUses.push(...toolUses);
         if (toolUses.length > 0) {
           saveToolUsesCalls.push({
             count: toolUses.length,
@@ -734,6 +743,80 @@ describe("SyncService", () => {
 
       expect(result.messagesInserted).toBe(2);
       expect(result.toolUsesInserted).toBe(1);
+    });
+
+    test("redacts secrets before saving messages, tool inputs, and tool results", async () => {
+      const rawSecret = ["sk", "proj_abcdefghijklmnopqrstuvwxyz1234567890"].join("-");
+      syncService = new SyncService(
+        sessionSource,
+        eventParser,
+        sessionRepo,
+        messageRepo,
+        toolUseRepo,
+        extractionStateRepo,
+        db,
+        abortSignal,
+        checkpointManager,
+        new PatternRedactor(),
+      );
+
+      const sessions = [
+        createMockSessionInfo("session-secret", "C:\\Projects\\test", new Date(), 1000),
+      ];
+      (sessionSource.discoverSessions as ReturnType<typeof mock>).mockResolvedValue(sessions);
+
+      const timestamp = new Date().toISOString();
+      const eventsWithSecret: ParsedEvent[] = [
+        {
+          type: "user",
+          data: {
+            uuid: "msg-secret-user",
+            message: { content: `Use ${rawSecret}` },
+            timestamp,
+          },
+        },
+        {
+          type: "assistant",
+          data: {
+            uuid: "msg-secret-assistant",
+            message: {
+              content: [
+                { type: "text", text: `Running with ${rawSecret}` },
+                {
+                  type: "tool_use",
+                  id: "tool-secret",
+                  name: "Bash",
+                  input: { command: `OPENAI_API_KEY=${rawSecret} node script.js` },
+                },
+              ],
+            },
+            timestamp,
+          },
+        },
+        {
+          type: "tool_result",
+          data: {
+            uuid: "result-tool-secret",
+            toolUseId: "tool-secret",
+            content: `Authorization: Bearer abcdefghijklmnopqrstuvwxyz123456`,
+            isError: false,
+            timestamp,
+          },
+        },
+      ];
+
+      const eventsMap = new Map([["/mock/path/session-secret.jsonl", eventsWithSecret]]);
+      (syncService as any).eventParser = createMockParser(eventsMap);
+
+      const result = await syncService.sync();
+
+      expect(result.success).toBe(true);
+      const persisted = JSON.stringify({ savedMessages, savedToolUses });
+      expect(persisted).toContain("[REDACTED:api_key]");
+      expect(persisted).toContain("[REDACTED:env_secret]");
+      expect(persisted).toContain("[REDACTED:bearer_token]");
+      expect(persisted).not.toContain(rawSecret);
+      expect(persisted).not.toContain("abcdefghijklmnopqrstuvwxyz123456");
     });
 
     test("handles tool use errors", async () => {

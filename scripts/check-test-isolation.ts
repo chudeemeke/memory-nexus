@@ -76,7 +76,7 @@ async function scanFile(file: string): Promise<Violation[]> {
   const rel = relative(PROJECT_ROOT, file).replace(/\\/g, "/");
 
   for (let i = 0; i < lines.length; i++) {
-    const line = lines[i];
+    const line = lines[i] ?? "";
     const lineNum = i + 1;
 
     if (isTest) {
@@ -162,7 +162,9 @@ async function main(): Promise<number> {
   console.error("");
   for (const [pattern, violations] of byRule) {
     console.error(`[${pattern}] (${violations.length})`);
-    console.error(`  ${violations[0].rule}`);
+    const firstViolation = violations[0];
+    if (!firstViolation) continue;
+    console.error(`  ${firstViolation.rule}`);
     console.error("");
     for (const v of violations) {
       console.error(`  ${v.file}:${v.line}`);

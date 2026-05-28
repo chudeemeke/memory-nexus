@@ -112,7 +112,10 @@ describe("status command", () => {
         test("returns default config when no config file", async () => {
             const status = await gatherStatus({ dbPath: testDbPath, logPath: testLogPath, configPath: testConfigPath, hookOverrides });
 
-            expect(status.config).toEqual(DEFAULT_CONFIG);
+            expect(status.config.machineId).not.toBe("");
+            const { machineId, ...rest } = status.config;
+            const { machineId: _, ...expectedRest } = DEFAULT_CONFIG;
+            expect(rest).toEqual(expectedRest);
         });
 
         test("returns config values from file", async () => {
@@ -126,6 +129,22 @@ describe("status command", () => {
 
             expect(status.config.autoSync).toBe(false);
             expect(status.config.timeout).toBe(10000);
+        });
+
+        test("redacts deprecated plaintext embedding apiKey in gathered status", async () => {
+            const secret = ["sk", "ant", "123456789012345678901234567890"].join("-");
+            mkdirSync(dirname(testConfigPath), { recursive: true });
+            writeFileSync(testConfigPath, JSON.stringify({
+                embedding: {
+                    provider: "openai",
+                    apiKey: secret,
+                },
+            }));
+
+            const status = await gatherStatus({ dbPath: testDbPath, logPath: testLogPath, configPath: testConfigPath, hookOverrides });
+
+            expect(status.config.embedding.apiKey).toBe("[REDACTED:api_key]");
+            expect(JSON.stringify(status.config)).not.toContain(secret);
         });
 
         test("returns null lastSync when no logs", async () => {
@@ -348,6 +367,24 @@ describe("status command", () => {
             expect(parsed).toHaveProperty("lastSync");
             expect(parsed).toHaveProperty("pendingSessions");
             expect(parsed).toHaveProperty("recentLogs");
+        });
+
+        test("JSON output never prints deprecated plaintext embedding apiKey", async () => {
+            const secret = ["sk", "ant", "123456789012345678901234567890"].join("-");
+            mkdirSync(dirname(testConfigPath), { recursive: true });
+            writeFileSync(testConfigPath, JSON.stringify({
+                embedding: {
+                    provider: "openai",
+                    apiKey: secret,
+                },
+            }));
+
+            await executeStatusCommand({ json: true }, { dbPath: testDbPath, logPath: testLogPath, configPath: testConfigPath, hookOverrides });
+
+            const output = logOutput.join("\n");
+            const parsed = JSON.parse(output);
+            expect(output).not.toContain(secret);
+            expect(parsed.config.embedding.apiKey).toBe("[REDACTED:api_key]");
         });
 
         test("JSON output contains hook status", async () => {

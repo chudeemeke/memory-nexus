@@ -49,7 +49,7 @@ _memory_completion() {
     local uninstall_opts="--restore"
     local doctor_opts="--json --fix"
     local purge_opts="--before --dry-run --force --json --verbose --quiet"
-    local export_opts="--json --verbose --quiet"
+    local export_opts="--json --verbose --quiet --include-sensitive"
     local import_opts="--force --dry-run --json --verbose --quiet"
     local completion_opts=""
 
@@ -278,6 +278,7 @@ _memory() {
         '--json[Output as JSON]'
         '--verbose[Show detailed output]'
         '--quiet[Minimal output]'
+        '--include-sensitive[Export raw sensitive values without redaction]'
     )
 
     import_opts=(
@@ -432,6 +433,7 @@ complete -c memory -n "__fish_seen_subcommand_from purge" -l quiet -d "Minimal o
 complete -c memory -n "__fish_seen_subcommand_from export" -l json -d "Output as JSON"
 complete -c memory -n "__fish_seen_subcommand_from export" -l verbose -d "Show detailed output"
 complete -c memory -n "__fish_seen_subcommand_from export" -l quiet -d "Minimal output"
+complete -c memory -n "__fish_seen_subcommand_from export" -l include-sensitive -d "Export raw sensitive values without redaction"
 
 # import options
 complete -c memory -n "__fish_seen_subcommand_from import" -l force -d "Overwrite existing data"

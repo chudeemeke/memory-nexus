@@ -7,8 +7,11 @@
  */
 
 import { describe, expect, it, beforeEach, afterEach, spyOn } from "bun:test";
+import { mkdtempSync, readFileSync, rmSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import { Command } from "commander";
-import { createBackfillCommand, executeBackfillCommand } from "./backfill.js";
+import { createBackfillCommand, executeBackfillCommand, FileDailyLogWriter } from "./backfill.js";
 import type { BackfillResult, DryRunResult } from "../../../application/services/backfill-service.js";
 
 describe("Backfill Command", () => {
@@ -263,6 +266,37 @@ describe("Backfill Command", () => {
       const output = consoleLogSpy.mock.calls.map((c: any) => c[0]).join(" ");
       expect(output).toContain("2 created");
       expect(output).toContain("1 updated");
+    });
+  });
+
+  describe("FileDailyLogWriter", () => {
+    it("creates parent directories and reports a new file", async () => {
+      const dir = mkdtempSync(join(tmpdir(), "memory-backfill-writer-"));
+      try {
+        const writer = new FileDailyLogWriter(dir);
+
+        const created = await writer.writeOrAppend("daily/2026-05-28.md", "first entry");
+
+        expect(created).toBe(true);
+        expect(readFileSync(join(dir, "daily", "2026-05-28.md"), "utf-8")).toBe("first entry");
+      } finally {
+        rmSync(dir, { recursive: true, force: true });
+      }
+    });
+
+    it("appends to existing daily logs and reports an update", async () => {
+      const dir = mkdtempSync(join(tmpdir(), "memory-backfill-writer-"));
+      try {
+        const writer = new FileDailyLogWriter(dir);
+
+        await writer.writeOrAppend("daily/2026-05-28.md", "first entry");
+        const created = await writer.writeOrAppend("daily/2026-05-28.md", "second entry");
+
+        expect(created).toBe(false);
+        expect(readFileSync(join(dir, "daily", "2026-05-28.md"), "utf-8")).toBe("first entry\nsecond entry");
+      } finally {
+        rmSync(dir, { recursive: true, force: true });
+      }
     });
   });
 });

@@ -15,6 +15,8 @@ export { createRelatedCommand, executeRelatedCommand } from "./related.js";
 export { createShowCommand, executeShowCommand } from "./show.js";
 export { createBrowseCommand, executeBrowseCommand } from "./browse.js";
 export { createQueryCommand, executeQueryCommand } from "./query.js";
+export { createRemoteCommand, executeRemoteSetCommand, executeRemoteRemoveCommand, executeRemoteStatusCommand } from "./remote.js";
+
 
 // Hook management commands
 export { createInstallCommand, executeInstallCommand } from "./install.js";
@@ -55,6 +57,8 @@ export type { ContextCommandOptions } from "./context.js";
 export type { RelatedCommandOptions } from "./related.js";
 export type { ShowCommandOptions } from "./show.js";
 export type { QueryCommandOptions } from "./query.js";
+export type { RemoteCommandOptions } from "./remote.js";
+
 export type { BrowseCommandOptions } from "./browse.js";
 export type { InstallOptions } from "./install.js";
 export type { UninstallOptions } from "./uninstall.js";

@@ -30,6 +30,7 @@
  */
 
 import { loadConfig } from "./config-manager.js";
+import type { MemoryConfig } from "./config-manager.js";
 import { logSync } from "./log-writer.js";
 import { spawnBackgroundSync } from "./hook-runner.js";
 
@@ -54,6 +55,15 @@ export interface HookInput {
     cwd?: string;
     /** Permission mode ("default", etc.) */
     permission_mode?: string;
+}
+
+export interface SyncHookDeps {
+    loadConfig: () => MemoryConfig;
+    readInput: () => Promise<HookInput>;
+    log: typeof logSync;
+    spawnSync: typeof spawnBackgroundSync;
+    writeStdout: (message: string) => void;
+    exit: (code: number) => void;
 }
 
 /**
@@ -94,6 +104,69 @@ export async function readStdinJson(): Promise<HookInput> {
     });
 }
 
+export async function executeSyncHook(deps: SyncHookDeps): Promise<void> {
+    const config = deps.loadConfig();
+
+    // Check if auto-sync is enabled
+    if (!config.autoSync) {
+        deps.exit(0); // Disabled by config
+        return;
+    }
+
+    // Read hook input from stdin
+    let hookInput: HookInput;
+    try {
+        hookInput = await deps.readInput();
+    } catch (err) {
+        const message = err instanceof Error ? err.message : String(err);
+        deps.log({
+            level: "error",
+            message: `Failed to read hook input: ${message}`,
+        });
+        deps.exit(0); // Never block user
+        return;
+    }
+
+    // Output flush reminder for PreCompact (before sync check)
+    if (hookInput.hook_event_name === "PreCompact") {
+        deps.writeStdout(
+            "MEMORY FLUSH: Session nearing compaction. " +
+            "Write important context (decisions, unresolved items, learnings) " +
+            "to ~/.memory/ files before context is compressed."
+        );
+    }
+
+    // Check if this hook type is enabled
+    if (hookInput.hook_event_name === "PreCompact" && !config.syncOnCompaction) {
+        deps.exit(0);
+        return;
+    }
+
+    // Extract session ID
+    const sessionId = hookInput.session_id;
+    if (!sessionId) {
+        deps.log({
+            level: "warn",
+            message: `No session_id in ${hookInput.hook_event_name} hook input`,
+            hookEvent: hookInput.hook_event_name,
+        });
+        deps.exit(0); // Fail gracefully
+        return;
+    }
+
+    // Spawn background sync
+    deps.spawnSync(sessionId);
+
+    deps.log({
+        level: "info",
+        message: `Triggered sync for session ${sessionId}`,
+        sessionId,
+        hookEvent: hookInput.hook_event_name,
+    });
+
+    deps.exit(0);
+}
+
 /**
  * Main entry point
  *
@@ -107,62 +180,14 @@ export async function readStdinJson(): Promise<HookInput> {
  * 7. Log and exit
  */
 async function main(): Promise<void> {
-    const config = loadConfig();
-
-    // Check if auto-sync is enabled
-    if (!config.autoSync) {
-        process.exit(0); // Disabled by config
-    }
-
-    // Read hook input from stdin
-    let hookInput: HookInput;
-    try {
-        hookInput = await readStdinJson();
-    } catch (err) {
-        const message = err instanceof Error ? err.message : String(err);
-        logSync({
-            level: "error",
-            message: `Failed to read hook input: ${message}`,
-        });
-        process.exit(0); // Never block user
-    }
-
-    // Output flush reminder for PreCompact (before sync check)
-    if (hookInput.hook_event_name === "PreCompact") {
-        console.log(
-            "MEMORY FLUSH: Session nearing compaction. " +
-            "Write important context (decisions, unresolved items, learnings) " +
-            "to ~/.memory/ files before context is compressed."
-        );
-    }
-
-    // Check if this hook type is enabled
-    if (hookInput.hook_event_name === "PreCompact" && !config.syncOnCompaction) {
-        process.exit(0);
-    }
-
-    // Extract session ID
-    const sessionId = hookInput.session_id;
-    if (!sessionId) {
-        logSync({
-            level: "warn",
-            message: `No session_id in ${hookInput.hook_event_name} hook input`,
-            hookEvent: hookInput.hook_event_name,
-        });
-        process.exit(0); // Fail gracefully
-    }
-
-    // Spawn background sync
-    spawnBackgroundSync(sessionId);
-
-    logSync({
-        level: "info",
-        message: `Triggered sync for session ${sessionId}`,
-        sessionId,
-        hookEvent: hookInput.hook_event_name,
+    await executeSyncHook({
+        loadConfig,
+        readInput: readStdinJson,
+        log: logSync,
+        spawnSync: spawnBackgroundSync,
+        writeStdout: console.log,
+        exit: process.exit,
     });
-
-    process.exit(0);
 }
 
 // Run only when executed directly

@@ -38,6 +38,14 @@ export type {
   IExtractionProvider,
 } from "./extraction.js";
 
+// Redaction port
+export type {
+  IRedactor,
+  JsonRedactionResult,
+  RedactionFinding,
+  RedactionKind,
+  RedactionResult,
+} from "./redactor.js";
 
 // Service interfaces
 export type {

@@ -16,6 +16,8 @@ import { mkdirSync, writeFileSync, rmSync, existsSync } from "node:fs";
 import { join } from "node:path";
 import { tmpdir } from "node:os";
 import { spawn } from "node:child_process";
+import { DEFAULT_CONFIG } from "./config-manager.js";
+import { executeSyncHook, type HookInput } from "./sync-hook-script.js";
 
 /** Path to the hook script under test */
 const HOOK_SCRIPT = join(
@@ -222,5 +224,113 @@ describe("sync-hook-script", () => {
             expect(result.exitCode).toBe(0);
             expect(result.stdout).not.toContain("MEMORY FLUSH");
         }, 15000);
+    });
+
+    describe("executeSyncHook", () => {
+        function runInProcess(
+            input: HookInput | Error,
+            config: Partial<typeof DEFAULT_CONFIG> = {},
+        ): Promise<{
+            exits: number[];
+            logs: Array<Record<string, unknown>>;
+            spawns: string[];
+            stdout: string[];
+        }> {
+            const exits: number[] = [];
+            const logs: Array<Record<string, unknown>> = [];
+            const spawns: string[] = [];
+            const stdout: string[] = [];
+
+            return executeSyncHook({
+                loadConfig: () => ({ ...DEFAULT_CONFIG, ...config }),
+                readInput: async () => {
+                    if (input instanceof Error) {
+                        throw input;
+                    }
+                    return input;
+                },
+                log: (entry) => {
+                    logs.push(entry as unknown as Record<string, unknown>);
+                },
+                spawnSync: (sessionId) => {
+                    spawns.push(sessionId);
+                },
+                writeStdout: (message) => {
+                    stdout.push(message);
+                },
+                exit: (code) => {
+                    exits.push(code);
+                },
+            }).then(() => ({ exits, logs, spawns, stdout }));
+        }
+
+        test("exits without reading input when auto sync is disabled", async () => {
+            const result = await runInProcess(
+                new Error("input should not be read"),
+                { autoSync: false },
+            );
+
+            expect(result.exits).toEqual([0]);
+            expect(result.logs).toEqual([]);
+            expect(result.spawns).toEqual([]);
+            expect(result.stdout).toEqual([]);
+        });
+
+        test("logs read failures and exits successfully so hooks never block Claude Code", async () => {
+            const result = await runInProcess(new Error("bad json"));
+
+            expect(result.exits).toEqual([0]);
+            expect(result.logs).toEqual([
+                {
+                    level: "error",
+                    message: "Failed to read hook input: bad json",
+                },
+            ]);
+            expect(result.spawns).toEqual([]);
+        });
+
+        test("prints PreCompact reminder before honoring disabled compaction sync", async () => {
+            const result = await runInProcess(
+                { hook_event_name: "PreCompact", session_id: "session-1" },
+                { syncOnCompaction: false },
+            );
+
+            expect(result.exits).toEqual([0]);
+            expect(result.stdout.join("\n")).toContain("MEMORY FLUSH");
+            expect(result.spawns).toEqual([]);
+            expect(result.logs).toEqual([]);
+        });
+
+        test("warns and exits when hook input has no session id", async () => {
+            const result = await runInProcess({ hook_event_name: "SessionEnd" });
+
+            expect(result.exits).toEqual([0]);
+            expect(result.spawns).toEqual([]);
+            expect(result.logs).toEqual([
+                {
+                    level: "warn",
+                    message: "No session_id in SessionEnd hook input",
+                    hookEvent: "SessionEnd",
+                },
+            ]);
+        });
+
+        test("spawns background sync and logs success for valid hook input", async () => {
+            const result = await runInProcess({
+                hook_event_name: "SessionEnd",
+                session_id: "session-123",
+            });
+
+            expect(result.exits).toEqual([0]);
+            expect(result.spawns).toEqual(["session-123"]);
+            expect(result.logs).toEqual([
+                {
+                    level: "info",
+                    message: "Triggered sync for session session-123",
+                    sessionId: "session-123",
+                    hookEvent: "SessionEnd",
+                },
+            ]);
+        });
     });
 });
