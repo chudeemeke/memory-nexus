@@ -972,6 +972,32 @@ describe("status command", () => {
             expect(output).toContain("150/500 messages");
         });
 
+        test("formatStatusOutput handles active embedding with unknown start time and no progress counts", () => {
+            const status: StatusInfo = {
+                hooks: {
+                    sessionEnd: true,
+                    preCompact: true,
+                    hookScriptExists: true,
+                    backupExists: true,
+                },
+                config: DEFAULT_CONFIG,
+                lastSync: null,
+                pendingSessions: 0,
+                recentLogs: 0,
+                embedding: {
+                    active: true,
+                    pid: 54321,
+                },
+            };
+
+            formatStatusOutput(status);
+
+            const output = logOutput.join("\n");
+            expect(output).toContain("PID 54321");
+            expect(output).toContain("started unknown");
+            expect(output).not.toContain("messages, started");
+        });
+
         test("formatStatusOutput shows idle when lock has dead PID", () => {
             // The StatusInfo with active:false represents dead PID case
             const status: StatusInfo = {
@@ -1002,6 +1028,59 @@ describe("status command", () => {
 
             expect(parsed).toHaveProperty("embedding");
             expect(parsed.embedding).toHaveProperty("active");
+        });
+    });
+
+    describe("colorized diagnostic branches", () => {
+        test("renders all selected diagnostic sections with ANSI color and no automatic fixes", async () => {
+            const originalForceColor = process.env.FORCE_COLOR;
+            process.env.FORCE_COLOR = "1";
+            try {
+                const result = await executeStatusCommand({
+                    all: true,
+                    fix: true,
+                }, {
+                    gatherStatus: async () => createStatusInfo({
+                        fixes: [],
+                        health: {
+                            ...createStatusInfo().health,
+                            hooks: {
+                                installed: true,
+                                enabled: true,
+                                lastRun: new Date(Date.now() - 60 * 60 * 1000),
+                            },
+                            embedding: {
+                                configured: true,
+                                provider: "ollama",
+                                model: "nomic-embed-text",
+                                dimensions: 768,
+                                enabled: false,
+                                ready: true,
+                                readyReason: "checked during sync",
+                            },
+                            llmExtraction: {
+                                provider: "ollama",
+                                model: "llama3.1",
+                                ready: true,
+                                readyReason: "checked during extraction",
+                            },
+                        },
+                    }),
+                });
+
+                const output = logOutput.join("\n");
+                expect(result.exitCode).toBe(0);
+                expect(output).toContain("\x1b[32m[OK]\x1b[0m");
+                expect(output).toContain("\x1b[2mNote: checked during sync\x1b[0m");
+                expect(output).toContain("\x1b[2mNo automatic fixes available.\x1b[0m");
+                expect(output).toContain("LLM Fact Extraction");
+            } finally {
+                if (originalForceColor === undefined) {
+                    delete process.env.FORCE_COLOR;
+                } else {
+                    process.env.FORCE_COLOR = originalForceColor;
+                }
+            }
         });
     });
 
