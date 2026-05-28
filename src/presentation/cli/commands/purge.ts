@@ -134,6 +134,18 @@ async function askConfirmation(message: string): Promise<boolean> {
 export interface PurgeCommandDeps {
   /** Database path. Defaults to getDefaultDbPath(). */
   dbPath?: string;
+  /** Default database path resolver. Defaults to getDefaultDbPath(). */
+  getDefaultDbPath?: () => string;
+  /** Database initializer. Defaults to initializeDatabase(). */
+  initializeDatabase?: (config: { path: string }) => { db: any };
+  /** Database closer. Defaults to closeDatabase(). */
+  closeDatabase?: (db: any) => void;
+  /** Session repository factory. Defaults to SqliteSessionRepository. */
+  createSessionRepository?: (db: any) => {
+    findOlderThan(cutoffDate: Date): Promise<any[]>;
+    findFiltered(options: { limit: number }): Promise<any[]>;
+    delete(id: string): void;
+  };
   /** Confirmation prompt. Defaults to readline-based askConfirmation. */
   askConfirmation?: (message: string) => Promise<boolean>;
   /** File existence checker function. Defaults to existsSync from fs. */
@@ -184,6 +196,11 @@ export async function executePurgeCommand(
 ): Promise<CommandResult> {
   const askConfirmFn = deps.askConfirmation ?? askConfirmation;
   const fsExistsSync = deps.existsSync ?? existsSync;
+  const getDbPath = deps.getDefaultDbPath ?? getDefaultDbPath;
+  const initializeDb = deps.initializeDatabase ?? initializeDatabase;
+  const closeDb = deps.closeDatabase ?? closeDatabase;
+  const createSessionRepository = deps.createSessionRepository
+    ?? ((db: any) => new SqliteSessionRepository(db));
 
   if (!options.olderThan && !options.orphans) {
     const message = "Please specify either --older-than <duration> or --orphans.";
@@ -211,11 +228,11 @@ export async function executePurgeCommand(
     }
   }
 
-  const dbPath = deps.dbPath ?? getDefaultDbPath();
+  const dbPath = deps.dbPath ?? getDbPath();
   let db;
 
   try {
-    const result = initializeDatabase({ path: dbPath });
+    const result = initializeDb({ path: dbPath });
     db = result.db;
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
@@ -228,7 +245,7 @@ export async function executePurgeCommand(
   }
 
   try {
-    const sessionRepo = new SqliteSessionRepository(db);
+    const sessionRepo = createSessionRepository(db);
     const sessionsToDelete = new Map<string, any>();
 
     // 1. Gather by age
@@ -372,7 +389,8 @@ export async function executePurgeCommand(
     }
     return { exitCode: 2 };
   } finally {
-    closeDatabase(db);
+    if (db) {
+      closeDb(db);
+    }
   }
 }
-

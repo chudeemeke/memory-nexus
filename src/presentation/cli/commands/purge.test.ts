@@ -568,6 +568,70 @@ describe("executePurgeCommand integration", () => {
       expect(output.error).toContain("Invalid duration format");
       expect(result.exitCode).toBe(1);
     });
+
+    it("should report database open failures without attempting cleanup", async () => {
+      let closeCalled = false;
+
+      const result = await executePurgeCommand(
+        { olderThan: "30d", force: true },
+        {
+          ...deps(),
+          initializeDatabase: () => {
+            throw new Error("open failed");
+          },
+          closeDatabase: () => {
+            closeCalled = true;
+          },
+        },
+      );
+
+      expect(result.exitCode).toBe(1);
+      expect(closeCalled).toBe(false);
+      expect(consoleErrorOutput.join("\n")).toContain("Database not found or could not be opened");
+    });
+
+    it("should output JSON for database open failures", async () => {
+      const result = await executePurgeCommand(
+        { olderThan: "30d", json: true },
+        {
+          ...deps(),
+          initializeDatabase: () => {
+            throw new Error("open failed");
+          },
+        },
+      );
+
+      const output = JSON.parse(consoleOutput.join("\n"));
+      expect(result.exitCode).toBe(1);
+      expect(output.error).toContain("Database error: open failed");
+    });
+
+    it("should close the database and return exit code 2 when purge scanning fails", async () => {
+      let closeCalled = false;
+
+      const result = await executePurgeCommand(
+        { olderThan: "30d", json: true },
+        {
+          ...deps(),
+          initializeDatabase: () => ({ db: { fake: true } }),
+          closeDatabase: () => {
+            closeCalled = true;
+          },
+          createSessionRepository: () => ({
+            findOlderThan: async () => {
+              throw new Error("scan failed");
+            },
+            findFiltered: async () => [],
+            delete: () => {},
+          }),
+        },
+      );
+
+      const output = JSON.parse(consoleOutput.join("\n"));
+      expect(result.exitCode).toBe(2);
+      expect(closeCalled).toBe(true);
+      expect(output.error).toContain("scan failed");
+    });
   });
 
   describe("orphans and option validation", () => {
@@ -618,6 +682,47 @@ describe("executePurgeCommand integration", () => {
       expect(await repo.findById("orphan-1")).toBeNull();
       expect(await repo.findById("active-1")).not.toBeNull();
       closeDatabase(db2);
+    });
+
+    it("should dry-run orphan deletion with the generic prompt-free message", async () => {
+      const { db } = initializeDatabase({ path: testDbPath });
+      createTestSession(db, "orphan-1", "dead-project", "2026-01-20T10:00:00Z");
+      closeDatabase(db);
+
+      const result = await executePurgeCommand(
+        { orphans: true, dryRun: true },
+        {
+          ...deps(),
+          existsSync: (p) => !p.includes("dead-project"),
+        },
+      );
+
+      expect(result.exitCode).toBe(0);
+      expect(consoleOutput.join("\n")).toContain("Would delete 1 session(s):");
+    });
+
+    it("should use the orphan confirmation prompt when no age cutoff is active", async () => {
+      const { db } = initializeDatabase({ path: testDbPath });
+      createTestSession(db, "orphan-1", "dead-project", "2026-01-20T10:00:00Z");
+      closeDatabase(db);
+
+      let prompt = "";
+      askConfirmation = async (message) => {
+        prompt = message;
+        return false;
+      };
+
+      const result = await executePurgeCommand(
+        { orphans: true },
+        {
+          ...deps(),
+          existsSync: (p) => !p.includes("dead-project"),
+        },
+      );
+
+      expect(result.exitCode).toBe(0);
+      expect(prompt).toBe("Delete 1 session(s)? This cannot be undone. (y/n) ");
+      expect(consoleOutput.join("\n")).toContain("Purge cancelled");
     });
 
     it("should use resolveExistingPath translation fallback during orphan scanning", async () => {
@@ -671,5 +776,4 @@ describe("executePurgeCommand integration", () => {
     });
   });
 });
-
 
