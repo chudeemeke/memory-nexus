@@ -417,6 +417,20 @@ export async function executeDoctorCommand(
     );
 }
 
+export function isMixedPathDialect(decoded: string, platform: NodeJS.Platform = process.platform): boolean {
+    if (platform === "win32") {
+        return decoded.includes("/") && (
+            decoded.startsWith("/home") ||
+            decoded.startsWith("/mnt") ||
+            decoded.startsWith("/var") ||
+            decoded.startsWith("/usr") ||
+            decoded.startsWith("/")
+        );
+    }
+
+    return decoded.includes("\\") || /^[a-zA-Z]:/.test(decoded);
+}
+
 /**
  * Execute portability diagnostics for environment transitions.
  */
@@ -456,19 +470,7 @@ export async function runPortabilityDiagnostics(
             const decoded = session.projectPath.decoded;
 
             // 1. Path Dialect Scan
-            const isWin = process.platform === "win32";
-            let isMixed = false;
-            if (isWin) {
-                if (decoded.includes("/") && (decoded.startsWith("/home") || decoded.startsWith("/mnt") || decoded.startsWith("/var") || decoded.startsWith("/usr") || decoded.startsWith("/"))) {
-                    isMixed = true;
-                }
-            } else {
-                if (decoded.includes("\\") || /^[a-zA-Z]:/.test(decoded)) {
-                    isMixed = true;
-                }
-            }
-
-            if (isMixed && !mixedDialects.includes(decoded)) {
+            if (isMixedPathDialect(decoded) && !mixedDialects.includes(decoded)) {
                 mixedDialects.push(decoded);
             }
 

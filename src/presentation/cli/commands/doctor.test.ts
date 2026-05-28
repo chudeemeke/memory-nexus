@@ -14,6 +14,7 @@ import {
     formatHealthResult,
     attemptFixes,
     runPortabilityDiagnostics,
+    isMixedPathDialect,
 } from "./doctor.js";
 import type { HealthCheckResult } from "../../../infrastructure/database/health-checker.js";
 import type { StatusInfo } from "./status.js";
@@ -1006,6 +1007,14 @@ describe("doctor command", () => {
     });
 
     describe("portability diagnostics", () => {
+        it("classifies path dialects for Windows and Unix hosts without reading the active platform", () => {
+            expect(isMixedPathDialect("/home/destiny/project", "win32")).toBe(true);
+            expect(isMixedPathDialect("/mnt/c/Users/Destiny/project", "win32")).toBe(true);
+            expect(isMixedPathDialect("C:\\Projects\\memory", "win32")).toBe(false);
+            expect(isMixedPathDialect("C:\\Projects\\memory", "linux")).toBe(true);
+            expect(isMixedPathDialect("/home/destiny/project", "linux")).toBe(false);
+        });
+
         it("reports missing database as JSON without attempting a scan", async () => {
             consoleOutput = [];
             console.log = (msg: string) => consoleOutput.push(msg);
@@ -1137,6 +1146,78 @@ describe("doctor command", () => {
                 expect(output).toContain("Orphaned Workspaces: All session folders exist");
                 expect(output).toContain("Active Locks: No stale");
                 expect(output).toContain("sqlite-vec: Loadable");
+            } finally {
+                try {
+                    rmSync(portabilityDir, { recursive: true, force: true, maxRetries: 10, retryDelay: 50 });
+                } catch {
+                    // Best-effort cleanup on Windows; SQLite can release handles late.
+                }
+            }
+        });
+
+        it("renders text warnings, stale lock details, and orphan cleanup tip without --fix", async () => {
+            const portabilityDir = join(tmpdir(), `doctor-portability-warn-${Date.now()}-${Math.random().toString(36).slice(2)}`);
+            const portabilityDb = join(portabilityDir, "memory.db");
+            mkdirSync(portabilityDir, { recursive: true });
+            const { db } = initializeDatabase({ path: portabilityDb });
+            const mixedPath = process.platform === "win32"
+                ? "/home/destiny/missing-project"
+                : "C:\\Projects\\missing-project";
+            try {
+                db.run(
+                    `INSERT INTO sessions (id, project_path_encoded, project_path_decoded, project_name, start_time)
+                     VALUES (?, ?, ?, ?, ?)`,
+                    ["portable-warn", "encoded-warn", mixedPath, "missing-project", new Date().toISOString()]
+                );
+            } finally {
+                closeDatabase(db);
+            }
+            writeFileSync(join(portabilityDir, "embedding.lock"), JSON.stringify({ pid: 99999999 }));
+
+            consoleOutput = [];
+            console.log = (msg: string) => consoleOutput.push(msg);
+
+            try {
+                const result = await runPortabilityDiagnostics({ portability: true }, {
+                    healthOverrides: {
+                        dbPath: portabilityDb,
+                        sourceDir: portabilityDir,
+                    },
+                    gatherStatus: async () => createStatusInfo({
+                        database: { exists: true, readable: true, writable: true, integrity: "ok", size: 1 },
+                        permissions: { configDir: true, logsDir: true, sourceDir: true },
+                        hooks: { installed: true, enabled: true, lastRun: null },
+                        config: { valid: true, issues: [] },
+                        embedding: {
+                            configured: true,
+                            provider: "local",
+                            model: "test",
+                            dimensions: 384,
+                            enabled: true,
+                            ready: true,
+                        },
+                        sqliteVec: { available: false, version: null },
+                        searchCapability: {
+                            fts5: true,
+                            sqliteVec: false,
+                            embeddedCount: 0,
+                            totalMessages: 0,
+                            coveragePercent: 0,
+                            defaultMode: "auto",
+                            vectorReady: false,
+                        },
+                    }),
+                });
+
+                const output = consoleOutput.join("\n");
+                expect(result.exitCode).toBe(1);
+                expect(output).toContain("Path Dialects:");
+                expect(output).toContain(mixedPath);
+                expect(output).toContain("Orphaned Workspaces:");
+                expect(output).toContain("Active Locks:");
+                expect(output).toContain("sqlite-vec: Not loadable");
+                expect(output).toContain("memory purge --orphans");
+                expect(output).toContain(join(portabilityDir, "embedding.lock"));
             } finally {
                 try {
                     rmSync(portabilityDir, { recursive: true, force: true, maxRetries: 10, retryDelay: 50 });
