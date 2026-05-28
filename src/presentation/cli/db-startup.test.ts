@@ -75,6 +75,23 @@ describe("db-startup", () => {
       const result = isTTY();
       expect(typeof result).toBe("boolean");
     });
+
+    test("requires both stdin and stdout to be TTYs", () => {
+      const origStdinTTY = process.stdin.isTTY;
+      const origStdoutTTY = process.stdout.isTTY;
+      try {
+        process.stdin.isTTY = true as unknown as boolean;
+        process.stdout.isTTY = false as unknown as boolean;
+        expect(isTTY()).toBe(false);
+
+        process.stdin.isTTY = true as unknown as boolean;
+        process.stdout.isTTY = true as unknown as boolean;
+        expect(isTTY()).toBe(true);
+      } finally {
+        process.stdin.isTTY = origStdinTTY;
+        process.stdout.isTTY = origStdoutTTY;
+      }
+    });
   });
 
   describe("initializeDatabaseForCli", () => {
@@ -303,6 +320,68 @@ describe("db-startup", () => {
       if (!result.success) {
         expect(result.error.code).toBe(ErrorCode.DB_CONNECTION_FAILED);
         expect(result.error.message).toContain("permission denied");
+      }
+      const jsonOutput = consoleErrors.find((line) => line.includes("DB_CONNECTION_FAILED"));
+      expect(jsonOutput).toBeDefined();
+    });
+
+    test("reports JSON recovery success without human-only recovery chatter", async () => {
+      const corrupted = new MemoryError(ErrorCode.DB_CORRUPTED, "bad db");
+      const init = mock((config) => {
+        if (config.quickCheck) throw corrupted;
+        return { db: { recreated: true } as any, sqliteVecAvailable: true };
+      });
+      const backup = mock(() => "bad.db.corrupted.2026");
+
+      const result = await initializeDatabaseForCli({ dbPath: "bad.db", json: true }, {
+        existsSync: () => true,
+        initializeDatabaseSafe: init as any,
+        isTTY: () => true,
+        confirm: async () => true,
+        backupCorruptedDatabase: backup,
+      });
+
+      expect(result.success).toBe(true);
+      expect(backup).toHaveBeenCalledWith("bad.db");
+      expect(consoleLogs.some((line) => line.includes("Backed up corrupted database"))).toBe(false);
+      expect(consoleLogs.some((line) => line.includes("Fresh database created"))).toBe(false);
+    });
+
+    test("preserves MemoryError from fresh database recreation failure", async () => {
+      const corrupted = new MemoryError(ErrorCode.DB_CORRUPTED, "bad db");
+      const recreationError = new MemoryError(ErrorCode.DB_CONNECTION_FAILED, "still locked");
+      const init = mock((config) => {
+        if (config.quickCheck) throw corrupted;
+        throw recreationError;
+      });
+
+      const result = await initializeDatabaseForCli({ dbPath: "bad.db" }, {
+        existsSync: () => true,
+        initializeDatabaseSafe: init as any,
+        isTTY: () => true,
+        confirm: async () => true,
+        backupCorruptedDatabase: () => "backup.db",
+      });
+
+      expect(result.success).toBe(false);
+      if (!result.success) {
+        expect(result.error).toBe(recreationError);
+      }
+      expect(consoleErrors.some((line) => line.includes("still locked"))).toBe(true);
+    });
+
+    test("wraps non-MemoryError initialization failures before formatting", async () => {
+      const result = await initializeDatabaseForCli({ dbPath: "bad.db", json: true }, {
+        existsSync: () => true,
+        initializeDatabaseSafe: (() => {
+          throw "sqlite busy";
+        }) as any,
+      });
+
+      expect(result.success).toBe(false);
+      if (!result.success) {
+        expect(result.error.code).toBe(ErrorCode.DB_CONNECTION_FAILED);
+        expect(result.error.message).toBe("sqlite busy");
       }
       const jsonOutput = consoleErrors.find((line) => line.includes("DB_CONNECTION_FAILED"));
       expect(jsonOutput).toBeDefined();

@@ -38,6 +38,31 @@ describe("runEmbeddingPass", () => {
     logSpy.mockRestore();
   });
 
+  it("suppresses disabled-provider message in quiet mode", async () => {
+    const logSpy = spyOn(console, "error").mockImplementation(() => {});
+    const mockFactory = {
+      createFromConfig: () => null,
+      dispose: async () => {},
+    };
+    const mockConfig = {
+      embedding: {
+        enabled: false,
+        provider: "local",
+        model: "test-model",
+        dimensions: 384,
+        batchSize: 100,
+      },
+    };
+
+    await runEmbeddingPass({} as any, { quiet: true }, {
+      factory: mockFactory as any,
+      config: mockConfig,
+    });
+
+    expect(logSpy).not.toHaveBeenCalled();
+    logSpy.mockRestore();
+  });
+
   it("prints message and returns when all messages already embedded", async () => {
     const logSpy = spyOn(console, "log").mockImplementation(() => {});
 
@@ -86,6 +111,51 @@ describe("runEmbeddingPass", () => {
     expect(logSpy).toHaveBeenCalledWith(
       expect.stringContaining("already embedded")
     );
+    logSpy.mockRestore();
+  });
+
+  it("suppresses already-embedded message in quiet mode", async () => {
+    const logSpy = spyOn(console, "log").mockImplementation(() => {});
+    const mockProvider = {
+      name: "local",
+      model: "test-model",
+      dimensions: 384,
+      isReady: () => true,
+      initialize: async () => {},
+      embed: async () => {},
+      embedBatch: async () => [],
+      dispose: async () => {},
+    };
+    const mockFactory = {
+      createFromConfig: () => mockProvider,
+      dispose: async () => {},
+    };
+    const mockConfig = {
+      embedding: {
+        enabled: true,
+        provider: "local",
+        model: "test-model",
+        dimensions: 384,
+        batchSize: 100,
+      },
+    };
+    const mockRepo = {
+      getStoredModelHash: () => null,
+      getStoredModelName: () => null,
+      getEmbeddedCount: () => 50,
+      getTotalMessageCount: () => 50,
+      findUnembedded: () => [],
+      storeBatch: () => {},
+      clearAllEmbeddings: () => {},
+    };
+
+    await runEmbeddingPass({} as any, { quiet: true }, {
+      factory: mockFactory as any,
+      config: mockConfig,
+      repositoryOverride: mockRepo as any,
+    });
+
+    expect(logSpy).not.toHaveBeenCalledWith(expect.stringContaining("already embedded"));
     logSpy.mockRestore();
   });
 
@@ -214,6 +284,52 @@ describe("runEmbeddingPass", () => {
 
     errorSpy.mockRestore();
     logSpy.mockRestore();
+  });
+
+  it("suppresses resume hint when embedding fails in quiet mode", async () => {
+    const errorSpy = spyOn(console, "error").mockImplementation(() => {});
+    const mockProvider = {
+      name: "local",
+      model: "test-model",
+      dimensions: 384,
+      isReady: () => true,
+      initialize: async () => {},
+      embed: async () => {},
+      embedBatch: async () => { throw new Error("ONNX failure"); },
+      dispose: async () => {},
+    };
+    const mockFactory = {
+      createFromConfig: () => mockProvider,
+      dispose: async () => {},
+    };
+    const mockConfig = {
+      embedding: {
+        enabled: true,
+        provider: "local",
+        model: "test-model",
+        dimensions: 384,
+        batchSize: 100,
+      },
+    };
+    const mockRepo = {
+      getStoredModelHash: () => null,
+      getStoredModelName: () => null,
+      getEmbeddedCount: () => 5,
+      getTotalMessageCount: () => 20,
+      findUnembedded: () => [{ rowid: 1, content: "test" }],
+      storeBatch: () => {},
+      clearAllEmbeddings: () => {},
+    };
+
+    await expect(runEmbeddingPass({} as any, { quiet: true }, {
+      factory: mockFactory as any,
+      config: mockConfig,
+      repositoryOverride: mockRepo as any,
+    })).rejects.toThrow("ONNX failure");
+
+    expect(errorSpy.mock.calls.map((call) => String(call[0])).join("\n"))
+      .not.toContain("Embedding failed");
+    errorSpy.mockRestore();
   });
 
   it("disposes factory and returns when model change is declined (non-interactive)", async () => {
@@ -362,6 +478,65 @@ describe("runEmbeddingPass", () => {
     expect(clearLine).toBeDefined();
     expect(clearCalled).toBe(true);
 
+    logSpy.mockRestore();
+  });
+
+  it("suppresses model-change progress messages in quiet force mode", async () => {
+    const logSpy = spyOn(console, "log").mockImplementation(() => {});
+
+    const mockProvider = {
+      name: "local",
+      model: "new-model",
+      dimensions: 384,
+      isReady: () => true,
+      initialize: async () => {},
+      embed: async () => {},
+      embedBatch: async (texts: string[]) => texts.map(() => ({
+        embedding: new Float32Array(384),
+        model: "new-model",
+        dimensions: 384,
+      })),
+      dispose: async () => {},
+    };
+    const mockFactory = {
+      createFromConfig: () => mockProvider,
+      dispose: async () => {},
+    };
+    const mockConfig = {
+      embedding: {
+        enabled: true,
+        provider: "local",
+        model: "new-model",
+        dimensions: 384,
+        batchSize: 100,
+      },
+    };
+    let callCount = 0;
+    const mockRepo = {
+      getStoredModelHash: () => "old-hash-different",
+      getStoredModelName: () => "old-model/v1",
+      getStoredEmbeddingDimensions: () => 1536,
+      getEmbeddedCount: () => 0,
+      getTotalMessageCount: () => 1,
+      findUnembedded: () => {
+        callCount++;
+        return callCount === 1 ? [{ rowid: 1, content: "message" }] : [];
+      },
+      storeBatch: () => {},
+      clearAllEmbeddings: () => {},
+      recreateVecTable: () => {},
+    };
+
+    await runEmbeddingPass({} as any, { force: true, quiet: true }, {
+      factory: mockFactory as any,
+      config: mockConfig,
+      repositoryOverride: mockRepo as any,
+    });
+
+    const output = logSpy.mock.calls.map((call) => String(call[0])).join("\n");
+    expect(output).not.toContain("Recreating embedding table");
+    expect(output).not.toContain("Clearing existing embeddings");
+    expect(output).not.toContain("Embedded");
     logSpy.mockRestore();
   });
 
@@ -882,6 +1057,37 @@ describe("handleModelChange", () => {
       typeof s === "string" && s.includes("abc123deadbeef00")
     );
     expect(warningLine).toBeDefined();
+
+    errorSpy.mockRestore();
+  });
+
+  it("uses unknown model fallback and zero count for legacy empty model state", async () => {
+    Object.defineProperty(process.stdin, "isTTY", {
+      value: false,
+      writable: true,
+      configurable: true,
+    });
+
+    const errorSpy = spyOn(console, "error").mockImplementation(() => {});
+
+    const modelState: ModelState = {
+      modelChanged: true,
+      needsReEmbed: true,
+      storedHash: undefined,
+      currentHash: "def456",
+      storedModelName: undefined,
+      currentModelName: "new-model",
+      embeddedCount: undefined,
+    };
+
+    const result = await handleModelChange(modelState, {});
+    expect(result).toBe(false);
+
+    const warningLine = errorSpy.mock.calls
+      .map((call) => String(call[0]))
+      .find((line) => line.includes("Model changed"));
+    expect(warningLine).toContain("unknown");
+    expect(warningLine).toContain("new-model");
 
     errorSpy.mockRestore();
   });

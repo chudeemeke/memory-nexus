@@ -121,7 +121,7 @@ describe("remote command", () => {
         });
 
         expect(result.exitCode).toBe(1);
-        const output = consoleErrorSpy.mock.calls.map((call: unknown[]) => String(call[0])).join("\n");
+        const output = consoleErrorSpy.mock.calls.map((call: unknown[]) => call.map(String).join(" ")).join("\n");
         expect(output).toContain("Failed to configure Git remote");
     });
 
@@ -176,6 +176,27 @@ describe("remote command", () => {
         });
     });
 
+    test("executeRemoteSetCommand defaults missing auto flags to enabled", async () => {
+        let saved: any;
+        const result = await executeRemoteSetCommand("git@example/repo.git", {
+            loadConfig: () => ({}) as any,
+            saveConfig: (config) => {
+                saved = config;
+            },
+            createGitSyncer: () => ({
+                isGitRepo: async () => true,
+                initRepo: async () => false,
+                configureRemote: async () => true,
+                removeRemote: async () => true,
+                getRemoteUrl: async () => null,
+            }),
+        });
+
+        expect(result.exitCode).toBe(0);
+        expect(saved.remoteSync.autoPush).toBe(true);
+        expect(saved.remoteSync.autoPull).toBe(true);
+    });
+
     test("executeRemoteSetCommand reports config read failures", async () => {
         const result = await executeRemoteSetCommand("git@example/repo.git", {
             loadConfig: () => {
@@ -186,6 +207,19 @@ describe("remote command", () => {
         expect(result.exitCode).toBe(1);
         expect(consoleErrorSpy.mock.calls.map((call: unknown[]) => String(call[0])).join("\n"))
             .toContain("Error setting remote:");
+    });
+
+    test("executeRemoteSetCommand formats non-Error thrown values", async () => {
+        const result = await executeRemoteSetCommand("git@example/repo.git", {
+            loadConfig: () => {
+                throw "config missing";
+            },
+        });
+
+        expect(result.exitCode).toBe(1);
+        const output = consoleErrorSpy.mock.calls.map((call: unknown[]) => call.map(String).join(" ")).join("\n");
+        expect(output).toContain("Error setting remote:");
+        expect(output).toContain("config missing");
     });
 
     test("executeRemoteRemoveCommand disables sync and clears configuration", async () => {
@@ -235,6 +269,30 @@ describe("remote command", () => {
         expect(parsed.remoteSync.autoPull).toBe(false);
     });
 
+    test("executeRemoteRemoveCommand defaults missing auto flags to enabled", async () => {
+        let saved: any;
+        const result = await executeRemoteRemoveCommand({
+            loadConfig: () => ({}) as any,
+            saveConfig: (config) => {
+                saved = config;
+            },
+            createGitSyncer: () => ({
+                isGitRepo: async () => false,
+                initRepo: async () => true,
+                configureRemote: async () => true,
+                removeRemote: async () => true,
+                getRemoteUrl: async () => null,
+            }),
+        });
+
+        expect(result.exitCode).toBe(0);
+        expect(saved.remoteSync).toEqual({
+            enabled: false,
+            autoPush: true,
+            autoPull: true,
+        });
+    });
+
     test("executeRemoteRemoveCommand reports config write failures", async () => {
         const result = await executeRemoteRemoveCommand({
             configPathOverride: testDir,
@@ -242,7 +300,7 @@ describe("remote command", () => {
         });
 
         expect(result.exitCode).toBe(1);
-        const output = consoleErrorSpy.mock.calls.map((call: unknown[]) => String(call[0])).join("\n");
+        const output = consoleErrorSpy.mock.calls.map((call: unknown[]) => call.map(String).join(" ")).join("\n");
         expect(output).toContain("Error removing remote:");
     });
 
@@ -256,6 +314,19 @@ describe("remote command", () => {
         expect(result.exitCode).toBe(1);
         expect(consoleErrorSpy.mock.calls.map((call: unknown[]) => String(call[0])).join("\n"))
             .toContain("Error removing remote:");
+    });
+
+    test("executeRemoteRemoveCommand formats non-Error thrown values", async () => {
+        const result = await executeRemoteRemoveCommand({
+            loadConfig: () => {
+                throw "config missing";
+            },
+        });
+
+        expect(result.exitCode).toBe(1);
+        const output = consoleErrorSpy.mock.calls.map((call: unknown[]) => call.map(String).join(" ")).join("\n");
+        expect(output).toContain("Error removing remote:");
+        expect(output).toContain("config missing");
     });
 
     test("executeRemoteStatusCommand renders status values correctly", async () => {
@@ -330,5 +401,18 @@ describe("remote command", () => {
         expect(result.exitCode).toBe(1);
         expect(consoleErrorSpy.mock.calls.map((call: unknown[]) => String(call[0])).join("\n"))
             .toContain("Error gathering remote status:");
+    });
+
+    test("executeRemoteStatusCommand formats non-Error thrown values", async () => {
+        const result = await executeRemoteStatusCommand({
+            loadConfig: () => {
+                throw "config missing";
+            },
+        });
+
+        expect(result.exitCode).toBe(1);
+        const output = consoleErrorSpy.mock.calls.map((call: unknown[]) => call.map(String).join(" ")).join("\n");
+        expect(output).toContain("Error gathering remote status:");
+        expect(output).toContain("config missing");
     });
 });
