@@ -101,7 +101,7 @@ export function summarizeToolResult(tool: ToolUse): string {
   switch (tool.name) {
     case "Read": {
       const path = tool.input.file_path as string;
-      const lines = tool.result?.split("\n").length ?? 0;
+      const lines = tool.result ? tool.result.split("\n").length : 0;
       return `${basename(path)} -> ${lines} lines`;
     }
     case "Write": {

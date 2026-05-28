@@ -87,6 +87,20 @@ describe("OutputFormatter", () => {
       const output = formatter.formatResults([], { query: "test" });
       expect(output).toContain("No results");
     });
+
+    it("uses the generic query label when no empty-result query is provided", () => {
+      const output = formatter.formatResults([]);
+      expect(output).toContain("No results found for: query");
+    });
+
+    it("skips sparse result entries without failing", () => {
+      const sparseResults = [mockResults[0], undefined, mockResults[1]] as unknown as SearchResult[];
+      const output = formatter.formatResults(sparseResults, { query: "test" });
+
+      expect(output).toContain("Found 3 result(s)");
+      expect(output).toContain("session-1234-abc");
+      expect(output).toContain("session-5678-ijk");
+    });
   });
 
   describe("default mode with colors", () => {
@@ -156,6 +170,23 @@ describe("OutputFormatter", () => {
 
       expect(error).toEqual({ error: "json failure" });
       expect(formatter.formatSummary({ found: 2, shown: 2 })).toBe("");
+    });
+
+    it("truncates JSON arrays to the largest result set inside the context budget", () => {
+      const largeResults: SearchResult[] = Array.from({ length: 3 }, (_, index) => ({
+        sessionId: `session-json-budget-${index}`,
+        messageId: `msg-json-budget-${index}`,
+        role: "user",
+        score: 0.9,
+        timestamp: new Date("2026-01-27T14:30:00Z"),
+        snippet: "X".repeat(120),
+      }));
+
+      const output = formatter.formatResults(largeResults, { contextBudget: 360 });
+      const parsed = JSON.parse(output);
+
+      expect(parsed.length).toBeLessThan(largeResults.length);
+      expect(output.length).toBeLessThanOrEqual(360);
     });
   });
 
@@ -234,6 +265,23 @@ describe("OutputFormatter", () => {
       });
       expect(output).toContain("150");
       expect(output).toContain("test*");
+    });
+
+    it("omits optional execution detail rows when values are absent", () => {
+      const output = formatter.formatResults(mockResults, {
+        query: "test",
+        executionDetails: {},
+      });
+
+      expect(output).toContain("=== Execution Details ===");
+      expect(output).not.toContain("Time:");
+      expect(output).not.toContain("FTS5 Query:");
+      expect(output).not.toContain("Filters:");
+    });
+
+    it("returns a generic empty-result message when no verbose query is provided", () => {
+      const output = formatter.formatResults([]);
+      expect(output).toBe("No results found for: query");
     });
   });
 
@@ -482,6 +530,31 @@ describe("OutputFormatter", () => {
       expect(output).toContain("cosine");
     });
 
+    it("includes rrf score and source in ranker breakdown when present", () => {
+      const output = formatter.formatResults(hybridResults, {
+        query: "test",
+        searchMeta: mockMeta,
+      });
+      expect(output).toContain("rrf");
+      expect(output).toContain("Source: both");
+    });
+
+    it("does not print an empty score line when rawScores has no recognized scores", () => {
+      const output = formatter.formatResults([
+        {
+          ...hybridResults[0],
+          rawScores: {},
+          source: undefined,
+        },
+      ], {
+        query: "test",
+        searchMeta: mockMeta,
+      });
+
+      expect(output).not.toContain("Scores:");
+      expect(output).not.toContain("Source:");
+    });
+
     it("shows existing format without searchMeta (backward compat)", () => {
       const output = formatter.formatResults(hybridResults, { query: "test" });
       expect(output).not.toContain("Mode:");
@@ -504,6 +577,11 @@ describe("OutputFormatter", () => {
 
     it("returns empty array when no marks", () => {
       const highlights = extractHighlights("No highlights here");
+      expect(highlights).toEqual([]);
+    });
+
+    it("stops gracefully when a mark tag is not closed", () => {
+      const highlights = extractHighlights("Prefix <mark>unterminated");
       expect(highlights).toEqual([]);
     });
 

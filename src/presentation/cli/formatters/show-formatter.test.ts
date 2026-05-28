@@ -66,7 +66,7 @@ function createTestToolUse(overrides: Partial<{
   input: Record<string, unknown>;
   timestamp: Date;
   status: "pending" | "success" | "error";
-  result: string;
+  result: string | undefined;
 }> = {}): ToolUse {
   return ToolUse.create({
     id: overrides.id ?? "tool-1",
@@ -74,7 +74,7 @@ function createTestToolUse(overrides: Partial<{
     input: overrides.input ?? { file_path: "/path/to/file.ts" },
     timestamp: overrides.timestamp ?? new Date("2026-01-15T10:06:00Z"),
     status: overrides.status ?? "success",
-    result: overrides.result ?? "file content here",
+    result: "result" in overrides ? overrides.result : "file content here",
   });
 }
 
@@ -217,6 +217,18 @@ describe("ShowFormatter", () => {
       expect(shortOutput).toContain("< 1m");
       expect(minuteOutput).toContain("5m");
     });
+
+    test("formats singular hour and minute durations", () => {
+      const formatter = createShowFormatter("default", false);
+      const output = formatter.formatSession(createSessionDetail({
+        session: createTestSession({
+          startTime: new Date("2026-01-15T10:00:00Z"),
+          endTime: new Date("2026-01-15T11:01:00Z"),
+        }),
+      }));
+
+      expect(output).toContain("1h 1m");
+    });
   });
 
   describe("summarizeToolResult", () => {
@@ -231,6 +243,16 @@ describe("ShowFormatter", () => {
 
       expect(summary).toContain("config.json");
       expect(summary).toContain("3 lines");
+    });
+
+    test("handles Read tool without a result", () => {
+      const tool = createTestToolUse({
+        name: "Read",
+        input: { file_path: "C:\\tmp\\empty.txt" },
+        result: undefined as unknown as string,
+      });
+
+      expect(summarizeToolResult(tool)).toBe("empty.txt -> 0 lines");
     });
 
     test("handles Write tool", () => {
@@ -258,6 +280,16 @@ describe("ShowFormatter", () => {
       expect(summary).toContain("npm test");
     });
 
+    test("keeps short Bash commands untruncated", () => {
+      const tool = createTestToolUse({
+        name: "Bash",
+        input: { command: "pwd" },
+        status: "success",
+      });
+
+      expect(summarizeToolResult(tool)).toBe("pwd");
+    });
+
     test("handles Bash tool failure", () => {
       const tool = createTestToolUse({
         name: "Bash",
@@ -282,6 +314,16 @@ describe("ShowFormatter", () => {
       const summary = summarizeToolResult(tool);
 
       expect(summary).toBe("3 files");
+    });
+
+    test("handles Glob tool without a result", () => {
+      const tool = createTestToolUse({
+        name: "Glob",
+        input: { pattern: "**/*.ts" },
+        result: undefined as unknown as string,
+      });
+
+      expect(summarizeToolResult(tool)).toBe("0 files");
     });
 
     test("handles Grep tool success", () => {
@@ -419,6 +461,33 @@ describe("ShowFormatter", () => {
 
       expect(output).toContain("Status: success");
     });
+
+    test("omits detailed tool result when a tool has no result", () => {
+      const formatter = createShowFormatter("tools", false);
+      const toolUse = createTestToolUse({
+        id: "tool-no-result",
+        name: "Bash",
+        input: { command: "true" },
+        result: "",
+      });
+      const messages = [
+        createTestMessage({
+          id: "msg-1",
+          role: "assistant",
+          content: "Running command.",
+          toolUseIds: ["tool-no-result"],
+        }),
+      ];
+      const detail = createSessionDetail({
+        messages,
+        toolUses: new Map<string, ToolUse>([["tool-no-result", toolUse]]),
+      });
+
+      const output = formatter.formatSession(detail);
+      expect(output).toContain("[TOOL: Bash]");
+      expect(output).toContain("Status: success");
+      expect(output).not.toContain("Result:");
+    });
   });
 
   describe("JsonShowFormatter", () => {
@@ -464,6 +533,23 @@ describe("ShowFormatter", () => {
       expect(parsed).toHaveProperty("toolUses");
       expect(parsed.toolUses).toHaveProperty("tool-json-1");
       expect(parsed.toolUses["tool-json-1"].name).toBe("Read");
+    });
+
+    test("serializes nullable session end time, duration, and tool result", () => {
+      const formatter = createShowFormatter("json", false);
+      const toolUse = createTestToolUse({
+        id: "tool-json-null",
+        result: undefined as unknown as string,
+      });
+      const detail = createSessionDetail({
+        session: createTestSession({ endTime: undefined }),
+        toolUses: new Map<string, ToolUse>([["tool-json-null", toolUse]]),
+      });
+
+      const parsed = JSON.parse(formatter.formatSession(detail));
+      expect(parsed.session.endTime).toBeNull();
+      expect(parsed.session.durationMs).toBeNull();
+      expect(parsed.toolUses["tool-json-null"].result).toBeNull();
     });
 
     test("formats error and not-found as JSON", () => {
@@ -520,6 +606,33 @@ describe("ShowFormatter", () => {
       // Verbose mode should include all 1000 x's
       const xCount = (output.match(/x/g) || []).length;
       expect(xCount).toBe(1000);
+    });
+
+    test("shows verbose tool status without a result block when result is empty", () => {
+      const formatter = createShowFormatter("verbose", false);
+      const toolUse = createTestToolUse({
+        id: "tool-empty-result",
+        name: "Bash",
+        input: { command: "true" },
+        result: "",
+      });
+      const messages = [
+        createTestMessage({
+          id: "msg-1",
+          role: "assistant",
+          content: "Running command.",
+          toolUseIds: ["tool-empty-result"],
+        }),
+      ];
+      const detail = createSessionDetail({
+        messages,
+        toolUses: new Map<string, ToolUse>([["tool-empty-result", toolUse]]),
+      });
+
+      const output = formatter.formatSession(detail);
+      expect(output).toContain("[TOOL: Bash]");
+      expect(output).toContain("Status: success");
+      expect(output).not.toContain("Result:");
     });
 
     test("formats errors with stack and not-found messages", () => {

@@ -8,13 +8,16 @@
 import { describe, test, expect, beforeEach, afterEach, spyOn } from "bun:test";
 import {
     existsSync,
+    mkdtempSync,
     mkdirSync,
     rmSync,
     writeFileSync,
 } from "node:fs";
 import { dirname, join } from "node:path";
-import { homedir, tmpdir } from "node:os";
+import { tmpdir } from "node:os";
 import {
+    createStatusCommand,
+    attemptFixes,
     executeStatusCommand,
     gatherStatus,
     formatStatusOutput,
@@ -41,7 +44,7 @@ import {
 
 describe("status command", () => {
     // Use a test-specific directory to avoid modifying actual settings
-    const testBaseDir = join(homedir(), ".memory-nexus-test-status");
+    const testBaseDir = join(tmpdir(), `memory-nexus-test-status-${process.pid}`);
     const testSettingsPath = join(testBaseDir, ".claude", "settings.json");
     const testBackupPath = join(testBaseDir, ".memory-nexus", "backups", "settings.json.backup");
     const testHookScriptPath = join(testBaseDir, ".memory-nexus", "hooks", "sync-hook.js");
@@ -59,10 +62,19 @@ describe("status command", () => {
     let consoleLogSpy: ReturnType<typeof spyOn>;
     let logOutput: string[];
 
+    function removeTestBaseDir(): void {
+        rmSync(testBaseDir, {
+            recursive: true,
+            force: true,
+            maxRetries: 10,
+            retryDelay: 50,
+        });
+    }
+
     beforeEach(() => {
         // Clean test directory
         if (existsSync(testBaseDir)) {
-            rmSync(testBaseDir, { recursive: true, force: true });
+            removeTestBaseDir();
         }
         mkdirSync(testBaseDir, { recursive: true });
 
@@ -80,7 +92,7 @@ describe("status command", () => {
         // Clean up test directory
         if (existsSync(testBaseDir)) {
             try {
-                rmSync(testBaseDir, { recursive: true, force: true });
+                removeTestBaseDir();
             } catch {
                 // Best-effort cleanup on Windows (EBUSY from WAL file locks)
             }
@@ -397,6 +409,178 @@ describe("status command", () => {
 
             expect(parsed.hooks.sessionEnd).toBe(true);
             expect(parsed.hooks.preCompact).toBe(true);
+        });
+
+        test("createStatusCommand action parses options and sets process.exitCode", async () => {
+            const originalExitCode = process.exitCode;
+            try {
+                const command = createStatusCommand();
+                await command.parseAsync(["node", "memory", "--json", "--projects", "0"]);
+
+                const parsed = JSON.parse(logOutput.join("\n"));
+                expect(parsed.error.code).toBe("INVALID_ARGUMENT");
+                expect(process.exitCode).toBe(1);
+            } finally {
+                process.exitCode = originalExitCode;
+            }
+        });
+
+        test("rejects invalid project limit in text mode", async () => {
+            const errors: string[] = [];
+            const errorSpy = spyOn(console, "error").mockImplementation((...args) => {
+                errors.push(args.join(" "));
+            });
+
+            try {
+                const result = await executeStatusCommand({ projects: "0" }, {
+                    dbPath: testDbPath,
+                    logPath: testLogPath,
+                    configPath: testConfigPath,
+                    hookOverrides,
+                });
+
+                expect(result.exitCode).toBe(1);
+                expect(errors.join("\n")).toContain("Projects count must be a positive number");
+            } finally {
+                errorSpy.mockRestore();
+            }
+        });
+
+        test("outputs stats-compatible JSON envelope for stats-only requests", async () => {
+            const commandBase = mkdtempSync(join(tmpdir(), "memory-status-stats-"));
+            try {
+                const result = await executeStatusCommand({ stats: true, json: true }, {
+                    dbPath: join(commandBase, "status.db"),
+                    logPath: join(commandBase, "sync.log"),
+                    configPath: join(commandBase, "config.json"),
+                    hookOverrides,
+                });
+
+                const parsed = JSON.parse(logOutput.join("\n"));
+                expect(result.exitCode).toBe(0);
+                expect(parsed.command).toBe("stats");
+                expect(parsed.kind).toBe("stats");
+                expect(parsed.data.totalSessions).toBe(0);
+            } finally {
+                try {
+                    rmSync(commandBase, { recursive: true, force: true, maxRetries: 10, retryDelay: 50 });
+                } catch {
+                    // Best-effort cleanup on Windows (SQLite can release WAL handles late).
+                }
+            }
+        });
+
+        test("renders selected diagnostic sections and fix output with isolated XDG paths", async () => {
+            const env = installEnvOverrides();
+            const xdgRoot = join(tmpdir(), `memory-status-fix-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`);
+            const commandBase = mkdtempSync(join(tmpdir(), "memory-status-sections-"));
+            try {
+                env.set("XDG_CONFIG_HOME", join(xdgRoot, "config"));
+                env.set("XDG_DATA_HOME", join(xdgRoot, "data"));
+
+                const result = await executeStatusCommand({
+                    hooks: true,
+                    config: true,
+                    db: true,
+                    embedding: true,
+                    stats: true,
+                    fix: true,
+                    format: "brief",
+                }, {
+                    dbPath: join(commandBase, "status.db"),
+                    logPath: join(commandBase, "sync.log"),
+                    configPath: join(commandBase, "config.json"),
+                    hookOverrides,
+                });
+
+                const output = logOutput.join("\n");
+                expect(result.exitCode).toBe(2);
+                expect(output).toContain("Hooks");
+                expect(output).toContain("Configuration");
+                expect(output).toContain("Database");
+                expect(output).toContain("Embeddings");
+                expect(output).toContain("LLM Fact Extraction");
+                expect(output).toContain("0 sessions");
+                expect(output).toContain("Attempting fixes");
+            } finally {
+                env.cleanup();
+                rmSync(xdgRoot, { recursive: true, force: true });
+                try {
+                    rmSync(commandBase, { recursive: true, force: true, maxRetries: 10, retryDelay: 50 });
+                } catch {
+                    // Best-effort cleanup on Windows (SQLite can release WAL handles late).
+                }
+            }
+        });
+
+        test("attemptFixes creates missing dirs and reports manual corruption recovery", () => {
+            const env = installEnvOverrides();
+            const xdgRoot = join(tmpdir(), `memory-status-attempt-fixes-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`);
+            try {
+                env.set("XDG_CONFIG_HOME", join(xdgRoot, "config"));
+                env.set("XDG_DATA_HOME", join(xdgRoot, "data"));
+
+                const messages = attemptFixes({
+                    database: {
+                        exists: true,
+                        readable: true,
+                        writable: true,
+                        integrity: "corrupted",
+                        size: 1024,
+                    },
+                    permissions: {
+                        configDir: false,
+                        logsDir: false,
+                        sourceDir: true,
+                    },
+                    hooks: {
+                        installed: false,
+                        enabled: true,
+                        lastRun: null,
+                    },
+                    config: {
+                        valid: true,
+                        issues: [],
+                    },
+                    embedding: {
+                        configured: true,
+                        provider: "local",
+                        model: "test-model",
+                        dimensions: 384,
+                        enabled: true,
+                        ready: true,
+                    },
+                    sqliteVec: {
+                        available: true,
+                        version: "v0.1.9",
+                    },
+                    searchCapability: {
+                        fts5: true,
+                        sqliteVec: true,
+                        embeddedCount: 0,
+                        totalMessages: 0,
+                        coveragePercent: 0,
+                        defaultMode: "auto",
+                        vectorReady: false,
+                    },
+                    llmExtraction: {
+                        provider: "claude-cli",
+                        model: "claude-cli-print",
+                        ready: true,
+                    },
+                }, false);
+
+                const output = messages.join("\n");
+                expect(output).toContain("Created config directory");
+                expect(output).toContain("Created logs directory");
+                expect(output).toContain("Database corruption detected");
+                expect(output).toContain("memory install");
+                expect(existsSync(join(xdgRoot, "config", "memory"))).toBe(true);
+                expect(existsSync(join(xdgRoot, "data", "memory", "logs"))).toBe(true);
+            } finally {
+                env.cleanup();
+                rmSync(xdgRoot, { recursive: true, force: true });
+            }
         });
     });
 
