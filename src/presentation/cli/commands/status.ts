@@ -94,6 +94,8 @@ export interface StatusCommandDeps {
     configPath?: string | undefined;
     /** Hook-related path overrides */
     hookOverrides?: import("../../../infrastructure/hooks/settings-manager.js").PathOverrides | undefined;
+    /** Status gatherer seam for tests and alternate hosts. Defaults to gatherStatus(). */
+    gatherStatus?: ((options: GatherStatusOptions) => Promise<StatusInfo>) | undefined;
 }
 
 /**
@@ -358,7 +360,8 @@ export async function executeStatusCommand(
         return { exitCode: 1 };
     }
 
-    const status = await gatherStatus({
+    const gather = deps.gatherStatus ?? gatherStatus;
+    const status = await gather({
         dbPath: deps.dbPath,
         logPath: deps.logPath,
         configPath: deps.configPath,

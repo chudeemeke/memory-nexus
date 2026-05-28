@@ -18,6 +18,7 @@ import { EmbeddingRepository } from "../repositories/embedding-repository.js";
 import { HybridSearchService } from "./hybrid-search-service.js";
 import type { HybridSearchDeps, SearchMeta } from "./hybrid-search-service.js";
 import { SearchQuery } from "../../../domain/value-objects/search-query.js";
+import { SearchResult } from "../../../domain/value-objects/search-result.js";
 import { ErrorCode, MemoryError } from "../../../domain/index.js";
 import {
   DEFAULT_CONFIG,
@@ -143,6 +144,43 @@ function createMockFactory(
     createFromConfig: mock(() => p),
     dispose: mock(() => Promise.resolve()),
   } as unknown as EmbeddingProviderFactory;
+}
+
+function createNullProviderFactory(): EmbeddingProviderFactory {
+  return {
+    create: mock(() => null),
+    createFromConfig: mock(() => null),
+    dispose: mock(() => Promise.resolve()),
+  } as unknown as EmbeddingProviderFactory;
+}
+
+function createThrowingFactory(error: unknown): EmbeddingProviderFactory {
+  return {
+    create: mock(() => {
+      throw error;
+    }),
+    createFromConfig: mock(() => {
+      throw error;
+    }),
+    dispose: mock(() => Promise.resolve()),
+  } as unknown as EmbeddingProviderFactory;
+}
+
+function createEmbeddingRepoStub(
+  rows: Array<{ rowid: number; distance: number }>,
+  counts: { embedded?: number; total?: number } = {}
+): EmbeddingRepository {
+  return {
+    getEmbeddedCount: mock(() => counts.embedded ?? rows.length),
+    getTotalMessageCount: mock(() => counts.total ?? Math.max(rows.length, counts.embedded ?? 0)),
+    vectorKnnSearch: mock(() => rows),
+  } as unknown as EmbeddingRepository;
+}
+
+function createFtsServiceStub(results: SearchResult[]): Fts5SearchService {
+  return {
+    search: mock(() => Promise.resolve(results)),
+  } as unknown as Fts5SearchService;
 }
 
 function createDeps(
@@ -393,6 +431,127 @@ describe("HybridSearchService", () => {
   });
 
   describe("vector-only search", () => {
+    it("explicit vector mode fails clearly when provider is disabled", async () => {
+      const rowid = insertTestMessage(
+        db, "msg-1", "session-1", "user", "authentication patterns"
+      );
+      if (!sqliteVecAvailable) return;
+      insertTestEmbedding(db, rowid);
+
+      const service = new HybridSearchService(createDeps(db, {
+        sqliteVecAvailable: true,
+        providerFactory: createNullProviderFactory(),
+      }));
+      const query = SearchQuery.from("authentication");
+
+      await expect(service.search(query, { mode: "vector" })).rejects.toThrow("disabled");
+    });
+
+    it("explicit vector mode wraps provider factory failures as VECTOR_UNAVAILABLE", async () => {
+      const rowid = insertTestMessage(
+        db, "msg-1", "session-1", "user", "authentication patterns"
+      );
+      if (!sqliteVecAvailable) return;
+      insertTestEmbedding(db, rowid);
+
+      const service = new HybridSearchService(createDeps(db, {
+        sqliteVecAvailable: true,
+        providerFactory: createThrowingFactory("boom"),
+      }));
+      const query = SearchQuery.from("authentication");
+
+      try {
+        await service.search(query, { mode: "vector" });
+        expect.unreachable();
+      } catch (error) {
+        expect(error).toBeInstanceOf(MemoryError);
+        expect((error as MemoryError).code).toBe(ErrorCode.VECTOR_UNAVAILABLE);
+        expect((error as Error).message).toContain("boom");
+      }
+    });
+
+    it("explicit vector mode returns an empty result set when KNN returns no rows", async () => {
+      const fakeDb = {
+        prepare: () => ({
+          get: () => ({ embedding: new Float32Array(384) }),
+        }),
+      } as unknown as Database;
+      const service = new HybridSearchService(createDeps(fakeDb, {
+        sqliteVecAvailable: true,
+        embeddingRepo: createEmbeddingRepoStub([], { embedded: 1, total: 1 }),
+        providerFactory: createMockFactory(createMockProvider()),
+      }));
+
+      const results = await service.search(SearchQuery.from("authentication"), { mode: "vector" });
+
+      expect(results).toEqual([]);
+    });
+
+    it("explicit vector mode ignores rows that cannot be hydrated", async () => {
+      const fakeDb = {
+        prepare: (sql: string) => ({
+          get: () => ({ embedding: new Float32Array(384) }),
+          all: () => sql.includes("messages_meta") ? [] : [],
+        }),
+      } as unknown as Database;
+      const service = new HybridSearchService(createDeps(fakeDb, {
+        sqliteVecAvailable: true,
+        embeddingRepo: createEmbeddingRepoStub([{ rowid: 999, distance: 0.2 }], { embedded: 1, total: 1 }),
+        providerFactory: createMockFactory(createMockProvider()),
+      }));
+
+      const results = await service.search(SearchQuery.from("authentication"), { mode: "vector" });
+
+      expect(results).toEqual([]);
+    });
+
+    it("explicit vector mode applies role, session, and date filters", async () => {
+      const oldDate = new Date("2026-01-01T00:00:00Z");
+      const newDate = new Date("2026-02-01T00:00:00Z");
+      const rowid1 = insertTestMessage(db, "msg-1", "session-1", "user", "short auth content", oldDate);
+      const rowid2 = insertTestMessage(db, "msg-2", "session-1", "assistant", "assistant auth content", newDate);
+      const repo = createEmbeddingRepoStub([
+        { rowid: rowid1, distance: 0.1 },
+        { rowid: rowid2, distance: 0.2 },
+      ], { embedded: 2, total: 2 });
+      const service = new HybridSearchService(createDeps(db, {
+        sqliteVecAvailable: true,
+        embeddingRepo: repo,
+        providerFactory: createMockFactory(createMockProvider()),
+      }));
+
+      const assistantResults = await service.search(SearchQuery.from("auth"), {
+        mode: "vector",
+        roleFilter: ["assistant"],
+        sessionFilter: "session-1",
+        sinceDate: new Date("2026-01-15T00:00:00Z"),
+        beforeDate: new Date("2026-02-15T00:00:00Z"),
+        noDecay: true,
+      });
+      const noRoleResults = await service.search(SearchQuery.from("auth"), {
+        mode: "vector",
+        roleFilter: "user",
+        sinceDate: new Date("2026-01-15T00:00:00Z"),
+        noDecay: true,
+      });
+      const wrongSessionResults = await service.search(SearchQuery.from("auth"), {
+        mode: "vector",
+        sessionFilter: "other-session",
+        noDecay: true,
+      });
+      const beforeFilteredResults = await service.search(SearchQuery.from("auth"), {
+        mode: "vector",
+        beforeDate: new Date("2026-01-15T00:00:00Z"),
+        roleFilter: "assistant",
+        noDecay: true,
+      });
+
+      expect(assistantResults.map((r) => r.messageId)).toEqual(["msg-2"]);
+      expect(noRoleResults).toEqual([]);
+      expect(wrongSessionResults).toEqual([]);
+      expect(beforeFilteredResults).toEqual([]);
+    });
+
     it("embeds query and returns results with vector source", async () => {
       if (!sqliteVecAvailable) return;
 
@@ -472,6 +631,88 @@ describe("HybridSearchService", () => {
   });
 
   describe("hybrid search", () => {
+    it("degrades to FTS when the provider factory returns null in hybrid mode", async () => {
+      const rowid = insertTestMessage(
+        db, "msg-1", "session-1", "user", "authentication patterns for security"
+      );
+      if (!sqliteVecAvailable) return;
+      insertTestEmbedding(db, rowid);
+
+      const service = new HybridSearchService(createDeps(db, {
+        sqliteVecAvailable: true,
+        providerFactory: createNullProviderFactory(),
+      }));
+
+      const results = await service.search(SearchQuery.from("authentication"), { mode: "hybrid" });
+
+      expect(results.length).toBeGreaterThan(0);
+      const meta = service.getLastSearchMeta();
+      expect(meta?.degraded).toBe(true);
+      expect(meta?.degradationReason).toBe("provider_unavailable");
+    });
+
+    it("returns an empty degraded hybrid result when neither FTS nor vector have candidates", async () => {
+      const service = new HybridSearchService(createDeps(db, {
+        sqliteVecAvailable: true,
+        fts5Service: createFtsServiceStub([]),
+        embeddingRepo: createEmbeddingRepoStub([], { embedded: 1, total: 1 }),
+        providerFactory: createNullProviderFactory(),
+      }));
+
+      const results = await service.search(SearchQuery.from("authentication"), { mode: "hybrid" });
+
+      expect(results).toEqual([]);
+      const meta = service.getLastSearchMeta();
+      expect(meta?.degraded).toBe(true);
+      expect(meta?.degradationReason).toBe("provider_unavailable");
+    });
+
+    it("hydrates vector-only and fts-only fused candidates with correct source labels", async () => {
+      const rowid1 = insertTestMessage(db, "msg-1", "session-1", "user", "authentication exact match");
+      const rowid2 = insertTestMessage(db, "msg-2", "session-1", "assistant", "semantic login details");
+      const ftsResult = SearchResult.create({
+        sessionId: "session-1",
+        messageId: "msg-1",
+        snippet: "authentication exact match",
+        score: 0.9,
+        timestamp: new Date(),
+        role: "user",
+      });
+      const service = new HybridSearchService(createDeps(db, {
+        sqliteVecAvailable: true,
+        fts5Service: createFtsServiceStub([ftsResult]),
+        embeddingRepo: createEmbeddingRepoStub([{ rowid: rowid2, distance: 0.1 }], { embedded: 1, total: 2 }),
+        providerFactory: createMockFactory(createMockProvider()),
+      }));
+
+      const results = await service.search(SearchQuery.from("authentication"), {
+        mode: "hybrid",
+        noDecay: true,
+      });
+
+      expect(results.find((r) => r.messageId === "msg-1")?.source).toBe("fts");
+      expect(results.find((r) => r.messageId === "msg-2")?.source).toBe("vector");
+      expect(rowid1).toBeGreaterThan(0);
+    });
+
+    it("hybrid search handles vector-only candidates when FTS returns no rows", async () => {
+      const rowid = insertTestMessage(db, "msg-1", "session-1", "assistant", "semantic login details");
+      const service = new HybridSearchService(createDeps(db, {
+        sqliteVecAvailable: true,
+        fts5Service: createFtsServiceStub([]),
+        embeddingRepo: createEmbeddingRepoStub([{ rowid, distance: 0.2 }], { embedded: 1, total: 1 }),
+        providerFactory: createMockFactory(createMockProvider()),
+      }));
+
+      const results = await service.search(SearchQuery.from("authentication"), {
+        mode: "hybrid",
+        noDecay: true,
+      });
+
+      expect(results).toHaveLength(1);
+      expect(results[0].source).toBe("vector");
+    });
+
     it("returns results from both FTS and vector, merged by RRF", async () => {
       if (!sqliteVecAvailable) return;
 

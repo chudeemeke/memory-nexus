@@ -71,6 +71,111 @@ describe("status command", () => {
         });
     }
 
+    function createStatusInfo(overrides: Partial<StatusInfo> = {}): StatusInfo {
+        const status = {
+            hooks: {
+                sessionEnd: false,
+                preCompact: false,
+                hookScriptExists: false,
+                backupExists: false,
+            },
+            config: DEFAULT_CONFIG,
+            lastSync: null,
+            pendingSessions: 0,
+            recentLogs: 0,
+            embedding: { active: false },
+            health: {
+                database: {
+                    exists: true,
+                    readable: true,
+                    writable: true,
+                    integrity: "ok",
+                    size: 1024,
+                },
+                permissions: {
+                    configDir: true,
+                    logsDir: true,
+                    sourceDir: true,
+                },
+                hooks: {
+                    installed: false,
+                    enabled: true,
+                    lastRun: null,
+                },
+                config: {
+                    valid: true,
+                    issues: [],
+                },
+                embedding: {
+                    configured: true,
+                    provider: "local",
+                    model: "test-model",
+                    dimensions: 384,
+                    enabled: true,
+                    ready: true,
+                },
+                sqliteVec: {
+                    available: true,
+                    version: "v0.1.9",
+                },
+                searchCapability: {
+                    fts5: true,
+                    sqliteVec: true,
+                    embeddedCount: 3,
+                    totalMessages: 5,
+                    coveragePercent: 60,
+                    defaultMode: "auto",
+                    vectorReady: true,
+                },
+                llmExtraction: {
+                    provider: "claude-cli",
+                    model: "claude-cli-print",
+                    ready: true,
+                },
+            },
+            stats: {
+                totalSessions: 2,
+                totalMessages: 12,
+                totalToolUses: 3,
+                databaseSizeBytes: 2048,
+                projectBreakdown: [
+                    { projectName: "memory", sessionCount: 2, messageCount: 12 },
+                ],
+                hooks: {
+                    installed: false,
+                    autoSync: true,
+                    pendingSessions: 0,
+                },
+            },
+            migration: {
+                legacyExists: false,
+                newExists: true,
+                status: "complete",
+            },
+            qmd: {
+                available: true,
+                path: "qmd",
+            },
+            fixes: [],
+            ...overrides,
+        };
+        return status as StatusInfo;
+    }
+
+    function withHealth(
+        healthOverrides: Partial<StatusInfo["health"]>,
+        statusOverrides: Partial<StatusInfo> = {}
+    ): StatusInfo {
+        const base = createStatusInfo(statusOverrides);
+        return {
+            ...base,
+            health: {
+                ...base.health,
+                ...healthOverrides,
+            },
+        } as StatusInfo;
+    }
+
     beforeEach(() => {
         // Clean test directory
         if (existsSync(testBaseDir)) {
@@ -581,6 +686,235 @@ describe("status command", () => {
                 env.cleanup();
                 rmSync(xdgRoot, { recursive: true, force: true });
             }
+        });
+
+        test("default dashboard prints applied fix messages when gatherer reports fixes", async () => {
+            const result = await executeStatusCommand({ fix: true }, {
+                gatherStatus: async () => createStatusInfo({ fixes: ["Created logs directory"] }),
+            });
+
+            const output = logOutput.join("\n");
+            expect(result.exitCode).toBe(0);
+            expect(output).toContain("Applied fixes:");
+            expect(output).toContain("Created logs directory");
+        });
+
+        test("all sections render invalid config, missing database, unavailable sqlite-vec, qmd absence, and pending migration", async () => {
+            const status = withHealth({
+                database: {
+                    exists: false,
+                    readable: false,
+                    writable: false,
+                    integrity: "unknown",
+                    size: 0,
+                },
+                permissions: {
+                    configDir: false,
+                    logsDir: false,
+                    sourceDir: false,
+                },
+                config: {
+                    valid: false,
+                    issues: ["bad config"],
+                },
+                sqliteVec: {
+                    available: false,
+                    version: null,
+                },
+                searchCapability: {
+                    fts5: true,
+                    sqliteVec: false,
+                    embeddedCount: 0,
+                    totalMessages: 0,
+                    coveragePercent: 0,
+                    defaultMode: "vector",
+                    vectorReady: false,
+                },
+            } as any, {
+                qmd: { available: false, path: null } as any,
+                migration: { legacyExists: true, newExists: false, status: "pending" } as any,
+            });
+
+            const result = await executeStatusCommand({ all: true }, {
+                gatherStatus: async () => status,
+            });
+
+            const output = logOutput.join("\n");
+            expect(result.exitCode).toBe(2);
+            expect(output).toContain("Invalid");
+            expect(output).toContain("bad config");
+            expect(output).toContain("Database not found");
+            expect(output).toContain("sqlite-vec: not available");
+            expect(output).toContain("qmd: not found");
+            expect(output).toContain("Legacy data found");
+        });
+
+        test("database section reports partial migration and corrupted database exit code", async () => {
+            const status = withHealth({
+                database: {
+                    exists: true,
+                    readable: true,
+                    writable: true,
+                    integrity: "corrupted",
+                    size: 0,
+                },
+            }, {
+                migration: { legacyExists: true, newExists: true, status: "partial" } as any,
+            });
+
+            const result = await executeStatusCommand({ db: true }, {
+                gatherStatus: async () => status,
+            });
+
+            const output = logOutput.join("\n");
+            expect(result.exitCode).toBe(2);
+            expect(output).toContain("CORRUPTED");
+            expect(output).toContain("Size: 0 B");
+            expect(output).toContain("Partial migration detected");
+        });
+
+        test("embedding and LLM sections render ready notes and failure reasons", async () => {
+            const readyStatus = withHealth({
+                embedding: {
+                    configured: true,
+                    provider: "local",
+                    model: "test-model",
+                    dimensions: 384,
+                    enabled: true,
+                    ready: true,
+                    readyReason: "using local model",
+                },
+                llmExtraction: {
+                    provider: "claude-cli",
+                    model: "claude-cli-print",
+                    ready: true,
+                    readyReason: "claude command available",
+                },
+            } as any);
+
+            await executeStatusCommand({ embedding: true }, {
+                gatherStatus: async () => readyStatus,
+            });
+            expect(logOutput.join("\n")).toContain("Note: using local model");
+            expect(logOutput.join("\n")).toContain("Note: claude command available");
+
+            logOutput = [];
+            const blockedStatus = withHealth({
+                embedding: {
+                    configured: true,
+                    provider: "openai",
+                    model: "text-embedding-3-small",
+                    dimensions: 1536,
+                    enabled: true,
+                    ready: false,
+                    readyReason: "missing apiKeyEnv",
+                },
+                llmExtraction: {
+                    provider: "openai",
+                    model: "gpt-4.1-mini",
+                    ready: false,
+                    readyReason: "missing provider credentials",
+                },
+            } as any);
+
+            await executeStatusCommand({ embedding: true }, {
+                gatherStatus: async () => blockedStatus,
+            });
+            const blockedOutput = logOutput.join("\n");
+            expect(blockedOutput).toContain("Reason: missing apiKeyEnv");
+            expect(blockedOutput).toContain("Reason: missing provider credentials");
+        });
+
+        test("hook section renders all relative time buckets", async () => {
+            const cases = [
+                { ageMs: 2 * 24 * 60 * 60 * 1000, expected: "2 days ago" },
+                { ageMs: 2 * 60 * 60 * 1000, expected: "2 hours ago" },
+                { ageMs: 2 * 60 * 1000, expected: "2 minutes ago" },
+                { ageMs: 5 * 1000, expected: "just now" },
+            ];
+
+            for (const item of cases) {
+                logOutput = [];
+                const status = withHealth({
+                    hooks: {
+                        installed: true,
+                        enabled: true,
+                        lastRun: new Date(Date.now() - item.ageMs),
+                    },
+                });
+
+                await executeStatusCommand({ hooks: true }, {
+                    gatherStatus: async () => status,
+                });
+
+                expect(logOutput.join("\n")).toContain(item.expected);
+            }
+        });
+
+        test("stats sections render unavailable, quiet, verbose, brief, and AI variants", async () => {
+            const noStats = createStatusInfo({ stats: undefined });
+            const unavailable = await executeStatusCommand({ stats: true }, {
+                gatherStatus: async () => noStats,
+            });
+            expect(unavailable.exitCode).toBe(1);
+            expect(logOutput.join("\n")).toContain("Database statistics are not available");
+
+            for (const options of [
+                { stats: true, quiet: true },
+                { stats: true, verbose: true },
+                { stats: true, format: "brief" as const },
+                { stats: true, format: "ai" as const },
+            ]) {
+                logOutput = [];
+                const result = await executeStatusCommand(options, {
+                    gatherStatus: async () => createStatusInfo(),
+                });
+                expect(result.exitCode).toBe(0);
+                expect(logOutput.join("\n").length).toBeGreaterThan(0);
+            }
+        });
+
+        test("stats-only JSON emits an error envelope when stats are unavailable", async () => {
+            const result = await executeStatusCommand({ stats: true, json: true }, {
+                gatherStatus: async () => createStatusInfo({ stats: undefined }),
+            });
+
+            const parsed = JSON.parse(logOutput.join("\n"));
+            expect(result.exitCode).toBe(1);
+            expect(parsed.command).toBe("stats");
+            expect(parsed.error.code).toBe("DB_CONNECTION_FAILED");
+        });
+
+        test("doctor exit code distinguishes warnings from clean health", async () => {
+            const warningStatus = withHealth({
+                database: {
+                    exists: true,
+                    readable: false,
+                    writable: false,
+                    integrity: "ok",
+                    size: 1024,
+                },
+                searchCapability: {
+                    fts5: true,
+                    sqliteVec: true,
+                    embeddedCount: 0,
+                    totalMessages: 2,
+                    coveragePercent: 0,
+                    defaultMode: "auto",
+                    vectorReady: false,
+                },
+            });
+
+            const warning = await executeStatusCommand({ db: true }, {
+                gatherStatus: async () => warningStatus,
+            });
+            expect(warning.exitCode).toBe(1);
+
+            logOutput = [];
+            const clean = await executeStatusCommand({ db: true }, {
+                gatherStatus: async () => createStatusInfo(),
+            });
+            expect(clean.exitCode).toBe(0);
         });
     });
 
