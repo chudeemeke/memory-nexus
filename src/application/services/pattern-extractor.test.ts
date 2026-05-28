@@ -168,6 +168,37 @@ describe("PatternExtractor", () => {
       expect(paths).toEqual([]);
     });
 
+    it("ignores path-capable tools when path fields or Glob result lines are blank", () => {
+      const toolUses = [
+        ToolUse.create({
+          id: "tu-missing-file-path",
+          name: "Read",
+          input: {},
+          timestamp: new Date(),
+          status: "success",
+        }),
+        ToolUse.create({
+          id: "tu-missing-search-path",
+          name: "Grep",
+          input: { pattern: "TODO" },
+          timestamp: new Date(),
+          status: "success",
+        }),
+        ToolUse.create({
+          id: "tu-blank-glob-result",
+          name: "Glob",
+          input: { pattern: "**/*.ts" },
+          timestamp: new Date(),
+          status: "success",
+          result: "\n   \n/src/from-result.ts\n",
+        }),
+      ];
+
+      const paths = PatternExtractor.extractFilePaths(toolUses);
+
+      expect(paths).toEqual(["/src/from-result.ts"]);
+    });
+
     it("handles empty input", () => {
       const paths = PatternExtractor.extractFilePaths([]);
       expect(paths).toEqual([]);
@@ -306,6 +337,22 @@ describe("PatternExtractor", () => {
       const modifications = PatternExtractor.extractFileModifications([]);
       expect(modifications).toEqual([]);
     });
+
+    it("ignores successful modification tools when file_path is absent", () => {
+      const toolUses = [
+        ToolUse.create({
+          id: "tu-success-no-path",
+          name: "Write",
+          input: { content: "// generated elsewhere" },
+          timestamp: new Date(),
+          status: "success",
+        }),
+      ];
+
+      const modifications = PatternExtractor.extractFileModifications(toolUses);
+
+      expect(modifications).toEqual([]);
+    });
   });
 
   describe("extractToolStats", () => {
@@ -409,6 +456,37 @@ describe("PatternExtractor", () => {
       expect(readStats?.count).toBe(2);
       expect(readStats?.successCount).toBe(1);
       expect(readStats?.errorCount).toBe(0);
+    });
+
+    it("updates existing tool stats for later errors after an initial success", () => {
+      const toolUses = [
+        ToolUse.create({
+          id: "tu-existing-success",
+          name: "Edit",
+          input: { file_path: "/a.ts" },
+          timestamp: new Date(),
+          status: "success",
+        }),
+        ToolUse.create({
+          id: "tu-existing-error",
+          name: "Edit",
+          input: { file_path: "/a.ts" },
+          timestamp: new Date(),
+          status: "error",
+          result: "replacement string not found",
+        }),
+      ];
+
+      const stats = PatternExtractor.extractToolStats(toolUses);
+
+      expect(stats).toEqual([
+        {
+          name: "Edit",
+          count: 2,
+          successCount: 1,
+          errorCount: 1,
+        },
+      ]);
     });
 
     it("returns empty array when no tool uses", () => {
