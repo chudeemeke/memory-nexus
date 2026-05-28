@@ -6,9 +6,11 @@
 
 import { describe, expect, it, beforeEach, afterEach, spyOn } from "bun:test";
 import { executeFrictionCommand } from "./index.js";
+import { handlePurge } from "./purge.js";
 import { mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import type { FrictionService } from "../../../../application/services/friction-service.js";
 
 describe("friction purge action", () => {
     let consoleLogSpy: ReturnType<typeof spyOn>;
@@ -83,5 +85,97 @@ describe("friction purge action", () => {
             typeof s === "string" && s.includes("No entries match")
         );
         expect(noMatchLine).toBeDefined();
+    });
+
+    it("dry-run outputs JSON when no entries match", async () => {
+        const service = {
+            list: async () => [],
+        } as unknown as FrictionService;
+
+        const result = await handlePurge(service, {
+            action: "purge",
+            pattern: "missing%",
+            dryRun: true,
+            json: true,
+        });
+
+        expect(result.exitCode).toBe(0);
+        const parsed = JSON.parse(String(consoleLogSpy.mock.calls.at(-1)?.[0]));
+        expect(parsed).toEqual({ wouldDelete: 0, pattern: "missing%" });
+    });
+
+    it("dry-run lists matching entries and caps preview after ten rows", async () => {
+        const entries = Array.from({ length: 12 }, (_, index) => ({
+            id: index + 1,
+            description: `cleanup target ${index + 1}`,
+        }));
+        const service = {
+            list: async () => entries,
+        } as unknown as FrictionService;
+
+        const result = await handlePurge(service, {
+            action: "purge",
+            pattern: "cleanup target %",
+            dryRun: true,
+        });
+
+        expect(result.exitCode).toBe(0);
+        const output = consoleLogSpy.mock.calls.map((call: unknown[]) => String(call[0])).join("\n");
+        expect(output).toContain("Would delete 12 entries");
+        expect(output).toContain("#1: cleanup target 1");
+        expect(output).toContain("... and 2 more");
+    });
+
+    it("dry-run outputs JSON match counts", async () => {
+        const service = {
+            list: async () => [
+                { id: 1, description: "provider timeout" },
+                { id: 2, description: "provider retry" },
+            ],
+        } as unknown as FrictionService;
+
+        const result = await handlePurge(service, {
+            action: "purge",
+            pattern: "provider %",
+            dryRun: true,
+            json: true,
+        });
+
+        expect(result.exitCode).toBe(0);
+        const parsed = JSON.parse(String(consoleLogSpy.mock.calls.at(-1)?.[0]));
+        expect(parsed).toEqual({ wouldDelete: 2, pattern: "provider %" });
+    });
+
+    it("force purge reports JSON deleted count", async () => {
+        const service = {
+            purge: async () => 3,
+        } as unknown as FrictionService;
+
+        const result = await handlePurge(service, {
+            action: "purge",
+            pattern: "old%",
+            force: true,
+            json: true,
+        });
+
+        expect(result.exitCode).toBe(0);
+        const parsed = JSON.parse(String(consoleLogSpy.mock.calls.at(-1)?.[0]));
+        expect(parsed).toEqual({ deleted: 3, pattern: "old%" });
+    });
+
+    it("force purge reports nonzero text deletion count", async () => {
+        const service = {
+            purge: async () => 2,
+        } as unknown as FrictionService;
+
+        const result = await handlePurge(service, {
+            action: "purge",
+            pattern: "stale%",
+            force: true,
+        });
+
+        expect(result.exitCode).toBe(0);
+        const output = consoleLogSpy.mock.calls.map((call: unknown[]) => String(call[0])).join("\n");
+        expect(output).toContain('Purged 2 friction entries matching "stale%"');
     });
 });

@@ -38,7 +38,6 @@ import {
 import {
   createContextFormatter,
   type ContextOutputMode,
-  type ContextFormatOptions,
 } from "../formatters/context-formatter.js";
 import { shouldUseColor } from "../formatters/color.js";
 import { formatError } from "../formatters/error-formatter.js";
@@ -125,27 +124,6 @@ export function createContextCommand(): Command {
     });
 }
 
-/**
- * Precedence rule for context command output (per Codex HIGH-5):
- *
- *   --json wins routing AND output formatting. When --json is set:
- *     - --format ai is IGNORED (no formatForAi() post-processing)
- *     - The routing decision (Smart vs Legacy) depends on --budget /
- *       --cross-project flags ONLY, not on --format ai.
- *
- *   When --json is NOT set:
- *     - --format ai routes to SmartContextService and post-processes
- *       text output via formatForAi().
- *
- * Plan 32-02's context.json.test.ts deep-equals the JSON output of
- * `--json` and `--json --format ai`. That assertion is the
- * verification that this precedence rule holds at the routing layer,
- * not just at the output-formatting layer.
- */
-function useSmartContext(_options: ContextCommandOptions): boolean {
-  return true;
-}
-
 export async function executeContextCommand(
   project: string,
   options: ContextCommandOptions
@@ -171,8 +149,6 @@ export async function runContextInternal(
   options: ContextCommandOptions,
   deps?: { dbPath?: string }
 ): Promise<CommandResult> {
-  const startTime = performance.now();
-
   // Phase 32 (CLI-03): deprecation warning for --format detailed
   // (alias retained for one-minor cadence; behavior preserved).
   if (options.format === "detailed") {
@@ -196,11 +172,7 @@ export async function runContextInternal(
   const { db } = initializeDatabase({ path: dbPath });
 
   try {
-    // Route to SmartContextService or legacy path
-    if (useSmartContext(options)) {
-      return await executeSmartContext(db, project, options, startTime);
-    }
-    return await executeLegacyContext(db, project, options, startTime);
+    return await executeSmartContext(db, project, options);
   } catch (error) {
     // Wrap in MemoryError for consistent formatting
     const nexusError =
@@ -237,7 +209,6 @@ async function executeSmartContext(
   db: ReturnType<typeof initializeDatabase>["db"],
   project: string,
   options: ContextCommandOptions,
-  _startTime: number,
 ): Promise<CommandResult> {
   const projectResolver = new SqliteProjectResolver(db);
   const factRepo = new SqliteFactRepository(db);
@@ -333,89 +304,4 @@ async function executeSmartContext(
   }
 
   return { exitCode: 0 };
-}
-
-/**
- * Execute legacy context path using SqliteContextService.
- * Preserves backward compatibility for brief/detailed/json/verbose/quiet modes.
- */
-async function executeLegacyContext(
-  db: ReturnType<typeof initializeDatabase>["db"],
-  project: string,
-  options: ContextCommandOptions,
-  startTime: number,
-): Promise<CommandResult> {
-  const contextService = new SqliteContextService(db);
-
-  // Build context options from CLI options
-  const contextOptions = {
-    days: options.days,
-  };
-
-  // Get project context
-  const context = await contextService.getProjectContext(project, contextOptions);
-
-  // --json: envelope path (Codex HIGH-2 — every exit point routes here)
-  if (options.json) {
-    if (!context) {
-      emitJsonErrorEnvelope({
-        command: "context",
-        code: "NOT_FOUND",
-        message: `Project not found: ${project}`,
-        context: { project },
-      });
-      return { exitCode: 1 };
-    }
-    emitJsonEnvelope({
-      command: "context",
-      kind: "context",
-      data: toContextDto(context),
-      meta: {
-        project,
-        days: options.days,
-        cross_project: !!options.crossProject,
-        mode: "legacy",
-      },
-    });
-    return { exitCode: 0 };
-  }
-
-  // Determine output mode (text mode)
-  let outputMode: ContextOutputMode = "brief";
-  if (options.verbose) outputMode = "verbose";
-  else if (options.quiet) outputMode = "quiet";
-  else if (options.format === "detailed") outputMode = "detailed";
-
-  const useColor = shouldUseColor();
-  const formatter = createContextFormatter(outputMode, useColor);
-
-  // Handle null result (project not found) — text mode
-  if (!context) {
-    const message = formatter.formatEmpty(project);
-    if (outputMode !== "quiet" || message) {
-      console.error(message);
-    }
-    return { exitCode: 1 };
-  }
-
-  // Format and output
-  const endTime = performance.now();
-  const formatOptions: ContextFormatOptions = {
-    executionTimeMs: Math.round(endTime - startTime),
-    filtersApplied: buildFiltersList(options),
-  };
-  const output = formatter.formatContext(context, formatOptions);
-  console.log(output);
-  return { exitCode: 0 };
-}
-
-/**
- * Build a list of filters applied for verbose output.
- */
-function buildFiltersList(options: ContextCommandOptions): string[] {
-  const filters: string[] = [];
-  if (options.days) filters.push(`days: ${options.days}`);
-  if (options.budget) filters.push(`budget: ${options.budget}`);
-  if (options.crossProject) filters.push("cross-project");
-  return filters;
 }
