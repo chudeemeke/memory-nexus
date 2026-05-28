@@ -407,6 +407,41 @@ describe("doctor command", () => {
             expect(output).toContain("LLM Fact Extraction");
             expect(output).toContain("Verified at extraction time");
         });
+
+        it("prints LLM extraction status without reason when no reason is provided", () => {
+            const result: HealthCheckResult = {
+                ...healthyResult,
+                llmExtraction: {
+                    ready: true,
+                    provider: "claude-cli",
+                    model: "claude-cli-print",
+                },
+            };
+
+            const output = formatHealthResult(result, false);
+
+            expect(output).toContain("LLM Fact Extraction");
+            expect(output).toContain("Ready: yes");
+            expect(output).not.toContain("Reason:");
+            expect(output).not.toContain("Note:");
+        });
+
+        it("counts config and log permission failures separately", () => {
+            const result: HealthCheckResult = {
+                ...healthyResult,
+                permissions: {
+                    configDir: false,
+                    logsDir: false,
+                    sourceDir: true,
+                },
+            };
+
+            const output = formatHealthResult(result, false);
+
+            expect(output).toContain("Config directory");
+            expect(output).toContain("Logs directory");
+            expect(output).toContain("2 issues found");
+        });
     });
 
     describe("attemptFixes", () => {

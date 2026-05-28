@@ -243,6 +243,45 @@ describe("doctor portability diagnostics", () => {
     expect(existsSync(lockPath)).toBe(true); // check it was not deleted
   });
 
+  it("should treat a lock with the current process pid as active rather than stale", async () => {
+    const { db } = initializeDatabase({ path: testDbPath });
+    const livePath = join(testDir, "live-proj");
+    mkdirSync(livePath, { recursive: true });
+    createTestSession(db, "session-1", livePath, "2026-01-20T10:00:00Z");
+    closeDatabase(db);
+
+    const lockPath = join(testDir, "embedding.lock");
+    writeFileSync(lockPath, JSON.stringify({ pid: process.pid, startedAt: new Date().toISOString() }));
+
+    const result = await executeDoctorCommand(
+      { portability: true },
+      { healthOverrides: { dbPath: testDbPath, sourceDir: testDir } }
+    );
+
+    expect(result.exitCode).toBe(0);
+    expect(consoleOutput.join("\n")).toContain("Active Locks: No stale sync/embedding lock files");
+    expect(existsSync(lockPath)).toBe(true);
+  });
+
+  it("should mark a lock without pid as stale", async () => {
+    const { db } = initializeDatabase({ path: testDbPath });
+    const livePath = join(testDir, "live-proj");
+    mkdirSync(livePath, { recursive: true });
+    createTestSession(db, "session-1", livePath, "2026-01-20T10:00:00Z");
+    closeDatabase(db);
+
+    const lockPath = join(testDir, "embedding.lock");
+    writeFileSync(lockPath, JSON.stringify({ startedAt: new Date().toISOString() }));
+
+    const result = await executeDoctorCommand(
+      { portability: true },
+      { healthOverrides: { dbPath: testDbPath, sourceDir: testDir } }
+    );
+
+    expect(result.exitCode).toBe(1);
+    expect(consoleOutput.join("\n")).toContain("Active Locks: 1 stale sync/embedding lock file(s) found");
+  });
+
   it("should automatically clean up stale locks if --fix is provided", async () => {
     const { db } = initializeDatabase({ path: testDbPath });
     const livePath = join(testDir, "live-proj");
@@ -284,6 +323,51 @@ describe("doctor portability diagnostics", () => {
     expect(output.portability.mixedDialectPaths).toEqual([]);
     expect(output.portability.staleLocks).toEqual([]);
     expect(output.portability.sqliteVecAvailable).toBeDefined();
+  });
+
+  it("should output JSON success when portability checks pass", async () => {
+    const { db } = initializeDatabase({ path: testDbPath });
+    const livePath = join(testDir, "json-live-proj");
+    mkdirSync(livePath, { recursive: true });
+    createTestSession(db, "session-json-ok", livePath, "2026-01-20T10:00:00Z");
+    closeDatabase(db);
+
+    const result = await executeDoctorCommand(
+      { portability: true, json: true },
+      {
+        healthOverrides: { dbPath: testDbPath, sourceDir: testDir },
+        gatherStatus: async () => createStatusInfo(healthyPortabilityHealth(true)),
+      }
+    );
+
+    expect(result.exitCode).toBe(0);
+    const output = JSON.parse(consoleOutput.join("\n"));
+    expect(output.portability.orphanedPaths).toEqual([]);
+    expect(output.portability.mixedDialectPaths).toEqual([]);
+    expect(output.portability.staleLocks).toEqual([]);
+    expect(output.portability.sqliteVecAvailable).toBe(true);
+    expect(output.portability.fixedStaleLocks).toBeUndefined();
+  });
+
+  it("should report sqlite-vec portability failure in JSON mode", async () => {
+    const { db } = initializeDatabase({ path: testDbPath });
+    const livePath = join(testDir, "json-vec-proj");
+    mkdirSync(livePath, { recursive: true });
+    createTestSession(db, "session-json-vec", livePath, "2026-01-20T10:00:00Z");
+    closeDatabase(db);
+
+    const result = await executeDoctorCommand(
+      { portability: true, json: true },
+      {
+        healthOverrides: { dbPath: testDbPath, sourceDir: testDir },
+        gatherStatus: async () => createStatusInfo(healthyPortabilityHealth(false)),
+      }
+    );
+
+    expect(result.exitCode).toBe(1);
+    const output = JSON.parse(consoleOutput.join("\n"));
+    expect(output.portability.sqliteVecAvailable).toBe(false);
+    expect(output.portability.sqliteVecVersion).toBeNull();
   });
 
   it("should report sqlite-vec portability failure from injected health status", async () => {
