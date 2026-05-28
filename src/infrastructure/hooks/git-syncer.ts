@@ -10,6 +10,7 @@ import { readFileSync, existsSync } from "node:fs";
 import { join } from "node:path";
 import { spawn } from "bun";
 import { getEventsDir, getAllLogFiles } from "../paths.js";
+import { unknownErrorMessage } from "../../domain/errors/unknown-error.js";
 
 export interface SyncResult {
     success: boolean;
@@ -240,7 +241,7 @@ export class GitSyncer {
             return {
                 success: false,
                 rebuildNeeded: false,
-                error: err?.message || String(err),
+                error: unknownErrorMessage(err),
             };
         }
     }

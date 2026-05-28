@@ -12,6 +12,7 @@ import { initializeDatabase } from "../../../../infrastructure/database/index.js
 import { FileSystemSessionSource, ProjectNameResolver } from "../../../../infrastructure/sources/index.js";
 import { loadCheckpoint } from "../../../../infrastructure/signals/index.js";
 import { formatError, formatErrorJson } from "../../formatters/index.js";
+import { unknownToError } from "../../../../domain/errors/unknown-error.js";
 
 /** Load embedding provider factory via dynamic import. */
 export async function loadFactory() {
@@ -109,10 +110,11 @@ export async function executeDryRun(options: SyncCommandOptions): Promise<Comman
 
 /** Handle error with appropriate formatting. */
 export function handleError(error: unknown, options: SyncCommandOptions): void {
+  const normalized = unknownToError(error);
   if (options.json) {
-    console.error(formatErrorJson(error instanceof Error ? error : new Error(String(error))));
+    console.error(formatErrorJson(normalized));
   } else {
-    console.error(formatError(error instanceof Error ? error : new Error(String(error)), {
+    console.error(formatError(normalized, {
       verbose: !!options.verbose,
     }));
   }

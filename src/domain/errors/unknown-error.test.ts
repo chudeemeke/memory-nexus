@@ -1,6 +1,6 @@
 import { describe, expect, it } from "bun:test";
 
-import { unknownErrorMessage } from "./unknown-error.js";
+import { unknownErrorMessage, unknownToError } from "./unknown-error.js";
 
 describe("unknownErrorMessage", () => {
   it("uses Error.message for Error instances", () => {
@@ -14,3 +14,17 @@ describe("unknownErrorMessage", () => {
   });
 });
 
+describe("unknownToError", () => {
+  it("preserves Error instances", () => {
+    const error = new Error("already structured");
+
+    expect(unknownToError(error)).toBe(error);
+  });
+
+  it("wraps non-Error throwables", () => {
+    const error = unknownToError("plain failure");
+
+    expect(error).toBeInstanceOf(Error);
+    expect(error.message).toBe("plain failure");
+  });
+});

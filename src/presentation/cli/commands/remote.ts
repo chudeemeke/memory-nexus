@@ -9,6 +9,7 @@ import { Command } from "commander";
 import type { CommandResult } from "../command-result.js";
 import { loadConfig, saveConfig } from "../../../infrastructure/hooks/config-manager.js";
 import { GitSyncer } from "../../../infrastructure/hooks/git-syncer.js";
+import { unknownErrorMessage } from "../../../domain/errors/unknown-error.js";
 
 /**
  * Options/parameters for remote subcommands.
@@ -98,7 +99,7 @@ export async function executeRemoteSetCommand(
 
         return { exitCode: 0 };
     } catch (err: any) {
-        console.error("Error setting remote:", err?.message || String(err));
+        console.error("Error setting remote:", unknownErrorMessage(err));
         return { exitCode: 1 };
     }
 }
@@ -134,7 +135,7 @@ export async function executeRemoteRemoveCommand(
         console.log("\nSuccess: Remote synchronization disabled and origin repository URL removed.");
         return { exitCode: 0 };
     } catch (err: any) {
-        console.error("Error removing remote:", err?.message || String(err));
+        console.error("Error removing remote:", unknownErrorMessage(err));
         return { exitCode: 1 };
     }
 }
@@ -170,7 +171,7 @@ export async function executeRemoteStatusCommand(
 
         return { exitCode: 0 };
     } catch (err: any) {
-        console.error("Error gathering remote status:", err?.message || String(err));
+        console.error("Error gathering remote status:", unknownErrorMessage(err));
         return { exitCode: 1 };
     }
 }

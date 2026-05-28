@@ -22,6 +22,7 @@ import { runAmbientContextGeneration } from "./ambient.js";
 import { executeDryRun, handleError, reportResults, createDriveResolver } from "./helpers.js";
 import { loadConfig } from "../../../../infrastructure/hooks/config-manager.js";
 import { PatternRedactor } from "../../../../infrastructure/security/pattern-redactor.js";
+import { unknownErrorMessage, unknownToError } from "../../../../domain/errors/unknown-error.js";
 
 
 /** Create the sync command for Commander.js. */
@@ -172,7 +173,7 @@ export async function executeSyncCommand(
           console.error(`Warning: Remote synchronization failed: ${syncResult.error}`);
         }
       } catch (err: any) {
-        console.error(`Warning: Remote synchronization failed to execute: ${err?.message || String(err)}`);
+        console.error(`Warning: Remote synchronization failed to execute: ${unknownErrorMessage(err)}`);
       }
     } else if (remoteConfigured && !options.quiet) {
       console.warn("Remote synchronization is configured but disabled until Phase 38 readiness. Set MEMORY_EXPERIMENTAL_REMOTE_SYNC=1 only for explicit prototype testing.");
@@ -196,11 +197,11 @@ export async function executeSyncCommand(
       } catch (embeddingError) {
         if (options.json) {
           console.error(formatErrorJson(
-            embeddingError instanceof Error ? embeddingError : new Error(String(embeddingError))
+            unknownToError(embeddingError)
           ));
         } else if (!options.quiet) {
           console.error(formatError(
-            embeddingError instanceof Error ? embeddingError : new Error(String(embeddingError)),
+            unknownToError(embeddingError),
             { verbose: options.verbose } as any
           ));
         }
