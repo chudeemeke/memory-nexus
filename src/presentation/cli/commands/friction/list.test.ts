@@ -83,4 +83,36 @@ describe("friction list action", () => {
         const parsed = JSON.parse(output);
         expect(Array.isArray(parsed)).toBe(true);
     });
+
+    it("renders filtered text list with truncation, reviewed entries, and tool summary", async () => {
+        const longDescription = "A".repeat(70);
+        await executeFrictionCommand({
+            action: "log",
+            description: longDescription,
+            severity: "high",
+            category: "sync",
+            tool: "memory",
+        });
+
+        consoleLogSpy.mockClear();
+        await executeFrictionCommand({
+            action: "list",
+            tool: "memory",
+        });
+        const firstOutput = consoleLogSpy.mock.calls.map((call: unknown[]) => String(call[0])).join("\n");
+        expect(firstOutput).toContain("[NEW]");
+        expect(firstOutput).toContain("AAA...");
+        expect(firstOutput).toContain("1 open entries for memory (1 high)");
+        expect(firstOutput).toContain("1 new since last review");
+
+        consoleLogSpy.mockClear();
+        await executeFrictionCommand({
+            action: "list",
+            tool: "memory",
+        });
+        const reviewedOutput = consoleLogSpy.mock.calls.map((call: unknown[]) => String(call[0])).join("\n");
+        expect(reviewedOutput).not.toContain("[NEW]");
+        expect(reviewedOutput).toContain("1 open entries for memory (1 high)");
+        expect(reviewedOutput).not.toContain("new since last review");
+    }, 15000);
 });

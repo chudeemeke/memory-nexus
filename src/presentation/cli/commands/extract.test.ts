@@ -20,6 +20,7 @@ import { Message } from "../../../domain/entities/message.js";
 import { ProjectPath } from "../../../domain/value-objects/project-path.js";
 import { SqliteSessionRepository } from "../../../infrastructure/database/repositories/session-repository.js";
 import { SqliteMessageRepository } from "../../../infrastructure/database/repositories/message-repository.js";
+import { SqliteExtractionLogRepository } from "../../../infrastructure/database/repositories/extraction-log-repository.js";
 import { createExtractCommand, executeExtractCommand } from "./extract.js";
 
 describe("Extract CLI Command", () => {
@@ -105,7 +106,7 @@ describe("Extract CLI Command", () => {
     expect(cmd.options.some(o => o.long === "--force")).toBe(true);
     expect(cmd.options.some(o => o.long === "--json")).toBe(true);
     expect(cmd.options.some(o => o.long === "--quiet")).toBe(true);
-  });
+  }, 15000);
 
   test("executeExtractCommand filters sessions and prints summaries (text mode)", async () => {
     // Populate session 1: 12 hours old
@@ -481,6 +482,126 @@ describe("Extract CLI Command", () => {
       const parsed = JSON.parse(consoleLogs.join("\n"));
       expect(parsed.data.added).toBe(0);
       expect(parsed.meta.sessions_processed).toBe(0);
+    } finally {
+      console.log = originalLog;
+    }
+  });
+
+  test("executeExtractCommand suppresses no-session output in quiet mode", async () => {
+    const consoleLogs: string[] = [];
+    const originalLog = console.log;
+    console.log = (msg, ...args) => consoleLogs.push([msg, ...args].map(String).join(" "));
+
+    try {
+      const result = await executeExtractCommand({
+        project: "missing-project",
+        quiet: true,
+      }, {
+        dbPath: testDbPath,
+        mockExtractor: {
+          providerId: "mock-llm",
+          modelName: "mock-model",
+          extract: async () => [],
+        },
+      });
+
+      expect(result.exitCode).toBe(0);
+      expect(consoleLogs).toEqual([]);
+    } finally {
+      console.log = originalLog;
+    }
+  });
+
+  test("executeExtractCommand reprocesses already logged sessions when forced", async () => {
+    const session = Session.create({
+      id: "session-force",
+      projectPath: ProjectPath.fromDecoded("C:\\Projects\\nexus"),
+      startTime: new Date()
+    });
+    await sessionRepo.save(session);
+    await messageRepo.save(
+      Message.create({ id: "msg-force", role: "user", content: "Force this extraction", timestamp: new Date() }),
+      "session-force"
+    );
+    const logRepo = new SqliteExtractionLogRepository(db);
+    await logRepo.save({
+      sessionId: "session-force",
+      mode: "manual",
+      factsAdded: 0,
+      factsUpdated: 0,
+      factsSuperseded: 0,
+      factsSkipped: 0,
+      provider: "mock-llm",
+      model: "mock-model",
+      tokensConsumed: 0,
+      extractedAt: new Date(),
+    });
+
+    const consoleLogs: string[] = [];
+    const originalLog = console.log;
+    console.log = (msg) => consoleLogs.push(String(msg));
+
+    try {
+      const result = await executeExtractCommand({
+        project: "nexus",
+        force: true,
+        json: true,
+      }, {
+        dbPath: testDbPath,
+        eventLogPath: testLogPath,
+        mockExtractor: {
+          providerId: "mock-llm",
+          modelName: "mock-model",
+          extract: async () => [{ type: "learning", content: "Forced extraction ran", confidence: 0.9 }],
+        },
+      });
+
+      expect(result.exitCode).toBe(0);
+      const parsed = JSON.parse(consoleLogs.join("\n"));
+      expect(parsed.data.added).toBe(1);
+      expect(parsed.meta.sessions_processed).toBe(1);
+    } finally {
+      console.log = originalLog;
+    }
+  });
+
+  test("executeExtractCommand emits JSON when pipeline execution fails", async () => {
+    const session = Session.create({
+      id: "session-pipeline-error",
+      projectPath: ProjectPath.fromDecoded("C:\\Projects\\nexus"),
+      startTime: new Date()
+    });
+    await sessionRepo.save(session);
+    await messageRepo.save(
+      Message.create({ id: "msg-pipeline-error", role: "user", content: "Trigger extraction failure", timestamp: new Date() }),
+      "session-pipeline-error"
+    );
+
+    const consoleLogs: string[] = [];
+    const originalLog = console.log;
+    console.log = (msg) => consoleLogs.push(String(msg));
+
+    try {
+      const result = await executeExtractCommand({
+        project: "nexus",
+        json: true,
+      }, {
+        dbPath: testDbPath,
+        eventLogPath: testLogPath,
+        mockExtractor: {
+          providerId: "mock-llm",
+          modelName: "mock-model",
+          extract: async () => {
+            throw new Error("provider exploded");
+          },
+        },
+      });
+
+      expect(result.exitCode).toBe(2);
+      const parsed = JSON.parse(consoleLogs.join("\n"));
+      expect(parsed.status).toBe("error");
+      expect(parsed.error.code).toBe("UNEXPECTED_ERROR");
+      expect(parsed.error.message).toBe("provider exploded");
     } finally {
       console.log = originalLog;
     }

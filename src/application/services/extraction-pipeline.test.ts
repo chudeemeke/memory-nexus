@@ -168,6 +168,36 @@ describe("ExtractionPipeline", () => {
     expect(result.added).toBe(1);
   });
 
+  test("returns a no-op result when a session has no messages", async () => {
+    const session = Session.create({
+      id: "session-empty",
+      projectPath: ProjectPath.fromDecoded("C:\\Projects\\nexus"),
+      startTime: new Date()
+    });
+    await sessionRepo.save(session);
+
+    const pipeline = new ExtractionPipeline(
+      db,
+      factRepo,
+      logRepo,
+      messageRepo,
+      mockExtractor([{ type: "learning", content: "Should not run", confidence: 0.9 }]),
+      mockEmbedder({}),
+      testLogPath
+    );
+
+    const result = await pipeline.extractFromSession("session-empty", "nexus");
+
+    expect(result).toEqual({
+      skippedSession: false,
+      added: 0,
+      updated: 0,
+      superseded: 0,
+      skipped: 0,
+    });
+    expect(await logRepo.findById("session-empty")).toBeNull();
+  });
+
   test("extracts new fact if similarity is low (< 0.85)", async () => {
     const session = Session.create({
       id: "session-abc",
@@ -404,6 +434,114 @@ describe("ExtractionPipeline", () => {
     // Duplicate Jaccard is 1.0 -> should skip!
     expect(result.added).toBe(0);
     expect(result.skipped).toBe(1);
+  });
+
+  test("falls back to Jaccard when embedding provider is present but not ready", async () => {
+    const session = Session.create({
+      id: "session-not-ready-embedder",
+      projectPath: ProjectPath.fromDecoded("C:\\Projects\\nexus"),
+      startTime: new Date()
+    });
+    await sessionRepo.save(session);
+    await messageRepo.save(
+      Message.create({
+        id: "msg-not-ready",
+        role: "user",
+        content: "Use bun test for test runs",
+        timestamp: new Date()
+      }),
+      "session-not-ready-embedder"
+    );
+
+    const activeFact = Fact.create({
+      uuid: "not-ready-active",
+      type: "learning",
+      project: "nexus",
+      content: "Use bun test for test runs",
+      observedAt: new Date()
+    });
+    await factRepo.save(activeFact);
+    writeFileSync(testLogPath, JSON.stringify({
+      uuid: activeFact.uuid,
+      type: activeFact.type,
+      project: activeFact.project,
+      content: activeFact.content,
+      observedAt: activeFact.observedAt.toISOString(),
+      version: 1
+    }) + "\n");
+
+    const notReadyEmbedder: IEmbeddingProvider = {
+      ...mockEmbedder({}),
+      isReady: () => false,
+    };
+
+    const pipeline = new ExtractionPipeline(
+      db,
+      factRepo,
+      logRepo,
+      messageRepo,
+      mockExtractor([{ type: "learning", content: "Use bun test for test runs", confidence: 0.95 }]),
+      notReadyEmbedder,
+      testLogPath
+    );
+
+    const result = await pipeline.extractFromSession("session-not-ready-embedder", "nexus");
+
+    expect(result.added).toBe(0);
+    expect(result.skipped).toBe(1);
+  });
+
+  test("treats zero-vector cosine similarity as dissimilar instead of dividing by zero", async () => {
+    const session = Session.create({
+      id: "session-zero-vector",
+      projectPath: ProjectPath.fromDecoded("C:\\Projects\\nexus"),
+      startTime: new Date()
+    });
+    await sessionRepo.save(session);
+    await messageRepo.save(
+      Message.create({
+        id: "msg-zero-vector",
+        role: "user",
+        content: "A new zero vector candidate",
+        timestamp: new Date()
+      }),
+      "session-zero-vector"
+    );
+
+    const activeFact = Fact.create({
+      uuid: "zero-active",
+      type: "learning",
+      project: "nexus",
+      content: "Existing zero vector fact",
+      observedAt: new Date()
+    });
+    await factRepo.save(activeFact);
+    writeFileSync(testLogPath, JSON.stringify({
+      uuid: activeFact.uuid,
+      type: activeFact.type,
+      project: activeFact.project,
+      content: activeFact.content,
+      observedAt: activeFact.observedAt.toISOString(),
+      version: 1
+    }) + "\n");
+
+    const pipeline = new ExtractionPipeline(
+      db,
+      factRepo,
+      logRepo,
+      messageRepo,
+      mockExtractor([{ type: "learning", content: "A new zero vector candidate", confidence: 0.95 }]),
+      mockEmbedder({
+        "Existing zero vector fact": [0, 0, 0],
+        "A new zero vector candidate": [0, 0, 0],
+      }),
+      testLogPath
+    );
+
+    const result = await pipeline.extractFromSession("session-zero-vector", "nexus");
+
+    expect(result.added).toBe(1);
+    expect(result.skipped).toBe(0);
   });
 
   test("handles empty candidate facts response gracefully", async () => {
