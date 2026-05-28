@@ -303,6 +303,189 @@ describe("Extract CLI Command", () => {
     }
   });
 
+  test("executeExtractCommand emits JSON error for unsupported LLM provider", async () => {
+    const oldProvider = process.env.LLM_PROVIDER;
+    process.env.LLM_PROVIDER = "unknown-provider";
+    const consoleLogs: string[] = [];
+    const originalLog = console.log;
+    console.log = (msg) => consoleLogs.push(String(msg));
+
+    try {
+      const result = await executeExtractCommand({
+        project: "nexus",
+        json: true,
+      }, {
+        dbPath: testDbPath,
+        eventLogPath: testLogPath,
+      });
+
+      expect(result.exitCode).toBe(1);
+      const parsed = JSON.parse(consoleLogs.join("\n"));
+      expect(parsed.error.code).toBe("PROVIDER_INIT_FAILED");
+      expect(parsed.error.message).toContain("unknown-provider");
+    } finally {
+      console.log = originalLog;
+      if (oldProvider === undefined) {
+        delete process.env.LLM_PROVIDER;
+      } else {
+        process.env.LLM_PROVIDER = oldProvider;
+      }
+    }
+  });
+
+  test("executeExtractCommand returns database error when connection fails", async () => {
+    const consoleErrors: string[] = [];
+    const originalError = console.error;
+    console.error = (msg) => consoleErrors.push(String(msg));
+
+    const invalidPath = process.platform === "win32"
+      ? "NUL/cannot/create/extract.db"
+      : "/dev/null/cannot/create/extract.db";
+
+    try {
+      const result = await executeExtractCommand({
+        project: "nexus",
+      }, {
+        dbPath: invalidPath,
+        mockExtractor: {
+          providerId: "mock-llm",
+          modelName: "mock-model",
+          extract: async () => [],
+        },
+      });
+
+      expect(result.exitCode).toBe(1);
+      expect(consoleErrors.join("\n")).toContain("Database connection failed");
+    } finally {
+      console.error = originalError;
+    }
+  });
+
+  test("executeExtractCommand emits JSON database error when connection fails", async () => {
+    const consoleLogs: string[] = [];
+    const originalLog = console.log;
+    console.log = (msg) => consoleLogs.push(String(msg));
+
+    const invalidPath = process.platform === "win32"
+      ? "NUL/cannot/create/extract-json.db"
+      : "/dev/null/cannot/create/extract-json.db";
+
+    try {
+      const result = await executeExtractCommand({
+        project: "nexus",
+        json: true,
+      }, {
+        dbPath: invalidPath,
+        mockExtractor: {
+          providerId: "mock-llm",
+          modelName: "mock-model",
+          extract: async () => [],
+        },
+      });
+
+      expect(result.exitCode).toBe(1);
+      const parsed = JSON.parse(consoleLogs.join("\n"));
+      expect(parsed.error.code).toBe("DB_CONNECTION_FAILED");
+    } finally {
+      console.log = originalLog;
+    }
+  });
+
+  test("executeExtractCommand rejects invalid since duration in text and JSON modes", async () => {
+    const session = Session.create({
+      id: "session-invalid-since",
+      projectPath: ProjectPath.fromDecoded("C:\\Projects\\nexus"),
+      startTime: new Date()
+    });
+    await sessionRepo.save(session);
+
+    const consoleErrors: string[] = [];
+    const consoleLogs: string[] = [];
+    const originalError = console.error;
+    const originalLog = console.log;
+    console.error = (msg) => consoleErrors.push(String(msg));
+    console.log = (msg) => consoleLogs.push(String(msg));
+
+    try {
+      const textResult = await executeExtractCommand({
+        project: "nexus",
+        since: "nonsense",
+      }, {
+        dbPath: testDbPath,
+        mockExtractor: {
+          providerId: "mock-llm",
+          modelName: "mock-model",
+          extract: async () => [],
+        },
+      });
+
+      expect(textResult.exitCode).toBe(1);
+      expect(consoleErrors.join("\n")).toContain("Invalid duration");
+
+      const jsonResult = await executeExtractCommand({
+        project: "nexus",
+        since: "nonsense",
+        json: true,
+      }, {
+        dbPath: testDbPath,
+        mockExtractor: {
+          providerId: "mock-llm",
+          modelName: "mock-model",
+          extract: async () => [],
+        },
+      });
+
+      expect(jsonResult.exitCode).toBe(1);
+      const parsed = JSON.parse(consoleLogs.join("\n"));
+      expect(parsed.error.code).toBe("INVALID_ARGUMENT");
+    } finally {
+      console.error = originalError;
+      console.log = originalLog;
+    }
+  });
+
+  test("executeExtractCommand reports no sessions in text and JSON modes", async () => {
+    const consoleLogs: string[] = [];
+    const originalLog = console.log;
+    console.log = (msg, ...args) => consoleLogs.push([msg, ...args].map(String).join(" "));
+
+    try {
+      const textResult = await executeExtractCommand({
+        project: "missing-project",
+      }, {
+        dbPath: testDbPath,
+        mockExtractor: {
+          providerId: "mock-llm",
+          modelName: "mock-model",
+          extract: async () => [],
+        },
+      });
+
+      expect(textResult.exitCode).toBe(0);
+      expect(consoleLogs.join("\n")).toContain("No new sessions to extract for project: missing-project");
+
+      consoleLogs.length = 0;
+      const jsonResult = await executeExtractCommand({
+        project: "missing-project",
+        json: true,
+      }, {
+        dbPath: testDbPath,
+        mockExtractor: {
+          providerId: "mock-llm",
+          modelName: "mock-model",
+          extract: async () => [],
+        },
+      });
+
+      expect(jsonResult.exitCode).toBe(0);
+      const parsed = JSON.parse(consoleLogs.join("\n"));
+      expect(parsed.data.added).toBe(0);
+      expect(parsed.meta.sessions_processed).toBe(0);
+    } finally {
+      console.log = originalLog;
+    }
+  });
+
   test("createExtractCommand action parses arguments, executes, and sets process.exitCode", async () => {
     const session = Session.create({
       id: "session-action",
