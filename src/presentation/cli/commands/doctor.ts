@@ -9,6 +9,7 @@ import { Command } from "commander";
 import { mkdirSync } from "node:fs";
 import type { CommandResult } from "../command-result.js";
 import { executeStatusCommand } from "./status.js";
+import type { GatherStatusOptions, StatusInfo } from "./status.js";
 import {
     getConfigDir,
     getLogDir,
@@ -55,6 +56,7 @@ export interface DoctorCommandDeps {
         sourceDir?: string;
         hookOverrides?: import("../../../infrastructure/hooks/settings-manager.js").PathOverrides;
     };
+    gatherStatus?: (options: GatherStatusOptions) => Promise<StatusInfo>;
 }
 
 /**
@@ -353,7 +355,7 @@ export async function executeDoctorCommand(
     }
 
     if (options.json) {
-        const { gatherStatus } = await import("./status.js");
+        const gatherStatus = deps.gatherStatus ?? (await import("./status.js")).gatherStatus;
         const status = await gatherStatus({
             dbPath: deps.healthOverrides?.dbPath,
             logPath: deps.healthOverrides?.logsDir ? join(deps.healthOverrides.logsDir, "sync.log") : undefined,
@@ -523,7 +525,7 @@ export async function runPortabilityDiagnostics(
     }
 
     // 4. sqlite-vec health
-    const { gatherStatus } = await import("./status.js");
+    const gatherStatus = deps.gatherStatus ?? (await import("./status.js")).gatherStatus;
     const status = await gatherStatus({
         dbPath,
         fix: false,
@@ -549,7 +551,7 @@ export async function runPortabilityDiagnostics(
                 2
             )
         );
-        const hasFailures = orphanedPaths.length > 0 || mixedDialects.length > 0 || (staleLocks.length > 0 && !options.fix);
+        const hasFailures = orphanedPaths.length > 0 || mixedDialects.length > 0 || (staleLocks.length > 0 && !options.fix) || !vecAvailable;
         return { exitCode: hasFailures ? 1 : 0 };
     }
 
@@ -607,7 +609,7 @@ export async function runPortabilityDiagnostics(
         console.log("");
     }
 
-    const hasFailures = orphanedPaths.length > 0 || mixedDialects.length > 0 || (staleLocks.length > 0 && !options.fix);
+    const hasFailures = orphanedPaths.length > 0 || mixedDialects.length > 0 || (staleLocks.length > 0 && !options.fix) || !vecAvailable;
     return { exitCode: hasFailures ? 1 : 0 };
 }
 

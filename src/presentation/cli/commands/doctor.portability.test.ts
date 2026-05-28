@@ -10,6 +10,8 @@ import {
   executeDoctorCommand,
   createDoctorCommand,
 } from "./doctor.js";
+import type { HealthCheckResult } from "../../../infrastructure/database/health-checker.js";
+import type { StatusInfo } from "./status.js";
 import { initializeDatabase, closeDatabase } from "../../../infrastructure/database/index.js";
 import { SqliteSessionRepository } from "../../../infrastructure/database/repositories/session-repository.js";
 import { Session } from "../../../domain/entities/session.js";
@@ -38,6 +40,60 @@ describe("doctor portability diagnostics", () => {
     const repo = new SqliteSessionRepository(db);
     repo.save(session);
     db.run(`UPDATE sessions SET updated_at = '${updatedAt}' WHERE id = '${id}'`);
+  }
+
+  function createStatusInfo(health: HealthCheckResult): StatusInfo {
+    return {
+      hooks: {
+        sessionEnd: health.hooks.installed,
+        preCompact: health.hooks.installed,
+        hookScriptExists: health.hooks.installed,
+        backupExists: false,
+      },
+      config: {} as StatusInfo["config"],
+      lastSync: null,
+      pendingSessions: 0,
+      recentLogs: 0,
+      embedding: { active: false },
+      health,
+      migration: {
+        legacyExists: false,
+        newExists: true,
+        status: "complete",
+      },
+      qmd: {
+        available: false,
+        path: null,
+      },
+      fixes: [],
+    };
+  }
+
+  function healthyPortabilityHealth(sqliteVecAvailable: boolean): HealthCheckResult {
+    return {
+      database: { exists: true, readable: true, writable: true, integrity: "ok", size: 1000 },
+      permissions: { configDir: true, logsDir: true, sourceDir: true },
+      hooks: { installed: true, enabled: true, lastRun: null },
+      config: { valid: true, issues: [] },
+      embedding: {
+        configured: true,
+        provider: "local",
+        model: "Xenova/all-MiniLM-L6-v2",
+        dimensions: 384,
+        enabled: true,
+        ready: true,
+      },
+      sqliteVec: { available: sqliteVecAvailable, version: sqliteVecAvailable ? "0.1.6" : null },
+      searchCapability: {
+        fts5: true,
+        sqliteVec: sqliteVecAvailable,
+        embeddedCount: 0,
+        totalMessages: 0,
+        coveragePercent: 0,
+        defaultMode: "auto",
+        vectorReady: sqliteVecAvailable,
+      },
+    };
   }
 
   beforeEach(() => {
@@ -228,5 +284,24 @@ describe("doctor portability diagnostics", () => {
     expect(output.portability.mixedDialectPaths).toEqual([]);
     expect(output.portability.staleLocks).toEqual([]);
     expect(output.portability.sqliteVecAvailable).toBeDefined();
+  });
+
+  it("should report sqlite-vec portability failure from injected health status", async () => {
+    const { db } = initializeDatabase({ path: testDbPath });
+    const livePath = join(testDir, "live-proj");
+    mkdirSync(livePath, { recursive: true });
+    createTestSession(db, "session-1", livePath, "2026-01-20T10:00:00Z");
+    closeDatabase(db);
+
+    const result = await executeDoctorCommand(
+      { portability: true },
+      {
+        healthOverrides: { dbPath: testDbPath, sourceDir: testDir },
+        gatherStatus: async () => createStatusInfo(healthyPortabilityHealth(false)),
+      },
+    );
+
+    expect(result.exitCode).toBe(1);
+    expect(consoleOutput.join("\n")).toContain("sqlite-vec: Not loadable");
   });
 });

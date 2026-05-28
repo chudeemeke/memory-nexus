@@ -15,6 +15,7 @@ import {
     attemptFixes,
 } from "./doctor.js";
 import type { HealthCheckResult } from "../../../infrastructure/database/health-checker.js";
+import type { StatusInfo } from "./status.js";
 import { initializeDatabase, closeDatabase } from "../../../infrastructure/database/connection.js";
 import type { PathOverrides } from "../../../infrastructure/hooks/settings-manager.js";
 
@@ -39,6 +40,33 @@ describe("doctor command", () => {
         sourceDir: testDir,
         hookOverrides,
     });
+
+    function createStatusInfo(health: HealthCheckResult): StatusInfo {
+        return {
+            hooks: {
+                sessionEnd: health.hooks.installed,
+                preCompact: health.hooks.installed,
+                hookScriptExists: health.hooks.installed,
+                backupExists: false,
+            },
+            config: {} as StatusInfo["config"],
+            lastSync: null,
+            pendingSessions: 0,
+            recentLogs: 0,
+            embedding: { active: false },
+            health,
+            migration: {
+                legacyExists: false,
+                newExists: true,
+                status: "complete",
+            },
+            qmd: {
+                available: true,
+                path: "/usr/bin/qmd",
+            },
+            fixes: [],
+        };
+    }
 
     beforeAll(() => {
         // Create test directories
@@ -272,6 +300,51 @@ describe("doctor command", () => {
             expect(formatHealthResult(justNowResult, false)).toContain("just now");
         });
 
+        it("formats plural day/hour/minute hook times", () => {
+            const twoDaysResult: HealthCheckResult = {
+                ...healthyResult,
+                hooks: {
+                    ...healthyResult.hooks,
+                    lastRun: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000),
+                },
+            };
+            const oneHourResult: HealthCheckResult = {
+                ...healthyResult,
+                hooks: {
+                    ...healthyResult.hooks,
+                    lastRun: new Date(Date.now() - 60 * 60 * 1000),
+                },
+            };
+            const twoMinutesResult: HealthCheckResult = {
+                ...healthyResult,
+                hooks: {
+                    ...healthyResult.hooks,
+                    lastRun: new Date(Date.now() - 2 * 60 * 1000),
+                },
+            };
+
+            expect(formatHealthResult(twoDaysResult, false)).toContain("2 days ago");
+            expect(formatHealthResult(oneHourResult, false)).toContain("1 hour ago");
+            expect(formatHealthResult(twoMinutesResult, false)).toContain("2 minutes ago");
+        });
+
+        it("formats disabled hooks and missing optional LLM extraction cleanly", () => {
+            const result: HealthCheckResult = {
+                ...healthyResult,
+                hooks: {
+                    installed: false,
+                    enabled: false,
+                    lastRun: null,
+                },
+            };
+
+            const output = formatHealthResult(result, false);
+
+            expect(output).toContain("Installed: no");
+            expect(output).toContain("Enabled (autoSync): no");
+            expect(output).not.toContain("LLM Fact Extraction");
+        });
+
         it("formats zero-size databases and unknown integrity distinctly", () => {
             const result: HealthCheckResult = {
                 ...healthyResult,
@@ -488,6 +561,119 @@ describe("doctor command", () => {
             expect(parsed).toHaveProperty("permissions");
             expect(parsed).toHaveProperty("hooks");
             expect(parsed).toHaveProperty("config");
+        });
+
+        it("returns JSON exit code 0 for injected fully healthy status", async () => {
+            consoleOutput = [];
+            console.log = (msg: string) => consoleOutput.push(msg);
+
+            const healthy: HealthCheckResult = {
+                database: { exists: true, readable: true, writable: true, integrity: "ok", size: 1000 },
+                permissions: { configDir: true, logsDir: true, sourceDir: true },
+                hooks: { installed: true, enabled: true, lastRun: new Date("2026-05-28T12:00:00Z") },
+                config: { valid: true, issues: [] },
+                embedding: {
+                    configured: true,
+                    provider: "local",
+                    model: "Xenova/all-MiniLM-L6-v2",
+                    dimensions: 384,
+                    enabled: true,
+                    ready: true,
+                },
+                sqliteVec: { available: true, version: "0.1.6" },
+                searchCapability: {
+                    fts5: true,
+                    sqliteVec: true,
+                    embeddedCount: 10,
+                    totalMessages: 10,
+                    coveragePercent: 100,
+                    defaultMode: "auto",
+                    vectorReady: true,
+                },
+            };
+
+            const result = await executeDoctorCommand(
+                { json: true },
+                { gatherStatus: async () => createStatusInfo(healthy) },
+            );
+
+            const parsed = JSON.parse(consoleOutput.join("\n"));
+            expect(result.exitCode).toBe(0);
+            expect(parsed.hooks.lastRun).toBe("2026-05-28T12:00:00.000Z");
+        });
+
+        it("returns JSON exit code 2 for corrupted database status", async () => {
+            consoleOutput = [];
+            console.log = (msg: string) => consoleOutput.push(msg);
+
+            const corrupted: HealthCheckResult = {
+                database: { exists: true, readable: true, writable: true, integrity: "corrupted", size: 1000 },
+                permissions: { configDir: true, logsDir: true, sourceDir: true },
+                hooks: { installed: true, enabled: true, lastRun: null },
+                config: { valid: true, issues: [] },
+                embedding: {
+                    configured: true,
+                    provider: "local",
+                    model: "Xenova/all-MiniLM-L6-v2",
+                    dimensions: 384,
+                    enabled: true,
+                    ready: true,
+                },
+                sqliteVec: { available: true, version: "0.1.6" },
+                searchCapability: {
+                    fts5: true,
+                    sqliteVec: true,
+                    embeddedCount: 10,
+                    totalMessages: 10,
+                    coveragePercent: 100,
+                    defaultMode: "auto",
+                    vectorReady: true,
+                },
+            };
+
+            const result = await executeDoctorCommand(
+                { json: true },
+                { gatherStatus: async () => createStatusInfo(corrupted) },
+            );
+
+            expect(result.exitCode).toBe(2);
+        });
+
+        it("returns JSON exit code 1 for non-fatal health issues", async () => {
+            consoleOutput = [];
+            console.log = (msg: string) => consoleOutput.push(msg);
+
+            const degraded: HealthCheckResult = {
+                database: { exists: true, readable: true, writable: true, integrity: "ok", size: 1000 },
+                permissions: { configDir: true, logsDir: false, sourceDir: true },
+                hooks: { installed: true, enabled: true, lastRun: null },
+                config: { valid: true, issues: [] },
+                embedding: {
+                    configured: true,
+                    provider: "local",
+                    model: "Xenova/all-MiniLM-L6-v2",
+                    dimensions: 384,
+                    enabled: true,
+                    ready: true,
+                },
+                sqliteVec: { available: true, version: "0.1.6" },
+                searchCapability: {
+                    fts5: true,
+                    sqliteVec: true,
+                    embeddedCount: 10,
+                    totalMessages: 10,
+                    coveragePercent: 100,
+                    defaultMode: "auto",
+                    vectorReady: true,
+                },
+            };
+
+            const result = await executeDoctorCommand(
+                { json: true },
+                { gatherStatus: async () => createStatusInfo(degraded) },
+            );
+
+            expect(result.exitCode).toBe(1);
         });
 
         it("JSON output has correct types", async () => {
