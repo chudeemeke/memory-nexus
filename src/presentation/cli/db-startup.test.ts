@@ -205,6 +205,109 @@ describe("db-startup", () => {
       }
     });
 
+    test("uses injected default path and disables quickCheck for missing database", async () => {
+      const init = mock((config) => ({ db: { config } as any, sqliteVecAvailable: true }));
+
+      const result = await initializeDatabaseForCli({}, {
+        getDefaultDbPath: () => "custom-default.db",
+        existsSync: () => false,
+        initializeDatabaseSafe: init as any,
+      });
+
+      expect(result.success).toBe(true);
+      expect(init).toHaveBeenCalledWith({
+        path: "custom-default.db",
+        quickCheck: false,
+      });
+    });
+
+    test("uses quickCheck for existing database", async () => {
+      const init = mock((config) => ({ db: { config } as any, sqliteVecAvailable: true }));
+
+      const result = await initializeDatabaseForCli({ dbPath: "existing.db" }, {
+        existsSync: () => true,
+        initializeDatabaseSafe: init as any,
+      });
+
+      expect(result.success).toBe(true);
+      expect(init).toHaveBeenCalledWith({
+        path: "existing.db",
+        quickCheck: true,
+      });
+    });
+
+    test("aborts corrupted database recovery when interactive confirmation is declined", async () => {
+      const corrupted = new MemoryError(ErrorCode.DB_CORRUPTED, "bad db");
+      const init = mock(() => {
+        throw corrupted;
+      });
+      const confirm = mock(async () => false);
+      const backup = mock(() => "backup.db");
+
+      const result = await initializeDatabaseForCli({ dbPath: "bad.db" }, {
+        existsSync: () => true,
+        initializeDatabaseSafe: init as any,
+        isTTY: () => true,
+        confirm,
+        backupCorruptedDatabase: backup,
+      });
+
+      expect(result.success).toBe(false);
+      expect(confirm).toHaveBeenCalledTimes(1);
+      expect(backup).not.toHaveBeenCalled();
+      expect(consoleLogs.some((line) => line.includes("Aborted"))).toBe(true);
+    });
+
+    test("backs up and recreates corrupted database when interactive confirmation is accepted", async () => {
+      const corrupted = new MemoryError(ErrorCode.DB_CORRUPTED, "bad db");
+      const init = mock((config) => {
+        if (config.quickCheck) throw corrupted;
+        return { db: { recreated: true } as any, sqliteVecAvailable: true };
+      });
+      const backup = mock(() => "bad.db.corrupted.2026");
+
+      const result = await initializeDatabaseForCli({ dbPath: "bad.db" }, {
+        existsSync: () => true,
+        initializeDatabaseSafe: init as any,
+        isTTY: () => true,
+        confirm: async () => true,
+        backupCorruptedDatabase: backup,
+      });
+
+      expect(result.success).toBe(true);
+      expect(backup).toHaveBeenCalledWith("bad.db");
+      expect(init).toHaveBeenLastCalledWith({
+        path: "bad.db",
+        quickCheck: false,
+      });
+      expect(consoleLogs.some((line) => line.includes("Backed up corrupted database"))).toBe(true);
+      expect(consoleLogs.some((line) => line.includes("Fresh database created"))).toBe(true);
+    });
+
+    test("wraps fresh database recreation failures after corrupted backup", async () => {
+      const corrupted = new MemoryError(ErrorCode.DB_CORRUPTED, "bad db");
+      const init = mock((config) => {
+        if (config.quickCheck) throw corrupted;
+        throw "permission denied";
+      });
+
+      const result = await initializeDatabaseForCli({ dbPath: "bad.db", json: true }, {
+        existsSync: () => true,
+        initializeDatabaseSafe: init as any,
+        isTTY: () => true,
+        confirm: async () => true,
+        backupCorruptedDatabase: () => "backup.db",
+      });
+
+      expect(result.success).toBe(false);
+      if (!result.success) {
+        expect(result.error.code).toBe(ErrorCode.DB_CONNECTION_FAILED);
+        expect(result.error.message).toContain("permission denied");
+      }
+      const jsonOutput = consoleErrors.find((line) => line.includes("DB_CONNECTION_FAILED"));
+      expect(jsonOutput).toBeDefined();
+    });
+
     test("respects custom dbPath option", async () => {
       const dbPath = createTempDbPath();
       tempPaths.push(dbPath);

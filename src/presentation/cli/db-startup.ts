@@ -37,6 +37,15 @@ export type DbStartupResult =
   | { success: true; db: DatabaseInitResult["db"] }
   | { success: false; error: MemoryError };
 
+export interface DbStartupDeps {
+  existsSync?: (path: string) => boolean;
+  getDefaultDbPath?: () => string;
+  initializeDatabaseSafe?: (config: DatabaseConfig) => DatabaseInitResult;
+  isTTY?: () => boolean;
+  confirm?: (message: string) => Promise<boolean>;
+  backupCorruptedDatabase?: (dbPath: string) => string;
+}
+
 /**
  * Check if running in an interactive TTY environment.
  *
@@ -94,7 +103,8 @@ function backupCorruptedDatabase(dbPath: string): string {
 async function handleCorruptedDatabase(
   error: MemoryError,
   dbPath: string,
-  options: DbStartupOptions
+  options: DbStartupOptions,
+  deps: DbStartupDeps = {},
 ): Promise<DbStartupResult> {
   // Show error
   if (options.json) {
@@ -104,7 +114,8 @@ async function handleCorruptedDatabase(
   }
 
   // Non-TTY: can't prompt, just fail
-  if (!isTTY()) {
+  const interactive = (deps.isTTY ?? isTTY)();
+  if (!interactive) {
     if (!options.json) {
       console.error("\nDatabase is corrupted. Run interactively to recreate.");
     }
@@ -113,7 +124,8 @@ async function handleCorruptedDatabase(
 
   // TTY: prompt for recreation
   console.log("");
-  const confirmed = await promptConfirmation(
+  const confirm = deps.confirm ?? promptConfirmation;
+  const confirmed = await confirm(
     "Database corrupted. Recreate and re-sync?"
   );
 
@@ -125,14 +137,15 @@ async function handleCorruptedDatabase(
   }
 
   // Backup old database
-  const backupPath = backupCorruptedDatabase(dbPath);
+  const backupPath = (deps.backupCorruptedDatabase ?? backupCorruptedDatabase)(dbPath);
   if (!options.json) {
     console.log(`Backed up corrupted database to: ${backupPath}`);
   }
 
   // Try to create fresh database
   try {
-    const result = initializeDatabaseSafe({
+    const init = deps.initializeDatabaseSafe ?? initializeDatabaseSafe;
+    const result = init({
       path: dbPath,
       quickCheck: false, // Skip check for new database
     });
@@ -169,10 +182,11 @@ async function handleCorruptedDatabase(
  * @returns Database startup result
  */
 export async function initializeDatabaseForCli(
-  options: DbStartupOptions = {}
+  options: DbStartupOptions = {},
+  deps: DbStartupDeps = {},
 ): Promise<DbStartupResult> {
-  const dbPath = options.dbPath ?? getDefaultDbPath();
-  const fileExists = existsSync(dbPath);
+  const dbPath = options.dbPath ?? (deps.getDefaultDbPath ?? getDefaultDbPath)();
+  const fileExists = (deps.existsSync ?? existsSync)(dbPath);
 
   const config: DatabaseConfig = {
     path: dbPath,
@@ -180,7 +194,8 @@ export async function initializeDatabaseForCli(
   };
 
   try {
-    const result = initializeDatabaseSafe(config);
+    const init = deps.initializeDatabaseSafe ?? initializeDatabaseSafe;
+    const result = init(config);
     return { success: true, db: result.db };
   } catch (error) {
     const nexusError =
@@ -193,7 +208,7 @@ export async function initializeDatabaseForCli(
 
     // Handle corrupted database specially
     if (nexusError.code === ErrorCode.DB_CORRUPTED) {
-      return handleCorruptedDatabase(nexusError, dbPath, options);
+      return handleCorruptedDatabase(nexusError, dbPath, options, deps);
     }
 
     // Other errors: just format and fail
