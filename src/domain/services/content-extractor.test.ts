@@ -82,6 +82,53 @@ describe("ContentExtractor domain service", () => {
 
       expect(result).toBeNull();
     });
+
+    it("returns null when a message has no content payload", () => {
+      const jsonLine = JSON.stringify({
+        type: "human",
+        message: { role: "user" },
+      });
+
+      const result = ContentExtractor.extractMessageContent(jsonLine);
+
+      expect(result).toBeNull();
+    });
+
+    it("ignores non-text and empty text blocks in content arrays", () => {
+      const jsonLine = JSON.stringify({
+        type: "assistant",
+        message: {
+          role: "assistant",
+          content: [
+            { type: "tool_use", id: "tool-1", name: "Read", input: {} },
+            { type: "text", text: "" },
+            { type: "text", text: "Only visible text" },
+            { type: "thinking", text: "not user-visible" },
+          ],
+        },
+      });
+
+      const result = ContentExtractor.extractMessageContent(jsonLine);
+
+      expect(result?.content).toBe("Only visible text");
+    });
+
+    it("returns null when content arrays contain no populated text blocks", () => {
+      const jsonLine = JSON.stringify({
+        type: "assistant",
+        message: {
+          role: "assistant",
+          content: [
+            { type: "tool_use", id: "tool-1", name: "Read", input: {} },
+            { type: "text", text: "" },
+          ],
+        },
+      });
+
+      const result = ContentExtractor.extractMessageContent(jsonLine);
+
+      expect(result).toBeNull();
+    });
   });
 
   describe("extractToolUse", () => {
@@ -148,6 +195,34 @@ describe("ContentExtractor domain service", () => {
 
       expect(result).toHaveLength(0);
     });
+
+    it("supplies safe defaults for incomplete tool use blocks", () => {
+      const jsonLine = JSON.stringify({
+        type: "assistant",
+        message: {
+          role: "assistant",
+          content: [{ type: "tool_use" }],
+        },
+      });
+
+      const result = ContentExtractor.extractToolUses(jsonLine);
+
+      expect(result).toEqual([{ id: "", name: "", input: {} }]);
+    });
+
+    it("returns empty array when content arrays contain no tool use blocks", () => {
+      const jsonLine = JSON.stringify({
+        type: "assistant",
+        message: {
+          role: "assistant",
+          content: [{ type: "text", text: "No tools here" }],
+        },
+      });
+
+      const result = ContentExtractor.extractToolUses(jsonLine);
+
+      expect(result).toHaveLength(0);
+    });
   });
 
   describe("extractToolResult", () => {
@@ -208,6 +283,40 @@ describe("ContentExtractor domain service", () => {
 
       expect(result).toHaveLength(0);
     });
+
+    it("returns empty array for invalid JSON", () => {
+      const result = ContentExtractor.extractToolResults("invalid json");
+
+      expect(result).toHaveLength(0);
+    });
+
+    it("supplies safe defaults for incomplete tool result blocks", () => {
+      const jsonLine = JSON.stringify({
+        type: "human",
+        message: {
+          role: "user",
+          content: [{ type: "tool_result" }],
+        },
+      });
+
+      const result = ContentExtractor.extractToolResults(jsonLine);
+
+      expect(result).toEqual([{ toolUseId: "", content: "", isError: false }]);
+    });
+
+    it("returns empty array when content arrays contain no tool result blocks", () => {
+      const jsonLine = JSON.stringify({
+        type: "human",
+        message: {
+          role: "user",
+          content: [{ type: "text", text: "No result here" }],
+        },
+      });
+
+      const result = ContentExtractor.extractToolResults(jsonLine);
+
+      expect(result).toHaveLength(0);
+    });
   });
 
   describe("isMessageLine", () => {
@@ -261,6 +370,12 @@ describe("ContentExtractor domain service", () => {
       });
 
       const result = ContentExtractor.extractTimestamp(jsonLine);
+
+      expect(result).toBeNull();
+    });
+
+    it("returns null when timestamp JSON cannot be parsed", () => {
+      const result = ContentExtractor.extractTimestamp("not json");
 
       expect(result).toBeNull();
     });
