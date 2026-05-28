@@ -234,6 +234,8 @@ describe("executePurgeCommand integration", () => {
   let consoleErrorOutput: string[];
   let originalLog: typeof console.log;
   let originalError: typeof console.error;
+  let originalForceColor: string | undefined;
+  let originalNoColor: string | undefined;
 
   function createTestSession(
     db: Database,
@@ -255,6 +257,10 @@ describe("executePurgeCommand integration", () => {
   beforeEach(() => {
     // Reset confirmation override
     askConfirmation = undefined;
+    originalForceColor = process.env.FORCE_COLOR;
+    originalNoColor = process.env.NO_COLOR;
+    delete process.env.FORCE_COLOR;
+    delete process.env.NO_COLOR;
 
     // Create unique test directory
     testDir = path.join(os.tmpdir(), `purge-test-${Date.now()}-${Math.random().toString(36).slice(2)}`);
@@ -283,6 +289,16 @@ describe("executePurgeCommand integration", () => {
     // Restore console
     console.log = originalLog;
     console.error = originalError;
+    if (originalForceColor === undefined) {
+      delete process.env.FORCE_COLOR;
+    } else {
+      process.env.FORCE_COLOR = originalForceColor;
+    }
+    if (originalNoColor === undefined) {
+      delete process.env.NO_COLOR;
+    } else {
+      process.env.NO_COLOR = originalNoColor;
+    }
 
     // Clean up test directory
     try {
@@ -316,6 +332,29 @@ describe("executePurgeCommand integration", () => {
       const output = JSON.parse(consoleOutput.join("\n"));
       expect(output.sessionsDeleted).toBe(0);
       expect(output.dryRun).toBe(false);
+    });
+
+    it("should output generic JSON when no orphan sessions match", async () => {
+      const options: PurgeCommandOptions = {
+        orphans: true,
+        json: true,
+      };
+
+      const result = await executePurgeCommand(options, {
+        ...deps(),
+        createSessionRepository: () => ({
+          findOlderThan: async () => [],
+          findFiltered: async () => [],
+          delete: () => {},
+        }),
+      });
+
+      const output = JSON.parse(consoleOutput.join("\n"));
+      expect(result.exitCode).toBe(0);
+      expect(output.sessionsDeleted).toBe(0);
+      expect(output.cutoffDate).toBeNull();
+      expect(output.dryRun).toBe(false);
+      expect(output.message).toBe("No sessions matched the purge criteria.");
     });
   });
 
@@ -387,6 +426,24 @@ describe("executePurgeCommand integration", () => {
 
       expect(consoleOutput).toEqual(["2"]);
     });
+
+    it("should color session ids when color is forced for dry-run output", async () => {
+      process.env.FORCE_COLOR = "1";
+      const { db } = initializeDatabase({ path: testDbPath });
+      createTestSession(db, "old-1", "project-a", "2025-01-10T10:00:00Z");
+      closeDatabase(db);
+
+      const result = await executePurgeCommand(
+        {
+          olderThan: "365d",
+          dryRun: true,
+        },
+        deps(),
+      );
+
+      expect(result.exitCode).toBe(0);
+      expect(consoleOutput.join("\n")).toContain("\x1b[33mold-1\x1b[0m");
+    });
   });
 
   describe("confirmation prompt", () => {
@@ -453,6 +510,25 @@ describe("executePurgeCommand integration", () => {
 
       const output = JSON.parse(consoleOutput.join("\n"));
       expect(output.cancelled).toBe(true);
+    });
+
+    it("should suppress cancellation output in quiet mode", async () => {
+      const { db } = initializeDatabase({ path: testDbPath });
+      createTestSession(db, "old-1", "project-a", "2025-01-10T10:00:00Z");
+      closeDatabase(db);
+
+      askConfirmation = (async () => false);
+
+      const result = await executePurgeCommand(
+        {
+          olderThan: "365d",
+          quiet: true,
+        },
+        deps(),
+      );
+
+      expect(result.exitCode).toBe(0);
+      expect(consoleOutput).toEqual([]);
     });
   });
 
@@ -632,6 +708,27 @@ describe("executePurgeCommand integration", () => {
       expect(closeCalled).toBe(true);
       expect(output.error).toContain("scan failed");
     });
+
+    it("should report non-JSON purge scanning failures to stderr", async () => {
+      const result = await executePurgeCommand(
+        { olderThan: "30d", force: true },
+        {
+          ...deps(),
+          initializeDatabase: () => ({ db: { fake: true } }),
+          closeDatabase: () => {},
+          createSessionRepository: () => ({
+            findOlderThan: async () => {
+              throw new Error("scan failed");
+            },
+            findFiltered: async () => [],
+            delete: () => {},
+          }),
+        },
+      );
+
+      expect(result.exitCode).toBe(2);
+      expect(consoleErrorOutput.join("\n")).toContain("Error: scan failed");
+    });
   });
 
   describe("orphans and option validation", () => {
@@ -776,4 +873,3 @@ describe("executePurgeCommand integration", () => {
     });
   });
 });
-

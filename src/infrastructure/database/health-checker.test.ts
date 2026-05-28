@@ -83,6 +83,17 @@ describe("health-checker", () => {
             const result = checkDatabaseIntegrity(mockDb);
             expect(result).toBe("corrupted");
         });
+
+        it("returns 'corrupted' when integrity_check reports a non-ok result", () => {
+            const mockDb = {
+                query: () => ({
+                    get: () => ({ integrity_check: "row 2 missing from index sessions_project" }),
+                }),
+            } as unknown as Database;
+
+            const result = checkDatabaseIntegrity(mockDb);
+            expect(result).toBe("corrupted");
+        });
     });
 
     describe("checkQuickIntegrity", () => {
@@ -134,6 +145,17 @@ describe("health-checker", () => {
                 query: () => {
                     throw new Error("Database error");
                 },
+            } as unknown as Database;
+
+            const result = checkQuickIntegrity(mockDb);
+            expect(result).toBe("corrupted");
+        });
+
+        it("returns 'corrupted' when quick_check has no ok row", () => {
+            const mockDb = {
+                query: () => ({
+                    get: () => null,
+                }),
             } as unknown as Database;
 
             const result = checkQuickIntegrity(mockDb);
@@ -204,6 +226,18 @@ describe("health-checker", () => {
             const result = checkConfigValidity(testConfigPath);
             expect(result.valid).toBe(false);
             expect(result.issues).toContain("autoSync is not a boolean");
+        });
+
+        it("returns issues for invalid startup and compaction boolean types", () => {
+            writeFileSync(testConfigPath, JSON.stringify({
+                recoveryOnStartup: "yes",
+                syncOnCompaction: 1,
+            }));
+
+            const result = checkConfigValidity(testConfigPath);
+            expect(result.valid).toBe(false);
+            expect(result.issues).toContain("recoveryOnStartup is not a boolean");
+            expect(result.issues).toContain("syncOnCompaction is not a boolean");
         });
 
         it("returns issues for invalid logLevel", () => {
