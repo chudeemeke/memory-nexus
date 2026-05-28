@@ -12,6 +12,8 @@ import {
   green,
   red,
   yellow,
+  cyan,
+  boldCyan,
 } from "./color.js";
 
 describe("ColorUtilities", () => {
@@ -112,6 +114,11 @@ describe("ColorUtilities", () => {
       const result = yellow("text", useColor);
       expect(result).toBe("\x1b[33mtext\x1b[0m");
     });
+
+    it("cyan and boldCyan wrap text with highlight codes", () => {
+      expect(cyan("text", useColor)).toBe("\x1b[36mtext\x1b[0m");
+      expect(boldCyan("text", useColor)).toBe("\x1b[1;36mtext\x1b[0m");
+    });
   });
 
   describe("color functions with color disabled", () => {
@@ -141,15 +148,24 @@ describe("ColorUtilities", () => {
       const result = yellow("text", useColor);
       expect(result).toBe("text");
     });
+
+    it("cyan and boldCyan return plain text", () => {
+      expect(cyan("text", useColor)).toBe("text");
+      expect(boldCyan("text", useColor)).toBe("text");
+    });
   });
 
   describe("color functions without explicit useColor", () => {
-    it("defaults to shouldUseColor() result", () => {
-      // When not in a TTY (typical test environment), returns plain text
-      const result = bold("text");
-      // Could be either depending on test environment; just verify it runs
-      expect(typeof result).toBe("string");
-      expect(result).toContain("text");
+    it("defaults every color helper through shouldUseColor()", () => {
+      process.env.FORCE_COLOR = "1";
+
+      expect(bold("text")).toBe("\x1b[1mtext\x1b[0m");
+      expect(dim("text")).toBe("\x1b[2mtext\x1b[0m");
+      expect(green("text")).toBe("\x1b[32mtext\x1b[0m");
+      expect(red("text")).toBe("\x1b[31mtext\x1b[0m");
+      expect(yellow("text")).toBe("\x1b[33mtext\x1b[0m");
+      expect(cyan("text")).toBe("\x1b[36mtext\x1b[0m");
+      expect(boldCyan("text")).toBe("\x1b[1;36mtext\x1b[0m");
     });
   });
 });
