@@ -101,6 +101,25 @@ describe("OutputFormatter", () => {
       expect(output).toContain("session-1234-abc");
       expect(output).toContain("session-5678-ijk");
     });
+
+    it("truncates before sparse entries when the context budget is already exhausted", () => {
+      const sparseResults = [
+        {
+          ...mockResults[0],
+          snippet: "A".repeat(200),
+        },
+        undefined,
+        mockResults[1],
+      ] as unknown as SearchResult[];
+
+      const output = formatter.formatResults(sparseResults, {
+        query: "test",
+        contextBudget: 80,
+      });
+
+      expect(output).toContain("Output truncated");
+      expect(output).not.toContain("session-5678-ijk");
+    });
   });
 
   describe("default mode with colors", () => {
@@ -234,6 +253,10 @@ describe("OutputFormatter", () => {
       expect(formatter.formatResults([], { query: "missing" })).toBe('No results for "missing"');
     });
 
+    it("uses an empty query fallback for empty brief results", () => {
+      expect(formatter.formatResults([])).toBe('No results for ""');
+    });
+
     it("formats errors and keeps summary empty", () => {
       expect(formatter.formatError(new Error("brief failure"))).toContain("brief failure");
       expect(formatter.formatSummary({ found: 2, shown: 2 })).toBe("");
@@ -279,6 +302,25 @@ describe("OutputFormatter", () => {
       expect(output).not.toContain("Filters:");
     });
 
+    it("skips sparse verbose results and truncates when the budget is exhausted", () => {
+      const sparseResults = [
+        {
+          ...mockResults[0],
+          snippet: "V".repeat(200),
+        },
+        undefined,
+        mockResults[1],
+      ] as unknown as SearchResult[];
+
+      const output = formatter.formatResults(sparseResults, {
+        query: "test",
+        contextBudget: 80,
+      });
+
+      expect(output).toContain("Output truncated");
+      expect(output).not.toContain("session-5678-ijkl-mnop");
+    });
+
     it("returns a generic empty-result message when no verbose query is provided", () => {
       const output = formatter.formatResults([]);
       expect(output).toBe("No results found for: query");
@@ -310,6 +352,15 @@ describe("OutputFormatter", () => {
       expect(output).toContain("Test error");
       // Stack trace should be present
       expect(output).toContain("at ");
+    });
+
+    it("handles verbose errors when stack is absent", () => {
+      const error = new Error("No stack available");
+      error.stack = undefined;
+
+      const output = formatter.formatError(error);
+
+      expect(output).toBe("Error: No stack available\n");
     });
   });
 
@@ -384,6 +435,15 @@ describe("OutputFormatter", () => {
       expect(parsed.meta.timing_ms).toBe(142);
       expect(parsed.results).toBeDefined();
       expect(parsed.results.length).toBe(1);
+    });
+
+    it("uses an empty query fallback in JSON meta envelopes", () => {
+      const output = formatter.formatResults(hybridResults, {
+        searchMeta: mockMeta,
+      });
+      const parsed = JSON.parse(output);
+
+      expect(parsed.meta.query).toBe("");
     });
 
     it("includes degradation_reason when degraded", () => {

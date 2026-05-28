@@ -83,6 +83,20 @@ describe("ContentExtractor domain service", () => {
       expect(result).toBeNull();
     });
 
+    it("returns null for unsupported structured content payloads", () => {
+      const jsonLine = JSON.stringify({
+        type: "human",
+        message: {
+          role: "user",
+          content: { text: "object content is not a supported Claude block array" },
+        },
+      });
+
+      const result = ContentExtractor.extractMessageContent(jsonLine);
+
+      expect(result).toBeNull();
+    });
+
     it("returns null when a message has no content payload", () => {
       const jsonLine = JSON.stringify({
         type: "human",
