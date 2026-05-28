@@ -1,9 +1,79 @@
-import { describe, expect, it, mock } from "bun:test";
+import { afterEach, beforeEach, describe, expect, it, mock, spyOn } from "bun:test";
 import { Command } from "commander";
 
 import { createSyncCommand, executeSyncCommand } from "./index.js";
+import type { SyncCommandDeps } from "./types.js";
 
 describe("Sync Command", () => {
+  function createHarness(overrides: Partial<SyncCommandDeps> = {}) {
+    const db = { id: "db" } as any;
+    const reporter = {
+      log: mock(() => undefined),
+      start: mock(() => undefined),
+      update: mock(() => undefined),
+      stop: mock(() => undefined),
+    };
+    const syncResult = {
+      success: true,
+      sessionsDiscovered: 1,
+      sessionsProcessed: 1,
+      sessionsSkipped: 0,
+      messagesInserted: 0,
+      toolUsesInserted: 0,
+      errors: [] as Array<{ sessionPath: string; error: string }>,
+      durationMs: 1,
+      aborted: false,
+    };
+    const syncService = {
+      fixProjectNames: mock(async () => 2),
+      sync: mock(async (options: any) => {
+        options.onProgress?.({ phase: "discovering" });
+        options.onProgress?.({ phase: "extracting", current: 1, total: 2, sessionId: "session-1" });
+        options.onProgress?.({ phase: "extracting", current: 2, total: 2, sessionId: "session-2" });
+        return syncResult;
+      }),
+    };
+    const config = {
+      machineId: "test-machine-id",
+      remoteSync: { enabled: false, repositoryUrl: "", autoPull: true, autoPush: true },
+      embedding: { enabled: false, provider: "local" as const, model: "Xenova/all-MiniLM-L6-v2", dimensions: 384, batchSize: 100 },
+      ambientContext: { enabled: false, budget: 800 },
+      autoSync: true,
+      recoveryOnStartup: true,
+      syncOnCompaction: true,
+      timeout: 5000,
+      logLevel: "info" as const,
+      logRetentionDays: 7,
+      showFailures: false,
+      search: { defaultMode: "auto" as const, temporalDecay: { enabled: true, halfLifeDays: 30 } },
+    };
+    const deps: SyncCommandDeps = {
+      setupSignalHandlers: mock(() => undefined),
+      hasCheckpoint: mock(() => false),
+      loadCheckpoint: mock(() => null),
+      createProgressReporter: mock(() => reporter),
+      getDefaultDbPath: mock(() => "memory-test.db"),
+      executeDryRun: mock(async () => ({ exitCode: 0 })),
+      handleError: mock(() => undefined),
+      reportResults: mock(() => undefined),
+      createDriveResolver: mock(() => ({ resolve: mock(() => "memory") }) as any),
+      initializeDatabase: mock(() => ({ db, sqliteVecAvailable: true }) as any),
+      closeDatabase: mock(() => undefined),
+      bulkOperationCheckpoint: mock(() => undefined),
+      registerCleanup: mock(() => undefined),
+      unregisterCleanup: mock(() => undefined),
+      createSyncService: mock(() => syncService),
+      loadConfig: mock(() => config as any),
+      runMemoryFileSync: mock(async () => null),
+      reportMemoryFileResults: mock(() => undefined),
+      runAmbientContextGeneration: mock(async () => undefined),
+      runEmbeddingPass: mock(async () => undefined),
+      removeBackgroundLock: mock(() => undefined),
+      ...overrides,
+    };
+
+    return { db, reporter, syncService, syncResult, config, deps };
+  }
 
   describe("createSyncCommand", () => {
     it("returns a Command instance", () => {
@@ -416,6 +486,181 @@ describe("Sync Command", () => {
 
       expect(capturedOptions?.embed).toBeUndefined();
       expect(capturedOptions?.background).toBeUndefined();
+    });
+  });
+
+  describe("executeSyncCommand dependency seam", () => {
+    let logs: string[];
+    let errors: string[];
+    let warnings: string[];
+    let logSpy: ReturnType<typeof spyOn>;
+    let errorSpy: ReturnType<typeof spyOn>;
+    let warnSpy: ReturnType<typeof spyOn>;
+
+    beforeEach(() => {
+      logs = [];
+      errors = [];
+      warnings = [];
+      logSpy = spyOn(console, "log").mockImplementation((...args) => logs.push(args.join(" ")));
+      errorSpy = spyOn(console, "error").mockImplementation((...args) => errors.push(args.join(" ")));
+      warnSpy = spyOn(console, "warn").mockImplementation((...args) => warnings.push(args.join(" ")));
+    });
+
+    afterEach(() => {
+      logSpy.mockRestore();
+      errorSpy.mockRestore();
+      warnSpy.mockRestore();
+      delete process.env.MEMORY_EMBED_BACKGROUND;
+    });
+
+    it("delegates background and dry-run paths through injected handlers", async () => {
+      const handleBackgroundMode = mock(async () => ({ exitCode: 0 }));
+      const background = await executeSyncCommand({ background: true }, {
+        handleBackgroundMode,
+        setupSignalHandlers: mock(() => {
+          throw new Error("should not run");
+        }),
+      });
+      expect(background.exitCode).toBe(0);
+      expect(handleBackgroundMode).toHaveBeenCalledTimes(1);
+
+      const { deps } = createHarness();
+      const dryRun = await executeSyncCommand({ dryRun: true, json: true }, deps);
+      expect(dryRun.exitCode).toBe(0);
+      expect(deps.setupSignalHandlers).toHaveBeenCalledTimes(1);
+      expect(deps.executeDryRun).toHaveBeenCalledWith({ dryRun: true, json: true });
+      expect(deps.initializeDatabase).not.toHaveBeenCalled();
+    });
+
+    it("reports checkpoint resume, fix-name progress, memory sync, ambient generation, and cleanup", async () => {
+      const { deps, reporter, syncService } = createHarness({
+        hasCheckpoint: mock(() => true),
+        loadCheckpoint: mock(() => ({ completedSessions: 1, totalSessions: 3 })),
+        runMemoryFileSync: mock(async () => ({ synced: 1 }) as any),
+      });
+
+      const result = await executeSyncCommand({ fixNames: true }, deps);
+
+      expect(result.exitCode).toBe(0);
+      expect(logs.join("\n")).toContain("Resuming from previous interrupted sync (1/3 sessions done)");
+      expect(logs.join("\n")).toContain("Fixed project names: 2 sessions updated");
+      expect(reporter.log).toHaveBeenCalledWith("Fixing project names...");
+      expect(reporter.start).toHaveBeenCalledWith(2);
+      expect(reporter.update).toHaveBeenCalledWith(2, "session-2");
+      expect(syncService.fixProjectNames).toHaveBeenCalledTimes(1);
+      expect(deps.reportMemoryFileResults).toHaveBeenCalledTimes(1);
+      expect(deps.runAmbientContextGeneration).toHaveBeenCalledTimes(1);
+      expect(deps.unregisterCleanup).toHaveBeenCalledTimes(1);
+      expect(deps.closeDatabase).toHaveBeenCalledTimes(1);
+    });
+
+    it("handles database open failures, sync failures, aborts, and thrown orchestration errors", async () => {
+      let harness = createHarness({
+        initializeDatabase: mock(() => {
+          throw new Error("db open failed");
+        }) as any,
+      });
+      expect((await executeSyncCommand({}, harness.deps)).exitCode).toBe(1);
+      expect(harness.deps.handleError).toHaveBeenCalledTimes(1);
+      expect(harness.deps.registerCleanup).not.toHaveBeenCalled();
+
+      harness = createHarness();
+      harness.syncResult.errors.push({ sessionPath: "bad.jsonl", error: "bad session" });
+      expect((await executeSyncCommand({}, harness.deps)).exitCode).toBe(1);
+
+      harness.syncResult.errors.length = 0;
+      harness.syncResult.aborted = true;
+      expect((await executeSyncCommand({}, harness.deps)).exitCode).toBe(1);
+
+      harness = createHarness({
+        createSyncService: mock(() => ({
+          fixProjectNames: mock(async () => 0),
+          sync: mock(async () => {
+            throw new Error("sync failed");
+          }),
+        })),
+      });
+      expect((await executeSyncCommand({}, harness.deps)).exitCode).toBe(1);
+      expect(harness.reporter.stop).toHaveBeenCalledTimes(1);
+      expect(harness.deps.handleError).toHaveBeenCalledTimes(1);
+      expect(harness.deps.unregisterCleanup).toHaveBeenCalledTimes(1);
+      expect(harness.deps.closeDatabase).toHaveBeenCalledTimes(1);
+    });
+
+    it("covers remote sync rebuild, current, failed, thrown, and disabled-prototype branches", async () => {
+      const remoteConfig = () => ({
+        ...createHarness().config,
+        remoteSync: {
+          enabled: true,
+          repositoryUrl: "https://github.com/example/repo.git",
+          autoPull: true,
+          autoPush: false,
+        },
+      });
+
+      let harness = createHarness({
+        loadConfig: mock(remoteConfig as any),
+        experimentalRemoteSync: true,
+        createGitSyncer: mock(async () => ({ sync: mock(async () => ({ success: true, rebuildNeeded: true })) })),
+        rebuildProjections: mock(async () => undefined),
+      });
+      await executeSyncCommand({}, harness.deps);
+      expect(logs.join("\n")).toContain("Remote events pulled. Rebuilding database projections");
+      expect(harness.deps.rebuildProjections).toHaveBeenCalledTimes(1);
+
+      logs = [];
+      harness = createHarness({
+        loadConfig: mock(remoteConfig as any),
+        experimentalRemoteSync: true,
+        createGitSyncer: mock(async () => ({ sync: mock(async () => ({ success: true, rebuildNeeded: false })) })),
+      });
+      await executeSyncCommand({}, harness.deps);
+      expect(logs.join("\n")).toContain("Git events are already up to date");
+
+      harness = createHarness({
+        loadConfig: mock(remoteConfig as any),
+        experimentalRemoteSync: true,
+        createGitSyncer: mock(async () => ({ sync: mock(async () => ({ success: false, rebuildNeeded: false, error: "push rejected" })) })),
+      });
+      await executeSyncCommand({}, harness.deps);
+      expect(errors.join("\n")).toContain("push rejected");
+
+      harness = createHarness({
+        loadConfig: mock(remoteConfig as any),
+        experimentalRemoteSync: true,
+        createGitSyncer: mock(async () => {
+          throw new Error("git missing");
+        }),
+      });
+      await executeSyncCommand({}, harness.deps);
+      expect(errors.join("\n")).toContain("git missing");
+
+      harness = createHarness({
+        loadConfig: mock(remoteConfig as any),
+        experimentalRemoteSync: false,
+      });
+      await executeSyncCommand({}, harness.deps);
+      expect(warnings.join("\n")).toContain("Remote synchronization is configured but disabled");
+    });
+
+    it("reports embedding failures and handles background lock cleanup", async () => {
+      process.env.MEMORY_EMBED_BACKGROUND = "1";
+      const { deps } = createHarness({
+        runEmbeddingPass: mock(async () => {
+          throw new Error("embedding failed");
+        }),
+      });
+
+      const jsonResult = await executeSyncCommand({ embed: true, json: true }, deps);
+      expect(jsonResult.exitCode).toBe(1);
+      expect(errors.join("\n")).toContain("embedding failed");
+      expect(deps.removeBackgroundLock).toHaveBeenCalledTimes(1);
+
+      errors = [];
+      delete process.env.MEMORY_EMBED_BACKGROUND;
+      const quietResult = await executeSyncCommand({ embed: true, quiet: true }, deps);
+      expect(quietResult.exitCode).toBe(1);
+      expect(errors).toEqual([]);
     });
   });
 

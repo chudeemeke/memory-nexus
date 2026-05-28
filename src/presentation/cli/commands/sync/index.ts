@@ -50,16 +50,18 @@ export async function executeSyncCommand(
   deps: SyncCommandDeps = {},
 ): Promise<CommandResult> {
   if (options.background) {
-    return await handleBackgroundMode(options);
+    const runBackground = deps.handleBackgroundMode ?? handleBackgroundMode;
+    return await runBackground(options);
   }
 
-  setupSignalHandlers();
+  const setupSignals = deps.setupSignalHandlers ?? setupSignalHandlers;
+  setupSignals();
   const startTime = Date.now();
-  const reporter = createProgressReporter(options);
+  const reporter = (deps.createProgressReporter ?? createProgressReporter)(options);
 
   // Check for recovery from previous interrupted sync
-  if (!options.quiet && hasCheckpoint()) {
-    const checkpoint = loadCheckpoint();
+  if (!options.quiet && (deps.hasCheckpoint ?? hasCheckpoint)()) {
+    const checkpoint = (deps.loadCheckpoint ?? loadCheckpoint)();
     if (checkpoint) {
       console.log(
         `Resuming from previous interrupted sync (${checkpoint.completedSessions}/${checkpoint.totalSessions} sessions done)`
@@ -67,38 +69,41 @@ export async function executeSyncCommand(
     }
   }
 
-  const dbPath = getDefaultDbPath();
+  const dbPath = (deps.getDefaultDbPath ?? getDefaultDbPath)();
   if (options.dryRun) {
-    return await executeDryRun(options);
+    return await (deps.executeDryRun ?? executeDryRun)(options);
   }
 
   let db: ReturnType<typeof initializeDatabase>["db"];
   try {
-    const result = initializeDatabase({ path: dbPath });
+    const result = (deps.initializeDatabase ?? initializeDatabase)({ path: dbPath });
     db = result.db;
   } catch (error) {
-    handleError(error, options);
+    (deps.handleError ?? handleError)(error, options);
     return { exitCode: 1 };
   }
 
-  const cleanupFn = async (): Promise<void> => { closeDatabase(db); };
-  registerCleanup(cleanupFn);
+  const closeDb = deps.closeDatabase ?? closeDatabase;
+  const cleanupFn = async (): Promise<void> => { closeDb(db); };
+  (deps.registerCleanup ?? registerCleanup)(cleanupFn);
 
   try {
-    const resolver = createDriveResolver();
-    const sessionSource = new FileSystemSessionSource({ projectNameResolver: resolver });
-    const eventParser = new JsonlEventParser();
-    const sessionRepo = new SqliteSessionRepository(db);
-    const messageRepo = new SqliteMessageRepository(db);
-    const toolUseRepo = new SqliteToolUseRepository(db);
-    const extractionStateRepo = new SqliteExtractionStateRepository(db);
+    const resolver = (deps.createDriveResolver ?? createDriveResolver)();
+    const syncService = deps.createSyncService?.({ db, resolver }) ?? (() => {
+      const sessionSource = new FileSystemSessionSource({ projectNameResolver: resolver });
+      const eventParser = new JsonlEventParser();
+      const sessionRepo = new SqliteSessionRepository(db);
+      const messageRepo = new SqliteMessageRepository(db);
+      const toolUseRepo = new SqliteToolUseRepository(db);
+      const extractionStateRepo = new SqliteExtractionStateRepository(db);
 
-    const syncService = new SyncService(
-      sessionSource, eventParser, sessionRepo, messageRepo,
-      toolUseRepo, extractionStateRepo, db,
-      new ProcessAbortSignal(), new FileCheckpointManager(),
-      new PatternRedactor(),
-    );
+      return new SyncService(
+        sessionSource, eventParser, sessionRepo, messageRepo,
+        toolUseRepo, extractionStateRepo, db,
+        new ProcessAbortSignal(), new FileCheckpointManager(),
+        new PatternRedactor(),
+      );
+    })();
 
     if (options.fixNames) {
       reporter.log("Fixing project names...");
@@ -124,9 +129,9 @@ export async function executeSyncCommand(
     } as any;
 
     const result = await syncService.sync(syncOptions);
-    bulkOperationCheckpoint(db);
+    (deps.bulkOperationCheckpoint ?? bulkOperationCheckpoint)(db);
     reporter.stop();
-    reportResults(result, startTime, options);
+    (deps.reportResults ?? reportResults)(result, startTime, options);
 
     // Git Remote Sync is Phase 38 work. Keep it opt-in until its threat model,
     // event envelope, conflict semantics, and privacy gates are finished.
@@ -175,11 +180,11 @@ export async function executeSyncCommand(
 
     // Memory file sync (after session extraction)
 
-    const memoryResult = await runMemoryFileSync(db, options);
-    if (memoryResult) reportMemoryFileResults(memoryResult, options);
+    const memoryResult = await (deps.runMemoryFileSync ?? runMemoryFileSync)(db, options);
+    if (memoryResult) (deps.reportMemoryFileResults ?? reportMemoryFileResults)(memoryResult, options);
 
     // Ambient context generation (after memory files are indexed)
-    if (!options.dryRun) await runAmbientContextGeneration(db, options);
+    if (!options.dryRun) await (deps.runAmbientContextGeneration ?? runAmbientContextGeneration)(db, options);
 
     const syncExitCode = (result.errors.length > 0 || result.aborted) ? 1 : 0;
 
@@ -187,7 +192,7 @@ export async function executeSyncCommand(
     if (options.embed && !options.dryRun) {
       const isBackground = process.env.MEMORY_EMBED_BACKGROUND === "1";
       try {
-        await runEmbeddingPass(db, options);
+        await (deps.runEmbeddingPass ?? runEmbeddingPass)(db, options);
       } catch (embeddingError) {
         if (options.json) {
           console.error(formatErrorJson(
@@ -202,8 +207,12 @@ export async function executeSyncCommand(
         return { exitCode: 1 };
       } finally {
         if (isBackground) {
-          const { removeLock } = await import("../../../../infrastructure/embedding/background-embedder.js");
-          removeLock();
+          if (deps.removeBackgroundLock) {
+            deps.removeBackgroundLock();
+          } else {
+            const { removeLock } = await import("../../../../infrastructure/embedding/background-embedder.js");
+            removeLock();
+          }
         }
       }
     }
@@ -211,11 +220,11 @@ export async function executeSyncCommand(
     return { exitCode: syncExitCode };
   } catch (error) {
     reporter.stop();
-    handleError(error, options);
+    (deps.handleError ?? handleError)(error, options);
     return { exitCode: 1 };
   } finally {
-    unregisterCleanup(cleanupFn);
-    closeDatabase(db);
+    (deps.unregisterCleanup ?? unregisterCleanup)(cleanupFn);
+    closeDb(db);
   }
 }
 

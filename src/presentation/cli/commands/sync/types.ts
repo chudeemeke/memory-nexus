@@ -46,6 +46,46 @@ export interface RemoteSyncer {
  * canonical test-isolation seam for command orchestration.
  */
 export interface SyncCommandDeps {
+  /** Override background-mode handling */
+  handleBackgroundMode?: (options: SyncCommandOptions) => Promise<import("../../command-result.js").CommandResult>;
+  /** Override process signal setup */
+  setupSignalHandlers?: () => void;
+  /** Override checkpoint presence check */
+  hasCheckpoint?: () => boolean;
+  /** Override checkpoint loading */
+  loadCheckpoint?: () => { completedSessions: number; totalSessions: number } | null;
+  /** Override progress reporter construction */
+  createProgressReporter?: (options: SyncCommandOptions) => {
+    log(message: string): void;
+    start(total: number): void;
+    update(current: number, sessionId?: string): void;
+    stop(): void;
+  };
+  /** Override database path resolution */
+  getDefaultDbPath?: () => string;
+  /** Override dry-run execution */
+  executeDryRun?: typeof import("./helpers.js").executeDryRun;
+  /** Override error handling */
+  handleError?: typeof import("./helpers.js").handleError;
+  /** Override text/JSON result reporting */
+  reportResults?: typeof import("./helpers.js").reportResults;
+  /** Override drive resolver creation */
+  createDriveResolver?: typeof import("./helpers.js").createDriveResolver;
+  /** Override database initialization */
+  initializeDatabase?: typeof import("../../../../infrastructure/database/index.js").initializeDatabase;
+  /** Override database close */
+  closeDatabase?: typeof import("../../../../infrastructure/database/index.js").closeDatabase;
+  /** Override bulk checkpoint flush */
+  bulkOperationCheckpoint?: typeof import("../../../../infrastructure/database/index.js").bulkOperationCheckpoint;
+  /** Override cleanup registration */
+  registerCleanup?: typeof import("../../../../infrastructure/signals/index.js").registerCleanup;
+  /** Override cleanup unregistration */
+  unregisterCleanup?: typeof import("../../../../infrastructure/signals/index.js").unregisterCleanup;
+  /** Override sync service construction */
+  createSyncService?: (deps: { db: import("bun:sqlite").Database; resolver: unknown }) => {
+    fixProjectNames: (resolver: unknown) => Promise<number>;
+    sync: (options: import("../../../../application/services/index.js").SyncOptions) => Promise<import("../../../../application/services/index.js").SyncResult>;
+  };
   /** Override config loading */
   loadConfig?: () => import("../../../../infrastructure/hooks/config-manager.js").MemoryConfig;
   /** Override remote syncer construction */
@@ -54,6 +94,16 @@ export interface SyncCommandDeps {
   rebuildProjections?: (db: import("bun:sqlite").Database) => Promise<void>;
   /** Explicitly enable the unfinished Phase 38 remote-sync prototype */
   experimentalRemoteSync?: boolean;
+  /** Override memory file sync */
+  runMemoryFileSync?: typeof import("./memory-files.js").runMemoryFileSync;
+  /** Override memory file sync reporting */
+  reportMemoryFileResults?: typeof import("./memory-files.js").reportMemoryFileResults;
+  /** Override ambient context generation */
+  runAmbientContextGeneration?: typeof import("./ambient.js").runAmbientContextGeneration;
+  /** Override embedding pass */
+  runEmbeddingPass?: typeof import("./embedding-pass.js").runEmbeddingPass;
+  /** Override background embedding lock removal */
+  removeBackgroundLock?: () => void;
 }
 
 /**
