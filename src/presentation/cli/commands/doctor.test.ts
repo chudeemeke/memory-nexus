@@ -243,6 +243,97 @@ describe("doctor command", () => {
             const output = formatHealthResult(neverRunResult, false);
             expect(output).toContain("never");
         });
+
+        it("formats singular and sub-minute relative hook times", () => {
+            const oneDayResult: HealthCheckResult = {
+                ...healthyResult,
+                hooks: {
+                    ...healthyResult.hooks,
+                    lastRun: new Date(Date.now() - 24 * 60 * 60 * 1000),
+                },
+            };
+            const oneMinuteResult: HealthCheckResult = {
+                ...healthyResult,
+                hooks: {
+                    ...healthyResult.hooks,
+                    lastRun: new Date(Date.now() - 60 * 1000),
+                },
+            };
+            const justNowResult: HealthCheckResult = {
+                ...healthyResult,
+                hooks: {
+                    ...healthyResult.hooks,
+                    lastRun: new Date(),
+                },
+            };
+
+            expect(formatHealthResult(oneDayResult, false)).toContain("1 day ago");
+            expect(formatHealthResult(oneMinuteResult, false)).toContain("1 minute ago");
+            expect(formatHealthResult(justNowResult, false)).toContain("just now");
+        });
+
+        it("formats zero-size databases and unknown integrity distinctly", () => {
+            const result: HealthCheckResult = {
+                ...healthyResult,
+                database: {
+                    exists: true,
+                    readable: true,
+                    writable: true,
+                    integrity: "unknown",
+                    size: 0,
+                },
+            };
+
+            const output = formatHealthResult(result, false);
+            expect(output).toContain("0 B");
+            expect(output).toContain("unknown");
+        });
+
+        it("counts unreadable, unwritable, source permission, and LLM extraction failures", () => {
+            const result: HealthCheckResult = {
+                ...healthyResult,
+                database: {
+                    exists: true,
+                    readable: false,
+                    writable: false,
+                    integrity: "corrupted",
+                    size: 1000,
+                },
+                permissions: {
+                    configDir: true,
+                    logsDir: true,
+                    sourceDir: false,
+                },
+                llmExtraction: {
+                    ready: false,
+                    provider: "openai",
+                    model: "gpt-4.1-mini",
+                    readyReason: "API key missing",
+                },
+            };
+
+            const output = formatHealthResult(result, false);
+            expect(output).toContain("CORRUPTED");
+            expect(output).toContain("Source directory");
+            expect(output).toContain("API key missing");
+            expect(output).toContain("issues found");
+        });
+
+        it("prints LLM extraction note when readiness is deferred but acceptable", () => {
+            const result: HealthCheckResult = {
+                ...healthyResult,
+                llmExtraction: {
+                    ready: true,
+                    provider: "claude-cli",
+                    model: "claude-cli-print",
+                    readyReason: "Verified at extraction time",
+                },
+            };
+
+            const output = formatHealthResult(result, false);
+            expect(output).toContain("LLM Fact Extraction");
+            expect(output).toContain("Verified at extraction time");
+        });
     });
 
     describe("attemptFixes", () => {
