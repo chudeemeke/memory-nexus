@@ -15,7 +15,9 @@ import {
     initializeDatabaseSafe,
     closeDatabase,
     checkpointDatabase,
+    bulkOperationCheckpoint,
     getDefaultDbPath,
+    loadSqliteVecExtension,
     type DatabaseConfig,
 } from "./connection.js";
 import { ErrorCode, MemoryError } from "../../domain/index.js";
@@ -201,6 +203,26 @@ describe("Database Connection", () => {
             }
             // If WAL file doesn't exist, checkpoint succeeded
         });
+
+        test("closes even when checkpoint pragmas fail", () => {
+            const calls: string[] = [];
+            const fakeDb = {
+                exec: (sql: string) => {
+                    calls.push(sql);
+                    throw new Error("pragma failed");
+                },
+                close: () => {
+                    calls.push("close");
+                },
+            };
+
+            expect(() => closeDatabase(fakeDb as unknown as Database)).not.toThrow();
+            expect(calls).toEqual([
+                "PRAGMA wal_checkpoint(TRUNCATE);",
+                "PRAGMA journal_mode = DELETE;",
+                "close",
+            ]);
+        });
     });
 
     describe("checkpointDatabase", () => {
@@ -222,6 +244,39 @@ describe("Database Connection", () => {
 
             // Should not throw
             expect(() => checkpointDatabase(db)).not.toThrow();
+        });
+    });
+
+    describe("bulkOperationCheckpoint", () => {
+        test("returns checkpoint counts from SQLite", () => {
+            const dbPath = createTempDbPath();
+            tempPaths.push(dbPath);
+
+            const { db } = initializeDatabase({
+                path: dbPath,
+                walMode: true,
+            });
+            openDbs.push(db);
+
+            const result = bulkOperationCheckpoint(db);
+
+            expect(typeof result.busy).toBe("number");
+            expect(typeof result.log).toBe("number");
+            expect(typeof result.checkpointed).toBe("number");
+        });
+
+        test("falls back to zero counts when SQLite returns no row", () => {
+            const fakeDb = {
+                query: () => ({
+                    get: () => null,
+                }),
+            };
+
+            expect(bulkOperationCheckpoint(fakeDb as unknown as Database)).toEqual({
+                busy: 0,
+                log: 0,
+                checkpointed: 0,
+            });
         });
     });
 
@@ -592,9 +647,6 @@ describe("Database Connection", () => {
         });
 
         test("loadSqliteVecExtension returns false for databases where load fails", () => {
-            // Import the helper to test it directly
-            const { loadSqliteVecExtension } = require("./connection.js");
-
             // Create a raw database without any setup
             const rawDb = new Database(":memory:");
             openDbs.push(rawDb);
@@ -604,6 +656,11 @@ describe("Database Connection", () => {
             expect(typeof result).toBe("boolean");
             // In our env it should succeed (sqlite-vec is installed)
             expect(result).toBe(true);
+        });
+
+        test("loadSqliteVecExtension returns false when sqlite-vec rejects the database handle", () => {
+            const result = loadSqliteVecExtension({} as Database);
+            expect(result).toBe(false);
         });
     });
 
