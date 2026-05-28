@@ -96,6 +96,15 @@ describe("BriefRelatedFormatter", () => {
     expect(output).toContain("1 hop");
   });
 
+  it("uses an unknown source fallback and returns empty output for no related sessions", () => {
+    const formatter = createRelatedFormatter("brief", false);
+
+    const output = formatter.formatRelated([createRelatedSession()]);
+
+    expect(output).toContain("Related to session unknown...");
+    expect(formatter.formatRelated([])).toBe("");
+  });
+
   it("should show 2-hop relationships", () => {
     const formatter = createRelatedFormatter("brief", false);
     const related: RelatedSession[] = [
@@ -226,6 +235,15 @@ describe("DetailedRelatedFormatter", () => {
     expect(output).toContain("=".repeat(40));
   });
 
+  it("uses an unknown source fallback and returns empty output for no detailed sessions", () => {
+    const formatter = createRelatedFormatter("detailed", false);
+
+    const output = formatter.formatRelated([createRelatedSession()]);
+
+    expect(output).toContain("Related to session unknown...");
+    expect(formatter.formatRelated([])).toBe("");
+  });
+
   it("should show full session details", () => {
     const formatter = createRelatedFormatter("detailed", false);
     const related: RelatedSession[] = [
@@ -324,6 +342,15 @@ describe("JsonRelatedFormatter", () => {
     expect(parsed.sourceId).toBe("abc123");
     expect(Array.isArray(parsed.related)).toBe(true);
     expect(parsed.related).toHaveLength(1);
+  });
+
+  it("uses unknown source fallback in JSON mode", () => {
+    const formatter = createRelatedFormatter("json", false);
+
+    const parsed = JSON.parse(formatter.formatRelated([]));
+
+    expect(parsed.sourceId).toBe("unknown");
+    expect(parsed.related).toEqual([]);
   });
 
   it("should include all expected fields", () => {
@@ -500,6 +527,17 @@ describe("VerboseRelatedFormatter", () => {
 
     expect(output).toContain("Error: Test error with stack");
     expect(output).toContain("at"); // Stack trace contains "at"
+  });
+
+  it("omits execution timing when absent and handles verbose errors without stacks", () => {
+    const formatter = createRelatedFormatter("verbose", false);
+    const error = new Error("no stack");
+    error.stack = undefined;
+
+    const output = formatter.formatRelated([createRelatedSession()]);
+
+    expect(output).not.toContain("=== Execution Details ===");
+    expect(formatter.formatError(error)).toBe("Error: no stack\n");
   });
 });
 

@@ -185,6 +185,25 @@ describe("ShowFormatter", () => {
       expect(output).toContain("5 lines");
     });
 
+    test("skips inline tool markers when referenced tool records are missing", () => {
+      const formatter = createShowFormatter("default", false);
+      const detail = createSessionDetail({
+        messages: [
+          createTestMessage({
+            role: "assistant",
+            content: "I called a tool that is no longer present in storage.",
+            toolUseIds: ["missing-tool"],
+          }),
+        ],
+        toolUses: new Map(),
+      });
+
+      const output = formatter.formatSession(detail);
+
+      expect(output).toContain("I called a tool");
+      expect(output).not.toContain("[missing-tool");
+    });
+
     test("handles ongoing session (no end time)", () => {
       const formatter = createShowFormatter("default", false);
       const session = createTestSession({
@@ -243,6 +262,15 @@ describe("ShowFormatter", () => {
 
       expect(summary).toContain("config.json");
       expect(summary).toContain("3 lines");
+    });
+
+    test("falls back to the original path when a path ends with a separator", () => {
+      const tool = createTestToolUse({
+        name: "Write",
+        input: { file_path: "C:\\Projects\\memory\\" },
+      });
+
+      expect(summarizeToolResult(tool)).toBe("C:\\Projects\\memory\\");
     });
 
     test("handles Read tool without a result", () => {
@@ -488,6 +516,25 @@ describe("ShowFormatter", () => {
       expect(output).toContain("Status: success");
       expect(output).not.toContain("Result:");
     });
+
+    test("skips detailed tool output when referenced tool records are missing", () => {
+      const formatter = createShowFormatter("tools", false);
+      const detail = createSessionDetail({
+        messages: [
+          createTestMessage({
+            role: "assistant",
+            content: "Tool record missing.",
+            toolUseIds: ["missing-tool"],
+          }),
+        ],
+        toolUses: new Map(),
+      });
+
+      const output = formatter.formatSession(detail);
+
+      expect(output).toContain("Tool record missing.");
+      expect(output).not.toContain("[TOOL:");
+    });
   });
 
   describe("JsonShowFormatter", () => {
@@ -642,6 +689,28 @@ describe("ShowFormatter", () => {
       expect(errorOutput).toContain("verbose failure");
       expect(errorOutput).toContain("at");
       expect(formatter.formatNotFound("missing-verbose")).toContain("missing-verbose");
+    });
+
+    test("handles verbose errors without stacks and missing tool records", () => {
+      const formatter = createShowFormatter("verbose", false);
+      const error = new Error("no stack");
+      error.stack = undefined;
+      const detail = createSessionDetail({
+        messages: [
+          createTestMessage({
+            role: "assistant",
+            content: "Verbose missing tool.",
+            toolUseIds: ["missing-tool"],
+          }),
+        ],
+        toolUses: new Map(),
+      });
+
+      const output = formatter.formatSession(detail);
+
+      expect(output).toContain("Verbose missing tool.");
+      expect(output).not.toContain("[TOOL:");
+      expect(formatter.formatError(error)).toBe("Error: no stack\n");
     });
   });
 
