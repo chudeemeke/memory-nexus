@@ -53,6 +53,25 @@ export interface BrowseCommandDeps {
   related?: typeof executeRelatedCommand;
 }
 
+interface ResolvedBrowseCommandDeps {
+  dbPath: string;
+  show: typeof executeShowCommand;
+  search: typeof executeSearchCommand;
+  context: typeof executeContextCommand;
+  related: typeof executeRelatedCommand;
+}
+
+function resolveBrowseDeps(deps: BrowseCommandDeps): ResolvedBrowseCommandDeps {
+  return {
+    dbPath: getDefaultDbPath(),
+    show: executeShowCommand,
+    search: executeSearchCommand,
+    context: executeContextCommand,
+    related: executeRelatedCommand,
+    ...deps,
+  };
+}
+
 /**
  * Create the browse command for Commander.js.
  *
@@ -92,13 +111,10 @@ export async function executeBrowseCommand(
     return { exitCode: 1 };
   }
 
-  const showFn = deps.show ?? executeShowCommand;
-  const searchFn = deps.search ?? executeSearchCommand;
-  const contextFn = deps.context ?? executeContextCommand;
-  const relatedFn = deps.related ?? executeRelatedCommand;
-
-  const limit = parseInt(options.limit ?? "100", 10);
-  const dbPath = deps.dbPath ?? getDefaultDbPath();
+  const resolved = resolveBrowseDeps(deps);
+  const resolvedOptions = { limit: "100", ...options };
+  const limit = parseInt(resolvedOptions.limit, 10);
+  const dbPath = resolved.dbPath;
   const { db } = initializeDatabase({ path: dbPath });
 
   try {
@@ -119,12 +135,12 @@ export async function executeBrowseCommand(
     // Dispatch to appropriate command via injected dispatchers
     switch (result.action) {
       case "show":
-        await showFn(result.sessionId, {});
+        await resolved.show(result.sessionId, {});
         break;
 
       case "search":
         // Search within session - launch search with session filter
-        await searchFn("*", { session: result.sessionId });
+        await resolved.search("*", { session: result.sessionId });
         break;
 
       case "context": {
@@ -134,13 +150,13 @@ export async function executeBrowseCommand(
         const session = await repo.findById(result.sessionId);
         closeDatabase(db2);
         if (session) {
-          await contextFn(session.projectPath.projectName, {});
+          await resolved.context(session.projectPath.projectName, {});
         }
         break;
       }
 
       case "related":
-        await relatedFn(result.sessionId, {});
+        await resolved.related(result.sessionId, {});
         break;
     }
 
