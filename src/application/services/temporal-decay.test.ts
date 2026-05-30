@@ -135,6 +135,21 @@ describe("applyTemporalDecay()", () => {
             expect(decayed[i].decayedScore).toBeGreaterThanOrEqual(decayed[i + 1].decayedScore);
         }
     });
+
+    test("uses default half-life and current time when optional arguments are omitted", () => {
+        const nowish = new Date();
+        const results: DecayableResult[] = [
+            { rowid: 1, score: 1.0 },
+        ];
+        const timestamps = new Map<number, Date>([
+            [1, new Date(nowish.getTime() - 30 * 24 * 60 * 60 * 1000)],
+        ]);
+
+        const decayed = applyTemporalDecay(results, timestamps);
+
+        expect(decayed[0].decayedScore).toBeGreaterThan(0.49);
+        expect(decayed[0].decayedScore).toBeLessThanOrEqual(0.5);
+    });
 });
 
 describe("applyTemporalDecayWithExemptions()", () => {
@@ -246,6 +261,21 @@ describe("applyTemporalDecayWithExemptions()", () => {
             [], new Map(), new Set(), 30, now
         );
         expect(decayed).toEqual([]);
+    });
+
+    test("uses default half-life and current time when optional arguments are omitted", () => {
+        const nowish = new Date();
+        const results: DecayableResult[] = [
+            { rowid: 1, score: 1.0 },
+        ];
+        const timestamps = new Map<number, Date>([
+            [1, new Date(nowish.getTime() - 30 * 24 * 60 * 60 * 1000)],
+        ]);
+
+        const decayed = applyTemporalDecayWithExemptions(results, timestamps, new Set());
+
+        expect(decayed[0].decayedScore).toBeGreaterThan(0.49);
+        expect(decayed[0].decayedScore).toBeLessThanOrEqual(0.5);
     });
 });
 

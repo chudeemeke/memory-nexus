@@ -1010,6 +1010,9 @@ describe("doctor command", () => {
         it("classifies path dialects for Windows and Unix hosts without reading the active platform", () => {
             expect(isMixedPathDialect("/home/destiny/project", "win32")).toBe(true);
             expect(isMixedPathDialect("/mnt/c/Users/Destiny/project", "win32")).toBe(true);
+            expect(isMixedPathDialect("/var/lib/memory", "win32")).toBe(true);
+            expect(isMixedPathDialect("/usr/local/bin", "win32")).toBe(true);
+            expect(isMixedPathDialect("/opt/memory", "win32")).toBe(true);
             expect(isMixedPathDialect("C:\\Projects\\memory", "win32")).toBe(false);
             expect(isMixedPathDialect("C:\\Projects\\memory", "linux")).toBe(true);
             expect(isMixedPathDialect("/home/destiny/project", "linux")).toBe(false);
@@ -1089,6 +1092,99 @@ describe("doctor command", () => {
                 expect(parsed.portability.staleLocks).toContain(join(portabilityDir, "embedding.lock"));
                 expect(parsed.portability.sqliteVecAvailable).toBe(false);
                 expect(parsed.portability.fixedStaleLocks).toBe(true);
+            } finally {
+                try {
+                    rmSync(portabilityDir, { recursive: true, force: true, maxRetries: 10, retryDelay: 50 });
+                } catch {
+                    // Best-effort cleanup on Windows; SQLite can release handles late.
+                }
+            }
+        });
+
+        it("deduplicates repeated orphan paths in portability JSON", async () => {
+            const portabilityDir = join(tmpdir(), `doctor-portability-dupe-${Date.now()}-${Math.random().toString(36).slice(2)}`);
+            const portabilityDb = join(portabilityDir, "memory.db");
+            mkdirSync(portabilityDir, { recursive: true });
+            const { db } = initializeDatabase({ path: portabilityDb });
+            try {
+                for (const id of ["portable-dupe-1", "portable-dupe-2"]) {
+                    db.run(
+                        `INSERT INTO sessions (id, project_path_encoded, project_path_decoded, project_name, start_time)
+                         VALUES (?, ?, ?, ?, ?)`,
+                        [id, `encoded-${id}`, "/home/destiny/repeated-missing-project", "missing-project", new Date().toISOString()]
+                    );
+                }
+            } finally {
+                closeDatabase(db);
+            }
+
+            consoleOutput = [];
+            console.log = (msg: string) => consoleOutput.push(msg);
+
+            try {
+                const result = await runPortabilityDiagnostics({ portability: true, json: true, fix: true }, {
+                    healthOverrides: {
+                        dbPath: portabilityDb,
+                        sourceDir: portabilityDir,
+                    },
+                    gatherStatus: async () => createStatusInfo({
+                        database: { exists: true, readable: true, writable: true, integrity: "ok", size: 1 },
+                        permissions: { configDir: true, logsDir: true, sourceDir: true },
+                        hooks: { installed: true, enabled: true, lastRun: null },
+                        config: { valid: true, issues: [] },
+                        embedding: {
+                            configured: true,
+                            provider: "local",
+                            model: "test",
+                            dimensions: 384,
+                            enabled: true,
+                            ready: true,
+                        },
+                        sqliteVec: { available: true, version: "v0.1.9" },
+                        searchCapability: {
+                            fts5: true,
+                            sqliteVec: true,
+                            embeddedCount: 0,
+                            totalMessages: 0,
+                            coveragePercent: 0,
+                            defaultMode: "auto",
+                            vectorReady: false,
+                        },
+                    }),
+                });
+
+                const parsed = JSON.parse(consoleOutput.join("\n"));
+                expect(result.exitCode).toBe(1);
+                expect(parsed.portability.orphanedPaths).toEqual(["/home/destiny/repeated-missing-project"]);
+            } finally {
+                try {
+                    rmSync(portabilityDir, { recursive: true, force: true, maxRetries: 10, retryDelay: 50 });
+                } catch {
+                    // Best-effort cleanup on Windows; SQLite can release handles late.
+                }
+            }
+        });
+
+        it("reports portability scan failures as JSON", async () => {
+            const portabilityDir = join(tmpdir(), `doctor-portability-corrupt-${Date.now()}-${Math.random().toString(36).slice(2)}`);
+            const portabilityDb = join(portabilityDir, "memory.db");
+            mkdirSync(portabilityDir, { recursive: true });
+            writeFileSync(portabilityDb, "not sqlite");
+
+            consoleOutput = [];
+            console.log = (msg: string) => consoleOutput.push(msg);
+
+            try {
+                const result = await runPortabilityDiagnostics({ portability: true, json: true }, {
+                    healthOverrides: {
+                        dbPath: portabilityDb,
+                        sourceDir: portabilityDir,
+                    },
+                });
+
+                const parsed = JSON.parse(consoleOutput.join("\n"));
+                expect(result.exitCode).toBe(2);
+                expect(parsed.error).toContain("Portability scan failed");
             } finally {
                 try {
                     rmSync(portabilityDir, { recursive: true, force: true, maxRetries: 10, retryDelay: 50 });
