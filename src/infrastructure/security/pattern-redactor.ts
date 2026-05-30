@@ -45,7 +45,7 @@ const SECRET_PATTERNS: SecretPattern[] = [
   {
     kind: "env_secret",
     pattern: /\b([A-Z][A-Z0-9_]*(?:KEY|TOKEN|SECRET|PASSWORD|PASS|CREDENTIAL)[A-Z0-9_]*)\s*=\s*(?:"[^"]+"|'[^']+'|[^\s]+)/g,
-    preservePrefix: (match) => `${match.split("=")[0]?.trim() ?? "SECRET"}=`,
+    preservePrefix: (match) => `${match.split("=")[0]!.trim()}=`,
   },
 ];
 

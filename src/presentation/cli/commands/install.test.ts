@@ -18,6 +18,7 @@ import { homedir } from "node:os";
 import {
     executeInstallCommand,
     findHookScriptSource,
+    warnStaleHookReferences,
     type InstallCommandDeps,
 } from "./install.js";
 import type { PathOverrides } from "../../../infrastructure/hooks/settings-manager.js";
@@ -211,6 +212,32 @@ describe("install command", () => {
 
             const allError = errorOutput.join("\n");
             expect(allError).not.toContain("Stale memory-nexus hook references detected");
+        });
+
+        test("stale scanner ignores settings without hook collections", () => {
+            mkdirSync(dirname(testSettingsPath), { recursive: true });
+            writeFileSync(testSettingsPath, JSON.stringify({ theme: "dark" }));
+
+            warnStaleHookReferences(hookOverrides);
+
+            expect(errorOutput.join("\n")).not.toContain("Stale memory-nexus hook references detected");
+        });
+
+        test("stale scanner skips non-array hook collections and configs without hooks", () => {
+            mkdirSync(dirname(testSettingsPath), { recursive: true });
+            writeFileSync(
+                testSettingsPath,
+                JSON.stringify({
+                    hooks: {
+                        SessionEnd: "not-an-array",
+                        PreCompact: [{ matcher: "auto" }],
+                    },
+                })
+            );
+
+            warnStaleHookReferences(hookOverrides);
+
+            expect(errorOutput.join("\n")).not.toContain("Stale memory-nexus hook references detected");
         });
     });
 

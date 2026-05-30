@@ -152,6 +152,22 @@ describe("Export Command", () => {
       expect(consoleErrors.join("\n")).toContain("Database does not exist");
     });
 
+    test("--json outputs an error envelope when export writing fails", async () => {
+      const result = await executeExportCommand(testDb.dir, { json: true });
+
+      expect(result.exitCode).toBe(1);
+      const output = JSON.parse(consoleLogs.join(""));
+      expect(output.success).toBe(false);
+      expect(output.error).toBeTruthy();
+    });
+
+    test("default mode reports export writing failures to stderr", async () => {
+      const result = await executeExportCommand(testDb.dir);
+
+      expect(result.exitCode).toBe(1);
+      expect(consoleErrors.join("\n")).toContain("Error:");
+    });
+
     test("includes file size in default output", async () => {
       const outputPath = join(testDb.dir, "export.json");
 

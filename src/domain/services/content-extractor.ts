@@ -59,8 +59,7 @@ export class ContentExtractor {
 
     if (!ContentExtractor.isMessageType(data.type)) return null;
 
-    const role = ContentExtractor.mapRole(data.type);
-    if (!role) return null;
+    const role = data.type === "human" ? "user" : "assistant";
 
     const content = ContentExtractor.extractTextContent(data.message?.content);
     if (!content) return null;
@@ -149,25 +148,19 @@ export class ContentExtractor {
     return type === "human" || type === "assistant";
   }
 
-  private static mapRole(type?: string): "user" | "assistant" | null {
-    if (type === "human") return "user";
-    if (type === "assistant") return "assistant";
-    return null;
-  }
-
   private static extractTextContent(
     content?: string | ContentBlock[]
   ): string | null {
     if (!content) return null;
 
     if (typeof content === "string") {
-      return content.length > 0 ? content : null;
+      return content;
     }
 
     if (Array.isArray(content)) {
       const textParts = content
         .filter((block) => block.type === "text" && block.text)
-        .map((block) => block.text ?? "");
+        .map((block) => block.text!);
 
       const combined = textParts.join("\n");
       return combined.length > 0 ? combined : null;

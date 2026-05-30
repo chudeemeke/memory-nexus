@@ -8,7 +8,7 @@ import { describe, it, expect, beforeEach, afterEach, spyOn } from "bun:test";
 import { mkdtempSync, rmSync } from "fs";
 import { tmpdir } from "os";
 import { join } from "path";
-import { createListCommand, executeListCommand } from "./list.js";
+import { createListCommand, executeListCommand, runListInternal } from "./list.js";
 import {
   initializeDatabase,
   closeDatabase,
@@ -273,6 +273,21 @@ describe("executeListCommand date parsing", () => {
 
     expect(result.exitCode).toBe(1);
     expect(consoleErrorSpy).toHaveBeenCalled();
+  });
+
+  it("runListInternal emits text error for invalid --since date", async () => {
+    const result = await runListInternal({ since: "not-a-real-date-at-all" });
+
+    expect(result.exitCode).toBe(1);
+    expect(consoleErrorSpy).toHaveBeenCalled();
+  });
+
+  it("runListInternal emits JSON error for invalid --before date", async () => {
+    const result = await runListInternal({ before: "not-a-real-date-at-all", json: true });
+
+    expect(result.exitCode).toBe(1);
+    const parsed = JSON.parse(String(consoleLogSpy.mock.calls[0]?.[0]));
+    expect(parsed.error.context.flag).toBe("before");
   });
 });
 

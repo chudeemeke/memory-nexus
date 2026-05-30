@@ -48,4 +48,19 @@ describe("PatternRedactor", () => {
     expect(result.text).toBe("key:\n[REDACTED:private_key]");
     expect(result.findings[0]?.kind).toBe("private_key");
   });
+
+  test("redacts circular JSON references without recursing forever", () => {
+    const redactor = new PatternRedactor();
+    const input: Record<string, unknown> = {
+      name: "cycle",
+    };
+    input.self = input;
+
+    const result = redactor.redactJson(input);
+
+    expect(result.value).toEqual({
+      name: "cycle",
+      self: "[REDACTED:circular]",
+    });
+  });
 });

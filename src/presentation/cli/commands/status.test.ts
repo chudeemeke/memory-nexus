@@ -214,6 +214,34 @@ describe("status command", () => {
             expect(status.hooks.backupExists).toBe(false);
         });
 
+        test("uses default path resolution when no gather options are provided", async () => {
+            const env = installEnvOverrides();
+            const root = join(tmpdir(), `memory-status-defaults-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`);
+            try {
+                env.set("XDG_CONFIG_HOME", join(root, "config"));
+                env.set("XDG_DATA_HOME", join(root, "data"));
+                env.set("HOME", join(root, "home"));
+                env.set("USERPROFILE", join(root, "home"));
+                mkdirSync(join(root, "config", "memory"), { recursive: true });
+                mkdirSync(join(root, "data", "memory", "logs"), { recursive: true });
+                mkdirSync(join(root, "home", ".claude", "projects"), { recursive: true });
+                const { db } = initializeDatabase({ path: join(root, "data", "memory", "memory.db") });
+                closeDatabase(db);
+
+                const status = await gatherStatus();
+
+                expect(status.config.autoSync).toBe(DEFAULT_CONFIG.autoSync);
+                expect(status.hooks.sessionEnd).toBe(false);
+            } finally {
+                env.cleanup();
+                try {
+                    rmSync(root, { recursive: true, force: true, maxRetries: 10, retryDelay: 50 });
+                } catch {
+                    // Best-effort cleanup on Windows.
+                }
+            }
+        });
+
         test("returns hook status when installed", async () => {
             installHooks(hookOverrides);
             mkdirSync(dirname(testHookScriptPath), { recursive: true });
@@ -727,6 +755,60 @@ describe("status command", () => {
                 env.cleanup();
                 rmSync(xdgRoot, { recursive: true, force: true });
             }
+        });
+
+        test("attemptFixes returns no messages for already healthy installed hooks", () => {
+            const messages = attemptFixes({
+                database: {
+                    exists: true,
+                    readable: true,
+                    writable: true,
+                    integrity: "ok",
+                    size: 1024,
+                },
+                permissions: {
+                    configDir: true,
+                    logsDir: true,
+                    sourceDir: true,
+                },
+                hooks: {
+                    installed: true,
+                    enabled: true,
+                    lastRun: null,
+                },
+                config: {
+                    valid: true,
+                    issues: [],
+                },
+                embedding: {
+                    configured: true,
+                    provider: "local",
+                    model: "test-model",
+                    dimensions: 384,
+                    enabled: true,
+                    ready: true,
+                },
+                sqliteVec: {
+                    available: true,
+                    version: "v0.1.9",
+                },
+                searchCapability: {
+                    fts5: true,
+                    sqliteVec: true,
+                    embeddedCount: 1,
+                    totalMessages: 1,
+                    coveragePercent: 100,
+                    defaultMode: "auto",
+                    vectorReady: true,
+                },
+                llmExtraction: {
+                    provider: "claude-cli",
+                    model: "claude-cli-print",
+                    ready: true,
+                },
+            }, false);
+
+            expect(messages).toEqual([]);
         });
 
         test("default dashboard prints applied fix messages when gatherer reports fixes", async () => {

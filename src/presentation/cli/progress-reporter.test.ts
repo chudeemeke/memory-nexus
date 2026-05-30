@@ -94,18 +94,31 @@ describe("isUnicodeSupported", () => {
 });
 
 describe("getBarCharacters", () => {
-  let savedMSYSTEM: string | undefined;
+  let savedEnv: Record<string, string | undefined>;
+  let savedPlatform: string;
 
   beforeEach(() => {
-    savedMSYSTEM = process.env.MSYSTEM;
+    savedEnv = {
+      MSYSTEM: process.env.MSYSTEM,
+      WT_SESSION: process.env.WT_SESSION,
+      TERMINUS_SUBLIME: process.env.TERMINUS_SUBLIME,
+      ConEmuTask: process.env.ConEmuTask,
+      TERM_PROGRAM: process.env.TERM_PROGRAM,
+      TERM: process.env.TERM,
+      TERMINAL_EMULATOR: process.env.TERMINAL_EMULATOR,
+    };
+    savedPlatform = process.platform;
   });
 
   afterEach(() => {
-    if (savedMSYSTEM === undefined) {
-      delete process.env.MSYSTEM;
-    } else {
-      process.env.MSYSTEM = savedMSYSTEM;
+    for (const [key, value] of Object.entries(savedEnv)) {
+      if (value === undefined) {
+        delete process.env[key];
+      } else {
+        process.env[key] = value;
+      }
     }
+    Object.defineProperty(process, "platform", { value: savedPlatform });
   });
 
   it("returns object with complete and incomplete properties", () => {
@@ -122,6 +135,20 @@ describe("getBarCharacters", () => {
     const chars = getBarCharacters();
     expect(chars.complete).toBe("\u2588");
     expect(chars.incomplete).toBe("\u2591");
+  });
+
+  it("returns ASCII fallback characters when Unicode is not supported", () => {
+    Object.defineProperty(process, "platform", { value: "win32" });
+    delete process.env.MSYSTEM;
+    delete process.env.WT_SESSION;
+    delete process.env.TERMINUS_SUBLIME;
+    delete process.env.ConEmuTask;
+    delete process.env.TERM_PROGRAM;
+    delete process.env.TERM;
+    delete process.env.TERMINAL_EMULATOR;
+    const chars = getBarCharacters();
+    expect(chars.complete).toBe("#");
+    expect(chars.incomplete).toBe("-");
   });
 });
 
@@ -290,6 +317,18 @@ describe("ProgressReporter", () => {
       reporter.stop();
 
       expect(logSpy).toHaveBeenCalledWith("  Processing: session-abc");
+      logSpy.mockRestore();
+    });
+
+    it("verbose mode logs explicit messages", () => {
+      const logSpy = spyOn(console, "log").mockImplementation(() => {});
+
+      const reporter = new TtyProgressReporter(true);
+      reporter.start(10);
+      reporter.log("checkpoint saved");
+      reporter.stop();
+
+      expect(logSpy).toHaveBeenCalledWith("checkpoint saved");
       logSpy.mockRestore();
     });
   });
@@ -695,6 +734,37 @@ describe("ModelDownloadReporter", () => {
       handler({ status: "downloading", file: "model.onnx", loaded: 5000000, total: 23000000 });
       handler({ status: "downloading", file: "model.onnx", loaded: 15000000, total: 23000000 });
       handler({ status: "ready", file: "model.onnx", loaded: 23000000, total: 23000000 });
+    }).not.toThrow();
+  });
+
+  it("TTY mode updates the tracked total when a larger download appears", () => {
+    Object.defineProperty(process.stdout, "isTTY", {
+      value: true,
+      writable: true,
+      configurable: true,
+    });
+
+    const handler = createModelDownloadHandler({});
+
+    expect(() => {
+      handler({ status: "downloading", file: "tokenizer.json", loaded: 1000000, total: 2000000 });
+      handler({ status: "downloading", file: "model.onnx", loaded: 5000000, total: 26000000 });
+      handler({ status: "ready", file: "model.onnx", loaded: 26000000, total: 26000000 });
+    }).not.toThrow();
+  });
+
+  it("TTY mode ignores zero-total download events before the bar starts", () => {
+    Object.defineProperty(process.stdout, "isTTY", {
+      value: true,
+      writable: true,
+      configurable: true,
+    });
+
+    const handler = createModelDownloadHandler({});
+
+    expect(() => {
+      handler({ status: "downloading", file: "config.json", loaded: 1000, total: 0 });
+      handler({ status: "ready", file: "config.json", loaded: 1000, total: 0 });
     }).not.toThrow();
   });
 

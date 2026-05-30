@@ -325,6 +325,26 @@ describe("settings-manager", () => {
             const settings = JSON.parse(readFileSync(testSettingsPath, "utf-8"));
             expect(settings.hooks).toBeUndefined();
         });
+
+        test("removes PreCompact-only memory hooks without requiring SessionEnd", () => {
+            mkdirSync(dirname(testSettingsPath), { recursive: true });
+            writeFileSync(
+                testSettingsPath,
+                JSON.stringify({
+                    hooks: {
+                        PreCompact: [
+                            { matcher: "auto", hooks: [{ type: "command", command: "bun run memory/hooks/sync-hook.js" }] },
+                        ],
+                    },
+                })
+            );
+
+            const result = uninstallHooks(overrides);
+
+            expect(result.success).toBe(true);
+            const settings = JSON.parse(readFileSync(testSettingsPath, "utf-8"));
+            expect(settings.hooks).toBeUndefined();
+        });
     });
 
     describe("checkHooksInstalled", () => {

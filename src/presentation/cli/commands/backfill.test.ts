@@ -356,6 +356,43 @@ describe("Backfill Command", () => {
       expect(output).not.toContain("Daily logs:");
     });
 
+    it("uses the built-in TTY progress bar when stderr is interactive", async () => {
+      const originalIsTTY = process.stderr.isTTY;
+      Object.defineProperty(process.stderr, "isTTY", {
+        value: true,
+        writable: true,
+        configurable: true,
+      });
+
+      try {
+        const result = await executeBackfillCommand(
+          { force: true, batch: "1" },
+          {
+            dryRun: async () => ({ unprocessedCount: 1, estimatedCost: 0.001 }),
+            backfill: async (opts) => {
+              opts?.onProgress?.({ current: 1, total: 1, sessionId: "session-tty-progress" });
+              return {
+                sessionsProcessed: 1,
+                sessionsFailed: 0,
+                sessionsSkipped: 0,
+                dailyLogsCreated: 0,
+                dailyLogsUpdated: 0,
+                errors: [],
+              };
+            },
+          },
+        );
+
+        expect(result.exitCode).toBe(0);
+      } finally {
+        Object.defineProperty(process.stderr, "isTTY", {
+          value: originalIsTTY,
+          writable: true,
+          configurable: true,
+        });
+      }
+    });
+
     it("displays daily log stats", async () => {
       await executeBackfillCommand(
         { force: true, batch: "50" },
