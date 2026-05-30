@@ -6,7 +6,7 @@
  * and text/JSON outputs for the extract CLI command.
  */
 
-import { describe, test, expect, beforeEach, afterEach, spyOn } from "bun:test";
+import { describe, test, expect, beforeEach, afterEach, spyOn, mock } from "bun:test";
 import * as connectionModule from "../../../infrastructure/database/connection.js";
 import { ClaudeCliExtractionProvider } from "../../../infrastructure/llm/claude-cli-extractor.js";
 import { Command } from "commander";
@@ -21,7 +21,9 @@ import { ProjectPath } from "../../../domain/value-objects/project-path.js";
 import { SqliteSessionRepository } from "../../../infrastructure/database/repositories/session-repository.js";
 import { SqliteMessageRepository } from "../../../infrastructure/database/repositories/message-repository.js";
 import { SqliteExtractionLogRepository } from "../../../infrastructure/database/repositories/extraction-log-repository.js";
-import { createExtractCommand, executeExtractCommand } from "./extract.js";
+import { DEFAULT_CONFIG } from "../../../infrastructure/hooks/config-manager.js";
+import type { IEmbeddingProvider } from "../../../domain/ports/embedding.js";
+import { createDefaultEmbedder, createExtractCommand, executeExtractCommand, ExtractProgress } from "./extract.js";
 
 describe("Extract CLI Command", () => {
   let db: Database;
@@ -107,6 +109,57 @@ describe("Extract CLI Command", () => {
     expect(cmd.options.some(o => o.long === "--json")).toBe(true);
     expect(cmd.options.some(o => o.long === "--quiet")).toBe(true);
   }, 15000);
+
+  test("ExtractProgress renders TTY updates, truncates long session names, and stops cleanly", () => {
+    const oldIsTty = process.stdout.isTTY;
+    const originalWrite = process.stdout.write;
+    const writes: string[] = [];
+
+    Object.defineProperty(process.stdout, "isTTY", {
+      value: true,
+      configurable: true,
+    });
+    process.stdout.write = ((chunk: string | Uint8Array) => {
+      writes.push(String(chunk));
+      return true;
+    }) as typeof process.stdout.write;
+
+    try {
+      const progress = new ExtractProgress(2);
+      progress.update("short-session");
+      progress.update("session-name-that-is-definitely-too-long-for-the-progress-line");
+      progress.stop();
+
+      expect(writes[0]).toContain("[0/2]");
+      expect(writes.join("\n")).toContain("short-session");
+      expect(writes.join("\n")).toContain("session-name-that-is-d...");
+      expect(writes[writes.length - 1]).toBe("\n");
+    } finally {
+      process.stdout.write = originalWrite;
+      Object.defineProperty(process.stdout, "isTTY", {
+        value: oldIsTty,
+        configurable: true,
+      });
+    }
+  });
+
+  test("createDefaultEmbedder builds and initializes the configured provider", async () => {
+    const embedder = await createDefaultEmbedder({
+      ...DEFAULT_CONFIG,
+      embedding: {
+        ...DEFAULT_CONFIG.embedding,
+        provider: "openai",
+        model: "text-embedding-3-small",
+        dimensions: 1536,
+        batchSize: 10,
+        apiKey: "test-key-not-secret",
+      },
+    });
+
+    expect(embedder.name).toBe("openai");
+    expect(embedder.isReady()).toBe(true);
+    await embedder.dispose();
+  });
 
   test("executeExtractCommand filters sessions and prints summaries (text mode)", async () => {
     // Populate session 1: 12 hours old
@@ -232,6 +285,76 @@ describe("Extract CLI Command", () => {
       const lastLog = consoleLogs[consoleLogs.length - 1];
       const parsed = JSON.parse(lastLog);
       expect(parsed.status).toBe("success");
+      expect(parsed.data.added).toBe(1);
+    } finally {
+      console.log = originalLog;
+    }
+  });
+
+  test("executeExtractCommand uses injected embedder factory when embeddings are enabled", async () => {
+    const fs = require("fs");
+    fs.writeFileSync(
+      join(tempDir, "config", "memory", "config.json"),
+      JSON.stringify({
+        embedding: {
+          enabled: true,
+          provider: "local",
+          model: "test-model",
+          dimensions: 1,
+          batchSize: 10,
+        },
+      })
+    );
+
+    const session = Session.create({
+      id: "session-embedder",
+      projectPath: ProjectPath.fromDecoded("C:\\Projects\\nexus"),
+      startTime: new Date()
+    });
+    await sessionRepo.save(session);
+    await messageRepo.save(
+      Message.create({ id: "msg-embedder", role: "user", content: "Embedding-backed extraction", timestamp: new Date() }),
+      "session-embedder"
+    );
+
+    const embedder = {
+      name: "mock-embedder",
+      model: "test-model",
+      dimensions: 1,
+      isReady: mock(() => true),
+      initialize: mock(() => Promise.resolve()),
+      embed: mock(() => Promise.resolve({ embedding: new Float32Array([1]), model: "test-model", dimensions: 1 })),
+      embedBatch: mock((values: string[]) =>
+        Promise.resolve(values.map(() => ({ embedding: new Float32Array([1]), model: "test-model", dimensions: 1 })))
+      ),
+      dispose: mock(() => Promise.resolve()),
+    } as IEmbeddingProvider;
+    const createEmbedder = mock(() => Promise.resolve(embedder));
+
+    const consoleLogs: string[] = [];
+    const originalLog = console.log;
+    console.log = (msg) => consoleLogs.push(String(msg));
+
+    try {
+      const result = await executeExtractCommand({
+        project: "nexus",
+        json: true,
+      }, {
+        dbPath: testDbPath,
+        eventLogPath: testLogPath,
+        createEmbedder,
+        mockExtractor: {
+          providerId: "mock-llm",
+          modelName: "mock-model",
+          extract: async () => [{ type: "observation", content: "Embedding path was used", confidence: 0.9 }],
+        },
+      });
+
+      expect(result.exitCode).toBe(0);
+      expect(createEmbedder).toHaveBeenCalled();
+      expect(embedder.isReady).toHaveBeenCalled();
+      expect(embedder.embedBatch).toHaveBeenCalled();
+      const parsed = JSON.parse(consoleLogs.join("\n"));
       expect(parsed.data.added).toBe(1);
     } finally {
       console.log = originalLog;
@@ -507,6 +630,57 @@ describe("Extract CLI Command", () => {
 
       expect(result.exitCode).toBe(0);
       expect(consoleLogs).toEqual([]);
+    } finally {
+      console.log = originalLog;
+    }
+  });
+
+  test("executeExtractCommand skips already logged sessions unless forced", async () => {
+    const session = Session.create({
+      id: "session-already-logged",
+      projectPath: ProjectPath.fromDecoded("C:\\Projects\\nexus"),
+      startTime: new Date()
+    });
+    await sessionRepo.save(session);
+    await messageRepo.save(
+      Message.create({ id: "msg-already-logged", role: "user", content: "Already extracted", timestamp: new Date() }),
+      "session-already-logged"
+    );
+    const logRepo = new SqliteExtractionLogRepository(db);
+    await logRepo.save({
+      sessionId: "session-already-logged",
+      mode: "manual",
+      factsAdded: 1,
+      factsUpdated: 0,
+      factsSuperseded: 0,
+      factsSkipped: 0,
+      provider: "mock-llm",
+      model: "mock-model",
+      tokensConsumed: 0,
+      extractedAt: new Date(),
+    });
+
+    const extract = mock(async () => [{ type: "learning" as const, content: "Should not run", confidence: 0.9 }]);
+    const consoleLogs: string[] = [];
+    const originalLog = console.log;
+    console.log = (msg, ...args) => consoleLogs.push([msg, ...args].map(String).join(" "));
+
+    try {
+      const result = await executeExtractCommand({
+        project: "nexus",
+      }, {
+        dbPath: testDbPath,
+        eventLogPath: testLogPath,
+        mockExtractor: {
+          providerId: "mock-llm",
+          modelName: "mock-model",
+          extract,
+        },
+      });
+
+      expect(result.exitCode).toBe(0);
+      expect(extract).not.toHaveBeenCalled();
+      expect(consoleLogs.join("\n")).toContain("No new sessions to extract for project: nexus");
     } finally {
       console.log = originalLog;
     }

@@ -15,7 +15,7 @@ import { SqliteFactRepository } from "../../../infrastructure/database/repositor
 import { SqliteExtractionLogRepository } from "../../../infrastructure/database/repositories/extraction-log-repository.js";
 import { SqliteSessionRepository } from "../../../infrastructure/database/repositories/session-repository.js";
 import { SqliteMessageRepository } from "../../../infrastructure/database/repositories/message-repository.js";
-import { loadConfig } from "../../../infrastructure/hooks/config-manager.js";
+import { loadConfig, type MemoryConfig } from "../../../infrastructure/hooks/config-manager.js";
 import { parseDuration } from "./purge.js";
 import { ExtractionPipeline } from "../../../application/services/extraction-pipeline.js";
 import type { IExtractionProvider } from "../../../domain/ports/extraction.js";
@@ -39,13 +39,14 @@ export interface ExtractCommandDeps {
   dbPath?: string;
   mockExtractor?: IExtractionProvider;
   mockEmbedder?: IEmbeddingProvider;
+  createEmbedder?: (config: MemoryConfig) => Promise<IEmbeddingProvider | undefined>;
   eventLogPath?: string;
 }
 
 /**
  * Custom Progress indicator for fact extraction.
  */
-class ExtractProgress {
+export class ExtractProgress {
   private current = 0;
   private total = 0;
   private isTty = process.stdout.isTTY;
@@ -85,6 +86,16 @@ class ExtractProgress {
       process.stdout.write("\n");
     }
   }
+}
+
+export async function createDefaultEmbedder(
+  config: MemoryConfig
+): Promise<IEmbeddingProvider | undefined> {
+  const { EmbeddingProviderFactory } = await import("../../../infrastructure/embedding/embedding-provider-factory.js");
+  const factory = new EmbeddingProviderFactory();
+  const embedder = factory.create(config.embedding);
+  await embedder.initialize();
+  return embedder;
 }
 
 export function createExtractCommand(): Command {
@@ -139,12 +150,7 @@ export async function executeExtractCommand(
   let embedder: IEmbeddingProvider | undefined = deps.mockEmbedder;
   if (!deps.mockEmbedder && config.embedding?.enabled) {
     try {
-      const { EmbeddingProviderFactory } = await import("../../../infrastructure/embedding/embedding-provider-factory.js");
-      const factory = new EmbeddingProviderFactory();
-      embedder = factory.create(config.embedding);
-      if (embedder) {
-        await embedder.initialize();
-      }
+      embedder = await (deps.createEmbedder ?? createDefaultEmbedder)(config);
     } catch (err) {
       // Gracefully continue without embeddings (falling back to Jaccard similarity)
     }
