@@ -662,6 +662,56 @@ describe("Sync Command", () => {
       expect(quietResult.exitCode).toBe(1);
       expect(errors).toEqual([]);
     });
+
+    it("covers quiet orchestration paths without changing side effects", async () => {
+      let harness = createHarness({
+        hasCheckpoint: mock(() => true),
+        loadCheckpoint: mock(() => null),
+      });
+      expect((await executeSyncCommand({}, harness.deps)).exitCode).toBe(0);
+      expect(logs.join("\n")).not.toContain("Resuming from previous interrupted sync");
+
+      logs = [];
+      harness = createHarness();
+      expect((await executeSyncCommand({ fixNames: true, quiet: true }, harness.deps)).exitCode).toBe(0);
+      expect(harness.syncService.fixProjectNames).toHaveBeenCalledTimes(1);
+      expect(logs.join("\n")).not.toContain("Fixed project names");
+
+      const remoteConfig = {
+        ...createHarness().config,
+        remoteSync: {
+          enabled: true,
+          repositoryUrl: "https://github.com/example/repo.git",
+          autoPull: true,
+          autoPush: true,
+        },
+      };
+
+      harness = createHarness({
+        loadConfig: mock(() => remoteConfig as any),
+        experimentalRemoteSync: true,
+        createGitSyncer: mock(async () => ({ sync: mock(async () => ({ success: true, rebuildNeeded: false })) })),
+      });
+      expect((await executeSyncCommand({ quiet: true }, harness.deps)).exitCode).toBe(0);
+      expect(logs.join("\n")).not.toContain("Synchronizing events");
+
+      harness = createHarness({
+        loadConfig: mock(() => remoteConfig as any),
+        experimentalRemoteSync: false,
+      });
+      expect((await executeSyncCommand({ quiet: true }, harness.deps)).exitCode).toBe(0);
+      expect(warnings.join("\n")).not.toContain("Remote synchronization is configured");
+    });
+
+    it("falls back to the default background lock cleanup when no seam is injected", async () => {
+      process.env.MEMORY_EMBED_BACKGROUND = "1";
+      const { deps } = createHarness({ removeBackgroundLock: undefined });
+
+      const result = await executeSyncCommand({ embed: true }, deps);
+
+      expect(result.exitCode).toBe(0);
+      expect(deps.runEmbeddingPass).toHaveBeenCalledTimes(1);
+    });
   });
 
   describe("executeSyncCommand with remote sync", () => {

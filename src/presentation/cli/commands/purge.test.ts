@@ -798,6 +798,69 @@ describe("executePurgeCommand integration", () => {
       expect(consoleOutput.join("\n")).toContain("Would delete 1 session(s):");
     });
 
+    it("should output orphan dry-run JSON with no cutoff date", async () => {
+      const { db } = initializeDatabase({ path: testDbPath });
+      createTestSession(db, "orphan-1", "dead-project", "2026-01-20T10:00:00Z");
+      closeDatabase(db);
+
+      const result = await executePurgeCommand(
+        { orphans: true, dryRun: true, json: true },
+        {
+          ...deps(),
+          existsSync: (p) => !p.includes("dead-project"),
+        },
+      );
+
+      const output = JSON.parse(consoleOutput.join("\n"));
+      expect(result.exitCode).toBe(0);
+      expect(output.sessionsToDelete).toBe(1);
+      expect(output.cutoffDate).toBeNull();
+      expect(output.dryRun).toBe(true);
+    });
+
+    it("should output orphan deletion JSON with no cutoff date", async () => {
+      const { db } = initializeDatabase({ path: testDbPath });
+      createTestSession(db, "orphan-1", "dead-project", "2026-01-20T10:00:00Z");
+      closeDatabase(db);
+
+      const result = await executePurgeCommand(
+        { orphans: true, force: true, json: true },
+        {
+          ...deps(),
+          existsSync: (p) => !p.includes("dead-project"),
+        },
+      );
+
+      const output = JSON.parse(consoleOutput.join("\n"));
+      expect(result.exitCode).toBe(0);
+      expect(output.sessionsDeleted).toBe(1);
+      expect(output.cutoffDate).toBeNull();
+      expect(output.dryRun).toBe(false);
+    });
+
+    it("should skip close when initialization returns no database handle", async () => {
+      let closeCalled = false;
+
+      const result = await executePurgeCommand(
+        { olderThan: "30d", json: true },
+        {
+          ...deps(),
+          initializeDatabase: () => ({ db: null }),
+          closeDatabase: () => {
+            closeCalled = true;
+          },
+          createSessionRepository: () => {
+            throw new Error("repo failed");
+          },
+        },
+      );
+
+      const output = JSON.parse(consoleOutput.join("\n"));
+      expect(result.exitCode).toBe(2);
+      expect(output.error).toBe("repo failed");
+      expect(closeCalled).toBe(false);
+    });
+
     it("should use the orphan confirmation prompt when no age cutoff is active", async () => {
       const { db } = initializeDatabase({ path: testDbPath });
       createTestSession(db, "orphan-1", "dead-project", "2026-01-20T10:00:00Z");

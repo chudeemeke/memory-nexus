@@ -450,6 +450,54 @@ describe("health-checker", () => {
             expect(result).toHaveProperty("config");
         });
 
+        it("uses sandboxed default paths when no overrides are provided", () => {
+            const defaultPathRoot = join(testDir, `default-paths-${Date.now()}`);
+            const configHome = join(defaultPathRoot, "config");
+            const dataHome = join(defaultPathRoot, "data");
+            const home = join(defaultPathRoot, "home");
+            const originalEnv = {
+                XDG_CONFIG_HOME: process.env.XDG_CONFIG_HOME,
+                XDG_DATA_HOME: process.env.XDG_DATA_HOME,
+                HOME: process.env.HOME,
+                USERPROFILE: process.env.USERPROFILE,
+            };
+
+            process.env.XDG_CONFIG_HOME = configHome;
+            process.env.XDG_DATA_HOME = dataHome;
+            process.env.HOME = home;
+            process.env.USERPROFILE = home;
+            mkdirSync(join(configHome, "memory"), { recursive: true });
+            mkdirSync(join(dataHome, "memory", "logs"), { recursive: true });
+            mkdirSync(join(home, ".claude", "projects"), { recursive: true });
+
+            const defaultDbPath = join(dataHome, "memory", "memory.db");
+            const { db } = initializeDatabase({ path: defaultDbPath });
+            closeDatabase(db);
+
+            try {
+                const result = runHealthCheck();
+
+                expect(result.database.exists).toBe(true);
+                expect(result.permissions.configDir).toBe(true);
+                expect(result.permissions.logsDir).toBe(true);
+                expect(result.searchCapability.defaultMode).toBe("auto");
+            } finally {
+                if (originalEnv.XDG_CONFIG_HOME === undefined) delete process.env.XDG_CONFIG_HOME;
+                else process.env.XDG_CONFIG_HOME = originalEnv.XDG_CONFIG_HOME;
+                if (originalEnv.XDG_DATA_HOME === undefined) delete process.env.XDG_DATA_HOME;
+                else process.env.XDG_DATA_HOME = originalEnv.XDG_DATA_HOME;
+                if (originalEnv.HOME === undefined) delete process.env.HOME;
+                else process.env.HOME = originalEnv.HOME;
+                if (originalEnv.USERPROFILE === undefined) delete process.env.USERPROFILE;
+                else process.env.USERPROFILE = originalEnv.USERPROFILE;
+                try {
+                    rmSync(defaultPathRoot, { recursive: true, force: true, maxRetries: 10, retryDelay: 50 });
+                } catch {
+                    // Best-effort cleanup on Windows; SQLite can briefly hold handles after close.
+                }
+            }
+        });
+
         it("includes embedding field in result", () => {
             const result = runHealthCheck(overrides());
             expect(result).toHaveProperty("embedding");
