@@ -254,6 +254,32 @@ describe("hook-runner", () => {
             spawnSpy.mockRestore();
         });
 
+        test("uses default options with XDG data directory resolution", () => {
+            const originalXdgData = process.env.XDG_DATA_HOME;
+            process.env.XDG_DATA_HOME = testDir;
+            const spawnSpy = spyOn(childProcess, "spawn").mockReturnValue({
+                unref: () => {},
+                pid: 24680,
+            } as unknown as childProcess.ChildProcess);
+
+            try {
+                const result = spawnBackgroundSync("default-options-session");
+
+                expect(result.pid).toBe(24680);
+                expect(existsSync(join(testDir, "memory", "logs", "sync.log"))).toBe(true);
+                const [command, args] = spawnSpy.mock.calls[0];
+                expect(command).toBe("aidev");
+                expect(args).toContain("--quiet");
+            } finally {
+                spawnSpy.mockRestore();
+                if (originalXdgData === undefined) {
+                    delete process.env.XDG_DATA_HOME;
+                } else {
+                    process.env.XDG_DATA_HOME = originalXdgData;
+                }
+            }
+        });
+
         test("handles spawn returning undefined pid gracefully", () => {
             const spawnSpy = spyOn(childProcess, "spawn").mockReturnValue({
                 unref: () => {},

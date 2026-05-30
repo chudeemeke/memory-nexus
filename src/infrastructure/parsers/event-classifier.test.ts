@@ -187,6 +187,46 @@ describe("Event Classifier", () => {
       }
     });
 
+    test("stringifies non-string tool result content inside user messages", () => {
+      const result = classifyEvent({
+        type: "user",
+        uuid: "user-object-content",
+        timestamp: "2026-01-28T10:00:00Z",
+        message: {
+          role: "user",
+          content: [
+            {
+              type: "tool_result",
+              tool_use_id: "toolu_json",
+              content: { ok: true, files: ["a.ts"] },
+            },
+          ],
+        },
+      });
+
+      expect(result.type).toBe("user");
+      if (result.type === "user") {
+        expect(result.data.message.content).toBe('{"ok":true,"files":["a.ts"]}');
+      }
+    });
+
+    test("returns empty content for unsupported user content shapes", () => {
+      const result = classifyEvent({
+        type: "user",
+        uuid: "user-unsupported-content",
+        timestamp: "2026-01-28T10:00:00Z",
+        message: {
+          role: "user",
+          content: { unexpected: true },
+        },
+      });
+
+      expect(result.type).toBe("user");
+      if (result.type === "user") {
+        expect(result.data.message.content).toBe("");
+      }
+    });
+
     test("includes optional cwd field", () => {
       const result = classifyEvent({
         type: "user",
@@ -340,6 +380,20 @@ describe("Event Classifier", () => {
       }
     });
 
+    test("treats missing assistant content as an empty block array", () => {
+      const result = classifyEvent({
+        type: "assistant",
+        uuid: "asst-no-content",
+        timestamp: "2026-01-28T10:00:00Z",
+        message: {},
+      });
+
+      expect(result.type).toBe("assistant");
+      if (result.type === "assistant") {
+        expect(result.data.message.content).toEqual([]);
+      }
+    });
+
     test("includes model when present", () => {
       const result = classifyEvent({
         type: "assistant",
@@ -459,6 +513,20 @@ describe("Event Classifier", () => {
         uuid: "asst-no-content",
         timestamp: "2026-01-28T10:00:00Z",
         message: {},
+      };
+
+      const toolUses = extractToolUseEvents(raw as any);
+      expect(toolUses).toHaveLength(0);
+    });
+
+    test("ignores non-array assistant content for tool use extraction", () => {
+      const raw = {
+        type: "assistant" as const,
+        uuid: "asst-string-content",
+        timestamp: "2026-01-28T10:00:00Z",
+        message: {
+          content: "plain text",
+        },
       };
 
       const toolUses = extractToolUseEvents(raw as any);
@@ -636,6 +704,30 @@ describe("Event Classifier", () => {
 
       const results = extractToolResultEvents(raw);
       expect(results).toHaveLength(0);
+    });
+
+    test("ignores non-object blocks in tool result content arrays", () => {
+      const raw = {
+        type: "user" as const,
+        uuid: "user-mixed-results",
+        timestamp: "2026-01-28T10:00:00Z",
+        message: {
+          role: "user" as const,
+          content: [
+            "plain text",
+            null,
+            {
+              type: "tool_result" as const,
+              tool_use_id: "t1",
+              content: "result",
+            },
+          ],
+        },
+      };
+
+      const results = extractToolResultEvents(raw as any);
+      expect(results).toHaveLength(1);
+      expect(results[0].toolUseId).toBe("t1");
     });
   });
 

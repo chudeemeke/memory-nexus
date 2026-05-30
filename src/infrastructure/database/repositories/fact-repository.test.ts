@@ -33,6 +33,8 @@ describe("SqliteFactRepository", () => {
     content: string;
     metadata: Record<string, any>;
     observedAt: Date;
+    supersededAt: Date | null;
+    supersededBy: string | null;
   }>): Fact {
     return Fact.create({
       type: "decision",
@@ -83,6 +85,44 @@ describe("SqliteFactRepository", () => {
       expect(row.content).toBe("Updated content");
       expect(row.project).toBe("other-project");
       expect(JSON.parse(row.metadata)).toEqual({ updated: true });
+    });
+
+    it("persists null metadata and supersedence timestamps on insert", async () => {
+      const supersededAt = new Date("2026-05-23T11:00:00Z");
+      const fact = createTestFact({
+        content: "Superseded insert content",
+        supersededAt,
+        supersededBy: "replacement-insert",
+      });
+
+      const saved = await repo.save(fact);
+      const found = await repo.findById(saved.id!);
+
+      expect(found?.metadata).toBeUndefined();
+      expect(found?.supersededAt?.toISOString()).toBe(supersededAt.toISOString());
+      expect(found?.supersededBy).toBe("replacement-insert");
+    });
+
+    it("clears metadata and supersedence fields when updating an existing Fact", async () => {
+      const original = createTestFact({
+        uuid: "update-clear-fields",
+        metadata: { old: true },
+        supersededAt: new Date("2026-05-23T11:00:00Z"),
+        supersededBy: "old-replacement",
+      });
+      const saved = await repo.save(original);
+
+      const replacement = createTestFact({
+        uuid: original.uuid,
+        content: "Updated clear content",
+      });
+      const updated = await repo.save(replacement);
+      const found = await repo.findById(updated.id!);
+
+      expect(updated.id).toBe(saved.id);
+      expect(found?.metadata).toBeUndefined();
+      expect(found?.supersededAt).toBeNull();
+      expect(found?.supersededBy).toBeNull();
     });
   });
 
@@ -180,6 +220,39 @@ describe("SqliteFactRepository", () => {
       await repo.clearAll();
       const cleared = await repo.findAll();
       expect(cleared.length).toBe(0);
+    });
+
+    it("updates existing facts and preserves supersedence fields inside a transaction", async () => {
+      const initial = await repo.save(createTestFact({
+        uuid: "save-many-existing",
+        content: "Initial transaction content",
+      }));
+      const supersededAt = new Date("2026-05-23T12:00:00Z");
+
+      const [updated, inserted] = await repo.saveMany([
+        createTestFact({
+          uuid: "save-many-existing",
+          content: "Updated transaction content",
+          metadata: { batch: true },
+          supersededAt,
+          supersededBy: "replacement-batch",
+        }),
+        createTestFact({
+          uuid: "save-many-new",
+          content: "New transaction content",
+          supersededAt,
+          supersededBy: "replacement-new",
+        }),
+      ]);
+
+      expect(updated.id).toBe(initial.id);
+      expect(inserted.id).toBeDefined();
+
+      const foundUpdated = await repo.findByUuid("save-many-existing");
+      const foundInserted = await repo.findByUuid("save-many-new");
+      expect(foundUpdated?.metadata).toEqual({ batch: true });
+      expect(foundUpdated?.supersededAt?.toISOString()).toBe(supersededAt.toISOString());
+      expect(foundInserted?.supersededAt?.toISOString()).toBe(supersededAt.toISOString());
     });
   });
 });

@@ -196,6 +196,17 @@ describe("executeSearchCommand multi-role + days + filter branches", () => {
     expect([0, 1]).toContain(result.exitCode);
   });
 
+  it("text-mode verbose includes successful since and before filters", async () => {
+    const result = await executeSearchCommand("authentication", {
+      verbose: true,
+      since: "2020-01-01",
+      before: "2030-01-01",
+      dbPath,
+    });
+
+    expect([0, 1]).toContain(result.exitCode);
+  });
+
   it("--no-vector forces FTS mode (DEGRADE-04)", async () => {
     const result = await executeSearchCommand("authentication", {
       vector: false,
@@ -648,6 +659,25 @@ describe("executeSearchCommand --files text-mode unavailable path", () => {
       expect(result.exitCode).toBe(0);
       const out = consoleLogSpy.mock.calls.map((c: unknown[]) => String(c[0])).join("\n");
       expect(out).toContain("No file results");
+    } finally {
+      isAvailSpy.mockRestore();
+      runnerSpy.mockRestore();
+    }
+  });
+
+  it("--files qmd available + 0 results supports --format ai", async () => {
+    const extMod = await import("../../../infrastructure/external/index.js");
+    const isAvailSpy = spyOn(extMod, "isQmdAvailable").mockReturnValue(true);
+    const runnerSpy = spyOn(extMod.QmdRunner.prototype, "search").mockResolvedValue([]);
+    try {
+      const result = await executeSearchCommand("q", {
+        files: true,
+        format: "ai",
+        dbPath,
+      });
+      expect(result.exitCode).toBe(0);
+      const out = consoleLogSpy.mock.calls.map((c: unknown[]) => String(c[0])).join("\n");
+      expect(out).toBe('No file results for "q"');
     } finally {
       isAvailSpy.mockRestore();
       runnerSpy.mockRestore();
