@@ -22,6 +22,7 @@
     "test:coverage": "bun run scripts/run-istanbul-bun-coverage.ts --coverage-dir coverage && bun run scripts/check-coverage-thresholds.ts --summary coverage/coverage-summary.json --threshold 95",
     "quality": "bun run typecheck && bun run build && bun test --timeout 15000 && bun run test:isolation && bun run test:coverage && bun audit",
     "test:smoke": "bun test tests/smoke",
+    "verify:published": "bun run scripts/verify-published-package.ts",
     "test:isolation": "bun run scripts/check-test-isolation.ts",
     "typecheck": "tsc --noEmit && tsc --project tsconfig.scripts.json",
     "lint": "bun run typecheck",

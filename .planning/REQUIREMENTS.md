@@ -45,8 +45,8 @@ Requirements for v4.0: Intelligence Layer -- automated knowledge extraction, int
 
 ### Publishing
 
-- [ ] **PUB-01**: `@chude/memory` published to npm registry with correct bin, files, and dependency configuration
-- [ ] **PUB-02**: `bun add -g @chude/memory` installs successfully and the `memory` binary is available in PATH
+- [x] **PUB-01**: `@chude/memory` published to npm registry with correct bin, files, and dependency configuration
+- [x] **PUB-02**: `bun add -g @chude/memory` installs successfully and the `memory` binary is available in PATH
 
 ### Code Quality (Refactoring)
 
@@ -123,8 +123,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 | FIX-01 | Phase 31 | Complete |
 | FIX-02 | Phase 31 | Complete |
 | FIX-03 | Phase 31 | Complete |
-| PUB-01 | Phase 37 | Pending |
-| PUB-02 | Phase 37 | Pending |
+| PUB-01 | Phase 37 | Complete |
+| PUB-02 | Phase 37 | Complete |
 | REFAC-01 | Phase 30 | Complete |
 | REFAC-02 | Phase 30 | Complete |
 | QUAL-01 | All + Phase 36.9 | Complete |
@@ -141,4 +141,4 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 ---
 *Requirements defined: 2026-04-03*
-*Last updated: 2026-05-30 after Phase 36.9 coverage gate restoration; PUB-01 and PUB-02 remain pending for Phase 37*
+*Last updated: 2026-05-30 after Phase 37 publish verification; PUB-01 and PUB-02 complete*

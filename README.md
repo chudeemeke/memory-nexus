@@ -268,6 +268,16 @@ bun audit
 
 `bun run quality` runs the release gate sequence. `bun run test:coverage` uses an Istanbul-backed Bun harness and is intentionally strict: statements, branches, functions, and lines must each be available and at least 95%. Missing metrics fail the gate.
 
+### Published package smoke
+
+After publishing, verify registry metadata plus npm and Bun global installs:
+
+```bash
+bun run verify:published @chude/memory@4.0.0
+```
+
+On Windows, Bun global install creates `memory.exe` in `bun pm bin -g`. Do not assume an npm-style `memory.cmd` shim exists.
+
 ### Running tests on Windows
 
 Current 2026-05-28 verification has `bun test --timeout 15000` passing on Windows 11 with Bun 1.3.5. A previous full-suite run crashed with Bun's `panic(main thread): integer overflow` signature at ~6.8GB peak memory pressure; keep the subdirectory workaround available if that upstream runtime crash returns.

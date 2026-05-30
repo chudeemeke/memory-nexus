@@ -80,7 +80,7 @@
 - [x] **Phase 36.8: Secret Boundary and Optional Provider Interop** (NEW, pre-publish hardening) - Redaction before persistence/provider egress; config stores env/ref metadata instead of plaintext API keys; authkey is supported as an optional `authkey run --env memory -- ...` execution path, never as a required dependency or raw-secret resolver. (Completed 2026-05-28)
 - [x] **Phase 36.9: Coverage Runner Migration** (NEW, pre-publish hardening) - Replace the current Bun-only coverage gate with an honest runner/instrumentation path that reports statements, branches, functions, and lines for the release surface; no aliasing unmeasured metrics to measured ones. (Completed 2026-05-30; final gate: statements 97.18%, branches 95.00%, functions 96.09%, lines 97.32%)
 - [x] **Phase 36.10: Legacy Memory File Publish Hardening** (NEW, pre-publish hardening) - Make legacy `~/.memory` / `MEMORY_HOME` reads and writes explicit opt-in instead of default behavior, preserving compatibility without contradicting Phase 35's SQLite/facts default. (Completed 2026-05-30; final gate: statements 97.18%, branches 95.02%, functions 96.09%, lines 97.33%)
-- [ ] **Phase 37: Publishing** - Prerelease (`@chude/memory@4.0.0-pre.N`) allowed after release gates are restored; GA (`@chude/memory@4.0.0`) gated on prior audit criteria plus Phase 36.8 secret-boundary hardening, Phase 36.9 four-metric coverage enforcement, and Phase 36.10 legacy-memory-file hardening.
+- [x] **Phase 37: Publishing** - `@chude/memory@4.0.0` published to npm with `latest` dist-tag and verified by npm and Bun global install smoke tests. (Completed 2026-05-30)
 
 ### v5.0 Autonomous & Synchronized Memory Layer (Phases 38-42, plus 38.5)
 
@@ -308,7 +308,15 @@ Rationale: Phase 32 explicitly deferred friction envelope adoption per audit §1
   1. `@chude/memory` is published to the npm registry with correct `bin`, `files`, and dependency configuration
   2. `bun add -g @chude/memory` installs successfully on a clean machine and the `memory` binary is available in PATH
   3. `memory --version` reports the published version; `memory doctor` passes all health checks on a fresh install
-**Plans**: `.planning/phases/37-publishing/37-01-PLAN.md` (blocked until Phase 36.10 completes)
+**Plans**: `.planning/phases/37-publishing/37-01-PLAN.md` (complete; summary in `37-01-SUMMARY.md`)
+
+**Final verification (2026-05-30):**
+  - `npm whoami`: PASS, `chude`
+  - `npm view @chude/memory version dist-tags --json`: PASS, version `4.0.0`, latest `4.0.0`
+  - `npm access get status @chude/memory --json`: PASS, public
+  - isolated npm global install from registry: PASS
+  - isolated Bun global install from registry: PASS; on Windows the binary is `memory.exe` under `bun pm bin -g`
+  - reusable post-publish smoke command added: `bun run verify:published @chude/memory@4.0.0`
 
 ---
 
@@ -493,8 +501,8 @@ v5.0
 | 36. Portability | v4.0 | 1/1 | Complete | 2026-05-25 |
 | 36.8. Secret Boundary and Optional Provider Interop | v4.0 | 1/1 | Complete | 2026-05-28 |
 | 36.9. Coverage Runner Migration | v4.0 | 1/1 | Complete | 2026-05-30 |
-| 36.10. Legacy Memory File Publish Hardening | v4.0 | 1/1 | In progress | - |
-| 37. Publishing | v4.0 | TBD | Planned | - |
+| 36.10. Legacy Memory File Publish Hardening | v4.0 | 1/1 | Complete | 2026-05-30 |
+| 37. Publishing | v4.0 | 1/1 | Complete | 2026-05-30 |
 | 38. Remote Sync | v5.0 | TBD | Planned | - |
 | 38.5. Secure Capability Interop | v5.0 | TBD | Planned | - |
 | Durable Friction Query Contract | post-v4 | TBD | Accepted backlog | - |
