@@ -237,6 +237,63 @@ describe("signal-handler", () => {
             }
         });
 
+        test("TTY prompt retries invalid input and accepts cancel choice", async () => {
+            const messages: string[] = [];
+            const originalLog = console.log;
+            console.log = (...args: unknown[]) => {
+                messages.push(args.map(String).join(" "));
+            };
+            const answers = ["bad", "3"];
+            const createInterfaceSpy = spyOn(readline, "createInterface").mockReturnValue({
+                question: (_prompt: string, callback: (answer: string) => void) => {
+                    callback(answers.shift() ?? "3");
+                },
+                close: () => {},
+            } as any);
+
+            try {
+                setTtyOverride(true);
+
+                await handleSignalForTesting();
+
+                expect(shouldAbort()).toBe(false);
+                expect(getInterruptCount()).toBe(0);
+                expect(messages.join("\n")).toContain("Invalid choice");
+                expect(messages.join("\n")).toContain("Continuing");
+                expect(createInterfaceSpy).toHaveBeenCalled();
+            } finally {
+                createInterfaceSpy.mockRestore();
+                console.log = originalLog;
+            }
+        });
+
+        test("falls back to real stdin TTY state when no override is set", async () => {
+            const originalDescriptor = Object.getOwnPropertyDescriptor(process.stdin, "isTTY");
+            const messages: string[] = [];
+            const originalLog = console.log;
+            console.log = (...args: unknown[]) => {
+                messages.push(args.map(String).join(" "));
+            };
+            Object.defineProperty(process.stdin, "isTTY", {
+                value: undefined,
+                configurable: true,
+            });
+
+            try {
+                setTtyOverride(null);
+
+                await handleSignalForTesting();
+
+                expect(shouldAbort()).toBe(true);
+                expect(messages.join("\n")).toContain("shutting down after current operation");
+            } finally {
+                console.log = originalLog;
+                if (originalDescriptor) {
+                    Object.defineProperty(process.stdin, "isTTY", originalDescriptor);
+                }
+            }
+        });
+
         test("second signal runs cleanups and exits with ctrl-c code", async () => {
             const calls: string[] = [];
             const exits: number[] = [];

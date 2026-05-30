@@ -579,6 +579,112 @@ describe("ExtractionPipeline", () => {
     expect(logs!.factsAdded).toBe(0);
   });
 
+  test("skips sparse candidate slots without writing invalid fact events", async () => {
+    const session = Session.create({
+      id: "session-sparse-candidates",
+      projectPath: ProjectPath.fromDecoded("C:\\Projects\\nexus"),
+      startTime: new Date()
+    });
+    await sessionRepo.save(session);
+    await messageRepo.save(
+      Message.create({
+        id: "msg-sparse-candidate",
+        role: "user",
+        content: "Sparse candidate extraction",
+        timestamp: new Date()
+      }),
+      "session-sparse-candidates"
+    );
+    const sparseCandidates = new Array(1) as any[];
+
+    const pipeline = new ExtractionPipeline(
+      db,
+      factRepo,
+      logRepo,
+      messageRepo,
+      mockExtractor(sparseCandidates),
+      undefined,
+      testLogPath
+    );
+
+    const result = await pipeline.extractFromSession("session-sparse-candidates", "nexus");
+
+    expect(result.added).toBe(0);
+    expect(result.skipped).toBe(0);
+    expect(await logRepo.findById("session-sparse-candidates")).not.toBeNull();
+  });
+
+  test("falls back to Jaccard when ready embedder returns incomplete batches", async () => {
+    const session = Session.create({
+      id: "session-incomplete-embeddings",
+      projectPath: ProjectPath.fromDecoded("C:\\Projects\\nexus"),
+      startTime: new Date()
+    });
+    await sessionRepo.save(session);
+    await messageRepo.save(
+      Message.create({
+        id: "msg-incomplete-embeddings",
+        role: "user",
+        content: "Use bun test for test runs",
+        timestamp: new Date()
+      }),
+      "session-incomplete-embeddings"
+    );
+
+    const activeFact = Fact.create({
+      uuid: "incomplete-active",
+      type: "learning",
+      project: "nexus",
+      content: "Use bun test for test runs",
+      observedAt: new Date()
+    });
+    await factRepo.save(activeFact);
+    writeFileSync(testLogPath, JSON.stringify({
+      uuid: activeFact.uuid,
+      type: activeFact.type,
+      project: activeFact.project,
+      content: activeFact.content,
+      observedAt: activeFact.observedAt.toISOString(),
+      version: 1
+    }) + "\n");
+
+    const incompleteEmbedder: IEmbeddingProvider = {
+      ...mockEmbedder({}),
+      embedBatch: async () => [],
+    };
+
+    const pipeline = new ExtractionPipeline(
+      db,
+      factRepo,
+      logRepo,
+      messageRepo,
+      mockExtractor([{ type: "learning", content: "Use bun test for test runs", confidence: 0.95 }]),
+      incompleteEmbedder,
+      testLogPath
+    );
+
+    const result = await pipeline.extractFromSession("session-incomplete-embeddings", "nexus");
+
+    expect(result.added).toBe(0);
+    expect(result.skipped).toBe(1);
+  });
+
+  test("private similarity helpers handle ragged and empty inputs defensively", () => {
+    const pipeline = new ExtractionPipeline(
+      db,
+      factRepo,
+      logRepo,
+      messageRepo,
+      mockExtractor([]),
+      undefined,
+      testLogPath
+    ) as any;
+
+    expect(pipeline.cosineSimilarity(new Float32Array([1]), new Float32Array([]))).toBe(0);
+    expect(pipeline.cosineSimilarity(new Float32Array([]), new Float32Array([1]))).toBe(0);
+    expect(pipeline.jaccardWordSimilarity("", "")).toBe(0);
+  });
+
   test("redacts secrets before extraction provider payloads and fact event writes", async () => {
     const rawSecret = ["sk", "proj_abcdefghijklmnopqrstuvwxyz1234567890"].join("-");
     const session = Session.create({
