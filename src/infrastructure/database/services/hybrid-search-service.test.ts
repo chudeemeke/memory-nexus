@@ -366,6 +366,33 @@ describe("HybridSearchService", () => {
       const meta = service.getLastSearchMeta();
       expect(meta?.mode).toBe("hybrid");
     });
+
+    it("missing search config defaults to auto mode", async () => {
+      insertTestMessage(db, "msg-1", "session-1", "user", "authentication patterns");
+      const config = { ...DEFAULT_CONFIG, search: undefined } as unknown as MemoryConfig;
+      const service = new HybridSearchService(createDeps(db, {
+        config,
+        sqliteVecAvailable: true,
+      }));
+
+      const results = await service.search(SearchQuery.from("authentication"));
+
+      expect(results.length).toBeGreaterThan(0);
+      expect(service.getLastSearchMeta()?.mode).toBe("fts");
+      expect(service.getLastSearchMeta()?.modeReason).toBe("no_embeddings");
+    });
+
+    it("explicit hybrid mode with sqlite-vec but no embeddings degrades for no_embeddings", async () => {
+      insertTestMessage(db, "msg-1", "session-1", "user", "authentication patterns");
+      const service = new HybridSearchService(createDeps(db, { sqliteVecAvailable: true }));
+
+      await service.search(SearchQuery.from("authentication"), { mode: "hybrid" });
+
+      const meta = service.getLastSearchMeta();
+      expect(meta?.mode).toBe("fts");
+      expect(meta?.degraded).toBe(true);
+      expect(meta?.degradationReason).toBe("no_embeddings");
+    });
   });
 
   describe("FTS-only search", () => {
@@ -946,6 +973,43 @@ describe("HybridSearchService", () => {
       expect(meta?.degraded).toBe(true);
     });
 
+    it("transient non-memory hybrid failure retries with FTS and records provider_failure", async () => {
+      const ftsResult = SearchResult.create({
+        sessionId: "session-1",
+        messageId: "msg-1",
+        snippet: "authentication patterns",
+        score: 1,
+        timestamp: new Date("2026-01-01T00:00:00.000Z"),
+        role: "user",
+      });
+      let callCount = 0;
+      const fts5Service = {
+        search: mock(() => {
+          callCount += 1;
+          if (callCount === 1) {
+            throw new Error("transient fts failure");
+          }
+          return Promise.resolve([ftsResult]);
+        }),
+      } as unknown as Fts5SearchService;
+      const service = new HybridSearchService(createDeps(db, {
+        fts5Service,
+        embeddingRepo: createEmbeddingRepoStub([{ rowid: 1, distance: 0.1 }], { embedded: 1, total: 1 }),
+        providerFactory: createMockFactory(createMockProvider()),
+        sqliteVecAvailable: true,
+      }));
+
+      const results = await service.search(SearchQuery.from("authentication"), {
+        mode: "hybrid",
+        noDecay: true,
+      });
+
+      expect(results.map((r) => r.messageId)).toEqual(["msg-1"]);
+      expect(callCount).toBe(2);
+      expect(service.getLastSearchMeta()?.mode).toBe("fts");
+      expect(service.getLastSearchMeta()?.degradationReason).toBe("provider_failure");
+    });
+
     it("provider.initialize() throws for vector mode: throws VECTOR_UNAVAILABLE", async () => {
       if (!sqliteVecAvailable) return;
 
@@ -1296,6 +1360,15 @@ describe("HybridSearchService", () => {
       expect((new HybridSearchService(createDeps(fakeDb)) as any).getStoredEmbeddingDimensions()).toBe(384);
     });
 
+    it("short-circuits dimension comparison when no embeddings exist", () => {
+      const service = new HybridSearchService(createDeps(db, {
+        embeddingRepo: createEmbeddingRepoStub([], { embedded: 0, total: 0 }),
+      })) as any;
+
+      expect(service.resolveMode(undefined).effectiveMode).toBe("fts");
+      expect(service.checkDimensionMismatch(createMockProvider())).toBeNull();
+    });
+
     it("short-circuits empty FTS rowid maps and empty hydration requests", () => {
       const service = new HybridSearchService(createDeps(db)) as any;
 
@@ -1339,6 +1412,91 @@ describe("HybridSearchService", () => {
       expect(results[0].messageId).toBe("msg-vector-only");
       expect(results[0].source).toBe("vector");
       expect(results[0].snippet.endsWith("...")).toBe(true);
+    });
+
+    it("skips sparse vector rows during vector hydration", async () => {
+      const fakeDb = {
+        prepare: (sql: string) => ({
+          get: () => ({ embedding: new Float32Array(384) }),
+          all: () => sql.includes("messages_meta")
+            ? [{
+                rowid: 42,
+                id: "msg-42",
+                session_id: "session-1",
+                content: "authentication from sparse vector result",
+                timestamp: "2026-01-01T00:00:00.000Z",
+                role: "user",
+              }]
+            : [],
+        }),
+      } as unknown as Database;
+      const sparseRows = new Array(2) as Array<{ rowid: number; distance: number }>;
+      sparseRows[1] = { rowid: 42, distance: 0.2 };
+      const service = new HybridSearchService(createDeps(fakeDb, {
+        sqliteVecAvailable: true,
+        embeddingRepo: createEmbeddingRepoStub(sparseRows, { embedded: 1, total: 1 }),
+        providerFactory: createMockFactory(createMockProvider()),
+      }));
+
+      const results = await service.search(SearchQuery.from("authentication"), {
+        mode: "vector",
+        noDecay: true,
+      });
+
+      expect(results.map((r) => r.messageId)).toEqual(["msg-42"]);
+    });
+
+    it("returns no fused results when fusion cannot hydrate metadata", async () => {
+      const fakeDb = {
+        prepare: () => ({
+          get: () => ({ embedding: new Float32Array(384) }),
+          all: () => [],
+        }),
+      } as unknown as Database;
+      const service = new HybridSearchService(createDeps(fakeDb, {
+        sqliteVecAvailable: true,
+        fts5Service: createFtsServiceStub([]),
+        embeddingRepo: createEmbeddingRepoStub([{ rowid: 7, distance: 0.1 }], { embedded: 1, total: 1 }),
+        providerFactory: createMockFactory(createMockProvider()),
+      }));
+
+      const results = await service.search(SearchQuery.from("authentication"), {
+        mode: "hybrid",
+        noDecay: true,
+      });
+
+      expect(results).toEqual([]);
+    });
+
+    it("returns an empty result when fusion is limited to zero candidates", async () => {
+      const ftsResult = SearchResult.create({
+        sessionId: "session-1",
+        messageId: "msg-fts",
+        snippet: "authentication",
+        score: 1,
+        timestamp: new Date("2026-01-01T00:00:00.000Z"),
+        role: "user",
+      });
+      const fakeDb = {
+        prepare: () => ({
+          get: () => ({ embedding: new Float32Array(384) }),
+          all: () => [{ rowid: 7, id: "msg-fts" }],
+        }),
+      } as unknown as Database;
+      const service = new HybridSearchService(createDeps(fakeDb, {
+        sqliteVecAvailable: true,
+        fts5Service: createFtsServiceStub([ftsResult]),
+        embeddingRepo: createEmbeddingRepoStub([{ rowid: 7, distance: 0.1 }], { embedded: 1, total: 1 }),
+        providerFactory: createMockFactory(createMockProvider()),
+      }));
+
+      const results = await service.search(SearchQuery.from("authentication"), {
+        mode: "hybrid",
+        limit: 0,
+        noDecay: true,
+      });
+
+      expect(results).toEqual([]);
     });
   });
 
