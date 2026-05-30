@@ -17,6 +17,10 @@ import { ErrorCode, MemoryError } from "../../domain/index.js";
 import { formatError, formatErrorJson } from "./formatters/index.js";
 import { unknownErrorMessage } from "../../domain/errors/unknown-error.js";
 
+interface TtyLikeStream {
+  isTTY?: boolean | undefined;
+}
+
 /**
  * Options for database startup.
  */
@@ -73,8 +77,11 @@ function resolveDbStartupDeps(deps?: DbStartupDeps): ResolvedDbStartupDeps {
  *
  * @returns true if stdin and stdout are TTYs
  */
-export function isTTY(): boolean {
-  return Boolean(process.stdin.isTTY && process.stdout.isTTY);
+export function isTTY(
+  input: TtyLikeStream = process.stdin,
+  output: TtyLikeStream = process.stdout,
+): boolean {
+  return Boolean(input.isTTY && output.isTTY);
 }
 
 /**
