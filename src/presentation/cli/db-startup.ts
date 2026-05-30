@@ -47,6 +47,27 @@ export interface DbStartupDeps {
   backupCorruptedDatabase?: (dbPath: string) => string;
 }
 
+interface ResolvedDbStartupDeps {
+  existsSync: (path: string) => boolean;
+  getDefaultDbPath: () => string;
+  initializeDatabaseSafe: (config: DatabaseConfig) => DatabaseInitResult;
+  isTTY: () => boolean;
+  confirm: (message: string) => Promise<boolean>;
+  backupCorruptedDatabase: (dbPath: string) => string;
+}
+
+function resolveDbStartupDeps(deps?: DbStartupDeps): ResolvedDbStartupDeps {
+  return {
+    existsSync,
+    getDefaultDbPath,
+    initializeDatabaseSafe,
+    isTTY,
+    confirm: promptConfirmation,
+    backupCorruptedDatabase,
+    ...deps,
+  };
+}
+
 /**
  * Check if running in an interactive TTY environment.
  *
@@ -105,7 +126,7 @@ async function handleCorruptedDatabase(
   error: MemoryError,
   dbPath: string,
   options: DbStartupOptions,
-  deps: DbStartupDeps = {},
+  deps: ResolvedDbStartupDeps,
 ): Promise<DbStartupResult> {
   // Show error
   if (options.json) {
@@ -115,7 +136,7 @@ async function handleCorruptedDatabase(
   }
 
   // Non-TTY: can't prompt, just fail
-  const interactive = (deps.isTTY ?? isTTY)();
+  const interactive = deps.isTTY();
   if (!interactive) {
     if (!options.json) {
       console.error("\nDatabase is corrupted. Run interactively to recreate.");
@@ -125,8 +146,7 @@ async function handleCorruptedDatabase(
 
   // TTY: prompt for recreation
   console.log("");
-  const confirm = deps.confirm ?? promptConfirmation;
-  const confirmed = await confirm(
+  const confirmed = await deps.confirm(
     "Database corrupted. Recreate and re-sync?"
   );
 
@@ -138,15 +158,14 @@ async function handleCorruptedDatabase(
   }
 
   // Backup old database
-  const backupPath = (deps.backupCorruptedDatabase ?? backupCorruptedDatabase)(dbPath);
+  const backupPath = deps.backupCorruptedDatabase(dbPath);
   if (!options.json) {
     console.log(`Backed up corrupted database to: ${backupPath}`);
   }
 
   // Try to create fresh database
   try {
-    const init = deps.initializeDatabaseSafe ?? initializeDatabaseSafe;
-    const result = init({
+    const result = deps.initializeDatabaseSafe({
       path: dbPath,
       quickCheck: false, // Skip check for new database
     });
@@ -183,20 +202,21 @@ async function handleCorruptedDatabase(
  * @returns Database startup result
  */
 export async function initializeDatabaseForCli(
-  options: DbStartupOptions = {},
-  deps: DbStartupDeps = {},
+  options?: DbStartupOptions,
+  deps?: DbStartupDeps,
 ): Promise<DbStartupResult> {
-  const dbPath = options.dbPath ?? (deps.getDefaultDbPath ?? getDefaultDbPath)();
-  const fileExists = (deps.existsSync ?? existsSync)(dbPath);
+  const startupOptions = { ...options };
+  const resolved = resolveDbStartupDeps(deps);
+  const dbPath = startupOptions.dbPath ?? resolved.getDefaultDbPath();
+  const fileExists = resolved.existsSync(dbPath);
 
   const config: DatabaseConfig = {
     path: dbPath,
-    quickCheck: !options.skipCheck && fileExists,
+    quickCheck: !startupOptions.skipCheck && fileExists,
   };
 
   try {
-    const init = deps.initializeDatabaseSafe ?? initializeDatabaseSafe;
-    const result = init(config);
+    const result = resolved.initializeDatabaseSafe(config);
     return { success: true, db: result.db };
   } catch (error) {
     const nexusError =
@@ -209,14 +229,14 @@ export async function initializeDatabaseForCli(
 
     // Handle corrupted database specially
     if (nexusError.code === ErrorCode.DB_CORRUPTED) {
-      return handleCorruptedDatabase(nexusError, dbPath, options, deps);
+      return handleCorruptedDatabase(nexusError, dbPath, startupOptions, resolved);
     }
 
     // Other errors: just format and fail
-    if (options.json) {
+    if (startupOptions.json) {
       console.error(formatErrorJson(nexusError));
     } else {
-      console.error(formatError(nexusError, { verbose: options.verbose } as any));
+      console.error(formatError(nexusError, { verbose: startupOptions.verbose } as any));
     }
     return { success: false, error: nexusError };
   }
