@@ -26,6 +26,7 @@ import { SqliteSessionRepository } from "../database/repositories/session-reposi
 import { Message } from "../../domain/entities/message.js";
 import { Session } from "../../domain/entities/session.js";
 import { ProjectPath } from "../../domain/value-objects/project-path.js";
+import { LlmExtractor } from "../../application/services/llm-extractor.js";
 
 describe("hook-runner", () => {
     const testDir = join(homedir(), ".memory-nexus-test-hook-runner");
@@ -503,6 +504,43 @@ describe("hook-runner", () => {
             expect(result.success).toBe(true);
             // Summary is undefined when LLM returns empty (unit test mode)
             expect(result.summary).toBeUndefined();
+        });
+
+        test("returns summary-only extraction results without persisting entities", async () => {
+            const sessionRepo = new SqliteSessionRepository(db);
+            const projectPath = ProjectPath.fromEncoded("C--Users-SummaryOnly");
+            const session = Session.create({
+                id: "summary-only-session",
+                projectPath,
+                startTime: new Date(),
+            });
+            await sessionRepo.save(session);
+
+            const messageRepo = new SqliteMessageRepository(db);
+            const message = Message.create({
+                id: "msg-summary-only",
+                role: "user",
+                content: "Summarize this session",
+                timestamp: new Date(),
+            });
+            await messageRepo.save(message, "summary-only-session");
+
+            const extractSpy = spyOn(LlmExtractor, "extract").mockResolvedValue({
+                topics: [],
+                terms: [],
+                decisions: [],
+                summary: "Only a summary was produced",
+            } as any);
+
+            try {
+                const result = await extractEntitiesFromSession("summary-only-session", db);
+
+                expect(result.success).toBe(true);
+                expect(result.entitiesExtracted).toBe(0);
+                expect(result.summary).toBe("Only a summary was produced");
+            } finally {
+                extractSpy.mockRestore();
+            }
         });
     });
 

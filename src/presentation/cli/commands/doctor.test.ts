@@ -600,6 +600,56 @@ describe("doctor command", () => {
             expect(parsed).toHaveProperty("config");
         });
 
+        it("passes undefined wrapper paths when JSON status uses default dependencies", async () => {
+            consoleOutput = [];
+            console.log = (msg: string) => consoleOutput.push(msg);
+            const healthy = createStatusInfo({
+                database: { exists: true, readable: true, writable: true, integrity: "ok", size: 1000 },
+                permissions: { configDir: true, logsDir: true, sourceDir: true },
+                hooks: { installed: true, enabled: true, lastRun: null },
+                config: { valid: true, issues: [] },
+                embedding: {
+                    configured: true,
+                    provider: "local",
+                    model: "Xenova/all-MiniLM-L6-v2",
+                    dimensions: 384,
+                    enabled: true,
+                    ready: true,
+                },
+                sqliteVec: { available: true, version: "0.1.6" },
+                searchCapability: {
+                    fts5: true,
+                    sqliteVec: true,
+                    embeddedCount: 1,
+                    totalMessages: 1,
+                    coveragePercent: 100,
+                    defaultMode: "auto",
+                    vectorReady: true,
+                },
+            });
+            let receivedOptions: unknown;
+
+            const result = await executeDoctorCommand(
+                { json: true },
+                {
+                    gatherStatus: async (options) => {
+                        receivedOptions = options;
+                        return healthy;
+                    },
+                },
+            );
+
+            expect(result.exitCode).toBe(0);
+            expect(receivedOptions).toEqual({
+                dbPath: undefined,
+                logPath: undefined,
+                configPath: undefined,
+                hookOverrides: undefined,
+                fix: undefined,
+                stats: false,
+            });
+        });
+
         it("returns JSON exit code 0 for injected fully healthy status", async () => {
             consoleOutput = [];
             console.log = (msg: string) => consoleOutput.push(msg);

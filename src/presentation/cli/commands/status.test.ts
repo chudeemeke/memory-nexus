@@ -293,6 +293,24 @@ describe("status command", () => {
             expect(status.stats?.hooks.installed).toBe(true);
         });
 
+        test("returns null lastSync when the latest log has no timestamp", async () => {
+            mkdirSync(dirname(testLogPath), { recursive: true });
+            writeFileSync(testLogPath, JSON.stringify({
+                level: "info",
+                message: "sync complete without timestamp",
+            }) + "\n");
+
+            const status = await gatherStatus({
+                dbPath: testDbPath,
+                logPath: testLogPath,
+                configPath: testConfigPath,
+                hookOverrides,
+            });
+
+            expect(status.lastSync).toBeNull();
+            expect(status.recentLogs).toBe(1);
+        });
+
         test("handles missing database gracefully", async () => {
             // No database created, should not throw
             // Uses test database path passed via deps

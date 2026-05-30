@@ -8,6 +8,7 @@
 import { describe, test, expect, mock, beforeEach, afterEach } from "bun:test";
 import { Database } from "bun:sqlite";
 import { SyncService, type SyncOptions, type SyncProgress } from "./sync-service.js";
+import { ErrorCode, MemoryError } from "../../domain/errors/index.js";
 import type {
   ISessionSource,
   IEventParser,
@@ -868,6 +869,58 @@ describe("SyncService", () => {
       expect(result.success).toBe(true);
     });
 
+    test("handles standalone tool uses, unmatched results, and non-message events", async () => {
+      const sessions = [
+        createMockSessionInfo("session-events", "C:\\Projects\\test", new Date(), 1000),
+      ];
+      (sessionSource.discoverSessions as ReturnType<typeof mock>).mockResolvedValue(sessions);
+
+      const timestamp = new Date().toISOString();
+      const events: ParsedEvent[] = [
+        {
+          type: "tool_use",
+          data: {
+            uuid: "tool-standalone",
+            name: "Bash",
+            input: { command: "echo ok" },
+            timestamp,
+          },
+        },
+        {
+          type: "tool_result",
+          data: {
+            uuid: "result-missing",
+            toolUseId: "missing-tool",
+            content: "orphaned result",
+            isError: false,
+            timestamp,
+          },
+        },
+        {
+          type: "summary",
+          data: {
+            summary: "Session summary",
+            timestamp,
+          },
+        },
+        {
+          type: "system",
+          data: {
+            subtype: "turn_duration",
+          },
+        },
+      ];
+
+      const eventsMap = new Map([["/mock/path/session-events.jsonl", events]]);
+      (syncService as any).eventParser = createMockParser(eventsMap);
+
+      const result = await syncService.sync();
+
+      expect(result.success).toBe(true);
+      expect(result.toolUsesInserted).toBe(1);
+      expect(savedToolUses[0].toolUse.id).toBe("tool-standalone");
+    });
+
     test("skips skipped events", async () => {
       const sessions = [
         createMockSessionInfo("session-1", "C:\\Projects\\test", new Date(), 1000),
@@ -1139,6 +1192,19 @@ describe("SyncService", () => {
       expect(mockCheckpointStore).not.toBeNull();
     });
 
+    test("does not save checkpoint on abort when checkpointing is disabled", async () => {
+      const sessions = [
+        createMockSessionInfo("session-1", "C:\\Projects\\test", new Date(), 1000),
+      ];
+      (sessionSource.discoverSessions as ReturnType<typeof mock>).mockResolvedValue(sessions);
+      mockAbortFlag = true;
+
+      const result = await syncService.sync({ checkpointEnabled: false });
+
+      expect(result.aborted).toBe(true);
+      expect(mockCheckpointStore).toBeNull();
+    });
+
     test("returns aborted=false when sync completes normally", async () => {
       const sessions = [
         createMockSessionInfo("session-1", "C:\\Projects\\test", new Date(), 1000),
@@ -1231,6 +1297,25 @@ describe("SyncService", () => {
 
       expect(result.errors.length).toBe(1);
       expect(result.errors[0].error).toContain("Database error");
+    });
+
+    test("preserves MemoryError instances raised during extraction", async () => {
+      const sessions = [
+        createMockSessionInfo("session-1", "C:\\Projects\\test", new Date(), 1000),
+      ];
+      (sessionSource.discoverSessions as ReturnType<typeof mock>).mockResolvedValue(sessions);
+
+      const errorParser: IEventParser = {
+        parse: async function* () {
+          throw new MemoryError(ErrorCode.INVALID_JSON, "already wrapped", { path: "custom" });
+        },
+      };
+      (syncService as any).eventParser = errorParser;
+
+      const result = await syncService.sync();
+
+      expect(result.errors).toHaveLength(1);
+      expect(result.errors[0].error).toBe("already wrapped");
     });
 
     test("wraps session discovery errors with SOURCE_INACCESSIBLE", async () => {

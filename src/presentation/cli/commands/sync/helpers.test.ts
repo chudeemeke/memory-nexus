@@ -270,6 +270,31 @@ describe("helpers", () => {
         console.log = originalLog;
       }
     });
+
+    it("omits recovered checkpoint and aborted fields when result leaves them unset", () => {
+      const originalLog = console.log;
+      let logOutput = "";
+      console.log = (...args) => {
+        logOutput += args.join(" ") + "\n";
+      };
+      try {
+        const mockResult = {
+          success: true,
+          sessionsDiscovered: 1,
+          sessionsProcessed: 1,
+          sessionsSkipped: 0,
+          messagesInserted: 2,
+          toolUsesInserted: 0,
+          errors: [],
+        };
+        reportResults(mockResult, Date.now() - 1000, { json: true });
+        const parsed = JSON.parse(logOutput);
+        expect(parsed.recoveredFromCheckpoint).toBeUndefined();
+        expect(parsed.aborted).toBe(false);
+      } finally {
+        console.log = originalLog;
+      }
+    });
   });
 
   describe("executeDryRun", () => {
@@ -361,6 +386,40 @@ describe("helpers", () => {
       } finally {
         console.log = originalLog;
         clearCheckpoint();
+      }
+    });
+
+    it("caps dry-run checkpoint preview after twenty remaining sessions", async () => {
+      const manySessions = Array.from({ length: 25 }, (_, index) => ({
+        id: `session-${index + 1}`,
+        projectPath: { decoded: `C:\\Projects\\project-${index + 1}` },
+        size: 100 + index,
+        modifiedTime: new Date("2026-05-21T12:00:00Z"),
+      }));
+      FileSystemSessionSource.prototype.discoverSessions = async () => manySessions as any;
+      saveCheckpoint({
+        startedAt: new Date().toISOString(),
+        totalSessions: 25,
+        completedSessions: 0,
+        completedSessionIds: [],
+        lastCompletedAt: new Date().toISOString(),
+      });
+
+      const originalLog = console.log;
+      let logOutput = "";
+      console.log = (...args) => {
+        logOutput += args.join(" ") + "\n";
+      };
+      try {
+        const res = await executeDryRun({ json: false });
+        expect(res.exitCode).toBe(0);
+        expect(logOutput).toContain("... and 5 more");
+      } finally {
+        console.log = originalLog;
+        clearCheckpoint();
+        FileSystemSessionSource.prototype.discoverSessions = async () => {
+          return mockSessions as any;
+        };
       }
     });
 
