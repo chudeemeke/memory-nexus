@@ -33,17 +33,19 @@ export interface GitSyncerDeps {
     now?: () => Date;
 }
 
-const ORIGINAL_ENV = { ...process.env };
-
 /**
  * Runs a git command securely using Bun's shell-less spawner.
  */
-export async function runGit(args: string[], cwd: string): Promise<GitCommandResult> {
+export async function runGit(
+    args: string[],
+    cwd: string,
+    env: NodeJS.ProcessEnv = process.env,
+): Promise<GitCommandResult> {
     const proc = spawn(["git", ...args], {
         cwd,
         stdout: "pipe",
         stderr: "pipe",
-        env: ORIGINAL_ENV,
+        env,
     });
 
     const stdout = await new Response(proc.stdout).text();

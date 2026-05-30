@@ -59,7 +59,10 @@ async function removeDirWithRetry(path: string): Promise<void> {
 describe("git-syncer", () => {
     let testDir: string;
     let mockRemoteDir: string;
+    let gitHomeDir: string;
     let syncer: GitSyncer;
+    let gitEnv: NodeJS.ProcessEnv;
+    let runIsolatedGit: typeof runGit;
 
     beforeEach(async () => {
         // Create unique sandbox directories
@@ -71,21 +74,35 @@ describe("git-syncer", () => {
             tmpdir(),
             `git-syncer-remote-${Date.now()}-${Math.random().toString(36).slice(2)}`
         );
+        gitHomeDir = join(
+            tmpdir(),
+            `git-syncer-home-${Date.now()}-${Math.random().toString(36).slice(2)}`
+        );
         mkdirSync(testDir, { recursive: true });
         mkdirSync(mockRemoteDir, { recursive: true });
+        mkdirSync(gitHomeDir, { recursive: true });
+
+        gitEnv = {
+            ...process.env,
+            HOME: gitHomeDir,
+            USERPROFILE: gitHomeDir,
+            XDG_CONFIG_HOME: join(gitHomeDir, ".config"),
+        };
+        runIsolatedGit = (args, cwd) => runGit(args, cwd, gitEnv);
 
         // Initialize mock remote repository as bare repo
-        await runGit(["init", "--bare"], mockRemoteDir);
+        await runIsolatedGit(["init", "--bare"], mockRemoteDir);
 
         // Configure default branch in remote
-        await runGit(["symbolic-ref", "HEAD", "refs/heads/main"], mockRemoteDir);
+        await runIsolatedGit(["symbolic-ref", "HEAD", "refs/heads/main"], mockRemoteDir);
 
-        syncer = new GitSyncer(testDir);
+        syncer = new GitSyncer(testDir, { runGit: runIsolatedGit });
     });
 
     afterEach(async () => {
         await removeDirWithRetry(testDir);
         await removeDirWithRetry(mockRemoteDir);
+        await removeDirWithRetry(gitHomeDir);
     });
 
     test("isGitRepo returns false when not a repository", async () => {
@@ -130,7 +147,7 @@ describe("git-syncer", () => {
         mkdirSync(device2Dir, { recursive: true });
         
         try {
-            const syncer2 = new GitSyncer(device2Dir);
+            const syncer2 = new GitSyncer(device2Dir, { runGit: runIsolatedGit });
             await syncer2.initRepo();
             await syncer2.configureRemote(mockRemoteDir);
 

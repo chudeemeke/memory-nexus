@@ -15,15 +15,30 @@ import {
     executeRemoteStatusCommand,
     createRemoteCommand,
 } from "./remote.js";
-import { runGit } from "../../../infrastructure/hooks/git-syncer.js";
+import { GitSyncer, runGit } from "../../../infrastructure/hooks/git-syncer.js";
 
 describe("remote command", () => {
     let testDir: string;
     let configPath: string;
     let eventsDir: string;
     let mockRemoteDir: string;
+    let gitHomeDir: string;
+    let gitEnv: NodeJS.ProcessEnv;
+    let runIsolatedGit: typeof runGit;
     let consoleLogSpy: ReturnType<typeof spyOn>;
     let consoleErrorSpy: ReturnType<typeof spyOn>;
+
+    function createRealGitSyncer(eventsDirOverride?: string): GitSyncer {
+        return new GitSyncer(eventsDirOverride, { runGit: runIsolatedGit });
+    }
+
+    function realGitOptions() {
+        return {
+            configPathOverride: configPath,
+            eventsDirOverride: eventsDir,
+            createGitSyncer: createRealGitSyncer,
+        };
+    }
 
     beforeEach(async () => {
         // Setup unique sandbox directories
@@ -40,9 +55,19 @@ describe("remote command", () => {
         mockRemoteDir = join(testDir, "remote-bare");
         mkdirSync(mockRemoteDir, { recursive: true });
 
+        gitHomeDir = join(testDir, "git-home");
+        mkdirSync(gitHomeDir, { recursive: true });
+        gitEnv = {
+            ...process.env,
+            HOME: gitHomeDir,
+            USERPROFILE: gitHomeDir,
+            XDG_CONFIG_HOME: join(gitHomeDir, ".config"),
+        };
+        runIsolatedGit = (args, cwd) => runGit(args, cwd, gitEnv);
+
         // Initialize bare repo
-        await runGit(["init", "--bare"], mockRemoteDir);
-        await runGit(["symbolic-ref", "HEAD", "refs/heads/main"], mockRemoteDir);
+        await runIsolatedGit(["init", "--bare"], mockRemoteDir);
+        await runIsolatedGit(["symbolic-ref", "HEAD", "refs/heads/main"], mockRemoteDir);
 
         consoleLogSpy = spyOn(console, "log").mockImplementation(() => {});
         consoleErrorSpy = spyOn(console, "error").mockImplementation(() => {});
@@ -68,24 +93,15 @@ describe("remote command", () => {
         const originalExitCode = process.exitCode;
         try {
             process.exitCode = undefined;
-            await createRemoteCommand({
-                configPathOverride: configPath,
-                eventsDirOverride: eventsDir,
-            }).parseAsync(["node", "memory remote", "set", mockRemoteDir]);
+            await createRemoteCommand(realGitOptions()).parseAsync(["node", "memory remote", "set", mockRemoteDir]);
             expect(process.exitCode).toBe(0);
 
             process.exitCode = undefined;
-            await createRemoteCommand({
-                configPathOverride: configPath,
-                eventsDirOverride: eventsDir,
-            }).parseAsync(["node", "memory remote", "status"]);
+            await createRemoteCommand(realGitOptions()).parseAsync(["node", "memory remote", "status"]);
             expect(process.exitCode).toBe(0);
 
             process.exitCode = undefined;
-            await createRemoteCommand({
-                configPathOverride: configPath,
-                eventsDirOverride: eventsDir,
-            }).parseAsync(["node", "memory remote", "remove"]);
+            await createRemoteCommand(realGitOptions()).parseAsync(["node", "memory remote", "remove"]);
             expect(process.exitCode).toBe(0);
         } finally {
             process.exitCode = originalExitCode;
@@ -94,8 +110,7 @@ describe("remote command", () => {
 
     test("executeRemoteSetCommand initializes Git repo and configures URL", async () => {
         const result = await executeRemoteSetCommand(mockRemoteDir, {
-            configPathOverride: configPath,
-            eventsDirOverride: eventsDir,
+            ...realGitOptions(),
         });
 
         expect(result.exitCode).toBe(0);
@@ -116,8 +131,7 @@ describe("remote command", () => {
 
     test("executeRemoteSetCommand fails when remote URL is blank", async () => {
         const result = await executeRemoteSetCommand("   ", {
-            configPathOverride: configPath,
-            eventsDirOverride: eventsDir,
+            ...realGitOptions(),
         });
 
         expect(result.exitCode).toBe(1);
@@ -225,14 +239,12 @@ describe("remote command", () => {
     test("executeRemoteRemoveCommand disables sync and clears configuration", async () => {
         // Set first
         await executeRemoteSetCommand(mockRemoteDir, {
-            configPathOverride: configPath,
-            eventsDirOverride: eventsDir,
+            ...realGitOptions(),
         });
 
         // Now remove
         const result = await executeRemoteRemoveCommand({
-            configPathOverride: configPath,
-            eventsDirOverride: eventsDir,
+            ...realGitOptions(),
         });
 
         expect(result.exitCode).toBe(0);
@@ -332,13 +344,11 @@ describe("remote command", () => {
     test("executeRemoteStatusCommand renders status values correctly", async () => {
         // Set first
         await executeRemoteSetCommand(mockRemoteDir, {
-            configPathOverride: configPath,
-            eventsDirOverride: eventsDir,
+            ...realGitOptions(),
         });
 
         const result = await executeRemoteStatusCommand({
-            configPathOverride: configPath,
-            eventsDirOverride: eventsDir,
+            ...realGitOptions(),
         });
 
         expect(result.exitCode).toBe(0);
