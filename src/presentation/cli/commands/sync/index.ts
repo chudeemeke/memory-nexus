@@ -24,6 +24,65 @@ import { loadConfig } from "../../../../infrastructure/hooks/config-manager.js";
 import { PatternRedactor } from "../../../../infrastructure/security/pattern-redactor.js";
 import { unknownErrorMessage, unknownToError } from "../../../../domain/errors/unknown-error.js";
 
+type ResolvedSyncCommandDeps = Omit<Required<SyncCommandDeps>, "removeBackgroundLock"> & {
+  removeBackgroundLock?: () => void;
+};
+
+function createDefaultSyncService({ db, resolver }: { db: ReturnType<typeof initializeDatabase>["db"]; resolver: unknown }) {
+  const sessionSource = new FileSystemSessionSource({ projectNameResolver: resolver as any });
+  const eventParser = new JsonlEventParser();
+  const sessionRepo = new SqliteSessionRepository(db);
+  const messageRepo = new SqliteMessageRepository(db);
+  const toolUseRepo = new SqliteToolUseRepository(db);
+  const extractionStateRepo = new SqliteExtractionStateRepository(db);
+
+  const service = new SyncService(
+    sessionSource, eventParser, sessionRepo, messageRepo,
+    toolUseRepo, extractionStateRepo, db,
+    new ProcessAbortSignal(), new FileCheckpointManager(),
+    new PatternRedactor(),
+  );
+
+  return {
+    fixProjectNames: (resolver: unknown) => service.fixProjectNames(resolver as any),
+    sync: (options: SyncOptions) => service.sync(options),
+  };
+}
+
+async function rebuildDefaultProjections(db: ReturnType<typeof initializeDatabase>["db"]): Promise<void> {
+  const rebuild = await loadDefaultRebuildProjections();
+  await rebuild(db);
+}
+
+function resolveSyncCommandDeps(deps: SyncCommandDeps): ResolvedSyncCommandDeps {
+  return {
+    handleBackgroundMode,
+    setupSignalHandlers,
+    hasCheckpoint,
+    loadCheckpoint,
+    createProgressReporter,
+    getDefaultDbPath,
+    executeDryRun,
+    handleError,
+    reportResults,
+    createDriveResolver,
+    initializeDatabase,
+    closeDatabase,
+    bulkOperationCheckpoint,
+    registerCleanup,
+    unregisterCleanup,
+    createSyncService: createDefaultSyncService,
+    loadConfig,
+    createGitSyncer: createDefaultGitSyncer,
+    rebuildProjections: rebuildDefaultProjections,
+    experimentalRemoteSync: process.env.MEMORY_EXPERIMENTAL_REMOTE_SYNC === "1",
+    runMemoryFileSync,
+    reportMemoryFileResults,
+    runAmbientContextGeneration,
+    runEmbeddingPass,
+    ...deps,
+  };
+}
 
 /** Create the sync command for Commander.js. */
 export function createSyncCommand(): Command {
@@ -50,19 +109,19 @@ export async function executeSyncCommand(
   options: SyncCommandOptions,
   deps: SyncCommandDeps = {},
 ): Promise<CommandResult> {
+  const resolved = resolveSyncCommandDeps(deps);
+
   if (options.background) {
-    const runBackground = deps.handleBackgroundMode ?? handleBackgroundMode;
-    return await runBackground(options);
+    return await resolved.handleBackgroundMode(options);
   }
 
-  const setupSignals = deps.setupSignalHandlers ?? setupSignalHandlers;
-  setupSignals();
+  resolved.setupSignalHandlers();
   const startTime = Date.now();
-  const reporter = (deps.createProgressReporter ?? createProgressReporter)(options);
+  const reporter = resolved.createProgressReporter(options);
 
   // Check for recovery from previous interrupted sync
-  if (!options.quiet && (deps.hasCheckpoint ?? hasCheckpoint)()) {
-    const checkpoint = (deps.loadCheckpoint ?? loadCheckpoint)();
+  if (!options.quiet && resolved.hasCheckpoint()) {
+    const checkpoint = resolved.loadCheckpoint();
     if (checkpoint) {
       console.log(
         `Resuming from previous interrupted sync (${checkpoint.completedSessions}/${checkpoint.totalSessions} sessions done)`
@@ -70,41 +129,26 @@ export async function executeSyncCommand(
     }
   }
 
-  const dbPath = (deps.getDefaultDbPath ?? getDefaultDbPath)();
+  const dbPath = resolved.getDefaultDbPath();
   if (options.dryRun) {
-    return await (deps.executeDryRun ?? executeDryRun)(options);
+    return await resolved.executeDryRun(options);
   }
 
   let db: ReturnType<typeof initializeDatabase>["db"];
   try {
-    const result = (deps.initializeDatabase ?? initializeDatabase)({ path: dbPath });
+    const result = resolved.initializeDatabase({ path: dbPath });
     db = result.db;
   } catch (error) {
-    (deps.handleError ?? handleError)(error, options);
+    resolved.handleError(error, options);
     return { exitCode: 1 };
   }
 
-  const closeDb = deps.closeDatabase ?? closeDatabase;
-  const cleanupFn = async (): Promise<void> => { closeDb(db); };
-  (deps.registerCleanup ?? registerCleanup)(cleanupFn);
+  const cleanupFn = async (): Promise<void> => { resolved.closeDatabase(db); };
+  resolved.registerCleanup(cleanupFn);
 
   try {
-    const resolver = (deps.createDriveResolver ?? createDriveResolver)();
-    const syncService = deps.createSyncService?.({ db, resolver }) ?? (() => {
-      const sessionSource = new FileSystemSessionSource({ projectNameResolver: resolver });
-      const eventParser = new JsonlEventParser();
-      const sessionRepo = new SqliteSessionRepository(db);
-      const messageRepo = new SqliteMessageRepository(db);
-      const toolUseRepo = new SqliteToolUseRepository(db);
-      const extractionStateRepo = new SqliteExtractionStateRepository(db);
-
-      return new SyncService(
-        sessionSource, eventParser, sessionRepo, messageRepo,
-        toolUseRepo, extractionStateRepo, db,
-        new ProcessAbortSignal(), new FileCheckpointManager(),
-        new PatternRedactor(),
-      );
-    })();
+    const resolver = resolved.createDriveResolver();
+    const syncService = resolved.createSyncService({ db, resolver });
 
     if (options.fixNames) {
       reporter.log("Fixing project names...");
@@ -130,25 +174,25 @@ export async function executeSyncCommand(
     } as any;
 
     const result = await syncService.sync(syncOptions);
-    (deps.bulkOperationCheckpoint ?? bulkOperationCheckpoint)(db);
+    resolved.bulkOperationCheckpoint(db);
     reporter.stop();
-    (deps.reportResults ?? reportResults)(result, startTime, options);
+    resolved.reportResults(result, startTime, options);
 
     // Git Remote Sync is Phase 38 work. Keep it opt-in until its threat model,
     // event envelope, conflict semantics, and privacy gates are finished.
-    const config = (deps.loadConfig ?? loadConfig)();
+    const config = resolved.loadConfig();
     const remoteUrl = config.remoteSync?.repositoryUrl;
     const remoteConfigured =
       config.remoteSync?.enabled === true &&
       typeof remoteUrl === "string" &&
       remoteUrl.trim().length > 0;
-    const remoteEnabled = deps.experimentalRemoteSync ?? process.env.MEMORY_EXPERIMENTAL_REMOTE_SYNC === "1";
+    const remoteEnabled = resolved.experimentalRemoteSync;
     if (remoteConfigured && remoteEnabled) {
       if (!options.quiet) {
         console.log("Synchronizing events with remote Git repository...");
       }
       try {
-        const syncer = await (deps.createGitSyncer?.() ?? createDefaultGitSyncer());
+        const syncer = await resolved.createGitSyncer();
         
         const syncResult = await syncer.sync(
           config.machineId,
@@ -162,8 +206,7 @@ export async function executeSyncCommand(
             if (!options.quiet) {
               console.log("Remote events pulled. Rebuilding database projections...");
             }
-            const rebuild = deps.rebuildProjections ?? await loadDefaultRebuildProjections();
-            await rebuild(db);
+            await resolved.rebuildProjections(db);
           } else {
             if (!options.quiet) {
               console.log("Git events are already up to date.");
@@ -181,11 +224,11 @@ export async function executeSyncCommand(
 
     // Memory file sync (after session extraction)
 
-    const memoryResult = await (deps.runMemoryFileSync ?? runMemoryFileSync)(db, options);
-    if (memoryResult) (deps.reportMemoryFileResults ?? reportMemoryFileResults)(memoryResult, options);
+    const memoryResult = await resolved.runMemoryFileSync(db, options);
+    if (memoryResult) resolved.reportMemoryFileResults(memoryResult, options);
 
     // Ambient context generation (after memory files are indexed)
-    if (!options.dryRun) await (deps.runAmbientContextGeneration ?? runAmbientContextGeneration)(db, options);
+    if (!options.dryRun) await resolved.runAmbientContextGeneration(db, options);
 
     const syncExitCode = (result.errors.length > 0 || result.aborted) ? 1 : 0;
 
@@ -193,7 +236,7 @@ export async function executeSyncCommand(
     if (options.embed && !options.dryRun) {
       const isBackground = process.env.MEMORY_EMBED_BACKGROUND === "1";
       try {
-        await (deps.runEmbeddingPass ?? runEmbeddingPass)(db, options);
+        await resolved.runEmbeddingPass(db, options);
       } catch (embeddingError) {
         if (options.json) {
           console.error(formatErrorJson(
@@ -208,8 +251,8 @@ export async function executeSyncCommand(
         return { exitCode: 1 };
       } finally {
         if (isBackground) {
-          if (deps.removeBackgroundLock) {
-            deps.removeBackgroundLock();
+          if (resolved.removeBackgroundLock) {
+            resolved.removeBackgroundLock();
           } else {
             const { removeLock } = await import("../../../../infrastructure/embedding/background-embedder.js");
             removeLock();
@@ -221,11 +264,11 @@ export async function executeSyncCommand(
     return { exitCode: syncExitCode };
   } catch (error) {
     reporter.stop();
-    (deps.handleError ?? handleError)(error, options);
+    resolved.handleError(error, options);
     return { exitCode: 1 };
   } finally {
-    (deps.unregisterCleanup ?? unregisterCleanup)(cleanupFn);
-    closeDb(db);
+    resolved.unregisterCleanup(cleanupFn);
+    resolved.closeDatabase(db);
   }
 }
 
