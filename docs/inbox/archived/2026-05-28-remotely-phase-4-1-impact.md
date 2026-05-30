@@ -5,7 +5,7 @@ created: 2026-05-28
 type: docs
 severity: low
 affects_scope: unknown
-status: open
+status: archived
 ---
 
 # Remotely Phase 4.1 Impact
@@ -23,3 +23,7 @@ Impact to check:
 - Reinstall remotely after source updates before comparing installed behavior.
 
 Next action: review any memory sync/recovery docs that prescribe raw SSH or old remotely behavior.
+
+## Disposition
+
+Reviewed 2026-05-30. Current memory-nexus docs and scripts do not prescribe raw SSH, hard-coded remotely tunnel state paths, or old remotely diagnostic behavior. Historical review artifacts mention `ssh desktop` only as quoted prior-session evidence, not as current operating instructions. No code change required.

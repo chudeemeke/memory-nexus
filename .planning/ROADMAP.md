@@ -5,7 +5,7 @@
 - SHIPPED **v1.0 Full Vision Implementation** -- Phases 1-12 (shipped 2026-02-16) -- [Archive](milestones/v1.0-ROADMAP.md)
 - SHIPPED **v2.0 Hybrid Search and Rebrand** -- Phases 13-22 (shipped 2026-03-01)
 - SHIPPED **v3.0 Knowledge Layer + Friction Logging** -- Phases 23-29.1 (shipped 2026-04-02)
-- **v4.0 Intelligence Layer** -- Phases 30-37 plus 32.5 and 36.8 (in progress; architecture audit LOCKED 2026-05-13, recommendation A-prime; 2026-05-27 foundation review added pre-publish security hardening before GA)
+- **v4.0 Intelligence Layer** -- Phases 30-37 plus 32.5, 36.8, and 36.9 (in progress; architecture audit LOCKED 2026-05-13, recommendation A-prime; 2026-05-27 foundation review added pre-publish security hardening before GA; Phase 36.9 coverage gate restored 2026-05-30)
 
 ## Phases
 
@@ -78,8 +78,8 @@
 - [x] **Phase 35: Context Intelligence** - Rewire SmartContextService to read from fact tables, deprecate ~/.memory/. **Every new typed memory kind in 33-35 must have plain-text canonical OR export-on-write before becoming default (T7) per audit §19 item 6.** (Completed 2026-05-24)
 - [x] **Phase 36: Portability** - WSL migration command, doctor --portability, migration guide (completed 2026-05-25)
 - [x] **Phase 36.8: Secret Boundary and Optional Provider Interop** (NEW, pre-publish hardening) - Redaction before persistence/provider egress; config stores env/ref metadata instead of plaintext API keys; authkey is supported as an optional `authkey run --env memory -- ...` execution path, never as a required dependency or raw-secret resolver. (Completed 2026-05-28)
-- [ ] **Phase 36.9: Coverage Runner Migration** (NEW, pre-publish hardening) - Replace the current Bun-only coverage gate with an honest runner/instrumentation path that reports statements, branches, functions, and lines for the release surface; no aliasing unmeasured metrics to measured ones.
-- [ ] **Phase 37: Publishing** - Prerelease (`@chude/memory@4.0.0-pre.N`) allowed only after release gates are restored; GA (`@chude/memory@4.0.0`) gated on prior audit criteria plus Phase 36.8 secret-boundary hardening and Phase 36.9 four-metric coverage enforcement.
+- [x] **Phase 36.9: Coverage Runner Migration** (NEW, pre-publish hardening) - Replace the current Bun-only coverage gate with an honest runner/instrumentation path that reports statements, branches, functions, and lines for the release surface; no aliasing unmeasured metrics to measured ones. (Completed 2026-05-30; final gate: statements 97.18%, branches 95.00%, functions 96.09%, lines 97.32%)
+- [ ] **Phase 37: Publishing** - Prerelease (`@chude/memory@4.0.0-pre.N`) allowed after release gates are restored; GA (`@chude/memory@4.0.0`) gated on prior audit criteria plus Phase 36.8 secret-boundary hardening and Phase 36.9 four-metric coverage enforcement.
 
 ### v5.0 Autonomous & Synchronized Memory Layer (Phases 38-42, plus 38.5)
 
@@ -87,7 +87,7 @@
 
 - [ ] **Phase 38: Remote Sync** - Private-Git-backed remote event log synchronization (multi-device consolidation)
 - [ ] **Phase 38.5: Secure Capability Interop** - Optional authkey readiness/status/fingerprint interop using handles, masked metadata, or proofs; no hard dependency and no plaintext secret resolution inside memory-nexus.
-- [ ] **Post-v4 accepted capacity: Durable Friction Query Contract** - Extend the existing `memory friction list` surface only if/when roadmap capacity allows. Required contract work: stable JSON schema, `--since`, exact severity/project filters, privacy-safe contains filters, `--count`, `--min`, explicit exit codes, timezone semantics, and tests. Source: `docs/inbox/2026-05-12-conversations-friction-list-durable-filters.md`.
+- [ ] **Post-v4 accepted capacity: Durable Friction Query Contract** - Extend the existing `memory friction list` surface only if/when roadmap capacity allows. Required contract work: stable JSON schema, `--since`, exact severity/project filters, privacy-safe contains filters, `--count`, `--min`, explicit exit codes, timezone semantics, and tests. Source: `docs/inbox/archived/2026-05-12-conversations-friction-list-durable-filters.md`.
 - [ ] **Phase 39: Persona Profiling** - Centralized developer/agent style persona profile aggregation
 - [ ] **Phase 40: Semantic Graph** - Entity-Relationship extraction and graph-traversal queries in the links table
 - [ ] **Phase 41: Importance Decay** - Utility weighting and half-life temporal relevance decay in search ranking
@@ -122,11 +122,11 @@ Plans:
   1. `memory search` with Unicode characters (CJK, emoji, accented) returns correct results without FTS5 syntax errors
   2. CLI output wraps or truncates cleanly at the terminal width boundary without cutting words or corrupting table alignment
   3. Download progress bar displays actual file sizes (e.g., "23/23 MB") instead of "0/0 MB" during model download
-**Plans:** 1/2 plans executed
+**Plans:** 2/2 plans complete
 
 Plans:
 - [x] 31-01-PLAN.md -- Fix Unicode FTS5 sanitization (FIX-01) and download progress bar 0/0 MB (FIX-03)
-- [ ] 31-02-PLAN.md -- Fix CLI output width-aware truncation and column alignment (FIX-02)
+- [x] 31-02-PLAN.md -- Fix CLI output width-aware truncation and column alignment (FIX-02)
 
 ---
 
@@ -139,12 +139,12 @@ Plans:
   1. `memory --help` groups commands under labeled categories (Query, Data, System, Feedback) instead of a flat alphabetical list
   2. All query commands (`search`, `context`, `show`, `list`, `related`, `stats`) accept `--json` and produce valid JSON to stdout
   3. All query commands support `--format brief` and `--format ai` where applicable, producing condensed or AI-optimized output respectively
-**Plans:** 3 plans
+**Plans:** 3/3 plans complete
 
 Plans:
-- [ ] 32-01-PLAN.md -- Help-group registration (CLI-01) + QueryResultEnvelope contract (CLI-02 foundation)
-- [ ] 32-02-PLAN.md -- Apply QueryResultEnvelope --json output to all 6 query commands (CLI-02)
-- [ ] 32-03-PLAN.md -- Normalize --format brief|ai across all 6 query commands (CLI-03) + --format detailed deprecation alias
+- [x] 32-01-PLAN.md -- Help-group registration (CLI-01) + QueryResultEnvelope contract (CLI-02 foundation)
+- [x] 32-02-PLAN.md -- Apply QueryResultEnvelope --json output to all 6 query commands (CLI-02)
+- [x] 32-03-PLAN.md -- Normalize --format brief|ai across all 6 query commands (CLI-03) + --format detailed deprecation alias
 
 ---
 
@@ -157,7 +157,7 @@ Plans:
   1. `bun --bun tsc --noEmit` exits 0 with 0 errors (down from ~181 baseline carried forward from pre-v4.0 code)
   2. Coverage on touched files maintained at or above the value before the cleanup (no regression)
   3. No behavioral change to any command output (refactor-only)
-**Plans**: TBD
+**Plans**: Implemented in Phase 32.6 completion pass; current `bun run typecheck` gate is clean.
 
 Pre-existing scope: db-startup.ts, context-formatter.ts, friction-dashboard.ts, output-formatter.ts, related-formatter.ts, stats-formatter.ts, and adjacent files surfaced during Phase 32 verification. The 181 errors all pre-date v4.0; Phase 32 confirmed via stash baseline that none were introduced by the CLI surface work.
 
@@ -172,7 +172,7 @@ Pre-existing scope: db-startup.ts, context-formatter.ts, friction-dashboard.ts, 
   1. The 8 failing tests in `src/presentation/cli/formatters/friction-dashboard.test.ts` pass cleanly (`generateFrictionHtml` rendering + `--html` action path)
   2. `memory friction list --json` produces a `QueryResultEnvelope`-shaped document on stdout, consistent with the 6 query commands from Phase 32
   3. The deferred Open Q7 from Plan 32-01 is closed (friction adoption no longer deferred)
-**Plans**: `.planning/phases/36.9-coverage-runner-migration/36.9-01-PLAN.md` (in progress)
+**Plans**: See `.planning/phases/32-cli-surface/32-VERIFICATION.md` (complete; Phase 32.7 closure verified as part of v4 surface cleanup)
 
 Rationale: Phase 32 explicitly deferred friction envelope adoption per audit §14.A. The dashboard test failures co-locate with that decision because the underlying surface changes when friction joins the envelope contract.
 
@@ -189,7 +189,7 @@ Rationale: Phase 32 explicitly deferred friction envelope adoption per audit §1
   3. `extraction_log` table records each extraction run with session ID, mode, fact counts (added/updated/superseded/skipped), provider/model, and tokens consumed
   4. Re-running extraction on an already-extracted session is a no-op (idempotency tracked via extraction_log)
   5. `memory doctor` reports extraction provider configuration and readiness
-**Plans**: `.planning/phases/36.9-coverage-runner-migration/36.9-01-PLAN.md` (in progress)
+**Plans**: Implemented in Phase 33 completion pass; see `.planning/SESSION_LOG.md` entry for 2026-05-24 and current code in extraction provider, fact repository, and extraction log paths.
 
 ---
 
@@ -204,7 +204,7 @@ Rationale: Phase 32 explicitly deferred friction envelope adoption per audit §1
   3. `memory extract --all --since 7d` batch-extracts from all sessions in the last 7 days with a progress bar showing sessions processed
   4. `memory facts <project>` displays current (non-superseded) facts for a project; `--superseded` includes historical/invalidated facts
   5. Running `memory extract <project>` a second time on already-processed sessions skips them and reports "N sessions already extracted"
-**Plans**: TBD
+**Plans**: Implemented in Phase 34 completion pass; see `.planning/SESSION_LOG.md` entry for 2026-05-24 and current `extract` / `facts` command code.
 
 ---
 
@@ -218,7 +218,7 @@ Rationale: Phase 32 explicitly deferred friction envelope adoption per audit §1
   2. `memory context <project> --global` returns cross-project context by querying facts from all projects, not just the specified one
   3. No command reads from or writes to the `~/.memory/` directory; all knowledge storage is in SQLite
   4. If `~/.memory/` directory exists, a deprecation warning is printed once per session advising the user that the directory is no longer used
-**Plans**: TBD
+**Plans**: `.planning/phases/35-context-intelligence/35-01-PLAN.md` (complete)
 
 ---
 
@@ -231,7 +231,7 @@ Rationale: Phase 32 explicitly deferred friction envelope adoption per audit §1
   1. `memory migrate --from-windows` checkpoints WAL, verifies database integrity, re-installs hooks for the new environment, and prints a session summary by project
   2. `memory doctor --portability` reports mixed-environment data (Windows vs Unix paths in session records), extraction state pointing to non-existent paths, and sqlite-vec availability
   3. Migration protocol is documented as a user-facing guide with step-by-step instructions in the project documentation
-**Plans**: TBD
+**Plans**: `.planning/phases/36-portability/36-01-PLAN.md` (complete)
 
 ---
 
@@ -261,7 +261,15 @@ Rationale: Phase 32 explicitly deferred friction envelope adoption per audit §1
   3. Test files, generated `dist`, dependency folders, and pure type/barrel files are excluded by explicit, reviewable rules only.
   4. The normal Bun test suite still runs successfully; any Node/Vitest path must either cover the same release surface or be documented as insufficient and rejected.
   5. `bun run typecheck`, `bun run build`, `bun run test:isolation`, `bun audit`, and the final coverage gate all pass before Phase 37 starts.
-**Plans**: `.planning/phases/36.9-coverage-runner-migration/36.9-01-PLAN.md` (in progress)
+**Plans**: `.planning/phases/36.9-coverage-runner-migration/36.9-01-PLAN.md` (complete; summary in `36.9-01-SUMMARY.md`)
+
+**Final verification (2026-05-30):**
+  - `bun run test:coverage`: PASS, 4,050 tests; statements 97.18% (7103/7309), branches 95.00% (4049/4262), functions 96.09% (1303/1356), lines 97.32% (6805/6992)
+  - `bun run typecheck`: PASS
+  - `bun run build`: PASS
+  - `bun run test:isolation`: PASS
+  - `bun audit`: PASS, no vulnerabilities
+  - `gitleaks detect --no-banner --redact --source .`: PASS, no leaks
 
 ---
 
@@ -450,7 +458,7 @@ v5.0
 | 35. Context Intelligence | v4.0 | 1/1 | Complete | 2026-05-24 |
 | 36. Portability | v4.0 | 1/1 | Complete | 2026-05-25 |
 | 36.8. Secret Boundary and Optional Provider Interop | v4.0 | 1/1 | Complete | 2026-05-28 |
-| 36.9. Coverage Runner Migration | v4.0 | 1/1 | In progress | - |
+| 36.9. Coverage Runner Migration | v4.0 | 1/1 | Complete | 2026-05-30 |
 | 37. Publishing | v4.0 | TBD | Planned | - |
 | 38. Remote Sync | v5.0 | TBD | Planned | - |
 | 38.5. Secure Capability Interop | v5.0 | TBD | Planned | - |
@@ -462,4 +470,4 @@ v5.0
 
 ---
 
-*Last updated: 2026-05-28 (Phase 36.9 coverage remediation in progress; durable friction query contract retained as accepted post-v4 capacity)*
+*Last updated: 2026-05-30 (Phase 36.9 coverage gate restored; durable friction query contract retained as accepted post-v4 capacity)*

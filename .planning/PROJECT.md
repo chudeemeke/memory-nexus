@@ -14,7 +14,7 @@ Cross-project context persistence for Claude Code sessions. Extracts JSONL sessi
 
 ## Current State
 
-Shipped v3.0. v4.0 Intelligence Layer is in foundation hardening, with Phase 36.8 implemented and Phase 37 publish execution blocked until the release coverage gate can measure and pass all four WoW metrics.
+Shipped v3.0. v4.0 Intelligence Layer has completed the pre-publish foundation hardening phases 36.8 and 36.9. Phase 37 publish execution is now next and remains responsible for packaging, install, prerelease, and GA release verification.
 
 **Tech stack:** Bun, TypeScript 5.5+, bun:sqlite with FTS5 + sqlite-vec, Commander.js v14, cli-progress, chrono-node, @huggingface/transformers v3
 
@@ -22,7 +22,7 @@ Shipped v3.0. v4.0 Intelligence Layer is in foundation hardening, with Phase 36.
 
 **Commands:** sync, search, list, stats, context, related, show, browse, install, uninstall, status, doctor, purge, export, import, completion
 
-**Test suite:** 3,762 tests currently pass under the Istanbul-backed `bun run test:coverage` harness. The release gate now measures all four metrics and fails honestly at statements 91.05%, branches 82.30%, functions 94.70%, and lines 91.55%; remediation is required before publish.
+**Test suite:** 4,050 tests currently pass under the Istanbul-backed `bun run test:coverage` harness. The release gate measures all four metrics independently and passes at statements 97.18%, branches 95.00%, functions 96.09%, and lines 97.32%.
 
 ## Problem Statement
 
@@ -66,7 +66,7 @@ Both Claude and humans use the same commands. No special formatting needed.
 - EXTR-01 through EXTR-04: Entity extraction, tool tracking -- v1.0
 - ERR-01 through ERR-05: Error handling, exit codes, signal handling -- v1.0
 - QUAL-02 through QUAL-05: Unit, integration, and concurrent tests -- v1.0
-- QUAL-01: Coverage threshold -- v1.0 initially near-pass; current all-four-metric gate is measurable but below threshold and blocks release
+- QUAL-01: Coverage threshold -- v1.0 initially near-pass; current all-four-metric gate is measurable and passes the 95% WoW threshold for statements, branches, functions, and lines
 - Hybrid search (FTS5 + sqlite-vec + RRF), embedding providers, embedding pipeline -- v2.0
 - Package rename to @chude/memory, programmatic API, aidev integration readiness -- v2.0
 - Agent-written memory, smart context, friction system, backfill, qmd integration -- v3.0
@@ -140,7 +140,7 @@ All open questions from pre-implementation were resolved:
 - **Local-first** -- No mandatory network access. Optional API embedding providers require user-configured API keys
 - **TypeScript** -- Matches aidev ecosystem
 - **bun** -- Package manager per WoW standards
-- **95%+ coverage at EACH metric** -- Statements, branches, functions, lines individually (Bun only measures functions + lines)
+- **95%+ coverage at EACH metric** -- Statements, branches, functions, lines individually via the Istanbul-backed Bun coverage harness
 - **Hexagonal architecture** -- Domain-Application-Infrastructure-Presentation layers
 - **TDD** -- Tests before implementation
 

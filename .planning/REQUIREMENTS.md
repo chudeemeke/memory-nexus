@@ -9,38 +9,38 @@ Requirements for v4.0: Intelligence Layer -- automated knowledge extraction, int
 
 ### Knowledge Extraction
 
-- [ ] **KNOW-01**: `IExtractionProvider` port in domain layer with extract method; adapters for Claude API (Anthropic SDK, API key auth), Ollama (local), and OpenAI
-- [ ] **KNOW-02**: `memory extract <project>` extracts atomic facts from session messages via configured provider and stores them in a `facts` SQLite table
-- [ ] **KNOW-03**: Each extracted fact carries `observed_at` (when the fact was first seen) and optional `superseded_at` / `superseded_by` fields for temporal tracking
-- [ ] **KNOW-04**: Extraction pipeline compares new candidate facts against existing facts using embedding similarity and decides ADD, UPDATE, DELETE (supersede), or NOOP per fact
-- [ ] **KNOW-05**: `memory extract` is idempotent -- re-running on already-extracted sessions skips them (tracked via `extraction_log` table)
-- [ ] **KNOW-06**: `extraction_log` table records each extraction run: session ID, mode, facts added/updated/superseded/skipped, LLM provider/model, tokens consumed
-- [ ] **KNOW-07**: `memory extract --all --since 7d` batch-extracts facts from all sessions in the last N days with progress reporting
-- [ ] **KNOW-08**: `memory facts <project>` displays extracted facts for a project; `--superseded` includes historical/invalidated facts
+- [x] **KNOW-01**: `IExtractionProvider` port in domain layer with extract method; adapters for Claude API (Anthropic SDK, API key auth), Ollama (local), and OpenAI
+- [x] **KNOW-02**: `memory extract <project>` extracts atomic facts from session messages via configured provider and stores them in a `facts` SQLite table
+- [x] **KNOW-03**: Each extracted fact carries `observed_at` (when the fact was first seen) and optional `superseded_at` / `superseded_by` fields for temporal tracking
+- [x] **KNOW-04**: Extraction pipeline compares new candidate facts against existing facts using embedding similarity and decides ADD, UPDATE, DELETE (supersede), or NOOP per fact
+- [x] **KNOW-05**: `memory extract` is idempotent -- re-running on already-extracted sessions skips them (tracked via `extraction_log` table)
+- [x] **KNOW-06**: `extraction_log` table records each extraction run: session ID, mode, facts added/updated/superseded/skipped, LLM provider/model, tokens consumed
+- [x] **KNOW-07**: `memory extract --all --since 7d` batch-extracts facts from all sessions in the last N days with progress reporting
+- [x] **KNOW-08**: `memory facts <project>` displays extracted facts for a project; `--superseded` includes historical/invalidated facts
 
 ### Context Intelligence
 
-- [ ] **CTXT-01**: `memory context <project>` default output is an AI-optimized structured briefing built from extracted facts, friction entries, and recent session summaries (SmartContextService)
-- [ ] **CTXT-02**: `memory context <project> --global` returns cross-project context by querying all projects, not just the specified one
-- [ ] **CTXT-03**: `memory context` reads knowledge from SQLite fact tables instead of `~/.memory/` filesystem files
-- [ ] **CTXT-04**: `~/.memory/` directory is no longer written to or read from by any command; a deprecation warning is shown if the directory exists
+- [x] **CTXT-01**: `memory context <project>` default output is an AI-optimized structured briefing built from extracted facts, friction entries, and recent session summaries (SmartContextService)
+- [x] **CTXT-02**: `memory context <project> --global` returns cross-project context by querying all projects, not just the specified one
+- [x] **CTXT-03**: `memory context` reads knowledge from SQLite fact tables instead of `~/.memory/` filesystem files
+- [x] **CTXT-04**: `~/.memory/` directory is no longer written to or read from by any command; a deprecation warning is shown if the directory exists
 
 ### CLI Surface
 
-- [ ] **CLI-01**: Help output groups commands under labeled categories (Query, Data, System, Feedback) using Commander.js help customization
-- [ ] **CLI-02**: All query commands (`search`, `context`, `show`, `list`, `related`, `stats`) support `--json` for structured output
-- [ ] **CLI-03**: All query commands support `--format` flag with at least `brief` and `ai` modes where applicable
+- [x] **CLI-01**: Help output groups commands under labeled categories (Query, Data, System, Feedback) using Commander.js help customization
+- [x] **CLI-02**: All query commands (`search`, `context`, `show`, `list`, `related`, `stats`) support `--json` for structured output
+- [x] **CLI-03**: All query commands support `--format` flag with at least `brief` and `ai` modes where applicable
 
 ### Portability
 
-- [ ] **PORT-01**: `memory migrate --from-windows` command checkpoints WAL, verifies integrity, re-installs hooks, and prints session summary by project
-- [ ] **PORT-02**: `memory doctor --portability` reports mixed-environment data (Windows vs Unix paths), extraction state pointing to non-existent paths, and sqlite-vec availability
-- [ ] **PORT-03**: Migration protocol documented as a user-facing guide in project documentation
+- [x] **PORT-01**: `memory migrate --from-windows` command checkpoints WAL, verifies integrity, re-installs hooks, and prints session summary by project
+- [x] **PORT-02**: `memory doctor --portability` reports mixed-environment data (Windows vs Unix paths), extraction state pointing to non-existent paths, and sqlite-vec availability
+- [x] **PORT-03**: Migration protocol documented as a user-facing guide in project documentation
 
 ### Bug Fixes
 
 - [x] **FIX-01**: `memory search` handles Unicode characters in queries without FTS5 syntax errors (issue #14)
-- [ ] **FIX-02**: CLI output respects terminal width and does not truncate content incorrectly (issue #15)
+- [x] **FIX-02**: CLI output respects terminal width and does not truncate content incorrectly (issue #15)
 - [x] **FIX-03**: Download progress bar shows correct file size instead of 0/0 MB (issue #163)
 
 ### Publishing
@@ -55,10 +55,10 @@ Requirements for v4.0: Intelligence Layer -- automated knowledge extraction, int
 
 ### Quality (Cross-Cutting)
 
-- [ ] **QUAL-01**: 95%+ coverage at EACH metric (functions, lines) for all new code
-- [ ] **QUAL-02**: Domain layer maintains zero external dependencies
-- [ ] **QUAL-03**: All new infrastructure adapters follow existing port/adapter patterns
-- [ ] **QUAL-04**: TDD workflow (RED-GREEN-REFACTOR) for all new features
+- [x] **QUAL-01**: 95%+ coverage at EACH metric (statements, branches, functions, lines) for the release surface
+- [x] **QUAL-02**: Domain layer maintains zero external dependencies
+- [x] **QUAL-03**: All new infrastructure adapters follow existing port/adapter patterns
+- [x] **QUAL-04**: TDD workflow (RED-GREEN-REFACTOR) for all new features
 
 ## Future Requirements
 
@@ -102,35 +102,35 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| KNOW-01 | Phase 33 | Pending |
-| KNOW-02 | Phase 34 | Pending |
-| KNOW-03 | Phase 33 | Pending |
-| KNOW-04 | Phase 34 | Pending |
-| KNOW-05 | Phase 33 | Pending |
-| KNOW-06 | Phase 33 | Pending |
-| KNOW-07 | Phase 34 | Pending |
-| KNOW-08 | Phase 34 | Pending |
-| CTXT-01 | Phase 35 | Pending |
-| CTXT-02 | Phase 35 | Pending |
-| CTXT-03 | Phase 35 | Pending |
-| CTXT-04 | Phase 35 | Pending |
-| CLI-01 | Phase 32 | Pending |
-| CLI-02 | Phase 32 | Pending |
-| CLI-03 | Phase 32 | Pending |
-| PORT-01 | Phase 36 | Pending |
-| PORT-02 | Phase 36 | Pending |
-| PORT-03 | Phase 36 | Pending |
+| KNOW-01 | Phase 33 | Complete |
+| KNOW-02 | Phase 34 | Complete |
+| KNOW-03 | Phase 33 | Complete |
+| KNOW-04 | Phase 34 | Complete |
+| KNOW-05 | Phase 33 | Complete |
+| KNOW-06 | Phase 33 | Complete |
+| KNOW-07 | Phase 34 | Complete |
+| KNOW-08 | Phase 34 | Complete |
+| CTXT-01 | Phase 35 | Complete |
+| CTXT-02 | Phase 35 | Complete |
+| CTXT-03 | Phase 35 | Complete |
+| CTXT-04 | Phase 35 | Complete |
+| CLI-01 | Phase 32 | Complete |
+| CLI-02 | Phase 32 | Complete |
+| CLI-03 | Phase 32 | Complete |
+| PORT-01 | Phase 36 | Complete |
+| PORT-02 | Phase 36 | Complete |
+| PORT-03 | Phase 36 | Complete |
 | FIX-01 | Phase 31 | Complete |
-| FIX-02 | Phase 31 | Pending |
+| FIX-02 | Phase 31 | Complete |
 | FIX-03 | Phase 31 | Complete |
 | PUB-01 | Phase 37 | Pending |
 | PUB-02 | Phase 37 | Pending |
 | REFAC-01 | Phase 30 | Complete |
 | REFAC-02 | Phase 30 | Complete |
-| QUAL-01 | All | Pending |
-| QUAL-02 | All | Pending |
-| QUAL-03 | All | Pending |
-| QUAL-04 | All | Pending |
+| QUAL-01 | All + Phase 36.9 | Complete |
+| QUAL-02 | All | Complete |
+| QUAL-03 | All | Complete |
+| QUAL-04 | All | Complete |
 
 **Coverage:**
 - v4.0 requirements: 25 total (excluding QUAL cross-cutting)
@@ -141,4 +141,4 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 ---
 *Requirements defined: 2026-04-03*
-*Last updated: 2026-04-03 after roadmap creation (all requirements mapped)*
+*Last updated: 2026-05-30 after Phase 36.9 coverage gate restoration; PUB-01 and PUB-02 remain pending for Phase 37*
