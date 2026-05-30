@@ -5,7 +5,7 @@
 - SHIPPED **v1.0 Full Vision Implementation** -- Phases 1-12 (shipped 2026-02-16) -- [Archive](milestones/v1.0-ROADMAP.md)
 - SHIPPED **v2.0 Hybrid Search and Rebrand** -- Phases 13-22 (shipped 2026-03-01)
 - SHIPPED **v3.0 Knowledge Layer + Friction Logging** -- Phases 23-29.1 (shipped 2026-04-02)
-- **v4.0 Intelligence Layer** -- Phases 30-37 plus 32.5, 36.8, and 36.9 (in progress; architecture audit LOCKED 2026-05-13, recommendation A-prime; 2026-05-27 foundation review added pre-publish security hardening before GA; Phase 36.9 coverage gate restored 2026-05-30)
+- **v4.0 Intelligence Layer** -- Phases 30-37 plus 32.5, 36.8, 36.9, and 36.10 (in progress; architecture audit LOCKED 2026-05-13, recommendation A-prime; 2026-05-27 foundation review added pre-publish security hardening before GA; Phase 36.9 coverage gate restored 2026-05-30; Phase 36.10 inserted 2026-05-30 after publish audit found active legacy memory-file defaults)
 
 ## Phases
 
@@ -58,7 +58,7 @@
 
 </details>
 
-### v4.0 Intelligence Layer (Phases 30-37, plus 32.5, 36.8, and 36.9)
+### v4.0 Intelligence Layer (Phases 30-37, plus 32.5, 36.8, 36.9, and 36.10)
 
 **Overview:** Transform memory from a data store into a knowledge system. Automated extraction of decisions, learnings, and patterns from sessions via LLM-powered pipeline. Intelligent context delivery from SQLite fact tables instead of filesystem. Clean CLI surface with labeled help groups. Cross-environment portability for WSL migration. npm publish to registry.
 
@@ -79,7 +79,8 @@
 - [x] **Phase 36: Portability** - WSL migration command, doctor --portability, migration guide (completed 2026-05-25)
 - [x] **Phase 36.8: Secret Boundary and Optional Provider Interop** (NEW, pre-publish hardening) - Redaction before persistence/provider egress; config stores env/ref metadata instead of plaintext API keys; authkey is supported as an optional `authkey run --env memory -- ...` execution path, never as a required dependency or raw-secret resolver. (Completed 2026-05-28)
 - [x] **Phase 36.9: Coverage Runner Migration** (NEW, pre-publish hardening) - Replace the current Bun-only coverage gate with an honest runner/instrumentation path that reports statements, branches, functions, and lines for the release surface; no aliasing unmeasured metrics to measured ones. (Completed 2026-05-30; final gate: statements 97.18%, branches 95.00%, functions 96.09%, lines 97.32%)
-- [ ] **Phase 37: Publishing** - Prerelease (`@chude/memory@4.0.0-pre.N`) allowed after release gates are restored; GA (`@chude/memory@4.0.0`) gated on prior audit criteria plus Phase 36.8 secret-boundary hardening and Phase 36.9 four-metric coverage enforcement.
+- [ ] **Phase 36.10: Legacy Memory File Publish Hardening** (NEW, pre-publish hardening) - Make legacy `~/.memory` / `MEMORY_HOME` reads and writes explicit opt-in instead of default behavior, preserving compatibility without contradicting Phase 35's SQLite/facts default.
+- [ ] **Phase 37: Publishing** - Prerelease (`@chude/memory@4.0.0-pre.N`) allowed after release gates are restored; GA (`@chude/memory@4.0.0`) gated on prior audit criteria plus Phase 36.8 secret-boundary hardening, Phase 36.9 four-metric coverage enforcement, and Phase 36.10 legacy-memory-file hardening.
 
 ### v5.0 Autonomous & Synchronized Memory Layer (Phases 38-42, plus 38.5)
 
@@ -273,16 +274,31 @@ Rationale: Phase 32 explicitly deferred friction envelope adoption per audit §1
 
 ---
 
+### Phase 36.10: Legacy Memory File Publish Hardening
+
+**Goal**: v4 default behavior no longer treats legacy `~/.memory` / `MEMORY_HOME` markdown files as active storage, while explicit compatibility paths remain available for users who need to import or maintain old sidecar files.
+**Depends on**: Phase 36.9; blocks Phase 37 GA
+**Requirements**: QUAL-04, CTXT-03, CTXT-04
+**Success Criteria** (what must be TRUE):
+  1. `memory sync` does not read or index `~/.memory` / `MEMORY_HOME` by default.
+  2. Legacy memory-file indexing is available only behind an explicit opt-in flag, env var, or config setting.
+  3. `memory backfill` does not write to `~/.memory` / `MEMORY_HOME` by default; any legacy write path requires explicit opt-in and labels itself as legacy.
+  4. README and release notes describe legacy memory-file behavior honestly.
+  5. Typecheck, build, test isolation, full coverage, audit, and gitleaks remain green.
+**Plans**: `.planning/phases/36.10-legacy-memory-file-publish-hardening/36.10-01-PLAN.md` (in progress)
+
+---
+
 ### Phase 37: Publishing
 
 **Goal**: `@chude/memory` is published to npm and installable globally by any user
-**Depends on**: Phase 35 (all features complete before publishing), Phase 36.8 (secret boundary and provider interop hardening), Phase 36.9 (four-metric coverage enforcement)
+**Depends on**: Phase 35 (all features complete before publishing), Phase 36.8 (secret boundary and provider interop hardening), Phase 36.9 (four-metric coverage enforcement), Phase 36.10 (legacy memory-file hardening)
 **Requirements**: PUB-01, PUB-02
 **Success Criteria** (what must be TRUE):
   1. `@chude/memory` is published to the npm registry with correct `bin`, `files`, and dependency configuration
   2. `bun add -g @chude/memory` installs successfully on a clean machine and the `memory` binary is available in PATH
   3. `memory --version` reports the published version; `memory doctor` passes all health checks on a fresh install
-**Plans**: TBD
+**Plans**: `.planning/phases/37-publishing/37-01-PLAN.md` (blocked until Phase 36.10 completes)
 
 ---
 
@@ -389,6 +405,8 @@ Phase 30 (God File Cleanup)
                                             |
                                             +---> Phase 36.9 (Coverage Runner)
                                                   |
+                                                  +---> Phase 36.10 (Legacy Memory Files)
+                                                        |
                                                   +---> Phase 37 (Publishing)
 
 Phase 32 (CLI Surface)
@@ -407,6 +425,11 @@ Phase 36.9 (Coverage Runner Migration)
     blocks Phase 37 GA
     must prove statements, branches, functions, and lines independently
 
+Phase 36.10 (Legacy Memory File Publish Hardening)
+    depends on Phase 36.9
+    blocks Phase 37 GA
+    must make legacy ~/.memory reads/writes explicit opt-in
+
 Phase 37 (Publishing)
     depends on Phase 35 (all features in before publish)
     depends on Phase 31 (bugs fixed before publish)
@@ -414,6 +437,7 @@ Phase 37 (Publishing)
     depends on Phase 36 (portability in before publish)
     depends on Phase 36.8 (secret boundary before publish)
     depends on Phase 36.9 (coverage runner before publish)
+    depends on Phase 36.10 (legacy memory-file hardening before publish)
 
 v5.0
     Phase 38 (Remote Sync) depends on Phase 37
@@ -459,6 +483,7 @@ v5.0
 | 36. Portability | v4.0 | 1/1 | Complete | 2026-05-25 |
 | 36.8. Secret Boundary and Optional Provider Interop | v4.0 | 1/1 | Complete | 2026-05-28 |
 | 36.9. Coverage Runner Migration | v4.0 | 1/1 | Complete | 2026-05-30 |
+| 36.10. Legacy Memory File Publish Hardening | v4.0 | 1/1 | In progress | - |
 | 37. Publishing | v4.0 | TBD | Planned | - |
 | 38. Remote Sync | v5.0 | TBD | Planned | - |
 | 38.5. Secure Capability Interop | v5.0 | TBD | Planned | - |
@@ -470,4 +495,4 @@ v5.0
 
 ---
 
-*Last updated: 2026-05-30 (Phase 36.9 coverage gate restored; durable friction query contract retained as accepted post-v4 capacity)*
+*Last updated: 2026-05-30 (Phase 36.10 inserted after publish audit found active legacy memory-file defaults; durable friction query contract retained as accepted post-v4 capacity)*

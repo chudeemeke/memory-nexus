@@ -3,16 +3,17 @@ gsd_state_version: 1.0
 milestone: v4.0
 milestone_name: Intelligence Layer
 status: in_progress
-last_updated: "2026-05-30T11:15:00.000+01:00"
+last_updated: "2026-05-30T11:35:00.000+01:00"
 progress:
-  total_phases: 13
+  total_phases: 14
   completed_phases: 12
-  total_plans: 13
+  total_plans: 15
   completed_plans: 13
 ---
 
 > **FOUNDATION HARDENING VERIFIED 2026-05-28** - Phase 36.8 is implemented. Typecheck, build, full tests, test-isolation, dependency audit, and gitleaks pass. Provider support now routes through an internal provider registry instead of presentation/health/factory switch drift. Phase 36.9 replaced the missing-metric Bun LCOV gate with an Istanbul-backed Bun coverage harness.
 > **COVERAGE GATE RESTORED 2026-05-30** - Phase 36.9 is complete. `bun run test:coverage` passes with statements 97.18% (7103/7309), branches 95.00% (4049/4262), functions 96.09% (1303/1356), and lines 97.32% (6805/6992). `bun run typecheck`, `bun run build`, `bun run test:isolation`, `bun audit`, and `gitleaks detect --no-banner --redact --source .` pass.
+> **PUBLISH BLOCKER INSERTED 2026-05-30** - Phase 37 audit found active legacy `~/.memory` / `MEMORY_HOME` reads and writes despite Phase 35's deprecated-filesystem claim, plus npm auth E401, placeholder repository metadata, and path leakage in current bundles. Phase 36.10 is inserted before publish to make legacy memory-file behavior explicit opt-in.
 > **INBOX RECONCILED 2026-05-28** - Stale bug reports for the Windows full-suite crash, orphaned friction test, and programmatic API real-DB pollution were validated against the current code and archived. The durable-friction-list filing was accepted into ROADMAP as post-v4 capacity, archived as planned, and counter-notified to conversations. No active memory-nexus inbox items remain.
 > **REMOTE CONSUMER NOTES REVIEWED 2026-05-30** - The two remotely consumer-impact inbox notes were reviewed against current memory-nexus docs/scripts. No current raw SSH/rsync operating instructions or hard-coded remotely tunnel-state assumptions were found, so both notes were archived with disposition text. Future Phase 38 cross-machine work must still use current `remotely` conventions where applicable.
 > **FIRST-PARTY INFRASTRUCTURE BROADCAST 2026-05-28** - User clarified that `memory` is a first-class first-party tool used by most/all projects. Canonical tool/package naming is `memory` / `@chude/memory`; the repository remains `memory-nexus`, and `nexus` is a legacy alias. Updated Codex/Claude rules and document-for-clear skills, added a Codex memory note, and filed notification inbox items to opted-in projects so consumers know about provider-secret, redaction/export, registry, and authkey-optional contract changes.
@@ -30,14 +31,14 @@ See: .planning/PROJECT.md (updated 2026-02-18)
 
 ## Current Position
 
-Phase: 37 (Publishing) - READY TO START
+Phase: 36.10 (Legacy Memory File Publish Hardening) - IN PROGRESS
 Test-isolation cleanup arc - RESTORED as of 2026-05-27 (`bun run test:isolation` passes)
 Architecture first-principles audit — COMPLETE (LOCKED 2026-05-13, recommendation A-prime)
 **Milestone:** v4.0 Intelligence Layer - foundation hardening inserted before publish
-**Status:** v4.0 can proceed to Phase 37 publish execution. Phase 36.8 removed the immediate security/gate blockers: release gates are honest, redaction runs before new storage/provider egress/export, `embedding.apiKey` is deprecated, `apiKeyEnv`/`apiKeyRef` are supported, authkey remains optional, and provider support is centralized through an internal registry with explicit unsupported-provider failures. Phase 36.9 restored the honest four-metric coverage gate: `bun run test:coverage` passes with statements 97.18%, branches 95.00%, functions 96.09%, and lines 97.32%.
+**Status:** v4.0 cannot publish yet. Phase 36.8 removed the immediate secret-boundary blockers and Phase 36.9 restored the honest four-metric coverage gate, but Phase 37 audit found default legacy memory-file reads/writes that contradict the Phase 35 storage claim. Phase 36.10 must make `~/.memory` / `MEMORY_HOME` behavior explicit opt-in before packaging/publish execution resumes.
 
 ```
-v4.0 Progress: [##########################__] 12/13 phases complete
+v4.0 Progress: [########################____] 12/14 phases complete
   Phase 30:   God File Cleanup                [done]
   Phase 31:   Bug Fixes                       [done] (31-01 + 31-02)
   Phase 32:   CLI Surface                     [done]
@@ -48,7 +49,8 @@ v4.0 Progress: [##########################__] 12/13 phases complete
   Phase 36:   Portability                     [done] — WSL migration + doctor portability
   Phase 36.8: Secret Boundary + Optional Interop [done] - redaction + env/ref secrets + optional authkey run path
   Phase 36.9: Coverage Runner Migration       [done] - honest four-metric gate restored and verified
-  Phase 37:   Publishing                      [ ] Not started - next phase
+  Phase 36.10: Legacy Memory File Hardening   [~] In progress - publish blocker inserted
+  Phase 37:   Publishing                      [ ] Not started - blocked until Phase 36.10 and npm auth/packaging gates pass
 ```
 
 ## Out-of-roadmap: Test Isolation Cleanup (2026-05-08 → 2026-05-11) — CLOSED
@@ -127,7 +129,7 @@ v4.0 Progress: [##########################__] 12/13 phases complete
 - Secret boundary hardening is implemented for new sync persistence, extraction payloads, embedding payloads, CLI export, health readiness, and status JSON config output.
 - Optional authkey interop is documented in `docs/plans/2026-05-27-authkey-optional-integration.md`; authkey must remain optional and must not be used as a raw secret resolver.
 - Phase 38 remote-sync prototype code exists in the tree but is parked behind `MEMORY_EXPERIMENTAL_REMOTE_SYNC=1`. The public CLI does not register `memory remote` and `memory sync` will not push/pull remote event logs unless that explicit prototype flag is set. It remains non-release-ready until the Phase 38 threat model, event envelope, conflict semantics, redaction/privacy controls, and application-port architecture are implemented.
-- Residual release-quality gap: none known in Phase 36.9. Publishing still requires Phase 37 packaging/install verification and release execution.
+- Residual release-quality gap: Phase 36.10 must remove default legacy `~/.memory` / `MEMORY_HOME` reads/writes before publish. Publishing also requires Phase 37 packaging/install verification, npm authentication, and release execution.
 
 ## Session Continuity
 
@@ -143,9 +145,10 @@ v4.0 Progress: [##########################__] 12/13 phases complete
 - Completed Phase 36.9 implementation and remediation: `bun run test:coverage` now passes the honest four-metric gate with statements 97.18%, branches 95.00%, functions 96.09%, and lines 97.32%. Supporting gates passed: `bun run typecheck`, `bun run build`, `bun run test:isolation`, `bun audit`, and `gitleaks detect --no-banner --redact --source .`.
 - Refreshed `ROADMAP.md` and `REQUIREMENTS.md` so completed v4 phases and the Phase 36.9 gate no longer show stale pending/in-progress statuses.
 - Reviewed and archived the two remotely consumer-impact inbox notes; current active inbox contains only `README.md` plus archived/rejected folders.
+- Began Phase 37 audit and inserted Phase 36.10 because current source still indexes `~/.memory` during `memory sync` and writes `MEMORY_HOME` daily logs during `memory backfill` by default. Additional publish blockers found: npm auth E401, package not visible to unauthenticated `npm view`, placeholder repository URL, and absolute local path leakage in current bundles.
 
 **Next step:**
-- Start Phase 37 Publishing. Coverage and foundation gates are no longer the blocker; packaging/install/publish readiness must now be verified before any prerelease.
+- Execute Phase 36.10. Do not publish until legacy memory-file behavior is default-off and verified, then resume Phase 37 packaging/install/auth verification.
 - Current inbox truth: zero active memory-nexus inbox items; only `docs/inbox/README.md` remains outside `docs/inbox/archived/` and `docs/inbox/rejected/`.
 - Cross-project notification filed at `C:\Projects\conversations\docs\inbox\2026-05-28-memory-nexus-friction-list-durable-filters-roadmapped.md`.
 - First-party infrastructure broadcast filed to opted-in project inboxes: ai-dev-environment, authkey, conversations, docTruth, ez-deploy, get-stuff-done, klakson, later, medesine-rx, prompter, tailscale, and watchtower. Frontmatter lint passed via `node C:\Projects\conversations\scripts\inbox-lint.cjs <files>`.
@@ -172,4 +175,4 @@ v4.0 Progress: [##########################__] 12/13 phases complete
 
 ---
 
-*Last updated: 2026-05-30 (Phase 36.9 coverage gate restored; Phase 37 publishing is next)*
+*Last updated: 2026-05-30 (Phase 36.10 inserted after publish audit; Phase 37 blocked until legacy memory-file defaults are hardened)*
