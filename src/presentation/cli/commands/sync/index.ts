@@ -95,6 +95,7 @@ export function createSyncCommand(): Command {
     .option("--fix-names", "Fix truncated project names in existing sessions")
     .option("--embed", "Generate embeddings for messages after sync")
     .option("--background", "Run embedding in background (use with --embed)")
+    .option("--include-memory-files", "Index legacy ~/.memory / MEMORY_HOME markdown files")
     .option("--json", "Output results as JSON")
     .addOption(new Option("-q, --quiet", "Suppress progress output").conflicts("verbose"))
     .addOption(new Option("-v, --verbose", "Show detailed progress").conflicts("quiet"))
@@ -222,12 +223,19 @@ export async function executeSyncCommand(
       console.warn("Remote synchronization is configured but disabled until Phase 38 readiness. Set MEMORY_EXPERIMENTAL_REMOTE_SYNC=1 only for explicit prototype testing.");
     }
 
-    // Memory file sync (after session extraction)
+    const legacyMemoryFilesEnabled =
+      options.includeMemoryFiles === true ||
+      config.legacyMemoryFiles?.enabled === true ||
+      process.env.MEMORY_LEGACY_MEMORY_FILES === "1";
 
-    const memoryResult = await resolved.runMemoryFileSync(db, options);
-    if (memoryResult) resolved.reportMemoryFileResults(memoryResult, options);
+    if (legacyMemoryFilesEnabled) {
+      const memoryResult = await resolved.runMemoryFileSync(db, options);
+      if (memoryResult) resolved.reportMemoryFileResults(memoryResult, options);
+    } else if (options.verbose && !options.quiet) {
+      console.log("  Memory files: skipped (legacy opt-in disabled)");
+    }
 
-    // Ambient context generation (after memory files are indexed)
+    // Ambient context generation (after facts/session projections are updated)
     if (!options.dryRun) await resolved.runAmbientContextGeneration(db, options);
 
     const syncExitCode = (result.errors.length > 0 || result.aborted) ? 1 : 0;

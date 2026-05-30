@@ -225,6 +225,9 @@ describe("config-manager", () => {
                     autoPush: true,
                     autoPull: true,
                 },
+                legacyMemoryFiles: {
+                    enabled: false,
+                },
             };
 
             const configDir = join(testDir, ".config", "memory");
@@ -891,6 +894,24 @@ describe("config-manager", () => {
             expect(config.remoteSync.repositoryUrl).toBe("git@github.com:user/repo.git");
             expect(config.remoteSync.autoPush).toBe(true); // default preserved
             expect(config.remoteSync.autoPull).toBe(true); // default preserved
+        });
+
+        test("loads legacyMemoryFiles defaults as disabled", () => {
+            const config = loadConfig();
+            expect(config.legacyMemoryFiles.enabled).toBe(false);
+        });
+
+        test("merges custom legacyMemoryFiles config correctly", () => {
+            const configDir = join(testDir, ".config", "memory");
+            mkdirSync(configDir, { recursive: true });
+            const configPath = join(configDir, "config.json");
+            writeFileSync(
+                configPath,
+                JSON.stringify({ legacyMemoryFiles: { enabled: true } })
+            );
+
+            const config = loadConfig(configPath);
+            expect(config.legacyMemoryFiles.enabled).toBe(true);
         });
     });
 });

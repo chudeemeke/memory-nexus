@@ -485,13 +485,13 @@ export interface IEmbeddingRepository {
 /**
  * Repository for MemoryFile entities.
  *
- * Handles persistence of indexed memory files from ~/.memory/.
+ * Handles persistence of indexed legacy memory files.
  * Files are identified by their path relative to the memory directory.
  */
 export interface IMemoryFileRepository {
   /**
    * Find a memory file by its relative path.
-   * @param filePath Path relative to ~/.memory/
+   * @param filePath Path relative to the legacy memory-file root
    * @returns The memory file if found, null otherwise
    */
   findByPath(filePath: string): Promise<MemoryFile | null>;

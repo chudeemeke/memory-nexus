@@ -79,7 +79,7 @@
 - [x] **Phase 36: Portability** - WSL migration command, doctor --portability, migration guide (completed 2026-05-25)
 - [x] **Phase 36.8: Secret Boundary and Optional Provider Interop** (NEW, pre-publish hardening) - Redaction before persistence/provider egress; config stores env/ref metadata instead of plaintext API keys; authkey is supported as an optional `authkey run --env memory -- ...` execution path, never as a required dependency or raw-secret resolver. (Completed 2026-05-28)
 - [x] **Phase 36.9: Coverage Runner Migration** (NEW, pre-publish hardening) - Replace the current Bun-only coverage gate with an honest runner/instrumentation path that reports statements, branches, functions, and lines for the release surface; no aliasing unmeasured metrics to measured ones. (Completed 2026-05-30; final gate: statements 97.18%, branches 95.00%, functions 96.09%, lines 97.32%)
-- [ ] **Phase 36.10: Legacy Memory File Publish Hardening** (NEW, pre-publish hardening) - Make legacy `~/.memory` / `MEMORY_HOME` reads and writes explicit opt-in instead of default behavior, preserving compatibility without contradicting Phase 35's SQLite/facts default.
+- [x] **Phase 36.10: Legacy Memory File Publish Hardening** (NEW, pre-publish hardening) - Make legacy `~/.memory` / `MEMORY_HOME` reads and writes explicit opt-in instead of default behavior, preserving compatibility without contradicting Phase 35's SQLite/facts default. (Completed 2026-05-30; final gate: statements 97.18%, branches 95.02%, functions 96.09%, lines 97.33%)
 - [ ] **Phase 37: Publishing** - Prerelease (`@chude/memory@4.0.0-pre.N`) allowed after release gates are restored; GA (`@chude/memory@4.0.0`) gated on prior audit criteria plus Phase 36.8 secret-boundary hardening, Phase 36.9 four-metric coverage enforcement, and Phase 36.10 legacy-memory-file hardening.
 
 ### v5.0 Autonomous & Synchronized Memory Layer (Phases 38-42, plus 38.5)
@@ -285,7 +285,17 @@ Rationale: Phase 32 explicitly deferred friction envelope adoption per audit §1
   3. `memory backfill` does not write to `~/.memory` / `MEMORY_HOME` by default; any legacy write path requires explicit opt-in and labels itself as legacy.
   4. README and release notes describe legacy memory-file behavior honestly.
   5. Typecheck, build, test isolation, full coverage, audit, and gitleaks remain green.
-**Plans**: `.planning/phases/36.10-legacy-memory-file-publish-hardening/36.10-01-PLAN.md` (in progress)
+**Plans**: `.planning/phases/36.10-legacy-memory-file-publish-hardening/36.10-01-PLAN.md` (complete; summary in `36.10-01-SUMMARY.md`)
+
+**Final verification (2026-05-30):**
+  - `bun run test:coverage`: PASS, 4,060 tests; statements 97.18%, branches 95.02%, functions 96.09%, lines 97.33%
+  - `bun run typecheck`: PASS
+  - `bun run build`: PASS
+  - `bun run test:isolation`: PASS
+  - `bun audit`: PASS, no vulnerabilities
+  - `gitleaks detect --no-banner --redact --source .`: PASS, no leaks
+  - `npm pack --dry-run --json`: PASS
+  - local tarball install smoke: PASS, `memory --version` returned `4.0.0`
 
 ---
 

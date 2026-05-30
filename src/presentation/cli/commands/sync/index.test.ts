@@ -132,6 +132,12 @@ describe("Sync Command", () => {
       );
       expect(verboseOption).toBeDefined();
     });
+
+    it("has --include-memory-files legacy opt-in option", () => {
+      const command = createSyncCommand();
+      const option = command.options.find((o) => o.long === "--include-memory-files");
+      expect(option).toBeDefined();
+    });
   });
 
   describe("option parsing", () => {
@@ -511,6 +517,7 @@ describe("Sync Command", () => {
       errorSpy.mockRestore();
       warnSpy.mockRestore();
       delete process.env.MEMORY_EMBED_BACKGROUND;
+      delete process.env.MEMORY_LEGACY_MEMORY_FILES;
     });
 
     it("delegates background and dry-run paths through injected handlers", async () => {
@@ -532,14 +539,14 @@ describe("Sync Command", () => {
       expect(deps.initializeDatabase).not.toHaveBeenCalled();
     });
 
-    it("reports checkpoint resume, fix-name progress, memory sync, ambient generation, and cleanup", async () => {
+    it("reports checkpoint resume, fix-name progress, legacy memory sync when opted in, ambient generation, and cleanup", async () => {
       const { deps, reporter, syncService } = createHarness({
         hasCheckpoint: mock(() => true),
         loadCheckpoint: mock(() => ({ completedSessions: 1, totalSessions: 3 })),
         runMemoryFileSync: mock(async () => ({ synced: 1 }) as any),
       });
 
-      const result = await executeSyncCommand({ fixNames: true }, deps);
+      const result = await executeSyncCommand({ fixNames: true, includeMemoryFiles: true }, deps);
 
       expect(result.exitCode).toBe(0);
       expect(logs.join("\n")).toContain("Resuming from previous interrupted sync (1/3 sessions done)");
@@ -552,6 +559,66 @@ describe("Sync Command", () => {
       expect(deps.runAmbientContextGeneration).toHaveBeenCalledTimes(1);
       expect(deps.unregisterCleanup).toHaveBeenCalledTimes(1);
       expect(deps.closeDatabase).toHaveBeenCalledTimes(1);
+    });
+
+    it("does not index legacy memory files by default", async () => {
+      const { deps } = createHarness({
+        runMemoryFileSync: mock(async () => ({ synced: 1 }) as any),
+      });
+
+      const result = await executeSyncCommand({}, deps);
+
+      expect(result.exitCode).toBe(0);
+      expect(deps.runMemoryFileSync).not.toHaveBeenCalled();
+      expect(deps.reportMemoryFileResults).not.toHaveBeenCalled();
+    });
+
+    it("indexes legacy memory files when config opts in", async () => {
+      const harness = createHarness({
+        runMemoryFileSync: mock(async () => ({ synced: 1 }) as any),
+      });
+      harness.config.legacyMemoryFiles = { enabled: true };
+
+      const result = await executeSyncCommand({}, harness.deps);
+
+      expect(result.exitCode).toBe(0);
+      expect(harness.deps.runMemoryFileSync).toHaveBeenCalledTimes(1);
+      expect(harness.deps.reportMemoryFileResults).toHaveBeenCalledTimes(1);
+    });
+
+    it("indexes legacy memory files when env opts in", async () => {
+      process.env.MEMORY_LEGACY_MEMORY_FILES = "1";
+      const { deps } = createHarness({
+        runMemoryFileSync: mock(async () => ({ synced: 1 }) as any),
+      });
+
+      const result = await executeSyncCommand({}, deps);
+
+      expect(result.exitCode).toBe(0);
+      expect(deps.runMemoryFileSync).toHaveBeenCalledTimes(1);
+      delete process.env.MEMORY_LEGACY_MEMORY_FILES;
+    });
+
+    it("does not report legacy memory-file results when the opt-in scan has nothing to index", async () => {
+      const { deps } = createHarness({
+        runMemoryFileSync: mock(async () => null),
+      });
+
+      const result = await executeSyncCommand({ includeMemoryFiles: true }, deps);
+
+      expect(result.exitCode).toBe(0);
+      expect(deps.runMemoryFileSync).toHaveBeenCalledTimes(1);
+      expect(deps.reportMemoryFileResults).not.toHaveBeenCalled();
+    });
+
+    it("reports the default legacy memory-file skip only in verbose non-quiet output", async () => {
+      const { deps } = createHarness();
+
+      const result = await executeSyncCommand({ verbose: true }, deps);
+
+      expect(result.exitCode).toBe(0);
+      expect(deps.runMemoryFileSync).not.toHaveBeenCalled();
+      expect(logs.join("\n")).toContain("Memory files: skipped (legacy opt-in disabled)");
     });
 
     it("handles database open failures, sync failures, aborts, and thrown orchestration errors", async () => {

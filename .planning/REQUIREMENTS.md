@@ -23,7 +23,7 @@ Requirements for v4.0: Intelligence Layer -- automated knowledge extraction, int
 - [x] **CTXT-01**: `memory context <project>` default output is an AI-optimized structured briefing built from extracted facts, friction entries, and recent session summaries (SmartContextService)
 - [x] **CTXT-02**: `memory context <project> --global` returns cross-project context by querying all projects, not just the specified one
 - [x] **CTXT-03**: `memory context` reads knowledge from SQLite fact tables instead of `~/.memory/` filesystem files
-- [x] **CTXT-04**: `~/.memory/` directory is no longer written to or read from by any command; a deprecation warning is shown if the directory exists
+- [x] **CTXT-04**: `~/.memory/` / `MEMORY_HOME` legacy sidecars are not read or written by default; compatibility access requires explicit opt-in and `memory context` warns when a legacy `~/.memory/` directory exists
 
 ### CLI Surface
 

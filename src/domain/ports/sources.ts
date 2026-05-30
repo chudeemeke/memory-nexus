@@ -102,7 +102,7 @@ export interface IProjectNameResolver {
  * Contains all data needed to create a MemoryFile entity.
  */
 export interface MemoryFileInfo {
-  /** Path relative to ~/.memory/ (uses forward slashes) */
+  /** Path relative to the legacy memory-file root (uses forward slashes) */
   filePath: string;
   /** Absolute path for reading */
   absolutePath: string;
@@ -117,7 +117,7 @@ export interface MemoryFileInfo {
 }
 
 /**
- * Scanner for discovering memory files in ~/.memory/.
+ * Scanner for discovering legacy markdown memory files.
  *
  * Implementations discover .md files, classify their type from
  * path patterns, extract project encoded names, and compute
@@ -126,7 +126,7 @@ export interface MemoryFileInfo {
  */
 export interface IMemoryFileScanner {
   /**
-   * Discover all memory files in ~/.memory/.
+   * Discover all legacy memory files.
    *
    * @returns Array of discovered file info, empty if directory missing
    */

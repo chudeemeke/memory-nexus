@@ -1,7 +1,7 @@
 /**
  * MemoryFileScanner
  *
- * Scans ~/.memory/ directory for markdown files.
+ * Scans the legacy memory-file directory for markdown files.
  *
  * Discovers .md files, classifies their type from path patterns,
  * extracts project encoded names, and computes content hashes.
@@ -19,7 +19,7 @@ import { getMemoryDir } from "../paths.js";
 
 export class MemoryFileScanner implements IMemoryFileScanner {
     /**
-     * Discover all memory files in ~/.memory/.
+     * Discover all legacy memory files.
      *
      * @returns Array of discovered file info, empty if directory missing
      */

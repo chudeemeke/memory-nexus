@@ -234,7 +234,7 @@ ALTER TABLE embedding_state ADD COLUMN model_name TEXT NOT NULL DEFAULT '';
 `;
 
 /**
- * Memory files table - stores indexed ~/.memory/ markdown files
+ * Memory files table - stores indexed legacy markdown sidecar files
  */
 export const MEMORY_FILES_TABLE = `
 CREATE TABLE IF NOT EXISTS memory_files (

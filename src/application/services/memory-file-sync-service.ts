@@ -1,7 +1,7 @@
 /**
  * MemoryFileSyncService
  *
- * Application service for syncing ~/.memory/ files to the database.
+ * Application service for syncing legacy markdown memory files to the database.
  *
  * Separate from SyncService to avoid constructor inflation.
  * The CLI sync command orchestrates both services sequentially.
@@ -43,7 +43,7 @@ export interface MemoryFileSyncOptions {
 }
 
 /**
- * Application service for syncing ~/.memory/ files to the database.
+ * Application service for syncing legacy markdown memory files to the database.
  *
  * Separate from SyncService to avoid constructor inflation.
  * The CLI sync command orchestrates both services sequentially.

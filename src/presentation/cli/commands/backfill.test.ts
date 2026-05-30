@@ -78,6 +78,14 @@ describe("Backfill Command", () => {
       expect(opt.short).toBe("-f");
     });
 
+    it("has --write-memory-files legacy opt-in option", () => {
+      const command = createBackfillCommand();
+      const opt = command.options.find(
+        (o: any) => o.long === "--write-memory-files",
+      );
+      expect(opt).toBeDefined();
+    });
+
     it("executes the real dry-run action against isolated runtime paths", async () => {
       const dir = mkdtempSync(join(tmpdir(), "memory-backfill-command-"));
       const oldXdgData = process.env.XDG_DATA_HOME;
@@ -119,6 +127,48 @@ describe("Backfill Command", () => {
         } catch {
           // Best-effort cleanup. Bun may release SQLite file handles after the test process exits on Windows.
         }
+      }
+    });
+
+    it("refuses the real write action unless legacy memory files are opted in", async () => {
+      const dir = mkdtempSync(join(tmpdir(), "memory-backfill-gate-"));
+      const oldXdgData = process.env.XDG_DATA_HOME;
+      const oldXdgConfig = process.env.XDG_CONFIG_HOME;
+      const oldMemoryHome = process.env.MEMORY_HOME;
+      const oldExitCode = process.exitCode;
+
+      process.env.XDG_DATA_HOME = join(dir, "data");
+      process.env.XDG_CONFIG_HOME = join(dir, "config");
+      process.env.MEMORY_HOME = join(dir, "memory");
+      process.exitCode = undefined;
+
+      try {
+        const command = createBackfillCommand();
+
+        await command.parseAsync(["node", "backfill", "--force"], { from: "node" });
+
+        expect(process.exitCode).toBe(1);
+        const errorOutput = consoleErrorSpy.mock.calls.map((c: any) => c[0]).join(" ");
+        expect(errorOutput).toContain("disabled by default");
+        expect(errorOutput).toContain("--write-memory-files");
+      } finally {
+        process.exitCode = oldExitCode;
+        if (oldXdgData === undefined) {
+          delete process.env.XDG_DATA_HOME;
+        } else {
+          process.env.XDG_DATA_HOME = oldXdgData;
+        }
+        if (oldXdgConfig === undefined) {
+          delete process.env.XDG_CONFIG_HOME;
+        } else {
+          process.env.XDG_CONFIG_HOME = oldXdgConfig;
+        }
+        if (oldMemoryHome === undefined) {
+          delete process.env.MEMORY_HOME;
+        } else {
+          process.env.MEMORY_HOME = oldMemoryHome;
+        }
+        rmSync(dir, { recursive: true, force: true });
       }
     });
   });

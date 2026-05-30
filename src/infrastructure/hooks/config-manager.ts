@@ -133,6 +133,15 @@ export const DEFAULT_REMOTE_SYNC_CONFIG: RemoteSyncConfigData = {
     autoPull: true,
 };
 
+export interface LegacyMemoryFilesConfigData {
+    /** Whether legacy ~/.memory / MEMORY_HOME markdown indexing and writes are enabled */
+    enabled: boolean;
+}
+
+export const DEFAULT_LEGACY_MEMORY_FILES_CONFIG: LegacyMemoryFilesConfigData = {
+    enabled: false,
+};
+
 /**
  * Memory configuration interface
  *
@@ -149,6 +158,7 @@ export const DEFAULT_REMOTE_SYNC_CONFIG: RemoteSyncConfigData = {
  * - ambientContext: Ambient context generation configuration
  * - machineId: Unique identifier for the local machine
  * - remoteSync: Remote sync configuration
+ * - legacyMemoryFiles: Explicit opt-in for pre-v4 ~/.memory / MEMORY_HOME sidecar files
  */
 export interface MemoryConfig {
 
@@ -176,6 +186,8 @@ export interface MemoryConfig {
     machineId: string;
     /** Remote sync configuration */
     remoteSync: RemoteSyncConfigData;
+    /** Legacy memory-file sidecar compatibility */
+    legacyMemoryFiles: LegacyMemoryFilesConfigData;
 }
 
 
@@ -318,6 +330,7 @@ export const DEFAULT_CONFIG: MemoryConfig = {
     ambientContext: DEFAULT_AMBIENT_CONTEXT_CONFIG,
     machineId: "",
     remoteSync: DEFAULT_REMOTE_SYNC_CONFIG,
+    legacyMemoryFiles: DEFAULT_LEGACY_MEMORY_FILES_CONFIG,
 };
 
 
@@ -394,11 +407,17 @@ export function loadConfig(configPathOverride?: string): MemoryConfig {
             ...(loaded.remoteSync ?? {}),
         };
 
+        const mergedLegacyMemoryFiles = {
+            ...DEFAULT_LEGACY_MEMORY_FILES_CONFIG,
+            ...(loaded.legacyMemoryFiles ?? {}),
+        };
+
         const config: MemoryConfig = {
             ...DEFAULT_CONFIG,
             ...loaded,
             machineId,
             remoteSync: mergedRemoteSync,
+            legacyMemoryFiles: mergedLegacyMemoryFiles,
             embedding: resolveProviderDefaults(mergedEmbedding, userEmbedding),
             search: {
                 ...DEFAULT_SEARCH_CONFIG,

@@ -1,7 +1,7 @@
 /**
  * Sync Memory Files
  *
- * Discovers and indexes ~/.memory/ markdown files after session extraction.
+ * Discovers and indexes legacy markdown memory files after session extraction.
  */
 
 import type { initializeDatabase } from "../../../../infrastructure/database/index.js";
@@ -13,10 +13,10 @@ import type { SyncCommandOptions } from "./types.js";
 import { unknownErrorMessage } from "../../../../domain/errors/unknown-error.js";
 
 /**
- * Run memory file sync: discover and index ~/.memory/ markdown files.
+ * Run memory file sync: discover and index legacy markdown memory files.
  *
  * Runs after session extraction. Returns null if no memory files
- * were processed (e.g., ~/.memory/ does not exist).
+ * were processed (for example, the legacy memory-file root does not exist).
  *
  * @param db Database connection
  * @param options Sync command options

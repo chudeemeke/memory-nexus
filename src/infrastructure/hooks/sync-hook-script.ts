@@ -150,7 +150,7 @@ export async function executeSyncHook(deps: SyncHookDeps): Promise<void> {
         deps.writeStdout(
             "MEMORY FLUSH: Session nearing compaction. " +
             "Write important context (decisions, unresolved items, learnings) " +
-            "to ~/.memory/ files before context is compressed."
+            "to durable project docs or SQLite-backed memory before context is compressed."
         );
     }
 

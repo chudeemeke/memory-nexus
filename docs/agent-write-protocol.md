@@ -1,6 +1,25 @@
-# Agent Write Protocol
+# Legacy Agent Write Protocol
 
-Conventions for how Claude writes durable memory during sessions. These files persist knowledge across sessions and are indexed by `memory sync` for full-text search.
+Compatibility conventions for pre-v4 markdown sidecar memory files. These files can still persist knowledge across sessions, but they are no longer active by default. Current memory-nexus storage is SQLite/fact based; `~/.memory` / `MEMORY_HOME` files are read only when legacy compatibility is explicitly enabled.
+
+Enable legacy indexing with one of:
+
+```bash
+memory sync --include-memory-files
+MEMORY_LEGACY_MEMORY_FILES=1 memory sync
+```
+
+Or set:
+
+```json
+{
+  "legacyMemoryFiles": {
+    "enabled": true
+  }
+}
+```
+
+Use `memory backfill --write-memory-files` only when you intentionally need to generate these legacy daily logs.
 
 ## Directory Structure
 
@@ -176,7 +195,7 @@ Claude writes to memory files at natural breakpoints during a session:
 
 ## Indexing
 
-Running `memory sync` automatically discovers and indexes all `~/.memory/**/*.md` files:
+Running `memory sync --include-memory-files` discovers and indexes all `~/.memory/**/*.md` files:
 
 1. Scans `~/.memory/` recursively for `.md` files
 2. Classifies each file by path pattern (see File Types table)
@@ -203,7 +222,7 @@ memory search "authentication patterns"
 
 ## Creating the Directory
 
-The `~/.memory/` directory is not created automatically. Claude should create it and any needed subdirectories when first writing memory files:
+The `~/.memory/` directory is not created automatically. Agents should create it only when legacy sidecar compatibility has been explicitly enabled:
 
 ```bash
 mkdir -p ~/.memory/daily

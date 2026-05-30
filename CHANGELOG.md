@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Legacy `~/.memory` / `MEMORY_HOME` markdown sidecars are now explicit opt-in. `memory sync` no longer indexes them by default; use `--include-memory-files`, `MEMORY_LEGACY_MEMORY_FILES=1`, or `legacyMemoryFiles.enabled=true` when compatibility indexing is needed. `memory backfill` now requires `--write-memory-files` or the same env/config opt-in before writing legacy daily logs.
+  [Phase 36.10]
+
 ## [4.0.0] - 2026-05-25
 
 ### Added

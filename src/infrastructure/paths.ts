@@ -6,7 +6,7 @@
  *
  * Config paths: $XDG_CONFIG_HOME/memory (default: ~/.config/memory)
  * Data paths:   $XDG_DATA_HOME/memory  (default: ~/.local/share/memory)
- * Memory files: $MEMORY_HOME           (default: ~/.memory)
+ * Legacy memory files: $MEMORY_HOME   (default: ~/.memory)
  * Legacy path:  ~/.memory-nexus (for migration detection; not overridable)
  */
 
@@ -212,5 +212,4 @@ export function getAllLogFiles(eventsDir?: string): string[] {
 
     return logFiles;
 }
-
 

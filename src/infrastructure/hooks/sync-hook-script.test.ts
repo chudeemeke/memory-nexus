@@ -186,7 +186,7 @@ describe("sync-hook-script", () => {
 
             expect(result.exitCode).toBe(0);
             expect(result.stdout).toContain("MEMORY FLUSH");
-            expect(result.stdout).toContain("~/.memory/");
+            expect(result.stdout).toContain("durable project docs or SQLite-backed memory");
             expect(result.stdout).toContain("decisions, unresolved items, learnings");
         }, 15000);
 
@@ -207,7 +207,7 @@ describe("sync-hook-script", () => {
             expect(result.exitCode).toBe(0);
             // Reminder should still appear even when sync is disabled
             expect(result.stdout).toContain("MEMORY FLUSH");
-            expect(result.stdout).toContain("~/.memory/");
+            expect(result.stdout).toContain("durable project docs or SQLite-backed memory");
         }, 15000);
 
         test("PreCompact with syncOnCompaction=true outputs reminder AND proceeds past sync check", async () => {
@@ -268,7 +268,7 @@ describe("sync-hook-script", () => {
             );
             expect(result.stdout).toContain(
                 "Write important context (decisions, unresolved items, learnings) " +
-                "to ~/.memory/ files before context is compressed.",
+                "to durable project docs or SQLite-backed memory before context is compressed.",
             );
         }, 15000);
 

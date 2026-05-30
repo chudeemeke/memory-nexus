@@ -26,6 +26,7 @@ export interface BackfillCommandOptions {
   project?: string;
   batch: string;
   force?: boolean;
+  writeMemoryFiles?: boolean;
 }
 
 /**
@@ -44,7 +45,7 @@ export interface BackfillExecutionDeps {
 /**
  * Daily log writer implementation.
  *
- * Writes or appends daily log entries to ~/.memory/daily/<date>.md.
+ * Writes or appends legacy daily log entries to the memory-file root.
  * Creates parent directories if needed.
  */
 export class FileDailyLogWriter implements IDailyLogWriter {
@@ -174,6 +175,7 @@ export function createBackfillCommand(): Command {
     .option("--project <name>", "Only backfill sessions for one project")
     .option("--batch <n>", "Process N sessions per run (default: 50)", "50")
     .option("-f, --force", "Skip confirmation prompt")
+    .option("--write-memory-files", "Write legacy ~/.memory / MEMORY_HOME daily log files")
     .action(async (options: BackfillCommandOptions) => {
       // Lazy-load infrastructure to avoid import cost when not used
       const { initializeDatabase, closeDatabase } = await import(
@@ -200,6 +202,23 @@ export function createBackfillCommand(): Command {
       const { getDefaultDbPath } = await import(
         "../../../infrastructure/database/index.js"
       );
+      const { loadConfig } = await import(
+        "../../../infrastructure/hooks/config-manager.js"
+      );
+
+      const config = loadConfig();
+      const legacyMemoryFilesEnabled =
+        options.writeMemoryFiles === true ||
+        config.legacyMemoryFiles?.enabled === true ||
+        process.env.MEMORY_LEGACY_MEMORY_FILES === "1";
+
+      if (!options.dryRun && !legacyMemoryFilesEnabled) {
+        console.error(
+          "Legacy memory-file backfill is disabled by default. Re-run with --write-memory-files or set legacyMemoryFiles.enabled=true to write ~/.memory / MEMORY_HOME daily logs."
+        );
+        process.exitCode = 1;
+        return;
+      }
 
       const dbPath = getDefaultDbPath();
       const result = initializeDatabase({ path: dbPath });
@@ -221,7 +240,8 @@ export function createBackfillCommand(): Command {
           dailyLogWriter,
         );
 
-        await executeBackfillCommand(options, service);
+        const commandResult = await executeBackfillCommand(options, service);
+        process.exitCode = commandResult.exitCode;
       } finally {
         closeDatabase(db);
       }

@@ -3,17 +3,18 @@ gsd_state_version: 1.0
 milestone: v4.0
 milestone_name: Intelligence Layer
 status: in_progress
-last_updated: "2026-05-30T11:35:00.000+01:00"
+last_updated: "2026-05-30T11:52:00.000+01:00"
 progress:
   total_phases: 14
-  completed_phases: 12
+  completed_phases: 13
   total_plans: 15
-  completed_plans: 13
+  completed_plans: 14
 ---
 
 > **FOUNDATION HARDENING VERIFIED 2026-05-28** - Phase 36.8 is implemented. Typecheck, build, full tests, test-isolation, dependency audit, and gitleaks pass. Provider support now routes through an internal provider registry instead of presentation/health/factory switch drift. Phase 36.9 replaced the missing-metric Bun LCOV gate with an Istanbul-backed Bun coverage harness.
 > **COVERAGE GATE RESTORED 2026-05-30** - Phase 36.9 is complete. `bun run test:coverage` passes with statements 97.18% (7103/7309), branches 95.00% (4049/4262), functions 96.09% (1303/1356), and lines 97.32% (6805/6992). `bun run typecheck`, `bun run build`, `bun run test:isolation`, `bun audit`, and `gitleaks detect --no-banner --redact --source .` pass.
 > **PUBLISH BLOCKER INSERTED 2026-05-30** - Phase 37 audit found active legacy `~/.memory` / `MEMORY_HOME` reads and writes despite Phase 35's deprecated-filesystem claim, plus npm auth E401, placeholder repository metadata, and path leakage in current bundles. Phase 36.10 is inserted before publish to make legacy memory-file behavior explicit opt-in.
+> **LEGACY MEMORY-FILE DEFAULTS HARDENED 2026-05-30** - Phase 36.10 is complete. `memory sync` and `memory backfill` no longer read/write legacy `~/.memory` / `MEMORY_HOME` sidecars by default; compatibility requires explicit CLI/env/config opt-in. Release gates pass with statements 97.18%, branches 95.02%, functions 96.09%, and lines 97.33%. Build output is clean of sourcemaps and local absolute path leakage. Phase 37 remains blocked only on npm auth/registry publish execution.
 > **INBOX RECONCILED 2026-05-28** - Stale bug reports for the Windows full-suite crash, orphaned friction test, and programmatic API real-DB pollution were validated against the current code and archived. The durable-friction-list filing was accepted into ROADMAP as post-v4 capacity, archived as planned, and counter-notified to conversations. No active memory-nexus inbox items remain.
 > **REMOTE CONSUMER NOTES REVIEWED 2026-05-30** - The two remotely consumer-impact inbox notes were reviewed against current memory-nexus docs/scripts. No current raw SSH/rsync operating instructions or hard-coded remotely tunnel-state assumptions were found, so both notes were archived with disposition text. Future Phase 38 cross-machine work must still use current `remotely` conventions where applicable.
 > **FIRST-PARTY INFRASTRUCTURE BROADCAST 2026-05-28** - User clarified that `memory` is a first-class first-party tool used by most/all projects. Canonical tool/package naming is `memory` / `@chude/memory`; the repository remains `memory-nexus`, and `nexus` is a legacy alias. Updated Codex/Claude rules and document-for-clear skills, added a Codex memory note, and filed notification inbox items to opted-in projects so consumers know about provider-secret, redaction/export, registry, and authkey-optional contract changes.
@@ -25,20 +26,20 @@ See: .planning/PROJECT.md (updated 2026-02-18)
 
 **Core Value:** Knowledge gained in one Claude Code project becomes accessible from any other project. No more context silos.
 
-**Current Focus:** 2026-05-27 foundation reviews supersede any publish-ready assumption. Phase 36.8 (Secret Boundary and Optional Provider Interop) and Phase 36.9 (Coverage Runner Migration) are implemented and verified. Relevant docs: `docs/audits/2026-05-27-v4-foundation-architecture-security-quality-review.md`, `docs/audits/2026-05-27-remote-sync-architecture-security-quality-review.md`, `docs/plans/2026-05-27-authkey-optional-integration.md`, `.planning/phases/36.8-secret-boundary-optional-provider-interop/36.8-01-SUMMARY.md`, and `.planning/phases/36.9-coverage-runner-migration/36.9-01-SUMMARY.md`.
+**Current Focus:** 2026-05-27 foundation reviews supersede any publish-ready assumption. Phase 36.8 (Secret Boundary and Optional Provider Interop), Phase 36.9 (Coverage Runner Migration), and Phase 36.10 (Legacy Memory File Publish Hardening) are implemented and verified. Relevant docs: `docs/audits/2026-05-27-v4-foundation-architecture-security-quality-review.md`, `docs/audits/2026-05-27-remote-sync-architecture-security-quality-review.md`, `docs/plans/2026-05-27-authkey-optional-integration.md`, `.planning/phases/36.8-secret-boundary-optional-provider-interop/36.8-01-SUMMARY.md`, `.planning/phases/36.9-coverage-runner-migration/36.9-01-SUMMARY.md`, and `.planning/phases/36.10-legacy-memory-file-publish-hardening/36.10-01-SUMMARY.md`.
 
 **Tech Stack:** Bun, TypeScript 5.5+, bun:sqlite with FTS5 + sqlite-vec, Commander.js v14, @huggingface/transformers v3, cli-progress, chrono-node, Chart.js (HTML dashboard)
 
 ## Current Position
 
-Phase: 36.10 (Legacy Memory File Publish Hardening) - IN PROGRESS
+Phase: 37 (Publishing) - BLOCKED ON NPM AUTH/PUBLISH EXECUTION
 Test-isolation cleanup arc - RESTORED as of 2026-05-27 (`bun run test:isolation` passes)
 Architecture first-principles audit — COMPLETE (LOCKED 2026-05-13, recommendation A-prime)
 **Milestone:** v4.0 Intelligence Layer - foundation hardening inserted before publish
-**Status:** v4.0 cannot publish yet. Phase 36.8 removed the immediate secret-boundary blockers and Phase 36.9 restored the honest four-metric coverage gate, but Phase 37 audit found default legacy memory-file reads/writes that contradict the Phase 35 storage claim. Phase 36.10 must make `~/.memory` / `MEMORY_HOME` behavior explicit opt-in before packaging/publish execution resumes.
+**Status:** v4.0 code/package hardening gates are restored. Phase 36.8 removed the immediate secret-boundary blockers, Phase 36.9 restored the honest four-metric coverage gate, and Phase 36.10 made legacy `~/.memory` / `MEMORY_HOME` sidecars explicit opt-in. Phase 37 packaging/install smoke passes locally, but publish cannot proceed until npm authentication is valid in the shell.
 
 ```
-v4.0 Progress: [########################____] 12/14 phases complete
+v4.0 Progress: [##########################__] 13/14 phases complete
   Phase 30:   God File Cleanup                [done]
   Phase 31:   Bug Fixes                       [done] (31-01 + 31-02)
   Phase 32:   CLI Surface                     [done]
@@ -49,8 +50,8 @@ v4.0 Progress: [########################____] 12/14 phases complete
   Phase 36:   Portability                     [done] — WSL migration + doctor portability
   Phase 36.8: Secret Boundary + Optional Interop [done] - redaction + env/ref secrets + optional authkey run path
   Phase 36.9: Coverage Runner Migration       [done] - honest four-metric gate restored and verified
-  Phase 36.10: Legacy Memory File Hardening   [~] In progress - publish blocker inserted
-  Phase 37:   Publishing                      [ ] Not started - blocked until Phase 36.10 and npm auth/packaging gates pass
+  Phase 36.10: Legacy Memory File Hardening   [done] - legacy sidecars explicit opt-in
+  Phase 37:   Publishing                      [ ] Blocked - npm auth/registry publish execution
 ```
 
 ## Out-of-roadmap: Test Isolation Cleanup (2026-05-08 → 2026-05-11) — CLOSED
@@ -111,8 +112,8 @@ v4.0 Progress: [########################____] 12/14 phases complete
 - Zep's temporal superseding adopted in simplified form (observed_at, superseded_at)
 - IExtractionProvider follows IEmbeddingProvider pattern (pluggable adapters)
 - CLI help groups via Commander.js labeled categories (no command renames)
-- SmartContextService reads from SQLite fact tables, not ~/.memory/ files
-- ~/.memory/ directory deprecated (knowledge goes in SQLite)
+- SmartContextService reads from SQLite fact tables, not legacy memory files
+- Legacy `~/.memory` / `MEMORY_HOME` sidecars are deprecated and explicit opt-in only; v4 default knowledge storage is SQLite/facts
 - [Phase 30]: Compressed JSDoc and consolidated imports to keep all sync modules under 200 lines
 - [Phase 30]: Compressed JSDoc and consolidated imports to keep friction/index.ts under 200-line cap
 - [Phase 31-bug-fixes]: Blacklist regex approach for FTS5 fallback (preserves symbols like C++, TCP/IP)
@@ -129,7 +130,7 @@ v4.0 Progress: [########################____] 12/14 phases complete
 - Secret boundary hardening is implemented for new sync persistence, extraction payloads, embedding payloads, CLI export, health readiness, and status JSON config output.
 - Optional authkey interop is documented in `docs/plans/2026-05-27-authkey-optional-integration.md`; authkey must remain optional and must not be used as a raw secret resolver.
 - Phase 38 remote-sync prototype code exists in the tree but is parked behind `MEMORY_EXPERIMENTAL_REMOTE_SYNC=1`. The public CLI does not register `memory remote` and `memory sync` will not push/pull remote event logs unless that explicit prototype flag is set. It remains non-release-ready until the Phase 38 threat model, event envelope, conflict semantics, redaction/privacy controls, and application-port architecture are implemented.
-- Residual release-quality gap: Phase 36.10 must remove default legacy `~/.memory` / `MEMORY_HOME` reads/writes before publish. Publishing also requires Phase 37 packaging/install verification, npm authentication, and release execution.
+- Residual release-quality gap: Phase 37 still requires npm authentication and registry publish execution. Local packaging/install verification passes.
 
 ## Session Continuity
 
@@ -145,14 +146,15 @@ v4.0 Progress: [########################____] 12/14 phases complete
 - Completed Phase 36.9 implementation and remediation: `bun run test:coverage` now passes the honest four-metric gate with statements 97.18%, branches 95.00%, functions 96.09%, and lines 97.32%. Supporting gates passed: `bun run typecheck`, `bun run build`, `bun run test:isolation`, `bun audit`, and `gitleaks detect --no-banner --redact --source .`.
 - Refreshed `ROADMAP.md` and `REQUIREMENTS.md` so completed v4 phases and the Phase 36.9 gate no longer show stale pending/in-progress statuses.
 - Reviewed and archived the two remotely consumer-impact inbox notes; current active inbox contains only `README.md` plus archived/rejected folders.
-- Began Phase 37 audit and inserted Phase 36.10 because current source still indexes `~/.memory` during `memory sync` and writes `MEMORY_HOME` daily logs during `memory backfill` by default. Additional publish blockers found: npm auth E401, package not visible to unauthenticated `npm view`, placeholder repository URL, and absolute local path leakage in current bundles.
+- Began Phase 37 audit and inserted Phase 36.10 because current source still indexed `~/.memory` during `memory sync` and wrote `MEMORY_HOME` daily logs during `memory backfill` by default. Additional publish blockers found: npm auth E401, package not visible to unauthenticated `npm view`, placeholder repository URL, and absolute local path leakage in current bundles.
+- Completed Phase 36.10: legacy memory files are default-off and explicit opt-in, PreCompact no longer tells agents to write `~/.memory`, package repository metadata is fixed, declaration maps are disabled, `dist` is cleaned before build, local package install smoke passes, and all release gates pass. Phase 37 remains blocked by npm authentication.
 
 **Next step:**
-- Execute Phase 36.10. Do not publish until legacy memory-file behavior is default-off and verified, then resume Phase 37 packaging/install/auth verification.
+- Resume Phase 37. Re-check `npm whoami`; if authenticated, publish according to `.planning/phases/37-publishing/37-01-PLAN.md`. If `npm whoami` still returns E401, stop at the auth blocker and do not attempt publish.
 - Current inbox truth: zero active memory-nexus inbox items; only `docs/inbox/README.md` remains outside `docs/inbox/archived/` and `docs/inbox/rejected/`.
 - Cross-project notification filed at `C:\Projects\conversations\docs\inbox\2026-05-28-memory-nexus-friction-list-durable-filters-roadmapped.md`.
 - First-party infrastructure broadcast filed to opted-in project inboxes: ai-dev-environment, authkey, conversations, docTruth, ez-deploy, get-stuff-done, klakson, later, medesine-rx, prompter, tailscale, and watchtower. Frontmatter lint passed via `node C:\Projects\conversations\scripts\inbox-lint.cjs <files>`.
-- Latest verification after coverage-runner migration: `bun run test:coverage` runs 4,050 tests successfully and passes the honest coverage gate at statements 97.18%, branches 95.00%, functions 96.09%, and lines 97.32%. `bun run typecheck`, `bun run build`, `bun run test:isolation`, `bun audit`, and gitleaks pass.
+- Latest verification after Phase 36.10: `bun run test:coverage` runs 4,060 tests successfully and passes the honest coverage gate at statements 97.18%, branches 95.02%, functions 96.09%, and lines 97.33%. `bun run typecheck`, `bun run build`, `bun run test:isolation`, `bun audit`, `gitleaks detect --no-banner --redact --source .`, `npm pack --dry-run --json`, and local tarball install smoke pass.
 
 ### Last Session — 2026-05-13 → 2026-05-14
 
@@ -175,4 +177,4 @@ v4.0 Progress: [########################____] 12/14 phases complete
 
 ---
 
-*Last updated: 2026-05-30 (Phase 36.10 inserted after publish audit; Phase 37 blocked until legacy memory-file defaults are hardened)*
+*Last updated: 2026-05-30 (Phase 36.10 complete; Phase 37 blocked on npm authentication/publish execution)*

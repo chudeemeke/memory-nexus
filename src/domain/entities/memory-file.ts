@@ -1,7 +1,7 @@
 /**
  * MemoryFile Entity
  *
- * Represents an indexed memory file from ~/.memory/.
+ * Represents an indexed legacy markdown memory file.
  * Memory files are agent-written markdown files (daily logs, decisions,
  * learnings, user preferences) that persist knowledge across sessions.
  *
@@ -100,7 +100,7 @@ export class MemoryFile {
   }
 
   /**
-   * Path relative to ~/.memory/ (uses forward slashes).
+   * Path relative to the legacy memory-file root (uses forward slashes).
    */
   get filePath(): string {
     return this._filePath;

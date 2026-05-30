@@ -28,6 +28,8 @@ export interface SyncCommandOptions {
   embed?: boolean;
   /** Run embedding generation in a background process */
   background?: boolean;
+  /** Explicitly index legacy ~/.memory / MEMORY_HOME markdown files */
+  includeMemoryFiles?: boolean;
 }
 
 export interface RemoteSyncer {
