@@ -82,17 +82,22 @@
 - [x] **Phase 36.10: Legacy Memory File Publish Hardening** (NEW, pre-publish hardening) - Make legacy `~/.memory` / `MEMORY_HOME` reads and writes explicit opt-in instead of default behavior, preserving compatibility without contradicting Phase 35's SQLite/facts default. (Completed 2026-05-30; final gate: statements 97.18%, branches 95.02%, functions 96.09%, lines 97.33%)
 - [x] **Phase 37: Publishing** - `@chude/memory@4.0.0` published to npm with `latest` dist-tag and verified by npm and Bun global install smoke tests. (Completed 2026-05-30)
 
-### v5.0 Autonomous & Synchronized Memory Layer (Phases 38-42, plus 38.5)
+### v5.0 Market-Leader Memory Platform (Phases 38.0-43)
 
-**Overview:** Transition `@chude/memory` into a world-class, multi-device, highly competitive agentic memory platform. Adds Git-backed remote database synchronization, optional secure capability interop, user/developer persona aggregation, semantic graph relations mapping, half-life importance decay algorithms, and biological "Dreaming" asynchronous background consolidation.
+**Overview:** Transition `@chude/memory` into a world-class, multi-device, local-first agentic memory platform. Adds a canonical event kernel, projection replay, privacy governance, Git-backed remote event synchronization, optional secure capability interop, durable friction contracts, developer/persona memory, temporal semantic graph retrieval, utility-aware ranking, audited dreaming consolidation, and final market/sales readiness gates.
 
-- [ ] **Phase 38: Remote Sync** - Private-Git-backed remote event log synchronization (multi-device consolidation)
+- [ ] **Phase 38.0: v5 Threat Model, Product PRD, and Eval Baseline** - Lock v5 requirements, threat model, eval fixtures, and excellent-grade rubric before implementation. Source: `docs/plans/2026-06-04-v5-market-leader-gsd-plan.md`.
+- [ ] **Phase 38.1: Canonical Event Kernel and Projection Replay** - Schema-versioned memory event envelopes, machine identity, event ordering/integrity, migration, and projection registry.
+- [ ] **Phase 38.2: Redaction, Privacy Governance, and Audit Commands** - Redaction before storage/indexing/egress, secret audit, provider egress policy, migration/quarantine.
+- [ ] **Phase 38.3: Remote Sync Application Service and Git Transport** - Private-Git-backed remote event synchronization through application ports and shell-safe transport adapter.
+- [ ] **Phase 38.4: Remote CLI, Operations, Backup, and Recovery** - `memory remote` surface, preflight, doctor, backup/restore/rollback, cross-machine verification.
 - [ ] **Phase 38.5: Secure Capability Interop** - Optional authkey readiness/status/fingerprint interop using handles, masked metadata, or proofs; no hard dependency and no plaintext secret resolution inside memory-nexus.
-- [ ] **Post-v4 accepted capacity: Durable Friction Query Contract** - Extend the existing `memory friction list` surface only if/when roadmap capacity allows. Required contract work: stable JSON schema, `--since`, exact severity/project filters, privacy-safe contains filters, `--count`, `--min`, explicit exit codes, timezone semantics, and tests. Source: `docs/inbox/archived/2026-05-12-conversations-friction-list-durable-filters.md`.
-- [ ] **Phase 39: Persona Profiling** - Centralized developer/agent style persona profile aggregation
-- [ ] **Phase 40: Semantic Graph** - Entity-Relationship extraction and graph-traversal queries in the links table
-- [ ] **Phase 41: Importance Decay** - Utility weighting and half-life temporal relevance decay in search ranking
-- [ ] **Phase 42: Dreaming Consolidation** - Asynchronous background reflection, pruning, and fact promotion cycles
+- [ ] **Phase 38.6: Durable Friction Query Contract** - Stable durable `memory friction list` filters, counts, exit codes, JSON schema, timezone semantics, and privacy-safe query handling. Source: `docs/inbox/archived/2026-05-12-conversations-friction-list-durable-filters.md`.
+- [ ] **Phase 39: Persona and Procedural Memory** - Centralized developer/agent profile projection with provenance, confidence, review, and scoped context injection.
+- [ ] **Phase 40: Temporal Semantic Graph** - Entity-relationship extraction, temporal graph projection, and graph-enriched retrieval in the links/entities tables.
+- [ ] **Phase 41: Importance, Utility, and Recall Ranking** - Utility metrics, memory-kind half-life policies, and explainable ranking.
+- [ ] **Phase 42: Dreaming Consolidation** - Audited asynchronous consolidation, promotion, supersedence, and dream logs.
+- [ ] **Phase 43: Market-Leader and Sales-Readiness Gate** - Final architecture/security/quality/product/competitive review and readiness proof.
 
 ## Phase Details
 
@@ -320,76 +325,168 @@ Rationale: Phase 32 explicitly deferred friction envelope adoption per audit §1
 
 ---
 
-### Phase 38: Remote Sync (Multi-Device Replication)
+### Phase 38.0: v5 Threat Model, Product PRD, and Eval Baseline
 
-**Goal**: Synchronize the Plain-Text Event Log securely across multiple developer devices using private Git repositories.
+**Goal**: Lock v5 product intent, threat model, evaluation baseline, and excellent-grade rubric before implementation.
 **Depends on**: Phase 37
-**Requirements**: SYNC-05, SYNC-06
+**Requirements**: V5-PRD-01, V5-EVAL-01
 **Success Criteria** (what must be TRUE):
-  1. `memory sync --remote` commits local event-log diffs, pulls remote event logs, merges them deterministically, and pushes changes to a configured private Git repository.
-  2. Conflict resolution rules merge event logs safely without losing past entries.
-  3. Encryption or access credentials utilize standard SSH/Git configurations transparently.
+  1. v5 PRD, threat model, eval baseline, ADRs, and review request exist and are committed.
+  2. Phase 38.1 context exists and can be planned/executed without chat context.
+  3. Phase 38 prototype code remains disabled behind `MEMORY_EXPERIMENTAL_REMOTE_SYNC=1`.
+**Plans**: `.planning/phases/38.0-v5-threat-model-product-prd-eval-baseline/38.0-01-PLAN.md`
+
+---
+
+### Phase 38.1: Canonical Event Kernel and Projection Replay
+
+**Goal**: Make the event log a real source of truth with schema-versioned envelopes, identity, ordering, migration, and projection replay contracts.
+**Depends on**: Phase 38.0
+**Requirements**: EVT-01, EVT-02, EVT-03, EVT-04
+**Success Criteria** (what must be TRUE):
+  1. `MemoryEventEnvelope` and related value objects validate event identity, machine identity, sequence, causality, privacy, provenance, and integrity.
+  2. Existing v1 fact-shaped records can be migrated or replayed without data loss.
+  3. Projection registry can rebuild applicable derived state from canonical events.
+  4. Replay tests cover duplicates, out-of-order events, supersedence, corrupted lines, redaction metadata, and migrated records.
+**Plans**: Placeholder directory exists; plan after Phase 38.0.
+
+---
+
+### Phase 38.2: Redaction, Privacy Governance, and Audit Commands
+
+**Goal**: Make privacy controls load-bearing before remote sync or external provider egress.
+**Depends on**: Phase 38.1
+**Requirements**: SEC-05, SEC-06, SEC-07, SEC-09
+**Success Criteria** (what must be TRUE):
+  1. Redaction/classification runs before storage, FTS, embeddings, extraction, export, remote sync, logs, and provider egress.
+  2. `memory audit-secrets` scans database and event logs without printing raw secrets.
+  3. Existing stored sensitive content can be migrated, redacted, or quarantined with audit evidence.
+  4. Remote provider egress policy is explicit and visible through doctor/status.
+**Plans**: Placeholder directory exists; plan after Phase 38.1.
+
+---
+
+### Phase 38.3: Remote Sync Application Service and Git Transport
+
+**Goal**: Synchronize canonical event logs through an application service and shell-safe Git transport adapter.
+**Depends on**: Phase 38.2
+**Requirements**: SEC-08, SYNC-05, SYNC-06
+**Success Criteria** (what must be TRUE):
+  1. `RemoteEventSyncService` orchestrates sync through ports; CLI does not construct infrastructure sync adapters directly.
+  2. Remote refs/URLs are validated, Git environment is sanitized, and machine identity must be durable.
+  3. Git-backed sync commits, fetches, merges, replays, and pushes deterministically.
+  4. Integration tests cover temp bare repositories and failure paths.
+**Plans**: Placeholder directory exists; plan after Phase 38.2.
+
+---
+
+### Phase 38.4: Remote CLI, Operations, Backup, and Recovery
+
+**Goal**: Make remote sync usable, diagnosable, and recoverable.
+**Depends on**: Phase 38.3
+**Requirements**: SYNC-07, SYNC-08
+**Success Criteria** (what must be TRUE):
+  1. `memory remote set/remove/status/preflight/doctor` expose stable JSON output and documented exit codes.
+  2. `memory sync --remote` or an equivalent named command calls the application service.
+  3. Backup, restore, rollback, cross-machine verification, and failure recovery are documented and tested.
+  4. First-party `remotely` conventions are used where cross-machine verification is needed.
+**Plans**: Placeholder directory exists; plan after Phase 38.3.
 
 ---
 
 ### Phase 38.5: Secure Capability Interop
 
-**Goal**: memory-nexus can optionally consume safe authkey capability metadata while preserving standalone operation and never resolving raw secrets inside memory-nexus.
-**Depends on**: Phase 36.8 and Phase 38; authkey readiness remains an optional enhancement, not a hard prerequisite
-**Requirements**: SEC-04, INTEG-01
+**Goal**: Optional authkey/capability interop improves diagnostics without creating a dependency or raw-secret path.
+**Depends on**: Phase 36.8 and Phase 38.4
+**Requirements**: INTEG-01, INTEG-02, INTEG-03
 **Success Criteria** (what must be TRUE):
-  1. authkey absence is handled as "optional provider unavailable", never as a memory-nexus failure.
-  2. authkey readiness/status checks return only masked metadata, handles, or proofs.
-  3. `authkey://...` references are treated as references for diagnostics and documentation, not as raw-secret resolver inputs.
-  4. A future authkey fingerprint inventory can help detect known leaked values without memory-nexus receiving those raw values.
-  5. Tests prove no AI-facing command path can print or return a secret value through this integration.
+  1. authkey absence is handled as optional provider unavailable, never as memory-nexus failure.
+  2. Readiness/status checks return only masked metadata, handles, proofs, or fingerprints.
+  3. `authkey://...` references are diagnostics/documentation references, not resolver inputs.
+  4. Tests prove no AI-facing path can print or return raw secrets through capability interop.
+**Plans**: Placeholder directory exists; plan after Phase 38.4.
 
 ---
 
-### Phase 39: Persona Profiling
+### Phase 38.6: Durable Friction Query Contract
 
-**Goal**: Aggregates developer preferences and friction facts into a high-density, version-controlled developer style profile briefing.
+**Goal**: Extend `memory friction list` into a stable durable signal without consumer-specific coupling.
+**Depends on**: Phase 38.1 and Phase 38.2
+**Requirements**: FRIC-01, FRIC-02
+**Success Criteria** (what must be TRUE):
+  1. Stable JSON schema covers durable friction list output.
+  2. `--since`, exact severity/project/tool/status filters, privacy-safe contains filters, `--count`, and `--min` are documented and tested.
+  3. Exit codes distinguish threshold met, threshold not met, argument/config error, and execution error.
+  4. Query strings are not logged unsafely.
+**Plans**: Placeholder directory exists; plan after Phase 38.1 and 38.2.
+
+---
+
+### Phase 39: Persona and Procedural Memory
+
+**Goal**: Create a high-density developer/agent profile projection with provenance, confidence, scope, review, and user controls.
 **Depends on**: Phase 38.5
-**Requirements**: CTXT-05, CTXT-06
+**Requirements**: PERS-01, PERS-02, PERS-03
 **Success Criteria** (what must be TRUE):
-  1. Background compiler aggregates facts to generate a clean, versioned `developer-profile.md` profile sheet.
-  2. Briefings automatically inject this profile at startup to maintain style and architectural alignment.
+  1. Profile projection compiles preferences, repeated corrections, friction, decisions, and validated behavior patterns.
+  2. Entries include provenance, confidence, scope, expiry/review metadata, and edit/suppress/invalidate controls.
+  3. `memory context` can include persona/procedural memory with why-included metadata and no cross-project leakage.
+**Plans**: Placeholder directory exists; plan after Phase 38.5.
 
 ---
 
-### Phase 40: Semantic Graph Extraction
+### Phase 40: Temporal Semantic Graph
 
-**Goal**: Build semantic links and Entity-Relationship maps between database entities to allow graph-traversal queries.
+**Goal**: Add graph traversal where it improves recall, context assembly, and explanation.
 **Depends on**: Phase 39
-**Requirements**: KNOW-09, KNOW-10
+**Requirements**: GRAPH-01, GRAPH-02, GRAPH-03, GRAPH-04
 **Success Criteria** (what must be TRUE):
-  1. LLM-extraction pulls named entities and structural relationships from sessions.
-  2. Relational mappings are stored inside the `links` table.
-  3. Search results traverse links to return relevant memories even when keyword or direct semantic overlap is absent.
+  1. Entity/relation taxonomy covers projects, tools, people, decisions, errors, plans, files, commands, and capabilities.
+  2. Extraction emits candidate entities/relationships with confidence and temporal validity.
+  3. Search/context can use graph enrichment with reasons while preserving vector/reranker baseline.
+  4. Pruning and stale-edge policy prevent unbounded noisy relationship growth.
+**Plans**: Placeholder directory exists; plan after Phase 39.
 
 ---
 
-### Phase 41: Importance Decay
+### Phase 41: Importance, Utility, and Recall Ranking
 
-**Goal**: Model facts utility decay over time using a mathematical half-life relevance scoring model.
+**Goal**: Prioritize useful current truth without losing evergreen decisions.
 **Depends on**: Phase 40
-**Requirements**: RANK-01, RANK-02
+**Requirements**: RANK-03, RANK-04, RANK-05
 **Success Criteria** (what must be TRUE):
-  1. Facts schema tracks access metrics (frequency, age, last accessed stamp).
-  2. Relevance scoring applies half-life decay function during hybrid search ranking.
+  1. Facts, links, profiles, and dreams track access/utility metrics.
+  2. Ranking applies memory-kind half-life policies, evergreen exemptions, and supersedence filtering.
+  3. Retrieval output can explain why each result was ranked or included.
+**Plans**: Placeholder directory exists; plan after Phase 40.
 
 ---
 
 ### Phase 42: Dreaming Consolidation
 
-**Goal**: Asynchronously review new logs, build consolidated "Dream Diaries", deduplicate/supersede records, and promote high-utility facts.
+**Goal**: Add audited asynchronous consolidation without hidden mutation or unreviewed data loss.
 **Depends on**: Phase 41
-**Requirements**: DREAM-01, DREAM-02
+**Requirements**: DREAM-01, DREAM-02, DREAM-03
 **Success Criteria** (what must be TRUE):
-  1. Standalone `memory dream` subcommand aggregates raw transcripts and prompts a structured consolidated reflection.
-  2. Writes reflects to `dreams.jsonl` audit log.
-  3. Promotes or supersedes events in the canonical Event-Log SSOT and rebuilds database projections.
-  4. Detached background hooks trigger dreaming during post-session idle states safely.
+  1. `memory dream` produces schema-versioned audited dream entries.
+  2. Dream proposals promote/supersede through canonical events, not hidden mutation.
+  3. Background dreaming remains disabled until explicit command path is safe, audited, redacted, and rollback-capable.
+**Plans**: Placeholder directory exists; plan after Phase 41.
+
+---
+
+### Phase 43: Market-Leader and Sales-Readiness Gate
+
+**Goal**: Prove architecture, security, quality, product readiness, competitive positioning, and sales readiness are excellent.
+**Depends on**: Phase 42
+**Requirements**: READY-01, READY-02, READY-03, READY-04, READY-05
+**Success Criteria** (what must be TRUE):
+  1. Architecture review grades excellent against hexagonal/SOLID/deep-module criteria.
+  2. Security review grades excellent against secrets, privacy, egress, remote sync, dependency, audit, and recovery criteria.
+  3. Quality review passes typecheck, build, full tests, test isolation, 95% coverage at every metric, dependency audit, gitleaks, and published-package smoke.
+  4. Product review proves fresh-user install, onboarding, configure, audit, backup, restore, upgrade, and verification flows.
+  5. Competitive review demonstrates a crisp local-first value proposition and no known unowned blocker.
+**Plans**: Placeholder directory exists; plan after Phase 42.
 
 ---
 
@@ -458,9 +555,18 @@ Phase 37 (Publishing)
     depends on Phase 36.10 (legacy memory-file hardening before publish)
 
 v5.0
-    Phase 38 (Remote Sync) depends on Phase 37
-    Phase 38.5 (Secure Capability Interop) depends on Phase 36.8 and Phase 38
-    Phase 39 (Persona Profiling) depends on Phase 38.5
+    Phase 38.0 (Threat Model, PRD, Eval Baseline) depends on Phase 37
+    Phase 38.1 (Canonical Event Kernel) depends on Phase 38.0
+    Phase 38.2 (Redaction and Privacy Governance) depends on Phase 38.1
+    Phase 38.3 (Remote Sync Service and Transport) depends on Phase 38.2
+    Phase 38.4 (Remote CLI and Operations) depends on Phase 38.3
+    Phase 38.5 (Secure Capability Interop) depends on Phase 36.8 and Phase 38.4
+    Phase 38.6 (Durable Friction Query Contract) depends on Phase 38.1 and Phase 38.2
+    Phase 39 (Persona and Procedural Memory) depends on Phase 38.5
+    Phase 40 (Temporal Semantic Graph) depends on Phase 39
+    Phase 41 (Importance, Utility, and Recall Ranking) depends on Phase 40
+    Phase 42 (Dreaming Consolidation) depends on Phase 41
+    Phase 43 (Market-Leader and Sales-Readiness Gate) depends on Phase 42
 ```
 
 ---
@@ -503,14 +609,19 @@ v5.0
 | 36.9. Coverage Runner Migration | v4.0 | 1/1 | Complete | 2026-05-30 |
 | 36.10. Legacy Memory File Publish Hardening | v4.0 | 1/1 | Complete | 2026-05-30 |
 | 37. Publishing | v4.0 | 1/1 | Complete | 2026-05-30 |
-| 38. Remote Sync | v5.0 | TBD | Planned | - |
+| 38.0. Threat Model, PRD, Eval Baseline | v5.0 | TBD | Planned | - |
+| 38.1. Canonical Event Kernel and Projection Replay | v5.0 | TBD | Planned | - |
+| 38.2. Redaction, Privacy Governance, and Audit Commands | v5.0 | TBD | Planned | - |
+| 38.3. Remote Sync Service and Git Transport | v5.0 | TBD | Planned | - |
+| 38.4. Remote CLI, Operations, Backup, and Recovery | v5.0 | TBD | Planned | - |
 | 38.5. Secure Capability Interop | v5.0 | TBD | Planned | - |
-| Durable Friction Query Contract | post-v4 | TBD | Accepted backlog | - |
-| 39. Persona Profiling | v5.0 | TBD | Planned | - |
-| 40. Semantic Graph | v5.0 | TBD | Planned | - |
-| 41. Importance Decay | v5.0 | TBD | Planned | - |
+| 38.6. Durable Friction Query Contract | v5.0 | TBD | Planned | - |
+| 39. Persona and Procedural Memory | v5.0 | TBD | Planned | - |
+| 40. Temporal Semantic Graph | v5.0 | TBD | Planned | - |
+| 41. Importance, Utility, and Recall Ranking | v5.0 | TBD | Planned | - |
 | 42. Dreaming Consolidation | v5.0 | TBD | Planned | - |
+| 43. Market-Leader and Sales-Readiness Gate | v5.0 | TBD | Planned | - |
 
 ---
 
-*Last updated: 2026-05-30 (Phase 36.10 inserted after publish audit found active legacy memory-file defaults; durable friction query contract retained as accepted post-v4 capacity)*
+*Last updated: 2026-06-04 (v5 market-leader GSD plan inserted after v4 publish reconciliation)*

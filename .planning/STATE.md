@@ -3,7 +3,7 @@ gsd_state_version: 1.0
 milestone: v4.0
 milestone_name: Intelligence Layer
 status: complete
-last_updated: "2026-06-04T00:00:00.000+01:00"
+last_updated: "2026-06-04T17:30:00.000+01:00"
 progress:
   total_phases: 14
   completed_phases: 14
@@ -17,6 +17,7 @@ progress:
 > **LEGACY MEMORY-FILE DEFAULTS HARDENED 2026-05-30** - Phase 36.10 is complete. `memory sync` and `memory backfill` no longer read/write legacy `~/.memory` / `MEMORY_HOME` sidecars by default; compatibility requires explicit CLI/env/config opt-in. Release gates pass with statements 97.18%, branches 95.02%, functions 96.09%, and lines 97.33%. Build output is clean of sourcemaps and local absolute path leakage. Phase 37 was unblocked by npm auth completion and registry publish execution.
 > **PHASE 37 LOCAL PUBLISH CHECKS PASS 2026-05-30** - `npm pack --dry-run --json`, isolated tarball install smoke (`memory --version`, `memory --help`, `memory status --json`), and `npm publish --dry-run --access public` passed before real publish. The earlier E401/E404 state is historical only; `@chude/memory@4.0.0` is now visible on npm with `latest` pointing to `4.0.0`.
 > **V4.0 PUBLISHED 2026-05-30** - `@chude/memory@4.0.0` is published on npm with `latest` pointing to `4.0.0`. Registry checks, npm global install smoke, and Bun global install smoke passed. Windows Bun creates `memory.exe` under `bun pm bin -g`, not npm-style `memory.cmd`; `bun run verify:published @chude/memory@4.0.0` now encodes this verification.
+> **V5 MARKET-LEADER PLAN INSERTED 2026-06-04** - `docs/plans/2026-06-04-v5-market-leader-gsd-plan.md` defines the long-horizon execution framework. ROADMAP now expands v5 into phases 38.0-43, and REQUIREMENTS now includes v5 traceability for event kernel, privacy governance, remote sync, secure capability interop, durable friction, persona, graph, ranking, dreaming, and final sales-readiness gates.
 > **INBOX RECONCILED 2026-05-28** - Stale bug reports for the Windows full-suite crash, orphaned friction test, and programmatic API real-DB pollution were validated against the current code and archived. The durable-friction-list filing was accepted into ROADMAP as post-v4 capacity, archived as planned, and counter-notified to conversations. No active memory-nexus inbox items remain.
 > **REMOTE CONSUMER NOTES REVIEWED 2026-05-30** - The two remotely consumer-impact inbox notes were reviewed against current memory-nexus docs/scripts. No current raw SSH/rsync operating instructions or hard-coded remotely tunnel-state assumptions were found, so both notes were archived with disposition text. Future Phase 38 cross-machine work must still use current `remotely` conventions where applicable.
 > **FIRST-PARTY INFRASTRUCTURE BROADCAST 2026-05-28** - User clarified that `memory` is a first-class first-party tool used by most/all projects. Canonical tool/package naming is `memory` / `@chude/memory`; the repository remains `memory-nexus`, and `nexus` is a legacy alias. Updated Codex/Claude rules and document-for-clear skills, added a Codex memory note, and filed notification inbox items to opted-in projects so consumers know about provider-secret, redaction/export, registry, and authkey-optional contract changes.
@@ -28,7 +29,7 @@ See: .planning/PROJECT.md (updated 2026-02-18)
 
 **Core Value:** Knowledge gained in one Claude Code project becomes accessible from any other project. No more context silos.
 
-**Current Focus:** v4.0 is complete and `@chude/memory@4.0.0` is published. Next roadmap capacity is v5.0 planning/execution, beginning with Phase 38 Remote Sync and Phase 38.5 Secure Capability Interop. Relevant v4 closure docs: `docs/audits/2026-05-27-v4-foundation-architecture-security-quality-review.md`, `docs/audits/2026-05-27-remote-sync-architecture-security-quality-review.md`, `docs/plans/2026-05-27-authkey-optional-integration.md`, `.planning/phases/36.8-secret-boundary-optional-provider-interop/36.8-01-SUMMARY.md`, `.planning/phases/36.9-coverage-runner-migration/36.9-01-SUMMARY.md`, and `.planning/phases/36.10-legacy-memory-file-publish-hardening/36.10-01-SUMMARY.md`.
+**Current Focus:** v4.0 is complete and `@chude/memory@4.0.0` is published. Next roadmap capacity is v5.0 market-leader execution, beginning with Phase 38.0 Threat Model, Product PRD, and Eval Baseline before any remote-sync implementation. Relevant docs: `docs/plans/2026-06-04-v5-market-leader-gsd-plan.md`, `docs/audits/2026-05-27-v4-foundation-architecture-security-quality-review.md`, `docs/audits/2026-05-27-remote-sync-architecture-security-quality-review.md`, `docs/plans/2026-05-27-authkey-optional-integration.md`, `.planning/phases/36.8-secret-boundary-optional-provider-interop/36.8-01-SUMMARY.md`, `.planning/phases/36.9-coverage-runner-migration/36.9-01-SUMMARY.md`, and `.planning/phases/36.10-legacy-memory-file-publish-hardening/36.10-01-SUMMARY.md`.
 
 **Tech Stack:** Bun, TypeScript 5.5+, bun:sqlite with FTS5 + sqlite-vec, Commander.js v14, @huggingface/transformers v3, cli-progress, chrono-node, Chart.js (HTML dashboard)
 
@@ -153,7 +154,7 @@ v4.0 Progress: [############################] 14/14 phases complete
 - Completed Phase 37: `@chude/memory@4.0.0` is published on npm with `latest` dist-tag. Registry visibility, package access status, owner listing, npm global install smoke, and Bun global install smoke passed. Added `bun run verify:published @chude/memory@4.0.0` to prevent future Windows Bun binary-name assumptions.
 
 **Next step:**
-- Move to v5.0 planning/execution starting with Phase 38 only after a fresh architecture/security pass on remote sync. Phase 38 prototype code remains parked behind `MEMORY_EXPERIMENTAL_REMOTE_SYNC=1`.
+- Move to v5.0 planning/execution starting with Phase 38.0 only after treating `docs/plans/2026-06-04-v5-market-leader-gsd-plan.md` as the execution framework. Phase 38 prototype code remains parked behind `MEMORY_EXPERIMENTAL_REMOTE_SYNC=1`.
 - Current inbox truth: zero active memory-nexus inbox items; only `docs/inbox/README.md` remains outside `docs/inbox/archived/` and `docs/inbox/rejected/`.
 - Cross-project notification filed at `C:\Projects\conversations\docs\inbox\2026-05-28-memory-nexus-friction-list-durable-filters-roadmapped.md`.
 - First-party infrastructure broadcast filed to opted-in project inboxes: ai-dev-environment, authkey, conversations, docTruth, ez-deploy, get-stuff-done, klakson, later, medesine-rx, prompter, tailscale, and watchtower. Frontmatter lint passed via `node C:\Projects\conversations\scripts\inbox-lint.cjs <files>`.

@@ -1,4 +1,4 @@
-# Requirements: @chude/memory v4.0
+# Requirements: @chude/memory
 
 **Defined:** 2026-04-03
 **Core Value:** Knowledge gained in one Claude Code project becomes accessible from any other project. No more context silos.
@@ -60,6 +60,81 @@ Requirements for v4.0: Intelligence Layer -- automated knowledge extraction, int
 - [x] **QUAL-03**: All new infrastructure adapters follow existing port/adapter patterns
 - [x] **QUAL-04**: TDD workflow (RED-GREEN-REFACTOR) for all new features
 
+## v5.0 Requirements
+
+Requirements for v5.0: market-leader memory platform readiness. Source plan: `docs/plans/2026-06-04-v5-market-leader-gsd-plan.md`.
+
+### Product and Evaluation
+
+- [ ] **V5-PRD-01**: v5 PRD, threat model, eval fixtures, readiness rubric, and traceability table are written before implementation.
+- [ ] **V5-EVAL-01**: Evaluation harness covers recall precision, cross-project leakage, supersedence, graph traversal, persona usefulness, privacy, and recovery.
+
+### Canonical Event Kernel
+
+- [ ] **EVT-01**: `MemoryEventEnvelope` is schema-versioned and includes event id, machine id, sequence, kind, operation, provenance, privacy, causality, payload, and integrity metadata.
+- [ ] **EVT-02**: Existing fact-shaped event records can be migrated or replayed without data loss.
+- [ ] **EVT-03**: Projection registry rebuilds facts, entities, links, friction, search indexes, extraction audit, persona, and dream projections from canonical events where applicable.
+- [ ] **EVT-04**: Replay is deterministic for duplicates, out-of-order events, supersedence, corrupted lines, redaction metadata, and migrated records.
+
+### Privacy and Security Governance
+
+- [ ] **SEC-05**: Redaction/classification runs before storage, FTS indexing, embedding, extraction, export, remote sync, logs, and provider egress.
+- [ ] **SEC-06**: `memory audit-secrets` scans database and event logs and reports redacted findings without printing raw secrets.
+- [ ] **SEC-07**: Remote provider egress requires explicit consent, allowlist policy, and doctor/status warnings.
+- [ ] **SEC-08**: Remote sync validates remote refs/URLs, uses sanitized Git environment, and refuses to run without durable validated machine identity.
+- [ ] **SEC-09**: Existing stored sensitive content can be migrated, redacted, or quarantined with audit evidence.
+
+### Remote Sync and Operations
+
+- [ ] **SYNC-05**: `RemoteEventSyncService` orchestrates remote sync through application ports; presentation commands do not directly construct infrastructure adapters.
+- [ ] **SYNC-06**: Git-backed remote event sync commits, fetches, merges, replays, and pushes deterministically without losing past entries.
+- [ ] **SYNC-07**: Conflict semantics, failure policy, rollback, backup, restore, and recovery are documented and tested.
+- [ ] **SYNC-08**: `memory remote set/remove/status/preflight/doctor` expose stable JSON output, documented exit codes, and privacy preflight.
+
+### Secure Capability Interop
+
+- [ ] **INTEG-01**: authkey and future capability providers are optional and absence never breaks core workflows.
+- [ ] **INTEG-02**: Capability interop consumes only masked metadata, handles, proofs, readiness, or fingerprint inventory; no raw secret resolution inside memory-nexus.
+- [ ] **INTEG-03**: Tests prove no AI-facing path can print or return a raw secret through capability interop.
+
+### Durable Friction Contract
+
+- [ ] **FRIC-01**: `memory friction list` has stable JSON schema and exact filter semantics for since, severity, project, tool, status, and privacy-safe contains filters.
+- [ ] **FRIC-02**: `memory friction list --count --min <n>` has documented exit codes and tests for threshold met, threshold not met, argument errors, and execution errors.
+
+### Persona and Procedural Memory
+
+- [ ] **PERS-01**: Developer/persona profile projection is generated from preferences, repeated corrections, friction, decisions, and validated behavior patterns.
+- [ ] **PERS-02**: Persona entries include provenance, confidence, scope, expiry/review metadata, and user-edit/suppress/invalidate controls.
+- [ ] **PERS-03**: `memory context` can include scoped persona/procedural memory with why-included metadata and no cross-project leakage.
+
+### Temporal Semantic Graph
+
+- [ ] **GRAPH-01**: Entity and relation taxonomy covers projects, tools, people, decisions, errors, plans, files, commands, and capabilities.
+- [ ] **GRAPH-02**: Extraction emits candidate entities/relationships with confidence and temporal validity.
+- [ ] **GRAPH-03**: Search/context can use graph enrichment with reasons while preserving vector/reranker baseline.
+- [ ] **GRAPH-04**: Graph pruning and stale-edge policy prevent unbounded noisy relationship growth.
+
+### Importance, Utility, and Recall Ranking
+
+- [ ] **RANK-03**: Facts, links, profiles, and dreams track access/utility metrics.
+- [ ] **RANK-04**: Ranking applies memory-kind half-life policies, evergreen exemptions, and supersedence filtering.
+- [ ] **RANK-05**: Retrieval output can explain why each result was ranked or included.
+
+### Dreaming Consolidation
+
+- [ ] **DREAM-01**: `memory dream` produces schema-versioned audited dream entries.
+- [ ] **DREAM-02**: Dream proposals promote/supersede through canonical events, not hidden mutation.
+- [ ] **DREAM-03**: Background dreaming is disabled until explicit command path is safe, audited, redacted, and rollback-capable.
+
+### Market and Sales Readiness
+
+- [ ] **READY-01**: Architecture review grades excellent against hexagonal/SOLID/deep-module criteria.
+- [ ] **READY-02**: Security review grades excellent against secrets, privacy, egress, remote sync, dependency, audit, and recovery criteria.
+- [ ] **READY-03**: Quality review passes typecheck, build, full tests, test isolation, 95% coverage at each metric, dependency audit, gitleaks, and published-package smoke.
+- [ ] **READY-04**: Product review proves fresh-user install, onboarding, configure, audit, backup, restore, upgrade, and verification flows.
+- [ ] **READY-05**: Competitive review demonstrates a crisp local-first value proposition and no known unowned blocker.
+
 ## Future Requirements
 
 Deferred. Tracked for context, not in current roadmap.
@@ -84,7 +159,7 @@ Deferred. Tracked for context, not in current roadmap.
 
 - **PORT-04**: Project alias table mapping different encoded paths to same logical project across environments
 
-## Out of Scope
+## v4.0 Out of Scope (Historical)
 
 | Feature | Reason |
 |---------|--------|
@@ -131,6 +206,44 @@ Which phases cover which requirements. Updated during roadmap creation.
 | QUAL-02 | All | Complete |
 | QUAL-03 | All | Complete |
 | QUAL-04 | All | Complete |
+| V5-PRD-01 | Phase 38.0 | Pending |
+| V5-EVAL-01 | Phase 38.0 + Phase 43 | Pending |
+| EVT-01 | Phase 38.1 | Pending |
+| EVT-02 | Phase 38.1 | Pending |
+| EVT-03 | Phase 38.1 | Pending |
+| EVT-04 | Phase 38.1 | Pending |
+| SEC-05 | Phase 38.2 | Pending |
+| SEC-06 | Phase 38.2 | Pending |
+| SEC-07 | Phase 38.2 | Pending |
+| SEC-08 | Phase 38.3 | Pending |
+| SEC-09 | Phase 38.2 | Pending |
+| SYNC-05 | Phase 38.3 | Pending |
+| SYNC-06 | Phase 38.3 | Pending |
+| SYNC-07 | Phase 38.4 | Pending |
+| SYNC-08 | Phase 38.4 | Pending |
+| INTEG-01 | Phase 38.5 | Pending |
+| INTEG-02 | Phase 38.5 | Pending |
+| INTEG-03 | Phase 38.5 | Pending |
+| FRIC-01 | Phase 38.6 | Pending |
+| FRIC-02 | Phase 38.6 | Pending |
+| PERS-01 | Phase 39 | Pending |
+| PERS-02 | Phase 39 | Pending |
+| PERS-03 | Phase 39 | Pending |
+| GRAPH-01 | Phase 40 | Pending |
+| GRAPH-02 | Phase 40 | Pending |
+| GRAPH-03 | Phase 40 | Pending |
+| GRAPH-04 | Phase 40 | Pending |
+| RANK-03 | Phase 41 | Pending |
+| RANK-04 | Phase 41 | Pending |
+| RANK-05 | Phase 41 | Pending |
+| DREAM-01 | Phase 42 | Pending |
+| DREAM-02 | Phase 42 | Pending |
+| DREAM-03 | Phase 42 | Pending |
+| READY-01 | Phase 43 | Pending |
+| READY-02 | Phase 43 | Pending |
+| READY-03 | Phase 43 | Pending |
+| READY-04 | Phase 43 | Pending |
+| READY-05 | Phase 43 | Pending |
 
 **Coverage:**
 - v4.0 requirements: 25 total (excluding QUAL cross-cutting)
@@ -141,4 +254,4 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 ---
 *Requirements defined: 2026-04-03*
-*Last updated: 2026-05-30 after Phase 37 publish verification; PUB-01 and PUB-02 complete*
+*Last updated: 2026-06-04 after v5 market-leader GSD plan insertion*
