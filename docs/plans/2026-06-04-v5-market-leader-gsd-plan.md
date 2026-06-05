@@ -291,17 +291,31 @@ Exit gates:
 1. Phase 38.0
 2. Phase 38.1
 3. Phase 38.2
-4. Phase 38.3
-5. Phase 38.4
-6. Phase 38.5
-7. Phase 38.6
-8. Phase 39
-9. Phase 40
-10. Phase 41
-11. Phase 42
-12. Phase 43
+4. Phase 38.2.5
+5. Phase 38.3
+6. Phase 38.4
+7. Phase 38.5
+8. Phase 38.6
+9. Phase 38.7
+10. Phase 39
+11. Phase 40
+12. Phase 41
+13. Phase 42
+14. Phase 42.5
+15. Phase 43
+16. Phase 44
 
-Do not start remote sync implementation before Phase 38.0 threat model and Phase 38.1 event kernel are accepted. Do not start graph/persona/dreaming until event replay and redaction are stable.
+Do not start remote sync implementation before Phase 38.0 threat model, Phase 38.1 event kernel, Phase 38.2 privacy controls, and Phase 38.2.5 consent/provenance controls are accepted. Do not start graph/persona/dreaming until event replay, redaction, consent, and eval fixtures are stable.
+
+## 2026-06-05 Amendment: Feature Preservation and Release Controls
+
+The execution plan is amended after Phase 38.0 research and user clarification:
+
+- Feature preservation is a hard invariant. No stated, inferred, prototype, documented, disabled, or partial feature may be removed to make v5 easier to ship. If a feature is incomplete, it must be completed, explicitly scoped to a later owned phase, or blocked with evidence.
+- Phase 38.2.5 is required for consent provenance, suppression, invalidation, review, and governance events before remote sync can ship.
+- Phase 38.7 is required for an executable evaluation harness and regression fixtures before persona, graph, ranking, or dreaming can claim production readiness.
+- Phase 42.5 is required for feature-completeness inventory, UX polish, CLI/API ergonomics, and fresh-user usability before the final readiness gate.
+- Phase 44 is required for release-candidate packaging, package smoke, npm dry-run, changelog/release notes, and OTP-backed publish handoff. Real publish remains user-authorized only.
 
 ## Verification Standard
 
@@ -328,4 +342,3 @@ The final application can be graded excellent only if:
 - Implementation completeness: every roadmap feature has code, tests, docs, migration, and operational diagnostics.
 - Product readiness: a fresh user can install, configure, understand, recover, and trust it.
 - Sales readiness: the product has a crisp local-first value proposition, competitive comparison, onboarding, support docs, and no known unowned blocker.
-

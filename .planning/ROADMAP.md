@@ -6,6 +6,7 @@
 - SHIPPED **v2.0 Hybrid Search and Rebrand** -- Phases 13-22 (shipped 2026-03-01)
 - SHIPPED **v3.0 Knowledge Layer + Friction Logging** -- Phases 23-29.1 (shipped 2026-04-02)
 - SHIPPED **v4.0 Intelligence Layer** -- Phases 30-37 plus 32.5, 36.8, 36.9, and 36.10 (published 2026-05-30 as `@chude/memory@4.0.0`; architecture audit LOCKED 2026-05-13, recommendation A-prime; 2026-05-27 foundation review added pre-publish security hardening before GA; Phase 36.9 coverage gate restored 2026-05-30; Phase 36.10 hardened legacy memory-file defaults before publish)
+- IN PROGRESS **v5.0 Market-Leader Memory Platform** -- Phases 38.0-44 (started 2026-06-05; Phase 38.0 foundation complete; added consent/provenance, eval harness, feature-completeness/UX, and release-candidate handoff gates)
 
 ## Phases
 
@@ -82,22 +83,26 @@
 - [x] **Phase 36.10: Legacy Memory File Publish Hardening** (NEW, pre-publish hardening) - Make legacy `~/.memory` / `MEMORY_HOME` reads and writes explicit opt-in instead of default behavior, preserving compatibility without contradicting Phase 35's SQLite/facts default. (Completed 2026-05-30; final gate: statements 97.18%, branches 95.02%, functions 96.09%, lines 97.33%)
 - [x] **Phase 37: Publishing** - `@chude/memory@4.0.0` published to npm with `latest` dist-tag and verified by npm and Bun global install smoke tests. (Completed 2026-05-30)
 
-### v5.0 Market-Leader Memory Platform (Phases 38.0-43)
+### v5.0 Market-Leader Memory Platform (Phases 38.0-44)
 
-**Overview:** Transition `@chude/memory` into a world-class, multi-device, local-first agentic memory platform. Adds a canonical event kernel, projection replay, privacy governance, Git-backed remote event synchronization, optional secure capability interop, durable friction contracts, developer/persona memory, temporal semantic graph retrieval, utility-aware ranking, audited dreaming consolidation, and final market/sales readiness gates.
+**Overview:** Transition `@chude/memory` into a world-class, multi-device, local-first agentic memory platform. Adds a canonical event kernel, projection replay, privacy governance, consent/provenance controls, Git-backed remote event synchronization, optional secure capability interop, durable friction contracts, executable eval harness, developer/persona memory, temporal semantic graph retrieval, utility-aware ranking, audited dreaming consolidation, feature-completeness/UX polish, final market/sales readiness gates, and release-candidate packaging/publish handoff.
 
-- [ ] **Phase 38.0: v5 Threat Model, Product PRD, and Eval Baseline** - Lock v5 requirements, threat model, eval fixtures, and excellent-grade rubric before implementation. Source: `docs/plans/2026-06-04-v5-market-leader-gsd-plan.md`.
+- [x] **Phase 38.0: v5 Threat Model, Product PRD, and Eval Baseline** - Lock v5 requirements, threat model, eval baseline, ADRs, and excellent-grade rubric before implementation. Completed 2026-06-05.
 - [ ] **Phase 38.1: Canonical Event Kernel and Projection Replay** - Schema-versioned memory event envelopes, machine identity, event ordering/integrity, migration, and projection registry.
 - [ ] **Phase 38.2: Redaction, Privacy Governance, and Audit Commands** - Redaction before storage/indexing/egress, secret audit, provider egress policy, migration/quarantine.
+- [ ] **Phase 38.2.5: Consent Provenance and Memory Governance** - User-visible consent, provenance, suppression, invalidation, review, and governance events for derived memory surfaces.
 - [ ] **Phase 38.3: Remote Sync Application Service and Git Transport** - Private-Git-backed remote event synchronization through application ports and shell-safe transport adapter.
 - [ ] **Phase 38.4: Remote CLI, Operations, Backup, and Recovery** - `memory remote` surface, preflight, doctor, backup/restore/rollback, cross-machine verification.
 - [ ] **Phase 38.5: Secure Capability Interop** - Optional authkey readiness/status/fingerprint interop using handles, masked metadata, or proofs; no hard dependency and no plaintext secret resolution inside memory-nexus.
 - [ ] **Phase 38.6: Durable Friction Query Contract** - Stable durable `memory friction list` filters, counts, exit codes, JSON schema, timezone semantics, and privacy-safe query handling. Source: `docs/inbox/archived/2026-05-12-conversations-friction-list-durable-filters.md`.
+- [ ] **Phase 38.7: Evaluation Harness and Regression Fixtures** - Executable eval runner, fixtures, report schema, and release-gate integration for v5 behavior checks.
 - [ ] **Phase 39: Persona and Procedural Memory** - Centralized developer/agent profile projection with provenance, confidence, review, and scoped context injection.
 - [ ] **Phase 40: Temporal Semantic Graph** - Entity-relationship extraction, temporal graph projection, and graph-enriched retrieval in the links/entities tables.
 - [ ] **Phase 41: Importance, Utility, and Recall Ranking** - Utility metrics, memory-kind half-life policies, and explainable ranking.
 - [ ] **Phase 42: Dreaming Consolidation** - Audited asynchronous consolidation, promotion, supersedence, and dream logs.
+- [ ] **Phase 42.5: Feature Completeness and UX Polish** - Inventory all stated/inferred/prototype features, complete or explicitly own them, and polish CLI/API usability to excellent standard.
 - [ ] **Phase 43: Market-Leader and Sales-Readiness Gate** - Final architecture/security/quality/product/competitive review and readiness proof.
+- [ ] **Phase 44: Release-Candidate Packaging and Publish Handoff** - Versioning, package smoke, changelog/release notes, npm dry-run, and OTP-backed publish handoff without publishing until user authorization.
 
 ## Phase Details
 
@@ -334,7 +339,7 @@ Rationale: Phase 32 explicitly deferred friction envelope adoption per audit §1
   1. v5 PRD, threat model, eval baseline, ADRs, and review request exist and are committed.
   2. Phase 38.1 context exists and can be planned/executed without chat context.
   3. Phase 38 prototype code remains disabled behind `MEMORY_EXPERIMENTAL_REMOTE_SYNC=1`.
-**Plans**: `.planning/phases/38.0-v5-threat-model-product-prd-eval-baseline/38.0-01-PLAN.md`
+**Plans**: `.planning/phases/38.0-v5-threat-model-product-prd-eval-baseline/38.0-01-PLAN.md` (complete; summary in `38.0-01-SUMMARY.md`)
 
 ---
 
@@ -366,10 +371,24 @@ Rationale: Phase 32 explicitly deferred friction envelope adoption per audit §1
 
 ---
 
+### Phase 38.2.5: Consent Provenance and Memory Governance
+
+**Goal**: Make consent, provenance, suppression, invalidation, review, and user-control state load-bearing before derived memory surfaces are built.
+**Depends on**: Phase 38.2
+**Requirements**: CONSENT-01, CONSENT-02, CONSENT-03, CONSENT-04
+**Success Criteria** (what must be TRUE):
+  1. Consent/provenance event types exist for provider egress, remote sync, persona/profile use, graph enrichment, ranking exemptions, and dream promotion.
+  2. Every derived memory entry can cite source event ids, transformation method, actor, confidence, redaction state, consent state, and scope.
+  3. Users can inspect, suppress, invalidate, expire, or review derived memory entries.
+  4. Suppression/invalidation state is enforced by context assembly, graph enrichment, ranking, and dreaming.
+**Plans**: Placeholder directory exists; plan after Phase 38.2.
+
+---
+
 ### Phase 38.3: Remote Sync Application Service and Git Transport
 
 **Goal**: Synchronize canonical event logs through an application service and shell-safe Git transport adapter.
-**Depends on**: Phase 38.2
+**Depends on**: Phase 38.2.5
 **Requirements**: SEC-08, SYNC-05, SYNC-06
 **Success Criteria** (what must be TRUE):
   1. `RemoteEventSyncService` orchestrates sync through ports; CLI does not construct infrastructure sync adapters directly.
@@ -411,21 +430,35 @@ Rationale: Phase 32 explicitly deferred friction envelope adoption per audit §1
 ### Phase 38.6: Durable Friction Query Contract
 
 **Goal**: Extend `memory friction list` into a stable durable signal without consumer-specific coupling.
-**Depends on**: Phase 38.1 and Phase 38.2
+**Depends on**: Phase 38.1, Phase 38.2, and Phase 38.2.5
 **Requirements**: FRIC-01, FRIC-02
 **Success Criteria** (what must be TRUE):
   1. Stable JSON schema covers durable friction list output.
   2. `--since`, exact severity/project/tool/status filters, privacy-safe contains filters, `--count`, and `--min` are documented and tested.
   3. Exit codes distinguish threshold met, threshold not met, argument/config error, and execution error.
   4. Query strings are not logged unsafely.
-**Plans**: Placeholder directory exists; plan after Phase 38.1 and 38.2.
+**Plans**: Placeholder directory exists; plan after Phase 38.1, 38.2, and 38.2.5.
+
+---
+
+### Phase 38.7: Evaluation Harness and Regression Fixtures
+
+**Goal**: Turn the v5 evaluation baseline into an executable regression harness with fixtures and release-gate evidence.
+**Depends on**: Phase 38.6 and Phase 38.2.5
+**Requirements**: EVAL-02, EVAL-03, EVAL-04
+**Success Criteria** (what must be TRUE):
+  1. `bun run eval:v5` or equivalent loads fixtures and emits schema-versioned JSON results.
+  2. Fixtures cover privacy, leakage, supersedence, sync recovery, friction filters, persona, graph, ranking, and dreaming.
+  3. Phase 43 can consume eval output as readiness evidence.
+  4. Eval fixtures are sanitized and do not store secrets or private raw transcripts.
+**Plans**: Placeholder directory exists; plan after Phase 38.6 and 38.2.5.
 
 ---
 
 ### Phase 39: Persona and Procedural Memory
 
 **Goal**: Create a high-density developer/agent profile projection with provenance, confidence, scope, review, and user controls.
-**Depends on**: Phase 38.5
+**Depends on**: Phase 38.5 and Phase 38.7
 **Requirements**: PERS-01, PERS-02, PERS-03
 **Success Criteria** (what must be TRUE):
   1. Profile projection compiles preferences, repeated corrections, friction, decisions, and validated behavior patterns.
@@ -475,18 +508,45 @@ Rationale: Phase 32 explicitly deferred friction envelope adoption per audit §1
 
 ---
 
+### Phase 42.5: Feature Completeness and UX Polish
+
+**Goal**: Ensure no stated/inferred/prototype feature is removed or left half-built, and make CLI/API usability excellent before final readiness audit.
+**Depends on**: Phase 42
+**Requirements**: UX-01, UX-02, UX-03
+**Success Criteria** (what must be TRUE):
+  1. Feature inventory covers current code, docs, roadmap, requirements, inbox, tests, and disabled prototype surfaces.
+  2. Every incomplete feature is completed or explicitly owned by a later requirement with a concrete gate; no feature is silently removed.
+  3. CLI help, errors, preflights, JSON schemas, docs, onboarding, backup/restore, audit, and recovery flows are polished for excellent usability.
+  4. Fresh-user UAT confirms install, configure, sync/search/context/audit/backup/restore, and feature discovery are clear.
+**Plans**: Placeholder directory exists; plan after Phase 42.
+
+---
+
 ### Phase 43: Market-Leader and Sales-Readiness Gate
 
 **Goal**: Prove architecture, security, quality, product readiness, competitive positioning, and sales readiness are excellent.
-**Depends on**: Phase 42
+**Depends on**: Phase 42.5
 **Requirements**: READY-01, READY-02, READY-03, READY-04, READY-05
 **Success Criteria** (what must be TRUE):
   1. Architecture review grades excellent against hexagonal/SOLID/deep-module criteria.
   2. Security review grades excellent against secrets, privacy, egress, remote sync, dependency, audit, and recovery criteria.
-  3. Quality review passes typecheck, build, full tests, test isolation, 95% coverage at every metric, dependency audit, gitleaks, and published-package smoke.
+  3. Quality review passes typecheck, build, full tests, test isolation, 95% coverage at every metric, dependency audit, gitleaks, and package smoke.
   4. Product review proves fresh-user install, onboarding, configure, audit, backup, restore, upgrade, and verification flows.
   5. Competitive review demonstrates a crisp local-first value proposition and no known unowned blocker.
-**Plans**: Placeholder directory exists; plan after Phase 42.
+**Plans**: Placeholder directory exists; plan after Phase 42.5.
+
+---
+
+### Phase 44: Release-Candidate Packaging and Publish Handoff
+
+**Goal**: Prepare the v5 release candidate for publication without performing real npm publish until the user explicitly authorizes and completes OTP.
+**Depends on**: Phase 43
+**Requirements**: REL-01, REL-02, REL-03
+**Success Criteria** (what must be TRUE):
+  1. Version, changelog, release notes, package contents, npm pack, install smoke, and publish dry-run pass.
+  2. Release runbook documents OTP publish steps, rollback, dist-tag handling, and post-publish verification.
+  3. Real `npm publish` is not run until user authorization and OTP are available.
+**Plans**: Placeholder directory exists; plan after Phase 43.
 
 ---
 
@@ -558,15 +618,19 @@ v5.0
     Phase 38.0 (Threat Model, PRD, Eval Baseline) depends on Phase 37
     Phase 38.1 (Canonical Event Kernel) depends on Phase 38.0
     Phase 38.2 (Redaction and Privacy Governance) depends on Phase 38.1
-    Phase 38.3 (Remote Sync Service and Transport) depends on Phase 38.2
+    Phase 38.2.5 (Consent Provenance and Memory Governance) depends on Phase 38.2
+    Phase 38.3 (Remote Sync Service and Transport) depends on Phase 38.2.5
     Phase 38.4 (Remote CLI and Operations) depends on Phase 38.3
     Phase 38.5 (Secure Capability Interop) depends on Phase 36.8 and Phase 38.4
-    Phase 38.6 (Durable Friction Query Contract) depends on Phase 38.1 and Phase 38.2
-    Phase 39 (Persona and Procedural Memory) depends on Phase 38.5
+    Phase 38.6 (Durable Friction Query Contract) depends on Phase 38.1, Phase 38.2, and Phase 38.2.5
+    Phase 38.7 (Evaluation Harness and Regression Fixtures) depends on Phase 38.6 and Phase 38.2.5
+    Phase 39 (Persona and Procedural Memory) depends on Phase 38.5 and Phase 38.7
     Phase 40 (Temporal Semantic Graph) depends on Phase 39
     Phase 41 (Importance, Utility, and Recall Ranking) depends on Phase 40
     Phase 42 (Dreaming Consolidation) depends on Phase 41
-    Phase 43 (Market-Leader and Sales-Readiness Gate) depends on Phase 42
+    Phase 42.5 (Feature Completeness and UX Polish) depends on Phase 42
+    Phase 43 (Market-Leader and Sales-Readiness Gate) depends on Phase 42.5
+    Phase 44 (Release-Candidate Packaging and Publish Handoff) depends on Phase 43
 ```
 
 ---
@@ -609,19 +673,23 @@ v5.0
 | 36.9. Coverage Runner Migration | v4.0 | 1/1 | Complete | 2026-05-30 |
 | 36.10. Legacy Memory File Publish Hardening | v4.0 | 1/1 | Complete | 2026-05-30 |
 | 37. Publishing | v4.0 | 1/1 | Complete | 2026-05-30 |
-| 38.0. Threat Model, PRD, Eval Baseline | v5.0 | TBD | Planned | - |
+| 38.0. Threat Model, PRD, Eval Baseline | v5.0 | 1/1 | Complete | 2026-06-05 |
 | 38.1. Canonical Event Kernel and Projection Replay | v5.0 | TBD | Planned | - |
 | 38.2. Redaction, Privacy Governance, and Audit Commands | v5.0 | TBD | Planned | - |
+| 38.2.5. Consent Provenance and Memory Governance | v5.0 | TBD | Planned | - |
 | 38.3. Remote Sync Service and Git Transport | v5.0 | TBD | Planned | - |
 | 38.4. Remote CLI, Operations, Backup, and Recovery | v5.0 | TBD | Planned | - |
 | 38.5. Secure Capability Interop | v5.0 | TBD | Planned | - |
 | 38.6. Durable Friction Query Contract | v5.0 | TBD | Planned | - |
+| 38.7. Evaluation Harness and Regression Fixtures | v5.0 | TBD | Planned | - |
 | 39. Persona and Procedural Memory | v5.0 | TBD | Planned | - |
 | 40. Temporal Semantic Graph | v5.0 | TBD | Planned | - |
 | 41. Importance, Utility, and Recall Ranking | v5.0 | TBD | Planned | - |
 | 42. Dreaming Consolidation | v5.0 | TBD | Planned | - |
+| 42.5. Feature Completeness and UX Polish | v5.0 | TBD | Planned | - |
 | 43. Market-Leader and Sales-Readiness Gate | v5.0 | TBD | Planned | - |
+| 44. Release-Candidate Packaging and Publish Handoff | v5.0 | TBD | Planned | - |
 
 ---
 
-*Last updated: 2026-06-04 (v5 market-leader GSD plan inserted after v4 publish reconciliation)*
+*Last updated: 2026-06-05 (Phase 38.0 complete; v5 expanded to include consent/provenance, eval harness, feature-completeness/UX, and release-candidate handoff gates)*

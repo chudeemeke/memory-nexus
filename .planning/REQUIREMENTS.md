@@ -66,8 +66,8 @@ Requirements for v5.0: market-leader memory platform readiness. Source plan: `do
 
 ### Product and Evaluation
 
-- [ ] **V5-PRD-01**: v5 PRD, threat model, eval fixtures, readiness rubric, and traceability table are written before implementation.
-- [ ] **V5-EVAL-01**: Evaluation harness covers recall precision, cross-project leakage, supersedence, graph traversal, persona usefulness, privacy, and recovery.
+- [x] **V5-PRD-01**: v5 PRD, threat model, eval baseline, ADRs, review request, readiness rubric, and traceability table are written before implementation.
+- [x] **V5-EVAL-01**: Evaluation baseline covers recall precision, cross-project leakage, supersedence, graph traversal, persona usefulness, privacy, and recovery.
 
 ### Canonical Event Kernel
 
@@ -83,6 +83,13 @@ Requirements for v5.0: market-leader memory platform readiness. Source plan: `do
 - [ ] **SEC-07**: Remote provider egress requires explicit consent, allowlist policy, and doctor/status warnings.
 - [ ] **SEC-08**: Remote sync validates remote refs/URLs, uses sanitized Git environment, and refuses to run without durable validated machine identity.
 - [ ] **SEC-09**: Existing stored sensitive content can be migrated, redacted, or quarantined with audit evidence.
+
+### Consent Provenance and Memory Governance
+
+- [ ] **CONSENT-01**: Consent/provenance events exist for provider egress, remote sync, persona/profile use, graph enrichment, ranking exemptions, and dream promotion.
+- [ ] **CONSENT-02**: Every derived memory entry cites source event ids, transformation method, actor, confidence, redaction state, consent state, and scope.
+- [ ] **CONSENT-03**: Users can inspect, suppress, invalidate, expire, or review derived memory entries.
+- [ ] **CONSENT-04**: Suppression/invalidation state is enforced by context assembly, graph enrichment, ranking, and dreaming.
 
 ### Remote Sync and Operations
 
@@ -101,6 +108,12 @@ Requirements for v5.0: market-leader memory platform readiness. Source plan: `do
 
 - [ ] **FRIC-01**: `memory friction list` has stable JSON schema and exact filter semantics for since, severity, project, tool, status, and privacy-safe contains filters.
 - [ ] **FRIC-02**: `memory friction list --count --min <n>` has documented exit codes and tests for threshold met, threshold not met, argument errors, and execution errors.
+
+### Evaluation Harness
+
+- [ ] **EVAL-02**: Executable v5 eval command loads sanitized fixtures and emits schema-versioned JSON results.
+- [ ] **EVAL-03**: Eval fixtures cover privacy, leakage, supersedence, sync recovery, friction filters, persona, graph, ranking, and dreaming.
+- [ ] **EVAL-04**: Phase 43 consumes eval output as readiness evidence and fails on privacy, leakage, or supersedence regressions.
 
 ### Persona and Procedural Memory
 
@@ -127,6 +140,12 @@ Requirements for v5.0: market-leader memory platform readiness. Source plan: `do
 - [ ] **DREAM-02**: Dream proposals promote/supersede through canonical events, not hidden mutation.
 - [ ] **DREAM-03**: Background dreaming is disabled until explicit command path is safe, audited, redacted, and rollback-capable.
 
+### Feature Completeness and UX
+
+- [ ] **UX-01**: Feature inventory covers current code, docs, roadmap, requirements, inbox, tests, and disabled prototype surfaces.
+- [ ] **UX-02**: Every stated, implemented, documented, inferred, disabled, or prototype feature is completed or explicitly owned by a later gate; no feature is silently removed.
+- [ ] **UX-03**: CLI help, errors, preflights, JSON schemas, docs, onboarding, backup/restore, audit, and recovery flows meet excellent usability standards.
+
 ### Market and Sales Readiness
 
 - [ ] **READY-01**: Architecture review grades excellent against hexagonal/SOLID/deep-module criteria.
@@ -134,6 +153,12 @@ Requirements for v5.0: market-leader memory platform readiness. Source plan: `do
 - [ ] **READY-03**: Quality review passes typecheck, build, full tests, test isolation, 95% coverage at each metric, dependency audit, gitleaks, and published-package smoke.
 - [ ] **READY-04**: Product review proves fresh-user install, onboarding, configure, audit, backup, restore, upgrade, and verification flows.
 - [ ] **READY-05**: Competitive review demonstrates a crisp local-first value proposition and no known unowned blocker.
+
+### Release Candidate and Publish Handoff
+
+- [ ] **REL-01**: Versioning, changelog, release notes, package contents, npm pack, install smoke, and publish dry-run pass.
+- [ ] **REL-02**: Release runbook documents OTP publish steps, rollback, dist-tag handling, and post-publish verification.
+- [ ] **REL-03**: Real npm publish is not run until the user explicitly authorizes and completes OTP.
 
 ## Future Requirements
 
@@ -206,8 +231,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 | QUAL-02 | All | Complete |
 | QUAL-03 | All | Complete |
 | QUAL-04 | All | Complete |
-| V5-PRD-01 | Phase 38.0 | Pending |
-| V5-EVAL-01 | Phase 38.0 + Phase 43 | Pending |
+| V5-PRD-01 | Phase 38.0 | Complete |
+| V5-EVAL-01 | Phase 38.0 | Complete |
 | EVT-01 | Phase 38.1 | Pending |
 | EVT-02 | Phase 38.1 | Pending |
 | EVT-03 | Phase 38.1 | Pending |
@@ -217,6 +242,10 @@ Which phases cover which requirements. Updated during roadmap creation.
 | SEC-07 | Phase 38.2 | Pending |
 | SEC-08 | Phase 38.3 | Pending |
 | SEC-09 | Phase 38.2 | Pending |
+| CONSENT-01 | Phase 38.2.5 | Pending |
+| CONSENT-02 | Phase 38.2.5 | Pending |
+| CONSENT-03 | Phase 38.2.5 | Pending |
+| CONSENT-04 | Phase 38.2.5 | Pending |
 | SYNC-05 | Phase 38.3 | Pending |
 | SYNC-06 | Phase 38.3 | Pending |
 | SYNC-07 | Phase 38.4 | Pending |
@@ -226,6 +255,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 | INTEG-03 | Phase 38.5 | Pending |
 | FRIC-01 | Phase 38.6 | Pending |
 | FRIC-02 | Phase 38.6 | Pending |
+| EVAL-02 | Phase 38.7 | Pending |
+| EVAL-03 | Phase 38.7 | Pending |
+| EVAL-04 | Phase 38.7 | Pending |
 | PERS-01 | Phase 39 | Pending |
 | PERS-02 | Phase 39 | Pending |
 | PERS-03 | Phase 39 | Pending |
@@ -239,19 +271,27 @@ Which phases cover which requirements. Updated during roadmap creation.
 | DREAM-01 | Phase 42 | Pending |
 | DREAM-02 | Phase 42 | Pending |
 | DREAM-03 | Phase 42 | Pending |
+| UX-01 | Phase 42.5 | Pending |
+| UX-02 | Phase 42.5 | Pending |
+| UX-03 | Phase 42.5 | Pending |
 | READY-01 | Phase 43 | Pending |
 | READY-02 | Phase 43 | Pending |
 | READY-03 | Phase 43 | Pending |
 | READY-04 | Phase 43 | Pending |
 | READY-05 | Phase 43 | Pending |
+| REL-01 | Phase 44 | Pending |
+| REL-02 | Phase 44 | Pending |
+| REL-03 | Phase 44 | Pending |
 
 **Coverage:**
 - v4.0 requirements: 25 total (excluding QUAL cross-cutting)
 - Cross-cutting: 4 QUAL requirements
-- Total: 29
-- Mapped to phases: 25/25
-- Unmapped: 0
+- v5.0 requirements: 51 total
+- v5.0 complete: 2/51
+- v5.0 pending: 49/51
+- v5.0 mapped to phases: 51/51
+- v5.0 unmapped: 0
 
 ---
 *Requirements defined: 2026-04-03*
-*Last updated: 2026-06-04 after v5 market-leader GSD plan insertion*
+*Last updated: 2026-06-05 after Phase 38.0 completion and v5 phase expansion*
