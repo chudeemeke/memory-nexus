@@ -117,3 +117,9 @@ export type {
   AmbientContextOptions,
   AmbientContextResult,
 } from "./ambient-context-service.js";
+
+export { ProjectionRegistry } from "./projection-registry.js";
+export type {
+  EventProjection,
+  ProjectionReplayResult,
+} from "./projection-registry.js";

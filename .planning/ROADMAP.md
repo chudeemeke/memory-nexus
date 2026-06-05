@@ -6,7 +6,7 @@
 - SHIPPED **v2.0 Hybrid Search and Rebrand** -- Phases 13-22 (shipped 2026-03-01)
 - SHIPPED **v3.0 Knowledge Layer + Friction Logging** -- Phases 23-29.1 (shipped 2026-04-02)
 - SHIPPED **v4.0 Intelligence Layer** -- Phases 30-37 plus 32.5, 36.8, 36.9, and 36.10 (published 2026-05-30 as `@chude/memory@4.0.0`; architecture audit LOCKED 2026-05-13, recommendation A-prime; 2026-05-27 foundation review added pre-publish security hardening before GA; Phase 36.9 coverage gate restored 2026-05-30; Phase 36.10 hardened legacy memory-file defaults before publish)
-- IN PROGRESS **v5.0 Market-Leader Memory Platform** -- Phases 38.0-44 (started 2026-06-05; Phase 38.0 foundation complete; added consent/provenance, eval harness, feature-completeness/UX, and release-candidate handoff gates)
+- IN PROGRESS **v5.0 Market-Leader Memory Platform** -- Phases 38.0-44 (started 2026-06-05; Phase 38.1 event kernel complete; added consent/provenance, eval harness, feature-completeness/UX, and release-candidate handoff gates)
 
 ## Phases
 
@@ -88,7 +88,7 @@
 **Overview:** Transition `@chude/memory` into a world-class, multi-device, local-first agentic memory platform. Adds a canonical event kernel, projection replay, privacy governance, consent/provenance controls, Git-backed remote event synchronization, optional secure capability interop, durable friction contracts, executable eval harness, developer/persona memory, temporal semantic graph retrieval, utility-aware ranking, audited dreaming consolidation, feature-completeness/UX polish, final market/sales readiness gates, and release-candidate packaging/publish handoff.
 
 - [x] **Phase 38.0: v5 Threat Model, Product PRD, and Eval Baseline** - Lock v5 requirements, threat model, eval baseline, ADRs, and excellent-grade rubric before implementation. Completed 2026-06-05.
-- [ ] **Phase 38.1: Canonical Event Kernel and Projection Replay** - Schema-versioned memory event envelopes, machine identity, event ordering/integrity, migration, and projection registry.
+- [x] **Phase 38.1: Canonical Event Kernel and Projection Replay** - Schema-versioned memory event envelopes, machine identity, event ordering/integrity, migration, and projection registry. Completed 2026-06-05.
 - [ ] **Phase 38.2: Redaction, Privacy Governance, and Audit Commands** - Redaction before storage/indexing/egress, secret audit, provider egress policy, migration/quarantine.
 - [ ] **Phase 38.2.5: Consent Provenance and Memory Governance** - User-visible consent, provenance, suppression, invalidation, review, and governance events for derived memory surfaces.
 - [ ] **Phase 38.3: Remote Sync Application Service and Git Transport** - Private-Git-backed remote event synchronization through application ports and shell-safe transport adapter.
@@ -353,7 +353,7 @@ Rationale: Phase 32 explicitly deferred friction envelope adoption per audit §1
   2. Existing v1 fact-shaped records can be migrated or replayed without data loss.
   3. Projection registry can rebuild applicable derived state from canonical events.
   4. Replay tests cover duplicates, out-of-order events, supersedence, corrupted lines, redaction metadata, and migrated records.
-**Plans**: Placeholder directory exists; plan after Phase 38.0.
+**Plans**: `.planning/phases/38.1-canonical-event-kernel-projection-replay/38.1-01-PLAN.md` (complete; summary in `38.1-01-SUMMARY.md`)
 
 ---
 
@@ -674,7 +674,7 @@ v5.0
 | 36.10. Legacy Memory File Publish Hardening | v4.0 | 1/1 | Complete | 2026-05-30 |
 | 37. Publishing | v4.0 | 1/1 | Complete | 2026-05-30 |
 | 38.0. Threat Model, PRD, Eval Baseline | v5.0 | 1/1 | Complete | 2026-06-05 |
-| 38.1. Canonical Event Kernel and Projection Replay | v5.0 | TBD | Planned | - |
+| 38.1. Canonical Event Kernel and Projection Replay | v5.0 | 1/1 | Complete | 2026-06-05 |
 | 38.2. Redaction, Privacy Governance, and Audit Commands | v5.0 | TBD | Planned | - |
 | 38.2.5. Consent Provenance and Memory Governance | v5.0 | TBD | Planned | - |
 | 38.3. Remote Sync Service and Git Transport | v5.0 | TBD | Planned | - |
@@ -692,4 +692,4 @@ v5.0
 
 ---
 
-*Last updated: 2026-06-05 (Phase 38.0 complete; v5 expanded to include consent/provenance, eval harness, feature-completeness/UX, and release-candidate handoff gates)*
+*Last updated: 2026-06-05 (Phase 38.1 complete; v5 event kernel and projection replay foundation in place)*

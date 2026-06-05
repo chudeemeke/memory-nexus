@@ -8,15 +8,20 @@
 
 import { describe, test, expect, beforeEach, afterEach } from "bun:test";
 import { Database } from "bun:sqlite";
-import { appendFileSync, existsSync, mkdirSync, rmSync, writeFileSync } from "fs";
+import { appendFileSync, existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "fs";
 import { join } from "path";
 import { tmpdir } from "os";
 import { Fact } from "../../../../src/domain/entities/fact.js";
+import { MemoryEventEnvelope } from "../../../../src/domain/entities/memory-event.js";
 import { createSchema } from "../../../../src/infrastructure/database/schema.js";
 import {
   appendEvent,
+  appendMemoryEvent,
+  readMemoryEvents,
+  readMemoryEventsWithReport,
   readEvents,
-  rebuildProjections
+  rebuildProjections,
+  rebuildProjectionsWithReport
 } from "../../../../src/infrastructure/database/event-log.js";
 
 describe("Event-Log SSOT Manager", () => {
@@ -65,6 +70,537 @@ describe("Event-Log SSOT Manager", () => {
     expect(events[0].type).toBe("decision");
     expect(events[0].project).toBe("memory-nexus");
     expect(events[0].content).toBe("Initial decision");
+  });
+
+  test("appendEvent writes v2 envelopes while readEvents preserves Fact compatibility", async () => {
+    const fact = Fact.create({
+      uuid: "fact-envelope-compat",
+      type: "decision",
+      project: "memory-nexus",
+      content: "Persist v2 envelope",
+      metadata: {
+        redactionState: "redacted",
+        redactedFields: ["content"],
+      },
+      observedAt: new Date("2026-06-05T08:00:00Z")
+    });
+
+    await appendEvent(fact, testLogPath);
+
+    const raw = JSON.parse(readFileSync(testLogPath, "utf-8").trim());
+    expect(raw.schemaVersion).toBe(2);
+    expect(raw.kind).toBe("decision");
+    expect(raw.operation).toBe("add");
+    expect(raw.payload.fact.uuid).toBe(fact.uuid);
+    expect(raw.privacy.redactionState).toBe("redacted");
+
+    const envelopes = [];
+    for await (const memoryEvent of readMemoryEvents(testLogPath)) {
+      envelopes.push(memoryEvent);
+    }
+    expect(envelopes.length).toBe(1);
+    expect(envelopes[0].eventId).toBe(fact.uuid);
+    expect(envelopes[0].integrity.payloadHash).toMatch(/^[a-f0-9]{64}$/);
+
+    const facts = [];
+    for await (const ev of readEvents(testLogPath)) {
+      facts.push(ev);
+    }
+    expect(facts.length).toBe(1);
+    expect(facts[0].uuid).toBe(fact.uuid);
+    expect(facts[0].content).toBe("Persist v2 envelope");
+  });
+
+  test("appendEvent uses explicit machine log identity and fact id sequence without config lookup", async () => {
+    const fact = Fact.create({
+      uuid: "fact-with-db-id",
+      type: "observation",
+      project: "memory-nexus",
+      content: "Fact with id-backed sequence",
+      observedAt: new Date("2026-06-05T08:20:00Z")
+    }).withId(123);
+    const machineLogPath = join(testLogDir, "events-machine-explicit.jsonl");
+
+    await appendEvent(fact, machineLogPath);
+
+    const raw = JSON.parse(readFileSync(machineLogPath, "utf-8").trim());
+    expect(raw.machineId).toBe("machine-explicit");
+    expect(raw.sequence).toBe(123);
+    expect(raw.payload.fact.id).toBe(123);
+
+    const facts = [];
+    for await (const ev of readEvents(machineLogPath)) {
+      facts.push(ev);
+    }
+    expect(facts[0].id).toBe(123);
+  });
+
+  test("appendEvent maps privacy metadata into envelope privacy controls", async () => {
+    const fact = Fact.create({
+      uuid: "fact-with-privacy-metadata",
+      type: "learning",
+      project: "memory-nexus",
+      content: "Privacy metadata is promoted",
+      metadata: {
+        privacy: {
+          redactionState: "quarantined",
+          containsSensitiveContent: true,
+          redactedFields: ["content"],
+        },
+      },
+      observedAt: new Date("2026-06-05T08:25:00Z")
+    });
+
+    await appendEvent(fact, testLogPath);
+
+    const raw = JSON.parse(readFileSync(testLogPath, "utf-8").trim());
+    expect(raw.privacy.redactionState).toBe("quarantined");
+    expect(raw.privacy.containsSensitiveContent).toBe(true);
+    expect(raw.privacy.redactedFields).toEqual(["content"]);
+  });
+
+  test("readMemoryEvents adapts legacy v1 fact-shaped records without data loss", async () => {
+    writeFileSync(
+      testLogPath,
+      JSON.stringify({
+        uuid: "legacy-redacted-fact",
+        type: "learning",
+        project: "memory-nexus",
+        content: "Legacy fact content",
+        metadata: {
+          confidence: 0.87,
+          redaction: {
+            state: "redacted",
+            fields: ["content"],
+          },
+        },
+        observedAt: "2026-05-23T08:00:00.000Z",
+        supersededAt: null,
+        supersededBy: null,
+        version: 1,
+      }) + "\n"
+    );
+
+    const events = [];
+    for await (const memoryEvent of readMemoryEvents(testLogPath)) {
+      events.push(memoryEvent);
+    }
+
+    expect(events.length).toBe(1);
+    expect(events[0].schemaVersion).toBe(2);
+    expect(events[0].eventId).toBe("legacy-redacted-fact");
+    expect(events[0].machineId).toBe("legacy");
+    expect(events[0].kind).toBe("learning");
+    expect(events[0].operation).toBe("add");
+    expect(events[0].privacy.redactionState).toBe("redacted");
+    expect(events[0].privacy.redactedFields).toEqual(["content"]);
+    expect(events[0].provenance.method).toBe("v1-jsonl-adapter");
+
+    const report = await rebuildProjectionsWithReport(db, testLogPath);
+    expect(report.invalidEvents).toBe(0);
+    expect(report.replay.processedEvents).toBe(1);
+
+    const row = db.prepare("SELECT * FROM facts WHERE uuid = ?").get("legacy-redacted-fact") as any;
+    expect(row.type).toBe("learning");
+    expect(row.project).toBe("memory-nexus");
+    expect(row.content).toBe("Legacy fact content");
+    expect(JSON.parse(row.metadata)).toEqual({
+      confidence: 0.87,
+      redaction: {
+        state: "redacted",
+        fields: ["content"],
+      },
+    });
+  });
+
+  test("readMemoryEvents reports invalid legacy records without mutating projections", async () => {
+    writeFileSync(
+      testLogPath,
+      JSON.stringify([]) + "\n" +
+        JSON.stringify({
+          uuid: "",
+          type: "decision",
+          project: "memory-nexus",
+          content: "Missing uuid",
+          observedAt: "2026-05-23T08:00:00.000Z",
+          version: 1,
+        }) + "\n" +
+        JSON.stringify({
+          uuid: "invalid-date-fact",
+          type: "decision",
+          project: "memory-nexus",
+          content: "Invalid date",
+          observedAt: "not-a-date",
+          version: 1,
+        }) + "\n" +
+        JSON.stringify({
+          uuid: "invalid-superseded-at-type",
+          type: "decision",
+          project: "memory-nexus",
+          content: "Invalid supersededAt type",
+          observedAt: "2026-05-23T08:00:00.000Z",
+          supersededAt: 123,
+          version: 1,
+        }) + "\n" +
+        JSON.stringify({
+          uuid: "invalid-superseded-at-date",
+          type: "decision",
+          project: "memory-nexus",
+          content: "Invalid supersededAt date",
+          observedAt: "2026-05-23T08:00:00.000Z",
+          supersededAt: "not-a-date",
+          version: 1,
+        }) + "\n"
+    );
+
+    const report = await readMemoryEventsWithReport(testLogPath);
+
+    expect(report.events).toEqual([]);
+    expect(report.invalidEvents.length).toBe(5);
+    expect(report.invalidEvents.map((event) => event.reason)).toEqual([
+      "Legacy event record must be an object",
+      "Legacy event uuid is required",
+      "observedAt must be a valid date",
+      "supersededAt must be a string or null",
+      "supersededAt must be a valid date",
+    ]);
+  });
+
+  test("legacy v1 migration preserves explicit sequence and supersedence fields", async () => {
+    writeFileSync(
+      testLogPath,
+      JSON.stringify({
+        uuid: "legacy-original",
+        type: "learning",
+        project: "memory-nexus",
+        content: "Legacy original",
+        observedAt: "2026-05-23T08:00:00.000Z",
+        version: 1,
+      }) + "\n" +
+        JSON.stringify({
+          uuid: "legacy-replacement",
+          type: "learning",
+          project: "memory-nexus",
+          content: "Legacy replacement",
+          observedAt: "2026-05-23T09:00:00.000Z",
+          supersededAt: "2026-05-23T10:00:00.000Z",
+          supersededBy: "future-fact",
+          version: 1,
+        }) + "\n" +
+        JSON.stringify({
+          uuid: "legacy-supersedence",
+          type: "supersedence",
+          project: "memory-nexus",
+          content: "Legacy supersedence",
+          metadata: {
+            superseded_uuid: "legacy-original",
+            superseded_by_uuid: "legacy-replacement",
+            redaction: {
+              state: "redacted",
+              fields: ["content"],
+              policy: "legacy-policy",
+            },
+          },
+          observedAt: "2026-05-23T10:00:00.000Z",
+          sequence: 77,
+          version: 1,
+        }) + "\n"
+    );
+
+    const events = [];
+    for await (const memoryEvent of readMemoryEvents(testLogPath)) {
+      events.push(memoryEvent);
+    }
+
+    expect(events[2].sequence).toBe(77);
+    expect(events[2].operation).toBe("supersede");
+    expect(events[2].privacy.policy).toBe("legacy-policy");
+    expect(events[2].causality.supersedesEventIds).toEqual(["legacy-original"]);
+    expect(events[2].causality.relatedEventIds).toEqual(["legacy-replacement"]);
+
+    await rebuildProjections(db, testLogPath);
+    const original = db.prepare("SELECT * FROM facts WHERE uuid = ?").get("legacy-original") as any;
+    const replacement = db.prepare("SELECT * FROM facts WHERE uuid = ?").get("legacy-replacement") as any;
+    expect(original.superseded_by).toBe("legacy-replacement");
+    expect(replacement.superseded_at).toBe("2026-05-23T10:00:00.000Z");
+    expect(replacement.superseded_by).toBe("future-fact");
+  });
+
+  test("appendMemoryEvent persists explicit v2 events that project to facts", async () => {
+    const memoryEvent = MemoryEventEnvelope.create({
+      eventId: "33333333-3333-4333-8333-333333333333",
+      machineId: "machine-explicit",
+      sequence: 1,
+      kind: "observation",
+      operation: "add",
+      occurredAt: new Date("2026-06-05T08:15:00Z"),
+      observedAt: new Date("2026-06-05T08:15:00Z"),
+      scope: { project: "memory-nexus", visibility: "project" },
+      provenance: { source: "test", actor: "test", method: "fixture" },
+      privacy: { redactionState: "none", containsSensitiveContent: false },
+      consent: { status: "not_required", scopes: [] },
+      causality: { parentEventIds: [], supersedesEventIds: [], relatedEventIds: [] },
+      payload: {
+        fact: {
+          uuid: "explicit-v2-fact",
+          type: "observation",
+          project: "memory-nexus",
+          content: "Explicit v2 fact payload",
+          observedAt: "2026-06-05T08:15:00.000Z",
+        },
+      },
+    });
+
+    await appendMemoryEvent(memoryEvent, testLogPath);
+
+    const facts = [];
+    for await (const ev of readEvents(testLogPath)) {
+      facts.push(ev);
+    }
+
+    expect(facts.length).toBe(1);
+    expect(facts[0].uuid).toBe("explicit-v2-fact");
+    expect(facts[0].content).toBe("Explicit v2 fact payload");
+  });
+
+  test("v2 fact projection falls back to event metadata when payload omits optional fact fields", async () => {
+    const memoryEvent = MemoryEventEnvelope.create({
+      eventId: "44444444-4444-4444-8444-444444444444",
+      machineId: "machine-fallback",
+      sequence: 1,
+      kind: "decision",
+      operation: "add",
+      occurredAt: new Date("2026-06-05T08:30:00Z"),
+      observedAt: new Date("2026-06-05T08:30:00Z"),
+      scope: { project: "fallback-project", visibility: "project" },
+      provenance: { source: "test", actor: "test", method: "fixture" },
+      privacy: { redactionState: "none", containsSensitiveContent: false },
+      consent: { status: "not_required", scopes: [] },
+      causality: { parentEventIds: [], supersedesEventIds: [], relatedEventIds: [] },
+      payload: {
+        fact: {
+          uuid: "fallback-fact",
+          content: "Fallback fact payload",
+        },
+      },
+    });
+
+    await appendMemoryEvent(memoryEvent, testLogPath);
+
+    const facts = [];
+    for await (const ev of readEvents(testLogPath)) {
+      facts.push(ev);
+    }
+
+    expect(facts[0].type).toBe("decision");
+    expect(facts[0].project).toBe("fallback-project");
+    expect(facts[0].observedAt.toISOString()).toBe("2026-06-05T08:30:00.000Z");
+    expect(facts[0].supersededAt).toBeNull();
+    expect(facts[0].supersededBy).toBeNull();
+  });
+
+  test("readEvents reports v2 records that do not contain fact payloads", async () => {
+    const memoryEvent = MemoryEventEnvelope.create({
+      eventId: "55555555-5555-4555-8555-555555555555",
+      machineId: "machine-no-fact",
+      sequence: 1,
+      kind: "governance",
+      operation: "add",
+      occurredAt: new Date("2026-06-05T08:35:00Z"),
+      observedAt: new Date("2026-06-05T08:35:00Z"),
+      scope: { visibility: "global" },
+      provenance: { source: "test", actor: "test", method: "fixture" },
+      privacy: { redactionState: "none", containsSensitiveContent: false },
+      consent: { status: "not_required", scopes: [] },
+      causality: { parentEventIds: [], supersedesEventIds: [], relatedEventIds: [] },
+      payload: {
+        governance: {
+          action: "noop",
+        },
+      },
+    });
+    const originalConsoleError = console.error;
+    const errors: unknown[][] = [];
+    console.error = (...args: unknown[]) => {
+      errors.push(args);
+    };
+
+    try {
+      await appendMemoryEvent(memoryEvent, testLogPath);
+      const facts = [];
+      for await (const ev of readEvents(testLogPath)) {
+        facts.push(ev);
+      }
+
+      expect(facts).toEqual([]);
+      expect(String(errors[0]?.[1])).toContain("does not contain a fact payload");
+    } finally {
+      console.error = originalConsoleError;
+    }
+  });
+
+  test("readEvents reports invalid v2 fact payload field types", async () => {
+    const memoryEvent = MemoryEventEnvelope.create({
+      eventId: "66666666-6666-4666-8666-666666666666",
+      machineId: "machine-invalid-payload",
+      sequence: 1,
+      kind: "decision",
+      operation: "add",
+      occurredAt: new Date("2026-06-05T08:40:00Z"),
+      observedAt: new Date("2026-06-05T08:40:00Z"),
+      scope: { project: "memory-nexus", visibility: "project" },
+      provenance: { source: "test", actor: "test", method: "fixture" },
+      privacy: { redactionState: "none", containsSensitiveContent: false },
+      consent: { status: "not_required", scopes: [] },
+      causality: { parentEventIds: [], supersedesEventIds: [], relatedEventIds: [] },
+      payload: {
+        fact: {
+          uuid: 123,
+          content: "Invalid uuid type",
+        },
+      },
+    });
+    const originalConsoleError = console.error;
+    const errors: unknown[][] = [];
+    console.error = (...args: unknown[]) => {
+      errors.push(args);
+    };
+
+    try {
+      await appendMemoryEvent(memoryEvent, testLogPath);
+      const facts = [];
+      for await (const ev of readEvents(testLogPath)) {
+        facts.push(ev);
+      }
+
+      expect(facts).toEqual([]);
+      expect(String(errors[0]?.[1])).toContain("uuid must be a string");
+    } finally {
+      console.error = originalConsoleError;
+    }
+  });
+
+  test("rebuildProjectionsWithReport reports invalid lines, sorts replay, and skips duplicate event ids", async () => {
+    const late = MemoryEventEnvelope.create({
+      eventId: "22222222-2222-4222-8222-222222222222",
+      machineId: "machine-b",
+      sequence: 2,
+      kind: "decision",
+      operation: "add",
+      occurredAt: new Date("2026-06-05T09:00:00Z"),
+      observedAt: new Date("2026-06-05T09:00:00Z"),
+      scope: { project: "memory-nexus", visibility: "project" },
+      provenance: { source: "test", actor: "test", method: "fixture" },
+      privacy: { redactionState: "none", containsSensitiveContent: false },
+      consent: { status: "not_required", scopes: [] },
+      causality: { parentEventIds: [], supersedesEventIds: [], relatedEventIds: [] },
+      payload: {
+        fact: {
+          uuid: "late-fact",
+          type: "decision",
+          project: "memory-nexus",
+          content: "Late fact",
+          observedAt: "2026-06-05T09:00:00.000Z",
+        },
+      },
+    });
+    const early = MemoryEventEnvelope.create({
+      eventId: "11111111-1111-4111-8111-111111111111",
+      machineId: "machine-a",
+      sequence: 1,
+      kind: "decision",
+      operation: "add",
+      occurredAt: new Date("2026-06-05T08:00:00Z"),
+      observedAt: new Date("2026-06-05T08:00:00Z"),
+      scope: { project: "memory-nexus", visibility: "project" },
+      provenance: { source: "test", actor: "test", method: "fixture" },
+      privacy: { redactionState: "none", containsSensitiveContent: false },
+      consent: { status: "not_required", scopes: [] },
+      causality: { parentEventIds: [], supersedesEventIds: [], relatedEventIds: [] },
+      payload: {
+        fact: {
+          uuid: "early-fact",
+          type: "decision",
+          project: "memory-nexus",
+          content: "Early fact",
+          observedAt: "2026-06-05T08:00:00.000Z",
+        },
+      },
+    });
+
+    writeFileSync(
+      testLogPath,
+      JSON.stringify(late.toJSON()) + "\n" +
+        "not-json\n" +
+        JSON.stringify(early.toJSON()) + "\n" +
+        JSON.stringify(early.toJSON()) + "\n"
+    );
+
+    const report = await rebuildProjectionsWithReport(db, testLogPath);
+
+    expect(report.invalidEvents).toBe(1);
+    expect(report.replay.processedEvents).toBe(2);
+    expect(report.replay.skippedDuplicateEvents).toBe(1);
+    expect(report.replay.appliedProjections).toEqual(["facts"]);
+
+    const rows = db.prepare("SELECT * FROM facts ORDER BY observed_at ASC").all() as any[];
+    expect(rows.map((row) => row.content)).toEqual(["Early fact", "Late fact"]);
+  });
+
+  test("rebuildProjectionsWithReport sorts same-time events by sequence before event id", async () => {
+    const first = MemoryEventEnvelope.create({
+      eventId: "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb",
+      machineId: "machine-sort",
+      sequence: 1,
+      kind: "decision",
+      operation: "add",
+      occurredAt: new Date("2026-06-05T09:30:00Z"),
+      observedAt: new Date("2026-06-05T09:30:00Z"),
+      scope: { project: "memory-nexus", visibility: "project" },
+      provenance: { source: "test", actor: "test", method: "fixture" },
+      privacy: { redactionState: "none", containsSensitiveContent: false },
+      consent: { status: "not_required", scopes: [] },
+      causality: { parentEventIds: [], supersedesEventIds: [], relatedEventIds: [] },
+      payload: {
+        fact: {
+          uuid: "sequence-first",
+          type: "decision",
+          project: "memory-nexus",
+          content: "Sequence first",
+          observedAt: "2026-06-05T09:30:00.000Z",
+        },
+      },
+    });
+    const second = MemoryEventEnvelope.create({
+      eventId: "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+      machineId: "machine-sort",
+      sequence: 2,
+      kind: "decision",
+      operation: "add",
+      occurredAt: new Date("2026-06-05T09:30:00Z"),
+      observedAt: new Date("2026-06-05T09:30:00Z"),
+      scope: { project: "memory-nexus", visibility: "project" },
+      provenance: { source: "test", actor: "test", method: "fixture" },
+      privacy: { redactionState: "none", containsSensitiveContent: false },
+      consent: { status: "not_required", scopes: [] },
+      causality: { parentEventIds: [], supersedesEventIds: [], relatedEventIds: [] },
+      payload: {
+        fact: {
+          uuid: "sequence-second",
+          type: "decision",
+          project: "memory-nexus",
+          content: "Sequence second",
+          observedAt: "2026-06-05T09:30:00.000Z",
+        },
+      },
+    });
+
+    writeFileSync(testLogPath, JSON.stringify(second.toJSON()) + "\n" + JSON.stringify(first.toJSON()) + "\n");
+
+    await rebuildProjectionsWithReport(db, testLogPath);
+
+    const rows = db.prepare("SELECT * FROM facts ORDER BY id ASC").all() as any[];
+    expect(rows.map((row) => row.content)).toEqual(["Sequence first", "Sequence second"]);
   });
 
   test("rebuilds database facts projection perfectly from event log", async () => {

@@ -30,4 +30,20 @@ export {
 } from "./friction-entry.js";
 export { BackfillState } from "./backfill-state.js";
 export { Fact, type FactType, type FactParams, type CandidateFact } from "./fact.js";
-
+export {
+  MemoryEventEnvelope,
+  MEMORY_EVENT_SCHEMA_VERSION,
+  type ConsentStatus,
+  type MemoryEventCausality,
+  type MemoryEventConsent,
+  type MemoryEventCreateParams,
+  type MemoryEventEnvelopeJson,
+  type MemoryEventIntegrity,
+  type MemoryEventKind,
+  type MemoryEventOperation,
+  type MemoryEventPrivacy,
+  type MemoryEventProvenance,
+  type MemoryEventScope,
+  type MemoryEventVisibility,
+  type RedactionState,
+} from "./memory-event.js";

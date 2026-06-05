@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v5.0
 milestone_name: Market-Leader Memory Platform
 status: in_progress
-last_updated: "2026-06-05T03:36:04.815+01:00"
+last_updated: "2026-06-05T04:41:19.894+01:00"
 progress:
   total_phases: 16
-  completed_phases: 1
-  total_plans: 1
-  completed_plans: 1
+  completed_phases: 2
+  total_plans: 2
+  completed_plans: 2
 ---
 
 > **FOUNDATION HARDENING VERIFIED 2026-05-28** - Phase 36.8 is implemented. Typecheck, build, full tests, test-isolation, dependency audit, and gitleaks pass. Provider support now routes through an internal provider registry instead of presentation/health/factory switch drift. Phase 36.9 replaced the missing-metric Bun LCOV gate with an Istanbul-backed Bun coverage harness.
@@ -19,6 +19,7 @@ progress:
 > **V4.0 PUBLISHED 2026-05-30** - `@chude/memory@4.0.0` is published on npm with `latest` pointing to `4.0.0`. Registry checks, npm global install smoke, and Bun global install smoke passed. Windows Bun creates `memory.exe` under `bun pm bin -g`, not npm-style `memory.cmd`; `bun run verify:published @chude/memory@4.0.0` now encodes this verification.
 > **V5 MARKET-LEADER PLAN INSERTED 2026-06-04** - `docs/plans/2026-06-04-v5-market-leader-gsd-plan.md` defines the long-horizon execution framework. ROADMAP now expands v5 into phases 38.0-44, and REQUIREMENTS now includes v5 traceability for event kernel, privacy governance, remote sync, secure capability interop, durable friction, persona, graph, ranking, dreaming, UX completeness, release-candidate handoff, and final sales-readiness gates.
 > **V5 PHASE 38.0 COMPLETE 2026-06-05** - v5 PRD, threat model, evaluation baseline, ADRs, Phase 38.1 context, and cross-AI review request were created. ROADMAP now includes required consent/provenance governance, executable eval harness, feature-completeness/UX polish, and release-candidate packaging/publish handoff gates. No source implementation changed in Phase 38.0.
+> **V5 PHASE 38.1 COMPLETE 2026-06-05** - Canonical v2 memory event envelopes, v1 fact-record adaptation, structured invalid-line reporting, deterministic projection replay, and the application-layer projection registry are implemented. Existing `appendEvent`, `readEvents`, and `rebuildProjections` compatibility APIs remain available. Remote sync remains gated; privacy enforcement moves next to Phase 38.2.
 > **INBOX RECONCILED 2026-05-28** - Stale bug reports for the Windows full-suite crash, orphaned friction test, and programmatic API real-DB pollution were validated against the current code and archived. The durable-friction-list filing was accepted into ROADMAP as post-v4 capacity, archived as planned, and counter-notified to conversations. No active memory-nexus inbox items remain.
 > **REMOTE CONSUMER NOTES REVIEWED 2026-05-30** - The two remotely consumer-impact inbox notes were reviewed against current memory-nexus docs/scripts. No current raw SSH/rsync operating instructions or hard-coded remotely tunnel-state assumptions were found, so both notes were archived with disposition text. Future Phase 38 cross-machine work must still use current `remotely` conventions where applicable.
 > **FIRST-PARTY INFRASTRUCTURE BROADCAST 2026-05-28** - User clarified that `memory` is a first-class first-party tool used by most/all projects. Canonical tool/package naming is `memory` / `@chude/memory`; the repository remains `memory-nexus`, and `nexus` is a legacy alias. Updated Codex/Claude rules and document-for-clear skills, added a Codex memory note, and filed notification inbox items to opted-in projects so consumers know about provider-secret, redaction/export, registry, and authkey-optional contract changes.
@@ -30,21 +31,21 @@ See: .planning/PROJECT.md (updated 2026-02-18)
 
 **Core Value:** Knowledge gained in one Claude Code project becomes accessible from any other project. No more context silos.
 
-**Current Focus:** v5.0 market-leader execution is active. Phase 38.0 is complete; next is Phase 38.1 Canonical Event Kernel and Projection Replay. Relevant docs: `docs/prd/2026-06-05-v5-market-leader-memory-platform.md`, `docs/security/2026-06-05-v5-threat-model.md`, `docs/evals/2026-06-05-v5-evaluation-baseline.md`, `docs/reviews/2026-06-05-v5-plan-review-request.md`, `docs/plans/2026-06-04-v5-market-leader-gsd-plan.md`, and `.planning/phases/38.1-canonical-event-kernel-projection-replay/38.1-CONTEXT.md`.
+**Current Focus:** v5.0 market-leader execution is active. Phase 38.1 is complete; next is Phase 38.2 Redaction, Privacy Governance, and Audit Commands. Relevant docs: `docs/prd/2026-06-05-v5-market-leader-memory-platform.md`, `docs/security/2026-06-05-v5-threat-model.md`, `docs/evals/2026-06-05-v5-evaluation-baseline.md`, `docs/reviews/2026-06-05-v5-plan-review-request.md`, `docs/plans/2026-06-04-v5-market-leader-gsd-plan.md`, and `.planning/phases/38.2-redaction-privacy-governance-audit/README.md`.
 
 **Tech Stack:** Bun, TypeScript 5.5+, bun:sqlite with FTS5 + sqlite-vec, Commander.js v14, @huggingface/transformers v3, cli-progress, chrono-node, Chart.js (HTML dashboard)
 
 ## Current Position
 
-Phase: v5.0 ACTIVE - PHASE 38.1 NEXT
+Phase: v5.0 ACTIVE - PHASE 38.2 NEXT
 **Milestone:** v5.0 Market-Leader Memory Platform
-**Status:** Phase 38.0 is complete. Phase 38.1 must implement the canonical event kernel and projection replay before remote sync, persona, graph, ranking, dreaming, or release-candidate work can proceed.
+**Status:** Phase 38.1 is complete. Phase 38.2 must make redaction, privacy governance, audit, quarantine, and provider-egress controls load-bearing before remote sync, persona, graph, ranking, dreaming, or release-candidate work can proceed.
 
 ```
-v5.0 Progress: [#---------------] 1/16 phases complete
+v5.0 Progress: [##--------------] 2/16 phases complete
   Phase 38.0: v5 Threat Model, PRD, Eval Baseline [done]
-  Phase 38.1: Canonical Event Kernel and Projection Replay [next]
-  Phase 38.2: Redaction, Privacy Governance, Audit Commands [planned]
+  Phase 38.1: Canonical Event Kernel and Projection Replay [done]
+  Phase 38.2: Redaction, Privacy Governance, Audit Commands [next]
   Phase 38.2.5: Consent Provenance and Memory Governance [planned]
   Phase 38.3: Remote Sync Service and Git Transport [planned]
   Phase 38.4: Remote CLI, Operations, Backup, Recovery [planned]
@@ -167,14 +168,17 @@ v4.0 Progress: [############################] 14/14 phases complete
 ### Current Resume Point - 2026-06-05
 
 **Completed this review/update pass:**
-- Promoted v5.0 to the active milestone in `.planning/STATE.md` with Phase 38.0 complete and Phase 38.1 next.
+- Promoted v5.0 to the active milestone in `.planning/STATE.md`, then advanced it through Phase 38.1 completion.
 - Completed Phase 38.0 foundation artifacts: v5 PRD, threat model, evaluation baseline, ADRs, Phase 38.1 context, cross-AI review request, and Phase 38.0 summary.
 - Expanded v5 roadmap from phases 38.0-43 to phases 38.0-44 to include consent/provenance governance, executable eval harness, feature-completeness/UX polish, and release-candidate packaging/publish handoff.
 - Captured the user-confirmed feature-preservation invariant: no stated, inferred, documented, prototype, disabled, or partial feature may be removed to make v5 easier to ship.
 - Updated requirements traceability so Phase 38.0 completes `V5-PRD-01` and `V5-EVAL-01`; executable eval harness requirements remain mapped to Phase 38.7.
+- Completed Phase 38.1 with `MemoryEventEnvelope`, compatibility-preserving v2 event-log append/read/replay APIs, v1 fact-record adaptation, structured invalid-line reports, and `ProjectionRegistry`.
+- Kept remote sync disabled outside `MEMORY_EXPERIMENTAL_REMOTE_SYNC=1`; Phase 38.1 did not skip the required privacy, consent, remote sync, feature-completeness, or release-readiness phases.
+- Updated `.planning/ROADMAP.md` and `.planning/REQUIREMENTS.md` so `EVT-01` through `EVT-04` are complete without implying later persona/graph/ranking/dreaming projections are done.
 
 **Next step:**
-- Execute Phase 38.1 Canonical Event Kernel and Projection Replay with TDD. Do not start remote sync implementation before Phase 38.1, Phase 38.2, and Phase 38.2.5 are accepted.
+- Execute Phase 38.2 Redaction, Privacy Governance, and Audit Commands with TDD. Do not start remote sync implementation before Phase 38.2 and Phase 38.2.5 are accepted.
 
 ### Current Resume Point - 2026-05-30
 
@@ -220,4 +224,4 @@ v4.0 Progress: [############################] 14/14 phases complete
 
 ---
 
-*Last updated: 2026-06-05 (v5.0 active; Phase 38.0 complete; Phase 38.1 next)*
+*Last updated: 2026-06-05 (v5.0 active; Phase 38.1 complete; Phase 38.2 next)*

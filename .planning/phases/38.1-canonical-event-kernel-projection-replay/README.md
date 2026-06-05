@@ -1,6 +1,11 @@
-# Phase 38.1 Placeholder
+# Phase 38.1: Canonical Event Kernel and Projection Replay
 
-Plan after Phase 38.0 completes and locks the v5 PRD, threat model, eval baseline, and ADRs.
+Status: complete as of 2026-06-05.
 
-Do not implement this phase until `.planning/phases/38.1-canonical-event-kernel-projection-replay/38.1-CONTEXT.md` exists.
+Files:
 
+- `38.1-CONTEXT.md` - phase context and constraints
+- `38.1-01-PLAN.md` - implementation plan
+- `38.1-01-SUMMARY.md` - completion summary and verification
+
+Next phase: Phase 38.2 Redaction, Privacy Governance, and Audit Commands.

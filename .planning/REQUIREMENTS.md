@@ -71,10 +71,12 @@ Requirements for v5.0: market-leader memory platform readiness. Source plan: `do
 
 ### Canonical Event Kernel
 
-- [ ] **EVT-01**: `MemoryEventEnvelope` is schema-versioned and includes event id, machine id, sequence, kind, operation, provenance, privacy, causality, payload, and integrity metadata.
-- [ ] **EVT-02**: Existing fact-shaped event records can be migrated or replayed without data loss.
-- [ ] **EVT-03**: Projection registry rebuilds facts, entities, links, friction, search indexes, extraction audit, persona, and dream projections from canonical events where applicable.
-- [ ] **EVT-04**: Replay is deterministic for duplicates, out-of-order events, supersedence, corrupted lines, redaction metadata, and migrated records.
+- [x] **EVT-01**: `MemoryEventEnvelope` is schema-versioned and includes event id, machine id, sequence, kind, operation, provenance, privacy, causality, payload, and integrity metadata.
+- [x] **EVT-02**: Existing fact-shaped event records can be migrated or replayed without data loss.
+- [x] **EVT-03**: Projection registry rebuilds facts, entities, links, friction, search indexes, extraction audit, persona, and dream projections from canonical events where applicable.
+- [x] **EVT-04**: Replay is deterministic for duplicates, out-of-order events, supersedence, corrupted lines, redaction metadata, and migrated records.
+
+Phase 38.1 completed the current applicable projection path: facts plus facts FTS via existing SQLite triggers. Future entity, link, friction, extraction audit, persona, graph, ranking, and dream projections remain mapped to their later phase requirements and must use the registry instead of removing or bypassing stated features.
 
 ### Privacy and Security Governance
 
@@ -233,10 +235,10 @@ Which phases cover which requirements. Updated during roadmap creation.
 | QUAL-04 | All | Complete |
 | V5-PRD-01 | Phase 38.0 | Complete |
 | V5-EVAL-01 | Phase 38.0 | Complete |
-| EVT-01 | Phase 38.1 | Pending |
-| EVT-02 | Phase 38.1 | Pending |
-| EVT-03 | Phase 38.1 | Pending |
-| EVT-04 | Phase 38.1 | Pending |
+| EVT-01 | Phase 38.1 | Complete |
+| EVT-02 | Phase 38.1 | Complete |
+| EVT-03 | Phase 38.1 | Complete |
+| EVT-04 | Phase 38.1 | Complete |
 | SEC-05 | Phase 38.2 | Pending |
 | SEC-06 | Phase 38.2 | Pending |
 | SEC-07 | Phase 38.2 | Pending |
@@ -287,11 +289,11 @@ Which phases cover which requirements. Updated during roadmap creation.
 - v4.0 requirements: 25 total (excluding QUAL cross-cutting)
 - Cross-cutting: 4 QUAL requirements
 - v5.0 requirements: 51 total
-- v5.0 complete: 2/51
-- v5.0 pending: 49/51
+- v5.0 complete: 6/51
+- v5.0 pending: 45/51
 - v5.0 mapped to phases: 51/51
 - v5.0 unmapped: 0
 
 ---
 *Requirements defined: 2026-04-03*
-*Last updated: 2026-06-05 after Phase 38.0 completion and v5 phase expansion*
+*Last updated: 2026-06-05 after Phase 38.1 canonical event kernel completion*
