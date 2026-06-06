@@ -38,6 +38,11 @@ import {
     assessExtractionProviderEgress,
     type ProviderEgressAssessment,
 } from "../providers/provider-egress-policy.js";
+import {
+    checkCapabilityInterop,
+    type CapabilityStatusOptions,
+} from "../capabilities/index.js";
+import type { CapabilityInteropStatus } from "../../domain/ports/capability.js";
 
 /**
  * Database health status
@@ -186,6 +191,8 @@ export interface HealthCheckResult {
     llmExtraction: LlmExtractionHealth;
     /** Remote provider egress consent and allowlist status */
     providerEgress: ProviderEgressHealth;
+    /** Optional capability provider diagnostics with masked references only */
+    capabilityInterop: CapabilityInteropStatus;
 }
 
 
@@ -205,6 +212,8 @@ export interface HealthCheckOverrides {
     hookOverrides?: import("../hooks/settings-manager.js").PathOverrides | undefined;
     /** Optional pre-calculated hook status to avoid redundant file reads */
     preCalculatedHookStatus?: HookStatus | undefined;
+    /** Optional capability-status overrides for deterministic tests */
+    capabilityInterop?: CapabilityStatusOptions | undefined;
 }
 
 /**
@@ -531,6 +540,14 @@ export function checkProviderEgressHealth(configPath?: string): ProviderEgressHe
     };
 }
 
+export function checkCapabilityInteropHealth(
+    configPath?: string,
+    options: CapabilityStatusOptions = {},
+): CapabilityInteropStatus {
+    const config = loadConfig(configPath);
+    return checkCapabilityInterop(config, options);
+}
+
 
 /**
  * Run comprehensive health check
@@ -594,6 +611,9 @@ export function runHealthCheck(overrides?: HealthCheckOverrides): HealthCheckRes
     // Provider egress policy
     const providerEgress = checkProviderEgressHealth(configPath);
 
+    // Optional capability interop
+    const capabilityInterop = checkCapabilityInterop(loadedConfig, overrides?.capabilityInterop);
+
     return {
         database,
         permissions,
@@ -604,6 +624,7 @@ export function runHealthCheck(overrides?: HealthCheckOverrides): HealthCheckRes
         searchCapability,
         llmExtraction,
         providerEgress,
+        capabilityInterop,
     };
 }
 

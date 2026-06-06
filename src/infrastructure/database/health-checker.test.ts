@@ -19,6 +19,7 @@ import {
     checkEmbeddingConfig,
     checkLlmExtractionHealth,
     checkProviderEgressHealth,
+    checkCapabilityInteropHealth,
     runHealthCheck,
     type HealthCheckResult,
 } from "./health-checker.js";
@@ -751,6 +752,54 @@ describe("health-checker", () => {
             expect(result.dimensions).toBe(1536);
             expect(result.ready).toBe(true);
             expect(result.readyReason).toBeUndefined();
+        });
+    });
+
+    describe("checkCapabilityInteropHealth", () => {
+        it("includes optional authkey status without failing when authkey is absent", () => {
+            writeFileSync(testConfigPath, JSON.stringify({
+                embedding: {
+                    provider: "openai",
+                    model: "text-embedding-3-small",
+                    dimensions: 1536,
+                    apiKeyRef: "authkey://memory/openai-api-key",
+                },
+            }));
+
+            const result = checkCapabilityInteropHealth(testConfigPath, {
+                commandResolver: () => null,
+                env: { PATH: "" },
+            });
+
+            expect(result.providers[0]?.provider).toBe("authkey");
+            expect(result.providers[0]?.status).toBe("optional_unavailable");
+            expect(result.references[0]?.status).toBe("reference_only");
+        });
+
+        it("does not return raw secret-shaped refs or env values", () => {
+            const secretLikeHandle = ["sk", "health", "123456789012345678901234567890"].join("-");
+            const envSecret = ["sk", "env", "123456789012345678901234567890"].join("-");
+            writeFileSync(testConfigPath, JSON.stringify({
+                embedding: {
+                    provider: "openai",
+                    model: "text-embedding-3-small",
+                    dimensions: 1536,
+                    apiKeyRef: `authkey://memory/${secretLikeHandle}`,
+                },
+            }));
+
+            const result = checkCapabilityInteropHealth(testConfigPath, {
+                commandResolver: () => "authkey",
+                env: {
+                    PATH: "",
+                    OPENAI_API_KEY: envSecret,
+                },
+            });
+
+            const serialized = JSON.stringify(result);
+            expect(result.references[0]?.runtimeSecretSource).toBe("environment");
+            expect(serialized).not.toContain(secretLikeHandle);
+            expect(serialized).not.toContain(envSecret);
         });
     });
 

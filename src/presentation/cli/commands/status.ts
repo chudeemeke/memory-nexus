@@ -52,6 +52,8 @@ import {
 } from "../formatters/envelope.js";
 import { toStatsDto } from "../formatters/dto-helpers.js";
 import { unknownErrorMessage } from "../../../domain/errors/unknown-error.js";
+import { maskCapabilityReference } from "../../../infrastructure/capabilities/index.js";
+import type { CapabilityInteropStatus } from "../../../domain/ports/capability.js";
 
 /**
  * Options for the status command.
@@ -319,6 +321,9 @@ function sanitizeConfigForOutput(config: MemoryConfig): MemoryConfig {
     if (embedding.apiKey) {
         embedding.apiKey = "[REDACTED:api_key]";
     }
+    if (embedding.apiKeyRef) {
+        embedding.apiKeyRef = maskCapabilityReference(embedding.apiKeyRef).maskedReference;
+    }
     return { ...config, embedding };
 }
 
@@ -477,6 +482,7 @@ export async function executeStatusCommand(
         outputSections.push(formatEmbeddingSection(status, useColor));
         outputSections.push(formatLlmExtractionSection(status, useColor));
         outputSections.push(formatProviderEgressSection(status, useColor));
+        outputSections.push(formatCapabilityInteropSection(status, useColor));
     }
 
 
@@ -699,6 +705,34 @@ function formatProviderEgressSection(status: StatusInfo, useColor: boolean): str
     return lines.join("\n");
 }
 
+function formatCapabilityInteropSection(status: StatusInfo, useColor: boolean): string {
+    const capabilityInterop = getCapabilityInteropForFormatting(status);
+    const lines: string[] = ["Capability Interop"];
+
+    for (const provider of capabilityInterop.providers) {
+        const label = provider.status === "optional_unavailable"
+            ? "optional unavailable"
+            : provider.status.replace(/_/g, " ");
+        const marker = provider.available ? formatStatus(true, useColor) : dim("[INFO]", useColor);
+        lines.push(`  ${marker} ${provider.provider}: ${label}`);
+    }
+
+    if (capabilityInterop.references.length === 0) {
+        lines.push(`  ${dim("References: none configured", useColor)}`);
+    } else {
+        for (const reference of capabilityInterop.references) {
+            const envSuffix = reference.envVar ? ` via ${reference.envVar}` : "";
+            lines.push(`  ${dim(`${reference.source}: ${reference.maskedReference} (${reference.status}${envSuffix})`, useColor)}`);
+        }
+    }
+
+    for (const warning of capabilityInterop.warnings) {
+        lines.push(`  ${yellow(`Warning: ${warning}`, useColor)}`);
+    }
+
+    return lines.join("\n");
+}
+
 function formatProviderEgressAssessment(
     label: string,
     assessment: StatusInfo["health"]["providerEgress"]["embedding"],
@@ -736,6 +770,15 @@ function getProviderEgressForFormatting(status: StatusInfo): StatusInfo["health"
             provider: llmProvider,
             warnings: [],
         },
+        warnings: [],
+    };
+}
+
+function getCapabilityInteropForFormatting(status: StatusInfo): CapabilityInteropStatus {
+    const health = status.health as Partial<StatusInfo["health"]> | undefined;
+    return health?.capabilityInterop ?? {
+        providers: [],
+        references: [],
         warnings: [],
     };
 }
@@ -891,6 +934,25 @@ export function formatStatusOutput(status: StatusInfo): void {
     console.log(`  Consent:           ${providerEgress.consent}`);
     console.log(`  Embeddings:        ${providerEgress.embedding.allowed ? "allowed" : "blocked"} (${providerEgress.embedding.host ?? providerEgress.embedding.target})`);
     console.log(`  LLM extraction:    ${providerEgress.llmExtraction.allowed ? "allowed" : "blocked"} (${providerEgress.llmExtraction.host ?? providerEgress.llmExtraction.target})`);
+    console.log("");
+
+    const capabilityInterop = getCapabilityInteropForFormatting(status);
+    console.log("Capability interop:");
+    if (capabilityInterop.providers.length === 0) {
+        console.log("  Providers:         not reported");
+    } else {
+        for (const provider of capabilityInterop.providers) {
+            const label = provider.status === "optional_unavailable"
+                ? "optional unavailable"
+                : provider.status.replace(/_/g, " ");
+            console.log(`  ${provider.provider}:          ${label}`);
+        }
+    }
+    if (capabilityInterop.references.length > 0) {
+        for (const reference of capabilityInterop.references) {
+            console.log(`  ${reference.source}: ${reference.maskedReference} (${reference.status})`);
+        }
+    }
     console.log("");
 
     console.log("Activity:");

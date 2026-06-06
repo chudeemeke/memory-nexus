@@ -573,6 +573,45 @@ describe("status command", () => {
             expect(parsed.config.embedding.apiKey).toBe("[REDACTED:api_key]");
         });
 
+        test("JSON output masks capability references and injected secret values", async () => {
+            const secretLikeHandle = ["sk", "capability", "123456789012345678901234567890"].join("-");
+            const envSecret = ["sk", "runtime", "123456789012345678901234567890"].join("-");
+            const previousOpenAiKey = process.env.OPENAI_API_KEY;
+            try {
+                process.env.OPENAI_API_KEY = envSecret;
+                mkdirSync(dirname(testConfigPath), { recursive: true });
+                writeFileSync(testConfigPath, JSON.stringify({
+                    embedding: {
+                        provider: "openai",
+                        model: "text-embedding-3-small",
+                        dimensions: 1536,
+                        apiKeyRef: `authkey://memory/${secretLikeHandle}`,
+                    },
+                    providerEgress: {
+                        consent: "granted",
+                        allowedHosts: ["api.openai.com"],
+                        allowedProviders: ["openai"],
+                    },
+                }));
+
+                await executeStatusCommand({ json: true }, { dbPath: testDbPath, logPath: testLogPath, configPath: testConfigPath, hookOverrides });
+
+                const output = logOutput.join("\n");
+                const parsed = JSON.parse(output);
+                expect(output).not.toContain(secretLikeHandle);
+                expect(output).not.toContain(envSecret);
+                expect(parsed.config.embedding.apiKeyRef).toMatch(/^authkey:\/\/\[redacted:[a-f0-9]{12}\]$/);
+                expect(parsed.health.capabilityInterop.references[0].runtimeSecretSource).toBe("environment");
+                expect(parsed.health.capabilityInterop.references[0].envVar).toBe("OPENAI_API_KEY");
+            } finally {
+                if (previousOpenAiKey === undefined) {
+                    delete process.env.OPENAI_API_KEY;
+                } else {
+                    process.env.OPENAI_API_KEY = previousOpenAiKey;
+                }
+            }
+        });
+
         test("JSON output contains hook status", async () => {
             installHooks(hookOverrides);
 
@@ -987,6 +1026,48 @@ describe("status command", () => {
             const blockedOutput = logOutput.join("\n");
             expect(blockedOutput).toContain("Reason: missing apiKeyEnv");
             expect(blockedOutput).toContain("Reason: missing provider credentials");
+        });
+
+        test("capability interop section renders optional absence without changing exit code", async () => {
+            const status = withHealth({
+                capabilityInterop: {
+                    providers: [
+                        {
+                            provider: "authkey",
+                            optional: true,
+                            available: false,
+                            status: "optional_unavailable",
+                            statusSource: "path",
+                            allowedSignals: ["env-injection", "masked-metadata", "proofs", "fingerprints"],
+                            rawSecretAccess: "forbidden",
+                            warnings: [],
+                        },
+                    ],
+                    references: [
+                        {
+                            source: "embedding.apiKeyRef",
+                            provider: "authkey",
+                            scheme: "authkey",
+                            maskedReference: "authkey://[redacted:abcdef123456]",
+                            fingerprint: "abcdef123456",
+                            runtimeSecretSource: "missing",
+                            status: "reference_only",
+                            note: "Run through a secret injector or set embedding.apiKeyEnv.",
+                        },
+                    ],
+                    warnings: [],
+                },
+            } as any);
+
+            const result = await executeStatusCommand({ embedding: true }, {
+                gatherStatus: async () => status,
+            });
+
+            const output = logOutput.join("\n");
+            expect(result.exitCode).toBe(0);
+            expect(output).toContain("Capability Interop");
+            expect(output).toContain("authkey: optional unavailable");
+            expect(output).toContain("authkey://[redacted:abcdef123456]");
         });
 
         test("hook section renders all relative time buckets", async () => {

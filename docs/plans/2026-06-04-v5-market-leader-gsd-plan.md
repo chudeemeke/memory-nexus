@@ -182,6 +182,8 @@ Exit gates:
 
 Goal: make authkey and future secure tools optional capability providers, never hard dependencies.
 
+Status: completed 2026-06-06. Implemented as a typed capability-status port plus non-executing optional-provider diagnostics. Status/doctor output reports availability, masked references, fingerprints, and env-injection readiness only; it does not resolve raw secrets or call raw retrieval commands.
+
 Tasks:
 - Add optional capability-status port.
 - Support masked readiness/status/handle/proof metadata only.

@@ -12,6 +12,8 @@ import {
     createEmbeddingProvider,
     createExtractionProvider,
     getEmbeddingProviderDefaults,
+    getEmbeddingProviderSecretEnvVars,
+    getExtractionProviderSecretEnvVars,
     getExtractionModel,
     listEmbeddingProviderIds,
     listExtractionProviderIds,
@@ -59,6 +61,18 @@ describe("provider-registry", () => {
             dimensions: 1536,
         });
         expect(getEmbeddingProviderDefaults("unknown")).toBeUndefined();
+    });
+
+    test("returns provider secret env vars from the registry", () => {
+        expect(getEmbeddingProviderSecretEnvVars("local")).toEqual([]);
+        expect(getEmbeddingProviderSecretEnvVars("openai")).toEqual(["OPENAI_API_KEY"]);
+        expect(getEmbeddingProviderSecretEnvVars("openai-compatible")).toEqual([]);
+        expect(getEmbeddingProviderSecretEnvVars("unknown")).toEqual([]);
+
+        expect(getExtractionProviderSecretEnvVars("anthropic")).toEqual(["ANTHROPIC_API_KEY"]);
+        expect(getExtractionProviderSecretEnvVars("openai")).toEqual(["OPENAI_API_KEY"]);
+        expect(getExtractionProviderSecretEnvVars("ollama")).toEqual([]);
+        expect(getExtractionProviderSecretEnvVars("unknown")).toEqual([]);
     });
 
     test("formats unsupported provider messages from registry contents", () => {

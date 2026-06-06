@@ -93,7 +93,7 @@
 - [x] **Phase 38.2.5: Consent Provenance and Memory Governance** - User-visible consent, provenance, suppression, invalidation, review, and governance events for derived memory surfaces. Completed 2026-06-06.
 - [x] **Phase 38.3: Remote Sync Application Service and Git Transport** - Private-Git-backed remote event synchronization through application ports and shell-safe transport adapter. Completed 2026-06-06.
 - [x] **Phase 38.4: Remote CLI, Operations, Backup, and Recovery** - `memory remote` surface, preflight, doctor, backup/restore/rollback, cross-machine verification. Completed 2026-06-06.
-- [ ] **Phase 38.5: Secure Capability Interop** - Optional authkey readiness/status/fingerprint interop using handles, masked metadata, or proofs; no hard dependency and no plaintext secret resolution inside memory-nexus.
+- [x] **Phase 38.5: Secure Capability Interop** - Optional authkey readiness/status/fingerprint interop using handles, masked metadata, or proofs; no hard dependency and no plaintext secret resolution inside memory-nexus. Completed 2026-06-06.
 - [ ] **Phase 38.6: Durable Friction Query Contract** - Stable durable `memory friction list` filters, counts, exit codes, JSON schema, timezone semantics, and privacy-safe query handling. Source: `docs/inbox/archived/2026-05-12-conversations-friction-list-durable-filters.md`.
 - [ ] **Phase 38.7: Evaluation Harness and Regression Fixtures** - Executable eval runner, fixtures, report schema, and release-gate integration for v5 behavior checks.
 - [ ] **Phase 39: Persona and Procedural Memory** - Centralized developer/agent profile projection with provenance, confidence, review, and scoped context injection.
@@ -443,7 +443,14 @@ Rationale: Phase 32 explicitly deferred friction envelope adoption per audit §1
   2. Readiness/status checks return only masked metadata, handles, proofs, or fingerprints.
   3. `authkey://...` references are diagnostics/documentation references, not resolver inputs.
   4. Tests prove no AI-facing path can print or return raw secrets through capability interop.
-**Plans**: Placeholder directory exists; plan after Phase 38.4.
+**Plans**: `.planning/phases/38.5-secure-capability-interop/README.md` (complete)
+**Completion Summary**:
+  - Added a typed capability-status port and infrastructure registry for optional capability providers.
+  - Capability diagnostics now read provider default secret-env metadata from the provider registry instead of duplicating provider switches in the health/capability layer.
+  - Added non-executing authkey availability diagnostics; memory does not call `authkey get` or expose raw secret retrieval paths.
+  - Masked capability references and fingerprints are included in status/doctor; deprecated plaintext config and injected env values are never returned.
+  - Future schemes such as `vault://...` are parsed as reference-only diagnostics without adding hard dependencies.
+  - Verification: focused Phase 38.5 tests passed (203 pass, 0 fail), full `bun run quality` passed (4,234 pass, 0 fail), coverage passed at statements 97.14%, branches 95.09%, functions 96.14%, lines 97.26%, `gitleaks detect --no-banner --redact --source .` passed, and `git diff --check` passed.
 
 ---
 
@@ -699,7 +706,7 @@ v5.0
 | 38.2.5. Consent Provenance and Memory Governance | v5.0 | 1/1 | Complete | 2026-06-06 |
 | 38.3. Remote Sync Service and Git Transport | v5.0 | 1/1 | Complete | 2026-06-06 |
 | 38.4. Remote CLI, Operations, Backup, and Recovery | v5.0 | 1/1 | Complete | 2026-06-06 |
-| 38.5. Secure Capability Interop | v5.0 | TBD | Planned | - |
+| 38.5. Secure Capability Interop | v5.0 | 1/1 | Complete | 2026-06-06 |
 | 38.6. Durable Friction Query Contract | v5.0 | TBD | Planned | - |
 | 38.7. Evaluation Harness and Regression Fixtures | v5.0 | TBD | Planned | - |
 | 39. Persona and Procedural Memory | v5.0 | TBD | Planned | - |

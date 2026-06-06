@@ -37,6 +37,7 @@ interface EmbeddingProviderRegistration {
     id: string;
     defaultModel: string;
     defaultDimensions: number;
+    secretEnvVars: string[];
     checkReadiness(config: EmbeddingConfigData): ProviderReadiness;
     create(config: EmbeddingConfigData): IEmbeddingProvider;
 }
@@ -44,6 +45,7 @@ interface EmbeddingProviderRegistration {
 interface ExtractionProviderRegistration {
     id: string;
     defaultModel: string;
+    secretEnvVars: string[];
     checkReadiness(config: EmbeddingConfigData): ProviderReadiness;
     create(config: EmbeddingConfigData, model: string): IExtractionProvider;
 }
@@ -98,11 +100,15 @@ function requireBaseUrl(config: EmbeddingConfigData, capability: "embedding" | "
     return config.baseUrl;
 }
 
+const OPENAI_SECRET_ENV_VARS = ["OPENAI_API_KEY"];
+const ANTHROPIC_SECRET_ENV_VARS = ["ANTHROPIC_API_KEY"];
+
 const EMBEDDING_PROVIDERS: EmbeddingProviderRegistration[] = [
     {
         id: "local",
         defaultModel: EMBEDDING_PROVIDER_DEFAULTS.local!.model,
         defaultDimensions: EMBEDDING_PROVIDER_DEFAULTS.local!.dimensions,
+        secretEnvVars: [],
         checkReadiness: () => ready(),
         create: (config) => new TransformersJsProvider({
             model: config.model,
@@ -113,13 +119,14 @@ const EMBEDDING_PROVIDERS: EmbeddingProviderRegistration[] = [
         id: "openai",
         defaultModel: EMBEDDING_PROVIDER_DEFAULTS.openai!.model,
         defaultDimensions: EMBEDDING_PROVIDER_DEFAULTS.openai!.dimensions,
+        secretEnvVars: OPENAI_SECRET_ENV_VARS,
         checkReadiness: (config) => keyReadiness(
             config,
-            ["OPENAI_API_KEY"],
+            OPENAI_SECRET_ENV_VARS,
             "API key not available at runtime; set OPENAI_API_KEY or embedding.apiKeyEnv",
         ),
         create: (config) => new OpenAiProvider({
-            apiKey: requireApiKey(config, ["OPENAI_API_KEY"], "OpenAI embedding"),
+            apiKey: requireApiKey(config, OPENAI_SECRET_ENV_VARS, "OpenAI embedding"),
             model: config.model,
             dimensions: config.dimensions,
             baseUrl: config.baseUrl,
@@ -129,6 +136,7 @@ const EMBEDDING_PROVIDERS: EmbeddingProviderRegistration[] = [
         id: "ollama",
         defaultModel: EMBEDDING_PROVIDER_DEFAULTS.ollama!.model,
         defaultDimensions: EMBEDDING_PROVIDER_DEFAULTS.ollama!.dimensions,
+        secretEnvVars: [],
         checkReadiness: () => ready("Server reachability verified at sync time"),
         create: (config) => new OllamaProvider({
             model: config.model,
@@ -140,6 +148,7 @@ const EMBEDDING_PROVIDERS: EmbeddingProviderRegistration[] = [
         id: "openai-compatible",
         defaultModel: EMBEDDING_PROVIDER_DEFAULTS["openai-compatible"]!.model,
         defaultDimensions: EMBEDDING_PROVIDER_DEFAULTS["openai-compatible"]!.dimensions,
+        secretEnvVars: [],
         checkReadiness: (config) => {
             if (!config.baseUrl) {
                 return notReady("openai-compatible embedding provider requires embedding.baseUrl");
@@ -164,32 +173,35 @@ const EXTRACTION_PROVIDERS: ExtractionProviderRegistration[] = [
     {
         id: "anthropic",
         defaultModel: EXTRACTION_PROVIDER_DEFAULT_MODELS.anthropic!,
+        secretEnvVars: ANTHROPIC_SECRET_ENV_VARS,
         checkReadiness: (config) => keyReadiness(
             config,
-            ["ANTHROPIC_API_KEY"],
+            ANTHROPIC_SECRET_ENV_VARS,
             "API key not available at runtime; set ANTHROPIC_API_KEY or embedding.apiKeyEnv",
         ),
         create: (config, model) => new AnthropicExtractionProvider({
-            apiKey: requireApiKey(config, ["ANTHROPIC_API_KEY"], "Anthropic extraction"),
+            apiKey: requireApiKey(config, ANTHROPIC_SECRET_ENV_VARS, "Anthropic extraction"),
             model,
         }),
     },
     {
         id: "openai",
         defaultModel: EXTRACTION_PROVIDER_DEFAULT_MODELS.openai!,
+        secretEnvVars: OPENAI_SECRET_ENV_VARS,
         checkReadiness: (config) => keyReadiness(
             config,
-            ["OPENAI_API_KEY"],
+            OPENAI_SECRET_ENV_VARS,
             "API key not available at runtime; set OPENAI_API_KEY or embedding.apiKeyEnv",
         ),
         create: (config, model) => new OpenAiExtractionProvider({
-            apiKey: requireApiKey(config, ["OPENAI_API_KEY"], "OpenAI extraction"),
+            apiKey: requireApiKey(config, OPENAI_SECRET_ENV_VARS, "OpenAI extraction"),
             model,
         }),
     },
     {
         id: "ollama",
         defaultModel: EXTRACTION_PROVIDER_DEFAULT_MODELS.ollama!,
+        secretEnvVars: [],
         checkReadiness: () => ready(),
         create: (config, model) => new OllamaExtractionProvider({
             baseUrl: config.baseUrl,
@@ -199,12 +211,14 @@ const EXTRACTION_PROVIDERS: ExtractionProviderRegistration[] = [
     {
         id: "claude-cli",
         defaultModel: EXTRACTION_PROVIDER_DEFAULT_MODELS["claude-cli"]!,
+        secretEnvVars: [],
         checkReadiness: () => ready(),
         create: () => new ClaudeCliExtractionProvider(),
     },
     {
         id: "openai-compatible",
         defaultModel: EXTRACTION_PROVIDER_DEFAULT_MODELS["openai-compatible"]!,
+        secretEnvVars: [],
         checkReadiness: (config) => {
             if (!config.baseUrl) {
                 return notReady("openai-compatible extraction provider requires embedding.baseUrl");
@@ -250,6 +264,14 @@ export function getEmbeddingProviderDefaults(providerId: string): { model: strin
         model: provider.defaultModel,
         dimensions: provider.defaultDimensions,
     };
+}
+
+export function getEmbeddingProviderSecretEnvVars(providerId: string): string[] {
+    return [...(embeddingProviderMap.get(providerId)?.secretEnvVars ?? [])];
+}
+
+export function getExtractionProviderSecretEnvVars(providerId: string): string[] {
+    return [...(extractionProviderMap.get(providerId)?.secretEnvVars ?? [])];
 }
 
 export function checkEmbeddingProviderReadiness(

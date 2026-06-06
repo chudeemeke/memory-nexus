@@ -38,6 +38,19 @@ export type {
   IExtractionProvider,
 } from "./extraction.js";
 
+// Capability provider status port
+export type {
+  CapabilityInteropStatus,
+  CapabilityProviderStatus,
+  CapabilityProviderStatusValue,
+  CapabilityReferenceStatus,
+  CapabilityReferenceStatusReport,
+  CapabilitySecretSource,
+  CapabilitySignal,
+  ICapabilityStatusProvider,
+  MaskedCapabilityReference,
+} from "./capability.js";
+
 // Redaction port
 export type {
   IRedactor,

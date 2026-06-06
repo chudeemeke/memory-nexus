@@ -33,6 +33,7 @@ import { getDataDir } from "../../../infrastructure/paths.js";
 import { getQmdInfo } from "../../../infrastructure/external/index.js";
 import type { HealthCheckResult } from "../../../infrastructure/database/health-checker.js";
 import { unknownErrorMessage } from "../../../domain/errors/unknown-error.js";
+import type { CapabilityInteropStatus } from "../../../domain/ports/capability.js";
 
 /**
  * Options for the doctor command.
@@ -234,6 +235,9 @@ export function formatHealthResult(result: HealthCheckResult, useColor: boolean)
     }
     lines.push("");
 
+    lines.push(formatCapabilityInteropSection(result, useColor));
+    lines.push("");
+
 
 
     // Search Capability section
@@ -291,6 +295,43 @@ function getProviderEgressForFormatting(result: HealthCheckResult): HealthCheckR
         },
         warnings: [],
     };
+}
+
+function getCapabilityInteropForFormatting(result: HealthCheckResult): CapabilityInteropStatus {
+    const health = result as Partial<HealthCheckResult> | undefined;
+    return health?.capabilityInterop ?? {
+        providers: [],
+        references: [],
+        warnings: [],
+    };
+}
+
+function formatCapabilityInteropSection(result: HealthCheckResult, useColor: boolean): string {
+    const capabilityInterop = getCapabilityInteropForFormatting(result);
+    const lines: string[] = ["Capability Interop"];
+
+    for (const provider of capabilityInterop.providers) {
+        const label = provider.status === "optional_unavailable"
+            ? "optional unavailable"
+            : provider.status.replace(/_/g, " ");
+        const marker = provider.available ? formatStatus(true, useColor) : dim("[INFO]", useColor);
+        lines.push(`  ${marker} ${provider.provider}: ${label}`);
+    }
+
+    if (capabilityInterop.references.length === 0) {
+        lines.push(`  ${dim("References: none configured", useColor)}`);
+    } else {
+        for (const reference of capabilityInterop.references) {
+            const envSuffix = reference.envVar ? ` via ${reference.envVar}` : "";
+            lines.push(`  ${dim(`${reference.source}: ${reference.maskedReference} (${reference.status}${envSuffix})`, useColor)}`);
+        }
+    }
+
+    for (const warning of capabilityInterop.warnings) {
+        lines.push(`  ${yellow(`Warning: ${warning}`, useColor)}`);
+    }
+
+    return lines.join("\n");
 }
 
 function formatProviderEgressAssessment(
@@ -431,6 +472,7 @@ export async function executeDoctorCommand(
             searchCapability: status.health.searchCapability,
             llmExtraction: status.health.llmExtraction,
             providerEgress: status.health.providerEgress,
+            capabilityInterop: status.health.capabilityInterop,
             migration: status.migration,
             qmd: status.qmd,
         };

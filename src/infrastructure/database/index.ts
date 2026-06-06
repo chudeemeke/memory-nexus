@@ -82,6 +82,7 @@ export {
   checkSqliteVecAvailability,
   checkEmbeddingConfig,
   checkProviderEgressHealth,
+  checkCapabilityInteropHealth,
   runHealthCheck,
   type DatabaseHealth,
   type PermissionsHealth,

@@ -108,9 +108,9 @@ Phase 38.3 completed the application-service and Git-transport substrate. Phase 
 
 ### Secure Capability Interop
 
-- [ ] **INTEG-01**: authkey and future capability providers are optional and absence never breaks core workflows.
-- [ ] **INTEG-02**: Capability interop consumes only masked metadata, handles, proofs, readiness, or fingerprint inventory; no raw secret resolution inside memory-nexus.
-- [ ] **INTEG-03**: Tests prove no AI-facing path can print or return a raw secret through capability interop.
+- [x] **INTEG-01**: authkey and future capability providers are optional and absence never breaks core workflows.
+- [x] **INTEG-02**: Capability interop consumes only masked metadata, handles, proofs, readiness, or fingerprint inventory; no raw secret resolution inside memory-nexus.
+- [x] **INTEG-03**: Tests prove no AI-facing path can print or return a raw secret through capability interop.
 
 ### Durable Friction Contract
 
@@ -258,9 +258,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 | SYNC-06 | Phase 38.3 | Complete |
 | SYNC-07 | Phase 38.4 | Complete |
 | SYNC-08 | Phase 38.4 | Complete |
-| INTEG-01 | Phase 38.5 | Pending |
-| INTEG-02 | Phase 38.5 | Pending |
-| INTEG-03 | Phase 38.5 | Pending |
+| INTEG-01 | Phase 38.5 | Complete |
+| INTEG-02 | Phase 38.5 | Complete |
+| INTEG-03 | Phase 38.5 | Complete |
 | FRIC-01 | Phase 38.6 | Pending |
 | FRIC-02 | Phase 38.6 | Pending |
 | EVAL-02 | Phase 38.7 | Pending |

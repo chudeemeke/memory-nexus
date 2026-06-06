@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v5.0
 milestone_name: Market-Leader Memory Platform
 status: in_progress
-last_updated: "2026-06-06T05:19:18.537+01:00"
+last_updated: "2026-06-06T07:43:00.000+01:00"
 progress:
   total_phases: 16
-  completed_phases: 6
-  total_plans: 6
-  completed_plans: 6
+  completed_phases: 7
+  total_plans: 7
+  completed_plans: 7
 ---
 
 > **FOUNDATION HARDENING VERIFIED 2026-05-28** - Phase 36.8 is implemented. Typecheck, build, full tests, test-isolation, dependency audit, and gitleaks pass. Provider support now routes through an internal provider registry instead of presentation/health/factory switch drift. Phase 36.9 replaced the missing-metric Bun LCOV gate with an Istanbul-backed Bun coverage harness.
@@ -24,6 +24,7 @@ progress:
 > **V5 PHASE 38.2.5 COMPLETE 2026-06-06** - Consent provenance and memory governance are implemented. Canonical fact events register governance provenance, governance/consent events replay into durable control state, `memory governance` exposes inspect/suppress/unsuppress/invalidate/expire/review/consent grant/revoke controls, and context assembly enforces blocked fact governance. Verification passed: focused governance/event-log/context tests (55 pass, 0 fail), typecheck, schema/completion/help tests, and full suite (4140 pass, 0 fail). Phase 38.3 later completed the remote sync service and Git transport substrate.
 > **V5 PHASE 38.3 COMPLETE 2026-06-06** - Remote sync now has an application service and shell-safe Git transport adapter. `RemoteEventSyncService` validates durable machine identity, refs, URLs, explicit local-path consent, privacy preflight, transport orchestration, and projection rebuild. `GitRemoteEventTransport` uses argument-array Git calls with sanitized environment. The experimental sync path now delegates through the application service. Verification passed: focused Phase 38.3 tests (87 pass, 0 fail), typecheck, build, and diff whitespace. Phase 38.4 remote CLI/operations/backup/recovery is next.
 > **V5 PHASE 38.4 COMPLETE 2026-06-06** - Remote sync now has a public operations surface. `memory remote` is registered; `memory sync --remote` is the explicit remote-egress command; plain `memory sync` skips configured remotes with an actionable warning. `remote set/remove/status/preflight/doctor` support stable JSON and readiness diagnostics, and `remote backup/restore/rollback` recover config plus event-log content with `--confirm` for mutations and `.git` internals excluded. Verification passed: focused Phase 38.4 tests, full `bun run quality`, coverage statements 97.13%, branches 95.13%, functions 96.09%, lines 97.25%, `gitleaks detect --no-banner --redact --source .`, and `git diff --check`.
+> **V5 PHASE 38.5 COMPLETE 2026-06-06** - Secure capability interop is implemented without adding an authkey dependency or a raw-secret resolver. A typed capability-status port and infrastructure capability registry report optional provider availability, masked references, fingerprints, env-injection readiness, and future provider schemes. Provider default secret-env metadata is read from the existing provider registry instead of duplicating provider switches in capability diagnostics. `memory status` and `memory doctor` include capability diagnostics, JSON output masks `embedding.apiKeyRef`, and no resolved executable path or raw secret value is returned. Verification passed: focused provider-registry/capability/health/status/doctor tests (203 pass, 0 fail), full `bun run quality` (4,234 pass, 0 fail), coverage statements 97.14%, branches 95.09%, functions 96.14%, lines 97.26%, `gitleaks detect --no-banner --redact --source .`, and `git diff --check`.
 > **INBOX RECONCILED 2026-05-28** - Stale bug reports for the Windows full-suite crash, orphaned friction test, and programmatic API real-DB pollution were validated against the current code and archived. The durable-friction-list filing was accepted into ROADMAP as post-v4 capacity, archived as planned, and counter-notified to conversations. No active memory-nexus inbox items remain.
 > **REMOTE CONSUMER NOTES REVIEWED 2026-05-30** - The two remotely consumer-impact inbox notes were reviewed against current memory-nexus docs/scripts. No current raw SSH/rsync operating instructions or hard-coded remotely tunnel-state assumptions were found, so both notes were archived with disposition text. Future Phase 38 cross-machine work must still use current `remotely` conventions where applicable.
 > **FIRST-PARTY INFRASTRUCTURE BROADCAST 2026-05-28** - User clarified that `memory` is a first-class first-party tool used by most/all projects. Canonical tool/package naming is `memory` / `@chude/memory`; the repository remains `memory-nexus`, and `nexus` is a legacy alias. Updated Codex/Claude rules and document-for-clear skills, added a Codex memory note, and filed notification inbox items to opted-in projects so consumers know about provider-secret, redaction/export, registry, and authkey-optional contract changes.
@@ -35,26 +36,26 @@ See: .planning/PROJECT.md (updated 2026-02-18)
 
 **Core Value:** Knowledge gained in one Claude Code project becomes accessible from any other project. No more context silos.
 
-**Current Focus:** v5.0 market-leader execution is active. Phase 38.4 is complete; next is Phase 38.5 Secure Capability Interop. Relevant docs: `docs/prd/2026-06-05-v5-market-leader-memory-platform.md`, `docs/security/2026-06-05-v5-threat-model.md`, `docs/evals/2026-06-05-v5-evaluation-baseline.md`, `docs/reviews/2026-06-05-v5-plan-review-request.md`, `docs/plans/2026-06-04-v5-market-leader-gsd-plan.md`, `docs/operations/remote-sync-runbook.md`, `.planning/phases/38.2.5-consent-provenance-governance/README.md`, `.planning/phases/38.3-remote-sync-service-git-transport/README.md`, `.planning/phases/38.4-remote-cli-operations-backup-recovery/README.md`, and `.planning/ROADMAP.md`.
+**Current Focus:** v5.0 market-leader execution is active. Phase 38.5 is complete; next is Phase 38.6 Durable Friction Query Contract. Relevant docs: `docs/prd/2026-06-05-v5-market-leader-memory-platform.md`, `docs/security/2026-06-05-v5-threat-model.md`, `docs/evals/2026-06-05-v5-evaluation-baseline.md`, `docs/reviews/2026-06-05-v5-plan-review-request.md`, `docs/plans/2026-06-04-v5-market-leader-gsd-plan.md`, `docs/operations/remote-sync-runbook.md`, `.planning/phases/38.2.5-consent-provenance-governance/README.md`, `.planning/phases/38.3-remote-sync-service-git-transport/README.md`, `.planning/phases/38.4-remote-cli-operations-backup-recovery/README.md`, `.planning/phases/38.5-secure-capability-interop/README.md`, and `.planning/ROADMAP.md`.
 
 **Tech Stack:** Bun, TypeScript 5.5+, bun:sqlite with FTS5 + sqlite-vec, Commander.js v14, @huggingface/transformers v3, cli-progress, chrono-node, Chart.js (HTML dashboard)
 
 ## Current Position
 
-Phase: v5.0 ACTIVE - PHASE 38.5 NEXT
+Phase: v5.0 ACTIVE - PHASE 38.6 NEXT
 **Milestone:** v5.0 Market-Leader Memory Platform
-**Status:** Phase 38.4 is complete. Phase 38.5 must add optional capability-provider interop without making authkey or any future provider a required dependency and without opening raw secret-resolution paths.
+**Status:** Phase 38.5 is complete. Phase 38.6 must turn durable friction into a stable query contract with exact filters, count/threshold exit codes, privacy-safe contains semantics, and tests.
 
 ```
-v5.0 Progress: [######----------] 6/16 phases complete
+v5.0 Progress: [#######---------] 7/16 phases complete
   Phase 38.0: v5 Threat Model, PRD, Eval Baseline [done]
   Phase 38.1: Canonical Event Kernel and Projection Replay [done]
   Phase 38.2: Redaction, Privacy Governance, Audit Commands [done]
   Phase 38.2.5: Consent Provenance and Memory Governance [done]
   Phase 38.3: Remote Sync Service and Git Transport [done]
   Phase 38.4: Remote CLI, Operations, Backup, Recovery [done]
-  Phase 38.5: Secure Capability Interop [next]
-  Phase 38.6: Durable Friction Query Contract [planned]
+  Phase 38.5: Secure Capability Interop [done]
+  Phase 38.6: Durable Friction Query Contract [next]
   Phase 38.7: Evaluation Harness and Regression Fixtures [planned]
   Phase 39: Persona and Procedural Memory [planned]
   Phase 40: Temporal Semantic Graph [planned]
@@ -186,6 +187,7 @@ v4.0 Progress: [############################] 14/14 phases complete
 
 **Next step:**
 - Execute Phase 38.5 Secure Capability Interop with TDD. Authkey and future providers must remain optional; memory may consume readiness, masked metadata, handles, proofs, or fingerprint inventory, but must not resolve or print raw secrets through an AI-facing path.
+- Execute Phase 38.6 Durable Friction Query Contract with TDD. `memory friction list` must gain stable filter/count semantics, privacy-safe contains handling, documented exit codes, and JSON schema coverage without coupling to one consumer project.
 
 ### Current Resume Point - 2026-05-30
 
@@ -231,4 +233,4 @@ v4.0 Progress: [############################] 14/14 phases complete
 
 ---
 
-*Last updated: 2026-06-06 (v5.0 active; Phase 38.4 complete; Phase 38.5 next)*
+*Last updated: 2026-06-06 (v5.0 active; Phase 38.5 complete; Phase 38.6 next)*

@@ -428,6 +428,46 @@ describe("doctor command", () => {
             expect(output).not.toContain("Note:");
         });
 
+        it("prints capability interop diagnostics without counting optional absence as an issue", () => {
+            const result: HealthCheckResult = {
+                ...healthyResult,
+                capabilityInterop: {
+                    providers: [
+                        {
+                            provider: "authkey",
+                            optional: true,
+                            available: false,
+                            status: "optional_unavailable",
+                            statusSource: "path",
+                            allowedSignals: ["env-injection", "masked-metadata", "proofs", "fingerprints"],
+                            rawSecretAccess: "forbidden",
+                            warnings: [],
+                        },
+                    ],
+                    references: [
+                        {
+                            source: "embedding.apiKeyRef",
+                            provider: "authkey",
+                            scheme: "authkey",
+                            maskedReference: "authkey://[redacted:abcdef123456]",
+                            fingerprint: "abcdef123456",
+                            runtimeSecretSource: "missing",
+                            status: "reference_only",
+                            note: "Run through a secret injector or set embedding.apiKeyEnv.",
+                        },
+                    ],
+                    warnings: [],
+                },
+            };
+
+            const output = formatHealthResult(result, false);
+
+            expect(output).toContain("Capability Interop");
+            expect(output).toContain("authkey: optional unavailable");
+            expect(output).toContain("authkey://[redacted:abcdef123456]");
+            expect(output).toContain("All checks passed");
+        });
+
         it("counts config and log permission failures separately", () => {
             const result: HealthCheckResult = {
                 ...healthyResult,
