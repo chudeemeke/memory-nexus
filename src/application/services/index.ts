@@ -132,3 +132,20 @@ export type {
   MemoryGovernanceServiceDeps,
   RegisterDerivedMemoryParams,
 } from "./memory-governance-service.js";
+
+export {
+  RemoteEventSyncService,
+  validateMachineIdentity,
+  validateRemoteRef,
+  validateRemoteRepositoryUrl,
+} from "./remote-event-sync-service.js";
+export type {
+  RemoteEventSyncRequest,
+  RemoteEventSyncResult,
+  RemoteEventSyncServiceDeps,
+  RemoteEventTransport,
+  RemoteGitIdentity,
+  RemotePrivacyPreflightPort,
+  RemoteProjectionRebuilderPort,
+  RemoteTransportCommandResult,
+} from "./remote-event-sync-service.js";

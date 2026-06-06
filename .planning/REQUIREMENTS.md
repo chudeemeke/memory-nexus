@@ -83,7 +83,7 @@ Phase 38.1 completed the current applicable projection path: facts plus facts FT
 - [x] **SEC-05**: Redaction/classification runs before storage, FTS indexing, embedding, extraction, export, remote sync, logs, and provider egress.
 - [x] **SEC-06**: `memory audit-secrets` scans database and event logs and reports redacted findings without printing raw secrets.
 - [x] **SEC-07**: Remote provider egress requires explicit consent, allowlist policy, and doctor/status warnings.
-- [ ] **SEC-08**: Remote sync validates remote refs/URLs, uses sanitized Git environment, and refuses to run without durable validated machine identity.
+- [x] **SEC-08**: Remote sync validates remote refs/URLs, uses sanitized Git environment, and refuses to run without durable validated machine identity.
 - [x] **SEC-09**: Existing stored sensitive content can be migrated, redacted, or quarantined with audit evidence.
 
 Phase 38.2 completed SEC-05, SEC-06, SEC-07, and SEC-09 for current active surfaces: sync persistence, FTS-backed stored fields, embedding payloads, extraction payloads/events, export defaults, hook/friction logs, provider readiness/creation, and the explicitly gated remote-sync prototype. Remote sync itself remains non-production until Phase 38.3 and Phase 38.4, but the prototype path now blocks Git egress when active event logs still contain audit findings.
@@ -99,10 +99,12 @@ Phase 38.2.5 completed the governance substrate for current and future derived s
 
 ### Remote Sync and Operations
 
-- [ ] **SYNC-05**: `RemoteEventSyncService` orchestrates remote sync through application ports; presentation commands do not directly construct infrastructure adapters.
-- [ ] **SYNC-06**: Git-backed remote event sync commits, fetches, merges, replays, and pushes deterministically without losing past entries.
+- [x] **SYNC-05**: `RemoteEventSyncService` orchestrates remote sync through application ports; presentation commands do not directly construct infrastructure adapters.
+- [x] **SYNC-06**: Git-backed remote event sync commits, fetches, merges, replays, and pushes deterministically without losing past entries.
 - [ ] **SYNC-07**: Conflict semantics, failure policy, rollback, backup, restore, and recovery are documented and tested.
 - [ ] **SYNC-08**: `memory remote set/remove/status/preflight/doctor` expose stable JSON output, documented exit codes, and privacy preflight.
+
+Phase 38.3 completed the application-service and Git-transport substrate. The experimental sync path now delegates through `RemoteEventSyncService`, which validates machine identity, URL/ref safety, local-path consent, privacy preflight, Git transport orchestration, and projection rebuild. Phase 38.4 still owns the public remote CLI, backup/restore/rollback, documented exit codes, and operational recovery flows.
 
 ### Secure Capability Interop
 
@@ -246,14 +248,14 @@ Which phases cover which requirements. Updated during roadmap creation.
 | SEC-05 | Phase 38.2 | Complete |
 | SEC-06 | Phase 38.2 | Complete |
 | SEC-07 | Phase 38.2 | Complete |
-| SEC-08 | Phase 38.3 | Pending |
+| SEC-08 | Phase 38.3 | Complete |
 | SEC-09 | Phase 38.2 | Complete |
 | CONSENT-01 | Phase 38.2.5 | Complete |
 | CONSENT-02 | Phase 38.2.5 | Complete |
 | CONSENT-03 | Phase 38.2.5 | Complete |
 | CONSENT-04 | Phase 38.2.5 | Complete |
-| SYNC-05 | Phase 38.3 | Pending |
-| SYNC-06 | Phase 38.3 | Pending |
+| SYNC-05 | Phase 38.3 | Complete |
+| SYNC-06 | Phase 38.3 | Complete |
 | SYNC-07 | Phase 38.4 | Pending |
 | SYNC-08 | Phase 38.4 | Pending |
 | INTEG-01 | Phase 38.5 | Pending |

@@ -49,11 +49,6 @@ function createDefaultSyncService({ db, resolver }: { db: ReturnType<typeof init
   };
 }
 
-async function rebuildDefaultProjections(db: ReturnType<typeof initializeDatabase>["db"]): Promise<void> {
-  const rebuild = await loadDefaultRebuildProjections();
-  await rebuild(db);
-}
-
 function resolveSyncCommandDeps(deps: SyncCommandDeps): ResolvedSyncCommandDeps {
   return {
     handleBackgroundMode,
@@ -73,9 +68,7 @@ function resolveSyncCommandDeps(deps: SyncCommandDeps): ResolvedSyncCommandDeps 
     unregisterCleanup,
     createSyncService: createDefaultSyncService,
     loadConfig,
-    createGitSyncer: createDefaultGitSyncer,
-    auditRemoteEventLogs: auditDefaultRemoteEventLogs,
-    rebuildProjections: rebuildDefaultProjections,
+    createRemoteEventSyncService: createDefaultRemoteEventSyncService,
     experimentalRemoteSync: process.env.MEMORY_EXPERIMENTAL_REMOTE_SYNC === "1",
     runMemoryFileSync,
     reportMemoryFileResults,
@@ -194,36 +187,31 @@ export async function executeSyncCommand(
         console.log("Synchronizing events with remote Git repository...");
       }
       try {
-        const privacyPreflight = await resolved.auditRemoteEventLogs();
-        if (privacyPreflight.eventLogFindings > 0) {
-          const message = [
-            `Remote synchronization blocked: active event logs contain ${privacyPreflight.eventLogFindings} likely secret finding(s).`,
-            "Run 'memory audit-secrets --skip-db --quarantine-events' and retry after reviewing the quarantine output.",
-          ].join(" ");
-          console.error(message);
-          return { exitCode: 1 };
-        }
-
-        const syncer = await resolved.createGitSyncer();
-        
-        const syncResult = await syncer.sync(
-          config.machineId,
-          remoteUrl,
-          config.remoteSync.autoPull,
-          config.remoteSync.autoPush
-        );
+        const remoteSyncService = await resolved.createRemoteEventSyncService({ db });
+        const syncResult = await remoteSyncService.sync({
+          machineId: config.machineId,
+          repositoryUrl: remoteUrl,
+          autoPull: config.remoteSync.autoPull,
+          autoPush: config.remoteSync.autoPush,
+        });
 
         if (syncResult.success) {
           if (syncResult.rebuildNeeded) {
             if (!options.quiet) {
               console.log("Remote events pulled. Rebuilding database projections...");
             }
-            await resolved.rebuildProjections(db);
           } else {
             if (!options.quiet) {
               console.log("Git events are already up to date.");
             }
           }
+        } else if (syncResult.status === "blocked") {
+          const message = [
+            syncResult.error ?? "Remote synchronization blocked.",
+            "Run 'memory audit-secrets --skip-db --quarantine-events' and retry after reviewing the quarantine output.",
+          ].join(" ");
+          console.error(message);
+          return { exitCode: 1 };
         } else {
           console.error(`Warning: Remote synchronization failed: ${syncResult.error}`);
         }
@@ -297,23 +285,27 @@ export { runEmbeddingPass, handleModelChange } from "./embedding-pass.js";
 export { handleBackgroundMode } from "./background.js";
 export { runAmbientContextGeneration } from "./ambient.js";
 
-async function createDefaultGitSyncer() {
-  const { GitSyncer } = await import("../../../../infrastructure/hooks/git-syncer.js");
-  return new GitSyncer();
-}
-
-async function loadDefaultRebuildProjections() {
+async function createDefaultRemoteEventSyncService({ db }: { db: ReturnType<typeof initializeDatabase>["db"] }) {
+  const { RemoteEventSyncService } = await import("../../../../application/services/remote-event-sync-service.js");
+  const { GitRemoteEventTransport } = await import("../../../../infrastructure/remote/git-remote-event-transport.js");
+  const { getEventsDir } = await import("../../../../infrastructure/paths.js");
   const { rebuildProjections } = await import("../../../../infrastructure/database/event-log.js");
-  return rebuildProjections;
-}
-
-async function auditDefaultRemoteEventLogs() {
   const { SecretAuditService } = await import("../../../../infrastructure/security/secret-audit-service.js");
   const { getAllLogFiles } = await import("../../../../infrastructure/paths.js");
-  const report = await new SecretAuditService(new PatternRedactor()).audit({
-    eventLogPaths: getAllLogFiles(),
+  return new RemoteEventSyncService({
+    transport: new GitRemoteEventTransport(getEventsDir()),
+    privacyPreflight: {
+      audit: async () => {
+        const report = await new SecretAuditService(new PatternRedactor()).audit({
+          eventLogPaths: getAllLogFiles(),
+        });
+        return { eventLogFindings: report.summary.eventLogFindings };
+      },
+    },
+    projectionRebuilder: {
+      rebuild: async () => {
+        await rebuildProjections(db);
+      },
+    },
   });
-  return {
-    eventLogFindings: report.summary.eventLogFindings,
-  };
 }

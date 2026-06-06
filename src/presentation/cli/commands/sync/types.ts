@@ -32,17 +32,10 @@ export interface SyncCommandOptions {
   includeMemoryFiles?: boolean;
 }
 
-export interface RemoteSyncer {
+export interface RemoteEventSyncCommandService {
   sync(
-    machineId: string,
-    remoteUrl: string,
-    autoPull?: boolean,
-    autoPush?: boolean,
-  ): Promise<{ success: boolean; rebuildNeeded: boolean; error?: string }>;
-}
-
-export interface RemotePrivacyPreflightResult {
-  eventLogFindings: number;
+    request: import("../../../../application/services/index.js").RemoteEventSyncRequest,
+  ): Promise<import("../../../../application/services/index.js").RemoteEventSyncResult>;
 }
 
 /**
@@ -94,12 +87,8 @@ export interface SyncCommandDeps {
   };
   /** Override config loading */
   loadConfig?: () => import("../../../../infrastructure/hooks/config-manager.js").MemoryConfig;
-  /** Override remote syncer construction */
-  createGitSyncer?: () => RemoteSyncer | Promise<RemoteSyncer>;
-  /** Override privacy preflight before experimental remote event-log egress */
-  auditRemoteEventLogs?: () => Promise<RemotePrivacyPreflightResult>;
-  /** Override projection rebuild after remote pulls */
-  rebuildProjections?: (db: import("bun:sqlite").Database) => Promise<void>;
+  /** Override remote event sync service construction */
+  createRemoteEventSyncService?: (deps: { db: import("bun:sqlite").Database }) => RemoteEventSyncCommandService | Promise<RemoteEventSyncCommandService>;
   /** Explicitly enable the unfinished Phase 38 remote-sync prototype */
   experimentalRemoteSync?: boolean;
   /** Override memory file sync */

@@ -91,7 +91,7 @@
 - [x] **Phase 38.1: Canonical Event Kernel and Projection Replay** - Schema-versioned memory event envelopes, machine identity, event ordering/integrity, migration, and projection registry. Completed 2026-06-05.
 - [x] **Phase 38.2: Redaction, Privacy Governance, and Audit Commands** - Redaction before storage/indexing/egress, secret audit, provider egress policy, migration/quarantine. Completed 2026-06-06.
 - [x] **Phase 38.2.5: Consent Provenance and Memory Governance** - User-visible consent, provenance, suppression, invalidation, review, and governance events for derived memory surfaces. Completed 2026-06-06.
-- [ ] **Phase 38.3: Remote Sync Application Service and Git Transport** - Private-Git-backed remote event synchronization through application ports and shell-safe transport adapter.
+- [x] **Phase 38.3: Remote Sync Application Service and Git Transport** - Private-Git-backed remote event synchronization through application ports and shell-safe transport adapter. Completed 2026-06-06.
 - [ ] **Phase 38.4: Remote CLI, Operations, Backup, and Recovery** - `memory remote` surface, preflight, doctor, backup/restore/rollback, cross-machine verification.
 - [ ] **Phase 38.5: Secure Capability Interop** - Optional authkey readiness/status/fingerprint interop using handles, masked metadata, or proofs; no hard dependency and no plaintext secret resolution inside memory-nexus.
 - [ ] **Phase 38.6: Durable Friction Query Contract** - Stable durable `memory friction list` filters, counts, exit codes, JSON schema, timezone semantics, and privacy-safe query handling. Source: `docs/inbox/archived/2026-05-12-conversations-friction-list-durable-filters.md`.
@@ -401,7 +401,13 @@ Rationale: Phase 32 explicitly deferred friction envelope adoption per audit §1
   2. Remote refs/URLs are validated, Git environment is sanitized, and machine identity must be durable.
   3. Git-backed sync commits, fetches, merges, replays, and pushes deterministically.
   4. Integration tests cover temp bare repositories and failure paths.
-**Plans**: Placeholder directory exists; plan after Phase 38.2.
+**Status**: Completed 2026-06-06.
+**Completion Evidence**:
+  - `RemoteEventSyncService` validates durable machine identity, remote refs, supported remote URLs, and explicit local-path consent before transport calls.
+  - `GitRemoteEventTransport` implements the application transport port with argument-array Git subprocesses and sanitized environment.
+  - Experimental `memory sync` remote path now delegates privacy preflight, transport orchestration, and projection rebuild to the application service instead of constructing `GitSyncer` directly.
+  - Integration tests cover a temp bare repository with two machine event logs and rebuild-on-pull behavior; failure tests cover privacy blocking, invalid remotes, pull abort, and disabled automation.
+  - Verification: focused Phase 38.3 tests passed (87 pass, 0 fail), typecheck passed, build passed, and diff whitespace passed.
 
 ---
 
@@ -683,7 +689,7 @@ v5.0
 | 38.1. Canonical Event Kernel and Projection Replay | v5.0 | 1/1 | Complete | 2026-06-05 |
 | 38.2. Redaction, Privacy Governance, and Audit Commands | v5.0 | 1/1 | Complete | 2026-06-06 |
 | 38.2.5. Consent Provenance and Memory Governance | v5.0 | 1/1 | Complete | 2026-06-06 |
-| 38.3. Remote Sync Service and Git Transport | v5.0 | TBD | Planned | - |
+| 38.3. Remote Sync Service and Git Transport | v5.0 | 1/1 | Complete | 2026-06-06 |
 | 38.4. Remote CLI, Operations, Backup, and Recovery | v5.0 | TBD | Planned | - |
 | 38.5. Secure Capability Interop | v5.0 | TBD | Planned | - |
 | 38.6. Durable Friction Query Contract | v5.0 | TBD | Planned | - |
