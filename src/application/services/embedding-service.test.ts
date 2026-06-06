@@ -377,7 +377,7 @@ describe("EmbeddingService", () => {
             await service.embedUnembedded();
 
             const [texts] = embedBatchMock.mock.calls[0];
-            expect(texts[0]).toContain("[REDACTED:api_key]");
+            expect(texts[0]).toMatch(/\[REDACTED:api_key:[a-f0-9]{8}\]/);
             expect(texts[0]).not.toContain(rawSecret);
         });
 

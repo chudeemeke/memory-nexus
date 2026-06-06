@@ -12,9 +12,9 @@
  */
 
 import type { IEmbeddingProvider } from "../../domain/ports/embedding.js";
-import type { EmbeddingConfigData } from "../hooks/config-manager.js";
+import type { EmbeddingConfigData, ProviderEgressPolicyData } from "../hooks/config-manager.js";
 import { createHash } from "node:crypto";
-import { DEFAULT_EMBEDDING_CONFIG } from "../hooks/config-manager.js";
+import { DEFAULT_EMBEDDING_CONFIG, DEFAULT_PROVIDER_EGRESS_POLICY } from "../hooks/config-manager.js";
 import { createEmbeddingProvider } from "../providers/provider-registry.js";
 
 export class EmbeddingProviderFactory {
@@ -23,7 +23,7 @@ export class EmbeddingProviderFactory {
     /**
      * Generate a cache key from embedding config.
      */
-    private cacheKey(config: EmbeddingConfigData): string {
+    private cacheKey(config: EmbeddingConfigData, providerEgress: ProviderEgressPolicyData): string {
         const apiKeyFingerprint = config.apiKey
             ? createHash("sha256").update(config.apiKey).digest("hex").slice(0, 16)
             : "";
@@ -35,6 +35,9 @@ export class EmbeddingProviderFactory {
             config.apiKeyEnv ?? "",
             config.apiKeyRef ?? "",
             apiKeyFingerprint,
+            providerEgress.consent,
+            providerEgress.allowedHosts.join(","),
+            providerEgress.allowedProviders.join(","),
         ].join(":");
     }
 
@@ -47,12 +50,15 @@ export class EmbeddingProviderFactory {
      *
      * @throws Error if provider type is unsupported
      */
-    create(config: EmbeddingConfigData): IEmbeddingProvider {
-        const key = this.cacheKey(config);
+    create(
+        config: EmbeddingConfigData,
+        providerEgress: ProviderEgressPolicyData = DEFAULT_PROVIDER_EGRESS_POLICY,
+    ): IEmbeddingProvider {
+        const key = this.cacheKey(config, providerEgress);
         const cached = this.cache.get(key);
         if (cached) return cached;
 
-        const provider = createEmbeddingProvider(config);
+        const provider = createEmbeddingProvider(config, providerEgress);
 
         this.cache.set(key, provider);
         return provider;
@@ -64,10 +70,10 @@ export class EmbeddingProviderFactory {
      * Reads the embedding section and delegates to create().
      * Returns null if embedding is disabled.
      */
-    createFromConfig(memoryConfig: { embedding?: EmbeddingConfigData }): IEmbeddingProvider | null {
+    createFromConfig(memoryConfig: { embedding?: EmbeddingConfigData; providerEgress?: ProviderEgressPolicyData }): IEmbeddingProvider | null {
         const embeddingConfig = memoryConfig.embedding ?? DEFAULT_EMBEDDING_CONFIG;
         if (!embeddingConfig.enabled) return null;
-        return this.create(embeddingConfig);
+        return this.create(embeddingConfig, memoryConfig.providerEgress ?? DEFAULT_PROVIDER_EGRESS_POLICY);
     }
 
     /**

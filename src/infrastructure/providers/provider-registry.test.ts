@@ -19,7 +19,18 @@ import {
     unsupportedEmbeddingProviderMessage,
     unsupportedExtractionProviderMessage,
 } from "./provider-registry.js";
-import type { EmbeddingConfigData, MemoryConfig } from "../hooks/config-manager.js";
+import type { EmbeddingConfigData, MemoryConfig, ProviderEgressPolicyData } from "../hooks/config-manager.js";
+import { DEFAULT_PROVIDER_EGRESS_POLICY } from "../hooks/config-manager.js";
+
+const TEST_PROVIDER_EGRESS_POLICY: ProviderEgressPolicyData = {
+    ...DEFAULT_PROVIDER_EGRESS_POLICY,
+    consent: "granted",
+    allowedHosts: [
+        ...DEFAULT_PROVIDER_EGRESS_POLICY.allowedHosts,
+        "gateway.example.test",
+        "custom.openai.com",
+    ],
+};
 
 function embeddingConfig(overrides: Partial<EmbeddingConfigData> = {}): EmbeddingConfigData {
     return {
@@ -32,8 +43,8 @@ function embeddingConfig(overrides: Partial<EmbeddingConfigData> = {}): Embeddin
     };
 }
 
-function memoryConfig(embedding: EmbeddingConfigData): Pick<MemoryConfig, "embedding"> {
-    return { embedding };
+function memoryConfig(embedding: EmbeddingConfigData): Pick<MemoryConfig, "embedding" | "providerEgress"> {
+    return { embedding, providerEgress: TEST_PROVIDER_EGRESS_POLICY };
 }
 
 describe("provider-registry", () => {
@@ -84,7 +95,7 @@ describe("provider-registry", () => {
             model: "text-embedding-3-small",
             dimensions: 1536,
             apiKey: "openai-test-key",
-        })).readyReason).toBe("Using deprecated plaintext config; prefer environment injection or embedding.apiKeyEnv");
+        }), TEST_PROVIDER_EGRESS_POLICY).readyReason).toBe("Using deprecated plaintext config; prefer environment injection or embedding.apiKeyEnv");
         process.env.MEMORY_NEXUS_REGISTRY_OPENAI_KEY = "openai-test-key";
         try {
             expect(checkEmbeddingProviderReadiness(embeddingConfig({
@@ -92,7 +103,7 @@ describe("provider-registry", () => {
                 model: "text-embedding-3-small",
                 dimensions: 1536,
                 apiKeyEnv: "MEMORY_NEXUS_REGISTRY_OPENAI_KEY",
-            }))).toEqual({ ready: true, readyReason: undefined });
+            }), TEST_PROVIDER_EGRESS_POLICY)).toEqual({ ready: true, readyReason: undefined });
         } finally {
             delete process.env.MEMORY_NEXUS_REGISTRY_OPENAI_KEY;
         }
@@ -119,7 +130,7 @@ describe("provider-registry", () => {
             dimensions: 1536,
             baseUrl: "https://gateway.example.test/v1",
             apiKey: "compat-test-key",
-        }));
+        }), TEST_PROVIDER_EGRESS_POLICY);
         expect(compatibleProvider).toBeInstanceOf(OpenAiProvider);
         expect(compatibleProvider.name).toBe("openai-compatible");
     });
@@ -130,7 +141,7 @@ describe("provider-registry", () => {
             model: "text-embedding-3-small",
             dimensions: 1536,
             apiKey: "openai-test-key",
-        }));
+        }), TEST_PROVIDER_EGRESS_POLICY);
         const ollamaProvider = createEmbeddingProvider(embeddingConfig({
             provider: "ollama",
             model: "nomic-embed-text",

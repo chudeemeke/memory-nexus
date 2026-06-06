@@ -30,6 +30,7 @@ import {
   executeUninstallCommand,
   executeStatusCommand,
   executeDoctorCommand,
+  executeAuditSecretsCommand,
   executePurgeCommand,
   executeExportCommand,
   executeImportCommand,
@@ -46,6 +47,7 @@ import {
   type InstallOptions,
   type UninstallOptions,
   type DoctorOptions,
+  type AuditSecretsOptions,
   type PurgeCommandOptions,
   type ExportOptions,
   type ImportOptions,
@@ -449,6 +451,15 @@ describe("Programmatic API", () => {
     }, 30_000);
   });
 
+  describe("executeAuditSecretsCommand", () => {
+    test("returns CommandResult for an explicit empty scan", async () => {
+      const options: AuditSecretsOptions = { skipDb: true, skipEvents: true, json: true };
+      const result = await executeAuditSecretsCommand(options);
+      expectCommandResult(result);
+      expect(result.exitCode).toBe(0);
+    }, 30_000);
+  });
+
   describe("Public API type exports", () => {
     test("SearchMode union covers all valid modes", () => {
       const modes: SearchMode[] = ["auto", "fts", "vector", "hybrid"];
@@ -514,6 +525,7 @@ describe("Programmatic API", () => {
         await executeStatsCommand({ quiet: true }),
         await executeContextCommand("test", { quiet: true }),
         await executeDoctorCommand({}),
+        await executeAuditSecretsCommand({ skipDb: true, skipEvents: true }),
         executeCompletionCommand("bash"),
       ];
 

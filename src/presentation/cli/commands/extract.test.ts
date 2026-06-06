@@ -11,7 +11,7 @@ import * as connectionModule from "../../../infrastructure/database/connection.j
 import { ClaudeCliExtractionProvider } from "../../../infrastructure/llm/claude-cli-extractor.js";
 import { Command } from "commander";
 import { Database } from "bun:sqlite";
-import { unlinkSync, existsSync } from "fs";
+import { unlinkSync, existsSync, writeFileSync } from "fs";
 import { join } from "path";
 import { tmpdir } from "os";
 import { createSchema } from "../../../infrastructure/database/schema.js";
@@ -153,6 +153,10 @@ describe("Extract CLI Command", () => {
         dimensions: 1536,
         batchSize: 10,
         apiKey: "test-key-not-secret",
+      },
+      providerEgress: {
+        ...DEFAULT_CONFIG.providerEgress,
+        consent: "granted",
       },
     });
 
@@ -804,6 +808,14 @@ describe("Extract CLI Command", () => {
     ]);
 
     try {
+      writeFileSync(
+        join(tempDir, "config", "memory", "config.json"),
+        JSON.stringify({
+          embedding: { enabled: false },
+          providerEgress: { consent: "granted" },
+        })
+      );
+
       const cmd = createExtractCommand();
       await cmd.parseAsync(["node", "memory", "nexus", "--json"]);
 

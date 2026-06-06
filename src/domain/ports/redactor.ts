@@ -9,6 +9,9 @@ export type RedactionKind =
 export interface RedactionFinding {
   kind: RedactionKind;
   placeholder: string;
+  hash?: string | undefined;
+  ruleVersion?: string | undefined;
+  path?: string | undefined;
 }
 
 export interface RedactionResult {

@@ -10,8 +10,19 @@ import { EmbeddingProviderFactory } from "./embedding-provider-factory.js";
 import { TransformersJsProvider } from "./transformers-js-provider.js";
 import { OpenAiProvider } from "./openai-provider.js";
 import { OllamaProvider } from "./ollama-provider.js";
-import type { EmbeddingConfigData } from "../hooks/config-manager.js";
-import { DEFAULT_EMBEDDING_CONFIG } from "../hooks/config-manager.js";
+import type { EmbeddingConfigData, ProviderEgressPolicyData } from "../hooks/config-manager.js";
+import { DEFAULT_EMBEDDING_CONFIG, DEFAULT_PROVIDER_EGRESS_POLICY } from "../hooks/config-manager.js";
+
+const TEST_PROVIDER_EGRESS_POLICY: ProviderEgressPolicyData = {
+    ...DEFAULT_PROVIDER_EGRESS_POLICY,
+    consent: "granted",
+    allowedHosts: [
+        ...DEFAULT_PROVIDER_EGRESS_POLICY.allowedHosts,
+        "custom.openai.com",
+        "gateway.example.test",
+        "192.168.1.100",
+    ],
+};
 
 describe("EmbeddingProviderFactory", () => {
     let factory: EmbeddingProviderFactory;
@@ -29,7 +40,7 @@ describe("EmbeddingProviderFactory", () => {
                 dimensions: 384,
             };
 
-            const provider = factory.create(config);
+            const provider = factory.create(config, TEST_PROVIDER_EGRESS_POLICY);
             expect(provider).toBeInstanceOf(TransformersJsProvider);
         });
 
@@ -41,7 +52,7 @@ describe("EmbeddingProviderFactory", () => {
                 dimensions: 384,
             };
 
-            const provider = factory.create(config);
+            const provider = factory.create(config, TEST_PROVIDER_EGRESS_POLICY);
             expect(provider.name).toBe("transformers-js");
             expect(provider.model).toBe("Xenova/all-MiniLM-L6-v2");
             expect(provider.dimensions).toBe(384);
@@ -55,7 +66,7 @@ describe("EmbeddingProviderFactory", () => {
                 dimensions: 384,
             };
 
-            const provider = factory.create(config);
+            const provider = factory.create(config, TEST_PROVIDER_EGRESS_POLICY);
             expect(provider.isReady()).toBe(false);
         });
 
@@ -115,7 +126,7 @@ describe("EmbeddingProviderFactory", () => {
                 apiKey: "sk-test-key",
             };
 
-            const provider = factory.create(config);
+            const provider = factory.create(config, TEST_PROVIDER_EGRESS_POLICY);
             expect(provider).toBeInstanceOf(OpenAiProvider);
             expect(provider.name).toBe("openai");
             expect(provider.model).toBe("text-embedding-3-small");
@@ -135,7 +146,7 @@ describe("EmbeddingProviderFactory", () => {
                     apiKeyEnv: "MEMORY_OPENAI_API_KEY",
                 };
 
-                const provider = factory.create(config);
+                const provider = factory.create(config, TEST_PROVIDER_EGRESS_POLICY);
                 expect(provider).toBeInstanceOf(OpenAiProvider);
             } finally {
                 if (oldValue === undefined) {
@@ -178,7 +189,7 @@ describe("EmbeddingProviderFactory", () => {
                 baseUrl: "https://custom.openai.com/v1",
             };
 
-            const provider = factory.create(config);
+            const provider = factory.create(config, TEST_PROVIDER_EGRESS_POLICY);
             expect(provider).toBeInstanceOf(OpenAiProvider);
             expect(provider.model).toBe("text-embedding-3-large");
             expect(provider.dimensions).toBe(3072);
@@ -193,7 +204,7 @@ describe("EmbeddingProviderFactory", () => {
                 batchSize: 100,
             };
 
-            const provider = factory.create(config);
+            const provider = factory.create(config, TEST_PROVIDER_EGRESS_POLICY);
             expect(provider).toBeInstanceOf(OllamaProvider);
             expect(provider.name).toBe("ollama");
             expect(provider.model).toBe("nomic-embed-text");
@@ -210,7 +221,7 @@ describe("EmbeddingProviderFactory", () => {
                 baseUrl: "http://192.168.1.100:11434",
             };
 
-            const provider = factory.create(config);
+            const provider = factory.create(config, TEST_PROVIDER_EGRESS_POLICY);
             expect(provider).toBeInstanceOf(OllamaProvider);
             expect(provider.model).toBe("mxbai-embed-large");
             expect(provider.dimensions).toBe(1024);
@@ -230,7 +241,7 @@ describe("EmbeddingProviderFactory", () => {
                     baseUrl: "https://gateway.example.test/v1",
                 };
 
-                const provider = factory.create(config);
+                const provider = factory.create(config, TEST_PROVIDER_EGRESS_POLICY);
                 expect(provider).toBeInstanceOf(OpenAiProvider);
                 expect(provider.name).toBe("openai-compatible");
                 expect(provider.model).toBe("text-embedding-3-small");
@@ -267,8 +278,8 @@ describe("EmbeddingProviderFactory", () => {
                 apiKey: "sk-test",
             };
 
-            const provider1 = factory.create(config);
-            const provider2 = factory.create(config);
+            const provider1 = factory.create(config, TEST_PROVIDER_EGRESS_POLICY);
+            const provider2 = factory.create(config, TEST_PROVIDER_EGRESS_POLICY);
             expect(provider1).toBe(provider2);
         });
 
@@ -369,6 +380,7 @@ describe("EmbeddingProviderFactory", () => {
                     batchSize: 100,
                     apiKey: "sk-test",
                 },
+                providerEgress: TEST_PROVIDER_EGRESS_POLICY,
             };
 
             const provider = factory.createFromConfig(memoryConfig);

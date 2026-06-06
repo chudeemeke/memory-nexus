@@ -74,6 +74,7 @@ function resolveSyncCommandDeps(deps: SyncCommandDeps): ResolvedSyncCommandDeps 
     createSyncService: createDefaultSyncService,
     loadConfig,
     createGitSyncer: createDefaultGitSyncer,
+    auditRemoteEventLogs: auditDefaultRemoteEventLogs,
     rebuildProjections: rebuildDefaultProjections,
     experimentalRemoteSync: process.env.MEMORY_EXPERIMENTAL_REMOTE_SYNC === "1",
     runMemoryFileSync,
@@ -179,8 +180,8 @@ export async function executeSyncCommand(
     reporter.stop();
     resolved.reportResults(result, startTime, options);
 
-    // Git Remote Sync is Phase 38 work. Keep it opt-in until its threat model,
-    // event envelope, conflict semantics, and privacy gates are finished.
+    // Git Remote Sync remains opt-in until consent/provenance, transport,
+    // conflict semantics, operations, backup, and recovery gates are finished.
     const config = resolved.loadConfig();
     const remoteUrl = config.remoteSync?.repositoryUrl;
     const remoteConfigured =
@@ -193,6 +194,16 @@ export async function executeSyncCommand(
         console.log("Synchronizing events with remote Git repository...");
       }
       try {
+        const privacyPreflight = await resolved.auditRemoteEventLogs();
+        if (privacyPreflight.eventLogFindings > 0) {
+          const message = [
+            `Remote synchronization blocked: active event logs contain ${privacyPreflight.eventLogFindings} likely secret finding(s).`,
+            "Run 'memory audit-secrets --skip-db --quarantine-events' and retry after reviewing the quarantine output.",
+          ].join(" ");
+          console.error(message);
+          return { exitCode: 1 };
+        }
+
         const syncer = await resolved.createGitSyncer();
         
         const syncResult = await syncer.sync(
@@ -220,7 +231,7 @@ export async function executeSyncCommand(
         console.error(`Warning: Remote synchronization failed to execute: ${unknownErrorMessage(err)}`);
       }
     } else if (remoteConfigured && !options.quiet) {
-      console.warn("Remote synchronization is configured but disabled until Phase 38 readiness. Set MEMORY_EXPERIMENTAL_REMOTE_SYNC=1 only for explicit prototype testing.");
+      console.warn("Remote synchronization is configured but disabled until Phase 38.2.5/38.3/38.4 readiness. Set MEMORY_EXPERIMENTAL_REMOTE_SYNC=1 only for explicit prototype testing.");
     }
 
     const legacyMemoryFilesEnabled =
@@ -294,4 +305,15 @@ async function createDefaultGitSyncer() {
 async function loadDefaultRebuildProjections() {
   const { rebuildProjections } = await import("../../../../infrastructure/database/event-log.js");
   return rebuildProjections;
+}
+
+async function auditDefaultRemoteEventLogs() {
+  const { SecretAuditService } = await import("../../../../infrastructure/security/secret-audit-service.js");
+  const { getAllLogFiles } = await import("../../../../infrastructure/paths.js");
+  const report = await new SecretAuditService(new PatternRedactor()).audit({
+    eventLogPaths: getAllLogFiles(),
+  });
+  return {
+    eventLogFindings: report.summary.eventLogFindings,
+  };
 }

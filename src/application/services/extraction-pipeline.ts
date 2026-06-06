@@ -24,6 +24,7 @@ import type {
 } from "../../domain/ports/repositories.js";
 import { appendEvent, rebuildProjections } from "../../infrastructure/database/event-log.js";
 import { Message } from "../../domain/entities/message.js";
+import { unknownErrorMessage } from "../../domain/errors/unknown-error.js";
 
 const NOOP_REDACTOR: IRedactor = {
   redactText: (input) => ({ text: input, findings: [] }),
@@ -130,13 +131,14 @@ export class ExtractionPipeline {
 
     if (useEmbeddings && this.embeddingProvider) {
       try {
-        const activeRes = await this.embeddingProvider.embedBatch(activeFacts.map((f) => f.content));
+        const activeRes = await this.embeddingProvider.embedBatch(activeFacts.map((f) => this.redactor.redactText(f.content).text));
         activeEmbeddings = activeRes.map((r) => r.embedding);
 
         const candidateRes = await this.embeddingProvider.embedBatch(candidates.map((c) => c.content));
         candidateEmbeddings = candidateRes.map((r) => r.embedding);
       } catch (err) {
-        console.warn("Failed to generate vector embeddings during extraction comparison, falling back to Jaccard:", err);
+        const safeMessage = this.redactor.redactText(unknownErrorMessage(err)).text;
+        console.warn("Failed to generate vector embeddings during extraction comparison, falling back to Jaccard:", safeMessage);
       }
     }
 

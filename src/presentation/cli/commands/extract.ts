@@ -93,7 +93,10 @@ export async function createDefaultEmbedder(
 ): Promise<IEmbeddingProvider | undefined> {
   const { EmbeddingProviderFactory } = await import("../../../infrastructure/embedding/embedding-provider-factory.js");
   const factory = new EmbeddingProviderFactory();
-  const embedder = factory.create(config.embedding);
+  const embedder = factory.createFromConfig(config);
+  if (!embedder) {
+    return undefined;
+  }
   await embedder.initialize();
   return embedder;
 }

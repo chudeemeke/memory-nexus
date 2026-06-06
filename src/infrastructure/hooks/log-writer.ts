@@ -27,6 +27,7 @@ import {
 } from "node:fs";
 import { dirname, join } from "node:path";
 import { getLogDir as pathsGetLogDir } from "../paths.js";
+import { PatternRedactor } from "../security/pattern-redactor.js";
 
 /**
  * Log entry structure for sync operations
@@ -61,6 +62,8 @@ export interface LogEntry {
  * Input type for logSync (timestamp added automatically)
  */
 export type LogEntryInput = Omit<LogEntry, "timestamp">;
+
+const LOG_REDACTOR = new PatternRedactor();
 
 /**
  * Get the directory containing the log file.
@@ -108,7 +111,7 @@ export function logSync(entry: LogEntryInput, logPathOverride?: string): void {
 
         const logEntry: LogEntry = {
             timestamp: new Date().toISOString(),
-            ...entry,
+            ...redactLogEntry(entry),
         };
 
         appendFileSync(logPath, JSON.stringify(logEntry) + "\n");
@@ -116,6 +119,10 @@ export function logSync(entry: LogEntryInput, logPathOverride?: string): void {
         // Silently ignore write errors to not break sync operations
         // This is intentional - logging should never cause failures
     }
+}
+
+function redactLogEntry(entry: LogEntryInput): LogEntryInput {
+    return LOG_REDACTOR.redactJson(entry).value;
 }
 
 /**

@@ -33,6 +33,7 @@ import {
   createExtractCommand,
   createFactsCommand,
   createRemoteCommand,
+  createAuditSecretsCommand,
 } from "./commands/index.js";
 
 
@@ -79,6 +80,7 @@ program.addCommand(createInstallCommand());
 program.addCommand(createUninstallCommand());
 program.addCommand(createStatusCommand());
 program.addCommand(createDoctorCommand());
+program.addCommand(createAuditSecretsCommand());
 program.addCommand(createCompletionCommand());
 program.addCommand(createBrowseCommand());
 

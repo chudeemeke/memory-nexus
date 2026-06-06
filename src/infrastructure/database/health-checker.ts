@@ -12,13 +12,14 @@
  */
 
 import { Database } from "bun:sqlite";
-import { accessSync, constants, existsSync, statSync } from "node:fs";
+import { accessSync, constants, existsSync, readFileSync, statSync } from "node:fs";
 import { homedir } from "node:os";
 import { join } from "node:path";
 import { getDefaultDbPath } from "./connection.js";
 import { unknownErrorMessage } from "../../domain/errors/unknown-error.js";
 import {
     loadConfig,
+    getConfigPath,
     getConfigDir,
     getLogDir,
     checkHooksInstalled,
@@ -32,6 +33,11 @@ import {
     getExtractionModel,
     resolveExtractionProviderId,
 } from "../providers/provider-registry.js";
+import {
+    assessEmbeddingProviderEgress,
+    assessExtractionProviderEgress,
+    type ProviderEgressAssessment,
+} from "../providers/provider-egress-policy.js";
 
 /**
  * Database health status
@@ -147,6 +153,17 @@ export interface LlmExtractionHealth {
     readyReason?: string | undefined;
 }
 
+export interface ProviderEgressHealth {
+    /** Configured consent state */
+    consent: MemoryConfig["providerEgress"]["consent"];
+    /** Embedding provider egress assessment, or disabled when embeddings are off */
+    embedding: ProviderEgressAssessment;
+    /** LLM extraction provider egress assessment */
+    llmExtraction: ProviderEgressAssessment;
+    /** User-visible warnings for allowed remote egress */
+    warnings: string[];
+}
+
 /**
  * Complete health check result
  */
@@ -167,6 +184,8 @@ export interface HealthCheckResult {
     searchCapability: SearchCapability;
     /** LLM extraction provider status */
     llmExtraction: LlmExtractionHealth;
+    /** Remote provider egress consent and allowlist status */
+    providerEgress: ProviderEgressHealth;
 }
 
 
@@ -295,6 +314,7 @@ export function checkHookStatus(
  * Valid log levels
  */
 const VALID_LOG_LEVELS = ["debug", "info", "warn", "error"];
+const VALID_PROVIDER_EGRESS_CONSENT = ["unset", "granted", "denied"];
 
 /**
  * Validate configuration and collect issues
@@ -306,6 +326,7 @@ export function checkConfigValidity(configPath?: string): ConfigHealth {
     const issues: string[] = [];
 
     try {
+        const rawProviderEgressIssues = checkRawProviderEgressConfig(configPath);
         const config = loadConfig(configPath);
 
         // Validate each field type
@@ -337,6 +358,24 @@ export function checkConfigValidity(configPath?: string): ConfigHealth {
             issues.push("showFailures is not a boolean");
         }
 
+        if (!VALID_PROVIDER_EGRESS_CONSENT.includes(config.providerEgress.consent)) {
+            issues.push(`providerEgress.consent "${config.providerEgress.consent}" is not valid (expected: ${VALID_PROVIDER_EGRESS_CONSENT.join(", ")})`);
+        }
+
+        if (!Array.isArray(config.providerEgress.allowedHosts) || !config.providerEgress.allowedHosts.every((host) => typeof host === "string" && host.trim() !== "")) {
+            issues.push("providerEgress.allowedHosts must be an array of non-empty strings");
+        }
+
+        if (!Array.isArray(config.providerEgress.allowedProviders) || !config.providerEgress.allowedProviders.every((provider) => typeof provider === "string" && provider.trim() !== "")) {
+            issues.push("providerEgress.allowedProviders must be an array of non-empty strings");
+        }
+
+        for (const issue of rawProviderEgressIssues) {
+            if (!issues.includes(issue)) {
+                issues.push(issue);
+            }
+        }
+
         return {
             valid: issues.length === 0,
             issues,
@@ -349,6 +388,53 @@ export function checkConfigValidity(configPath?: string): ConfigHealth {
             issues,
         };
     }
+}
+
+function checkRawProviderEgressConfig(configPathOverride?: string): string[] {
+    const issues: string[] = [];
+    const configPath = getConfigPath(configPathOverride);
+    if (!existsSync(configPath)) {
+        return issues;
+    }
+
+    try {
+        const parsed = JSON.parse(readFileSync(configPath, "utf-8")) as unknown;
+        if (!isRecord(parsed) || parsed.providerEgress === undefined) {
+            return issues;
+        }
+
+        const providerEgress = parsed.providerEgress;
+        if (!isRecord(providerEgress)) {
+            return ["providerEgress must be an object"];
+        }
+
+        if (
+            "consent" in providerEgress &&
+            (typeof providerEgress.consent !== "string" || !VALID_PROVIDER_EGRESS_CONSENT.includes(providerEgress.consent))
+        ) {
+            issues.push(`providerEgress.consent "${String(providerEgress.consent)}" is not valid (expected: ${VALID_PROVIDER_EGRESS_CONSENT.join(", ")})`);
+        }
+
+        if ("allowedHosts" in providerEgress && !isNonEmptyStringArray(providerEgress.allowedHosts)) {
+            issues.push("providerEgress.allowedHosts must be an array of non-empty strings");
+        }
+
+        if ("allowedProviders" in providerEgress && !isNonEmptyStringArray(providerEgress.allowedProviders)) {
+            issues.push("providerEgress.allowedProviders must be an array of non-empty strings");
+        }
+    } catch {
+        return issues;
+    }
+
+    return issues;
+}
+
+function isNonEmptyStringArray(value: unknown): value is string[] {
+    return Array.isArray(value) && value.every((item) => typeof item === "string" && item.trim() !== "");
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+    return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
 /**
@@ -387,7 +473,7 @@ export function checkEmbeddingConfig(configPath?: string): EmbeddingHealth {
     const config = loadConfig(configPath);
     const embedding = config.embedding;
 
-    const readiness = checkEmbeddingProviderReadiness(embedding);
+    const readiness = checkEmbeddingProviderReadiness(embedding, config.providerEgress);
 
     return {
         configured: true,
@@ -416,6 +502,32 @@ export function checkLlmExtractionHealth(configPath?: string): LlmExtractionHeal
         model: getExtractionModel(config, provider),
         ready: readiness.ready,
         readyReason: readiness.readyReason,
+    };
+}
+
+export function checkProviderEgressHealth(configPath?: string): ProviderEgressHealth {
+    const config = loadConfig(configPath);
+    const extractionProvider = resolveExtractionProviderId(config);
+    const embedding = config.embedding.enabled
+        ? assessEmbeddingProviderEgress(config.embedding, config.providerEgress)
+        : {
+            required: false,
+            allowed: true,
+            target: "disabled",
+            capability: "embedding" as const,
+            provider: config.embedding.provider,
+            warnings: [],
+        };
+    const llmExtraction = assessExtractionProviderEgress(config, extractionProvider);
+
+    return {
+        consent: config.providerEgress.consent,
+        embedding,
+        llmExtraction,
+        warnings: [
+            ...embedding.warnings,
+            ...llmExtraction.warnings,
+        ],
     };
 }
 
@@ -479,6 +591,9 @@ export function runHealthCheck(overrides?: HealthCheckOverrides): HealthCheckRes
     // LLM Fact Extraction health
     const llmExtraction = checkLlmExtractionHealth(configPath);
 
+    // Provider egress policy
+    const providerEgress = checkProviderEgressHealth(configPath);
+
     return {
         database,
         permissions,
@@ -488,6 +603,7 @@ export function runHealthCheck(overrides?: HealthCheckOverrides): HealthCheckRes
         sqliteVec,
         searchCapability,
         llmExtraction,
+        providerEgress,
     };
 }
 

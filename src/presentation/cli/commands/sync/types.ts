@@ -41,6 +41,10 @@ export interface RemoteSyncer {
   ): Promise<{ success: boolean; rebuildNeeded: boolean; error?: string }>;
 }
 
+export interface RemotePrivacyPreflightResult {
+  eventLogFindings: number;
+}
+
 /**
  * Dependency overrides for executeSyncCommand.
  *
@@ -92,6 +96,8 @@ export interface SyncCommandDeps {
   loadConfig?: () => import("../../../../infrastructure/hooks/config-manager.js").MemoryConfig;
   /** Override remote syncer construction */
   createGitSyncer?: () => RemoteSyncer | Promise<RemoteSyncer>;
+  /** Override privacy preflight before experimental remote event-log egress */
+  auditRemoteEventLogs?: () => Promise<RemotePrivacyPreflightResult>;
   /** Override projection rebuild after remote pulls */
   rebuildProjections?: (db: import("bun:sqlite").Database) => Promise<void>;
   /** Explicitly enable the unfinished Phase 38 remote-sync prototype */

@@ -78,6 +78,7 @@ export {
   checkHookStatus,
   checkSqliteVecAvailability,
   checkEmbeddingConfig,
+  checkProviderEgressHealth,
   runHealthCheck,
   type DatabaseHealth,
   type PermissionsHealth,
@@ -88,4 +89,5 @@ export {
   type HealthCheckResult,
   type HealthCheckOverrides,
   type SearchCapability,
+  type ProviderEgressHealth,
 } from "./health-checker.js";

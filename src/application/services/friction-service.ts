@@ -25,6 +25,12 @@ import {
     type FrictionCategory,
 } from "../../domain/entities/friction-entry.js";
 import { ErrorCode, MemoryError } from "../../domain/errors/index.js";
+import type { IRedactor } from "../../domain/ports/redactor.js";
+
+const NOOP_REDACTOR: IRedactor = {
+    redactText: (input) => ({ text: input, findings: [] }),
+    redactJson: (input) => ({ value: input, findings: [] }),
+};
 
 /**
  * Parameters for logging a new friction entry.
@@ -58,7 +64,10 @@ export interface ListFrictionOptions {
  * Enforces business rules: defaults, validation, state transitions.
  */
 export class FrictionService {
-    constructor(private readonly repository: IFrictionRepository) {}
+    constructor(
+        private readonly repository: IFrictionRepository,
+        private readonly redactor: IRedactor = NOOP_REDACTOR
+    ) {}
 
     /**
      * Log a new friction entry.
@@ -71,13 +80,13 @@ export class FrictionService {
      */
     async log(params: LogFrictionParams): Promise<FrictionEntry> {
         const entry = FrictionEntry.create({
-            description: params.description,
+            description: this.redactor.redactText(params.description).text,
             severity: params.severity ?? "medium",
             category: params.category ?? "cli",
-            tool: params.tool ?? "memory",
+            tool: this.redactor.redactText(params.tool ?? "memory").text,
             status: "open",
-            context: params.context,
-            sourceProject: params.sourceProject,
+            context: params.context ? this.redactor.redactText(params.context).text : undefined,
+            sourceProject: params.sourceProject ? this.redactor.redactText(params.sourceProject).text : undefined,
             loggedAt: params.loggedAt ?? new Date(),
         } as any);
 

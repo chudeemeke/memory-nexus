@@ -799,7 +799,7 @@ describe("SyncService", () => {
           data: {
             uuid: "result-tool-secret",
             toolUseId: "tool-secret",
-            content: `Authorization: Bearer abcdefghijklmnopqrstuvwxyz123456`,
+            content: `Authorization: ${["Bearer", "abcdefghijklmnopqrstuvwxyz123456"].join(" ")}`,
             isError: false,
             timestamp,
           },
@@ -813,9 +813,9 @@ describe("SyncService", () => {
 
       expect(result.success).toBe(true);
       const persisted = JSON.stringify({ savedMessages, savedToolUses });
-      expect(persisted).toContain("[REDACTED:api_key]");
-      expect(persisted).toContain("[REDACTED:env_secret]");
-      expect(persisted).toContain("[REDACTED:bearer_token]");
+      expect(persisted).toMatch(/\[REDACTED:api_key:[a-f0-9]{8}\]/);
+      expect(persisted).toMatch(/\[REDACTED:env_secret:[a-f0-9]{8}\]/);
+      expect(persisted).toMatch(/\[REDACTED:bearer_token:[a-f0-9]{8}\]/);
       expect(persisted).not.toContain(rawSecret);
       expect(persisted).not.toContain("abcdefghijklmnopqrstuvwxyz123456");
     });

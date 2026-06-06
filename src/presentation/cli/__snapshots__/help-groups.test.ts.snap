@@ -40,6 +40,8 @@ System Commands:
                                   sync
   status [options]                Show system status, health, and statistics
   doctor [options]                Check system health and diagnose issues
+  audit-secrets [options]         Scan memory database and event logs for likely
+                                  leaked secrets
   completion <shell>              Generate shell completion script
   browse [options]                Interactive session browser
 

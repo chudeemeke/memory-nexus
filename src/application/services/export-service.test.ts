@@ -164,7 +164,7 @@ describe("Export Service", () => {
         INSERT INTO tool_uses (id, session_id, name, input, timestamp, status, result)
         VALUES ('tool-secret', 'session-secret', 'Read',
           '{"token":"${secret}"}', '2024-01-01T00:00:01Z', 'success',
-          'Bearer abcdefghijklmnopqrstuvwxyz')
+          '${["Bearer", "abcdefghijklmnopqrstuvwxyz"].join(" ")}')
       `);
       db.exec(`
         INSERT INTO facts (uuid, type, project, content, metadata, observed_at)
@@ -177,8 +177,8 @@ describe("Export Service", () => {
       const content = await Bun.file(exportPath).text();
       expect(content).not.toContain(secret);
       expect(content).not.toContain("abcdefghijklmnopqrstuvwxyz");
-      expect(content).toContain("[REDACTED:api_key]");
-      expect(content).toContain("[REDACTED:bearer_token]");
+      expect(content).toMatch(/\[REDACTED:api_key:[a-f0-9]{8}\]/);
+      expect(content).toMatch(/\[REDACTED:bearer_token:[a-f0-9]{8}\]/);
     });
 
     test("can explicitly include sensitive values for raw backup workflows", async () => {

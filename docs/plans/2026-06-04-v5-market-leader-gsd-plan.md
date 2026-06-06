@@ -128,6 +128,8 @@ Exit gates:
 
 ### Phase 38.2 - Redaction, Privacy Governance, and Audit Commands
 
+Status: completed 2026-06-06. See `.planning/phases/38.2-redaction-privacy-governance-audit/38.2-01-SUMMARY.md`.
+
 Goal: make privacy controls load-bearing before remote sync.
 
 Tasks:

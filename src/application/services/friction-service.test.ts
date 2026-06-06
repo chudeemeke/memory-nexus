@@ -22,6 +22,7 @@ import { MemoryError } from "../../domain/errors/index.js";
 import { existsSync, writeFileSync, mkdtempSync, unlinkSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { tmpdir } from "node:os";
+import { PatternRedactor } from "../../infrastructure/security/pattern-redactor.js";
 
 /**
  * Create a mock IFrictionRepository.
@@ -256,6 +257,22 @@ describe("FrictionService", () => {
             });
 
             expect(entry.loggedAt.toISOString()).toBe("2026-03-08T00:00:00.000Z");
+        });
+
+        it("redacts secrets before saving friction entries", async () => {
+            const rawSecret = ["sk", "test_abcdefghijklmnopqrstuvwxyz123456"].join("-");
+            const redactingService = new FrictionService(repo, new PatternRedactor());
+
+            const entry = await redactingService.log({
+                description: `Tool printed ${rawSecret}`,
+                context: `OPENAI_API_KEY=${rawSecret}`,
+                tool: "memory",
+            });
+
+            expect(entry.description).not.toContain(rawSecret);
+            expect(entry.context).not.toContain(rawSecret);
+            expect(entry.description).toMatch(/\[REDACTED:api_key:[a-f0-9]{8}\]/);
+            expect(entry.context).toMatch(/OPENAI_API_KEY=\[REDACTED:env_secret:[a-f0-9]{8}\]/);
         });
     });
 

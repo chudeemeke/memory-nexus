@@ -476,6 +476,7 @@ export async function executeStatusCommand(
     if (options.embedding || options.all) {
         outputSections.push(formatEmbeddingSection(status, useColor));
         outputSections.push(formatLlmExtractionSection(status, useColor));
+        outputSections.push(formatProviderEgressSection(status, useColor));
     }
 
 
@@ -683,6 +684,62 @@ function formatLlmExtractionSection(status: StatusInfo, useColor: boolean): stri
     return lines.join("\n");
 }
 
+function formatProviderEgressSection(status: StatusInfo, useColor: boolean): string {
+    const providerEgress = getProviderEgressForFormatting(status);
+    const lines: string[] = [];
+    lines.push("Provider Egress");
+    lines.push(`  ${formatStatus(providerEgress.consent === "granted", useColor)} Consent: ${providerEgress.consent}`);
+    lines.push(formatProviderEgressAssessment("Embeddings", providerEgress.embedding, useColor));
+    lines.push(formatProviderEgressAssessment("LLM Extraction", providerEgress.llmExtraction, useColor));
+    if (providerEgress.warnings.length > 0) {
+        for (const warning of providerEgress.warnings) {
+            lines.push(`  ${yellow(`Warning: ${warning}`, useColor)}`);
+        }
+    }
+    return lines.join("\n");
+}
+
+function formatProviderEgressAssessment(
+    label: string,
+    assessment: StatusInfo["health"]["providerEgress"]["embedding"],
+    useColor: boolean,
+): string {
+    const target = assessment.host ?? assessment.target;
+    if (!assessment.required) {
+        return `  ${formatStatus(true, useColor)} ${label}: local/none (${target})`;
+    }
+    if (assessment.allowed) {
+        return `  ${formatStatus(true, useColor)} ${label}: allowed (${target})`;
+    }
+    return `  ${formatStatus(false, useColor)} ${label}: blocked - ${assessment.reason}`;
+}
+
+function getProviderEgressForFormatting(status: StatusInfo): StatusInfo["health"]["providerEgress"] {
+    const health = status.health as Partial<StatusInfo["health"]> | undefined;
+    const embeddingProvider = health?.embedding?.provider ?? "unknown";
+    const llmProvider = health?.llmExtraction?.provider ?? "unknown";
+    return health?.providerEgress ?? {
+        consent: "unset",
+        embedding: {
+            required: false,
+            allowed: true,
+            target: embeddingProvider,
+            capability: "embedding",
+            provider: embeddingProvider,
+            warnings: [],
+        },
+        llmExtraction: {
+            required: false,
+            allowed: true,
+            target: llmProvider,
+            capability: "extraction",
+            provider: llmProvider,
+            warnings: [],
+        },
+        warnings: [],
+    };
+}
+
 
 /**
  * Format a boolean value as a status indicator.
@@ -827,6 +884,13 @@ export function formatStatusOutput(status: StatusInfo): void {
     console.log(`  timeout:           ${status.config.timeout}ms`);
     console.log(`  logLevel:          ${status.config.logLevel}`);
     console.log(`  showFailures:      ${status.config.showFailures}`);
+    console.log("");
+
+    const providerEgress = getProviderEgressForFormatting(status);
+    console.log("Provider egress:");
+    console.log(`  Consent:           ${providerEgress.consent}`);
+    console.log(`  Embeddings:        ${providerEgress.embedding.allowed ? "allowed" : "blocked"} (${providerEgress.embedding.host ?? providerEgress.embedding.target})`);
+    console.log(`  LLM extraction:    ${providerEgress.llmExtraction.allowed ? "allowed" : "blocked"} (${providerEgress.llmExtraction.host ?? providerEgress.llmExtraction.target})`);
     console.log("");
 
     console.log("Activity:");

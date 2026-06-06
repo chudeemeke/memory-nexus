@@ -64,6 +64,7 @@ describe("Sync Command", () => {
       unregisterCleanup: mock(() => undefined),
       createSyncService: mock(() => syncService),
       loadConfig: mock(() => config as any),
+      auditRemoteEventLogs: mock(async () => ({ eventLogFindings: 0 })),
       runMemoryFileSync: mock(async () => null),
       reportMemoryFileResults: mock(() => undefined),
       runAmbientContextGeneration: mock(async () => undefined),
@@ -710,6 +711,37 @@ describe("Sync Command", () => {
       expect(warnings.join("\n")).toContain("Remote synchronization is configured but disabled");
     });
 
+    it("blocks experimental remote sync when event-log secret findings remain", async () => {
+      const secretLike = ["sk", "test_remote_preflight_should_not_print"].join("-");
+      const remoteConfig = () => ({
+        ...createHarness().config,
+        remoteSync: {
+          enabled: true,
+          repositoryUrl: "https://github.com/example/repo.git",
+          autoPull: true,
+          autoPush: true,
+        },
+      });
+      const createGitSyncer = mock(async () => ({
+        sync: mock(async () => ({ success: true, rebuildNeeded: false })),
+      }));
+
+      const harness = createHarness({
+        loadConfig: mock(remoteConfig as any),
+        experimentalRemoteSync: true,
+        auditRemoteEventLogs: mock(async () => ({ eventLogFindings: 2 })),
+        createGitSyncer,
+      });
+
+      const result = await executeSyncCommand({}, harness.deps);
+
+      expect(result.exitCode).toBe(1);
+      expect(createGitSyncer).not.toHaveBeenCalled();
+      expect(errors.join("\n")).toContain("Remote synchronization blocked");
+      expect(errors.join("\n")).toContain("memory audit-secrets --skip-db --quarantine-events");
+      expect(errors.join("\n")).not.toContain(secretLike);
+    });
+
     it("reports embedding failures and handles background lock cleanup", async () => {
       process.env.MEMORY_EMBED_BACKGROUND = "1";
       const { deps } = createHarness({
@@ -898,6 +930,7 @@ describe("Sync Command", () => {
           {
             loadConfig: remoteSyncConfig,
             createGitSyncer: () => ({ sync: mockGitSync }),
+            auditRemoteEventLogs: async () => ({ eventLogFindings: 0 }),
             experimentalRemoteSync: false,
           }
         );

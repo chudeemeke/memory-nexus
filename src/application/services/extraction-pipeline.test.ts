@@ -5,7 +5,7 @@
  * Unit/integration tests for the ExtractionPipeline service.
  */
 
-import { describe, test, expect, beforeEach, afterEach } from "bun:test";
+import { describe, test, expect, beforeEach, afterEach, spyOn } from "bun:test";
 import { Database } from "bun:sqlite";
 import { unlinkSync, existsSync, writeFileSync } from "fs";
 import { join } from "path";
@@ -730,12 +730,77 @@ describe("ExtractionPipeline", () => {
     const result = await pipeline.extractFromSession("session-redact", "nexus");
 
     expect(result.added).toBe(1);
-    expect(providerPayload).toContain("[REDACTED:api_key]");
+    expect(providerPayload).toMatch(/\[REDACTED:api_key:[a-f0-9]{8}\]/);
     expect(providerPayload).not.toContain(rawSecret);
 
     const eventLogContent = require("fs").readFileSync(testLogPath, "utf-8");
-    expect(eventLogContent).toContain("[REDACTED:api_key]");
+    expect(eventLogContent).toMatch(/\[REDACTED:api_key:[a-f0-9]{8}\]/);
     expect(eventLogContent).not.toContain(rawSecret);
+  });
+
+  test("redacts active facts before embedding comparison", async () => {
+    const rawSecret = ["sk", "proj_activeabcdefghijklmnopqrstuvwxyz123456"].join("-");
+    const session = Session.create({
+      id: "session-active-redact",
+      projectPath: ProjectPath.fromDecoded("C:\\Projects\\nexus"),
+      startTime: new Date()
+    });
+    await sessionRepo.save(session);
+
+    await messageRepo.save(Message.create({
+      id: "msg-active-redact",
+      role: "user",
+      content: "Remember the integration rule",
+      timestamp: new Date()
+    }), "session-active-redact");
+
+    const activeFact = Fact.create({
+      uuid: "active-secret-fact",
+      type: "learning",
+      project: "nexus",
+      content: `Existing fact has ${rawSecret}`,
+      observedAt: new Date()
+    });
+    await factRepo.save(activeFact);
+
+    const embeddedTexts: string[] = [];
+    const captureEmbedder: IEmbeddingProvider = {
+      name: "capture-embedder",
+      dimensions: 3,
+      model: "mock-model",
+      embed: async () => EmbeddingResult.create({
+        embedding: new Float32Array([1, 0, 0]),
+        model: "mock-model",
+        dimensions: 3
+      }),
+      embedBatch: async (texts) => {
+        embeddedTexts.push(...texts);
+        return texts.map(() => EmbeddingResult.create({
+          embedding: new Float32Array([1, 0, 0]),
+          model: "mock-model",
+          dimensions: 3
+        }));
+      },
+      isReady: () => true,
+      initialize: async () => {},
+      dispose: async () => {}
+    };
+
+    const pipeline = new ExtractionPipeline(
+      db,
+      factRepo,
+      logRepo,
+      messageRepo,
+      mockExtractor([{ type: "learning", content: "A different integration rule", confidence: 0.95 }]),
+      captureEmbedder,
+      testLogPath,
+      new PatternRedactor(),
+    );
+
+    await pipeline.extractFromSession("session-active-redact", "nexus");
+
+    expect(embeddedTexts.join("\n")).not.toContain(rawSecret);
+    expect(embeddedTexts[0]).toMatch(/\[REDACTED:api_key:[a-f0-9]{8}\]/);
   });
 
   test("falls back to Jaccard if embedding provider throws an error during embedBatch", async () => {
@@ -798,5 +863,65 @@ describe("ExtractionPipeline", () => {
     // Should fall back to Jaccard and detect it as a duplicate (Jaccard 1.0)
     expect(result.added).toBe(0);
     expect(result.skipped).toBe(1);
+  });
+
+  test("redacts embedding fallback warning messages", async () => {
+    const rawSecret = ["sk", "test_abcdefghijklmnopqrstuvwxyz123456"].join("-");
+    const warnMessages: string[] = [];
+    const warnSpy = spyOn(console, "warn").mockImplementation((...args) => {
+      warnMessages.push(args.map(String).join(" "));
+    });
+
+    const session = Session.create({
+      id: "session-warning-redact",
+      projectPath: ProjectPath.fromDecoded("C:\\Projects\\nexus"),
+      startTime: new Date()
+    });
+    await sessionRepo.save(session);
+    await messageRepo.save(Message.create({
+      id: "msg-warning-redact",
+      role: "user",
+      content: "Hello",
+      timestamp: new Date()
+    }), "session-warning-redact");
+    await factRepo.save(Fact.create({
+      uuid: "warning-redact-fact",
+      type: "learning",
+      project: "nexus",
+      content: "Use bun test",
+      observedAt: new Date()
+    }));
+
+    const throwingEmbedder: IEmbeddingProvider = {
+      name: "throwing-embedder",
+      dimensions: 3,
+      model: "mock-model",
+      embed: async () => { throw new Error(rawSecret); },
+      embedBatch: async () => { throw new Error(`Embed failed with ${rawSecret}`); },
+      isReady: () => true,
+      initialize: async () => {},
+      dispose: async () => {}
+    };
+
+    try {
+      const pipeline = new ExtractionPipeline(
+        db,
+        factRepo,
+        logRepo,
+        messageRepo,
+        mockExtractor([{ type: "learning", content: "Use bun test", confidence: 0.95 }]),
+        throwingEmbedder,
+        testLogPath,
+        new PatternRedactor(),
+      );
+
+      await pipeline.extractFromSession("session-warning-redact", "nexus");
+    } finally {
+      warnSpy.mockRestore();
+    }
+
+    const output = warnMessages.join("\n");
+    expect(output).not.toContain(rawSecret);
+    expect(output).toMatch(/\[REDACTED:api_key:[a-f0-9]{8}\]/);
   });
 });

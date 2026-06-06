@@ -36,7 +36,7 @@ _memory_completion() {
     local cur prev words cword
     _init_completion || return
 
-    local commands="sync search list stats context related show browse install uninstall status doctor purge export import completion"
+    local commands="sync search list stats context related show browse install uninstall status doctor audit-secrets purge export import completion"
     local search_opts="--limit --project --role --session --after --before --case-sensitive --json --verbose --quiet"
     local list_opts="--limit --project --after --before --sort --json --verbose --quiet"
     local stats_opts="--projects --json --verbose --quiet"
@@ -48,6 +48,7 @@ _memory_completion() {
     local install_opts="--force"
     local uninstall_opts="--restore"
     local doctor_opts="--json --fix"
+    local audit_secrets_opts="--json --db --skip-db --event-log --events-dir --skip-events --redact-db --quarantine-events --quarantine-dir --report"
     local purge_opts="--before --dry-run --force --json --verbose --quiet"
     local export_opts="--json --verbose --quiet --include-sensitive"
     local import_opts="--force --dry-run --json --verbose --quiet"
@@ -102,6 +103,10 @@ _memory_completion() {
             COMPREPLY=( \$(compgen -W "\${doctor_opts}" -- "\${cur}") )
             return 0
             ;;
+        audit-secrets)
+            COMPREPLY=( \$(compgen -W "\${audit_secrets_opts}" -- "\${cur}") )
+            return 0
+            ;;
         purge)
             COMPREPLY=( \$(compgen -W "\${purge_opts}" -- "\${cur}") )
             return 0
@@ -141,6 +146,7 @@ _memory_completion() {
             install) COMPREPLY=( \$(compgen -W "\${install_opts}" -- "\${cur}") ) ;;
             uninstall) COMPREPLY=( \$(compgen -W "\${uninstall_opts}" -- "\${cur}") ) ;;
             doctor) COMPREPLY=( \$(compgen -W "\${doctor_opts}" -- "\${cur}") ) ;;
+            audit-secrets) COMPREPLY=( \$(compgen -W "\${audit_secrets_opts}" -- "\${cur}") ) ;;
             purge) COMPREPLY=( \$(compgen -W "\${purge_opts}" -- "\${cur}") ) ;;
             export) COMPREPLY=( \$(compgen -W "\${export_opts}" -- "\${cur}") ) ;;
             import) COMPREPLY=( \$(compgen -W "\${import_opts}" -- "\${cur}") ) ;;
@@ -180,6 +186,7 @@ _memory() {
         'uninstall:Remove automatic sync hook'
         'status:Show hook installation status'
         'doctor:Check system health and diagnose issues'
+        'audit-secrets:Scan database and event logs for likely leaked secrets'
         'purge:Remove old sessions from database'
         'export:Export database to JSON file'
         'import:Import database from JSON file'
@@ -187,7 +194,7 @@ _memory() {
     )
 
     local -a search_opts list_opts stats_opts context_opts related_opts show_opts browse_opts
-    local -a sync_opts install_opts uninstall_opts doctor_opts purge_opts export_opts import_opts completion_shells
+    local -a sync_opts install_opts uninstall_opts doctor_opts audit_secrets_opts purge_opts export_opts import_opts completion_shells
 
     search_opts=(
         '--limit[Maximum number of results]:number'
@@ -265,6 +272,19 @@ _memory() {
         '--fix[Attempt to fix common issues]'
     )
 
+    audit_secrets_opts=(
+        '--json[Output as JSON]'
+        '--db[Database path override]:path:_files'
+        '--skip-db[Skip database scanning]'
+        '--event-log[Specific event log path]:path:_files'
+        '--events-dir[Events directory to scan]:directory:_files -/'
+        '--skip-events[Skip event-log scanning]'
+        '--redact-db[Rewrite mutable database fields with redacted values]'
+        '--quarantine-events[Quarantine raw event logs and write sanitized active copies]'
+        '--quarantine-dir[Quarantine directory]:directory:_files -/'
+        '--report[Write a redacted evidence report]:path:_files'
+    )
+
     purge_opts=(
         '--before[Delete sessions before date]:date'
         '--dry-run[Preview deletions without removing]'
@@ -312,6 +332,7 @@ _memory() {
                 install) _arguments "\$install_opts[@]" ;;
                 uninstall) _arguments "\$uninstall_opts[@]" ;;
                 doctor) _arguments "\$doctor_opts[@]" ;;
+                audit-secrets) _arguments "\$audit_secrets_opts[@]" ;;
                 purge) _arguments "\$purge_opts[@]" ;;
                 export) _arguments "\$export_opts[@]" ':output-file:_files' ;;
                 import) _arguments "\$import_opts[@]" ':input-file:_files' ;;
@@ -351,6 +372,7 @@ complete -c memory -n "__fish_use_subcommand" -a install -d "Install automatic s
 complete -c memory -n "__fish_use_subcommand" -a uninstall -d "Remove automatic sync hook"
 complete -c memory -n "__fish_use_subcommand" -a status -d "Show hook installation status"
 complete -c memory -n "__fish_use_subcommand" -a doctor -d "Check system health and diagnose issues"
+complete -c memory -n "__fish_use_subcommand" -a audit-secrets -d "Scan database and event logs for likely leaked secrets"
 complete -c memory -n "__fish_use_subcommand" -a purge -d "Remove old sessions from database"
 complete -c memory -n "__fish_use_subcommand" -a export -d "Export database to JSON file"
 complete -c memory -n "__fish_use_subcommand" -a import -d "Import database from JSON file"
@@ -420,6 +442,18 @@ complete -c memory -n "__fish_seen_subcommand_from uninstall" -l restore -d "Res
 # doctor options
 complete -c memory -n "__fish_seen_subcommand_from doctor" -l json -d "Output as JSON"
 complete -c memory -n "__fish_seen_subcommand_from doctor" -l fix -d "Attempt to fix common issues"
+
+# audit-secrets options
+complete -c memory -n "__fish_seen_subcommand_from audit-secrets" -l json -d "Output as JSON"
+complete -c memory -n "__fish_seen_subcommand_from audit-secrets" -l db -d "Database path override" -r
+complete -c memory -n "__fish_seen_subcommand_from audit-secrets" -l skip-db -d "Skip database scanning"
+complete -c memory -n "__fish_seen_subcommand_from audit-secrets" -l event-log -d "Specific event log path" -r
+complete -c memory -n "__fish_seen_subcommand_from audit-secrets" -l events-dir -d "Events directory to scan" -r
+complete -c memory -n "__fish_seen_subcommand_from audit-secrets" -l skip-events -d "Skip event-log scanning"
+complete -c memory -n "__fish_seen_subcommand_from audit-secrets" -l redact-db -d "Rewrite mutable database fields with redacted values"
+complete -c memory -n "__fish_seen_subcommand_from audit-secrets" -l quarantine-events -d "Quarantine raw event logs and write sanitized active copies"
+complete -c memory -n "__fish_seen_subcommand_from audit-secrets" -l quarantine-dir -d "Quarantine directory" -r
+complete -c memory -n "__fish_seen_subcommand_from audit-secrets" -l report -d "Write a redacted evidence report" -r
 
 # purge options
 complete -c memory -n "__fish_seen_subcommand_from purge" -l before -d "Delete sessions before date"

@@ -89,7 +89,7 @@
 
 - [x] **Phase 38.0: v5 Threat Model, Product PRD, and Eval Baseline** - Lock v5 requirements, threat model, eval baseline, ADRs, and excellent-grade rubric before implementation. Completed 2026-06-05.
 - [x] **Phase 38.1: Canonical Event Kernel and Projection Replay** - Schema-versioned memory event envelopes, machine identity, event ordering/integrity, migration, and projection registry. Completed 2026-06-05.
-- [ ] **Phase 38.2: Redaction, Privacy Governance, and Audit Commands** - Redaction before storage/indexing/egress, secret audit, provider egress policy, migration/quarantine.
+- [x] **Phase 38.2: Redaction, Privacy Governance, and Audit Commands** - Redaction before storage/indexing/egress, secret audit, provider egress policy, migration/quarantine. Completed 2026-06-06.
 - [ ] **Phase 38.2.5: Consent Provenance and Memory Governance** - User-visible consent, provenance, suppression, invalidation, review, and governance events for derived memory surfaces.
 - [ ] **Phase 38.3: Remote Sync Application Service and Git Transport** - Private-Git-backed remote event synchronization through application ports and shell-safe transport adapter.
 - [ ] **Phase 38.4: Remote CLI, Operations, Backup, and Recovery** - `memory remote` surface, preflight, doctor, backup/restore/rollback, cross-machine verification.
@@ -367,7 +367,7 @@ Rationale: Phase 32 explicitly deferred friction envelope adoption per audit §1
   2. `memory audit-secrets` scans database and event logs without printing raw secrets.
   3. Existing stored sensitive content can be migrated, redacted, or quarantined with audit evidence.
   4. Remote provider egress policy is explicit and visible through doctor/status.
-**Plans**: Placeholder directory exists; plan after Phase 38.1.
+**Plans**: `.planning/phases/38.2-redaction-privacy-governance-audit/38.2-01-PLAN.md` (complete; summary in `38.2-01-SUMMARY.md`)
 
 ---
 
@@ -675,7 +675,7 @@ v5.0
 | 37. Publishing | v4.0 | 1/1 | Complete | 2026-05-30 |
 | 38.0. Threat Model, PRD, Eval Baseline | v5.0 | 1/1 | Complete | 2026-06-05 |
 | 38.1. Canonical Event Kernel and Projection Replay | v5.0 | 1/1 | Complete | 2026-06-05 |
-| 38.2. Redaction, Privacy Governance, and Audit Commands | v5.0 | TBD | Planned | - |
+| 38.2. Redaction, Privacy Governance, and Audit Commands | v5.0 | 1/1 | Complete | 2026-06-06 |
 | 38.2.5. Consent Provenance and Memory Governance | v5.0 | TBD | Planned | - |
 | 38.3. Remote Sync Service and Git Transport | v5.0 | TBD | Planned | - |
 | 38.4. Remote CLI, Operations, Backup, and Recovery | v5.0 | TBD | Planned | - |

@@ -9,9 +9,11 @@ describe("PatternRedactor", () => {
 
     const result = redactor.redactText(raw);
 
-    expect(result.text).toContain("OPENAI_API_KEY=[REDACTED:env_secret]");
+    expect(result.text).toMatch(/OPENAI_API_KEY=\[REDACTED:env_secret:[a-f0-9]{8}\]/);
     expect(result.text).not.toContain(secret);
     expect(JSON.stringify(result.findings)).not.toContain("sk-proj");
+    expect(result.findings[0]?.hash).toMatch(/^[a-f0-9]{8}$/);
+    expect(result.findings[0]?.ruleVersion).toBe("pattern-redactor-v2");
   });
 
   test("redacts nested JSON strings while preserving object shape", () => {
@@ -20,7 +22,7 @@ describe("PatternRedactor", () => {
     const result = redactor.redactJson({
       command: "deploy",
       headers: {
-        authorization: "Bearer abcdefghijklmnopqrstuvwxyz123456",
+        authorization: ["Bearer", "abcdefghijklmnopqrstuvwxyz123456"].join(" "),
       },
       args: ["--token", ["ghp", "abcdefghijklmnopqrstuvwxyz1234567890"].join("_")],
     });
@@ -28,9 +30,9 @@ describe("PatternRedactor", () => {
     expect(result.value).toEqual({
       command: "deploy",
       headers: {
-        authorization: "Bearer [REDACTED:bearer_token]",
+        authorization: expect.stringMatching(/^Bearer \[REDACTED:bearer_token:[a-f0-9]{8}\]$/),
       },
-      args: ["--token", "[REDACTED:api_key]"],
+      args: ["--token", expect.stringMatching(/^\[REDACTED:api_key:[a-f0-9]{8}\]$/)],
     });
     expect(result.findings.length).toBe(2);
   });
@@ -45,7 +47,7 @@ describe("PatternRedactor", () => {
 
     const result = redactor.redactText(`key:\n${pem}`);
 
-    expect(result.text).toBe("key:\n[REDACTED:private_key]");
+    expect(result.text).toMatch(/^key:\n\[REDACTED:private_key:[a-f0-9]{8}\]$/);
     expect(result.findings[0]?.kind).toBe("private_key");
   });
 
@@ -62,5 +64,48 @@ describe("PatternRedactor", () => {
       name: "cycle",
       self: "[REDACTED:circular]",
     });
+  });
+
+  test("redacts sensitive JSON keys even when values do not match provider-specific token patterns", () => {
+    const redactor = new PatternRedactor();
+
+    const result = redactor.redactJson({
+      provider: "custom",
+      apiKey: "short-runtime-key",
+      nested: {
+        password: "correct horse battery staple",
+        publicName: "safe",
+      },
+    });
+
+    expect(result.value).toEqual({
+      provider: "custom",
+      apiKey: expect.stringMatching(/^\[REDACTED:api_key:[a-f0-9]{8}\]$/),
+      nested: {
+        password: expect.stringMatching(/^\[REDACTED:env_secret:[a-f0-9]{8}\]$/),
+        publicName: "safe",
+      },
+    });
+    expect(JSON.stringify(result.findings)).not.toContain("short-runtime-key");
+    expect(JSON.stringify(result.findings)).not.toContain("correct horse");
+  });
+
+  test("redacts Tailscale keys and flag-adjacent array values", () => {
+    const redactor = new PatternRedactor();
+    const tailscaleKey = ["tskey", "auth", "abcdefghijklmnopqrstuvwxyz1234567890"].join("-");
+
+    const result = redactor.redactJson({
+      command: "tailscale up",
+      raw: tailscaleKey,
+      args: ["--authkey", "not-provider-shaped-but-sensitive"],
+    });
+
+    expect(result.value).toEqual({
+      command: "tailscale up",
+      raw: expect.stringMatching(/^\[REDACTED:api_key:[a-f0-9]{8}\]$/),
+      args: ["--authkey", expect.stringMatching(/^\[REDACTED:env_secret:[a-f0-9]{8}\]$/)],
+    });
+    expect(JSON.stringify(result.value)).not.toContain(tailscaleKey);
+    expect(JSON.stringify(result.findings)).not.toContain(tailscaleKey);
   });
 });

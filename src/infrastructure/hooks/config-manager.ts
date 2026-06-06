@@ -133,6 +133,25 @@ export const DEFAULT_REMOTE_SYNC_CONFIG: RemoteSyncConfigData = {
     autoPull: true,
 };
 
+export type ProviderEgressConsent = "unset" | "granted" | "denied";
+
+export interface ProviderEgressPolicyData {
+    /** Consent state for sending redacted memory content to remote providers */
+    consent: ProviderEgressConsent;
+    /** Remote hosts allowed to receive provider payloads after consent is granted */
+    allowedHosts: string[];
+    /** Hostless remote provider ids allowed after consent is granted */
+    allowedProviders: string[];
+    /** Optional ISO timestamp for when consent was granted */
+    grantedAt?: string | undefined;
+}
+
+export const DEFAULT_PROVIDER_EGRESS_POLICY: ProviderEgressPolicyData = {
+    consent: "unset",
+    allowedHosts: ["api.openai.com", "api.anthropic.com"],
+    allowedProviders: ["anthropic", "openai", "claude-cli"],
+};
+
 export interface LegacyMemoryFilesConfigData {
     /** Whether legacy ~/.memory / MEMORY_HOME markdown indexing and writes are enabled */
     enabled: boolean;
@@ -158,6 +177,7 @@ export const DEFAULT_LEGACY_MEMORY_FILES_CONFIG: LegacyMemoryFilesConfigData = {
  * - ambientContext: Ambient context generation configuration
  * - machineId: Unique identifier for the local machine
  * - remoteSync: Remote sync configuration
+ * - providerEgress: Remote provider egress consent and allowlist policy
  * - legacyMemoryFiles: Explicit opt-in for pre-v4 ~/.memory / MEMORY_HOME sidecar files
  */
 export interface MemoryConfig {
@@ -186,6 +206,8 @@ export interface MemoryConfig {
     machineId: string;
     /** Remote sync configuration */
     remoteSync: RemoteSyncConfigData;
+    /** Remote provider egress consent and allowlist policy */
+    providerEgress: ProviderEgressPolicyData;
     /** Legacy memory-file sidecar compatibility */
     legacyMemoryFiles: LegacyMemoryFilesConfigData;
 }
@@ -330,6 +352,7 @@ export const DEFAULT_CONFIG: MemoryConfig = {
     ambientContext: DEFAULT_AMBIENT_CONTEXT_CONFIG,
     machineId: "",
     remoteSync: DEFAULT_REMOTE_SYNC_CONFIG,
+    providerEgress: DEFAULT_PROVIDER_EGRESS_POLICY,
     legacyMemoryFiles: DEFAULT_LEGACY_MEMORY_FILES_CONFIG,
 };
 
@@ -407,6 +430,17 @@ export function loadConfig(configPathOverride?: string): MemoryConfig {
             ...(loaded.remoteSync ?? {}),
         };
 
+        const mergedProviderEgress = {
+            ...DEFAULT_PROVIDER_EGRESS_POLICY,
+            ...(loaded.providerEgress ?? {}),
+            allowedHosts: Array.isArray(loaded.providerEgress?.allowedHosts)
+                ? loaded.providerEgress.allowedHosts.map(String)
+                : [...DEFAULT_PROVIDER_EGRESS_POLICY.allowedHosts],
+            allowedProviders: Array.isArray(loaded.providerEgress?.allowedProviders)
+                ? loaded.providerEgress.allowedProviders.map(String)
+                : [...DEFAULT_PROVIDER_EGRESS_POLICY.allowedProviders],
+        };
+
         const mergedLegacyMemoryFiles = {
             ...DEFAULT_LEGACY_MEMORY_FILES_CONFIG,
             ...(loaded.legacyMemoryFiles ?? {}),
@@ -417,6 +451,7 @@ export function loadConfig(configPathOverride?: string): MemoryConfig {
             ...loaded,
             machineId,
             remoteSync: mergedRemoteSync,
+            providerEgress: mergedProviderEgress,
             legacyMemoryFiles: mergedLegacyMemoryFiles,
             embedding: resolveProviderDefaults(mergedEmbedding, userEmbedding),
             search: {

@@ -1,7 +1,7 @@
 /**
  * API Consumption Smoke Test
  *
- * Verifies that the dist artifacts exist and all 16 execute*Command
+ * Verifies that the dist artifacts exist and all 17 execute*Command
  * functions are importable from dist/index.js as a library consumer would.
  *
  * Requires: `bun run build` to have been run first.
@@ -34,7 +34,7 @@ describe("API consumption", () => {
   });
 
   describe("library exports", () => {
-    test("all 16 execute*Command functions are importable", async () => {
+    test("all 17 execute*Command functions are importable", async () => {
       const mod = await import(join(distDir, "index.js"));
 
       const expectedFunctions = [
@@ -50,6 +50,7 @@ describe("API consumption", () => {
         "executeUninstallCommand",
         "executeStatusCommand",
         "executeDoctorCommand",
+        "executeAuditSecretsCommand",
         "executePurgeCommand",
         "executeExportCommand",
         "executeImportCommand",

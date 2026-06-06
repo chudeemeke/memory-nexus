@@ -53,6 +53,9 @@ memory related <session-id>
 
 # Browse sessions interactively
 memory browse
+
+# Audit durable memory surfaces for suspected secrets
+memory audit-secrets
 ```
 
 ## How It Works
@@ -114,6 +117,19 @@ Known secret patterns in newly synced transcript content, tool inputs/results, e
 memory export backup.json --include-sensitive
 ```
 
+Run a read-only scan of the database and event logs before publishing, syncing to a remote, or reviewing older data:
+
+```bash
+memory audit-secrets
+memory audit-secrets --json
+```
+
+Remediation is explicit. Database redaction rewrites mutable stored fields and rebuilds FTS indexes; event-log quarantine moves raw logs aside and writes sanitized active replacements:
+
+```bash
+memory audit-secrets --redact-db --quarantine-events --report audit-report.json
+```
+
 ## Provider Support
 
 Provider support is explicit and registry-backed. Built-in embedding providers are `local`, `openai`, `ollama`, and `openai-compatible`. Built-in extraction providers are `claude-cli`, `anthropic`, `openai`, `ollama`, and `openai-compatible`.
@@ -131,6 +147,20 @@ Use `openai-compatible` for gateways or providers that expose OpenAI-compatible 
 ```
 
 `LLM_PROVIDER` selects the extraction provider. `LLM_MODEL` overrides the extraction model without changing embedding configuration.
+
+Remote provider egress is deny-by-default until the config grants consent and the target provider or host is allowlisted. Local providers do not require egress consent.
+
+```json
+{
+  "providerEgress": {
+    "consent": "granted",
+    "allowedHosts": ["api.openai.com", "api.anthropic.com"],
+    "allowedProviders": ["openai", "anthropic", "claude-cli"]
+  }
+}
+```
+
+`memory status` and `memory doctor` report provider egress readiness without printing secrets. The experimental Git remote-sync path also runs an event-log secret preflight before any push and blocks remote sync until active logs are clean or quarantined.
 
 ## AI-First Design
 
@@ -198,6 +228,7 @@ const contextResult = await executeContextCommand("my-project", {
 | `executeUninstallCommand` | `options: UninstallOptions` | `Promise<CommandResult>` |
 | `executeStatusCommand` | `options: StatusOptions` | `Promise<CommandResult>` |
 | `executeDoctorCommand` | `options: DoctorOptions` | `Promise<CommandResult>` |
+| `executeAuditSecretsCommand` | `options: AuditSecretsOptions` | `Promise<CommandResult>` |
 | `executePurgeCommand` | `options: PurgeCommandOptions` | `Promise<CommandResult>` |
 | `executeExportCommand` | `outputPath: string, options: ExportOptions` | `Promise<CommandResult>` |
 | `executeImportCommand` | `inputPath: string, options: ImportOptions` | `Promise<CommandResult>` |
@@ -207,7 +238,7 @@ const contextResult = await executeContextCommand("my-project", {
 
 ```typescript
 interface CommandResult {
-  exitCode: number; // 0 = success, 1 = error/not found
+  exitCode: number; // 0 = success, 1 = error/not found/findings, 2 = operational/remediation failure where used
 }
 ```
 
@@ -264,6 +295,7 @@ bun test --timeout 15000
 bun run test:isolation
 bun run test:coverage
 bun audit
+gitleaks detect --no-banner --redact --source .
 ```
 
 `bun run quality` runs the release gate sequence. `bun run test:coverage` uses an Istanbul-backed Bun harness and is intentionally strict: statements, branches, functions, and lines must each be available and at least 95%. Missing metrics fail the gate.

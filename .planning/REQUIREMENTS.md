@@ -80,11 +80,13 @@ Phase 38.1 completed the current applicable projection path: facts plus facts FT
 
 ### Privacy and Security Governance
 
-- [ ] **SEC-05**: Redaction/classification runs before storage, FTS indexing, embedding, extraction, export, remote sync, logs, and provider egress.
-- [ ] **SEC-06**: `memory audit-secrets` scans database and event logs and reports redacted findings without printing raw secrets.
-- [ ] **SEC-07**: Remote provider egress requires explicit consent, allowlist policy, and doctor/status warnings.
+- [x] **SEC-05**: Redaction/classification runs before storage, FTS indexing, embedding, extraction, export, remote sync, logs, and provider egress.
+- [x] **SEC-06**: `memory audit-secrets` scans database and event logs and reports redacted findings without printing raw secrets.
+- [x] **SEC-07**: Remote provider egress requires explicit consent, allowlist policy, and doctor/status warnings.
 - [ ] **SEC-08**: Remote sync validates remote refs/URLs, uses sanitized Git environment, and refuses to run without durable validated machine identity.
-- [ ] **SEC-09**: Existing stored sensitive content can be migrated, redacted, or quarantined with audit evidence.
+- [x] **SEC-09**: Existing stored sensitive content can be migrated, redacted, or quarantined with audit evidence.
+
+Phase 38.2 completed SEC-05, SEC-06, SEC-07, and SEC-09 for current active surfaces: sync persistence, FTS-backed stored fields, embedding payloads, extraction payloads/events, export defaults, hook/friction logs, provider readiness/creation, and the explicitly gated remote-sync prototype. Remote sync itself remains non-production until Phase 38.3 and Phase 38.4, but the prototype path now blocks Git egress when active event logs still contain audit findings.
 
 ### Consent Provenance and Memory Governance
 
@@ -239,11 +241,11 @@ Which phases cover which requirements. Updated during roadmap creation.
 | EVT-02 | Phase 38.1 | Complete |
 | EVT-03 | Phase 38.1 | Complete |
 | EVT-04 | Phase 38.1 | Complete |
-| SEC-05 | Phase 38.2 | Pending |
-| SEC-06 | Phase 38.2 | Pending |
-| SEC-07 | Phase 38.2 | Pending |
+| SEC-05 | Phase 38.2 | Complete |
+| SEC-06 | Phase 38.2 | Complete |
+| SEC-07 | Phase 38.2 | Complete |
 | SEC-08 | Phase 38.3 | Pending |
-| SEC-09 | Phase 38.2 | Pending |
+| SEC-09 | Phase 38.2 | Complete |
 | CONSENT-01 | Phase 38.2.5 | Pending |
 | CONSENT-02 | Phase 38.2.5 | Pending |
 | CONSENT-03 | Phase 38.2.5 | Pending |

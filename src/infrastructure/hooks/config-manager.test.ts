@@ -228,6 +228,9 @@ describe("config-manager", () => {
                 legacyMemoryFiles: {
                     enabled: false,
                 },
+                providerEgress: {
+                    ...DEFAULT_CONFIG.providerEgress,
+                },
             };
 
             const configDir = join(testDir, ".config", "memory");

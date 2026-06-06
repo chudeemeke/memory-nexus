@@ -19,6 +19,7 @@ import { handleWontFix } from "./wontfix.js";
 import { handleDashboard } from "./dashboard.js";
 import { handlePurge } from "./purge.js";
 import { unknownErrorMessage } from "../../../../domain/errors/unknown-error.js";
+import { PatternRedactor } from "../../../../infrastructure/security/pattern-redactor.js";
 
 /** Create the friction command group for Commander.js. */
 export function createFrictionCommand(): Command {
@@ -120,7 +121,7 @@ export async function executeFrictionCommand(
         const dbPath = deps.dbPath ?? getDefaultDbPath();
         db = initializeDatabase({ path: dbPath }).db;
         const repository = new SqliteFrictionRepository(db);
-        const service = new FrictionService(repository);
+        const service = new FrictionService(repository, new PatternRedactor());
 
         // Auto-ingest fallback file before any action
         const fallbackPath = join(homedir(), ".claude", "friction.jsonl");

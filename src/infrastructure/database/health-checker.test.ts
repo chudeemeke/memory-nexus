@@ -18,6 +18,7 @@ import {
     checkSqliteVecAvailability,
     checkEmbeddingConfig,
     checkLlmExtractionHealth,
+    checkProviderEgressHealth,
     runHealthCheck,
     type HealthCheckResult,
 } from "./health-checker.js";
@@ -290,6 +291,32 @@ describe("health-checker", () => {
             expect(result.issues).toContain("showFailures is not a boolean");
         });
 
+        it("returns issues for invalid provider egress policy", () => {
+            writeFileSync(testConfigPath, JSON.stringify({
+                providerEgress: {
+                    consent: "maybe",
+                    allowedHosts: ["api.openai.com", ""],
+                    allowedProviders: [""],
+                },
+            }));
+
+            const result = checkConfigValidity(testConfigPath);
+            expect(result.valid).toBe(false);
+            expect(result.issues).toContain('providerEgress.consent "maybe" is not valid (expected: unset, granted, denied)');
+            expect(result.issues).toContain("providerEgress.allowedHosts must be an array of non-empty strings");
+            expect(result.issues).toContain("providerEgress.allowedProviders must be an array of non-empty strings");
+        });
+
+        it("returns issues when provider egress is not an object", () => {
+            writeFileSync(testConfigPath, JSON.stringify({
+                providerEgress: "granted",
+            }));
+
+            const result = checkConfigValidity(testConfigPath);
+            expect(result.valid).toBe(false);
+            expect(result.issues).toContain("providerEgress must be an object");
+        });
+
         it("collects multiple issues", () => {
             writeFileSync(testConfigPath, JSON.stringify({
                 autoSync: "yes",
@@ -528,6 +555,11 @@ describe("health-checker", () => {
 
     describe("checkEmbeddingConfig", () => {
         const originalEnv = { ...process.env };
+        const grantedProviderEgress = (allowedHosts: string[] = []) => ({
+            consent: "granted",
+            allowedHosts: ["api.openai.com", "api.anthropic.com", ...allowedHosts],
+            allowedProviders: ["anthropic", "openai", "claude-cli", "openai-compatible"],
+        });
 
         afterEach(() => {
             process.env = { ...originalEnv };
@@ -602,6 +634,7 @@ describe("health-checker", () => {
                     dimensions: 1536,
                     apiKeyEnv: "MEMORY_NEXUS_TEST_OPENAI_KEY",
                 },
+                providerEgress: grantedProviderEgress(),
             }));
 
             const result = checkEmbeddingConfig(testConfigPath);
@@ -618,6 +651,7 @@ describe("health-checker", () => {
                     dimensions: 1536,
                     apiKey: "sk-test-key",
                 },
+                providerEgress: grantedProviderEgress(),
             }));
 
             const result = checkEmbeddingConfig(testConfigPath);
@@ -662,6 +696,7 @@ describe("health-checker", () => {
                     provider: "openai",
                     apiKeyEnv: "MEMORY_NEXUS_TEST_OPENAI_KEY",
                 },
+                providerEgress: grantedProviderEgress(),
             }));
 
             const result = checkEmbeddingConfig(testConfigPath);
@@ -707,6 +742,7 @@ describe("health-checker", () => {
                     baseUrl: "https://gateway.example.test/v1",
                     apiKeyEnv: "MEMORY_NEXUS_COMPAT_KEY",
                 },
+                providerEgress: grantedProviderEgress(["gateway.example.test"]),
             }));
 
             const result = checkEmbeddingConfig(testConfigPath);
@@ -718,15 +754,65 @@ describe("health-checker", () => {
         });
     });
 
+    describe("checkProviderEgressHealth", () => {
+        it("reports disabled embeddings as local-safe while still checking extraction egress", () => {
+            try {
+                writeFileSync(testConfigPath, JSON.stringify({
+                    embedding: {
+                        enabled: false,
+                        provider: "openai",
+                    },
+                    providerEgress: {
+                        consent: "granted",
+                        allowedHosts: ["api.openai.com", "api.anthropic.com"],
+                        allowedProviders: ["anthropic", "openai", "claude-cli"],
+                    },
+                }));
+
+                const result = checkProviderEgressHealth(testConfigPath);
+
+                expect(result.embedding.required).toBe(false);
+                expect(result.embedding.allowed).toBe(true);
+                expect(result.embedding.target).toBe("disabled");
+                expect(result.llmExtraction.allowed).toBe(true);
+            } finally {
+                rmSync(testConfigPath, { force: true });
+            }
+        });
+    });
+
     describe("checkLlmExtractionHealth", () => {
         const originalEnv = { ...process.env };
+        const grantedProviderEgress = (allowedHosts: string[] = []) => ({
+            consent: "granted",
+            allowedHosts: ["api.openai.com", "api.anthropic.com", ...allowedHosts],
+            allowedProviders: ["anthropic", "openai", "claude-cli", "openai-compatible"],
+        });
 
         afterEach(() => {
             process.env = { ...originalEnv };
+            try {
+                rmSync(testConfigPath, { force: true });
+            } catch {
+                // Ignore
+            }
         });
 
-        it("returns claude-cli as default provider when no environment or config override is present", () => {
+        it("blocks default claude-cli extraction until provider egress consent is granted", () => {
             delete process.env.LLM_PROVIDER;
+            const result = checkLlmExtractionHealth(testConfigPath);
+            expect(result.provider).toBe("claude-cli");
+            expect(result.model).toBe("claude-cli-print");
+            expect(result.ready).toBe(false);
+            expect(result.readyReason).toContain("Remote extraction provider egress consent is not granted");
+        });
+
+        it("returns claude-cli as default provider when provider egress consent is granted", () => {
+            delete process.env.LLM_PROVIDER;
+            writeFileSync(testConfigPath, JSON.stringify({
+                providerEgress: grantedProviderEgress(),
+            }));
+
             const result = checkLlmExtractionHealth(testConfigPath);
             expect(result.provider).toBe("claude-cli");
             expect(result.model).toBe("claude-cli-print");
@@ -749,6 +835,9 @@ describe("health-checker", () => {
         it("returns ready: true for anthropic provider when environment ANTHROPIC_API_KEY is present", () => {
             process.env.LLM_PROVIDER = "anthropic";
             process.env.ANTHROPIC_API_KEY = "sk-ant-test";
+            writeFileSync(testConfigPath, JSON.stringify({
+                providerEgress: grantedProviderEgress(),
+            }));
 
             const result = checkLlmExtractionHealth(testConfigPath);
             expect(result.provider).toBe("anthropic");
@@ -780,6 +869,7 @@ describe("health-checker", () => {
                     apiKeyEnv: "MEMORY_NEXUS_COMPAT_KEY",
                     baseUrl: "https://gateway.example.test/v1",
                 },
+                providerEgress: grantedProviderEgress(["gateway.example.test"]),
             }));
 
             const result = checkLlmExtractionHealth(testConfigPath);
@@ -797,6 +887,7 @@ describe("health-checker", () => {
                     provider: "local",
                     model: "Xenova/all-MiniLM-L6-v2",
                 },
+                providerEgress: grantedProviderEgress(),
             }));
 
             const result = checkLlmExtractionHealth(testConfigPath);
@@ -809,6 +900,9 @@ describe("health-checker", () => {
             process.env.LLM_PROVIDER = "openai";
             process.env.LLM_MODEL = "gpt-4.1-mini";
             process.env.OPENAI_API_KEY = "sk-test";
+            writeFileSync(testConfigPath, JSON.stringify({
+                providerEgress: grantedProviderEgress(),
+            }));
 
             const result = checkLlmExtractionHealth(testConfigPath);
             expect(result.provider).toBe("openai");

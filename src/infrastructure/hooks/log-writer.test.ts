@@ -152,6 +152,23 @@ describe("log-writer", () => {
             expect(entry.error).toBe("Connection timeout");
         });
 
+        test("redacts secrets before persisting log entries", () => {
+            const rawSecret = ["sk", "test_abcdefghijklmnopqrstuvwxyz123456"].join("-");
+            logSync({
+                level: "error",
+                message: `sync failed with ${rawSecret}`,
+                error: `OPENAI_API_KEY=${rawSecret}`,
+            });
+
+            const logPath = join(testDir, ".local", "share", "memory", "logs", "sync.log");
+            const content = readFileSync(logPath, "utf-8");
+            const entry = JSON.parse(content.trim()) as LogEntry;
+
+            expect(content).not.toContain(rawSecret);
+            expect(entry.message).toMatch(/\[REDACTED:api_key:[a-f0-9]{8}\]/);
+            expect(entry.error).toMatch(/OPENAI_API_KEY=\[REDACTED:env_secret:[a-f0-9]{8}\]/);
+        });
+
         test("includes optional hookEvent", () => {
             logSync({ level: "info", message: "hook triggered", hookEvent: "SessionEnd" });
 

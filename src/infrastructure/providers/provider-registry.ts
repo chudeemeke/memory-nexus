@@ -8,7 +8,7 @@
 
 import type { IEmbeddingProvider } from "../../domain/ports/embedding.js";
 import type { IExtractionProvider } from "../../domain/ports/extraction.js";
-import type { EmbeddingConfigData, MemoryConfig } from "../hooks/config-manager.js";
+import type { EmbeddingConfigData, MemoryConfig, ProviderEgressPolicyData } from "../hooks/config-manager.js";
 import { resolveEmbeddingApiKey } from "../hooks/config-manager.js";
 import { TransformersJsProvider } from "../embedding/transformers-js-provider.js";
 import { OpenAiProvider } from "../embedding/openai-provider.js";
@@ -21,6 +21,12 @@ import {
     EMBEDDING_PROVIDER_DEFAULTS,
     EXTRACTION_PROVIDER_DEFAULT_MODELS,
 } from "./provider-defaults.js";
+import {
+    assessEmbeddingProviderEgress,
+    assessExtractionProviderEgress,
+    DEFAULT_PROVIDER_EGRESS_POLICY,
+    requireProviderEgressAllowed,
+} from "./provider-egress-policy.js";
 
 export interface ProviderReadiness {
     ready: boolean;
@@ -246,18 +252,38 @@ export function getEmbeddingProviderDefaults(providerId: string): { model: strin
     };
 }
 
-export function checkEmbeddingProviderReadiness(config: EmbeddingConfigData): ProviderReadiness {
+export function checkEmbeddingProviderReadiness(
+    config: EmbeddingConfigData,
+    providerEgress: ProviderEgressPolicyData = DEFAULT_PROVIDER_EGRESS_POLICY,
+): ProviderReadiness {
     const provider = embeddingProviderMap.get(config.provider);
     if (!provider) {
         return notReady(unsupportedEmbeddingProviderMessage(config.provider));
     }
-    return provider.checkReadiness(config);
+    const providerReadiness = provider.checkReadiness(config);
+    if (!providerReadiness.ready) {
+        return providerReadiness;
+    }
+
+    const egress = assessEmbeddingProviderEgress(config, providerEgress);
+    if (!egress.allowed) {
+        return notReady(egress.reason ?? "Provider egress is not allowed by policy");
+    }
+
+    return providerReadiness;
 }
 
-export function createEmbeddingProvider(config: EmbeddingConfigData): IEmbeddingProvider {
+export function createEmbeddingProvider(
+    config: EmbeddingConfigData,
+    providerEgress: ProviderEgressPolicyData = DEFAULT_PROVIDER_EGRESS_POLICY,
+): IEmbeddingProvider {
     const provider = embeddingProviderMap.get(config.provider);
     if (!provider) {
         throw new Error(unsupportedEmbeddingProviderMessage(config.provider));
+    }
+    const readiness = provider.checkReadiness(config);
+    if (readiness.ready) {
+        requireProviderEgressAllowed(assessEmbeddingProviderEgress(config, providerEgress));
     }
     return provider.create(config);
 }
@@ -290,14 +316,28 @@ export function checkExtractionProviderReadiness(
     if (!provider) {
         return notReady(unsupportedExtractionProviderMessage(providerId));
     }
-    return provider.checkReadiness(config.embedding);
+    const providerReadiness = provider.checkReadiness(config.embedding);
+    if (!providerReadiness.ready) {
+        return providerReadiness;
+    }
+
+    const egress = assessExtractionProviderEgress(config as Pick<MemoryConfig, "embedding"> & { providerEgress?: ProviderEgressPolicyData }, providerId);
+    if (!egress.allowed) {
+        return notReady(egress.reason ?? "Provider egress is not allowed by policy");
+    }
+
+    return providerReadiness;
 }
 
-export function createExtractionProvider(config: Pick<MemoryConfig, "embedding">): IExtractionProvider {
+export function createExtractionProvider(config: Pick<MemoryConfig, "embedding"> & { providerEgress?: ProviderEgressPolicyData }): IExtractionProvider {
     const providerId = resolveExtractionProviderId(config);
     const provider = extractionProviderMap.get(providerId);
     if (!provider) {
         throw new Error(unsupportedExtractionProviderMessage(providerId));
+    }
+    const readiness = provider.checkReadiness(config.embedding);
+    if (readiness.ready) {
+        requireProviderEgressAllowed(assessExtractionProviderEgress(config, providerId));
     }
     return provider.create(config.embedding, getExtractionModel(config, providerId));
 }

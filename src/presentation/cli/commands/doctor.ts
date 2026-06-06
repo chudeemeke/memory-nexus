@@ -222,6 +222,18 @@ export function formatHealthResult(result: HealthCheckResult, useColor: boolean)
         lines.push("");
     }
 
+    const providerEgress = getProviderEgressForFormatting(result);
+    lines.push("Provider Egress");
+    lines.push(`  ${formatStatus(providerEgress.consent === "granted", useColor)} Consent: ${providerEgress.consent}`);
+    lines.push(formatProviderEgressAssessment("Embeddings", providerEgress.embedding, useColor));
+    lines.push(formatProviderEgressAssessment("LLM Extraction", providerEgress.llmExtraction, useColor));
+    if (providerEgress.warnings.length > 0) {
+        for (const warning of providerEgress.warnings) {
+            lines.push(`  ${yellow(`Warning: ${warning}`, useColor)}`);
+        }
+    }
+    lines.push("");
+
 
 
     // Search Capability section
@@ -254,6 +266,46 @@ export function formatHealthResult(result: HealthCheckResult, useColor: boolean)
     }
 
     return lines.join("\n");
+}
+
+function getProviderEgressForFormatting(result: HealthCheckResult): HealthCheckResult["providerEgress"] {
+    const embeddingProvider = result.embedding?.provider ?? "unknown";
+    const llmProvider = result.llmExtraction?.provider ?? "unknown";
+    return result.providerEgress ?? {
+        consent: "unset",
+        embedding: {
+            required: false,
+            allowed: true,
+            target: embeddingProvider,
+            capability: "embedding",
+            provider: embeddingProvider,
+            warnings: [],
+        },
+        llmExtraction: {
+            required: false,
+            allowed: true,
+            target: llmProvider,
+            capability: "extraction",
+            provider: llmProvider,
+            warnings: [],
+        },
+        warnings: [],
+    };
+}
+
+function formatProviderEgressAssessment(
+    label: string,
+    assessment: HealthCheckResult["providerEgress"]["embedding"],
+    useColor: boolean,
+): string {
+    const target = assessment.host ?? assessment.target;
+    if (!assessment.required) {
+        return `  ${formatStatus(true, useColor)} ${label}: local/none (${target})`;
+    }
+    if (assessment.allowed) {
+        return `  ${formatStatus(true, useColor)} ${label}: allowed (${target})`;
+    }
+    return `  ${formatStatus(false, useColor)} ${label}: blocked - ${assessment.reason}`;
 }
 
 /**
@@ -378,6 +430,7 @@ export async function executeDoctorCommand(
             sqliteVec: status.health.sqliteVec,
             searchCapability: status.health.searchCapability,
             llmExtraction: status.health.llmExtraction,
+            providerEgress: status.health.providerEgress,
             migration: status.migration,
             qmd: status.qmd,
         };

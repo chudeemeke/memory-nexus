@@ -25,6 +25,7 @@ export { createStatusCommand, executeStatusCommand } from "./status.js";
 
 // Diagnostic commands
 export { createDoctorCommand, executeDoctorCommand } from "./doctor.js";
+export { createAuditSecretsCommand, executeAuditSecretsCommand } from "./audit-secrets.js";
 
 // Maintenance commands
 export { createPurgeCommand, executePurgeCommand } from "./purge.js";
@@ -63,6 +64,7 @@ export type { BrowseCommandOptions } from "./browse.js";
 export type { InstallOptions } from "./install.js";
 export type { UninstallOptions } from "./uninstall.js";
 export type { DoctorOptions } from "./doctor.js";
+export type { AuditSecretsOptions } from "./audit-secrets.js";
 export type { PurgeCommandOptions, PurgeResult } from "./purge.js";
 export type { ExportOptions } from "./export.js";
 export type { ImportOptions } from "./import.js";

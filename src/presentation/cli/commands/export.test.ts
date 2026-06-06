@@ -202,7 +202,7 @@ describe("Export Command", () => {
 
       const content = await Bun.file(outputPath).text();
       expect(content).not.toContain(secret);
-      expect(content).toContain("[REDACTED:api_key]");
+      expect(content).toMatch(/\[REDACTED:api_key:[a-f0-9]{8}\]/);
     });
 
     test("--include-sensitive writes raw content explicitly", async () => {
