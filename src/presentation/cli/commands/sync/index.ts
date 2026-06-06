@@ -69,7 +69,6 @@ function resolveSyncCommandDeps(deps: SyncCommandDeps): ResolvedSyncCommandDeps 
     createSyncService: createDefaultSyncService,
     loadConfig,
     createRemoteEventSyncService: createDefaultRemoteEventSyncService,
-    experimentalRemoteSync: process.env.MEMORY_EXPERIMENTAL_REMOTE_SYNC === "1",
     runMemoryFileSync,
     reportMemoryFileResults,
     runAmbientContextGeneration,
@@ -90,6 +89,7 @@ export function createSyncCommand(): Command {
     .option("--embed", "Generate embeddings for messages after sync")
     .option("--background", "Run embedding in background (use with --embed)")
     .option("--include-memory-files", "Index legacy ~/.memory / MEMORY_HOME markdown files")
+    .option("--remote", "Synchronize canonical event logs with configured remote")
     .option("--json", "Output results as JSON")
     .addOption(new Option("-q, --quiet", "Suppress progress output").conflicts("verbose"))
     .addOption(new Option("-v, --verbose", "Show detailed progress").conflicts("quiet"))
@@ -173,16 +173,15 @@ export async function executeSyncCommand(
     reporter.stop();
     resolved.reportResults(result, startTime, options);
 
-    // Git Remote Sync remains opt-in until consent/provenance, transport,
-    // conflict semantics, operations, backup, and recovery gates are finished.
+    // Git remote sync is explicit to avoid hidden data egress from an ordinary
+    // local session sync.
     const config = resolved.loadConfig();
     const remoteUrl = config.remoteSync?.repositoryUrl;
     const remoteConfigured =
       config.remoteSync?.enabled === true &&
       typeof remoteUrl === "string" &&
       remoteUrl.trim().length > 0;
-    const remoteEnabled = resolved.experimentalRemoteSync;
-    if (remoteConfigured && remoteEnabled) {
+    if (remoteConfigured && options.remote === true) {
       if (!options.quiet) {
         console.log("Synchronizing events with remote Git repository...");
       }
@@ -218,8 +217,11 @@ export async function executeSyncCommand(
       } catch (err: any) {
         console.error(`Warning: Remote synchronization failed to execute: ${unknownErrorMessage(err)}`);
       }
+    } else if (options.remote === true) {
+      console.error("Remote synchronization requested but no remote repository is configured. Run 'memory remote set <repository-url>' first.");
+      return { exitCode: 1 };
     } else if (remoteConfigured && !options.quiet) {
-      console.warn("Remote synchronization is configured but disabled until Phase 38.2.5/38.3/38.4 readiness. Set MEMORY_EXPERIMENTAL_REMOTE_SYNC=1 only for explicit prototype testing.");
+      console.warn("Remote synchronization is configured but skipped. Run 'memory sync --remote' to synchronize canonical event logs.");
     }
 
     const legacyMemoryFilesEnabled =

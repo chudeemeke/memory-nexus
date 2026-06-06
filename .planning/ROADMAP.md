@@ -92,7 +92,7 @@
 - [x] **Phase 38.2: Redaction, Privacy Governance, and Audit Commands** - Redaction before storage/indexing/egress, secret audit, provider egress policy, migration/quarantine. Completed 2026-06-06.
 - [x] **Phase 38.2.5: Consent Provenance and Memory Governance** - User-visible consent, provenance, suppression, invalidation, review, and governance events for derived memory surfaces. Completed 2026-06-06.
 - [x] **Phase 38.3: Remote Sync Application Service and Git Transport** - Private-Git-backed remote event synchronization through application ports and shell-safe transport adapter. Completed 2026-06-06.
-- [ ] **Phase 38.4: Remote CLI, Operations, Backup, and Recovery** - `memory remote` surface, preflight, doctor, backup/restore/rollback, cross-machine verification.
+- [x] **Phase 38.4: Remote CLI, Operations, Backup, and Recovery** - `memory remote` surface, preflight, doctor, backup/restore/rollback, cross-machine verification. Completed 2026-06-06.
 - [ ] **Phase 38.5: Secure Capability Interop** - Optional authkey readiness/status/fingerprint interop using handles, masked metadata, or proofs; no hard dependency and no plaintext secret resolution inside memory-nexus.
 - [ ] **Phase 38.6: Durable Friction Query Contract** - Stable durable `memory friction list` filters, counts, exit codes, JSON schema, timezone semantics, and privacy-safe query handling. Source: `docs/inbox/archived/2026-05-12-conversations-friction-list-durable-filters.md`.
 - [ ] **Phase 38.7: Evaluation Harness and Regression Fixtures** - Executable eval runner, fixtures, report schema, and release-gate integration for v5 behavior checks.
@@ -421,7 +421,15 @@ Rationale: Phase 32 explicitly deferred friction envelope adoption per audit §1
   2. `memory sync --remote` or an equivalent named command calls the application service.
   3. Backup, restore, rollback, cross-machine verification, and failure recovery are documented and tested.
   4. First-party `remotely` conventions are used where cross-machine verification is needed.
-**Plans**: Placeholder directory exists; plan after Phase 38.3.
+**Plans**: 1/1 complete.
+**Status**: Completed 2026-06-06.
+**Completion Evidence**:
+  - `memory remote` is registered publicly; `memory sync --remote` is the explicit remote-egress path and plain `memory sync` warns/skips configured remotes.
+  - `memory remote set/remove/status/preflight/doctor` support stable JSON output, readiness diagnostics, URL validation, local-path consent, machine identity validation, and event-log privacy preflight.
+  - `memory remote backup/restore/rollback` snapshot and restore remote config plus event-log content; restore and rollback require `--confirm`; `.git` internals are excluded.
+  - Shell completions and CLI help expose the new remote surface.
+  - Operational recovery runbook: `docs/operations/remote-sync-runbook.md`.
+  - Verification: focused Phase 38.4 tests passed (140 pass, 0 fail) and typecheck passed before final release-gate run.
 
 ---
 
@@ -690,7 +698,7 @@ v5.0
 | 38.2. Redaction, Privacy Governance, and Audit Commands | v5.0 | 1/1 | Complete | 2026-06-06 |
 | 38.2.5. Consent Provenance and Memory Governance | v5.0 | 1/1 | Complete | 2026-06-06 |
 | 38.3. Remote Sync Service and Git Transport | v5.0 | 1/1 | Complete | 2026-06-06 |
-| 38.4. Remote CLI, Operations, Backup, and Recovery | v5.0 | TBD | Planned | - |
+| 38.4. Remote CLI, Operations, Backup, and Recovery | v5.0 | 1/1 | Complete | 2026-06-06 |
 | 38.5. Secure Capability Interop | v5.0 | TBD | Planned | - |
 | 38.6. Durable Friction Query Contract | v5.0 | TBD | Planned | - |
 | 38.7. Evaluation Harness and Regression Fixtures | v5.0 | TBD | Planned | - |

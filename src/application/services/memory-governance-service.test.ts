@@ -86,6 +86,38 @@ class InMemoryGovernanceRepo implements IMemoryGovernanceRepository {
 }
 
 describe("MemoryGovernanceService", () => {
+  test("uses safe defaults, supports no event writer, and allows unregistered memories", async () => {
+    const repo = new InMemoryGovernanceRepo();
+    const service = new MemoryGovernanceService({
+      repository: repo,
+      machineId: "   ",
+      now: () => new Date("2026-06-06T08:00:00Z"),
+      nextSequence: () => 20,
+    });
+
+    const entry = await service.registerDerivedMemory({
+      surface: "context",
+      targetId: "ctx-1",
+      sourceEventIds: ["source-1"],
+      transformationMethod: "context.compose",
+    });
+    const empty: Array<{ id: string }> = [];
+
+    expect(entry.toJSON()).toMatchObject({
+      surface: "context",
+      target_id: "ctx-1",
+      visibility: "global",
+      actor: "memory",
+      confidence: 1,
+      redaction_state: "none",
+      consent_status: "not_required",
+      consent_scopes: [],
+    });
+    expect(entry.project).toBeUndefined();
+    expect(await service.isAllowed("context", "missing")).toBe(true);
+    await expect(service.filterAllowed("context", empty, (item) => item.id)).resolves.toBe(empty);
+  });
+
   test("registers derived memory by emitting a canonical event and updating projection", async () => {
     const repo = new InMemoryGovernanceRepo();
     const events: MemoryEventEnvelope[] = [];
@@ -117,6 +149,83 @@ describe("MemoryGovernanceService", () => {
       transformationMethod: "llm.extract",
     });
     expect(entry.consentStatus).toBe("granted");
+  });
+
+  test("applies all control commands and emits consent events for consent changes", async () => {
+    const repo = new InMemoryGovernanceRepo();
+    const events: MemoryEventEnvelope[] = [];
+    const service = new MemoryGovernanceService({
+      repository: repo,
+      writeEvent: async (event) => { events.push(event); },
+      machineId: "machine-1",
+      now: () => new Date("2026-06-06T09:00:00Z"),
+      nextSequence: (() => {
+        let sequence = 100;
+        return () => sequence++;
+      })(),
+    });
+    await service.registerDerivedMemory({
+      surface: "fact",
+      targetId: "fact-controls",
+      project: "memory-nexus",
+      sourceEventIds: ["source-1"],
+      transformationMethod: "test",
+    });
+
+    const suppressed = await service.suppress({ surface: "fact", targetId: "fact-controls", reason: "wrong" });
+    const unsuppressed = await service.unsuppress({ surface: "fact", targetId: "fact-controls" });
+    const invalidated = await service.invalidate({ surface: "fact", targetId: "fact-controls", reason: "false" });
+    const reviewed = await service.review({ surface: "fact", targetId: "fact-controls" });
+    const granted = await service.grantConsent({
+      surface: "fact",
+      targetId: "fact-controls",
+      consentScopes: ["remote-sync"],
+    });
+    const revoked = await service.revokeConsent({ surface: "fact", targetId: "fact-controls" });
+    const expired = await service.expire({ surface: "fact", targetId: "fact-controls" });
+
+    expect(suppressed.status).toBe("suppressed");
+    expect(unsuppressed.status).toBe("active");
+    expect(invalidated.status).toBe("invalidated");
+    expect(reviewed.reviewedAt?.toISOString()).toBe("2026-06-06T09:00:00.000Z");
+    expect(granted.consentStatus).toBe("granted");
+    expect(granted.consentScopes).toEqual(["remote-sync"]);
+    expect(revoked.consentStatus).toBe("revoked");
+    expect(expired.status).toBe("expired");
+    expect(expired.expiresAt?.toISOString()).toBe("2026-06-06T09:00:00.000Z");
+    expect(events.filter((event) => event.kind === "consent").map((event) => event.payload.governance.control))
+      .toEqual(["consent_grant", "consent_revoke"]);
+  });
+
+  test("controls an unregistered target with explicit fallback provenance instead of dropping the request", async () => {
+    const repo = new InMemoryGovernanceRepo();
+    const events: MemoryEventEnvelope[] = [];
+    const service = new MemoryGovernanceService({
+      repository: repo,
+      writeEvent: async (event) => { events.push(event); },
+      now: () => new Date("2026-06-06T10:00:00Z"),
+      nextSequence: () => 30,
+    });
+
+    const entry = await service.suppress({
+      surface: "persona",
+      targetId: "persona-1",
+      actor: "user",
+      reason: "do not personalize from this",
+    });
+    const payload = events[0].payload.governance as any;
+
+    expect(entry.toJSON()).toMatchObject({
+      surface: "persona",
+      target_id: "persona-1",
+      visibility: "global",
+      source_event_ids: ["persona-1"],
+      transformation_method: "governance.suppress",
+      status: "suppressed",
+      status_reason: "do not personalize from this",
+    });
+    expect(payload.visibility).toBe("global");
+    expect(payload.sourceEventIds).toEqual(["persona-1"]);
   });
 
   test("suppresses entries and filters blocked items for downstream context/ranking surfaces", async () => {
@@ -152,5 +261,54 @@ describe("MemoryGovernanceService", () => {
 
     expect(await service.isAllowed("fact", "drop")).toBe(false);
     expect(allowed.map((item) => item.id)).toEqual(["keep", "unregistered"]);
+  });
+
+  test("delegates list and show filters to the repository", async () => {
+    const repo = new InMemoryGovernanceRepo();
+    const service = new MemoryGovernanceService({ repository: repo });
+    await service.registerDerivedMemory({
+      surface: "fact",
+      targetId: "fact-a",
+      project: "a",
+      sourceEventIds: ["source-a"],
+      transformationMethod: "test",
+    });
+    await service.registerDerivedMemory({
+      surface: "fact",
+      targetId: "fact-b",
+      project: "b",
+      sourceEventIds: ["source-b"],
+      transformationMethod: "test",
+    });
+    await service.suppress({ surface: "fact", targetId: "fact-b" });
+
+    expect((await service.list({ project: "a" })).map((entry) => entry.targetId)).toEqual(["fact-a"]);
+    expect((await service.list({ status: "suppressed" })).map((entry) => entry.targetId)).toEqual(["fact-b"]);
+    expect((await service.show("fact", "fact-a"))?.targetId).toBe("fact-a");
+    expect(await service.show("fact", "missing")).toBeNull();
+  });
+
+  test("fails loudly when repository projection does not materialize a registration or control", async () => {
+    class NullProjectionRepo extends InMemoryGovernanceRepo {
+      override async applyMemoryEvent(): Promise<MemoryGovernanceEntry | null> {
+        return null;
+      }
+    }
+    const service = new MemoryGovernanceService({
+      repository: new NullProjectionRepo(),
+      writeEvent: async () => undefined,
+    });
+
+    await expect(service.registerDerivedMemory({
+      surface: "fact",
+      targetId: "fact-null",
+      sourceEventIds: ["source"],
+      transformationMethod: "test",
+    })).rejects.toThrow("Governance registration did not produce a projection entry");
+
+    await expect(service.suppress({
+      surface: "fact",
+      targetId: "fact-null",
+    })).rejects.toThrow("Governance suppress did not produce a projection entry");
   });
 });

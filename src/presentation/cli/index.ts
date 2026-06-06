@@ -70,9 +70,7 @@ program.addCommand(createImportCommand());
 program.addCommand(createPurgeCommand());
 program.addCommand(createMigrateCommand());
 program.addCommand(createExtractCommand());
-if (process.env.MEMORY_EXPERIMENTAL_REMOTE_SYNC === "1") {
-  program.addCommand(createRemoteCommand());
-}
+program.addCommand(createRemoteCommand());
 
 
 // System Commands — hooks, diagnostics, completion. `browse` lives here

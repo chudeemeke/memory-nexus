@@ -20,63 +20,72 @@ function fail(error: string): RemoteTransportCommandResult {
 function createTransport(options: {
   isRepository?: boolean;
   currentRemote?: string | null;
+  hasEventLog?: boolean;
   remoteRefExists?: boolean;
   snapshots?: Array<Record<string, string>>;
   failures?: Partial<Record<keyof RemoteEventTransport, RemoteTransportCommandResult>>;
+  throwOn?: keyof RemoteEventTransport;
 } = {}): { transport: RemoteEventTransport; calls: string[] } {
   const calls: string[] = [];
   const snapshots = [...(options.snapshots ?? [{ "events-machine-1234.jsonl": "a" }])];
   const nextSnapshot = () => snapshots.shift() ?? snapshots[snapshots.length - 1] ?? {};
 
+  const beforeCall = (name: keyof RemoteEventTransport) => {
+    calls.push(name);
+    if (options.throwOn === name) {
+      throw new Error(`${name} exploded`);
+    }
+  };
+
   const resultFor = (name: keyof RemoteEventTransport) => options.failures?.[name] ?? ok();
 
   const transport: RemoteEventTransport = {
     isRepository: mock(async () => {
-      calls.push("isRepository");
+      beforeCall("isRepository");
       return options.isRepository ?? true;
     }),
     initRepository: mock(async () => {
-      calls.push("initRepository");
+      beforeCall("initRepository");
       return resultFor("initRepository");
     }),
     getRemoteUrl: mock(async () => {
-      calls.push("getRemoteUrl");
+      beforeCall("getRemoteUrl");
       return options.currentRemote ?? null;
     }),
     setRemoteUrl: mock(async () => {
-      calls.push("setRemoteUrl");
+      beforeCall("setRemoteUrl");
       return resultFor("setRemoteUrl");
     }),
     listEventLogFingerprints: mock(async () => {
-      calls.push("listEventLogFingerprints");
+      beforeCall("listEventLogFingerprints");
       return nextSnapshot();
     }),
     hasEventLog: mock(async () => {
-      calls.push("hasEventLog");
-      return true;
+      beforeCall("hasEventLog");
+      return options.hasEventLog ?? true;
     }),
     commitEventLog: mock(async () => {
-      calls.push("commitEventLog");
+      beforeCall("commitEventLog");
       return resultFor("commitEventLog");
     }),
     fetch: mock(async () => {
-      calls.push("fetch");
+      beforeCall("fetch");
       return resultFor("fetch");
     }),
     hasRemoteRef: mock(async () => {
-      calls.push("hasRemoteRef");
+      beforeCall("hasRemoteRef");
       return options.remoteRefExists ?? true;
     }),
     pullRebase: mock(async () => {
-      calls.push("pullRebase");
+      beforeCall("pullRebase");
       return resultFor("pullRebase");
     }),
     abortRebase: mock(async () => {
-      calls.push("abortRebase");
+      beforeCall("abortRebase");
       return resultFor("abortRebase");
     }),
     push: mock(async () => {
-      calls.push("push");
+      beforeCall("push");
       return resultFor("push");
     }),
   };
@@ -91,6 +100,22 @@ describe("remote sync validation", () => {
     expect(validateRemoteRepositoryUrl("git@github.com:chude/memory-events.git")).toEqual({ valid: true });
   });
 
+  it("rejects empty, control-character, malformed, and unsupported remote URLs", () => {
+    expect(validateRemoteRepositoryUrl("   ")).toEqual({ valid: false, error: "Remote URL is required" });
+    expect(validateRemoteRepositoryUrl("https://github.com/chude/repo.git\nbad")).toEqual({
+      valid: false,
+      error: "Remote URL contains control characters",
+    });
+    expect(validateRemoteRepositoryUrl("not a git remote")).toEqual({
+      valid: false,
+      error: "Remote URL is not a supported Git remote",
+    });
+    expect(validateRemoteRepositoryUrl("ftp://example.com/repo.git")).toEqual({
+      valid: false,
+      error: "Remote URL protocol is not supported",
+    });
+  });
+
   it("rejects unsupported protocols and local paths unless explicitly allowed", () => {
     expect(validateRemoteRepositoryUrl("git://github.com/chude/memory-events.git")).toEqual({
       valid: false,
@@ -103,6 +128,25 @@ describe("remote sync validation", () => {
     expect(validateRemoteRepositoryUrl("C:\\tmp\\memory-events.git", { allowLocalPathRemote: true })).toEqual({ valid: true });
   });
 
+  it("requires explicit consent for every local-path remote shape", () => {
+    const localRemotes = [
+      "/tmp/memory-events.git",
+      "./memory-events.git",
+      "../memory-events.git",
+      "~/memory-events.git",
+      "file:///tmp/memory-events.git",
+      "D:/memory-events.git",
+    ];
+
+    for (const remote of localRemotes) {
+      expect(validateRemoteRepositoryUrl(remote)).toEqual({
+        valid: false,
+        error: "Local path remotes require explicit allowLocalPathRemote consent",
+      });
+      expect(validateRemoteRepositoryUrl(remote, { allowLocalPathRemote: true })).toEqual({ valid: true });
+    }
+  });
+
   it("rejects unsafe refs and non-durable machine identities", () => {
     expect(validateRemoteRef("main")).toEqual({ valid: true });
     expect(validateRemoteRef("feature/sync")).toEqual({ valid: true });
@@ -112,6 +156,28 @@ describe("remote sync validation", () => {
     expect(validateMachineIdentity("machine-1234")).toEqual({ valid: true });
     expect(validateMachineIdentity("local")).toEqual({ valid: false, error: "Machine identity must come from durable config, not a fallback value" });
     expect(validateMachineIdentity("bad/id")).toEqual({ valid: false, error: "Machine identity contains unsafe characters" });
+  });
+
+  it("rejects branch names that Git treats as ambiguous or unsafe", () => {
+    for (const ref of ["", "/main", "main/", ".main", "main..next", "main//next", "main.", "main.lock", "main name"]) {
+      expect(validateRemoteRef(ref).valid).toBe(false);
+    }
+  });
+
+  it("rejects blank, fallback, unsafe, and oversized machine identities", () => {
+    expect(validateMachineIdentity("")).toEqual({ valid: false, error: "Machine identity is required" });
+    expect(validateMachineIdentity("legacy")).toEqual({
+      valid: false,
+      error: "Machine identity must come from durable config, not a fallback value",
+    });
+    expect(validateMachineIdentity("machine 1234")).toEqual({
+      valid: false,
+      error: "Machine identity contains unsafe characters",
+    });
+    expect(validateMachineIdentity("m".repeat(129))).toEqual({
+      valid: false,
+      error: "Machine identity is too long",
+    });
   });
 });
 
@@ -179,6 +245,106 @@ describe("RemoteEventSyncService", () => {
     expect(calls).toEqual([]);
   });
 
+  it("fails when repository initialization or remote configuration fails", async () => {
+    const init = createTransport({
+      isRepository: false,
+      failures: { initRepository: fail("git init denied") },
+    });
+    const initResult = await new RemoteEventSyncService({ transport: init.transport }).sync({
+      machineId: "machine-1234",
+      repositoryUrl: "git@github.com:chude/memory-events.git",
+    });
+
+    expect(initResult).toMatchObject({
+      success: false,
+      status: "failed",
+      initializedRepository: false,
+      error: "git init denied",
+    });
+    expect(init.calls).toEqual(["isRepository", "initRepository"]);
+
+    const configure = createTransport({
+      isRepository: false,
+      failures: { setRemoteUrl: fail("remote add denied") },
+    });
+    const configureResult = await new RemoteEventSyncService({ transport: configure.transport }).sync({
+      machineId: "machine-1234",
+      repositoryUrl: "git@github.com:chude/memory-events.git",
+    });
+
+    expect(configureResult).toMatchObject({
+      success: false,
+      status: "failed",
+      initializedRepository: true,
+      configuredRemote: false,
+      error: "remote add denied",
+    });
+    expect(configure.calls).toContain("setRemoteUrl");
+  });
+
+  it("skips remote reconfiguration and local commit when already configured with no local event log", async () => {
+    const { transport, calls } = createTransport({
+      currentRemote: "git@github.com:chude/memory-events.git",
+      hasEventLog: false,
+      remoteRefExists: false,
+      snapshots: [
+        { "events-machine-1234.jsonl": "same" },
+        { "events-machine-1234.jsonl": "same" },
+      ],
+    });
+    const service = new RemoteEventSyncService({ transport });
+
+    const result = await service.sync({
+      machineId: "machine-1234",
+      repositoryUrl: " git@github.com:chude/memory-events.git ",
+    });
+
+    expect(result).toMatchObject({
+      success: true,
+      configuredRemote: false,
+      initializedRepository: false,
+      pulled: false,
+      pushed: true,
+      rebuildNeeded: false,
+      projectionRebuilt: false,
+    });
+    expect(calls).not.toContain("setRemoteUrl");
+    expect(calls).not.toContain("commitEventLog");
+    expect(calls).not.toContain("pullRebase");
+  });
+
+  it("reports commit and fetch failures without continuing to unsafe network mutation", async () => {
+    const commit = createTransport({
+      failures: { commitEventLog: fail("nothing can be committed") },
+    });
+    const commitResult = await new RemoteEventSyncService({ transport: commit.transport }).sync({
+      machineId: "machine-1234",
+      repositoryUrl: "git@github.com:chude/memory-events.git",
+    });
+
+    expect(commitResult).toMatchObject({
+      success: false,
+      status: "failed",
+      error: "Git commit failed: nothing can be committed",
+    });
+    expect(commit.calls).not.toContain("fetch");
+
+    const fetch = createTransport({
+      failures: { fetch: fail("network unavailable") },
+    });
+    const fetchResult = await new RemoteEventSyncService({ transport: fetch.transport }).sync({
+      machineId: "machine-1234",
+      repositoryUrl: "git@github.com:chude/memory-events.git",
+    });
+
+    expect(fetchResult).toMatchObject({
+      success: false,
+      status: "failed",
+      error: "Git fetch failed: network unavailable",
+    });
+    expect(fetch.calls).not.toContain("push");
+  });
+
   it("aborts rebase and reports pull failures without pushing", async () => {
     const { transport, calls } = createTransport({
       failures: { pullRebase: fail("conflict") },
@@ -200,6 +366,56 @@ describe("RemoteEventSyncService", () => {
     });
     expect(calls).toContain("abortRebase");
     expect(calls).not.toContain("push");
+  });
+
+  it("rebuilds projections after push failures when pulled logs changed", async () => {
+    const { transport, calls } = createTransport({
+      snapshots: [
+        { "events-machine-1234.jsonl": "before" },
+        { "events-machine-1234.jsonl": "before", "events-machine-5678.jsonl": "after" },
+      ],
+      failures: { push: fail("non fast-forward") },
+    });
+    const rebuild = mock(async () => undefined);
+    const service = new RemoteEventSyncService({ transport, projectionRebuilder: { rebuild } });
+
+    const result = await service.sync({
+      machineId: "machine-1234",
+      repositoryUrl: "git@github.com:chude/memory-events.git",
+    });
+
+    expect(result).toMatchObject({
+      success: false,
+      status: "failed",
+      error: "Git push failed: non fast-forward",
+      pulled: true,
+      pushed: false,
+      rebuildNeeded: true,
+      projectionRebuilt: true,
+    });
+    expect(calls).toContain("push");
+    expect(rebuild).toHaveBeenCalledTimes(1);
+  });
+
+  it("marks rebuild needed without rebuilding when no projection rebuilder is configured", async () => {
+    const { transport } = createTransport({
+      snapshots: [
+        { "events-machine-1234.jsonl": "before" },
+        { "events-machine-1234.jsonl": "after" },
+      ],
+    });
+    const service = new RemoteEventSyncService({ transport });
+
+    const result = await service.sync({
+      machineId: "machine-1234",
+      repositoryUrl: "git@github.com:chude/memory-events.git",
+    });
+
+    expect(result).toMatchObject({
+      success: true,
+      rebuildNeeded: true,
+      projectionRebuilt: false,
+    });
   });
 
   it("does not fetch or push when auto flags are disabled", async () => {
@@ -233,5 +449,70 @@ describe("RemoteEventSyncService", () => {
       error: "Local path remotes require explicit allowLocalPathRemote consent",
     });
     expect(calls).toEqual([]);
+  });
+
+  it("allows local path remotes only when explicit request consent is present", async () => {
+    const { transport, calls } = createTransport();
+    const service = new RemoteEventSyncService({ transport });
+
+    const result = await service.sync({
+      machineId: "machine-1234",
+      repositoryUrl: "C:\\tmp\\memory-events.git",
+      allowLocalPathRemote: true,
+      autoPull: false,
+      autoPush: false,
+    });
+
+    expect(result).toMatchObject({ success: true, status: "synced" });
+    expect(calls).toContain("isRepository");
+  });
+
+  it("blocks invalid branch and remote alias before transport", async () => {
+    const badBranch = createTransport();
+    const branchResult = await new RemoteEventSyncService({ transport: badBranch.transport }).sync({
+      machineId: "machine-1234",
+      repositoryUrl: "git@github.com:chude/memory-events.git",
+      branch: "main.lock",
+    });
+
+    expect(branchResult).toMatchObject({
+      success: false,
+      status: "blocked",
+      error: "Remote ref is not a valid branch name",
+    });
+    expect(badBranch.calls).toEqual([]);
+
+    const badRemoteName = createTransport();
+    const remoteNameResult = await new RemoteEventSyncService({ transport: badRemoteName.transport }).sync({
+      machineId: "machine-1234",
+      repositoryUrl: "git@github.com:chude/memory-events.git",
+      remoteName: "origin;bad",
+    });
+
+    expect(remoteNameResult).toMatchObject({
+      success: false,
+      status: "blocked",
+      error: "Remote name is not valid",
+    });
+    expect(badRemoteName.calls).toEqual([]);
+  });
+
+  it("captures unexpected transport errors with partial progress flags", async () => {
+    const { transport } = createTransport({ throwOn: "push" });
+    const service = new RemoteEventSyncService({ transport });
+
+    const result = await service.sync({
+      machineId: "machine-1234",
+      repositoryUrl: "git@github.com:chude/memory-events.git",
+    });
+
+    expect(result).toMatchObject({
+      success: false,
+      status: "failed",
+      configuredRemote: true,
+      pulled: true,
+      pushed: false,
+      error: "push exploded",
+    });
   });
 });

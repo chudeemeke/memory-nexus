@@ -59,6 +59,69 @@ describe("git transport environment hardening", () => {
 });
 
 describe("GitRemoteEventTransport unit behavior", () => {
+  it("initializes a repository with durable Git identity and main branch", async () => {
+    const calls: string[][] = [];
+    const madeDirs: Array<{ path: string; recursive: boolean | undefined }> = [];
+    const transport = new GitRemoteEventTransport("C:\\events", {
+      mkdirSync: (path, options) => {
+        madeDirs.push({ path, recursive: options?.recursive });
+      },
+      runGit: async (args) => {
+        calls.push(args);
+        return gitOk();
+      },
+    });
+
+    await expect(transport.initRepository({
+      machineId: "machine-1234",
+      userName: "Memory Sync",
+      userEmail: "sync@memory.local",
+    })).resolves.toEqual({ success: true });
+
+    expect(madeDirs).toEqual([{ path: "C:\\events", recursive: true }]);
+    expect(calls).toEqual([
+      ["init"],
+      ["config", "user.name", "Memory Sync"],
+      ["config", "user.email", "sync@memory.local"],
+      ["symbolic-ref", "HEAD", "refs/heads/main"],
+    ]);
+  });
+
+  it("reports initialization failures at each Git setup step", async () => {
+    const cases: Array<{ failingCall: number; expected: string }> = [
+      { failingCall: 1, expected: "Failed to initialize Git repository in events directory" },
+      { failingCall: 2, expected: "Failed to configure Git user.name" },
+      { failingCall: 3, expected: "Failed to configure Git user.email" },
+      { failingCall: 4, expected: "Failed to configure Git main branch" },
+    ];
+
+    for (const testCase of cases) {
+      let call = 0;
+      const transport = new GitRemoteEventTransport("C:\\events", {
+        runGit: async () => {
+          call += 1;
+          return call === testCase.failingCall ? gitFail("", 128) : gitOk();
+        },
+      });
+
+      await expect(transport.initRepository({
+        machineId: "machine-1234",
+        userName: "Memory Sync",
+        userEmail: "sync@memory.local",
+      })).resolves.toEqual({ success: false, error: testCase.expected });
+    }
+  });
+
+  it("returns repository and remote status without throwing when Git has no origin yet", async () => {
+    const transport = new GitRemoteEventTransport("C:\\events", {
+      existsSync: (path) => path.endsWith(".git"),
+      runGit: async () => gitFail("No such remote", 2),
+    });
+
+    await expect(transport.isRepository()).resolves.toBe(true);
+    await expect(transport.getRemoteUrl()).resolves.toBeNull();
+  });
+
   it("configures origin with argument-array Git calls", async () => {
     const calls: string[][] = [];
     const transport = new GitRemoteEventTransport("C:\\events", {
@@ -73,6 +136,71 @@ describe("GitRemoteEventTransport unit behavior", () => {
       ["remote", "remove", "origin"],
       ["remote", "add", "origin", "git@github.com:chude/memory-events.git"],
     ]);
+  });
+
+  it("reports remote configuration failures using stderr, stdout, or fallback text", async () => {
+    const stderrTransport = new GitRemoteEventTransport("C:\\events", {
+      runGit: async (args) => args[0] === "remote" && args[1] === "add"
+        ? gitFail("permission denied", 128)
+        : gitOk(),
+    });
+    await expect(stderrTransport.setRemoteUrl("git@example.com:repo.git")).resolves.toEqual({
+      success: false,
+      error: "permission denied",
+    });
+
+    const stdoutTransport = new GitRemoteEventTransport("C:\\events", {
+      runGit: async (args) => args[0] === "remote" && args[1] === "add"
+        ? { success: false, stdout: "bad stdout", stderr: "", exitCode: 128 }
+        : gitOk(),
+    });
+    await expect(stdoutTransport.setRemoteUrl("git@example.com:repo.git")).resolves.toEqual({
+      success: false,
+      error: "bad stdout",
+    });
+
+    const fallbackTransport = new GitRemoteEventTransport("C:\\events", {
+      runGit: async (args) => args[0] === "remote" && args[1] === "add"
+        ? { success: false, stdout: "", stderr: "", exitCode: 128 }
+        : gitOk(),
+    });
+    await expect(fallbackTransport.setRemoteUrl("git@example.com:repo.git")).resolves.toEqual({
+      success: false,
+      error: "Failed to configure Git remote repository URL",
+    });
+  });
+
+  it("fingerprints only event log files still present on disk", async () => {
+    const transport = new GitRemoteEventTransport("C:\\events", {
+      getAllLogFiles: () => [
+        "C:\\events\\events-missing.jsonl",
+        "C:\\events\\events-machine-1234.jsonl",
+      ],
+      existsSync: (path) => path.endsWith("events-machine-1234.jsonl"),
+      readFileSync: () => "{\"event\":\"one\"}\n",
+    });
+
+    const fingerprints = await transport.listEventLogFingerprints();
+
+    expect(Object.keys(fingerprints)).toEqual(["events-machine-1234.jsonl"]);
+    expect(fingerprints["events-machine-1234.jsonl"]).toHaveLength(64);
+  });
+
+  it("skips commit when the machine has no event log", async () => {
+    const calls: string[][] = [];
+    const transport = new GitRemoteEventTransport("C:\\events", {
+      existsSync: () => false,
+      runGit: async (args) => {
+        calls.push(args);
+        return gitOk();
+      },
+    });
+
+    await expect(transport.commitEventLog("machine-1234", "sync message")).resolves.toEqual({
+      success: true,
+      skipped: true,
+    });
+    expect(calls).toEqual([]);
   });
 
   it("treats clean staged event logs as a skipped commit", async () => {
@@ -94,6 +222,39 @@ describe("GitRemoteEventTransport unit behavior", () => {
     ]);
   });
 
+  it("reports add, diff, and commit failures when staging local event logs", async () => {
+    const addFailure = new GitRemoteEventTransport("C:\\events", {
+      existsSync: () => true,
+      runGit: async (args) => args[0] === "add" ? gitFail("index locked", 128) : gitOk(),
+    });
+    await expect(addFailure.commitEventLog("machine-1234", "sync message")).resolves.toEqual({
+      success: false,
+      error: "index locked",
+    });
+
+    const diffFailure = new GitRemoteEventTransport("C:\\events", {
+      existsSync: () => true,
+      runGit: async (args) => args[0] === "diff" ? gitFail("diff died", 2) : gitOk(),
+    });
+    await expect(diffFailure.commitEventLog("machine-1234", "sync message")).resolves.toEqual({
+      success: false,
+      error: "diff died",
+    });
+
+    const commitFailure = new GitRemoteEventTransport("C:\\events", {
+      existsSync: () => true,
+      runGit: async (args) => {
+        if (args[0] === "diff") return gitFail("", 1);
+        if (args[0] === "commit") return gitFail("commit rejected", 1);
+        return gitOk();
+      },
+    });
+    await expect(commitFailure.commitEventLog("machine-1234", "sync message")).resolves.toEqual({
+      success: false,
+      error: "commit rejected",
+    });
+  });
+
   it("commits when staged event log content changed", async () => {
     const calls: string[][] = [];
     const transport = new GitRemoteEventTransport("C:\\events", {
@@ -112,6 +273,41 @@ describe("GitRemoteEventTransport unit behavior", () => {
       ["diff", "--cached", "--quiet", "--", "events-machine-1234.jsonl"],
       ["commit", "--no-gpg-sign", "-m", "sync message", "--", "events-machine-1234.jsonl"],
     ]);
+  });
+
+  it("reports fetch, pull, rebase abort, and push failures", async () => {
+    const transport = new GitRemoteEventTransport("C:\\events", {
+      runGit: async (args) => {
+        switch (args[0]) {
+          case "fetch":
+            return gitFail("fetch denied", 128);
+          case "pull":
+            return gitFail("pull conflict", 1);
+          case "rebase":
+            return gitFail("abort denied", 1);
+          case "push":
+            return gitFail("push rejected", 1);
+          case "rev-parse":
+            return gitFail("missing ref", 128);
+          default:
+            return gitOk();
+        }
+      },
+    });
+
+    await expect(transport.fetch("origin")).resolves.toEqual({ success: false, error: "fetch denied" });
+    await expect(transport.hasRemoteRef("origin", "main")).resolves.toBe(false);
+    await expect(transport.pullRebase("origin", "main")).resolves.toEqual({ success: false, error: "pull conflict" });
+    await expect(transport.abortRebase()).resolves.toEqual({ success: false, error: "abort denied" });
+    await expect(transport.push("origin", "main")).resolves.toEqual({ success: false, error: "push rejected" });
+  });
+
+  it("treats an absent in-progress rebase as a successful cleanup", async () => {
+    const transport = new GitRemoteEventTransport("C:\\events", {
+      runGit: async () => gitFail("fatal: No rebase in progress?", 128),
+    });
+
+    await expect(transport.abortRebase()).resolves.toEqual({ success: true });
   });
 });
 

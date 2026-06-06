@@ -30,6 +30,8 @@ export interface SyncCommandOptions {
   background?: boolean;
   /** Explicitly index legacy ~/.memory / MEMORY_HOME markdown files */
   includeMemoryFiles?: boolean;
+  /** Explicitly synchronize canonical event logs with configured remote */
+  remote?: boolean;
 }
 
 export interface RemoteEventSyncCommandService {
@@ -89,8 +91,6 @@ export interface SyncCommandDeps {
   loadConfig?: () => import("../../../../infrastructure/hooks/config-manager.js").MemoryConfig;
   /** Override remote event sync service construction */
   createRemoteEventSyncService?: (deps: { db: import("bun:sqlite").Database }) => RemoteEventSyncCommandService | Promise<RemoteEventSyncCommandService>;
-  /** Explicitly enable the unfinished Phase 38 remote-sync prototype */
-  experimentalRemoteSync?: boolean;
   /** Override memory file sync */
   runMemoryFileSync?: typeof import("./memory-files.js").runMemoryFileSync;
   /** Override memory file sync reporting */

@@ -151,6 +151,12 @@ describe("Sync Command", () => {
       const option = command.options.find((o) => o.long === "--include-memory-files");
       expect(option).toBeDefined();
     });
+
+    it("has --remote explicit egress option", () => {
+      const command = createSyncCommand();
+      const option = command.options.find((o) => o.long === "--remote");
+      expect(option).toBeDefined();
+    });
   });
 
   describe("option parsing", () => {
@@ -398,6 +404,18 @@ describe("Sync Command", () => {
       command.parse(["--json"], { from: "user" });
 
       expect(capturedOptions?.json).toBe(true);
+    });
+
+    it("parses --remote flag", () => {
+      const command = createSyncCommand();
+      let capturedOptions: Record<string, unknown> | undefined;
+      command.action((options) => {
+        capturedOptions = options;
+      });
+
+      command.parse(["--remote"], { from: "user" });
+
+      expect(capturedOptions?.remote).toBe(true);
     });
 
     it("dry-run and json options in help", () => {
@@ -667,7 +685,7 @@ describe("Sync Command", () => {
       expect(harness.deps.closeDatabase).toHaveBeenCalledTimes(1);
     });
 
-    it("covers remote sync rebuild, current, failed, thrown, and disabled-prototype branches", async () => {
+    it("covers remote sync rebuild, current, failed, thrown, and skipped branches", async () => {
       const remoteConfig = () => ({
         ...createHarness().config,
         remoteSync: {
@@ -680,7 +698,6 @@ describe("Sync Command", () => {
 
       let harness = createHarness({
         loadConfig: mock(remoteConfig as any),
-        experimentalRemoteSync: true,
         createRemoteEventSyncService: mock(async () => ({
           sync: mock(async () => ({
             success: true,
@@ -695,13 +712,12 @@ describe("Sync Command", () => {
           })),
         })),
       });
-      await executeSyncCommand({}, harness.deps);
+      await executeSyncCommand({ remote: true }, harness.deps);
       expect(logs.join("\n")).toContain("Remote events pulled. Rebuilding database projections");
 
       logs = [];
       harness = createHarness({
         loadConfig: mock(remoteConfig as any),
-        experimentalRemoteSync: true,
         createRemoteEventSyncService: mock(async () => ({
           sync: mock(async () => ({
             success: true,
@@ -716,12 +732,11 @@ describe("Sync Command", () => {
           })),
         })),
       });
-      await executeSyncCommand({}, harness.deps);
+      await executeSyncCommand({ remote: true }, harness.deps);
       expect(logs.join("\n")).toContain("Git events are already up to date");
 
       harness = createHarness({
         loadConfig: mock(remoteConfig as any),
-        experimentalRemoteSync: true,
         createRemoteEventSyncService: mock(async () => ({
           sync: mock(async () => ({
             success: false,
@@ -736,28 +751,26 @@ describe("Sync Command", () => {
           })),
         })),
       });
-      await executeSyncCommand({}, harness.deps);
+      await executeSyncCommand({ remote: true }, harness.deps);
       expect(errors.join("\n")).toContain("push rejected");
 
       harness = createHarness({
         loadConfig: mock(remoteConfig as any),
-        experimentalRemoteSync: true,
         createRemoteEventSyncService: mock(async () => {
           throw new Error("git missing");
         }),
       });
-      await executeSyncCommand({}, harness.deps);
+      await executeSyncCommand({ remote: true }, harness.deps);
       expect(errors.join("\n")).toContain("git missing");
 
       harness = createHarness({
         loadConfig: mock(remoteConfig as any),
-        experimentalRemoteSync: false,
       });
       await executeSyncCommand({}, harness.deps);
-      expect(warnings.join("\n")).toContain("Remote synchronization is configured but disabled");
+      expect(warnings.join("\n")).toContain("Remote synchronization is configured but skipped");
     });
 
-    it("blocks experimental remote sync when event-log secret findings remain", async () => {
+    it("blocks explicit remote sync when event-log secret findings remain", async () => {
       const secretLike = ["sk", "test_remote_preflight_should_not_print"].join("-");
       const remoteConfig = () => ({
         ...createHarness().config,
@@ -783,11 +796,10 @@ describe("Sync Command", () => {
 
       const harness = createHarness({
         loadConfig: mock(remoteConfig as any),
-        experimentalRemoteSync: true,
         createRemoteEventSyncService,
       });
 
-      const result = await executeSyncCommand({}, harness.deps);
+      const result = await executeSyncCommand({ remote: true }, harness.deps);
 
       expect(result.exitCode).toBe(1);
       expect(createRemoteEventSyncService).toHaveBeenCalledTimes(1);
@@ -843,7 +855,6 @@ describe("Sync Command", () => {
 
       harness = createHarness({
         loadConfig: mock(() => remoteConfig as any),
-        experimentalRemoteSync: true,
         createRemoteEventSyncService: mock(async () => ({
           sync: mock(async () => ({
             success: true,
@@ -858,12 +869,11 @@ describe("Sync Command", () => {
           })),
         })),
       });
-      expect((await executeSyncCommand({ quiet: true }, harness.deps)).exitCode).toBe(0);
+      expect((await executeSyncCommand({ quiet: true, remote: true }, harness.deps)).exitCode).toBe(0);
       expect(logs.join("\n")).not.toContain("Synchronizing events");
 
       harness = createHarness({
         loadConfig: mock(() => remoteConfig as any),
-        experimentalRemoteSync: false,
       });
       expect((await executeSyncCommand({ quiet: true }, harness.deps)).exitCode).toBe(0);
       expect(warnings.join("\n")).not.toContain("Remote synchronization is configured");
@@ -948,11 +958,10 @@ describe("Sync Command", () => {
 
       try {
         const result = await executeSyncCommand(
-          { quiet: true, project: "nonexistent-project-xyz" },
+          { quiet: true, remote: true, project: "nonexistent-project-xyz" },
           {
             loadConfig: remoteSyncConfig,
             createRemoteEventSyncService: () => ({ sync: mockRemoteSync }),
-            experimentalRemoteSync: true,
           }
         );
 
@@ -987,7 +996,7 @@ describe("Sync Command", () => {
       }
     }, 30000);
 
-    it("does not call RemoteEventSyncService.sync when remoteSync is configured but the prototype flag is disabled", async () => {
+    it("does not call RemoteEventSyncService.sync when remoteSync is configured but --remote is not requested", async () => {
       const mockRemoteSync = mock(async () => ({
         success: true,
         status: "synced" as const,
@@ -1017,7 +1026,6 @@ describe("Sync Command", () => {
           {
             loadConfig: remoteSyncConfig,
             createRemoteEventSyncService: () => ({ sync: mockRemoteSync }),
-            experimentalRemoteSync: false,
           }
         );
 

@@ -355,5 +355,21 @@ describe("completion command", () => {
             expect(generateFishCompletion()).toContain("consent-grant consent-revoke");
             expect(generateFishCompletion()).toContain("provider_egress remote_sync");
         });
+
+        it("includes remote command and explicit sync remote option in all shells", () => {
+            expect(generateBashCompletion()).toContain("remote");
+            expect(generateBashCompletion()).toContain("--remote");
+            expect(generateBashCompletion()).toContain("preflight doctor backup restore rollback");
+            expect(generateBashCompletion()).toContain("--confirm");
+            expect(generateZshCompletion()).toContain("remote:Manage remote event-log synchronization");
+            expect(generateZshCompletion()).toContain("--remote[Synchronize canonical event logs");
+            expect(generateZshCompletion()).toContain("backup restore rollback");
+            expect(generateZshCompletion()).toContain("--confirm[Confirm restore or rollback mutation]");
+            expect(generateFishCompletion()).toContain('__fish_use_subcommand" -a remote');
+            expect(generateFishCompletion()).toContain('__fish_seen_subcommand_from sync" -l remote');
+            expect(generateFishCompletion()).toContain("__fish_seen_subcommand_from remote");
+            expect(generateFishCompletion()).toContain("backup restore rollback");
+            expect(generateFishCompletion()).toContain("-l confirm");
+        });
     });
 });

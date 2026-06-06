@@ -107,7 +107,7 @@ Tasks:
 Exit gates:
 - PRD, threat model, eval plan, requirements, and roadmap are committed.
 - Cross-AI review requested for the plan before implementation.
-- Existing Phase 38 prototype remains disabled behind `MEMORY_EXPERIMENTAL_REMOTE_SYNC=1`.
+- Superseded by Phase 38.4: remote egress is now explicit through `memory sync --remote`; plain `memory sync` skips configured remotes.
 
 ### Phase 38.1 - Canonical Event Kernel and Projection Replay
 
