@@ -6,7 +6,7 @@
 - SHIPPED **v2.0 Hybrid Search and Rebrand** -- Phases 13-22 (shipped 2026-03-01)
 - SHIPPED **v3.0 Knowledge Layer + Friction Logging** -- Phases 23-29.1 (shipped 2026-04-02)
 - SHIPPED **v4.0 Intelligence Layer** -- Phases 30-37 plus 32.5, 36.8, 36.9, and 36.10 (published 2026-05-30 as `@chude/memory@4.0.0`; architecture audit LOCKED 2026-05-13, recommendation A-prime; 2026-05-27 foundation review added pre-publish security hardening before GA; Phase 36.9 coverage gate restored 2026-05-30; Phase 36.10 hardened legacy memory-file defaults before publish)
-- IN PROGRESS **v5.0 Market-Leader Memory Platform** -- Phases 38.0-44 (started 2026-06-05; Phase 38.1 event kernel complete; added consent/provenance, eval harness, feature-completeness/UX, and release-candidate handoff gates)
+- IN PROGRESS **v5.0 Market-Leader Memory Platform** -- Phases 38.0-44 (started 2026-06-05; Phase 38.6 durable friction query contract complete; added consent/provenance, eval harness, feature-completeness/UX, and release-candidate handoff gates)
 
 ## Phases
 
@@ -94,7 +94,7 @@
 - [x] **Phase 38.3: Remote Sync Application Service and Git Transport** - Private-Git-backed remote event synchronization through application ports and shell-safe transport adapter. Completed 2026-06-06.
 - [x] **Phase 38.4: Remote CLI, Operations, Backup, and Recovery** - `memory remote` surface, preflight, doctor, backup/restore/rollback, cross-machine verification. Completed 2026-06-06.
 - [x] **Phase 38.5: Secure Capability Interop** - Optional authkey readiness/status/fingerprint interop using handles, masked metadata, or proofs; no hard dependency and no plaintext secret resolution inside memory-nexus. Completed 2026-06-06.
-- [ ] **Phase 38.6: Durable Friction Query Contract** - Stable durable `memory friction list` filters, counts, exit codes, JSON schema, timezone semantics, and privacy-safe query handling. Source: `docs/inbox/archived/2026-05-12-conversations-friction-list-durable-filters.md`.
+- [x] **Phase 38.6: Durable Friction Query Contract** - Stable durable `memory friction list` filters, counts, exit codes, JSON schema, timezone semantics, and privacy-safe query handling. Completed 2026-06-06.
 - [ ] **Phase 38.7: Evaluation Harness and Regression Fixtures** - Executable eval runner, fixtures, report schema, and release-gate integration for v5 behavior checks.
 - [ ] **Phase 39: Persona and Procedural Memory** - Centralized developer/agent profile projection with provenance, confidence, review, and scoped context injection.
 - [ ] **Phase 40: Temporal Semantic Graph** - Entity-relationship extraction, temporal graph projection, and graph-enriched retrieval in the links/entities tables.
@@ -464,7 +464,13 @@ Rationale: Phase 32 explicitly deferred friction envelope adoption per audit §1
   2. `--since`, exact severity/project/tool/status filters, privacy-safe contains filters, `--count`, and `--min` are documented and tested.
   3. Exit codes distinguish threshold met, threshold not met, argument/config error, and execution error.
   4. Query strings are not logged unsafely.
-**Plans**: Placeholder directory exists; plan after Phase 38.1, 38.2, and 38.2.5.
+**Plans**: 1/1 plan complete. See `.planning/phases/38.6-durable-friction-query-contract/README.md`.
+
+**Completion (2026-06-06):**
+  - `memory friction list` now supports stable exact filters for status, severity, category, tool, and project; inclusive UTC `--since`; privacy-safe description/context contains filters; `--count`; and `--min`.
+  - JSON output uses the common `schema_version: "1"` query envelope and documents count/list metadata in `docs/reference/friction-query-contract.md`.
+  - Counts are total-match counts independent of returned row limits, enabling durable watcher/reminder thresholds.
+  - Verification passed: full `bun run quality` (4,250 pass, 0 fail), coverage statements 97.17%, branches 95.19%, functions 96.17%, lines 97.29%, `gitleaks detect --no-banner --redact --source .`, and `git diff --check`.
 
 ---
 
@@ -491,7 +497,7 @@ Rationale: Phase 32 explicitly deferred friction envelope adoption per audit §1
   1. Profile projection compiles preferences, repeated corrections, friction, decisions, and validated behavior patterns.
   2. Entries include provenance, confidence, scope, expiry/review metadata, and edit/suppress/invalidate controls.
   3. `memory context` can include persona/procedural memory with why-included metadata and no cross-project leakage.
-**Plans**: Placeholder directory exists; plan after Phase 38.5.
+**Plans**: Placeholder directory exists; plan after Phase 38.7.
 
 ---
 
@@ -707,7 +713,7 @@ v5.0
 | 38.3. Remote Sync Service and Git Transport | v5.0 | 1/1 | Complete | 2026-06-06 |
 | 38.4. Remote CLI, Operations, Backup, and Recovery | v5.0 | 1/1 | Complete | 2026-06-06 |
 | 38.5. Secure Capability Interop | v5.0 | 1/1 | Complete | 2026-06-06 |
-| 38.6. Durable Friction Query Contract | v5.0 | TBD | Planned | - |
+| 38.6. Durable Friction Query Contract | v5.0 | 1/1 | Complete | 2026-06-06 |
 | 38.7. Evaluation Harness and Regression Fixtures | v5.0 | TBD | Planned | - |
 | 39. Persona and Procedural Memory | v5.0 | TBD | Planned | - |
 | 40. Temporal Semantic Graph | v5.0 | TBD | Planned | - |
@@ -719,4 +725,4 @@ v5.0
 
 ---
 
-*Last updated: 2026-06-05 (Phase 38.1 complete; v5 event kernel and projection replay foundation in place)*
+*Last updated: 2026-06-06 (Phase 38.6 complete; durable friction query contract in place)*

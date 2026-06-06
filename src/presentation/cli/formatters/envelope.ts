@@ -37,6 +37,7 @@ export const QUERY_COMMAND_NAMES = [
   "related",
   "stats",
   "query",
+  "friction",
 ] as const;
 
 /**
@@ -56,6 +57,7 @@ export const QUERY_RESULT_KINDS = [
   "related",
   "stats",
   "file",
+  "friction",
 ] as const;
 
 /**

@@ -6,7 +6,13 @@
  */
 
 import type { Database } from "bun:sqlite";
-import type { IFrictionRepository, FrictionStats, FrictionPattern } from "../../../domain/ports/repositories.js";
+import type {
+    IFrictionRepository,
+    FrictionStats,
+    FrictionPattern,
+    FrictionQueryOptions,
+    FrictionQueryResult,
+} from "../../../domain/ports/repositories.js";
 import {
     FrictionEntry,
     type FrictionSeverity,
@@ -137,6 +143,28 @@ export class SqliteFrictionRepository implements IFrictionRepository {
         const sql = `SELECT * FROM friction_log ${whereClause} ORDER BY logged_at DESC LIMIT ?`;
         const rows = this.db.prepare<FrictionRow, (string | number)[]>(sql).all(...params);
         return rows.map((r) => this.toEntity(r));
+    }
+
+    async query(options: FrictionQueryOptions = {}): Promise<FrictionQueryResult> {
+        const { whereClause, params } = buildFrictionQueryWhere(options);
+        const countRow = this.db.prepare<{ count: number }, (string | number)[]>(
+            `SELECT COUNT(*) as count FROM friction_log ${whereClause}`
+        ).get(...params)!;
+
+        const rowParams = [...params];
+        const limitClause = options.limit !== undefined ? " LIMIT ?" : "";
+        if (options.limit !== undefined) {
+            rowParams.push(options.limit);
+        }
+
+        const rows = this.db.prepare<FrictionRow, (string | number)[]>(
+            `SELECT * FROM friction_log ${whereClause} ORDER BY logged_at DESC${limitClause}`
+        ).all(...rowParams);
+
+        return {
+            entries: rows.map((r) => this.toEntity(r)),
+            totalCount: countRow.count,
+        };
     }
 
     async resolve(id: number, resolution: string): Promise<void> {
@@ -351,4 +379,54 @@ export class SqliteFrictionRepository implements IFrictionRepository {
             resolution: row.resolution ?? undefined,
         });
     }
+}
+
+function buildFrictionQueryWhere(options: FrictionQueryOptions): {
+    whereClause: string;
+    params: (string | number)[];
+} {
+    const conditions: string[] = [];
+    const params: (string | number)[] = [];
+
+    if (options.status) {
+        conditions.push("status = ?");
+        params.push(options.status);
+    }
+    if (options.severity) {
+        conditions.push("severity = ?");
+        params.push(options.severity);
+    }
+    if (options.category) {
+        conditions.push("category = ?");
+        params.push(options.category);
+    }
+    if (options.tool) {
+        conditions.push("tool = ?");
+        params.push(options.tool);
+    }
+    if (options.sourceProject) {
+        conditions.push("source_project = ?");
+        params.push(options.sourceProject);
+    }
+    if (options.since) {
+        conditions.push("logged_at >= ?");
+        params.push(options.since.toISOString());
+    }
+    if (options.descriptionContains) {
+        conditions.push("LOWER(description) LIKE LOWER(?) ESCAPE '\\'");
+        params.push(`%${escapeLikePattern(options.descriptionContains)}%`);
+    }
+    if (options.contextContains) {
+        conditions.push("LOWER(COALESCE(context, '')) LIKE LOWER(?) ESCAPE '\\'");
+        params.push(`%${escapeLikePattern(options.contextContains)}%`);
+    }
+
+    return {
+        whereClause: conditions.length > 0 ? `WHERE ${conditions.join(" AND ")}` : "",
+        params,
+    };
+}
+
+function escapeLikePattern(value: string): string {
+    return value.replace(/\\/g, "\\\\").replace(/%/g, "\\%").replace(/_/g, "\\_");
 }

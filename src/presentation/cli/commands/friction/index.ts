@@ -10,7 +10,8 @@ import type { CommandResult } from "../../command-result.js";
 import { ErrorCode, MemoryError } from "../../../../domain/errors/index.js";
 import { initializeDatabase, closeDatabase, getDefaultDbPath, SqliteFrictionRepository } from "../../../../infrastructure/database/index.js";
 import { FrictionService } from "../../../../application/services/friction-service.js";
-import { formatError, formatErrorJson } from "../../formatters/error-formatter.js";
+import { formatError } from "../../formatters/error-formatter.js";
+import { emitJsonErrorEnvelope } from "../../formatters/envelope.js";
 import type { FrictionExecuteOptions, FrictionCommandDeps, FrictionLogOptions, FrictionListOptions, FrictionResolveOptions, FrictionPurgeOptions, FrictionCommandOptions } from "./types.js";
 import { handleLog } from "./log.js";
 import { handleList } from "./list.js";
@@ -20,6 +21,11 @@ import { handleDashboard } from "./dashboard.js";
 import { handlePurge } from "./purge.js";
 import { unknownErrorMessage } from "../../../../domain/errors/unknown-error.js";
 import { PatternRedactor } from "../../../../infrastructure/security/pattern-redactor.js";
+
+const USER_FAILURE_ERROR_CODES = new Set<string>([
+    ErrorCode.NOT_FOUND,
+    ErrorCode.INVALID_STATE,
+]);
 
 /** Create the friction command group for Commander.js. */
 export function createFrictionCommand(): Command {
@@ -48,8 +54,15 @@ export function createFrictionCommand(): Command {
             .description("List friction entries")
             .option("--all", "Include resolved and won't-fix entries")
             .option("--status <status>", "Filter by status")
+            .option("--severity <level>", "Filter by severity")
             .option("--category <cat>", "Filter by category")
             .option("--tool <name>", "Filter by tool name")
+            .option("--project <name>", "Filter by source project")
+            .option("--since <date>", "Include entries logged on or after YYYY-MM-DD UTC")
+            .option("--description-contains <text>", "Filter by case-insensitive description substring")
+            .option("--context-contains <text>", "Filter by case-insensitive context substring")
+            .option("--count", "Print only the matching count")
+            .option("--min <n>", "Exit 0 when matching count is at least n, else 1")
             .option("--limit <n>", "Maximum entries", "50")
             .option("--json", "Output as JSON")
             .action(async (options: FrictionListOptions) => {
@@ -139,7 +152,7 @@ export async function executeFrictionCommand(
             case "purge": return await handlePurge(service, options);
             default:
                 console.error(`Unknown friction action: ${options.action}`);
-                return { exitCode: 1 };
+                return { exitCode: 2 };
         }
     } catch (error) {
         const nexusError = error instanceof MemoryError
@@ -147,11 +160,16 @@ export async function executeFrictionCommand(
             : new MemoryError(ErrorCode.UNKNOWN, unknownErrorMessage(error));
 
         if (options.json) {
-            console.log(formatErrorJson(nexusError));
+            emitJsonErrorEnvelope({
+                command: "friction",
+                code: nexusError.code,
+                message: nexusError.message,
+                ...(nexusError.context !== undefined ? { context: nexusError.context } : {}),
+            });
         } else {
             console.error(formatError(nexusError));
         }
-        return { exitCode: 1 };
+        return { exitCode: USER_FAILURE_ERROR_CODES.has(nexusError.code) ? 1 : 3 };
     } finally {
         if (db) {
             closeDatabase(db);

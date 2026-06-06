@@ -114,8 +114,10 @@ Phase 38.3 completed the application-service and Git-transport substrate. Phase 
 
 ### Durable Friction Contract
 
-- [ ] **FRIC-01**: `memory friction list` has stable JSON schema and exact filter semantics for since, severity, project, tool, status, and privacy-safe contains filters.
-- [ ] **FRIC-02**: `memory friction list --count --min <n>` has documented exit codes and tests for threshold met, threshold not met, argument errors, and execution errors.
+- [x] **FRIC-01**: `memory friction list` has stable JSON schema and exact filter semantics for since, severity, project, tool, status, and privacy-safe contains filters.
+- [x] **FRIC-02**: `memory friction list --count --min <n>` has documented exit codes and tests for threshold met, threshold not met, argument errors, and execution errors.
+
+Phase 38.6 completed the durable friction contract. `memory friction list` now exposes exact status/severity/category/tool/project filters, inclusive UTC `--since`, privacy-safe contains filters with redacted metadata fingerprints, stable `schema_version: "1"` JSON envelopes, count/min threshold semantics, and documented exit codes in `docs/reference/friction-query-contract.md`.
 
 ### Evaluation Harness
 
@@ -261,8 +263,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 | INTEG-01 | Phase 38.5 | Complete |
 | INTEG-02 | Phase 38.5 | Complete |
 | INTEG-03 | Phase 38.5 | Complete |
-| FRIC-01 | Phase 38.6 | Pending |
-| FRIC-02 | Phase 38.6 | Pending |
+| FRIC-01 | Phase 38.6 | Complete |
+| FRIC-02 | Phase 38.6 | Complete |
 | EVAL-02 | Phase 38.7 | Pending |
 | EVAL-03 | Phase 38.7 | Pending |
 | EVAL-04 | Phase 38.7 | Pending |
@@ -295,11 +297,11 @@ Which phases cover which requirements. Updated during roadmap creation.
 - v4.0 requirements: 25 total (excluding QUAL cross-cutting)
 - Cross-cutting: 4 QUAL requirements
 - v5.0 requirements: 51 total
-- v5.0 complete: 6/51
-- v5.0 pending: 45/51
+- v5.0 complete: 24/51
+- v5.0 pending: 27/51
 - v5.0 mapped to phases: 51/51
 - v5.0 unmapped: 0
 
 ---
 *Requirements defined: 2026-04-03*
-*Last updated: 2026-06-06 after Phase 38.4 remote CLI, operations, backup, and recovery completion*
+*Last updated: 2026-06-06 after Phase 38.6 durable friction query contract completion*

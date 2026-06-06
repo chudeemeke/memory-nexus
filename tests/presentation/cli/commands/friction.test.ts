@@ -61,6 +61,15 @@ function getStderr(): string {
     return capturedStderr.join("\n");
 }
 
+function parseFrictionListEntries(): Array<{ description: string; lastReviewedAt: string | null }> {
+    const envelope = JSON.parse(getStdout());
+    expect(envelope.schema_version).toBe("1");
+    expect(envelope.command).toBe("friction");
+    expect(envelope.kind).toBe("friction");
+    expect(Array.isArray(envelope.data)).toBe(true);
+    return envelope.data;
+}
+
 // Integration tests using real database
 describe("friction CLI commands", () => {
     let db: ReturnType<typeof initializeDatabase>["db"];
@@ -136,7 +145,7 @@ describe("friction CLI commands", () => {
             });
 
             expect(result.exitCode).toBe(0);
-            const entries = JSON.parse(getStdout());
+            const entries = parseFrictionListEntries();
             expect(entries).toHaveLength(1);
             expect(entries[0].description).toBe("aidev friction");
 
@@ -169,7 +178,7 @@ describe("friction CLI commands", () => {
                 json: true,
             });
 
-            const entries = JSON.parse(getStdout());
+            const entries = parseFrictionListEntries();
             // After markReviewed, lastReviewedAt should be set
             expect(entries[0].lastReviewedAt).not.toBeNull();
 
@@ -193,7 +202,7 @@ describe("friction CLI commands", () => {
                 json: true,
             });
 
-            const entries = JSON.parse(getStdout());
+            const entries = parseFrictionListEntries();
             // Without --tool, markReviewed not called, lastReviewedAt stays null
             expect(entries[0].lastReviewedAt).toBeNull();
 
@@ -301,7 +310,7 @@ describe("friction CLI commands", () => {
                     json: true,
                 });
 
-                const entries = JSON.parse(getStdout());
+                const entries = parseFrictionListEntries();
                 const fallbackEntry = entries.find((e: { description: string }) => e.description === "from fallback");
                 expect(fallbackEntry).toBeDefined();
 

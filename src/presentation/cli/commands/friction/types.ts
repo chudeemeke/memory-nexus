@@ -48,8 +48,15 @@ export interface FrictionLogOptions extends FrictionCommandOptions {
 export interface FrictionListOptions extends FrictionCommandOptions {
     all?: boolean;
     status?: string;
+    severity?: string;
     category?: string;
     tool?: string;
+    project?: string;
+    since?: string;
+    descriptionContains?: string;
+    contextContains?: string;
+    count?: boolean;
+    min?: string;
     limit?: string;
 }
 
@@ -88,6 +95,12 @@ export interface FrictionExecuteOptions {
     limit?: string;
     resolution?: string;
     tool?: string;
+    project?: string;
+    since?: string;
+    descriptionContains?: string;
+    contextContains?: string;
+    count?: boolean;
+    min?: string;
     html?: boolean;
     dryRun?: boolean;
     force?: boolean;

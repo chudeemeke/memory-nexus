@@ -127,6 +127,9 @@ function createMockFrictionRepo(entries: FrictionEntry[]): IFrictionRepository {
         async findAll(): Promise<FrictionEntry[]> {
             return entries;
         },
+        async query(): Promise<{ entries: FrictionEntry[]; totalCount: number }> {
+            return { entries, totalCount: entries.length };
+        },
         async resolve(): Promise<void> {},
         async updateStatus(): Promise<void> {},
         async getStats(): Promise<FrictionStats> {

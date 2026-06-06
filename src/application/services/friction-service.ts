@@ -18,6 +18,8 @@ import type {
     IFrictionRepository,
     FrictionStats,
     FrictionPattern,
+    FrictionQueryOptions,
+    FrictionQueryResult,
 } from "../../domain/ports/repositories.js";
 import {
     FrictionEntry,
@@ -51,9 +53,13 @@ export interface LogFrictionParams {
 export interface ListFrictionOptions {
     all?: boolean | undefined;
     status?: string | undefined;
+    severity?: string | undefined;
     category?: string | undefined;
     tool?: string | undefined;
     sourceProject?: string | undefined;
+    since?: Date | undefined;
+    descriptionContains?: string | undefined;
+    contextContains?: string | undefined;
     limit?: number | undefined;
 }
 
@@ -103,21 +109,38 @@ export class FrictionService {
      * @returns Array of matching friction entries
      */
     async list(options?: ListFrictionOptions): Promise<FrictionEntry[]> {
-        // Use findAll when any filter is specified (tool, category, sourceProject)
-        // or when explicitly requesting all statuses
-        if (options?.all || options?.tool || options?.category || options?.sourceProject) {
-            return this.repository.findAll({
-                status: options?.all
-                    ? (options.status as FrictionEntry["status"] | undefined)
-                    : "open",
-                category: options?.category as FrictionEntry["category"] | undefined,
-                tool: options?.tool,
-                sourceProject: options?.sourceProject,
-                limit: options?.limit,
-            } as any);
-        }
+        return (await this.query(options)).entries;
+    }
 
-        return this.repository.findOpen();
+    /**
+     * Query friction entries using the durable friction contract.
+     *
+     * Default behavior remains open-only. Explicit status wins; `all: true`
+     * removes the default status filter when no status is provided.
+     *
+     * @param options Query options
+     * @returns Matching entries and total count before limit is applied
+     */
+    async query(options: ListFrictionOptions = {}): Promise<FrictionQueryResult> {
+        const status = options.status
+            ? options.status
+            : options.all
+                ? undefined
+                : "open";
+
+        const query: FrictionQueryOptions = {
+            status: status as FrictionEntry["status"] | undefined,
+            severity: options.severity as FrictionEntry["severity"] | undefined,
+            category: options.category,
+            tool: options.tool,
+            sourceProject: options.sourceProject,
+            since: options.since,
+            descriptionContains: options.descriptionContains,
+            contextContains: options.contextContains,
+            limit: options.limit,
+        };
+
+        return this.repository.query(query);
     }
 
     /**

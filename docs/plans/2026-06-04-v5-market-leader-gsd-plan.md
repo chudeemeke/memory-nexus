@@ -199,6 +199,8 @@ Exit gates:
 
 Goal: turn friction into a stable durable signal without overfitting to one consumer.
 
+Status: completed 2026-06-06. Implemented stable exact filters, inclusive UTC date semantics, privacy-safe contains filters, count/min threshold exit codes, and shared query-envelope JSON output. Contract reference: `docs/reference/friction-query-contract.md`.
+
 Tasks:
 - Extend `memory friction list` with `--since`, exact severity/project/tool/status filters, privacy-safe contains filters, `--count`, `--min`, and documented exit codes.
 - Define UTC/local/inclusive date semantics.
@@ -208,6 +210,22 @@ Tasks:
 Exit gates:
 - Conversations can optionally replace transient JSONL scanning, but no consumer-specific coupling is introduced.
 - JSON schema and exit codes are stable and documented.
+
+### Phase 38.7 - Evaluation Harness and Regression Fixtures
+
+Goal: turn the v5 evaluation baseline into an executable regression harness with sanitized fixtures and release-gate evidence.
+
+Tasks:
+- Add an eval command or script that loads versioned fixture suites and emits schema-versioned JSON results.
+- Create sanitized fixtures for privacy, leakage, supersedence, sync recovery, friction filters, persona, graph, ranking, and dreaming.
+- Include Phase 38.6 friction-filter regressions so durable query semantics are measured by the eval harness, not only unit tests.
+- Add score/threshold semantics that Phase 43 can consume as readiness evidence.
+- Document fixture authoring, redaction expectations, and failure triage.
+
+Exit gates:
+- Eval output is deterministic and safe to publish in release-readiness reports.
+- Fixtures do not store secrets or private raw transcripts.
+- Phase 43 can fail readiness on privacy, leakage, supersedence, or durable friction regressions.
 
 ### Phase 39 - Persona and Procedural Memory
 

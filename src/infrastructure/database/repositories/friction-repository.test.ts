@@ -180,6 +180,77 @@ describe("SqliteFrictionRepository", () => {
         });
     });
 
+    describe("query", () => {
+        it("applies exact filters, inclusive UTC since, and case-insensitive contains filters", async () => {
+            await repo.save(createEntry({
+                description: "Retry failure on Windows path",
+                severity: "high",
+                category: "sync",
+                tool: "memory",
+                sourceProject: "conversations",
+                context: "Shell output mentions escaped path",
+                loggedAt: new Date("2026-05-01T00:00:00.000Z"),
+            }));
+            await repo.save(createEntry({
+                description: "Retry failure before boundary",
+                severity: "high",
+                category: "sync",
+                tool: "memory",
+                sourceProject: "conversations",
+                context: "Shell output mentions escaped path",
+                loggedAt: new Date("2026-04-30T23:59:59.999Z"),
+            }));
+            await repo.save(createEntry({
+                description: "Retry failure on Windows path",
+                severity: "medium",
+                category: "sync",
+                tool: "memory",
+                sourceProject: "conversations",
+                context: "Shell output mentions escaped path",
+                loggedAt: new Date("2026-05-02T00:00:00.000Z"),
+            }));
+
+            const result = await repo.query({
+                status: "open",
+                severity: "high",
+                category: "sync",
+                tool: "memory",
+                sourceProject: "conversations",
+                since: new Date("2026-05-01T00:00:00.000Z"),
+                descriptionContains: "retry failure",
+                contextContains: "SHELL OUTPUT",
+            });
+
+            expect(result.totalCount).toBe(1);
+            expect(result.entries).toHaveLength(1);
+            expect(result.entries[0].loggedAt.toISOString()).toBe("2026-05-01T00:00:00.000Z");
+        });
+
+        it("returns totalCount before limit is applied", async () => {
+            await repo.save(createEntry({ description: "One", tool: "memory" }));
+            await repo.save(createEntry({ description: "Two", tool: "memory" }));
+            await repo.save(createEntry({ description: "Three", tool: "memory" }));
+
+            const result = await repo.query({ status: "open", tool: "memory", limit: 1 });
+
+            expect(result.totalCount).toBe(3);
+            expect(result.entries).toHaveLength(1);
+        });
+
+        it("treats contains filters as parameterized values instead of SQL fragments", async () => {
+            await repo.save(createEntry({ description: "Actual memory issue", tool: "memory" }));
+            await repo.save(createEntry({ description: "Other issue", tool: "aidev" }));
+
+            const result = await repo.query({
+                status: "open",
+                descriptionContains: "%' OR 1=1 --",
+            });
+
+            expect(result.totalCount).toBe(0);
+            expect(result.entries).toHaveLength(0);
+        });
+    });
+
     describe("resolve", () => {
         it("updates status and sets resolution + resolvedAt", async () => {
             await repo.save(createEntry({ description: "To resolve" }));

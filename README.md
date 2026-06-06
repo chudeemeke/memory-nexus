@@ -56,7 +56,12 @@ memory browse
 
 # Audit durable memory surfaces for suspected secrets
 memory audit-secrets
+
+# Query durable friction signals for first-party tooling
+memory friction list --tool aidev --since 2026-06-01 --count --min 3
 ```
+
+Machine consumers should use `memory friction list --json`; see [Friction Query Contract](docs/reference/friction-query-contract.md) for the versioned envelope, filter semantics, privacy behavior, and exit codes.
 
 ## How It Works
 

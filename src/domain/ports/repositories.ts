@@ -575,6 +575,29 @@ export interface FrictionPattern {
 }
 
 /**
+ * Durable friction query options.
+ */
+export interface FrictionQueryOptions {
+    status?: FrictionStatus | undefined;
+    severity?: FrictionSeverity | undefined;
+    category?: string | undefined;
+    tool?: string | undefined;
+    sourceProject?: string | undefined;
+    since?: Date | undefined;
+    descriptionContains?: string | undefined;
+    contextContains?: string | undefined;
+    limit?: number | undefined;
+}
+
+/**
+ * Durable friction query result.
+ */
+export interface FrictionQueryResult {
+    entries: FrictionEntry[];
+    totalCount: number;
+}
+
+/**
  * Repository for FrictionEntry entities.
  *
  * Handles persistence of friction log entries and provides
@@ -613,6 +636,14 @@ export interface IFrictionRepository {
         sourceProject?: string;
         limit?: number;
     }): Promise<FrictionEntry[]>;
+
+    /**
+     * Query friction entries with stable durable contract semantics.
+     * Returns totalCount before limit is applied.
+     * @param options Durable query filters
+     * @returns Matching entries and total matching count
+     */
+    query(options?: FrictionQueryOptions): Promise<FrictionQueryResult>;
 
     /**
      * Resolve a friction entry with a resolution description.

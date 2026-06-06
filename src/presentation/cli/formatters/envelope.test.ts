@@ -22,9 +22,9 @@ import {
 
 describe("envelope (CLI-02 foundation)", () => {
   describe("runtime tuples (HIGH-1)", () => {
-    test("QUERY_COMMAND_NAMES is an array of strings with 7 entries", () => {
+    test("QUERY_COMMAND_NAMES is an array of strings with 8 entries", () => {
       expect(Array.isArray(QUERY_COMMAND_NAMES)).toBe(true);
-      expect(QUERY_COMMAND_NAMES.length).toBe(7);
+      expect(QUERY_COMMAND_NAMES.length).toBe(8);
       for (const name of QUERY_COMMAND_NAMES) {
         expect(typeof name).toBe("string");
       }
@@ -58,6 +58,10 @@ describe("envelope (CLI-02 foundation)", () => {
       expect(QUERY_COMMAND_NAMES.includes("query" as QueryCommandName)).toBe(true);
     });
 
+    test("QUERY_COMMAND_NAMES includes friction", () => {
+      expect(QUERY_COMMAND_NAMES.includes("friction" as QueryCommandName)).toBe(true);
+    });
+
     test("QUERY_RESULT_KINDS is an array with at least 5 string entries", () => {
       expect(Array.isArray(QUERY_RESULT_KINDS)).toBe(true);
       expect(QUERY_RESULT_KINDS.length).toBeGreaterThanOrEqual(5);
@@ -76,6 +80,10 @@ describe("envelope (CLI-02 foundation)", () => {
 
     test("QUERY_RESULT_KINDS includes file (HIGH-4: search --files branch)", () => {
       expect(QUERY_RESULT_KINDS.includes("file" as QueryResultKind)).toBe(true);
+    });
+
+    test("QUERY_RESULT_KINDS includes friction", () => {
+      expect(QUERY_RESULT_KINDS.includes("friction" as QueryResultKind)).toBe(true);
     });
 
     test("ENVELOPE_SCHEMA_VERSION equals \"1\"", () => {

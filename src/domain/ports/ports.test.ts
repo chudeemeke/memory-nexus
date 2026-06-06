@@ -370,6 +370,7 @@ describe("Repository Port Interfaces", () => {
         findOpen: async () =>
           store.filter((e) => e.status === "open"),
         findAll: async () => store,
+        query: async () => ({ entries: store, totalCount: store.length }),
         resolve: async () => {},
         updateStatus: async () => {},
         getStats: async () => ({

@@ -180,6 +180,22 @@ describe("createFrictionCommand", () => {
         expect(opt).toBeDefined();
     });
 
+    it("list subcommand exposes durable query contract options", () => {
+        const command = createFrictionCommand();
+        const sub = command.commands.find(
+            (c: Command) => c.name() === "list"
+        );
+        const optionNames = new Set(sub?.options.map((option: { long?: string }) => option.long));
+
+        expect(optionNames.has("--since")).toBe(true);
+        expect(optionNames.has("--severity")).toBe(true);
+        expect(optionNames.has("--project")).toBe(true);
+        expect(optionNames.has("--description-contains")).toBe(true);
+        expect(optionNames.has("--context-contains")).toBe(true);
+        expect(optionNames.has("--count")).toBe(true);
+        expect(optionNames.has("--min")).toBe(true);
+    });
+
     it("resolve subcommand has required --resolution option", () => {
         const command = createFrictionCommand();
         const sub = command.commands.find(
@@ -203,7 +219,7 @@ describe("createFrictionCommand", () => {
                 { dbPath: join(tempDir, "memory.db") },
             );
 
-            expect(result.exitCode).toBe(1);
+            expect(result.exitCode).toBe(2);
             expect(consoleSpy.mock.calls.map((call: unknown[]) => String(call[0])).join("\n"))
                 .toContain("Unknown friction action: unknown");
         } finally {
@@ -223,8 +239,10 @@ describe("createFrictionCommand", () => {
                 { dbPath: invalidPath },
             );
 
-            expect(result.exitCode).toBe(1);
+            expect(result.exitCode).toBe(3);
             const output = JSON.parse(consoleSpy.mock.calls.map((call: unknown[]) => String(call[0])).join("\n"));
+            expect(output.schema_version).toBe("1");
+            expect(output.command).toBe("friction");
             expect(output.error.code).toBe("DB_CONNECTION_FAILED");
         } finally {
             consoleSpy.mockRestore();

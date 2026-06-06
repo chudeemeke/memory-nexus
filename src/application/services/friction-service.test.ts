@@ -12,6 +12,8 @@ import type {
     IFrictionRepository,
     FrictionStats,
     FrictionPattern,
+    FrictionQueryOptions,
+    FrictionQueryResult,
 } from "../../domain/ports/repositories.js";
 import type {
     FrictionSeverity,
@@ -91,6 +93,41 @@ function createMockRepository(): IFrictionRepository & {
                 result = result.slice(0, options.limit);
             }
             return result;
+        },
+
+        async query(options?: FrictionQueryOptions): Promise<FrictionQueryResult> {
+            let result = Array.from(entries.values());
+            if (options?.status) {
+                result = result.filter((e) => e.status === options.status);
+            }
+            if (options?.severity) {
+                result = result.filter((e) => e.severity === options.severity);
+            }
+            if (options?.category) {
+                result = result.filter((e) => e.category === options.category);
+            }
+            if (options?.tool) {
+                result = result.filter((e) => e.tool === options.tool);
+            }
+            if (options?.sourceProject) {
+                result = result.filter((e) => e.sourceProject === options.sourceProject);
+            }
+            if (options?.since) {
+                result = result.filter((e) => e.loggedAt >= options.since!);
+            }
+            if (options?.descriptionContains) {
+                const needle = options.descriptionContains.toLowerCase();
+                result = result.filter((e) => e.description.toLowerCase().includes(needle));
+            }
+            if (options?.contextContains) {
+                const needle = options.contextContains.toLowerCase();
+                result = result.filter((e) => (e.context ?? "").toLowerCase().includes(needle));
+            }
+            const totalCount = result.length;
+            if (options?.limit) {
+                result = result.slice(0, options.limit);
+            }
+            return { entries: result, totalCount };
         },
 
         async resolve(id: number, resolution: string): Promise<void> {
@@ -277,43 +314,47 @@ describe("FrictionService", () => {
     });
 
     describe("list()", () => {
-        it("calls findOpen() by default", async () => {
-            const findOpenSpy = spyOn(repo, "findOpen");
+        it("queries open entries by default", async () => {
+            const querySpy = spyOn(repo, "query");
             await service.list();
 
-            expect(findOpenSpy).toHaveBeenCalledTimes(1);
+            expect(querySpy).toHaveBeenCalledWith(
+                expect.objectContaining({ status: "open" })
+            );
         });
 
-        it("calls findAll() when all is true", async () => {
-            const findAllSpy = spyOn(repo, "findAll");
+        it("removes default status filter when all is true", async () => {
+            const querySpy = spyOn(repo, "query");
             await service.list({ all: true });
 
-            expect(findAllSpy).toHaveBeenCalledTimes(1);
+            expect(querySpy).toHaveBeenCalledWith(
+                expect.objectContaining({ status: undefined })
+            );
         });
 
-        it("passes status filter to findAll()", async () => {
-            const findAllSpy = spyOn(repo, "findAll");
+        it("passes status filter to query()", async () => {
+            const querySpy = spyOn(repo, "query");
             await service.list({ all: true, status: "resolved" });
 
-            expect(findAllSpy).toHaveBeenCalledWith(
+            expect(querySpy).toHaveBeenCalledWith(
                 expect.objectContaining({ status: "resolved" })
             );
         });
 
-        it("passes category filter to findAll()", async () => {
-            const findAllSpy = spyOn(repo, "findAll");
+        it("passes category filter to query()", async () => {
+            const querySpy = spyOn(repo, "query");
             await service.list({ all: true, category: "search" });
 
-            expect(findAllSpy).toHaveBeenCalledWith(
+            expect(querySpy).toHaveBeenCalledWith(
                 expect.objectContaining({ category: "search" })
             );
         });
 
-        it("passes limit to findAll()", async () => {
-            const findAllSpy = spyOn(repo, "findAll");
+        it("passes limit to query()", async () => {
+            const querySpy = spyOn(repo, "query");
             await service.list({ all: true, limit: 10 });
 
-            expect(findAllSpy).toHaveBeenCalledWith(
+            expect(querySpy).toHaveBeenCalledWith(
                 expect.objectContaining({ limit: 10 })
             );
         });
@@ -326,21 +367,71 @@ describe("FrictionService", () => {
             expect(entries.length).toBe(2);
         });
 
-        it("passes tool filter to findAll()", async () => {
-            const findAllSpy = spyOn(repo, "findAll");
+        it("passes tool filter to query()", async () => {
+            const querySpy = spyOn(repo, "query");
             await service.list({ all: true, tool: "aidev" });
 
-            expect(findAllSpy).toHaveBeenCalledWith(
+            expect(querySpy).toHaveBeenCalledWith(
                 expect.objectContaining({ tool: "aidev" })
             );
         });
 
-        it("passes sourceProject filter to findAll()", async () => {
-            const findAllSpy = spyOn(repo, "findAll");
+        it("passes sourceProject filter to query()", async () => {
+            const querySpy = spyOn(repo, "query");
             await service.list({ all: true, sourceProject: "gsd" });
 
-            expect(findAllSpy).toHaveBeenCalledWith(
+            expect(querySpy).toHaveBeenCalledWith(
                 expect.objectContaining({ sourceProject: "gsd" })
+            );
+        });
+    });
+
+    describe("query()", () => {
+        it("defaults to open status and delegates durable filters to the repository", async () => {
+            const querySpy = spyOn(repo, "query");
+            await service.query({
+                severity: "high",
+                category: "sync",
+                tool: "memory",
+                sourceProject: "conversations",
+                since: new Date("2026-05-01T00:00:00.000Z"),
+                descriptionContains: "retry",
+                contextContains: "shell",
+                limit: 10,
+            });
+
+            expect(querySpy).toHaveBeenCalledWith(
+                expect.objectContaining({
+                    status: "open",
+                    severity: "high",
+                    category: "sync",
+                    tool: "memory",
+                    sourceProject: "conversations",
+                    since: new Date("2026-05-01T00:00:00.000Z"),
+                    descriptionContains: "retry",
+                    contextContains: "shell",
+                    limit: 10,
+                })
+            );
+        });
+
+        it("returns total count independently of returned-entry limit", async () => {
+            await service.log({ description: "Entry 1", tool: "memory" });
+            await service.log({ description: "Entry 2", tool: "memory" });
+            await service.log({ description: "Entry 3", tool: "memory" });
+
+            const result = await service.query({ tool: "memory", limit: 1 });
+
+            expect(result.totalCount).toBe(3);
+            expect(result.entries).toHaveLength(1);
+        });
+
+        it("lets explicit status override the default open-only status", async () => {
+            const querySpy = spyOn(repo, "query");
+            await service.query({ all: true, status: "resolved" });
+
+            expect(querySpy).toHaveBeenCalledWith(
+                expect.objectContaining({ status: "resolved" })
             );
         });
     });
