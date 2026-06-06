@@ -109,6 +109,7 @@ export type {
   SmartContextResult,
   ContextSection,
   IProjectResolver,
+  IContextGovernancePolicy,
   SmartContextDeps,
 } from "./smart-context-service.js";
 
@@ -123,3 +124,11 @@ export type {
   EventProjection,
   ProjectionReplayResult,
 } from "./projection-registry.js";
+
+export { MemoryGovernanceService } from "./memory-governance-service.js";
+export type {
+  GovernanceControlCommand,
+  MemoryEventWriter,
+  MemoryGovernanceServiceDeps,
+  RegisterDerivedMemoryParams,
+} from "./memory-governance-service.js";

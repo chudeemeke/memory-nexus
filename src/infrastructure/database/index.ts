@@ -22,6 +22,8 @@ export {
     MESSAGE_EMBEDDINGS_TABLE,
     FRICTION_LOG_TABLE,
     BACKFILL_STATE_TABLE,
+    MEMORY_GOVERNANCE_TABLE,
+    MEMORY_GOVERNANCE_EVENTS_TABLE,
     type SchemaOptions,
 } from "./schema.js";
 
@@ -51,8 +53,9 @@ export {
     EmbeddingRepository,
     type UnembeddedMessage,
     type EmbeddingBatchItem,
-    SqliteFrictionRepository,
-    SqliteBackfillStateRepository,
+  SqliteFrictionRepository,
+  SqliteBackfillStateRepository,
+  SqliteMemoryGovernanceRepository,
 } from "./repositories/index.js";
 
 // Services

@@ -547,6 +547,75 @@ describe("Event-Log SSOT Manager", () => {
     expect(rows.map((row) => row.content)).toEqual(["Early fact", "Late fact"]);
   });
 
+  test("rebuildProjections creates governance provenance entries for fact events", async () => {
+    const fact = Fact.create({
+      uuid: "governed-fact",
+      type: "learning",
+      project: "memory-nexus",
+      content: "Governed fact",
+      metadata: { confidence: 0.82 },
+      observedAt: new Date("2026-06-06T08:00:00Z"),
+    });
+
+    await appendEvent(fact, testLogPath);
+    await rebuildProjections(db, testLogPath);
+
+    const row = db.prepare("SELECT * FROM memory_governance WHERE surface = ? AND target_id = ?")
+      .get("fact", "governed-fact") as any;
+
+    expect(row.project).toBe("memory-nexus");
+    expect(row.transformation_method).toBe("appendEvent");
+    expect(row.confidence).toBe(0.82);
+    expect(row.status).toBe("active");
+    expect(JSON.parse(row.source_event_ids)).toEqual(["governed-fact"]);
+  });
+
+  test("rebuildProjections applies governance controls after fact registration", async () => {
+    const fact = Fact.create({
+      uuid: "suppressed-governed-fact",
+      type: "decision",
+      project: "memory-nexus",
+      content: "Suppressed fact",
+      observedAt: new Date("2026-06-06T08:00:00Z"),
+    });
+    const control = MemoryEventEnvelope.create({
+      eventId: "governance-suppress-event",
+      machineId: "machine-governance",
+      sequence: 2,
+      kind: "governance",
+      operation: "update",
+      occurredAt: new Date("2026-06-06T09:00:00Z"),
+      observedAt: new Date("2026-06-06T09:00:00Z"),
+      scope: { project: "memory-nexus", visibility: "project" },
+      provenance: { source: "cli", actor: "user", method: "governance.suppress" },
+      privacy: { redactionState: "none", containsSensitiveContent: false },
+      consent: { status: "not_required", scopes: [] },
+      causality: { parentEventIds: [fact.uuid], supersedesEventIds: [], relatedEventIds: [fact.uuid] },
+      payload: {
+        governance: {
+          control: "suppress",
+          surface: "fact",
+          targetId: fact.uuid,
+          reason: "user suppressed",
+        },
+      },
+    });
+
+    await appendEvent(fact, testLogPath);
+    await appendMemoryEvent(control, testLogPath);
+    const report = await rebuildProjectionsWithReport(db, testLogPath);
+
+    const row = db.prepare("SELECT * FROM memory_governance WHERE surface = ? AND target_id = ?")
+      .get("fact", fact.uuid) as any;
+    const audit = db.prepare("SELECT * FROM memory_governance_events WHERE event_id = ?")
+      .get("governance-suppress-event") as any;
+
+    expect(report.replay.appliedProjections).toEqual(["facts", "memory_governance"]);
+    expect(row.status).toBe("suppressed");
+    expect(row.status_reason).toBe("user suppressed");
+    expect(audit.control).toBe("suppress");
+  });
+
   test("rebuildProjectionsWithReport sorts same-time events by sequence before event id", async () => {
     const first = MemoryEventEnvelope.create({
       eventId: "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb",

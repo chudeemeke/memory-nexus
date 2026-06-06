@@ -90,7 +90,7 @@
 - [x] **Phase 38.0: v5 Threat Model, Product PRD, and Eval Baseline** - Lock v5 requirements, threat model, eval baseline, ADRs, and excellent-grade rubric before implementation. Completed 2026-06-05.
 - [x] **Phase 38.1: Canonical Event Kernel and Projection Replay** - Schema-versioned memory event envelopes, machine identity, event ordering/integrity, migration, and projection registry. Completed 2026-06-05.
 - [x] **Phase 38.2: Redaction, Privacy Governance, and Audit Commands** - Redaction before storage/indexing/egress, secret audit, provider egress policy, migration/quarantine. Completed 2026-06-06.
-- [ ] **Phase 38.2.5: Consent Provenance and Memory Governance** - User-visible consent, provenance, suppression, invalidation, review, and governance events for derived memory surfaces.
+- [x] **Phase 38.2.5: Consent Provenance and Memory Governance** - User-visible consent, provenance, suppression, invalidation, review, and governance events for derived memory surfaces. Completed 2026-06-06.
 - [ ] **Phase 38.3: Remote Sync Application Service and Git Transport** - Private-Git-backed remote event synchronization through application ports and shell-safe transport adapter.
 - [ ] **Phase 38.4: Remote CLI, Operations, Backup, and Recovery** - `memory remote` surface, preflight, doctor, backup/restore/rollback, cross-machine verification.
 - [ ] **Phase 38.5: Secure Capability Interop** - Optional authkey readiness/status/fingerprint interop using handles, masked metadata, or proofs; no hard dependency and no plaintext secret resolution inside memory-nexus.
@@ -381,7 +381,13 @@ Rationale: Phase 32 explicitly deferred friction envelope adoption per audit §1
   2. Every derived memory entry can cite source event ids, transformation method, actor, confidence, redaction state, consent state, and scope.
   3. Users can inspect, suppress, invalidate, expire, or review derived memory entries.
   4. Suppression/invalidation state is enforced by context assembly, graph enrichment, ranking, and dreaming.
-**Plans**: Placeholder directory exists; plan after Phase 38.2.
+**Status**: Completed 2026-06-06.
+**Completion Evidence**:
+  - `memory_governance` and `memory_governance_events` tables persist governance state and auditable consent/control events.
+  - `MemoryGovernanceService`, `SqliteMemoryGovernanceRepository`, and event-log projections register fact provenance and apply governance/consent events deterministically.
+  - `memory governance list/show/suppress/unsuppress/invalidate/expire/review/consent-grant/consent-revoke` exposes user-visible inspection and controls with JSON support.
+  - `SmartContextService` enforces governance suppression/invalidation for fact context now; later persona, graph, ranking, and dreaming phases must use the same governance policy instead of inventing parallel controls.
+  - Verification: focused governance/event-log/context tests passed (55 pass, 0 fail), typecheck passed, schema/completion/help tests passed, and full suite passed (4140 pass, 0 fail).
 
 ---
 
@@ -676,7 +682,7 @@ v5.0
 | 38.0. Threat Model, PRD, Eval Baseline | v5.0 | 1/1 | Complete | 2026-06-05 |
 | 38.1. Canonical Event Kernel and Projection Replay | v5.0 | 1/1 | Complete | 2026-06-05 |
 | 38.2. Redaction, Privacy Governance, and Audit Commands | v5.0 | 1/1 | Complete | 2026-06-06 |
-| 38.2.5. Consent Provenance and Memory Governance | v5.0 | TBD | Planned | - |
+| 38.2.5. Consent Provenance and Memory Governance | v5.0 | 1/1 | Complete | 2026-06-06 |
 | 38.3. Remote Sync Service and Git Transport | v5.0 | TBD | Planned | - |
 | 38.4. Remote CLI, Operations, Backup, and Recovery | v5.0 | TBD | Planned | - |
 | 38.5. Secure Capability Interop | v5.0 | TBD | Planned | - |

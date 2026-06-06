@@ -25,6 +25,12 @@ import type {
 import type { BackfillState } from "../entities/backfill-state.js";
 import type { ProjectPath } from "../value-objects/project-path.js";
 import type { Fact } from "../entities/fact.js";
+import type {
+  MemoryGovernanceEntry,
+  MemoryGovernanceStatus,
+  MemoryGovernanceSurface,
+} from "../entities/memory-governance.js";
+import type { MemoryEventEnvelope } from "../entities/memory-event.js";
 
 
 /**
@@ -745,6 +751,32 @@ export interface IExtractionLogRepository {
   findById(sessionId: string): Promise<ExtractionLogEntry | null>;
   save(entry: ExtractionLogEntry): Promise<void>;
   findAll(): Promise<ExtractionLogEntry[]>;
+  clearAll(): Promise<void>;
+}
+
+/**
+ * Options for listing governed derived memory entries.
+ */
+export interface MemoryGovernanceListOptions {
+  surface?: MemoryGovernanceSurface | undefined;
+  targetId?: string | undefined;
+  project?: string | undefined;
+  status?: MemoryGovernanceStatus | undefined;
+  limit?: number | undefined;
+}
+
+/**
+ * Repository for consent/provenance governance state.
+ *
+ * This stores the current projection of control events. Canonical event logs
+ * remain the source of truth; this projection makes policy checks cheap.
+ */
+export interface IMemoryGovernanceRepository {
+  save(entry: MemoryGovernanceEntry): Promise<MemoryGovernanceEntry>;
+  findByTarget(surface: MemoryGovernanceSurface, targetId: string): Promise<MemoryGovernanceEntry | null>;
+  findByTargetIds(surface: MemoryGovernanceSurface, targetIds: string[]): Promise<MemoryGovernanceEntry[]>;
+  findAll(options?: MemoryGovernanceListOptions): Promise<MemoryGovernanceEntry[]>;
+  applyMemoryEvent(event: MemoryEventEnvelope): Promise<MemoryGovernanceEntry | null>;
   clearAll(): Promise<void>;
 }
 

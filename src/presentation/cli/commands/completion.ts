@@ -36,7 +36,7 @@ _memory_completion() {
     local cur prev words cword
     _init_completion || return
 
-    local commands="sync search list stats context related show browse install uninstall status doctor audit-secrets purge export import completion"
+    local commands="sync search list stats context related show browse governance install uninstall status doctor audit-secrets purge export import completion"
     local search_opts="--limit --project --role --session --after --before --case-sensitive --json --verbose --quiet"
     local list_opts="--limit --project --after --before --sort --json --verbose --quiet"
     local stats_opts="--projects --json --verbose --quiet"
@@ -44,6 +44,7 @@ _memory_completion() {
     local related_opts="--limit --depth --json --verbose --quiet"
     local show_opts="--json --verbose --quiet"
     local browse_opts="--project"
+    local governance_opts="--surface --project --status --limit --reason --at --scope --json"
     local sync_opts="--force --dry-run --verbose --quiet"
     local install_opts="--force"
     local uninstall_opts="--restore"
@@ -85,6 +86,10 @@ _memory_completion() {
             ;;
         browse)
             COMPREPLY=( \$(compgen -W "\${browse_opts}" -- "\${cur}") )
+            return 0
+            ;;
+        governance)
+            COMPREPLY=( \$(compgen -W "list show suppress unsuppress invalidate expire review consent-grant consent-revoke \${governance_opts}" -- "\${cur}") )
             return 0
             ;;
         sync)
@@ -142,6 +147,7 @@ _memory_completion() {
             related) COMPREPLY=( \$(compgen -W "\${related_opts}" -- "\${cur}") ) ;;
             show) COMPREPLY=( \$(compgen -W "\${show_opts}" -- "\${cur}") ) ;;
             browse) COMPREPLY=( \$(compgen -W "\${browse_opts}" -- "\${cur}") ) ;;
+            governance) COMPREPLY=( \$(compgen -W "list show suppress unsuppress invalidate expire review consent-grant consent-revoke \${governance_opts}" -- "\${cur}") ) ;;
             sync) COMPREPLY=( \$(compgen -W "\${sync_opts}" -- "\${cur}") ) ;;
             install) COMPREPLY=( \$(compgen -W "\${install_opts}" -- "\${cur}") ) ;;
             uninstall) COMPREPLY=( \$(compgen -W "\${uninstall_opts}" -- "\${cur}") ) ;;
@@ -182,6 +188,7 @@ _memory() {
         'related:Find sessions related to a given session'
         'show:Show session details and conversation'
         'browse:Browse and select sessions interactively'
+        'governance:Inspect and control derived memory consent/provenance state'
         'install:Install automatic sync hook'
         'uninstall:Remove automatic sync hook'
         'status:Show hook installation status'
@@ -193,7 +200,7 @@ _memory() {
         'completion:Generate shell completion script'
     )
 
-    local -a search_opts list_opts stats_opts context_opts related_opts show_opts browse_opts
+    local -a search_opts list_opts stats_opts context_opts related_opts show_opts browse_opts governance_opts
     local -a sync_opts install_opts uninstall_opts doctor_opts audit_secrets_opts purge_opts export_opts import_opts completion_shells
 
     search_opts=(
@@ -250,6 +257,17 @@ _memory() {
 
     browse_opts=(
         '--project[Filter by project name]:project'
+    )
+
+    governance_opts=(
+        '--surface[Governance surface]:surface:(fact context provider_egress remote_sync friction evaluation persona graph ranking dream projection)'
+        '--project[Filter by project name]:project'
+        '--status[Governance status]:status:(active pending_review suppressed invalidated expired)'
+        '--limit[Maximum number of entries]:number'
+        '--reason[Reason for the control event]:reason'
+        '--at[Expiry timestamp]:iso-date'
+        '--scope[Consent scope]:scope'
+        '--json[Output as JSON]'
     )
 
     sync_opts=(
@@ -328,6 +346,7 @@ _memory() {
                 related) _arguments "\$related_opts[@]" ':session:' ;;
                 show) _arguments "\$show_opts[@]" ':session:' ;;
                 browse) _arguments "\$browse_opts[@]" ;;
+                governance) _arguments '1:action:(list show suppress unsuppress invalidate expire review consent-grant consent-revoke)' "\$governance_opts[@]" ':target:' ;;
                 sync) _arguments "\$sync_opts[@]" ;;
                 install) _arguments "\$install_opts[@]" ;;
                 uninstall) _arguments "\$uninstall_opts[@]" ;;
@@ -368,6 +387,7 @@ complete -c memory -n "__fish_use_subcommand" -a context -d "Get context for a p
 complete -c memory -n "__fish_use_subcommand" -a related -d "Find sessions related to a given session"
 complete -c memory -n "__fish_use_subcommand" -a show -d "Show session details and conversation"
 complete -c memory -n "__fish_use_subcommand" -a browse -d "Browse and select sessions interactively"
+complete -c memory -n "__fish_use_subcommand" -a governance -d "Inspect and control derived memory consent/provenance state"
 complete -c memory -n "__fish_use_subcommand" -a install -d "Install automatic sync hook"
 complete -c memory -n "__fish_use_subcommand" -a uninstall -d "Remove automatic sync hook"
 complete -c memory -n "__fish_use_subcommand" -a status -d "Show hook installation status"
@@ -426,6 +446,17 @@ complete -c memory -n "__fish_seen_subcommand_from show" -l quiet -d "Minimal ou
 
 # browse options
 complete -c memory -n "__fish_seen_subcommand_from browse" -l project -d "Filter by project name"
+
+# governance actions and options
+complete -c memory -n "__fish_seen_subcommand_from governance" -a "list show suppress unsuppress invalidate expire review consent-grant consent-revoke"
+complete -c memory -n "__fish_seen_subcommand_from governance" -l surface -d "Governance surface" -a "fact context provider_egress remote_sync friction evaluation persona graph ranking dream projection"
+complete -c memory -n "__fish_seen_subcommand_from governance" -l project -d "Filter by project name"
+complete -c memory -n "__fish_seen_subcommand_from governance" -l status -d "Governance status" -a "active pending_review suppressed invalidated expired"
+complete -c memory -n "__fish_seen_subcommand_from governance" -l limit -d "Maximum number of entries"
+complete -c memory -n "__fish_seen_subcommand_from governance" -l reason -d "Reason for the control event"
+complete -c memory -n "__fish_seen_subcommand_from governance" -l at -d "Expiry timestamp"
+complete -c memory -n "__fish_seen_subcommand_from governance" -l scope -d "Consent scope"
+complete -c memory -n "__fish_seen_subcommand_from governance" -l json -d "Output as JSON"
 
 # sync options
 complete -c memory -n "__fish_seen_subcommand_from sync" -l force -d "Force re-sync all sessions"

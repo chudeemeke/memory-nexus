@@ -34,6 +34,7 @@ import {
   createFactsCommand,
   createRemoteCommand,
   createAuditSecretsCommand,
+  createGovernanceCommand,
 } from "./commands/index.js";
 
 
@@ -58,6 +59,7 @@ program.addCommand(createListCommand());
 program.addCommand(createRelatedCommand());
 program.addCommand(createStatsCommand());
 program.addCommand(createFactsCommand());
+program.addCommand(createGovernanceCommand());
 
 // Data Commands — sync, backfill, backup, maintenance.
 program.commandsGroup("Data Commands:");

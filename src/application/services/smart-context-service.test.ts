@@ -14,6 +14,7 @@ import {
     type ContextSection,
     type IProjectResolver,
     type SmartContextDeps,
+    type IContextGovernancePolicy,
 } from "./smart-context-service.js";
 import { Fact } from "../../domain/entities/fact.js";
 import { FrictionEntry } from "../../domain/entities/friction-entry.js";
@@ -154,6 +155,16 @@ function createMockFrictionRepo(entries: FrictionEntry[]): IFrictionRepository {
     };
 }
 
+function createBlockingGovernancePolicy(blockedIds: string[]): IContextGovernancePolicy {
+    const blocked = new Set(blockedIds);
+    return {
+        async filterAllowed(surface, items, getTargetId) {
+            expect(surface).toBe("fact");
+            return items.filter((item) => !blocked.has(getTargetId(item)));
+        },
+    };
+}
+
 // -- Test Data --
 
 const PROJECT_ENCODED = "c-users-test-project";
@@ -210,6 +221,35 @@ describe("SmartContextService", () => {
     });
 
     describe("data source assembly (priority order)", () => {
+        test("governance controls suppress blocked facts before context assembly", async () => {
+            const allowedDecision = makeFact({
+                uuid: "allowed-decision",
+                type: "decision",
+                project: PROJECT_NAME,
+                content: "Allowed decision",
+            });
+            const suppressedDecision = makeFact({
+                uuid: "suppressed-decision",
+                type: "decision",
+                project: PROJECT_NAME,
+                content: "Suppressed decision",
+            });
+
+            mockFactRepo = createMockFactRepo([allowedDecision, suppressedDecision]);
+            service = new SmartContextService({
+                projectResolver: mockResolver,
+                factRepo: mockFactRepo,
+                frictionRepo: mockFrictionRepo,
+                governancePolicy: createBlockingGovernancePolicy(["suppressed-decision"]),
+            });
+
+            const result = await service.getContext({ projectFilter: "test-project" });
+
+            const decisions = result!.sections.find((s) => s.key === "decisions");
+            expect(decisions?.content).toContain("Allowed decision");
+            expect(decisions?.content).not.toContain("Suppressed decision");
+        });
+
         test("section 1: Active Decisions from facts table (priority 1)", async () => {
             const decisionFact = makeFact({
                 type: "decision",

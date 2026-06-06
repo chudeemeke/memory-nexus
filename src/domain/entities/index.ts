@@ -47,3 +47,17 @@ export {
   type MemoryEventVisibility,
   type RedactionState,
 } from "./memory-event.js";
+export {
+  MemoryGovernanceEntry,
+  MEMORY_GOVERNANCE_CONTROLS,
+  MEMORY_GOVERNANCE_STATUSES,
+  MEMORY_GOVERNANCE_SURFACES,
+  assertMemoryGovernanceControl,
+  assertMemoryGovernanceSurface,
+  type GovernanceControlParams,
+  type MemoryGovernanceControl,
+  type MemoryGovernanceEntryJson,
+  type MemoryGovernanceEntryParams,
+  type MemoryGovernanceStatus,
+  type MemoryGovernanceSurface,
+} from "./memory-governance.js";

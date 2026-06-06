@@ -90,10 +90,12 @@ Phase 38.2 completed SEC-05, SEC-06, SEC-07, and SEC-09 for current active surfa
 
 ### Consent Provenance and Memory Governance
 
-- [ ] **CONSENT-01**: Consent/provenance events exist for provider egress, remote sync, persona/profile use, graph enrichment, ranking exemptions, and dream promotion.
-- [ ] **CONSENT-02**: Every derived memory entry cites source event ids, transformation method, actor, confidence, redaction state, consent state, and scope.
-- [ ] **CONSENT-03**: Users can inspect, suppress, invalidate, expire, or review derived memory entries.
-- [ ] **CONSENT-04**: Suppression/invalidation state is enforced by context assembly, graph enrichment, ranking, and dreaming.
+- [x] **CONSENT-01**: Consent/provenance events exist for provider egress, remote sync, persona/profile use, graph enrichment, ranking exemptions, and dream promotion.
+- [x] **CONSENT-02**: Every derived memory entry cites source event ids, transformation method, actor, confidence, redaction state, consent state, and scope.
+- [x] **CONSENT-03**: Users can inspect, suppress, invalidate, expire, or review derived memory entries.
+- [x] **CONSENT-04**: Suppression/invalidation state is enforced by context assembly, graph enrichment, ranking, and dreaming.
+
+Phase 38.2.5 completed the governance substrate for current and future derived surfaces. Fact projection now registers provenance-backed governance entries, governance/consent events replay into durable control state, `memory governance` exposes inspection and suppression/invalidation/review/expiry/consent controls, and context assembly enforces blocked fact governance state. Future remote sync, persona, graph, ranking, and dreaming work must integrate through this governance policy rather than creating parallel consent/provenance controls.
 
 ### Remote Sync and Operations
 
@@ -246,10 +248,10 @@ Which phases cover which requirements. Updated during roadmap creation.
 | SEC-07 | Phase 38.2 | Complete |
 | SEC-08 | Phase 38.3 | Pending |
 | SEC-09 | Phase 38.2 | Complete |
-| CONSENT-01 | Phase 38.2.5 | Pending |
-| CONSENT-02 | Phase 38.2.5 | Pending |
-| CONSENT-03 | Phase 38.2.5 | Pending |
-| CONSENT-04 | Phase 38.2.5 | Pending |
+| CONSENT-01 | Phase 38.2.5 | Complete |
+| CONSENT-02 | Phase 38.2.5 | Complete |
+| CONSENT-03 | Phase 38.2.5 | Complete |
+| CONSENT-04 | Phase 38.2.5 | Complete |
 | SYNC-05 | Phase 38.3 | Pending |
 | SYNC-06 | Phase 38.3 | Pending |
 | SYNC-07 | Phase 38.4 | Pending |

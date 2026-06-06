@@ -51,3 +51,9 @@ export { SqliteFactRepository } from "./fact-repository.js";
 // Extraction Log Repository
 export { SqliteExtractionLogRepository } from "./extraction-log-repository.js";
 
+// Memory Governance Repository
+export {
+  SqliteMemoryGovernanceRepository,
+  governanceEntryFromFactEvent,
+} from "./memory-governance-repository.js";
+

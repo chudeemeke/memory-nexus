@@ -21,6 +21,8 @@ Query Commands:
                                   topics/entities
   stats [options]                 Show database statistics
   facts [options] <project>       View active facts for a project
+  governance                      Inspect and control derived memory
+                                  consent/provenance state
 
 Data Commands:
   sync [options]                  Sync sessions from ~/.claude/projects/ to

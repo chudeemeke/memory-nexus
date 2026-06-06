@@ -21,6 +21,7 @@
 import type { IFactRepository, IFrictionRepository } from "../../domain/ports/repositories.js";
 import type { Fact } from "../../domain/entities/fact.js";
 import type { FrictionEntry } from "../../domain/entities/friction-entry.js";
+import type { MemoryGovernanceSurface } from "../../domain/entities/memory-governance.js";
 import { allocateBudget, type BudgetSection } from "./budget-allocator.js";
 
 /**
@@ -88,12 +89,25 @@ export interface IProjectResolver {
 }
 
 /**
+ * Optional governance policy used to suppress/expire/invalidate derived memory
+ * before it reaches context assembly or AI-facing output.
+ */
+export interface IContextGovernancePolicy {
+    filterAllowed<T>(
+        surface: MemoryGovernanceSurface,
+        items: T[],
+        getTargetId: (item: T) => string,
+    ): Promise<T[]>;
+}
+
+/**
  * Dependencies for SmartContextService (constructor injection).
  */
 export interface SmartContextDeps {
     projectResolver: IProjectResolver;
     factRepo: IFactRepository;
     frictionRepo: IFrictionRepository;
+    governancePolicy?: IContextGovernancePolicy | undefined;
     /** Optional legacy session summary provider */
     getSessionSummary?: (projectFilter: string, days?: number) => Promise<string | null>;
     now?: () => Date;
@@ -131,12 +145,14 @@ export class SmartContextService {
     private readonly projectResolver: IProjectResolver;
     private readonly factRepo: IFactRepository;
     private readonly frictionRepo: IFrictionRepository;
+    private readonly governancePolicy?: IContextGovernancePolicy | undefined;
     private readonly getSessionSummary?: (projectFilter: string, days?: number) => Promise<string | null>;
 
     constructor(deps: SmartContextDeps) {
         this.projectResolver = deps.projectResolver;
         this.factRepo = deps.factRepo;
         this.frictionRepo = deps.frictionRepo;
+        this.governancePolicy = deps.governancePolicy;
         if (deps.getSessionSummary) {
             this.getSessionSummary = deps.getSessionSummary;
         }
@@ -161,7 +177,7 @@ export class SmartContextService {
 
         // Gather all active facts matching the project
         const allFacts = await this.factRepo.findByProject(projectName);
-        const activeFacts = allFacts.filter((f) => f.supersededAt === null);
+        const activeFacts = await this.filterAllowedFacts(allFacts.filter((f) => f.supersededAt === null));
 
         const formatFactList = (factsList: Fact[]) => {
             return factsList.map((f) => `- ${f.content}`).join("\n");
@@ -197,8 +213,8 @@ export class SmartContextService {
         // Section 5: Global/Cross-Project Sections (only when crossProject=true)
         if (options.crossProject) {
             const allFactsGlobal = await this.factRepo.findAll();
-            const globalActive = allFactsGlobal.filter(
-                (f) => f.supersededAt === null && f.project !== projectName
+            const globalActive = await this.filterAllowedFacts(
+                allFactsGlobal.filter((f) => f.supersededAt === null && f.project !== projectName)
             );
 
             // Cross-Project Preferences (priority 5)
@@ -304,6 +320,17 @@ export class SmartContextService {
         // If no project-specific friction, include all open friction
         const entries = projectEntries.length > 0 ? projectEntries : openEntries;
         return entries.map(formatFrictionLine).join("\n");
+    }
+
+    /**
+     * Remove derived facts blocked by governance controls. Ungoverned facts are
+     * allowed for backward compatibility with pre-governance databases.
+     */
+    private async filterAllowedFacts(facts: Fact[]): Promise<Fact[]> {
+        if (!this.governancePolicy || facts.length === 0) {
+            return facts;
+        }
+        return this.governancePolicy.filterAllowed("fact", facts, (fact) => fact.uuid);
     }
 
     /**

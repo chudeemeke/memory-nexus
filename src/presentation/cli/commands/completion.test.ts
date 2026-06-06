@@ -109,6 +109,7 @@ describe("completion command", () => {
             expect(script).toContain("related");
             expect(script).toContain("show");
             expect(script).toContain("browse");
+            expect(script).toContain("governance");
             expect(script).toContain("install");
             expect(script).toContain("uninstall");
             expect(script).toContain("status");
@@ -152,6 +153,7 @@ describe("completion command", () => {
             expect(script).toContain("'related:Find sessions");
             expect(script).toContain("'show:Show session");
             expect(script).toContain("'browse:Browse and select");
+            expect(script).toContain("'governance:Inspect and control");
             expect(script).toContain("'install:Install automatic");
             expect(script).toContain("'uninstall:Remove automatic");
             expect(script).toContain("'status:Show hook");
@@ -200,6 +202,7 @@ describe("completion command", () => {
             expect(script).toContain('-a related -d "Find sessions');
             expect(script).toContain('-a show -d "Show session');
             expect(script).toContain('-a browse -d "Browse and');
+            expect(script).toContain('-a governance -d "Inspect and');
             expect(script).toContain('-a install -d "Install automatic');
             expect(script).toContain('-a uninstall -d "Remove automatic');
             expect(script).toContain('-a status -d "Show hook');
@@ -342,6 +345,15 @@ describe("completion command", () => {
             expect(generateBashCompletion()).toContain("--include-sensitive");
             expect(generateZshCompletion()).toContain("--include-sensitive[Export raw sensitive");
             expect(generateFishCompletion()).toContain("-l include-sensitive");
+        });
+
+        it("includes governance actions and surfaces in all shells", () => {
+            expect(generateBashCompletion()).toContain("consent-revoke");
+            expect(generateBashCompletion()).toContain("--surface");
+            expect(generateZshCompletion()).toContain("governance_opts");
+            expect(generateZshCompletion()).toContain("provider_egress");
+            expect(generateFishCompletion()).toContain("consent-grant consent-revoke");
+            expect(generateFishCompletion()).toContain("provider_egress remote_sync");
         });
     });
 });

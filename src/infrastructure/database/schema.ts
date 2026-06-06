@@ -431,6 +431,60 @@ CREATE TABLE IF NOT EXISTS extraction_log (
 `;
 
 /**
+ * Governance projection table - current consent/provenance/control state for
+ * derived memory entries across all user-visible and agent-visible surfaces.
+ */
+export const MEMORY_GOVERNANCE_TABLE = `
+CREATE TABLE IF NOT EXISTS memory_governance (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    surface TEXT NOT NULL CHECK (surface IN ('fact', 'context', 'provider_egress', 'remote_sync', 'friction', 'evaluation', 'persona', 'graph', 'ranking', 'dream', 'projection')),
+    target_id TEXT NOT NULL,
+    project TEXT,
+    visibility TEXT NOT NULL CHECK (visibility IN ('project', 'workspace', 'global')),
+    source_event_ids TEXT NOT NULL,
+    transformation_method TEXT NOT NULL,
+    actor TEXT NOT NULL,
+    confidence REAL NOT NULL CHECK (confidence >= 0 AND confidence <= 1),
+    redaction_state TEXT NOT NULL CHECK (redaction_state IN ('none', 'redacted', 'quarantined')),
+    consent_status TEXT NOT NULL CHECK (consent_status IN ('not_required', 'granted', 'denied', 'revoked')),
+    consent_scopes TEXT NOT NULL,
+    scope TEXT NOT NULL,
+    status TEXT NOT NULL CHECK (status IN ('active', 'pending_review', 'suppressed', 'invalidated', 'expired')),
+    status_reason TEXT,
+    created_at TEXT NOT NULL,
+    updated_at TEXT NOT NULL,
+    reviewed_at TEXT,
+    expires_at TEXT,
+    last_event_id TEXT,
+    UNIQUE(surface, target_id)
+);
+CREATE INDEX IF NOT EXISTS idx_memory_governance_surface ON memory_governance(surface);
+CREATE INDEX IF NOT EXISTS idx_memory_governance_project ON memory_governance(project);
+CREATE INDEX IF NOT EXISTS idx_memory_governance_status ON memory_governance(status);
+CREATE INDEX IF NOT EXISTS idx_memory_governance_target ON memory_governance(surface, target_id);
+`;
+
+/**
+ * Governance event audit table - every replayed governance/consent control
+ * event. This keeps manual controls inspectable without reading JSONL logs.
+ */
+export const MEMORY_GOVERNANCE_EVENTS_TABLE = `
+CREATE TABLE IF NOT EXISTS memory_governance_events (
+    event_id TEXT PRIMARY KEY,
+    kind TEXT NOT NULL CHECK (kind IN ('governance', 'consent')),
+    control TEXT NOT NULL,
+    surface TEXT NOT NULL,
+    target_id TEXT NOT NULL,
+    actor TEXT NOT NULL,
+    reason TEXT,
+    occurred_at TEXT NOT NULL,
+    payload TEXT NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_memory_governance_events_target ON memory_governance_events(surface, target_id);
+CREATE INDEX IF NOT EXISTS idx_memory_governance_events_occurred ON memory_governance_events(occurred_at);
+`;
+
+/**
  * Schema options for conditional table creation
  */
 
@@ -525,6 +579,8 @@ export const SCHEMA_SQL: readonly string[] = [
     FACTS_FTS_TABLE,
     FACTS_FTS_TRIGGERS,
     EXTRACTION_LOG_TABLE,
+    MEMORY_GOVERNANCE_TABLE,
+    MEMORY_GOVERNANCE_EVENTS_TABLE,
 ];
 
 

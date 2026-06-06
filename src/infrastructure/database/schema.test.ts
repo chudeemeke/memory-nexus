@@ -35,6 +35,8 @@ import {
     FACTS_FTS_TABLE,
     FACTS_FTS_TRIGGERS,
     EXTRACTION_LOG_TABLE,
+    MEMORY_GOVERNANCE_TABLE,
+    MEMORY_GOVERNANCE_EVENTS_TABLE,
     type SchemaOptions,
 } from "./schema.js";
 
@@ -71,12 +73,14 @@ describe("Database Schema", () => {
             expect(FACTS_FTS_TABLE).toBeDefined();
             expect(FACTS_FTS_TRIGGERS).toBeDefined();
             expect(EXTRACTION_LOG_TABLE).toBeDefined();
+            expect(MEMORY_GOVERNANCE_TABLE).toBeDefined();
+            expect(MEMORY_GOVERNANCE_EVENTS_TABLE).toBeDefined();
         });
 
 
         it("should have SCHEMA_SQL as an array with correct order", () => {
             expect(Array.isArray(SCHEMA_SQL)).toBe(true);
-            expect(SCHEMA_SQL.length).toBe(23);
+            expect(SCHEMA_SQL.length).toBe(25);
             expect(SCHEMA_SQL[0]).toBe(SESSIONS_TABLE);
             expect(SCHEMA_SQL[1]).toBe(MESSAGES_META_TABLE);
             expect(SCHEMA_SQL[2]).toBe(MESSAGES_FTS_TABLE);
@@ -100,6 +104,8 @@ describe("Database Schema", () => {
             expect(SCHEMA_SQL[20]).toBe(FACTS_FTS_TABLE);
             expect(SCHEMA_SQL[21]).toBe(FACTS_FTS_TRIGGERS);
             expect(SCHEMA_SQL[22]).toBe(EXTRACTION_LOG_TABLE);
+            expect(SCHEMA_SQL[23]).toBe(MEMORY_GOVERNANCE_TABLE);
+            expect(SCHEMA_SQL[24]).toBe(MEMORY_GOVERNANCE_EVENTS_TABLE);
         });
 
     });
@@ -153,6 +159,8 @@ describe("Database Schema", () => {
             expect(tableNames).toContain("entities");
             expect(tableNames).toContain("session_entities");
             expect(tableNames).toContain("entity_links");
+            expect(tableNames).toContain("memory_governance");
+            expect(tableNames).toContain("memory_governance_events");
         });
 
         it("should create FTS5 virtual table", () => {
@@ -199,6 +207,9 @@ describe("Database Schema", () => {
             expect(indexNames).toContain("idx_extraction_status");
             expect(indexNames).toContain("idx_entities_type");
             expect(indexNames).toContain("idx_entities_name");
+            expect(indexNames).toContain("idx_memory_governance_surface");
+            expect(indexNames).toContain("idx_memory_governance_target");
+            expect(indexNames).toContain("idx_memory_governance_events_target");
         });
 
         it("should create FTS synchronization triggers", () => {

@@ -17,6 +17,10 @@ import {
   type MemoryEventKind,
   type MemoryEventPrivacy,
 } from "../../domain/entities/memory-event.js";
+import {
+  SqliteMemoryGovernanceRepository,
+  governanceEntryFromFactEvent,
+} from "./repositories/memory-governance-repository.js";
 import { getMachineLogPath, getAllLogFiles } from "../paths.js";
 import { loadConfig } from "../hooks/config-manager.js";
 
@@ -42,7 +46,7 @@ interface ReadOptions {
   reportInvalidToConsole: boolean;
 }
 
-interface FactsProjectionContext {
+interface ProjectionContext {
   db: Database;
 }
 
@@ -116,7 +120,10 @@ export async function rebuildProjections(db: Database, logPath?: string, eventsD
 export async function rebuildProjectionsWithReport(db: Database, logPath?: string, eventsDir?: string): Promise<ProjectionRebuildReport> {
   const report = await collectMemoryEvents(logPath, eventsDir, { reportInvalidToConsole: false });
   const sortedEvents = sortMemoryEvents(report.events);
-  const registry = new ProjectionRegistry<FactsProjectionContext>([createFactsProjection()]);
+  const registry = new ProjectionRegistry<ProjectionContext>([
+    createFactsProjection(),
+    createGovernanceProjection(),
+  ]);
   const replay = await registry.replay(sortedEvents, { db });
 
   return {
@@ -319,12 +326,17 @@ function createFactsProjection() {
   return {
     name: "facts",
     consumedKinds: FACT_EVENT_KINDS,
-    reset: (context: FactsProjectionContext) => {
+    reset: (context: ProjectionContext) => {
       context.db.run("DELETE FROM facts;");
     },
-    apply: (event: MemoryEventEnvelope, context: FactsProjectionContext) => {
+    apply: async (event: MemoryEventEnvelope, context: ProjectionContext) => {
       const fact = memoryEventToFact(event);
       insertFact(context.db, fact);
+      const governanceRepo = new SqliteMemoryGovernanceRepository(context.db);
+      const existingGovernance = await governanceRepo.findByTarget("fact", fact.uuid);
+      if (!existingGovernance) {
+        await governanceRepo.save(governanceEntryFromFactEvent(event, fact.uuid, fact.project));
+      }
 
       if (fact.type === "supersedence") {
         const supersededUuid = fact.metadata?.superseded_uuid;
@@ -337,6 +349,20 @@ function createFactsProjection() {
           `).run(fact.observedAt.toISOString(), supersededByUuid, supersededUuid);
         }
       }
+    },
+  };
+}
+
+function createGovernanceProjection() {
+  return {
+    name: "memory_governance",
+    consumedKinds: ["governance", "consent"] as const,
+    reset: (context: ProjectionContext) => {
+      context.db.run("DELETE FROM memory_governance_events; DELETE FROM memory_governance;");
+    },
+    apply: async (event: MemoryEventEnvelope, context: ProjectionContext) => {
+      const governanceRepo = new SqliteMemoryGovernanceRepository(context.db);
+      await governanceRepo.applyMemoryEvent(event);
     },
   };
 }

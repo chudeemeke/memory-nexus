@@ -28,6 +28,9 @@ import {
   SqliteFrictionRepository,
 } from "../../../infrastructure/database/repositories/friction-repository.js";
 import {
+  SqliteMemoryGovernanceRepository,
+} from "../../../infrastructure/database/repositories/memory-governance-repository.js";
+import {
   initializeDatabase,
   closeDatabase,
   getDefaultDbPath,
@@ -35,6 +38,9 @@ import {
 import {
   SmartContextService,
 } from "../../../application/services/smart-context-service.js";
+import {
+  MemoryGovernanceService,
+} from "../../../application/services/memory-governance-service.js";
 import {
   createContextFormatter,
   type ContextOutputMode,
@@ -214,6 +220,8 @@ async function executeSmartContext(
   const projectResolver = new SqliteProjectResolver(db);
   const factRepo = new SqliteFactRepository(db);
   const frictionRepo = new SqliteFrictionRepository(db);
+  const governanceRepo = new SqliteMemoryGovernanceRepository(db);
+  const governancePolicy = new MemoryGovernanceService({ repository: governanceRepo });
 
   // We need a captured legacy context if --json is set so we can build
   // the envelope's data field (toContextDto). The smart-context summary
@@ -224,6 +232,7 @@ async function executeSmartContext(
     projectResolver,
     factRepo,
     frictionRepo,
+    governancePolicy,
     getSessionSummary: async (filter, days) => {
       const ctx = await legacy.getProjectContext(filter, { days });
       if (!ctx) return null;
