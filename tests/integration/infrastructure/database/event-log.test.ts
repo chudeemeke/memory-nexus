@@ -596,6 +596,46 @@ describe("Event-Log SSOT Manager", () => {
     expect(governance.confidence).toBe(0.91);
   });
 
+  test("rebuildProjections creates graph edges and governance from fact graph metadata", async () => {
+    const fact = Fact.create({
+      uuid: "graph-fact",
+      type: "decision",
+      project: "memory-nexus",
+      content: "authkey remains optional capability injection for memory.",
+      metadata: {
+        confidence: 0.92,
+        graph_edges: [
+          {
+            id: "memory-authkey-graph",
+            source: { type: "tool", id: "memory", label: "memory" },
+            target: { type: "capability", id: "authkey", label: "authkey" },
+            relationship: "optional-capability-provider",
+            confidence: 0.92,
+            validFrom: "2026-05-27T00:00:00.000Z",
+            why: "Derived from the optional capability interop decision.",
+          },
+        ],
+      },
+      observedAt: new Date("2026-06-06T08:00:00Z"),
+    });
+
+    await appendEvent(fact, testLogPath);
+    const report = await rebuildProjectionsWithReport(db, testLogPath);
+
+    const edge = db.prepare("SELECT * FROM graph_edges WHERE edge_id = ?")
+      .get("memory-authkey-graph") as any;
+    const governance = db.prepare("SELECT * FROM memory_governance WHERE surface = ? AND target_id = ?")
+      .get("graph", "memory-authkey-graph") as any;
+
+    expect(report.replay.appliedProjections).toContain("graph");
+    expect(edge.project).toBe("memory-nexus");
+    expect(edge.relationship).toBe("optional-capability-provider");
+    expect(edge.confidence).toBe(0.92);
+    expect(JSON.parse(edge.source_event_ids)).toEqual(["graph-fact"]);
+    expect(governance.transformation_method).toBe("graph-event-projection");
+    expect(governance.confidence).toBe(0.92);
+  });
+
   test("rebuildProjections applies governance controls after fact registration", async () => {
     const fact = Fact.create({
       uuid: "suppressed-governed-fact",

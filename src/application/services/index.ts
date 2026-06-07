@@ -121,6 +121,11 @@ export type {
 
 export { ProjectionRegistry } from "./projection-registry.js";
 export { PersonaProfileService, personaEntryFromFactEvent } from "./persona-profile-service.js";
+export {
+  TemporalGraphService,
+  graphEdgesFromFact,
+  governanceEntryForGraphEdge,
+} from "./temporal-graph-service.js";
 export type {
   EventProjection,
   ProjectionReplayResult,

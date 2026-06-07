@@ -54,14 +54,14 @@ Behavior-backed fixtures:
 - `secret_in_tool_output`: uses `PatternRedactor`.
 - `friction_query_contract`: uses `SqliteFrictionRepository` against an in-memory SQLite database.
 - `repeated_correction_to_persona`: uses `PersonaProfileService` through in-memory repository ports.
+- `project_scope_leakage`: uses `SmartContextService` to prove unrelated project-private facts stay out of cross-project context.
+- `graph_stale_edge`: uses `TemporalGraphService` with `SqliteGraphRepository` and graph governance.
+- `superseded_provider_fact`: uses `SqliteFactRepository` persisted fact state.
 
 Contract fixtures, to be promoted by later phases:
 
-- `project_scope_leakage`
-- `superseded_provider_fact`
 - `remote_sync_conflict`
-- `graph_stale_edge`
 - `ranking_evergreen_preference`
 - `dream_proposed_supersedence`
 
-Phase 40-42 must convert the remaining graph, ranking, dreaming, and adjacent contract fixtures into behavior-backed evals as each product surface is implemented.
+Phase 41-42 must convert the remaining ranking and dreaming contract fixtures into behavior-backed evals as each product surface is implemented. The remote-sync conflict fixture remains a recovery contract until Phase 43 determines whether existing Phase 38.4 tests are sufficient evidence or whether a higher-level behavior fixture is required.

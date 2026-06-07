@@ -38,6 +38,7 @@ import {
     MEMORY_GOVERNANCE_TABLE,
     MEMORY_GOVERNANCE_EVENTS_TABLE,
     PERSONA_ENTRIES_TABLE,
+    GRAPH_EDGES_TABLE,
     type SchemaOptions,
 } from "./schema.js";
 
@@ -77,12 +78,13 @@ describe("Database Schema", () => {
             expect(MEMORY_GOVERNANCE_TABLE).toBeDefined();
             expect(MEMORY_GOVERNANCE_EVENTS_TABLE).toBeDefined();
             expect(PERSONA_ENTRIES_TABLE).toBeDefined();
+            expect(GRAPH_EDGES_TABLE).toBeDefined();
         });
 
 
         it("should have SCHEMA_SQL as an array with correct order", () => {
             expect(Array.isArray(SCHEMA_SQL)).toBe(true);
-            expect(SCHEMA_SQL.length).toBe(26);
+            expect(SCHEMA_SQL.length).toBe(27);
             expect(SCHEMA_SQL[0]).toBe(SESSIONS_TABLE);
             expect(SCHEMA_SQL[1]).toBe(MESSAGES_META_TABLE);
             expect(SCHEMA_SQL[2]).toBe(MESSAGES_FTS_TABLE);
@@ -109,6 +111,7 @@ describe("Database Schema", () => {
             expect(SCHEMA_SQL[23]).toBe(MEMORY_GOVERNANCE_TABLE);
             expect(SCHEMA_SQL[24]).toBe(MEMORY_GOVERNANCE_EVENTS_TABLE);
             expect(SCHEMA_SQL[25]).toBe(PERSONA_ENTRIES_TABLE);
+            expect(SCHEMA_SQL[26]).toBe(GRAPH_EDGES_TABLE);
         });
 
     });

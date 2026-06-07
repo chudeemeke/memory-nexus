@@ -515,6 +515,44 @@ CREATE INDEX IF NOT EXISTS idx_persona_entries_visibility ON persona_entries(vis
 `;
 
 /**
+ * Temporal semantic graph edge projection table.
+ *
+ * Derived from canonical fact events and extraction metadata. Governance for
+ * whether edges may be used lives in memory_governance(surface='graph').
+ */
+export const GRAPH_EDGES_TABLE = `
+CREATE TABLE IF NOT EXISTS graph_edges (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    edge_id TEXT UNIQUE NOT NULL,
+    source_type TEXT NOT NULL CHECK (source_type IN ('project', 'tool', 'person', 'decision', 'error', 'plan', 'file', 'command', 'capability')),
+    source_id TEXT NOT NULL,
+    source_label TEXT NOT NULL,
+    target_type TEXT NOT NULL CHECK (target_type IN ('project', 'tool', 'person', 'decision', 'error', 'plan', 'file', 'command', 'capability')),
+    target_id TEXT NOT NULL,
+    target_label TEXT NOT NULL,
+    relationship TEXT NOT NULL,
+    project TEXT,
+    visibility TEXT NOT NULL CHECK (visibility IN ('project', 'workspace', 'global')),
+    source_event_ids TEXT NOT NULL,
+    source_kinds TEXT NOT NULL,
+    confidence REAL NOT NULL CHECK (confidence >= 0 AND confidence <= 1),
+    valid_from TEXT NOT NULL,
+    valid_to TEXT,
+    why TEXT NOT NULL,
+    metadata TEXT,
+    created_at TEXT NOT NULL,
+    updated_at TEXT NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_graph_edges_edge_id ON graph_edges(edge_id);
+CREATE INDEX IF NOT EXISTS idx_graph_edges_project ON graph_edges(project);
+CREATE INDEX IF NOT EXISTS idx_graph_edges_scope ON graph_edges(project, visibility);
+CREATE INDEX IF NOT EXISTS idx_graph_edges_source ON graph_edges(source_type, source_id);
+CREATE INDEX IF NOT EXISTS idx_graph_edges_target ON graph_edges(target_type, target_id);
+CREATE INDEX IF NOT EXISTS idx_graph_edges_relationship ON graph_edges(relationship);
+CREATE INDEX IF NOT EXISTS idx_graph_edges_temporal ON graph_edges(valid_from, valid_to, confidence);
+`;
+
+/**
  * Schema options for conditional table creation
  */
 
@@ -612,6 +650,7 @@ export const SCHEMA_SQL: readonly string[] = [
     MEMORY_GOVERNANCE_TABLE,
     MEMORY_GOVERNANCE_EVENTS_TABLE,
     PERSONA_ENTRIES_TABLE,
+    GRAPH_EDGES_TABLE,
 ];
 
 

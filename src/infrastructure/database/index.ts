@@ -25,6 +25,7 @@ export {
     MEMORY_GOVERNANCE_TABLE,
     MEMORY_GOVERNANCE_EVENTS_TABLE,
     PERSONA_ENTRIES_TABLE,
+    GRAPH_EDGES_TABLE,
     type SchemaOptions,
 } from "./schema.js";
 
@@ -58,6 +59,7 @@ export {
   SqliteBackfillStateRepository,
   SqliteMemoryGovernanceRepository,
   SqlitePersonaRepository,
+  SqliteGraphRepository,
 } from "./repositories/index.js";
 
 // Services

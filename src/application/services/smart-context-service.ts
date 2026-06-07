@@ -18,10 +18,11 @@
  * Zero imports from infrastructure layer.
  */
 
-import type { IFactRepository, IFrictionRepository, IPersonaRepository } from "../../domain/ports/repositories.js";
+import type { IFactRepository, IFrictionRepository, IPersonaRepository, IGraphRepository } from "../../domain/ports/repositories.js";
 import type { Fact } from "../../domain/entities/fact.js";
 import type { FrictionEntry } from "../../domain/entities/friction-entry.js";
 import type { PersonaEntry } from "../../domain/entities/persona-entry.js";
+import type { GraphEdge } from "../../domain/entities/graph-edge.js";
 import type { MemoryGovernanceSurface } from "../../domain/entities/memory-governance.js";
 import { allocateBudget, type BudgetSection } from "./budget-allocator.js";
 
@@ -109,6 +110,7 @@ export interface SmartContextDeps {
     factRepo: IFactRepository;
     frictionRepo: IFrictionRepository;
     personaRepo?: IPersonaRepository | undefined;
+    graphRepo?: IGraphRepository | undefined;
     governancePolicy?: IContextGovernancePolicy | undefined;
     /** Optional legacy session summary provider */
     getSessionSummary?: (projectFilter: string, days?: number) => Promise<string | null>;
@@ -145,6 +147,14 @@ function formatPersonaLine(entry: PersonaEntry): string {
     ].join(" ");
 }
 
+function formatGraphLine(entry: GraphEdge): string {
+    const scope = entry.visibility === "global" ? "global" : entry.project ?? entry.visibility;
+    return [
+        `- ${entry.source.label} --${entry.relationship}--> ${entry.target.label}`,
+        `(id: ${entry.edgeId}; confidence: ${entry.confidence.toFixed(2)}; scope: ${scope}; why: ${entry.why})`,
+    ].join(" ");
+}
+
 /**
  * Smart Context Service.
  *
@@ -156,15 +166,19 @@ export class SmartContextService {
     private readonly factRepo: IFactRepository;
     private readonly frictionRepo: IFrictionRepository;
     private readonly personaRepo?: IPersonaRepository | undefined;
+    private readonly graphRepo?: IGraphRepository | undefined;
     private readonly governancePolicy?: IContextGovernancePolicy | undefined;
     private readonly getSessionSummary?: (projectFilter: string, days?: number) => Promise<string | null>;
+    private readonly now: () => Date;
 
     constructor(deps: SmartContextDeps) {
         this.projectResolver = deps.projectResolver;
         this.factRepo = deps.factRepo;
         this.frictionRepo = deps.frictionRepo;
         this.personaRepo = deps.personaRepo;
+        this.graphRepo = deps.graphRepo;
         this.governancePolicy = deps.governancePolicy;
+        this.now = deps.now ?? (() => new Date());
         if (deps.getSessionSummary) {
             this.getSessionSummary = deps.getSessionSummary;
         }
@@ -222,6 +236,12 @@ export class SmartContextService {
             sections.push(this.buildSection("persona", "Persona and Procedural Memory", 4, personaContent));
         }
 
+        // Section 4b: Temporal Semantic Graph (priority 4 retained for context enrichment)
+        const graphContent = await this.buildGraphContent(projectName);
+        if (graphContent) {
+            sections.push(this.buildSection("semantic_graph", "Temporal Semantic Graph", 4, graphContent));
+        }
+
         // Section 5: Observations (priority 4 retained for backward-compatible ordering)
         const activeObservations = activeFacts.filter((f) => f.type === "observation");
         if (activeObservations.length > 0) {
@@ -232,7 +252,7 @@ export class SmartContextService {
         if (options.crossProject) {
             const allFactsGlobal = await this.factRepo.findAll();
             const globalActive = await this.filterAllowedFacts(
-                allFactsGlobal.filter((f) => f.supersededAt === null && f.project !== projectName)
+                allFactsGlobal.filter((f) => f.supersededAt === null && f.project !== projectName && isCrossProjectVisible(f))
             );
 
             // Cross-Project Preferences (priority 5)
@@ -351,6 +371,23 @@ export class SmartContextService {
         return entries.map(formatPersonaLine).join("\n");
     }
 
+    private async buildGraphContent(projectName: string): Promise<string | null> {
+        if (!this.graphRepo) {
+            return null;
+        }
+        const entries = await this.filterAllowedGraph(await this.graphRepo.findCurrent({
+            project: projectName,
+            includeGlobal: true,
+            asOf: this.now(),
+            minConfidence: 0.7,
+            limit: 12,
+        }));
+        if (entries.length === 0) {
+            return null;
+        }
+        return entries.map(formatGraphLine).join("\n");
+    }
+
     /**
      * Remove derived facts blocked by governance controls. Ungoverned facts are
      * allowed for backward compatibility with pre-governance databases.
@@ -367,6 +404,13 @@ export class SmartContextService {
             return entries;
         }
         return this.governancePolicy.filterAllowed("persona", entries, (entry) => entry.entryId);
+    }
+
+    private async filterAllowedGraph(entries: GraphEdge[]): Promise<GraphEdge[]> {
+        if (!this.governancePolicy || entries.length === 0) {
+            return entries;
+        }
+        return this.governancePolicy.filterAllowed("graph", entries, (entry) => entry.edgeId);
     }
 
     /**
@@ -406,4 +450,17 @@ export class SmartContextService {
             truncated: allocation.budgetExceeded,
         };
     }
+}
+
+function isCrossProjectVisible(fact: Fact): boolean {
+    const metadata = fact.metadata ?? {};
+    const explicitVisibility = metadata.visibility;
+    if (explicitVisibility === "global") {
+        return true;
+    }
+    const scope = metadata.scope;
+    return typeof scope === "object" &&
+        scope !== null &&
+        !Array.isArray(scope) &&
+        (scope as { visibility?: unknown }).visibility === "global";
 }

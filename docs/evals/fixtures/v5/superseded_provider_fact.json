@@ -3,7 +3,7 @@
   "id": "superseded_provider_fact",
   "title": "Superseded provider facts are historical unless explicitly requested",
   "dimension": "supersedence",
-  "mode": "contract",
+  "mode": "behavior",
   "ownerPhase": "40",
   "tags": ["supersedence", "provider", "current-truth"],
   "sanitized": {

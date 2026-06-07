@@ -70,3 +70,11 @@ export {
   type PersonaEntryParams,
   type PersonaReviewStatus,
 } from "./persona-entry.js";
+export {
+  GraphEdge,
+  GRAPH_NODE_TYPES,
+  type GraphEdgeJson,
+  type GraphEdgeParams,
+  type GraphNodeRef,
+  type GraphNodeType,
+} from "./graph-edge.js";

@@ -23,6 +23,11 @@ import {
 } from "./repositories/memory-governance-repository.js";
 import { SqlitePersonaRepository } from "./repositories/persona-repository.js";
 import { personaEntryFromFactEvent } from "../../application/services/persona-profile-service.js";
+import { SqliteGraphRepository } from "./repositories/graph-repository.js";
+import {
+  governanceEntryForGraphEdge,
+  graphEdgesFromFact,
+} from "../../application/services/temporal-graph-service.js";
 import { MemoryGovernanceEntry } from "../../domain/entities/memory-governance.js";
 import { getMachineLogPath, getAllLogFiles } from "../paths.js";
 import { loadConfig } from "../hooks/config-manager.js";
@@ -126,6 +131,7 @@ export async function rebuildProjectionsWithReport(db: Database, logPath?: strin
   const registry = new ProjectionRegistry<ProjectionContext>([
     createFactsProjection(),
     createPersonaProjection(),
+    createGraphProjection(),
     createGovernanceProjection(),
   ]);
   const replay = await registry.replay(sortedEvents, { db });
@@ -409,6 +415,34 @@ function createPersonaProjection() {
           expiresAt: saved.expiresAt,
           lastEventId: event.eventId,
         }));
+      }
+      return true;
+    },
+  };
+}
+
+function createGraphProjection() {
+  return {
+    name: "graph",
+    consumedKinds: FACT_EVENT_KINDS,
+    reset: (context: ProjectionContext) => {
+      context.db.run("DELETE FROM graph_edges;");
+    },
+    apply: async (event: MemoryEventEnvelope, context: ProjectionContext) => {
+      const fact = memoryEventToFact(event);
+      const edges = graphEdgesFromFact(fact, event.observedAt);
+      if (edges.length === 0) {
+        return false;
+      }
+
+      const graphRepo = new SqliteGraphRepository(context.db);
+      const saved = await graphRepo.saveMany(edges);
+      const governanceRepo = new SqliteMemoryGovernanceRepository(context.db);
+      for (const edge of saved) {
+        const existingGovernance = await governanceRepo.findByTarget("graph", edge.edgeId);
+        if (!existingGovernance) {
+          await governanceRepo.save(governanceEntryForGraphEdge(edge, "graph-event-projection"));
+        }
       }
       return true;
     },

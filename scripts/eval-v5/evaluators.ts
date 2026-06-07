@@ -1,6 +1,11 @@
 import { initializeDatabase } from "../../src/infrastructure/database/connection.js";
 import { SqliteFrictionRepository } from "../../src/infrastructure/database/repositories/friction-repository.js";
+import { SqliteFactRepository } from "../../src/infrastructure/database/repositories/fact-repository.js";
+import { SqliteGraphRepository } from "../../src/infrastructure/database/repositories/graph-repository.js";
+import { SqliteMemoryGovernanceRepository } from "../../src/infrastructure/database/repositories/memory-governance-repository.js";
 import { PersonaProfileService } from "../../src/application/services/persona-profile-service.js";
+import { TemporalGraphService } from "../../src/application/services/temporal-graph-service.js";
+import { SmartContextService } from "../../src/application/services/smart-context-service.js";
 import { PatternRedactor } from "../../src/infrastructure/security/pattern-redactor.js";
 import { Fact, type FactType } from "../../src/domain/entities/fact.js";
 import { FrictionEntry } from "../../src/domain/entities/friction-entry.js";
@@ -123,6 +128,10 @@ async function evaluateFrictionQuery(fixture: V5EvalFixture): Promise<V5EvalResu
 }
 
 async function evaluateCrossProjectLeakage(fixture: V5EvalFixture): Promise<V5EvalResult> {
+  if (fixture.mode === "behavior") {
+    return evaluateCrossProjectLeakageBehavior(fixture);
+  }
+
   const request = recordValue(fixture.input.request, "request");
   const project = stringValue(request.project, "request.project");
   const records = recordArray(fixture.input.records, "records");
@@ -137,7 +146,50 @@ async function evaluateCrossProjectLeakage(fixture: V5EvalFixture): Promise<V5Ev
   return finalize(fixture, checks, { visible_ids: visibleIds });
 }
 
+async function evaluateCrossProjectLeakageBehavior(fixture: V5EvalFixture): Promise<V5EvalResult> {
+  const request = recordValue(fixture.input.request, "request");
+  const project = stringValue(request.project, "request.project");
+  const records = recordArray(fixture.input.records, "records");
+  const facts = records.map((record) => Fact.create({
+    uuid: stringValue(record.id, "record.id"),
+    type: "decision",
+    project: stringValue(record.project, "record.project"),
+    content: `${stringValue(record.id, "record.id")}:: ${stringValue(record.content, "record.content")}`,
+    metadata: { visibility: stringValue(record.visibility, "record.visibility") },
+    observedAt: new Date("2026-06-07T00:00:00.000Z"),
+  }));
+
+  const service = new SmartContextService({
+    projectResolver: {
+      resolveProjectEncoded(value) {
+        return value === project ? `encoded-${project}` : null;
+      },
+      resolveProjectName(value) {
+        return value === project ? project : null;
+      },
+    },
+    factRepo: createFactRepo(facts),
+    frictionRepo: createFrictionRepo([]),
+    now: () => new Date("2026-06-07T00:00:00.000Z"),
+  });
+  const context = await service.getContext({ projectFilter: project, crossProject: true });
+  const content = context?.sections.map((section) => section.content).join("\n") ?? "";
+  const visibleIds = records
+    .map((record) => stringValue(record.id, "record.id"))
+    .filter((id) => content.includes(`${id}::`));
+
+  const checks = inclusionChecks(fixture, visibleIds);
+  return finalize(fixture, checks, {
+    visible_ids: visibleIds,
+    section_keys: context?.sections.map((section) => section.key) ?? [],
+  });
+}
+
 async function evaluateSupersedence(fixture: V5EvalFixture): Promise<V5EvalResult> {
+  if (fixture.mode === "behavior") {
+    return evaluateSupersedenceBehavior(fixture);
+  }
+
   const request = recordValue(fixture.input.request, "request");
   const includeHistorical = request.includeHistorical === true;
   const visibleIds = recordArray(fixture.input.facts, "facts")
@@ -146,6 +198,43 @@ async function evaluateSupersedence(fixture: V5EvalFixture): Promise<V5EvalResul
 
   const checks = inclusionChecks(fixture, visibleIds);
   return finalize(fixture, checks, { visible_ids: visibleIds, include_historical: includeHistorical });
+}
+
+async function evaluateSupersedenceBehavior(fixture: V5EvalFixture): Promise<V5EvalResult> {
+  const { db } = initializeDatabase({ path: ":memory:", walMode: false, quickCheck: false });
+  try {
+    const request = recordValue(fixture.input.request, "request");
+    const includeHistorical = request.includeHistorical === true;
+    const project = optionalString(request.project) ?? "memory-nexus";
+    const repo = new SqliteFactRepository(db);
+    const facts = recordArray(fixture.input.facts, "facts").map((fact) => {
+      const factType = optionalString(fact.type) ?? "observation";
+      return Fact.create({
+        uuid: stringValue(fact.id, "fact.id"),
+        type: factType as FactType,
+        project,
+        content: stringValue(fact.content, "fact.content"),
+        observedAt: new Date(stringValue(fact.observedAt, "fact.observedAt")),
+        supersededAt: fact.supersededAt ? new Date(stringValue(fact.supersededAt, "fact.supersededAt")) : null,
+        supersededBy: optionalString(fact.supersededBy) ?? null,
+      });
+    });
+    await repo.saveMany(facts);
+
+    const stored = await repo.findByProject(project);
+    const visibleIds = stored
+      .filter((fact) => includeHistorical || fact.supersededAt === null)
+      .map((fact) => fact.uuid);
+
+    const checks = inclusionChecks(fixture, visibleIds);
+    return finalize(fixture, checks, {
+      visible_ids: visibleIds,
+      include_historical: includeHistorical,
+      persisted_fact_count: stored.length,
+    });
+  } finally {
+    db.close();
+  }
 }
 
 async function evaluateSyncRecovery(fixture: V5EvalFixture): Promise<V5EvalResult> {
@@ -242,6 +331,10 @@ async function evaluatePersonaBehavior(fixture: V5EvalFixture): Promise<V5EvalRe
 }
 
 async function evaluateGraph(fixture: V5EvalFixture): Promise<V5EvalResult> {
+  if (fixture.mode === "behavior") {
+    return evaluateGraphBehavior(fixture);
+  }
+
   const query = recordValue(fixture.input.query, "query");
   const asOf = new Date(stringValue(query.asOf, "query.asOf"));
   const minConfidence = numberValue(query.minConfidence, "query.minConfidence");
@@ -256,6 +349,65 @@ async function evaluateGraph(fixture: V5EvalFixture): Promise<V5EvalResult> {
 
   const checks = inclusionChecks(fixture, visibleIds);
   return finalize(fixture, checks, { visible_edge_ids: visibleIds });
+}
+
+async function evaluateGraphBehavior(fixture: V5EvalFixture): Promise<V5EvalResult> {
+  const { db } = initializeDatabase({ path: ":memory:", walMode: false, quickCheck: false });
+  try {
+    const query = recordValue(fixture.input.query, "query");
+    const asOf = new Date(stringValue(query.asOf, "query.asOf"));
+    const minConfidence = numberValue(query.minConfidence, "query.minConfidence");
+    const project = optionalString(query.project) ?? "memory-nexus";
+    const factRepo = new SqliteFactRepository(db);
+    const graphRepo = new SqliteGraphRepository(db);
+    const governanceRepo = new SqliteMemoryGovernanceRepository(db);
+
+    const facts = recordArray(fixture.input.edges, "edges").map((edge) => {
+      const edgeId = stringValue(edge.id, "edge.id");
+      return Fact.create({
+        uuid: `fact-${edgeId}`,
+        type: "decision",
+        project,
+        content: `Graph edge fixture ${edgeId}`,
+        metadata: {
+          graph_edges: [{
+            id: edgeId,
+            source: stringValue(edge.source, "edge.source"),
+            target: stringValue(edge.target, "edge.target"),
+            sourceType: optionalString(edge.sourceType) ?? "tool",
+            targetType: optionalString(edge.targetType) ?? "capability",
+            relationship: stringValue(edge.relationship, "edge.relationship"),
+            confidence: numberValue(edge.confidence, "edge.confidence"),
+            validFrom: stringValue(edge.validFrom, "edge.validFrom"),
+            ...(edge.validTo ? { validTo: stringValue(edge.validTo, "edge.validTo") } : {}),
+            project: optionalString(edge.project) ?? project,
+            why: optionalString(edge.why) ?? `Fixture edge ${edgeId}.`,
+          }],
+        },
+        observedAt: new Date(stringValue(edge.validFrom, "edge.validFrom")),
+      });
+    });
+    await factRepo.saveMany(facts);
+
+    const service = new TemporalGraphService({
+      factRepo,
+      graphRepo,
+      governanceRepo,
+      now: () => asOf,
+    });
+    await service.rebuildGraph({ project });
+    const visibleEdges = await service.findContextEdges({ project, asOf, minConfidence });
+    const visibleIds = visibleEdges.map((edge) => edge.edgeId);
+    const checks = inclusionChecks(fixture, visibleIds);
+
+    return finalize(fixture, checks, {
+      visible_edge_ids: visibleIds,
+      persisted_edge_count: (await graphRepo.findCurrent({ project, asOf, minConfidence: 0 })).length,
+      governance_count: (await governanceRepo.findAll({ surface: "graph" })).length,
+    });
+  } finally {
+    db.close();
+  }
 }
 
 async function evaluateRanking(fixture: V5EvalFixture): Promise<V5EvalResult> {

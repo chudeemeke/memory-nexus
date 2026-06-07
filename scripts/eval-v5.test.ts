@@ -35,6 +35,18 @@ describe("v5 evaluation harness", () => {
     const persona = run.report.results.find((result) => result.fixture_id === "repeated_correction_to_persona");
     expect(persona?.mode).toBe("behavior");
     expect(persona?.status).toBe("pass");
+
+    const graph = run.report.results.find((result) => result.fixture_id === "graph_stale_edge");
+    expect(graph?.mode).toBe("behavior");
+    expect(graph?.status).toBe("pass");
+
+    const leakage = run.report.results.find((result) => result.fixture_id === "project_scope_leakage");
+    expect(leakage?.mode).toBe("behavior");
+    expect(leakage?.status).toBe("pass");
+
+    const supersedence = run.report.results.find((result) => result.fixture_id === "superseded_provider_fact");
+    expect(supersedence?.mode).toBe("behavior");
+    expect(supersedence?.status).toBe("pass");
   });
 
   test("fixture validation rejects raw secrets and private transcript markers", () => {

@@ -3,7 +3,7 @@
   "id": "graph_stale_edge",
   "title": "Temporal graph excludes stale edges from current retrieval",
   "dimension": "graph",
-  "mode": "contract",
+  "mode": "behavior",
   "ownerPhase": "40",
   "tags": ["graph", "temporal", "stale-edge"],
   "sanitized": {

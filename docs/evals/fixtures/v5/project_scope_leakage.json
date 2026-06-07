@@ -3,7 +3,7 @@
   "id": "project_scope_leakage",
   "title": "Project-private facts stay out of unrelated project context",
   "dimension": "cross_project_leakage",
-  "mode": "contract",
+  "mode": "behavior",
   "ownerPhase": "39",
   "tags": ["privacy", "scope", "context"],
   "sanitized": {

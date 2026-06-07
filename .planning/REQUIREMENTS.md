@@ -125,7 +125,7 @@ Phase 38.6 completed the durable friction contract. `memory friction list` now e
 - [x] **EVAL-03**: Eval fixtures cover privacy, leakage, supersedence, sync recovery, friction filters, persona, graph, ranking, and dreaming.
 - [ ] **EVAL-04**: Phase 43 consumes eval output as readiness evidence and fails on privacy, leakage, or supersedence regressions.
 
-Phase 38.7 completed the executable harness and fixture coverage. `bun run eval:v5` is part of `bun run quality`, and `bun run eval:v5:market` already fails while contract-only fixtures remain. EVAL-04 remains pending until Phase 43 actually consumes the report as final readiness evidence.
+Phase 38.7 completed the executable harness and fixture coverage. `bun run eval:v5` is part of `bun run quality`, and `bun run eval:v5:market` already fails while contract-only fixtures remain. Phase 39 promoted the persona fixture, and Phase 40 promoted graph, supersedence, and cross-project leakage fixtures to behavior-backed checks. EVAL-04 remains pending until Phase 43 actually consumes the report as final readiness evidence.
 
 ### Persona and Procedural Memory
 
@@ -137,10 +137,12 @@ Phase 39 completed the governed persona/procedural memory surface. `PersonaProfi
 
 ### Temporal Semantic Graph
 
-- [ ] **GRAPH-01**: Entity and relation taxonomy covers projects, tools, people, decisions, errors, plans, files, commands, and capabilities.
-- [ ] **GRAPH-02**: Extraction emits candidate entities/relationships with confidence and temporal validity.
-- [ ] **GRAPH-03**: Search/context can use graph enrichment with reasons while preserving vector/reranker baseline.
-- [ ] **GRAPH-04**: Graph pruning and stale-edge policy prevent unbounded noisy relationship growth.
+- [x] **GRAPH-01**: Entity and relation taxonomy covers projects, tools, people, decisions, errors, plans, files, commands, and capabilities.
+- [x] **GRAPH-02**: Extraction emits candidate entities/relationships with confidence and temporal validity.
+- [x] **GRAPH-03**: Search/context can use graph enrichment with reasons while preserving vector/reranker baseline.
+- [x] **GRAPH-04**: Graph pruning and stale-edge policy prevent unbounded noisy relationship growth.
+
+Phase 40 completed temporal semantic graph projection. `GraphEdge`, `IGraphRepository`, `graph_edges`, `SqliteGraphRepository`, `TemporalGraphService`, event-log graph projection, graph governance registration, and context graph enrichment are implemented. Graph candidates are derived from fact metadata with confidence and validity windows, current-edge queries enforce `valid_from` / `valid_to` / confidence / scope, graph context includes why-included metadata, and stale/noisy edges are pruned or excluded. Phase 40 also tightened cross-project context so unrelated project facts must be explicitly global before appearing in another project's context.
 
 ### Importance, Utility, and Recall Ranking
 
@@ -275,10 +277,10 @@ Which phases cover which requirements. Updated during roadmap creation.
 | PERS-01 | Phase 39 | Complete |
 | PERS-02 | Phase 39 | Complete |
 | PERS-03 | Phase 39 | Complete |
-| GRAPH-01 | Phase 40 | Pending |
-| GRAPH-02 | Phase 40 | Pending |
-| GRAPH-03 | Phase 40 | Pending |
-| GRAPH-04 | Phase 40 | Pending |
+| GRAPH-01 | Phase 40 | Complete |
+| GRAPH-02 | Phase 40 | Complete |
+| GRAPH-03 | Phase 40 | Complete |
+| GRAPH-04 | Phase 40 | Complete |
 | RANK-03 | Phase 41 | Pending |
 | RANK-04 | Phase 41 | Pending |
 | RANK-05 | Phase 41 | Pending |
@@ -308,4 +310,4 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 ---
 *Requirements defined: 2026-04-03*
-*Last updated: 2026-06-07 after Phase 39 persona/procedural memory completion*
+*Last updated: 2026-06-07 after Phase 40 temporal semantic graph completion*

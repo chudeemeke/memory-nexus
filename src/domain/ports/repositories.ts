@@ -26,6 +26,7 @@ import type { BackfillState } from "../entities/backfill-state.js";
 import type { ProjectPath } from "../value-objects/project-path.js";
 import type { Fact } from "../entities/fact.js";
 import type { PersonaEntry, PersonaEntryKind } from "../entities/persona-entry.js";
+import type { GraphEdge } from "../entities/graph-edge.js";
 import type {
   MemoryGovernanceEntry,
   MemoryGovernanceStatus,
@@ -616,6 +617,26 @@ export interface IPersonaRepository {
   findByEntryId(entryId: string): Promise<PersonaEntry | null>;
   findAll(options?: PersonaListOptions): Promise<PersonaEntry[]>;
   findForContext(project: string, options?: PersonaContextOptions): Promise<PersonaEntry[]>;
+  deleteByProject(project: string): Promise<void>;
+  clearAll(): Promise<void>;
+}
+
+export interface GraphEdgeQueryOptions {
+  project?: string | undefined;
+  includeGlobal?: boolean | undefined;
+  asOf?: Date | undefined;
+  minConfidence?: number | undefined;
+  nodeId?: string | undefined;
+  relationship?: string | undefined;
+  limit?: number | undefined;
+}
+
+export interface IGraphRepository {
+  save(edge: GraphEdge): Promise<GraphEdge>;
+  saveMany(edges: GraphEdge[]): Promise<GraphEdge[]>;
+  findByEdgeId(edgeId: string): Promise<GraphEdge | null>;
+  findCurrent(options?: GraphEdgeQueryOptions): Promise<GraphEdge[]>;
+  pruneStale(cutoff: Date): Promise<number>;
   deleteByProject(project: string): Promise<void>;
   clearAll(): Promise<void>;
 }

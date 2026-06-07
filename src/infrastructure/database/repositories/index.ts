@@ -60,3 +60,5 @@ export {
 // Persona Repository
 export { SqlitePersonaRepository } from "./persona-repository.js";
 
+// Temporal Graph Repository
+export { SqliteGraphRepository } from "./graph-repository.js";

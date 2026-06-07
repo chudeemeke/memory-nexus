@@ -19,11 +19,13 @@ import {
 import { Fact } from "../../domain/entities/fact.js";
 import { FrictionEntry } from "../../domain/entities/friction-entry.js";
 import { PersonaEntry } from "../../domain/entities/persona-entry.js";
+import { GraphEdge } from "../../domain/entities/graph-edge.js";
 import type {
     IFactRepository,
     IFrictionRepository,
     FrictionStats,
     IPersonaRepository,
+    IGraphRepository,
 } from "../../domain/ports/repositories.js";
 
 // -- Helpers --
@@ -33,6 +35,7 @@ function makeFact(overrides: {
     project: string;
     content: string;
     uuid?: string;
+    metadata?: Record<string, unknown>;
     supersededAt?: Date | null;
     supersededBy?: string | null;
 }): Fact {
@@ -41,6 +44,7 @@ function makeFact(overrides: {
         type: overrides.type,
         project: overrides.project,
         content: overrides.content,
+        metadata: overrides.metadata,
         observedAt: new Date(),
         supersededAt: overrides.supersededAt ?? null,
         supersededBy: overrides.supersededBy ?? null,
@@ -164,7 +168,7 @@ function createBlockingGovernancePolicy(blockedIds: string[]): IContextGovernanc
     const blocked = new Set(blockedIds);
     return {
         async filterAllowed(surface, items, getTargetId) {
-            expect(["fact", "persona"]).toContain(surface);
+            expect(["fact", "persona", "graph"]).toContain(surface);
             return items.filter((item) => !blocked.has(getTargetId(item)));
         },
     };
@@ -207,6 +211,53 @@ function createMockPersonaRepo(entries: PersonaEntry[]): IPersonaRepository {
         async findForContext(project) {
             return entries.filter((entry) => entry.visibility === "global" || entry.project === project);
         },
+        async deleteByProject() {},
+        async clearAll() {},
+    };
+}
+
+function makeGraphEdge(overrides: {
+    edgeId: string;
+    project?: string;
+    visibility?: "project" | "global";
+    source?: string;
+    target?: string;
+    why?: string;
+}): GraphEdge {
+    const visibility = overrides.visibility ?? "project";
+    return GraphEdge.create({
+        edgeId: overrides.edgeId,
+        source: { type: "tool", id: overrides.source ?? "memory", label: overrides.source ?? "memory" },
+        target: { type: "capability", id: overrides.target ?? "authkey", label: overrides.target ?? "authkey" },
+        relationship: "uses",
+        project: overrides.project,
+        visibility,
+        sourceEventIds: [`evt-${overrides.edgeId}`],
+        sourceKinds: ["decision"],
+        confidence: 0.9,
+        validFrom: new Date("2026-05-01T00:00:00.000Z"),
+        why: overrides.why ?? "Derived from graph metadata.",
+        createdAt: new Date("2026-06-07T00:00:00.000Z"),
+        updatedAt: new Date("2026-06-07T00:00:00.000Z"),
+    });
+}
+
+function createMockGraphRepo(entries: GraphEdge[]): IGraphRepository {
+    return {
+        async save(edge) { return edge; },
+        async saveMany(items) { return items; },
+        async findByEdgeId(edgeId) { return entries.find((entry) => entry.edgeId === edgeId) ?? null; },
+        async findCurrent(options = {}) {
+            const asOf = options.asOf ?? new Date("2026-06-07T00:00:00.000Z");
+            const minConfidence = options.minConfidence ?? 0.7;
+            return entries.filter((entry) => {
+                const scopeAllowed = !options.project ||
+                    entry.project === options.project ||
+                    ((options.includeGlobal ?? true) && entry.visibility === "global");
+                return scopeAllowed && entry.isCurrent(asOf, minConfidence);
+            });
+        },
+        async pruneStale() { return 0; },
         async deleteByProject() {},
         async clearAll() {},
     };
@@ -383,6 +434,49 @@ describe("SmartContextService", () => {
             expect(persona?.content).not.toContain("Blocked persona entry.");
         });
 
+        test("injects current governed graph edges with explanations and no unrelated project leakage", async () => {
+            const graphRepo = createMockGraphRepo([
+                makeGraphEdge({
+                    edgeId: "memory-authkey",
+                    project: PROJECT_NAME,
+                    why: "Derived from optional authkey interop decision.",
+                }),
+                makeGraphEdge({
+                    edgeId: "global-capability",
+                    visibility: "global",
+                    why: "Derived from global capability rule.",
+                }),
+                makeGraphEdge({
+                    edgeId: "authkey-private",
+                    project: "authkey",
+                    target: "authkey-private",
+                    why: "Private to authkey.",
+                }),
+                makeGraphEdge({
+                    edgeId: "blocked-graph",
+                    project: PROJECT_NAME,
+                    target: "blocked",
+                }),
+            ]);
+            service = new SmartContextService({
+                projectResolver: mockResolver,
+                factRepo: mockFactRepo,
+                frictionRepo: mockFrictionRepo,
+                graphRepo,
+                governancePolicy: createBlockingGovernancePolicy(["blocked-graph"]),
+            });
+
+            const result = await service.getContext({ projectFilter: "test-project" });
+
+            const graph = result!.sections.find((section) => section.key === "semantic_graph");
+            expect(graph?.title).toBe("Temporal Semantic Graph");
+            expect(graph?.content).toContain("memory --uses--> authkey");
+            expect(graph?.content).toContain("why: Derived from optional authkey interop decision.");
+            expect(graph?.content).toContain("global-capability");
+            expect(graph?.content).not.toContain("authkey-private");
+            expect(graph?.content).not.toContain("blocked");
+        });
+
         test("section 2: Recent Learnings from facts table (priority 2)", async () => {
             const learningFact = makeFact({
                 type: "learning",
@@ -454,6 +548,7 @@ describe("SmartContextService", () => {
                 type: "preference",
                 project: "other-project",
                 content: "Always use Bun as runtime package manager",
+                metadata: { visibility: "global" },
             });
 
             mockFactRepo = createMockFactRepo([globalPreference]);
@@ -483,6 +578,7 @@ describe("SmartContextService", () => {
                 type: "decision",
                 project: "other-project",
                 content: "Use Vitest instead of Jest for all units",
+                metadata: { visibility: "global" },
             });
 
             mockFactRepo = createMockFactRepo([globalDecision]);
@@ -507,6 +603,7 @@ describe("SmartContextService", () => {
                 type: "learning",
                 project: "other-project",
                 content: "Chrononode parser handles duration inputs like '7d'",
+                metadata: { visibility: "global" },
             });
 
             mockFactRepo = createMockFactRepo([globalLearning]);
@@ -524,6 +621,37 @@ describe("SmartContextService", () => {
             expect(xpLearnings).toBeDefined();
             expect(xpLearnings!.priority).toBe(7);
             expect(xpLearnings!.content).toContain("Chrononode parser");
+        });
+
+        test("cross-project sections exclude project-private facts from unrelated projects", async () => {
+            const privateOtherProject = makeFact({
+                type: "decision",
+                project: "authkey",
+                content: "authkey private implementation note",
+                metadata: { visibility: "project" },
+            });
+            const globalOtherProject = makeFact({
+                type: "decision",
+                project: "authkey",
+                content: "authkey global integration rule",
+                metadata: { visibility: "global" },
+            });
+
+            mockFactRepo = createMockFactRepo([privateOtherProject, globalOtherProject]);
+            service = new SmartContextService({
+                projectResolver: mockResolver,
+                factRepo: mockFactRepo,
+                frictionRepo: mockFrictionRepo,
+            });
+
+            const result = await service.getContext({
+                projectFilter: "test-project",
+                crossProject: true,
+            });
+
+            const crossProjectDecisions = result!.sections.find((s) => s.key === "cross_project_decisions");
+            expect(crossProjectDecisions?.content).toContain("authkey global integration rule");
+            expect(crossProjectDecisions?.content).not.toContain("authkey private implementation note");
         });
 
         test("section 8: Open Friction entries (priority 8)", async () => {

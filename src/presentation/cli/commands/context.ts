@@ -34,6 +34,9 @@ import {
   SqlitePersonaRepository,
 } from "../../../infrastructure/database/repositories/persona-repository.js";
 import {
+  SqliteGraphRepository,
+} from "../../../infrastructure/database/repositories/graph-repository.js";
+import {
   initializeDatabase,
   closeDatabase,
   getDefaultDbPath,
@@ -224,6 +227,7 @@ async function executeSmartContext(
   const factRepo = new SqliteFactRepository(db);
   const frictionRepo = new SqliteFrictionRepository(db);
   const personaRepo = new SqlitePersonaRepository(db);
+  const graphRepo = new SqliteGraphRepository(db);
   const governanceRepo = new SqliteMemoryGovernanceRepository(db);
   const governancePolicy = new MemoryGovernanceService({ repository: governanceRepo });
 
@@ -237,6 +241,7 @@ async function executeSmartContext(
     factRepo,
     frictionRepo,
     personaRepo,
+    graphRepo,
     governancePolicy,
     getSessionSummary: async (filter, days) => {
       const ctx = await legacy.getProjectContext(filter, { days });

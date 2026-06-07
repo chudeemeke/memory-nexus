@@ -70,6 +70,12 @@ future contracts as shipped behavior. See `docs/evals/v5-evaluation-harness.md`.
 Phase 39 implementation note: `repeated_correction_to_persona` is now behavior-backed through
 `PersonaProfileService`; remaining contract fixtures still block `eval:v5:market`.
 
+Phase 40 implementation note: `graph_stale_edge` is now behavior-backed through
+`TemporalGraphService` plus `SqliteGraphRepository`; `superseded_provider_fact` is behavior-backed
+through persisted `SqliteFactRepository` facts; `project_scope_leakage` is behavior-backed through
+`SmartContextService` and now proves unrelated project-private facts are excluded from cross-project
+context unless explicitly global.
+
 ## Relationship to Tests
 
 - Unit tests validate value objects and pure policy logic.
