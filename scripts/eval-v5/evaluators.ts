@@ -6,9 +6,11 @@ import { SqliteMemoryGovernanceRepository } from "../../src/infrastructure/datab
 import { PersonaProfileService } from "../../src/application/services/persona-profile-service.js";
 import { TemporalGraphService } from "../../src/application/services/temporal-graph-service.js";
 import { SmartContextService } from "../../src/application/services/smart-context-service.js";
+import { MemoryRankingService, type MemoryRankCandidate } from "../../src/application/services/memory-ranking-service.js";
 import { PatternRedactor } from "../../src/infrastructure/security/pattern-redactor.js";
 import { Fact, type FactType } from "../../src/domain/entities/fact.js";
 import { FrictionEntry } from "../../src/domain/entities/friction-entry.js";
+import { MemoryUtilityMetric } from "../../src/domain/entities/memory-utility-metric.js";
 import type { MemoryEventEnvelope } from "../../src/domain/entities/memory-event.js";
 import type { MemoryGovernanceEntry, MemoryGovernanceSurface } from "../../src/domain/entities/memory-governance.js";
 import type { PersonaEntry } from "../../src/domain/entities/persona-entry.js";
@@ -411,18 +413,44 @@ async function evaluateGraphBehavior(fixture: V5EvalFixture): Promise<V5EvalResu
 }
 
 async function evaluateRanking(fixture: V5EvalFixture): Promise<V5EvalResult> {
-  const candidates = recordArray(fixture.input.candidates, "candidates");
-  const ranked = candidates
-    .filter((candidate) => candidate.superseded !== true)
-    .map((candidate) => ({
-      id: stringValue(candidate.id, "candidate.id"),
-      score:
-        numberValue(candidate.importance, "candidate.importance") +
-        numberValue(candidate.utility, "candidate.utility") +
-        (candidate.evergreen === true ? 0.5 : 0) -
-        numberValue(candidate.recencyNoisePenalty, "candidate.recencyNoisePenalty"),
-    }))
-    .sort((a, b) => b.score - a.score);
+  const asOf = new Date(optionalString(fixture.input.asOf) ?? "2026-06-07T00:00:00.000Z");
+  const service = new MemoryRankingService({ now: () => asOf });
+  const candidates = recordArray(fixture.input.candidates, "candidates").map((candidate): MemoryRankCandidate => {
+    const id = stringValue(candidate.id, "candidate.id");
+    const observedAt = optionalString(candidate.observedAt);
+    const importance = numberValue(candidate.importance, "candidate.importance");
+    const utility = numberValue(candidate.utility, "candidate.utility");
+    const accessCount = optionalNumberValue(candidate.accessCount, "candidate.accessCount") ?? 0;
+    return {
+      id,
+      kind: "fact",
+      memoryType: optionalString(candidate.type) ?? "preference",
+      content: optionalString(candidate.content) ?? id,
+      observedAt: observedAt ? new Date(observedAt) : asOf,
+      supersededAt: candidate.superseded === true ? asOf : null,
+      confidence: optionalNumberValue(candidate.confidence, "candidate.confidence") ?? 0.8,
+      importance,
+      utility,
+      evergreen: candidate.evergreen === true,
+      pinned: candidate.pinned === true,
+      recencyNoisePenalty: numberValue(candidate.recencyNoisePenalty, "candidate.recencyNoisePenalty"),
+      governanceStatus: optionalString(candidate.governanceStatus) as MemoryRankCandidate["governanceStatus"],
+      metric: MemoryUtilityMetric.create({
+        surface: "fact",
+        targetId: id,
+        accessCount,
+        lastAccessedAt: null,
+        lastRankedAt: asOf,
+        importanceScore: importance,
+        utilityScore: utility,
+        evergreen: candidate.evergreen === true,
+        pinned: candidate.pinned === true,
+        createdAt: asOf,
+        updatedAt: asOf,
+      }),
+    };
+  });
+  const ranked = service.rank(candidates);
 
   const expectedTopId = stringValue(fixture.expected.topId, "topId");
   const checks = [
@@ -435,6 +463,8 @@ async function evaluateRanking(fixture: V5EvalFixture): Promise<V5EvalResult> {
   return finalize(fixture, checks, {
     ranked_ids: ranked.map((candidate) => candidate.id),
     top_score: ranked[0]?.score ?? null,
+    top_why_included: ranked[0]?.whyIncluded ?? null,
+    behavior_backed: fixture.mode === "behavior",
   });
 }
 
@@ -568,6 +598,13 @@ function numberValue(value: unknown, name: string): number {
     throw new Error(`${name} must be a finite number`);
   }
   return value;
+}
+
+function optionalNumberValue(value: unknown, name: string): number | undefined {
+  if (value === undefined || value === null) {
+    return undefined;
+  }
+  return numberValue(value, name);
 }
 
 function optionalRecord(value: unknown): Record<string, unknown> | undefined {

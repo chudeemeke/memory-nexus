@@ -62,3 +62,6 @@ export { SqlitePersonaRepository } from "./persona-repository.js";
 
 // Temporal Graph Repository
 export { SqliteGraphRepository } from "./graph-repository.js";
+
+// Memory Utility Repository
+export { SqliteMemoryUtilityRepository } from "./memory-utility-repository.js";

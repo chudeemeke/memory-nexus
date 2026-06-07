@@ -3,7 +3,7 @@
   "id": "ranking_evergreen_preference",
   "title": "Evergreen durable preference outranks noisy recent context",
   "dimension": "ranking",
-  "mode": "contract",
+  "mode": "behavior",
   "ownerPhase": "41",
   "tags": ["ranking", "utility", "evergreen"],
   "sanitized": {
@@ -12,27 +12,40 @@
     "notes": ["Synthetic ranking candidates only."]
   },
   "input": {
+    "asOf": "2026-06-07T00:00:00.000Z",
     "candidates": [
       {
         "id": "durable-path-symlink-rule",
+        "type": "preference",
+        "content": "Always use symlinked project paths.",
+        "observedAt": "2026-01-01T00:00:00.000Z",
         "importance": 0.8,
         "utility": 0.72,
+        "accessCount": 6,
         "recencyNoisePenalty": 0.0,
         "evergreen": true,
         "superseded": false
       },
       {
         "id": "recent-terminal-tab-label",
+        "type": "observation",
+        "content": "Terminal tab label was npm whoami.",
+        "observedAt": "2026-06-06T00:00:00.000Z",
         "importance": 0.15,
         "utility": 0.1,
+        "accessCount": 0,
         "recencyNoisePenalty": 0.25,
         "evergreen": false,
         "superseded": false
       },
       {
         "id": "superseded-provider-switch",
+        "type": "decision",
+        "content": "Use a superseded provider switch.",
+        "observedAt": "2026-05-01T00:00:00.000Z",
         "importance": 0.9,
         "utility": 0.7,
+        "accessCount": 3,
         "recencyNoisePenalty": 0.0,
         "evergreen": false,
         "superseded": true

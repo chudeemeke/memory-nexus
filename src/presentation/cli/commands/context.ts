@@ -37,6 +37,9 @@ import {
   SqliteGraphRepository,
 } from "../../../infrastructure/database/repositories/graph-repository.js";
 import {
+  SqliteMemoryUtilityRepository,
+} from "../../../infrastructure/database/repositories/memory-utility-repository.js";
+import {
   initializeDatabase,
   closeDatabase,
   getDefaultDbPath,
@@ -47,6 +50,9 @@ import {
 import {
   MemoryGovernanceService,
 } from "../../../application/services/memory-governance-service.js";
+import {
+  MemoryRankingService,
+} from "../../../application/services/memory-ranking-service.js";
 import {
   createContextFormatter,
   type ContextOutputMode,
@@ -228,8 +234,10 @@ async function executeSmartContext(
   const frictionRepo = new SqliteFrictionRepository(db);
   const personaRepo = new SqlitePersonaRepository(db);
   const graphRepo = new SqliteGraphRepository(db);
+  const utilityRepo = new SqliteMemoryUtilityRepository(db);
   const governanceRepo = new SqliteMemoryGovernanceRepository(db);
   const governancePolicy = new MemoryGovernanceService({ repository: governanceRepo });
+  const rankingService = new MemoryRankingService();
 
   // We need a captured legacy context if --json is set so we can build
   // the envelope's data field (toContextDto). The smart-context summary
@@ -243,6 +251,8 @@ async function executeSmartContext(
     personaRepo,
     graphRepo,
     governancePolicy,
+    rankingService,
+    utilityRepo,
     getSessionSummary: async (filter, days) => {
       const ctx = await legacy.getProjectContext(filter, { days });
       if (!ctx) return null;

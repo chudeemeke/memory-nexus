@@ -78,3 +78,12 @@ export {
   type GraphNodeRef,
   type GraphNodeType,
 } from "./graph-edge.js";
+export {
+  MemoryUtilityMetric,
+  MEMORY_UTILITY_CONTROLS,
+  MEMORY_UTILITY_SURFACES,
+  type MemoryUtilityControl,
+  type MemoryUtilityMetricJson,
+  type MemoryUtilityMetricParams,
+  type MemoryUtilitySurface,
+} from "./memory-utility-metric.js";

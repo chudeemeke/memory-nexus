@@ -14,15 +14,15 @@ Cross-project context persistence for Claude Code sessions. Extracts JSONL sessi
 
 ## Current State
 
-Shipped v3.0. v4.0 Intelligence Layer has completed the pre-publish foundation hardening phases 36.8 and 36.9. Phase 37 publish execution is now next and remains responsible for packaging, install, prerelease, and GA release verification.
+v4.0 is shipped and published as `@chude/memory@4.0.0`. v5.0 Market-Leader Memory Platform execution is active; Phase 41 importance, utility, and recall ranking is complete and verified, and Phase 42 Dreaming Consolidation is next.
 
 **Tech stack:** Bun, TypeScript 5.5+, bun:sqlite with FTS5 + sqlite-vec, Commander.js v14, cli-progress, chrono-node, @huggingface/transformers v3
 
 **Architecture:** Hexagonal (Domain-Application-Infrastructure-Presentation) with strict layer separation. Domain layer has zero external dependencies. 99%+ domain coverage.
 
-**Commands:** sync, search, list, stats, context, related, show, browse, install, uninstall, status, doctor, purge, export, import, completion
+**Commands:** sync, search, list, stats, context, related, show, browse, install, uninstall, status, doctor, purge, export, import, completion, facts, extract, remote, governance, profile, friction
 
-**Test suite:** 4,050 tests currently pass under the Istanbul-backed `bun run test:coverage` harness. The release gate measures all four metrics independently and passes at statements 97.18%, branches 95.00%, functions 96.09%, and lines 97.32%.
+**Test suite:** Current Phase 41 gate passes `bun run quality` with 4,316 tests passing and zero failures. The Istanbul-backed coverage gate measures all four metrics independently and passes at statements 97.29%, branches 95.11%, functions 96.47%, and lines 97.40%.
 
 ## Problem Statement
 

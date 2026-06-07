@@ -62,44 +62,7 @@ export async function runAmbientContextGeneration(
       const { join } = await import("node:path");
       autoMemoryDir = join(homedir(), ".claude", "projects", encoded, "memory");
 
-      const { SqliteProjectResolver } = await import(
-        "../../../../infrastructure/database/services/context-service.js"
-      );
-      const { SqliteFactRepository } = await import(
-        "../../../../infrastructure/database/repositories/fact-repository.js"
-      );
-      const { SqliteFrictionRepository } = await import(
-        "../../../../infrastructure/database/repositories/friction-repository.js"
-      );
-      const { AutoMemoryWriter } = await import(
-        "../../../../infrastructure/hooks/auto-memory-writer.js"
-      );
-      const { SmartContextService } = await import(
-        "../../../../application/services/smart-context-service.js"
-      );
-      const { AmbientContextService } = await import(
-        "../../../../application/services/ambient-context-service.js"
-      );
-      const { createContextFormatter } = await import(
-        "../../formatters/context-formatter.js"
-      );
-
-      const projectResolver = new SqliteProjectResolver(db);
-      const factRepo = new SqliteFactRepository(db);
-      const frictionRepo = new SqliteFrictionRepository(db);
-      const formatter = createContextFormatter("ai", false);
-
-      const smartContext = new SmartContextService({
-        projectResolver,
-        factRepo,
-        frictionRepo,
-      });
-
-      ambientService = new AmbientContextService(
-        smartContext,
-        new AutoMemoryWriter(),
-        formatter as { formatSmartContext(result: any): string },
-      );
+      ambientService = await createDefaultAmbientService(db);
     }
 
     const result = await ambientService.generateAmbientContext({
@@ -121,4 +84,67 @@ export async function runAmbientContextGeneration(
       );
     }
   }
+}
+
+export async function createDefaultAmbientService(
+  db: ReturnType<typeof initializeDatabase>["db"],
+): Promise<{ generateAmbientContext: (opts: any) => Promise<{ success: boolean; contextTokens?: number; reason?: string }> }> {
+  const { SqliteProjectResolver } = await import(
+    "../../../../infrastructure/database/services/context-service.js"
+  );
+  const { SqliteFactRepository } = await import(
+    "../../../../infrastructure/database/repositories/fact-repository.js"
+  );
+  const { SqliteFrictionRepository } = await import(
+    "../../../../infrastructure/database/repositories/friction-repository.js"
+  );
+  const { SqlitePersonaRepository } = await import(
+    "../../../../infrastructure/database/repositories/persona-repository.js"
+  );
+  const { SqliteGraphRepository } = await import(
+    "../../../../infrastructure/database/repositories/graph-repository.js"
+  );
+  const { SqliteMemoryGovernanceRepository } = await import(
+    "../../../../infrastructure/database/repositories/memory-governance-repository.js"
+  );
+  const { SqliteMemoryUtilityRepository } = await import(
+    "../../../../infrastructure/database/repositories/memory-utility-repository.js"
+  );
+  const { AutoMemoryWriter } = await import(
+    "../../../../infrastructure/hooks/auto-memory-writer.js"
+  );
+  const { SmartContextService } = await import(
+    "../../../../application/services/smart-context-service.js"
+  );
+  const { MemoryGovernanceService } = await import(
+    "../../../../application/services/memory-governance-service.js"
+  );
+  const { MemoryRankingService } = await import(
+    "../../../../application/services/memory-ranking-service.js"
+  );
+  const { AmbientContextService } = await import(
+    "../../../../application/services/ambient-context-service.js"
+  );
+  const { createContextFormatter } = await import(
+    "../../formatters/context-formatter.js"
+  );
+
+  const governanceRepo = new SqliteMemoryGovernanceRepository(db);
+  const smartContext = new SmartContextService({
+    projectResolver: new SqliteProjectResolver(db),
+    factRepo: new SqliteFactRepository(db),
+    frictionRepo: new SqliteFrictionRepository(db),
+    personaRepo: new SqlitePersonaRepository(db),
+    graphRepo: new SqliteGraphRepository(db),
+    governancePolicy: new MemoryGovernanceService({ repository: governanceRepo }),
+    rankingService: new MemoryRankingService(),
+    utilityRepo: new SqliteMemoryUtilityRepository(db),
+  });
+  const formatter = createContextFormatter("ai", false);
+
+  return new AmbientContextService(
+    smartContext,
+    new AutoMemoryWriter(),
+    formatter as { formatSmartContext(result: any): string },
+  );
 }

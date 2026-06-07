@@ -27,6 +27,7 @@ import type { ProjectPath } from "../value-objects/project-path.js";
 import type { Fact } from "../entities/fact.js";
 import type { PersonaEntry, PersonaEntryKind } from "../entities/persona-entry.js";
 import type { GraphEdge } from "../entities/graph-edge.js";
+import type { MemoryUtilityMetric, MemoryUtilitySurface } from "../entities/memory-utility-metric.js";
 import type {
   MemoryGovernanceEntry,
   MemoryGovernanceStatus,
@@ -637,6 +638,22 @@ export interface IGraphRepository {
   findByEdgeId(edgeId: string): Promise<GraphEdge | null>;
   findCurrent(options?: GraphEdgeQueryOptions): Promise<GraphEdge[]>;
   pruneStale(cutoff: Date): Promise<number>;
+  deleteByProject(project: string): Promise<void>;
+  clearAll(): Promise<void>;
+}
+
+/**
+ * Repository for utility/ranking metrics across governed memory surfaces.
+ *
+ * Metrics are keyed by surface + target id so ranking can work for existing
+ * facts/persona/graph entries and future dream/link projections without adding
+ * per-surface coupling to context assembly.
+ */
+export interface IMemoryUtilityRepository {
+  save(metric: MemoryUtilityMetric): Promise<MemoryUtilityMetric>;
+  findByTarget(surface: MemoryUtilitySurface, targetId: string): Promise<MemoryUtilityMetric | null>;
+  findByTargetIds(surface: MemoryUtilitySurface, targetIds: string[]): Promise<MemoryUtilityMetric[]>;
+  recordAccess(surface: MemoryUtilitySurface, targetId: string, accessedAt: Date): Promise<MemoryUtilityMetric>;
   deleteByProject(project: string): Promise<void>;
   clearAll(): Promise<void>;
 }

@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v5.0
 milestone_name: Market-Leader Memory Platform
 status: in_progress
-last_updated: "2026-06-07T04:10:00.000+01:00"
+last_updated: "2026-06-07T06:20:00.000+01:00"
 progress:
   total_phases: 16
-  completed_phases: 11
-  total_plans: 11
-  completed_plans: 11
+  completed_phases: 12
+  total_plans: 12
+  completed_plans: 12
 ---
 
 > **FOUNDATION HARDENING VERIFIED 2026-05-28** - Phase 36.8 is implemented. Typecheck, build, full tests, test-isolation, dependency audit, and gitleaks pass. Provider support now routes through an internal provider registry instead of presentation/health/factory switch drift. Phase 36.9 replaced the missing-metric Bun LCOV gate with an Istanbul-backed Bun coverage harness.
@@ -29,6 +29,7 @@ progress:
 > **V5 PHASE 38.7 COMPLETE 2026-06-07** - The v5 evaluation harness is implemented. `bun run eval:v5` loads sanitized fixtures from `docs/evals/fixtures/v5`, emits a schema-versioned JSON report, covers privacy, leakage, supersedence, sync recovery, friction filters, persona, graph, ranking, and dreaming, and is now part of `bun run quality`. Initial behavior-backed fixtures exercised `PatternRedactor` and `SqliteFrictionRepository`; Phase 39 later promoted the persona fixture to behavior-backed coverage. Remaining later-phase graph/ranking/dreaming and adjacent contract fixtures still block `eval:v5:market`, so Phase 43 cannot confuse planned behavior with shipped behavior. Verification passed: focused eval tests, `bun run eval:v5`, `bun run typecheck`, and full `bun run quality` (4,254 pass, 0 fail).
 > **V5 PHASE 39 COMPLETE 2026-06-07** - Persona and procedural memory is implemented as a governed derived surface. `PersonaEntry`, `IPersonaRepository`, `persona_entries`, `PersonaProfileService`, fact-event persona projection, `memory profile show/export/rebuild`, completion/help updates, and `memory context` persona injection are live. Persona entries include source ids/kinds, confidence, scope, review metadata, why text, and user controls; governance suppression is enforced before context/profile output. The `repeated_correction_to_persona` eval fixture is now behavior-backed through the real service. Verification passed: focused Phase 39 tests, `bun run typecheck`, `bun run eval:v5` (9/9; 3 behavior, 6 contract), full `bun run quality` (4,281 pass, 0 fail), coverage statements 97.2%, branches 95.19%, functions 96.19%, lines 97.31%, `gitleaks detect --no-banner --redact --source .`, and `git diff --check`.
 > **V5 PHASE 40 COMPLETE 2026-06-07** - Temporal semantic graph projection is implemented as a governed local-first surface. `GraphEdge`, graph node taxonomy, `IGraphRepository`, `graph_edges`, `SqliteGraphRepository`, `TemporalGraphService`, event-log graph projection, graph governance registration, and graph-enriched context output are live. Current-edge queries enforce temporal validity, confidence, scope, node/relationship filters, and stale-edge pruning. Cross-project context now excludes unrelated project-private facts unless explicitly global. The graph, supersedence, and cross-project leakage eval fixtures are behavior-backed. Verification passed: focused Phase 40 tests, `bun run typecheck`, `bun run eval:v5` (9/9; 6 behavior, 3 contract), full `bun run quality` (4,300 pass, 0 fail), coverage statements 97.28%, branches 95.17%, functions 96.36%, lines 97.38%, `gitleaks detect --no-banner --redact --source .`, and `git diff --check`.
+> **V5 PHASE 41 COMPLETE 2026-06-07** - Importance, utility, and recall ranking is implemented as a governed local-first application surface. `MemoryUtilityMetric`, `IMemoryUtilityRepository`, `memory_utility_metrics`, `SqliteMemoryUtilityRepository`, and `MemoryRankingService` are live. Ranking applies per-kind/type half-life policies, evergreen/pinned exemptions, access utility, supersedence/governance/temporal exclusion, and deterministic why-ranked explanations. `SmartContextService`, `memory context`, and ambient context rank allowed facts/persona/graph entries after governance filtering. The ranking eval fixture is behavior-backed; `bun run eval:v5` passes 9/9 with 7 behavior fixtures and 2 contract fixtures. Verification passed: full `bun run quality` (4,316 pass, 0 fail), coverage statements 97.29%, branches 95.11%, functions 96.47%, lines 97.40%, `gitleaks detect --no-banner --redact --source .`, and `git diff --check`. `eval:v5:market` still intentionally fails until Phase 42 and Phase 43 retire or justify the remaining contract fixtures.
 > **INBOX RECONCILED 2026-05-28** - Stale bug reports for the Windows full-suite crash, orphaned friction test, and programmatic API real-DB pollution were validated against the current code and archived. The durable-friction-list filing was accepted into ROADMAP as post-v4 capacity, archived as planned, and counter-notified to conversations. No active memory-nexus inbox items remain.
 > **REMOTE CONSUMER NOTES REVIEWED 2026-05-30** - The two remotely consumer-impact inbox notes were reviewed against current memory-nexus docs/scripts. No current raw SSH/rsync operating instructions or hard-coded remotely tunnel-state assumptions were found, so both notes were archived with disposition text. Future Phase 38 cross-machine work must still use current `remotely` conventions where applicable.
 > **FIRST-PARTY INFRASTRUCTURE BROADCAST 2026-05-28** - User clarified that `memory` is a first-class first-party tool used by most/all projects. Canonical tool/package naming is `memory` / `@chude/memory`; the repository remains `memory-nexus`, and `nexus` is a legacy alias. Updated Codex/Claude rules and document-for-clear skills, added a Codex memory note, and filed notification inbox items to opted-in projects so consumers know about provider-secret, redaction/export, registry, and authkey-optional contract changes.
@@ -40,18 +41,18 @@ See: .planning/PROJECT.md (updated 2026-02-18)
 
 **Core Value:** Knowledge gained in one Claude Code project becomes accessible from any other project. No more context silos.
 
-**Current Focus:** v5.0 market-leader execution is active. Phase 40 is complete; next is Phase 41 Importance, Utility, and Recall Ranking. Relevant docs: `docs/prd/2026-06-05-v5-market-leader-memory-platform.md`, `docs/security/2026-06-05-v5-threat-model.md`, `docs/evals/2026-06-05-v5-evaluation-baseline.md`, `docs/evals/v5-evaluation-harness.md`, `docs/reviews/2026-06-05-v5-plan-review-request.md`, `docs/plans/2026-06-04-v5-market-leader-gsd-plan.md`, `docs/reference/friction-query-contract.md`, `docs/operations/remote-sync-runbook.md`, `.planning/phases/38.2.5-consent-provenance-governance/README.md`, `.planning/phases/38.3-remote-sync-service-git-transport/README.md`, `.planning/phases/38.4-remote-cli-operations-backup-recovery/README.md`, `.planning/phases/38.5-secure-capability-interop/README.md`, `.planning/phases/38.6-durable-friction-query-contract/README.md`, `.planning/phases/38.7-evaluation-harness-regression-fixtures/README.md`, `.planning/phases/39-persona-procedural-memory/README.md`, `.planning/phases/40-temporal-semantic-graph/README.md`, and `.planning/ROADMAP.md`.
+**Current Focus:** v5.0 market-leader execution is active. Phase 41 is complete and ready to commit; next is Phase 42 Dreaming Consolidation. Relevant docs: `docs/prd/2026-06-05-v5-market-leader-memory-platform.md`, `docs/security/2026-06-05-v5-threat-model.md`, `docs/evals/2026-06-05-v5-evaluation-baseline.md`, `docs/evals/v5-evaluation-harness.md`, `docs/reviews/2026-06-05-v5-plan-review-request.md`, `docs/plans/2026-06-04-v5-market-leader-gsd-plan.md`, `docs/reference/friction-query-contract.md`, `docs/operations/remote-sync-runbook.md`, `.planning/phases/38.2.5-consent-provenance-governance/README.md`, `.planning/phases/38.3-remote-sync-service-git-transport/README.md`, `.planning/phases/38.4-remote-cli-operations-backup-recovery/README.md`, `.planning/phases/38.5-secure-capability-interop/README.md`, `.planning/phases/38.6-durable-friction-query-contract/README.md`, `.planning/phases/38.7-evaluation-harness-regression-fixtures/README.md`, `.planning/phases/39-persona-procedural-memory/README.md`, `.planning/phases/40-temporal-semantic-graph/README.md`, `.planning/phases/41-importance-utility-recall-ranking/README.md`, and `.planning/ROADMAP.md`.
 
 **Tech Stack:** Bun, TypeScript 5.5+, bun:sqlite with FTS5 + sqlite-vec, Commander.js v14, @huggingface/transformers v3, cli-progress, chrono-node, Chart.js (HTML dashboard)
 
 ## Current Position
 
-Phase: v5.0 ACTIVE - PHASE 41 NEXT
+Phase: v5.0 ACTIVE - PHASE 42 NEXT
 **Milestone:** v5.0 Market-Leader Memory Platform
-**Status:** Phase 40 is complete. Phase 41 must add utility-aware ranking, half-life policies, access metrics, and explainable inclusion without bypassing graph/persona/fact governance.
+**Status:** Phase 41 has passed final quality/security/whitespace gates and is ready to commit. Phase 42 must add audited dreaming consolidation without hidden mutation or unreviewed data loss.
 
 ```
-v5.0 Progress: [###########-----] 11/16 phases complete
+v5.0 Progress: [############----] 12/16 phases complete
   Phase 38.0: v5 Threat Model, PRD, Eval Baseline [done]
   Phase 38.1: Canonical Event Kernel and Projection Replay [done]
   Phase 38.2: Redaction, Privacy Governance, Audit Commands [done]
@@ -63,7 +64,8 @@ v5.0 Progress: [###########-----] 11/16 phases complete
   Phase 38.7: Evaluation Harness and Regression Fixtures [done]
   Phase 39: Persona and Procedural Memory [done]
   Phase 40: Temporal Semantic Graph [done]
-  Phase 41: Importance, Utility, Recall Ranking [planned]
+  Phase 41: Importance, Utility, Recall Ranking [done]
+  Phase 42: Dreaming Consolidation [next]
   Phase 42: Dreaming Consolidation [planned]
   Phase 42.5: Feature Completeness and UX Polish [planned]
   Phase 43: Market-Leader and Sales-Readiness Gate [planned]
@@ -197,13 +199,14 @@ v4.0 Progress: [############################] 14/14 phases complete
 - Completed Phase 38.7 with the v5 eval harness, sanitized fixtures, schema-versioned reports, `eval:v5` quality-gate integration, and the stricter `eval:v5:market` gate.
 - Completed Phase 39 with governed persona/procedural memory: `PersonaEntry`, `persona_entries`, repository port/adapter, profile compilation service, persona governance registration, fact-event projection, `memory profile show/export/rebuild`, completion/help updates, and context injection with why-included metadata.
 - Completed Phase 40 with governed temporal semantic graph memory: `GraphEdge`, graph node taxonomy, repository port/adapter, `graph_edges`, temporal graph service, event-log projection, context enrichment, stale-edge pruning, and stricter cross-project fact visibility.
-- Promoted `repeated_correction_to_persona`, `graph_stale_edge`, `superseded_provider_fact`, and `project_scope_leakage` from contract-only to behavior-backed by invoking real services/repositories in the v5 eval harness.
-- `eval:v5` currently passes 9/9 fixtures with 6 behavior-backed fixtures and 3 contract fixtures. `eval:v5:market` intentionally fails until Phase 41-42 and the final readiness pass replace or disposition the remaining ranking/dreaming/remote-recovery contract fixtures with behavior-backed checks.
+- Promoted `repeated_correction_to_persona`, `graph_stale_edge`, `superseded_provider_fact`, `project_scope_leakage`, and `ranking_evergreen_preference` from contract-only to behavior-backed by invoking real services/repositories in the v5 eval harness.
+- `eval:v5` currently passes 9/9 fixtures with 7 behavior-backed fixtures and 2 contract fixtures. `eval:v5:market` intentionally fails until Phase 42 and the final readiness pass replace or disposition the remaining dreaming/remote-recovery contract fixtures with behavior-backed checks or final evidence.
 - Verified Phase 39 with focused Phase 39 tests, `bun run typecheck`, `bun run eval:v5`, full `bun run quality` (4,281 pass, 0 fail), coverage statements 97.2%, branches 95.19%, functions 96.19%, lines 97.31%, `gitleaks detect --no-banner --redact --source .`, and `git diff --check`.
 - Verified Phase 40 final gates: focused graph/context/event/eval tests, `bun run typecheck`, `bun run eval:v5` (9/9; 6 behavior, 3 contract), full `bun run quality` (4,300 pass, 0 fail), coverage statements 97.28%, branches 95.17%, functions 96.36%, lines 97.38%, `gitleaks detect --no-banner --redact --source .`, and `git diff --check`.
+- Verified Phase 41 final gates: focused ranking/utility/context/eval tests, `bun run typecheck`, `bun run eval:v5` (9/9; 7 behavior, 2 contract), full `bun run quality` (4,316 pass, 0 fail), coverage statements 97.29%, branches 95.11%, functions 96.47%, lines 97.40%, `gitleaks detect --no-banner --redact --source .`, and `git diff --check`.
 
 **Next step:**
-- Execute Phase 41 Importance, Utility, and Recall Ranking with TDD. Ranking must respect fact/persona/graph governance, supersedence, temporal validity, and explainable why-included metadata.
+- Commit Phase 41, then execute Phase 42 Dreaming Consolidation with TDD. Dreaming must remain explicit, audited, redacted, rollback-capable, review-gated, and integrated with governance/ranking instead of hidden mutation.
 
 ### Current Resume Point - 2026-05-30
 
@@ -249,4 +252,4 @@ v4.0 Progress: [############################] 14/14 phases complete
 
 ---
 
-*Last updated: 2026-06-07 (v5.0 active; Phase 40 complete; Phase 41 next)*
+*Last updated: 2026-06-07 (v5.0 active; Phase 41 verified; Phase 42 next)*

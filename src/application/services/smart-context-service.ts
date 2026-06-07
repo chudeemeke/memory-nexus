@@ -18,13 +18,26 @@
  * Zero imports from infrastructure layer.
  */
 
-import type { IFactRepository, IFrictionRepository, IPersonaRepository, IGraphRepository } from "../../domain/ports/repositories.js";
+import type {
+    IFactRepository,
+    IFrictionRepository,
+    IPersonaRepository,
+    IGraphRepository,
+    IMemoryUtilityRepository,
+} from "../../domain/ports/repositories.js";
 import type { Fact } from "../../domain/entities/fact.js";
 import type { FrictionEntry } from "../../domain/entities/friction-entry.js";
 import type { PersonaEntry } from "../../domain/entities/persona-entry.js";
 import type { GraphEdge } from "../../domain/entities/graph-edge.js";
 import type { MemoryGovernanceSurface } from "../../domain/entities/memory-governance.js";
 import { allocateBudget, type BudgetSection } from "./budget-allocator.js";
+import {
+    candidateFromFact,
+    candidateFromGraphEdge,
+    candidateFromPersonaEntry,
+    type MemoryRankingService,
+    type RankedMemory,
+} from "./memory-ranking-service.js";
 
 /**
  * Options for smart context retrieval.
@@ -112,6 +125,8 @@ export interface SmartContextDeps {
     personaRepo?: IPersonaRepository | undefined;
     graphRepo?: IGraphRepository | undefined;
     governancePolicy?: IContextGovernancePolicy | undefined;
+    rankingService?: MemoryRankingService | undefined;
+    utilityRepo?: IMemoryUtilityRepository | undefined;
     /** Optional legacy session summary provider */
     getSessionSummary?: (projectFilter: string, days?: number) => Promise<string | null>;
     now?: () => Date;
@@ -139,20 +154,32 @@ function formatFrictionLine(entry: FrictionEntry): string {
     return `#${entry.id} (${entry.severity}/${entry.category}): ${entry.description}`;
 }
 
-function formatPersonaLine(entry: PersonaEntry): string {
+function formatFactLine(fact: Fact, rank?: RankedMemory | undefined): string {
+    return `- ${fact.content}${formatRankingSuffix(rank)}`;
+}
+
+function formatPersonaLine(entry: PersonaEntry, rank?: RankedMemory | undefined): string {
     const scope = entry.visibility === "global" ? "global" : entry.project ?? entry.visibility;
     return [
         `- ${entry.content}`,
-        `(confidence: ${entry.confidence.toFixed(2)}; scope: ${scope}; why: ${entry.why}; review: ${entry.reviewStatus} after ${entry.reviewAfter.toISOString()})`,
+        `(confidence: ${entry.confidence.toFixed(2)}; scope: ${scope}; why: ${entry.why}; review: ${entry.reviewStatus} after ${entry.reviewAfter.toISOString()}${formatRankingInsideSuffix(rank)})`,
     ].join(" ");
 }
 
-function formatGraphLine(entry: GraphEdge): string {
+function formatGraphLine(entry: GraphEdge, rank?: RankedMemory | undefined): string {
     const scope = entry.visibility === "global" ? "global" : entry.project ?? entry.visibility;
     return [
         `- ${entry.source.label} --${entry.relationship}--> ${entry.target.label}`,
-        `(id: ${entry.edgeId}; confidence: ${entry.confidence.toFixed(2)}; scope: ${scope}; why: ${entry.why})`,
+        `(id: ${entry.edgeId}; confidence: ${entry.confidence.toFixed(2)}; scope: ${scope}; why: ${entry.why}${formatRankingInsideSuffix(rank)})`,
     ].join(" ");
+}
+
+function formatRankingSuffix(rank?: RankedMemory | undefined): string {
+    return rank ? ` (rank: ${rank.score.toFixed(3)}; why-ranked: ${rank.whyIncluded})` : "";
+}
+
+function formatRankingInsideSuffix(rank?: RankedMemory | undefined): string {
+    return rank ? `; rank: ${rank.score.toFixed(3)}; why-ranked: ${rank.whyIncluded}` : "";
 }
 
 /**
@@ -168,6 +195,8 @@ export class SmartContextService {
     private readonly personaRepo?: IPersonaRepository | undefined;
     private readonly graphRepo?: IGraphRepository | undefined;
     private readonly governancePolicy?: IContextGovernancePolicy | undefined;
+    private readonly rankingService?: MemoryRankingService | undefined;
+    private readonly utilityRepo?: IMemoryUtilityRepository | undefined;
     private readonly getSessionSummary?: (projectFilter: string, days?: number) => Promise<string | null>;
     private readonly now: () => Date;
 
@@ -178,6 +207,8 @@ export class SmartContextService {
         this.personaRepo = deps.personaRepo;
         this.graphRepo = deps.graphRepo;
         this.governancePolicy = deps.governancePolicy;
+        this.rankingService = deps.rankingService;
+        this.utilityRepo = deps.utilityRepo;
         this.now = deps.now ?? (() => new Date());
         if (deps.getSessionSummary) {
             this.getSessionSummary = deps.getSessionSummary;
@@ -205,8 +236,9 @@ export class SmartContextService {
         const allFacts = await this.factRepo.findByProject(projectName);
         const activeFacts = await this.filterAllowedFacts(allFacts.filter((f) => f.supersededAt === null));
 
-        const formatFactList = (factsList: Fact[]) => {
-            return factsList.map((f) => `- ${f.content}`).join("\n");
+        const formatFactList = async (factsList: Fact[]) => {
+            const rankedFacts = await this.rankFacts(factsList);
+            return rankedFacts.map(({ item, rank }) => formatFactLine(item, rank)).join("\n");
         };
 
         // Build sections from data sources
@@ -215,19 +247,19 @@ export class SmartContextService {
         // Section 1: Active Decisions (priority 1)
         const activeDecisions = activeFacts.filter((f) => f.type === "decision");
         if (activeDecisions.length > 0) {
-            sections.push(this.buildSection("decisions", "Active Decisions", 1, formatFactList(activeDecisions)));
+            sections.push(this.buildSection("decisions", "Active Decisions", 1, await formatFactList(activeDecisions)));
         }
 
         // Section 2: Recent Learnings (priority 2)
         const activeLearnings = activeFacts.filter((f) => f.type === "learning");
         if (activeLearnings.length > 0) {
-            sections.push(this.buildSection("learnings", "Recent Learnings", 2, formatFactList(activeLearnings)));
+            sections.push(this.buildSection("learnings", "Recent Learnings", 2, await formatFactList(activeLearnings)));
         }
 
         // Section 3: User Preferences (priority 3)
         const activePreferences = activeFacts.filter((f) => f.type === "preference");
         if (activePreferences.length > 0) {
-            sections.push(this.buildSection("preferences", "User Preferences", 3, formatFactList(activePreferences)));
+            sections.push(this.buildSection("preferences", "User Preferences", 3, await formatFactList(activePreferences)));
         }
 
         // Section 4: Persona and Procedural Memory (priority 4)
@@ -245,7 +277,7 @@ export class SmartContextService {
         // Section 5: Observations (priority 4 retained for backward-compatible ordering)
         const activeObservations = activeFacts.filter((f) => f.type === "observation");
         if (activeObservations.length > 0) {
-            sections.push(this.buildSection("observations", "Observations", 4, formatFactList(activeObservations)));
+            sections.push(this.buildSection("observations", "Observations", 4, await formatFactList(activeObservations)));
         }
 
         // Section 5: Global/Cross-Project Sections (only when crossProject=true)
@@ -262,7 +294,7 @@ export class SmartContextService {
                     "cross_project_preferences",
                     "Global/Cross-Project User Preferences",
                     5,
-                    formatFactList(globalPreferences)
+                    await formatFactList(globalPreferences)
                 ));
             }
 
@@ -273,7 +305,7 @@ export class SmartContextService {
                     "cross_project_decisions",
                     "Cross-Project Decisions",
                     6,
-                    formatFactList(globalDecisions)
+                    await formatFactList(globalDecisions)
                 ));
             }
 
@@ -284,7 +316,7 @@ export class SmartContextService {
                     "cross_project_learnings",
                     "Cross-Project Learnings",
                     7,
-                    formatFactList(globalLearnings)
+                    await formatFactList(globalLearnings)
                 ));
             }
         }
@@ -368,7 +400,8 @@ export class SmartContextService {
         if (entries.length === 0) {
             return null;
         }
-        return entries.map(formatPersonaLine).join("\n");
+        const rankedEntries = await this.rankPersona(entries);
+        return rankedEntries.map(({ item, rank }) => formatPersonaLine(item, rank)).join("\n");
     }
 
     private async buildGraphContent(projectName: string): Promise<string | null> {
@@ -385,7 +418,49 @@ export class SmartContextService {
         if (entries.length === 0) {
             return null;
         }
-        return entries.map(formatGraphLine).join("\n");
+        const rankedEntries = await this.rankGraph(entries);
+        return rankedEntries.map(({ item, rank }) => formatGraphLine(item, rank)).join("\n");
+    }
+
+    private async rankFacts(facts: Fact[]): Promise<Array<{ item: Fact; rank?: RankedMemory | undefined }>> {
+        if (!this.rankingService || facts.length === 0) {
+            return facts.map((item) => ({ item }));
+        }
+        const metrics = await this.lookupMetrics("fact", facts.map((fact) => fact.uuid));
+        const byId = new Map(facts.map((fact) => [fact.uuid, fact]));
+        return this.rankingService
+            .rank(facts.map((fact) => candidateFromFact(fact, metrics.get(fact.uuid))))
+            .map((rank) => ({ item: byId.get(rank.id)!, rank }));
+    }
+
+    private async rankPersona(entries: PersonaEntry[]): Promise<Array<{ item: PersonaEntry; rank?: RankedMemory | undefined }>> {
+        if (!this.rankingService || entries.length === 0) {
+            return entries.map((item) => ({ item }));
+        }
+        const metrics = await this.lookupMetrics("persona", entries.map((entry) => entry.entryId));
+        const byId = new Map(entries.map((entry) => [entry.entryId, entry]));
+        return this.rankingService
+            .rank(entries.map((entry) => candidateFromPersonaEntry(entry, metrics.get(entry.entryId))))
+            .map((rank) => ({ item: byId.get(rank.id)!, rank }));
+    }
+
+    private async rankGraph(entries: GraphEdge[]): Promise<Array<{ item: GraphEdge; rank?: RankedMemory | undefined }>> {
+        if (!this.rankingService || entries.length === 0) {
+            return entries.map((item) => ({ item }));
+        }
+        const metrics = await this.lookupMetrics("graph", entries.map((entry) => entry.edgeId));
+        const byId = new Map(entries.map((entry) => [entry.edgeId, entry]));
+        return this.rankingService
+            .rank(entries.map((entry) => candidateFromGraphEdge(entry, metrics.get(entry.edgeId))))
+            .map((rank) => ({ item: byId.get(rank.id)!, rank }));
+    }
+
+    private async lookupMetrics(surface: "fact" | "persona" | "graph", targetIds: string[]) {
+        if (!this.utilityRepo || targetIds.length === 0) {
+            return new Map<string, never>();
+        }
+        const metrics = await this.utilityRepo.findByTargetIds(surface, targetIds);
+        return new Map(metrics.map((metric) => [metric.targetId, metric]));
     }
 
     /**

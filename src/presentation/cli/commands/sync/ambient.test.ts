@@ -5,9 +5,27 @@
  */
 
 import { describe, expect, it, spyOn } from "bun:test";
-import { runAmbientContextGeneration } from "./ambient.js";
+import { initializeDatabase, closeDatabase } from "../../../../infrastructure/database/index.js";
+import { createDefaultAmbientService, runAmbientContextGeneration } from "./ambient.js";
 
 describe("runAmbientContextGeneration", () => {
+  it("production ambient service wires governed persona, graph, ranking, and utility context", async () => {
+    const { db } = initializeDatabase({ path: ":memory:", walMode: false, quickCheck: false });
+    try {
+      const ambientService = await createDefaultAmbientService(db);
+      const smartContext = (ambientService as any).smartContext;
+
+      expect(smartContext).toBeDefined();
+      expect(smartContext.personaRepo).toBeDefined();
+      expect(smartContext.graphRepo).toBeDefined();
+      expect(smartContext.governancePolicy).toBeDefined();
+      expect(smartContext.rankingService).toBeDefined();
+      expect(smartContext.utilityRepo).toBeDefined();
+    } finally {
+      closeDatabase(db);
+    }
+  });
+
   it("calls AmbientContextService when enabled", async () => {
     const logSpy = spyOn(console, "log").mockImplementation(() => {});
 

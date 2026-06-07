@@ -6,7 +6,7 @@
 - SHIPPED **v2.0 Hybrid Search and Rebrand** -- Phases 13-22 (shipped 2026-03-01)
 - SHIPPED **v3.0 Knowledge Layer + Friction Logging** -- Phases 23-29.1 (shipped 2026-04-02)
 - SHIPPED **v4.0 Intelligence Layer** -- Phases 30-37 plus 32.5, 36.8, 36.9, and 36.10 (published 2026-05-30 as `@chude/memory@4.0.0`; architecture audit LOCKED 2026-05-13, recommendation A-prime; 2026-05-27 foundation review added pre-publish security hardening before GA; Phase 36.9 coverage gate restored 2026-05-30; Phase 36.10 hardened legacy memory-file defaults before publish)
-- IN PROGRESS **v5.0 Market-Leader Memory Platform** -- Phases 38.0-44 (started 2026-06-05; Phase 40 temporal semantic graph complete; added consent/provenance, eval harness, feature-completeness/UX, and release-candidate handoff gates)
+- IN PROGRESS **v5.0 Market-Leader Memory Platform** -- Phases 38.0-44 (started 2026-06-05; Phase 41 importance, utility, and recall ranking complete; Phase 42 dreaming consolidation next; added consent/provenance, eval harness, feature-completeness/UX, and release-candidate handoff gates)
 
 ## Phases
 
@@ -98,7 +98,7 @@
 - [x] **Phase 38.7: Evaluation Harness and Regression Fixtures** - Executable eval runner, fixtures, report schema, and release-gate integration for v5 behavior checks. Completed 2026-06-07.
 - [x] **Phase 39: Persona and Procedural Memory** - Centralized developer/agent profile projection with provenance, confidence, review, and scoped context injection. Completed 2026-06-07.
 - [x] **Phase 40: Temporal Semantic Graph** - Entity-relationship extraction, temporal graph projection, and graph-enriched retrieval through governed temporal graph projection. Completed 2026-06-07.
-- [ ] **Phase 41: Importance, Utility, and Recall Ranking** - Utility metrics, memory-kind half-life policies, and explainable ranking.
+- [x] **Phase 41: Importance, Utility, and Recall Ranking** - Utility metrics, memory-kind half-life policies, and explainable ranking. Completed 2026-06-07.
 - [ ] **Phase 42: Dreaming Consolidation** - Audited asynchronous consolidation, promotion, supersedence, and dream logs.
 - [ ] **Phase 42.5: Feature Completeness and UX Polish** - Inventory all stated/inferred/prototype features, complete or explicitly own them, and polish CLI/API usability to excellent standard.
 - [ ] **Phase 43: Market-Leader and Sales-Readiness Gate** - Final architecture/security/quality/product/competitive review and readiness proof.
@@ -550,7 +550,14 @@ Rationale: Phase 32 explicitly deferred friction envelope adoption per audit §1
   1. Facts, links, profiles, and dreams track access/utility metrics.
   2. Ranking applies memory-kind half-life policies, evergreen exemptions, and supersedence filtering.
   3. Retrieval output can explain why each result was ranked or included.
-**Plans**: Placeholder directory exists; plan after Phase 40.
+**Plans**: 1/1 plan complete. See `.planning/phases/41-importance-utility-recall-ranking/README.md`.
+**Status**: Complete 2026-06-07.
+**Implemented**:
+  - Added `MemoryUtilityMetric`, `IMemoryUtilityRepository`, `memory_utility_metrics`, and `SqliteMemoryUtilityRepository` for surface-agnostic utility/access tracking across `fact`, `persona`, `graph`, `link`, and future `dream` targets.
+  - Added `MemoryRankingService` with per-kind/type half-life policies, evergreen/pinned exemptions, utility/access scoring, supersedence/governance/temporal filtering, and deterministic why-ranked explanations.
+  - Integrated ranking into `SmartContextService`, `memory context`, and ambient context after governance filtering for facts, persona entries, and graph edges.
+  - Promoted `ranking_evergreen_preference` to behavior-backed eval coverage through the real ranking service and utility metric entity; `bun run eval:v5` now passes 9/9 with 7 behavior fixtures and 2 remaining contract fixtures.
+**Verification**: Focused Phase 41 tests passed, `bun run typecheck` passed, `bun run eval:v5` passed, and full `bun run quality` passed (4,316 pass, 0 fail; coverage statements 97.29%, branches 95.11%, functions 96.47%, lines 97.40%; test isolation passed; `bun audit` found no vulnerabilities). `gitleaks detect --no-banner --redact --source .` passed, and `git diff --check` passed. `bun run eval:v5:market` still intentionally fails because the two remaining contract fixtures are owned by Phase 42 and Phase 43 readiness work.
 
 ---
 
@@ -751,4 +758,4 @@ v5.0
 
 ---
 
-*Last updated: 2026-06-07 (Phase 40 complete; Phase 41 next)*
+*Last updated: 2026-06-07 (Phase 41 complete; Phase 42 next)*

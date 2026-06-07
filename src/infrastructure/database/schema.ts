@@ -553,6 +553,36 @@ CREATE INDEX IF NOT EXISTS idx_graph_edges_temporal ON graph_edges(valid_from, v
 `;
 
 /**
+ * Utility/ranking metrics for governed memory surfaces.
+ *
+ * The table is surface-agnostic so Phase 41 can rank current fact/persona/graph
+ * projections and future link/dream projections without schema churn.
+ */
+export const MEMORY_UTILITY_METRICS_TABLE = `
+CREATE TABLE IF NOT EXISTS memory_utility_metrics (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    surface TEXT NOT NULL CHECK (surface IN ('fact', 'persona', 'graph', 'link', 'dream')),
+    target_id TEXT NOT NULL,
+    project TEXT,
+    access_count INTEGER NOT NULL DEFAULT 0 CHECK (access_count >= 0),
+    last_accessed_at TEXT,
+    last_ranked_at TEXT,
+    utility_score REAL NOT NULL DEFAULT 0.5 CHECK (utility_score >= 0 AND utility_score <= 1),
+    importance_score REAL NOT NULL DEFAULT 0.5 CHECK (importance_score >= 0 AND importance_score <= 1),
+    evergreen INTEGER NOT NULL DEFAULT 0 CHECK (evergreen IN (0, 1)),
+    pinned INTEGER NOT NULL DEFAULT 0 CHECK (pinned IN (0, 1)),
+    half_life_days REAL CHECK (half_life_days IS NULL OR half_life_days > 0),
+    metadata TEXT,
+    created_at TEXT NOT NULL,
+    updated_at TEXT NOT NULL,
+    UNIQUE(surface, target_id)
+);
+CREATE INDEX IF NOT EXISTS idx_memory_utility_metrics_target ON memory_utility_metrics(surface, target_id);
+CREATE INDEX IF NOT EXISTS idx_memory_utility_metrics_project ON memory_utility_metrics(project);
+CREATE INDEX IF NOT EXISTS idx_memory_utility_metrics_rank ON memory_utility_metrics(surface, evergreen, pinned, utility_score, importance_score);
+`;
+
+/**
  * Schema options for conditional table creation
  */
 
@@ -651,6 +681,7 @@ export const SCHEMA_SQL: readonly string[] = [
     MEMORY_GOVERNANCE_EVENTS_TABLE,
     PERSONA_ENTRIES_TABLE,
     GRAPH_EDGES_TABLE,
+    MEMORY_UTILITY_METRICS_TABLE,
 ];
 
 

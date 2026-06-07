@@ -64,8 +64,8 @@ Phase 38.0 creates this baseline. Phase 38.7 must implement the executable harne
 
 Phase 38.7 implementation note: `bun run eval:v5` is implemented and included in `bun run quality`.
 `bun run eval:v5:market` is the stricter release-readiness gate; it fails while contract-only
-fixtures remain so Phase 43 cannot accidentally treat planned graph, ranking, dreaming, or adjacent
-future contracts as shipped behavior. See `docs/evals/v5-evaluation-harness.md`.
+fixtures remain so Phase 43 cannot accidentally treat planned dreaming or adjacent future contracts
+as shipped behavior. See `docs/evals/v5-evaluation-harness.md`.
 
 Phase 39 implementation note: `repeated_correction_to_persona` is now behavior-backed through
 `PersonaProfileService`; remaining contract fixtures still block `eval:v5:market`.
@@ -75,6 +75,10 @@ Phase 40 implementation note: `graph_stale_edge` is now behavior-backed through
 through persisted `SqliteFactRepository` facts; `project_scope_leakage` is behavior-backed through
 `SmartContextService` and now proves unrelated project-private facts are excluded from cross-project
 context unless explicitly global.
+
+Phase 41 implementation note: `ranking_evergreen_preference` is now behavior-backed through
+`MemoryRankingService` and `MemoryUtilityMetric`; `eval:v5` passes 9/9 with 7 behavior-backed
+fixtures and 2 contract fixtures.
 
 ## Relationship to Tests
 

@@ -26,6 +26,7 @@ export {
     MEMORY_GOVERNANCE_EVENTS_TABLE,
     PERSONA_ENTRIES_TABLE,
     GRAPH_EDGES_TABLE,
+    MEMORY_UTILITY_METRICS_TABLE,
     type SchemaOptions,
 } from "./schema.js";
 
@@ -60,6 +61,7 @@ export {
   SqliteMemoryGovernanceRepository,
   SqlitePersonaRepository,
   SqliteGraphRepository,
+  SqliteMemoryUtilityRepository,
 } from "./repositories/index.js";
 
 // Services

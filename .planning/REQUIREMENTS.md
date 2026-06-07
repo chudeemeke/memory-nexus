@@ -125,7 +125,7 @@ Phase 38.6 completed the durable friction contract. `memory friction list` now e
 - [x] **EVAL-03**: Eval fixtures cover privacy, leakage, supersedence, sync recovery, friction filters, persona, graph, ranking, and dreaming.
 - [ ] **EVAL-04**: Phase 43 consumes eval output as readiness evidence and fails on privacy, leakage, or supersedence regressions.
 
-Phase 38.7 completed the executable harness and fixture coverage. `bun run eval:v5` is part of `bun run quality`, and `bun run eval:v5:market` already fails while contract-only fixtures remain. Phase 39 promoted the persona fixture, and Phase 40 promoted graph, supersedence, and cross-project leakage fixtures to behavior-backed checks. EVAL-04 remains pending until Phase 43 actually consumes the report as final readiness evidence.
+Phase 38.7 completed the executable harness and fixture coverage. `bun run eval:v5` is part of `bun run quality`, and `bun run eval:v5:market` already fails while contract-only fixtures remain. Phase 39 promoted the persona fixture, Phase 40 promoted graph, supersedence, and cross-project leakage fixtures, and Phase 41 promoted ranking to behavior-backed checks. EVAL-04 remains pending until Phase 43 actually consumes the report as final readiness evidence.
 
 ### Persona and Procedural Memory
 
@@ -146,9 +146,11 @@ Phase 40 completed temporal semantic graph projection. `GraphEdge`, `IGraphRepos
 
 ### Importance, Utility, and Recall Ranking
 
-- [ ] **RANK-03**: Facts, links, profiles, and dreams track access/utility metrics.
-- [ ] **RANK-04**: Ranking applies memory-kind half-life policies, evergreen exemptions, and supersedence filtering.
-- [ ] **RANK-05**: Retrieval output can explain why each result was ranked or included.
+- [x] **RANK-03**: Facts, links, profiles, and dreams track access/utility metrics.
+- [x] **RANK-04**: Ranking applies memory-kind half-life policies, evergreen exemptions, and supersedence filtering.
+- [x] **RANK-05**: Retrieval output can explain why each result was ranked or included.
+
+Phase 41 completed the utility-aware ranking surface. `MemoryUtilityMetric` and `memory_utility_metrics` track `fact`, `persona`, `graph`, `link`, and future `dream` targets without provider or network coupling. `MemoryRankingService` applies per-kind/type half-life policies, supersedence/governance/temporal exclusion, evergreen and pinned exemptions, access utility, and deterministic why-ranked explanations. `SmartContextService`, `memory context`, and ambient context now rank allowed facts/persona/graph entries after governance filtering. The ranking eval fixture is behavior-backed through the real ranking service. Dream proposal production remains Phase 42, but it uses the same metric surface instead of a separate ranking schema.
 
 ### Dreaming Consolidation
 
@@ -281,9 +283,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 | GRAPH-02 | Phase 40 | Complete |
 | GRAPH-03 | Phase 40 | Complete |
 | GRAPH-04 | Phase 40 | Complete |
-| RANK-03 | Phase 41 | Pending |
-| RANK-04 | Phase 41 | Pending |
-| RANK-05 | Phase 41 | Pending |
+| RANK-03 | Phase 41 | Complete |
+| RANK-04 | Phase 41 | Complete |
+| RANK-05 | Phase 41 | Complete |
 | DREAM-01 | Phase 42 | Pending |
 | DREAM-02 | Phase 42 | Pending |
 | DREAM-03 | Phase 42 | Pending |
@@ -303,11 +305,11 @@ Which phases cover which requirements. Updated during roadmap creation.
 - v4.0 requirements: 25 total (excluding QUAL cross-cutting)
 - Cross-cutting: 4 QUAL requirements
 - v5.0 requirements: 51 total
-- v5.0 complete: 29/51
-- v5.0 pending: 22/51
+- v5.0 complete: 36/51
+- v5.0 pending: 15/51
 - v5.0 mapped to phases: 51/51
 - v5.0 unmapped: 0
 
 ---
 *Requirements defined: 2026-04-03*
-*Last updated: 2026-06-07 after Phase 40 temporal semantic graph completion*
+*Last updated: 2026-06-07 after Phase 41 importance, utility, and recall ranking completion*

@@ -126,6 +126,20 @@ export {
   graphEdgesFromFact,
   governanceEntryForGraphEdge,
 } from "./temporal-graph-service.js";
+export {
+  MemoryRankingService,
+  candidateFromFact,
+  candidateFromGraphEdge,
+  candidateFromPersonaEntry,
+} from "./memory-ranking-service.js";
+export type {
+  MemoryRankCandidate,
+  MemoryRankKind,
+  MemoryRankingPolicy,
+  MemoryRankingServiceDeps,
+  RankedMemory,
+  RankedMemoryComponents,
+} from "./memory-ranking-service.js";
 export type {
   EventProjection,
   ProjectionReplayResult,

@@ -16,16 +16,19 @@ import {
     type SmartContextDeps,
     type IContextGovernancePolicy,
 } from "./smart-context-service.js";
+import { MemoryRankingService } from "./memory-ranking-service.js";
 import { Fact } from "../../domain/entities/fact.js";
 import { FrictionEntry } from "../../domain/entities/friction-entry.js";
 import { PersonaEntry } from "../../domain/entities/persona-entry.js";
 import { GraphEdge } from "../../domain/entities/graph-edge.js";
+import { MemoryUtilityMetric, type MemoryUtilitySurface } from "../../domain/entities/memory-utility-metric.js";
 import type {
     IFactRepository,
     IFrictionRepository,
     FrictionStats,
     IPersonaRepository,
     IGraphRepository,
+    IMemoryUtilityRepository,
 } from "../../domain/ports/repositories.js";
 
 // -- Helpers --
@@ -36,6 +39,7 @@ function makeFact(overrides: {
     content: string;
     uuid?: string;
     metadata?: Record<string, unknown>;
+    observedAt?: Date;
     supersededAt?: Date | null;
     supersededBy?: string | null;
 }): Fact {
@@ -45,7 +49,7 @@ function makeFact(overrides: {
         project: overrides.project,
         content: overrides.content,
         metadata: overrides.metadata,
-        observedAt: new Date(),
+        observedAt: overrides.observedAt ?? new Date(),
         supersededAt: overrides.supersededAt ?? null,
         supersededBy: overrides.supersededBy ?? null,
     });
@@ -263,6 +267,53 @@ function createMockGraphRepo(entries: GraphEdge[]): IGraphRepository {
     };
 }
 
+function createMockUtilityRepo(metrics: MemoryUtilityMetric[]): IMemoryUtilityRepository {
+    return {
+        async save(metric) { return metric; },
+        async findByTarget(surface, targetId) {
+            return metrics.find((metric) => metric.surface === surface && metric.targetId === targetId) ?? null;
+        },
+        async findByTargetIds(surface, targetIds) {
+            return metrics.filter((metric) => metric.surface === surface && targetIds.includes(metric.targetId));
+        },
+        async recordAccess(surface, targetId, accessedAt) {
+            return MemoryUtilityMetric.create({
+                surface,
+                targetId,
+                accessCount: 1,
+                lastAccessedAt: accessedAt,
+                lastRankedAt: null,
+                createdAt: accessedAt,
+                updatedAt: accessedAt,
+            });
+        },
+        async deleteByProject() {},
+        async clearAll() {},
+    };
+}
+
+function makeUtilityMetric(
+    surface: MemoryUtilitySurface,
+    targetId: string,
+    overrides: Partial<Parameters<typeof MemoryUtilityMetric.create>[0]> = {},
+): MemoryUtilityMetric {
+    return MemoryUtilityMetric.create({
+        surface,
+        targetId,
+        project: PROJECT_NAME,
+        accessCount: 0,
+        lastAccessedAt: null,
+        lastRankedAt: null,
+        utilityScore: 0.5,
+        importanceScore: 0.5,
+        evergreen: false,
+        pinned: false,
+        createdAt: new Date("2026-06-07T00:00:00.000Z"),
+        updatedAt: new Date("2026-06-07T00:00:00.000Z"),
+        ...overrides,
+    });
+}
+
 // -- Test Data --
 
 const PROJECT_ENCODED = "c-users-test-project";
@@ -348,6 +399,54 @@ describe("SmartContextService", () => {
             expect(decisions?.content).not.toContain("Suppressed decision");
         });
 
+        test("ranking orders allowed facts by durable utility and explains why-ranked metadata", async () => {
+            const durableDecision = makeFact({
+                uuid: "durable-path-rule",
+                type: "decision",
+                project: PROJECT_NAME,
+                content: "Always use symlinked project paths.",
+                metadata: { evergreen: true },
+                observedAt: new Date("2026-01-01T00:00:00.000Z"),
+            });
+            const recentNoise = makeFact({
+                uuid: "recent-noise",
+                type: "decision",
+                project: PROJECT_NAME,
+                content: "Terminal tab was labelled npm whoami.",
+                metadata: { recencyNoisePenalty: 0.25 },
+                observedAt: new Date("2026-06-06T00:00:00.000Z"),
+            });
+
+            mockFactRepo = createMockFactRepo([recentNoise, durableDecision]);
+            service = new SmartContextService({
+                projectResolver: mockResolver,
+                factRepo: mockFactRepo,
+                frictionRepo: mockFrictionRepo,
+                rankingService: new MemoryRankingService({ now: () => new Date("2026-06-07T00:00:00.000Z") }),
+                utilityRepo: createMockUtilityRepo([
+                    makeUtilityMetric("fact", "durable-path-rule", {
+                        importanceScore: 0.8,
+                        utilityScore: 0.72,
+                        accessCount: 6,
+                        evergreen: true,
+                    }),
+                    makeUtilityMetric("fact", "recent-noise", {
+                        importanceScore: 0.15,
+                        utilityScore: 0.1,
+                    }),
+                ]),
+            });
+
+            const result = await service.getContext({ projectFilter: "test-project" });
+
+            const decisions = result!.sections.find((s) => s.key === "decisions");
+            expect(decisions?.content.indexOf("Always use symlinked project paths."))
+                .toBeLessThan(decisions?.content.indexOf("Terminal tab was labelled npm whoami.") ?? Number.MAX_SAFE_INTEGER);
+            expect(decisions?.content).toContain("why-ranked: active; kind=fact; type=decision");
+            expect(decisions?.content).toContain("evergreen");
+            expect(decisions?.content).toContain("access_count=6");
+        });
+
         test("section 1: Active Decisions from facts table (priority 1)", async () => {
             const decisionFact = makeFact({
                 type: "decision",
@@ -395,6 +494,18 @@ describe("SmartContextService", () => {
                 factRepo: mockFactRepo,
                 frictionRepo: mockFrictionRepo,
                 personaRepo,
+                rankingService: new MemoryRankingService({ now: () => new Date("2026-06-07T00:00:00.000Z") }),
+                utilityRepo: createMockUtilityRepo([
+                    makeUtilityMetric("persona", "memory-persona", {
+                        importanceScore: 0.75,
+                        utilityScore: 0.8,
+                        accessCount: 4,
+                    }),
+                    makeUtilityMetric("persona", "global-persona", {
+                        importanceScore: 0.7,
+                        utilityScore: 0.7,
+                    }),
+                ]),
             });
 
             const result = await service.getContext({ projectFilter: "test-project" });
@@ -402,6 +513,8 @@ describe("SmartContextService", () => {
             const persona = result!.sections.find((section) => section.key === "persona");
             expect(persona?.content).toContain("Prefer durable disk artifacts.");
             expect(persona?.content).toContain("why: Derived from repeated corrections.");
+            expect(persona?.content).toContain("why-ranked: active; kind=persona; type=preference");
+            expect(persona?.content).toContain("access_count=4");
             expect(persona?.content).toContain("Use symlinked project paths.");
             expect(persona?.content).not.toContain("Authkey-only private preference.");
         });
@@ -464,6 +577,18 @@ describe("SmartContextService", () => {
                 frictionRepo: mockFrictionRepo,
                 graphRepo,
                 governancePolicy: createBlockingGovernancePolicy(["blocked-graph"]),
+                rankingService: new MemoryRankingService({ now: () => new Date("2026-06-07T00:00:00.000Z") }),
+                utilityRepo: createMockUtilityRepo([
+                    makeUtilityMetric("graph", "memory-authkey", {
+                        importanceScore: 0.8,
+                        utilityScore: 0.8,
+                        pinned: true,
+                    }),
+                    makeUtilityMetric("graph", "global-capability", {
+                        importanceScore: 0.6,
+                        utilityScore: 0.6,
+                    }),
+                ]),
             });
 
             const result = await service.getContext({ projectFilter: "test-project" });
@@ -472,6 +597,8 @@ describe("SmartContextService", () => {
             expect(graph?.title).toBe("Temporal Semantic Graph");
             expect(graph?.content).toContain("memory --uses--> authkey");
             expect(graph?.content).toContain("why: Derived from optional authkey interop decision.");
+            expect(graph?.content).toContain("why-ranked: active; kind=graph; type=uses");
+            expect(graph?.content).toContain("pinned");
             expect(graph?.content).toContain("global-capability");
             expect(graph?.content).not.toContain("authkey-private");
             expect(graph?.content).not.toContain("blocked");
