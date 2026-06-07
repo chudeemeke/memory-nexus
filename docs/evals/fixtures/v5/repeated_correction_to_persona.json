@@ -1,0 +1,42 @@
+{
+  "schemaVersion": 1,
+  "id": "repeated_correction_to_persona",
+  "title": "Repeated corrections become scoped persona entries with review controls",
+  "dimension": "persona",
+  "mode": "contract",
+  "ownerPhase": "39",
+  "tags": ["persona", "procedural-memory", "review"],
+  "sanitized": {
+    "containsRawSecrets": false,
+    "containsPrivateTranscript": false,
+    "notes": ["Synthetic correction content derived from public project conventions, not transcript excerpts."]
+  },
+  "input": {
+    "entries": [
+      {
+        "id": "prefer-durable-disk-artifacts",
+        "content": "For persistence-sensitive work, write durable disk artifacts rather than relying on chat memory.",
+        "provenance": {
+          "sourceEventIds": ["evt-correction-001", "evt-correction-002"],
+          "sourceKinds": ["correction", "instruction"]
+        },
+        "confidence": 0.92,
+        "scope": {
+          "visibility": "global"
+        },
+        "review": {
+          "status": "pending_review",
+          "reviewAfter": "2026-07-07T00:00:00.000Z"
+        },
+        "controls": ["suppress", "invalidate", "expire"]
+      }
+    ]
+  },
+  "expected": {
+    "requiredControls": ["suppress", "invalidate"],
+    "requireProvenance": true,
+    "requireReviewMetadata": true,
+    "requireScope": true,
+    "minConfidence": 0.75
+  }
+}

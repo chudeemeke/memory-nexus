@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v5.0
 milestone_name: Market-Leader Memory Platform
 status: in_progress
-last_updated: "2026-06-06T10:06:58.682+01:00"
+last_updated: "2026-06-07T00:25:00.000+01:00"
 progress:
   total_phases: 16
-  completed_phases: 8
-  total_plans: 8
-  completed_plans: 8
+  completed_phases: 9
+  total_plans: 9
+  completed_plans: 9
 ---
 
 > **FOUNDATION HARDENING VERIFIED 2026-05-28** - Phase 36.8 is implemented. Typecheck, build, full tests, test-isolation, dependency audit, and gitleaks pass. Provider support now routes through an internal provider registry instead of presentation/health/factory switch drift. Phase 36.9 replaced the missing-metric Bun LCOV gate with an Istanbul-backed Bun coverage harness.
@@ -26,6 +26,7 @@ progress:
 > **V5 PHASE 38.4 COMPLETE 2026-06-06** - Remote sync now has a public operations surface. `memory remote` is registered; `memory sync --remote` is the explicit remote-egress command; plain `memory sync` skips configured remotes with an actionable warning. `remote set/remove/status/preflight/doctor` support stable JSON and readiness diagnostics, and `remote backup/restore/rollback` recover config plus event-log content with `--confirm` for mutations and `.git` internals excluded. Verification passed: focused Phase 38.4 tests, full `bun run quality`, coverage statements 97.13%, branches 95.13%, functions 96.09%, lines 97.25%, `gitleaks detect --no-banner --redact --source .`, and `git diff --check`.
 > **V5 PHASE 38.5 COMPLETE 2026-06-06** - Secure capability interop is implemented without adding an authkey dependency or a raw-secret resolver. A typed capability-status port and infrastructure capability registry report optional provider availability, masked references, fingerprints, env-injection readiness, and future provider schemes. Provider default secret-env metadata is read from the existing provider registry instead of duplicating provider switches in capability diagnostics. `memory status` and `memory doctor` include capability diagnostics, JSON output masks `embedding.apiKeyRef`, and no resolved executable path or raw secret value is returned. Verification passed: focused provider-registry/capability/health/status/doctor tests (203 pass, 0 fail), full `bun run quality` (4,234 pass, 0 fail), coverage statements 97.14%, branches 95.09%, functions 96.14%, lines 97.26%, `gitleaks detect --no-banner --redact --source .`, and `git diff --check`.
 > **V5 PHASE 38.6 COMPLETE 2026-06-06** - Durable friction query contract is implemented. `memory friction list` now exposes stable exact filters for status/severity/category/tool/project, inclusive UTC `--since`, privacy-safe description/context contains filters with redacted fingerprints, count/min threshold semantics, versioned JSON envelopes, and documented exit codes. Query counting is durable and limit-independent; contains filters use parameterized SQL and never echo raw filter strings. Verification passed: full `bun run quality` (4,250 pass, 0 fail), coverage statements 97.17%, branches 95.19%, functions 96.17%, lines 97.29%, `gitleaks detect --no-banner --redact --source .`, and `git diff --check`.
+> **V5 PHASE 38.7 COMPLETE 2026-06-07** - The v5 evaluation harness is implemented. `bun run eval:v5` loads sanitized fixtures from `docs/evals/fixtures/v5`, emits a schema-versioned JSON report, covers privacy, leakage, supersedence, sync recovery, friction filters, persona, graph, ranking, and dreaming, and is now part of `bun run quality`. Behavior-backed fixtures exercise `PatternRedactor` and `SqliteFrictionRepository`; later-phase persona/graph/ranking/dreaming fixtures are explicit contract fixtures. `bun run eval:v5:market` intentionally fails while contract fixtures remain, so Phase 43 cannot confuse planned behavior with shipped behavior. Verification passed: focused eval tests, `bun run eval:v5`, `bun run typecheck`, and full `bun run quality` (4,254 pass, 0 fail).
 > **INBOX RECONCILED 2026-05-28** - Stale bug reports for the Windows full-suite crash, orphaned friction test, and programmatic API real-DB pollution were validated against the current code and archived. The durable-friction-list filing was accepted into ROADMAP as post-v4 capacity, archived as planned, and counter-notified to conversations. No active memory-nexus inbox items remain.
 > **REMOTE CONSUMER NOTES REVIEWED 2026-05-30** - The two remotely consumer-impact inbox notes were reviewed against current memory-nexus docs/scripts. No current raw SSH/rsync operating instructions or hard-coded remotely tunnel-state assumptions were found, so both notes were archived with disposition text. Future Phase 38 cross-machine work must still use current `remotely` conventions where applicable.
 > **FIRST-PARTY INFRASTRUCTURE BROADCAST 2026-05-28** - User clarified that `memory` is a first-class first-party tool used by most/all projects. Canonical tool/package naming is `memory` / `@chude/memory`; the repository remains `memory-nexus`, and `nexus` is a legacy alias. Updated Codex/Claude rules and document-for-clear skills, added a Codex memory note, and filed notification inbox items to opted-in projects so consumers know about provider-secret, redaction/export, registry, and authkey-optional contract changes.
@@ -37,18 +38,18 @@ See: .planning/PROJECT.md (updated 2026-02-18)
 
 **Core Value:** Knowledge gained in one Claude Code project becomes accessible from any other project. No more context silos.
 
-**Current Focus:** v5.0 market-leader execution is active. Phase 38.6 is complete; next is Phase 38.7 Evaluation Harness and Regression Fixtures. Relevant docs: `docs/prd/2026-06-05-v5-market-leader-memory-platform.md`, `docs/security/2026-06-05-v5-threat-model.md`, `docs/evals/2026-06-05-v5-evaluation-baseline.md`, `docs/reviews/2026-06-05-v5-plan-review-request.md`, `docs/plans/2026-06-04-v5-market-leader-gsd-plan.md`, `docs/reference/friction-query-contract.md`, `docs/operations/remote-sync-runbook.md`, `.planning/phases/38.2.5-consent-provenance-governance/README.md`, `.planning/phases/38.3-remote-sync-service-git-transport/README.md`, `.planning/phases/38.4-remote-cli-operations-backup-recovery/README.md`, `.planning/phases/38.5-secure-capability-interop/README.md`, `.planning/phases/38.6-durable-friction-query-contract/README.md`, and `.planning/ROADMAP.md`.
+**Current Focus:** v5.0 market-leader execution is active. Phase 38.7 is complete; next is Phase 39 Persona and Procedural Memory. Relevant docs: `docs/prd/2026-06-05-v5-market-leader-memory-platform.md`, `docs/security/2026-06-05-v5-threat-model.md`, `docs/evals/2026-06-05-v5-evaluation-baseline.md`, `docs/evals/v5-evaluation-harness.md`, `docs/reviews/2026-06-05-v5-plan-review-request.md`, `docs/plans/2026-06-04-v5-market-leader-gsd-plan.md`, `docs/reference/friction-query-contract.md`, `docs/operations/remote-sync-runbook.md`, `.planning/phases/38.2.5-consent-provenance-governance/README.md`, `.planning/phases/38.3-remote-sync-service-git-transport/README.md`, `.planning/phases/38.4-remote-cli-operations-backup-recovery/README.md`, `.planning/phases/38.5-secure-capability-interop/README.md`, `.planning/phases/38.6-durable-friction-query-contract/README.md`, `.planning/phases/38.7-evaluation-harness-regression-fixtures/README.md`, and `.planning/ROADMAP.md`.
 
 **Tech Stack:** Bun, TypeScript 5.5+, bun:sqlite with FTS5 + sqlite-vec, Commander.js v14, @huggingface/transformers v3, cli-progress, chrono-node, Chart.js (HTML dashboard)
 
 ## Current Position
 
-Phase: v5.0 ACTIVE - PHASE 38.7 NEXT
+Phase: v5.0 ACTIVE - PHASE 39 NEXT
 **Milestone:** v5.0 Market-Leader Memory Platform
-**Status:** Phase 38.6 is complete. Phase 38.7 must turn the v5 evaluation baseline into an executable regression harness with sanitized fixtures, schema-versioned results, and release-gate evidence.
+**Status:** Phase 38.7 is complete. Phase 39 must implement persona/procedural memory using the governance substrate and promote the persona eval fixture from contract-only to behavior-backed.
 
 ```
-v5.0 Progress: [########--------] 8/16 phases complete
+v5.0 Progress: [#########-------] 9/16 phases complete
   Phase 38.0: v5 Threat Model, PRD, Eval Baseline [done]
   Phase 38.1: Canonical Event Kernel and Projection Replay [done]
   Phase 38.2: Redaction, Privacy Governance, Audit Commands [done]
@@ -57,7 +58,7 @@ v5.0 Progress: [########--------] 8/16 phases complete
   Phase 38.4: Remote CLI, Operations, Backup, Recovery [done]
   Phase 38.5: Secure Capability Interop [done]
   Phase 38.6: Durable Friction Query Contract [done]
-  Phase 38.7: Evaluation Harness and Regression Fixtures [next]
+  Phase 38.7: Evaluation Harness and Regression Fixtures [done]
   Phase 39: Persona and Procedural Memory [planned]
   Phase 40: Temporal Semantic Graph [planned]
   Phase 41: Importance, Utility, Recall Ranking [planned]
@@ -171,7 +172,7 @@ v4.0 Progress: [############################] 14/14 phases complete
 
 ## Session Continuity
 
-### Current Resume Point - 2026-06-06
+### Current Resume Point - 2026-06-07
 
 **Completed this review/update pass:**
 - Promoted v5.0 to the active milestone in `.planning/STATE.md`, then advanced it through Phase 38.1 completion.
@@ -191,9 +192,12 @@ v4.0 Progress: [############################] 14/14 phases complete
 - Completed Phase 38.5 with optional secure capability diagnostics for authkey/future providers without raw secret resolution or hard dependency.
 - Completed Phase 38.6 with durable friction query filters, count/min threshold semantics, privacy-safe contains filters, versioned JSON envelopes, documented exit codes, and `docs/reference/friction-query-contract.md`.
 - Verified Phase 38.6 final gates: full `bun run quality` (4,250 pass, 0 fail), coverage statements 97.17%, branches 95.19%, functions 96.17%, lines 97.29%, `gitleaks detect --no-banner --redact --source .`, and `git diff --check`.
+- Completed Phase 38.7 with the v5 eval harness, sanitized fixtures, schema-versioned reports, `eval:v5` quality-gate integration, and the stricter `eval:v5:market` gate.
+- `eval:v5` currently passes 9/9 fixtures with 2 behavior-backed fixtures and 7 contract fixtures. `eval:v5:market` intentionally fails until Phase 39-42 replace those contract fixtures with behavior-backed checks.
+- Verified Phase 38.7 with focused eval tests, `bun run eval:v5`, `bun run typecheck`, and full `bun run quality` (4,254 pass, 0 fail).
 
 **Next step:**
-- Execute Phase 38.7 Evaluation Harness and Regression Fixtures with TDD. The harness must load sanitized fixtures, emit schema-versioned results, include friction-filter regression cases from Phase 38.6, and become consumable evidence for Phase 43 readiness.
+- Execute Phase 39 Persona and Procedural Memory with TDD. The implementation must use governance/provenance controls, avoid cross-project leakage, integrate into context only with why-included metadata, and promote `repeated_correction_to_persona` from contract-only to behavior-backed eval coverage.
 
 ### Current Resume Point - 2026-05-30
 
@@ -239,4 +243,4 @@ v4.0 Progress: [############################] 14/14 phases complete
 
 ---
 
-*Last updated: 2026-06-06 (v5.0 active; Phase 38.6 complete; Phase 38.7 next)*
+*Last updated: 2026-06-07 (v5.0 active; Phase 38.7 complete; Phase 39 next)*

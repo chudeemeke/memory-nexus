@@ -1,0 +1,51 @@
+{
+  "schemaVersion": 1,
+  "id": "graph_stale_edge",
+  "title": "Temporal graph excludes stale edges from current retrieval",
+  "dimension": "graph",
+  "mode": "contract",
+  "ownerPhase": "40",
+  "tags": ["graph", "temporal", "stale-edge"],
+  "sanitized": {
+    "containsRawSecrets": false,
+    "containsPrivateTranscript": false,
+    "notes": ["Synthetic graph IDs and relationships only."]
+  },
+  "input": {
+    "query": {
+      "asOf": "2026-06-07T00:00:00.000Z",
+      "minConfidence": 0.7
+    },
+    "edges": [
+      {
+        "id": "authkey-memory-interop-current",
+        "source": "memory",
+        "target": "authkey",
+        "relationship": "optional-capability-provider",
+        "confidence": 0.91,
+        "validFrom": "2026-05-27T00:00:00.000Z"
+      },
+      {
+        "id": "memory-legacy-sidecar-default",
+        "source": "memory",
+        "target": "legacy-memory-files",
+        "relationship": "default-storage",
+        "confidence": 0.88,
+        "validFrom": "2026-04-01T00:00:00.000Z",
+        "validTo": "2026-05-30T00:00:00.000Z"
+      },
+      {
+        "id": "low-confidence-noisy-link",
+        "source": "memory",
+        "target": "unreviewed-note",
+        "relationship": "mentions",
+        "confidence": 0.2,
+        "validFrom": "2026-06-06T00:00:00.000Z"
+      }
+    ]
+  },
+  "expected": {
+    "requiredIds": ["authkey-memory-interop-current"],
+    "forbiddenIds": ["memory-legacy-sidecar-default", "low-confidence-noisy-link"]
+  }
+}

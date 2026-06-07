@@ -1,0 +1,37 @@
+{
+  "schemaVersion": 1,
+  "id": "superseded_provider_fact",
+  "title": "Superseded provider facts are historical unless explicitly requested",
+  "dimension": "supersedence",
+  "mode": "contract",
+  "ownerPhase": "40",
+  "tags": ["supersedence", "provider", "current-truth"],
+  "sanitized": {
+    "containsRawSecrets": false,
+    "containsPrivateTranscript": false,
+    "notes": ["Synthetic fact IDs and provider names only."]
+  },
+  "input": {
+    "request": {
+      "includeHistorical": false
+    },
+    "facts": [
+      {
+        "id": "provider-switch-old",
+        "content": "Health checks hard-code provider switches in presentation code.",
+        "observedAt": "2026-05-27T00:00:00.000Z",
+        "supersededAt": "2026-06-06T09:00:00.000Z",
+        "supersededBy": "provider-switch-registry"
+      },
+      {
+        "id": "provider-switch-registry",
+        "content": "Provider diagnostics read metadata from the provider registry.",
+        "observedAt": "2026-06-06T09:00:00.000Z"
+      }
+    ]
+  },
+  "expected": {
+    "requiredIds": ["provider-switch-registry"],
+    "forbiddenIds": ["provider-switch-old"]
+  }
+}

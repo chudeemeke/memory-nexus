@@ -1,0 +1,43 @@
+{
+  "schemaVersion": 1,
+  "id": "project_scope_leakage",
+  "title": "Project-private facts stay out of unrelated project context",
+  "dimension": "cross_project_leakage",
+  "mode": "contract",
+  "ownerPhase": "39",
+  "tags": ["privacy", "scope", "context"],
+  "sanitized": {
+    "containsRawSecrets": false,
+    "containsPrivateTranscript": false,
+    "notes": ["Synthetic project records use invented names and contain no private transcript excerpts."]
+  },
+  "input": {
+    "request": {
+      "project": "authkey"
+    },
+    "records": [
+      {
+        "id": "authkey-secret-boundary",
+        "project": "authkey",
+        "visibility": "project",
+        "content": "authkey must not expose raw secret retrieval through AI-facing paths."
+      },
+      {
+        "id": "memory-first-party-global",
+        "project": "memory-nexus",
+        "visibility": "global",
+        "content": "memory is first-party infrastructure and consumer-visible changes are broadcast."
+      },
+      {
+        "id": "medesine-deployment-private",
+        "project": "medesine-rx",
+        "visibility": "project",
+        "content": "deployment notes are private to medesine-rx unless explicitly globalized."
+      }
+    ]
+  },
+  "expected": {
+    "requiredIds": ["authkey-secret-boundary", "memory-first-party-global"],
+    "forbiddenIds": ["medesine-deployment-private"]
+  }
+}

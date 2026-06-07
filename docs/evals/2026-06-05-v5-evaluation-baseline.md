@@ -62,6 +62,11 @@ Phase 38.0 creates this baseline. Phase 38.7 must implement the executable harne
 - CLI command such as `bun run eval:v5`.
 - CI/release integration by Phase 43/44.
 
+Phase 38.7 implementation note: `bun run eval:v5` is implemented and included in `bun run quality`.
+`bun run eval:v5:market` is the stricter release-readiness gate; it fails while contract-only
+fixtures remain so Phase 43 cannot accidentally treat planned persona, graph, ranking, or dreaming
+contracts as shipped behavior. See `docs/evals/v5-evaluation-harness.md`.
+
 ## Relationship to Tests
 
 - Unit tests validate value objects and pure policy logic.

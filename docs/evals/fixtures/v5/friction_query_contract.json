@@ -1,0 +1,106 @@
+{
+  "schemaVersion": 1,
+  "id": "friction_query_contract",
+  "title": "Durable friction filters count total matches independently of returned rows",
+  "dimension": "friction_query",
+  "mode": "behavior",
+  "ownerPhase": "38.6",
+  "tags": ["friction", "durable-signal", "query"],
+  "sanitized": {
+    "containsRawSecrets": false,
+    "containsPrivateTranscript": false,
+    "notes": ["Synthetic friction entries model watcher and inbox cases without private transcript content."]
+  },
+  "input": {
+    "entries": [
+      {
+        "description": "memory sync embed duplicate embedding row",
+        "severity": "high",
+        "category": "sync",
+        "tool": "memory",
+        "status": "open",
+        "sourceProject": "memory-nexus",
+        "context": "UNIQUE constraint regression with literal percent % and underscore _ characters",
+        "loggedAt": "2026-06-01T00:00:00.000Z"
+      },
+      {
+        "description": "memory status hides optional capability details",
+        "severity": "medium",
+        "category": "capability",
+        "tool": "memory",
+        "status": "open",
+        "sourceProject": "memory-nexus",
+        "context": "capability readiness should stay masked",
+        "loggedAt": "2026-06-07T00:00:00.000Z"
+      },
+      {
+        "description": "conversations reminder count increments before condition fires",
+        "severity": "high",
+        "category": "workflow",
+        "tool": "conversations",
+        "status": "open",
+        "sourceProject": "conversations",
+        "context": "condition-triggered reminder escalation bug",
+        "loggedAt": "2026-06-03T00:00:00.000Z"
+      },
+      {
+        "description": "old resolved memory friction should not appear in open default",
+        "severity": "low",
+        "category": "cli",
+        "tool": "memory",
+        "status": "resolved",
+        "sourceProject": "memory-nexus",
+        "context": "historical resolved signal",
+        "loggedAt": "2026-05-01T00:00:00.000Z",
+        "resolvedAt": "2026-05-02T00:00:00.000Z",
+        "resolution": "already fixed"
+      }
+    ],
+    "queries": [
+      {
+        "name": "exact memory open count ignores limit",
+        "options": {
+          "status": "open",
+          "tool": "memory",
+          "sourceProject": "memory-nexus",
+          "limit": 1
+        },
+        "expected": {
+          "totalCount": 2,
+          "returnedCount": 1,
+          "requiredDescriptions": ["memory status hides optional capability details"],
+          "forbiddenDescriptions": ["conversations reminder count increments before condition fires"]
+        }
+      },
+      {
+        "name": "since is inclusive at UTC midnight",
+        "options": {
+          "status": "open",
+          "tool": "memory",
+          "since": "2026-06-07T00:00:00.000Z"
+        },
+        "expected": {
+          "totalCount": 1,
+          "returnedCount": 1,
+          "requiredDescriptions": ["memory status hides optional capability details"],
+          "forbiddenDescriptions": ["memory sync embed duplicate embedding row"]
+        }
+      },
+      {
+        "name": "contains filters escape wildcard characters",
+        "options": {
+          "contextContains": "percent % and underscore _"
+        },
+        "expected": {
+          "totalCount": 1,
+          "returnedCount": 1,
+          "requiredDescriptions": ["memory sync embed duplicate embedding row"],
+          "forbiddenDescriptions": ["memory status hides optional capability details"]
+        }
+      }
+    ]
+  },
+  "expected": {
+    "dimensions": ["status", "tool", "sourceProject", "since", "contextContains", "limitIndependentCount"]
+  }
+}

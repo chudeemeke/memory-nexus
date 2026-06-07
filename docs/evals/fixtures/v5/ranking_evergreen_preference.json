@@ -1,0 +1,46 @@
+{
+  "schemaVersion": 1,
+  "id": "ranking_evergreen_preference",
+  "title": "Evergreen durable preference outranks noisy recent context",
+  "dimension": "ranking",
+  "mode": "contract",
+  "ownerPhase": "41",
+  "tags": ["ranking", "utility", "evergreen"],
+  "sanitized": {
+    "containsRawSecrets": false,
+    "containsPrivateTranscript": false,
+    "notes": ["Synthetic ranking candidates only."]
+  },
+  "input": {
+    "candidates": [
+      {
+        "id": "durable-path-symlink-rule",
+        "importance": 0.8,
+        "utility": 0.72,
+        "recencyNoisePenalty": 0.0,
+        "evergreen": true,
+        "superseded": false
+      },
+      {
+        "id": "recent-terminal-tab-label",
+        "importance": 0.15,
+        "utility": 0.1,
+        "recencyNoisePenalty": 0.25,
+        "evergreen": false,
+        "superseded": false
+      },
+      {
+        "id": "superseded-provider-switch",
+        "importance": 0.9,
+        "utility": 0.7,
+        "recencyNoisePenalty": 0.0,
+        "evergreen": false,
+        "superseded": true
+      }
+    ]
+  },
+  "expected": {
+    "topId": "durable-path-symlink-rule",
+    "forbiddenIds": ["superseded-provider-switch"]
+  }
+}

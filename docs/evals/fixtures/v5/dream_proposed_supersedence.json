@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "id": "dream_proposed_supersedence",
+  "title": "Dreaming proposes supersedence through audited review, not hidden mutation",
+  "dimension": "dreaming",
+  "mode": "contract",
+  "ownerPhase": "42",
+  "tags": ["dreaming", "audit", "supersedence"],
+  "sanitized": {
+    "containsRawSecrets": false,
+    "containsPrivateTranscript": false,
+    "notes": ["Synthetic dream proposal only."]
+  },
+  "input": {
+    "proposals": [
+      {
+        "id": "dream-supersede-old-provider-note",
+        "status": "pending_review",
+        "autoPromoted": false,
+        "sourceEventIds": ["evt-provider-registry-001", "evt-provider-registry-002"],
+        "rollbackEventKind": "dream.rollback",
+        "audit": {
+          "redactionState": "none",
+          "reviewer": "user"
+        }
+      }
+    ]
+  },
+  "expected": {
+    "requiresReview": true,
+    "requiresRollback": true,
+    "forbidHiddenMutation": true
+  }
+}

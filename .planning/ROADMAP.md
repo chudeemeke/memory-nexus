@@ -6,7 +6,7 @@
 - SHIPPED **v2.0 Hybrid Search and Rebrand** -- Phases 13-22 (shipped 2026-03-01)
 - SHIPPED **v3.0 Knowledge Layer + Friction Logging** -- Phases 23-29.1 (shipped 2026-04-02)
 - SHIPPED **v4.0 Intelligence Layer** -- Phases 30-37 plus 32.5, 36.8, 36.9, and 36.10 (published 2026-05-30 as `@chude/memory@4.0.0`; architecture audit LOCKED 2026-05-13, recommendation A-prime; 2026-05-27 foundation review added pre-publish security hardening before GA; Phase 36.9 coverage gate restored 2026-05-30; Phase 36.10 hardened legacy memory-file defaults before publish)
-- IN PROGRESS **v5.0 Market-Leader Memory Platform** -- Phases 38.0-44 (started 2026-06-05; Phase 38.6 durable friction query contract complete; added consent/provenance, eval harness, feature-completeness/UX, and release-candidate handoff gates)
+- IN PROGRESS **v5.0 Market-Leader Memory Platform** -- Phases 38.0-44 (started 2026-06-05; Phase 38.7 evaluation harness complete; added consent/provenance, eval harness, feature-completeness/UX, and release-candidate handoff gates)
 
 ## Phases
 
@@ -95,7 +95,7 @@
 - [x] **Phase 38.4: Remote CLI, Operations, Backup, and Recovery** - `memory remote` surface, preflight, doctor, backup/restore/rollback, cross-machine verification. Completed 2026-06-06.
 - [x] **Phase 38.5: Secure Capability Interop** - Optional authkey readiness/status/fingerprint interop using handles, masked metadata, or proofs; no hard dependency and no plaintext secret resolution inside memory-nexus. Completed 2026-06-06.
 - [x] **Phase 38.6: Durable Friction Query Contract** - Stable durable `memory friction list` filters, counts, exit codes, JSON schema, timezone semantics, and privacy-safe query handling. Completed 2026-06-06.
-- [ ] **Phase 38.7: Evaluation Harness and Regression Fixtures** - Executable eval runner, fixtures, report schema, and release-gate integration for v5 behavior checks.
+- [x] **Phase 38.7: Evaluation Harness and Regression Fixtures** - Executable eval runner, fixtures, report schema, and release-gate integration for v5 behavior checks. Completed 2026-06-07.
 - [ ] **Phase 39: Persona and Procedural Memory** - Centralized developer/agent profile projection with provenance, confidence, review, and scoped context injection.
 - [ ] **Phase 40: Temporal Semantic Graph** - Entity-relationship extraction, temporal graph projection, and graph-enriched retrieval in the links/entities tables.
 - [ ] **Phase 41: Importance, Utility, and Recall Ranking** - Utility metrics, memory-kind half-life policies, and explainable ranking.
@@ -478,13 +478,20 @@ Rationale: Phase 32 explicitly deferred friction envelope adoption per audit §1
 
 **Goal**: Turn the v5 evaluation baseline into an executable regression harness with fixtures and release-gate evidence.
 **Depends on**: Phase 38.6 and Phase 38.2.5
-**Requirements**: EVAL-02, EVAL-03, EVAL-04
+**Requirements**: EVAL-02, EVAL-03. EVAL-04 is enabled by this phase but remains a Phase 43 consumption gate.
 **Success Criteria** (what must be TRUE):
   1. `bun run eval:v5` or equivalent loads fixtures and emits schema-versioned JSON results.
   2. Fixtures cover privacy, leakage, supersedence, sync recovery, friction filters, persona, graph, ranking, and dreaming.
   3. Phase 43 can consume eval output as readiness evidence.
   4. Eval fixtures are sanitized and do not store secrets or private raw transcripts.
-**Plans**: Placeholder directory exists; plan after Phase 38.6 and 38.2.5.
+**Plans**: 1/1 complete. See `.planning/phases/38.7-evaluation-harness-regression-fixtures/README.md`.
+**Status**: Completed 2026-06-07.
+**Completion Evidence**:
+  - `bun run eval:v5` loads 9 sanitized fixtures from `docs/evals/fixtures/v5` and emits `schema_version: "1"` JSON.
+  - Fixture coverage includes privacy, cross-project leakage, supersedence, sync recovery, friction filters, persona, graph, ranking, and dreaming.
+  - Behavior-backed fixtures exercise `PatternRedactor` and `SqliteFrictionRepository`; persona, graph, ranking, dreaming, and remaining future surfaces are explicit contract fixtures.
+  - `bun run eval:v5` is part of `bun run quality`; `bun run eval:v5:market` fails while contract fixtures remain so Phase 43 cannot treat planned behavior as shipped behavior.
+  - Verification: focused eval tests passed, `bun run eval:v5` passed, `bun run typecheck` passed, and full `bun run quality` passed (4,254 pass, 0 fail).
 
 ---
 
@@ -714,7 +721,7 @@ v5.0
 | 38.4. Remote CLI, Operations, Backup, and Recovery | v5.0 | 1/1 | Complete | 2026-06-06 |
 | 38.5. Secure Capability Interop | v5.0 | 1/1 | Complete | 2026-06-06 |
 | 38.6. Durable Friction Query Contract | v5.0 | 1/1 | Complete | 2026-06-06 |
-| 38.7. Evaluation Harness and Regression Fixtures | v5.0 | TBD | Planned | - |
+| 38.7. Evaluation Harness and Regression Fixtures | v5.0 | 1/1 | Complete | 2026-06-07 |
 | 39. Persona and Procedural Memory | v5.0 | TBD | Planned | - |
 | 40. Temporal Semantic Graph | v5.0 | TBD | Planned | - |
 | 41. Importance, Utility, and Recall Ranking | v5.0 | TBD | Planned | - |
@@ -725,4 +732,4 @@ v5.0
 
 ---
 
-*Last updated: 2026-06-06 (Phase 38.6 complete; durable friction query contract in place)*
+*Last updated: 2026-06-07 (Phase 38.7 complete; v5 evaluation harness in place)*
