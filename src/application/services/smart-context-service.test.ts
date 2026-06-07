@@ -18,10 +18,12 @@ import {
 } from "./smart-context-service.js";
 import { Fact } from "../../domain/entities/fact.js";
 import { FrictionEntry } from "../../domain/entities/friction-entry.js";
+import { PersonaEntry } from "../../domain/entities/persona-entry.js";
 import type {
     IFactRepository,
     IFrictionRepository,
     FrictionStats,
+    IPersonaRepository,
 } from "../../domain/ports/repositories.js";
 
 // -- Helpers --
@@ -162,9 +164,51 @@ function createBlockingGovernancePolicy(blockedIds: string[]): IContextGovernanc
     const blocked = new Set(blockedIds);
     return {
         async filterAllowed(surface, items, getTargetId) {
-            expect(surface).toBe("fact");
+            expect(["fact", "persona"]).toContain(surface);
             return items.filter((item) => !blocked.has(getTargetId(item)));
         },
+    };
+}
+
+function makePersonaEntry(overrides: {
+    entryId: string;
+    content: string;
+    project?: string;
+    visibility?: "project" | "global";
+    why?: string;
+}): PersonaEntry {
+    const visibility = overrides.visibility ?? "project";
+    return PersonaEntry.create({
+        entryId: overrides.entryId,
+        kind: "preference",
+        content: overrides.content,
+        project: overrides.project,
+        visibility,
+        sourceEventIds: [`evt-${overrides.entryId}`],
+        sourceKinds: ["preference"],
+        confidence: 0.9,
+        scope: visibility === "project"
+            ? { project: overrides.project, visibility }
+            : { visibility },
+        reviewStatus: "pending_review",
+        reviewAfter: new Date("2026-07-07T00:00:00.000Z"),
+        why: overrides.why ?? "Derived from an active preference fact.",
+        createdAt: new Date("2026-06-07T00:00:00.000Z"),
+        updatedAt: new Date("2026-06-07T00:00:00.000Z"),
+    });
+}
+
+function createMockPersonaRepo(entries: PersonaEntry[]): IPersonaRepository {
+    return {
+        async save(entry) { return entry; },
+        async saveMany(items) { return items; },
+        async findByEntryId(entryId) { return entries.find((entry) => entry.entryId === entryId) ?? null; },
+        async findAll() { return entries; },
+        async findForContext(project) {
+            return entries.filter((entry) => entry.visibility === "global" || entry.project === project);
+        },
+        async deleteByProject() {},
+        async clearAll() {},
     };
 }
 
@@ -273,6 +317,70 @@ describe("SmartContextService", () => {
             expect(decisions).toBeDefined();
             expect(decisions!.priority).toBe(1);
             expect(decisions!.content).toContain("hexagonal architecture");
+        });
+
+        test("injects governed persona entries with why-included metadata and no unrelated project leakage", async () => {
+            const personaRepo = createMockPersonaRepo([
+                makePersonaEntry({
+                    entryId: "memory-persona",
+                    project: PROJECT_NAME,
+                    content: "Prefer durable disk artifacts.",
+                    why: "Derived from repeated corrections.",
+                }),
+                makePersonaEntry({
+                    entryId: "global-persona",
+                    visibility: "global",
+                    content: "Use symlinked project paths.",
+                    why: "Derived from global rule facts.",
+                }),
+                makePersonaEntry({
+                    entryId: "authkey-persona",
+                    project: "authkey",
+                    content: "Authkey-only private preference.",
+                }),
+            ]);
+            service = new SmartContextService({
+                projectResolver: mockResolver,
+                factRepo: mockFactRepo,
+                frictionRepo: mockFrictionRepo,
+                personaRepo,
+            });
+
+            const result = await service.getContext({ projectFilter: "test-project" });
+
+            const persona = result!.sections.find((section) => section.key === "persona");
+            expect(persona?.content).toContain("Prefer durable disk artifacts.");
+            expect(persona?.content).toContain("why: Derived from repeated corrections.");
+            expect(persona?.content).toContain("Use symlinked project paths.");
+            expect(persona?.content).not.toContain("Authkey-only private preference.");
+        });
+
+        test("governance controls suppress persona entries before context assembly", async () => {
+            const personaRepo = createMockPersonaRepo([
+                makePersonaEntry({
+                    entryId: "allowed-persona",
+                    project: PROJECT_NAME,
+                    content: "Allowed persona entry.",
+                }),
+                makePersonaEntry({
+                    entryId: "blocked-persona",
+                    project: PROJECT_NAME,
+                    content: "Blocked persona entry.",
+                }),
+            ]);
+            service = new SmartContextService({
+                projectResolver: mockResolver,
+                factRepo: mockFactRepo,
+                frictionRepo: mockFrictionRepo,
+                personaRepo,
+                governancePolicy: createBlockingGovernancePolicy(["blocked-persona"]),
+            });
+
+            const result = await service.getContext({ projectFilter: "test-project" });
+
+            const persona = result!.sections.find((section) => section.key === "persona");
+            expect(persona?.content).toContain("Allowed persona entry.");
+            expect(persona?.content).not.toContain("Blocked persona entry.");
         });
 
         test("section 2: Recent Learnings from facts table (priority 2)", async () => {

@@ -61,3 +61,12 @@ export {
   type MemoryGovernanceStatus,
   type MemoryGovernanceSurface,
 } from "./memory-governance.js";
+export {
+  PersonaEntry,
+  PERSONA_ENTRY_CONTROLS,
+  PERSONA_ENTRY_KINDS,
+  type PersonaEntryJson,
+  type PersonaEntryKind,
+  type PersonaEntryParams,
+  type PersonaReviewStatus,
+} from "./persona-entry.js";

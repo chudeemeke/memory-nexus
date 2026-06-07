@@ -6,7 +6,7 @@
 - SHIPPED **v2.0 Hybrid Search and Rebrand** -- Phases 13-22 (shipped 2026-03-01)
 - SHIPPED **v3.0 Knowledge Layer + Friction Logging** -- Phases 23-29.1 (shipped 2026-04-02)
 - SHIPPED **v4.0 Intelligence Layer** -- Phases 30-37 plus 32.5, 36.8, 36.9, and 36.10 (published 2026-05-30 as `@chude/memory@4.0.0`; architecture audit LOCKED 2026-05-13, recommendation A-prime; 2026-05-27 foundation review added pre-publish security hardening before GA; Phase 36.9 coverage gate restored 2026-05-30; Phase 36.10 hardened legacy memory-file defaults before publish)
-- IN PROGRESS **v5.0 Market-Leader Memory Platform** -- Phases 38.0-44 (started 2026-06-05; Phase 38.7 evaluation harness complete; added consent/provenance, eval harness, feature-completeness/UX, and release-candidate handoff gates)
+- IN PROGRESS **v5.0 Market-Leader Memory Platform** -- Phases 38.0-44 (started 2026-06-05; Phase 39 persona/procedural memory complete; added consent/provenance, eval harness, feature-completeness/UX, and release-candidate handoff gates)
 
 ## Phases
 
@@ -96,7 +96,7 @@
 - [x] **Phase 38.5: Secure Capability Interop** - Optional authkey readiness/status/fingerprint interop using handles, masked metadata, or proofs; no hard dependency and no plaintext secret resolution inside memory-nexus. Completed 2026-06-06.
 - [x] **Phase 38.6: Durable Friction Query Contract** - Stable durable `memory friction list` filters, counts, exit codes, JSON schema, timezone semantics, and privacy-safe query handling. Completed 2026-06-06.
 - [x] **Phase 38.7: Evaluation Harness and Regression Fixtures** - Executable eval runner, fixtures, report schema, and release-gate integration for v5 behavior checks. Completed 2026-06-07.
-- [ ] **Phase 39: Persona and Procedural Memory** - Centralized developer/agent profile projection with provenance, confidence, review, and scoped context injection.
+- [x] **Phase 39: Persona and Procedural Memory** - Centralized developer/agent profile projection with provenance, confidence, review, and scoped context injection. Completed 2026-06-07.
 - [ ] **Phase 40: Temporal Semantic Graph** - Entity-relationship extraction, temporal graph projection, and graph-enriched retrieval in the links/entities tables.
 - [ ] **Phase 41: Importance, Utility, and Recall Ranking** - Utility metrics, memory-kind half-life policies, and explainable ranking.
 - [ ] **Phase 42: Dreaming Consolidation** - Audited asynchronous consolidation, promotion, supersedence, and dream logs.
@@ -489,7 +489,8 @@ Rationale: Phase 32 explicitly deferred friction envelope adoption per audit §1
 **Completion Evidence**:
   - `bun run eval:v5` loads 9 sanitized fixtures from `docs/evals/fixtures/v5` and emits `schema_version: "1"` JSON.
   - Fixture coverage includes privacy, cross-project leakage, supersedence, sync recovery, friction filters, persona, graph, ranking, and dreaming.
-  - Behavior-backed fixtures exercise `PatternRedactor` and `SqliteFrictionRepository`; persona, graph, ranking, dreaming, and remaining future surfaces are explicit contract fixtures.
+  - Initial behavior-backed fixtures exercise `PatternRedactor` and `SqliteFrictionRepository`; Phase 39 later promoted persona coverage through `PersonaProfileService`.
+  - Remaining graph, ranking, dreaming, and adjacent future-surface fixtures are explicit contract fixtures until their phases replace them with behavior-backed checks.
   - `bun run eval:v5` is part of `bun run quality`; `bun run eval:v5:market` fails while contract fixtures remain so Phase 43 cannot treat planned behavior as shipped behavior.
   - Verification: focused eval tests passed, `bun run eval:v5` passed, `bun run typecheck` passed, and full `bun run quality` passed (4,254 pass, 0 fail).
 
@@ -504,7 +505,16 @@ Rationale: Phase 32 explicitly deferred friction envelope adoption per audit §1
   1. Profile projection compiles preferences, repeated corrections, friction, decisions, and validated behavior patterns.
   2. Entries include provenance, confidence, scope, expiry/review metadata, and edit/suppress/invalidate controls.
   3. `memory context` can include persona/procedural memory with why-included metadata and no cross-project leakage.
-**Plans**: Placeholder directory exists; plan after Phase 38.7.
+**Plans**: 1/1 complete. See `.planning/phases/39-persona-procedural-memory/README.md`.
+**Status**: Completed 2026-06-07.
+**Completion Evidence**:
+  - Added `PersonaEntry`, `IPersonaRepository`, `persona_entries`, and `SqlitePersonaRepository` with parameterized SQL and context-aware filters.
+  - Added `PersonaProfileService` to derive governed entries from active preferences, corrections, validated procedures, decision patterns, and recurring friction patterns.
+  - Registered persona governance entries and added fact-event persona projection through the projection registry.
+  - Added `memory profile show/export/rebuild` plus shell completion/help snapshot coverage.
+  - Integrated persona/procedural memory into `memory context` with governance filtering, scoped inclusion, confidence, review, controls, and why-included metadata.
+  - Promoted `repeated_correction_to_persona` to behavior-backed eval coverage; `bun run eval:v5` now passes 9/9 with 3 behavior fixtures and 6 contract fixtures.
+  - Verification: focused Phase 39 tests passed, `bun run typecheck` passed, `bun run eval:v5` passed, full `bun run quality` passed (4,281 pass, 0 fail), coverage statements 97.2%, branches 95.19%, functions 96.19%, lines 97.31%, `gitleaks detect --no-banner --redact --source .` passed, and `git diff --check` passed.
 
 ---
 
@@ -722,7 +732,7 @@ v5.0
 | 38.5. Secure Capability Interop | v5.0 | 1/1 | Complete | 2026-06-06 |
 | 38.6. Durable Friction Query Contract | v5.0 | 1/1 | Complete | 2026-06-06 |
 | 38.7. Evaluation Harness and Regression Fixtures | v5.0 | 1/1 | Complete | 2026-06-07 |
-| 39. Persona and Procedural Memory | v5.0 | TBD | Planned | - |
+| 39. Persona and Procedural Memory | v5.0 | 1/1 | Complete | 2026-06-07 |
 | 40. Temporal Semantic Graph | v5.0 | TBD | Planned | - |
 | 41. Importance, Utility, and Recall Ranking | v5.0 | TBD | Planned | - |
 | 42. Dreaming Consolidation | v5.0 | TBD | Planned | - |
@@ -732,4 +742,4 @@ v5.0
 
 ---
 
-*Last updated: 2026-06-07 (Phase 38.7 complete; v5 evaluation harness in place)*
+*Last updated: 2026-06-07 (Phase 39 complete; Phase 40 next)*

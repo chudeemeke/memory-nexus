@@ -1,8 +1,22 @@
 import { initializeDatabase } from "../../src/infrastructure/database/connection.js";
 import { SqliteFrictionRepository } from "../../src/infrastructure/database/repositories/friction-repository.js";
+import { PersonaProfileService } from "../../src/application/services/persona-profile-service.js";
 import { PatternRedactor } from "../../src/infrastructure/security/pattern-redactor.js";
+import { Fact, type FactType } from "../../src/domain/entities/fact.js";
 import { FrictionEntry } from "../../src/domain/entities/friction-entry.js";
-import type { FrictionQueryOptions } from "../../src/domain/ports/repositories.js";
+import type { MemoryEventEnvelope } from "../../src/domain/entities/memory-event.js";
+import type { MemoryGovernanceEntry, MemoryGovernanceSurface } from "../../src/domain/entities/memory-governance.js";
+import type { PersonaEntry } from "../../src/domain/entities/persona-entry.js";
+import type {
+  FrictionPattern,
+  FrictionQueryOptions,
+  FrictionStats,
+  IFactRepository,
+  IFrictionRepository,
+  IMemoryGovernanceRepository,
+  IPersonaRepository,
+  MemoryGovernanceListOptions,
+} from "../../src/domain/ports/repositories.js";
 import {
   type V5EvalCheckResult,
   type V5EvalFixture,
@@ -155,6 +169,10 @@ async function evaluateSyncRecovery(fixture: V5EvalFixture): Promise<V5EvalResul
 }
 
 async function evaluatePersona(fixture: V5EvalFixture): Promise<V5EvalResult> {
+  if (fixture.mode === "behavior") {
+    return evaluatePersonaBehavior(fixture);
+  }
+
   const expected = fixture.expected;
   const entries = recordArray(fixture.input.entries, "entries");
   const requiredControls = stringArray(expected.requiredControls, "requiredControls");
@@ -176,6 +194,51 @@ async function evaluatePersona(fixture: V5EvalFixture): Promise<V5EvalResult> {
   }
 
   return finalize(fixture, checks, { entry_count: entries.length });
+}
+
+async function evaluatePersonaBehavior(fixture: V5EvalFixture): Promise<V5EvalResult> {
+  const expected = fixture.expected;
+  const project = optionalString(fixture.input.project);
+  const facts = recordArray(fixture.input.facts, "facts").map(factFromFixture);
+  const personaRepo = createPersonaRepo();
+  const governanceRepo = createGovernanceRepo();
+  const service = new PersonaProfileService({
+    factRepo: createFactRepo(facts),
+    frictionRepo: createFrictionRepo([]),
+    personaRepo,
+    governanceRepo,
+    now: () => new Date("2026-06-07T00:00:00.000Z"),
+  });
+
+  const rebuild = await service.rebuildProfile(project ? { project } : {});
+  const entries = rebuild.entries;
+  const requiredControls = stringArray(expected.requiredControls, "requiredControls");
+  const requiredContent = stringArray(expected.requiredContent, "requiredContent");
+  const requiredKinds = stringArray(expected.requiredKinds, "requiredKinds");
+  const minConfidence = numberValue(expected.minConfidence, "minConfidence");
+
+  const checks: V5EvalCheckResult[] = [
+    check("profile service produced persona entries", entries.length > 0),
+    ...requiredContent.map((fragment) =>
+      check("required persona content is generated", entries.some((entry) => entry.content.includes(fragment)), fragment),
+    ),
+    ...requiredKinds.map((kind) =>
+      check("required persona kind is generated", entries.some((entry) => entry.kind === kind), kind),
+    ),
+    check("generated entries meet confidence threshold", entries.every((entry) => entry.confidence >= minConfidence)),
+    check("generated entries include provenance", entries.every((entry) => entry.sourceEventIds.length > 0 && entry.sourceKinds.length > 0)),
+    check("generated entries include explicit scope", entries.every((entry) => isNonEmptyString(entry.scope.visibility))),
+    check("generated entries include review metadata", entries.every((entry) => entry.reviewAfter instanceof Date && entry.reviewStatus.length > 0)),
+    check("generated entries expose required user controls", entries.every((entry) => requiredControls.every((control) => entry.controls.includes(control)))),
+    check("persona governance entries are registered", governanceRepo.saved.length === entries.length),
+  ];
+
+  return finalize(fixture, checks, {
+    entry_count: entries.length,
+    generated_entry_ids: entries.map((entry) => entry.entryId),
+    generated_kinds: entries.map((entry) => entry.kind),
+    governance_count: governanceRepo.saved.length,
+  });
 }
 
 async function evaluateGraph(fixture: V5EvalFixture): Promise<V5EvalResult> {
@@ -353,4 +416,166 @@ function numberValue(value: unknown, name: string): number {
     throw new Error(`${name} must be a finite number`);
   }
   return value;
+}
+
+function optionalRecord(value: unknown): Record<string, unknown> | undefined {
+  if (value === undefined || value === null) {
+    return undefined;
+  }
+  return recordValue(value, "value");
+}
+
+function factFromFixture(input: Record<string, unknown>): Fact {
+  return Fact.create({
+    uuid: stringValue(input.uuid, "fact.uuid"),
+    type: stringValue(input.type, "fact.type") as FactType,
+    project: stringValue(input.project, "fact.project"),
+    content: stringValue(input.content, "fact.content"),
+    metadata: optionalRecord(input.metadata),
+    observedAt: new Date(stringValue(input.observedAt, "fact.observedAt")),
+    supersededAt: input.supersededAt ? new Date(stringValue(input.supersededAt, "fact.supersededAt")) : null,
+    supersededBy: optionalString(input.supersededBy) ?? null,
+  });
+}
+
+function createFactRepo(facts: Fact[]): IFactRepository {
+  return {
+    async findById(id: number) {
+      return facts.find((fact) => fact.id === id) ?? null;
+    },
+    async findByUuid(uuid: string) {
+      return facts.find((fact) => fact.uuid === uuid) ?? null;
+    },
+    async findByProject(project: string) {
+      return facts.filter((fact) => fact.project === project);
+    },
+    async findRecent(limit: number) {
+      return facts.slice(0, limit);
+    },
+    async save(fact: Fact) {
+      facts.push(fact);
+      return fact;
+    },
+    async saveMany(items: Fact[]) {
+      facts.push(...items);
+      return items;
+    },
+    async search(query: string, limit = 10) {
+      return facts.filter((fact) => fact.content.includes(query)).slice(0, limit);
+    },
+    async supersede(uuid: string, supersededAt: Date, supersededByUuid: string) {
+      const index = facts.findIndex((fact) => fact.uuid === uuid);
+      const current = facts[index];
+      if (current) {
+        facts[index] = current.withSuperseded(supersededAt, supersededByUuid);
+      }
+    },
+    async findAll() {
+      return facts;
+    },
+    async clearAll() {
+      facts.length = 0;
+    },
+  };
+}
+
+function createFrictionRepo(patterns: FrictionPattern[]): IFrictionRepository {
+  return {
+    async save(entry: FrictionEntry) {
+      return entry;
+    },
+    async findById() {
+      return null;
+    },
+    async findOpen() {
+      return [];
+    },
+    async findAll() {
+      return [];
+    },
+    async query() {
+      return { entries: [], totalCount: 0 };
+    },
+    async resolve() {},
+    async updateStatus() {},
+    async getStats(): Promise<FrictionStats> {
+      return {
+        total: 0,
+        open: 0,
+        resolved: 0,
+        wontFix: 0,
+        bySeverity: { low: 0, medium: 0, high: 0, critical: 0 },
+        byCategory: {},
+        byTool: {},
+        meanTimeToResolve: null,
+        oldestOpen: null,
+      };
+    },
+    async getWeeklyTrends() {
+      return [];
+    },
+    async markReviewed() {},
+    async findPatterns() {
+      return patterns;
+    },
+    async deleteByPattern() {
+      return 0;
+    },
+  };
+}
+
+function createPersonaRepo(): IPersonaRepository & { saved: PersonaEntry[] } {
+  const repo = {
+    saved: [] as PersonaEntry[],
+    async save(entry: PersonaEntry) {
+      repo.saved.push(entry);
+      return entry;
+    },
+    async saveMany(entries: PersonaEntry[]) {
+      repo.saved.push(...entries);
+      return entries;
+    },
+    async findByEntryId(entryId: string) {
+      return repo.saved.find((entry) => entry.entryId === entryId) ?? null;
+    },
+    async findAll() {
+      return repo.saved;
+    },
+    async findForContext() {
+      return repo.saved;
+    },
+    async deleteByProject(project: string) {
+      repo.saved = repo.saved.filter((entry) => entry.project !== project);
+    },
+    async clearAll() {
+      repo.saved = [];
+    },
+  };
+  return repo;
+}
+
+function createGovernanceRepo(): IMemoryGovernanceRepository & { saved: MemoryGovernanceEntry[] } {
+  const repo = {
+    saved: [] as MemoryGovernanceEntry[],
+    async save(entry: MemoryGovernanceEntry) {
+      repo.saved.push(entry);
+      return entry;
+    },
+    async findByTarget(_surface: MemoryGovernanceSurface, targetId: string) {
+      return repo.saved.find((entry) => entry.targetId === targetId) ?? null;
+    },
+    async findByTargetIds(_surface: MemoryGovernanceSurface, targetIds: string[]) {
+      return repo.saved.filter((entry) => targetIds.includes(entry.targetId));
+    },
+    async findAll(_options?: MemoryGovernanceListOptions) {
+      return repo.saved;
+    },
+    async applyMemoryEvent(_event: MemoryEventEnvelope) {
+      return null;
+    },
+    async clearAll() {
+      repo.saved = [];
+    },
+  };
+  return repo;
 }

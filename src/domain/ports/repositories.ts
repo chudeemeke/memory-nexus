@@ -25,6 +25,7 @@ import type {
 import type { BackfillState } from "../entities/backfill-state.js";
 import type { ProjectPath } from "../value-objects/project-path.js";
 import type { Fact } from "../entities/fact.js";
+import type { PersonaEntry, PersonaEntryKind } from "../entities/persona-entry.js";
 import type {
   MemoryGovernanceEntry,
   MemoryGovernanceStatus,
@@ -595,6 +596,28 @@ export interface FrictionQueryOptions {
 export interface FrictionQueryResult {
     entries: FrictionEntry[];
     totalCount: number;
+}
+
+export interface PersonaListOptions {
+  project?: string | undefined;
+  visibility?: "project" | "workspace" | "global" | undefined;
+  kind?: PersonaEntryKind | undefined;
+  limit?: number | undefined;
+}
+
+export interface PersonaContextOptions {
+  includeGlobal?: boolean | undefined;
+  limit?: number | undefined;
+}
+
+export interface IPersonaRepository {
+  save(entry: PersonaEntry): Promise<PersonaEntry>;
+  saveMany(entries: PersonaEntry[]): Promise<PersonaEntry[]>;
+  findByEntryId(entryId: string): Promise<PersonaEntry | null>;
+  findAll(options?: PersonaListOptions): Promise<PersonaEntry[]>;
+  findForContext(project: string, options?: PersonaContextOptions): Promise<PersonaEntry[]>;
+  deleteByProject(project: string): Promise<void>;
+  clearAll(): Promise<void>;
 }
 
 /**

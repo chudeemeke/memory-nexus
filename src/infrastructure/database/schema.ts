@@ -485,6 +485,36 @@ CREATE INDEX IF NOT EXISTS idx_memory_governance_events_occurred ON memory_gover
 `;
 
 /**
+ * Persona/profile projection table.
+ *
+ * Derived from canonical fact events and friction patterns. Governance for
+ * whether entries may be used lives in memory_governance(surface='persona').
+ */
+export const PERSONA_ENTRIES_TABLE = `
+CREATE TABLE IF NOT EXISTS persona_entries (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    entry_id TEXT UNIQUE NOT NULL,
+    kind TEXT NOT NULL CHECK (kind IN ('preference', 'procedure', 'correction', 'decision_pattern', 'friction_pattern')),
+    content TEXT NOT NULL,
+    project TEXT,
+    visibility TEXT NOT NULL CHECK (visibility IN ('project', 'workspace', 'global')),
+    source_event_ids TEXT NOT NULL,
+    source_kinds TEXT NOT NULL,
+    confidence REAL NOT NULL CHECK (confidence >= 0 AND confidence <= 1),
+    scope TEXT NOT NULL,
+    review_status TEXT NOT NULL CHECK (review_status IN ('pending_review', 'reviewed')),
+    review_after TEXT NOT NULL,
+    expires_at TEXT,
+    why TEXT NOT NULL,
+    created_at TEXT NOT NULL,
+    updated_at TEXT NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_persona_entries_project ON persona_entries(project);
+CREATE INDEX IF NOT EXISTS idx_persona_entries_kind ON persona_entries(kind);
+CREATE INDEX IF NOT EXISTS idx_persona_entries_visibility ON persona_entries(visibility);
+`;
+
+/**
  * Schema options for conditional table creation
  */
 
@@ -581,6 +611,7 @@ export const SCHEMA_SQL: readonly string[] = [
     EXTRACTION_LOG_TABLE,
     MEMORY_GOVERNANCE_TABLE,
     MEMORY_GOVERNANCE_EVENTS_TABLE,
+    PERSONA_ENTRIES_TABLE,
 ];
 
 

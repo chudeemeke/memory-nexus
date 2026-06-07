@@ -18,9 +18,10 @@
  * Zero imports from infrastructure layer.
  */
 
-import type { IFactRepository, IFrictionRepository } from "../../domain/ports/repositories.js";
+import type { IFactRepository, IFrictionRepository, IPersonaRepository } from "../../domain/ports/repositories.js";
 import type { Fact } from "../../domain/entities/fact.js";
 import type { FrictionEntry } from "../../domain/entities/friction-entry.js";
+import type { PersonaEntry } from "../../domain/entities/persona-entry.js";
 import type { MemoryGovernanceSurface } from "../../domain/entities/memory-governance.js";
 import { allocateBudget, type BudgetSection } from "./budget-allocator.js";
 
@@ -107,6 +108,7 @@ export interface SmartContextDeps {
     projectResolver: IProjectResolver;
     factRepo: IFactRepository;
     frictionRepo: IFrictionRepository;
+    personaRepo?: IPersonaRepository | undefined;
     governancePolicy?: IContextGovernancePolicy | undefined;
     /** Optional legacy session summary provider */
     getSessionSummary?: (projectFilter: string, days?: number) => Promise<string | null>;
@@ -135,6 +137,14 @@ function formatFrictionLine(entry: FrictionEntry): string {
     return `#${entry.id} (${entry.severity}/${entry.category}): ${entry.description}`;
 }
 
+function formatPersonaLine(entry: PersonaEntry): string {
+    const scope = entry.visibility === "global" ? "global" : entry.project ?? entry.visibility;
+    return [
+        `- ${entry.content}`,
+        `(confidence: ${entry.confidence.toFixed(2)}; scope: ${scope}; why: ${entry.why}; review: ${entry.reviewStatus} after ${entry.reviewAfter.toISOString()})`,
+    ].join(" ");
+}
+
 /**
  * Smart Context Service.
  *
@@ -145,6 +155,7 @@ export class SmartContextService {
     private readonly projectResolver: IProjectResolver;
     private readonly factRepo: IFactRepository;
     private readonly frictionRepo: IFrictionRepository;
+    private readonly personaRepo?: IPersonaRepository | undefined;
     private readonly governancePolicy?: IContextGovernancePolicy | undefined;
     private readonly getSessionSummary?: (projectFilter: string, days?: number) => Promise<string | null>;
 
@@ -152,6 +163,7 @@ export class SmartContextService {
         this.projectResolver = deps.projectResolver;
         this.factRepo = deps.factRepo;
         this.frictionRepo = deps.frictionRepo;
+        this.personaRepo = deps.personaRepo;
         this.governancePolicy = deps.governancePolicy;
         if (deps.getSessionSummary) {
             this.getSessionSummary = deps.getSessionSummary;
@@ -204,7 +216,13 @@ export class SmartContextService {
             sections.push(this.buildSection("preferences", "User Preferences", 3, formatFactList(activePreferences)));
         }
 
-        // Section 4: Observations (priority 4)
+        // Section 4: Persona and Procedural Memory (priority 4)
+        const personaContent = await this.buildPersonaContent(projectName);
+        if (personaContent) {
+            sections.push(this.buildSection("persona", "Persona and Procedural Memory", 4, personaContent));
+        }
+
+        // Section 5: Observations (priority 4 retained for backward-compatible ordering)
         const activeObservations = activeFacts.filter((f) => f.type === "observation");
         if (activeObservations.length > 0) {
             sections.push(this.buildSection("observations", "Observations", 4, formatFactList(activeObservations)));
@@ -322,6 +340,17 @@ export class SmartContextService {
         return entries.map(formatFrictionLine).join("\n");
     }
 
+    private async buildPersonaContent(projectName: string): Promise<string | null> {
+        if (!this.personaRepo) {
+            return null;
+        }
+        const entries = await this.filterAllowedPersona(await this.personaRepo.findForContext(projectName));
+        if (entries.length === 0) {
+            return null;
+        }
+        return entries.map(formatPersonaLine).join("\n");
+    }
+
     /**
      * Remove derived facts blocked by governance controls. Ungoverned facts are
      * allowed for backward compatibility with pre-governance databases.
@@ -331,6 +360,13 @@ export class SmartContextService {
             return facts;
         }
         return this.governancePolicy.filterAllowed("fact", facts, (fact) => fact.uuid);
+    }
+
+    private async filterAllowedPersona(entries: PersonaEntry[]): Promise<PersonaEntry[]> {
+        if (!this.governancePolicy || entries.length === 0) {
+            return entries;
+        }
+        return this.governancePolicy.filterAllowed("persona", entries, (entry) => entry.entryId);
     }
 
     /**

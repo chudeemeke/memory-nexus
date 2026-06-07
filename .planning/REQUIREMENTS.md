@@ -129,9 +129,11 @@ Phase 38.7 completed the executable harness and fixture coverage. `bun run eval:
 
 ### Persona and Procedural Memory
 
-- [ ] **PERS-01**: Developer/persona profile projection is generated from preferences, repeated corrections, friction, decisions, and validated behavior patterns.
-- [ ] **PERS-02**: Persona entries include provenance, confidence, scope, expiry/review metadata, and user-edit/suppress/invalidate controls.
-- [ ] **PERS-03**: `memory context` can include scoped persona/procedural memory with why-included metadata and no cross-project leakage.
+- [x] **PERS-01**: Developer/persona profile projection is generated from preferences, repeated corrections, friction, decisions, and validated behavior patterns.
+- [x] **PERS-02**: Persona entries include provenance, confidence, scope, expiry/review metadata, and user-edit/suppress/invalidate controls.
+- [x] **PERS-03**: `memory context` can include scoped persona/procedural memory with why-included metadata and no cross-project leakage.
+
+Phase 39 completed the governed persona/procedural memory surface. `PersonaProfileService` derives entries from active facts and recurring friction patterns, `persona_entries` persists scoped profile entries, governance entries enforce suppression/review state, `memory profile show/export/rebuild` exposes inspection/rebuild controls, context assembly includes only governed scoped persona entries with why metadata, and the persona eval fixture is behavior-backed.
 
 ### Temporal Semantic Graph
 
@@ -270,9 +272,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 | EVAL-02 | Phase 38.7 | Complete |
 | EVAL-03 | Phase 38.7 | Complete |
 | EVAL-04 | Phase 43 | Pending |
-| PERS-01 | Phase 39 | Pending |
-| PERS-02 | Phase 39 | Pending |
-| PERS-03 | Phase 39 | Pending |
+| PERS-01 | Phase 39 | Complete |
+| PERS-02 | Phase 39 | Complete |
+| PERS-03 | Phase 39 | Complete |
 | GRAPH-01 | Phase 40 | Pending |
 | GRAPH-02 | Phase 40 | Pending |
 | GRAPH-03 | Phase 40 | Pending |
@@ -299,11 +301,11 @@ Which phases cover which requirements. Updated during roadmap creation.
 - v4.0 requirements: 25 total (excluding QUAL cross-cutting)
 - Cross-cutting: 4 QUAL requirements
 - v5.0 requirements: 51 total
-- v5.0 complete: 26/51
-- v5.0 pending: 25/51
+- v5.0 complete: 29/51
+- v5.0 pending: 22/51
 - v5.0 mapped to phases: 51/51
 - v5.0 unmapped: 0
 
 ---
 *Requirements defined: 2026-04-03*
-*Last updated: 2026-06-07 after Phase 38.7 evaluation harness completion*
+*Last updated: 2026-06-07 after Phase 39 persona/procedural memory completion*

@@ -36,7 +36,7 @@ _memory_completion() {
     local cur prev words cword
     _init_completion || return
 
-    local commands="sync search list stats context related show browse governance remote install uninstall status doctor audit-secrets purge export import completion"
+    local commands="sync search list stats context related show browse governance profile remote install uninstall status doctor audit-secrets purge export import completion"
     local search_opts="--limit --project --role --session --after --before --case-sensitive --json --verbose --quiet"
     local list_opts="--limit --project --after --before --sort --json --verbose --quiet"
     local stats_opts="--projects --json --verbose --quiet"
@@ -45,6 +45,7 @@ _memory_completion() {
     local show_opts="--json --verbose --quiet"
     local browse_opts="--project"
     local governance_opts="--surface --project --status --limit --reason --at --scope --json"
+    local profile_opts="show export rebuild --kind --limit --all --json"
     local sync_opts="--force --dry-run --remote --verbose --quiet"
     local remote_opts="set remove status preflight doctor backup restore rollback --json --allow-local-path --no-auto-pull --no-auto-push --confirm"
     local install_opts="--force"
@@ -91,6 +92,10 @@ _memory_completion() {
             ;;
         governance)
             COMPREPLY=( \$(compgen -W "list show suppress unsuppress invalidate expire review consent-grant consent-revoke \${governance_opts}" -- "\${cur}") )
+            return 0
+            ;;
+        profile)
+            COMPREPLY=( \$(compgen -W "\${profile_opts}" -- "\${cur}") )
             return 0
             ;;
         sync)
@@ -153,6 +158,7 @@ _memory_completion() {
             show) COMPREPLY=( \$(compgen -W "\${show_opts}" -- "\${cur}") ) ;;
             browse) COMPREPLY=( \$(compgen -W "\${browse_opts}" -- "\${cur}") ) ;;
             governance) COMPREPLY=( \$(compgen -W "list show suppress unsuppress invalidate expire review consent-grant consent-revoke \${governance_opts}" -- "\${cur}") ) ;;
+            profile) COMPREPLY=( \$(compgen -W "\${profile_opts}" -- "\${cur}") ) ;;
             sync) COMPREPLY=( \$(compgen -W "\${sync_opts}" -- "\${cur}") ) ;;
             remote) COMPREPLY=( \$(compgen -W "\${remote_opts}" -- "\${cur}") ) ;;
             install) COMPREPLY=( \$(compgen -W "\${install_opts}" -- "\${cur}") ) ;;
@@ -195,6 +201,7 @@ _memory() {
         'show:Show session details and conversation'
         'browse:Browse and select sessions interactively'
         'governance:Inspect and control derived memory consent/provenance state'
+        'profile:Inspect and rebuild governed persona/procedural memory'
         'remote:Manage remote event-log synchronization'
         'install:Install automatic sync hook'
         'uninstall:Remove automatic sync hook'
@@ -207,7 +214,7 @@ _memory() {
         'completion:Generate shell completion script'
     )
 
-    local -a search_opts list_opts stats_opts context_opts related_opts show_opts browse_opts governance_opts
+    local -a search_opts list_opts stats_opts context_opts related_opts show_opts browse_opts governance_opts profile_opts
     local -a sync_opts remote_opts install_opts uninstall_opts doctor_opts audit_secrets_opts purge_opts export_opts import_opts completion_shells
 
     search_opts=(
@@ -274,6 +281,14 @@ _memory() {
         '--reason[Reason for the control event]:reason'
         '--at[Expiry timestamp]:iso-date'
         '--scope[Consent scope]:scope'
+        '--json[Output as JSON]'
+    )
+
+    profile_opts=(
+        '1:action:(show export rebuild)'
+        '--kind[Persona entry kind]:kind:(preference procedure correction decision_pattern friction_pattern)'
+        '--limit[Maximum number of entries]:number'
+        '--all[Use every project scope where supported]'
         '--json[Output as JSON]'
     )
 
@@ -364,6 +379,7 @@ _memory() {
                 show) _arguments "\$show_opts[@]" ':session:' ;;
                 browse) _arguments "\$browse_opts[@]" ;;
                 governance) _arguments '1:action:(list show suppress unsuppress invalidate expire review consent-grant consent-revoke)' "\$governance_opts[@]" ':target:' ;;
+                profile) _arguments "\$profile_opts[@]" ':project:' ;;
                 sync) _arguments "\$sync_opts[@]" ;;
                 remote) _arguments "\$remote_opts[@]" ':repository-url:' ;;
                 install) _arguments "\$install_opts[@]" ;;
@@ -406,6 +422,7 @@ complete -c memory -n "__fish_use_subcommand" -a related -d "Find sessions relat
 complete -c memory -n "__fish_use_subcommand" -a show -d "Show session details and conversation"
 complete -c memory -n "__fish_use_subcommand" -a browse -d "Browse and select sessions interactively"
 complete -c memory -n "__fish_use_subcommand" -a governance -d "Inspect and control derived memory consent/provenance state"
+complete -c memory -n "__fish_use_subcommand" -a profile -d "Inspect and rebuild governed persona/procedural memory"
 complete -c memory -n "__fish_use_subcommand" -a remote -d "Manage remote event-log synchronization"
 complete -c memory -n "__fish_use_subcommand" -a install -d "Install automatic sync hook"
 complete -c memory -n "__fish_use_subcommand" -a uninstall -d "Remove automatic sync hook"
@@ -476,6 +493,13 @@ complete -c memory -n "__fish_seen_subcommand_from governance" -l reason -d "Rea
 complete -c memory -n "__fish_seen_subcommand_from governance" -l at -d "Expiry timestamp"
 complete -c memory -n "__fish_seen_subcommand_from governance" -l scope -d "Consent scope"
 complete -c memory -n "__fish_seen_subcommand_from governance" -l json -d "Output as JSON"
+
+# profile actions and options
+complete -c memory -n "__fish_seen_subcommand_from profile" -a "show export rebuild"
+complete -c memory -n "__fish_seen_subcommand_from profile" -l kind -d "Persona entry kind" -a "preference procedure correction decision_pattern friction_pattern"
+complete -c memory -n "__fish_seen_subcommand_from profile" -l limit -d "Maximum number of entries"
+complete -c memory -n "__fish_seen_subcommand_from profile" -l all -d "Use every project scope where supported"
+complete -c memory -n "__fish_seen_subcommand_from profile" -l json -d "Output as JSON"
 
 # sync options
 complete -c memory -n "__fish_seen_subcommand_from sync" -l force -d "Force re-sync all sessions"

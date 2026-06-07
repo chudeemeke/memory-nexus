@@ -41,6 +41,7 @@ export { createCompletionCommand, executeCompletionCommand } from "./completion.
 // Friction commands
 export { createFrictionCommand, executeFrictionCommand } from "./friction/index.js";
 export { createGovernanceCommand, executeGovernanceCommand } from "./governance.js";
+export { createProfileCommand, executeProfileCommand } from "./profile.js";
 
 // Backfill commands
 export { createBackfillCommand, executeBackfillCommand } from "./backfill.js";
@@ -83,6 +84,11 @@ export type {
   GovernanceCommandDeps,
   GovernanceCommandOptions,
 } from "./governance.js";
+export type {
+  ProfileAction,
+  ProfileCommandDeps,
+  ProfileCommandOptions,
+} from "./profile.js";
 export type {
   BackfillCommandOptions,
   BackfillServiceDeps,

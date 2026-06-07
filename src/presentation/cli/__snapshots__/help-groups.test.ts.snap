@@ -23,6 +23,8 @@ Query Commands:
   facts [options] <project>       View active facts for a project
   governance                      Inspect and control derived memory
                                   consent/provenance state
+  profile                         Inspect and rebuild governed
+                                  persona/procedural memory
 
 Data Commands:
   sync [options]                  Sync sessions from ~/.claude/projects/ to

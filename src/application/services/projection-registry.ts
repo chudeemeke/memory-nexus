@@ -4,7 +4,7 @@ export interface EventProjection<TContext> {
   name: string;
   consumedKinds: readonly MemoryEventKind[];
   reset?: (context: TContext) => void | Promise<void>;
-  apply: (event: MemoryEventEnvelope, context: TContext) => void | Promise<void>;
+  apply: (event: MemoryEventEnvelope, context: TContext) => void | boolean | Promise<void | boolean>;
 }
 
 export interface ProjectionReplayResult {
@@ -61,8 +61,10 @@ export class ProjectionRegistry<TContext> {
 
       for (const projection of this.projections) {
         if (projection.consumedKinds.includes(event.kind)) {
-          await projection.apply(event, context);
-          appliedProjectionNames.add(projection.name);
+          const applied = await projection.apply(event, context);
+          if (applied !== false) {
+            appliedProjectionNames.add(projection.name);
+          }
         }
       }
     }

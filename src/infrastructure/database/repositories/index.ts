@@ -57,3 +57,6 @@ export {
   governanceEntryFromFactEvent,
 } from "./memory-governance-repository.js";
 
+// Persona Repository
+export { SqlitePersonaRepository } from "./persona-repository.js";
+

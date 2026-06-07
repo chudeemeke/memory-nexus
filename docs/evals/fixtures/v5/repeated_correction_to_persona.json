@@ -3,7 +3,7 @@
   "id": "repeated_correction_to_persona",
   "title": "Repeated corrections become scoped persona entries with review controls",
   "dimension": "persona",
-  "mode": "contract",
+  "mode": "behavior",
   "ownerPhase": "39",
   "tags": ["persona", "procedural-memory", "review"],
   "sanitized": {
@@ -12,27 +12,27 @@
     "notes": ["Synthetic correction content derived from public project conventions, not transcript excerpts."]
   },
   "input": {
-    "entries": [
+    "project": "memory-nexus",
+    "facts": [
       {
-        "id": "prefer-durable-disk-artifacts",
+        "uuid": "fact-prefer-durable-disk-artifacts",
+        "type": "learning",
+        "project": "memory-nexus",
         "content": "For persistence-sensitive work, write durable disk artifacts rather than relying on chat memory.",
-        "provenance": {
-          "sourceEventIds": ["evt-correction-001", "evt-correction-002"],
-          "sourceKinds": ["correction", "instruction"]
+        "metadata": {
+          "persona_kind": "correction",
+          "source_kind": "correction",
+          "visibility": "global",
+          "confidence": 0.92,
+          "review_after_days": 30
         },
-        "confidence": 0.92,
-        "scope": {
-          "visibility": "global"
-        },
-        "review": {
-          "status": "pending_review",
-          "reviewAfter": "2026-07-07T00:00:00.000Z"
-        },
-        "controls": ["suppress", "invalidate", "expire"]
+        "observedAt": "2026-06-07T00:00:00.000Z"
       }
     ]
   },
   "expected": {
+    "requiredContent": ["durable disk artifacts"],
+    "requiredKinds": ["correction"],
     "requiredControls": ["suppress", "invalidate"],
     "requireProvenance": true,
     "requireReviewMetadata": true,

@@ -24,6 +24,7 @@ export {
     BACKFILL_STATE_TABLE,
     MEMORY_GOVERNANCE_TABLE,
     MEMORY_GOVERNANCE_EVENTS_TABLE,
+    PERSONA_ENTRIES_TABLE,
     type SchemaOptions,
 } from "./schema.js";
 
@@ -56,6 +57,7 @@ export {
   SqliteFrictionRepository,
   SqliteBackfillStateRepository,
   SqliteMemoryGovernanceRepository,
+  SqlitePersonaRepository,
 } from "./repositories/index.js";
 
 // Services

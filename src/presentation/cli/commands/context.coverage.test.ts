@@ -29,6 +29,10 @@ import {
   initializeDatabase,
   closeDatabase,
 } from "../../../infrastructure/database/index.js";
+import { PersonaEntry } from "../../../domain/entities/persona-entry.js";
+import { MemoryGovernanceEntry } from "../../../domain/entities/memory-governance.js";
+import { SqliteMemoryGovernanceRepository } from "../../../infrastructure/database/repositories/memory-governance-repository.js";
+import { SqlitePersonaRepository } from "../../../infrastructure/database/repositories/persona-repository.js";
 
 function seedSession(db: Database, id: string, projectName: string): void {
   db.run(
@@ -216,6 +220,57 @@ describe("executeContextCommand smart-context path", () => {
       dbPath,
     });
     expect([0, 1]).toContain(result.exitCode);
+  });
+
+  it("smart context includes governed persona entries from the real CLI composition root", async () => {
+    const { db } = initializeDatabase({ path: dbPath });
+    const personaRepo = new SqlitePersonaRepository(db);
+    const governanceRepo = new SqliteMemoryGovernanceRepository(db);
+    const entry = await personaRepo.save(PersonaEntry.create({
+      entryId: "persona-context-cli",
+      kind: "procedure",
+      content: "Verify repo state before claiming implementation status.",
+      project: "SmartProj",
+      visibility: "project",
+      sourceEventIds: ["source-context-cli"],
+      sourceKinds: ["validated_behavior"],
+      confidence: 0.9,
+      scope: { project: "SmartProj", visibility: "project" },
+      reviewStatus: "pending_review",
+      reviewAfter: new Date("2026-07-07T00:00:00Z"),
+      why: "Derived from validated procedural behavior.",
+      createdAt: new Date("2026-06-07T00:00:00Z"),
+      updatedAt: new Date("2026-06-07T00:00:00Z"),
+    }));
+    await governanceRepo.save(MemoryGovernanceEntry.create({
+      surface: "persona",
+      targetId: entry.entryId,
+      project: entry.project,
+      visibility: entry.visibility,
+      sourceEventIds: entry.sourceEventIds,
+      transformationMethod: "test",
+      actor: "memory",
+      confidence: entry.confidence,
+      redactionState: "redacted",
+      consentStatus: "not_required",
+      consentScopes: [],
+      scope: entry.scope,
+      status: "active",
+      createdAt: entry.createdAt,
+      updatedAt: entry.updatedAt,
+    }));
+    closeDatabase(db);
+
+    const result = await executeContextCommand("SmartProj", {
+      format: "ai",
+      budget: 1000,
+      dbPath,
+    });
+    const out = consoleLogSpy.mock.calls.map((call: unknown[]) => String(call[0])).join("\n");
+
+    expect(result.exitCode).toBe(0);
+    expect(out).toContain("Persona and Procedural Memory");
+    expect(out).toContain("Verify repo state before claiming implementation status");
   });
 
   it("smart context with --days passes days through to smart service", async () => {

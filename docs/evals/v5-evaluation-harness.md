@@ -53,15 +53,15 @@ Behavior-backed fixtures:
 
 - `secret_in_tool_output`: uses `PatternRedactor`.
 - `friction_query_contract`: uses `SqliteFrictionRepository` against an in-memory SQLite database.
+- `repeated_correction_to_persona`: uses `PersonaProfileService` through in-memory repository ports.
 
 Contract fixtures, to be promoted by later phases:
 
 - `project_scope_leakage`
 - `superseded_provider_fact`
 - `remote_sync_conflict`
-- `repeated_correction_to_persona`
 - `graph_stale_edge`
 - `ranking_evergreen_preference`
 - `dream_proposed_supersedence`
 
-Phase 39-42 must convert their related contract fixtures into behavior-backed evals as each product surface is implemented.
+Phase 40-42 must convert the remaining graph, ranking, dreaming, and adjacent contract fixtures into behavior-backed evals as each product surface is implemented.

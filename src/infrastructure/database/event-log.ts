@@ -21,6 +21,9 @@ import {
   SqliteMemoryGovernanceRepository,
   governanceEntryFromFactEvent,
 } from "./repositories/memory-governance-repository.js";
+import { SqlitePersonaRepository } from "./repositories/persona-repository.js";
+import { personaEntryFromFactEvent } from "../../application/services/persona-profile-service.js";
+import { MemoryGovernanceEntry } from "../../domain/entities/memory-governance.js";
 import { getMachineLogPath, getAllLogFiles } from "../paths.js";
 import { loadConfig } from "../hooks/config-manager.js";
 
@@ -122,6 +125,7 @@ export async function rebuildProjectionsWithReport(db: Database, logPath?: strin
   const sortedEvents = sortMemoryEvents(report.events);
   const registry = new ProjectionRegistry<ProjectionContext>([
     createFactsProjection(),
+    createPersonaProjection(),
     createGovernanceProjection(),
   ]);
   const replay = await registry.replay(sortedEvents, { db });
@@ -363,6 +367,50 @@ function createGovernanceProjection() {
     apply: async (event: MemoryEventEnvelope, context: ProjectionContext) => {
       const governanceRepo = new SqliteMemoryGovernanceRepository(context.db);
       await governanceRepo.applyMemoryEvent(event);
+    },
+  };
+}
+
+function createPersonaProjection() {
+  return {
+    name: "persona",
+    consumedKinds: FACT_EVENT_KINDS,
+    reset: (context: ProjectionContext) => {
+      context.db.run("DELETE FROM persona_entries;");
+    },
+    apply: async (event: MemoryEventEnvelope, context: ProjectionContext) => {
+      const fact = memoryEventToFact(event);
+      const entry = personaEntryFromFactEvent(fact, event.observedAt);
+      if (!entry) {
+        return false;
+      }
+
+      const personaRepo = new SqlitePersonaRepository(context.db);
+      const saved = await personaRepo.save(entry);
+      const governanceRepo = new SqliteMemoryGovernanceRepository(context.db);
+      const existingGovernance = await governanceRepo.findByTarget("persona", saved.entryId);
+      if (!existingGovernance) {
+        await governanceRepo.save(MemoryGovernanceEntry.create({
+          surface: "persona",
+          targetId: saved.entryId,
+          project: saved.project,
+          visibility: saved.visibility,
+          sourceEventIds: saved.sourceEventIds,
+          transformationMethod: "persona-event-projection",
+          actor: "memory",
+          confidence: saved.confidence,
+          redactionState: "redacted",
+          consentStatus: "not_required",
+          consentScopes: [],
+          scope: saved.scope,
+          status: "active",
+          createdAt: saved.createdAt,
+          updatedAt: saved.updatedAt,
+          expiresAt: saved.expiresAt,
+          lastEventId: event.eventId,
+        }));
+      }
+      return true;
     },
   };
 }

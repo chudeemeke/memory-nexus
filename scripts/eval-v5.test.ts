@@ -31,6 +31,10 @@ describe("v5 evaluation harness", () => {
     const friction = run.report.results.find((result) => result.dimension === "friction_query");
     expect(friction?.mode).toBe("behavior");
     expect(friction?.status).toBe("pass");
+
+    const persona = run.report.results.find((result) => result.fixture_id === "repeated_correction_to_persona");
+    expect(persona?.mode).toBe("behavior");
+    expect(persona?.status).toBe("pass");
   });
 
   test("fixture validation rejects raw secrets and private transcript markers", () => {

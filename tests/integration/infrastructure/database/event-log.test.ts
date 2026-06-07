@@ -570,6 +570,32 @@ describe("Event-Log SSOT Manager", () => {
     expect(JSON.parse(row.source_event_ids)).toEqual(["governed-fact"]);
   });
 
+  test("rebuildProjections creates persona projection entries for persona-worthy fact events", async () => {
+    const fact = Fact.create({
+      uuid: "persona-fact",
+      type: "preference",
+      project: "memory-nexus",
+      content: "Prefer durable disk artifacts for continuity work.",
+      metadata: { confidence: 0.91, source_kind: "preference" },
+      observedAt: new Date("2026-06-06T08:00:00Z"),
+    });
+
+    await appendEvent(fact, testLogPath);
+    const report = await rebuildProjectionsWithReport(db, testLogPath);
+
+    const persona = db.prepare("SELECT * FROM persona_entries WHERE entry_id LIKE ?")
+      .get("persona-preference-%") as any;
+    const governance = db.prepare("SELECT * FROM memory_governance WHERE surface = ? AND target_id = ?")
+      .get("persona", persona.entry_id) as any;
+
+    expect(report.replay.appliedProjections).toContain("persona");
+    expect(persona.content).toBe("Prefer durable disk artifacts for continuity work.");
+    expect(persona.project).toBe("memory-nexus");
+    expect(JSON.parse(persona.source_event_ids)).toEqual(["persona-fact"]);
+    expect(governance.transformation_method).toBe("persona-event-projection");
+    expect(governance.confidence).toBe(0.91);
+  });
+
   test("rebuildProjections applies governance controls after fact registration", async () => {
     const fact = Fact.create({
       uuid: "suppressed-governed-fact",
