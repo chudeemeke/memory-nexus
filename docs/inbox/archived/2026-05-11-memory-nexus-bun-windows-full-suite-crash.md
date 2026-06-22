@@ -10,13 +10,14 @@ affects_scope: this-project-only
 status: merged
 workaround_applied: run tests by subdirectory; workaround documented in README.md Development section
 resolved_at: 2026-05-28
-resolution_ref: local-worktree-verification
 priority_rationale: Current Windows verification on Bun 1.3.5 has the full-suite command passing with `bun test --timeout 15000`; README now keeps the historical workaround only as fallback if the upstream crash returns.
 ---
 
 ## Resolution (2026-05-28)
 
 Archived as resolved/stale against the current implementation and runtime behavior.
+
+Resolution reference: local-worktree-verification.
 
 Validation:
 - `bun --version` reports `1.3.5`.

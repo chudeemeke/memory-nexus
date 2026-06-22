@@ -583,6 +583,32 @@ CREATE INDEX IF NOT EXISTS idx_memory_utility_metrics_rank ON memory_utility_met
 `;
 
 /**
+ * Model-scoped embedding skip ledger.
+ *
+ * Stores only sanitized metadata for messages that a provider/model cannot
+ * embed, so deterministic provider-limit failures do not wedge future syncs.
+ */
+export const EMBEDDING_SKIPS_TABLE = `
+CREATE TABLE IF NOT EXISTS embedding_skips (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    message_id INTEGER NOT NULL,
+    model_hash TEXT NOT NULL,
+    model_name TEXT NOT NULL,
+    provider TEXT NOT NULL,
+    reason TEXT NOT NULL CHECK (reason IN ('payload_too_large')),
+    retryable INTEGER NOT NULL CHECK (retryable IN (0, 1)),
+    content_hash TEXT NOT NULL,
+    content_bytes INTEGER NOT NULL CHECK (content_bytes >= 0),
+    safe_error TEXT,
+    skipped_at TEXT NOT NULL,
+    FOREIGN KEY (message_id) REFERENCES messages_meta(rowid) ON DELETE CASCADE,
+    UNIQUE(message_id, model_hash, reason)
+);
+CREATE INDEX IF NOT EXISTS idx_embedding_skips_model ON embedding_skips(model_hash);
+CREATE INDEX IF NOT EXISTS idx_embedding_skips_message_model ON embedding_skips(message_id, model_hash);
+`;
+
+/**
  * Schema options for conditional table creation
  */
 
@@ -649,6 +675,8 @@ END;
  * 17. memory_files FTS triggers (depend on both memory_files tables)
  * 18. friction_log (no dependencies)
  * 19. backfill_state (no dependencies)
+ * 20. facts / governance / derived memory projections
+ * 21. embedding skip ledger (depends on messages_meta)
  *
  * Note: message_embeddings (vec0) is NOT in this array.
  * It is conditionally created in createSchema() when sqliteVecAvailable is true.
@@ -682,6 +710,7 @@ export const SCHEMA_SQL: readonly string[] = [
     PERSONA_ENTRIES_TABLE,
     GRAPH_EDGES_TABLE,
     MEMORY_UTILITY_METRICS_TABLE,
+    EMBEDDING_SKIPS_TABLE,
 ];
 
 

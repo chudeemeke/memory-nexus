@@ -9,13 +9,14 @@ fix_status: merged
 affects_scope: this-project-only
 status: merged
 resolved_at: 2026-05-28
-resolution_ref: local-worktree-verification
 priority_rationale: Decision = MIGRATE (not delete); execution deferred until architecture audit Stage 3 recommends an outcome in {A, B, C, D}. Outcome E (deprecate memory-nexus) would abandon the fix entirely.
 ---
 
 ## Resolution (2026-05-28)
 
 Archived as resolved/stale against the current implementation.
+
+Resolution reference: local-worktree-verification.
 
 Validation:
 - `tests/presentation/cli/commands/friction.test.ts` exists.

@@ -130,6 +130,57 @@ describe("EmbeddingRepository", () => {
             const result = repo.findUnembedded(10);
             expect(result).toHaveLength(0);
         });
+
+        test("model-scoped skip excludes current model without hiding new model retry", () => {
+            const rowids = insertTestMessages(db, 2);
+            repo.markSkipped({
+                messageId: rowids[0],
+                modelHash: "current-model-hash",
+                modelName: "nomic-embed-text",
+                provider: "ollama",
+                reason: "payload_too_large",
+                retryable: false,
+                contentHash: "a".repeat(64),
+                contentBytes: 12345,
+                safeError: "Provider payload exceeded request limit",
+            });
+
+            const currentModel = repo.findUnembedded(10, "current-model-hash");
+            expect(currentModel.map((message) => message.rowid)).toEqual([rowids[1]]);
+
+            const nextModel = repo.findUnembedded(10, "next-model-hash");
+            expect(nextModel.map((message) => message.rowid)).toEqual(rowids);
+        });
+
+        test("model-scoped skip is counted per model hash", () => {
+            const rowids = insertTestMessages(db, 2);
+            repo.markSkipped({
+                messageId: rowids[0],
+                modelHash: "hash-a",
+                modelName: "model-a",
+                provider: "ollama",
+                reason: "payload_too_large",
+                retryable: false,
+                contentHash: "b".repeat(64),
+                contentBytes: 100,
+                safeError: "payload too large",
+            });
+            repo.markSkipped({
+                messageId: rowids[1],
+                modelHash: "hash-b",
+                modelName: "model-b",
+                provider: "ollama",
+                reason: "payload_too_large",
+                retryable: false,
+                contentHash: "c".repeat(64),
+                contentBytes: 200,
+                safeError: "payload too large",
+            });
+
+            expect(repo.getSkippedCount("hash-a")).toBe(1);
+            expect(repo.getSkippedCount("hash-b")).toBe(1);
+            expect(repo.getSkippedCount()).toBe(2);
+        });
     });
 
     describe("storeBatch()", () => {

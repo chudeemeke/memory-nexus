@@ -1,8 +1,13 @@
 ---
+schema_version: "1.3"
 source_project: remotely
 created: 2026-05-28
+type: docs
 severity: medium
-status: archived
+fix_status: tested
+affects_scope: this-project-only
+status: merged
+resolved_at: 2026-05-30
 ---
 
 # remotely Phase 4.5-5 Consumer Impact

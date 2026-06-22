@@ -11,6 +11,12 @@ Cross-project context persistence for Claude Code sessions.
 **Package:** `@chude/memory` (binary: `memory`)
 **Install:** `bun add -g @chude/memory`
 
+## Product North Star
+
+Before planning, implementation, review, or release work, read `.planning/PROJECT.md` and treat its `Product North Star` section as normative project direction. It defines the intended end state for `@chude/memory` as first-class, first-party, local-first memory infrastructure for the whole project portfolio.
+
+Do not narrow this project back into a Claude-log search CLI, remove stated or inferred features silently, overstate docs beyond verified implementation, hardcode provider/project/path assumptions where registry/configuration is required, or treat isolated test success as sufficient when full-suite/readiness gates are required.
+
 ## AI-First Design
 
 **CRITICAL:** This tool is designed for Claude to use, not just humans.

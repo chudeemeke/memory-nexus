@@ -207,6 +207,7 @@ describe("config-manager", () => {
                     model: "text-embedding-3-small",
                     dimensions: 1536,
                     batchSize: 200,
+                    maxBatchBytes: 800_000,
                 },
                 search: {
                     defaultMode: "hybrid",
@@ -348,6 +349,7 @@ describe("config-manager", () => {
                 model: "Xenova/all-MiniLM-L6-v2",
                 dimensions: 384,
                 batchSize: 100,
+                maxBatchBytes: 800_000,
             });
         });
 

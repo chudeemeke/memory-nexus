@@ -12,6 +12,7 @@ import type {
   DownloadProgress,
   EmbeddingModelInfo,
 } from "./embedding.js";
+import { EmbeddingProviderError, isEmbeddingProviderError } from "./embedding.js";
 import { EmbeddingResult } from "../value-objects/embedding-result.js";
 
 describe("IEmbeddingProvider Port Interface", () => {
@@ -266,5 +267,39 @@ describe("EmbeddingModelInfo Interface", () => {
     };
 
     expect(info.description).toBeUndefined();
+  });
+});
+
+describe("EmbeddingProviderError", () => {
+  it("defaults to non-retryable provider errors with privacy-safe empty metadata", () => {
+    const error = new EmbeddingProviderError({
+      kind: "provider_error",
+      message: "Embedding provider failed",
+    });
+
+    expect(error.name).toBe("EmbeddingProviderError");
+    expect(error.retryable).toBe(false);
+    expect(error.metadata).toEqual({});
+    expect(isEmbeddingProviderError(error)).toBe(true);
+    expect(isEmbeddingProviderError(error, "provider_error")).toBe(true);
+  });
+
+  it("preserves cause and typed payload-too-large matching without raw payload content", () => {
+    const cause = new Error("HTTP 413");
+    const error = new EmbeddingProviderError({
+      kind: "payload_too_large",
+      message: "Embedding payload is too large for provider request limits",
+      status: 413,
+      retryable: false,
+      metadata: { text_bytes: 1_000_000 },
+      cause,
+    });
+
+    expect(error.cause).toBe(cause);
+    expect(error.status).toBe(413);
+    expect(error.metadata).toEqual({ text_bytes: 1_000_000 });
+    expect(error.message).not.toContain("raw transcript");
+    expect(isEmbeddingProviderError(error, "payload_too_large")).toBe(true);
+    expect(isEmbeddingProviderError(error, "provider_error")).toBe(false);
   });
 });

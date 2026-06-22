@@ -15,10 +15,11 @@ import type {
     IEmbeddingRepository,
     UnembeddedMessage,
     EmbeddingBatchItem,
+    EmbeddingSkipRecordInput,
 } from "../../../domain/ports/repositories.js";
 
 // Re-export domain types so existing infrastructure consumers don't break
-export type { UnembeddedMessage, EmbeddingBatchItem };
+export type { UnembeddedMessage, EmbeddingBatchItem, EmbeddingSkipRecordInput };
 
 /**
  * A vector KNN search result row.
@@ -44,12 +45,30 @@ export class EmbeddingRepository implements IEmbeddingRepository {
      * Find messages that have not yet been embedded.
      *
      * Uses LEFT JOIN on messages_meta and embedding_state to find
-     * messages without a corresponding embedding_state row.
+     * messages without a corresponding embedding_state row. When a model hash
+     * is supplied, rows skipped for that exact model are also excluded so
+     * deterministic oversize failures do not block later batches.
      *
      * @param limit Maximum number of messages to return
+     * @param modelHash Optional model hash for model-scoped skip filtering
      * @returns Array of unembedded messages ordered by rowid ASC
      */
-    findUnembedded(limit: number): UnembeddedMessage[] {
+    findUnembedded(limit: number, modelHash?: string): UnembeddedMessage[] {
+        if (modelHash) {
+            return this.db.prepare<UnembeddedMessage, [string, number]>(`
+                SELECT m.rowid AS rowid, m.content AS content
+                FROM messages_meta m
+                LEFT JOIN embedding_state es ON m.rowid = es.message_id
+                LEFT JOIN embedding_skips esk
+                    ON m.rowid = esk.message_id
+                    AND esk.model_hash = ?
+                WHERE es.message_id IS NULL
+                  AND esk.message_id IS NULL
+                ORDER BY m.rowid ASC
+                LIMIT ?
+            `).all(modelHash, limit);
+        }
+
         return this.db.prepare<UnembeddedMessage, [number]>(`
             SELECT m.rowid AS rowid, m.content AS content
             FROM messages_meta m
@@ -58,6 +77,71 @@ export class EmbeddingRepository implements IEmbeddingRepository {
             ORDER BY m.rowid ASC
             LIMIT ?
         `).all(limit);
+    }
+
+    /**
+     * Persist a sanitized skip record for a message/model pair.
+     *
+     * The record is idempotent for message + model + reason. It stores a hash
+     * and byte count instead of raw content.
+     */
+    markSkipped(record: EmbeddingSkipRecordInput): void {
+        const skippedAt =
+            record.skippedAt instanceof Date
+                ? record.skippedAt.toISOString()
+                : record.skippedAt ?? new Date().toISOString();
+
+        this.db.prepare(`
+            INSERT INTO embedding_skips (
+                message_id,
+                model_hash,
+                model_name,
+                provider,
+                reason,
+                retryable,
+                content_hash,
+                content_bytes,
+                safe_error,
+                skipped_at
+            )
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ON CONFLICT(message_id, model_hash, reason) DO UPDATE SET
+                model_name = excluded.model_name,
+                provider = excluded.provider,
+                retryable = excluded.retryable,
+                content_hash = excluded.content_hash,
+                content_bytes = excluded.content_bytes,
+                safe_error = excluded.safe_error,
+                skipped_at = excluded.skipped_at
+        `).run(
+            record.messageId,
+            record.modelHash,
+            record.modelName,
+            record.provider,
+            record.reason,
+            record.retryable ? 1 : 0,
+            record.contentHash,
+            record.contentBytes,
+            record.safeError ?? null,
+            skippedAt,
+        );
+    }
+
+    /**
+     * Count skipped messages, optionally for a specific model hash.
+     */
+    getSkippedCount(modelHash?: string): number {
+        if (modelHash) {
+            const row = this.db.prepare<{ count: number }, [string]>(
+                "SELECT COUNT(*) as count FROM embedding_skips WHERE model_hash = ?"
+            ).get(modelHash);
+            return row?.count ?? 0;
+        }
+
+        const row = this.db.prepare<{ count: number }, []>(
+            "SELECT COUNT(*) as count FROM embedding_skips"
+        ).get();
+        return row?.count ?? 0;
     }
 
     /**

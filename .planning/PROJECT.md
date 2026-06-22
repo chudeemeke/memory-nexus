@@ -4,7 +4,32 @@
 
 Cross-project context persistence for Claude Code sessions. Extracts JSONL session files into a searchable SQLite database with full-text search, relationship tracking, entity extraction, and graph-like traversal capabilities. Ships as a standalone CLI with 16 commands covering sync, search, navigation, statistics, hooks, health checks, data management, and shell completion.
 
-**Core Value:** Knowledge gained in one Claude Code project becomes accessible from any other project. No more context silos.
+## Core Value
+
+Knowledge gained in one Claude Code project becomes accessible from any other project. No more context silos.
+
+## Product North Star
+
+This section is normative, not aspirational. Future planning, implementation, review, and release decisions must preserve this end state unless the user explicitly changes it.
+
+I understand the ideal end state as this:
+
+`@chude/memory` becomes your first-class, first-party memory infrastructure layer for the whole project portfolio, not just a Claude-log search CLI. It should be the durable, auditable, local-first memory substrate that lets every project and agent carry forward verified context, decisions, user preferences, friction, facts, and derived knowledge without depending on stale chat summaries or scattered docs.
+
+The finished product should be:
+
+- **Local-first and private by default**, with explicit consent for provider egress, remote sync, profile/persona use, graph enrichment, and dream promotion.
+- **Cross-project intelligent**, so knowledge from one repo is available elsewhere only when scoped, relevant, explainable, and safe.
+- **Event-sourced and auditable**, where raw sessions, extracted facts, derived memories, graph edges, rankings, and dream consolidations can be traced back to source events and replayed.
+- **Provider-flexible**, using registries/configuration/capabilities instead of hardcoded OpenAI/Ollama/Anthropic assumptions or fixed paths.
+- **Secure enough to trust**, with redaction before storage, FTS, embedding, extraction, export, logs, provider egress, and remote sync; no raw secret resolution through AI-visible flows.
+- **Excellent as a CLI/API product**, with reliable `doctor`, `status`, `sync`, `search`, `context`, `governance`, `remote`, `audit`, and recovery surfaces that are clear for humans and stable for agents.
+- **Market-ready**, meaning SOLID/hexagonal architecture, strong tests, 95%+ per coverage metric, package smoke tests, dependency/security/gitleaks checks, eval harnesses, onboarding verification, backup/restore/upgrade checks, and no known unowned blockers.
+- **Agentic, but controlled**, with persona/procedural memory, temporal graph retrieval, utility-aware ranking, and audited dreaming consolidation that proposes/promotes/supersedes through events rather than silently mutating truth.
+
+The sharper version: your ideal end state is the operating memory layer for your entire AI development environment, comparable to or better than the best agentic memory tools, but with your priorities baked in: local-first, first-party, verifiable, privacy-governed, cross-project aware, loosely coupled, tightly integrated, and independently shippable as `@chude/memory`.
+
+My pushback line is also clear: it is not done if it merely "works." It is not done if docs overstate implementation, if provider behavior is hardcoded, if consent is bolted on, if dreams mutate hidden state, if `conversations` becomes a stale truth proxy, or if passing isolated tests masks full-suite instability.
 
 ## What This Is Not
 
@@ -14,7 +39,7 @@ Cross-project context persistence for Claude Code sessions. Extracts JSONL sessi
 
 ## Current State
 
-v4.0 is shipped and published as `@chude/memory@4.0.0`. v5.0 Market-Leader Memory Platform execution is active; Phase 41 importance, utility, and recall ranking is complete and verified, and Phase 42 Dreaming Consolidation is next.
+v4.0 is shipped and published as `@chude/memory@4.0.0`. v5.0 Market-Leader Memory Platform execution is active; Phase 41 importance, utility, and recall ranking is complete and verified. Phase 41.1 embedding pipeline resilience is complete in source and verified, so Phase 42 dreaming consolidation is next. The installed global `memory@4.0.0` binary is not claimed fixed until a fixed install or publish smoke is run.
 
 **Tech stack:** Bun, TypeScript 5.5+, bun:sqlite with FTS5 + sqlite-vec, Commander.js v14, cli-progress, chrono-node, @huggingface/transformers v3
 
@@ -22,7 +47,7 @@ v4.0 is shipped and published as `@chude/memory@4.0.0`. v5.0 Market-Leader Memor
 
 **Commands:** sync, search, list, stats, context, related, show, browse, install, uninstall, status, doctor, purge, export, import, completion, facts, extract, remote, governance, profile, friction
 
-**Test suite:** Current Phase 41 gate passes `bun run quality` with 4,316 tests passing and zero failures. The Istanbul-backed coverage gate measures all four metrics independently and passes at statements 97.29%, branches 95.11%, functions 96.47%, and lines 97.40%.
+**Test suite:** Current Phase 41.1 gate passes typecheck, build, full tests, test isolation, eval, coverage, dependency audit, inbox lint, and diff whitespace. Full tests pass with 4,364 tests and zero failures. The Istanbul-backed coverage gate measures all four metrics independently and passes at statements 97.35%, branches 95.00%, functions 96.59%, and lines 97.45%.
 
 ## Problem Statement
 
@@ -76,7 +101,22 @@ Both Claude and humans use the same commands. No special formatting needed.
 
 ### Active
 
-## Current Milestone: v4.0 Intelligence Layer
+## Current Milestone: v5.0 Market-Leader Memory Platform
+
+**Goal:** Make `@chude/memory` a local-first, privacy-governed, cross-project, event-sourced memory substrate with governed persona/procedural memory, temporal graph retrieval, utility-aware ranking, audited dreaming consolidation, excellent CLI/API usability, and demonstrable market readiness.
+
+**Active work:** Phase 42 dreaming consolidation is next. Phase 41.1 completed the source fix that prevents provider/transport payload-size failures from wedging cross-project re-embedding.
+
+**Target features:**
+- Consent/provenance governance for derived memory and provider egress
+- Canonical event kernel and deterministic projection replay
+- Remote sync operations with explicit egress and recovery controls
+- Optional secure capability interop without raw secret resolution
+- Durable friction query contract and cross-project issue flow
+- Persona/procedural memory, temporal graph, utility ranking, and audited dreaming
+- Feature completeness, excellent CLI/API UX, market-readiness gate, and release-candidate handoff
+
+## Historical Milestone: v4.0 Intelligence Layer
 
 **Goal:** Transform memory from a data store into a knowledge system -- automated extraction of decisions/learnings/patterns from sessions, intelligent context delivery instead of raw retrieval, a clean CLI surface, and cross-environment portability.
 

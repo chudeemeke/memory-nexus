@@ -410,6 +410,41 @@ export interface EmbeddingBatchItem {
   embedding: Float32Array;
 }
 
+export type EmbeddingSkipReason = "payload_too_large";
+
+/**
+ * Durable model-scoped record for messages the current provider/model cannot
+ * embed safely. It deliberately stores a content hash and byte size instead of
+ * raw content so skip state remains useful without becoming a leakage surface.
+ */
+export interface EmbeddingSkipRecordInput {
+  /** The integer rowid matching messages_meta.rowid */
+  messageId: number;
+  /** Hash identifying the provider/model/dimension configuration */
+  modelHash: string;
+  /** Human-readable model name */
+  modelName: string;
+  /** Provider identifier */
+  provider: string;
+  /** Stable skip reason */
+  reason: EmbeddingSkipReason;
+  /** Whether retrying the exact same item/model is expected to help */
+  retryable: boolean;
+  /** SHA-256 hash of the original message content */
+  contentHash: string;
+  /** UTF-8 byte size of the original message content */
+  contentBytes: number;
+  /** Sanitized provider/application error context */
+  safeError?: string | undefined;
+  /** Optional explicit skip timestamp */
+  skippedAt?: Date | string | undefined;
+}
+
+export interface EmbeddingSkipRecord extends EmbeddingSkipRecordInput {
+  id: number;
+  skippedAt: string;
+}
+
 /**
  * Domain-layer configuration contract for the embedding service.
  *
@@ -427,6 +462,8 @@ export interface EmbeddingServiceConfig {
   dimensions: number;
   /** Number of messages to process per batch */
   batchSize: number;
+  /** Maximum estimated JSON payload bytes to send in a provider request */
+  maxBatchBytes?: number | undefined;
 }
 
 /**
@@ -450,7 +487,20 @@ export interface IEmbeddingRepository {
    * @param limit Maximum number of messages to return
    * @returns Array of unembedded messages ordered by rowid ASC
    */
-  findUnembedded(limit: number): UnembeddedMessage[];
+  findUnembedded(limit: number, modelHash?: string): UnembeddedMessage[];
+
+  /**
+   * Persist a model-scoped skipped message without storing raw message content.
+   * @param record Sanitized skip metadata
+   */
+  markSkipped(record: EmbeddingSkipRecordInput): void;
+
+  /**
+   * Count skipped messages, optionally for a specific model hash.
+   * @param modelHash Optional model hash filter
+   * @returns Number of skipped message records
+   */
+  getSkippedCount(modelHash?: string): number;
 
   /**
    * Store a batch of embeddings in a single transaction.
@@ -871,4 +921,3 @@ export interface IMemoryGovernanceRepository {
   applyMemoryEvent(event: MemoryEventEnvelope): Promise<MemoryGovernanceEntry | null>;
   clearAll(): Promise<void>;
 }
-

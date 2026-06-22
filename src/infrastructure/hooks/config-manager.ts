@@ -35,6 +35,8 @@ export interface EmbeddingConfigData {
     dimensions: number;
     /** Number of messages to embed per batch */
     batchSize: number;
+    /** Maximum estimated JSON payload bytes per embedding provider request */
+    maxBatchBytes: number;
     /** @deprecated Prefer apiKeyEnv or runtime environment injection. */
     apiKey?: string;
     /** Environment variable name that contains the provider API key */
@@ -326,6 +328,7 @@ export const DEFAULT_EMBEDDING_CONFIG: EmbeddingConfigData = {
     model: "Xenova/all-MiniLM-L6-v2",
     dimensions: 384,
     batchSize: 100,
+    maxBatchBytes: 800_000,
 };
 
 /**

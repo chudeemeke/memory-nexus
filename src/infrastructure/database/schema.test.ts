@@ -40,6 +40,7 @@ import {
     PERSONA_ENTRIES_TABLE,
     GRAPH_EDGES_TABLE,
     MEMORY_UTILITY_METRICS_TABLE,
+    EMBEDDING_SKIPS_TABLE,
     type SchemaOptions,
 } from "./schema.js";
 
@@ -81,12 +82,13 @@ describe("Database Schema", () => {
             expect(PERSONA_ENTRIES_TABLE).toBeDefined();
             expect(GRAPH_EDGES_TABLE).toBeDefined();
             expect(MEMORY_UTILITY_METRICS_TABLE).toBeDefined();
+            expect(EMBEDDING_SKIPS_TABLE).toBeDefined();
         });
 
 
         it("should have SCHEMA_SQL as an array with correct order", () => {
             expect(Array.isArray(SCHEMA_SQL)).toBe(true);
-            expect(SCHEMA_SQL.length).toBe(28);
+            expect(SCHEMA_SQL.length).toBe(29);
             expect(SCHEMA_SQL[0]).toBe(SESSIONS_TABLE);
             expect(SCHEMA_SQL[1]).toBe(MESSAGES_META_TABLE);
             expect(SCHEMA_SQL[2]).toBe(MESSAGES_FTS_TABLE);
@@ -115,6 +117,7 @@ describe("Database Schema", () => {
             expect(SCHEMA_SQL[25]).toBe(PERSONA_ENTRIES_TABLE);
             expect(SCHEMA_SQL[26]).toBe(GRAPH_EDGES_TABLE);
             expect(SCHEMA_SQL[27]).toBe(MEMORY_UTILITY_METRICS_TABLE);
+            expect(SCHEMA_SQL[28]).toBe(EMBEDDING_SKIPS_TABLE);
         });
 
     });
@@ -171,6 +174,7 @@ describe("Database Schema", () => {
             expect(tableNames).toContain("memory_governance");
             expect(tableNames).toContain("memory_governance_events");
             expect(tableNames).toContain("memory_utility_metrics");
+            expect(tableNames).toContain("embedding_skips");
         });
 
         it("should create FTS5 virtual table", () => {
@@ -221,6 +225,7 @@ describe("Database Schema", () => {
             expect(indexNames).toContain("idx_memory_governance_target");
             expect(indexNames).toContain("idx_memory_governance_events_target");
             expect(indexNames).toContain("idx_memory_utility_metrics_target");
+            expect(indexNames).toContain("idx_embedding_skips_model");
         });
 
         it("should create FTS synchronization triggers", () => {

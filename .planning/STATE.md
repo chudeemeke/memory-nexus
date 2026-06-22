@@ -1,14 +1,15 @@
 ---
 gsd_state_version: 1.0
-milestone: v5.0
-milestone_name: Market-Leader Memory Platform
-status: in_progress
-last_updated: "2026-06-07T06:20:00.000+01:00"
+milestone: v4.0
+milestone_name: Intelligence Layer
+status: planning
+last_updated: "2026-06-22T03:07:50+01:00"
 progress:
-  total_phases: 16
-  completed_phases: 12
-  total_plans: 12
-  completed_plans: 12
+  total_phases: 30
+  completed_phases: 10
+  total_plans: 17
+  completed_plans: 15
+  percent: 82
 ---
 
 > **FOUNDATION HARDENING VERIFIED 2026-05-28** - Phase 36.8 is implemented. Typecheck, build, full tests, test-isolation, dependency audit, and gitleaks pass. Provider support now routes through an internal provider registry instead of presentation/health/factory switch drift. Phase 36.9 replaced the missing-metric Bun LCOV gate with an Istanbul-backed Bun coverage harness.
@@ -30,9 +31,11 @@ progress:
 > **V5 PHASE 39 COMPLETE 2026-06-07** - Persona and procedural memory is implemented as a governed derived surface. `PersonaEntry`, `IPersonaRepository`, `persona_entries`, `PersonaProfileService`, fact-event persona projection, `memory profile show/export/rebuild`, completion/help updates, and `memory context` persona injection are live. Persona entries include source ids/kinds, confidence, scope, review metadata, why text, and user controls; governance suppression is enforced before context/profile output. The `repeated_correction_to_persona` eval fixture is now behavior-backed through the real service. Verification passed: focused Phase 39 tests, `bun run typecheck`, `bun run eval:v5` (9/9; 3 behavior, 6 contract), full `bun run quality` (4,281 pass, 0 fail), coverage statements 97.2%, branches 95.19%, functions 96.19%, lines 97.31%, `gitleaks detect --no-banner --redact --source .`, and `git diff --check`.
 > **V5 PHASE 40 COMPLETE 2026-06-07** - Temporal semantic graph projection is implemented as a governed local-first surface. `GraphEdge`, graph node taxonomy, `IGraphRepository`, `graph_edges`, `SqliteGraphRepository`, `TemporalGraphService`, event-log graph projection, graph governance registration, and graph-enriched context output are live. Current-edge queries enforce temporal validity, confidence, scope, node/relationship filters, and stale-edge pruning. Cross-project context now excludes unrelated project-private facts unless explicitly global. The graph, supersedence, and cross-project leakage eval fixtures are behavior-backed. Verification passed: focused Phase 40 tests, `bun run typecheck`, `bun run eval:v5` (9/9; 6 behavior, 3 contract), full `bun run quality` (4,300 pass, 0 fail), coverage statements 97.28%, branches 95.17%, functions 96.36%, lines 97.38%, `gitleaks detect --no-banner --redact --source .`, and `git diff --check`.
 > **V5 PHASE 41 COMPLETE 2026-06-07** - Importance, utility, and recall ranking is implemented as a governed local-first application surface. `MemoryUtilityMetric`, `IMemoryUtilityRepository`, `memory_utility_metrics`, `SqliteMemoryUtilityRepository`, and `MemoryRankingService` are live. Ranking applies per-kind/type half-life policies, evergreen/pinned exemptions, access utility, supersedence/governance/temporal exclusion, and deterministic why-ranked explanations. `SmartContextService`, `memory context`, and ambient context rank allowed facts/persona/graph entries after governance filtering. The ranking eval fixture is behavior-backed; `bun run eval:v5` passes 9/9 with 7 behavior fixtures and 2 contract fixtures. Verification passed: full `bun run quality` (4,316 pass, 0 fail), coverage statements 97.29%, branches 95.11%, functions 96.47%, lines 97.40%, `gitleaks detect --no-banner --redact --source .`, and `git diff --check`. `eval:v5:market` still intentionally fails until Phase 42 and Phase 43 retire or justify the remaining contract fixtures.
+> **V5 PHASE 41.1 COMPLETE 2026-06-22** - Embedding pipeline resilience is implemented and verified in source. `EmbeddingProviderError` now exposes typed provider failures, Ollama HTTP 413 multi-item batches split/retry while preserving order, `embedding.maxBatchBytes` bounds service batches, `embedding_skips` records durable model-scoped skip/quarantine state, resume excludes current-model skipped rows while permitting new-model retry, and `memory sync --embed` reports skipped counts safely. Verification passed: typecheck, build, full tests (4,364 pass, 0 fail), test isolation, eval:v5 (9/9, market ineligible due to 2 future contract fixtures), coverage statements 97.35%, branches 95.00%, functions 96.59%, lines 97.45%, dependency audit, inbox lint, and diff whitespace. The installed global `memory@4.0.0` binary is not claimed fixed until a fixed install or publish smoke is run.
 > **INBOX RECONCILED 2026-05-28** - Stale bug reports for the Windows full-suite crash, orphaned friction test, and programmatic API real-DB pollution were validated against the current code and archived. The durable-friction-list filing was accepted into ROADMAP as post-v4 capacity, archived as planned, and counter-notified to conversations. No active memory-nexus inbox items remain.
 > **REMOTE CONSUMER NOTES REVIEWED 2026-05-30** - The two remotely consumer-impact inbox notes were reviewed against current memory-nexus docs/scripts. No current raw SSH/rsync operating instructions or hard-coded remotely tunnel-state assumptions were found, so both notes were archived with disposition text. Future Phase 38 cross-machine work must still use current `remotely` conventions where applicable.
 > **FIRST-PARTY INFRASTRUCTURE BROADCAST 2026-05-28** - User clarified that `memory` is a first-class first-party tool used by most/all projects. Canonical tool/package naming is `memory` / `@chude/memory`; the repository remains `memory-nexus`, and `nexus` is a legacy alias. Updated Codex/Claude rules and document-for-clear skills, added a Codex memory note, and filed notification inbox items to opted-in projects so consumers know about provider-secret, redaction/export, registry, and authkey-optional contract changes.
+
 # State: @chude/memory (memory-nexus)
 
 ## Project Reference
@@ -41,18 +44,19 @@ See: .planning/PROJECT.md (updated 2026-02-18)
 
 **Core Value:** Knowledge gained in one Claude Code project becomes accessible from any other project. No more context silos.
 
-**Current Focus:** v5.0 market-leader execution is active. Phase 41 is complete and ready to commit; next is Phase 42 Dreaming Consolidation. Relevant docs: `docs/prd/2026-06-05-v5-market-leader-memory-platform.md`, `docs/security/2026-06-05-v5-threat-model.md`, `docs/evals/2026-06-05-v5-evaluation-baseline.md`, `docs/evals/v5-evaluation-harness.md`, `docs/reviews/2026-06-05-v5-plan-review-request.md`, `docs/plans/2026-06-04-v5-market-leader-gsd-plan.md`, `docs/reference/friction-query-contract.md`, `docs/operations/remote-sync-runbook.md`, `.planning/phases/38.2.5-consent-provenance-governance/README.md`, `.planning/phases/38.3-remote-sync-service-git-transport/README.md`, `.planning/phases/38.4-remote-cli-operations-backup-recovery/README.md`, `.planning/phases/38.5-secure-capability-interop/README.md`, `.planning/phases/38.6-durable-friction-query-contract/README.md`, `.planning/phases/38.7-evaluation-harness-regression-fixtures/README.md`, `.planning/phases/39-persona-procedural-memory/README.md`, `.planning/phases/40-temporal-semantic-graph/README.md`, `.planning/phases/41-importance-utility-recall-ranking/README.md`, and `.planning/ROADMAP.md`.
+**Current Focus:** Phase 42 - dreaming-consolidation
 
 **Tech Stack:** Bun, TypeScript 5.5+, bun:sqlite with FTS5 + sqlite-vec, Commander.js v14, @huggingface/transformers v3, cli-progress, chrono-node, Chart.js (HTML dashboard)
 
 ## Current Position
 
-Phase: v5.0 ACTIVE - PHASE 42 NEXT
+Phase: 42 (Dreaming Consolidation) - NEXT
+Plan: not yet planned in this session
 **Milestone:** v5.0 Market-Leader Memory Platform
-**Status:** Phase 41 has passed final quality/security/whitespace gates and is ready to commit. Phase 42 must add audited dreaming consolidation without hidden mutation or unreviewed data loss.
+**Status:** Phase 41.1 source verification complete; prepare Phase 42 execution
 
 ```
-v5.0 Progress: [############----] 12/16 phases complete
+v5.0 Progress: [#############----] 13/17 phases complete
   Phase 38.0: v5 Threat Model, PRD, Eval Baseline [done]
   Phase 38.1: Canonical Event Kernel and Projection Replay [done]
   Phase 38.2: Redaction, Privacy Governance, Audit Commands [done]
@@ -65,8 +69,8 @@ v5.0 Progress: [############----] 12/16 phases complete
   Phase 39: Persona and Procedural Memory [done]
   Phase 40: Temporal Semantic Graph [done]
   Phase 41: Importance, Utility, Recall Ranking [done]
+  Phase 41.1: Embedding Pipeline Resilience [done]
   Phase 42: Dreaming Consolidation [next]
-  Phase 42: Dreaming Consolidation [planned]
   Phase 42.5: Feature Completeness and UX Polish [planned]
   Phase 43: Market-Leader and Sales-Readiness Gate [planned]
   Phase 44: Release-Candidate Packaging and Publish Handoff [planned]
@@ -103,6 +107,7 @@ v4.0 Progress: [############################] 14/14 phases complete
 **Historical CI gate:** `bun run test:isolation` passed at closure. **Current 2026-05-27 truth:** gate passes again after replacing first-party remote-sync module mocks with dependency injection.
 
 **Pre-existing issues surfaced during verification (filed to inbox, NOT arc-scoped):**
+
 - `docs/inbox/2026-05-11-memory-nexus-programmatic-api-real-db-pollution.md`
 - `docs/inbox/2026-05-11-memory-nexus-friction-test-phase-30-orphan.md`
 - `docs/inbox/2026-05-11-memory-nexus-bun-windows-full-suite-crash.md`
@@ -110,6 +115,7 @@ v4.0 Progress: [############################] 14/14 phases complete
 ## Out-of-roadmap: Architecture First-Principles Audit (2026-05-11 → 2026-05-13) — COMPLETE
 
 **Locked:** 2026-05-13.
+
 - Audit doc: `docs/audits/2026-05-11-architecture-first-principles-audit.md` (LOCKED)
 - Both codex reviews integrated (§13 review #1, §20 review #2). Both BLOCK verdicts, all 20 findings addressed.
 - Source inbox item: `docs/inbox/archived/2026-05-08-conversations-first-principles-architecture-audit.md` (status: merged)
@@ -122,6 +128,7 @@ v4.0 Progress: [############################] 14/14 phases complete
 **B (federation) deferred re-evaluation post-Phase-35**, not preemptively rejected. Recommend adding deferred reminder when Phase 35 acceptance criteria pass.
 
 **Stage 1a output files (kept as reference for Phase 33-35 PLAN.md):**
+
 - `docs/audits/2026-05-11-subagent-A-friction-surface.md`
 - `docs/audits/2026-05-11-subagent-B-search-surface.md`
 - `docs/audits/2026-05-11-subagent-C-sync-surface.md`
@@ -179,6 +186,7 @@ v4.0 Progress: [############################] 14/14 phases complete
 ### Current Resume Point - 2026-06-07
 
 **Completed this review/update pass:**
+
 - Promoted v5.0 to the active milestone in `.planning/STATE.md`, then advanced it through Phase 38.1 completion.
 - Completed Phase 38.0 foundation artifacts: v5 PRD, threat model, evaluation baseline, ADRs, Phase 38.1 context, cross-AI review request, and Phase 38.0 summary.
 - Expanded v5 roadmap from phases 38.0-43 to phases 38.0-44 to include consent/provenance governance, executable eval harness, feature-completeness/UX polish, and release-candidate packaging/publish handoff.
@@ -206,11 +214,13 @@ v4.0 Progress: [############################] 14/14 phases complete
 - Verified Phase 41 final gates: focused ranking/utility/context/eval tests, `bun run typecheck`, `bun run eval:v5` (9/9; 7 behavior, 2 contract), full `bun run quality` (4,316 pass, 0 fail), coverage statements 97.29%, branches 95.11%, functions 96.47%, lines 97.40%, `gitleaks detect --no-banner --redact --source .`, and `git diff --check`.
 
 **Next step:**
-- Commit Phase 41, then execute Phase 42 Dreaming Consolidation with TDD. Dreaming must remain explicit, audited, redacted, rollback-capable, review-gated, and integrated with governance/ranking instead of hidden mutation.
+
+- Commit Phase 41.1 and dependency-security work carefully, preserving existing Phase 42/Dreaming files. Then execute Phase 42 Dreaming Consolidation with TDD. Dreaming must remain explicit, audited, redacted, rollback-capable, review-gated, and integrated with governance/ranking instead of hidden mutation.
 
 ### Current Resume Point - 2026-05-30
 
 **Completed this review/update pass:**
+
 - Added `docs/audits/2026-05-27-v4-foundation-architecture-security-quality-review.md` with the conclusion that v4 is not publication-grade until foundation hardening lands.
 - Added `docs/audits/2026-05-27-remote-sync-architecture-security-quality-review.md` with the conclusion that dirty remote-sync work must not ship as-is.
 - Added `docs/plans/2026-05-27-authkey-optional-integration.md` to capture optional authkey interop without hard dependency.
@@ -225,6 +235,7 @@ v4.0 Progress: [############################] 14/14 phases complete
 - Completed Phase 37: `@chude/memory@4.0.0` is published on npm with `latest` dist-tag. Registry visibility, package access status, owner listing, npm global install smoke, and Bun global install smoke passed. Added `bun run verify:published @chude/memory@4.0.0` to prevent future Windows Bun binary-name assumptions.
 
 **Next step:**
+
 - Historical next step at 2026-05-30 was v5.0 planning/execution starting with Phase 38.0. Current 2026-06-05 resume point supersedes this: Phase 38.0 is complete and Phase 38.1 is next. Phase 38 prototype code remains parked behind `MEMORY_EXPERIMENTAL_REMOTE_SYNC=1`.
 - Current inbox truth: zero active memory-nexus inbox items; only `docs/inbox/README.md` remains outside `docs/inbox/archived/` and `docs/inbox/rejected/`.
 - Cross-project notification filed at `C:\Projects\conversations\docs\inbox\2026-05-28-memory-nexus-friction-list-durable-filters-roadmapped.md`.
@@ -234,6 +245,7 @@ v4.0 Progress: [############################] 14/14 phases complete
 ### Last Session — 2026-05-13 → 2026-05-14
 
 **Completed:**
+
 - 4 inbox items triaged (bun-windows-crash, friction-test-phase-30-orphan, programmatic-api-real-db-pollution, friction-list-durable-filter). Item 1 workaround documented in README. Items 2-4 deferred with concrete trigger = audit Stage 3 outcome in {A, B, C, D}; A-prime is in scope.
 - Architecture audit Stage 0 → Stage 3 completed: 4 parallel subagents (Stage 1a), architecture-evidence map (Stage 1b), 4 adjacent-system summaries (Stage 2), refined truths + comparison matrix + gap analysis + recommendation (Stage 3).
 - Both codex audit-cap reviews consumed. #1 (audit plan) BLOCK 8 findings integrated. #2 (recommendation) BLOCK 12 findings integrated. §19 rewritten to A-prime per codex review #2.
@@ -242,14 +254,16 @@ v4.0 Progress: [############################] 14/14 phases complete
 - STATE.md updated to release audit pause; total phases now 9 (was 8).
 
 **Next step:**
+
 - v4.0 resumes at Phase 32 (CLI Surface). Phase 31 already complete.
 - When Phase 32 plans, scope stays as labeled help groups + uniform flags. Surface consolidation moves to NEW Phase 32.5.
 - Phase 33 PLAN.md must encode event-log SSOT requirement per audit §19 item 4 and §21 acceptance gates.
 
 **Cross-project follow-up (uncommitted):**
+
 - Counter-notification file in conversations inbox needs commit/push from a conversations session.
 - Conversations memory architecture inventory should be updated to note A-prime landing (deferred B-revaluation path).
 
 ---
 
-*Last updated: 2026-06-07 (v5.0 active; Phase 41 verified; Phase 42 next)*
+*Last updated: 2026-06-22 (v5.0 active; Phase 41.1 source verified; Phase 42 next)*

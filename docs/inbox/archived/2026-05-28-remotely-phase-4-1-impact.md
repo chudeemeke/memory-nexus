@@ -4,8 +4,10 @@ source_project: remotely
 created: 2026-05-28
 type: docs
 severity: low
+fix_status: tested
 affects_scope: unknown
-status: archived
+status: merged
+resolved_at: 2026-06-04
 ---
 
 # Remotely Phase 4.1 Impact

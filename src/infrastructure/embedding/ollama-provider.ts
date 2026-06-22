@@ -19,6 +19,10 @@ import type {
     IEmbeddingProvider,
     DownloadProgress,
 } from "../../domain/ports/embedding.js";
+import {
+    EmbeddingProviderError,
+    isEmbeddingProviderError,
+} from "../../domain/ports/embedding.js";
 import { EmbeddingResult } from "../../domain/value-objects/embedding-result.js";
 import { unknownErrorMessage } from "../../domain/errors/unknown-error.js";
 
@@ -76,37 +80,11 @@ export class OllamaProvider implements IEmbeddingProvider {
             );
         }
 
-        const response = await fetch(`${this.baseUrl}/api/embed`, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-                model: this.model,
-                input: text,
-            }),
-        });
-
-        if (!response.ok) {
-            const errorBody = await response.text();
-            this.throwWithHint(response.status, errorBody);
-        }
-
-        const json = (await response.json()) as {
-            embeddings: number[][];
-        };
-
-        const firstEmbedding = json.embeddings?.[0];
+        const [firstEmbedding] = await this.requestEmbeddings(text);
         if (!firstEmbedding) {
             throw new Error("Ollama returned empty embeddings response");
         }
-
-        const embedding = new Float32Array(firstEmbedding);
-        return EmbeddingResult.create({
-            embedding,
-            model: this.model,
-            dimensions: this.dimensions,
-        });
+        return firstEmbedding;
     }
 
     async embedBatch(texts: string[]): Promise<EmbeddingResult[]> {
@@ -116,6 +94,36 @@ export class OllamaProvider implements IEmbeddingProvider {
             );
         }
 
+        if (texts.length === 0) {
+            return [];
+        }
+
+        try {
+            return await this.requestEmbeddings(texts);
+        } catch (error) {
+            if (
+                texts.length > 1 &&
+                isEmbeddingProviderError(error, "payload_too_large")
+            ) {
+                const midpoint = Math.ceil(texts.length / 2);
+                const left = await this.embedBatch(texts.slice(0, midpoint));
+                const right = await this.embedBatch(texts.slice(midpoint));
+                return [...left, ...right];
+            }
+
+            throw error;
+        }
+    }
+
+    isReady(): boolean {
+        return this._ready;
+    }
+
+    async dispose(): Promise<void> {
+        this._ready = false;
+    }
+
+    private async requestEmbeddings(input: string | string[]): Promise<EmbeddingResult[]> {
         const response = await fetch(`${this.baseUrl}/api/embed`, {
             method: "POST",
             headers: {
@@ -123,13 +131,13 @@ export class OllamaProvider implements IEmbeddingProvider {
             },
             body: JSON.stringify({
                 model: this.model,
-                input: texts,
+                input,
             }),
         });
 
         if (!response.ok) {
             const errorBody = await response.text();
-            this.throwWithHint(response.status, errorBody);
+            this.throwWithHint(response.status, errorBody, input);
         }
 
         const json = (await response.json()) as {
@@ -145,18 +153,28 @@ export class OllamaProvider implements IEmbeddingProvider {
         );
     }
 
-    isReady(): boolean {
-        return this._ready;
-    }
-
-    async dispose(): Promise<void> {
-        this._ready = false;
-    }
-
     /**
      * Throw an error with an actionable hint for model-not-found cases.
      */
-    private throwWithHint(status: number, errorBody: string): never {
+    private throwWithHint(
+        status: number,
+        errorBody: string,
+        input: string | string[],
+    ): never {
+        if (status === 413) {
+            throw new EmbeddingProviderError({
+                kind: "payload_too_large",
+                status,
+                retryable: false,
+                message: "Ollama error 413: provider payload too large",
+                metadata: {
+                    provider: this.name,
+                    model: this.model,
+                    inputCount: Array.isArray(input) ? input.length : 1,
+                },
+            });
+        }
+
         const isModelNotFound =
             status === 404 || errorBody.includes("not found");
         if (isModelNotFound) {

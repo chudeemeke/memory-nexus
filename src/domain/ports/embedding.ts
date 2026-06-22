@@ -12,6 +12,53 @@
 import type { EmbeddingResult } from "../value-objects/embedding-result.js";
 
 /**
+ * Stable provider error categories the application layer can react to without
+ * knowing provider-specific transport details.
+ */
+export type EmbeddingProviderErrorKind =
+  | "payload_too_large"
+  | "provider_error";
+
+export interface EmbeddingProviderErrorOptions {
+  kind: EmbeddingProviderErrorKind;
+  message: string;
+  status?: number | undefined;
+  retryable?: boolean | undefined;
+  metadata?: Record<string, string | number | boolean | null> | undefined;
+  cause?: unknown;
+}
+
+export class EmbeddingProviderError extends Error {
+  readonly kind: EmbeddingProviderErrorKind;
+  readonly status?: number | undefined;
+  readonly retryable: boolean;
+  readonly metadata: Record<string, string | number | boolean | null>;
+
+  constructor(options: EmbeddingProviderErrorOptions) {
+    super(options.message);
+    this.name = "EmbeddingProviderError";
+    this.kind = options.kind;
+    this.status = options.status;
+    this.retryable = options.retryable ?? false;
+    this.metadata = options.metadata ?? {};
+
+    if (options.cause !== undefined) {
+      this.cause = options.cause;
+    }
+  }
+}
+
+export function isEmbeddingProviderError(
+  error: unknown,
+  kind?: EmbeddingProviderErrorKind,
+): error is EmbeddingProviderError {
+  return (
+    error instanceof EmbeddingProviderError &&
+    (kind === undefined || error.kind === kind)
+  );
+}
+
+/**
  * Progress update during model download or initialization.
  */
 export interface DownloadProgress {

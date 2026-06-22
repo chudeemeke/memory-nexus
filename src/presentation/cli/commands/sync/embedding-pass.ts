@@ -86,12 +86,25 @@ export async function runEmbeddingPass(
   const downloadHandler = createModelDownloadHandler({ quiet: !!options.quiet });
   await provider.initialize(downloadHandler);
 
-  // Calculate how many messages need embedding
-  const totalToEmbed = repository.getTotalMessageCount() - repository.getEmbeddedCount();
+  // Calculate how many messages need embedding for the current model.
+  const skippedForCurrentModel =
+    typeof repository.getSkippedCount === "function"
+      ? repository.getSkippedCount(modelState.currentHash)
+      : 0;
+  const totalToEmbed = Math.max(
+    0,
+    repository.getTotalMessageCount() -
+      repository.getEmbeddedCount() -
+      skippedForCurrentModel,
+  );
 
   if (totalToEmbed === 0) {
     if (!options.quiet) {
-      console.log("\nAll messages already embedded.");
+      if (skippedForCurrentModel > 0) {
+        console.log(`\nAll embeddable messages already embedded (${skippedForCurrentModel} skipped for current model).`);
+      } else {
+        console.log("\nAll messages already embedded.");
+      }
     }
     await factory.dispose();
     return;
@@ -118,7 +131,8 @@ export async function runEmbeddingPass(
     if (!options.quiet) {
       const seconds = Math.max(1, Math.round(result.durationMs / 1000));
       const rate = result.rate.toFixed(1);
-      console.log(`\nEmbedded ${result.embedded} messages in ${seconds}s (${rate} msg/s)`);
+      const skippedSuffix = result.skipped > 0 ? `, skipped ${result.skipped}` : "";
+      console.log(`\nEmbedded ${result.embedded} messages${skippedSuffix} in ${seconds}s (${rate} msg/s)`);
     }
   } catch (error) {
     embeddingReporter.stop();

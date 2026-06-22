@@ -8,6 +8,10 @@
 import { describe, expect, test, beforeEach, afterEach, mock } from "bun:test";
 import { OllamaProvider } from "./ollama-provider.js";
 import { EmbeddingResult } from "../../domain/value-objects/embedding-result.js";
+import {
+    EmbeddingProviderError,
+    isEmbeddingProviderError,
+} from "../../domain/ports/embedding.js";
 
 describe("OllamaProvider", () => {
     let provider: OllamaProvider;
@@ -273,6 +277,66 @@ describe("OllamaProvider", () => {
             await expect(
                 provider.embedBatch(["text1", "text2"])
             ).rejects.toThrow("503");
+        });
+
+        test("splits a multi-item batch on HTTP 413 and preserves result order", async () => {
+            const embeddingsByText = new Map(
+                ["alpha", "beta", "gamma", "delta"].map((text, index) => [
+                    text,
+                    Array.from({ length: 768 }, () => index + 0.25),
+                ]),
+            );
+            let postCalls = 0;
+            const mockFetch = mock((_url: string, options?: RequestInit) => {
+                postCalls += 1;
+                if (postCalls === 1) {
+                    return Promise.resolve(
+                        new Response("request entity too large", { status: 413 }),
+                    );
+                }
+
+                const body = JSON.parse(String(options?.body)) as { input: string[] };
+                return Promise.resolve(
+                    new Response(
+                        JSON.stringify({
+                            embeddings: body.input.map((text) => embeddingsByText.get(text)),
+                        }),
+                        { status: 200 },
+                    ),
+                );
+            });
+            globalThis.fetch = mockFetch;
+
+            const results = await provider.embedBatch(["alpha", "beta", "gamma", "delta"]);
+
+            expect(mockFetch).toHaveBeenCalledTimes(3);
+            const retriedInputs = mockFetch.mock.calls.slice(1).map((call) => {
+                const body = JSON.parse(String((call[1] as RequestInit).body)) as { input: string[] };
+                return body.input;
+            });
+            expect(retriedInputs).toEqual([["alpha", "beta"], ["gamma", "delta"]]);
+            expect(results.map((result) => result.embedding[0])).toEqual([0.25, 1.25, 2.25, 3.25]);
+        });
+
+        test("throws typed payload_too_large error for a single oversized item without raw text", async () => {
+            const rawText = `oversized transcript fragment ${"x".repeat(256)}`;
+            globalThis.fetch = mock(() =>
+                Promise.resolve(
+                    new Response("request entity too large", { status: 413 }),
+                )
+            );
+
+            try {
+                await provider.embedBatch([rawText]);
+                throw new Error("expected embedBatch to throw");
+            } catch (error) {
+                expect(error).toBeInstanceOf(EmbeddingProviderError);
+                expect(isEmbeddingProviderError(error, "payload_too_large")).toBe(true);
+                expect((error as EmbeddingProviderError).status).toBe(413);
+                expect(String((error as Error).message)).not.toContain(rawText);
+                expect(JSON.stringify((error as EmbeddingProviderError).metadata ?? {}))
+                    .not.toContain(rawText);
+            }
         });
     });
 

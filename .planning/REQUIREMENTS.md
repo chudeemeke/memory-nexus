@@ -152,6 +152,18 @@ Phase 40 completed temporal semantic graph projection. `GraphEdge`, `IGraphRepos
 
 Phase 41 completed the utility-aware ranking surface. `MemoryUtilityMetric` and `memory_utility_metrics` track `fact`, `persona`, `graph`, `link`, and future `dream` targets without provider or network coupling. `MemoryRankingService` applies per-kind/type half-life policies, supersedence/governance/temporal exclusion, evergreen and pinned exemptions, access utility, and deterministic why-ranked explanations. `SmartContextService`, `memory context`, and ambient context now rank allowed facts/persona/graph entries after governance filtering. The ranking eval fixture is behavior-backed through the real ranking service. Dream proposal production remains Phase 42, but it uses the same metric surface instead of a separate ranking schema.
 
+### Embedding Pipeline Resilience
+
+- [x] **EMBED-RES-01**: Embedding batches are bounded by both configured item count and a conservative provider/transport payload budget.
+- [x] **EMBED-RES-02**: Provider payload-too-large failures on multi-item batches are retried through deterministic splitting while preserving input/result order.
+- [x] **EMBED-RES-03**: Provider payload-too-large failures on a single item create a durable, model-scoped skip/quarantine record with safe metadata only.
+- [x] **EMBED-RES-04**: Resume excludes current-model skipped rows, continues later rows, and reports embedded/skipped/failure counts honestly in CLI and JSON surfaces.
+- [x] **EMBED-RES-05**: Tests cover Ollama 413 behavior, repository skip filtering, application resume semantics, and privacy-safe error reporting without raw transcript content.
+
+Phase 41.1 was inserted after Phase 41 because Kanbanflow re-embedding surfaced a deterministic 413 failure against the Tailscale Ollama sidecar. This is an all-consumer memory reliability issue, not a Kanbanflow-specific workaround. The fix must keep provider choice loosely coupled: Ollama gets concrete 413 coverage, but the application behavior must work for any provider that signals payload-too-large or equivalent request-size failure.
+
+Phase 41.1 completed the memory-side source fix. Embedding now has typed provider payload-too-large errors, Ollama 413 split/retry, byte-bounded service batches, durable model-scoped skip/quarantine state, resume filtering, and safe skipped-count CLI/JSON reporting. Verification passed typecheck, build, full tests, isolation, coverage, dependency audit, inbox lint, and diff whitespace. The installed global `memory@4.0.0` binary is not claimed fixed until a fixed install or publish smoke is run.
+
 ### Dreaming Consolidation
 
 - [ ] **DREAM-01**: `memory dream` produces schema-versioned audited dream entries.
@@ -163,6 +175,7 @@ Phase 41 completed the utility-aware ranking surface. `MemoryUtilityMetric` and 
 - [ ] **UX-01**: Feature inventory covers current code, docs, roadmap, requirements, inbox, tests, and disabled prototype surfaces.
 - [ ] **UX-02**: Every stated, implemented, documented, inferred, disabled, or prototype feature is completed or explicitly owned by a later gate; no feature is silently removed.
 - [ ] **UX-03**: CLI help, errors, preflights, JSON schemas, docs, onboarding, backup/restore, audit, and recovery flows meet excellent usability standards.
+- [ ] **UX-04**: Phase 42.5 traces every Product North Star claim in `.planning/PROJECT.md` to implemented behavior, an explicit later owner, or a documented non-goal with rationale.
 
 ### Market and Sales Readiness
 
@@ -171,6 +184,7 @@ Phase 41 completed the utility-aware ranking surface. `MemoryUtilityMetric` and 
 - [ ] **READY-03**: Quality review passes typecheck, build, full tests, test isolation, 95% coverage at each metric, dependency audit, gitleaks, and published-package smoke.
 - [ ] **READY-04**: Product review proves fresh-user install, onboarding, configure, audit, backup, restore, upgrade, and verification flows.
 - [ ] **READY-05**: Competitive review demonstrates a crisp local-first value proposition and no known unowned blocker.
+- [ ] **READY-06**: Phase 43 includes a Product North Star conformance audit and blocks market-ready approval on any unowned mismatch.
 
 ### Release Candidate and Publish Handoff
 
@@ -286,17 +300,24 @@ Which phases cover which requirements. Updated during roadmap creation.
 | RANK-03 | Phase 41 | Complete |
 | RANK-04 | Phase 41 | Complete |
 | RANK-05 | Phase 41 | Complete |
+| EMBED-RES-01 | Phase 41.1 | Complete |
+| EMBED-RES-02 | Phase 41.1 | Complete |
+| EMBED-RES-03 | Phase 41.1 | Complete |
+| EMBED-RES-04 | Phase 41.1 | Complete |
+| EMBED-RES-05 | Phase 41.1 | Complete |
 | DREAM-01 | Phase 42 | Pending |
 | DREAM-02 | Phase 42 | Pending |
 | DREAM-03 | Phase 42 | Pending |
 | UX-01 | Phase 42.5 | Pending |
 | UX-02 | Phase 42.5 | Pending |
 | UX-03 | Phase 42.5 | Pending |
+| UX-04 | Phase 42.5 | Pending |
 | READY-01 | Phase 43 | Pending |
 | READY-02 | Phase 43 | Pending |
 | READY-03 | Phase 43 | Pending |
 | READY-04 | Phase 43 | Pending |
 | READY-05 | Phase 43 | Pending |
+| READY-06 | Phase 43 | Pending |
 | REL-01 | Phase 44 | Pending |
 | REL-02 | Phase 44 | Pending |
 | REL-03 | Phase 44 | Pending |
@@ -304,12 +325,12 @@ Which phases cover which requirements. Updated during roadmap creation.
 **Coverage:**
 - v4.0 requirements: 25 total (excluding QUAL cross-cutting)
 - Cross-cutting: 4 QUAL requirements
-- v5.0 requirements: 51 total
-- v5.0 complete: 36/51
-- v5.0 pending: 15/51
-- v5.0 mapped to phases: 51/51
+- v5.0 requirements: 53 total
+- v5.0 complete: 36/53
+- v5.0 pending: 17/53
+- v5.0 mapped to phases: 53/53
 - v5.0 unmapped: 0
 
 ---
 *Requirements defined: 2026-04-03*
-*Last updated: 2026-06-07 after Phase 41 importance, utility, and recall ranking completion*
+*Last updated: 2026-06-22 after Phase 41.1 embedding resilience completed source verification*

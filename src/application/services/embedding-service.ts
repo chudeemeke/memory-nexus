@@ -11,15 +11,32 @@
  * (repository + provider). Respects hexagonal architecture boundaries.
  */
 
+import { Buffer } from "node:buffer";
 import { createHash } from "node:crypto";
-import type { IEmbeddingProvider } from "../../domain/ports/embedding.js";
+import {
+    isEmbeddingProviderError,
+    type IEmbeddingProvider,
+} from "../../domain/ports/embedding.js";
 import type { IRedactor } from "../../domain/ports/redactor.js";
-import type { IEmbeddingRepository, EmbeddingBatchItem, EmbeddingServiceConfig } from "../../domain/ports/repositories.js";
+import type {
+    IEmbeddingRepository,
+    EmbeddingBatchItem,
+    EmbeddingServiceConfig,
+    UnembeddedMessage,
+} from "../../domain/ports/repositories.js";
+
+const DEFAULT_MAX_BATCH_BYTES = 800_000;
 
 const NOOP_REDACTOR: IRedactor = {
     redactText: (input) => ({ text: input, findings: [] }),
     redactJson: (input) => ({ value: input, findings: [] }),
 };
+
+interface PreparedEmbeddingInput {
+    rowid: number;
+    rawContent: string;
+    text: string;
+}
 
 /**
  * Options for embedding operations.
@@ -106,6 +123,7 @@ export class EmbeddingService {
     private readonly repository: IEmbeddingRepository;
     private readonly provider: IEmbeddingProvider;
     private readonly batchSize: number;
+    private readonly maxBatchBytes: number;
     private readonly modelHash: string;
     private readonly modelName: string;
     private readonly redactor: IRedactor;
@@ -119,6 +137,10 @@ export class EmbeddingService {
         this.repository = deps.repository;
         this.provider = deps.provider;
         this.batchSize = deps.config.batchSize;
+        this.maxBatchBytes = Math.max(
+            1,
+            deps.config.maxBatchBytes ?? DEFAULT_MAX_BATCH_BYTES,
+        );
         this.modelHash = computeModelHash(deps.config);
         this.modelName = deps.config.model;
         this.redactor = deps.redactor ?? NOOP_REDACTOR;
@@ -173,40 +195,44 @@ export class EmbeddingService {
     async embedUnembedded(options: EmbedOptions = {}): Promise<EmbedResult> {
         const startTime = Date.now();
         let embedded = 0;
+        let skipped = 0;
 
         // Get total count of unembedded messages for progress reporting
-        const totalUnembedded =
-            this.repository.getTotalMessageCount() - this.repository.getEmbeddedCount();
+        const totalUnembedded = Math.max(
+            0,
+            this.repository.getTotalMessageCount() -
+                this.repository.getEmbeddedCount() -
+                this.getSkippedCountForCurrentModel(),
+        );
 
         if (totalUnembedded <= 0) {
             return { embedded: 0, skipped: 0, durationMs: 0, rate: 0 };
         }
 
         // Process in batches
-        let batch = this.repository.findUnembedded(this.batchSize);
+        let batch = this.repository.findUnembedded(this.batchSize, this.modelHash);
         while (batch.length > 0) {
-            // Embed the batch via provider
-            const texts = batch.map((m) => this.redactor.redactText(m.content).text);
-            const results = await this.provider.embedBatch(texts);
+            const preparedBatch = this.prepareBatch(batch);
+            const chunks = this.chunkByPayloadBytes(preparedBatch);
 
-            // Store results with both hash and human-readable model name
-            const items: EmbeddingBatchItem[] = batch.map((msg, i) => ({
-                rowid: msg.rowid,
-                embedding: results[i]!.embedding,
-            }));
-            this.repository.storeBatch(items, this.modelHash, this.modelName);
-
-            embedded += batch.length;
-            options.onProgress?.({ current: embedded, total: totalUnembedded });
+            for (const chunk of chunks) {
+                const result = await this.embedChunk(chunk);
+                embedded += result.embedded;
+                skipped += result.skipped;
+                options.onProgress?.({
+                    current: Math.min(embedded + skipped, totalUnembedded),
+                    total: totalUnembedded,
+                });
+            }
 
             // Get next batch
-            batch = this.repository.findUnembedded(this.batchSize);
+            batch = this.repository.findUnembedded(this.batchSize, this.modelHash);
         }
 
         const durationMs = Date.now() - startTime;
         const rate = durationMs > 0 ? embedded / (durationMs / 1000) : 0;
 
-        return { embedded, skipped: 0, durationMs, rate };
+        return { embedded, skipped, durationMs, rate };
     }
 
     /**
@@ -221,5 +247,105 @@ export class EmbeddingService {
     async clearAndReembed(options: EmbedOptions = {}): Promise<EmbedResult> {
         this.repository.clearAllEmbeddings();
         return this.embedUnembedded(options);
+    }
+
+    private prepareBatch(batch: UnembeddedMessage[]): PreparedEmbeddingInput[] {
+        return batch.map((message) => ({
+            rowid: message.rowid,
+            rawContent: message.content,
+            text: this.redactor.redactText(message.content).text,
+        }));
+    }
+
+    private chunkByPayloadBytes(
+        inputs: PreparedEmbeddingInput[],
+    ): PreparedEmbeddingInput[][] {
+        const chunks: PreparedEmbeddingInput[][] = [];
+        let current: PreparedEmbeddingInput[] = [];
+
+        for (const input of inputs) {
+            const candidate = [...current, input];
+            if (
+                current.length > 0 &&
+                this.estimatePayloadBytes(candidate) > this.maxBatchBytes
+            ) {
+                chunks.push(current);
+                current = [input];
+                continue;
+            }
+
+            current = candidate;
+        }
+
+        if (current.length > 0) {
+            chunks.push(current);
+        }
+
+        return chunks;
+    }
+
+    private estimatePayloadBytes(inputs: PreparedEmbeddingInput[]): number {
+        return Buffer.byteLength(
+            JSON.stringify({
+                model: this.modelName,
+                input: inputs.map((input) => input.text),
+            }),
+            "utf8",
+        );
+    }
+
+    private async embedChunk(
+        chunk: PreparedEmbeddingInput[],
+    ): Promise<{ embedded: number; skipped: number }> {
+        try {
+            const results = await this.provider.embedBatch(
+                chunk.map((input) => input.text),
+            );
+
+            const items: EmbeddingBatchItem[] = chunk.map((input, i) => ({
+                rowid: input.rowid,
+                embedding: results[i]!.embedding,
+            }));
+            this.repository.storeBatch(items, this.modelHash, this.modelName);
+            return { embedded: chunk.length, skipped: 0 };
+        } catch (error) {
+            if (!isEmbeddingProviderError(error, "payload_too_large")) {
+                throw error;
+            }
+
+            if (chunk.length > 1) {
+                const midpoint = Math.ceil(chunk.length / 2);
+                const left = await this.embedChunk(chunk.slice(0, midpoint));
+                const right = await this.embedChunk(chunk.slice(midpoint));
+                return {
+                    embedded: left.embedded + right.embedded,
+                    skipped: left.skipped + right.skipped,
+                };
+            }
+
+            this.markPayloadTooLargeSkip(chunk[0]!);
+            return { embedded: 0, skipped: 1 };
+        }
+    }
+
+    private markPayloadTooLargeSkip(input: PreparedEmbeddingInput): void {
+        this.repository.markSkipped({
+            messageId: input.rowid,
+            modelHash: this.modelHash,
+            modelName: this.modelName,
+            provider: this.provider.name,
+            reason: "payload_too_large",
+            retryable: false,
+            contentHash: createHash("sha256").update(input.rawContent).digest("hex"),
+            contentBytes: Buffer.byteLength(input.rawContent, "utf8"),
+            safeError:
+                "Provider payload exceeded request limit for this message and model.",
+        });
+    }
+
+    private getSkippedCountForCurrentModel(): number {
+        return typeof this.repository.getSkippedCount === "function"
+            ? this.repository.getSkippedCount(this.modelHash)
+            : 0;
     }
 }

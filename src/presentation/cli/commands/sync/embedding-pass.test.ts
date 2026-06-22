@@ -6,6 +6,7 @@
 
 import { describe, expect, it, afterEach, spyOn, mock } from "bun:test";
 import { runEmbeddingPass, handleModelChange } from "./embedding-pass.js";
+import { EmbeddingProviderError } from "../../../../domain/ports/embedding.js";
 import type { ModelState } from "../../../../application/services/embedding-service.js";
 
 describe("runEmbeddingPass", () => {
@@ -226,6 +227,85 @@ describe("runEmbeddingPass", () => {
     expect(summaryLine).toBeDefined();
     expect(summaryLine).toMatch(/Embedded \d+ messages in \d+s \(\d+\.?\d* msg\/s\)/);
 
+    logSpy.mockRestore();
+  });
+
+  it("prints handled skipped count without raw message content", async () => {
+    const logSpy = spyOn(console, "log").mockImplementation(() => {});
+    const rawOversized = `oversized private transcript ${"x".repeat(128)}`;
+
+    const mockProvider = {
+      name: "ollama",
+      model: "nomic-embed-text",
+      dimensions: 768,
+      isReady: () => true,
+      initialize: async () => {},
+      embed: async () => {},
+      embedBatch: async (texts: string[]) => {
+        if (texts[0]?.includes("oversized")) {
+          throw new EmbeddingProviderError({
+            kind: "payload_too_large",
+            message: "Provider payload exceeded request limit",
+            status: 413,
+            retryable: false,
+          });
+        }
+        return texts.map(() => ({
+          embedding: new Float32Array(768),
+          model: "nomic-embed-text",
+          dimensions: 768,
+        }));
+      },
+      dispose: async () => {},
+    };
+
+    const mockFactory = {
+      createFromConfig: () => mockProvider,
+      dispose: async () => {},
+    };
+
+    const mockConfig = {
+      embedding: {
+        enabled: true,
+        provider: "ollama",
+        model: "nomic-embed-text",
+        dimensions: 768,
+        batchSize: 100,
+        maxBatchBytes: 512,
+      },
+    };
+
+    let callCount = 0;
+    const mockRepo = {
+      getStoredModelHash: () => null,
+      getStoredModelName: () => null,
+      getEmbeddedCount: () => 0,
+      getSkippedCount: () => 0,
+      getTotalMessageCount: () => 2,
+      findUnembedded: () => {
+        callCount++;
+        return callCount === 1
+          ? [
+              { rowid: 1, content: rawOversized },
+              { rowid: 2, content: "safe later message" },
+            ]
+          : [];
+      },
+      markSkipped: () => {},
+      storeBatch: () => {},
+      clearAllEmbeddings: () => {},
+    };
+
+    await runEmbeddingPass({} as any, {}, {
+      factory: mockFactory as any,
+      config: mockConfig,
+      repositoryOverride: mockRepo as any,
+    });
+
+    const output = logSpy.mock.calls.map((call) => String(call[0])).join("\n");
+    expect(output).toContain("Embedded 1 messages");
+    expect(output).toContain("skipped 1");
+    expect(output).not.toContain(rawOversized);
     logSpy.mockRestore();
   });
 

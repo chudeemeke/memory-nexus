@@ -6,7 +6,7 @@
 - SHIPPED **v2.0 Hybrid Search and Rebrand** -- Phases 13-22 (shipped 2026-03-01)
 - SHIPPED **v3.0 Knowledge Layer + Friction Logging** -- Phases 23-29.1 (shipped 2026-04-02)
 - SHIPPED **v4.0 Intelligence Layer** -- Phases 30-37 plus 32.5, 36.8, 36.9, and 36.10 (published 2026-05-30 as `@chude/memory@4.0.0`; architecture audit LOCKED 2026-05-13, recommendation A-prime; 2026-05-27 foundation review added pre-publish security hardening before GA; Phase 36.9 coverage gate restored 2026-05-30; Phase 36.10 hardened legacy memory-file defaults before publish)
-- IN PROGRESS **v5.0 Market-Leader Memory Platform** -- Phases 38.0-44 (started 2026-06-05; Phase 41 importance, utility, and recall ranking complete; Phase 42 dreaming consolidation next; added consent/provenance, eval harness, feature-completeness/UX, and release-candidate handoff gates)
+- IN PROGRESS **v5.0 Market-Leader Memory Platform** -- Phases 38.0-44 plus urgent Phase 41.1 (started 2026-06-05; Phase 41 importance, utility, and recall ranking complete; Phase 41.1 embedding pipeline resilience active before Phase 42 dreaming consolidation; added consent/provenance, eval harness, feature-completeness/UX, and release-candidate handoff gates)
 
 ## Phases
 
@@ -85,7 +85,7 @@
 
 ### v5.0 Market-Leader Memory Platform (Phases 38.0-44)
 
-**Overview:** Transition `@chude/memory` into a world-class, multi-device, local-first agentic memory platform. Adds a canonical event kernel, projection replay, privacy governance, consent/provenance controls, Git-backed remote event synchronization, optional secure capability interop, durable friction contracts, executable eval harness, developer/persona memory, temporal semantic graph retrieval, utility-aware ranking, audited dreaming consolidation, feature-completeness/UX polish, final market/sales readiness gates, and release-candidate packaging/publish handoff.
+**Overview:** Transition `@chude/memory` into a world-class, multi-device, local-first agentic memory platform governed by the Product North Star in `.planning/PROJECT.md`. Adds a canonical event kernel, projection replay, privacy governance, consent/provenance controls, Git-backed remote event synchronization, optional secure capability interop, durable friction contracts, executable eval harness, developer/persona memory, temporal semantic graph retrieval, utility-aware ranking, audited dreaming consolidation, feature-completeness/UX polish, final market/sales readiness gates, and release-candidate packaging/publish handoff.
 
 - [x] **Phase 38.0: v5 Threat Model, Product PRD, and Eval Baseline** - Lock v5 requirements, threat model, eval baseline, ADRs, and excellent-grade rubric before implementation. Completed 2026-06-05.
 - [x] **Phase 38.1: Canonical Event Kernel and Projection Replay** - Schema-versioned memory event envelopes, machine identity, event ordering/integrity, migration, and projection registry. Completed 2026-06-05.
@@ -561,6 +561,29 @@ Rationale: Phase 32 explicitly deferred friction envelope adoption per audit §1
 
 ---
 
+### Phase 41.1: Embedding Pipeline Resilience for Ollama 413 and Resume Safety
+
+**Goal**: Make embedding generation monotonic and provider-limit-aware so oversized provider or transport requests cannot wedge cross-project re-embedding.
+**Requirements**: EMBED-RES-01, EMBED-RES-02, EMBED-RES-03, EMBED-RES-04, EMBED-RES-05
+**Depends on**: Phase 41
+**Success Criteria** (what must be TRUE):
+  1. Embedding work is bounded by provider/transport payload budget, not only by fixed message count.
+  2. Multi-item provider payload-too-large failures are retried by splitting work without losing input/result order.
+  3. A single oversized item is persisted as a safe current-model skip/quarantine with provider/model/reason/hash/size metadata and no raw content in logs or CLI output.
+  4. Resume excludes current-model quarantined items, reports skipped counts honestly, and continues embedding later rows instead of re-hitting the same deterministic failure.
+  5. CLI errors and sync output distinguish retryable provider failure from handled skip state, and tests prove the behavior.
+**Plans**: 1/1 plan complete. See `.planning/phases/41.1-embedding-pipeline-resilience-for-ollama-413-and-resume-safety/41.1-01-SUMMARY.md`.
+**Status**: Complete 2026-06-22.
+**Implemented**:
+  - Added typed provider payload-too-large errors and Ollama 413 split/retry while preserving input/result order.
+  - Added `embedding.maxBatchBytes`, byte-bounded embedding sub-batches, and durable model-scoped skip/quarantine state.
+  - Updated resume filtering and `memory sync --embed` output so handled skips are reported safely in text and JSON.
+  - Remediated dependency-audit blockers by updating `@anthropic-ai/claude-code`, `vitest`, `vite`, and `protobufjs` resolution.
+**Verification**: Focused Dream/embedding contract tests passed, `bun run typecheck` passed, `bun run build` passed, `bun run test:isolation` passed, `bun run eval:v5` passed 9/9 fixtures, `bun run test:coverage` passed (4,364 pass, 0 fail; statements 97.35%, branches 95.00%, functions 96.59%, lines 97.45%), `bun test --timeout 15000` passed (4,364 pass, 0 fail), `bun audit` found no vulnerabilities, `git diff --check` passed, and inbox lint passed. `eval:v5` still reports market readiness ineligible because two contract fixtures remain owned by Phase 42/43.
+
+Plans:
+- [x] 41.1-01 Embedding resilience and durable skip state
+
 ### Phase 42: Dreaming Consolidation
 
 **Goal**: Add audited asynchronous consolidation without hidden mutation or unreviewed data loss.
@@ -578,12 +601,13 @@ Rationale: Phase 32 explicitly deferred friction envelope adoption per audit §1
 
 **Goal**: Ensure no stated/inferred/prototype feature is removed or left half-built, and make CLI/API usability excellent before final readiness audit.
 **Depends on**: Phase 42
-**Requirements**: UX-01, UX-02, UX-03
+**Requirements**: UX-01, UX-02, UX-03, UX-04
 **Success Criteria** (what must be TRUE):
   1. Feature inventory covers current code, docs, roadmap, requirements, inbox, tests, and disabled prototype surfaces.
   2. Every incomplete feature is completed or explicitly owned by a later requirement with a concrete gate; no feature is silently removed.
   3. CLI help, errors, preflights, JSON schemas, docs, onboarding, backup/restore, audit, and recovery flows are polished for excellent usability.
   4. Fresh-user UAT confirms install, configure, sync/search/context/audit/backup/restore, and feature discovery are clear.
+  5. Every Product North Star claim in `.planning/PROJECT.md` is traced to implemented behavior, an explicit later owner, or a documented non-goal with rationale.
 **Plans**: Placeholder directory exists; plan after Phase 42.
 
 ---
@@ -592,13 +616,14 @@ Rationale: Phase 32 explicitly deferred friction envelope adoption per audit §1
 
 **Goal**: Prove architecture, security, quality, product readiness, competitive positioning, and sales readiness are excellent.
 **Depends on**: Phase 42.5
-**Requirements**: READY-01, READY-02, READY-03, READY-04, READY-05
+**Requirements**: READY-01, READY-02, READY-03, READY-04, READY-05, READY-06
 **Success Criteria** (what must be TRUE):
   1. Architecture review grades excellent against hexagonal/SOLID/deep-module criteria.
   2. Security review grades excellent against secrets, privacy, egress, remote sync, dependency, audit, and recovery criteria.
   3. Quality review passes typecheck, build, full tests, test isolation, 95% coverage at every metric, dependency audit, gitleaks, and package smoke.
   4. Product review proves fresh-user install, onboarding, configure, audit, backup, restore, upgrade, and verification flows.
   5. Competitive review demonstrates a crisp local-first value proposition and no known unowned blocker.
+  6. Product North Star conformance audit passes with no unowned mismatch.
 **Plans**: Placeholder directory exists; plan after Phase 42.5.
 
 ---
@@ -750,7 +775,8 @@ v5.0
 | 38.7. Evaluation Harness and Regression Fixtures | v5.0 | 1/1 | Complete | 2026-06-07 |
 | 39. Persona and Procedural Memory | v5.0 | 1/1 | Complete | 2026-06-07 |
 | 40. Temporal Semantic Graph | v5.0 | 1/1 | Complete | 2026-06-07 |
-| 41. Importance, Utility, and Recall Ranking | v5.0 | TBD | Planned | - |
+| 41. Importance, Utility, and Recall Ranking | v5.0 | 1/1 | Complete | 2026-06-07 |
+| 41.1. Embedding Pipeline Resilience | v5.0 | 1/1 | Complete | 2026-06-22 |
 | 42. Dreaming Consolidation | v5.0 | TBD | Planned | - |
 | 42.5. Feature Completeness and UX Polish | v5.0 | TBD | Planned | - |
 | 43. Market-Leader and Sales-Readiness Gate | v5.0 | TBD | Planned | - |
@@ -758,4 +784,4 @@ v5.0
 
 ---
 
-*Last updated: 2026-06-07 (Phase 41 complete; Phase 42 next)*
+*Last updated: 2026-06-22 (Phase 41.1 complete; Phase 42 next)*

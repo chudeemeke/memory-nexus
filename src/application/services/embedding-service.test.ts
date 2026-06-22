@@ -8,9 +8,15 @@
 
 import { describe, expect, test, beforeEach, mock } from "bun:test";
 import { createHash } from "node:crypto";
-import type { IEmbeddingProvider } from "../../domain/ports/embedding.js";
+import { EmbeddingProviderError, type IEmbeddingProvider } from "../../domain/ports/embedding.js";
 import type { EmbeddingResult } from "../../domain/value-objects/embedding-result.js";
-import type { IEmbeddingRepository, UnembeddedMessage, EmbeddingBatchItem, EmbeddingServiceConfig } from "../../domain/ports/repositories.js";
+import type {
+    IEmbeddingRepository,
+    UnembeddedMessage,
+    EmbeddingBatchItem,
+    EmbeddingServiceConfig,
+    EmbeddingSkipRecordInput,
+} from "../../domain/ports/repositories.js";
 import {
     computeModelHash,
     EmbeddingService,
@@ -27,10 +33,12 @@ function createMockRepository(overrides?: Partial<IEmbeddingRepository>): IEmbed
     return {
         findUnembedded: mock(() => [] as UnembeddedMessage[]),
         storeBatch: mock(() => {}),
+        markSkipped: mock(() => {}),
         getStoredModelHash: mock(() => null as string | null),
         getStoredModelName: mock(() => null as string | null),
         clearAllEmbeddings: mock(() => {}),
         getEmbeddedCount: mock(() => 0),
+        getSkippedCount: mock(() => 0),
         getTotalMessageCount: mock(() => 0),
         ...overrides,
     } as IEmbeddingRepository;
@@ -275,8 +283,11 @@ describe("EmbeddingService", () => {
 
             expect(result.embedded).toBe(5);
             expect(result.durationMs).toBeGreaterThanOrEqual(0);
-            // findUnembedded called with batchSize=2
-            expect(findUnembeddedMock).toHaveBeenCalledWith(2);
+            // findUnembedded called with batchSize=2 and current model hash.
+            expect(findUnembeddedMock).toHaveBeenCalledWith(
+                2,
+                computeModelHash({ ...DEFAULT_CONFIG, batchSize: 2 }),
+            );
         });
 
         test("calls onProgress callback after each batch", async () => {
@@ -348,6 +359,55 @@ describe("EmbeddingService", () => {
             expect(embedBatchMock).toHaveBeenCalledWith(["hello world", "foo bar"]);
         });
 
+        test("monotonic resume: respects maxBatchBytes when batchSize would overfill provider payload", async () => {
+            const messages = [
+                { rowid: 1, content: "a".repeat(80) },
+                { rowid: 2, content: "b".repeat(80) },
+                { rowid: 3, content: "c".repeat(80) },
+            ];
+            const findUnembeddedMock = mock<(limit: number, modelHash?: string) => UnembeddedMessage[]>();
+            findUnembeddedMock.mockReturnValueOnce(messages);
+            findUnembeddedMock.mockReturnValueOnce([]);
+
+            const storeBatchMock = mock(() => {});
+            const repo = createMockRepository({
+                findUnembedded: findUnembeddedMock,
+                storeBatch: storeBatchMock,
+                getTotalMessageCount: mock(() => 3),
+                getEmbeddedCount: mock(() => 0),
+            });
+
+            const embedBatchMock = mock(async (texts: string[]) =>
+                texts.map((_, index) => createFakeEmbeddingResult(index + 1))
+            );
+            const provider = createMockProvider({ embedBatch: embedBatchMock });
+            const singlePayloadBytes = Buffer.byteLength(JSON.stringify({
+                model: DEFAULT_CONFIG.model,
+                input: [messages[0].content],
+            }));
+            const config = {
+                ...DEFAULT_CONFIG,
+                batchSize: 10,
+                maxBatchBytes: singlePayloadBytes + 8,
+            };
+
+            const service = new EmbeddingService({
+                repository: repo,
+                provider,
+                config,
+            });
+
+            const result = await service.embedUnembedded();
+
+            expect(result.embedded).toBe(3);
+            expect(embedBatchMock.mock.calls.map((call) => call[0].length)).toEqual([1, 1, 1]);
+            expect(storeBatchMock).toHaveBeenCalledTimes(3);
+            expect(findUnembeddedMock.mock.calls[0]).toEqual([
+                10,
+                computeModelHash(config),
+            ]);
+        });
+
         test("redacts secret-shaped content before provider egress", async () => {
             const rawSecret = ["sk", "proj_abcdefghijklmnopqrstuvwxyz1234567890"].join("-");
             const findUnembeddedMock = mock<(limit: number) => UnembeddedMessage[]>();
@@ -379,6 +439,70 @@ describe("EmbeddingService", () => {
             const [texts] = embedBatchMock.mock.calls[0];
             expect(texts[0]).toMatch(/\[REDACTED:api_key:[a-f0-9]{8}\]/);
             expect(texts[0]).not.toContain(rawSecret);
+        });
+
+        test("model-scoped skip: marks single payload_too_large item and continues later rows", async () => {
+            const rawOversized = `oversized transcript ${"x".repeat(128)}`;
+            const findUnembeddedMock = mock<(limit: number, modelHash?: string) => UnembeddedMessage[]>();
+            findUnembeddedMock.mockReturnValueOnce([
+                { rowid: 10, content: rawOversized },
+                { rowid: 20, content: "safe later message" },
+            ]);
+            findUnembeddedMock.mockReturnValueOnce([]);
+
+            const skipped: EmbeddingSkipRecordInput[] = [];
+            const storeBatchMock = mock(() => {});
+            const repo = createMockRepository({
+                findUnembedded: findUnembeddedMock,
+                markSkipped: mock((record: EmbeddingSkipRecordInput) => {
+                    skipped.push(record);
+                }),
+                storeBatch: storeBatchMock,
+                getTotalMessageCount: mock(() => 2),
+                getEmbeddedCount: mock(() => 0),
+                getSkippedCount: mock(() => 0),
+            });
+
+            const embedBatchMock = mock(async (texts: string[]) => {
+                if (texts[0]?.includes("oversized")) {
+                    throw new EmbeddingProviderError({
+                        kind: "payload_too_large",
+                        message: "Provider payload exceeded request limit",
+                        status: 413,
+                        retryable: false,
+                    });
+                }
+                return [createFakeEmbeddingResult(2)];
+            });
+            const provider = createMockProvider({ name: "ollama", embedBatch: embedBatchMock });
+
+            const service = new EmbeddingService({
+                repository: repo,
+                provider,
+                config: { ...DEFAULT_CONFIG, provider: "ollama", batchSize: 10 },
+            });
+
+            const result = await service.embedUnembedded();
+
+            expect(result.embedded).toBe(1);
+            expect(result.skipped).toBe(1);
+            expect(embedBatchMock.mock.calls.map((call) => call[0])).toEqual([
+                [rawOversized, "safe later message"],
+                [rawOversized],
+                ["safe later message"],
+            ]);
+            expect(storeBatchMock).toHaveBeenCalledTimes(1);
+            expect(skipped).toHaveLength(1);
+            expect(skipped[0]).toMatchObject({
+                messageId: 10,
+                provider: "ollama",
+                modelName: DEFAULT_CONFIG.model,
+                reason: "payload_too_large",
+                retryable: false,
+                contentBytes: Buffer.byteLength(rawOversized, "utf8"),
+            });
+            expect(skipped[0]!.contentHash).toMatch(/^[a-f0-9]{64}$/);
+            expect(JSON.stringify(skipped[0])).not.toContain(rawOversized);
         });
 
         test("calls storeBatch with correct rowids, embeddings, modelHash, and modelName", async () => {
