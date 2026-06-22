@@ -159,9 +159,17 @@ Phase 41.1 completed the memory-side source fix for oversized embedding
 batches. Source gates passed, including typecheck, build, full tests, coverage,
 dependency audit, inbox lint, and diff whitespace.
 
-This does not close the Tailscale endpoint-consumption item yet: the fixed
-source still needs to be installed or published, and the 768-dimension re-embed
-must be rerun successfully against `https://ollama.tail859c3a.ts.net`.
+The fixed source has now also been installed locally for the global `memory`
+command via Bun link to `C:\Projects\memory-nexus-hotfix-41-1` at hotfix commit
+`03cbe28`. Runtime status reports Ollama provider egress allowed for
+`ollama.tail859c3a.ts.net` with `maxBatchBytes: 800000`, and live embedding
+progressed against the sidecar after install.
+
+This item is no longer blocked on Tailscale reachability or memory's local
+install state. The remaining distinction is release scope: npm still has
+`@chude/memory@4.0.0`, so registry-level distribution requires a `4.0.1` patch
+publish with OTP. Full corpus re-embedding can continue as a long-running
+memory operation; it is not evidence of a Tailscale endpoint defect.
 
 ## Event Log
 
@@ -174,3 +182,4 @@ must be rerun successfully against `https://ollama.tail859c3a.ts.net`.
 - 2026-06-21T13:15:00.000Z | memory-nexus | in_progress | User granted provider egress consent; memory config was updated and full Ollama re-embedding started.
 - 2026-06-22T00:28:00.000Z | memory-nexus | triaged | Full re-embed is blocked by memory-nexus Ollama 413 oversized batch handling; endpoint remains healthy and no Tailscale config change is currently required.
 - 2026-06-22T02:07:50.000Z | memory-nexus | in_progress | Memory-side oversized batch source fix passed gates; endpoint item remains open pending fixed install/publish and successful 768-dimension re-embed.
+- 2026-06-22T05:25:00.000Z | memory-nexus | in_progress | Fixed global CLI now uses `C:\Projects\memory-nexus-hotfix-41-1` at commit `03cbe28`; Ollama endpoint remains reachable and provider egress allowed. Remaining work is npm patch publish/full corpus completion, not Tailscale endpoint repair.

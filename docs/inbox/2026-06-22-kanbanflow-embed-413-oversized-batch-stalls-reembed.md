@@ -161,10 +161,38 @@ memory-nexus Phase 41.1 implemented and verified the source-side fix:
 
 Verification passed: `bun run typecheck`, `bun run build`, `bun test --timeout 15000` (4,364 pass, 0 fail), `bun run test:isolation`, `bun run eval:v5`, `bun run test:coverage` (statements 97.35%, branches 95.00%, functions 96.59%, lines 97.45%), `bun audit`, `git diff --check`, and inbox lint.
 
-This item remains open until the fixed code is installed or published and the blocked Kanbanflow re-embed is rerun against that fixed binary. Do not treat the currently installed global `memory@4.0.0` as fixed from source verification alone.
+This item remains open until the fixed code is published as a patch release or the remaining local-only install status is explicitly accepted as sufficient for the next goal. Do not treat npm `@chude/memory@4.0.0` as registry-fixed; the local global CLI is currently fixed by a Bun link to the verified hotfix worktree.
+
+## Local Fixed Install - 2026-06-22
+
+The fixed build was committed and installed locally for the actual global `memory` command:
+
+- Hotfix commit: `03cbe28 fix: harden embedding pipeline provider limits`.
+- Clean verification worktree: `C:\Projects\memory-nexus-hotfix-41-1`.
+- Clean `bun run quality`: passed.
+- Global `memory` executable: `C:\Users\Destiny\.bun\bin\memory.exe`.
+- Bun global package target: `C:\Projects\memory-nexus-hotfix-41-1`.
+- Installed CLI still reports version `4.0.0` because npm patch versioning has not yet been done.
+- `memory --help` does not expose Phase 42/Dreaming commands, confirming the global CLI is not running the dirty main worktree.
+
+Runtime checks after install:
+
+- `memory status --json` reported provider `ollama`, model `nomic-embed-text`, base URL `https://ollama.tail859c3a.ts.net`, `maxBatchBytes: 800000`, and provider egress allowed for `ollama.tail859c3a.ts.net`.
+- Live `https://ollama.tail859c3a.ts.net/api/tags` returned `nomic-embed-text:latest`.
+- A production `memory sync --embed --json` run progressed from about `176100` embedded rows to `180100` embedded rows before being stopped to avoid leaving a long orphaned foreground process. It did not hit the old immediate 413 wedge during that observed window.
+- Kanbanflow has `25577` messages; `23479` were embedded at the time of inspection, with the largest known Kanbanflow messages up to `427070` bytes already embedded and `2098` remaining unembedded. The remaining Kanbanflow maximum was `102589` bytes.
+- Installed public API smoke proved byte-bounded batching under a `512` byte cap: provider calls were split into `509` bytes and `50` bytes, both below the configured cap.
+- Focused clean-worktree tests passed for `EmbeddingService`, `EmbeddingRepository`, and sync embedding pass, including model-scoped `payload_too_large` skip and resume behavior.
+
+Remaining release truth:
+
+- The public npm registry is not fixed yet because `@chude/memory@4.0.0` has already been published and cannot be republished.
+- Registry-level resolution requires a patch release, most likely `4.0.1`, and npm OTP at publish time.
+- Full 768-dimension corpus completion was not forced as a pre-goal gate because the remaining corpus is large enough to run for hours; the blocker class is the deterministic 413 wedge, not the existence of remaining unembedded rows.
 
 ## Event Log
 <!-- inbox-events:v1 -->
 - 2026-06-22T00:00:00.000Z | kanbanflow | filed | `memory sync --embed` aborted at 168300/366032 with Ollama 413; root-caused to count-based batching + no 413 handling in OllamaProvider.embedBatch.
 - 2026-06-22T00:25:00.000Z | memory-nexus | triaged | Accepted as an all-consumer embedding pipeline bug; endpoint is healthy, installed memory is v4.0.0, and source confirms fixed count-based batches can wedge resume on 413.
 - 2026-06-22T02:07:50.000Z | memory-nexus | in_progress | Phase 41.1 source fix and quality/security gates passed; awaiting fixed install/publish and live re-embed verification before closure.
+- 2026-06-22T05:25:00.000Z | memory-nexus | in_progress | Fixed global CLI now resolves through Bun to `C:\Projects\memory-nexus-hotfix-41-1` at commit `03cbe28`; clean quality passed, status shows `maxBatchBytes: 800000`, live embedding progressed, and focused skip/resume tests passed. npm patch publish remains outstanding.
