@@ -147,26 +147,39 @@ export class EmbeddingRepository implements IEmbeddingRepository {
     /**
      * Store a batch of embeddings in a single transaction.
      *
-     * Inserts into both message_embeddings (vec0 virtual table) and
-     * embedding_state (tracking table) atomically. If any insert fails,
-     * the entire batch rolls back.
+     * Writes to both message_embeddings (vec0 virtual table) and
+     * embedding_state (tracking table) atomically. The operation is
+     * idempotent so interrupted runs that leave a vector without state can
+     * be repaired by a normal resume instead of wedging on a primary-key
+     * collision.
      *
      * @param items Array of embedding batch items (rowid + vector)
      * @param modelHash Hash identifying the model configuration
      * @param modelName Human-readable model name (e.g., "Xenova/all-MiniLM-L6-v2")
      */
     storeBatch(items: EmbeddingBatchItem[], modelHash: string, modelName: string): void {
+        const updateVec = this.db.prepare(
+            "UPDATE message_embeddings SET embedding = vec_f32(?) WHERE rowid = ?"
+        );
         const insertVec = this.db.prepare(
             "INSERT INTO message_embeddings(rowid, embedding) VALUES (?, vec_f32(?))"
         );
         const insertState = this.db.prepare(
-            "INSERT INTO embedding_state(message_id, embedded_at, model_hash, model_name) VALUES (?, ?, ?, ?)"
+            `INSERT INTO embedding_state(message_id, embedded_at, model_hash, model_name)
+             VALUES (?, ?, ?, ?)
+             ON CONFLICT(message_id) DO UPDATE SET
+                embedded_at = excluded.embedded_at,
+                model_hash = excluded.model_hash,
+                model_name = excluded.model_name`
         );
 
         const txn = this.db.transaction((batch: EmbeddingBatchItem[]) => {
             const now = new Date().toISOString();
             for (const item of batch) {
-                insertVec.run(item.rowid, item.embedding);
+                const updated = updateVec.run(item.embedding, item.rowid);
+                if (updated.changes === 0) {
+                    insertVec.run(item.rowid, item.embedding);
+                }
                 insertState.run(item.rowid, now, modelHash, modelName);
             }
         });

@@ -260,36 +260,75 @@ describe("EmbeddingRepository", () => {
             expect(vecCount.count).toBe(3);
         });
 
-        test("is atomic -- duplicate rowid rolls back entire batch", () => {
+        test("is idempotent when a rowid already exists in message_embeddings", () => {
             if (!sqliteVecAvailable) {
                 console.warn("Skipping storeBatch test: sqlite-vec not available");
                 return;
             }
 
-            const rowids = insertTestMessages(db, 3);
+            const rowids = insertTestMessages(db, 2);
 
-            // First, insert one embedding
             repo.storeBatch(
                 [{ rowid: rowids[0], embedding: createTestEmbedding(1) }],
                 "hash1",
                 "model1"
             );
 
-            // Try to insert a batch with a duplicate (rowids[0] already exists)
             const items: EmbeddingBatchItem[] = [
                 { rowid: rowids[1], embedding: createTestEmbedding(2) },
-                { rowid: rowids[0], embedding: createTestEmbedding(1) }, // duplicate
+                { rowid: rowids[0], embedding: createTestEmbedding(3) },
             ];
 
-            expect(() => {
-                repo.storeBatch(items, "hash2", "model2");
-            }).toThrow();
+            expect(() => repo.storeBatch(items, "hash2", "model2")).not.toThrow();
 
-            // Only the original 1 row should exist (batch rolled back)
+            const stateCount = db.prepare(
+                "SELECT COUNT(*) as count FROM embedding_state"
+            ).get() as { count: number };
+            expect(stateCount.count).toBe(2);
+
+            const vecCount = db.prepare(
+                "SELECT COUNT(*) as count FROM message_embeddings"
+            ).get() as { count: number };
+            expect(vecCount.count).toBe(2);
+
+            const updatedState = db.prepare(
+                "SELECT model_hash, model_name FROM embedding_state WHERE message_id = ?"
+            ).get(rowids[0]) as { model_hash: string; model_name: string };
+            expect(updatedState).toEqual({
+                model_hash: "hash2",
+                model_name: "model2",
+            });
+        });
+
+        test("repairs orphan message_embeddings rows missing embedding_state on resume", () => {
+            if (!sqliteVecAvailable) {
+                console.warn("Skipping storeBatch test: sqlite-vec not available");
+                return;
+            }
+
+            const rowids = insertTestMessages(db, 1);
+            db.prepare(
+                "INSERT INTO message_embeddings(rowid, embedding) VALUES (?, vec_f32(?))"
+            ).run(rowids[0], createTestEmbedding(1));
+
+            const unembedded = repo.findUnembedded(10, "hash1");
+            expect(unembedded.map((message) => message.rowid)).toEqual([rowids[0]]);
+
+            expect(() => repo.storeBatch(
+                [{ rowid: rowids[0], embedding: createTestEmbedding(2) }],
+                "hash1",
+                "model1",
+            )).not.toThrow();
+
             const stateCount = db.prepare(
                 "SELECT COUNT(*) as count FROM embedding_state"
             ).get() as { count: number };
             expect(stateCount.count).toBe(1);
+
+            const vecCount = db.prepare(
+                "SELECT COUNT(*) as count FROM message_embeddings"
+            ).get() as { count: number };
+            expect(vecCount.count).toBe(1);
         });
     });
 
