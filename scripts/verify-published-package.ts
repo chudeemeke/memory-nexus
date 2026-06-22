@@ -3,7 +3,7 @@ import { tmpdir } from "node:os";
 import { delimiter, join } from "node:path";
 import { execFileSync } from "node:child_process";
 
-const packageSpec = process.argv[2] ?? "@chude/memory@4.0.0";
+const packageSpec = process.argv[2] ?? "@chude/memory@4.0.1";
 const packageName = packageSpec.replace(/@\d+\.\d+\.\d+(?:[-+].*)?$/, "");
 const expectedVersion = packageSpec.match(/@(\d+\.\d+\.\d+(?:[-+][^@]+)?)$/)?.[1];
 
