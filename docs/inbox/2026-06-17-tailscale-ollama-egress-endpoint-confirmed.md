@@ -160,10 +160,15 @@ batches. Source gates passed, including typecheck, build, full tests, coverage,
 dependency audit, inbox lint, and diff whitespace.
 
 The fixed source has now also been installed locally for the global `memory`
-command via Bun link to `C:\Projects\memory-nexus-hotfix-41-1` at hotfix commit
-`03cbe28`. Runtime status reports Ollama provider egress allowed for
-`ollama.tail859c3a.ts.net` with `maxBatchBytes: 800000`, and live embedding
+command as a package copy at
+`C:\Users\Destiny\.bun\install\global\node_modules\@chude\memory`, built from
+hotfix commit `03cbe28`. Runtime status reports Ollama provider egress allowed
+for `ollama.tail859c3a.ts.net` with `maxBatchBytes: 800000`, and live embedding
 progressed against the sidecar after install.
+
+The temporary verification worktree `C:\Projects\memory-nexus-hotfix-41-1`
+was removed after install verification; the global CLI must not depend on an
+extra project folder.
 
 This item is no longer blocked on Tailscale reachability or memory's local
 install state. The remaining distinction is release scope: npm still has
@@ -182,4 +187,4 @@ memory operation; it is not evidence of a Tailscale endpoint defect.
 - 2026-06-21T13:15:00.000Z | memory-nexus | in_progress | User granted provider egress consent; memory config was updated and full Ollama re-embedding started.
 - 2026-06-22T00:28:00.000Z | memory-nexus | triaged | Full re-embed is blocked by memory-nexus Ollama 413 oversized batch handling; endpoint remains healthy and no Tailscale config change is currently required.
 - 2026-06-22T02:07:50.000Z | memory-nexus | in_progress | Memory-side oversized batch source fix passed gates; endpoint item remains open pending fixed install/publish and successful 768-dimension re-embed.
-- 2026-06-22T05:25:00.000Z | memory-nexus | in_progress | Fixed global CLI now uses `C:\Projects\memory-nexus-hotfix-41-1` at commit `03cbe28`; Ollama endpoint remains reachable and provider egress allowed. Remaining work is npm patch publish/full corpus completion, not Tailscale endpoint repair.
+- 2026-06-22T05:25:00.000Z | memory-nexus | in_progress | Fixed global CLI uses a package-copy install at `C:\Users\Destiny\.bun\install\global\node_modules\@chude\memory` built from commit `03cbe28`; Ollama endpoint remains reachable and provider egress allowed. Remaining work is npm patch publish/full corpus completion, not Tailscale endpoint repair.

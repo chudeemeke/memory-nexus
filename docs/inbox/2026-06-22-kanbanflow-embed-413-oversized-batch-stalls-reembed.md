@@ -168,10 +168,10 @@ This item remains open until the fixed code is published as a patch release or t
 The fixed build was committed and installed locally for the actual global `memory` command:
 
 - Hotfix commit: `03cbe28 fix: harden embedding pipeline provider limits`.
-- Clean verification worktree: `C:\Projects\memory-nexus-hotfix-41-1`.
+- Clean verification worktree: `C:\Projects\memory-nexus-hotfix-41-1` was used for isolation, then removed after package-copy install verification.
 - Clean `bun run quality`: passed.
 - Global `memory` executable: `C:\Users\Destiny\.bun\bin\memory.exe`.
-- Bun global package target: `C:\Projects\memory-nexus-hotfix-41-1`.
+- Bun global package target: `C:\Users\Destiny\.bun\install\global\node_modules\@chude\memory` as a real package directory, not a junction to the dirty main repo or a temporary worktree.
 - Installed CLI still reports version `4.0.0` because npm patch versioning has not yet been done.
 - `memory --help` does not expose Phase 42/Dreaming commands, confirming the global CLI is not running the dirty main worktree.
 
@@ -195,4 +195,4 @@ Remaining release truth:
 - 2026-06-22T00:00:00.000Z | kanbanflow | filed | `memory sync --embed` aborted at 168300/366032 with Ollama 413; root-caused to count-based batching + no 413 handling in OllamaProvider.embedBatch.
 - 2026-06-22T00:25:00.000Z | memory-nexus | triaged | Accepted as an all-consumer embedding pipeline bug; endpoint is healthy, installed memory is v4.0.0, and source confirms fixed count-based batches can wedge resume on 413.
 - 2026-06-22T02:07:50.000Z | memory-nexus | in_progress | Phase 41.1 source fix and quality/security gates passed; awaiting fixed install/publish and live re-embed verification before closure.
-- 2026-06-22T05:25:00.000Z | memory-nexus | in_progress | Fixed global CLI now resolves through Bun to `C:\Projects\memory-nexus-hotfix-41-1` at commit `03cbe28`; clean quality passed, status shows `maxBatchBytes: 800000`, live embedding progressed, and focused skip/resume tests passed. npm patch publish remains outstanding.
+- 2026-06-22T05:25:00.000Z | memory-nexus | in_progress | Fixed global CLI now resolves through Bun to a package-copy install at `C:\Users\Destiny\.bun\install\global\node_modules\@chude\memory` built from commit `03cbe28`; clean quality passed, status shows `maxBatchBytes: 800000`, live embedding progressed, and focused skip/resume tests passed. npm patch publish remains outstanding.
