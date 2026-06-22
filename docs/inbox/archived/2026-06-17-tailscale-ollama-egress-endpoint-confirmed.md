@@ -4,9 +4,9 @@ source_project: tailscale
 created: 2026-06-17
 type: enhancement
 severity: medium
-fix_status: tested
+fix_status: merged
 affects_scope: this-project-only
-workaround_applied: "Memory config updated with explicit consent; endpoint verified. Full 768-dimension re-embed is now blocked by memory-nexus Ollama 413 batch handling, not by Tailscale reachability."
+workaround_applied: "No endpoint workaround required. Memory uses https://ollama.tail859c3a.ts.net with explicit provider-egress consent."
 priority_rationale: "Provider egress is scoped to the exact sidecar host; endpoint contract is accepted, but embedding rebuild cannot complete until memory-nexus fixes oversized Ollama batch handling."
 closure_notify_to: tailscale
 closure_notify_reason: "Tailscale should know whether memory-nexus consumes, rejects, or needs changes to the Ollama endpoint contract."
@@ -14,8 +14,9 @@ issue_id: tailscale:2026-06-17:ollama-egress-endpoint-confirmed
 thread_id: memory-nexus:2026-06-14:confirm-ollama-egress-endpoint
 related_issue: C:\Projects\tailscale\docs\inbox\archived\2026-06-21-memory-nexus-ollama-sidecar-offline-after-desktop-restart.md
 next_owner: memory-nexus
-status: in-progress
+status: merged
 triaged_at: 2026-06-21
+resolved_at: 2026-06-22
 ---
 
 # Ollama Tailnet Endpoint Confirmed
@@ -176,6 +177,29 @@ install state. The remaining distinction is release scope: npm still has
 publish with OTP. Full corpus re-embedding can continue as a long-running
 memory operation; it is not evidence of a Tailscale endpoint defect.
 
+## Resolution - 2026-06-22
+
+Memory-nexus has consumed the Tailscale endpoint contract and no longer needs a Tailscale-side change for this item.
+
+Verified facts:
+
+- Memory config uses `https://ollama.tail859c3a.ts.net`, not the retired desktop root endpoint.
+- Provider egress consent is `granted` and `allowedHosts` contains only `ollama.tail859c3a.ts.net` for this remote Ollama host.
+- Live `https://ollama.tail859c3a.ts.net/api/tags` returned `nomic-embed-text:latest` with embedding length `768`.
+- Installed `memory --version` reports `4.0.2`.
+- `memory status --embedding --json` reports the Ollama embedding provider ready and provider egress allowed for `ollama.tail859c3a.ts.net`.
+- The prior full re-embed blocker was memory-nexus's Ollama 413 batch handling, now fixed and published in `@chude/memory@4.0.2`.
+- A bounded Kanbanflow-scoped verification advanced embedding count from `180100` to `180700` without re-hitting the old 413 wedge.
+
+Scope of closure:
+
+- Closed: endpoint selection, consented memory config consumption, and Tailscale-vs-memory ownership ambiguity.
+- Not claimed: full corpus re-embed completion; that is a long-running memory operation and no longer a Tailscale endpoint defect.
+
+Counter-notification:
+
+- A notification was filed to `C:\Projects\tailscale\docs\inbox\2026-06-22-memory-nexus-memory-sync-embed-4-0-2-ready.md` so the Tailscale project sees that memory has consumed the endpoint and published the memory-side fix.
+
 ## Event Log
 
 - 2026-06-17T00:00:00.000Z | tailscale | filed | Confirmed Ollama sidecar endpoint for memory provider egress.
@@ -188,3 +212,4 @@ memory operation; it is not evidence of a Tailscale endpoint defect.
 - 2026-06-22T00:28:00.000Z | memory-nexus | triaged | Full re-embed is blocked by memory-nexus Ollama 413 oversized batch handling; endpoint remains healthy and no Tailscale config change is currently required.
 - 2026-06-22T02:07:50.000Z | memory-nexus | in_progress | Memory-side oversized batch source fix passed gates; endpoint item remains open pending fixed install/publish and successful 768-dimension re-embed.
 - 2026-06-22T05:25:00.000Z | memory-nexus | in_progress | Fixed global CLI uses a package-copy install at `C:\Users\Destiny\.bun\install\global\node_modules\@chude\memory` built from commit `03cbe28`; Ollama endpoint remains reachable and provider egress allowed. Remaining work is npm patch publish/full corpus completion, not Tailscale endpoint repair.
+- 2026-06-22T22:20:00.000Z | memory-nexus | merged | Memory consumed the Ollama sidecar endpoint with explicit egress consent; @chude/memory@4.0.2 is published and installed; the old 413 blocker is closed as memory-owned, not Tailscale-owned.

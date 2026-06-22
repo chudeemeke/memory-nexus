@@ -4,16 +4,17 @@ source_project: kanbanflow
 created: 2026-06-22
 type: bug
 severity: high
-fix_status: tested
+fix_status: merged
 affects_scope: all-consumers
-workaround_applied: "None effective; metadata sync works, --embed stalls at the same offset on every resume. Untested stopgap: lower embedding.batchSize in config."
+workaround_applied: "No workaround now required once @chude/memory@4.0.2 is installed; stale 4.0.0 installs remain affected."
 priority_rationale: "Embedding (semantic search) is blocked corpus-wide; resume re-hits the same oversized batch so the run can never complete unattended."
 issue_id: kanbanflow:2026-06-22:embed-413-oversized-batch
 thread_id: memory-nexus:2026-06-22:embed-413-batching
 related_issue: C:\Projects\memory-nexus\docs\inbox\2026-06-17-tailscale-ollama-egress-endpoint-confirmed.md
 next_owner: memory-nexus
-status: in-progress
+status: merged
 triaged_at: 2026-06-22
+resolved_at: 2026-06-22
 ---
 
 # `memory sync --embed` aborts on Ollama 413 (oversized batch) and stalls at the same offset on resume
@@ -190,9 +191,30 @@ Remaining release truth:
 - Registry-level resolution requires a patch release, most likely `4.0.1`, and npm OTP at publish time.
 - Full 768-dimension corpus completion was not forced as a pre-goal gate because the remaining corpus is large enough to run for hours; the blocker class is the deterministic 413 wedge, not the existence of remaining unembedded rows.
 
+## Resolution - 2026-06-22
+
+Resolved by published package `@chude/memory@4.0.2` and local global install verification.
+
+Verified facts:
+
+- `npm view @chude/memory version dist-tags --json` reports `4.0.2` and `latest: 4.0.2`.
+- `memory --version` reports `4.0.2` after `bun add -g @chude/memory@4.0.2`.
+- `bun run verify:published @chude/memory@4.0.2` passed registry, npm global, Bun global, and published package smoke checks.
+- The published npm tarball passed `gitleaks` and explicit artifact scans for local user paths, iCloud paths, user-name strings, tailnet host strings, project-specific private strings, TODO/FIXME/HACK/debugger markers, and common token patterns.
+- `memory status --embedding --json` reports valid config, provider `ollama`, model `nomic-embed-text`, dimensions `768`, `maxBatchBytes: 800000`, provider egress allowed for `ollama.tail859c3a.ts.net`, and embedding readiness true.
+- Live `https://ollama.tail859c3a.ts.net/api/tags` returned `nomic-embed-text:latest` with embedding length `768`.
+- A bounded `memory sync --project C:\Projects\Kanbanflow --embed` verification advanced the global embedded count from `180100` to `180700` before being intentionally stopped; it did not re-hit the old deterministic 413 wedge.
+
+Scope of closure:
+
+- Closed: the known oversized Ollama batch 413/resume wedge.
+- Not claimed: full 366k-message corpus completion in this session. That remains a long-running embedding operation, not a release gate for this blocker.
+- If a project still fails after installing 4.0.2, treat it as a fresh memory-nexus issue with current logs/error text.
+
 ## Event Log
 <!-- inbox-events:v1 -->
 - 2026-06-22T00:00:00.000Z | kanbanflow | filed | `memory sync --embed` aborted at 168300/366032 with Ollama 413; root-caused to count-based batching + no 413 handling in OllamaProvider.embedBatch.
 - 2026-06-22T00:25:00.000Z | memory-nexus | triaged | Accepted as an all-consumer embedding pipeline bug; endpoint is healthy, installed memory is v4.0.0, and source confirms fixed count-based batches can wedge resume on 413.
 - 2026-06-22T02:07:50.000Z | memory-nexus | in_progress | Phase 41.1 source fix and quality/security gates passed; awaiting fixed install/publish and live re-embed verification before closure.
 - 2026-06-22T05:25:00.000Z | memory-nexus | in_progress | Fixed global CLI now resolves through Bun to a package-copy install at `C:\Users\Destiny\.bun\install\global\node_modules\@chude\memory` built from commit `03cbe28`; clean quality passed, status shows `maxBatchBytes: 800000`, live embedding progressed, and focused skip/resume tests passed. npm patch publish remains outstanding.
+- 2026-06-22T22:20:00.000Z | memory-nexus | merged | Published and installed @chude/memory@4.0.2; published smoke and artifact privacy gates passed; live Kanbanflow-scoped sync advanced embeddings without re-hitting the old 413 wedge.
