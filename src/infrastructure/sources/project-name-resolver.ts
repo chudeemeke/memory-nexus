@@ -59,7 +59,7 @@ export class ProjectNameResolver implements IProjectNameResolver {
    * Resolve the project name from an encoded path (without drive prefix).
    * Walks the filesystem matching encoded segments against real directory names.
    *
-   * @param encodedSegments - The encoded path without drive prefix (e.g., "Users-Destiny-Projects-memory-nexus")
+   * @param encodedSegments - The encoded path without drive prefix (e.g., "Projects-memory-nexus")
    * @returns The actual name of the last matched directory
    */
   resolveProjectName(encodedSegments: string): string {
@@ -113,7 +113,7 @@ export class ProjectNameResolver implements IProjectNameResolver {
     }
 
     // No enumerable match found. Probe for hidden/virtual directories
-    // (e.g., iCloudDrive on Windows) that readdirSync does not return.
+    // (for example, cloud-synced Windows folders) that readdirSync does not return.
     const probeResult = this.probeHiddenDirectories(currentDir, remaining);
     if (probeResult !== undefined) {
       return probeResult;
@@ -126,7 +126,7 @@ export class ProjectNameResolver implements IProjectNameResolver {
   /**
    * Probe for hidden/virtual directories that readdirSync does not enumerate.
    *
-   * Some directories (e.g., iCloudDrive on Windows) are valid and traversable
+   * Some directories (for example, cloud-synced Windows folders) are valid and traversable
    * but invisible to readdirSync. This method tries progressively longer
    * dash-separated prefixes of the remaining encoded string as candidate
    * directory names, checking each via statSync.

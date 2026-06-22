@@ -40,7 +40,7 @@ export class ProjectPath {
 
   /**
    * Create ProjectPath from a decoded (original) path.
-   * @param path The original filesystem path (e.g., "C:\Users\Destiny\Projects\foo")
+   * @param path The original filesystem path (e.g., "C:\Projects\foo")
    * @throws Error if path is empty or whitespace-only
    */
   static fromDecoded(path: string): ProjectPath {
@@ -54,7 +54,7 @@ export class ProjectPath {
 
   /**
    * Create ProjectPath from an encoded path.
-   * @param encoded The encoded path (e.g., "C--Users-Destiny-Projects-foo")
+   * @param encoded The encoded path (e.g., "C--Projects-foo")
    * @throws Error if path is empty or whitespace-only
    */
   static fromEncoded(encoded: string): ProjectPath {

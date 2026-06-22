@@ -89,7 +89,7 @@ export interface IProjectNameResolver {
   /**
    * Resolve a project name from a full encoded path.
    *
-   * @param encodedPath The encoded directory path (e.g., "C--Users-Destiny-Projects-memory-nexus")
+   * @param encodedPath The encoded directory path (e.g., "C--Projects-memory-nexus")
    * @returns The resolved project name (e.g., "memory-nexus")
    */
   resolveFromEncodedPath(encodedPath: string): string;

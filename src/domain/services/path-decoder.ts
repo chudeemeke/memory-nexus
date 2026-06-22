@@ -27,7 +27,7 @@ const UNIX_ROOT_PATTERN = /^-[a-z]/i;
 export class PathDecoder {
   /**
    * Decode an encoded project directory name to a ProjectPath value object.
-   * @param encoded The encoded directory name (e.g., "C--Users-Destiny-Projects-foo")
+   * @param encoded The encoded directory name (e.g., "C--Projects-foo")
    * @returns ProjectPath value object with decoded path
    */
   static decodeProjectDirectory(encoded: string): ProjectPath {
@@ -90,7 +90,7 @@ export class PathDecoder {
     }
 
     if (targetPlatform === "win32") {
-      // Unix/WSL to Windows: /mnt/c/Users/Destiny -> C:\Users\Destiny
+      // Unix/WSL to Windows: /mnt/c/Projects/foo -> C:\Projects\foo
       const wslMatch = path.match(/^\/mnt\/([a-zA-Z])([\/]?)(.*)$/);
       if (wslMatch) {
         const drive = wslMatch[1]!.toUpperCase();
@@ -99,7 +99,7 @@ export class PathDecoder {
       }
       return path;
     } else {
-      // Windows to Unix/WSL: C:\Users\Destiny -> /mnt/c/Users/Destiny
+      // Windows to Unix/WSL: C:\Projects\foo -> /mnt/c/Projects/foo
       const winMatch = path.match(/^([a-zA-Z]):([\\/]?)(.*)$/);
       if (winMatch) {
         const drive = winMatch[1]!.toLowerCase();
@@ -139,4 +139,3 @@ export class PathDecoder {
     return path;
   }
 }
-

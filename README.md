@@ -310,7 +310,7 @@ gitleaks detect --no-banner --redact --source .
 After publishing, verify registry metadata plus npm and Bun global installs:
 
 ```bash
-bun run verify:published @chude/memory@4.0.1
+bun run verify:published @chude/memory@4.0.2
 ```
 
 On Windows, Bun global install creates `memory.exe` in `bun pm bin -g`. Do not assume an npm-style `memory.cmd` shim exists.
