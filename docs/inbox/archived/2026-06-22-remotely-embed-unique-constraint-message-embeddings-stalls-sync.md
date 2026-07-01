@@ -4,7 +4,7 @@ source_project: remotely
 created: 2026-06-22
 type: bug
 severity: medium
-fix_status: tested
+fix_status: merged
 affects_scope: all-consumers
 workaround_applied: "None — partial embed completes (~190700/366553); cross-project semantic search is stale past that offset. File-based project memory is unaffected."
 priority_rationale: "memory is shared infrastructure; this is a SEPARATE failure surviving the 4.0.2 Ollama-413 fix, recurring since at least 2026-05-14, that wedges full embedding for every consumer of memory sync --embed."
@@ -13,9 +13,10 @@ thread_id: remotely:2026-06-22:embed-unique-constraint-message-embeddings
 related_issue: memory-nexus:2026-06-22:memory-sync-embed-4-0-2-ready
 closure_notify_to: remotely
 closure_notify_reason: "remotely's cross-project semantic search is stale past the wedge offset until this is fixed; this session's content is not searchable cross-project."
-next_owner: memory-nexus
-status: in-progress
+next_owner: remotely
+status: merged
 triaged_at: 2026-06-22
+resolved_at: 2026-07-01
 ---
 
 # `memory sync --embed` wedges on `UNIQUE constraint failed on message_embeddings primary key`
@@ -63,7 +64,11 @@ Implementation detail: sqlite-vec rejected `INSERT OR REPLACE` for `message_embe
 
 The report's "sync exits 0" note was not reproduced in current source: `runEmbeddingPass` throws on embedding failure and `executeSyncCommand` maps that to exit code 1; existing sync tests cover that path. I did not change exit-code handling in this patch.
 
-Current state: fix is tested locally but not yet committed, tagged, published, or installed as a new package version.
+Resolved state: fix is committed at `6155b68`, published, installed, and smoke-verified as `@chude/memory@4.0.2`.
+Current memory-nexus verification on 2026-07-01: `memory --version` is 4.0.2, `npm view @chude/memory version` is 4.0.2,
+the installed compiled CLI bundle contains the idempotent `UPDATE message_embeddings` path and `ON CONFLICT(message_id)` state upsert,
+`bun test src/infrastructure/database/repositories/embedding-repository.test.ts` passes 39/39, and `bun run verify:published` passes.
+remotely still owns live corpus re-embed verification from its own CWD.
 
 ## Test plan
 
@@ -98,3 +103,4 @@ skip-don't-wedge philosophy.
 <!-- inbox-events:v1 -->
 - 2026-06-22T07:30:00.000Z | remotely | filed | Post-4.0.2 UNIQUE-constraint embed wedge at offset 190700/366553; recurring since 2026-05-14 friction signal.
 - 2026-06-22T22:59:55.136Z | memory-nexus | triaged | Confirmed as same root bug as Kanbanflow report; implemented and locally tested idempotent message_embeddings update-or-insert plus embedding_state upsert, with release still pending.
+- 2026-07-01T20:32:00.000Z | memory-nexus | merged | Archived as shipped after commit 6155b68, registry/global @chude/memory@4.0.2 verification, compiled bundle check, focused embedding repository regression tests, and published-package smoke.

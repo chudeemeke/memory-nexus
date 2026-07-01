@@ -4,16 +4,17 @@ source_project: kanbanflow
 created: 2026-06-22
 type: bug
 severity: high
-fix_status: tested
+fix_status: merged
 affects_scope: all-consumers
 workaround_applied: "None; plain resume re-hits the same orphan rowid. `--embed --force` clears both tables and avoids it for an uninterrupted run but redoes all prior embeddings."
 priority_rationale: "Regression exposed by the v4.0.2 413 fix: corpus-wide embedding is again deterministically wedged, now via a message_embeddings/embedding_state drift + non-idempotent insert. This is the failure the v4.0.2 closure condition (rerun the blocked re-embed against the fixed binary) would have caught."
 issue_id: kanbanflow:2026-06-22:embedding-pk-collision-on-resume
 thread_id: memory-nexus:2026-06-22:embed-413-batching
 related_issue: C:\Projects\memory-nexus\docs\inbox\archived\2026-06-22-kanbanflow-embed-413-oversized-batch-stalls-reembed.md
-next_owner: memory-nexus
-status: in-progress
+next_owner: kanbanflow
+status: merged
 triaged_at: 2026-06-22
+resolved_at: 2026-07-01
 ---
 
 # `memory sync --embed` aborts on `UNIQUE constraint failed on message_embeddings primary key` and resume re-hits it
@@ -76,7 +77,11 @@ Implemented tests:
 - `storeBatch` is idempotent when a rowid already exists in `message_embeddings`.
 - orphan `message_embeddings` rows missing `embedding_state` are selected and repaired on resume.
 
-Current state: fix is tested locally but not yet committed, tagged, published, or installed as a new package version.
+Resolved state: fix is committed at `6155b68`, published, installed, and smoke-verified as `@chude/memory@4.0.2`.
+Current memory-nexus verification on 2026-07-01: `memory --version` is 4.0.2, `npm view @chude/memory version` is 4.0.2,
+the installed compiled CLI bundle contains the idempotent `UPDATE message_embeddings` path and `ON CONFLICT(message_id)` state upsert,
+`bun test src/infrastructure/database/repositories/embedding-repository.test.ts` passes 39/39, and `bun run verify:published` passes.
+Kanbanflow still owns live corpus re-embed verification from its own CWD.
 
 ## Test plan
 
@@ -123,3 +128,4 @@ constraint failed on message_embeddings primary key. Exposed by the v4.0.2
 <!-- inbox-events:v1 -->
 - 2026-06-22T22:30:00.000Z | kanbanflow | filed | memory sync --embed on v4.0.2 cleared the 413 (168300->181700) then aborted with UNIQUE constraint failed on message_embeddings PK; root-caused to non-idempotent storeBatch insert + findUnembedded keyed only on embedding_state + vec0/state drift.
 - 2026-06-22T22:59:55.136Z | memory-nexus | triaged | Root cause confirmed in source; implemented and locally tested idempotent vec update-or-insert plus embedding_state upsert, leaving state-driven resume to repair orphan vectors.
+- 2026-07-01T20:32:00.000Z | memory-nexus | merged | Archived as shipped after commit 6155b68, registry/global @chude/memory@4.0.2 verification, compiled bundle check, focused embedding repository regression tests, and published-package smoke.

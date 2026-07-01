@@ -1,7 +1,8 @@
 # Inbox — Cross-Project Issues
+<!-- cross-project-inbox:managed-stub:v1 -->
 
-This directory accepts issue reports from other Claude Code sessions per the
-convention documented in `~/.claude/rules/cross-project-issues.md`.
+This directory accepts issue reports from other agent or project sessions per
+the convention documented in `~/.claude/rules/cross-project-issues.md`.
 
 ## What lives here
 
@@ -33,7 +34,42 @@ After reject: `status: rejected`, append rationale → move to `rejected/`.
 
 - Filename: `YYYY-MM-DD-<reporting-project>-<slug>.md`
 - One issue per file
-- Frontmatter schema: see `~/.claude/rules/cross-project-issues.md` (currently v1.2)
+- Frontmatter schema: see `~/.claude/rules/cross-project-issues.md` (currently v1.3)
+
+## Human Action Handoffs
+
+Use `next_owner: user` when the next step genuinely needs the human to decide
+or act. Examples: approval, account setup, credential action, product decision,
+scope choice, or sequencing decision.
+
+Do not use `next_owner: user` just to keep the user informed. Use normal
+briefing summaries, event logs, or `closure_notify_to` for awareness and
+round-trip closure.
+
+`conversations` projects active `next_owner: user` items into its generated
+`docs/user-inbox/pending.md` view and future notification surfaces. The
+canonical action still lives in the owning project's inbox item. Close or
+advance it there, not in the generated view.
+
+Regenerate the current projection from `conversations` with one of:
+
+```text
+# Windows PowerShell
+node C:/Projects/conversations/scripts/user-actions.cjs --write
+
+# WSL/Linux
+node ~/Projects/conversations/scripts/user-actions.cjs --write
+```
+
+Validate active project inbox files from `conversations` with one of:
+
+```text
+# Windows PowerShell
+node C:/Projects/conversations/scripts/inbox-lint.cjs --active-projects --root C:/Projects
+
+# WSL/Linux
+node ~/Projects/conversations/scripts/inbox-lint.cjs --active-projects --root ~/Projects
+```
 
 ## Why this directory exists (not a rule restatement)
 
