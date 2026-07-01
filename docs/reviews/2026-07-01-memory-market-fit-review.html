@@ -1,0 +1,1068 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>@chude/memory Market Fit Review - 2026-07-01</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f8fafc;
+      --panel: #ffffff;
+      --panel-2: #eef4f7;
+      --ink: #0f172a;
+      --muted: #5b6776;
+      --line: #d8e1ea;
+      --accent: #0f766e;
+      --accent-soft: #d8f3ef;
+      --blue: #2563eb;
+      --green: #15803d;
+      --amber: #b45309;
+      --red: #b91c1c;
+      --shadow: 0 18px 46px rgba(15, 23, 42, 0.08);
+      --radius: 8px;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+      line-height: 1.55;
+    }
+
+    a {
+      color: var(--blue);
+      text-underline-offset: 2px;
+    }
+
+    .shell {
+      display: grid;
+      grid-template-columns: 248px minmax(0, 1fr);
+      min-height: 100vh;
+    }
+
+    nav {
+      position: sticky;
+      top: 0;
+      align-self: start;
+      height: 100vh;
+      padding: 22px 18px;
+      background: #0f172a;
+      color: #e2e8f0;
+      border-right: 1px solid #1e293b;
+      overflow: auto;
+    }
+
+    nav .brand {
+      font-weight: 800;
+      font-size: 1.05rem;
+      letter-spacing: 0;
+      margin-bottom: 8px;
+    }
+
+    nav .meta {
+      color: #94a3b8;
+      font-size: 0.78rem;
+      margin-bottom: 22px;
+    }
+
+    nav a {
+      display: block;
+      color: #cbd5e1;
+      text-decoration: none;
+      padding: 9px 10px;
+      border-radius: 6px;
+      font-weight: 650;
+      font-size: 0.9rem;
+    }
+
+    nav a:hover,
+    nav a:focus {
+      background: #1e293b;
+      color: white;
+      outline: none;
+    }
+
+    main {
+      width: min(1180px, calc(100vw - 304px));
+      margin: 0 auto;
+      padding: 34px 0 58px;
+    }
+
+    section {
+      margin-top: 24px;
+    }
+
+    h1,
+    h2,
+    h3 {
+      margin: 0;
+      line-height: 1.15;
+      letter-spacing: 0;
+    }
+
+    h1 {
+      font-size: clamp(2rem, 4.8vw, 4.4rem);
+      max-width: 1000px;
+    }
+
+    h2 {
+      font-size: 1.35rem;
+      margin-bottom: 12px;
+    }
+
+    h3 {
+      font-size: 1rem;
+      margin-bottom: 8px;
+    }
+
+    p {
+      margin: 0 0 12px;
+    }
+
+    ul {
+      margin: 0;
+      padding-left: 20px;
+    }
+
+    li {
+      margin-bottom: 7px;
+    }
+
+    .mono {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+    }
+
+    .muted {
+      color: var(--muted);
+    }
+
+    .small {
+      font-size: 0.88rem;
+    }
+
+    .hero {
+      background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 28px;
+      box-shadow: var(--shadow);
+    }
+
+    .eyebrow {
+      font-size: 0.74rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      font-weight: 800;
+      margin-bottom: 14px;
+    }
+
+    .lede {
+      max-width: 900px;
+      font-size: 1.1rem;
+      color: var(--muted);
+      margin-top: 16px;
+    }
+
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 20px;
+    }
+
+    .grid {
+      display: grid;
+      gap: 16px;
+    }
+
+    .grid.two {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .grid.three {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .metric {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 16px;
+      min-height: 128px;
+    }
+
+    .metric strong {
+      display: block;
+      font-size: 2rem;
+      line-height: 1;
+      margin: 10px 0;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background: var(--panel-2);
+      color: var(--muted);
+      font-size: 0.78rem;
+      font-weight: 800;
+      padding: 4px 10px;
+      white-space: nowrap;
+    }
+
+    .pill.green {
+      color: var(--green);
+      background: #eaf7ed;
+      border-color: #b9e2c4;
+    }
+
+    .pill.amber {
+      color: var(--amber);
+      background: #fff7ed;
+      border-color: #fed7aa;
+    }
+
+    .pill.red {
+      color: var(--red);
+      background: #fef2f2;
+      border-color: #fecaca;
+    }
+
+    .callout {
+      border-left: 4px solid var(--accent);
+      border-radius: 0 6px 6px 0;
+      background: var(--panel-2);
+      padding: 13px 15px;
+    }
+
+    .callout.amber {
+      border-left-color: var(--amber);
+    }
+
+    .callout.red {
+      border-left-color: var(--red);
+    }
+
+    .verdict-box {
+      display: grid;
+      gap: 12px;
+      grid-template-columns: minmax(0, 1fr) minmax(280px, 0.62fr);
+      align-items: stretch;
+      margin-top: 22px;
+    }
+
+    .verdict-card {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 18px;
+      background: #ffffff;
+    }
+
+    .verdict-card .answer {
+      font-size: 1.34rem;
+      line-height: 1.25;
+      font-weight: 850;
+    }
+
+    .switcher {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin: 12px 0;
+    }
+
+    button {
+      appearance: none;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: white;
+      color: var(--ink);
+      padding: 8px 10px;
+      font-weight: 750;
+      cursor: pointer;
+    }
+
+    button.active {
+      border-color: var(--accent);
+      color: var(--accent);
+      box-shadow: inset 0 0 0 1px var(--accent);
+    }
+
+    .phase-track {
+      display: grid;
+      gap: 9px;
+      margin-top: 14px;
+    }
+
+    .phase-bar {
+      display: grid;
+      grid-template-columns: repeat(17, 1fr);
+      gap: 3px;
+      min-height: 22px;
+    }
+
+    .phase-segment {
+      border-radius: 4px;
+      background: #dbe4ec;
+      border: 1px solid #cbd5e1;
+      position: relative;
+    }
+
+    .phase-segment.done {
+      background: var(--accent);
+      border-color: var(--accent);
+    }
+
+    .phase-segment.wip {
+      background: var(--amber);
+      border-color: var(--amber);
+    }
+
+    .phase-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      gap: 8px;
+      margin-top: 14px;
+    }
+
+    .phase-item {
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: 10px;
+      background: white;
+      font-size: 0.9rem;
+    }
+
+    .map {
+      position: relative;
+      min-height: 500px;
+      background:
+        linear-gradient(90deg, transparent 49.8%, var(--line) 50%, transparent 50.2%),
+        linear-gradient(0deg, transparent 49.8%, var(--line) 50%, transparent 50.2%),
+        white;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      overflow: hidden;
+      margin-top: 12px;
+    }
+
+    .axis {
+      position: absolute;
+      color: var(--muted);
+      font-size: 0.76rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      font-weight: 800;
+    }
+
+    .axis.left {
+      left: 14px;
+      bottom: 12px;
+    }
+
+    .axis.right {
+      right: 14px;
+      bottom: 12px;
+    }
+
+    .axis.top {
+      top: 12px;
+      left: 14px;
+    }
+
+    .axis.bottom {
+      top: 12px;
+      right: 14px;
+    }
+
+    .point {
+      position: absolute;
+      left: calc(var(--x) * 1%);
+      top: calc((100 - var(--y)) * 1%);
+      transform: translate(-50%, -50%);
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: rgba(255, 255, 255, 0.95);
+      box-shadow: 0 10px 26px rgba(15, 23, 42, 0.12);
+      padding: 6px 8px;
+      font-size: 0.78rem;
+      font-weight: 750;
+      max-width: 190px;
+    }
+
+    .point.memory {
+      border-color: var(--accent);
+      color: var(--accent);
+      background: #f0fdfa;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.9rem;
+    }
+
+    th,
+    td {
+      border-bottom: 1px solid var(--line);
+      padding: 10px 8px;
+      text-align: left;
+      vertical-align: top;
+    }
+
+    th {
+      color: var(--muted);
+      font-size: 0.74rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .heat {
+      display: inline-flex;
+      justify-content: center;
+      min-width: 32px;
+      border-radius: 999px;
+      font-weight: 850;
+      padding: 2px 8px;
+      background: var(--panel-2);
+    }
+
+    .heat.s5,
+    .heat.s4 {
+      color: var(--green);
+      background: #eaf7ed;
+    }
+
+    .heat.s3,
+    .heat.s2 {
+      color: var(--amber);
+      background: #fff7ed;
+    }
+
+    .heat.s1,
+    .heat.s0 {
+      color: var(--red);
+      background: #fef2f2;
+    }
+
+    .matrix-note {
+      margin-top: 10px;
+      color: var(--muted);
+      font-size: 0.88rem;
+    }
+
+    .filters {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .roadmap {
+      display: grid;
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .roadmap-step {
+      display: grid;
+      grid-template-columns: 120px 1fr;
+      gap: 12px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: white;
+      padding: 12px;
+    }
+
+    .roadmap-step strong:first-child {
+      color: var(--accent);
+    }
+
+    .source-list {
+      columns: 2 320px;
+      gap: 24px;
+      padding-left: 18px;
+    }
+
+    .source-list li {
+      break-inside: avoid;
+      margin-bottom: 8px;
+    }
+
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+
+    .map-alternative {
+      margin-top: 14px;
+    }
+
+    details {
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: 10px 12px;
+      background: white;
+      margin-top: 8px;
+    }
+
+    summary {
+      cursor: pointer;
+      font-weight: 800;
+    }
+
+    .footer-note {
+      color: var(--muted);
+      font-size: 0.82rem;
+      margin-top: 18px;
+    }
+
+    @media (max-width: 1000px) {
+      .shell {
+        display: block;
+      }
+
+      nav {
+        position: static;
+        height: auto;
+      }
+
+      nav a {
+        display: inline-block;
+        margin: 0 4px 6px 0;
+      }
+
+      main {
+        width: min(100% - 24px, 1180px);
+      }
+
+      .grid.two,
+      .grid.three,
+      .verdict-box {
+        grid-template-columns: 1fr;
+      }
+
+      .roadmap-step {
+        grid-template-columns: 1fr;
+      }
+
+      .map {
+        min-height: 560px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <nav aria-label="Report navigation">
+      <div class="brand">@chude/memory review</div>
+      <div class="meta">Market fit and goal recovery<br>Verified 2026-07-01</div>
+      <a href="#verdict">Verdict</a>
+      <a href="#goal">Goal and completeness</a>
+      <a href="#landscape">Market landscape</a>
+      <a href="#matrix">Capability matrix</a>
+      <a href="#wins">Where it wins and loses</a>
+      <a href="#roadmap">Recommendation</a>
+      <a href="#sources">Sources</a>
+    </nav>
+
+    <main>
+      <header class="hero" id="verdict">
+        <div class="eyebrow">Strategy artifact, not release approval</div>
+        <h1>Should the old goal resume, and is <span class="mono">@chude/memory</span> still competitive?</h1>
+        <p class="lede">
+          The previous goal was v5.0 market-leader readiness. It is incomplete. The product is not market-ready today,
+          but it remains strategically relevant if narrowed to a local-first, inspectable, replayable, zero-egress memory
+          server for coding agents and first-party developer portfolios.
+        </p>
+
+        <div class="verdict-box">
+          <div class="verdict-card">
+            <span class="pill amber">Conditional pass</span>
+            <p class="answer" style="margin-top:12px">
+              Resume the goal only after sharpening the buyer and product lane: trusted local developer-memory infrastructure,
+              not hosted memory SaaS and not an autonomous-agent runtime.
+            </p>
+            <p class="muted">
+              Claude's critique agreed directionally but flagged the same hard issue: "market competitive" means different things for
+              first-party infrastructure, OSS developer tool, and sellable hosted product.
+            </p>
+          </div>
+          <div class="verdict-card">
+            <h3>Three direct answers</h3>
+            <p><strong>What was the goal?</strong><br>v5.0 Market-Leader Memory Platform.</p>
+            <p><strong>Was it completed?</strong><br>No. The strict market gate is still red.</p>
+            <p><strong>Is it competitive?</strong><br>Not broadly. Potentially yes in a narrower local-trust lane.</p>
+          </div>
+        </div>
+      </header>
+
+      <section class="grid three">
+        <div class="metric">
+          <span class="pill green">Verified</span>
+          <strong>13/17</strong>
+          <p class="muted small">v5 phases complete in repo planning.</p>
+        </div>
+        <div class="metric">
+          <span class="pill red">Market gate</span>
+          <strong>Fail</strong>
+          <p class="muted small"><span class="mono">eval:v5:market</span> exits 1 due to two contract fixtures.</p>
+        </div>
+        <div class="metric">
+          <span class="pill amber">Version gap</span>
+          <strong>4.0.2</strong>
+          <p class="muted small">Installed package remains behind source WIP.</p>
+        </div>
+      </section>
+
+      <section class="panel" id="goal">
+        <h2>Goal And Completeness</h2>
+        <div class="callout amber">
+          <strong>Important distinction:</strong> there is no active runtime <span class="mono">/goal</span> object now.
+          The goal recovered here is disk-backed repo planning: v5.0 market-leader readiness through Phase 44.
+        </div>
+        <div class="phase-track">
+          <div class="phase-bar" aria-label="17 phase progress bar">
+            <div class="phase-segment done" title="38.0: v5 PRD, threat model, eval baseline"></div>
+            <div class="phase-segment done" title="38.1: event kernel and projection replay"></div>
+            <div class="phase-segment done" title="38.2: privacy, redaction, audit"></div>
+            <div class="phase-segment done" title="38.2.5: consent provenance and governance"></div>
+            <div class="phase-segment done" title="38.3: remote sync service and Git transport"></div>
+            <div class="phase-segment done" title="38.4: remote CLI, operations, backup, recovery"></div>
+            <div class="phase-segment done" title="38.5: secure capability interop"></div>
+            <div class="phase-segment done" title="38.6: durable friction query contract"></div>
+            <div class="phase-segment done" title="38.7: evaluation harness"></div>
+            <div class="phase-segment done" title="39: persona and procedural memory"></div>
+            <div class="phase-segment done" title="40: temporal semantic graph"></div>
+            <div class="phase-segment done" title="41: ranking"></div>
+            <div class="phase-segment done" title="41.1: embedding pipeline resilience"></div>
+            <div class="phase-segment wip" title="42: dreaming consolidation WIP"></div>
+            <div class="phase-segment" title="42.5: feature completeness and UX polish"></div>
+            <div class="phase-segment" title="43: market and sales readiness gate"></div>
+            <div class="phase-segment" title="44: release-candidate packaging and publish handoff"></div>
+          </div>
+          <p class="muted small">Hover the segments for phase names. Completed: 13. WIP: Phase 42. Remaining: 42.5, 43, 44.</p>
+        </div>
+
+        <div class="phase-list">
+          <div class="phase-item"><strong>Done:</strong> event kernel, privacy, governance, remote sync substrate, friction contract, evals, persona, graph, ranking, embedding resilience.</div>
+          <div class="phase-item"><strong>Current:</strong> Phase 42 Dreaming Consolidation is dirty WIP, not release evidence.</div>
+          <div class="phase-item"><strong>Blocked gate:</strong> dreaming and remote recovery are still contract-only in <span class="mono">eval:v5:market</span>.</div>
+          <div class="phase-item"><strong>Release gap:</strong> installed <span class="mono">memory</span> is 4.0.2 while source is ahead.</div>
+        </div>
+      </section>
+
+      <section class="panel" id="landscape">
+        <h2>Market Landscape</h2>
+        <p class="muted">
+          The current memory market is not one market. It splits across hosted memory APIs, temporal graph frameworks,
+          local agent runtimes, local-first recall tools, and platform memory built into agent runtimes.
+        </p>
+        <div class="map" aria-label="competitor positioning map" aria-describedby="landscape-map-alt">
+          <div class="axis top">Agent-native/runtime</div>
+          <div class="axis bottom">CLI/library layer</div>
+          <div class="axis left">Hosted/platform</div>
+          <div class="axis right">Local-first/control</div>
+          <div class="point memory" style="--x:72;--y:45" title="Current: strong local governance, CLI-first, missing MCP/server">memory current</div>
+          <div class="point memory" style="--x:82;--y:70" title="Target: local governed memory server">memory target</div>
+          <div class="point" style="--x:82;--y:86">Hermes</div>
+          <div class="point" style="--x:85;--y:80">OpenClaw</div>
+          <div class="point" style="--x:88;--y:66">MemPalace</div>
+          <div class="point" style="--x:30;--y:58">Mem0</div>
+          <div class="point" style="--x:34;--y:62">Zep</div>
+          <div class="point" style="--x:56;--y:78">Letta</div>
+          <div class="point" style="--x:67;--y:56">Cognee</div>
+          <div class="point" style="--x:16;--y:82">Cloudflare</div>
+          <div class="point" style="--x:22;--y:60">Supermemory</div>
+        </div>
+        <p class="map-alternative small" id="landscape-map-alt">
+          Text alternative: Hermes, OpenClaw, and MemPalace currently lead the local agent-native quadrant.
+          <span class="mono">@chude/memory</span> is strong on local inspection and governance but lower on agent-native integration today.
+          Its target position is the same local quadrant with a stronger MCP/local-server surface, not the hosted SaaS quadrant occupied by
+          Mem0, Zep, Cloudflare, and Supermemory.
+        </p>
+        <p class="matrix-note">
+          Positioning is qualitative. The key issue is not whether memory has graph/ranking/governance code.
+          It is whether an agent can use it as a native memory substrate with clear controls and proof.
+        </p>
+      </section>
+
+      <section class="panel" id="matrix">
+        <h2>Capability Matrix</h2>
+        <div class="filters" aria-label="Matrix filters">
+          <button class="active" data-filter="all" aria-pressed="true">All</button>
+          <button data-filter="local" aria-pressed="false">Local-first</button>
+          <button data-filter="agent" aria-pressed="false">Agent-native</button>
+          <button data-filter="governance" aria-pressed="false">Governance</button>
+          <button data-filter="benchmark" aria-pressed="false">Benchmarks</button>
+          <button data-filter="hosted" aria-pressed="false">Hosted</button>
+        </div>
+        <noscript>
+          <p class="matrix-note">Filtering requires the local inline enhancement script; the complete unfiltered matrix is shown below.</p>
+        </noscript>
+        <div style="overflow:auto">
+          <table id="matrix-table">
+            <thead>
+              <tr>
+                <th>System</th>
+                <th>Category</th>
+                <th>Local</th>
+                <th>Agent-native</th>
+                <th>Graph/time</th>
+                <th>Governance</th>
+                <th>Benchmarks</th>
+                <th>Polish</th>
+                <th>Notes</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr data-category="local governance cli">
+                <td><strong>memory current</strong></td>
+                <td>local, governance, cli</td>
+                <td><span class="heat s5" aria-label="5 out of 5">5</span></td>
+                <td><span class="heat s1" aria-label="1 out of 5">1</span></td>
+                <td><span class="heat s3" aria-label="3 out of 5">3</span></td>
+                <td><span class="heat s5" aria-label="5 out of 5">5</span></td>
+                <td><span class="heat s1" aria-label="1 out of 5">1</span></td>
+                <td><span class="heat s2" aria-label="2 out of 5">2</span></td>
+                <td>Strong trust primitives; missing MCP/server and market proof.</td>
+              </tr>
+              <tr data-category="local governance agent">
+                <td><strong>memory target</strong></td>
+                <td>local, governance, agent</td>
+                <td><span class="heat s5" aria-label="5 out of 5">5</span></td>
+                <td><span class="heat s4" aria-label="4 out of 5">4</span></td>
+                <td><span class="heat s4" aria-label="4 out of 5">4</span></td>
+                <td><span class="heat s5" aria-label="5 out of 5">5</span></td>
+                <td><span class="heat s3" aria-label="3 out of 5">3</span></td>
+                <td><span class="heat s4" aria-label="4 out of 5">4</span></td>
+                <td>Defensible if MCP/server, interop, UX, and gates land.</td>
+              </tr>
+              <tr data-category="local agent">
+                <td><strong>Hermes</strong></td>
+                <td>local, agent</td>
+                <td><span class="heat s5" aria-label="5 out of 5">5</span></td>
+                <td><span class="heat s5" aria-label="5 out of 5">5</span></td>
+                <td><span class="heat s2" aria-label="2 out of 5">2</span></td>
+                <td><span class="heat s3" aria-label="3 out of 5">3</span></td>
+                <td><span class="heat s2" aria-label="2 out of 5">2</span></td>
+                <td><span class="heat s4" aria-label="4 out of 5">4</span></td>
+                <td>Bounded prompt memory plus session search and provider plugins.</td>
+              </tr>
+              <tr data-category="local agent governance">
+                <td><strong>OpenClaw</strong></td>
+                <td>local, agent, governance</td>
+                <td><span class="heat s4" aria-label="4 out of 5">4</span></td>
+                <td><span class="heat s5" aria-label="5 out of 5">5</span></td>
+                <td><span class="heat s3" aria-label="3 out of 5">3</span></td>
+                <td><span class="heat s4" aria-label="4 out of 5">4</span></td>
+                <td><span class="heat s3" aria-label="3 out of 5">3</span></td>
+                <td><span class="heat s4" aria-label="4 out of 5">4</span></td>
+                <td>Markdown memory, DREAMS, active memory, memory-wiki.</td>
+              </tr>
+              <tr data-category="local agent benchmark">
+                <td><strong>MemPalace</strong></td>
+                <td>local, agent, benchmark</td>
+                <td><span class="heat s5" aria-label="5 out of 5">5</span></td>
+                <td><span class="heat s5" aria-label="5 out of 5">5</span></td>
+                <td><span class="heat s4" aria-label="4 out of 5">4</span></td>
+                <td><span class="heat s3" aria-label="3 out of 5">3</span></td>
+                <td><span class="heat s5" aria-label="5 out of 5">5</span></td>
+                <td><span class="heat s4" aria-label="4 out of 5">4</span></td>
+                <td>Local-first, MCP, hooks, and strong public benchmark claims.</td>
+              </tr>
+              <tr data-category="hosted agent benchmark">
+                <td><strong>Mem0</strong></td>
+                <td>hosted, agent, benchmark</td>
+                <td><span class="heat s3" aria-label="3 out of 5">3</span></td>
+                <td><span class="heat s5" aria-label="5 out of 5">5</span></td>
+                <td><span class="heat s4" aria-label="4 out of 5">4</span></td>
+                <td><span class="heat s3" aria-label="3 out of 5">3</span></td>
+                <td><span class="heat s5" aria-label="5 out of 5">5</span></td>
+                <td><span class="heat s5" aria-label="5 out of 5">5</span></td>
+                <td>Universal memory layer with hosted and self-host options.</td>
+              </tr>
+              <tr data-category="hosted agent benchmark governance">
+                <td><strong>Zep / Graphiti</strong></td>
+                <td>hosted, agent, benchmark, governance</td>
+                <td><span class="heat s3" aria-label="3 out of 5">3</span></td>
+                <td><span class="heat s4" aria-label="4 out of 5">4</span></td>
+                <td><span class="heat s5" aria-label="5 out of 5">5</span></td>
+                <td><span class="heat s4" aria-label="4 out of 5">4</span></td>
+                <td><span class="heat s5" aria-label="5 out of 5">5</span></td>
+                <td><span class="heat s5" aria-label="5 out of 5">5</span></td>
+                <td>Temporal graph, fact invalidation, hybrid retrieval, enterprise Zep.</td>
+              </tr>
+              <tr data-category="agent">
+                <td><strong>Letta</strong></td>
+                <td>agent</td>
+                <td><span class="heat s3" aria-label="3 out of 5">3</span></td>
+                <td><span class="heat s5" aria-label="5 out of 5">5</span></td>
+                <td><span class="heat s2" aria-label="2 out of 5">2</span></td>
+                <td><span class="heat s3" aria-label="3 out of 5">3</span></td>
+                <td><span class="heat s3" aria-label="3 out of 5">3</span></td>
+                <td><span class="heat s5" aria-label="5 out of 5">5</span></td>
+                <td>Stateful agent architecture with blocks, files, archival memory, MCP.</td>
+              </tr>
+              <tr data-category="local graph">
+                <td><strong>Cognee</strong></td>
+                <td>local, graph</td>
+                <td><span class="heat s4" aria-label="4 out of 5">4</span></td>
+                <td><span class="heat s3" aria-label="3 out of 5">3</span></td>
+                <td><span class="heat s5" aria-label="5 out of 5">5</span></td>
+                <td><span class="heat s2" aria-label="2 out of 5">2</span></td>
+                <td><span class="heat s3" aria-label="3 out of 5">3</span></td>
+                <td><span class="heat s3" aria-label="3 out of 5">3</span></td>
+                <td>Remember/recall API, graph building, visualization.</td>
+              </tr>
+              <tr data-category="hosted agent governance">
+                <td><strong>Cloudflare</strong></td>
+                <td>hosted, agent, governance</td>
+                <td><span class="heat s1" aria-label="1 out of 5">1</span></td>
+                <td><span class="heat s5" aria-label="5 out of 5">5</span></td>
+                <td><span class="heat s3" aria-label="3 out of 5">3</span></td>
+                <td><span class="heat s4" aria-label="4 out of 5">4</span></td>
+                <td><span class="heat s2" aria-label="2 out of 5">2</span></td>
+                <td><span class="heat s5" aria-label="5 out of 5">5</span></td>
+                <td>Managed scoped memory inside Workers/Agents ecosystem.</td>
+              </tr>
+              <tr data-category="hosted agent benchmark">
+                <td><strong>Supermemory</strong></td>
+                <td>hosted, agent, benchmark</td>
+                <td><span class="heat s2" aria-label="2 out of 5">2</span></td>
+                <td><span class="heat s4" aria-label="4 out of 5">4</span></td>
+                <td><span class="heat s4" aria-label="4 out of 5">4</span></td>
+                <td><span class="heat s3" aria-label="3 out of 5">3</span></td>
+                <td><span class="heat s5" aria-label="5 out of 5">5</span></td>
+                <td><span class="heat s5" aria-label="5 out of 5">5</span></td>
+                <td>Hosted context infrastructure, connectors, memory API, RAG.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="matrix-note">
+          Scores are directional, 0 to 5, and intentionally market-facing. They measure proof and usability, not source-code ambition.
+          Internal <span class="mono">eval:v5</span> is not treated as a public benchmark.
+        </p>
+      </section>
+
+      <section class="grid two" id="wins">
+        <div class="panel">
+          <h2>Where memory Can Win</h2>
+          <ul>
+            <li><strong>Deterministic replay:</strong> event envelopes plus projections are stronger trust primitives than prompt-only memory.</li>
+            <li><strong>Zero hidden egress:</strong> remote providers and sync paths are explicitly consented and allowlisted.</li>
+            <li><strong>Governed memory:</strong> suppress, invalidate, expire, review, consent, and provenance are central rather than afterthoughts.</li>
+            <li><strong>Developer portfolio fit:</strong> inboxes, friction, cross-project continuity, and coding-agent context are first-class.</li>
+            <li><strong>Local-first operations:</strong> SQLite, event logs, audit commands, backup/restore, and no hosted dependency by default.</li>
+          </ul>
+        </div>
+        <div class="panel">
+          <h2>Where It Loses Today</h2>
+          <ul>
+            <li><strong>MCP/server gap:</strong> CLI-first means it is not yet agent-native in the current market sense.</li>
+            <li><strong>Benchmark gap:</strong> competitors publish external benchmark claims; memory has internal evals only.</li>
+            <li><strong>UX gap:</strong> Phase 42.5 exists because fresh-user flow and command ergonomics are not proven finished.</li>
+            <li><strong>Interop gap:</strong> no first-class import/export bridge for MEMORY.md, DREAMS.md, MemPalace, Mem0, or graph artifacts.</li>
+            <li><strong>Release gap:</strong> source WIP and installed package truth are not aligned.</li>
+          </ul>
+        </div>
+      </section>
+
+      <section class="panel" id="roadmap">
+        <h2>Recommendation And Next Order</h2>
+        <div class="callout">
+          <strong>Sharper thesis:</strong>
+          <span class="mono">@chude/memory</span> should be the deterministic, fully inspectable, zero-egress memory server for coding agents:
+          every write replayable, governed, locally owned, redacted, consented, suppressible, invalidatable, and auditable.
+        </div>
+
+        <div class="switcher" aria-label="Consumer lens switcher">
+          <button class="active" data-lens="infra" aria-pressed="true">First-party infrastructure</button>
+          <button data-lens="oss" aria-pressed="false">OSS developer tool</button>
+          <button data-lens="hosted" aria-pressed="false">Hosted product</button>
+        </div>
+        <div id="lens-output" class="callout amber">
+          <strong>First-party infrastructure:</strong> resume after the report, because the current wedge is valuable internally even before external market polish. Release/install truth still matters because other projects depend on it.
+        </div>
+
+        <div class="roadmap">
+          <div class="roadmap-step">
+            <strong>0. Stabilize</strong>
+            <span>Close or re-own inbox blockers, especially the embedding release/install gap and Tailscale/Ollama egress notes.</span>
+          </div>
+          <div class="roadmap-step">
+            <strong>1. Phase 42</strong>
+            <span>Finish dreaming as governed, explicit, review-gated consolidation. Do not ship hidden background mutation.</span>
+          </div>
+          <div class="roadmap-step">
+            <strong>2. Agent-native</strong>
+            <span>Promote MCP/local server integration to a market-entry phase, not a nice-to-have.</span>
+          </div>
+          <div class="roadmap-step">
+            <strong>3. Phase 42.5</strong>
+            <span>Feature inventory, CLI/API ergonomics, docs, onboarding, command contracts, and fresh-user usability.</span>
+          </div>
+          <div class="roadmap-step">
+            <strong>4. Interop</strong>
+            <span>Add import/export bridges for common local memory artifacts and avoid becoming another silo.</span>
+          </div>
+          <div class="roadmap-step">
+            <strong>5. Phase 43-44</strong>
+            <span>Run market, security, quality, release, package, install, audit, backup, restore, and publish-handoff gates.</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel">
+        <h2>What Not To Build</h2>
+        <ul>
+          <li>A generic hosted memory API. Mem0, Zep, Supermemory, and Cloudflare already have stronger distribution there.</li>
+          <li>A full autonomous-agent runtime. Hermes, OpenClaw, Letta, and Cloudflare Agents own that lane more naturally.</li>
+          <li>Fake benchmark parity. Do not compare internal fixtures to LongMemEval, LoCoMo, or vendor claims as if equivalent.</li>
+          <li>Silent dreaming. Governed consolidation is the point; hidden mutation would contradict the product's trust thesis.</li>
+          <li>Raw secret resolution. Keep authkey optional and capability-based.</li>
+        </ul>
+      </section>
+
+      <section class="panel" id="sources">
+        <h2>Sources And Evidence</h2>
+        <details open>
+          <summary>Repo evidence used</summary>
+          <ul class="small">
+            <li><span class="mono">.planning/STATE.md</span>: v5 phase state and goal framing.</li>
+            <li><span class="mono">docs/plans/2026-06-04-v5-market-leader-gsd-plan.md</span>: market-leader goal definition.</li>
+            <li><span class="mono">bun run eval:v5</span>: 9/9 pass, 7 behavior fixtures, 2 contract fixtures.</li>
+            <li><span class="mono">bun run eval:v5:market</span>: exit 1, market readiness ineligible due to 2 contract fixtures.</li>
+            <li><span class="mono">memory --version</span>: installed package currently 4.0.2.</li>
+            <li><span class="mono">git status --short --branch</span>: dirty Phase 42 WIP and inbox docs.</li>
+          </ul>
+        </details>
+        <details open>
+          <summary>Market sources</summary>
+          <ol class="source-list small">
+            <li><a href="https://hermes-agent.nousresearch.com/docs/user-guide/features/memory">Hermes Agent persistent memory docs</a></li>
+            <li><a href="https://docs.openclaw.ai/concepts/memory">OpenClaw memory overview</a></li>
+            <li><a href="https://github.com/mempalace/mempalace">MemPalace GitHub README</a></li>
+            <li><a href="https://docs.mem0.ai/introduction">Mem0 documentation</a></li>
+            <li><a href="https://help.getzep.com/graphiti/getting-started/overview">Graphiti / Zep overview</a></li>
+            <li><a href="https://docs.letta.com/guides/core-concepts/memory/context-hierarchy">Letta context hierarchy docs</a></li>
+            <li><a href="https://docs.cognee.ai/getting-started/quickstart">Cognee quickstart</a></li>
+            <li><a href="https://developers.cloudflare.com/agent-memory/">Cloudflare Agent Memory docs</a></li>
+            <li><a href="https://developers.cloudflare.com/agents/concepts/conversation-state-and-memory/">Cloudflare Agents conversation state and memory docs</a></li>
+            <li><a href="https://supermemory.ai/docs/intro">Supermemory docs</a></li>
+            <li><a href="https://openai.com/index/memory-and-new-controls-for-chatgpt/">OpenAI memory controls</a></li>
+            <li><a href="https://unit42.paloaltonetworks.com/openclaw-ai-supply-chain-risk/">Unit 42 OpenClaw supply-chain risk research</a></li>
+          </ol>
+        </details>
+        <p class="footer-note">
+          Generated as a local static HTML artifact. It intentionally uses no remote scripts, fonts, images, or CSS.
+          A small inline script enhances filtering and lens switching; the table and default recommendation remain readable without JavaScript.
+          Source links are normal outbound anchors only.
+        </p>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    const systems = [
+      { name: "memory current", category: "local governance cli", local: 5, agent: 1, graph: 3, governance: 5, benchmarks: 1, polish: 2, notes: "Strong trust primitives; missing MCP/server and market proof." },
+      { name: "memory target", category: "local governance agent", local: 5, agent: 4, graph: 4, governance: 5, benchmarks: 3, polish: 4, notes: "Defensible if MCP/server, interop, UX, and gates land." },
+      { name: "Hermes", category: "local agent", local: 5, agent: 5, graph: 2, governance: 3, benchmarks: 2, polish: 4, notes: "Bounded prompt memory plus session search and provider plugins." },
+      { name: "OpenClaw", category: "local agent governance", local: 4, agent: 5, graph: 3, governance: 4, benchmarks: 3, polish: 4, notes: "Markdown memory, DREAMS, active memory, memory-wiki." },
+      { name: "MemPalace", category: "local agent benchmark", local: 5, agent: 5, graph: 4, governance: 3, benchmarks: 5, polish: 4, notes: "Local-first, MCP, hooks, and strong public benchmark claims." },
+      { name: "Mem0", category: "hosted agent benchmark", local: 3, agent: 5, graph: 4, governance: 3, benchmarks: 5, polish: 5, notes: "Universal memory layer with hosted and self-host options." },
+      { name: "Zep / Graphiti", category: "hosted agent benchmark governance", local: 3, agent: 4, graph: 5, governance: 4, benchmarks: 5, polish: 5, notes: "Temporal graph, fact invalidation, hybrid retrieval, enterprise Zep." },
+      { name: "Letta", category: "agent", local: 3, agent: 5, graph: 2, governance: 3, benchmarks: 3, polish: 5, notes: "Stateful agent architecture with blocks, files, archival memory, MCP." },
+      { name: "Cognee", category: "local graph", local: 4, agent: 3, graph: 5, governance: 2, benchmarks: 3, polish: 3, notes: "Remember/recall API, graph building, visualization." },
+      { name: "Cloudflare", category: "hosted agent governance", local: 1, agent: 5, graph: 3, governance: 4, benchmarks: 2, polish: 5, notes: "Managed scoped memory inside Workers/Agents ecosystem." },
+      { name: "Supermemory", category: "hosted agent benchmark", local: 2, agent: 4, graph: 4, governance: 3, benchmarks: 5, polish: 5, notes: "Hosted context infrastructure, connectors, memory API, RAG." }
+    ];
+
+    const tbody = document.querySelector("#matrix-table tbody");
+
+    function score(value) {
+      return `<span class="heat s${value}" aria-label="${value} out of 5">${value}</span>`;
+    }
+
+    function renderRows(filter) {
+      tbody.innerHTML = "";
+      for (const system of systems) {
+        const matches = filter === "all"
+          || (filter === "local" && system.category.includes("local"))
+          || (filter === "agent" && system.category.includes("agent"))
+          || (filter === "governance" && system.category.includes("governance"))
+          || (filter === "benchmark" && system.category.includes("benchmark"))
+          || (filter === "hosted" && system.category.includes("hosted"));
+        if (!matches) continue;
+
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td><strong>${system.name}</strong></td>
+          <td>${system.category.replaceAll(" ", ", ")}</td>
+          <td>${score(system.local)}</td>
+          <td>${score(system.agent)}</td>
+          <td>${score(system.graph)}</td>
+          <td>${score(system.governance)}</td>
+          <td>${score(system.benchmarks)}</td>
+          <td>${score(system.polish)}</td>
+          <td>${system.notes}</td>
+        `;
+        tbody.appendChild(tr);
+      }
+    }
+
+    document.querySelectorAll("[data-filter]").forEach((button) => {
+      button.addEventListener("click", () => {
+        document.querySelectorAll("[data-filter]").forEach((item) => {
+          item.classList.remove("active");
+          item.setAttribute("aria-pressed", "false");
+        });
+        button.classList.add("active");
+        button.setAttribute("aria-pressed", "true");
+        renderRows(button.dataset.filter);
+      });
+    });
+
+    const lensOutput = document.querySelector("#lens-output");
+    const lensText = {
+      infra: "<strong>First-party infrastructure:</strong> resume after the report, because the current wedge is valuable internally even before external market polish. Release/install truth still matters because other projects depend on it.",
+      oss: "<strong>OSS developer tool:</strong> resume, but add MCP/server, interop, install docs, and public eval artifacts before claiming market competitiveness.",
+      hosted: "<strong>Hosted product:</strong> do not resume under that framing. The hosted lane is crowded and would require a different product, security, compliance, support, and distribution model."
+    };
+
+    document.querySelectorAll("[data-lens]").forEach((button) => {
+      button.addEventListener("click", () => {
+        document.querySelectorAll("[data-lens]").forEach((item) => {
+          item.classList.remove("active");
+          item.setAttribute("aria-pressed", "false");
+        });
+        button.classList.add("active");
+        button.setAttribute("aria-pressed", "true");
+        lensOutput.innerHTML = lensText[button.dataset.lens];
+      });
+    });
+  </script>
+</body>
+</html>
