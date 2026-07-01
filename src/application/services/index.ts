@@ -140,6 +140,15 @@ export type {
   RankedMemory,
   RankedMemoryComponents,
 } from "./memory-ranking-service.js";
+export { DreamingService } from "./dreaming-service.js";
+export type {
+  DreamApplyCommand,
+  DreamApplyResult,
+  DreamRollbackResult,
+  DreamingServiceDeps,
+  DreamReviewCommand,
+  ProposeSupersedenceParams,
+} from "./dreaming-service.js";
 export type {
   EventProjection,
   ProjectionReplayResult,

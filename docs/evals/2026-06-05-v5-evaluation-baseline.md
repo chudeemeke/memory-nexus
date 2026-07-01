@@ -77,8 +77,13 @@ through persisted `SqliteFactRepository` facts; `project_scope_leakage` is behav
 context unless explicitly global.
 
 Phase 41 implementation note: `ranking_evergreen_preference` is now behavior-backed through
-`MemoryRankingService` and `MemoryUtilityMetric`; `eval:v5` passes 9/9 with 7 behavior-backed
-fixtures and 2 contract fixtures.
+`MemoryRankingService` and `MemoryUtilityMetric`.
+
+Phase 42 implementation note: `dream_proposed_supersedence` is now behavior-backed through
+`DreamingService`, `SqliteDreamRepository`, `SqliteFactRepository`, `MemoryGovernanceService`,
+and `PatternRedactor`; `eval:v5` passes 9/9 with 8 behavior-backed fixtures and 1 contract
+fixture. `eval:v5:market` still fails until the remaining `remote_sync_conflict` contract
+fixture is promoted or explicitly accepted by the Phase 43 readiness gate.
 
 ## Relationship to Tests
 

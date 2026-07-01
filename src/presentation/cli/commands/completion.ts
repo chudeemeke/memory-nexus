@@ -36,7 +36,7 @@ _memory_completion() {
     local cur prev words cword
     _init_completion || return
 
-    local commands="sync search list stats context related show browse governance profile remote install uninstall status doctor audit-secrets purge export import completion"
+    local commands="sync search list stats context related show browse governance profile dream remote install uninstall status doctor audit-secrets purge export import completion"
     local search_opts="--limit --project --role --session --after --before --case-sensitive --json --verbose --quiet"
     local list_opts="--limit --project --after --before --sort --json --verbose --quiet"
     local stats_opts="--projects --json --verbose --quiet"
@@ -46,6 +46,7 @@ _memory_completion() {
     local browse_opts="--project"
     local governance_opts="--surface --project --status --limit --reason --at --scope --json"
     local profile_opts="show export rebuild --kind --limit --all --json"
+    local dream_opts="propose-supersedence list show approve reject apply rollback --project --target --replacement --reason --source-event --type --confidence --status --kind --limit --confirm --json"
     local sync_opts="--force --dry-run --remote --verbose --quiet"
     local remote_opts="set remove status preflight doctor backup restore rollback --json --allow-local-path --no-auto-pull --no-auto-push --confirm"
     local install_opts="--force"
@@ -96,6 +97,10 @@ _memory_completion() {
             ;;
         profile)
             COMPREPLY=( \$(compgen -W "\${profile_opts}" -- "\${cur}") )
+            return 0
+            ;;
+        dream)
+            COMPREPLY=( \$(compgen -W "\${dream_opts}" -- "\${cur}") )
             return 0
             ;;
         sync)
@@ -159,6 +164,7 @@ _memory_completion() {
             browse) COMPREPLY=( \$(compgen -W "\${browse_opts}" -- "\${cur}") ) ;;
             governance) COMPREPLY=( \$(compgen -W "list show suppress unsuppress invalidate expire review consent-grant consent-revoke \${governance_opts}" -- "\${cur}") ) ;;
             profile) COMPREPLY=( \$(compgen -W "\${profile_opts}" -- "\${cur}") ) ;;
+            dream) COMPREPLY=( \$(compgen -W "\${dream_opts}" -- "\${cur}") ) ;;
             sync) COMPREPLY=( \$(compgen -W "\${sync_opts}" -- "\${cur}") ) ;;
             remote) COMPREPLY=( \$(compgen -W "\${remote_opts}" -- "\${cur}") ) ;;
             install) COMPREPLY=( \$(compgen -W "\${install_opts}" -- "\${cur}") ) ;;
@@ -202,6 +208,7 @@ _memory() {
         'browse:Browse and select sessions interactively'
         'governance:Inspect and control derived memory consent/provenance state'
         'profile:Inspect and rebuild governed persona/procedural memory'
+        'dream:Create, review, apply, and rollback audited dream proposals'
         'remote:Manage remote event-log synchronization'
         'install:Install automatic sync hook'
         'uninstall:Remove automatic sync hook'
@@ -214,7 +221,7 @@ _memory() {
         'completion:Generate shell completion script'
     )
 
-    local -a search_opts list_opts stats_opts context_opts related_opts show_opts browse_opts governance_opts profile_opts
+    local -a search_opts list_opts stats_opts context_opts related_opts show_opts browse_opts governance_opts profile_opts dream_opts
     local -a sync_opts remote_opts install_opts uninstall_opts doctor_opts audit_secrets_opts purge_opts export_opts import_opts completion_shells
 
     search_opts=(
@@ -289,6 +296,22 @@ _memory() {
         '--kind[Persona entry kind]:kind:(preference procedure correction decision_pattern friction_pattern)'
         '--limit[Maximum number of entries]:number'
         '--all[Use every project scope where supported]'
+        '--json[Output as JSON]'
+    )
+
+    dream_opts=(
+        '1:action:(propose-supersedence list show approve reject apply rollback)'
+        '--project[Project scope or filter]:project'
+        '--target[Target fact UUID to supersede]:fact-uuid'
+        '--replacement[Replacement fact content]:content'
+        '--reason[Reason for proposal]:reason'
+        '--source-event[Source event id]:event-id'
+        '--type[Replacement fact type]:type:(decision learning preference friction observation supersedence)'
+        '--confidence[Proposal confidence]:number'
+        '--status[Dream status]:status:(pending_review approved rejected applied rolled_back)'
+        '--kind[Dream proposal kind]:kind:(supersedence_proposal)'
+        '--limit[Maximum entries]:number'
+        '--confirm[Confirm apply or rollback mutation]'
         '--json[Output as JSON]'
     )
 
@@ -380,6 +403,7 @@ _memory() {
                 browse) _arguments "\$browse_opts[@]" ;;
                 governance) _arguments '1:action:(list show suppress unsuppress invalidate expire review consent-grant consent-revoke)' "\$governance_opts[@]" ':target:' ;;
                 profile) _arguments "\$profile_opts[@]" ':project:' ;;
+                dream) _arguments "\$dream_opts[@]" ':dream-id:' ;;
                 sync) _arguments "\$sync_opts[@]" ;;
                 remote) _arguments "\$remote_opts[@]" ':repository-url:' ;;
                 install) _arguments "\$install_opts[@]" ;;
@@ -423,6 +447,7 @@ complete -c memory -n "__fish_use_subcommand" -a show -d "Show session details a
 complete -c memory -n "__fish_use_subcommand" -a browse -d "Browse and select sessions interactively"
 complete -c memory -n "__fish_use_subcommand" -a governance -d "Inspect and control derived memory consent/provenance state"
 complete -c memory -n "__fish_use_subcommand" -a profile -d "Inspect and rebuild governed persona/procedural memory"
+complete -c memory -n "__fish_use_subcommand" -a dream -d "Create, review, apply, and rollback audited dream proposals"
 complete -c memory -n "__fish_use_subcommand" -a remote -d "Manage remote event-log synchronization"
 complete -c memory -n "__fish_use_subcommand" -a install -d "Install automatic sync hook"
 complete -c memory -n "__fish_use_subcommand" -a uninstall -d "Remove automatic sync hook"
@@ -500,6 +525,21 @@ complete -c memory -n "__fish_seen_subcommand_from profile" -l kind -d "Persona 
 complete -c memory -n "__fish_seen_subcommand_from profile" -l limit -d "Maximum number of entries"
 complete -c memory -n "__fish_seen_subcommand_from profile" -l all -d "Use every project scope where supported"
 complete -c memory -n "__fish_seen_subcommand_from profile" -l json -d "Output as JSON"
+
+# dream actions and options
+complete -c memory -n "__fish_seen_subcommand_from dream" -a "propose-supersedence list show approve reject apply rollback"
+complete -c memory -n "__fish_seen_subcommand_from dream" -l project -d "Project scope or filter"
+complete -c memory -n "__fish_seen_subcommand_from dream" -l target -d "Target fact UUID to supersede"
+complete -c memory -n "__fish_seen_subcommand_from dream" -l replacement -d "Replacement fact content"
+complete -c memory -n "__fish_seen_subcommand_from dream" -l reason -d "Reason for proposal"
+complete -c memory -n "__fish_seen_subcommand_from dream" -l source-event -d "Source event id"
+complete -c memory -n "__fish_seen_subcommand_from dream" -l type -d "Replacement fact type" -a "decision learning preference friction observation supersedence"
+complete -c memory -n "__fish_seen_subcommand_from dream" -l confidence -d "Proposal confidence"
+complete -c memory -n "__fish_seen_subcommand_from dream" -l status -d "Dream status" -a "pending_review approved rejected applied rolled_back"
+complete -c memory -n "__fish_seen_subcommand_from dream" -l kind -d "Dream proposal kind" -a "supersedence_proposal"
+complete -c memory -n "__fish_seen_subcommand_from dream" -l limit -d "Maximum entries"
+complete -c memory -n "__fish_seen_subcommand_from dream" -l confirm -d "Confirm apply or rollback mutation"
+complete -c memory -n "__fish_seen_subcommand_from dream" -l json -d "Output as JSON"
 
 # sync options
 complete -c memory -n "__fish_seen_subcommand_from sync" -l force -d "Force re-sync all sessions"

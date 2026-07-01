@@ -3,10 +3,13 @@ import { SqliteFrictionRepository } from "../../src/infrastructure/database/repo
 import { SqliteFactRepository } from "../../src/infrastructure/database/repositories/fact-repository.js";
 import { SqliteGraphRepository } from "../../src/infrastructure/database/repositories/graph-repository.js";
 import { SqliteMemoryGovernanceRepository } from "../../src/infrastructure/database/repositories/memory-governance-repository.js";
+import { SqliteDreamRepository } from "../../src/infrastructure/database/repositories/dream-repository.js";
 import { PersonaProfileService } from "../../src/application/services/persona-profile-service.js";
 import { TemporalGraphService } from "../../src/application/services/temporal-graph-service.js";
 import { SmartContextService } from "../../src/application/services/smart-context-service.js";
 import { MemoryRankingService, type MemoryRankCandidate } from "../../src/application/services/memory-ranking-service.js";
+import { DreamingService } from "../../src/application/services/dreaming-service.js";
+import { MemoryGovernanceService } from "../../src/application/services/memory-governance-service.js";
 import { PatternRedactor } from "../../src/infrastructure/security/pattern-redactor.js";
 import { Fact, type FactType } from "../../src/domain/entities/fact.js";
 import { FrictionEntry } from "../../src/domain/entities/friction-entry.js";
@@ -469,6 +472,131 @@ async function evaluateRanking(fixture: V5EvalFixture): Promise<V5EvalResult> {
 }
 
 async function evaluateDreaming(fixture: V5EvalFixture): Promise<V5EvalResult> {
+  if (fixture.mode === "behavior") {
+    const { db } = initializeDatabase({ path: ":memory:", walMode: false, quickCheck: false });
+    try {
+      const dreamRepo = new SqliteDreamRepository(db);
+      const factRepo = new SqliteFactRepository(db);
+      const governanceRepo = new SqliteMemoryGovernanceRepository(db);
+      const writtenEvents: MemoryEventEnvelope[] = [];
+      let sequence = 0;
+      const now = () => new Date(stringValue(fixture.input.now, "now"));
+      const nextSequence = () => ++sequence;
+      const writeEvent = async (event: MemoryEventEnvelope) => {
+        writtenEvents.push(event);
+      };
+      const targetFact = factFromFixture(recordValue(fixture.input.targetFact, "targetFact"));
+      await factRepo.save(targetFact);
+      const service = new DreamingService({
+        dreamRepo,
+        factRepo,
+        governanceService: new MemoryGovernanceService({
+          repository: governanceRepo,
+          writeEvent,
+          machineId: "eval",
+          now,
+          nextSequence,
+        }),
+        writeEvent,
+        redactor: new PatternRedactor(),
+        machineId: "eval",
+        now,
+        nextSequence,
+      });
+      const proposalInput = recordValue(fixture.input.proposal, "proposal");
+      const proposal = await service.proposeSupersedence({
+        project: stringValue(proposalInput.project, "proposal.project"),
+        sourceEventIds: stringArray(proposalInput.sourceEventIds, "proposal.sourceEventIds"),
+        targetFactUuid: stringValue(proposalInput.targetFactUuid, "proposal.targetFactUuid"),
+        proposedContent: materializeText(proposalInput.proposedContent),
+        proposedFactType: optionalString(proposalInput.proposedFactType) as FactType | undefined,
+        proposedFactUuid: optionalString(proposalInput.proposedFactUuid),
+        reason: materializeText(proposalInput.reason),
+        confidence: optionalNumberValue(proposalInput.confidence, "proposal.confidence"),
+        actor: optionalString(proposalInput.actor),
+      });
+      const targetAfterProposal = await factRepo.findByUuid(targetFact.uuid);
+      const governance = await governanceRepo.findByTarget("dream", proposal.dreamId);
+      const approved = await service.approveProposal(proposal.dreamId, { actor: "eval-reviewer" });
+      let unconfirmedApplyRejected = false;
+      try {
+        await service.applyProposal(approved.dreamId);
+      } catch {
+        unconfirmedApplyRejected = true;
+      }
+      const applied = await service.applyProposal(approved.dreamId, { actor: "eval-operator", confirm: true });
+      let unconfirmedRollbackRejected = false;
+      try {
+        await service.rollbackProposal(applied.entry.dreamId);
+      } catch {
+        unconfirmedRollbackRejected = true;
+      }
+      const rolledBack = await service.rollbackProposal(applied.entry.dreamId, { actor: "eval-operator", confirm: true });
+      const storedFinal = await dreamRepo.findByDreamId(proposal.dreamId);
+      const expected = fixture.expected;
+      const requiredRedactedFields = optionalStringArray(expected.requiredRedactedFields) ?? [];
+      const placeholderPrefixes = optionalStringArray(expected.requiredPlaceholderPrefixes) ?? [];
+      const redactedLabels = optionalStringArray(expected.requiredRedactedLabels) ?? [];
+      const forbiddenFragments = optionalMaterializedStringArray(expected.forbiddenFragments);
+      const redactedText = `${proposal.proposedFact.content}\n${proposal.reason}`;
+      const checks = [
+        check("proposal remains review-gated before approval", proposal.status === "pending_review"),
+        check("no hidden automatic promotion", proposal.toJSON().auto_promoted === false),
+        check("source events are recorded", proposal.sourceEventIds.length > 0),
+        check("rollback event is available", isNonEmptyString(proposal.rollbackEventKind)),
+        check(
+          "audit trail is redacted or explicitly clean",
+          requiredRedactedFields.length > 0
+            ? proposal.audit.redactionState === "redacted"
+            : proposal.audit.redactionState === "redacted" || proposal.audit.redactionState === "none",
+        ),
+        check(
+          "audit reports required redacted fields",
+          requiredRedactedFields.every((field) => proposal.audit.redactedFields.includes(field)),
+        ),
+        check(
+          "redacted proposal contains expected placeholders",
+          placeholderPrefixes.every((prefix) => redactedText.includes(prefix)),
+        ),
+        check(
+          "redacted proposal preserves safe secret labels",
+          redactedLabels.every((label) => redactedText.includes(label)),
+        ),
+        check(
+          "redacted proposal omits assembled fixture secrets",
+          forbiddenFragments.every((fragment) => !redactedText.includes(fragment)),
+        ),
+        check(
+          "redacted proposal records finding hashes",
+          requiredRedactedFields.length === 0 ||
+            (proposal.audit.findingHashes.length > 0 && proposal.audit.findingHashes.every((hash) => /^[a-f0-9]{8}$/.test(hash))),
+        ),
+        check("derived dream governance is registered", governance?.surface === "dream"),
+        check("proposal does not mutate the target fact", targetAfterProposal?.supersededAt === null && targetAfterProposal?.supersededBy === null),
+        check("apply requires explicit confirmation", unconfirmedApplyRejected),
+        check("apply emits canonical events", applied.canonicalEventIds.length === numberValue(expected.requiredApplyEventCount, "requiredApplyEventCount")),
+        check("rollback requires explicit confirmation", unconfirmedRollbackRejected),
+        check("rollback emits rollback events", rolledBack.rollbackEventIds.length === numberValue(expected.requiredRollbackEventCount, "requiredRollbackEventCount")),
+        check("final dream state is persisted", storedFinal?.status === "rolled_back"),
+        check("canonical events are event-sourced", writtenEvents.some((event) => event.kind === "dream") && writtenEvents.some((event) => event.kind === "supersedence")),
+      ];
+
+      return finalize(fixture, checks, {
+        behavior_backed: true,
+        dream_id: proposal.dreamId,
+        proposal_status: proposal.status,
+        applied_status: applied.entry.status,
+        final_status: storedFinal?.status ?? null,
+        canonical_event_ids: applied.canonicalEventIds,
+        rollback_event_ids: rolledBack.rollbackEventIds,
+        written_event_kinds: writtenEvents.map((event) => event.kind),
+        governance_count: (await governanceRepo.findAll()).length,
+      });
+    } finally {
+      db.close();
+    }
+  }
+
   const proposals = recordArray(fixture.input.proposals, "proposals");
   const checks: V5EvalCheckResult[] = [];
 
@@ -482,7 +610,7 @@ async function evaluateDreaming(fixture: V5EvalFixture): Promise<V5EvalResult> {
     checks.push(check(`${id}: audit trail is redacted`, audit.redactionState === "redacted" || audit.redactionState === "none"));
   }
 
-  return finalize(fixture, checks, { proposal_count: proposals.length });
+  return finalize(fixture, checks, { proposal_count: proposals.length, behavior_backed: false });
 }
 
 function toFrictionQueryOptions(input: Record<string, unknown>): FrictionQueryOptions {
@@ -535,6 +663,13 @@ function check(name: string, condition: boolean, detail?: string): V5EvalCheckRe
 
 function materializedStringArray(value: unknown, name: string): string[] {
   return unknownArray(value, name).map((item) => materializeText(item));
+}
+
+function optionalMaterializedStringArray(value: unknown): string[] {
+  if (value === undefined || value === null) {
+    return [];
+  }
+  return materializedStringArray(value, "value");
 }
 
 function materializeText(value: unknown): string {

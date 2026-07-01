@@ -28,6 +28,7 @@ import type { Fact } from "../entities/fact.js";
 import type { PersonaEntry, PersonaEntryKind } from "../entities/persona-entry.js";
 import type { GraphEdge } from "../entities/graph-edge.js";
 import type { MemoryUtilityMetric, MemoryUtilitySurface } from "../entities/memory-utility-metric.js";
+import type { DreamEntry, DreamEntryKind, DreamEntryStatus } from "../entities/dream-entry.js";
 import type {
   MemoryGovernanceEntry,
   MemoryGovernanceStatus,
@@ -688,6 +689,22 @@ export interface IGraphRepository {
   findByEdgeId(edgeId: string): Promise<GraphEdge | null>;
   findCurrent(options?: GraphEdgeQueryOptions): Promise<GraphEdge[]>;
   pruneStale(cutoff: Date): Promise<number>;
+  deleteByProject(project: string): Promise<void>;
+  clearAll(): Promise<void>;
+}
+
+export interface DreamListOptions {
+  project?: string | undefined;
+  status?: DreamEntryStatus | undefined;
+  kind?: DreamEntryKind | undefined;
+  limit?: number | undefined;
+}
+
+export interface IDreamRepository {
+  save(entry: DreamEntry): Promise<DreamEntry>;
+  findByDreamId(dreamId: string): Promise<DreamEntry | null>;
+  findAll(options?: DreamListOptions): Promise<DreamEntry[]>;
+  applyMemoryEvent(event: MemoryEventEnvelope): Promise<DreamEntry | null>;
   deleteByProject(project: string): Promise<void>;
   clearAll(): Promise<void>;
 }

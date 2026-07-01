@@ -399,7 +399,7 @@ describe("Event-Log SSOT Manager", () => {
     expect(facts[0].supersededBy).toBeNull();
   });
 
-  test("readEvents reports v2 records that do not contain fact payloads", async () => {
+  test("readEvents skips valid non-fact v2 records without treating them as malformed", async () => {
     const memoryEvent = MemoryEventEnvelope.create({
       eventId: "55555555-5555-4555-8555-555555555555",
       machineId: "machine-no-fact",
@@ -433,7 +433,7 @@ describe("Event-Log SSOT Manager", () => {
       }
 
       expect(facts).toEqual([]);
-      expect(String(errors[0]?.[1])).toContain("does not contain a fact payload");
+      expect(errors).toEqual([]);
     } finally {
       console.error = originalConsoleError;
     }

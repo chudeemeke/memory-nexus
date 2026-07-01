@@ -34,6 +34,7 @@ export {
   executeImportCommand,
   executeCompletionCommand,
   executeFrictionCommand,
+  executeDreamCommand,
 } from "./presentation/cli/commands/index.js";
 
 // Programmatic API: result and option types
@@ -68,4 +69,7 @@ export type {
   FrictionListOptions,
   FrictionResolveOptions,
   FrictionExecuteOptions,
+  DreamAction,
+  DreamCommandDeps,
+  DreamCommandOptions,
 } from "./presentation/cli/commands/index.js";

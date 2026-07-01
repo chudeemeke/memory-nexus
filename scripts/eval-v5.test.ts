@@ -18,6 +18,8 @@ describe("v5 evaluation harness", () => {
     expect(run.report.command).toBe("eval:v5");
     expect(run.report.summary.failed).toBe(0);
     expect(run.report.summary.blocking_failed).toBe(0);
+    expect(run.report.summary.behavior).toBe(8);
+    expect(run.report.summary.contract).toBe(1);
     expect(run.report.coverage.dimensions.sort()).toEqual([...V5_EVAL_DIMENSIONS].sort());
 
     const reportJson = JSON.stringify(run.report);
@@ -47,6 +49,11 @@ describe("v5 evaluation harness", () => {
     const supersedence = run.report.results.find((result) => result.fixture_id === "superseded_provider_fact");
     expect(supersedence?.mode).toBe("behavior");
     expect(supersedence?.status).toBe("pass");
+
+    const dreaming = run.report.results.find((result) => result.fixture_id === "dream_proposed_supersedence");
+    expect(dreaming?.mode).toBe("behavior");
+    expect(dreaming?.status).toBe("pass");
+    expect(dreaming?.evidence.behavior_backed).toBe(true);
   });
 
   test("fixture validation rejects raw secrets and private transcript markers", () => {

@@ -87,3 +87,17 @@ export {
   type MemoryUtilityMetricParams,
   type MemoryUtilitySurface,
 } from "./memory-utility-metric.js";
+export {
+  DreamEntry,
+  DREAM_ENTRY_CONTROLS,
+  DREAM_ENTRY_KINDS,
+  DREAM_ENTRY_SCHEMA_VERSION,
+  DREAM_ENTRY_STATUSES,
+  type DreamAudit,
+  type DreamEntryControl,
+  type DreamEntryJson,
+  type DreamEntryKind,
+  type DreamEntryParams,
+  type DreamEntryStatus,
+  type DreamFactProposal,
+} from "./dream-entry.js";

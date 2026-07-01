@@ -24,6 +24,7 @@ import {
 import { SqlitePersonaRepository } from "./repositories/persona-repository.js";
 import { personaEntryFromFactEvent } from "../../application/services/persona-profile-service.js";
 import { SqliteGraphRepository } from "./repositories/graph-repository.js";
+import { SqliteDreamRepository } from "./repositories/dream-repository.js";
 import {
   governanceEntryForGraphEdge,
   graphEdgesFromFact,
@@ -107,6 +108,9 @@ export async function readMemoryEventsWithReport(logPath?: string, eventsDir?: s
 export async function* readEvents(logPath?: string, eventsDir?: string): AsyncGenerator<Fact, void, unknown> {
   const report = await collectMemoryEvents(logPath, eventsDir, { reportInvalidToConsole: true });
   for (const event of report.events) {
+    if (!isFactEventKind(event.kind)) {
+      continue;
+    }
     try {
       yield memoryEventToFact(event);
     } catch (error) {
@@ -132,6 +136,7 @@ export async function rebuildProjectionsWithReport(db: Database, logPath?: strin
     createFactsProjection(),
     createPersonaProjection(),
     createGraphProjection(),
+    createDreamProjection(),
     createGovernanceProjection(),
   ]);
   const replay = await registry.replay(sortedEvents, { db });
@@ -447,6 +452,25 @@ function createGraphProjection() {
       return true;
     },
   };
+}
+
+function createDreamProjection() {
+  return {
+    name: "dreams",
+    consumedKinds: ["dream"] as const,
+    reset: (context: ProjectionContext) => {
+      context.db.run("DELETE FROM dream_entries;");
+    },
+    apply: async (event: MemoryEventEnvelope, context: ProjectionContext) => {
+      const dreamRepo = new SqliteDreamRepository(context.db);
+      const saved = await dreamRepo.applyMemoryEvent(event);
+      return saved !== null;
+    },
+  };
+}
+
+function isFactEventKind(kind: MemoryEventKind): boolean {
+  return FACT_EVENT_KINDS.includes(kind);
 }
 
 function resolveLogPath(logPath?: string): string {

@@ -59,6 +59,11 @@ memory audit-secrets
 
 # Query durable friction signals for first-party tooling
 memory friction list --tool aidev --since 2026-06-01 --count --min 3
+
+# Propose and review an audited supersedence through canonical events
+memory dream propose-supersedence --project memory-nexus --target <fact-uuid> --replacement "Updated fact" --reason "Supersedes stale guidance"
+memory dream approve <dream-id>
+memory dream apply <dream-id> --confirm
 ```
 
 Machine consumers should use `memory friction list --json`; see [Friction Query Contract](docs/reference/friction-query-contract.md) for the versioned envelope, filter semantics, privacy behavior, and exit codes.

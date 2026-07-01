@@ -65,3 +65,6 @@ export { SqliteGraphRepository } from "./graph-repository.js";
 
 // Memory Utility Repository
 export { SqliteMemoryUtilityRepository } from "./memory-utility-repository.js";
+
+// Dream Repository
+export { SqliteDreamRepository } from "./dream-repository.js";

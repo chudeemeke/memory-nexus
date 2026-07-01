@@ -99,7 +99,7 @@
 - [x] **Phase 39: Persona and Procedural Memory** - Centralized developer/agent profile projection with provenance, confidence, review, and scoped context injection. Completed 2026-06-07.
 - [x] **Phase 40: Temporal Semantic Graph** - Entity-relationship extraction, temporal graph projection, and graph-enriched retrieval through governed temporal graph projection. Completed 2026-06-07.
 - [x] **Phase 41: Importance, Utility, and Recall Ranking** - Utility metrics, memory-kind half-life policies, and explainable ranking. Completed 2026-06-07.
-- [ ] **Phase 42: Dreaming Consolidation** - Audited asynchronous consolidation, promotion, supersedence, and dream logs.
+- [x] **Phase 42: Dreaming Consolidation** - Audited dreaming consolidation, promotion, supersedence, and rollback through canonical events and schema-versioned projection. Completed 2026-07-01.
 - [ ] **Phase 42.5: Feature Completeness and UX Polish** - Inventory all stated/inferred/prototype features, complete or explicitly own them, and polish CLI/API usability to excellent standard.
 - [ ] **Phase 43: Market-Leader and Sales-Readiness Gate** - Final architecture/security/quality/product/competitive review and readiness proof.
 - [ ] **Phase 44: Release-Candidate Packaging and Publish Handoff** - Versioning, package smoke, changelog/release notes, npm dry-run, and OTP-backed publish handoff without publishing until user authorization.
@@ -593,7 +593,14 @@ Plans:
   1. `memory dream` produces schema-versioned audited dream entries.
   2. Dream proposals promote/supersede through canonical events, not hidden mutation.
   3. Background dreaming remains disabled until explicit command path is safe, audited, redacted, and rollback-capable.
-**Plans**: Placeholder directory exists; plan after Phase 41.
+**Plans**: Phase complete. See `.planning/phases/42-dreaming-consolidation/README.md`.
+**Status**: Complete 2026-07-01.
+**Implemented**:
+  - Added explicit `memory dream propose-supersedence/list/show/approve/reject/apply/rollback` commands.
+  - Added `DreamEntry`, `dream_entries`, `SqliteDreamRepository`, canonical dream events, projection replay, and governance registration.
+  - Redacts proposal content before persistence, requires explicit confirmation for apply/rollback, and keeps background dreaming disabled.
+  - Reconciled the original `dreams.jsonl` wording by using the canonical `MemoryEventEnvelope` log plus schema-versioned `dream_entries` projection instead of a parallel log.
+**Verification**: Focused Phase 42 tests passed (39 pass, 0 fail), completion tests passed (47 pass, 0 fail), `bun run typecheck` passed, `bun run build` passed, `bun test --timeout 15000` passed (4,366 pass, 0 fail), `bun run test:isolation` passed, `bun run eval:v5` passed 9/9 fixtures with 8 behavior-backed and 1 contract fixture, `bun run test:coverage` passed (statements 97.35%, branches 95.01%, functions 96.59%, lines 97.45%), `bun audit` found no vulnerabilities, `gitleaks detect --no-banner --redact --source .` found no leaks, scoped inbox lint passed, and `git diff --check` passed. `eval:v5:market` still intentionally fails until Phase 43 handles `remote_sync_conflict`.
 
 ---
 
@@ -777,11 +784,11 @@ v5.0
 | 40. Temporal Semantic Graph | v5.0 | 1/1 | Complete | 2026-06-07 |
 | 41. Importance, Utility, and Recall Ranking | v5.0 | 1/1 | Complete | 2026-06-07 |
 | 41.1. Embedding Pipeline Resilience | v5.0 | 1/1 | Complete | 2026-06-22 |
-| 42. Dreaming Consolidation | v5.0 | TBD | Planned | - |
+| 42. Dreaming Consolidation | v5.0 | 2026-07-01 | Complete | Explicit `memory dream`; audited/event-sourced proposal, apply, rollback; behavior-backed eval |
 | 42.5. Feature Completeness and UX Polish | v5.0 | TBD | Planned | - |
 | 43. Market-Leader and Sales-Readiness Gate | v5.0 | TBD | Planned | - |
 | 44. Release-Candidate Packaging and Publish Handoff | v5.0 | TBD | Planned | - |
 
 ---
 
-*Last updated: 2026-06-22 (Phase 41.1 complete; Phase 42 next)*
+*Last updated: 2026-07-01 (Phase 42 complete; Phase 42.5 next)*

@@ -10,7 +10,7 @@ import type { FactType } from "./fact.js";
 
 export const MEMORY_EVENT_SCHEMA_VERSION = 2;
 
-export type MemoryEventKind = FactType | "governance" | "privacy" | "consent" | "projection";
+export type MemoryEventKind = FactType | "governance" | "privacy" | "consent" | "projection" | "dream";
 export type MemoryEventOperation = "add" | "update" | "delete" | "supersede" | "noop" | "migrate";
 export type MemoryEventVisibility = "project" | "workspace" | "global";
 export type RedactionState = "none" | "redacted" | "quarantined";

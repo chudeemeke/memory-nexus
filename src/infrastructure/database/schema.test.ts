@@ -41,6 +41,7 @@ import {
     GRAPH_EDGES_TABLE,
     MEMORY_UTILITY_METRICS_TABLE,
     EMBEDDING_SKIPS_TABLE,
+    DREAM_ENTRIES_TABLE,
     type SchemaOptions,
 } from "./schema.js";
 
@@ -83,12 +84,13 @@ describe("Database Schema", () => {
             expect(GRAPH_EDGES_TABLE).toBeDefined();
             expect(MEMORY_UTILITY_METRICS_TABLE).toBeDefined();
             expect(EMBEDDING_SKIPS_TABLE).toBeDefined();
+            expect(DREAM_ENTRIES_TABLE).toBeDefined();
         });
 
 
         it("should have SCHEMA_SQL as an array with correct order", () => {
             expect(Array.isArray(SCHEMA_SQL)).toBe(true);
-            expect(SCHEMA_SQL.length).toBe(29);
+            expect(SCHEMA_SQL.length).toBe(30);
             expect(SCHEMA_SQL[0]).toBe(SESSIONS_TABLE);
             expect(SCHEMA_SQL[1]).toBe(MESSAGES_META_TABLE);
             expect(SCHEMA_SQL[2]).toBe(MESSAGES_FTS_TABLE);
@@ -118,6 +120,7 @@ describe("Database Schema", () => {
             expect(SCHEMA_SQL[26]).toBe(GRAPH_EDGES_TABLE);
             expect(SCHEMA_SQL[27]).toBe(MEMORY_UTILITY_METRICS_TABLE);
             expect(SCHEMA_SQL[28]).toBe(EMBEDDING_SKIPS_TABLE);
+            expect(SCHEMA_SQL[29]).toBe(DREAM_ENTRIES_TABLE);
         });
 
     });
@@ -175,6 +178,7 @@ describe("Database Schema", () => {
             expect(tableNames).toContain("memory_governance_events");
             expect(tableNames).toContain("memory_utility_metrics");
             expect(tableNames).toContain("embedding_skips");
+            expect(tableNames).toContain("dream_entries");
         });
 
         it("should create FTS5 virtual table", () => {

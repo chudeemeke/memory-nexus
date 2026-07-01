@@ -3,32 +3,73 @@
   "id": "dream_proposed_supersedence",
   "title": "Dreaming proposes supersedence through audited review, not hidden mutation",
   "dimension": "dreaming",
-  "mode": "contract",
+  "mode": "behavior",
   "ownerPhase": "42",
   "tags": ["dreaming", "audit", "supersedence"],
   "sanitized": {
     "containsRawSecrets": false,
     "containsPrivateTranscript": false,
-    "notes": ["Synthetic dream proposal only."]
+    "notes": ["Synthetic behavior-backed dream proposal; no private transcript content."]
   },
   "input": {
-    "proposals": [
-      {
-        "id": "dream-supersede-old-provider-note",
-        "status": "pending_review",
-        "autoPromoted": false,
-        "sourceEventIds": ["evt-provider-registry-001", "evt-provider-registry-002"],
-        "rollbackEventKind": "dream.rollback",
-        "audit": {
-          "redactionState": "none",
-          "reviewer": "user"
-        }
-      }
-    ]
+    "now": "2026-06-07T08:00:00.000Z",
+    "targetFact": {
+      "uuid": "fact-provider-old",
+      "type": "decision",
+      "project": "memory-nexus",
+      "content": "Provider health checks enumerate individual provider names directly.",
+      "observedAt": "2026-06-07T07:00:00.000Z"
+    },
+    "proposal": {
+      "project": "memory-nexus",
+      "sourceEventIds": ["evt-provider-registry-001", "evt-provider-registry-002"],
+      "targetFactUuid": "fact-provider-old",
+      "proposedFactUuid": "fact-provider-registry-capabilities",
+      "proposedFactType": "decision",
+      "proposedContent": [
+        "Provider health checks use provider registry capability metadata instead of provider-specific branching. Draft note accidentally included ",
+        "OPENAI_API_KEY=",
+        "eval_dream_secret_do_not_use_",
+        "20260701_",
+        "abcdefghijklmnopqrstuvwxyz",
+        " and must be redacted before persistence."
+      ],
+      "reason": [
+        "Supersedes the older provider-specific health-check note with a registry-based architecture decision while removing ",
+        "DREAM_SECRET=",
+        "eval_reason_secret_do_not_use_",
+        "20260701_",
+        "abcdefghijklmnopqrstuvwxyz",
+        " from the stored audit trail."
+      ],
+      "confidence": 0.91,
+      "actor": "memory"
+    }
   },
   "expected": {
     "requiresReview": true,
     "requiresRollback": true,
-    "forbidHiddenMutation": true
+    "forbidHiddenMutation": true,
+    "requiredRedactedFields": ["proposedFact.content", "reason"],
+    "requiredPlaceholderPrefixes": ["[REDACTED:env_secret:"],
+    "requiredRedactedLabels": ["OPENAI_API_KEY=", "DREAM_SECRET="],
+    "forbiddenFragments": [
+      {
+        "parts": [
+          "eval_dream_secret_do_not_use_",
+          "20260701_",
+          "abcdefghijklmnopqrstuvwxyz"
+        ]
+      },
+      {
+        "parts": [
+          "eval_reason_secret_do_not_use_",
+          "20260701_",
+          "abcdefghijklmnopqrstuvwxyz"
+        ]
+      }
+    ],
+    "requiredApplyEventCount": 2,
+    "requiredRollbackEventCount": 1
   }
 }

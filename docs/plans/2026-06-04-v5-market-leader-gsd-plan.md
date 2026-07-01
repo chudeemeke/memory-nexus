@@ -281,10 +281,12 @@ Goal: add asynchronous consolidation without hidden mutation or unreviewed data 
 
 Tasks:
 - Implement `memory dream` as explicit command first.
-- Produce `dreams.jsonl` with schema-versioned audit entries.
+- Produce schema-versioned audit entries through canonical dream events and the `dream_entries` projection.
 - Generate proposed promotions/supersedences, then apply through event kernel.
 - Add idle hook only after explicit command is safe.
 - Add guardrails for rate limits, provider policy, redaction, and rollback.
+
+Implementation note: Phase 42 uses the canonical `MemoryEventEnvelope` log plus the durable `dream_entries` projection as the dream audit source of truth. A separate `dreams.jsonl` file is intentionally not created because it would duplicate the event log and introduce a divergence path.
 
 Exit gates:
 - Dreaming is replayable and auditable.

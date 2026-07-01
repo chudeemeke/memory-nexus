@@ -42,6 +42,7 @@ export { createCompletionCommand, executeCompletionCommand } from "./completion.
 export { createFrictionCommand, executeFrictionCommand } from "./friction/index.js";
 export { createGovernanceCommand, executeGovernanceCommand } from "./governance.js";
 export { createProfileCommand, executeProfileCommand } from "./profile.js";
+export { createDreamCommand, executeDreamCommand } from "./dream.js";
 
 // Backfill commands
 export { createBackfillCommand, executeBackfillCommand } from "./backfill.js";
@@ -89,6 +90,11 @@ export type {
   ProfileCommandDeps,
   ProfileCommandOptions,
 } from "./profile.js";
+export type {
+  DreamAction,
+  DreamCommandDeps,
+  DreamCommandOptions,
+} from "./dream.js";
 export type {
   BackfillCommandOptions,
   BackfillServiceDeps,

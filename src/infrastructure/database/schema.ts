@@ -609,6 +609,44 @@ CREATE INDEX IF NOT EXISTS idx_embedding_skips_message_model ON embedding_skips(
 `;
 
 /**
+ * Dreaming consolidation projection table.
+ *
+ * Dream entries are proposals and audit state projected from canonical dream
+ * events. Applying a proposal appends canonical fact/supersedence events; this
+ * table does not hide-mutate facts.
+ */
+export const DREAM_ENTRIES_TABLE = `
+CREATE TABLE IF NOT EXISTS dream_entries (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    dream_id TEXT UNIQUE NOT NULL,
+    schema_version INTEGER NOT NULL CHECK (schema_version = 1),
+    kind TEXT NOT NULL CHECK (kind IN ('supersedence_proposal')),
+    status TEXT NOT NULL CHECK (status IN ('pending_review', 'approved', 'rejected', 'applied', 'rolled_back')),
+    project TEXT,
+    visibility TEXT NOT NULL CHECK (visibility IN ('project', 'workspace', 'global')),
+    source_event_ids TEXT NOT NULL,
+    target_fact_uuid TEXT NOT NULL,
+    proposed_fact TEXT NOT NULL,
+    reason TEXT NOT NULL,
+    confidence REAL NOT NULL CHECK (confidence >= 0 AND confidence <= 1),
+    audit TEXT NOT NULL,
+    auto_promoted INTEGER NOT NULL DEFAULT 0 CHECK (auto_promoted = 0),
+    rollback_event_kind TEXT NOT NULL,
+    applied_event_ids TEXT NOT NULL,
+    rollback_event_ids TEXT NOT NULL,
+    created_at TEXT NOT NULL,
+    updated_at TEXT NOT NULL,
+    reviewed_at TEXT,
+    applied_at TEXT,
+    rolled_back_at TEXT
+);
+CREATE INDEX IF NOT EXISTS idx_dream_entries_project ON dream_entries(project);
+CREATE INDEX IF NOT EXISTS idx_dream_entries_status ON dream_entries(status);
+CREATE INDEX IF NOT EXISTS idx_dream_entries_kind ON dream_entries(kind);
+CREATE INDEX IF NOT EXISTS idx_dream_entries_updated ON dream_entries(updated_at);
+`;
+
+/**
  * Schema options for conditional table creation
  */
 
@@ -677,6 +715,7 @@ END;
  * 19. backfill_state (no dependencies)
  * 20. facts / governance / derived memory projections
  * 21. embedding skip ledger (depends on messages_meta)
+ * 22. dream entries (canonical event projection)
  *
  * Note: message_embeddings (vec0) is NOT in this array.
  * It is conditionally created in createSchema() when sqliteVecAvailable is true.
@@ -711,6 +750,7 @@ export const SCHEMA_SQL: readonly string[] = [
     GRAPH_EDGES_TABLE,
     MEMORY_UTILITY_METRICS_TABLE,
     EMBEDDING_SKIPS_TABLE,
+    DREAM_ENTRIES_TABLE,
 ];
 
 

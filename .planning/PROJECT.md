@@ -39,15 +39,15 @@ My pushback line is also clear: it is not done if it merely "works." It is not d
 
 ## Current State
 
-v4.0 is shipped and published as `@chude/memory@4.0.0`. v5.0 Market-Leader Memory Platform execution is active; Phase 41 importance, utility, and recall ranking is complete and verified. Phase 41.1 embedding pipeline resilience is complete in source and verified, so Phase 42 dreaming consolidation is next. The installed global `memory@4.0.0` binary is not claimed fixed until a fixed install or publish smoke is run.
+v4.0 is shipped, and the latest verified patch on npm/local install is `@chude/memory@4.0.2`. v5.0 Market-Leader Memory Platform execution is active; Phase 42 dreaming consolidation is implemented and verified, so Phase 42.5 feature completeness and UX polish is next. The final market-readiness gate is still blocked by one contract-only v5 eval fixture owned by Phase 43.
 
 **Tech stack:** Bun, TypeScript 5.5+, bun:sqlite with FTS5 + sqlite-vec, Commander.js v14, cli-progress, chrono-node, @huggingface/transformers v3
 
 **Architecture:** Hexagonal (Domain-Application-Infrastructure-Presentation) with strict layer separation. Domain layer has zero external dependencies. 99%+ domain coverage.
 
-**Commands:** sync, search, list, stats, context, related, show, browse, install, uninstall, status, doctor, purge, export, import, completion, facts, extract, remote, governance, profile, friction
+**Commands:** sync, search, list, stats, context, related, show, browse, install, uninstall, status, doctor, purge, export, import, completion, facts, extract, remote, governance, profile, friction, dream
 
-**Test suite:** Current Phase 41.1 gate passes typecheck, build, full tests, test isolation, eval, coverage, dependency audit, inbox lint, and diff whitespace. Full tests pass with 4,364 tests and zero failures. The Istanbul-backed coverage gate measures all four metrics independently and passes at statements 97.35%, branches 95.00%, functions 96.59%, and lines 97.45%.
+**Test suite:** Current Phase 42 gate passes typecheck, build, full tests, test isolation, eval, coverage, dependency audit, focused inbox lint, gitleaks, and diff whitespace. Full tests pass with 4,366 tests and zero failures. The Istanbul-backed coverage gate measures all four metrics independently and passes at statements 97.35%, branches 95.01%, functions 96.59%, and lines 97.45%.
 
 ## Problem Statement
 
@@ -105,7 +105,7 @@ Both Claude and humans use the same commands. No special formatting needed.
 
 **Goal:** Make `@chude/memory` a local-first, privacy-governed, cross-project, event-sourced memory substrate with governed persona/procedural memory, temporal graph retrieval, utility-aware ranking, audited dreaming consolidation, excellent CLI/API usability, and demonstrable market readiness.
 
-**Active work:** Phase 42 dreaming consolidation is next. Phase 41.1 completed the source fix that prevents provider/transport payload-size failures from wedging cross-project re-embedding.
+**Active work:** Phase 42.5 feature completeness and UX polish is next. Phase 42 completed the explicit, audited `memory dream` workflow; Phase 43 still owns the remaining market-readiness disposition for the contract-only remote-sync conflict eval.
 
 **Target features:**
 - Consent/provenance governance for derived memory and provider egress

@@ -110,6 +110,7 @@ describe("completion command", () => {
             expect(script).toContain("show");
             expect(script).toContain("browse");
             expect(script).toContain("governance");
+            expect(script).toContain("dream");
             expect(script).toContain("install");
             expect(script).toContain("uninstall");
             expect(script).toContain("status");
@@ -154,6 +155,7 @@ describe("completion command", () => {
             expect(script).toContain("'show:Show session");
             expect(script).toContain("'browse:Browse and select");
             expect(script).toContain("'governance:Inspect and control");
+            expect(script).toContain("'dream:Create, review");
             expect(script).toContain("'install:Install automatic");
             expect(script).toContain("'uninstall:Remove automatic");
             expect(script).toContain("'status:Show hook");
@@ -203,6 +205,7 @@ describe("completion command", () => {
             expect(script).toContain('-a show -d "Show session');
             expect(script).toContain('-a browse -d "Browse and');
             expect(script).toContain('-a governance -d "Inspect and');
+            expect(script).toContain('-a dream -d "Create, review');
             expect(script).toContain('-a install -d "Install automatic');
             expect(script).toContain('-a uninstall -d "Remove automatic');
             expect(script).toContain('-a status -d "Show hook');
@@ -369,6 +372,21 @@ describe("completion command", () => {
             expect(generateFishCompletion()).toContain('__fish_seen_subcommand_from sync" -l remote');
             expect(generateFishCompletion()).toContain("__fish_seen_subcommand_from remote");
             expect(generateFishCompletion()).toContain("backup restore rollback");
+            expect(generateFishCompletion()).toContain("-l confirm");
+        });
+
+        it("includes dream command actions and guarded mutation options in all shells", () => {
+            expect(generateBashCompletion()).toContain("dream");
+            expect(generateBashCompletion()).toContain("propose-supersedence list show approve reject apply rollback");
+            expect(generateBashCompletion()).toContain("--replacement");
+            expect(generateBashCompletion()).toContain("--confirm");
+            expect(generateZshCompletion()).toContain("dream:Create, review, apply, and rollback audited dream proposals");
+            expect(generateZshCompletion()).toContain("dream_opts");
+            expect(generateZshCompletion()).toContain("propose-supersedence list show approve reject apply rollback");
+            expect(generateZshCompletion()).toContain("--confirm[Confirm apply or rollback mutation]");
+            expect(generateFishCompletion()).toContain('__fish_use_subcommand" -a dream');
+            expect(generateFishCompletion()).toContain("__fish_seen_subcommand_from dream");
+            expect(generateFishCompletion()).toContain("propose-supersedence list show approve reject apply rollback");
             expect(generateFishCompletion()).toContain("-l confirm");
         });
     });

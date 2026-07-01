@@ -125,7 +125,7 @@ Phase 38.6 completed the durable friction contract. `memory friction list` now e
 - [x] **EVAL-03**: Eval fixtures cover privacy, leakage, supersedence, sync recovery, friction filters, persona, graph, ranking, and dreaming.
 - [ ] **EVAL-04**: Phase 43 consumes eval output as readiness evidence and fails on privacy, leakage, or supersedence regressions.
 
-Phase 38.7 completed the executable harness and fixture coverage. `bun run eval:v5` is part of `bun run quality`, and `bun run eval:v5:market` already fails while contract-only fixtures remain. Phase 39 promoted the persona fixture, Phase 40 promoted graph, supersedence, and cross-project leakage fixtures, and Phase 41 promoted ranking to behavior-backed checks. EVAL-04 remains pending until Phase 43 actually consumes the report as final readiness evidence.
+Phase 38.7 completed the executable harness and fixture coverage. `bun run eval:v5` is part of `bun run quality`, and `bun run eval:v5:market` already fails while contract-only fixtures remain. Phase 39 promoted the persona fixture, Phase 40 promoted graph, supersedence, and cross-project leakage fixtures, Phase 41 promoted ranking, and Phase 42 promoted dreaming to behavior-backed checks. EVAL-04 remains pending until Phase 43 actually consumes the report as final readiness evidence.
 
 ### Persona and Procedural Memory
 
@@ -162,13 +162,15 @@ Phase 41 completed the utility-aware ranking surface. `MemoryUtilityMetric` and 
 
 Phase 41.1 was inserted after Phase 41 because Kanbanflow re-embedding surfaced a deterministic 413 failure against the Tailscale Ollama sidecar. This is an all-consumer memory reliability issue, not a Kanbanflow-specific workaround. The fix must keep provider choice loosely coupled: Ollama gets concrete 413 coverage, but the application behavior must work for any provider that signals payload-too-large or equivalent request-size failure.
 
-Phase 41.1 completed the memory-side source fix. Embedding now has typed provider payload-too-large errors, Ollama 413 split/retry, byte-bounded service batches, durable model-scoped skip/quarantine state, resume filtering, and safe skipped-count CLI/JSON reporting. Verification passed typecheck, build, full tests, isolation, coverage, dependency audit, inbox lint, and diff whitespace. The installed global `memory@4.0.0` binary is not claimed fixed until a fixed install or publish smoke is run.
+Phase 41.1 completed the memory-side source fix. Embedding now has typed provider payload-too-large errors, Ollama 413 split/retry, byte-bounded service batches, durable model-scoped skip/quarantine state, resume filtering, and safe skipped-count CLI/JSON reporting. Verification passed typecheck, build, full tests, isolation, coverage, dependency audit, inbox lint, and diff whitespace. The fixed package is published and locally verified as `@chude/memory@4.0.2`.
 
 ### Dreaming Consolidation
 
-- [ ] **DREAM-01**: `memory dream` produces schema-versioned audited dream entries.
-- [ ] **DREAM-02**: Dream proposals promote/supersede through canonical events, not hidden mutation.
-- [ ] **DREAM-03**: Background dreaming is disabled until explicit command path is safe, audited, redacted, and rollback-capable.
+- [x] **DREAM-01**: `memory dream` produces schema-versioned audited dream entries.
+- [x] **DREAM-02**: Dream proposals promote/supersede through canonical events, not hidden mutation.
+- [x] **DREAM-03**: Background dreaming is disabled until explicit command path is safe, audited, redacted, and rollback-capable.
+
+Phase 42 completed the explicit dreaming surface. `DreamEntry`, `dream_entries`, `SqliteDreamRepository`, `DreamingService`, canonical dream event projection, `memory dream propose-supersedence/list/show/approve/reject/apply/rollback`, shell completion coverage, and the behavior-backed dreaming eval are implemented. Dream proposal content and reasons are redacted before persistence, governance provenance is registered, apply/rollback require explicit confirmation, apply/rollback emit canonical events, and no background dreaming hook is enabled. The planned `dreams.jsonl` audit file is intentionally superseded by the canonical event log plus schema-versioned `dream_entries` projection to avoid a parallel log divergence path.
 
 ### Feature Completeness and UX
 
@@ -305,9 +307,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 | EMBED-RES-03 | Phase 41.1 | Complete |
 | EMBED-RES-04 | Phase 41.1 | Complete |
 | EMBED-RES-05 | Phase 41.1 | Complete |
-| DREAM-01 | Phase 42 | Pending |
-| DREAM-02 | Phase 42 | Pending |
-| DREAM-03 | Phase 42 | Pending |
+| DREAM-01 | Phase 42 | Complete |
+| DREAM-02 | Phase 42 | Complete |
+| DREAM-03 | Phase 42 | Complete |
 | UX-01 | Phase 42.5 | Pending |
 | UX-02 | Phase 42.5 | Pending |
 | UX-03 | Phase 42.5 | Pending |
@@ -326,11 +328,11 @@ Which phases cover which requirements. Updated during roadmap creation.
 - v4.0 requirements: 25 total (excluding QUAL cross-cutting)
 - Cross-cutting: 4 QUAL requirements
 - v5.0 requirements: 53 total
-- v5.0 complete: 36/53
-- v5.0 pending: 17/53
+- v5.0 complete: 39/53
+- v5.0 pending: 14/53
 - v5.0 mapped to phases: 53/53
 - v5.0 unmapped: 0
 
 ---
 *Requirements defined: 2026-04-03*
-*Last updated: 2026-06-22 after Phase 41.1 embedding resilience completed source verification*
+*Last updated: 2026-07-01 after Phase 42 dreaming consolidation completed source verification*

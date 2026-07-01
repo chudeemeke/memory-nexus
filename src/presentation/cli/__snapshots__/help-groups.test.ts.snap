@@ -25,6 +25,8 @@ Query Commands:
                                   consent/provenance state
   profile                         Inspect and rebuild governed
                                   persona/procedural memory
+  dream                           Create, review, apply, and rollback audited
+                                  dream proposals
 
 Data Commands:
   sync [options]                  Sync sessions from ~/.claude/projects/ to

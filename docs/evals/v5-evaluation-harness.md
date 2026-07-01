@@ -58,10 +58,10 @@ Behavior-backed fixtures:
 - `graph_stale_edge`: uses `TemporalGraphService` with `SqliteGraphRepository` and graph governance.
 - `superseded_provider_fact`: uses `SqliteFactRepository` persisted fact state.
 - `ranking_evergreen_preference`: uses `MemoryRankingService` and `MemoryUtilityMetric` to prove evergreen useful memory outranks noisy recency.
+- `dream_proposed_supersedence`: uses `DreamingService`, `SqliteDreamRepository`, `SqliteFactRepository`, `MemoryGovernanceService`, and `PatternRedactor` to prove reviewed, redacted, event-sourced apply/rollback behavior without hidden mutation.
 
 Contract fixtures, to be promoted by later phases:
 
 - `remote_sync_conflict`
-- `dream_proposed_supersedence`
 
-Phase 42 must convert the remaining dreaming contract fixture into a behavior-backed eval when audited dreaming is implemented. The remote-sync conflict fixture remains a recovery contract until Phase 43 determines whether existing Phase 38.4 tests are sufficient evidence or whether a higher-level behavior fixture is required.
+Phase 42 converted the dreaming fixture into behavior-backed coverage. The remote-sync conflict fixture remains a recovery contract until Phase 43 determines whether existing Phase 38.4 tests are sufficient evidence or whether a higher-level behavior fixture is required.
