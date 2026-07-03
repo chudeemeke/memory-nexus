@@ -3,7 +3,7 @@
   "id": "remote_sync_conflict",
   "title": "Remote sync conflict recovery is deterministic and does not push after failure",
   "dimension": "sync_recovery",
-  "mode": "contract",
+  "mode": "behavior",
   "ownerPhase": "38.4",
   "tags": ["remote-sync", "recovery", "backup"],
   "sanitized": {
@@ -12,16 +12,21 @@
     "notes": ["Synthetic remote refs and backup identifiers only."]
   },
   "input": {
-    "failureStep": "fetch_conflict",
+    "failureStep": "pull_rebase_conflict",
     "stepsAfterFailure": ["record_diagnostic", "preserve_local_log", "operator_review"],
     "backupRef": "memory-backup-2026-06-07T00-00-00Z",
     "rollbackCommand": "memory remote rollback --backup memory-backup-2026-06-07T00-00-00Z --confirm",
     "localEventLogPreserved": true,
-    "operatorReviewRequired": true
+    "operatorReviewRequired": true,
+    "machineId": "machine-1234",
+    "repositoryUrl": "git@github.com:chude/memory-events.git",
+    "pullFailure": "conflict"
   },
   "expected": {
     "noPushAfterFailure": true,
     "backupRequired": true,
-    "operatorReviewRequired": true
+    "operatorReviewRequired": true,
+    "abortRebaseRequired": true,
+    "requiredErrorFragment": "Git pull failed: conflict"
   }
 }

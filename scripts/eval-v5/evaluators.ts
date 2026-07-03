@@ -10,6 +10,11 @@ import { SmartContextService } from "../../src/application/services/smart-contex
 import { MemoryRankingService, type MemoryRankCandidate } from "../../src/application/services/memory-ranking-service.js";
 import { DreamingService } from "../../src/application/services/dreaming-service.js";
 import { MemoryGovernanceService } from "../../src/application/services/memory-governance-service.js";
+import {
+  RemoteEventSyncService,
+  type RemoteEventTransport,
+  type RemoteTransportCommandResult,
+} from "../../src/application/services/remote-event-sync-service.js";
 import { PatternRedactor } from "../../src/infrastructure/security/pattern-redactor.js";
 import { Fact, type FactType } from "../../src/domain/entities/fact.js";
 import { FrictionEntry } from "../../src/domain/entities/friction-entry.js";
@@ -243,6 +248,10 @@ async function evaluateSupersedenceBehavior(fixture: V5EvalFixture): Promise<V5E
 }
 
 async function evaluateSyncRecovery(fixture: V5EvalFixture): Promise<V5EvalResult> {
+  if (fixture.mode === "behavior") {
+    return evaluateSyncRecoveryBehavior(fixture);
+  }
+
   const input = fixture.input;
   const failureStep = stringValue(input.failureStep, "failureStep");
   const stepsAfterFailure = stringArray(input.stepsAfterFailure, "stepsAfterFailure");
@@ -259,6 +268,64 @@ async function evaluateSyncRecovery(fixture: V5EvalFixture): Promise<V5EvalResul
     failure_step: failureStep,
     backup_available: isNonEmptyString(input.backupRef),
     post_failure_steps: stepsAfterFailure,
+    behavior_backed: false,
+  });
+}
+
+async function evaluateSyncRecoveryBehavior(fixture: V5EvalFixture): Promise<V5EvalResult> {
+  const input = fixture.input;
+  const expected = fixture.expected;
+  const failureStep = stringValue(input.failureStep, "failureStep");
+  const stepsAfterFailure = stringArray(input.stepsAfterFailure, "stepsAfterFailure");
+  const machineId = optionalString(input.machineId) ?? "machine-1234";
+  const repositoryUrl = optionalString(input.repositoryUrl) ?? "git@github.com:chude/memory-events.git";
+  const pullFailure = optionalString(input.pullFailure) ?? "conflict";
+  const requiredErrorFragment = optionalString(expected.requiredErrorFragment);
+  const expectedNoPush = expected.noPushAfterFailure === true;
+  const expectedAbort = expected.abortRebaseRequired === true;
+  const { transport, calls } = createRemoteSyncConflictTransport({ pullFailure });
+
+  const service = new RemoteEventSyncService({
+    transport,
+    now: () => new Date("2026-06-07T00:00:00.000Z"),
+  });
+  const result = await service.sync({ machineId, repositoryUrl });
+  const pushCalled = calls.includes("push");
+  const abortRebaseCalled = calls.includes("abortRebase");
+
+  const checks = [
+    check("failure step is captured", failureStep.length > 0),
+    check("backup reference is available", isNonEmptyString(input.backupRef)),
+    check("rollback command is documented", isNonEmptyString(input.rollbackCommand)),
+    check("remote sync reports a failed result", result.success === false && result.status === "failed"),
+    check(
+      "remote sync reports the expected failure",
+      requiredErrorFragment ? (result.error ?? "").includes(requiredErrorFragment) : isNonEmptyString(result.error),
+      requiredErrorFragment ?? result.error,
+    ),
+    check(
+      "failed preflight does not push",
+      (!expectedNoPush || (!pushCalled && result.pushed === false)) && !stepsAfterFailure.includes("push"),
+    ),
+    check("failed pull aborts any in-progress rebase", !expectedAbort || abortRebaseCalled),
+    check("remote sync did not mark pull as complete", result.pulled === false),
+    check("local event log remains preserved", input.localEventLogPreserved === true),
+    check("conflict/corruption is recorded for operator review", input.operatorReviewRequired === true),
+  ];
+
+  return finalize(fixture, checks, {
+    behavior_backed: true,
+    failure_step: failureStep,
+    backup_available: isNonEmptyString(input.backupRef),
+    post_failure_steps: stepsAfterFailure,
+    service_status: result.status,
+    service_success: result.success,
+    error: result.error ?? null,
+    calls,
+    pushed: result.pushed,
+    pulled: result.pulled,
+    abort_rebase_called: abortRebaseCalled,
+    push_called: pushCalled,
   });
 }
 
@@ -658,6 +725,71 @@ function check(name: string, condition: boolean, detail?: string): V5EvalCheckRe
     name,
     status: condition ? "pass" : "fail",
     message: condition ? "passed" : detail ? `failed: ${detail}` : "failed",
+  };
+}
+
+function createRemoteSyncConflictTransport(input: {
+  pullFailure: string;
+}): { transport: RemoteEventTransport; calls: string[] } {
+  const calls: string[] = [];
+  const ok = (): RemoteTransportCommandResult => ({ success: true });
+  const fail = (error: string): RemoteTransportCommandResult => ({ success: false, error });
+  const call = (name: keyof RemoteEventTransport) => {
+    calls.push(name);
+  };
+
+  return {
+    calls,
+    transport: {
+      async isRepository() {
+        call("isRepository");
+        return true;
+      },
+      async initRepository() {
+        call("initRepository");
+        return ok();
+      },
+      async getRemoteUrl() {
+        call("getRemoteUrl");
+        return "git@github.com:chude/memory-events.git";
+      },
+      async setRemoteUrl() {
+        call("setRemoteUrl");
+        return ok();
+      },
+      async listEventLogFingerprints() {
+        call("listEventLogFingerprints");
+        return { "events-machine-1234.jsonl": "before" };
+      },
+      async hasEventLog() {
+        call("hasEventLog");
+        return true;
+      },
+      async commitEventLog() {
+        call("commitEventLog");
+        return ok();
+      },
+      async fetch() {
+        call("fetch");
+        return ok();
+      },
+      async hasRemoteRef() {
+        call("hasRemoteRef");
+        return true;
+      },
+      async pullRebase() {
+        call("pullRebase");
+        return fail(input.pullFailure);
+      },
+      async abortRebase() {
+        call("abortRebase");
+        return ok();
+      },
+      async push() {
+        call("push");
+        return ok();
+      },
+    },
   };
 }
 

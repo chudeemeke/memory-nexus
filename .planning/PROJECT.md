@@ -39,7 +39,7 @@ My pushback line is also clear: it is not done if it merely "works." It is not d
 
 ## Current State
 
-v4.0 is shipped, and the latest verified patch on npm/local install is `@chude/memory@4.0.2`. v5.0 Market-Leader Memory Platform execution is active; Phase 42 dreaming consolidation is implemented and verified, so Phase 42.5 feature completeness and UX polish is next. The final market-readiness gate is still blocked by one contract-only v5 eval fixture owned by Phase 43.
+v4.0 is shipped, and the latest verified patch on npm/local install is `@chude/memory@4.0.2`. v5.0 Market-Leader Memory Platform execution is active. Phase 42 dreaming consolidation and Phase 42.5 safe local maintenance workflows are implemented and verified. Phase 43 market-leader sales/readiness gate is active; its first implementation slice promoted the last contract-only v5 eval fixture to behavior-backed coverage, so `eval:v5:market` now passes. The remaining Phase 43 work is the readiness audit, competitive market report, Claude critique disposition, final gates, and Phase 44 release-candidate handoff.
 
 **Tech stack:** Bun, TypeScript 5.5+, bun:sqlite with FTS5 + sqlite-vec, Commander.js v14, cli-progress, chrono-node, @huggingface/transformers v3
 
@@ -105,7 +105,7 @@ Both Claude and humans use the same commands. No special formatting needed.
 
 **Goal:** Make `@chude/memory` a local-first, privacy-governed, cross-project, event-sourced memory substrate with governed persona/procedural memory, temporal graph retrieval, utility-aware ranking, audited dreaming consolidation, excellent CLI/API usability, and demonstrable market readiness.
 
-**Active work:** Phase 42.5 feature completeness and UX polish is next. Phase 42 completed the explicit, audited `memory dream` workflow; Phase 43 still owns the remaining market-readiness disposition for the contract-only remote-sync conflict eval.
+**Active work:** Phase 43 market-leader sales/readiness gate. Phase 43 must prove the current implementation against the product north star, competitive market baseline, security and quality gates, and release-candidate criteria before Phase 44 publish/release work.
 
 **Target features:**
 - Consent/provenance governance for derived memory and provider egress

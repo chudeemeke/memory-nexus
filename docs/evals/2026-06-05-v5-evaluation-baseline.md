@@ -81,9 +81,13 @@ Phase 41 implementation note: `ranking_evergreen_preference` is now behavior-bac
 
 Phase 42 implementation note: `dream_proposed_supersedence` is now behavior-backed through
 `DreamingService`, `SqliteDreamRepository`, `SqliteFactRepository`, `MemoryGovernanceService`,
-and `PatternRedactor`; `eval:v5` passes 9/9 with 8 behavior-backed fixtures and 1 contract
-fixture. `eval:v5:market` still fails until the remaining `remote_sync_conflict` contract
-fixture is promoted or explicitly accepted by the Phase 43 readiness gate.
+and `PatternRedactor`.
+
+Phase 43 implementation note: `remote_sync_conflict` is now behavior-backed through
+`RemoteEventSyncService` and a deterministic fake transport that fails `pullRebase`, verifies
+`abortRebase`, and verifies no `push` occurs after the pull failure. `eval:v5` and
+`eval:v5:market` pass 9/9 with 9 behavior-backed fixtures, 0 contract fixtures, and no market
+readiness blockers.
 
 ## Relationship to Tests
 

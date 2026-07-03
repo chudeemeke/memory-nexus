@@ -18,9 +18,14 @@ describe("v5 evaluation harness", () => {
     expect(run.report.command).toBe("eval:v5");
     expect(run.report.summary.failed).toBe(0);
     expect(run.report.summary.blocking_failed).toBe(0);
-    expect(run.report.summary.behavior).toBe(8);
-    expect(run.report.summary.contract).toBe(1);
+    expect(run.report.summary.behavior).toBe(9);
+    expect(run.report.summary.contract).toBe(0);
     expect(run.report.coverage.dimensions.sort()).toEqual([...V5_EVAL_DIMENSIONS].sort());
+    expect(run.report.market_readiness).toEqual({
+      eligible: true,
+      contract_fixture_count: 0,
+      blockers: [],
+    });
 
     const reportJson = JSON.stringify(run.report);
     expect(reportJson).not.toContain("eval_secret_do_not_use");
@@ -54,6 +59,25 @@ describe("v5 evaluation harness", () => {
     expect(dreaming?.mode).toBe("behavior");
     expect(dreaming?.status).toBe("pass");
     expect(dreaming?.evidence.behavior_backed).toBe(true);
+
+    const remoteSync = run.report.results.find((result) => result.fixture_id === "remote_sync_conflict");
+    expect(remoteSync?.mode).toBe("behavior");
+    expect(remoteSync?.status).toBe("pass");
+    expect(remoteSync?.evidence.behavior_backed).toBe(true);
+    expect(remoteSync?.evidence.push_called).toBe(false);
+    expect(remoteSync?.evidence.abort_rebase_called).toBe(true);
+  });
+
+  test("market-ready mode passes when the default suite has no contracts or failures", async () => {
+    const run = await runV5EvalHarness({
+      marketReady: true,
+      now: new Date("2026-06-07T00:00:00.000Z"),
+    });
+
+    expect(run.exitCode).toBe(0);
+    expect(run.report.market_readiness.eligible).toBe(true);
+    expect(run.report.market_readiness.contract_fixture_count).toBe(0);
+    expect(run.report.market_readiness.blockers).toEqual([]);
   });
 
   test("fixture validation rejects raw secrets and private transcript markers", () => {

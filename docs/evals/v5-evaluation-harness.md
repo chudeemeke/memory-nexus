@@ -19,7 +19,7 @@ bun run eval:v5:market
 
 - `eval:v5` loads `docs/evals/fixtures/v5/*.json` and emits a schema-versioned JSON report.
 - `eval:v5` is part of `bun run quality`.
-- `eval:v5:market` adds the market-readiness rule: contract-only fixtures fail until the relevant product phases replace them with behavior-backed checks.
+- `eval:v5:market` adds the market-readiness rule: contract-only fixtures fail until the relevant product phases replace them with behavior-backed checks. The default fixture suite currently passes this stricter gate.
 
 ## Report Contract
 
@@ -59,9 +59,10 @@ Behavior-backed fixtures:
 - `superseded_provider_fact`: uses `SqliteFactRepository` persisted fact state.
 - `ranking_evergreen_preference`: uses `MemoryRankingService` and `MemoryUtilityMetric` to prove evergreen useful memory outranks noisy recency.
 - `dream_proposed_supersedence`: uses `DreamingService`, `SqliteDreamRepository`, `SqliteFactRepository`, `MemoryGovernanceService`, and `PatternRedactor` to prove reviewed, redacted, event-sourced apply/rollback behavior without hidden mutation.
+- `remote_sync_conflict`: uses `RemoteEventSyncService` through a deterministic fake transport to prove pull conflicts abort any in-progress rebase and do not push after failure.
 
-Contract fixtures, to be promoted by later phases:
+Contract fixtures:
 
-- `remote_sync_conflict`
+- None in the default suite.
 
-Phase 42 converted the dreaming fixture into behavior-backed coverage. The remote-sync conflict fixture remains a recovery contract until Phase 43 determines whether existing Phase 38.4 tests are sufficient evidence or whether a higher-level behavior fixture is required.
+Phase 42 converted the dreaming fixture into behavior-backed coverage. Phase 43 converted the remote-sync conflict fixture into behavior-backed coverage. `eval:v5:market` now requires and demonstrates 9 behavior-backed fixtures, 0 contract fixtures, 0 failures, and market-readiness eligibility.
