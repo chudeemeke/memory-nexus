@@ -118,6 +118,11 @@ describe("completion command", () => {
             expect(script).toContain("purge");
             expect(script).toContain("export");
             expect(script).toContain("import");
+            expect(script).toContain("backup");
+            expect(script).toContain("restore");
+            expect(script).toContain("migrate");
+            expect(script).toContain("extract");
+            expect(script).toContain("projections");
             expect(script).toContain("completion");
         });
 
@@ -163,6 +168,11 @@ describe("completion command", () => {
             expect(script).toContain("'purge:Remove old sessions");
             expect(script).toContain("'export:Export database");
             expect(script).toContain("'import:Import database");
+            expect(script).toContain("'backup:Create and verify local");
+            expect(script).toContain("'restore:Restore local memory");
+            expect(script).toContain("'migrate:Migrate database");
+            expect(script).toContain("'extract:Extract facts");
+            expect(script).toContain("'projections:Verify and rebuild");
             expect(script).toContain("'completion:Generate shell");
         });
 
@@ -213,6 +223,11 @@ describe("completion command", () => {
             expect(script).toContain('-a purge -d "Remove old');
             expect(script).toContain('-a export -d "Export database');
             expect(script).toContain('-a import -d "Import database');
+            expect(script).toContain('-a backup -d "Create and verify local');
+            expect(script).toContain('-a restore -d "Restore local memory');
+            expect(script).toContain('-a migrate -d "Migrate database');
+            expect(script).toContain('-a extract -d "Extract facts');
+            expect(script).toContain('-a projections -d "Verify and rebuild');
             expect(script).toContain('-a completion -d "Generate shell');
         });
 
@@ -388,6 +403,32 @@ describe("completion command", () => {
             expect(generateFishCompletion()).toContain("__fish_seen_subcommand_from dream");
             expect(generateFishCompletion()).toContain("propose-supersedence list show approve reject apply rollback");
             expect(generateFishCompletion()).toContain("-l confirm");
+        });
+
+        it("includes local backup, restore, projection, migration, and upgrade safety options in all shells", () => {
+            expect(generateBashCompletion()).toContain("create verify");
+            expect(generateBashCompletion()).toContain("--dry-run --confirm --json");
+            expect(generateBashCompletion()).toContain("rebuild --verify --confirm --json");
+            expect(generateBashCompletion()).toContain("--upgrade");
+
+            expect(generateZshCompletion()).toContain("backup_opts");
+            expect(generateZshCompletion()).toContain("--quiet[Print only the backup path]");
+            expect(generateZshCompletion()).toContain("--from-windows[Migrate database from native Windows or desktop host]");
+            expect(generateZshCompletion()).toContain("--dry-run[Check migration readiness without mutation]");
+            expect(generateZshCompletion()).toContain("--force[Force extraction even on previously processed sessions]");
+            expect(generateZshCompletion()).toContain("--dry-run[Verify restore without mutation]");
+            expect(generateZshCompletion()).toContain("--verify[Verify without mutation]");
+            expect(generateZshCompletion()).toContain("--upgrade[Perform upgrade readiness diagnostics]");
+
+            expect(generateFishCompletion()).toContain("__fish_seen_subcommand_from backup");
+            expect(generateFishCompletion()).toContain("__fish_seen_subcommand_from restore");
+            expect(generateFishCompletion()).toContain("__fish_seen_subcommand_from migrate");
+            expect(generateFishCompletion()).toContain("__fish_seen_subcommand_from extract");
+            expect(generateFishCompletion()).toContain("__fish_seen_subcommand_from projections");
+            expect(generateFishCompletion()).toContain('-l dry-run -d "Verify restore without mutation"');
+            expect(generateFishCompletion()).toContain('-l dry-run -d "Check migration readiness without mutation"');
+            expect(generateFishCompletion()).toContain('-l force -d "Force extraction even on previously processed sessions"');
+            expect(generateFishCompletion()).toContain('-l upgrade -d "Perform upgrade readiness diagnostics"');
         });
     });
 });

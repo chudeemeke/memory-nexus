@@ -28,6 +28,9 @@ import {
   createCompletionCommand,
   createExportCommand,
   createImportCommand,
+  createBackupCommand,
+  createRestoreCommand,
+  createProjectionsCommand,
   createFrictionCommand,
   createBackfillCommand,
   createExtractCommand,
@@ -71,10 +74,13 @@ program.addCommand(createSyncCommand());
 program.addCommand(createBackfillCommand());
 program.addCommand(createExportCommand());
 program.addCommand(createImportCommand());
+program.addCommand(createBackupCommand());
+program.addCommand(createRestoreCommand());
 program.addCommand(createPurgeCommand());
 program.addCommand(createMigrateCommand());
 program.addCommand(createExtractCommand());
 program.addCommand(createRemoteCommand());
+program.addCommand(createProjectionsCommand());
 
 
 // System Commands — hooks, diagnostics, completion. `browse` lives here

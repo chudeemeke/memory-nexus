@@ -35,8 +35,11 @@ export const COVERAGE_IGNORE_PATTERNS = [
   ".git/",
   "tests/",
   ".planning/",
+  ".claude/",
+  ".cc-guardian/",
   "scratch/",
   ".coverage-work/",
+  "~/",
   ".test.ts",
   ".coverage.test.ts",
 ] as const;
@@ -49,8 +52,11 @@ const COPY_IGNORE_PATTERNS = [
   "coverage-vitest-domain/",
   ".git/",
   ".planning/",
+  ".claude/",
+  ".cc-guardian/",
   "scratch/",
   ".coverage-work/",
+  "~/",
 ] as const;
 
 const PROJECT_ROOT = resolve(import.meta.dir, "..");
@@ -58,6 +64,7 @@ const SAFE_WORK_DIR_PREFIX = "memory-nexus-coverage-work-";
 const DEFAULT_WORK_DIR = join(tmpdir(), `${SAFE_WORK_DIR_PREFIX}${process.pid}`);
 const DEFAULT_COVERAGE_DIR = join(PROJECT_ROOT, "coverage");
 const DEFAULT_TEST_TIMEOUT_MS = 15_000;
+const DEFAULT_TEST_TARGETS = ["src", "tests", "scripts"] as const;
 const COVERAGE_JSON = "coverage-final.json";
 const BASELINE_JSON = "coverage-baseline.json";
 
@@ -252,9 +259,10 @@ export function parseRunnerArgs(argv: string[]): RunnerOptions {
 }
 
 function withDefaultTestTimeout(testArgs: string[]): string[] {
-  const hasExplicitTimeout = testArgs.some((arg) => arg === "--timeout" || arg.startsWith("--timeout="));
-  if (hasExplicitTimeout) return testArgs;
-  return ["--timeout", String(DEFAULT_TEST_TIMEOUT_MS), ...testArgs];
+  const args = testArgs.length > 0 ? testArgs : [...DEFAULT_TEST_TARGETS];
+  const hasExplicitTimeout = args.some((arg) => arg === "--timeout" || arg.startsWith("--timeout="));
+  if (hasExplicitTimeout) return args;
+  return ["--timeout", String(DEFAULT_TEST_TIMEOUT_MS), ...args];
 }
 
 export function runInstrumentedCoverage(options: RunnerOptions): RunnerResult {

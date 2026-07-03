@@ -148,17 +148,89 @@ describe("MemoryEventEnvelope", () => {
     expect(event.scope.visibility).toBe("workspace");
   });
 
-  test("rejects null persisted metadata blocks through shared validation", () => {
+  test("normalizes optional create metadata to durable empty/default values", () => {
+    const event = createEnvelope({
+      scope: {
+        visibility: "global",
+      },
+      provenance: {
+        source: "session",
+        actor: "memory extract",
+        method: "llm-extraction",
+      },
+      privacy: {
+        redactionState: "none",
+        containsSensitiveContent: false,
+      },
+      consent: {
+        status: "not_required",
+        scopes: [],
+        expiresAt: new Date("2026-06-06T08:00:00Z"),
+      },
+      causality: undefined,
+    });
+
+    expect(event.scope.project).toBeUndefined();
+    expect(event.scope.workspace).toBeUndefined();
+    expect(event.provenance.sourceIds).toEqual([]);
+    expect(event.privacy.redactedFields).toBeUndefined();
+    expect(event.consent.expiresAt).toBe("2026-06-06T08:00:00.000Z");
+    expect(event.causality.parentEventIds).toEqual([]);
+    expect(event.causality.supersedesEventIds).toEqual([]);
+    expect(event.causality.relatedEventIds).toEqual([]);
+  });
+
+  test("normalizes missing persisted scalar fields to validation failures before integrity checks", () => {
     const cases: Array<[string, (json: any) => unknown, string]> = [
-      ["null provenance", (json) => ({ ...json, provenance: null }), "provenance.source"],
-      ["null privacy", (json) => ({ ...json, privacy: null }), "privacy.redactionState"],
-      ["null consent", (json) => ({ ...json, consent: null }), "consent.status"],
-      ["null causality", (json) => ({ ...json, causality: null }), "causality.parentEventIds"],
+      ["eventId", (json) => ({ ...json, eventId: undefined }), "eventId"],
+      ["machineId", (json) => ({ ...json, machineId: undefined }), "machineId"],
+      ["occurredAt", (json) => ({ ...json, occurredAt: undefined }), "occurredAt"],
+      ["observedAt", (json) => ({ ...json, observedAt: undefined }), "observedAt"],
     ];
 
     for (const [, mutate, expected] of cases) {
       const persisted = createEnvelope().toJSON();
       expect(() => MemoryEventEnvelope.fromJSON(mutate(persisted))).toThrow(expected);
+    }
+  });
+
+  test("normalizes missing persisted integrity hashes to integrity failures", () => {
+    const payloadHashMissing = createEnvelope().toJSON() as any;
+    payloadHashMissing.integrity.payloadHash = undefined;
+    expect(() => MemoryEventEnvelope.fromJSON(payloadHashMissing)).toThrow("payload integrity");
+
+    const envelopeHashMissing = createEnvelope().toJSON() as any;
+    envelopeHashMissing.integrity.envelopeHash = undefined;
+    expect(() => MemoryEventEnvelope.fromJSON(envelopeHashMissing)).toThrow("envelope integrity");
+  });
+
+  test("rejects null persisted metadata blocks through shared validation", () => {
+    const cases: Array<[string, (json: any) => unknown, string]> = [
+      ["null provenance", (json) => ({ ...json, provenance: null }), "provenance.source"],
+      ["null privacy", (json) => ({ ...json, privacy: null }), "privacy.redactionState"],
+      ["null consent", (json) => ({ ...json, consent: null }), "consent.status"],
+      ["null causality", (json) => ({ ...json, causality: null }), "envelope integrity"],
+    ];
+
+    for (const [, mutate, expected] of cases) {
+      const persisted = createEnvelope().toJSON();
+      expect(() => MemoryEventEnvelope.fromJSON(mutate(persisted))).toThrow(expected);
+    }
+  });
+
+  test("rejects invalid create-time metadata instead of coercing it", () => {
+    const cases: Array<[string, Partial<Parameters<typeof MemoryEventEnvelope.create>[0]>, string]> = [
+      ["null scope", { scope: null as never }, "scope"],
+      ["non-string project scope", { scope: { project: 123 as never, visibility: "project" } }, "scope.project"],
+      ["non-string provenance source ids", { provenance: { source: "session", actor: "memory", method: "extract", sourceIds: [1 as never] } }, "provenance.sourceIds"],
+      ["non-string privacy redacted fields", { privacy: { redactionState: "redacted", containsSensitiveContent: true, redactedFields: [1 as never] } }, "privacy.redactedFields"],
+      ["non-string consent scopes", { consent: { status: "granted", scopes: [1 as never] } }, "consent.scopes"],
+      ["non-string causality parents", { causality: { parentEventIds: [1 as never], supersedesEventIds: [], relatedEventIds: [] } }, "causality.parentEventIds"],
+      ["undefined payload", { payload: undefined as never }, "payload"],
+    ];
+
+    for (const [, overrides, expected] of cases) {
+      expect(() => createEnvelope(overrides)).toThrow(expected);
     }
   });
 });

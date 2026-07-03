@@ -14,6 +14,7 @@ import {
     formatHealthResult,
     attemptFixes,
     runPortabilityDiagnostics,
+    runUpgradeDiagnostics,
     isMixedPathDialect,
 } from "./doctor.js";
 import type { HealthCheckResult } from "../../../infrastructure/database/health-checker.js";
@@ -70,6 +71,65 @@ describe("doctor command", () => {
         };
     }
 
+    function createHealthyHealth(overrides: Partial<HealthCheckResult> = {}): HealthCheckResult {
+        const base: HealthCheckResult = {
+            database: { exists: true, readable: true, writable: true, integrity: "ok", size: 1 },
+            permissions: { configDir: true, logsDir: true, sourceDir: true },
+            hooks: { installed: true, enabled: true, lastRun: null },
+            config: { valid: true, issues: [] },
+            embedding: {
+                configured: true,
+                provider: "local",
+                model: "Xenova/all-MiniLM-L6-v2",
+                dimensions: 384,
+                enabled: true,
+                ready: true,
+            },
+            sqliteVec: { available: true, version: "0.1.6" },
+            searchCapability: {
+                fts5: true,
+                sqliteVec: true,
+                embeddedCount: 0,
+                totalMessages: 0,
+                coveragePercent: 0,
+                defaultMode: "auto",
+                vectorReady: false,
+            },
+            llmExtraction: {
+                provider: "claude-cli",
+                model: "claude-cli-print",
+                ready: true,
+            },
+            providerEgress: {
+                consent: "unset",
+                embedding: {
+                    required: false,
+                    allowed: true,
+                    target: "local",
+                    capability: "embedding",
+                    provider: "local",
+                    warnings: [],
+                },
+                llmExtraction: {
+                    required: false,
+                    allowed: true,
+                    target: "claude-cli",
+                    capability: "extraction",
+                    provider: "claude-cli",
+                    warnings: [],
+                },
+                warnings: [],
+            },
+            capabilityInterop: {
+                providers: [],
+                references: [],
+                warnings: [],
+            },
+        };
+
+        return { ...base, ...overrides };
+    }
+
     beforeAll(() => {
         // Create test directories
         mkdirSync(join(testDir, "logs"), { recursive: true });
@@ -120,6 +180,195 @@ describe("doctor command", () => {
             const options = cmd.options;
             const fixOption = options.find(o => o.long === "--fix");
             expect(fixOption).toBeDefined();
+        });
+
+        it("has --upgrade option", () => {
+            const cmd = createDoctorCommand();
+            const options = cmd.options;
+            const upgradeOption = options.find(o => o.long === "--upgrade");
+            expect(upgradeOption).toBeDefined();
+        });
+    });
+
+    describe("runUpgradeDiagnostics", () => {
+        it("routes --upgrade through executeDoctorCommand", async () => {
+            consoleOutput = [];
+            console.log = (msg: string) => consoleOutput.push(msg);
+
+            const result = await executeDoctorCommand({ upgrade: true, json: true }, {
+                gatherStatus: async () => createStatusInfo(createHealthyHealth({
+                    searchCapability: {
+                        fts5: true,
+                        sqliteVec: true,
+                        embeddedCount: 10,
+                        totalMessages: 10,
+                        coveragePercent: 100,
+                        defaultMode: "hybrid",
+                        vectorReady: true,
+                    },
+                })),
+            });
+
+            expect(result.exitCode).toBe(0);
+            const parsed = JSON.parse(consoleOutput.join("\n"));
+            expect(parsed.command).toBe("doctor.upgrade");
+            expect(parsed.ready).toBe(true);
+        });
+
+        it("reports upgrade readiness as stable JSON when blockers are absent", async () => {
+            consoleOutput = [];
+            console.log = (msg: string) => consoleOutput.push(msg);
+
+            const result = await runUpgradeDiagnostics({ upgrade: true, json: true }, {
+                gatherStatus: async () => createStatusInfo(createHealthyHealth()),
+            });
+
+            expect(result.exitCode).toBe(0);
+            const parsed = JSON.parse(consoleOutput.join("\n"));
+            expect(parsed.schemaVersion).toBe(1);
+            expect(parsed.command).toBe("doctor.upgrade");
+            expect(parsed.ready).toBe(true);
+            expect(parsed.checks.databaseIntegrity).toBe("ok");
+            expect(parsed.checks.providerEgressConsent).toBe("unset");
+            expect(parsed.blockers).toEqual([]);
+            expect(parsed.recommendations).toContain("Run `memory backup create` before mutating migration, restore, or projection state.");
+        });
+
+        it("blocks upgrade readiness when database, config, or sqlite-vec checks fail", async () => {
+            consoleOutput = [];
+            console.log = (msg: string) => consoleOutput.push(msg);
+
+            const result = await runUpgradeDiagnostics({ upgrade: true, json: true }, {
+                gatherStatus: async () => createStatusInfo(createHealthyHealth({
+                    database: { exists: false, readable: false, writable: false, integrity: "unknown", size: 0 },
+                    config: { valid: false, issues: ["config invalid"] },
+                    sqliteVec: { available: false, version: null },
+                    embedding: {
+                        configured: true,
+                        provider: "ollama",
+                        model: "nomic-embed-text",
+                        dimensions: 768,
+                        enabled: true,
+                        ready: false,
+                        readyReason: "provider egress consent not granted",
+                    },
+                })),
+            });
+
+            expect(result.exitCode).toBe(1);
+            const parsed = JSON.parse(consoleOutput.join("\n"));
+            expect(parsed.ready).toBe(false);
+            expect(parsed.blockers).toContain("Database does not exist. Run `memory sync` first.");
+            expect(parsed.blockers).toContain("Configuration is invalid.");
+            expect(parsed.blockers).toContain("sqlite-vec is unavailable.");
+            expect(parsed.recommendations.join("\n")).toContain("memory status --embedding --json");
+        });
+
+        it("reports unknown provider egress consent when status omits provider egress details", async () => {
+            consoleOutput = [];
+            console.log = (msg: string) => consoleOutput.push(msg);
+
+            const result = await runUpgradeDiagnostics({ upgrade: true, json: true }, {
+                gatherStatus: async () => createStatusInfo(createHealthyHealth({
+                    providerEgress: undefined as any,
+                })),
+            });
+
+            expect(result.exitCode).toBe(0);
+            const parsed = JSON.parse(consoleOutput.join("\n"));
+            expect(parsed.checks.providerEgressConsent).toBe("unknown");
+        });
+
+        it("renders text upgrade readiness when provider egress details are omitted", async () => {
+            consoleOutput = [];
+            console.log = (msg: string) => consoleOutput.push(msg);
+
+            const result = await runUpgradeDiagnostics({ upgrade: true }, {
+                gatherStatus: async () => createStatusInfo(createHealthyHealth({
+                    providerEgress: undefined as any,
+                })),
+            });
+
+            expect(result.exitCode).toBe(0);
+            expect(consoleOutput.join("\n")).toContain("Upgrade Readiness");
+        });
+
+        it("reports config-only upgrade blockers without adding database integrity blockers", async () => {
+            consoleOutput = [];
+            console.log = (msg: string) => consoleOutput.push(msg);
+
+            const result = await runUpgradeDiagnostics({ upgrade: true, json: true }, {
+                gatherStatus: async () => createStatusInfo(createHealthyHealth({
+                    config: { valid: false, issues: ["bad json"] },
+                })),
+            });
+
+            expect(result.exitCode).toBe(1);
+            const parsed = JSON.parse(consoleOutput.join("\n"));
+            expect(parsed.blockers).toEqual(["Configuration is invalid."]);
+            expect(parsed.recommendations.join("\n")).not.toContain("memory status --embedding --json");
+        });
+
+        it("renders text upgrade readiness when all upgrade blockers are clear", async () => {
+            consoleOutput = [];
+            console.log = (msg: string) => consoleOutput.push(msg);
+
+            const result = await runUpgradeDiagnostics({ upgrade: true }, {
+                gatherStatus: async () => createStatusInfo(createHealthyHealth()),
+            });
+
+            expect(result.exitCode).toBe(0);
+            const output = consoleOutput.join("\n");
+            expect(output).toContain("Upgrade Readiness");
+            expect(output).toContain("Database: ready");
+            expect(output).toContain("Config:   valid");
+            expect(output).toContain("sqlite-vec: available");
+            expect(output).toContain("Recommended safe path");
+        });
+
+        it("renders text blockers when existing database integrity is not ok", async () => {
+            consoleOutput = [];
+            console.log = (msg: string) => consoleOutput.push(msg);
+
+            const result = await runUpgradeDiagnostics({ upgrade: true }, {
+                gatherStatus: async () => createStatusInfo(createHealthyHealth({
+                    database: { exists: true, readable: true, writable: true, integrity: "malformed", size: 1 },
+                    embedding: {
+                        configured: true,
+                        provider: "local",
+                        model: "Xenova/all-MiniLM-L6-v2",
+                        dimensions: 384,
+                        enabled: true,
+                        ready: false,
+                    },
+                })),
+            });
+
+            expect(result.exitCode).toBe(1);
+            const output = consoleOutput.join("\n");
+            expect(output).toContain("Database: not ready");
+            expect(output).toContain("Database integrity is not ok.");
+            expect(output).toContain("memory status --embedding --json");
+        });
+
+        it("renders text blockers for invalid config and unavailable sqlite-vec while database is ready", async () => {
+            consoleOutput = [];
+            console.log = (msg: string) => consoleOutput.push(msg);
+
+            const result = await runUpgradeDiagnostics({ upgrade: true }, {
+                gatherStatus: async () => createStatusInfo(createHealthyHealth({
+                    config: { valid: false, issues: ["bad json"] },
+                    sqliteVec: { available: false, version: null },
+                })),
+            });
+
+            expect(result.exitCode).toBe(1);
+            const output = consoleOutput.join("\n");
+            expect(output).toContain("Database: ready");
+            expect(output).toContain("Config:   invalid");
+            expect(output).toContain("sqlite-vec: unavailable");
+            expect(output).toContain("Configuration is invalid.");
+            expect(output).toContain("sqlite-vec is unavailable.");
         });
     });
 

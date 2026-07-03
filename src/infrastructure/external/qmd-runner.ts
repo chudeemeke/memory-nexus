@@ -8,12 +8,16 @@
  * the case where qmd is not installed.
  */
 
-import { spawn, execSync } from "node:child_process";
+import { spawn } from "node:child_process";
+import { accessSync, constants, statSync } from "node:fs";
+import { basename, delimiter, dirname, extname, isAbsolute, join } from "node:path";
 import type {
   IExternalSearchProvider,
   QmdSearchResult,
   QmdHealthInfo,
 } from "../../domain/ports/index.js";
+
+const WINDOWS_EXECUTABLE_EXTENSIONS = ".COM;.EXE;.BAT;.CMD";
 
 export class QmdRunner implements IExternalSearchProvider {
   /**
@@ -68,24 +72,15 @@ export class QmdRunner implements IExternalSearchProvider {
    * Check if qmd binary is available in PATH.
    */
   isAvailable(): boolean {
-    try {
-      execSync("which qmd", { stdio: "ignore" });
-      return true;
-    } catch {
-      return false;
-    }
+    return findExecutableOnPath("qmd") !== null;
   }
 
   /**
    * Get health info including binary path.
    */
   getHealthInfo(): QmdHealthInfo {
-    try {
-      const path = (execSync("which qmd", { encoding: "utf-8" }) as string).trim();
-      return { available: true, path };
-    } catch {
-      return { available: false, path: null };
-    }
+    const path = findExecutableOnPath("qmd");
+    return path ? { available: true, path } : { available: false, path: null };
   }
 }
 
@@ -94,12 +89,7 @@ export class QmdRunner implements IExternalSearchProvider {
  * Used by doctor command and other non-DI contexts.
  */
 export function isQmdAvailable(): boolean {
-  try {
-    execSync("which qmd", { stdio: "ignore" });
-    return true;
-  } catch {
-    return false;
-  }
+  return findExecutableOnPath("qmd") !== null;
 }
 
 /**
@@ -107,10 +97,58 @@ export function isQmdAvailable(): boolean {
  * Used by doctor command and other non-DI contexts.
  */
 export function getQmdInfo(): QmdHealthInfo {
+  const path = findExecutableOnPath("qmd");
+  return path ? { available: true, path } : { available: false, path: null };
+}
+
+export function findExecutableOnPath(
+  command: string,
+  env: NodeJS.ProcessEnv = process.env,
+  platform: NodeJS.Platform = process.platform,
+): string | null {
+  const hasDirectory = command.includes("/") || command.includes("\\") || isAbsolute(command);
+  const pathEnv = env.PATH ?? env.Path ?? "";
+  if (!hasDirectory && !pathEnv.trim()) return null;
+
+  const searchDirectories = hasDirectory ? [dirname(command)] : pathEnv.split(delimiter).filter(Boolean);
+  const commandName = hasDirectory ? basename(command) : command;
+  const candidates = executableCandidates(commandName, env, platform);
+
+  for (const directory of searchDirectories) {
+    for (const candidate of candidates) {
+      const fullPath = join(directory, candidate);
+      if (isExecutableFile(fullPath, platform)) {
+        return fullPath;
+      }
+    }
+  }
+
+  return null;
+}
+
+function executableCandidates(
+  command: string,
+  env: NodeJS.ProcessEnv,
+  platform: NodeJS.Platform,
+): string[] {
+  if (platform !== "win32" || extname(command)) return [command];
+
+  const extensions = (env.PATHEXT ?? WINDOWS_EXECUTABLE_EXTENSIONS)
+    .split(";")
+    .map((extension) => extension.trim())
+    .filter(Boolean);
+
+  return [command, ...extensions.map((extension) => `${command}${extension}`)];
+}
+
+function isExecutableFile(path: string, platform: NodeJS.Platform): boolean {
   try {
-    const path = (execSync("which qmd", { encoding: "utf-8" }) as string).trim();
-    return { available: true, path };
+    const stat = statSync(path);
+    if (!stat.isFile()) return false;
+    if (platform === "win32") return true;
+    accessSync(path, constants.X_OK);
+    return true;
   } catch {
-    return { available: false, path: null };
+    return false;
   }
 }

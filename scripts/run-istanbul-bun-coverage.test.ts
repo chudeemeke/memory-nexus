@@ -20,6 +20,9 @@ describe("run-istanbul-bun-coverage", () => {
     expect(isCoverageIgnored("dist/index.js", COVERAGE_IGNORE_PATTERNS)).toBe(true);
     expect(isCoverageIgnored("node_modules/pkg/index.js", COVERAGE_IGNORE_PATTERNS)).toBe(true);
     expect(isCoverageIgnored("tests/integration/example.test.ts", COVERAGE_IGNORE_PATTERNS)).toBe(true);
+    expect(isCoverageIgnored(".claude/settings.local.json", COVERAGE_IGNORE_PATTERNS)).toBe(true);
+    expect(isCoverageIgnored(".cc-guardian/state.json", COVERAGE_IGNORE_PATTERNS)).toBe(true);
+    expect(isCoverageIgnored("~/scratch.ts", COVERAGE_IGNORE_PATTERNS)).toBe(true);
   });
 
   test("instruments TypeScript with real statement and branch counters", () => {
@@ -51,6 +54,12 @@ describe("run-istanbul-bun-coverage", () => {
 
     expect(options.coverageDir.endsWith("coverage-custom")).toBe(true);
     expect(options.testArgs).toEqual(["--timeout", "15000", "src/example.test.ts"]);
+  });
+
+  test("defaults instrumented discovery to project test roots", () => {
+    const options = parseRunnerArgs(["--coverage-dir", "coverage-custom"]);
+
+    expect(options.testArgs).toEqual(["--timeout", "15000", "src", "tests", "scripts"]);
   });
 
   test("preserves an explicit instrumented test timeout", () => {

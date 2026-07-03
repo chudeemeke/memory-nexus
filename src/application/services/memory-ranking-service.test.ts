@@ -166,6 +166,77 @@ describe("MemoryRankingService", () => {
     expect(byId.get("nonfinite")?.components.confidence).toBe(0);
     expect(byId.get("nonfinite")?.components.recencyNoisePenalty).toBe(0);
   });
+
+  test("uses age-basis fallbacks and supported type half-life branches", () => {
+    const service = new MemoryRankingService({ now: () => NOW });
+    const validFromOnly = makeCandidate("valid-from-only", {
+      observedAt: undefined,
+      validFrom: new Date("2026-06-06T00:00:00.000Z"),
+    });
+    const metricAccessOnly = makeCandidate("metric-access-only", {
+      observedAt: undefined,
+      validFrom: undefined,
+      metric: makeMetric("fact", "metric-access-only", {
+        lastAccessedAt: new Date("2026-06-05T00:00:00.000Z"),
+      }),
+    });
+    const asOfFallback = makeCandidate("as-of-fallback", {
+      observedAt: undefined,
+      validFrom: undefined,
+      metric: makeMetric("fact", "as-of-fallback", {
+        lastAccessedAt: null,
+      }),
+    });
+    const preference = makeCandidate("preference", { memoryType: "preference" });
+    const supersedence = makeCandidate("supersedence", { memoryType: "supersedence" });
+    const correction = candidateFromPersonaEntry(makePersona("persona-correction", "correction"));
+    const decisionPattern = candidateFromPersonaEntry(makePersona("persona-decision-pattern", "decision_pattern"));
+    const frictionPattern = candidateFromPersonaEntry(makePersona("persona-friction-pattern", "friction_pattern"));
+
+    const ranked = service.rank([
+      validFromOnly,
+      metricAccessOnly,
+      asOfFallback,
+      preference,
+      supersedence,
+      correction,
+      decisionPattern,
+      frictionPattern,
+    ]);
+    const byId = new Map(ranked.map((item) => [item.id, item]));
+
+    expect(byId.get("valid-from-only")?.components.ageDays).toBe(1);
+    expect(byId.get("metric-access-only")?.components.ageDays).toBe(2);
+    expect(byId.get("as-of-fallback")?.components.ageDays).toBe(0);
+    expect(byId.get("preference")?.components.halfLifeDays).toBeGreaterThan(0);
+    expect(byId.get("supersedence")?.components.halfLifeDays).toBeGreaterThan(0);
+    expect(byId.get("persona-correction")?.components.halfLifeDays).toBeGreaterThan(0);
+    expect(byId.get("persona-decision-pattern")?.components.halfLifeDays).toBeGreaterThan(0);
+    expect(byId.get("persona-friction-pattern")?.components.halfLifeDays).toBeGreaterThan(0);
+  });
+
+  test("falls back to default half-life when policy overrides are undefined", () => {
+    const service = new MemoryRankingService({
+      now: () => NOW,
+      policy: {
+        defaultHalfLifeDays: 7,
+        halfLifeByKind: { dream: undefined as never },
+        halfLifeByFactType: { decision: undefined as never },
+        halfLifeByPersonaKind: { procedure: undefined as never },
+      },
+    });
+
+    const ranked = service.rank([
+      makeCandidate("decision-default", { memoryType: "decision" }),
+      makeCandidate("dream-default", { kind: "dream" as const, memoryType: undefined }),
+      candidateFromPersonaEntry(makePersona("persona-default", "procedure")),
+    ]);
+    const byId = new Map(ranked.map((item) => [item.id, item]));
+
+    expect(byId.get("decision-default")?.components.halfLifeDays).toBe(7);
+    expect(byId.get("dream-default")?.components.halfLifeDays).toBe(7);
+    expect(byId.get("persona-default")?.components.halfLifeDays).toBe(7);
+  });
 });
 
 function makeFact(
@@ -202,10 +273,10 @@ function makeGraph(edgeId: string, overrides: Partial<Parameters<typeof GraphEdg
   });
 }
 
-function makePersona(entryId: string): PersonaEntry {
+function makePersona(entryId: string, kind: Parameters<typeof PersonaEntry.create>[0]["kind"] = "procedure"): PersonaEntry {
   return PersonaEntry.create({
     entryId,
-    kind: "procedure",
+    kind,
     content: "Use the repo planning files before implementation.",
     project: "memory-nexus",
     visibility: "project",

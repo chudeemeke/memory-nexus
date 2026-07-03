@@ -36,7 +36,7 @@ _memory_completion() {
     local cur prev words cword
     _init_completion || return
 
-    local commands="sync search list stats context related show browse governance profile dream remote install uninstall status doctor audit-secrets purge export import completion"
+    local commands="sync search list stats context related show browse governance profile dream remote install uninstall status doctor audit-secrets purge export import backup restore migrate extract projections completion"
     local search_opts="--limit --project --role --session --after --before --case-sensitive --json --verbose --quiet"
     local list_opts="--limit --project --after --before --sort --json --verbose --quiet"
     local stats_opts="--projects --json --verbose --quiet"
@@ -51,11 +51,16 @@ _memory_completion() {
     local remote_opts="set remove status preflight doctor backup restore rollback --json --allow-local-path --no-auto-pull --no-auto-push --confirm"
     local install_opts="--force"
     local uninstall_opts="--restore"
-    local doctor_opts="--json --fix"
+    local doctor_opts="--json --fix --upgrade"
     local audit_secrets_opts="--json --db --skip-db --event-log --events-dir --skip-events --redact-db --quarantine-events --quarantine-dir --report"
     local purge_opts="--before --dry-run --force --json --verbose --quiet"
     local export_opts="--json --verbose --quiet --include-sensitive"
     local import_opts="--force --dry-run --json --verbose --quiet"
+    local migrate_opts="--from-windows --dry-run --json --confirm"
+    local extract_opts="--all --since --force --json --quiet"
+    local backup_opts="create verify --json --quiet"
+    local restore_opts="--dry-run --confirm --json"
+    local projections_opts="rebuild --verify --confirm --json"
     local completion_opts=""
 
     case "\${prev}" in
@@ -139,6 +144,26 @@ _memory_completion() {
             COMPREPLY=( \$(compgen -W "\${import_opts}" -- "\${cur}") )
             return 0
             ;;
+        migrate)
+            COMPREPLY=( \$(compgen -W "\${migrate_opts}" -- "\${cur}") )
+            return 0
+            ;;
+        extract)
+            COMPREPLY=( \$(compgen -W "\${extract_opts}" -- "\${cur}") )
+            return 0
+            ;;
+        backup)
+            COMPREPLY=( \$(compgen -W "\${backup_opts}" -- "\${cur}") )
+            return 0
+            ;;
+        restore)
+            COMPREPLY=( \$(compgen -W "\${restore_opts}" -- "\${cur}") )
+            return 0
+            ;;
+        projections)
+            COMPREPLY=( \$(compgen -W "\${projections_opts}" -- "\${cur}") )
+            return 0
+            ;;
         completion)
             COMPREPLY=( \$(compgen -W "bash zsh fish" -- "\${cur}") )
             return 0
@@ -174,6 +199,11 @@ _memory_completion() {
             purge) COMPREPLY=( \$(compgen -W "\${purge_opts}" -- "\${cur}") ) ;;
             export) COMPREPLY=( \$(compgen -W "\${export_opts}" -- "\${cur}") ) ;;
             import) COMPREPLY=( \$(compgen -W "\${import_opts}" -- "\${cur}") ) ;;
+            migrate) COMPREPLY=( \$(compgen -W "\${migrate_opts}" -- "\${cur}") ) ;;
+            extract) COMPREPLY=( \$(compgen -W "\${extract_opts}" -- "\${cur}") ) ;;
+            backup) COMPREPLY=( \$(compgen -W "\${backup_opts}" -- "\${cur}") ) ;;
+            restore) COMPREPLY=( \$(compgen -W "\${restore_opts}" -- "\${cur}") ) ;;
+            projections) COMPREPLY=( \$(compgen -W "\${projections_opts}" -- "\${cur}") ) ;;
         esac
         return 0
     fi
@@ -218,11 +248,16 @@ _memory() {
         'purge:Remove old sessions from database'
         'export:Export database to JSON file'
         'import:Import database from JSON file'
+        'backup:Create and verify local memory backups'
+        'restore:Restore local memory data from a backup'
+        'migrate:Migrate database across platform environments'
+        'extract:Extract facts from session messages using LLM'
+        'projections:Verify and rebuild derived memory projections'
         'completion:Generate shell completion script'
     )
 
     local -a search_opts list_opts stats_opts context_opts related_opts show_opts browse_opts governance_opts profile_opts dream_opts
-    local -a sync_opts remote_opts install_opts uninstall_opts doctor_opts audit_secrets_opts purge_opts export_opts import_opts completion_shells
+    local -a sync_opts remote_opts install_opts uninstall_opts doctor_opts audit_secrets_opts purge_opts export_opts import_opts migrate_opts extract_opts backup_opts restore_opts projections_opts completion_shells
 
     search_opts=(
         '--limit[Maximum number of results]:number'
@@ -343,6 +378,7 @@ _memory() {
     doctor_opts=(
         '--json[Output as JSON]'
         '--fix[Attempt to fix common issues]'
+        '--upgrade[Perform upgrade readiness diagnostics]'
     )
 
     audit_secrets_opts=(
@@ -382,6 +418,40 @@ _memory() {
         '--quiet[Minimal output]'
     )
 
+    migrate_opts=(
+        '--from-windows[Migrate database from native Windows or desktop host]'
+        '--dry-run[Check migration readiness without mutation]'
+        '--json[Output as JSON]'
+        '--confirm[Confirm migration mutation]'
+    )
+
+    extract_opts=(
+        '--all[Process all sessions matching this project]'
+        '--since[Filter sessions by age]:duration'
+        '--force[Force extraction even on previously processed sessions]'
+        '--json[Output as JSON]'
+        '--quiet[Minimal output]'
+    )
+
+    backup_opts=(
+        '1:action:(create verify)'
+        '--json[Output as JSON]'
+        '--quiet[Print only the backup path]'
+    )
+
+    restore_opts=(
+        '--dry-run[Verify restore without mutation]'
+        '--confirm[Confirm restore mutation]'
+        '--json[Output as JSON]'
+    )
+
+    projections_opts=(
+        '1:action:(rebuild)'
+        '--verify[Verify without mutation]'
+        '--confirm[Confirm rebuild mutation]'
+        '--json[Output as JSON]'
+    )
+
     completion_shells=(bash zsh fish)
 
     _arguments -C \\
@@ -413,6 +483,11 @@ _memory() {
                 purge) _arguments "\$purge_opts[@]" ;;
                 export) _arguments "\$export_opts[@]" ':output-file:_files' ;;
                 import) _arguments "\$import_opts[@]" ':input-file:_files' ;;
+                migrate) _arguments "\$migrate_opts[@]" ;;
+                extract) _arguments "\$extract_opts[@]" ':project:' ;;
+                backup) _arguments "\$backup_opts[@]" ':backup-path:_files -/' ;;
+                restore) _arguments "\$restore_opts[@]" ':backup-path:_files -/' ;;
+                projections) _arguments "\$projections_opts[@]" ;;
                 completion) _arguments '1:shell:(bash zsh fish)' ;;
             esac
             ;;
@@ -457,6 +532,11 @@ complete -c memory -n "__fish_use_subcommand" -a audit-secrets -d "Scan database
 complete -c memory -n "__fish_use_subcommand" -a purge -d "Remove old sessions from database"
 complete -c memory -n "__fish_use_subcommand" -a export -d "Export database to JSON file"
 complete -c memory -n "__fish_use_subcommand" -a import -d "Import database from JSON file"
+complete -c memory -n "__fish_use_subcommand" -a backup -d "Create and verify local memory backups"
+complete -c memory -n "__fish_use_subcommand" -a restore -d "Restore local memory data from a backup"
+complete -c memory -n "__fish_use_subcommand" -a migrate -d "Migrate database across platform environments"
+complete -c memory -n "__fish_use_subcommand" -a extract -d "Extract facts from session messages using LLM"
+complete -c memory -n "__fish_use_subcommand" -a projections -d "Verify and rebuild derived memory projections"
 complete -c memory -n "__fish_use_subcommand" -a completion -d "Generate shell completion script"
 
 # search options
@@ -565,6 +645,7 @@ complete -c memory -n "__fish_seen_subcommand_from uninstall" -l restore -d "Res
 # doctor options
 complete -c memory -n "__fish_seen_subcommand_from doctor" -l json -d "Output as JSON"
 complete -c memory -n "__fish_seen_subcommand_from doctor" -l fix -d "Attempt to fix common issues"
+complete -c memory -n "__fish_seen_subcommand_from doctor" -l upgrade -d "Perform upgrade readiness diagnostics"
 
 # audit-secrets options
 complete -c memory -n "__fish_seen_subcommand_from audit-secrets" -l json -d "Output as JSON"
@@ -598,6 +679,35 @@ complete -c memory -n "__fish_seen_subcommand_from import" -l dry-run -d "Previe
 complete -c memory -n "__fish_seen_subcommand_from import" -l json -d "Output as JSON"
 complete -c memory -n "__fish_seen_subcommand_from import" -l verbose -d "Show detailed output"
 complete -c memory -n "__fish_seen_subcommand_from import" -l quiet -d "Minimal output"
+
+# migrate options
+complete -c memory -n "__fish_seen_subcommand_from migrate" -l from-windows -d "Migrate database from native Windows or desktop host"
+complete -c memory -n "__fish_seen_subcommand_from migrate" -l dry-run -d "Check migration readiness without mutation"
+complete -c memory -n "__fish_seen_subcommand_from migrate" -l json -d "Output as JSON"
+complete -c memory -n "__fish_seen_subcommand_from migrate" -l confirm -d "Confirm migration mutation"
+
+# extract options
+complete -c memory -n "__fish_seen_subcommand_from extract" -l all -d "Process all sessions matching this project"
+complete -c memory -n "__fish_seen_subcommand_from extract" -l since -d "Filter sessions by age" -r
+complete -c memory -n "__fish_seen_subcommand_from extract" -l force -d "Force extraction even on previously processed sessions"
+complete -c memory -n "__fish_seen_subcommand_from extract" -l json -d "Output as JSON"
+complete -c memory -n "__fish_seen_subcommand_from extract" -l quiet -d "Minimal output"
+
+# backup options
+complete -c memory -n "__fish_seen_subcommand_from backup" -a "create verify"
+complete -c memory -n "__fish_seen_subcommand_from backup" -l json -d "Output as JSON"
+complete -c memory -n "__fish_seen_subcommand_from backup" -l quiet -d "Print only the backup path"
+
+# restore options
+complete -c memory -n "__fish_seen_subcommand_from restore" -l dry-run -d "Verify restore without mutation"
+complete -c memory -n "__fish_seen_subcommand_from restore" -l confirm -d "Confirm restore mutation"
+complete -c memory -n "__fish_seen_subcommand_from restore" -l json -d "Output as JSON"
+
+# projections options
+complete -c memory -n "__fish_seen_subcommand_from projections" -a "rebuild"
+complete -c memory -n "__fish_seen_subcommand_from projections" -l verify -d "Verify without mutation"
+complete -c memory -n "__fish_seen_subcommand_from projections" -l confirm -d "Confirm rebuild mutation"
+complete -c memory -n "__fish_seen_subcommand_from projections" -l json -d "Output as JSON"
 
 # completion shells
 complete -c memory -n "__fish_seen_subcommand_from completion" -a "bash zsh fish"

@@ -174,10 +174,10 @@ Phase 42 completed the explicit dreaming surface. `DreamEntry`, `dream_entries`,
 
 ### Feature Completeness and UX
 
-- [ ] **UX-01**: Feature inventory covers current code, docs, roadmap, requirements, inbox, tests, and disabled prototype surfaces.
-- [ ] **UX-02**: Every stated, implemented, documented, inferred, disabled, or prototype feature is completed or explicitly owned by a later gate; no feature is silently removed.
-- [ ] **UX-03**: CLI help, errors, preflights, JSON schemas, docs, onboarding, backup/restore, audit, and recovery flows meet excellent usability standards.
-- [ ] **UX-04**: Phase 42.5 traces every Product North Star claim in `.planning/PROJECT.md` to implemented behavior, an explicit later owner, or a documented non-goal with rationale.
+- [x] **UX-01**: Feature inventory covers current code, docs, roadmap, requirements, inbox, tests, and disabled prototype surfaces.
+- [x] **UX-02**: Every stated, implemented, documented, inferred, disabled, or prototype feature is completed or explicitly owned by a later gate; no feature is silently removed.
+- [x] **UX-03**: CLI help, errors, preflights, JSON schemas, docs, onboarding, backup/restore, audit, and recovery flows meet excellent usability standards.
+- [x] **UX-04**: Phase 42.5 traces every Product North Star claim in `.planning/PROJECT.md` to implemented behavior, an explicit later owner, or a documented non-goal with rationale.
 
 ### Market and Sales Readiness
 
@@ -310,10 +310,10 @@ Which phases cover which requirements. Updated during roadmap creation.
 | DREAM-01 | Phase 42 | Complete |
 | DREAM-02 | Phase 42 | Complete |
 | DREAM-03 | Phase 42 | Complete |
-| UX-01 | Phase 42.5 | Pending |
-| UX-02 | Phase 42.5 | Pending |
-| UX-03 | Phase 42.5 | Pending |
-| UX-04 | Phase 42.5 | Pending |
+| UX-01 | Phase 42.5 | Complete |
+| UX-02 | Phase 42.5 | Complete |
+| UX-03 | Phase 42.5 | Complete |
+| UX-04 | Phase 42.5 | Complete |
 | READY-01 | Phase 43 | Pending |
 | READY-02 | Phase 43 | Pending |
 | READY-03 | Phase 43 | Pending |

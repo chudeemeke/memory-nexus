@@ -35,11 +35,14 @@ Data Commands:
                                   sessions via claude -p
   export [options] <output-file>  Export database to JSON file for backup
   import [options] <input-file>   Import database from JSON backup file
+  backup                          Create and verify local memory backups
+  restore [options] <backupDir>   Restore local memory data from a backup
   purge [options]                 Remove old sessions from database
   migrate [options]               Migrate database across platform environments
   extract [options] <project>     Extract facts from session messages using LLM
   remote                          Manage multi-device Git transport
                                   synchronization configuration
+  projections                     Verify and rebuild derived memory projections
 
 System Commands:
   install [options]               Install Claude Code hooks for automatic

@@ -290,9 +290,9 @@ function normalizeConsent(value: unknown): MemoryEventConsent {
 function normalizeCausality(value: unknown): MemoryEventCausality {
   if (!isObject(value)) {
     return {
-      parentEventIds: undefined as never,
-      supersedesEventIds: undefined as never,
-      relatedEventIds: undefined as never,
+      parentEventIds: [],
+      supersedesEventIds: [],
+      relatedEventIds: [],
     };
   }
   const causality = value as Partial<MemoryEventCausality>;
@@ -433,7 +433,7 @@ function normalizeStringArray(value: unknown): string[] {
   if (!Array.isArray(value)) {
     return [];
   }
-  return value.map((item) => String(item));
+  return [...value] as string[];
 }
 
 function normalizeOptionalStringArray(value: unknown): string[] | undefined {

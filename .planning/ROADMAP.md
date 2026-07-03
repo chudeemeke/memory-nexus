@@ -100,7 +100,7 @@
 - [x] **Phase 40: Temporal Semantic Graph** - Entity-relationship extraction, temporal graph projection, and graph-enriched retrieval through governed temporal graph projection. Completed 2026-06-07.
 - [x] **Phase 41: Importance, Utility, and Recall Ranking** - Utility metrics, memory-kind half-life policies, and explainable ranking. Completed 2026-06-07.
 - [x] **Phase 42: Dreaming Consolidation** - Audited dreaming consolidation, promotion, supersedence, and rollback through canonical events and schema-versioned projection. Completed 2026-07-01.
-- [ ] **Phase 42.5: Feature Completeness and UX Polish** - Inventory all stated/inferred/prototype features, complete or explicitly own them, and polish CLI/API usability to excellent standard.
+- [x] **Phase 42.5: Feature Completeness and UX Polish** - Inventory all stated/inferred/prototype features, complete or explicitly own them, and polish CLI/API usability to excellent standard. Completed 2026-07-03.
 - [ ] **Phase 43: Market-Leader and Sales-Readiness Gate** - Final architecture/security/quality/product/competitive review and readiness proof.
 - [ ] **Phase 44: Release-Candidate Packaging and Publish Handoff** - Versioning, package smoke, changelog/release notes, npm dry-run, and OTP-backed publish handoff without publishing until user authorization.
 
@@ -615,7 +615,16 @@ Plans:
   3. CLI help, errors, preflights, JSON schemas, docs, onboarding, backup/restore, audit, and recovery flows are polished for excellent usability.
   4. Fresh-user UAT confirms install, configure, sync/search/context/audit/backup/restore, and feature discovery are clear.
   5. Every Product North Star claim in `.planning/PROJECT.md` is traced to implemented behavior, an explicit later owner, or a documented non-goal with rationale.
-**Plans**: Placeholder directory exists; plan after Phase 42.
+**Plans**: 1/1 complete. See `.planning/phases/42.5-feature-completeness-and-ux-polish/42.5-01-SUMMARY.md`.
+**Status**: Complete 2026-07-03.
+**Implemented**:
+  - Added local `memory backup create/verify` and `memory restore` compatibility surfaces with JSON, quiet, dry-run, confirmation, manifest verification, and rollback-backup behavior.
+  - Added `memory projections rebuild --verify/--confirm/--json`.
+  - Hardened `memory migrate` with `--dry-run`, `--json`, and `--confirm`.
+  - Added `memory doctor --upgrade --json` upgrade readiness diagnostics.
+  - Updated completion/help/README/programmatic exports and tightened qmd executable discovery.
+  - Tightened `MemoryEventEnvelope` validation so invalid metadata arrays are rejected instead of coerced.
+**Verification**: `bun run typecheck`, `bun run build`, full tests (4,451 pass, 0 fail), `bun run test:isolation`, `bun run eval:v5` (9/9; 8 behavior-backed, 1 contract), `bun run test:coverage` (statements 97.30%, branches 95.02%, functions 96.51%, lines 97.39%), `bun audit`, `gitleaks detect --no-banner --redact --source .`, `git diff --check`, `npm pack --dry-run --json`, and isolated dist smoke passed. `eval:v5:market` remains intentionally ineligible until Phase 43 handles `remote_sync_conflict`.
 
 ---
 
@@ -785,10 +794,10 @@ v5.0
 | 41. Importance, Utility, and Recall Ranking | v5.0 | 1/1 | Complete | 2026-06-07 |
 | 41.1. Embedding Pipeline Resilience | v5.0 | 1/1 | Complete | 2026-06-22 |
 | 42. Dreaming Consolidation | v5.0 | 2026-07-01 | Complete | Explicit `memory dream`; audited/event-sourced proposal, apply, rollback; behavior-backed eval |
-| 42.5. Feature Completeness and UX Polish | v5.0 | TBD | Planned | - |
+| 42.5. Feature Completeness and UX Polish | v5.0 | 1/1 | Complete | 2026-07-03 |
 | 43. Market-Leader and Sales-Readiness Gate | v5.0 | TBD | Planned | - |
 | 44. Release-Candidate Packaging and Publish Handoff | v5.0 | TBD | Planned | - |
 
 ---
 
-*Last updated: 2026-07-01 (Phase 42 complete; Phase 42.5 next)*
+*Last updated: 2026-07-03 (Phase 42.5 complete; Phase 43 next)*

@@ -9,8 +9,11 @@
 import { describe, it, expect, beforeEach, afterEach, spyOn } from "bun:test";
 import * as childProcess from "node:child_process";
 import { EventEmitter } from "node:events";
+import { chmodSync, mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import type { Readable } from "node:stream";
-import { QmdRunner, isQmdAvailable, getQmdInfo } from "./qmd-runner.js";
+import { QmdRunner, findExecutableOnPath, getQmdInfo, isQmdAvailable } from "./qmd-runner.js";
 
 /**
  * Creates a mock child process with controllable stdout/stderr streams.
@@ -33,7 +36,6 @@ function createMockProcess() {
 describe("QmdRunner", () => {
   let runner: QmdRunner;
   let spawnSpy: ReturnType<typeof spyOn>;
-  let execSyncSpy: ReturnType<typeof spyOn>;
 
   beforeEach(() => {
     runner = new QmdRunner();
@@ -41,7 +43,6 @@ describe("QmdRunner", () => {
 
   afterEach(() => {
     spawnSpy?.mockRestore();
-    execSyncSpy?.mockRestore();
   });
 
   describe("search()", () => {
@@ -176,81 +177,273 @@ describe("QmdRunner", () => {
   });
 
   describe("isAvailable()", () => {
-    it("returns true when which succeeds", () => {
-      execSyncSpy = spyOn(childProcess, "execSync").mockReturnValue(
-        Buffer.from("/usr/bin/qmd\n"),
-      );
+    it("returns true when qmd exists on PATH", () => {
+      const fixture = createExecutableFixture("qmd");
+      const originalPath = process.env.PATH;
+      const originalPathAlias = process.env.Path;
+      const originalPathExt = process.env.PATHEXT;
 
-      expect(runner.isAvailable()).toBe(true);
-      expect(execSyncSpy).toHaveBeenCalledWith("which qmd", {
-        stdio: "ignore",
-      });
+      try {
+        process.env.PATH = fixture.dir;
+        process.env.Path = fixture.dir;
+        process.env.PATHEXT = "";
+
+        expect(runner.isAvailable()).toBe(true);
+      } finally {
+        restorePathEnv(originalPath, originalPathAlias, originalPathExt);
+        fixture.cleanup();
+      }
     });
 
-    it("returns false when which throws", () => {
-      execSyncSpy = spyOn(childProcess, "execSync").mockImplementation(() => {
-        throw new Error("Command not found");
-      });
+    it("returns false when qmd is not on PATH", () => {
+      const originalPath = process.env.PATH;
+      const originalPathAlias = process.env.Path;
 
-      expect(runner.isAvailable()).toBe(false);
+      try {
+        process.env.PATH = "";
+        delete process.env.Path;
+
+        expect(runner.isAvailable()).toBe(false);
+      } finally {
+        restorePathEnv(originalPath, originalPathAlias, process.env.PATHEXT);
+      }
     });
   });
 
   describe("getHealthInfo()", () => {
     it("returns available=true with path", () => {
-      execSyncSpy = spyOn(childProcess, "execSync").mockReturnValue(
-        "/usr/bin/qmd\n" as any,
-      );
+      const fixture = createExecutableFixture("qmd");
+      const originalPath = process.env.PATH;
+      const originalPathAlias = process.env.Path;
+      const originalPathExt = process.env.PATHEXT;
 
-      const info = runner.getHealthInfo();
-      expect(info).toEqual({ available: true, path: "/usr/bin/qmd" });
+      try {
+        process.env.PATH = fixture.dir;
+        process.env.Path = fixture.dir;
+        process.env.PATHEXT = "";
+
+        const info = runner.getHealthInfo();
+        expect(info).toEqual({ available: true, path: fixture.path });
+      } finally {
+        restorePathEnv(originalPath, originalPathAlias, originalPathExt);
+        fixture.cleanup();
+      }
     });
 
     it("returns available=false, path=null", () => {
-      execSyncSpy = spyOn(childProcess, "execSync").mockImplementation(() => {
-        throw new Error("Command not found");
-      });
+      const originalPath = process.env.PATH;
+      const originalPathAlias = process.env.Path;
 
-      const info = runner.getHealthInfo();
-      expect(info).toEqual({ available: false, path: null });
+      try {
+        process.env.PATH = "";
+        delete process.env.Path;
+
+        const info = runner.getHealthInfo();
+        expect(info).toEqual({ available: false, path: null });
+      } finally {
+        restorePathEnv(originalPath, originalPathAlias, process.env.PATHEXT);
+      }
     });
   });
 });
 
 describe("standalone functions", () => {
-  let execSyncSpy: ReturnType<typeof spyOn>;
-
-  afterEach(() => {
-    execSyncSpy?.mockRestore();
-  });
-
   it("isQmdAvailable() returns true when qmd found", () => {
-    execSyncSpy = spyOn(childProcess, "execSync").mockReturnValue(
-      Buffer.from("/usr/bin/qmd\n"),
-    );
-    expect(isQmdAvailable()).toBe(true);
+    const fixture = createExecutableFixture("qmd");
+    const originalPath = process.env.PATH;
+    const originalPathAlias = process.env.Path;
+    const originalPathExt = process.env.PATHEXT;
+
+    try {
+      process.env.PATH = fixture.dir;
+      process.env.Path = fixture.dir;
+      process.env.PATHEXT = "";
+
+      expect(isQmdAvailable()).toBe(true);
+    } finally {
+      restorePathEnv(originalPath, originalPathAlias, originalPathExt);
+      fixture.cleanup();
+    }
   });
 
   it("isQmdAvailable() returns false when qmd not found", () => {
-    execSyncSpy = spyOn(childProcess, "execSync").mockImplementation(() => {
-      throw new Error("Command not found");
-    });
-    expect(isQmdAvailable()).toBe(false);
+    const originalPath = process.env.PATH;
+    const originalPathAlias = process.env.Path;
+
+    try {
+      process.env.PATH = "";
+      delete process.env.Path;
+
+      expect(isQmdAvailable()).toBe(false);
+    } finally {
+      restorePathEnv(originalPath, originalPathAlias, process.env.PATHEXT);
+    }
   });
 
   it("getQmdInfo() returns available=true with path", () => {
-    execSyncSpy = spyOn(childProcess, "execSync").mockReturnValue(
-      "/usr/local/bin/qmd\n" as any,
-    );
-    const info = getQmdInfo();
-    expect(info).toEqual({ available: true, path: "/usr/local/bin/qmd" });
+    const fixture = createExecutableFixture("qmd");
+    const originalPath = process.env.PATH;
+    const originalPathAlias = process.env.Path;
+    const originalPathExt = process.env.PATHEXT;
+
+    try {
+      process.env.PATH = fixture.dir;
+      process.env.Path = fixture.dir;
+      process.env.PATHEXT = "";
+
+      const info = getQmdInfo();
+      expect(info).toEqual({ available: true, path: fixture.path });
+    } finally {
+      restorePathEnv(originalPath, originalPathAlias, originalPathExt);
+      fixture.cleanup();
+    }
   });
 
   it("getQmdInfo() returns available=false, path=null", () => {
-    execSyncSpy = spyOn(childProcess, "execSync").mockImplementation(() => {
-      throw new Error("Command not found");
-    });
-    const info = getQmdInfo();
-    expect(info).toEqual({ available: false, path: null });
+    const originalPath = process.env.PATH;
+    const originalPathAlias = process.env.Path;
+
+    try {
+      process.env.PATH = "";
+      delete process.env.Path;
+
+      const info = getQmdInfo();
+      expect(info).toEqual({ available: false, path: null });
+    } finally {
+      restorePathEnv(originalPath, originalPathAlias, process.env.PATHEXT);
+    }
   });
 });
+
+describe("findExecutableOnPath", () => {
+  it("finds an exact executable path without shelling out", () => {
+    const fixture = createExecutableFixture("qmd");
+
+    try {
+      expect(findExecutableOnPath("qmd", { PATH: fixture.dir, PATHEXT: "" }, process.platform)).toBe(fixture.path);
+    } finally {
+      fixture.cleanup();
+    }
+  });
+
+  it("uses Path as a Windows-compatible PATH alias", () => {
+    const fixture = createExecutableFixture("qmd");
+
+    try {
+      expect(findExecutableOnPath("qmd", { Path: fixture.dir, PATHEXT: "" }, process.platform)).toBe(fixture.path);
+    } finally {
+      fixture.cleanup();
+    }
+  });
+
+  it("resolves direct command paths even when PATH is empty", () => {
+    const fixture = createExecutableFixture("qmd");
+
+    try {
+      expect(findExecutableOnPath(fixture.path, { PATH: "", PATHEXT: "" }, process.platform)).toBe(fixture.path);
+    } finally {
+      fixture.cleanup();
+    }
+  });
+
+  it("returns null for direct command paths that do not exist", () => {
+    const fixture = createExecutableFixture("qmd");
+
+    try {
+      expect(findExecutableOnPath(join(fixture.dir, "missing-qmd"), { PATH: fixture.dir, PATHEXT: "" }, process.platform)).toBeNull();
+    } finally {
+      fixture.cleanup();
+    }
+  });
+
+  it("honors Windows PATHEXT candidates", () => {
+    const fixture = createExecutableFixture("qmd.CMD");
+
+    try {
+      expect(findExecutableOnPath("qmd", { PATH: fixture.dir, PATHEXT: ".CMD;.EXE" }, "win32")).toBe(fixture.path);
+    } finally {
+      fixture.cleanup();
+    }
+  });
+
+  it("does not expand PATHEXT when the command already has an extension", () => {
+    const fixture = createExecutableFixture("qmd.CMD");
+
+    try {
+      expect(findExecutableOnPath("qmd.CMD", { PATH: fixture.dir, PATHEXT: ".EXE" }, "win32")).toBe(fixture.path);
+      expect(findExecutableOnPath("qmd", { PATH: fixture.dir, PATHEXT: ".EXE" }, "win32")).toBeNull();
+    } finally {
+      fixture.cleanup();
+    }
+  });
+
+  it("returns null when PATH and Path are both absent for a bare command", () => {
+    expect(findExecutableOnPath("qmd", { PATHEXT: "" }, process.platform)).toBeNull();
+  });
+
+  it("ignores directories that happen to match the command name", () => {
+    const dir = mkdtempSync(join(tmpdir(), "memory-qmd-test-"));
+
+    try {
+      mkdirSync(join(dir, "qmd"));
+      expect(findExecutableOnPath("qmd", { PATH: dir, PATHEXT: "" }, process.platform)).toBeNull();
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it("ignores non-executable files on POSIX platforms", () => {
+    const dir = mkdtempSync(join(tmpdir(), "memory-qmd-test-"));
+    const path = join(dir, "qmd");
+
+    try {
+      writeFileSync(path, "echo qmd\n");
+      if (process.platform !== "win32") chmodSync(path, 0o644);
+
+      const expected = process.platform === "win32" ? path : null;
+      expect(findExecutableOnPath("qmd", { PATH: dir, PATHEXT: "" }, process.platform)).toBe(expected);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it("accepts executable files on POSIX platforms", () => {
+    const fixture = createExecutableFixture("qmd");
+
+    try {
+      chmodSync(fixture.path, 0o755);
+      expect(findExecutableOnPath("qmd", { PATH: fixture.dir, PATHEXT: "" }, "linux")).toBe(fixture.path);
+    } finally {
+      fixture.cleanup();
+    }
+  });
+});
+
+function createExecutableFixture(name: string): { dir: string; path: string; cleanup: () => void } {
+  const dir = mkdtempSync(join(tmpdir(), "memory-qmd-test-"));
+  const path = join(dir, name);
+
+  writeFileSync(path, "echo qmd\n");
+  if (process.platform !== "win32") chmodSync(path, 0o755);
+
+  return {
+    dir,
+    path,
+    cleanup: () => rmSync(dir, { recursive: true, force: true }),
+  };
+}
+
+function restorePathEnv(
+  originalPath: string | undefined,
+  originalPathAlias: string | undefined,
+  originalPathExt: string | undefined,
+): void {
+  if (originalPath === undefined) delete process.env.PATH;
+  else process.env.PATH = originalPath;
+
+  if (originalPathAlias === undefined) delete process.env.Path;
+  else process.env.Path = originalPathAlias;
+
+  if (originalPathExt === undefined) delete process.env.PATHEXT;
+  else process.env.PATHEXT = originalPathExt;
+}

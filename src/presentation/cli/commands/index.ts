@@ -34,6 +34,17 @@ export { createMigrateCommand, executeMigrateCommand } from "./migrate.js";
 // Backup commands
 export { createExportCommand, executeExportCommand } from "./export.js";
 export { createImportCommand, executeImportCommand } from "./import.js";
+export {
+  createBackupCommand,
+  createRestoreCommand,
+  executeBackupCreateCommand,
+  executeBackupVerifyCommand,
+  executeRestoreCommand,
+} from "./backup.js";
+export {
+  createProjectionsCommand,
+  executeProjectionsRebuildCommand,
+} from "./projections.js";
 
 // Shell completion
 export { createCompletionCommand, executeCompletionCommand } from "./completion.js";
@@ -71,6 +82,8 @@ export type { AuditSecretsOptions } from "./audit-secrets.js";
 export type { PurgeCommandOptions, PurgeResult } from "./purge.js";
 export type { ExportOptions } from "./export.js";
 export type { ImportOptions } from "./import.js";
+export type { LocalBackupCommandOptions, LocalBackupCliOptions } from "./backup.js";
+export type { ProjectionCommandOptions, ProjectionCliOptions } from "./projections.js";
 export type { ShellType } from "./completion.js";
 export type { StatusOptions, StatusInfo, EmbeddingStatus, GatherStatusOptions } from "./status.js";
 export type {

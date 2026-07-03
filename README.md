@@ -60,6 +60,20 @@ memory audit-secrets
 # Query durable friction signals for first-party tooling
 memory friction list --tool aidev --since 2026-06-01 --count --min 3
 
+# Create and verify a full local backup before risky changes
+memory backup create --json
+memory backup verify <backup-id> --json
+
+# Restore only after a dry-run has passed
+memory restore <backup-id> --dry-run --json
+memory restore <backup-id> --confirm
+
+# Check upgrade readiness and projection replay safety
+memory doctor --upgrade
+memory migrate --dry-run --json
+memory migrate --confirm
+memory projections rebuild --verify
+
 # Propose and review an audited supersedence through canonical events
 memory dream propose-supersedence --project memory-nexus --target <fact-uuid> --replacement "Updated fact" --reason "Supersedes stale guidance"
 memory dream approve <dream-id>
@@ -87,6 +101,32 @@ Machine consumers should use `memory friction list --json`; see [Friction Query 
 Tool-managed paths follow the XDG Base Directory Specification. Override with `XDG_CONFIG_HOME` and `XDG_DATA_HOME`.
 
 Legacy memory files are retained for compatibility with pre-v4 markdown sidecars. They are not read or written by default. To index them during sync, use `memory sync --include-memory-files`, set `MEMORY_LEGACY_MEMORY_FILES=1`, or set `legacyMemoryFiles.enabled=true` in config. To generate legacy daily logs with `memory backfill`, pass `--write-memory-files` or use the same env/config opt-in. `MEMORY_HOME` follows the `GNUPGHOME` / `JAVA_HOME` tradition: the value is the exact directory path, not a base directory under which a subdirectory is appended. Empty string is ignored; no `~` expansion.
+
+## Local Backup, Restore, And Upgrade Safety
+
+`memory export` and `memory import` are JSON interchange commands for older database-shaped data. They are not full v5 backups. Newer v5 surfaces include SQLite projection tables and canonical event logs, so use `memory backup` before risky local operations:
+
+```bash
+memory backup create --json
+memory backup verify <backup-id> --json
+```
+
+`memory restore` is a local-state restore command. It verifies the backup first, supports a non-mutating dry-run, and requires explicit confirmation before it overwrites database, config, or event-log files. Sparse backups restore only the components present in their manifest; omitted database, config, or event-log components are left untouched and reported as warnings instead of being deleted.
+
+```bash
+memory restore <backup-id> --dry-run --json
+memory restore <backup-id> --confirm
+```
+
+Upgrade and portability work should follow the same safe path:
+
+```bash
+memory doctor --upgrade
+memory migrate --dry-run --json
+memory migrate --confirm
+memory projections rebuild --verify
+memory projections rebuild --confirm
+```
 
 ## Secret Handling
 
@@ -121,7 +161,7 @@ authkey run --env memory -- memory sync --embed
 authkey run --env memory -- memory extract memory-nexus
 ```
 
-Known secret patterns in newly synced transcript content, tool inputs/results, extraction payloads, embeddings, and CLI JSON exports are redacted before storage or provider egress. Raw JSON backups require explicit opt-in:
+Known secret patterns in newly synced transcript content, tool inputs/results, extraction payloads, embeddings, and CLI JSON exports are redacted before storage or provider egress. Raw JSON exports require explicit opt-in:
 
 ```bash
 memory export backup.json --include-sensitive
@@ -199,6 +239,11 @@ import {
   executeSyncCommand,
   executeSearchCommand,
   executeContextCommand,
+  executeBackupCreateCommand,
+  executeBackupVerifyCommand,
+  executeRestoreCommand,
+  executeMigrateCommand,
+  executeProjectionsRebuildCommand,
   type CommandResult,
   type SyncCommandOptions,
   type SearchCommandOptions,
@@ -242,6 +287,11 @@ const contextResult = await executeContextCommand("my-project", {
 | `executePurgeCommand` | `options: PurgeCommandOptions` | `Promise<CommandResult>` |
 | `executeExportCommand` | `outputPath: string, options: ExportOptions` | `Promise<CommandResult>` |
 | `executeImportCommand` | `inputPath: string, options: ImportOptions` | `Promise<CommandResult>` |
+| `executeBackupCreateCommand` | `outputDir?: string, opts?: LocalBackupCommandOptions, options?: LocalBackupCliOptions` | `Promise<CommandResult>` |
+| `executeBackupVerifyCommand` | `backupDir: string, opts?: LocalBackupCommandOptions, options?: LocalBackupCliOptions` | `Promise<CommandResult>` |
+| `executeRestoreCommand` | `backupDir: string, opts?: LocalBackupCommandOptions, options?: LocalBackupCliOptions` | `Promise<CommandResult>` |
+| `executeMigrateCommand` | `options: MigrateCommandOptions` | `Promise<CommandResult>` |
+| `executeProjectionsRebuildCommand` | `opts?: ProjectionCommandOptions, options?: ProjectionCliOptions` | `Promise<CommandResult>` |
 | `executeCompletionCommand` | `shell: string` | `CommandResult` |
 
 ### CommandResult

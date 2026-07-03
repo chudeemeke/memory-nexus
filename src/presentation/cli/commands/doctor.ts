@@ -45,6 +45,8 @@ export interface DoctorOptions {
     fix?: boolean;
     /** Perform portability diagnostics */
     portability?: boolean;
+    /** Perform upgrade readiness diagnostics */
+    upgrade?: boolean;
 }
 
 /**
@@ -431,6 +433,7 @@ export function createDoctorCommand(): Command {
         .option("--json", "Output as JSON")
         .option("--fix", "Attempt to fix common issues")
         .option("--portability", "Perform portability and path-dialect migration checks")
+        .option("--upgrade", "Perform upgrade readiness diagnostics")
         .action(async (options: DoctorOptions) => {
             const result = await executeDoctorCommand(options);
             process.exitCode = result.exitCode;
@@ -446,6 +449,10 @@ export async function executeDoctorCommand(
 ): Promise<CommandResult> {
     if (options.portability) {
         return runPortabilityDiagnostics(options, deps);
+    }
+
+    if (options.upgrade) {
+        return runUpgradeDiagnostics(options, deps);
     }
 
     if (options.json) {
@@ -510,6 +517,73 @@ export async function executeDoctorCommand(
             hookOverrides: deps.healthOverrides?.hookOverrides,
         }
     );
+}
+
+export async function runUpgradeDiagnostics(
+    options: DoctorOptions,
+    deps: DoctorCommandDeps = {}
+): Promise<CommandResult> {
+    const gatherStatus = deps.gatherStatus ?? (await import("./status.js")).gatherStatus;
+    const status = await gatherStatus({
+        dbPath: deps.healthOverrides?.dbPath,
+        logPath: deps.healthOverrides?.logsDir ? join(deps.healthOverrides.logsDir, "sync.log") : undefined,
+        configPath: deps.healthOverrides?.configDir ? join(deps.healthOverrides.configDir, "config.json") : undefined,
+        hookOverrides: deps.healthOverrides?.hookOverrides,
+        fix: false,
+        stats: false,
+    });
+
+    const checks = {
+        databaseExists: status.health.database.exists,
+        databaseReadable: status.health.database.readable,
+        databaseWritable: status.health.database.writable,
+        databaseIntegrity: status.health.database.integrity,
+        configValid: status.health.config.valid,
+        sqliteVecAvailable: status.health.sqliteVec.available,
+        embeddingsReady: status.health.embedding.ready,
+        providerEgressConsent: status.health.providerEgress?.consent ?? "unknown",
+    };
+    const blockers: string[] = [];
+    const recommendations: string[] = [
+        "Run `memory backup create` before mutating migration, restore, or projection state.",
+        "Run `memory projections rebuild --verify` before `memory projections rebuild --confirm`.",
+        "Use `memory migrate --dry-run --json` before `memory migrate --confirm`.",
+    ];
+
+    if (!checks.databaseExists) blockers.push("Database does not exist. Run `memory sync` first.");
+    if (checks.databaseExists && checks.databaseIntegrity !== "ok") blockers.push("Database integrity is not ok.");
+    if (!checks.configValid) blockers.push("Configuration is invalid.");
+    if (!checks.sqliteVecAvailable) blockers.push("sqlite-vec is unavailable.");
+    if (!checks.embeddingsReady) recommendations.push("Embedding readiness is incomplete; run `memory status --embedding --json` for details.");
+
+    const ready = blockers.length === 0;
+    if (options.json) {
+        console.log(JSON.stringify({
+            schemaVersion: 1,
+            command: "doctor.upgrade",
+            ready,
+            checks,
+            blockers,
+            recommendations,
+        }, null, 2));
+    } else {
+        const useColor = shouldUseColor();
+        console.log("Upgrade Readiness");
+        console.log("=================");
+        console.log(`Database: ${checks.databaseExists && checks.databaseIntegrity === "ok" ? green("ready", useColor) : red("not ready", useColor)}`);
+        console.log(`Config:   ${checks.configValid ? green("valid", useColor) : red("invalid", useColor)}`);
+        console.log(`sqlite-vec: ${checks.sqliteVecAvailable ? green("available", useColor) : red("unavailable", useColor)}`);
+        if (blockers.length > 0) {
+            console.log("");
+            console.log("Blockers:");
+            for (const blocker of blockers) console.log(`  - ${blocker}`);
+        }
+        console.log("");
+        console.log("Recommended safe path:");
+        for (const recommendation of recommendations) console.log(`  - ${recommendation}`);
+    }
+
+    return { exitCode: ready ? 0 : 1 };
 }
 
 export function isMixedPathDialect(decoded: string, platform: NodeJS.Platform = process.platform): boolean {

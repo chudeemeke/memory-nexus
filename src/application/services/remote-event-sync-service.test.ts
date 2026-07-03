@@ -17,6 +17,10 @@ function fail(error: string): RemoteTransportCommandResult {
   return { success: false, error };
 }
 
+function failWithoutError(): RemoteTransportCommandResult {
+  return { success: false };
+}
+
 function createTransport(options: {
   isRepository?: boolean;
   currentRemote?: string | null;
@@ -345,6 +349,81 @@ describe("RemoteEventSyncService", () => {
     expect(fetch.calls).not.toContain("push");
   });
 
+  it("uses stable fallback errors when transport failures omit provider details", async () => {
+    const init = createTransport({
+      isRepository: false,
+      failures: { initRepository: failWithoutError() },
+    });
+    await expect(new RemoteEventSyncService({ transport: init.transport }).sync({
+      machineId: "machine-1234",
+      repositoryUrl: "git@github.com:chude/memory-events.git",
+    })).resolves.toMatchObject({
+      success: false,
+      status: "failed",
+      error: "Failed to initialize Git repository in events directory",
+    });
+
+    const configure = createTransport({
+      failures: { setRemoteUrl: failWithoutError() },
+    });
+    await expect(new RemoteEventSyncService({ transport: configure.transport }).sync({
+      machineId: "machine-1234",
+      repositoryUrl: "git@github.com:chude/memory-events.git",
+    })).resolves.toMatchObject({
+      success: false,
+      status: "failed",
+      error: "Failed to configure Git remote repository URL",
+    });
+
+    const commit = createTransport({
+      failures: { commitEventLog: failWithoutError() },
+    });
+    await expect(new RemoteEventSyncService({ transport: commit.transport }).sync({
+      machineId: "machine-1234",
+      repositoryUrl: "git@github.com:chude/memory-events.git",
+    })).resolves.toMatchObject({
+      success: false,
+      status: "failed",
+      error: "Git commit failed: unknown error",
+    });
+
+    const fetch = createTransport({
+      failures: { fetch: failWithoutError() },
+    });
+    await expect(new RemoteEventSyncService({ transport: fetch.transport }).sync({
+      machineId: "machine-1234",
+      repositoryUrl: "git@github.com:chude/memory-events.git",
+    })).resolves.toMatchObject({
+      success: false,
+      status: "failed",
+      error: "Git fetch failed: unknown error",
+    });
+
+    const pull = createTransport({
+      failures: { pullRebase: failWithoutError() },
+    });
+    await expect(new RemoteEventSyncService({ transport: pull.transport }).sync({
+      machineId: "machine-1234",
+      repositoryUrl: "git@github.com:chude/memory-events.git",
+    })).resolves.toMatchObject({
+      success: false,
+      status: "failed",
+      error: "Git pull failed: unknown error",
+    });
+
+    const push = createTransport({
+      failures: { push: failWithoutError() },
+    });
+    await expect(new RemoteEventSyncService({ transport: push.transport }).sync({
+      machineId: "machine-1234",
+      repositoryUrl: "git@github.com:chude/memory-events.git",
+    })).resolves.toMatchObject({
+      success: false,
+      status: "failed",
+      error: "Git push failed: unknown error",
+    });
+  });
+
   it("aborts rebase and reports pull failures without pushing", async () => {
     const { transport, calls } = createTransport({
       failures: { pullRebase: fail("conflict") },
@@ -468,6 +547,19 @@ describe("RemoteEventSyncService", () => {
   });
 
   it("blocks invalid branch and remote alias before transport", async () => {
+    const badMachine = createTransport();
+    const machineResult = await new RemoteEventSyncService({ transport: badMachine.transport }).sync({
+      machineId: "local",
+      repositoryUrl: "git@github.com:chude/memory-events.git",
+    });
+
+    expect(machineResult).toMatchObject({
+      success: false,
+      status: "blocked",
+      error: "Machine identity must come from durable config, not a fallback value",
+    });
+    expect(badMachine.calls).toEqual([]);
+
     const badBranch = createTransport();
     const branchResult = await new RemoteEventSyncService({ transport: badBranch.transport }).sync({
       machineId: "machine-1234",
