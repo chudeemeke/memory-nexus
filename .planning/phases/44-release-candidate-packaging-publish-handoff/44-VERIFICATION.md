@@ -94,3 +94,9 @@ npm publish --access public --otp=<code>
 ```
 
 `aidev release` was not run for `4.0.3`. The manual path was acceptable for this hotfix only because the release gates had already been run and recorded before publish. The tradeoff is that `aidev release` did not create any release metadata/tag automatically.
+
+## Release Provenance
+
+The historical `v4.0.2` ambiguity and the corrected `v4.0.3` tag/provenance shape are recorded in `docs/releases/2026-07-06-release-provenance-v4.0.2-v4.0.3.md`.
+
+`v4.0.3` is an annotated tag on release-source commit `2bc83131f3275c245b759edca666ae0975e7d86e`, not on the later post-publish verification commit.
