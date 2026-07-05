@@ -39,7 +39,7 @@ My pushback line is also clear: it is not done if it merely "works." It is not d
 
 ## Current State
 
-v4.0 is shipped, and the latest verified patch on npm/local install is `@chude/memory@4.0.2`. v5.0 Market-Leader Memory Platform execution is active. Phase 42 dreaming consolidation, Phase 42.5 safe local maintenance workflows, and Phase 43 scoped market-readiness gates are implemented and verified. Phase 43 promoted the last contract-only v5 eval fixture to behavior-backed coverage, so `eval:v5:market` now passes. Phase 43 approves scoped market readiness for the local-first CLI/API product only; broad agentic-memory category-leader claims remain blocked until MCP/local-server support and public benchmark parity are implemented or explicitly dispositioned. Source is ahead of the published package after a Windows hook-launcher fix, so Phase 44 owns the next version and release handoff.
+v4.0 is shipped, and npm `latest` remains `@chude/memory@4.0.2` until the next OTP-backed publish. v5.0 Market-Leader Memory Platform execution is active. Phase 42 dreaming consolidation, Phase 42.5 safe local maintenance workflows, and Phase 43 scoped market-readiness gates are implemented and verified. Phase 43 promoted the last contract-only v5 eval fixture to behavior-backed coverage, so `eval:v5:market` now passes. Phase 43 approves scoped market readiness for the local-first CLI/API product only; broad agentic-memory category-leader claims remain blocked until MCP/local-server support and public benchmark parity are implemented or explicitly dispositioned. Phase 44 prepared the `@chude/memory@4.0.3` release candidate for the Windows hook-launcher fix; real npm publish remains pending user OTP.
 
 **Tech stack:** Bun, TypeScript 5.5+, bun:sqlite with FTS5 + sqlite-vec, Commander.js v14, cli-progress, chrono-node, @huggingface/transformers v3
 
@@ -105,7 +105,7 @@ Both Claude and humans use the same commands. No special formatting needed.
 
 **Goal:** Make `@chude/memory` a local-first, privacy-governed, cross-project, event-sourced memory substrate with governed persona/procedural memory, temporal graph retrieval, utility-aware ranking, audited dreaming consolidation, excellent CLI/API usability, and demonstrable market readiness.
 
-**Active work:** Phase 44 release-candidate packaging and publish handoff. Phase 44 must decide the next version, changelog/release notes, package/install smoke, publish dry-run, rollback/dist-tag handling, and user-authorized OTP publish workflow.
+**Active work:** Phase 44 release-candidate publish handoff. The next version is `4.0.3`; changelog, release notes, package/install smoke, package privacy, publish dry-run, and verification evidence are prepared. Real npm publish still requires user OTP authorization, followed by registry-backed Bun global install verification.
 
 **Target features:**
 - Consent/provenance governance for derived memory and provider egress
@@ -206,4 +206,4 @@ Per WoW (Ways of Working):
 
 ---
 
-*Last updated: 2026-02-18 after v2.0 milestone questioning*
+*Last updated: 2026-07-05 after Phase 44 release-candidate preparation*

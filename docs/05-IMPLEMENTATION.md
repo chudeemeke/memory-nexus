@@ -8,7 +8,7 @@ Memory-nexus will be built as a standalone CLI tool that integrates with the exi
 
 **Timeline:** 10-14 days total (after WoW v8.0 completion)
 **Approach:** Incremental delivery with working software at each phase
-**Integration:** aidev subcommand (`aidev memory <action>`)
+**Integration:** standalone CLI (`memory <action>`) with optional aidev delegation
 
 ---
 
@@ -37,8 +37,8 @@ Without requiring:
 - [ ] JSONL parser (read session files)
 - [ ] SQLite database creation with schema
 - [ ] FTS5 message indexing
-- [ ] Basic CLI: `aidev memory sync`
-- [ ] Basic CLI: `aidev memory search "query"`
+- [ ] Basic CLI: `memory sync`
+- [ ] Basic CLI: `memory search "query"`
 - [ ] Basic entity extraction (project names, file paths mentioned)
 - [ ] Create links between sessions and projects
 
@@ -77,7 +77,7 @@ tests/entity-extractor.test.js # Entity extraction tests
 - [ ] Context display: Show surrounding messages
 - [ ] Result ranking improvements
 - [ ] Pagination: `--limit 20 --offset 0`
-- [ ] `aidev memory related <id>` - Find related sessions/topics
+- [ ] `memory related <id>` - Find related sessions/topics
 - [ ] Topic extraction and linking
 - [ ] Cross-project relationship queries
 
@@ -139,7 +139,7 @@ tests/incremental.test.js     # Incremental sync tests
 **Tasks:**
 - [ ] Semantic search with embeddings (optional)
 - [ ] Topic clustering and tagging
-- [ ] Export to markdown (`aidev memory export`)
+- [ ] Export to markdown (`memory export`)
 - [ ] Web UI for browsing (Electron or local server)
 - [ ] Statistics and analytics
 - [ ] Cross-conversation threading

@@ -24,14 +24,14 @@
 
 ## CLI Integration
 
-**aidev Subcommand:**
-- Integrates as `aidev memory <action>`
+**Standalone CLI and optional aidev delegation:**
+- Ships as `memory <action>`
 - Commands:
-  - `aidev memory sync` - Extract sessions to database
-  - `aidev memory search "query"` - Full-text search
-  - `aidev memory context <project>` - Get project context
-  - `aidev memory related <id>` - Find related sessions/topics
-  - `aidev memory stats` - Database statistics
+  - `memory sync` - Extract sessions to database
+  - `memory search "query"` - Full-text search
+  - `memory context <project>` - Get project context
+  - `memory related <id>` - Find related sessions/topics
+  - `memory stats` - Database statistics
 
 **Integration Pattern:**
 ```javascript
@@ -55,7 +55,7 @@ aidev.registerSubcommand('memory', {
     "SessionStop": [
       {
         "matcher": "",
-        "command": "aidev memory sync --session $CLAUDE_SESSION_ID --quiet"
+        "command": "memory sync --session $CLAUDE_SESSION_ID --quiet"
       }
     ]
   }
@@ -67,15 +67,15 @@ aidev.registerSubcommand('memory', {
 - `$CLAUDE_CWD` - Session working directory
 
 **Manual Sync:**
-- `aidev memory sync` - Full extraction
-- `aidev memory sync --session <id>` - Single session
-- `aidev memory sync --project <name>` - Project filter
-- `aidev memory sync --force` - Ignore incremental state
+- `memory sync` - Full extraction
+- `memory sync --session <id>` - Single session
+- `memory sync --project <name>` - Project filter
+- `memory sync --force` - Ignore incremental state
 
 **Scheduled Sync (Optional):**
 ```bash
 # Cron example: hourly background sync
-0 * * * * aidev memory sync --quiet --log /tmp/memory-nexus-sync.log
+0 * * * * memory sync --quiet --log /tmp/memory-nexus-sync.log
 ```
 
 ## Data Sources
@@ -123,7 +123,7 @@ aidev.registerSubcommand('memory', {
 
 | Project | Path | Relationship |
 |---------|------|--------------|
-| ai-dev-environment | `~/Projects/ai-dev-environment` | CLI integration target (`aidev memory` subcommand) |
+| ai-dev-environment | `~/Projects/ai-dev-environment` | Optional platform delegation target for the `memory` CLI |
 | wow-system | `~/Projects/wow-system` | Source of WoW standards; build memory-nexus after v8.0 |
 | get-stuff-done | `~/Projects/get-stuff-done` | GSD-Lite methodology for implementation |
 | mcp-nexus | `~/Projects/mcp-nexus/servers/memory-nexus` | Predecessor MCP approach (abandoned) |

@@ -106,7 +106,7 @@ What must happen before memory-nexus implementation can proceed.
 
 **aidev Integration Point:**
 - Files: `docs/05-IMPLEMENTATION.md`, `docs/04-ARCHITECTURE.md`
-- Dependency: Memory-nexus integrates as `aidev memory` subcommand
+- Dependency: Memory-nexus ships as the `memory` CLI and may be delegated to by aidev
 - Rationale: Consistent with user's existing tooling
 - Impact: Must understand aidev CLI registration pattern
 

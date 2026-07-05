@@ -371,10 +371,10 @@ memory-nexus/
 |   |
 |   |-- cli/
 |   |   |-- commands/
-|   |   |   |-- sync.ts           # aidev memory sync
-|   |   |   |-- search.ts         # aidev memory search
-|   |   |   |-- context.ts        # aidev memory context
-|   |   |   +-- stats.ts          # aidev memory stats
+|   |   |   |-- sync.ts           # memory sync
+|   |   |   |-- search.ts         # memory search
+|   |   |   |-- context.ts        # memory context
+|   |   |   +-- stats.ts          # memory stats
 |   |   +-- index.ts              # CLI entry point
 |   |
 |   +-- hooks/
@@ -438,7 +438,7 @@ Using Claude Code's `SessionStop` hook:
     "SessionStop": [
       {
         "matcher": "",
-        "command": "aidev memory sync --session $CLAUDE_SESSION_ID --quiet"
+        "command": "memory sync --session $CLAUDE_SESSION_ID --quiet"
       }
     ]
   }
@@ -458,19 +458,19 @@ Using Claude Code's `SessionStop` hook:
 
 ```bash
 # Full sync - extract all sessions
-aidev memory sync
+memory sync
 
 # Sync specific project only
-aidev memory sync --project wow-system
+memory sync --project wow-system
 
 # Sync with verbose output
-aidev memory sync --verbose
+memory sync --verbose
 
 # Force re-extraction (ignore incremental state)
-aidev memory sync --force
+memory sync --force
 
 # Sync specific session
-aidev memory sync --session b0a283ef-ea70-4509-a791-4f65831c3174
+memory sync --session b0a283ef-ea70-4509-a791-4f65831c3174
 ```
 
 ### 3. Scheduled Sync (Optional)
@@ -479,7 +479,7 @@ For users who want background extraction:
 
 ```bash
 # Cron job example (every hour)
-0 * * * * aidev memory sync --quiet --log /tmp/memory-nexus-sync.log
+0 * * * * memory sync --quiet --log /tmp/memory-nexus-sync.log
 ```
 
 ## Integration with aidev
@@ -692,7 +692,7 @@ The SQLite database is the single source of truth. CLI commands query it. Both C
 SQLite Database (Structured Data)
         │
         ▼
-   CLI Commands (aidev memory *)
+   CLI Commands (memory *)
         │
         ├── Claude (via Bash tool)
         └── Human (via terminal)

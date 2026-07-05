@@ -44,7 +44,7 @@
 - Used by: CLI layer
 
 **CLI Layer (Presentation):**
-- Purpose: User interface via `aidev memory` subcommands
+- Purpose: User interface via `memory` subcommands
 - Location: `src/cli/` (planned)
 - Contains: Command handlers for sync, search, context, stats, related
 - Depends on: Query layer, Commander.js
@@ -118,7 +118,7 @@ This enables graph-like queries without a dedicated graph database:
 **Query Flow:**
 
 ```
-1. CLI Input (aidev memory search "query")
+1. CLI Input (memory search "query")
             |
             v
 2. Query Builder (construct FTS5 MATCH clause + filters)
@@ -142,7 +142,7 @@ This enables graph-like queries without a dedicated graph database:
 
 **CLI Entry (`src/cli/memory-command.js`):**
 - Location: `src/cli/memory-command.js` (planned)
-- Triggers: User runs `aidev memory <command>`
+- Triggers: User runs `memory <command>`
 - Responsibilities: Parse arguments, dispatch to appropriate handler, format output
 
 **Hook Entry (`hooks/post-session-sync.sh`):**
@@ -151,11 +151,11 @@ This enables graph-like queries without a dedicated graph database:
 - Responsibilities: Invoke incremental sync for completed session
 
 **Planned Commands:**
-- `aidev memory sync` - Extract sessions to database
-- `aidev memory search <query>` - Full-text search
-- `aidev memory context <project>` - Get project context
-- `aidev memory related <id>` - Find related items
-- `aidev memory stats` - Database statistics
+- `memory sync` - Extract sessions to database
+- `memory search <query>` - Full-text search
+- `memory context <project>` - Get project context
+- `memory related <id>` - Find related items
+- `memory stats` - Database statistics
 
 ## Error Handling
 
@@ -203,19 +203,19 @@ enum ExtractionError {
   "hooks": {
     "SessionStop": [{
       "matcher": "",
-      "command": "aidev memory sync --session $CLAUDE_SESSION_ID --quiet"
+      "command": "memory sync --session $CLAUDE_SESSION_ID --quiet"
     }]
   }
 }
 ```
 
 **Manual:**
-- `aidev memory sync` - Full sync of all sessions
-- `aidev memory sync --project <name>` - Project-specific sync
-- `aidev memory sync --force` - Force re-extraction
+- `memory sync` - Full sync of all sessions
+- `memory sync --project <name>` - Project-specific sync
+- `memory sync --force` - Force re-extraction
 
 **Scheduled (Optional):**
-- Cron job for background extraction: `0 * * * * aidev memory sync --quiet`
+- Cron job for background extraction: `0 * * * * memory sync --quiet`
 
 ## Key Technical Decisions
 

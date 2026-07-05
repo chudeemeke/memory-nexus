@@ -16,8 +16,9 @@ Do not silently remove stated, inferred, prototype, disabled, or partial feature
 - v5 Market-Leader Memory Platform is active.
 - Phase 42.5 is complete.
 - Phase 43 is complete with scoped local-first CLI/API market readiness approved.
-- Phase 44 is next and owns release-candidate packaging, versioning, changelog, release notes, npm dry-run, install smoke, and user-authorized OTP publish handoff.
-- The current published package remains `@chude/memory@4.0.2`; source is ahead after a Windows hook-launcher fix, so Phase 44 must decide the next version and release path.
+- Phase 44 has prepared the `@chude/memory@4.0.3` release candidate and owns the remaining user-authorized OTP publish handoff.
+- The current npm `latest` package remains `@chude/memory@4.0.2` until publish completes. The local Windows `memory.exe` currently reports `4.0.3`, but Bun's global manifest remains registry-backed at `4.0.2`; after publish, run `bun add -g @chude/memory@4.0.3` and `bun run verify:published @chude/memory@4.0.3`.
+- Do not use local Bun tarball/path global install as a release gate for this package on Bun 1.3.5; Phase 44 observed a dependency-loop failure and a Bun segmentation fault in that path.
 
 Do not claim broad market-leader status unless MCP/local-server and public benchmark gaps are either implemented or explicitly dispositioned with user sign-off. Scoped market readiness for the local-first CLI/API product is a separate, narrower claim.
 

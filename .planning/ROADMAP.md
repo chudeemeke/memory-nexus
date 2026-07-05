@@ -6,7 +6,7 @@
 - SHIPPED **v2.0 Hybrid Search and Rebrand** -- Phases 13-22 (shipped 2026-03-01)
 - SHIPPED **v3.0 Knowledge Layer + Friction Logging** -- Phases 23-29.1 (shipped 2026-04-02)
 - SHIPPED **v4.0 Intelligence Layer** -- Phases 30-37 plus 32.5, 36.8, 36.9, and 36.10 (published 2026-05-30 as `@chude/memory@4.0.0`; architecture audit LOCKED 2026-05-13, recommendation A-prime; 2026-05-27 foundation review added pre-publish security hardening before GA; Phase 36.9 coverage gate restored 2026-05-30; Phase 36.10 hardened legacy memory-file defaults before publish)
-- IN PROGRESS **v5.0 Market-Leader Memory Platform** -- Phases 38.0-44 plus urgent Phase 41.1 (started 2026-06-05; Phase 43 scoped market-readiness gate complete; Phase 44 release-candidate packaging and publish handoff remains)
+- IN PROGRESS **v5.0 Market-Leader Memory Platform** -- Phases 38.0-44 plus urgent Phase 41.1 (started 2026-06-05; Phase 43 scoped market-readiness gate complete; Phase 44 release candidate prepared, real publish pending user OTP)
 
 ## Phases
 
@@ -102,7 +102,7 @@
 - [x] **Phase 42: Dreaming Consolidation** - Audited dreaming consolidation, promotion, supersedence, and rollback through canonical events and schema-versioned projection. Completed 2026-07-01.
 - [x] **Phase 42.5: Feature Completeness and UX Polish** - Inventory all stated/inferred/prototype features, complete or explicitly own them, and polish CLI/API usability to excellent standard. Completed 2026-07-03.
 - [x] **Phase 43: Market-Leader and Sales-Readiness Gate** - Final architecture/security/quality/product/competitive review and readiness proof. Completed 2026-07-05 for scoped local-first CLI/API market readiness.
-- [ ] **Phase 44: Release-Candidate Packaging and Publish Handoff** - Versioning, package smoke, changelog/release notes, npm dry-run, and OTP-backed publish handoff without publishing until user authorization.
+- [ ] **Phase 44: Release-Candidate Packaging and Publish Handoff** - Versioning, package smoke, changelog/release notes, npm dry-run, and OTP-backed publish handoff without publishing until user authorization. Release candidate `@chude/memory@4.0.3` is prepared; real publish remains pending OTP.
 
 ## Phase Details
 
@@ -662,7 +662,9 @@ Plans:
   1. Version, changelog, release notes, package contents, npm pack, install smoke, and publish dry-run pass.
   2. Release runbook documents OTP publish steps, rollback, dist-tag handling, and post-publish verification.
   3. Real `npm publish` is not run until user authorization and OTP are available.
-**Plans**: Placeholder directory exists; plan after Phase 43.
+**Plans**: 1/1 plan prepared. See `.planning/phases/44-release-candidate-packaging-publish-handoff/44-PLAN.md`.
+**Status**: Release candidate prepared; publish pending user OTP.
+**Verification**: Typecheck, build, full tests, test isolation, eval:v5, eval:v5:market, coverage, dependency audit, gitleaks, diff whitespace, npm pack dry-run, package privacy scan, npm publish dry-run, and isolated npm tarball install smoke passed for `@chude/memory@4.0.3`. Local Bun tarball/path install is excluded as a trustworthy gate on Bun 1.3.5 due to a dependency-loop failure and Bun crash; registry-backed Bun install must run after publish.
 
 ---
 
@@ -805,8 +807,8 @@ v5.0
 | 42. Dreaming Consolidation | v5.0 | 2026-07-01 | Complete | Explicit `memory dream`; audited/event-sourced proposal, apply, rollback; behavior-backed eval |
 | 42.5. Feature Completeness and UX Polish | v5.0 | 1/1 | Complete | 2026-07-03 |
 | 43. Market-Leader and Sales-Readiness Gate | v5.0 | 1/1 | Complete | 2026-07-05 |
-| 44. Release-Candidate Packaging and Publish Handoff | v5.0 | TBD | Planned | - |
+| 44. Release-Candidate Packaging and Publish Handoff | v5.0 | 1/1 | RC prepared | Publish pending OTP |
 
 ---
 
-*Last updated: 2026-07-05 (Phase 43 complete; Phase 44 next)*
+*Last updated: 2026-07-05 (Phase 44 release candidate prepared; publish pending OTP)*

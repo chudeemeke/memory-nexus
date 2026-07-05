@@ -120,7 +120,7 @@ memory-nexus/
 
 **src/cli/**
 - Purpose: Command-line interface handlers
-- Contains: Subcommand implementations for `aidev memory`
+- Contains: Subcommand implementations for `memory`
 - Key files: `memory-command.js` (main entry), individual command files
 
 **hooks/**

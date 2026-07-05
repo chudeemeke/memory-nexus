@@ -7,12 +7,41 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [4.0.3] - 2026-07-05
+
+### Fixed
+
+- Windows hook background sync now resolves and launches the `memory` executable directly instead of routing through `aidev memory sync`, avoiding `bash ...\.bun\bin\aidev ...` launch failures on Windows.
+- Hook/stats install hints now point at `memory install`, matching the published CLI binary.
+
+### Documentation
+
+- Recorded the scoped Phase 43 market-readiness decision and Phase 44 publish handoff requirements.
+- Documented that broad agentic-memory category-leader claims remain blocked until MCP/local-server integration and public benchmark parity are implemented or explicitly dispositioned.
+
+## [4.0.2] - 2026-06-22
+
+### Fixed
+
+- Completed the embedding pipeline follow-up for idempotent embedding storage after the 4.0.1 provider-limit resilience release.
+- Corrected path/source naming behavior found during Windows and cross-project verification.
+
+## [4.0.1] - 2026-06-22
+
+### Added
+
+- Added the v5 memory platform foundation: canonical event kernel, privacy governance, remote event sync, secure capability interop, durable friction query contract, evaluation harness, persona memory, temporal graph retrieval, and utility-aware ranking.
+
+### Fixed
+
+- Hardened embedding-provider limit handling so oversized provider requests can split and resume instead of wedging `memory sync --embed`.
+
+## [4.0.0] - 2026-05-30
+
 ### Changed
 
 - Legacy `~/.memory` / `MEMORY_HOME` markdown sidecars are now explicit opt-in. `memory sync` no longer indexes them by default; use `--include-memory-files`, `MEMORY_LEGACY_MEMORY_FILES=1`, or `legacyMemoryFiles.enabled=true` when compatibility indexing is needed. `memory backfill` now requires `--write-memory-files` or the same env/config opt-in before writing legacy daily logs.
   [Phase 36.10]
-
-## [4.0.0] - 2026-05-25
 
 ### Added
 

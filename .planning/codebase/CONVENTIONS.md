@@ -141,7 +141,7 @@ async function* parseSessionFile(filePath) {
 **Framework:** Commander.js (matches aidev ecosystem)
 
 **Pattern:**
-- Main command with subcommands: `aidev memory <action>`
+- Main command with subcommands: `memory <action>`
 - Options use standard flags: `-v, --verbose`, `-f, --full`
 - Provide help text for all commands and options
 

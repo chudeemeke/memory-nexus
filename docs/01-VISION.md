@@ -145,7 +145,7 @@ SELECT * FROM sessions WHERE project LIKE '%wow-system%'
 From ANY project, query conversations from ANY other project:
 ```bash
 # While working in get-stuff-done, recall wow-system context
-aidev memory search "Strategy pattern handler design"
+memory search "Strategy pattern handler design"
 
 # Results show conversations from wow-system
 # Can provide this context to current Claude session
@@ -154,7 +154,7 @@ aidev memory search "Strategy pattern handler design"
 #### 4. Automatic Sync
 Two sync mechanisms:
 - **Hook-triggered**: When Claude Code sessions update, sync to database
-- **Manual**: `aidev memory sync` command for explicit synchronization
+- **Manual**: `memory sync` command for explicit synchronization
 
 #### 5. Selective Recall
 Query specific types of information:
@@ -259,7 +259,7 @@ Memory-Nexus will be considered successful when:
 3. **Permanence**: No automatic deletion; user-controlled retention
 4. **Accessibility**: Queryable from any project directory
 5. **Freshness**: Automatic sync keeps database current
-6. **Usability**: Simple CLI interface (`aidev memory search`)
+6. **Usability**: Simple CLI interface (`memory search`)
 
 ---
 
