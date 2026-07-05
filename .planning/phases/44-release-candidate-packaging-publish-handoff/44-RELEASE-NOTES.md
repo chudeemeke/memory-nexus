@@ -1,11 +1,11 @@
 # @chude/memory 4.0.3 Release Notes
 
-Status: release candidate prepared; publish pending OTP
+Status: published
 Date: 2026-07-05
 
 ## Summary
 
-`@chude/memory@4.0.3` is a patch release candidate for the Windows hook-launcher fix discovered during Phase 43 market-readiness verification.
+`@chude/memory@4.0.3` is a patch release for the Windows hook-launcher fix discovered during Phase 43 market-readiness verification.
 
 ## User-Visible Fixes
 
@@ -38,7 +38,7 @@ npm pack --dry-run --json
 npm publish --dry-run --access public
 ```
 
-Candidate verification passed the full source, eval, coverage, security, package privacy, npm pack, npm publish dry-run, and isolated npm tarball install smoke gates. Local Bun tarball/path global install is not a reliable gate on Bun 1.3.5 for this same-package upgrade path; use registry-backed Bun install after publication.
+Verification passed the full source, eval, coverage, security, package privacy, npm pack, npm publish dry-run, isolated npm tarball install smoke, real registry metadata, registry-backed Bun global install, and `verify:published` gates. Local Bun tarball/path global install is not a reliable gate on Bun 1.3.5 for this same-package upgrade path.
 
 ## Publish Boundary
 
@@ -48,9 +48,11 @@ Do not run real publish without user OTP authorization:
 npm publish --access public --otp=<code>
 ```
 
-After publish, verify:
+Post-publish verification:
 
 ```bash
 bun add -g @chude/memory@4.0.3
 bun run verify:published @chude/memory@4.0.3
 ```
+
+Release execution note: this was published manually/directly with `npm publish --access public --otp=<code>`, not through `aidev release`.

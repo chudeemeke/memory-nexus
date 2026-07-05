@@ -2,14 +2,14 @@
 gsd_state_version: 1.0
 milestone: v5.0
 milestone_name: Market-Leader Memory Platform
-status: release-candidate
-last_updated: "2026-07-05T23:59:54+01:00"
+status: shipped
+last_updated: "2026-07-06T00:30:00+01:00"
 progress:
   total_phases: 17
-  completed_phases: 16
+  completed_phases: 17
   total_plans: 17
   completed_plans: 17
-  percent: 94
+  percent: 100
 ---
 
 > **FOUNDATION HARDENING VERIFIED 2026-05-28** - Phase 36.8 is implemented. Typecheck, build, full tests, test-isolation, dependency audit, and gitleaks pass. Provider support now routes through an internal provider registry instead of presentation/health/factory switch drift. Phase 36.9 replaced the missing-metric Bun LCOV gate with an Istanbul-backed Bun coverage harness.
@@ -35,7 +35,8 @@ progress:
 > **V5 PHASE 42 COMPLETE 2026-07-01** - Dreaming consolidation is implemented as an explicit, audited workflow. `memory dream propose-supersedence/list/show/approve/reject/apply/rollback` is live; `DreamEntry`, `dream_entries`, `SqliteDreamRepository`, canonical dream event projection, governance registration, redaction-before-persistence, explicit apply/rollback confirmation, and shell completion coverage are implemented. Phase 42 intentionally uses the canonical `MemoryEventEnvelope` log plus schema-versioned `dream_entries` projection instead of a parallel `dreams.jsonl` file. Verification passed: focused Phase 42 tests (39 pass, 0 fail), completion tests (47 pass, 0 fail), typecheck, build, full tests (4,366 pass, 0 fail), test isolation, `eval:v5` (9/9; 8 behavior-backed, 1 contract), coverage statements 97.35%, branches 95.01%, functions 96.59%, lines 97.45%, dependency audit, `gitleaks detect --no-banner --redact --source .`, scoped inbox lint, and `git diff --check`. `eval:v5:market` still intentionally fails until Phase 43 handles `remote_sync_conflict`.
 > **V5 PHASE 42.5 COMPLETE 2026-07-03** - Feature completeness and UX polish is implemented. `memory backup create/verify`, top-level `memory restore`, `memory projections rebuild --verify/--confirm`, `memory migrate --dry-run/--json/--confirm`, and `memory doctor --upgrade` are live and documented. Completion/help/programmatic exports are updated, qmd executable discovery no longer shells through `which`, and `MemoryEventEnvelope` now rejects invalid metadata arrays instead of coercing them. Verification passed: typecheck, build, full tests (4,451 pass, 0 fail), test isolation, `eval:v5` (9/9; 8 behavior-backed, 1 contract), coverage statements 97.30%, branches 95.02%, functions 96.51%, lines 97.39%, dependency audit, gitleaks, diff whitespace, npm pack dry-run, and isolated dist smoke. Phase 43 now owns the remaining `remote_sync_conflict` behavior-backed market gate, competitive/MCP/benchmark/readiness review, and final market approval.
 > **V5 PHASE 43 COMPLETE 2026-07-05** - Market-leader and sales-readiness gate is complete for scoped local-first CLI/API readiness. `remote_sync_conflict` is behavior-backed; `eval:v5:market` passes 9/9 with 0 blockers; readiness and market reports explicitly block broad category-leader claims until MCP/local-server and public benchmark parity are implemented or dispositioned. Verification passed: typecheck, build, full tests (4,455 pass, 0 fail), test isolation, eval:v5, eval:v5:market, coverage statements 97.31%, branches 95.00%, functions 96.51%, lines 97.39%, `bun audit`, `gitleaks detect --no-banner --redact --source .`, `git diff --check`, npm pack dry-run, and package privacy check. A Windows hook-launcher defect was fixed in source by resolving `memory` directly instead of assuming `aidev memory sync`; Phase 44 must decide the next version/release path because npm remains at `@chude/memory@4.0.2`.
-> **V5 PHASE 44 RELEASE CANDIDATE PREPARED 2026-07-05** - `@chude/memory@4.0.3` is prepared as the patch release candidate for the Windows hook-launcher fix. Verification passed: typecheck, build, full tests (4,455 pass, 0 fail), test isolation, eval:v5, eval:v5:market, coverage statements 97.31%, branches 95.00%, functions 96.51%, lines 97.39%, `bun audit`, `gitleaks detect --no-banner --redact --source .`, `git diff --check`, npm pack dry-run with package privacy scan, npm publish dry-run, and isolated npm tarball install smoke. Real npm publish remains pending user OTP. Local `memory.exe` reports `4.0.3`, but npm `latest` and Bun global manifest still reference `4.0.2` until registry publish and registry-backed Bun reinstall. Do not use local Bun tarball/path install as a gate on Bun 1.3.5; Phase 44 observed a dependency-loop failure and Bun crash in that path.
+> **V5 PHASE 44 RELEASE CANDIDATE PREPARED 2026-07-05** - `@chude/memory@4.0.3` was prepared as the patch release candidate for the Windows hook-launcher fix. Verification passed: typecheck, build, full tests (4,455 pass, 0 fail), test isolation, eval:v5, eval:v5:market, coverage statements 97.31%, branches 95.00%, functions 96.51%, lines 97.39%, `bun audit`, `gitleaks detect --no-banner --redact --source .`, `git diff --check`, npm pack dry-run with package privacy scan, npm publish dry-run, and isolated npm tarball install smoke. At RC-preparation time, real npm publish was pending user OTP and Bun's global manifest still referenced `4.0.2`; the 2026-07-06 Phase 44 publish entry supersedes that pre-publish state. Do not use local Bun tarball/path install as a gate on Bun 1.3.5; Phase 44 observed a dependency-loop failure and Bun crash in that path.
+> **V5 PHASE 44 PUBLISHED 2026-07-06** - `@chude/memory@4.0.3` is published and verified. The user executed the real release manually/directly with `npm publish --access public --otp=<code>`; `aidev release` was not run. npm registry metadata reports `version=4.0.3` and `latest=4.0.3`, with `4.0.3` publish time `2026-07-05T23:19:39.577Z`. `bun add -g @chude/memory@4.0.3` completed from the registry, `memory --version` reports `4.0.3`, the Bun global manifest now references `4.0.3`, and `bun run verify:published @chude/memory@4.0.3` reports registry, npm global, Bun global, and smoke PASS. The scoped v5 local-first CLI/API release lane is shipped; broad category-leader claims remain blocked until MCP/local-server and public benchmark parity are implemented or explicitly dispositioned.
 > **INBOX RECONCILED 2026-05-28** - Stale bug reports for the Windows full-suite crash, orphaned friction test, and programmatic API real-DB pollution were validated against the current code and archived. The durable-friction-list filing was accepted into ROADMAP as post-v4 capacity, archived as planned, and counter-notified to conversations. No active memory-nexus inbox items remain.
 > **REMOTE CONSUMER NOTES REVIEWED 2026-05-30** - The two remotely consumer-impact inbox notes were reviewed against current memory-nexus docs/scripts. No current raw SSH/rsync operating instructions or hard-coded remotely tunnel-state assumptions were found, so both notes were archived with disposition text. Future Phase 38 cross-machine work must still use current `remotely` conventions where applicable.
 > **FIRST-PARTY INFRASTRUCTURE BROADCAST 2026-05-28** - User clarified that `memory` is a first-class first-party tool used by most/all projects. Canonical tool/package naming is `memory` / `@chude/memory`; the repository remains `memory-nexus`, and `nexus` is a legacy alias. Updated Codex/Claude rules and document-for-clear skills, added a Codex memory note, and filed notification inbox items to opted-in projects so consumers know about provider-secret, redaction/export, registry, and authkey-optional contract changes.
@@ -48,19 +49,19 @@ See: .planning/PROJECT.md (updated 2026-02-18)
 
 **Core Value:** Knowledge gained in one Claude Code project becomes accessible from any other project. No more context silos.
 
-**Current Focus:** Phase 44 - release-candidate-packaging-and-publish-handoff
+**Current Focus:** Post-v5 release follow-up
 
 **Tech Stack:** Bun, TypeScript 5.5+, bun:sqlite with FTS5 + sqlite-vec, Commander.js v14, @huggingface/transformers v3, cli-progress, chrono-node, Chart.js (HTML dashboard)
 
 ## Current Position
 
-Phase: 44 (Release-Candidate Packaging and Publish Handoff) - RC PREPARED
+Phase: 44 (Release-Candidate Packaging and Publish Handoff) - COMPLETE
 Plan: .planning/phases/44-release-candidate-packaging-publish-handoff/44-PLAN.md
 **Milestone:** v5.0 Market-Leader Memory Platform
-**Status:** Phase 44 release candidate prepared; real npm publish pending user OTP
+**Status:** `@chude/memory@4.0.3` published and registry-backed npm/Bun installs verified
 
 ```
-v5.0 Progress: [################-] 16/17 phases complete
+v5.0 Progress: [#################] 17/17 phases complete
   Phase 38.0: v5 Threat Model, PRD, Eval Baseline [done]
   Phase 38.1: Canonical Event Kernel and Projection Replay [done]
   Phase 38.2: Redaction, Privacy Governance, Audit Commands [done]
@@ -77,7 +78,7 @@ v5.0 Progress: [################-] 16/17 phases complete
   Phase 42: Dreaming Consolidation [done]
   Phase 42.5: Feature Completeness and UX Polish [done]
   Phase 43: Market-Leader and Sales-Readiness Gate [done]
-  Phase 44: Release-Candidate Packaging and Publish Handoff [RC prepared; publish pending]
+  Phase 44: Release-Candidate Packaging and Publish Handoff [done]
 ```
 
 ## v4.0 Published Baseline
@@ -199,9 +200,15 @@ v4.0 Progress: [############################] 14/14 phases complete
 - Added `43-VERIFICATION.md`; updated `43-READINESS-REPORT.md`, `43-CLAUDE-REVIEW.md`, `43-MARKET-REPORT.html`, `PROJECT.md`, `REQUIREMENTS.md`, `ROADMAP.md`, and this state file to reflect the scoped pass.
 - Active inbox truth: `docs/inbox/2026-07-05-remotely-phase25-reliability-contract.md` is triaged and is not a Phase 44 blocker. Act on it when memory next touches cross-machine automation or `remotely` install/run assumptions.
 
+**Completed publish handoff:**
+
+- The user ran direct `npm publish --access public --otp=<code>`, not `aidev release`.
+- Verified registry latest, registry publish time, registry-backed Bun global install, local `memory --version`, global manifest version, and `bun run verify:published @chude/memory@4.0.3`.
+
 **Next step:**
 
-- Real publish handoff: run `npm publish --access public --otp=<code>` only with the user's current OTP authorization, then run registry-backed verification with `bun add -g @chude/memory@4.0.3` and `bun run verify:published @chude/memory@4.0.3`.
+- Decide whether to create/push a `v4.0.3` git tag or leave this direct npm hotfix documented without a tag. Do not rewrite older ambiguous tags silently.
+- Continue with post-v5 follow-up: active inbox item `docs/inbox/2026-07-05-remotely-phase25-reliability-contract.md` remains triaged and low-priority; broad category-leader gaps remain MCP/local-server and public benchmark parity.
 
 ### Historical Resume Point - 2026-06-07
 
@@ -288,4 +295,4 @@ v4.0 Progress: [############################] 14/14 phases complete
 
 ---
 
-*Last updated: 2026-07-05 (v5.0 active; Phase 44 release candidate prepared; publish pending OTP)*
+*Last updated: 2026-07-06 (v5.0 scoped local-first release lane shipped as @chude/memory@4.0.3)*

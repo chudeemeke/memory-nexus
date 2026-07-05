@@ -1,11 +1,11 @@
 # Phase 44 Plan - Release-Candidate Packaging And Publish Handoff
 
 Created: 2026-07-05
-Status: release candidate prepared; publish pending OTP
+Status: complete
 
 ## Objective
 
-Prepare a clean `@chude/memory@4.0.3` release candidate from the post-Phase 43 source tree, prove it is package-safe and installable, install the fixed artifact locally for live use where the installer is trustworthy, and stop before real npm publish until the user provides OTP authorization.
+Prepare a clean `@chude/memory@4.0.3` release candidate from the post-Phase 43 source tree, prove it is package-safe and installable, install the fixed artifact locally for live use where the installer is trustworthy, and stop before real npm publish until the user provides OTP authorization. After user-authorized publish, verify registry metadata and registry-backed npm/Bun installs.
 
 ## Starting Truth
 
@@ -16,6 +16,14 @@ Prepare a clean `@chude/memory@4.0.3` release candidate from the post-Phase 43 s
 - Phase 43 passed scoped local-first CLI/API market readiness.
 - Broad market-leader claims remain blocked until MCP/local-server support and public benchmark parity are implemented or explicitly dispositioned.
 - Historical release hygiene issue: local tag `v4.0.2` points at `44a8707`, while later local docs say commit `6155b68` was published and verified as `4.0.2`. Do not rewrite the tag silently during this phase.
+
+## Completion Truth
+
+- `@chude/memory@4.0.3` was published manually/directly with `npm publish --access public --otp=<code>`.
+- `aidev release` was not run for this release.
+- npm `latest` now points at `4.0.3`.
+- `bun add -g @chude/memory@4.0.3` completed successfully from the registry.
+- `bun run verify:published @chude/memory@4.0.3` passed for registry, npm global, Bun global, and smoke checks.
 
 ## Version Decision
 
@@ -39,11 +47,11 @@ In scope:
 - Prove package privacy with `npm pack --dry-run --json`.
 - Create an installable tarball and smoke-test it in an isolated npm prefix.
 - Treat local Bun tarball/path global install as blocked on Bun 1.3.5 because it produced a dependency-loop failure and one Bun crash during this phase.
-- After real publish, install from the registry with `bun add -g @chude/memory@4.0.3` and verify with `bun run verify:published @chude/memory@4.0.3`.
+- After real publish, install from the registry with `bun add -g @chude/memory@4.0.3` and verify with `bun run verify:published @chude/memory@4.0.3`. This was completed after the user-authorized direct npm publish.
 - Record verification and update planning state.
 - Commit the release-candidate work.
 
-Out of scope:
+Out of scope before user OTP authorization:
 
 - Real `npm publish`.
 - Moving or rewriting historical tags.
@@ -72,3 +80,5 @@ Required before local install or publish handoff:
 ## Stop Condition
 
 Stop before real `npm publish --access public --otp=<code>`. The user must provide OTP authorization in the terminal session.
+
+Completed: the user provided OTP in their terminal and ran the direct npm publish command.
