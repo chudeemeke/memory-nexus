@@ -67,4 +67,3 @@ For future releases:
 4. Record npm shasum/integrity and publish time.
 5. Add post-publish verification in a later commit if needed.
 6. Push the branch commits and tag together so the tag target exists on the remote.
-
