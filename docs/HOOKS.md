@@ -6,13 +6,13 @@ Memory-nexus can automatically sync Claude Code sessions using the hook system. 
 
 ```bash
 # Install hooks (one-time setup)
-aidev memory install
+memory install
 
 # Check status
-aidev memory status
+memory status
 
 # Uninstall if needed
-aidev memory uninstall
+memory uninstall
 ```
 
 ## How It Works
@@ -141,10 +141,10 @@ If automatic installation fails, you can manually add hooks to `~/.claude/settin
 
 ```bash
 # Remove hooks (preserves database and config)
-aidev memory uninstall
+memory uninstall
 
 # Restore original settings from backup
-aidev memory uninstall --restore
+memory uninstall --restore
 ```
 
 The uninstall command:
@@ -157,7 +157,7 @@ The uninstall command:
 ### Check Status
 
 ```bash
-aidev memory status
+memory status
 ```
 
 Shows:
@@ -170,7 +170,7 @@ Shows:
 The `stats` command also includes a hooks section:
 
 ```bash
-aidev memory stats
+memory stats
 ```
 
 ### View Logs
@@ -201,7 +201,7 @@ Log entries include:
 
 #### Hooks Not Triggering
 
-1. Check hooks are installed: `aidev memory status`
+1. Check hooks are installed: `memory status`
 2. Verify `autoSync: true` in config
 3. Check Claude Code recognizes hooks: restart Claude Code
 4. Check logs for errors: `tail ~/.memory-nexus/logs/sync.log`
@@ -215,15 +215,15 @@ Log entries include:
 #### Sync Failing
 
 1. Check log file for errors
-2. Verify database is accessible: `aidev memory stats`
-3. Try manual sync: `aidev memory sync`
+2. Verify database is accessible: `memory stats`
+3. Try manual sync: `memory sync`
 4. Check disk space
 
 #### Settings.json Corrupted
 
 1. Restore from backup:
    ```bash
-   aidev memory uninstall --restore
+   memory uninstall --restore
    ```
 2. Or manually restore:
    ```bash
@@ -248,13 +248,13 @@ If hooks were disabled or failed, sessions may not have been synced. Use recover
 
 ```bash
 # See pending sessions count
-aidev memory status
+memory status
 
 # View stats (includes pending sessions)
-aidev memory stats
+memory stats
 
 # Sync all pending sessions
-aidev memory sync
+memory sync
 ```
 
 The `recoveryOnStartup` config option automatically scans for missed sessions on the first command.
@@ -273,13 +273,13 @@ To disable automatic sync while keeping hooks installed:
 Or uninstall hooks entirely:
 
 ```bash
-aidev memory uninstall
+memory uninstall
 ```
 
 Manual sync remains available:
 
 ```bash
-aidev memory sync
+memory sync
 ```
 
 ## File Locations
@@ -318,7 +318,7 @@ Check config (autoSync, syncOnCompaction)
 Spawn detached background process
        |
        v
-aidev memory sync --session <id> --quiet
+memory sync --session <id> --quiet
        |
        v
 Session extracted and stored in SQLite

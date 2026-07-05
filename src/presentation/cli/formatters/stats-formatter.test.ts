@@ -426,12 +426,12 @@ describe("StatsFormatter", () => {
 
       it("shows install hint when hooks not installed", () => {
         const output = formatter.formatStats(statsWithHooksNotInstalled);
-        expect(output).toContain("aidev memory install");
+        expect(output).toContain("memory install");
       });
 
       it("does not show install hint when hooks installed", () => {
         const output = formatter.formatStats(statsWithHooks);
-        expect(output).not.toContain("aidev memory install");
+        expect(output).not.toContain("memory install");
       });
 
       it("does not show hooks section when hooks not provided", () => {
@@ -511,7 +511,7 @@ describe("StatsFormatter", () => {
 
       it("shows install hint when not installed in verbose mode", () => {
         const output = formatter.formatStats(statsWithHooksNotInstalled);
-        expect(output).toContain("aidev memory install");
+        expect(output).toContain("memory install");
       });
     });
   });

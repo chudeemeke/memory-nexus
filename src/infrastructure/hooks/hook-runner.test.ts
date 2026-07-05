@@ -18,6 +18,7 @@ import {
     ensureLogDirectory,
     extractEntitiesFromSession,
     isInvokedByHook,
+    resolveDefaultMemoryCommand,
     type SpawnOptions,
 } from "./hook-runner.js";
 import { initializeDatabase, closeDatabase } from "../database/index.js";
@@ -80,6 +81,41 @@ describe("hook-runner", () => {
         });
     });
 
+    describe("resolveDefaultMemoryCommand", () => {
+        test("uses the PATH-resolved memory executable on Windows", () => {
+            const secondPathEntry = "C:\\Tools\\memory-bin";
+            const expected = join(secondPathEntry, "memory.cmd");
+
+            const command = resolveDefaultMemoryCommand({
+                platform: "win32",
+                pathEnv: ["C:\\Missing", secondPathEntry].join(";"),
+                exists: (candidate) => candidate === expected,
+            });
+
+            expect(command).toBe(expected);
+        });
+
+        test("falls back to memory when Windows PATH has no memory executable", () => {
+            const command = resolveDefaultMemoryCommand({
+                platform: "win32",
+                pathEnv: ["C:\\Missing", "C:\\StillMissing"].join(";"),
+                exists: () => false,
+            });
+
+            expect(command).toBe("memory");
+        });
+
+        test("uses memory command directly on non-Windows platforms", () => {
+            const command = resolveDefaultMemoryCommand({
+                platform: "linux",
+                pathEnv: "/tmp/bin",
+                exists: () => true,
+            });
+
+            expect(command).toBe("memory");
+        });
+    });
+
     describe("spawnBackgroundSync", () => {
         test("calls spawn with detached: true", () => {
             const spawnSpy = spyOn(childProcess, "spawn").mockReturnValue({
@@ -110,8 +146,7 @@ describe("hook-runner", () => {
 
             expect(spawnSpy).toHaveBeenCalledTimes(1);
             const [command, args] = spawnSpy.mock.calls[0];
-            expect(command).toBe("aidev");
-            expect(args).toContain("memory");
+            expect(String(command).toLowerCase()).toContain("memory");
             expect(args).toContain("sync");
             expect(args).toContain("--session");
             expect(args).toContain("my-session-id");
@@ -269,7 +304,7 @@ describe("hook-runner", () => {
                 expect(result.pid).toBe(24680);
                 expect(existsSync(join(testDir, "memory", "logs", "sync.log"))).toBe(true);
                 const [command, args] = spawnSpy.mock.calls[0];
-                expect(command).toBe("aidev");
+                expect(String(command).toLowerCase()).toContain("memory");
                 expect(args).toContain("--quiet");
             } finally {
                 spawnSpy.mockRestore();
@@ -309,12 +344,11 @@ describe("hook-runner", () => {
             });
 
             const [, args] = spawnSpy.mock.calls[0];
-            // Expected: ["memory", "sync", "--session", "sess-abc-123", "--quiet"]
-            expect(args[0]).toBe("memory");
-            expect(args[1]).toBe("sync");
-            expect(args[2]).toBe("--session");
-            expect(args[3]).toBe("sess-abc-123");
-            expect(args[4]).toBe("--quiet");
+            // Expected: ["sync", "--session", "sess-abc-123", "--quiet"]
+            expect(args[0]).toBe("sync");
+            expect(args[1]).toBe("--session");
+            expect(args[2]).toBe("sess-abc-123");
+            expect(args[3]).toBe("--quiet");
 
             spawnSpy.mockRestore();
         });

@@ -15,8 +15,8 @@
  */
 
 import { spawn, type ChildProcess } from "node:child_process";
-import { openSync, mkdirSync } from "node:fs";
-import { join } from "node:path";
+import { existsSync, openSync, mkdirSync } from "node:fs";
+import { delimiter, join } from "node:path";
 import { getLogDir as pathsGetLogDir } from "../paths.js";
 import type { Database } from "bun:sqlite";
 import { LlmExtractor } from "../../application/services/llm-extractor.js";
@@ -36,7 +36,7 @@ export interface LogWriter {
  * Options for spawnBackgroundSync
  */
 export interface SpawnOptions {
-    /** Override CLI command (default: "aidev") */
+    /** Override CLI command (default: resolved "memory" executable) */
     command?: string;
     /** Include --quiet flag (default: true) */
     quiet?: boolean;
@@ -50,6 +50,18 @@ export interface SpawnOptions {
 export interface SpawnResult {
     /** Process ID of spawned child, or undefined if spawn failed */
     pid: number | undefined;
+}
+
+/**
+ * Options for resolving the default memory executable.
+ */
+export interface ResolveMemoryCommandOptions {
+    /** Platform override for deterministic tests */
+    platform?: NodeJS.Platform;
+    /** PATH override for deterministic tests */
+    pathEnv?: string;
+    /** Filesystem existence check override */
+    exists?: (path: string) => boolean;
 }
 
 /**
@@ -74,6 +86,34 @@ export function ensureLogDirectory(logDir?: string): void {
     mkdirSync(dir, { recursive: true });
 }
 
+export function resolveDefaultMemoryCommand(
+    options: ResolveMemoryCommandOptions = {}
+): string {
+    const platform = options.platform ?? process.platform;
+    const pathEnv = options.pathEnv ?? process.env.PATH ?? "";
+    const pathExists = options.exists ?? existsSync;
+
+    if (platform !== "win32") {
+        return "memory";
+    }
+
+    const pathDelimiter = platform === "win32" ? ";" : delimiter;
+    const pathEntries = pathEnv
+        .split(pathDelimiter)
+        .filter(Boolean);
+
+    for (const dir of pathEntries) {
+        for (const name of ["memory.exe", "memory.cmd", "memory.bat", "memory"]) {
+            const candidate = join(dir, name);
+            if (pathExists(candidate)) {
+                return candidate;
+            }
+        }
+    }
+
+    return "memory";
+}
+
 /**
  * Spawn a background sync process for the given session
  *
@@ -83,7 +123,7 @@ export function ensureLogDirectory(logDir?: string): void {
  * - Logs output to sync.log
  *
  * The spawned command runs:
- * `aidev memory sync --session <sessionId> [--quiet]`
+ * `memory sync --session <sessionId> [--quiet]`
  *
  * Key implementation details:
  * - detached: true - Process runs in own process group
@@ -99,7 +139,7 @@ export function spawnBackgroundSync(
     sessionId: string,
     options: SpawnOptions = {}
 ): SpawnResult {
-    const { command = "aidev", quiet = true, logDir } = options;
+    const { command = resolveDefaultMemoryCommand(), quiet = true, logDir } = options;
 
     // Ensure log directory exists
     const logDirPath = logDir ?? pathsGetLogDir();
@@ -111,7 +151,7 @@ export function spawnBackgroundSync(
     const err = openSync(logPath, "a");
 
     // Build command arguments
-    const args = ["memory", "sync", "--session", sessionId];
+    const args = ["sync", "--session", sessionId];
     if (quiet) {
         args.push("--quiet");
     }

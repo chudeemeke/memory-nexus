@@ -1,0 +1,474 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>@chude/memory Phase 43 Market Readiness Report</title>
+  <style>
+    :root {
+      color-scheme: light dark;
+      --bg: #f6f7f2;
+      --panel: #ffffff;
+      --text: #17201b;
+      --muted: #5f6b62;
+      --line: #d8ded6;
+      --accent: #176b5b;
+      --accent-2: #2457a6;
+      --warn: #9a5b00;
+      --risk: #9b2f2f;
+      --ok: #1d7a46;
+      --shadow: 0 12px 30px rgba(20, 30, 24, 0.10);
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #111512;
+        --panel: #191f1b;
+        --text: #edf3ee;
+        --muted: #a8b5ad;
+        --line: #2d3831;
+        --accent: #62c4ac;
+        --accent-2: #8eb6ff;
+        --warn: #e1b35d;
+        --risk: #ff9b9b;
+        --ok: #76d49b;
+        --shadow: 0 12px 30px rgba(0, 0, 0, 0.30);
+      }
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.5;
+    }
+
+    a {
+      color: var(--accent-2);
+    }
+
+    .hero {
+      min-height: 84vh;
+      display: grid;
+      align-items: end;
+      padding: 56px clamp(20px, 5vw, 72px);
+      background:
+        linear-gradient(180deg, rgba(0, 0, 0, 0.15), rgba(0, 0, 0, 0.55)),
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1600' height='1000' viewBox='0 0 1600 1000'%3E%3Crect width='1600' height='1000' fill='%2318231d'/%3E%3Cg fill='none' stroke='%2362c4ac' stroke-opacity='.28' stroke-width='2'%3E%3Cpath d='M120 720 C320 510 450 590 630 380 S980 260 1210 420 1390 390 1500 260'/%3E%3Cpath d='M90 610 C250 450 440 460 610 300 S970 210 1210 320 1410 310 1510 170'/%3E%3Cpath d='M160 820 C350 690 500 760 710 590 S1040 510 1250 640 1420 650 1510 560'/%3E%3C/g%3E%3Cg fill='%23f6f7f2' fill-opacity='.86'%3E%3Ccircle cx='260' cy='565' r='8'/%3E%3Ccircle cx='610' cy='300' r='8'/%3E%3Ccircle cx='935' cy='254' r='8'/%3E%3Ccircle cx='1210' cy='420' r='8'/%3E%3Ccircle cx='1385' cy='388' r='8'/%3E%3Ccircle cx='710' cy='590' r='8'/%3E%3Ccircle cx='1250' cy='640' r='8'/%3E%3C/g%3E%3C/svg%3E");
+      background-size: cover;
+      background-position: center;
+      color: #ffffff;
+    }
+
+    .hero h1 {
+      max-width: 980px;
+      margin: 0 0 18px;
+      font-size: clamp(40px, 7vw, 92px);
+      line-height: 0.98;
+      letter-spacing: 0;
+    }
+
+    .hero p {
+      max-width: 880px;
+      margin: 0;
+      color: rgba(255, 255, 255, 0.88);
+      font-size: clamp(17px, 2.2vw, 24px);
+    }
+
+    main {
+      padding: 34px clamp(16px, 4vw, 56px) 72px;
+    }
+
+    .toolbar {
+      position: sticky;
+      top: 0;
+      z-index: 5;
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      align-items: center;
+      padding: 12px 0 18px;
+      background: color-mix(in srgb, var(--bg) 88%, transparent);
+      backdrop-filter: blur(12px);
+    }
+
+    button {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel);
+      color: var(--text);
+      padding: 9px 12px;
+      font: inherit;
+      cursor: pointer;
+    }
+
+    button[aria-pressed="true"] {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #ffffff;
+    }
+
+    section {
+      max-width: 1180px;
+      margin: 0 auto 46px;
+    }
+
+    h2 {
+      margin: 0 0 16px;
+      font-size: clamp(25px, 3vw, 40px);
+      letter-spacing: 0;
+    }
+
+    h3 {
+      margin: 0 0 8px;
+      font-size: 18px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 14px;
+    }
+
+    .card {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel);
+      padding: 18px;
+      box-shadow: var(--shadow);
+    }
+
+    .metric {
+      display: grid;
+      gap: 9px;
+    }
+
+    .metric strong {
+      font-size: 30px;
+      line-height: 1;
+    }
+
+    .bar {
+      height: 10px;
+      border-radius: 999px;
+      background: color-mix(in srgb, var(--line) 72%, transparent);
+      overflow: hidden;
+    }
+
+    .bar span {
+      display: block;
+      height: 100%;
+      width: var(--value);
+      background: var(--accent);
+    }
+
+    .status {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      border-radius: 999px;
+      padding: 4px 9px;
+      background: color-mix(in srgb, var(--accent) 12%, transparent);
+      color: var(--accent);
+      font-weight: 700;
+      font-size: 13px;
+    }
+
+    .status.warn {
+      background: color-mix(in srgb, var(--warn) 14%, transparent);
+      color: var(--warn);
+    }
+
+    .matrix {
+      overflow-x: auto;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 760px;
+    }
+
+    th, td {
+      border-bottom: 1px solid var(--line);
+      padding: 12px;
+      text-align: left;
+      vertical-align: top;
+    }
+
+    th {
+      color: var(--muted);
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    tr:last-child td {
+      border-bottom: 0;
+    }
+
+    .chart-wrap {
+      display: grid;
+      grid-template-columns: minmax(260px, 420px) 1fr;
+      gap: 18px;
+      align-items: center;
+    }
+
+    .radar {
+      width: 100%;
+      max-width: 420px;
+      aspect-ratio: 1;
+    }
+
+    .legend {
+      display: grid;
+      gap: 10px;
+    }
+
+    .legend-row {
+      display: grid;
+      grid-template-columns: 160px 1fr 44px;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    .source-list {
+      columns: 2 320px;
+      padding-left: 18px;
+    }
+
+    .note {
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    @media (max-width: 720px) {
+      .chart-wrap {
+        grid-template-columns: 1fr;
+      }
+
+      .legend-row {
+        grid-template-columns: 1fr;
+      }
+
+      table {
+        min-width: 680px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="hero">
+    <div>
+      <p class="status">Phase 43 complete - scoped approval granted</p>
+      <h1>@chude/memory market readiness</h1>
+      <p>A local-first, auditable, privacy-governed memory substrate for developer and agent workspaces. The credible claim is scoped CLI/API readiness; broad market-leader status remains blocked by MCP and benchmark gaps.</p>
+    </div>
+  </header>
+
+  <main>
+    <nav class="toolbar" aria-label="Report sections">
+      <button type="button" data-section="summary" aria-pressed="true">Summary</button>
+      <button type="button" data-section="competitors" aria-pressed="false">Competitors</button>
+      <button type="button" data-section="gaps" aria-pressed="false">Gaps</button>
+      <button type="button" data-section="evidence" aria-pressed="false">Evidence</button>
+      <button type="button" data-section="sources" aria-pressed="false">Sources</button>
+    </nav>
+
+    <section data-panel="summary">
+      <h2>Readiness Snapshot</h2>
+      <div class="grid">
+        <article class="card metric">
+          <span class="status">Eval gate</span>
+          <strong>9 / 9</strong>
+          <p>All v5 fixtures are behavior-backed. Contract fixture count is zero.</p>
+          <div class="bar" style="--value: 100%"><span></span></div>
+        </article>
+        <article class="card metric">
+          <span class="status warn">Decision</span>
+          <strong>Scoped Pass</strong>
+          <p>Phase 43 verification, package dry-run, gitleaks, coverage, and Claude review disposition are complete.</p>
+          <div class="bar" style="--value: 100%"><span></span></div>
+        </article>
+        <article class="card metric">
+          <span class="status">Lane</span>
+          <strong>Local-first</strong>
+          <p>The strongest claim is governed developer memory, not hosted enterprise graph memory or a full agent runtime.</p>
+          <div class="bar" style="--value: 88%"><span></span></div>
+        </article>
+      </div>
+    </section>
+
+    <section data-panel="summary">
+      <h2>Capability Profile</h2>
+      <div class="chart-wrap card">
+        <svg class="radar" viewBox="0 0 420 420" role="img" aria-label="Capability radar chart">
+          <defs>
+            <filter id="soft-shadow">
+              <feDropShadow dx="0" dy="8" stdDeviation="10" flood-opacity=".18"/>
+            </filter>
+          </defs>
+          <g transform="translate(210 210)" fill="none" stroke="currentColor" stroke-opacity=".16">
+            <polygon points="0,-180 156,-90 156,90 0,180 -156,90 -156,-90"/>
+            <polygon points="0,-135 117,-67.5 117,67.5 0,135 -117,67.5 -117,-67.5"/>
+            <polygon points="0,-90 78,-45 78,45 0,90 -78,45 -78,-45"/>
+            <line x1="0" y1="0" x2="0" y2="-180"/>
+            <line x1="0" y1="0" x2="156" y2="-90"/>
+            <line x1="0" y1="0" x2="156" y2="90"/>
+            <line x1="0" y1="0" x2="0" y2="180"/>
+            <line x1="0" y1="0" x2="-156" y2="90"/>
+            <line x1="0" y1="0" x2="-156" y2="-90"/>
+          </g>
+          <polygon transform="translate(210 210)" filter="url(#soft-shadow)" points="0,-164 133,-77 125,72 0,145 -109,63 -102,-59" fill="#176b5b" fill-opacity=".32" stroke="#176b5b" stroke-width="3"/>
+          <g fill="currentColor" font-size="13" text-anchor="middle">
+            <text x="210" y="18">Privacy</text>
+            <text x="384" y="119">Governance</text>
+            <text x="384" y="307">Recovery</text>
+            <text x="210" y="410">Agentic control</text>
+            <text x="36" y="307">Agent-native UX</text>
+            <text x="36" y="119">Benchmarks</text>
+          </g>
+        </svg>
+        <div class="legend">
+          <div class="legend-row"><strong>Privacy</strong><div class="bar" style="--value: 91%"><span></span></div><span>9.1</span></div>
+          <div class="legend-row"><strong>Governance</strong><div class="bar" style="--value: 85%"><span></span></div><span>8.5</span></div>
+          <div class="legend-row"><strong>Recovery</strong><div class="bar" style="--value: 80%"><span></span></div><span>8.0</span></div>
+          <div class="legend-row"><strong>Agentic control</strong><div class="bar" style="--value: 81%"><span></span></div><span>8.1</span></div>
+          <div class="legend-row"><strong>Agent-native UX</strong><div class="bar" style="--value: 63%"><span></span></div><span>6.3</span></div>
+          <div class="legend-row"><strong>Benchmarks</strong><div class="bar" style="--value: 45%"><span></span></div><span>4.5</span></div>
+        </div>
+      </div>
+      <p class="note">Scores are Phase 43 audit judgments, not benchmark results. Benchmark parity remains an owned gap and blocks broad market-leader claims.</p>
+    </section>
+
+    <section data-panel="competitors" class="hidden">
+      <h2>Competitive Matrix</h2>
+      <div class="matrix">
+        <table>
+          <thead>
+            <tr>
+              <th>System</th>
+              <th>Market pattern</th>
+              <th>Where it is stronger</th>
+              <th>Where memory can win</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>Mem0</td><td>Universal memory layer with broad agent integrations.</td><td>Ecosystem and adoption.</td><td>Local-first audit, explicit egress, first-party developer workflow.</td></tr>
+            <tr><td>Zep / Graphiti</td><td>Enterprise temporal knowledge graph memory.</td><td>Graph depth and enterprise positioning.</td><td>Private local graph, event replay, personal portfolio memory.</td></tr>
+            <tr><td>Letta</td><td>Stateful agent runtime and memory-native agent products.</td><td>Agent runtime integration.</td><td>Standalone substrate across many tools without becoming the runtime.</td></tr>
+            <tr><td>Hermes</td><td>Complete agent runtime with bounded built-in memory, provider plugins, skills, gateways, and scheduling.</td><td>Product surface and agent-native learning loop.</td><td>Search, governance, event replay, explicit egress, recovery, cross-project recall.</td></tr>
+            <tr><td>OpenClaw</td><td>Personal assistant with broad device/channel reach and human-readable Markdown workspace memory.</td><td>Assistant reach, inspectable files, and user-facing product flow.</td><td>Structured eventing, consent, redaction, evals, remote recovery.</td></tr>
+            <tr><td>MemPalace</td><td>Local-first memory product with pluggable backend and public LongMemEval-style benchmark positioning.</td><td>Benchmark story and retrieval credibility.</td><td>Governed derived memory, explicit egress, provenance, project portfolio operations.</td></tr>
+            <tr><td>Hedra</td><td>Creative agent rather than direct memory substrate.</td><td>Intent-to-output workflow, reference assets, brand/style consistency.</td><td>Project style capsules, document-grounded context, revision memory patterns.</td></tr>
+            <tr><td>GitHub Copilot memory</td><td>Cross-agent memory across coding agent, CLI, and code review.</td><td>Workflow integration and branch/code-state relevance framing.</td><td>Local-first user control, inspectability, first-party portfolio scope.</td></tr>
+            <tr><td>LangMem</td><td>SDK for long-term memory and LangGraph integration.</td><td>Developer SDK ecosystem.</td><td>CLI/API product independent of a single agent framework.</td></tr>
+            <tr><td>OpenAI memory</td><td>Saved memories, reference history, and reviewable dreaming summaries.</td><td>Consumer UX and model-native memory.</td><td>Local-first inspectability, explicit operational recovery, first-party control.</td></tr>
+            <tr><td>Claude Code memory</td><td>CLAUDE.md and auto-memory loaded as session context.</td><td>Native Claude workflow context.</td><td>Durable search, governance, evals, cross-project historical recall.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section data-panel="gaps" class="hidden">
+      <h2>Owned Gaps</h2>
+      <div class="grid">
+        <article class="card">
+          <h3>MCP/local server</h3>
+          <p>Competitive gap against MemPalace, OpenClaw, and Mem0 plugins. It blocks broad market-leader claims and must be owned as a v5.x or post-v5 phase.</p>
+        </article>
+        <article class="card">
+          <h3>Benchmark parity</h3>
+          <p>No LongMemEval/LoCoMo-style public result exists. The product must not claim benchmark leadership until those tests are designed and run.</p>
+        </article>
+        <article class="card">
+          <h3>Release packaging</h3>
+          <p>Phase 44 owns versioning, changelog, release notes, package smoke, npm dry-run, and OTP-backed publish handoff.</p>
+        </article>
+      </div>
+      <h2 style="margin-top: 34px;">Top Competitive Enhancements</h2>
+      <div class="matrix">
+        <table>
+          <thead>
+            <tr>
+              <th>Rank</th>
+              <th>Enhancement</th>
+              <th>Why it matters</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>1</td><td>MCP/local server adapter</td><td>Turns memory from CLI-native to agent-native with scoped tools and permissions.</td></tr>
+            <tr><td>2</td><td>Public benchmark harness</td><td>Replaces internal confidence with reproducible retrieval proof.</td></tr>
+            <tr><td>3</td><td>Bounded active-memory capsule</td><td>Gives agents a stable always-present prompt memory without losing auditability.</td></tr>
+            <tr><td>4</td><td>Branch/worktree validity</td><td>Prevents stale or branch-local observations from becoming global truth.</td></tr>
+            <tr><td>5</td><td>Interop bridges</td><td>Lets users migrate from Hermes, OpenClaw, MemPalace, Mem0, Zep, and Graphiti surfaces.</td></tr>
+            <tr><td>6</td><td>Outcome-backed procedural learning</td><td>Promotes lessons only when tied to verified task outcomes.</td></tr>
+            <tr><td>7</td><td>Memory-poisoning defenses</td><td>Adds trust, contradiction, receipt, suppression, and confirmation controls.</td></tr>
+            <tr><td>8</td><td>Inspection dashboard or TUI</td><td>Makes provenance, graph edges, ranking, dreams, and egress understandable.</td></tr>
+            <tr><td>9</td><td>Consent-aware connectors</td><td>Captures Codex, Claude Code, GitHub, IDE, shell, and first-party tool events without hidden egress.</td></tr>
+            <tr><td>10</td><td>Tiered retrieval</td><td>Supports abstract, overview, and full-context retrieval with explainable budgets.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section data-panel="evidence" class="hidden">
+      <h2>Current Evidence</h2>
+      <div class="grid">
+        <article class="card"><h3>Behavior evals</h3><p>9 fixtures passed. Privacy, leakage, supersedence, sync recovery, friction, persona, graph, ranking, and dreaming are behavior-backed.</p></article>
+        <article class="card"><h3>Remote conflict</h3><p>Fake transport fails pullRebase; service aborts rebase and does not call push. Evidence is emitted by the eval harness.</p></article>
+        <article class="card"><h3>Quality gate</h3><p>Final Phase 43 verification passed: full tests 4,455/0, coverage statements 97.31%, branches 95.00%, functions 96.51%, lines 97.39%.</p></article>
+      </div>
+    </section>
+
+    <section data-panel="sources" class="hidden">
+      <h2>Sources</h2>
+      <ul class="source-list">
+        <li><a href="https://docs.mem0.ai/introduction">Mem0 documentation</a></li>
+        <li><a href="https://www.getzep.com/">Zep homepage</a></li>
+        <li><a href="https://arxiv.org/abs/2501.13956">Zep / Graphiti paper</a></li>
+        <li><a href="https://www.letta.com/">Letta homepage</a></li>
+        <li><a href="https://hermes-agent.nousresearch.com/docs/user-guide/features/memory">Hermes memory docs</a></li>
+        <li><a href="https://docs.openclaw.ai/concepts/memory">OpenClaw memory docs</a></li>
+        <li><a href="https://github.com/mempalace/mempalace">MemPalace GitHub</a></li>
+        <li><a href="https://www.hedra.com/models/ai-agent">Hedra Agent</a></li>
+        <li><a href="https://github.blog/ai-and-ml/github-copilot/building-an-agentic-memory-system-for-github-copilot/">GitHub Copilot memory</a></li>
+        <li><a href="https://langchain-ai.github.io/langmem/">LangMem docs</a></li>
+        <li><a href="https://help.openai.com/en/articles/8590148-memory-faq">OpenAI Memory FAQ</a></li>
+        <li><a href="https://openai.com/index/chatgpt-memory-dreaming/">OpenAI memory dreaming</a></li>
+        <li><a href="https://code.claude.com/docs/en/memory">Claude Code memory docs</a></li>
+      </ul>
+    </section>
+  </main>
+
+  <script>
+    const buttons = Array.from(document.querySelectorAll("[data-section]"));
+    const panels = Array.from(document.querySelectorAll("[data-panel]"));
+
+    function show(section) {
+      buttons.forEach((button) => {
+        button.setAttribute("aria-pressed", String(button.dataset.section === section));
+      });
+      panels.forEach((panel) => {
+        panel.classList.toggle("hidden", panel.dataset.panel !== section);
+      });
+    }
+
+    buttons.forEach((button) => {
+      button.addEventListener("click", () => show(button.dataset.section));
+    });
+  </script>
+</body>
+</html>

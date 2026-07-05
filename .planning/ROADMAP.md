@@ -6,7 +6,7 @@
 - SHIPPED **v2.0 Hybrid Search and Rebrand** -- Phases 13-22 (shipped 2026-03-01)
 - SHIPPED **v3.0 Knowledge Layer + Friction Logging** -- Phases 23-29.1 (shipped 2026-04-02)
 - SHIPPED **v4.0 Intelligence Layer** -- Phases 30-37 plus 32.5, 36.8, 36.9, and 36.10 (published 2026-05-30 as `@chude/memory@4.0.0`; architecture audit LOCKED 2026-05-13, recommendation A-prime; 2026-05-27 foundation review added pre-publish security hardening before GA; Phase 36.9 coverage gate restored 2026-05-30; Phase 36.10 hardened legacy memory-file defaults before publish)
-- IN PROGRESS **v5.0 Market-Leader Memory Platform** -- Phases 38.0-44 plus urgent Phase 41.1 (started 2026-06-05; Phase 41 importance, utility, and recall ranking complete; Phase 41.1 embedding pipeline resilience active before Phase 42 dreaming consolidation; added consent/provenance, eval harness, feature-completeness/UX, and release-candidate handoff gates)
+- IN PROGRESS **v5.0 Market-Leader Memory Platform** -- Phases 38.0-44 plus urgent Phase 41.1 (started 2026-06-05; Phase 43 scoped market-readiness gate complete; Phase 44 release-candidate packaging and publish handoff remains)
 
 ## Phases
 
@@ -101,7 +101,7 @@
 - [x] **Phase 41: Importance, Utility, and Recall Ranking** - Utility metrics, memory-kind half-life policies, and explainable ranking. Completed 2026-06-07.
 - [x] **Phase 42: Dreaming Consolidation** - Audited dreaming consolidation, promotion, supersedence, and rollback through canonical events and schema-versioned projection. Completed 2026-07-01.
 - [x] **Phase 42.5: Feature Completeness and UX Polish** - Inventory all stated/inferred/prototype features, complete or explicitly own them, and polish CLI/API usability to excellent standard. Completed 2026-07-03.
-- [ ] **Phase 43: Market-Leader and Sales-Readiness Gate** - Final architecture/security/quality/product/competitive review and readiness proof.
+- [x] **Phase 43: Market-Leader and Sales-Readiness Gate** - Final architecture/security/quality/product/competitive review and readiness proof. Completed 2026-07-05 for scoped local-first CLI/API market readiness.
 - [ ] **Phase 44: Release-Candidate Packaging and Publish Handoff** - Versioning, package smoke, changelog/release notes, npm dry-run, and OTP-backed publish handoff without publishing until user authorization.
 
 ## Phase Details
@@ -640,7 +640,16 @@ Plans:
   4. Product review proves fresh-user install, onboarding, configure, audit, backup, restore, upgrade, and verification flows.
   5. Competitive review demonstrates a crisp local-first value proposition and no known unowned blocker.
   6. Product North Star conformance audit passes with no unowned mismatch.
-**Plans**: Placeholder directory exists; plan after Phase 42.5.
+**Plans**: 1/1 complete. See `.planning/phases/43-market-leader-sales-readiness-gate/43-VERIFICATION.md`.
+**Status**: Complete 2026-07-05.
+**Implemented**:
+  - Promoted `remote_sync_conflict` from the final market-blocking contract fixture to behavior-backed eval coverage.
+  - Added final architecture, security, quality, product, competitive, and Product North Star readiness reports.
+  - Added interactive HTML market report with competitor positioning and explicit owned gaps.
+  - Refreshed `CLAUDE.md` to remove stale downstream-agent guidance and encode the scoped readiness boundary.
+  - Fixed Windows hook background sync launcher behavior so hooks resolve and launch `memory sync` directly instead of assuming `aidev memory sync` through a shell.
+**Verification**: `bun run typecheck`, `bun run build`, full tests (4,455 pass, 0 fail), `bun run test:isolation`, `bun run eval:v5`, `bun run eval:v5:market`, `bun run test:coverage` (statements 97.31%, branches 95.00%, functions 96.51%, lines 97.39%), `bun audit`, `gitleaks detect --no-banner --redact --source .`, `git diff --check`, `npm pack --dry-run --json`, and package privacy check passed.
+**Decision**: Scoped local-first CLI/API market readiness approved. Broad agentic-memory category-leader claims remain blocked until MCP/local-server support and public benchmark parity are implemented or explicitly dispositioned.
 
 ---
 
@@ -795,9 +804,9 @@ v5.0
 | 41.1. Embedding Pipeline Resilience | v5.0 | 1/1 | Complete | 2026-06-22 |
 | 42. Dreaming Consolidation | v5.0 | 2026-07-01 | Complete | Explicit `memory dream`; audited/event-sourced proposal, apply, rollback; behavior-backed eval |
 | 42.5. Feature Completeness and UX Polish | v5.0 | 1/1 | Complete | 2026-07-03 |
-| 43. Market-Leader and Sales-Readiness Gate | v5.0 | TBD | Planned | - |
+| 43. Market-Leader and Sales-Readiness Gate | v5.0 | 1/1 | Complete | 2026-07-05 |
 | 44. Release-Candidate Packaging and Publish Handoff | v5.0 | TBD | Planned | - |
 
 ---
 
-*Last updated: 2026-07-03 (Phase 42.5 complete; Phase 43 next)*
+*Last updated: 2026-07-05 (Phase 43 complete; Phase 44 next)*

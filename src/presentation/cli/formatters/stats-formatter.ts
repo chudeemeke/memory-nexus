@@ -171,7 +171,7 @@ class DefaultStatsFormatter implements StatsFormatter {
       output += `  Pending sessions: ${stats.hooks.pendingSessions}\n`;
 
       if (!stats.hooks.installed) {
-        output += "\n  Run 'aidev memory install' to enable automatic sync\n";
+        output += "\n  Run 'memory install' to enable automatic sync\n";
       }
     }
 
@@ -310,7 +310,7 @@ class VerboseStatsFormatter implements StatsFormatter {
       output += `  Pending sessions: ${stats.hooks.pendingSessions}\n`;
 
       if (!stats.hooks.installed) {
-        output += "\n  Run 'aidev memory install' to enable automatic sync\n";
+        output += "\n  Run 'memory install' to enable automatic sync\n";
       }
     }
 

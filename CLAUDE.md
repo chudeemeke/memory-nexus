@@ -1,229 +1,109 @@
 # @chude/memory
 
-Cross-project context persistence for Claude Code sessions.
-
-## Quick Summary
-
-**Problem:** Claude Code sessions are per-directory and deleted after 30 days. Context does not transfer between projects. Knowledge gained in one project is invisible to work in another.
-
-**Solution:** Extract session JSONL files into a searchable SQLite database accessible from any project via the `memory` CLI.
-
-**Package:** `@chude/memory` (binary: `memory`)
-**Install:** `bun add -g @chude/memory`
+`@chude/memory` is the first-party memory infrastructure layer for this project portfolio. The repository name is `memory-nexus`; the package and binary are `@chude/memory` and `memory`.
 
 ## Product North Star
 
-Before planning, implementation, review, or release work, read `.planning/PROJECT.md` and treat its `Product North Star` section as normative project direction. It defines the intended end state for `@chude/memory` as first-class, first-party, local-first memory infrastructure for the whole project portfolio.
+Before planning, implementation, review, or release work, read `.planning/PROJECT.md` and treat its Product North Star section as normative.
 
-Do not narrow this project back into a Claude-log search CLI, remove stated or inferred features silently, overstate docs beyond verified implementation, hardcode provider/project/path assumptions where registry/configuration is required, or treat isolated test success as sufficient when full-suite/readiness gates are required.
+The intended end state is not a Claude-log search CLI. It is a local-first, privacy-governed, auditable memory substrate that lets multiple projects and agents carry forward verified context, decisions, preferences, friction, facts, and derived knowledge without relying on stale chat summaries or scattered notes.
 
-## AI-First Design
+Do not silently remove stated, inferred, prototype, disabled, or partial features. Complete them, explicitly own them in a later phase, or document why they are a non-goal.
 
-**CRITICAL:** This tool is designed for Claude to use, not just humans.
+## Current State
 
-### How It Works
+- v4 is published as `@chude/memory`.
+- v5 Market-Leader Memory Platform is active.
+- Phase 42.5 is complete.
+- Phase 43 is complete with scoped local-first CLI/API market readiness approved.
+- Phase 44 is next and owns release-candidate packaging, versioning, changelog, release notes, npm dry-run, install smoke, and user-authorized OTP publish handoff.
+- The current published package remains `@chude/memory@4.0.2`; source is ahead after a Windows hook-launcher fix, so Phase 44 must decide the next version and release path.
 
-Memory creates a well-structured SQLite database. Both Claude and humans query it using the same CLI commands:
+Do not claim broad market-leader status unless MCP/local-server and public benchmark gaps are either implemented or explicitly dispositioned with user sign-off. Scoped market readiness for the local-first CLI/API product is a separate, narrower claim.
 
-```bash
-# These work identically whether Claude or human runs them
-memory search "authentication patterns"
-memory context wow-system
-memory related <session-id>
-```
+## Architecture
 
-Claude uses the Bash tool to run these commands. No special formatting needed - good database design + standard CLI = works for everyone.
+Use the existing hexagonal architecture:
 
-### Database Design (Medium Complexity)
+- `src/domain`: entities, value objects, ports, pure domain services. No third-party runtime dependencies.
+- `src/application`: use cases and orchestration through ports.
+- `src/infrastructure`: SQLite, filesystem, hooks, providers, Git transport, security adapters.
+- `src/presentation`: Commander CLI commands, formatters, pickers, process-facing surfaces.
 
-SQLite + FTS5 + Relationship Tables:
-- **Relational queries** - Standard SQL
-- **Full-text search** - FTS5 extension
-- **Graph-like traversal** - Link tables for multi-relationships
+Prefer dependency injection and existing ports over hardcoded provider, path, project, or process assumptions. Provider behavior belongs in registries/configuration/capabilities, not scattered switches in presentation code.
 
-```sql
--- The "links" table enables graph-like queries
-CREATE TABLE links (
-    source_type TEXT,  -- 'message', 'session', 'topic'
-    source_id TEXT,
-    target_type TEXT,
-    target_id TEXT,
-    relationship TEXT, -- 'mentions', 'related_to', 'continues'
-    weight REAL
-);
-```
+## Command Surface
 
-### When Claude Should Query Memory
+Important current surfaces include:
 
-- Starting work on unfamiliar project area
-- User references "what we discussed before"
-- Looking for patterns across projects
-- Retrieving decisions/rationale from past sessions
+- Query: `query`, `search`, `context`, `show`, `list`, `related`, `stats`, `facts`, `governance`, `profile`, `dream`
+- Data: `sync`, `backfill`, `export`, `import`, `purge`, `migrate`, `extract`, `remote`, `backup`, `restore`, `projections`
+- System: `install`, `uninstall`, `status`, `doctor`, `audit-secrets`, `completion`, `browse`
+- Feedback: `friction`
 
-### Future Enhancement: Vector Embeddings
+Prefer JSON output for machine-facing checks. Do not call `process.exit()` from programmatic execute functions.
 
-Semantic similarity search via embedding infrastructure. Phases 14-16 add sqlite-vec, embedding pipeline, and hybrid BM25+cosine search.
+Hook background sync must launch `memory sync` directly through the resolved `memory` executable. Do not reintroduce `aidev memory sync` or shell-wrapper assumptions in hook code.
 
-## Documentation
+## Privacy And Security
 
-Read these in order to understand the full context:
+Memory ingests sensitive transcripts and tool output. Treat privacy as product behavior.
 
-1. **[docs/01-VISION.md](docs/01-VISION.md)** - Problem statement and vision
-2. **[docs/02-RESEARCH.md](docs/02-RESEARCH.md)** - Technical research findings
-3. **[docs/03-DECISION-JOURNEY.md](docs/03-DECISION-JOURNEY.md)** - How we arrived at current design
-4. **[docs/04-ARCHITECTURE.md](docs/04-ARCHITECTURE.md)** - Technical design and data model
-5. **[docs/05-IMPLEMENTATION.md](docs/05-IMPLEMENTATION.md)** - Build plan and phases
+- Redact before storage, FTS, embedding, extraction, export, logs, provider egress, and remote sync.
+- Provider egress is deny-by-default unless explicit consent and provider/host allowlists are configured.
+- Remote sync is explicit. Plain `memory sync` must not silently push to a remote.
+- `memory audit-secrets` must not print raw secrets.
+- `apiKeyRef` is opaque metadata. Do not resolve it to plaintext and do not call `authkey get`.
+- Authkey interop is optional and should use runtime injection such as `authkey run --env memory -- memory sync --embed`.
 
-## Project Structure
+## Local Paths
 
-```
-memory/
-├── CLAUDE.md               # This file - project guidance
-├── MIGRATION.md            # Upgrade guide from memory-nexus to @chude/memory
-├── deprecation-stub/       # Stub package published as "memory-nexus" on npm
-├── docs/
-│   ├── SCRATCHPAD.md       # Documentation coordination
-│   ├── 01-VISION.md        # Problem and vision
-│   ├── 02-RESEARCH.md      # Technical research
-│   ├── 03-DECISION-JOURNEY.md  # Design decisions
-│   ├── 04-ARCHITECTURE.md      # Technical design
-│   └── 05-IMPLEMENTATION.md    # Build plan
-├── src/                    # Implementation
-│   ├── domain/             # Domain layer (zero external deps)
-│   ├── application/        # Application services
-│   ├── infrastructure/     # Database, hooks, filesystem
-│   └── presentation/       # CLI commands
-└── tests/                  # Test suites
-```
+Use symlinked project paths:
 
-## Related Projects
+- WSL/Linux: `~/Projects/memory-nexus`
+- Windows: `C:\Projects\memory-nexus`
 
-| Project | Path | Relationship |
-|---------|------|--------------|
-| MCP Attempt | ~/Projects/mcp-nexus/servers/memory-nexus | Predecessor using MCP approach (different design) |
-| aidev | ~/Projects/ai-dev-environment | CLI integration target (`aidev memory` subcommand) |
-| wow-system | ~/Projects/wow-system | Where this idea originated during v8.0 planning |
-| get-stuff-done | ~/Projects/get-stuff-done | GSD methodology for implementation |
+Avoid full iCloud paths with spaces in commands, docs, examples, and new tests unless the point of the test is path-decoding behavior.
 
-## Key Technical Decisions
+Runtime data follows XDG-style locations:
 
-| Decision | Choice | Rationale |
-|----------|--------|-----------|
-| Package name | @chude/memory, binary: memory | Matches aidev subcommand; old name deprecated |
-| Database | SQLite + FTS5 | Embedded, no server, full-text search built-in |
-| Paths | XDG Base Directory Specification | ~/.config/memory (config), ~/.local/share/memory (data) |
-| Trigger | Hook + manual CLI | Automatic extraction with manual fallback |
-| Integration | aidev subcommand | Consistent with user's existing tooling |
-| Migration | Automatic on first run | Detects ~/.memory-nexus/ and migrates to XDG paths |
+- Config: `~/.config/memory/config.json`
+- Data: `~/.local/share/memory/`
+- Database: `~/.local/share/memory/memory.db`
+- Backups: `~/.local/share/memory/backups/`
 
-## Session Storage Reference
+Legacy `~/.memory` / `MEMORY_HOME` sidecars are compatibility-only and explicit opt-in.
 
-Understanding Claude Code's session storage is critical for this project:
+## Quality Gates
 
-- **Location:** `~/.claude/projects/<encoded-dir>/*.jsonl`
-- **Format:** Newline-delimited JSON (one event per line)
-- **Retention:** 30 days (configurable in Claude Code settings)
-- **Encoding:** Directory path is encoded (possibly base64 or hash)
-- **Limitation:** Sessions are NOT portable between project directories
-
-## Commands
+Use Bun. Required gates for serious changes:
 
 ```bash
-# Sync all sessions to database
-memory sync
-
-# Full-text search across all sessions
-memory search "query"
-
-# Get context for specific project
-memory context <project>
-
-# List recent sessions
-memory list
-
-# Show session details
-memory show <session-id>
-
-# Install/uninstall Claude Code hooks
-memory install
-memory uninstall
-
-# Check installation health
-memory doctor
-memory status
+bun run typecheck
+bun run build
+bun test --timeout 15000
+bun run test:isolation
+bun run eval:v5
+bun run eval:v5:market
+bun run test:coverage
+bun audit
+gitleaks detect --no-banner --redact --source .
+git diff --check
+npm pack --dry-run --json
 ```
 
-## Data Paths
+Coverage must pass at each metric independently: statements, branches, functions, and lines all >= 95%.
 
-| Purpose | Path |
-|---------|------|
-| Config | `~/.config/memory/config.json` |
-| Database | `~/.local/share/memory/memory.db` |
-| Logs | `~/.local/share/memory/logs/` |
-| Hooks | `~/.local/share/memory/hooks/` |
-| Backups | `~/.local/share/memory/backups/` |
-| Legacy (migration source) | `~/.memory-nexus/` |
+## Agent Guidance
 
-## Quality Standards
+When resuming work, recover from disk-backed truth first:
 
-This project follows the user's Ways of Working (WoW) standards:
+1. `git status --short --branch`
+2. `.planning/STATE.md`
+3. `.planning/ROADMAP.md`
+4. `.planning/REQUIREMENTS.md`
+5. The active phase directory under `.planning/phases/`
+6. `docs/inbox/`
+7. Current command output
 
-- **TDD:** Write tests before implementation
-- **Coverage:** 95%+ at EACH metric (statements, branches, functions, lines)
-- **Architecture:** Hexagonal (Domain-Application-Infrastructure-Presentation)
-- **SOLID:** Apply principles to all design decisions
-- **Git Author:** Chude <chude@emeke.org>
-- **No Emojis:** Never in commits, docs, or code
-- **No AI Attribution:** Never include "Generated with Claude" etc.
-
-## Technical Context
-
-### SQLite FTS5
-
-Full-text search extension for SQLite:
-```sql
--- Create virtual table with FTS5
-CREATE VIRTUAL TABLE sessions_fts USING fts5(
-    content,
-    project,
-    timestamp
-);
-
--- Search with ranking
-SELECT * FROM sessions_fts WHERE sessions_fts MATCH 'query'
-ORDER BY rank;
-```
-
-### JSONL Parsing
-
-Each line is independent JSON:
-```python
-with open(session_file) as f:
-    for line in f:
-        event = json.loads(line)
-        # Process event
-```
-
-### Hook Integration
-
-Claude Code hooks trigger automatic sync:
-```json
-{
-  "hooks": {
-    "SessionEnd": [{
-      "hooks": [{
-        "type": "command",
-        "command": "bun run ~/.local/share/memory/hooks/sync-hook.js",
-        "timeout": 5
-      }]
-    }]
-  }
-}
-```
-
-## History
-
-- **Origin:** Idea emerged during WoW v8.0 planning session
-- **MCP Attempt:** Previous approach using MCP server (abandoned)
-- **v1.0:** Shipped as memory-nexus with full CLI, sync, search, and hooks
-- **v2.0:** Renamed to @chude/memory, XDG paths, embedding infrastructure planned
+Treat docs as hypotheses when they conflict with code or runtime evidence. Update stale project guidance as part of the work instead of leaving future agents to rediscover drift.

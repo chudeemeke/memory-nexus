@@ -39,7 +39,7 @@ My pushback line is also clear: it is not done if it merely "works." It is not d
 
 ## Current State
 
-v4.0 is shipped, and the latest verified patch on npm/local install is `@chude/memory@4.0.2`. v5.0 Market-Leader Memory Platform execution is active. Phase 42 dreaming consolidation and Phase 42.5 safe local maintenance workflows are implemented and verified. Phase 43 market-leader sales/readiness gate is active; its first implementation slice promoted the last contract-only v5 eval fixture to behavior-backed coverage, so `eval:v5:market` now passes. The remaining Phase 43 work is the readiness audit, competitive market report, Claude critique disposition, final gates, and Phase 44 release-candidate handoff.
+v4.0 is shipped, and the latest verified patch on npm/local install is `@chude/memory@4.0.2`. v5.0 Market-Leader Memory Platform execution is active. Phase 42 dreaming consolidation, Phase 42.5 safe local maintenance workflows, and Phase 43 scoped market-readiness gates are implemented and verified. Phase 43 promoted the last contract-only v5 eval fixture to behavior-backed coverage, so `eval:v5:market` now passes. Phase 43 approves scoped market readiness for the local-first CLI/API product only; broad agentic-memory category-leader claims remain blocked until MCP/local-server support and public benchmark parity are implemented or explicitly dispositioned. Source is ahead of the published package after a Windows hook-launcher fix, so Phase 44 owns the next version and release handoff.
 
 **Tech stack:** Bun, TypeScript 5.5+, bun:sqlite with FTS5 + sqlite-vec, Commander.js v14, cli-progress, chrono-node, @huggingface/transformers v3
 
@@ -47,7 +47,7 @@ v4.0 is shipped, and the latest verified patch on npm/local install is `@chude/m
 
 **Commands:** sync, search, list, stats, context, related, show, browse, install, uninstall, status, doctor, purge, export, import, completion, facts, extract, remote, governance, profile, friction, dream
 
-**Test suite:** Current Phase 42 gate passes typecheck, build, full tests, test isolation, eval, coverage, dependency audit, focused inbox lint, gitleaks, and diff whitespace. Full tests pass with 4,366 tests and zero failures. The Istanbul-backed coverage gate measures all four metrics independently and passes at statements 97.35%, branches 95.01%, functions 96.59%, and lines 97.45%.
+**Test suite:** Current Phase 43 gate passes typecheck, build, full tests, test isolation, evals, coverage, dependency audit, gitleaks, diff whitespace, and package dry-run. Full tests pass with 4,455 tests and zero failures. The Istanbul-backed coverage gate measures all four metrics independently and passes at statements 97.31%, branches 95.00%, functions 96.51%, and lines 97.39%.
 
 ## Problem Statement
 
@@ -105,7 +105,7 @@ Both Claude and humans use the same commands. No special formatting needed.
 
 **Goal:** Make `@chude/memory` a local-first, privacy-governed, cross-project, event-sourced memory substrate with governed persona/procedural memory, temporal graph retrieval, utility-aware ranking, audited dreaming consolidation, excellent CLI/API usability, and demonstrable market readiness.
 
-**Active work:** Phase 43 market-leader sales/readiness gate. Phase 43 must prove the current implementation against the product north star, competitive market baseline, security and quality gates, and release-candidate criteria before Phase 44 publish/release work.
+**Active work:** Phase 44 release-candidate packaging and publish handoff. Phase 44 must decide the next version, changelog/release notes, package/install smoke, publish dry-run, rollback/dist-tag handling, and user-authorized OTP publish workflow.
 
 **Target features:**
 - Consent/provenance governance for derived memory and provider egress

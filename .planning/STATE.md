@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v5.0
 milestone_name: Market-Leader Memory Platform
 status: planning
-last_updated: "2026-07-03T22:31:00+01:00"
+last_updated: "2026-07-05T23:07:53+01:00"
 progress:
   total_phases: 17
-  completed_phases: 15
+  completed_phases: 16
   total_plans: 17
-  completed_plans: 16
-  percent: 88
+  completed_plans: 17
+  percent: 94
 ---
 
 > **FOUNDATION HARDENING VERIFIED 2026-05-28** - Phase 36.8 is implemented. Typecheck, build, full tests, test-isolation, dependency audit, and gitleaks pass. Provider support now routes through an internal provider registry instead of presentation/health/factory switch drift. Phase 36.9 replaced the missing-metric Bun LCOV gate with an Istanbul-backed Bun coverage harness.
@@ -34,6 +34,7 @@ progress:
 > **V5 PHASE 41.1 COMPLETE 2026-06-22** - Embedding pipeline resilience is implemented and verified in source. `EmbeddingProviderError` now exposes typed provider failures, Ollama HTTP 413 multi-item batches split/retry while preserving order, `embedding.maxBatchBytes` bounds service batches, `embedding_skips` records durable model-scoped skip/quarantine state, resume excludes current-model skipped rows while permitting new-model retry, and `memory sync --embed` reports skipped counts safely. Verification passed: typecheck, build, full tests (4,364 pass, 0 fail), test isolation, eval:v5 (9/9, market ineligible due to 2 future contract fixtures), coverage statements 97.35%, branches 95.00%, functions 96.59%, lines 97.45%, dependency audit, inbox lint, and diff whitespace. The fixed package is published and locally verified as `@chude/memory@4.0.2`.
 > **V5 PHASE 42 COMPLETE 2026-07-01** - Dreaming consolidation is implemented as an explicit, audited workflow. `memory dream propose-supersedence/list/show/approve/reject/apply/rollback` is live; `DreamEntry`, `dream_entries`, `SqliteDreamRepository`, canonical dream event projection, governance registration, redaction-before-persistence, explicit apply/rollback confirmation, and shell completion coverage are implemented. Phase 42 intentionally uses the canonical `MemoryEventEnvelope` log plus schema-versioned `dream_entries` projection instead of a parallel `dreams.jsonl` file. Verification passed: focused Phase 42 tests (39 pass, 0 fail), completion tests (47 pass, 0 fail), typecheck, build, full tests (4,366 pass, 0 fail), test isolation, `eval:v5` (9/9; 8 behavior-backed, 1 contract), coverage statements 97.35%, branches 95.01%, functions 96.59%, lines 97.45%, dependency audit, `gitleaks detect --no-banner --redact --source .`, scoped inbox lint, and `git diff --check`. `eval:v5:market` still intentionally fails until Phase 43 handles `remote_sync_conflict`.
 > **V5 PHASE 42.5 COMPLETE 2026-07-03** - Feature completeness and UX polish is implemented. `memory backup create/verify`, top-level `memory restore`, `memory projections rebuild --verify/--confirm`, `memory migrate --dry-run/--json/--confirm`, and `memory doctor --upgrade` are live and documented. Completion/help/programmatic exports are updated, qmd executable discovery no longer shells through `which`, and `MemoryEventEnvelope` now rejects invalid metadata arrays instead of coercing them. Verification passed: typecheck, build, full tests (4,451 pass, 0 fail), test isolation, `eval:v5` (9/9; 8 behavior-backed, 1 contract), coverage statements 97.30%, branches 95.02%, functions 96.51%, lines 97.39%, dependency audit, gitleaks, diff whitespace, npm pack dry-run, and isolated dist smoke. Phase 43 now owns the remaining `remote_sync_conflict` behavior-backed market gate, competitive/MCP/benchmark/readiness review, and final market approval.
+> **V5 PHASE 43 COMPLETE 2026-07-05** - Market-leader and sales-readiness gate is complete for scoped local-first CLI/API readiness. `remote_sync_conflict` is behavior-backed; `eval:v5:market` passes 9/9 with 0 blockers; readiness and market reports explicitly block broad category-leader claims until MCP/local-server and public benchmark parity are implemented or dispositioned. Verification passed: typecheck, build, full tests (4,455 pass, 0 fail), test isolation, eval:v5, eval:v5:market, coverage statements 97.31%, branches 95.00%, functions 96.51%, lines 97.39%, `bun audit`, `gitleaks detect --no-banner --redact --source .`, `git diff --check`, npm pack dry-run, and package privacy check. A Windows hook-launcher defect was fixed in source by resolving `memory` directly instead of assuming `aidev memory sync`; Phase 44 must decide the next version/release path because npm remains at `@chude/memory@4.0.2`.
 > **INBOX RECONCILED 2026-05-28** - Stale bug reports for the Windows full-suite crash, orphaned friction test, and programmatic API real-DB pollution were validated against the current code and archived. The durable-friction-list filing was accepted into ROADMAP as post-v4 capacity, archived as planned, and counter-notified to conversations. No active memory-nexus inbox items remain.
 > **REMOTE CONSUMER NOTES REVIEWED 2026-05-30** - The two remotely consumer-impact inbox notes were reviewed against current memory-nexus docs/scripts. No current raw SSH/rsync operating instructions or hard-coded remotely tunnel-state assumptions were found, so both notes were archived with disposition text. Future Phase 38 cross-machine work must still use current `remotely` conventions where applicable.
 > **FIRST-PARTY INFRASTRUCTURE BROADCAST 2026-05-28** - User clarified that `memory` is a first-class first-party tool used by most/all projects. Canonical tool/package naming is `memory` / `@chude/memory`; the repository remains `memory-nexus`, and `nexus` is a legacy alias. Updated Codex/Claude rules and document-for-clear skills, added a Codex memory note, and filed notification inbox items to opted-in projects so consumers know about provider-secret, redaction/export, registry, and authkey-optional contract changes.
@@ -46,19 +47,19 @@ See: .planning/PROJECT.md (updated 2026-02-18)
 
 **Core Value:** Knowledge gained in one Claude Code project becomes accessible from any other project. No more context silos.
 
-**Current Focus:** Phase 43 - market-leader-and-sales-readiness-gate
+**Current Focus:** Phase 44 - release-candidate-packaging-and-publish-handoff
 
 **Tech Stack:** Bun, TypeScript 5.5+, bun:sqlite with FTS5 + sqlite-vec, Commander.js v14, @huggingface/transformers v3, cli-progress, chrono-node, Chart.js (HTML dashboard)
 
 ## Current Position
 
-Phase: 43 (Market-Leader and Sales-Readiness Gate) - NEXT
+Phase: 44 (Release-Candidate Packaging and Publish Handoff) - NEXT
 Plan: not yet planned in this session
 **Milestone:** v5.0 Market-Leader Memory Platform
-**Status:** Phase 42.5 complete; prepare Phase 43 planning/execution
+**Status:** Phase 43 complete; prepare Phase 44 release-candidate packaging and publish handoff
 
 ```
-v5.0 Progress: [###############--] 15/17 phases complete
+v5.0 Progress: [################-] 16/17 phases complete
   Phase 38.0: v5 Threat Model, PRD, Eval Baseline [done]
   Phase 38.1: Canonical Event Kernel and Projection Replay [done]
   Phase 38.2: Redaction, Privacy Governance, Audit Commands [done]
@@ -74,7 +75,7 @@ v5.0 Progress: [###############--] 15/17 phases complete
   Phase 41.1: Embedding Pipeline Resilience [done]
   Phase 42: Dreaming Consolidation [done]
   Phase 42.5: Feature Completeness and UX Polish [done]
-  Phase 43: Market-Leader and Sales-Readiness Gate [planned]
+  Phase 43: Market-Leader and Sales-Readiness Gate [done]
   Phase 44: Release-Candidate Packaging and Publish Handoff [planned]
 ```
 
@@ -185,7 +186,23 @@ v4.0 Progress: [############################] 14/14 phases complete
 
 ## Session Continuity
 
-### Current Resume Point - 2026-06-07
+### Current Resume Point - 2026-07-05
+
+**Completed this review/update pass:**
+
+- Completed Phase 43 Market-Leader and Sales-Readiness Gate for the scoped local-first CLI/API release lane.
+- Promoted the remaining `remote_sync_conflict` market blocker to behavior-backed eval coverage; `bun run eval:v5:market` now passes 9/9 with 0 blockers.
+- Refreshed `CLAUDE.md` so future agents see `memory` / `@chude/memory` as the first-party infrastructure tool, Phase 43 as complete, and Phase 44 as the next release-candidate handoff.
+- Fixed a Windows hook-launcher defect in source: background sync resolves and launches `memory sync` directly instead of assuming `aidev memory sync` through a shell wrapper.
+- Verified final Phase 43 gates: typecheck, build, full tests (4,455 pass, 0 fail), test isolation, eval:v5, eval:v5:market, coverage statements 97.31%, branches 95.00%, functions 96.51%, lines 97.39%, dependency audit, gitleaks, diff whitespace, npm pack dry-run, and package privacy check.
+- Added `43-VERIFICATION.md`; updated `43-READINESS-REPORT.md`, `43-CLAUDE-REVIEW.md`, `43-MARKET-REPORT.html`, `PROJECT.md`, `REQUIREMENTS.md`, `ROADMAP.md`, and this state file to reflect the scoped pass.
+- Active inbox truth: `docs/inbox/2026-07-05-remotely-phase25-reliability-contract.md` remains incoming and is not a Phase 43 blocker. Act on it when memory next touches cross-machine automation or `remotely` install/run assumptions.
+
+**Next step:**
+
+- Execute Phase 44 Release-Candidate Packaging and Publish Handoff. Start by deciding the next version for source ahead of published `@chude/memory@4.0.2`, then run changelog/release notes, package/install smoke, publish dry-run, rollback/dist-tag runbook, and user-authorized OTP publish handoff.
+
+### Historical Resume Point - 2026-06-07
 
 **Completed this review/update pass:**
 
@@ -210,7 +227,7 @@ v4.0 Progress: [############################] 14/14 phases complete
 - Completed Phase 39 with governed persona/procedural memory: `PersonaEntry`, `persona_entries`, repository port/adapter, profile compilation service, persona governance registration, fact-event projection, `memory profile show/export/rebuild`, completion/help updates, and context injection with why-included metadata.
 - Completed Phase 40 with governed temporal semantic graph memory: `GraphEdge`, graph node taxonomy, repository port/adapter, `graph_edges`, temporal graph service, event-log projection, context enrichment, stale-edge pruning, and stricter cross-project fact visibility.
 - Promoted `repeated_correction_to_persona`, `graph_stale_edge`, `superseded_provider_fact`, `project_scope_leakage`, `ranking_evergreen_preference`, and `dream_proposed_supersedence` from contract-only to behavior-backed by invoking real services/repositories in the v5 eval harness.
-- `eval:v5` currently passes 9/9 fixtures with 8 behavior-backed fixtures and 1 contract fixture. `eval:v5:market` intentionally fails until Phase 43 promotes or explicitly dispositions the remaining `remote_sync_conflict` recovery contract fixture.
+- At that 2026-06-07 point, `eval:v5` passed 9/9 fixtures with 8 behavior-backed fixtures and 1 contract fixture, and `eval:v5:market` intentionally failed until Phase 43 promoted or dispositioned `remote_sync_conflict`.
 - Verified Phase 39 with focused Phase 39 tests, `bun run typecheck`, `bun run eval:v5`, full `bun run quality` (4,281 pass, 0 fail), coverage statements 97.2%, branches 95.19%, functions 96.19%, lines 97.31%, `gitleaks detect --no-banner --redact --source .`, and `git diff --check`.
 - Verified Phase 40 final gates: focused graph/context/event/eval tests, `bun run typecheck`, `bun run eval:v5` (9/9; 6 behavior, 3 contract), full `bun run quality` (4,300 pass, 0 fail), coverage statements 97.28%, branches 95.17%, functions 96.36%, lines 97.38%, `gitleaks detect --no-banner --redact --source .`, and `git diff --check`.
 - Verified Phase 41 final gates: focused ranking/utility/context/eval tests, `bun run typecheck`, `bun run eval:v5` (9/9; 7 behavior, 2 contract), full `bun run quality` (4,316 pass, 0 fail), coverage statements 97.29%, branches 95.11%, functions 96.47%, lines 97.40%, `gitleaks detect --no-banner --redact --source .`, and `git diff --check`.
@@ -219,7 +236,7 @@ v4.0 Progress: [############################] 14/14 phases complete
 
 **Next step:**
 
-- Execute Phase 43 Market-Leader and Sales-Readiness Gate. The first work should convert the remaining `remote_sync_conflict` fixture from contract-only to behavior-backed or explicitly justify/disposition it, then run the architecture/security/quality/product/competitive/Product North Star readiness reviews before Phase 44 release-candidate packaging.
+- Historical next step at 2026-06-07 was Phase 43. Current 2026-07-05 truth supersedes this: Phase 43 is complete and Phase 44 is next.
 
 ### Current Resume Point - 2026-05-30
 
@@ -270,4 +287,4 @@ v4.0 Progress: [############################] 14/14 phases complete
 
 ---
 
-*Last updated: 2026-07-03 (v5.0 active; Phase 42.5 complete; Phase 43 next)*
+*Last updated: 2026-07-05 (v5.0 active; Phase 43 complete; Phase 44 next)*

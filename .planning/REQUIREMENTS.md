@@ -123,9 +123,9 @@ Phase 38.6 completed the durable friction contract. `memory friction list` now e
 
 - [x] **EVAL-02**: Executable v5 eval command loads sanitized fixtures and emits schema-versioned JSON results.
 - [x] **EVAL-03**: Eval fixtures cover privacy, leakage, supersedence, sync recovery, friction filters, persona, graph, ranking, and dreaming.
-- [ ] **EVAL-04**: Phase 43 consumes eval output as readiness evidence and fails on privacy, leakage, or supersedence regressions.
+- [x] **EVAL-04**: Phase 43 consumes eval output as readiness evidence and fails on privacy, leakage, or supersedence regressions.
 
-Phase 38.7 completed the executable harness and fixture coverage. `bun run eval:v5` is part of `bun run quality`, and `bun run eval:v5:market` already fails while contract-only fixtures remain. Phase 39 promoted the persona fixture, Phase 40 promoted graph, supersedence, and cross-project leakage fixtures, Phase 41 promoted ranking, and Phase 42 promoted dreaming to behavior-backed checks. EVAL-04 remains pending until Phase 43 actually consumes the report as final readiness evidence.
+Phase 38.7 completed the executable harness and fixture coverage. `bun run eval:v5` is part of `bun run quality`. Phase 39 promoted the persona fixture, Phase 40 promoted graph, supersedence, and cross-project leakage fixtures, Phase 41 promoted ranking, Phase 42 promoted dreaming, and Phase 43 promoted `remote_sync_conflict` to behavior-backed coverage. `bun run eval:v5:market` now passes with 9/9 behavior-backed fixtures and 0 blockers.
 
 ### Persona and Procedural Memory
 
@@ -181,12 +181,14 @@ Phase 42 completed the explicit dreaming surface. `DreamEntry`, `dream_entries`,
 
 ### Market and Sales Readiness
 
-- [ ] **READY-01**: Architecture review grades excellent against hexagonal/SOLID/deep-module criteria.
-- [ ] **READY-02**: Security review grades excellent against secrets, privacy, egress, remote sync, dependency, audit, and recovery criteria.
-- [ ] **READY-03**: Quality review passes typecheck, build, full tests, test isolation, 95% coverage at each metric, dependency audit, gitleaks, and published-package smoke.
-- [ ] **READY-04**: Product review proves fresh-user install, onboarding, configure, audit, backup, restore, upgrade, and verification flows.
-- [ ] **READY-05**: Competitive review demonstrates a crisp local-first value proposition and no known unowned blocker.
-- [ ] **READY-06**: Phase 43 includes a Product North Star conformance audit and blocks market-ready approval on any unowned mismatch.
+- [x] **READY-01**: Architecture review grades excellent against hexagonal/SOLID/deep-module criteria.
+- [x] **READY-02**: Security review grades excellent against secrets, privacy, egress, remote sync, dependency, audit, and recovery criteria.
+- [x] **READY-03**: Quality review passes typecheck, build, full tests, test isolation, 95% coverage at each metric, dependency audit, gitleaks, and package dry-run.
+- [x] **READY-04**: Product review proves fresh-user install, onboarding, configure, audit, backup, restore, upgrade, and verification flows.
+- [x] **READY-05**: Competitive review demonstrates a crisp local-first value proposition and no known unowned blocker for the scoped CLI/API lane.
+- [x] **READY-06**: Phase 43 includes a Product North Star conformance audit and blocks market-ready approval on any unowned mismatch.
+
+Phase 43 approves scoped market readiness for the local-first CLI/API product. It does not approve broad category-leader claims; MCP/local-server support, public benchmark parity, and richer interop/UX remain owned competitive gaps for later phases unless explicitly dispositioned.
 
 ### Release Candidate and Publish Handoff
 
@@ -291,7 +293,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | FRIC-02 | Phase 38.6 | Complete |
 | EVAL-02 | Phase 38.7 | Complete |
 | EVAL-03 | Phase 38.7 | Complete |
-| EVAL-04 | Phase 43 | Pending |
+| EVAL-04 | Phase 43 | Complete |
 | PERS-01 | Phase 39 | Complete |
 | PERS-02 | Phase 39 | Complete |
 | PERS-03 | Phase 39 | Complete |
@@ -314,12 +316,12 @@ Which phases cover which requirements. Updated during roadmap creation.
 | UX-02 | Phase 42.5 | Complete |
 | UX-03 | Phase 42.5 | Complete |
 | UX-04 | Phase 42.5 | Complete |
-| READY-01 | Phase 43 | Pending |
-| READY-02 | Phase 43 | Pending |
-| READY-03 | Phase 43 | Pending |
-| READY-04 | Phase 43 | Pending |
-| READY-05 | Phase 43 | Pending |
-| READY-06 | Phase 43 | Pending |
+| READY-01 | Phase 43 | Complete |
+| READY-02 | Phase 43 | Complete |
+| READY-03 | Phase 43 | Complete |
+| READY-04 | Phase 43 | Complete |
+| READY-05 | Phase 43 | Complete |
+| READY-06 | Phase 43 | Complete |
 | REL-01 | Phase 44 | Pending |
 | REL-02 | Phase 44 | Pending |
 | REL-03 | Phase 44 | Pending |
