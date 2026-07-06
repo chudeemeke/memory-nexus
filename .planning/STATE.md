@@ -205,10 +205,11 @@ v4.0 Progress: [############################] 14/14 phases complete
 
 - The user ran direct `npm publish --access public --otp=<code>`, not `aidev release`.
 - Verified registry latest, registry publish time, registry-backed Bun global install, local `memory --version`, global manifest version, and `bun run verify:published @chude/memory@4.0.3`.
+- Pushed `main` through `8bd92d366234109ce2c86da97c00581577ac130e` and pushed annotated `v4.0.3`; remote `v4.0.3^{}` peels to release-source commit `2bc83131f3275c245b759edca666ae0975e7d86e`.
 
 **Next step:**
 
-- Push local release commits and the annotated `v4.0.3` tag together if remote publication is desired; do not push the tag alone while its target commit is missing from `origin/main`.
+- No Phase 44 release/publish/provenance steps remain.
 - Continue with post-v5 follow-up: active inbox item `docs/inbox/2026-07-05-remotely-phase25-reliability-contract.md` remains triaged and low-priority; broad category-leader gaps remain MCP/local-server and public benchmark parity.
 
 ### Historical Resume Point - 2026-06-07

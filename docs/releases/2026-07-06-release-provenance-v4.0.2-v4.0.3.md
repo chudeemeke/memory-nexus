@@ -54,6 +54,8 @@ Because `dist/` is not tracked in git, the npm tarball cannot be fully reconstru
 - npm artifact: `@chude/memory@4.0.3`
 - npm publish time: `2026-07-05T23:19:39.577Z`
 - Post-publish verification commit: `61514423398909ab0ddf53d4d024ff1b8e5b7347`
+- Remote provenance correction commit: `8bd92d366234109ce2c86da97c00581577ac130e`
+- Remote tag peel target: `2bc83131f3275c245b759edca666ae0975e7d86e`
 
 The tag intentionally points at the release source commit, not the later verification-documentation commit. This keeps release source, npm artifact, and post-publish audit trail distinct.
 

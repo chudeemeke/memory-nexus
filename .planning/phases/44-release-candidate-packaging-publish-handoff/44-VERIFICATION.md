@@ -100,3 +100,9 @@ npm publish --access public --otp=<code>
 The historical `v4.0.2` ambiguity and the corrected `v4.0.3` tag/provenance shape are recorded in `docs/releases/2026-07-06-release-provenance-v4.0.2-v4.0.3.md`.
 
 `v4.0.3` is an annotated tag on release-source commit `2bc83131f3275c245b759edca666ae0975e7d86e`, not on the later post-publish verification commit.
+
+Remote verification after provenance correction:
+
+- `origin/main` is `8bd92d366234109ce2c86da97c00581577ac130e`.
+- `origin` tag `v4.0.3` object is `7014d3c3ba0f9d42d9f10d5a9e0fbe235eb29d11`.
+- `origin` tag `v4.0.3^{}` peels to `2bc83131f3275c245b759edca666ae0975e7d86e`.
