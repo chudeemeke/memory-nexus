@@ -196,6 +196,54 @@ Phase 43 approves scoped market readiness for the local-first CLI/API product. I
 - [ ] **REL-02**: Release runbook documents OTP publish steps, rollback, dist-tag handling, and post-publish verification.
 - [ ] **REL-03**: Real npm publish is not run until the user explicitly authorizes and completes OTP.
 
+## v6.0 Requirements
+
+Milestone v6.0 "Server Surface & Benchmark Parity" lifts the broad agentic-memory category-leader block by adding a full local server surface and proving public benchmark parity. Scope invariants: the server is a new presentation adapter over a new application-layer facade, with no business logic in the adapter and no parallel governance path; local-first is preserved (binds 127.0.0.1, no new mandatory egress).
+
+**Scope decision — read-only-first (overridable at confirmation):** v6.0 ships the server as a READ query surface (query, search, context, facts, related, friction-list). Ingestion stays CLI-driven (`sync`/`extract`/`backfill`) per the North Star anti-feature guidance, and governance/dream mutations stay on the CLI in v6.0. Server-side writes are deferred to Future Requirements. This removes the write-queue from the critical path and lowers the long-lived-process concurrency risk.
+
+### Server Foundation and Concurrency
+
+- [ ] **SRV-01**: A long-lived server process holds a single SQLite connection open across many requests without unbounded WAL growth, using a `ServerDatabaseProvider` that performs periodic passive checkpoints.
+- [ ] **SRV-02**: Concurrent reads are served safely and any writes (external `memory sync`, internal control operations) are serialized without corruption, using WAL plus `busy_timeout` plus application-layer write serialization.
+- [ ] **SRV-03**: The server shuts down gracefully and releases the database lock cleanly on all platforms, including Windows.
+- [ ] **SRV-04**: `memory serve` starts and stops the server, reports status with `--json`, and follows the established CLI grammar, flags, help structure, and exit codes.
+
+### Shared Query Facade and Governance Parity
+
+- [ ] **SGOV-01**: A new application-layer `MemoryQueryFacade` returns DTOs with no stdout side-effects, and both the CLI and the server route reads through it so one governance-enforced path is shared.
+- [ ] **SGOV-02**: Redaction, consent/suppression, and cross-project scope isolation are enforced identically on server output as on CLI output.
+- [ ] **SGOV-03**: An import-boundary check prevents server code from importing repositories or `bun:sqlite` directly (application layer only) and fails the build on violation.
+- [ ] **SGOV-04**: Automated tests assert redaction and cross-project scope isolation on both MCP and HTTP output, proving governance cannot be bypassed on server surfaces.
+
+### MCP Server Adapter
+
+- [ ] **MCP-01**: An MCP server over stdio exposes curated read tools (query, search, context, facts, related, friction-list) mapped one-to-one to existing application use-cases.
+- [ ] **MCP-02**: MCP tool inputs are schema-validated and outputs match the CLI's JSON contracts for the same operation.
+- [ ] **MCP-03**: The MCP surface exposes no free-text memory-write tool and no operation that bypasses governance.
+
+### Local HTTP Daemon
+
+- [ ] **HTTP-01**: The HTTP daemon binds 127.0.0.1 by default and never binds a non-loopback interface without explicit, documented opt-in.
+- [ ] **HTTP-02**: HTTP endpoints mirror the MCP read tools with consistent request/response JSON contracts and error/exit semantics.
+- [ ] **HTTP-03**: The daemon enforces Origin/Host validation (DNS-rebinding protection) and requires a local auth token for any opt-in non-loopback exposure.
+
+### Live Streaming
+
+- [ ] **STREAM-01**: Live query/context streaming is delivered via Streamable-HTTP (not the deprecated SSE transport), with a connection lifecycle that leaks no readers and does not pin the WAL checkpoint.
+
+### Public Benchmark Suite
+
+- [ ] **BENCH-01**: A benchmark harness extending `scripts/eval-v5` runs LongMemEval (MIT) and emits a reproducible, schema-versioned, per-category report.
+- [ ] **BENCH-02**: The harness runs LOCOMO as a comparison point, fetching the dataset at runtime into a gitignored cache; the dataset is never vendored and is asserted absent from `npm pack` output.
+- [ ] **BENCH-03**: Every benchmark report records the judge model and run configuration for reproducibility and documents where methodology differs from competitor-cited numbers.
+- [ ] **BENCH-04**: Benchmark reports include all categories (no cherry-picking) and clearly distinguish measured numbers from any contextual or estimated ones.
+
+### Category-Leader Readiness Gate
+
+- [ ] **MKT-01**: A readiness report demonstrates the server surface shipped, governance verified on the new surfaces, and reproducible public benchmark numbers published, mirroring the Phase 43 exit-gate pattern.
+- [ ] **MKT-02**: The broad category-leader block in PROJECT.md is lifted, or explicitly re-scoped with evidence, with no unowned blocker remaining.
+
 ## Future Requirements
 
 Deferred. Tracked for context, not in current roadmap.
@@ -219,6 +267,24 @@ Deferred. Tracked for context, not in current roadmap.
 ### Advanced Portability
 
 - **PORT-04**: Project alias table mapping different encoded paths to same logical project across environments
+
+### Server-Side Writes (deferred from v6.0)
+
+- **SRVW-01**: Server-side governance mutations (suppress/consent) and dream approval over MCP/HTTP, gated by the write-queue and additional authorization. Deferred; v6.0 ships a read-only server surface.
+
+### Backward Architecture and Implementation Audit (separately gated)
+
+- **AUDIT-01**: A separately-gated slice audits pre-existing code against v6.0 architecture, security, and quality standards, with concrete file evidence, risk, ownership, and acceptance gates per finding. It excludes any issue resolved opportunistically during v6.0 and is not interleaved with v6.0 forward work.
+
+## v6.0 Out of Scope
+
+| Feature | Reason |
+|---------|--------|
+| Cloud/hosted server or remote SaaS | Local-first; the server binds 127.0.0.1 and adds no mandatory egress |
+| Free-text `add_memory` write tool | North Star anti-feature; ingestion stays `sync`/`extract`/`backfill` |
+| Vendoring benchmark datasets | Licensing (LOCOMO is CC BY-NC 4.0); datasets fetched at runtime into a gitignored cache |
+| Default non-loopback network exposure | Security; non-loopback binding is opt-in only and requires a local auth token |
+| Server-side memory writes | Deferred to Future Requirements (SRVW-01) to keep v6.0 read-only and lower concurrency risk |
 
 ## v4.0 Out of Scope (Historical)
 
@@ -322,9 +388,11 @@ Which phases cover which requirements. Updated during roadmap creation.
 | READY-04 | Phase 43 | Complete |
 | READY-05 | Phase 43 | Complete |
 | READY-06 | Phase 43 | Complete |
-| REL-01 | Phase 44 | Pending |
-| REL-02 | Phase 44 | Pending |
-| REL-03 | Phase 44 | Pending |
+| REL-01 | Phase 44 | Complete |
+| REL-02 | Phase 44 | Complete |
+| REL-03 | Phase 44 | Complete |
+
+v6.0 requirement-to-phase mapping is appended by the roadmapper below.
 
 **Coverage:**
 - v4.0 requirements: 25 total (excluding QUAL cross-cutting)
@@ -334,7 +402,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 - v5.0 pending: 14/53
 - v5.0 mapped to phases: 53/53
 - v5.0 unmapped: 0
+- v6.0 requirements: 20 total (SRV, SGOV, MCP, HTTP, STREAM, BENCH, MKT) — phase mapping pending roadmapper
 
 ---
 *Requirements defined: 2026-04-03*
-*Last updated: 2026-07-01 after Phase 42 dreaming consolidation completed source verification*
+*Last updated: 2026-07-21 — added v6.0 Server Surface & Benchmark Parity requirements; corrected REL-01/02/03 traceability to Complete (Phase 44 shipped)*
