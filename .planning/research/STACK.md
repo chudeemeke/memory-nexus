@@ -1,277 +1,117 @@
-# Stack Research: memory-nexus
+# Stack Research
 
-**Project:** Claude Code Session Extraction and Search System
-**Researched:** 2026-01-27
-**Research Type:** Ecosystem
+**Domain:** Local-first memory infrastructure — adding a server surface (MCP + HTTP + SSE) and a public benchmark harness to a shipped Bun/TypeScript CLI (`@chude/memory` v4.0.3, targeting v6.0)
+**Researched:** 2026-07-21
+**Confidence:** HIGH (versions verified against the live npm registry; Bun/hexagonal integration read from the actual repo)
 
-## Executive Summary
+> Note: the prior foundational v1.0 stack research previously at this path is preserved at `.planning/research/STACK-v1-baseline.md`. This file is scoped to the NEW v6.0 additions only.
 
-memory-nexus is a CLI tool for extracting Claude Code JSONL sessions into a searchable SQLite database. The stack must support:
+## Scope Guardrail
 
-1. **High-performance SQLite** with FTS5 full-text search
-2. **Streaming JSONL parsing** for large session files (10K+ lines)
-3. **CLI framework** compatible with aidev integration
-4. **TypeScript** with bun runtime
-
-The key finding is that **better-sqlite3 is NOT compatible with Bun** due to ABI version mismatches. Bun's built-in `bun:sqlite` module is the correct choice - it's faster (3-6x), has FTS5 support, and requires no native compilation.
-
----
+This file covers **only the NEW stack additions** the v6.0 server + benchmark features require. The validated existing stack (Bun 1.3.5, TypeScript 5.5+, `bun:sqlite` + FTS5 + `sqlite-vec@0.1.9`, `commander@14.0.3`, `@huggingface/transformers@4.2.0`, `@anthropic-ai/sdk@0.98.1`, `chrono-node@2.9.1`, `cli-progress`) is NOT re-researched and NOT proposed for replacement. The headline finding: **the only mandatory new production dependencies are `@modelcontextprotocol/sdk` and its required `zod` peer.** Everything else (HTTP daemon, SSE, benchmark metrics, dataset fetch) should be built on Bun-native primitives with zero added dependencies.
 
 ## Recommended Stack
 
-### Runtime
+### Core Technologies (new)
 
-| Technology | Version | Purpose | Rationale |
-|------------|---------|---------|-----------|
-| **Bun** | 1.2.x+ | JavaScript/TypeScript runtime | User preference (WoW standard), native SQLite driver, fastest JSONL parsing. Bun's built-in SQLite is 3-6x faster than better-sqlite3. |
+| Technology | Version | Purpose | Why Recommended |
+|------------|---------|---------|-----------------|
+| `@modelcontextprotocol/sdk` | `1.29.0` (npm `latest`, verified 2026-07-21) | MCP server over stdio: `McpServer` + `StdioServerTransport`, tool/resource registration, JSON-RPC 2.0 framing, protocol version negotiation | The official, spec-authoritative TypeScript SDK. There is no credible alternative — hand-rolling JSON-RPC + the MCP handshake would reinvent a moving spec and fail conformance against Claude Desktop / Claude Code clients. `engines: node>=18`; pure JS/TS, runs on Bun 1.3.5. |
+| `zod` | `^4.0` (latest `4.4.3`) | Runtime schema validation for MCP tool input shapes; required peer of the SDK | Required peer of `@modelcontextprotocol/sdk` (`peerDependencies.zod: "^3.25 \|\| ^4.0"`). The SDK derives JSON Schema for tool params from zod schemas. New dep anyway, so adopt zod 4 (current major) rather than legacy zod 3. |
+| `Bun.serve` (Bun-native, NOT a package) | Bun 1.3.5 | Local HTTP daemon bound to `127.0.0.1`; also serves SSE responses | Built into the runtime already required. Binds a specific hostname (`hostname: "127.0.0.1"`) natively, returns `Response` objects, and streams `ReadableStream` bodies. Adding express/fastify/hono would duplicate what the runtime provides and enlarge the `bun audit` surface for zero benefit. |
+| Native `ReadableStream` + `Response` (Web/Bun-native, NOT a package) | Bun 1.3.5 | SSE / live context subscription surface | SSE is just `Content-Type: text/event-stream` over a chunked `ReadableStream`. `Bun.serve` returns exactly that with no library. A server-side SSE package (`sse`, `better-sse`, `eventsource`) adds a dependency to emit `data: ...\n\n` strings — not worth it. |
 
-**Confidence:** HIGH (user tooling preference + official Bun documentation)
+### Supporting Libraries (benchmark harness — all NEW work uses ZERO new deps)
 
-### Database
+| Library | Version | Purpose | When to Use |
+|---------|---------|---------|-------------|
+| `@anthropic-ai/sdk` | `0.98.1` (already a dependency) | LLM-as-judge for LOCOMO/LongMemEval scoring (binary CORRECT/WRONG per answer) | Reuse the existing dep. The judge model must be provider-configurable through the existing provider registry — see the reproducibility note below. Do NOT add an OpenAI SDK just to match Mem0's published judge. |
+| `Bun.fetch` (native) | Bun 1.3.5 | Scripted download of dataset files (LOCOMO `locomo10.json`, LongMemEval JSON/JSONL) into a gitignored cache | Native `fetch` + `Bun.write` handles public HTTPS file downloads (GitHub raw, HuggingFace `resolve/main` URLs). No `axios`/`node-fetch`/`@huggingface/hub` needed. |
+| Inline F1 / BLEU-1 (write ~50 LOC in the harness) | n/a | Token-level lexical metrics reported alongside the LLM-judge score, matching Mem0/Zep reporting | Token-F1 and unigram BLEU (precision + brevity penalty) are small, deterministic functions. Implementing inline avoids pulling an NLP library and keeps the numbers auditable. See "What NOT to Use". |
 
-| Technology | Version | Purpose | Rationale |
-|------------|---------|---------|-----------|
-| **bun:sqlite** | Built-in | SQLite driver | Native to Bun, no npm dependency, FTS5 support enabled (since v0.6.12 on Linux). API inspired by better-sqlite3 but faster. |
-| **SQLite FTS5** | Built-in | Full-text search | Porter tokenizer, BM25 ranking, snippet extraction. No external dependencies. |
+### Development Tools
 
-**Confidence:** HIGH
+| Tool | Purpose | Notes |
+|------|---------|-------|
+| Existing `scripts/eval-v5/` harness (`harness.ts`, `evaluators.ts`, `fixtures.ts`, `types.ts`, `cli.ts`) | The benchmark work EXTENDS this, it does not fork it | Add a sibling report path (e.g. a `PublicBenchmarkReport` next to `V5EvalReport`) or a parallel `scripts/eval-bench/` that reuses the same `runEvalCli` shape, JSON-first output, and blocking/threshold model. Keep the `{ exitCode, report }` contract. |
+| `bun test` + `bun:sqlite` (existing) | Concurrency/WAL stress tests for the long-lived-process model | The highest technical risk in v6.0 is a long-lived server holding SQLite/WAL connections across concurrent MCP + HTTP clients. This is a testing/architecture concern, not a new dependency — no connection-pool library is needed for a single-file local SQLite; use one writer + WAL readers. |
+| `.gitignore` entry for the dataset cache | Keep large, licensed datasets out of git history | e.g. `.cache/benchmarks/` or `docs/evals/datasets/` (gitignored). Datasets are fetched at run time, never committed. |
 
-**Important Notes:**
-- FTS5 is enabled in Bun's SQLite on Linux builds since v0.6.12
-- macOS uses Apple's SQLite build which disables extensions by default; may need `Database.setCustomSQLite()` to load FTS5-enabled SQLite library
-- Windows support needs verification (likely works, FTS5 is compiled in)
+## Installation
 
-### CLI Framework
-
-| Technology | Version | Purpose | Rationale |
-|------------|---------|---------|-----------|
-| **Commander.js** | ^14.0.0 | CLI parsing | Best TypeScript support via @commander-js/extra-typings. Simple API, zero dependencies, great DX. User's aidev CLI is bash-based, so memory-nexus will be a standalone executable that aidev calls. |
-| **@commander-js/extra-typings** | ^14.0.0 | Type inference | Infers strong types for options and action handlers. Version must match Commander major.minor. |
-
-**Confidence:** HIGH
-
-**Alternative considered:** Yargs
-- More feature-rich but heavier
-- TypeScript support less ergonomic (async typing issues)
-- Commander is simpler and sufficient for this use case
-
-### JSONL Parsing
-
-| Technology | Version | Purpose | Rationale |
-|------------|---------|---------|-----------|
-| **Native Bun streaming** | Built-in | Large file processing | Use `Bun.file(path).stream()` + line buffering for JSONL. No external library needed. Bun can process 1 billion rows under 10 seconds with proper chunking. |
-
-**Confidence:** HIGH
-
-**Pattern for JSONL streaming:**
-```typescript
-import { createReadStream } from 'fs';
-import { createInterface } from 'readline';
-
-// For large files, use fs.createReadStream (works better than Bun.file().stream() for readline)
-const rl = createInterface({
-  input: createReadStream(filePath),
-  crlfDelay: Infinity
-});
-
-for await (const line of rl) {
-  const event = JSON.parse(line);
-  // Process event
-}
-```
-
-**Alternative considered:** stream-json v1.9.1
-- Overkill for JSONL (designed for complex JSON streaming)
-- Native readline is simpler and sufficient
-- Only use stream-json if we need SAX-style parsing or memory-constrained environments
-
-### Validation
-
-| Technology | Version | Purpose | Rationale |
-|------------|---------|---------|-----------|
-| **Zod** | ^4.3.5 | Schema validation | TypeScript-first validation. v4 has 14x faster string parsing, 7x faster array parsing. New @zod/mini (~1.9KB) available for tree-shaking if bundle size matters later. |
-
-**Confidence:** HIGH
-
-### Testing
-
-| Technology | Version | Purpose | Rationale |
-|------------|---------|---------|-----------|
-| **bun:test** | Built-in | Unit/integration tests | Native to Bun, Jest-compatible API, no configuration needed. |
-
-**Confidence:** HIGH
-
-### Build & Development
-
-| Technology | Version | Purpose | Rationale |
-|------------|---------|---------|-----------|
-| **TypeScript** | ^5.5.0 | Type safety | Zod v4 requires TypeScript 5.0+. Commander extra-typings requires TypeScript 5.0+. |
-| **Bun bundler** | Built-in | Bundling | `bun build` for creating standalone executable. |
-
-**Confidence:** HIGH
-
----
-
-## Full Package Dependencies
-
-```json
-{
-  "dependencies": {
-    "commander": "^14.0.0",
-    "@commander-js/extra-typings": "^14.0.0",
-    "zod": "^4.3.5"
-  },
-  "devDependencies": {
-    "typescript": "^5.5.0",
-    "@types/bun": "latest"
-  }
-}
-```
-
-**Installation command:**
 ```bash
-bun add commander @commander-js/extra-typings zod
-bun add -d typescript @types/bun
+# New production dependencies (the ONLY two required)
+bun add @modelcontextprotocol/sdk@1.29.0 zod@^4.0
+
+# Nothing else. HTTP daemon, SSE, dataset fetch, and benchmark metrics
+# use Bun-native primitives and the existing @anthropic-ai/sdk.
 ```
 
----
+## Integration Points (how this lands in the existing hexagonal app)
+
+- **New presentation adapters, not new logic.** Per the PROJECT.md invariant, the MCP server and HTTP daemon are new adapters under `src/presentation/` (e.g. `src/presentation/mcp/`, `src/presentation/http/`) that delegate to the existing `src/application/services/*` use-cases (`SmartContextService`, search, `MemoryGovernanceService`, `FrictionService`, etc.). No business logic and no second governance path in the adapter.
+- **stdout is reserved.** The MCP stdio transport frames JSON-RPC on `stdout`; the CLI already writes human/JSON output to `stdout`. The MCP server MUST be a distinct entry (e.g. a `memory mcp` subcommand or a separate bin) where ALL logging/diagnostics go to `stderr`. This composes with the repo's AI-first stdout constraint.
+- **Governance reuse is verified, not re-implemented.** The v5 eval dimensions `privacy_redaction` and `cross_project_leakage` are already blocking. Extend the eval harness so the same governance/redaction fixtures run through the MCP and HTTP code paths (adapter-level tests), proving redaction happens before egress on every surface.
+- **Benchmark harness calls the application layer directly.** The LOCOMO/LongMemEval runner ingests a conversation, drives memory writes/reads through use-cases, and scores answers — it does NOT need the HTTP/MCP server running. MCP/HTTP and the benchmark are independent workstreams.
+- **`command-result.ts` contract holds.** Adapters return exit codes / structured results rather than calling `process.exit()`, matching the existing `CommandResult` and eval `{ exitCode, report }` conventions.
+
+## Alternatives Considered
+
+| Recommended | Alternative | When to Use Alternative |
+|-------------|-------------|-------------------------|
+| `Bun.serve` for HTTP + SSE | `hono@4.x` | Only if the daemon grows complex middleware/routing needs (auth chains, many route groups). For a localhost-only daemon delegating to a handful of use-cases, Bun.serve routing suffices. Note: `hono` is already a *transitive* dep of the MCP SDK, so if you ever need it you can use it without a new top-level install — but do not reach for it preemptively. |
+| MCP over **stdio** (`StdioServerTransport`) | MCP over **Streamable HTTP** (`StreamableHTTPServerTransport`) | Stdio is canonical for local single-client agents (Claude Desktop/Code launch the process). Use Streamable HTTP only if multiple remote MCP clients must share one server. If you do, the SDK's `StreamableHTTPServerTransport` can be mounted into `Bun.serve` via its fetch/Node-req interface — **spike this first**, it is the least Bun-proven path in the SDK. |
+| zod 4 | zod 3 (`^3.25`) | Only if a transitive consumer forces zod 3. The SDK supports both; default to 4. |
+| Inline F1/BLEU-1 | `sacrebleu` (Python) / `natural` (JS) | If a reviewer demands canonical, citable BLEU parity. `sacrebleu` is the academic reference but is Python (out-of-runtime). `natural` is heavy. For LOCOMO-style reporting the LLM-judge score is the headline metric; lexical metrics are secondary, so inline is adequate and auditable. |
+| Official `@modelcontextprotocol/sdk` | `fastmcp` / `mcp-framework` (community wrappers) | Never for this project. Wrappers lag the spec and add a dependency on top of the SDK. Use the official SDK directly. |
 
 ## What NOT to Use
 
-### better-sqlite3
+| Avoid | Why | Use Instead |
+|-------|-----|-------------|
+| `express`, `fastify`, `hono`, `koa` (as a NEW top-level dep) | Duplicates `Bun.serve`; enlarges install + audit surface. (`express`/`hono` already arrive transitively via the MCP SDK — unavoidable, but don't add them yourself.) | `Bun.serve` with `hostname: "127.0.0.1"` |
+| `sse`, `better-sse`, `eventsource` (server-side), `socket.io`, `ws` | SSE is a content-type + `ReadableStream`; websockets aren't needed for one-way live-context push and MCP stdio doesn't use them | Native `Response` + `ReadableStream` with `text/event-stream` |
+| `axios`, `node-fetch`, `got` | Bun has native `fetch` | `fetch` + `Bun.write` |
+| `@huggingface/hub`, `datasets` | Public dataset files are downloadable via plain HTTPS (`resolve/main/...`); a full HF client is overkill | Scripted `fetch` into a gitignored cache |
+| `adm-zip`, `unzipper`, `tar` | LOCOMO ships as a single JSON file; fetch LongMemEval's raw JSON/JSONL files individually to avoid archive handling. Bun has no built-in general ZIP extractor | Fetch individual raw files; if an archive is truly unavoidable, shell out to system `unzip` via `Bun.$` rather than adding a dep |
+| `sacrebleu` / `natural` / `compromise` NLP libs | Heavy; wrong runtime (Python) or maintenance risk for one metric | ~50 LOC inline F1 + BLEU-1 |
+| `fastmcp` / `mcp-framework` / other MCP wrappers | Lag the spec; add a layer over the SDK | `@modelcontextprotocol/sdk` directly |
+| `dotenv` | Local-first; project follows varlock/env conventions and needs no runtime env loader for a localhost daemon | Existing config / `process.env` handling |
+| A SQLite connection-pool library | A single local SQLite file uses one writer + WAL readers; pooling libs solve a networked-DB problem this project doesn't have | `bun:sqlite` + WAL, one write path, serialized writes |
 
-**DO NOT USE.** Despite being mentioned in project docs, better-sqlite3 is incompatible with Bun:
+## Dataset & Benchmark Reproducibility (licensing is load-bearing)
 
-- Compiled against different Node.js ABI version
-- Requires recompilation which often fails
-- bun:sqlite is faster anyway (3-6x for reads)
+| Benchmark | Source | License | Format | Metrics | Recommendation |
+|-----------|--------|---------|--------|---------|----------------|
+| **LOCOMO** (LoCoMo) | `github.com/snap-research/locomo` → `data/locomo10.json` | **CC BY-NC 4.0 — NON-COMMERCIAL** (verified from `LICENSE.txt`) | Single JSON: 10 conversations (~300 turns / ~9K tokens each), `qa` pairs across 4 categories (single-hop, multi-hop, temporal, open-domain), ~1,540 questions | LLM-as-judge (binary correct/wrong, run ×3, mean); plus token-F1 and BLEU-1 | Fetch at runtime into a **gitignored** cache; NEVER vendor into the MIT repo. Flag the license tension explicitly (below). |
+| **LongMemEval** | `github.com/xiaowu0162/LongMemEval` + HuggingFace | **MIT** | JSON/JSONL, 500 questions, 5 abilities (info extraction, multi-session reasoning, temporal reasoning, knowledge updates, abstention); scales to >1M tokens | Accuracy / LLM-judge per ability | **Preferred second benchmark** — MIT license is commercially safe and aligns with the market-ready constraint. |
+| (optional 3rd) DMR / other | Various | Verify per source before adding | — | — | Only add if a reviewer wants breadth; LOCOMO + LongMemEval is sufficient for "parity with Mem0/Zep-cited numbers." |
 
-If you need better-sqlite3 API compatibility for some library, use the compatibility shim:
-```bash
-bun add better-sqlite3@nounder/bun-better-sqlite3
-```
+**License tension — surface to the roadmapper (do NOT bury):** `@chude/memory` is MIT and explicitly "potentially taken to market." LOCOMO's dataset is CC BY-NC 4.0 (non-commercial). Mitigation that keeps the product clean:
+- The benchmark **harness/code** is first-party MIT. The **LOCOMO dataset** is fetched at run time, lives only in a gitignored cache, used for research/evaluation reporting — never redistributed in the package (`files: ["dist"]` already excludes it) and never bundled into a commercial artifact.
+- Published LOCOMO result *numbers* (aggregate scores) are facts about performance, not redistribution of the dataset — safe to publish with attribution.
+- **LongMemEval (MIT) should be the benchmark leaned on for any commercially-framed claim.** Treat LOCOMO as the comparability datapoint against Mem0/Zep, with the NC constraint documented.
 
-But for memory-nexus, use `bun:sqlite` directly.
+**Comparability caveat (reproducibility honesty):** Mem0/Zep publish LOCOMO numbers using an OpenAI judge (GPT-4o-mini / GPT-5-mini) run ×3. Exact numeric parity requires matching their judge model → OpenAI egress, which conflicts with local-first + no-new-mandatory-egress. Recommendation: make the judge **provider-configurable** (default to the existing `@anthropic-ai/sdk`), and every published report must record which judge model produced the score. Note that cross-tool comparisons are judge-model-sensitive (the public Zep-vs-Mem0 dispute over the same LOCOMO claim shows this is a real, contested measurement, not a settled number). This protects the project's "docs don't overstate" North Star line.
 
-### stream-json / @streamparser/json
+## Version Compatibility
 
-**NOT NEEDED.** These are powerful but overkill for JSONL parsing:
-
-- JSONL is line-delimited, not nested JSON
-- Native readline + JSON.parse per line is simpler
-- Only use if SAX-style parsing or extreme memory constraints arise
-
-### Drizzle ORM / Kysely / Other ORMs
-
-**NOT NEEDED.** SQLite schema is simple enough for raw SQL:
-
-- Only 5 tables with straightforward relationships
-- FTS5 virtual tables don't work well with ORMs
-- Raw SQL via bun:sqlite is more performant and transparent
-
-### npm
-
-**DO NOT USE.** User's WoW standard requires bun for all package operations.
-
----
-
-## Integration Architecture
-
-### How memory-nexus integrates with aidev
-
-The aidev CLI is bash-based (`aidev.sh`). memory-nexus will be a **standalone Bun executable**:
-
-```
-aidev memory <command>  -->  memory-nexus-cli <command>
-```
-
-**Integration options:**
-
-1. **Shell script wrapper** (simplest):
-   ```bash
-   # In aidev.sh
-   aidev_memory() {
-     bun run ~/Projects/memory-nexus/src/cli/index.ts "$@"
-   }
-   ```
-
-2. **Compiled executable**:
-   ```bash
-   # Build standalone binary
-   bun build src/cli/index.ts --compile --outfile memory-nexus
-   ```
-
-3. **npm global install** (if published):
-   ```bash
-   bun add -g @chude/memory-nexus
-   ```
-
-**Recommendation:** Start with option 1 during development, then compile to standalone binary for production.
-
----
-
-## Platform-Specific Considerations
-
-### Windows
-
-- bun:sqlite works on Windows
-- FTS5 availability needs testing (likely enabled)
-- Path handling: Use path.posix or normalize paths for SQLite
-
-### macOS
-
-- Apple's SQLite build disables extensions (including FTS5)
-- May need to install vanilla SQLite via Homebrew
-- Use `Database.setCustomSQLite("/opt/homebrew/Cellar/sqlite/<version>/libsqlite3.dylib")`
-
-### Linux (WSL)
-
-- FTS5 fully supported since Bun v0.6.12
-- Best platform for this tool
-
----
-
-## Confidence Assessment
-
-| Component | Confidence | Reason |
-|-----------|------------|--------|
-| Bun runtime | HIGH | User WoW standard, official docs |
-| bun:sqlite | HIGH | Official Bun docs, GitHub discussions confirm FTS5 |
-| Commander.js | HIGH | npm registry, official typings package |
-| Zod v4 | HIGH | npm registry, official release notes |
-| Native JSONL parsing | HIGH | Bun docs, community benchmarks |
-| macOS FTS5 workaround | MEDIUM | Documented but not personally tested |
-| Windows FTS5 | LOW | Assumed based on Bun's SQLite build, needs verification |
-
----
-
-## Open Questions
-
-1. **Windows FTS5 support:** Does Bun's Windows build have FTS5 enabled? Needs testing.
-
-2. **macOS SQLite path:** What's the exact libsqlite3.dylib path for current Homebrew installations?
-
-3. **aidev integration mechanism:** Should memory-nexus be:
-   - A shell function in aidev.sh?
-   - A standalone binary called by aidev?
-   - A separate npm package?
-
-4. **Database location:** Where should the SQLite database live?
-   - `~/.config/memory-nexus/sessions.db` (XDG standard)
-   - `~/.memory-nexus/sessions.db` (simpler)
-   - Configurable via environment variable
-
----
+| Package A | Compatible With | Notes |
+|-----------|-----------------|-------|
+| `@modelcontextprotocol/sdk@1.29.0` | `zod@^3.25 \|\| ^4.0` | Peer dep. Use zod 4.x. |
+| `@modelcontextprotocol/sdk@1.29.0` | Bun 1.3.5 | stdio transport (`process.stdin`/`stdout`) expected to work on Bun; **spike/verify** the stdio handshake against a real client early — Bun process-stream edge cases exist. `engines: node>=18` satisfied by Bun's Node compat. |
+| `@modelcontextprotocol/sdk@1.29.0` | its transitive deps (`express@^5`, `hono@^4.11`, `jose@^6`, `ajv@^8`, `eventsource@^3`, `cross-spawn@^7`) | Installing the SDK pulls a **heavy transitive tree** even when only stdio is used. Unavoidable with the official SDK. Expect `bun audit` to see more surface; the repo already uses `overrides` extensively — pin transitive deps there if audit flags them. This footprint is the main cost of choosing the SDK; still the correct choice over hand-rolling the protocol. |
+| `Bun.serve` SSE | native `fetch`/`ReadableStream` | Server and any TS test client are fully native; if a client must parse SSE, `eventsource-parser@^3` already exists transitively via the SDK — reuse it rather than adding a new dep. |
 
 ## Sources
 
-- [Bun SQLite Documentation](https://bun.sh/docs/api/sqlite)
-- [Bun v0.6.12 Release Notes - FTS5 enabled](https://github.com/oven-sh/bun/discussions/3468)
-- [better-sqlite3 Bun compatibility discussion](https://github.com/oven-sh/bun/discussions/16049)
-- [Commander.js npm package](https://www.npmjs.com/package/commander)
-- [@commander-js/extra-typings](https://www.npmjs.com/package/@commander-js/extra-typings)
-- [Zod v4 release](https://www.infoq.com/news/2025/08/zod-v4-available/)
-- [stream-json npm](https://www.npmjs.com/package/stream-json)
-- [SQLite FTS5 Extension](https://sqlite.org/fts5.html)
-- [Parsing 1 Billion Rows in Bun](https://www.taekim.dev/writing/parsing-1b-rows-in-bun)
-- [Building CLI apps with TypeScript in 2026](https://dev.to/hongminhee/building-cli-apps-with-typescript-in-2026-5c9d)
+- npm registry (verified 2026-07-21): `@modelcontextprotocol/sdk` = `1.29.0` (`engines.node >=18`; peer `zod ^3.25 || ^4.0`, `@cfworker/json-schema ^4.1.1`); `zod` latest = `4.4.3`; local `bun --version` = `1.3.5` — HIGH confidence
+- `github.com/snap-research/locomo` (repo + `LICENSE.txt`) — dataset schema (`locomo10.json`), 10 conversations / ~1,540 QA, **CC BY-NC 4.0** — HIGH confidence
+- `github.com/xiaowu0162/LongMemEval` + LICENSE — **MIT**, 500 questions, 5 abilities, ICLR 2025 — HIGH confidence
+- Mem0 paper (arxiv 2504.19413) + Zep blog "Is Mem0 Really SOTA" + `getzep/zep-papers` issue #5 — LOCOMO LLM-as-judge methodology (binary, ×3 mean, F1/BLEU-1 secondary) and judge-model-sensitivity dispute — MEDIUM-HIGH confidence (vendor sources, cross-checked against the methodology dispute)
+- Repo read (`package.json`, `scripts/eval-v5/*`, `src/application/`, `src/presentation/cli/`, `.planning/PROJECT.md`) — existing stack, hexagonal integration points, eval harness contract — HIGH confidence
+- Context7: attempted, tool unavailable this session; all version claims verified directly against npm instead
+
+---
+*Stack research for: local-first memory server surface + public benchmark parity (v6.0)*
+*Researched: 2026-07-21*
