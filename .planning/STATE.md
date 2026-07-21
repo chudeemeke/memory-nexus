@@ -1,15 +1,16 @@
 ---
 gsd_state_version: 1.0
-milestone: v5.0
-milestone_name: Market-Leader Memory Platform
-status: shipped
-last_updated: "2026-07-06T01:17:21+01:00"
+milestone: v6.0
+milestone_name: Server Surface & Benchmark Parity
+status: planning
+last_updated: "2026-07-21T19:47:38.294Z"
+last_activity: 2026-07-21
 progress:
-  total_phases: 17
-  completed_phases: 17
-  total_plans: 17
-  completed_plans: 17
-  percent: 100
+  total_phases: 0
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
+  percent: 0
 ---
 
 > **FOUNDATION HARDENING VERIFIED 2026-05-28** - Phase 36.8 is implemented. Typecheck, build, full tests, test-isolation, dependency audit, and gitleaks pass. Provider support now routes through an internal provider registry instead of presentation/health/factory switch drift. Phase 36.9 replaced the missing-metric Bun LCOV gate with an Istanbul-backed Bun coverage harness.
@@ -56,31 +57,10 @@ See: .planning/PROJECT.md (updated 2026-02-18)
 
 ## Current Position
 
-Phase: 44 (Release-Candidate Packaging and Publish Handoff) - COMPLETE
-Plan: .planning/phases/44-release-candidate-packaging-publish-handoff/44-PLAN.md
-**Milestone:** v5.0 Market-Leader Memory Platform
-**Status:** `@chude/memory@4.0.3` published and registry-backed npm/Bun installs verified
-
-```
-v5.0 Progress: [#################] 17/17 phases complete
-  Phase 38.0: v5 Threat Model, PRD, Eval Baseline [done]
-  Phase 38.1: Canonical Event Kernel and Projection Replay [done]
-  Phase 38.2: Redaction, Privacy Governance, Audit Commands [done]
-  Phase 38.2.5: Consent Provenance and Memory Governance [done]
-  Phase 38.3: Remote Sync Service and Git Transport [done]
-  Phase 38.4: Remote CLI, Operations, Backup, Recovery [done]
-  Phase 38.5: Secure Capability Interop [done]
-  Phase 38.6: Durable Friction Query Contract [done]
-  Phase 38.7: Evaluation Harness and Regression Fixtures [done]
-  Phase 39: Persona and Procedural Memory [done]
-  Phase 40: Temporal Semantic Graph [done]
-  Phase 41: Importance, Utility, Recall Ranking [done]
-  Phase 41.1: Embedding Pipeline Resilience [done]
-  Phase 42: Dreaming Consolidation [done]
-  Phase 42.5: Feature Completeness and UX Polish [done]
-  Phase 43: Market-Leader and Sales-Readiness Gate [done]
-  Phase 44: Release-Candidate Packaging and Publish Handoff [done]
-```
+Phase: Not started (defining requirements)
+Plan: —
+Status: Defining requirements
+Last activity: 2026-07-21 — Milestone v6.0 started
 
 ## v4.0 Published Baseline
 

@@ -101,11 +101,29 @@ Both Claude and humans use the same commands. No special formatting needed.
 
 ### Active
 
-## Current Milestone: v5.0 Market-Leader Memory Platform
+## Current Milestone: v6.0 Server Surface & Benchmark Parity
+
+**Goal:** Lift the broad agentic-memory category-leader block that Phase 43 gated on, by shipping a full local server surface (MCP + HTTP + streaming) and proving public benchmark parity with the leading agentic-memory tools.
+
+**Target features:**
+- MCP server (stdio) exposing curated memory tools over existing application use-cases
+- Local HTTP daemon bound to 127.0.0.1 for multi-client access
+- SSE/streaming surface for live context subscriptions
+- Long-lived-process concurrency model over SQLite/WAL (highest technical risk)
+- Governance/privacy enforcement reused and verified across the MCP and HTTP paths
+- Broad public benchmark suite (LOCOMO plus additional memory/retrieval benchmarks) extending `scripts/eval-v5`, with reproducible reports comparable to Mem0/Zep-cited numbers
+- Market/readiness gate that lifts, or evidence-re-scopes, the category-leader block
+
+**Invariants:**
+- The server is a new presentation adapter over existing application ports; no business logic in the adapter and no parallel governance path.
+- Local-first preserved: binds 127.0.0.1 by default, no new egress introduced.
+- Exit gate mirrors Phase 43: server shipped, governance verified on new surfaces, reproducible public benchmark numbers published, before the category-leader block lifts.
+
+## Historical Milestone: v5.0 Market-Leader Memory Platform
 
 **Goal:** Make `@chude/memory` a local-first, privacy-governed, cross-project, event-sourced memory substrate with governed persona/procedural memory, temporal graph retrieval, utility-aware ranking, audited dreaming consolidation, excellent CLI/API usability, and demonstrable market readiness.
 
-**Active work:** Post-v5 release follow-up. `@chude/memory@4.0.3` is published and installed. Remaining release-hygiene question: decide whether to create/push a `v4.0.3` git tag for the direct npm hotfix, without rewriting older ambiguous tags.
+**Outcome:** Shipped as `@chude/memory@4.0.3` (2026-07-06). Scoped local-first CLI/API market readiness approved; broad category-leader claims deferred to v6.0 (MCP/local-server + public benchmark parity).
 
 **Target features:**
 - Consent/provenance governance for derived memory and provider egress
