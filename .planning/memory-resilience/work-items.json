@@ -3,7 +3,7 @@
   "workstream": "memory-resilience",
   "goal_status": "active",
   "starting_revision": "77d54e05be7fc24cede4a9a3e1fede6fa113ac8f",
-  "current_item": "B01",
+  "current_item": "B02",
   "status_semantics": {
     "pending": "Not started; authorization and dependencies must permit work.",
     "pending_rebaseline": "Historical candidate, not a confirmed current failure or a completed task.",
@@ -36,8 +36,8 @@
     {
       "id": "B01",
       "stage": "baseline",
-      "title": "Guard coverage output ownership",
-      "status": "pending",
+      "title": "Guard coverage output containment",
+      "status": "verified",
       "depends_on": [],
       "scope": "scripts/run-istanbul-bun-coverage{,.test}.ts",
       "deliverable": "Reject project root, ancestor, sibling-prefix and escaping output paths before mutation.",
@@ -45,8 +45,11 @@
       "risk": "S",
       "authorization": "authorized",
       "owner": "memory-nexus",
-      "evidence": [],
-      "acceptance_record": ".planning/memory-resilience/evidence/B01.json"
+      "evidence": [
+        ".planning/memory-resilience/evidence/B01.json"
+      ],
+      "acceptance_record": ".planning/memory-resilience/evidence/B01.json",
+      "verification_scope": "B01 lexical containment behavior on Windows only. Complete runner Tier S coverage, linked-path safety, ownership and final independent review remain explicit later gates; no merge acceptance."
     },
     {
       "id": "B02",
@@ -57,7 +60,7 @@
         "B01"
       ],
       "scope": "scripts/run-istanbul-bun-coverage{,.test}.ts",
-      "deliverable": "Reject symlink/junction escapes and unsafe existing work directories; validate resolved ancestry.",
+      "deliverable": "Reject symlink/junction escapes and unsafe existing work destinations; validate resolved ancestry, disjoint paths and copied source links before instrumentation can write through them.",
       "verification": "Windows junction and POSIX symlink adversarial fixtures; no outside sentinel is changed.",
       "risk": "S",
       "authorization": "authorized",

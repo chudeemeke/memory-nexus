@@ -1,0 +1,44 @@
+bun test v1.4.1 (4661e494f)
+
+scripts\run-istanbul-bun-coverage.test.ts:
+(pass) run-istanbul-bun-coverage > rejects the project root as coverage output before deleting any files [22.22ms]
+36 |         runInstrumentedCoverage({ projectRoot, workDir, coverageDir, testArgs: [] });
+37 |       } catch (caught) {
+38 |         error = caught;
+39 |       }
+40 |       expect(existsSync(sourceSentinel)).toBe(true);
+41 |       expect(existsSync(outputSentinel)).toBe(true);
+                                              ^
+error: expect(received).toBe(expected)
+
+Expected: true
+Received: false
+
+      at expectCoverageRejection (C:\Projects\memory-nexus\scripts\run-istanbul-bun-coverage.test.ts:41:42)
+      at <anonymous> (C:\Projects\memory-nexus\scripts\run-istanbul-bun-coverage.test.ts:58:5)
+(fail) run-istanbul-bun-coverage > rejects a sibling with the project-name prefix before deleting any files [358.57ms]
+(pass) run-istanbul-bun-coverage > ignores tests, generated output, dependency folders, and explicit coverage tests [0.39ms]
+(pass) run-istanbul-bun-coverage > instruments TypeScript with real statement and branch counters [370.26ms]
+(pass) run-istanbul-bun-coverage > returns zero-count baseline coverage for unexecuted instrumented files [135.88ms]
+(pass) run-istanbul-bun-coverage > adds the release-suite timeout to instrumented test runs by default [1.16ms]
+(pass) run-istanbul-bun-coverage > defaults instrumented discovery to project test roots [0.16ms]
+(pass) run-istanbul-bun-coverage > preserves an explicit instrumented test timeout [0.06ms]
+
+=============================== Coverage summary ===============================
+Statements   : 100% ( 1/1 )
+Branches     : 100% ( 0/0 )
+Functions    : 100% ( 0/0 )
+Lines        : 100% ( 1/1 )
+================================================================================
+(pass) run-istanbul-bun-coverage > writes Istanbul reports with all four coverage totals [38.74ms]
+--------------------------------------|---------|---------|-------------------
+File                                  | % Funcs | % Lines | Uncovered Line #s
+--------------------------------------|---------|---------|-------------------
+All files                             |   80.00 |   79.30 |
+ scripts\run-istanbul-bun-coverage.ts |   80.00 |   79.30 | 163,165,173,180-181,197,207-226,244-245,252,276,279,298-301,303-307,310-311,316-319,321
+--------------------------------------|---------|---------|-------------------
+
+ 8 pass
+ 1 fail
+ 35 expect() calls
+Ran 9 tests across 1 file. [1.59s]

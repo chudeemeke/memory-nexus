@@ -1,5 +1,24 @@
 # Memory resilience execution journal
 
+## 2026-09-19 - B01 containment regression repaired
+
+- Reproduced actual deletion of disposable fixture sentinels for project-root and
+  sibling-prefix output paths; both retained RED runs exited 1. The original guard
+  used a string prefix rather than a strict path-descendant check.
+- Candidate now rejects root, ancestor, normalized traversal and sibling output
+  before mutation. A valid dot-prefixed descendant runs a real instrumented child
+  test and produces all four nonzero fixture metrics without changing source.
+- Focused suite: 14 pass, 0 fail, 79 assertions; child fixture: 1 pass. Typecheck
+  passes. Evidence and input hashes: `evidence/B01.json`. This is scoped B01 proof;
+  whole-runner Tier S quality and final independent review remain open.
+- Next item: **B02**. Add a linked coverage-ancestor regression using only a fresh
+  disposable fixture, then inspect overlapping work/output paths and source-copy
+  links. Instrumentation must never write through a copied link outside its workdir.
+- B03 must additionally prove directory ownership before replacement: a strict
+  descendant alone is not permission to delete an existing source/report directory.
+- No full repository instrumentation was run through the still-incomplete safety
+  boundary. The previously policy-blocked old coverage copy was not touched.
+
 ## 2026-09-19 - Execution system established
 
 Native goal created at 2026-09-19T20:02:57Z, status **active**, thread

@@ -20,7 +20,7 @@ import {
   writeFileSync,
 } from "node:fs";
 import { tmpdir } from "node:os";
-import { basename, join, relative, resolve, sep } from "node:path";
+import { basename, isAbsolute, join, relative, resolve, sep } from "node:path";
 import { createCoverageMap, type CoverageMap, type CoverageMapData } from "istanbul-lib-coverage";
 import { createContext } from "istanbul-lib-report";
 import reports from "istanbul-reports";
@@ -278,8 +278,9 @@ export function runInstrumentedCoverage(options: RunnerOptions): RunnerResult {
   if (!basename(workDir).startsWith(SAFE_WORK_DIR_PREFIX) && basename(workDir) !== ".coverage-work") {
     throw new Error(`Refusing to use unsafe workDir name: ${workDir}`);
   }
-  if (!coverageDir.startsWith(projectRoot)) {
-    throw new Error(`Refusing to use coverageDir outside project root: ${coverageDir}`);
+  const coverageRelative = relative(projectRoot, coverageDir);
+  if (coverageRelative === "" || coverageRelative === ".." || coverageRelative.startsWith(`..${sep}`) || isAbsolute(coverageRelative)) {
+    throw new Error(`Refusing to use coverageDir that is not a strict descendant of project root: ${coverageDir}`);
   }
 
   rmSync(coverageDir, { recursive: true, force: true });
