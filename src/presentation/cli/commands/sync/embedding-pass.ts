@@ -38,113 +38,117 @@ export async function runEmbeddingPass(
     return;
   }
 
-  // Create repository (override for testing, real for production)
-  const repository = deps.repositoryOverride ?? await loadRepository(db);
+  try {
+    // Create repository (override for testing, real for production)
+    const repository = deps.repositoryOverride ?? await loadRepository(db);
 
-  const { EmbeddingService } = await import(
-    "../../../../application/services/embedding-service.js"
-  );
-  const { PatternRedactor } = await import(
-    "../../../../infrastructure/security/pattern-redactor.js"
-  );
-  const { createEmbeddingProgressReporter, createModelDownloadHandler } = await import(
-    "../../progress-reporter.js"
-  );
+    const { EmbeddingService } = await import(
+      "../../../../application/services/embedding-service.js"
+    );
+    const { PatternRedactor } = await import(
+      "../../../../infrastructure/security/pattern-redactor.js"
+    );
+    const { createEmbeddingProgressReporter, createModelDownloadHandler } = await import(
+      "../../progress-reporter.js"
+    );
 
-  const service = new EmbeddingService({
-    repository,
-    provider,
-    config: config.embedding,
-    redactor: new PatternRedactor(),
-  });
+    const service = new EmbeddingService({
+      repository,
+      provider,
+      config: config.embedding,
+      redactor: new PatternRedactor(),
+    });
 
-  // Check for model change
-  const modelState = service.checkModelState();
-  if (modelState.modelChanged && modelState.needsReEmbed) {
-    const proceed = await handleModelChange(modelState, options);
-    if (!proceed) {
-      await factory.dispose();
+    // Check for model change
+    const modelState = service.checkModelState();
+    if (modelState.modelChanged && modelState.needsReEmbed) {
+      const proceed = await handleModelChange(modelState, options);
+      if (!proceed) {
+        return;
+      }
+    }
+
+    // Initialize provider (triggers model download on first run)
+    const downloadHandler = createModelDownloadHandler({ quiet: !!options.quiet });
+    await provider.initialize(downloadHandler);
+
+    if (modelState.modelChanged && modelState.needsReEmbed) {
+      // Check for dimension change -- requires vec0 table recreation
+      const storedDimensions = repository.getStoredEmbeddingDimensions();
+      const newDimensions = config.embedding.dimensions;
+      if (storedDimensions !== null && storedDimensions !== newDimensions) {
+        if (!options.quiet) {
+          console.log(`Recreating embedding table for ${newDimensions}-dimensional vectors...`);
+        }
+        repository.recreateVecTable(newDimensions);
+      }
+
+      if (!options.quiet) {
+        console.log("Clearing existing embeddings for re-embedding...");
+      }
+    }
+
+    // Calculate how many messages need embedding for the current model.
+    const skippedForCurrentModel =
+      typeof repository.getSkippedCount === "function"
+        ? repository.getSkippedCount(modelState.currentHash)
+        : 0;
+    const totalToEmbed = Math.max(
+      0,
+      repository.getTotalMessageCount() -
+        (modelState.modelChanged && modelState.needsReEmbed
+          ? 0
+          : repository.getEmbeddedCount()) -
+        skippedForCurrentModel,
+    );
+
+    if (totalToEmbed === 0) {
+      if (!options.quiet) {
+        if (skippedForCurrentModel > 0) {
+          console.log(`\nAll embeddable messages already embedded (${skippedForCurrentModel} skipped for current model).`);
+        } else {
+          console.log("\nAll messages already embedded.");
+        }
+      }
       return;
     }
 
-    // Check for dimension change -- requires vec0 table recreation
-    const storedDimensions = repository.getStoredEmbeddingDimensions();
-    const newDimensions = config.embedding.dimensions;
-    if (storedDimensions !== null && storedDimensions !== newDimensions) {
-      if (!options.quiet) {
-        console.log(`Recreating embedding table for ${newDimensions}-dimensional vectors...`);
-      }
-      repository.recreateVecTable(newDimensions);
-    }
+    // Run embedding pass with progress
+    const embeddingReporter = createEmbeddingProgressReporter({ quiet: !!options.quiet });
+    embeddingReporter.start(totalToEmbed);
 
-    if (!options.quiet) {
-      console.log("Clearing existing embeddings for re-embedding...");
-    }
-  }
-
-  // Initialize provider (triggers model download on first run)
-  const downloadHandler = createModelDownloadHandler({ quiet: !!options.quiet });
-  await provider.initialize(downloadHandler);
-
-  // Calculate how many messages need embedding for the current model.
-  const skippedForCurrentModel =
-    typeof repository.getSkippedCount === "function"
-      ? repository.getSkippedCount(modelState.currentHash)
-      : 0;
-  const totalToEmbed = Math.max(
-    0,
-    repository.getTotalMessageCount() -
-      repository.getEmbeddedCount() -
-      skippedForCurrentModel,
-  );
-
-  if (totalToEmbed === 0) {
-    if (!options.quiet) {
-      if (skippedForCurrentModel > 0) {
-        console.log(`\nAll embeddable messages already embedded (${skippedForCurrentModel} skipped for current model).`);
+    try {
+      let result;
+      if (modelState.modelChanged && modelState.needsReEmbed) {
+        result = await service.clearAndReembed({
+          onProgress: (p) => embeddingReporter.update(p.current),
+        });
       } else {
-        console.log("\nAll messages already embedded.");
+        result = await service.embedUnembedded({
+          onProgress: (p) => embeddingReporter.update(p.current),
+        });
       }
-    }
-    await factory.dispose();
-    return;
-  }
 
-  // Run embedding pass with progress
-  const embeddingReporter = createEmbeddingProgressReporter({ quiet: !!options.quiet });
-  embeddingReporter.start(totalToEmbed);
+      embeddingReporter.stop();
 
-  try {
-    let result;
-    if (modelState.modelChanged && modelState.needsReEmbed) {
-      result = await service.clearAndReembed({
-        onProgress: (p) => embeddingReporter.update(p.current),
-      });
-    } else {
-      result = await service.embedUnembedded({
-        onProgress: (p) => embeddingReporter.update(p.current),
-      });
+      if (!options.quiet) {
+        const seconds = Math.max(1, Math.round(result.durationMs / 1000));
+        const rate = result.rate.toFixed(1);
+        const skippedSuffix = result.skipped > 0 ? `, skipped ${result.skipped}` : "";
+        console.log(`\nEmbedded ${result.embedded} messages${skippedSuffix} in ${seconds}s (${rate} msg/s)`);
+      }
+    } catch (error) {
+      embeddingReporter.stop();
+      const embeddedSoFar = repository.getEmbeddedCount();
+      const total = repository.getTotalMessageCount();
+      if (!options.quiet) {
+        console.error(
+          `\nEmbedding failed at ${embeddedSoFar}/${total} messages. ` +
+          `Run memory sync --embed to resume from where it stopped.`
+        );
+      }
+      throw error;
     }
-
-    embeddingReporter.stop();
-
-    if (!options.quiet) {
-      const seconds = Math.max(1, Math.round(result.durationMs / 1000));
-      const rate = result.rate.toFixed(1);
-      const skippedSuffix = result.skipped > 0 ? `, skipped ${result.skipped}` : "";
-      console.log(`\nEmbedded ${result.embedded} messages${skippedSuffix} in ${seconds}s (${rate} msg/s)`);
-    }
-  } catch (error) {
-    embeddingReporter.stop();
-    const embeddedSoFar = repository.getEmbeddedCount();
-    const total = repository.getTotalMessageCount();
-    if (!options.quiet) {
-      console.error(
-        `\nEmbedding failed at ${embeddedSoFar}/${total} messages. ` +
-        `Run memory sync --embed to resume from where it stopped.`
-      );
-    }
-    throw error;
   } finally {
     await factory.dispose();
   }
