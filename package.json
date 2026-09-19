@@ -19,7 +19,7 @@
     "build": "bun run clean:dist && bun run build:types && bun run build:lib && bun run build:cli",
     "build:hook": "bun build src/infrastructure/hooks/sync-hook-script.ts --outfile=dist/sync-hook.js --target=bun",
     "test": "bun test",
-    "test:coverage": "bun run scripts/run-istanbul-bun-coverage.ts --coverage-dir coverage && bun run scripts/check-coverage-thresholds.ts --summary coverage/coverage-summary.json --threshold 95",
+    "test:coverage": "bun run scripts/run-istanbul-bun-coverage.ts --coverage-dir coverage --check",
     "eval:v5": "bun run scripts/eval-v5.ts",
     "eval:v5:market": "bun run scripts/eval-v5.ts --market-ready",
     "quality": "bun run typecheck && bun run build && bun test --timeout 15000 && bun run test:isolation && bun run eval:v5 && bun run test:coverage && bun audit",

@@ -358,7 +358,9 @@ bun audit
 gitleaks detect --no-banner --redact --source .
 ```
 
-`bun run quality` runs the release gate sequence. `bun run test:coverage` uses an Istanbul-backed Bun harness and is intentionally strict: statements, branches, functions, and lines must each be available and at least 95%. Missing metrics fail the gate.
+`bun run quality` runs the release gate sequence. `bun run test:coverage` uses an Istanbul-backed Bun harness: aggregate statements, branches, functions, and lines must each be available and at least 95%. Missing metrics fail the gate. Complete per-file, risk-tier, omitted-file and changed-line enforcement is tracked in `.planning/memory-resilience/work-items.json`; an aggregate pass does not establish that broader quality contract.
+
+Each coverage invocation prints its own retained report path under `coverage/run-<id>/` and checks that exact summary. The runner refuses existing unowned output directories and existing working directories; it does not overwrite earlier reports. Preserve and inventory legacy coverage output before moving it aside. Working copies are removed only after ownership checks; interrupted or locked remnants are reported for verified project-owned cleanup. The standalone threshold checker needs an explicit generated summary path when inspecting these reports.
 
 ### Published package smoke
 

@@ -1,5 +1,35 @@
 # Memory resilience execution journal
 
+## 2026-09-19 - B03 owned storage and test-home lifecycle verified; B04 next
+
+- Coverage runs now exclusively claim a fresh work directory and retain separate
+  owned report generations. Existing sources, foreign directories and prior reports
+  survive. The actual CLI gates its exact generated summary; no shared latest pointer.
+- Retained RED/GREEN evidence covers replacement/copied/malformed/missing markers,
+  PID reuse, concurrent processes, abrupt death, real Windows locks, allocation and
+  child/instrumentation failures. Empty unmarked claims use non-recursive cleanup;
+  partial ownership remains diagnosable. See `evidence/B03.json` and B03-storage-plan.md.
+- Corrected the earlier lifecycle claim: normal Bun completion skipped the exit
+  callback in the probe. Global preload teardown now owns normal cleanup, with an
+  explicit-exit fallback and directory/marker identity checks. Linux Bun 1.3.14 also
+  retained the startup home in its built-in lookup: a test-only OS adapter repairs
+  named/default import paths, while a real child validates the isolated startup environment.
+- Final Windows focused run: 63 pass, 0 fail, 275 assertions. Linux: 62 pass,
+  1 Windows-lock-only skip, 0 fail, 267 assertions. Home consumers: 302 pass on each
+  platform, 672 assertions each. Typecheck and static isolation pass. These scoped
+  checks do not replace current full-suite, four-metric or clean-install acceptance.
+- Ledger: 135 items (47 delivery/gates, 88 quality candidates). Q087/Q088 explicitly
+  own storage-helper and preload Tier S proof; Q086 retains runner gaps. All are B10
+  dependencies. Missing statements/branches cannot be accepted as green coverage.
+- Preserved 2,571,698 bytes of legacy coverage plus a 102-byte synthetic failed-probe
+  artifact in the project archive; before/after hashes and manifests retained. No
+  deletion of the separately policy-blocked old copy, runtime/model download or
+  production feature activation. Last disk observation: about 2.13 GiB free.
+- Next: **B04**, complete executable-file/package/risk/applicability inventory,
+  then B05 instrumentation. Independent final review and hosted CI remain open;
+  Fable quota failure has not changed and is not an approval. Native goal stays active.
+
+
 ## 2026-09-19 - B02 linked-path safety verified; B03 next
 
 - Reproduced deletion through a coverage ancestor junction, replacement of a work

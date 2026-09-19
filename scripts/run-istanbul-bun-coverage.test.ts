@@ -1,7 +1,8 @@
 import { describe, expect, test } from "bun:test";
-import { existsSync, lstatSync, mkdirSync, mkdtempSync, readFileSync, rmSync, symlinkSync, writeFileSync } from "node:fs";
+import { spawnSync } from "node:child_process";
+import { copyFileSync, existsSync, lstatSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, symlinkSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
-import { join } from "node:path";
+import { basename, dirname, join } from "node:path";
 import {
   COVERAGE_IGNORE_PATTERNS,
   createCoverageSummary,
@@ -50,6 +51,140 @@ function expectCoverageRejection(selectOutput: (projectRoot: string) => string):
 }
 
 describe("run-istanbul-bun-coverage", () => {
+  test("the actual CLI gates its generated summary and prints its retained path", () => {
+    const fixtureRoot = mkdtempSync(join(tmpdir(), "memory-coverage-cli-"));
+    const projectRoot = join(fixtureRoot, "project");
+    mkdirSync(join(projectRoot, "src"), { recursive: true });
+    mkdirSync(join(projectRoot, "scripts"));
+    for (const name of ["run-istanbul-bun-coverage.ts", "coverage-run-storage.ts", "check-coverage-thresholds.ts"]) {
+      copyFileSync(join(import.meta.dir, name), join(projectRoot, "scripts", name));
+    }
+    symlinkSync(join(import.meta.dir, "..", "node_modules"), join(projectRoot, "node_modules"), "junction");
+    writeFileSync(join(projectRoot, "src", "choose.ts"), "export function choose(value: boolean) { return value ? 1 : 0; }");
+    writeFileSync(join(projectRoot, "src", "choose.test.ts"), 'import { test, expect } from "bun:test"; import { choose } from "./choose"; test("one branch", () => expect(choose(true)).toBe(1));');
+    try {
+      const result = spawnSync(process.execPath, ["run", join(projectRoot, "scripts", "run-istanbul-bun-coverage.ts"), "--coverage-dir", "coverage", "--check", "--", "src/choose.test.ts"], { cwd: projectRoot, encoding: "utf-8" });
+      expect(result.status).toBe(1);
+      expect(result.stderr).toContain("coverage gate: FAIL");
+      const report = result.stdout.match(/Coverage report: (.+)/)?.[1]?.trim();
+      expect(report).toBeDefined();
+      expect(dirname(dirname(report!))).toBe(join(projectRoot, "coverage"));
+      expect(JSON.parse(readFileSync(report!, "utf-8")).total.branches.pct).toBe(50);
+    } finally { rmSync(fixtureRoot, { recursive: true, force: true }); }
+  }, 20000);
+
+  test("refuses an existing source directory as output without deleting its content", () => {
+    const fixtureRoot = mkdtempSync(join(tmpdir(), "memory-coverage-ownership-"));
+    const projectRoot = join(fixtureRoot, "project");
+    const coverageDir = join(projectRoot, "src");
+    const workDir = join(fixtureRoot, "memory-nexus-coverage-work-fixture");
+    mkdirSync(coverageDir, { recursive: true });
+    const sentinel = join(coverageDir, "valuable.ts");
+    writeFileSync(sentinel, "export const = ;");
+    try {
+      let error: unknown;
+      try {
+        runInstrumentedCoverage({ projectRoot, workDir, coverageDir, testArgs: [] });
+      } catch (caught) { error = caught; }
+      expect(existsSync(sentinel)).toBe(true);
+      expect(readFileSync(sentinel, "utf-8")).toBe("export const = ;");
+      expect(error).toBeInstanceOf(Error);
+      expect((error as Error).message).toContain("Refusing");
+    } finally {
+      rmSync(fixtureRoot, { recursive: true, force: true });
+    }
+  });
+
+  test("refuses an existing prefixed work directory without deleting foreign content", () => {
+    const fixtureRoot = mkdtempSync(join(tmpdir(), "memory-coverage-work-owner-"));
+    const projectRoot = join(fixtureRoot, "project");
+    const workDir = join(fixtureRoot, "memory-nexus-coverage-work-fixture");
+    mkdirSync(join(projectRoot, "src"), { recursive: true });
+    mkdirSync(workDir);
+    const sentinel = join(workDir, "valuable.txt");
+    writeFileSync(sentinel, "foreign work must survive");
+    writeFileSync(join(projectRoot, "src", "invalid.ts"), "export const = ;");
+    try {
+      let error: unknown;
+      try {
+        runInstrumentedCoverage({ projectRoot, workDir, coverageDir: join(projectRoot, "coverage"), testArgs: [] });
+      } catch (caught) { error = caught; }
+      expect(existsSync(sentinel)).toBe(true);
+      expect(readFileSync(sentinel, "utf-8")).toBe("foreign work must survive");
+      expect(error).toBeInstanceOf(Error);
+      expect((error as Error).message).toContain("Refusing");
+    } finally {
+      rmSync(fixtureRoot, { recursive: true, force: true });
+    }
+  });
+
+  test("keeps independent report generations across repeat runs and cleans its working copies", () => {
+    const fixtureRoot = mkdtempSync(join(tmpdir(), "memory-coverage-repeat-"));
+    const projectRoot = join(fixtureRoot, "project");
+    const workDir = join(fixtureRoot, "memory-nexus-coverage-work-fixture");
+    const coverageDir = join(projectRoot, "coverage");
+    mkdirSync(join(projectRoot, "src"), { recursive: true });
+    writeFileSync(join(projectRoot, "src", "choose.ts"), "export function choose(value: boolean) { return value ? 1 : 0; }");
+    writeFileSync(join(projectRoot, "src", "choose.test.ts"), 'import { test, expect } from "bun:test"; import { choose } from "./choose"; test("both", () => { expect(choose(true)).toBe(1); expect(choose(false)).toBe(0); });');
+    try {
+      const options = { projectRoot, workDir, coverageDir, testArgs: ["src/choose.test.ts"] };
+      const first = runInstrumentedCoverage(options);
+      expect(first.exitCode).toBe(0);
+      const firstSummary = readFileSync(first.coverageSummaryPath, "utf-8");
+      expect(existsSync(workDir)).toBe(false);
+      const second = runInstrumentedCoverage(options);
+      expect(second.exitCode).toBe(0);
+      expect(second.coverageSummaryPath).not.toBe(first.coverageSummaryPath);
+      expect(readFileSync(first.coverageSummaryPath, "utf-8")).toBe(firstSummary);
+      expect(existsSync(second.coverageSummaryPath)).toBe(true);
+      expect(existsSync(workDir)).toBe(false);
+    } finally {
+      rmSync(fixtureRoot, { recursive: true, force: true });
+    }
+  }, 30000);
+
+  test("checks its own new report and fails when a passing test leaves a branch uncovered", () => {
+    const fixtureRoot = mkdtempSync(join(tmpdir(), "memory-coverage-check-"));
+    const projectRoot = join(fixtureRoot, "project");
+    const coverageDir = join(projectRoot, "coverage");
+    const workDir = join(fixtureRoot, "memory-nexus-coverage-work-fixture");
+    mkdirSync(join(projectRoot, "src"), { recursive: true });
+    writeFileSync(join(projectRoot, "src", "choose.ts"), "export function choose(value: boolean) { return value ? 1 : 0; }");
+    writeFileSync(join(projectRoot, "src", "choose.test.ts"), 'import { test, expect } from "bun:test"; import { choose } from "./choose"; test("one branch", () => expect(choose(true)).toBe(1));');
+    try {
+      const result = runInstrumentedCoverage({ projectRoot, workDir, coverageDir, testArgs: ["src/choose.test.ts"], checkCoverage: true });
+      expect(result.exitCode).toBe(1);
+      const summary = JSON.parse(readFileSync(result.coverageSummaryPath, "utf-8"));
+      expect(summary.total.branches.pct).toBe(50);
+      expect(existsSync(workDir)).toBe(false);
+    } finally {
+      rmSync(fixtureRoot, { recursive: true, force: true });
+    }
+  });
+
+  for (const failure of ["instrumentation", "child"] as const) {
+    test(`retains failed-run evidence and removes its owned working copy after ${failure} failure`, () => {
+      const fixtureRoot = mkdtempSync(join(tmpdir(), "memory-coverage-failure-"));
+      const projectRoot = join(fixtureRoot, "project");
+      const coverageDir = join(projectRoot, "coverage");
+      const workDir = join(fixtureRoot, "memory-nexus-coverage-work-fixture");
+      mkdirSync(join(projectRoot, "src"), { recursive: true });
+      writeFileSync(join(projectRoot, "src", "source.ts"), failure === "instrumentation" ? "export const = ;" : "export const value = true;");
+      writeFileSync(join(projectRoot, "src", "source.test.ts"), 'import { test, expect } from "bun:test"; test("synthetic failure", () => expect(true).toBe(false));');
+      try {
+        const invoke = () => runInstrumentedCoverage({ projectRoot, workDir, coverageDir, testArgs: ["src/source.test.ts"] });
+        if (failure === "instrumentation") expect(invoke).toThrow();
+        else expect(invoke().exitCode).toBe(1);
+        expect(existsSync(workDir)).toBe(false);
+        const generations = readdirSync(coverageDir).filter((name) => name.startsWith("run-"));
+        expect(generations).toHaveLength(1);
+        const record = JSON.parse(readFileSync(join(coverageDir, generations[0]!, "run.json"), "utf-8"));
+        expect(record.status).toBe("failed");
+        expect(record.exitCode).toBe(failure === "instrumentation" ? null : 1);
+      } finally { rmSync(fixtureRoot, { recursive: true, force: true }); }
+    });
+  }
+
   test("rejects the project root as coverage output before deleting any files", () => {
     expectCoverageRejection((projectRoot) => projectRoot);
   });
@@ -129,9 +264,10 @@ describe("run-istanbul-bun-coverage", () => {
         'test("both outcomes", () => { expect(choose(true)).toBe(1); expect(choose(false)).toBe(0); });',
       ].join("\n"));
       try {
-        const result = runInstrumentedCoverage({ projectRoot, workDir, coverageDir, testArgs: ["src/choose.test.ts"] });
+        const result = runInstrumentedCoverage({ projectRoot, workDir, coverageDir, testArgs: ["src/choose.test.ts"], checkCoverage: true });
         expect(result.exitCode).toBe(0);
-        expect(result.coverageJsonPath).toBe(join(coverageDir, "coverage-final.json"));
+        expect(dirname(dirname(result.coverageJsonPath))).toBe(coverageDir);
+        expect(basename(result.coverageJsonPath)).toBe("coverage-final.json");
         expect(readFileSync(sourcePath, "utf-8")).toBe(source);
         const summary = JSON.parse(readFileSync(result.coverageSummaryPath, "utf-8"));
         for (const metric of ["statements", "branches", "functions", "lines"]) {
@@ -310,6 +446,12 @@ describe("run-istanbul-bun-coverage", () => {
     const options = parseRunnerArgs(["--coverage-dir", "coverage-custom", "--", "src/example.test.ts"]);
 
     expect(options.coverageDir.endsWith("coverage-custom")).toBe(true);
+    expect(options.testArgs).toEqual(["--timeout", "15000", "src/example.test.ts"]);
+  });
+
+  test("consumes the coverage-check flag instead of passing it to Bun test", () => {
+    const options = parseRunnerArgs(["--check", "--", "src/example.test.ts"]);
+    expect(options.checkCoverage).toBe(true);
     expect(options.testArgs).toEqual(["--timeout", "15000", "src/example.test.ts"]);
   });
 

@@ -3,7 +3,7 @@
   "workstream": "memory-resilience",
   "goal_status": "active",
   "starting_revision": "77d54e05be7fc24cede4a9a3e1fede6fa113ac8f",
-  "current_item": "B03",
+  "current_item": "B04",
   "status_semantics": {
     "pending": "Not started; authorization and dependencies must permit work.",
     "pending_rebaseline": "Historical candidate, not a confirmed current failure or a completed task.",
@@ -75,7 +75,7 @@
       "id": "B03",
       "stage": "baseline",
       "title": "Bound verification storage lifecycle",
-      "status": "pending",
+      "status": "verified",
       "depends_on": [
         "B02"
       ],
@@ -85,8 +85,12 @@
       "risk": "S",
       "authorization": "authorized",
       "owner": "memory-nexus",
-      "evidence": [],
-      "acceptance_record": ".planning/memory-resilience/evidence/B03.json"
+      "evidence": [
+        ".planning/memory-resilience/evidence/B03.json",
+        ".planning/memory-resilience/B03-storage-plan.md"
+      ],
+      "acceptance_record": ".planning/memory-resilience/evidence/B03.json",
+      "verification_scope": "Scoped ownership/allocation/concurrent-run/crash/lock/teardown behavior, actual CLI wiring and Windows/Linux home isolation. Full Tier S and final independent review remain Q086-Q088/R02."
     },
     {
       "id": "B04",
@@ -2145,7 +2149,9 @@
         "Q083",
         "Q084",
         "Q085",
-        "Q086"
+        "Q086",
+        "Q087",
+        "Q088"
       ],
       "scope": "all Q-* work items",
       "deliverable": "Close individually verified quality work items; fix discovered defects and meaningful boundaries, not artificial counter tests.",
@@ -2803,8 +2809,46 @@
       "owner": "memory-nexus",
       "evidence": [],
       "acceptance_record": ".planning/memory-resilience/evidence/Q086.json",
-      "observed_gap": "B02 focused native coverage reports functions 88.00% and lines 94.51%; statements/branches are unmeasured. This is not a complete instrumented baseline.",
-      "observed_evidence": ".planning/memory-resilience/evidence/B02-windows-final.txt"
+      "observed_gap": "B03 focused native runner coverage: functions 88.00%, lines 93.92%; statements/branches unmeasured. Complete four-metric rebaseline remains required.",
+      "observed_evidence": ".planning/memory-resilience/evidence/B03-windows-final.txt"
+    },
+    {
+      "id": "Q087",
+      "stage": "baseline-quality",
+      "title": "Verify owned coverage storage against Tier S quality",
+      "status": "pending_rebaseline",
+      "depends_on": [
+        "B09"
+      ],
+      "scope": "scripts/coverage-run-storage.ts",
+      "deliverable": "Include the executable in the complete inventory and instrumentation; meet Tier S coverage plus adversarial and decision checks.",
+      "verification": "Current-source per-file statements/functions/lines >=95%, branches 100%, meaningful decision checks, no missing metric accepted.",
+      "risk": "S",
+      "authorization": "authorized",
+      "owner": "memory-nexus",
+      "evidence": [],
+      "acceptance_record": ".planning/memory-resilience/evidence/Q087.json",
+      "observed_gap": "B03 behavior tests pass; native coverage is not four-metric Tier S proof. Test preload currently excluded from instrumentation.",
+      "observed_evidence": ".planning/memory-resilience/evidence/B03.json"
+    },
+    {
+      "id": "Q088",
+      "stage": "baseline-quality",
+      "title": "Verify test-home lifecycle and isolation against Tier S quality",
+      "status": "pending_rebaseline",
+      "depends_on": [
+        "B09"
+      ],
+      "scope": "tests/test-setup.ts",
+      "deliverable": "Include the executable in the complete inventory and instrumentation; meet Tier S coverage plus adversarial and decision checks.",
+      "verification": "Current-source per-file statements/functions/lines >=95%, branches 100%, meaningful decision checks, no missing metric accepted.",
+      "risk": "S",
+      "authorization": "authorized",
+      "owner": "memory-nexus",
+      "evidence": [],
+      "acceptance_record": ".planning/memory-resilience/evidence/Q088.json",
+      "observed_gap": "B03 behavior tests pass; native coverage is not four-metric Tier S proof. Test preload currently excluded from instrumentation.",
+      "observed_evidence": ".planning/memory-resilience/evidence/B03.json"
     }
   ],
   "decisions": {

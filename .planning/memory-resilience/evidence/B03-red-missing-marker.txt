@@ -1,0 +1,29 @@
+bun test v1.4.1 (4661e494f)
+
+scripts\coverage-run-storage.test.ts:
+Coverage work retained for verified cleanup: C:\Users\Destiny\AppData\Local\Temp\memory-coverage-owner-test-qSOwET\work; bytes=389; Refusing unowned coverage directory: C:\Users\Destiny\AppData\Local\Temp\memory-coverage-owner-test-qSOwET\work
+15 |       const valuable = join(run.workDir, "valuable.txt");
+16 |       writeFileSync(valuable, "must survive lost ownership");
+17 |       unlinkSync(marker);
+18 |       releaseCoverageWork(run);
+19 |       expect(readFileSync(valuable, "utf-8")).toBe("must survive lost ownership");
+20 |       expect(existsSync(marker)).toBe(false);
+                                      ^
+error: expect(received).toBe(expected)
+
+Expected: false
+Received: true
+
+      at <anonymous> (C:\Projects\memory-nexus\scripts\coverage-run-storage.test.ts:20:34)
+(fail) coverage run ownership > missing ownership cannot be restored as permission to clean a directory [34.53ms]
+---------------------------------|---------|---------|-------------------
+File                             | % Funcs | % Lines | Uncovered Line #s
+---------------------------------|---------|---------|-------------------
+All files                        |   85.71 |   76.19 |
+ scripts\coverage-run-storage.ts |   85.71 |   76.19 | 37-49,67-68,80-83,97
+---------------------------------|---------|---------|-------------------
+
+ 0 pass
+ 1 fail
+ 2 expect() calls
+Ran 1 test across 1 file. [262.00ms]

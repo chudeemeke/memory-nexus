@@ -1,0 +1,2 @@
+$ bun run scripts/check-test-isolation.ts
+test-isolation gate: PASS (no violations)

@@ -1,0 +1,28 @@
+{
+  "recorded_at": "2026-09-19T21:03:21.1808428Z",
+  "original": "coverage/",
+  "archive": ".cc-guardian/archives/coverage-pre-ownership-20260919T210320Z",
+  "files": [
+    {
+      "name": "coverage-final.json",
+      "bytes": 2172941,
+      "sha256": "B5B7785D2D169224169647B7DC4877636B0FB2E0A6074457DF21CD14B16A69D8"
+    },
+    {
+      "name": "coverage-summary.json",
+      "bytes": 67081,
+      "sha256": "F99F3A21640B6B87C2214AA30C8B6DDFB89566F333444D515D454E65D6775519"
+    },
+    {
+      "name": "lcov.info",
+      "bytes": 331676,
+      "sha256": "2FF883D646544979FDA1DE8D7829ED4FFAE68CC01ED997969CC84557DB00C872"
+    }
+  ],
+  "bytes": 2571698,
+  "action": "Moved exact legacy report directory within project; no data deleted",
+  "verification": "All three length/SHA256 fingerprints retained; matching hashes verified before and after move",
+  "purpose": "Preserve historical pre-hardening coverage; new runner must create an owned report container",
+  "restore": "After stopping coverage runs, restore these three files into a separate inspection directory. Do not overwrite new owned generations or treat this historical report as current acceptance.",
+  "policy_blocked_old_temp_copy": "Not touched"
+}

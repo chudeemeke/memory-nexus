@@ -19,7 +19,7 @@ The first repair/dependency revision passed the instrumented full run: 4,455 tes
 
 That summary exposes 85 files below 95% in at least one metric, before stricter Tier S requirements. Current instrumentation omits executable scripts and the gate reads aggregate totals. Per-file risk classification, omission checks, changed-line proof, reviewed applicability for zero-denominator metrics, executable CI, and coverage repairs remain open. The inventory is `2026-09-19-repair-evidence/per-file-coverage-gaps.json`.
 
-The first full run after hardening produced 4,459 passes and one hook-fixture failure. The fixture correction passed all 18 hook tests and a 4,460-test full repeat. Independent review then led to a reproduced ownership-marker loss during partial Windows cleanup. Cleanup now runs at process exit and restores the marker when locked files must be retained; the inherited friction-file sentinel is also checked byte-for-byte. The subsequent full run passed **4,461 tests across 209 files, zero failures**, with 11,005 assertions and one snapshot (241.14 seconds; bare exit 0), on source commit `3a5f8c9`. Type checking was rerun and passed; build and the static test-isolation gate pass. The retained history secret scan passed; that scan alone is not proof for untracked files or the final PR revision. Selected verification inputs are fingerprinted in `2026-09-19-repair-evidence/verification-inputs.json`. Older unmarked temporary directories remain inventoried; no name-only automatic sweep was introduced.
+The first full run after hardening produced 4,459 passes and one hook-fixture failure. The fixture correction passed all 18 hook tests and a 4,460-test full repeat. Independent review then led to a reproduced ownership-marker loss during partial Windows cleanup. At that revision, cleanup was moved to process exit and restored the marker when locked files had to be retained; B03 later disproved normal-exit invocation on Bun 1.4.1 (correction below); the inherited friction-file sentinel is also checked byte-for-byte. The subsequent full run passed **4,461 tests across 209 files, zero failures**, with 11,005 assertions and one snapshot (241.14 seconds; bare exit 0), on source commit `3a5f8c9`. Type checking was rerun and passed; build and the static test-isolation gate pass. The retained history secret scan passed; that scan alone is not proof for untracked files or the final PR revision. Selected verification inputs are fingerprinted in `2026-09-19-repair-evidence/verification-inputs.json`. Older unmarked temporary directories remain inventoried; no name-only automatic sweep was introduced.
 
 ## Owned remaining work
 
@@ -29,7 +29,7 @@ The first full run after hardening produced 4,459 passes and one hook-fixture fa
 | Per-file/Tier S/changed-line/omitted-script enforcement and the 85 known gaps | memory-nexus | Repair before merge/release; aggregate PASS cannot waive these failures |
 | Exact-ID historical friction quarantine | memory-nexus | Refresh tuple provenance, dry-run, recoverable backup, rollback proof and independent review before mutation; close before friction-driven prioritisation |
 | Atomic embedding model migration and stronger artifact/preprocessing identity | memory-nexus | Required before the proposed offline feature reuses or replaces an existing index; current initialization guard provides narrower protection |
-| Coverage runner deletion guards and temporary retention | memory-nexus | Harden path boundaries and linked destinations before enabling automatic cleanup or accepting caller-selected output paths; current prefix comparison is insufficient |
+| Coverage runner ownership and full Tier S proof | memory-nexus | B01-B03 scoped path/link/ownership/lifecycle behavior verified; Q086-Q088, complete quality enforcement and final review still required before merge |
 | Assembled-diff review, final independent code review and hosted checks | memory-nexus | Draft PR #1 preserves five signed code commits and recovered documentation, with dependencies separate; no merge while quality gates remain open |
 | Desktop runtime/clone/cutover verification | memory-nexus | Next successful desktop connection, before retiring its clone or changing authority; September 19 connection timed out |
 | Remaining temporary cleanup | memory-nexus | Resolve the automatic approval-review rejection before retrying the rejected removal; do not bypass it |
@@ -45,3 +45,22 @@ The persistent execution contract is `.planning/memory-resilience/EXECUTION.md`;
 The owner requested project-scoped disk management during repair. Verified archives reclaimed 631,781,536 logical bytes (602.5 MiB); two missing worktree registrations were pruned with branch refs preserved. The live database and recovered work remain intact. See `2026-09-19-disk-ownership.md` for ownership boundaries, archive manifests, pending cleanup and ongoing policy.
 
 The owner approved Step A, the bounded local performance experiment in `../plans/2026-09-19-offline-embedding-decision.md`, to run after baseline repairs. That approval permits the local runtime/model and synthetic tests with recorded resource/disk footprint and removal instructions. It does not approve production feature implementation or source replication. No new runtime/model, scheduler, endpoint, replication path or fallback policy has been activated. The owner's requested desktop role includes both embedding computation and receiving memory data.
+
+## B03 correction and current scoped evidence
+
+The earlier process-exit implementation did not prove normal test teardown. A new
+probe showed ordinary Windows Bun 1.4.1 completion skipped that callback; explicit
+exit could also delete a replacement test home. Global preload teardown plus original
+directory/marker checks repair both. Linux Bun 1.3.14 retained its startup home in
+`os.homedir()`, despite changed environment variables. The test harness now redirects
+that built-in lookup when needed, including named/default imports; real child
+processes retain their native lookup with the isolated startup environment.
+
+Coverage runs use exclusive owned working copies and independent retained report
+generations; the actual CLI checks its new summary. Final focused checks: Windows
+63 pass; Linux 62 pass and one Windows-specific lock skip; zero failures. Home-path
+consumers pass 302 tests on each platform. Typecheck and isolation pass. Retained
+source fingerprints, RED/GREEN logs, archive manifests and limits are in
+`.planning/memory-resilience/evidence/B03.json`. This is not current full-suite or
+complete four-metric Tier S acceptance. B04 is next; Q086-Q088 and the broader
+quality/CI/review gates remain open. The approved embedding experiment has not started.

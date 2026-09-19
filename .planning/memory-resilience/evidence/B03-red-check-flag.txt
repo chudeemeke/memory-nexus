@@ -1,0 +1,30 @@
+bun test v1.4.1 (4661e494f)
+
+scripts\run-istanbul-bun-coverage.test.ts:
+384 |     expect(options.testArgs).toEqual(["--timeout", "15000", "src/example.test.ts"]);
+385 |   });
+386 |
+387 |   test("consumes the coverage-check flag instead of passing it to Bun test", () => {
+388 |     const options = parseRunnerArgs(["--check", "--", "src/example.test.ts"]);
+389 |     expect(options.checkCoverage).toBe(true);
+                                        ^
+error: expect(received).toBe(expected)
+
+Expected: true
+Received: undefined
+
+      at <anonymous> (C:\Projects\memory-nexus\scripts\run-istanbul-bun-coverage.test.ts:389:35)
+(fail) run-istanbul-bun-coverage > consumes the coverage-check flag instead of passing it to Bun test [8.51ms]
+--------------------------------------|---------|---------|-------------------
+File                                  | % Funcs | % Lines | Uncovered Line #s
+--------------------------------------|---------|---------|-------------------
+All files                             |    6.52 |   18.53 |
+ scripts\coverage-run-storage.ts      |    0.00 |    8.54 | 26-28,32-48,52-59,63-76,80-83,87-95,99-118
+ scripts\run-istanbul-bun-coverage.ts |   13.04 |   28.52 | 91,95-96,100,104-114,118,122-131,135-166,170-178,182-190,194-198,202-206,210-229,233-252,270-271,273-274,294-302,306-309,313-314,318-373,378-379,384-387,389
+--------------------------------------|---------|---------|-------------------
+
+ 0 pass
+ 26 filtered out
+ 1 fail
+ 1 expect() calls
+Ran 1 test across 1 file. [1176.00ms]
