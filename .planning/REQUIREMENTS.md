@@ -391,8 +391,29 @@ Which phases cover which requirements. Updated during roadmap creation.
 | REL-01 | Phase 44 | Complete |
 | REL-02 | Phase 44 | Complete |
 | REL-03 | Phase 44 | Complete |
+| SRV-01 | Phase 46 | Pending |
+| SRV-02 | Phase 46 | Pending |
+| SRV-03 | Phase 46 | Pending |
+| SRV-04 | Phase 51 | Pending |
+| SGOV-01 | Phase 47 | Pending |
+| SGOV-02 | Phase 47 | Pending |
+| SGOV-03 | Phase 47 | Pending |
+| SGOV-04 | Phase 48 | Pending |
+| MCP-01 | Phase 48 | Pending |
+| MCP-02 | Phase 48 | Pending |
+| MCP-03 | Phase 48 | Pending |
+| HTTP-01 | Phase 49 | Pending |
+| HTTP-02 | Phase 49 | Pending |
+| HTTP-03 | Phase 49 | Pending |
+| STREAM-01 | Phase 50 | Pending |
+| BENCH-01 | Phase 52 | Pending |
+| BENCH-02 | Phase 52 | Pending |
+| BENCH-03 | Phase 52 | Pending |
+| BENCH-04 | Phase 52 | Pending |
+| MKT-01 | Phase 53 | Pending |
+| MKT-02 | Phase 53 | Pending |
 
-v6.0 requirement-to-phase mapping is appended by the roadmapper below.
+v6.0 requirement-to-phase mapping is complete in the table above: 21 enumerated requirements mapped to Phases 45-53. The Phase 45 concurrency spike carries no mapped requirement (it de-risks SRV-01/02/03 before Phase 46 implements them).
 
 **Coverage:**
 - v4.0 requirements: 25 total (excluding QUAL cross-cutting)
@@ -402,8 +423,12 @@ v6.0 requirement-to-phase mapping is appended by the roadmapper below.
 - v5.0 pending: 14/53
 - v5.0 mapped to phases: 53/53
 - v5.0 unmapped: 0
-- v6.0 requirements: 20 total (SRV, SGOV, MCP, HTTP, STREAM, BENCH, MKT) — phase mapping pending roadmapper
+- v6.0 requirements: 21 total enumerated (SRV, SGOV, MCP, HTTP, STREAM, BENCH, MKT) — phase mapping complete (21/21 mapped to Phases 45-53)
+- v6.0 mapped to phases: 21/21
+- v6.0 unmapped: 0
+- v6.0 phases: 9 (Phase 45 is a de-risking concurrency spike with no mapped requirement)
+- Note: the earlier "20 total" summary was an off-by-one; the enumerated set is 21 (SRV 4 + SGOV 4 + MCP 3 + HTTP 3 + STREAM 1 + BENCH 4 + MKT 2)
 
 ---
 *Requirements defined: 2026-04-03*
-*Last updated: 2026-07-21 — added v6.0 Server Surface & Benchmark Parity requirements; corrected REL-01/02/03 traceability to Complete (Phase 44 shipped)*
+*Last updated: 2026-07-21 — added v6.0 Server Surface & Benchmark Parity requirements; corrected REL-01/02/03 traceability to Complete (Phase 44 shipped); mapped 21 v6.0 requirements to Phases 45-53 (roadmap creation)*

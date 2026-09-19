@@ -1,0 +1,43 @@
+# Baseline repair status — 2026-09-19
+
+Status: in progress on `fix/baseline-trust-repair`; not release acceptance. The recovered v6 requirements and roadmap remain intact, with Phase 45 unstarted. This report supersedes September 12 findings only where new evidence is listed below.
+
+## Implemented candidates
+
+- Reproduced the resolver defect and repaired probing of an unlisted terminal directory. Portable junction fixtures replace tests tied to a personal cloud-directory layout.
+- Isolated `NO_COLOR` in the forced-color status test while preserving production precedence.
+- Updated compatible direct/transitive dependency versions. The refreshed audit reported zero vulnerabilities across 332 packages. Transformer runtime compatibility beyond the covered paths remains subject to the existing release checks; no local model was downloaded for the offline proposal.
+- Redirected default test storage, configuration, hooks, and legacy files into temporary homes, including child commands. A regression first demonstrated default friction-command pollution of an inherited home. Windows can retain locked temporary SQLite files; those are reported rather than hidden. A hook subprocess fixture now also overrides its XDG paths explicitly.
+- Protected the existing vector table when replacement-provider initialization fails and ensured factory disposal for initialization and setup failures. A second regression repairs same-dimension model changes incorrectly returning early when every message already has an old embedding. This does not make later model replacement atomic.
+- Hardened coverage-summary numeric validation: malformed values, inconsistent reported percentages, and rounded-up below-threshold counts cannot pass. This is not yet the required per-file quality gate.
+
+## Evidence and current limits
+
+The first repair/dependency revision passed the instrumented full run: 4,455 tests, zero failures; statements 97.32%, branches 95.03%, functions 96.51%, lines 97.41%. Its retained summary is `2026-09-19-repair-evidence/pre-hardening-coverage-summary.json`. It predates the later test-store, embedding-lifecycle, and gate changes; its coverage must not be transferred to them.
+
+That summary exposes 85 files below 95% in at least one metric, before stricter Tier S requirements. Current instrumentation omits executable scripts and the gate reads aggregate totals. Per-file risk classification, omission checks, changed-line proof, reviewed applicability for zero-denominator metrics, executable CI, and coverage repairs remain open. The inventory is `2026-09-19-repair-evidence/per-file-coverage-gaps.json`.
+
+The first full run after hardening produced 4,459 passes and one hook-fixture failure. The fixture correction passed all 18 hook tests and a 4,460-test full repeat. Independent review then led to a reproduced ownership-marker loss during partial Windows cleanup. Cleanup now runs at process exit and restores the marker when locked files must be retained; the inherited friction-file sentinel is also checked byte-for-byte. The subsequent full run passed **4,461 tests across 209 files, zero failures**, with 11,005 assertions and one snapshot (241.14 seconds; bare exit 0), on source commit `3a5f8c9`. Type checking was rerun and passed; build and the static test-isolation gate pass. The retained history secret scan passed; that scan alone is not proof for untracked files or the final PR revision. Selected verification inputs are fingerprinted in `2026-09-19-repair-evidence/verification-inputs.json`. Older unmarked temporary directories remain inventoried; no name-only automatic sweep was introduced.
+
+## Owned remaining work
+
+| Work | Owner | Completion trigger |
+| --- | --- | --- |
+| Final tests, current-source coverage and all release checks | memory-nexus | Required before any ready-for-review/release claim |
+| Per-file/Tier S/changed-line/omitted-script enforcement and the 85 known gaps | memory-nexus | Repair before merge/release; aggregate PASS cannot waive these failures |
+| Exact-ID historical friction quarantine | memory-nexus | Refresh tuple provenance, dry-run, recoverable backup, rollback proof and independent review before mutation; close before friction-driven prioritisation |
+| Atomic embedding model migration and stronger artifact/preprocessing identity | memory-nexus | Required before the proposed offline feature reuses or replaces an existing index; current initialization guard provides narrower protection |
+| Coverage runner deletion guards and temporary retention | memory-nexus | Harden path boundaries and linked destinations before enabling automatic cleanup or accepting caller-selected output paths; current prefix comparison is insufficient |
+| Draft PR, assembled-diff review, final independent code review and hosted checks | memory-nexus | Five signed code commits preserve the candidate, with dependencies separate; no merge while quality gates remain open |
+| Desktop runtime/clone/cutover verification | memory-nexus | Next successful desktop connection, before retiring its clone or changing authority; September 19 connection timed out |
+| Remaining temporary cleanup | memory-nexus | Resolve the automatic approval-review rejection before retrying the rejected removal; do not bypass it |
+
+The three inbox items remain triaged. No historical friction rows have been changed in this repair so far. A successful live Fable READY smoke and proposal review exist, but neither closes all future review gates. Desktop source classification from September 12 does not prove runtime data migration or safe clone retirement today.
+
+The separate code packet review returned APPROVE WITH CONDITIONS. Reproduced cleanup findings were repaired; dependency/runtime compatibility and final-revision review remain open. See `2026-09-19-repair-review-disposition.md`. No tuicr review session exists; the human assembled-diff gate remains pending (`tuicr -r origin/main..HEAD -w` from the project root). No hosted workflow currently establishes the required quality contract.
+
+## Disk management and separate feature proposal
+
+The owner requested project-scoped disk management during repair. Verified archives reclaimed 631,781,536 logical bytes (602.5 MiB); two missing worktree registrations were pruned with branch refs preserved. The live database and recovered work remain intact. See `2026-09-19-disk-ownership.md` for ownership boundaries, archive manifests, pending cleanup and ongoing policy.
+
+The offline feature remains a proposal in `../plans/2026-09-19-offline-embedding-decision.md`. The recommendation is local encoding on each active machine, independently approved source replication, and a bounded local performance experiment before implementation. No new runtime/model, scheduler, endpoint, replication path or fallback policy has been activated. The owner's requested desktop role includes both embedding computation and receiving memory data.

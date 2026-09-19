@@ -12,6 +12,8 @@ Do not silently remove stated, inferred, prototype, disabled, or partial feature
 
 ## Current State
 
+For current readiness and recovery evidence, read `docs/audits/2026-09-12-project-status.md`. The historical release completion below does not establish present-day release readiness. The v6 roadmap is preserved in uncommitted planning work; Phase 45 has not started. Before a mandatory Fable review, require a live readiness smoke and substantive retained review output, as tracked in `docs/inbox/2026-07-23-remotely-fable-auth-preflight-notice.md`.
+
 - v4 is published as `@chude/memory`.
 - v5 Market-Leader Memory Platform is active.
 - Phase 42.5 is complete.
@@ -76,6 +78,8 @@ Runtime data follows XDG-style locations:
 
 Legacy `~/.memory` / `MEMORY_HOME` sidecars are compatibility-only and explicit opt-in.
 
+Memory Nexus owns its checkout, worktree, temporary verification, and runtime backup storage. Follow `docs/audits/2026-09-19-disk-ownership.md` for verified archives, retained worktree refs, cleanup limits, and ongoing retention rules. Preserve active/uncommitted work and do not clean other projects or shared caches.
+
 ## Quality Gates
 
 Use Bun. Required gates for serious changes:
@@ -94,7 +98,7 @@ git diff --check
 npm pack --dry-run --json
 ```
 
-Coverage must pass at each metric independently: statements, branches, functions, and lines all >= 95%.
+The shared quality contract in `~/.claude/rules/quality-standards.md` is authoritative: enforce all four metrics per executable file and package, the stricter Tier S branch/adversarial requirements, changed-line coverage, and explicit reviewed exceptions. The current aggregate gate does not establish that compliance. The September 19 repair inventory records 85 files below the ordinary floor before Tier S assessment; release acceptance remains blocked until enforcement and gaps are repaired.
 
 ## Agent Guidance
 

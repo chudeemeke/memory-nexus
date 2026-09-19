@@ -3,10 +3,10 @@ gsd_state_version: 1.0
 milestone: v6.0
 milestone_name: Server Surface & Benchmark Parity
 status: planning
-last_updated: "2026-07-21T19:47:38.294Z"
-last_activity: 2026-07-21
+last_updated: "2026-09-19T13:08:00.000Z"
+last_activity: 2026-09-19
 progress:
-  total_phases: 0
+  total_phases: 9
   completed_phases: 0
   total_plans: 0
   completed_plans: 0
@@ -43,7 +43,13 @@ progress:
 > **REMOTE CONSUMER NOTES REVIEWED 2026-05-30** - The two remotely consumer-impact inbox notes were reviewed against current memory-nexus docs/scripts. No current raw SSH/rsync operating instructions or hard-coded remotely tunnel-state assumptions were found, so both notes were archived with disposition text. Future Phase 38 cross-machine work must still use current `remotely` conventions where applicable.
 > **FIRST-PARTY INFRASTRUCTURE BROADCAST 2026-05-28** - User clarified that `memory` is a first-class first-party tool used by most/all projects. Canonical tool/package naming is `memory` / `@chude/memory`; the repository remains `memory-nexus`, and `nexus` is a legacy alias. Updated Codex/Claude rules and document-for-clear skills, added a Codex memory note, and filed notification inbox items to opted-in projects so consumers know about provider-secret, redaction/export, registry, and authkey-optional contract changes.
 
+> **V6.0 ROADMAP CREATED 2026-07-21** - Milestone v6.0 Server Surface & Benchmark Parity is roadmapped into 9 phases (45-53). Phase 45 is a de-risking concurrency spike (highest technical risk: the long-lived SQLite/WAL lifecycle on Bun/Windows has zero signal in the current open-per-invocation code). Foundation lands before any adapter: `ServerDatabaseProvider` (Phase 46) then the `MemoryQueryFacade` governance seam with the CLI refactored onto it (Phase 47). Adapters in dependency order: MCP stdio (48) -> 127.0.0.1 HTTP daemon (49) -> Streamable-HTTP streaming (50) -> `memory serve` (51). Then the public benchmark suite (52: LongMemEval MIT-load-bearing + LOCOMO CC-BY-NC comparison fetched to a gitignored cache), then the category-leader readiness/market gate (53) mirroring the Phase 43 exit-gate. Read-only-first server (query/search/context/facts/related/friction-list); server-side writes (SRVW-01) and the backward audit (AUDIT-01) are out of v6.0. 21 v6.0 requirements mapped 21/21; the REQUIREMENTS.md "20 total" summary was an off-by-one.
+
 # State: @chude/memory (memory-nexus)
+
+> **BASELINE REPAIR IN PROGRESS 2026-09-19:** The owner accepted baseline repair before Phase 45 and requested project-scoped disk management. Work is preserved on `fix/baseline-trust-repair`. Resolver/color defects, dependency updates, test-store isolation, embedding setup/model-change defects, and numeric coverage validation have candidate fixes. The first instrumented repair run passed 4,455 tests, but its coverage does not cover later changes; it also reveals 85 files below the ordinary per-file floor. Per-file/Tier S enforcement, historical friction quarantine, final checks, and review/CI remain open. Verified archives reclaimed 602.5 MiB and missing worktree registrations were pruned with refs preserved. See `docs/audits/2026-09-19-baseline-repair-status.md` and `docs/audits/2026-09-19-disk-ownership.md` for the current restart point. The offline embedding/desktop replication design is a separate owner-gated proposal; no feature has been activated. Older PASS, ready, and zero-inbox statements remain dated history.
+
+> **CURRENT STATUS ASSESSMENT 2026-09-12:** Preserve the July 21 v6 roadmap and requirements work below. Phase 45 remains unstarted. Current release readiness is blocked: live dependency audit reports 26 vulnerabilities (17 high, 9 moderate), the full test invocation exposes a project-name resolver failure, coverage enforcement reads aggregate totals rather than the required per-file risk tiers, and 27 historical synthetic friction rows remain open. Desktop source classification is complete without mutation: 54 line-ending-only tracked changes plus 11 recoverable duplicate/historical files; desktop HEAD is an ancestor of this checkout. All 3 active inbox items are triaged. The current evidence, remaining limits, and next-action ownership are in `docs/audits/2026-09-12-project-status.md`; older PASS and zero-inbox statements below are historical, not current acceptance.
 
 ## Project Reference
 
@@ -51,16 +57,16 @@ See: .planning/PROJECT.md (updated 2026-02-18)
 
 **Core Value:** Knowledge gained in one Claude Code project becomes accessible from any other project. No more context silos.
 
-**Current Focus:** Post-v5 release follow-up
+**Current Focus:** Approved baseline trust repair before v6.0 Phase 45. Preserve the Server Surface & Benchmark Parity roadmap (Phases 45-53).
 
 **Tech Stack:** Bun, TypeScript 5.5+, bun:sqlite with FTS5 + sqlite-vec, Commander.js v14, @huggingface/transformers v3, cli-progress, chrono-node, Chart.js (HTML dashboard)
 
 ## Current Position
 
-Phase: Not started (defining requirements)
+Phase: Phase 45 (Server Concurrency Spike) — not started
 Plan: —
-Status: Defining requirements
-Last activity: 2026-07-21 — Milestone v6.0 started
+Status: Roadmap preserved (9 phases, 45-53); baseline repair and quality gates precede phase execution
+Last activity: 2026-09-19 — baseline repair, offline design assessment, and project disk management; see current repair report above
 
 ## v4.0 Published Baseline
 
@@ -277,4 +283,4 @@ v4.0 Progress: [############################] 14/14 phases complete
 
 ---
 
-*Last updated: 2026-07-06 (v5.0 scoped local-first release lane shipped as @chude/memory@4.0.3)*
+*Last updated: 2026-09-19 (baseline repair remains in progress; v6.0 counters remain 9 phases, 0 complete)*

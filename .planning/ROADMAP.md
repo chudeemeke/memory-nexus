@@ -7,6 +7,7 @@
 - SHIPPED **v3.0 Knowledge Layer + Friction Logging** -- Phases 23-29.1 (shipped 2026-04-02)
 - SHIPPED **v4.0 Intelligence Layer** -- Phases 30-37 plus 32.5, 36.8, 36.9, and 36.10 (published 2026-05-30 as `@chude/memory@4.0.0`; architecture audit LOCKED 2026-05-13, recommendation A-prime; 2026-05-27 foundation review added pre-publish security hardening before GA; Phase 36.9 coverage gate restored 2026-05-30; Phase 36.10 hardened legacy memory-file defaults before publish)
 - SHIPPED **v5.0 Market-Leader Memory Platform** -- Phases 38.0-44 plus urgent Phase 41.1 (started 2026-06-05; scoped local-first CLI/API release lane published as `@chude/memory@4.0.3`; broad category-leader claims still require future MCP/local-server and public benchmark parity work)
+- ACTIVE **v6.0 Server Surface & Benchmark Parity** -- Phases 45-53 (started 2026-07-21; lifts the broad agentic-memory category-leader block via a local server surface -- MCP stdio + a 127.0.0.1 HTTP daemon + Streamable-HTTP streaming + `memory serve` -- built as a presentation adapter over a shared governance-enforced `MemoryQueryFacade`, plus a reproducible public benchmark suite (LongMemEval + LOCOMO). Read-only-first, local-first, no new mandatory egress. Server-side writes (SRVW-01) and the backward architecture audit (AUDIT-01) are out of scope.)
 
 ## Phases
 
@@ -103,6 +104,23 @@
 - [x] **Phase 42.5: Feature Completeness and UX Polish** - Inventory all stated/inferred/prototype features, complete or explicitly own them, and polish CLI/API usability to excellent standard. Completed 2026-07-03.
 - [x] **Phase 43: Market-Leader and Sales-Readiness Gate** - Final architecture/security/quality/product/competitive review and readiness proof. Completed 2026-07-05 for scoped local-first CLI/API market readiness.
 - [x] **Phase 44: Release-Candidate Packaging and Publish Handoff** - Versioning, package smoke, changelog/release notes, npm dry-run, and OTP-backed publish handoff without publishing until user authorization. Completed 2026-07-06 after user-authorized direct npm publish and registry-backed npm/Bun verification.
+
+### v6.0 Server Surface & Benchmark Parity (Phases 45-53)
+
+**Overview:** Lift the broad agentic-memory category-leader block that Phase 43 gated on by shipping a full local server surface (MCP stdio + a 127.0.0.1 HTTP daemon + Streamable-HTTP streaming + `memory serve`) over a shared governance-enforced application-layer `MemoryQueryFacade`, and by proving public benchmark parity (LongMemEval + LOCOMO) with reproducible, judge-pinned, per-category reports. The server is a new presentation adapter over existing application ports: no business logic in the adapter and no parallel governance path. Local-first is preserved -- the daemon binds 127.0.0.1 by default and adds no new mandatory egress. v6.0 ships a READ-ONLY server surface (query, search, context, facts, related, friction-list); server-side writes (SRVW-01) are deferred to Future Requirements and the backward architecture audit (AUDIT-01) is a separately-gated future slice, not a v6.0 phase.
+
+**Depth:** Fine (9 phases)
+**Total v6.0 Requirements:** 21 enumerated, mapped 21/21 (SRV-01..04, SGOV-01..04, MCP-01..03, HTTP-01..03, STREAM-01, BENCH-01..04, MKT-01..02). Phase 45 is a de-risking concurrency spike and carries no mapped requirement; it validates SRV-01/02/03 empirically before Phase 46 implements them. (Note: the REQUIREMENTS.md summary line called this "20 total" -- an off-by-one; the enumerated set is 21.)
+
+- [ ] **Phase 45: Server Concurrency Spike** - De-risk the long-lived-process SQLite/WAL lifecycle on Bun/Windows before any server code (highest technical risk; zero signal in the current open-per-invocation code)
+- [ ] **Phase 46: Server Foundation & Concurrency Model** - `ServerDatabaseProvider` with periodic passive checkpoints, serialized writes, and graceful cross-platform shutdown (SRV-01, SRV-02, SRV-03)
+- [ ] **Phase 47: Shared Query Facade & Governance Parity Seam** - `MemoryQueryFacade` returning DTOs, the CLI refactored onto it as a regression net, and an import-boundary lint (SGOV-01, SGOV-02, SGOV-03)
+- [ ] **Phase 48: MCP stdio Server Adapter** - Curated read tools over stdio mapped 1:1 to the facade, with server-output governance proven (MCP-01, MCP-02, MCP-03, SGOV-04)
+- [ ] **Phase 49: Local HTTP Daemon & Local Auth** - 127.0.0.1-bound daemon mirroring the MCP read tools with Origin/Host validation and a local auth token (HTTP-01, HTTP-02, HTTP-03)
+- [ ] **Phase 50: Streamable-HTTP Live Streaming** - Live query/context streaming over Streamable-HTTP with a leak-free, checkpoint-safe lifecycle (STREAM-01)
+- [ ] **Phase 51: `memory serve` CLI Command** - Start/stop/status for the server following the established CLI grammar (SRV-04)
+- [ ] **Phase 52: Public Benchmark Suite (LongMemEval + LOCOMO)** - Reproducible, judge-pinned, per-category benchmark harness extending `scripts/eval-v5` (BENCH-01, BENCH-02, BENCH-03, BENCH-04)
+- [ ] **Phase 53: Category-Leader Readiness & Market Gate** - Lift or evidence-re-scope the category-leader block, mirroring the Phase 43 exit gate (MKT-01, MKT-02)
 
 ## Phase Details
 
@@ -669,6 +687,130 @@ Plans:
 
 ---
 
+### Phase 45: Server Concurrency Spike
+
+**Goal**: De-risk the long-lived-process SQLite/WAL lifecycle on Bun/Windows before any server code is written, proving or disproving the single-long-lived-connection + WAL + tuned `busy_timeout` + write-serialization model under concurrent readers and a concurrent external `memory sync` writer.
+**Depends on**: Phase 44 (v5.0 shipped baseline)
+**Requirements**: None (de-risking spike; empirically validates the SRV-01/SRV-02/SRV-03 concurrency assumptions before Phase 46 implements them). This is the milestone's highest technical risk and has zero signal in the current 100%-open-per-invocation code.
+**Success Criteria** (what must be TRUE):
+  1. A committed decision doc records whether a single long-lived SQLite connection with WAL and a tuned `busy_timeout` survives a soak test of concurrent reads plus a concurrent external `memory sync` writer on Windows, with no corruption and no unbounded WAL growth.
+  2. The doc empirically confirms or refutes the Bun-on-Windows `journal_mode` DELETE-on-close FD-hold quirk, using a reproducible test script committed alongside it.
+  3. WAL size is measured to stay bounded when periodic passive checkpoints run and to grow unbounded when they do not, with both cases recorded.
+  4. The doc states an explicit go/no-go decision and the concrete connection, checkpoint-interval, and `busy_timeout` parameters that Phase 46 will implement.
+**Plans**: TBD
+
+---
+
+### Phase 46: Server Foundation & Concurrency Model
+
+**Goal**: A long-lived server process holds one SQLite connection open across many requests, serves concurrent reads safely, serializes writes without corruption, and shuts down cleanly releasing the database lock on every platform.
+**Depends on**: Phase 45
+**Requirements**: SRV-01, SRV-02, SRV-03
+**Success Criteria** (what must be TRUE):
+  1. A `ServerDatabaseProvider` opens the database once and performs periodic passive WAL checkpoints, keeping the WAL bounded over a long-running process without depending on the per-command TRUNCATE checkpoint.
+  2. Concurrent reads succeed while an external `memory sync` writer runs, and any writes are serialized through application-layer write serialization plus WAL and `busy_timeout` so no corruption or unhandled `SQLITE_BUSY` reaches a caller.
+  3. Sending SIGINT or SIGTERM drains in-flight work, runs a final checkpoint, closes the connection exactly once, and releases the database lock on both Windows and Unix.
+  4. The existing per-command `connection.ts` lifecycle is unchanged; tests confirm the CLI open-per-invocation behavior still holds and the server provider is a separate path.
+**Plans**: TBD
+
+---
+
+### Phase 47: Shared Query Facade & Governance Parity Seam
+
+**Goal**: A single application-layer read seam exists that both the CLI and the future server route through, so redaction, consent/suppression, and cross-project scope isolation are enforced in exactly one governance-enforced path.
+**Depends on**: Phase 46
+**Requirements**: SGOV-01, SGOV-02, SGOV-03
+**Success Criteria** (what must be TRUE):
+  1. A `MemoryQueryFacade` in the application layer returns DTOs with no stdout side-effects for the read operations (query, search, context, facts, related, friction-list).
+  2. The existing CLI query commands are refactored to route through the facade with byte-identical output, serving as a regression net that proves no behavior change.
+  3. Redaction, consent/suppression, and cross-project scope isolation are enforced inside the facade, so every consumer inherits identical governance -- this is the mechanism guaranteeing server output will match CLI output.
+  4. An import-boundary check fails the build when presentation or server code imports repositories or `bun:sqlite` directly instead of the application layer.
+**Plans**: TBD
+
+---
+
+### Phase 48: MCP stdio Server Adapter
+
+**Goal**: An MCP server over stdio exposes curated read tools to agents (Claude Code, Claude Desktop, Cursor), each a thin wrapper over the shared facade, with governance proven on the server output.
+**Depends on**: Phase 47
+**Requirements**: MCP-01, MCP-02, MCP-03, SGOV-04
+**Success Criteria** (what must be TRUE):
+  1. An MCP stdio server exposes curated read tools (search, context, related, show, list, stats, facts, friction-list, status) each mapped one-to-one to a facade method, with stdout reserved strictly for JSON-RPC frames and all diagnostics on stderr.
+  2. MCP tool inputs are schema-validated and each tool's output matches the CLI's `--json` contract for the same operation.
+  3. The MCP surface exposes no free-text memory-write tool and no operation that bypasses governance.
+  4. Poisoned-corpus tests seed known secrets and multi-project rows and assert redaction and cross-project scope isolation on MCP tool output, proving governance cannot be bypassed on the server surface.
+**Note**: SGOV-04 lands here with the first read tool (governance-on-server evals ship with MCP, not after). The same server-governance suite is extended to HTTP output in Phase 49 once the HTTP surface exists.
+**Plans**: TBD
+
+---
+
+### Phase 49: Local HTTP Daemon & Local Auth
+
+**Goal**: A localhost-bound HTTP daemon offers the same read tools as MCP to a second concurrent client, secured against LAN exposure and DNS-rebinding, validating the Phase 45/46 concurrency model under real multi-client load.
+**Depends on**: Phase 48
+**Requirements**: HTTP-01, HTTP-02, HTTP-03
+**Success Criteria** (what must be TRUE):
+  1. The HTTP daemon binds 127.0.0.1 by default and refuses to bind a non-loopback interface without explicit, documented opt-in.
+  2. HTTP endpoints mirror the MCP read tools with consistent request/response JSON contracts and matching error and exit semantics.
+  3. The daemon validates Origin and Host headers (DNS-rebinding protection) and requires a local bearer token for any opt-in non-loopback exposure.
+  4. The Phase 48 server-governance suite is extended to assert redaction and cross-project scope isolation on HTTP output, completing SGOV-04 coverage across both server surfaces.
+**Plans**: TBD
+
+---
+
+### Phase 50: Streamable-HTTP Live Streaming
+
+**Goal**: Live query/context streaming is delivered over Streamable-HTTP (not the deprecated legacy SSE transport) with a connection lifecycle that leaks no readers and never pins the WAL checkpoint.
+**Depends on**: Phase 49
+**Requirements**: STREAM-01
+**Success Criteria** (what must be TRUE):
+  1. Live query/context subscriptions stream over the Streamable-HTTP transport; the deprecated legacy SSE transport is not used.
+  2. Client disconnects tear down the subscription and release readers, verified by a test that opens and drops many subscriptions with no reader leak.
+  3. Streaming uses snapshot-then-stream and never holds a read transaction open across a subscription lifetime, so periodic WAL checkpointing is never pinned.
+**Plans**: TBD
+
+---
+
+### Phase 51: `memory serve` CLI Command
+
+**Goal**: Operators can start, stop, and inspect the server through the established CLI grammar.
+**Depends on**: Phase 50
+**Requirements**: SRV-04
+**Success Criteria** (what must be TRUE):
+  1. `memory serve` starts the server (MCP and/or HTTP transports per flags) and a stop path shuts it down, releasing the database lock cleanly.
+  2. `memory serve status --json` reports running state, bound transports, and address using the established query/JSON envelope.
+  3. The command follows existing CLI grammar, flag conventions, help grouping, and documented exit codes, and shell completion covers the new subcommand.
+**Plans**: TBD
+
+---
+
+### Phase 52: Public Benchmark Suite (LongMemEval + LOCOMO)
+
+**Goal**: A reproducible, judge-pinned, per-category benchmark suite produces defensible parity numbers against leading agentic-memory tools without vendoring non-commercial data.
+**Depends on**: Phase 47 (runs against the shared facade/CLI; independent of the server adapters and can run in parallel with Phases 48-51)
+**Requirements**: BENCH-01, BENCH-02, BENCH-03, BENCH-04
+**Success Criteria** (what must be TRUE):
+  1. A benchmark harness extending `scripts/eval-v5` runs LongMemEval (MIT-licensed) and emits a reproducible, schema-versioned, per-category report.
+  2. The harness runs LOCOMO as a comparison point by fetching the dataset at runtime into a gitignored cache, and `npm pack --dry-run` output asserts the dataset (CC BY-NC 4.0) never ships in the package.
+  3. Every benchmark report records the pinned judge model and full run configuration, and documents where methodology differs from competitor-cited numbers.
+  4. Reports include all categories with no cherry-picking and clearly distinguish measured numbers from any contextual or estimated ones.
+**Plans**: TBD
+
+---
+
+### Phase 53: Category-Leader Readiness & Market Gate
+
+**Goal**: The broad agentic-memory category-leader block is lifted or evidence-re-scoped, mirroring the Phase 43 exit-gate pattern, once server surfaces are governance-verified and benchmark numbers are reproducible.
+**Depends on**: Phase 52 and Phases 48-51
+**Requirements**: MKT-01, MKT-02
+**Success Criteria** (what must be TRUE):
+  1. A readiness report demonstrates the server surface shipped (MCP + HTTP + streaming + `memory serve`), governance verified on the new surfaces, and reproducible public benchmark numbers published.
+  2. The broad category-leader block in PROJECT.md is either lifted with evidence or explicitly re-scoped with documented rationale, with no unowned blocker remaining.
+  3. The readiness gate reuses the Phase 43 exit-gate structure (architecture, security, quality, product, and competitive review) applied to the new server and benchmark surfaces.
+**Plans**: TBD
+
+---
+
 ### Cross-Cutting: Quality (All v4.0 Phases)
 
 Requirements: QUAL-01, QUAL-02, QUAL-03, QUAL-04
@@ -754,6 +896,38 @@ v5.0
 
 ---
 
+## v6.0 Dependency Graph
+
+```
+Phase 45 (Server Concurrency Spike)   [de-risking spike; no mapped requirement]
+    |
+    +---> Phase 46 (Server Foundation & Concurrency Model)   [SRV-01, SRV-02, SRV-03]
+              |
+              +---> Phase 47 (Shared Query Facade & Governance Parity Seam)   [SGOV-01, SGOV-02, SGOV-03]
+                        |
+                        +---> Phase 48 (MCP stdio Server Adapter)   [MCP-01, MCP-02, MCP-03, SGOV-04]
+                        |         |
+                        |         +---> Phase 49 (Local HTTP Daemon & Local Auth)   [HTTP-01, HTTP-02, HTTP-03]
+                        |                   |
+                        |                   +---> Phase 50 (Streamable-HTTP Live Streaming)   [STREAM-01]
+                        |                             |
+                        |                             +---> Phase 51 (memory serve CLI Command)   [SRV-04]
+                        |
+                        +---> Phase 52 (Public Benchmark Suite: LongMemEval + LOCOMO)   [BENCH-01..04]
+                                  [depends only on the facade; runs in parallel with Phases 48-51]
+
+Phase 53 (Category-Leader Readiness & Market Gate)   [MKT-01, MKT-02]
+    depends on Phase 52 (reproducible benchmark numbers)
+    depends on Phases 48-51 (governance-verified server surfaces shipped)
+    mirrors the Phase 43 exit-gate pattern
+
+Scope guardrails: READ-ONLY server (query/search/context/facts/related/friction-list).
+Server-side writes (SRVW-01) are deferred to Future Requirements.
+The backward architecture/implementation audit (AUDIT-01) is a separately-gated future slice, not a v6.0 phase.
+```
+
+---
+
 ## Progress
 
 | Phase | Milestone | Plans | Status | Completed |
@@ -809,7 +983,16 @@ v5.0
 | 42.5. Feature Completeness and UX Polish | v5.0 | 1/1 | Complete | 2026-07-03 |
 | 43. Market-Leader and Sales-Readiness Gate | v5.0 | 1/1 | Complete | 2026-07-05 |
 | 44. Release-Candidate Packaging and Publish Handoff | v5.0 | 1/1 | Complete | 2026-07-06 |
+| 45. Server Concurrency Spike | v6.0 | — | Not started | - |
+| 46. Server Foundation & Concurrency Model | v6.0 | — | Not started | - |
+| 47. Shared Query Facade & Governance Parity Seam | v6.0 | — | Not started | - |
+| 48. MCP stdio Server Adapter | v6.0 | — | Not started | - |
+| 49. Local HTTP Daemon & Local Auth | v6.0 | — | Not started | - |
+| 50. Streamable-HTTP Live Streaming | v6.0 | — | Not started | - |
+| 51. memory serve CLI Command | v6.0 | — | Not started | - |
+| 52. Public Benchmark Suite (LongMemEval + LOCOMO) | v6.0 | — | Not started | - |
+| 53. Category-Leader Readiness & Market Gate | v6.0 | — | Not started | - |
 
 ---
 
-*Last updated: 2026-07-06 (Phase 44 complete; 4.0.3 published and installed)*
+*Last updated: 2026-07-21 (v6.0 Server Surface & Benchmark Parity roadmapped: Phases 45-53; 21 requirements mapped 21/21)*

@@ -1,0 +1,34 @@
+[
+  {
+    "path": "src/infrastructure/sources/project-name-resolver.ts",
+    "sha256": "0078AACA784F6FBC89080909FD305258AAFED4E485808F52A99D167A9CC3B246"
+  },
+  {
+    "path": "src/presentation/cli/commands/sync/embedding-pass.ts",
+    "sha256": "84CCF232122C351455DBE7313F721EEC2B6706B061FF937BD3DD4D4A57604AA5"
+  },
+  {
+    "path": "scripts/check-coverage-thresholds.ts",
+    "sha256": "1BF02E44CB4B68ACF3DC306BFA315CA0F67C23AB2854B00CE5D6CDC78FB6C4D0"
+  },
+  {
+    "path": "tests/test-setup.ts",
+    "sha256": "2E765668D0165FCD99ABD7D1AAB617351AA74C1979FCA90797A2C5B04E2FA890"
+  },
+  {
+    "path": "tests/test-store-isolation.test.ts",
+    "sha256": "72FCB7768EAF63280433D2775FD7F28176EF874988D177C4F909EEBC266FE154"
+  },
+  {
+    "path": "src/infrastructure/hooks/sync-hook-script.test.ts",
+    "sha256": "6D703EC0A4C9F14EED75381021A62771B280306B87B07B1437EBBE3E602C9E72"
+  },
+  {
+    "path": "package.json",
+    "sha256": "2C9E9925E7EF8F90F0B0BE4202BF2A93AF8EE7A1DFAFAB0396B6EF1CAF8B3884"
+  },
+  {
+    "path": "bun.lock",
+    "sha256": "C20E3FD095669F70357651EB2BA6A496D3B455032D8D20F7B9A5C09BF5758FFF"
+  }
+]
