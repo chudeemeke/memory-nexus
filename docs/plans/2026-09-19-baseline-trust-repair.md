@@ -9,7 +9,7 @@ Current delivery: draft PR #1, https://github.com/chudeemeke/memory-nexus/pull/1
 
 Repair the existing product before beginning Phase 45. Preserve the recovered v6 requirements and roadmap, prior status evidence, and inbox work. Use focused TDD slices, explicit Git paths, independent review, and final-revision local/hosted evidence. Do not weaken thresholds or discard user data. Desktop authority cutover remains subject to its existing live-session gates.
 
-The offline desktop embedding proposal is research and design only until the owner confirms the concrete recommendation. No background task, transport, data replication, or provider fallback is activated by this plan.
+The owner approved the bounded local embedding experiment (Step A in the offline decision document) on September 19, to run after baseline repairs. Until this plan's acceptance gates close, that experiment remains queued. Production feature implementation and desktop data replication need their separate decisions. No background task, transport, data replication, or provider fallback is activated by this plan.
 
 ## Sequence and acceptance
 
