@@ -118,17 +118,19 @@
         ".planning/memory-resilience/evidence/B04-timestamp-probe.json",
         ".planning/memory-resilience/evidence/B04-classification-batch-4.json",
         ".planning/memory-resilience/evidence/B04-presentation-probes.json",
-        ".planning/memory-resilience/evidence/B04-dashboard-tokens.json"
+        ".planning/memory-resilience/evidence/B04-dashboard-tokens.json",
+        ".planning/memory-resilience/evidence/B04-classification-batch-5.json",
+        ".planning/memory-resilience/evidence/B04-scratch-lifecycle-probe.json"
       ],
       "acceptance_record": ".planning/memory-resilience/evidence/B04.json",
       "progress": {
         "discovery": "implemented and focused behavior verified",
         "sourceCandidates": 446,
-        "proposedClassifications": 241,
-        "unclassified": 205,
+        "proposedClassifications": 266,
+        "unclassified": 180,
         "approvedExclusions": 0,
         "independentReview": "pending",
-        "next": "Inspect the 205 remaining test drivers individually and resolve per-file metric applicability; then obtain independent review. All non-test candidates have proposed tiers; B05 remains pending.",
+        "next": "Inspect remaining 180 test drivers and resolve individual metric applicability, then independent review. Twenty-five infrastructure test drivers now have proposed S tiers based on actual disk mutation/cleanup; no exclusions approved.",
         "packageOutputMapping": "Source-bound mapping recorded; artifact verification and independent review pending."
       }
     },
@@ -208,7 +210,21 @@
       "title": "Rebaseline and expand repair queue",
       "status": "pending",
       "depends_on": [
-        "B08"
+        "B08",
+        "B11.1",
+        "B11.2",
+        "B11.4",
+        "B11.5",
+        "B11.6",
+        "B11.7",
+        "B11.8",
+        "B11.9",
+        "B11.10",
+        "B11.11",
+        "B11.12",
+        "B11.13",
+        "B11.14",
+        "B11.15"
       ],
       "scope": "coverage evidence and work-items.json",
       "deliverable": "Run current instrumented suite; refresh each seeded gap and add every new gap, including scripts and stricter tiers.",
@@ -217,7 +233,8 @@
       "authorization": "authorized",
       "owner": "memory-nexus",
       "evidence": [],
-      "acceptance_record": ".planning/memory-resilience/evidence/B09.json"
+      "acceptance_record": ".planning/memory-resilience/evidence/B09.json",
+      "additional_acceptance": "Known test fixture cleanup repairs precede the complete instrumented run. Scoped gate fixture tests may proceed independently; no affected full-suite run before the owned-cleanup tasks are verified."
     },
     {
       "id": "Q001",
@@ -2194,7 +2211,18 @@
         "Q093",
         "Q094",
         "B11.4",
-        "Q095"
+        "Q095",
+        "B11.5",
+        "B11.6",
+        "B11.7",
+        "B11.8",
+        "B11.9",
+        "B11.10",
+        "B11.11",
+        "B11.12",
+        "B11.13",
+        "B11.14",
+        "B11.15"
       ],
       "scope": "all Q-* work items",
       "deliverable": "Close individually verified quality work items; fix discovered defects and meaningful boundaries, not artificial counter tests.",
@@ -3142,6 +3170,226 @@
       "observed_gap": "With one synthetic 500-character snippet and contextBudget 100, JSON formatter returns 672 characters and one result.",
       "observed_evidence": ".planning/memory-resilience/evidence/B04-presentation-probes.json",
       "retirement_trigger": "Before B10/R02; diagnostic output is not passing acceptance."
+    },
+    {
+      "id": "B11.5",
+      "stage": "baseline",
+      "title": "Replace shared parser scratch lifecycle",
+      "status": "pending",
+      "depends_on": [
+        "B03"
+      ],
+      "scope": "src/infrastructure/parsers/integration.test.ts",
+      "deliverable": "Allocate an exclusive per-run workspace; never adopt or pre-delete a preexisting scratch directory. Use owned cleanup with retained failure diagnostics.",
+      "verification": "RED/GREEN actual test-runner regression with preexisting synthetic marker, concurrent isolated invocations, normal cleanup and interrupted/replaced-path failure. Preserve existing assertions; complete applicable Tier S evidence and review.",
+      "risk": "S",
+      "authorization": "authorized",
+      "owner": "memory-nexus",
+      "evidence": [],
+      "acceptance_record": ".planning/memory-resilience/evidence/B11.5.json",
+      "observed_gap": "The extracted afterAll callback deletes a preexisting synthetic marker in its fixed scratch target.",
+      "observed_evidence": ".planning/memory-resilience/evidence/B04-scratch-lifecycle-probe.json",
+      "retirement_trigger": "Before affected full-suite execution/B09 and B10/R02; diagnostic/source inspection is not completed repair acceptance."
+    },
+    {
+      "id": "B11.6",
+      "stage": "baseline",
+      "title": "Replace shared discovery scratch lifecycle",
+      "status": "pending",
+      "depends_on": [
+        "B03"
+      ],
+      "scope": "src/infrastructure/sources/integration.test.ts",
+      "deliverable": "Allocate an exclusive per-run workspace; never adopt or pre-delete a preexisting scratch directory. Use owned cleanup with retained failure diagnostics.",
+      "verification": "RED/GREEN actual test-runner regression with preexisting synthetic marker, concurrent isolated invocations, normal cleanup and interrupted/replaced-path failure. Preserve existing assertions; complete applicable Tier S evidence and review.",
+      "risk": "S",
+      "authorization": "authorized",
+      "owner": "memory-nexus",
+      "evidence": [],
+      "acceptance_record": ".planning/memory-resilience/evidence/B11.6.json",
+      "observed_gap": "The extracted beforeAll callback deletes a preexisting synthetic marker before recreating its fixed scratch target.",
+      "observed_evidence": ".planning/memory-resilience/evidence/B04-scratch-lifecycle-probe.json",
+      "retirement_trigger": "Before affected full-suite execution/B09 and B10/R02; diagnostic/source inspection is not completed repair acceptance."
+    },
+    {
+      "id": "B11.7",
+      "stage": "baseline",
+      "title": "Replace fixed settings-test workspace lifecycle",
+      "status": "pending",
+      "depends_on": [
+        "B03"
+      ],
+      "scope": "src/infrastructure/hooks/settings-manager.test.ts",
+      "deliverable": "Allocate an exclusive per-run workspace; never adopt or pre-delete a preexisting scratch directory. Use owned cleanup with retained failure diagnostics.",
+      "verification": "RED/GREEN actual test-runner regression with preexisting synthetic marker, concurrent isolated invocations, normal cleanup and interrupted/replaced-path failure. Preserve existing assertions; complete applicable Tier S evidence and review.",
+      "risk": "S",
+      "authorization": "authorized",
+      "owner": "memory-nexus",
+      "evidence": [],
+      "acceptance_record": ".planning/memory-resilience/evidence/B11.7.json",
+      "observed_gap": "The extracted beforeEach callback deletes a preexisting synthetic marker before recreating its fixed home-relative target.",
+      "observed_evidence": ".planning/memory-resilience/evidence/B04-scratch-lifecycle-probe.json",
+      "retirement_trigger": "Before affected full-suite execution/B09 and B10/R02; diagnostic/source inspection is not completed repair acceptance."
+    },
+    {
+      "id": "B11.8",
+      "stage": "baseline",
+      "title": "Replace fixed hook-runner workspace lifecycle",
+      "status": "pending",
+      "depends_on": [
+        "B03"
+      ],
+      "scope": "src/infrastructure/hooks/hook-runner.test.ts",
+      "deliverable": "Allocate an exclusive per-run workspace; never adopt or pre-delete a preexisting scratch directory. Use owned cleanup with retained failure diagnostics.",
+      "verification": "RED/GREEN actual test-runner regression with preexisting synthetic marker, concurrent isolated invocations, normal cleanup and interrupted/replaced-path failure. Preserve existing assertions; complete applicable Tier S evidence and review.",
+      "risk": "S",
+      "authorization": "authorized",
+      "owner": "memory-nexus",
+      "evidence": [],
+      "acceptance_record": ".planning/memory-resilience/evidence/B11.8.json",
+      "observed_gap": "The extracted beforeEach callback deletes a preexisting synthetic marker in its fixed home-relative target.",
+      "observed_evidence": ".planning/memory-resilience/evidence/B04-scratch-lifecycle-probe.json",
+      "retirement_trigger": "Before affected full-suite execution/B09 and B10/R02; diagnostic/source inspection is not completed repair acceptance."
+    },
+    {
+      "id": "B11.9",
+      "stage": "baseline",
+      "title": "Make connection-test cleanup failures observable",
+      "status": "pending",
+      "depends_on": [
+        "B03"
+      ],
+      "scope": "src/infrastructure/database/connection.test.ts",
+      "deliverable": "Make this file's cleanup ownership and failures observable; retain failed paths and preserve primary test outcomes. Reuse an appropriate owned fixture primitive rather than duplicating deletion logic.",
+      "verification": "RED/GREEN injected removal/close failure and real locked-file case where supported; successful/repeated cleanup, replaced/foreign-path protection, retained path diagnostics and preservation of primary failure. Complete applicable Tier S evidence and review.",
+      "risk": "S",
+      "authorization": "authorized",
+      "owner": "memory-nexus",
+      "evidence": [],
+      "acceptance_record": ".planning/memory-resilience/evidence/B11.9.json",
+      "observed_gap": "Source inspection: cleanupTempDb swallows recursive-removal errors and its caller clears the temporary path tracker.",
+      "observed_evidence": ".planning/memory-resilience/B04-source-findings.md",
+      "retirement_trigger": "Before affected full-suite execution/B09 and B10/R02; diagnostic/source inspection is not completed repair acceptance."
+    },
+    {
+      "id": "B11.10",
+      "stage": "baseline",
+      "title": "Make health-test cleanup failures observable",
+      "status": "pending",
+      "depends_on": [
+        "B03"
+      ],
+      "scope": "src/infrastructure/database/health-checker.test.ts",
+      "deliverable": "Make this file's cleanup ownership and failures observable; retain failed paths and preserve primary test outcomes. Reuse an appropriate owned fixture primitive rather than duplicating deletion logic.",
+      "verification": "RED/GREEN injected removal/close failure and real locked-file case where supported; successful/repeated cleanup, replaced/foreign-path protection, retained path diagnostics and preservation of primary failure. Complete applicable Tier S evidence and review.",
+      "risk": "S",
+      "authorization": "authorized",
+      "owner": "memory-nexus",
+      "evidence": [],
+      "acceptance_record": ".planning/memory-resilience/evidence/B11.10.json",
+      "observed_gap": "Source inspection: afterAll silently catches recursive test directory removal failures.",
+      "observed_evidence": ".planning/memory-resilience/B04-source-findings.md",
+      "retirement_trigger": "Before affected full-suite execution/B09 and B10/R02; diagnostic/source inspection is not completed repair acceptance."
+    },
+    {
+      "id": "B11.11",
+      "stage": "baseline",
+      "title": "Make WAL-test cleanup failures observable",
+      "status": "pending",
+      "depends_on": [
+        "B03"
+      ],
+      "scope": "src/infrastructure/database/integration.test.ts",
+      "deliverable": "Make this file's cleanup ownership and failures observable; retain failed paths and preserve primary test outcomes. Reuse an appropriate owned fixture primitive rather than duplicating deletion logic.",
+      "verification": "RED/GREEN injected removal/close failure and real locked-file case where supported; successful/repeated cleanup, replaced/foreign-path protection, retained path diagnostics and preservation of primary failure. Complete applicable Tier S evidence and review.",
+      "risk": "S",
+      "authorization": "authorized",
+      "owner": "memory-nexus",
+      "evidence": [],
+      "acceptance_record": ".planning/memory-resilience/evidence/B11.11.json",
+      "observed_gap": "Source inspection: DB/WAL/SHM cleanup shares a catch that ignores all removal errors.",
+      "observed_evidence": ".planning/memory-resilience/B04-source-findings.md",
+      "retirement_trigger": "Before affected full-suite execution/B09 and B10/R02; diagnostic/source inspection is not completed repair acceptance."
+    },
+    {
+      "id": "B11.12",
+      "stage": "baseline",
+      "title": "Make auto-memory test cleanup failures observable",
+      "status": "pending",
+      "depends_on": [
+        "B03"
+      ],
+      "scope": "src/infrastructure/hooks/auto-memory-writer.test.ts",
+      "deliverable": "Make this file's cleanup ownership and failures observable; retain failed paths and preserve primary test outcomes. Reuse an appropriate owned fixture primitive rather than duplicating deletion logic.",
+      "verification": "RED/GREEN injected removal/close failure and real locked-file case where supported; successful/repeated cleanup, replaced/foreign-path protection, retained path diagnostics and preservation of primary failure. Complete applicable Tier S evidence and review.",
+      "risk": "S",
+      "authorization": "authorized",
+      "owner": "memory-nexus",
+      "evidence": [],
+      "acceptance_record": ".planning/memory-resilience/evidence/B11.12.json",
+      "observed_gap": "Source inspection: afterEach silently catches recursive test directory removal failures.",
+      "observed_evidence": ".planning/memory-resilience/B04-source-findings.md",
+      "retirement_trigger": "Before affected full-suite execution/B09 and B10/R02; diagnostic/source inspection is not completed repair acceptance."
+    },
+    {
+      "id": "B11.13",
+      "stage": "baseline",
+      "title": "Make hook-process test cleanup failures observable",
+      "status": "pending",
+      "depends_on": [
+        "B03"
+      ],
+      "scope": "src/infrastructure/hooks/sync-hook-script.test.ts",
+      "deliverable": "Make this file's cleanup ownership and failures observable; retain failed paths and preserve primary test outcomes. Reuse an appropriate owned fixture primitive rather than duplicating deletion logic.",
+      "verification": "RED/GREEN injected removal/close failure and real locked-file case where supported; successful/repeated cleanup, replaced/foreign-path protection, retained path diagnostics and preservation of primary failure. Complete applicable Tier S evidence and review.",
+      "risk": "S",
+      "authorization": "authorized",
+      "owner": "memory-nexus",
+      "evidence": [],
+      "acceptance_record": ".planning/memory-resilience/evidence/B11.13.json",
+      "observed_gap": "Source inspection: afterEach silently catches recursive test directory removal failures.",
+      "observed_evidence": ".planning/memory-resilience/B04-source-findings.md",
+      "retirement_trigger": "Before affected full-suite execution/B09 and B10/R02; diagnostic/source inspection is not completed repair acceptance."
+    },
+    {
+      "id": "B11.14",
+      "stage": "baseline",
+      "title": "Make migration-test cleanup failures observable",
+      "status": "pending",
+      "depends_on": [
+        "B03"
+      ],
+      "scope": "src/infrastructure/migration.test.ts",
+      "deliverable": "Make this file's cleanup ownership and failures observable; retain failed paths and preserve primary test outcomes. Reuse an appropriate owned fixture primitive rather than duplicating deletion logic.",
+      "verification": "RED/GREEN injected removal/close failure and real locked-file case where supported; successful/repeated cleanup, replaced/foreign-path protection, retained path diagnostics and preservation of primary failure. Complete applicable Tier S evidence and review.",
+      "risk": "S",
+      "authorization": "authorized",
+      "owner": "memory-nexus",
+      "evidence": [],
+      "acceptance_record": ".planning/memory-resilience/evidence/B11.14.json",
+      "observed_gap": "Source inspection: afterEach silently catches recursive test directory removal failures.",
+      "observed_evidence": ".planning/memory-resilience/B04-source-findings.md",
+      "retirement_trigger": "Before affected full-suite execution/B09 and B10/R02; diagnostic/source inspection is not completed repair acceptance."
+    },
+    {
+      "id": "B11.15",
+      "stage": "baseline",
+      "title": "Make checkpoint-test cleanup failures observable",
+      "status": "pending",
+      "depends_on": [
+        "B03"
+      ],
+      "scope": "src/infrastructure/signals/checkpoint-manager.test.ts",
+      "deliverable": "Make this file's cleanup ownership and failures observable; retain failed paths and preserve primary test outcomes. Reuse an appropriate owned fixture primitive rather than duplicating deletion logic.",
+      "verification": "RED/GREEN injected removal/close failure and real locked-file case where supported; successful/repeated cleanup, replaced/foreign-path protection, retained path diagnostics and preservation of primary failure. Complete applicable Tier S evidence and review.",
+      "risk": "S",
+      "authorization": "authorized",
+      "owner": "memory-nexus",
+      "evidence": [],
+      "acceptance_record": ".planning/memory-resilience/evidence/B11.15.json",
+      "observed_gap": "Source inspection: afterEach silently catches recursive test directory removal failures.",
+      "observed_evidence": ".planning/memory-resilience/B04-source-findings.md",
+      "retirement_trigger": "Before affected full-suite execution/B09 and B10/R02; diagnostic/source inspection is not completed repair acceptance."
     }
   ],
   "decisions": {

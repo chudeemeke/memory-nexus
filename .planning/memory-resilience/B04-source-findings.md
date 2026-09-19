@@ -137,3 +137,52 @@ browser JavaScript was executed and no production memory was read or changed.
 The generated synthetic HTML remains local under `.git`; the exact probe source
 allows regeneration in an isolated checkout. Both findings are mandatory baseline
 dependencies. Neither defect has been repaired by this classification checkpoint.
+
+## Test-driver disk lifecycle findings (batch 5)
+
+Twenty-five infrastructure test drivers have proposed Tier S classifications
+because inspected setup/fixture/cleanup code mutates actual filesystem state.
+This is a positive risk finding, not blanket classification by filename or proof
+that every directory allocation is unsafe. Full assertion review, metric
+applicability and independent classification approval remain open.
+
+At source `a4b80f8f2bc3facf011327d99e8b63cb2755ffe9`, four extracted lifecycle
+callbacks removed preexisting synthetic markers. The diagnostic used newly
+allocated, guarded directories under this checkout's `.git`, remapped only the
+callback's scratch target, and invoked actual filesystem operations. No original
+test module, existing scratch directory or production memory was used. Exact
+callback source, source hashes and results are in
+`evidence/B04-scratch-lifecycle-probe.json`; the complete probe source is retained
+in `evidence/B04-classification-batch-5.json`. This is not full Bun test-runner
+proof or a claim of historical data loss.
+
+| Owner task | Source under src/infrastructure | Observed behavior |
+|---|---|---|
+| B11.5 | parsers/integration.test.ts | afterAll removes fixed tests/.scratchpad-parsers even if setup reused an existing directory. |
+| B11.6 | sources/integration.test.ts | beforeAll pre-deletes fixed tests/.scratchpad-sources. |
+| B11.7 | hooks/settings-manager.test.ts | beforeEach pre-deletes fixed home-relative settings-test directory. |
+| B11.8 | hooks/hook-runner.test.ts | beforeEach pre-deletes fixed home-relative hook-runner directory. |
+
+B03's isolated test home remains useful protection for home-relative paths. It
+does not grant ownership of an arbitrary preexisting child, and the two checkout
+scratch paths are outside that home. Each task requires actual runner regression,
+concurrent-invocation isolation, preservation of preexisting paths and owned cleanup.
+
+Seven further files visibly swallow cleanup errors. These are source findings,
+not injected-failure results in this checkpoint. Each has a separate repair task:
+
+| Owner task | Source under src/infrastructure | Local failure handling |
+|---|---|---|
+| B11.9 | database/connection.test.ts | cleanupTempDb catches removal errors; caller clears tracked paths. |
+| B11.10 | database/health-checker.test.ts | afterAll ignores recursive removal failure. |
+| B11.11 | database/integration.test.ts | one catch ignores DB/WAL/SHM removal failures. |
+| B11.12 | hooks/auto-memory-writer.test.ts | afterEach ignores recursive removal failure. |
+| B11.13 | hooks/sync-hook-script.test.ts | afterEach ignores recursive removal failure. |
+| B11.14 | migration.test.ts | afterEach ignores recursive removal failure. |
+| B11.15 | signals/checkpoint-manager.test.ts | afterEach ignores recursive removal failure. |
+
+The retirement trigger is verified ownership/retention diagnostics and applicable
+Tier S proof before the affected full-suite run and B10/R02. B09 now depends on
+the test fixture cleanup tasks, so the complete instrumented run cannot precede
+their repairs. Scoped gate fixtures can proceed independently. Reuse appropriate
+owned storage primitives during repair; do not create eleven duplicate cleaners.

@@ -62,7 +62,7 @@ denominator to the historical count.
 | Stage | Ledger items | Verifiable checkpoint |
 |---|---|---|
 | Safe verification | B01-B08 | Destructive output paths are guarded; complete, fresh, revision-bound evidence is measured and enforced; known violations fail. |
-| Baseline repair | B09, Q001-Q085 and discovered gaps, B10; B11.1-B11.4, B12; D01-D05; F01-F03 | Every required coverage gap repaired; helper cleanup, complete evaluation admission and packaged hooks proved; actual dependency/runtime and consumer compatibility proved; exact synthetic friction cleanup recoverable and verified. |
+| Baseline repair | B09, Q001-Q085 and discovered gaps, B10; B11.1-B11.15, B12; D01-D05; F01-F03 | Every required coverage gap repaired; helper cleanup, complete evaluation admission and packaged hooks proved; actual dependency/runtime and consumer compatibility proved; exact synthetic friction cleanup recoverable and verified. |
 | Baseline delivery | R01-R04 | Final checks and independent review; one concrete Tier D brief; accepted integration and post-merge proof. |
 | Bounded experiment | S01-S05 | Synthetic local inference measured against hard targets; pass/fail/inconclusive report and retained resource/removal evidence. |
 | Production specification and decision | P01-P03 | Complete data/topology/privacy/recovery specification; separate local-compute and replication decisions supported by evidence. P01/P02 can proceed during external waits. |

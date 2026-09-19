@@ -2063,13 +2063,18 @@
       "path": "src/infrastructure/capabilities/capability-status.test.ts",
       "package": "package.json",
       "sourceHash": "b2ab916220bf65c1d27e9da742c7d71bd20b4fb61742ac2a00a9995eddf9794b",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "S",
+      "rationale": "Creates executable PATH fixtures and recursively removes their allocated directories in finally blocks.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "a4b80f8f2bc3facf011327d99e8b63cb2755ffe9",
+        "anchor": "rmSync(dir,",
+        "scope": "Inspected imports, setup/path construction and actual filesystem mutation or cleanup boundary. Positive critical operation establishes risk; not full test correctness or cleanup acceptance."
+      }
     },
     {
       "path": "src/infrastructure/capabilities/capability-status.ts",
@@ -2104,13 +2109,18 @@
       "path": "src/infrastructure/database/connection.test.ts",
       "package": "package.json",
       "sourceHash": "dc6311aeb196a72b03273998a07fd2dc31af0e5eaf501e119656ab1a641b2402",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "S",
+      "rationale": "Local cleanupTempDb derives a directory from a DB path and recursively removes it while swallowing failures.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "a4b80f8f2bc3facf011327d99e8b63cb2755ffe9",
+        "anchor": "rmSync(dir,",
+        "scope": "Inspected imports, setup/path construction and actual filesystem mutation or cleanup boundary. Positive critical operation establishes risk; not full test correctness or cleanup acceptance."
+      }
     },
     {
       "path": "src/infrastructure/database/connection.ts",
@@ -2133,13 +2143,18 @@
       "path": "src/infrastructure/database/event-log.dream.test.ts",
       "package": "package.json",
       "sourceHash": "732ed937df7ce60fcfcbec0d14fae190674d01f9d56ea2557f2a736e66b0b1dc",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "S",
+      "rationale": "Appends real synthetic event logs under tmpdir and unlinks them in teardown.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "a4b80f8f2bc3facf011327d99e8b63cb2755ffe9",
+        "anchor": "unlinkSync(logPath)",
+        "scope": "Inspected imports, setup/path construction and actual filesystem mutation or cleanup boundary. Positive critical operation establishes risk; not full test correctness or cleanup acceptance."
+      }
     },
     {
       "path": "src/infrastructure/database/event-log.ts",
@@ -2162,13 +2177,18 @@
       "path": "src/infrastructure/database/health-checker.test.ts",
       "package": "package.json",
       "sourceHash": "2ff2e504e60ce6ff386cbc6d0f5775be704658867f29a11be04abcea037ebfc4",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "S",
+      "rationale": "Creates disk-backed database/config fixtures and recursively deletes the test directory with a silent catch.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "a4b80f8f2bc3facf011327d99e8b63cb2755ffe9",
+        "anchor": "rmSync(testDir,",
+        "scope": "Inspected imports, setup/path construction and actual filesystem mutation or cleanup boundary. Positive critical operation establishes risk; not full test correctness or cleanup acceptance."
+      }
     },
     {
       "path": "src/infrastructure/database/health-checker.ts",
@@ -2203,13 +2223,18 @@
       "path": "src/infrastructure/database/integration.test.ts",
       "package": "package.json",
       "sourceHash": "72731717dafd74d9086f38cc35b9ba7ae25a7fdede3a6a0f8c708cae2f5d6b2a",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "S",
+      "rationale": "WAL integration lifecycle creates file-backed databases and unlinks DB/WAL/SHM files under a silent cleanup catch.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "a4b80f8f2bc3facf011327d99e8b63cb2755ffe9",
+        "anchor": "unlinkSync(dbPath)",
+        "scope": "Inspected imports, setup/path construction and actual filesystem mutation or cleanup boundary. Positive critical operation establishes risk; not full test correctness or cleanup acceptance."
+      }
     },
     {
       "path": "src/infrastructure/database/repositories/backfill-state-repository.test.ts",
@@ -2841,13 +2866,18 @@
       "path": "src/infrastructure/embedding/background-embedder.test.ts",
       "package": "package.json",
       "sourceHash": "1cee22c1cbd8083e4e80a9d2749c56df6e5cb45c2481be0e64a20acf8a34330b",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "S",
+      "rationale": "PID lock fixtures mutate real disk state; teardown recursively removes allocated test directories.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "a4b80f8f2bc3facf011327d99e8b63cb2755ffe9",
+        "anchor": "rmSync(testDir,",
+        "scope": "Inspected imports, setup/path construction and actual filesystem mutation or cleanup boundary. Positive critical operation establishes risk; not full test correctness or cleanup acceptance."
+      }
     },
     {
       "path": "src/infrastructure/embedding/background-embedder.ts",
@@ -3010,13 +3040,18 @@
       "path": "src/infrastructure/external/qmd-runner.test.ts",
       "package": "package.json",
       "sourceHash": "3f3970b050266ee24bcd1cd807d03c9c3a47e947d2d120fb6d61144df1efa9b7",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "S",
+      "rationale": "PATH resolution cases create and chmod executable fixtures, then recursively remove the fixture directory.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "a4b80f8f2bc3facf011327d99e8b63cb2755ffe9",
+        "anchor": "rmSync(dir,",
+        "scope": "Inspected imports, setup/path construction and actual filesystem mutation or cleanup boundary. Positive critical operation establishes risk; not full test correctness or cleanup acceptance."
+      }
     },
     {
       "path": "src/infrastructure/external/qmd-runner.ts",
@@ -3039,13 +3074,18 @@
       "path": "src/infrastructure/hooks/auto-memory-writer.test.ts",
       "package": "package.json",
       "sourceHash": "791cf42df33af0e382baa73a84af9dcb153fb981bb01b303ed2db87fcaed6bb8",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "S",
+      "rationale": "Tests write real markdown fixtures and recursively remove their directories; cleanup failures are swallowed.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "a4b80f8f2bc3facf011327d99e8b63cb2755ffe9",
+        "anchor": "rmSync(testDir,",
+        "scope": "Inspected imports, setup/path construction and actual filesystem mutation or cleanup boundary. Positive critical operation establishes risk; not full test correctness or cleanup acceptance."
+      }
     },
     {
       "path": "src/infrastructure/hooks/auto-memory-writer.ts",
@@ -3068,13 +3108,18 @@
       "path": "src/infrastructure/hooks/config-manager.test.ts",
       "package": "package.json",
       "sourceHash": "8f2b49a6b52de344c4570fddff35467d1865c6c76d5a319b04f842827fdecc70",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "S",
+      "rationale": "Redirects process configuration paths into generated disk fixtures and recursively removes those directories.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "a4b80f8f2bc3facf011327d99e8b63cb2755ffe9",
+        "anchor": "rmSync(testDir,",
+        "scope": "Inspected imports, setup/path construction and actual filesystem mutation or cleanup boundary. Positive critical operation establishes risk; not full test correctness or cleanup acceptance."
+      }
     },
     {
       "path": "src/infrastructure/hooks/config-manager.ts",
@@ -3097,13 +3142,18 @@
       "path": "src/infrastructure/hooks/git-syncer.test.ts",
       "package": "package.json",
       "sourceHash": "c38c574fc189fbd52b56dc8b94b37a318be86d80ead7da788b29c07477151920",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "S",
+      "rationale": "Runs isolated Git repositories and removes three sandbox roots through a retrying recursive cleanup function.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "a4b80f8f2bc3facf011327d99e8b63cb2755ffe9",
+        "anchor": "rmSync(path,",
+        "scope": "Inspected imports, setup/path construction and actual filesystem mutation or cleanup boundary. Positive critical operation establishes risk; not full test correctness or cleanup acceptance."
+      }
     },
     {
       "path": "src/infrastructure/hooks/git-syncer.ts",
@@ -3126,13 +3176,18 @@
       "path": "src/infrastructure/hooks/hook-runner.test.ts",
       "package": "package.json",
       "sourceHash": "3f998a868485183a7861fa35fac6c414523af8b32b0d5fa28d56d6222d6f98e4",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "S",
+      "rationale": "beforeEach recursively deletes a fixed home-relative test directory when it already exists.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "a4b80f8f2bc3facf011327d99e8b63cb2755ffe9",
+        "anchor": "rmSync(testDir,",
+        "scope": "Inspected imports, setup/path construction and actual filesystem mutation or cleanup boundary. Positive critical operation establishes risk; not full test correctness or cleanup acceptance."
+      }
     },
     {
       "path": "src/infrastructure/hooks/hook-runner.ts",
@@ -3167,13 +3222,18 @@
       "path": "src/infrastructure/hooks/log-writer.test.ts",
       "package": "package.json",
       "sourceHash": "1af8fa897b6db5965a2b40552007520d26c888a3e0bf15afce87fed8c11b8940",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "S",
+      "rationale": "Redirects log/config paths to generated fixtures and recursively removes real disk contents after tests.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "a4b80f8f2bc3facf011327d99e8b63cb2755ffe9",
+        "anchor": "rmSync(testDir,",
+        "scope": "Inspected imports, setup/path construction and actual filesystem mutation or cleanup boundary. Positive critical operation establishes risk; not full test correctness or cleanup acceptance."
+      }
     },
     {
       "path": "src/infrastructure/hooks/log-writer.ts",
@@ -3196,13 +3256,18 @@
       "path": "src/infrastructure/hooks/settings-manager.test.ts",
       "package": "package.json",
       "sourceHash": "e628f193cbaf280c8496a0a8069afd7e3912f96fefea10b01c445ffb86e168f2",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "S",
+      "rationale": "beforeEach and afterEach recursively delete a fixed home-relative directory containing settings and backup fixtures.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "a4b80f8f2bc3facf011327d99e8b63cb2755ffe9",
+        "anchor": "rmSync(testBaseDir,",
+        "scope": "Inspected imports, setup/path construction and actual filesystem mutation or cleanup boundary. Positive critical operation establishes risk; not full test correctness or cleanup acceptance."
+      }
     },
     {
       "path": "src/infrastructure/hooks/settings-manager.ts",
@@ -3225,13 +3290,18 @@
       "path": "src/infrastructure/hooks/sync-hook-script.test.ts",
       "package": "package.json",
       "sourceHash": "6d703ec0a4c9f14eed75381021a62771b280306b87b07b1437ebbe3e602c9e72",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "S",
+      "rationale": "Launches actual Bun hook subprocesses with redirected storage and silently catches recursive cleanup failures.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "a4b80f8f2bc3facf011327d99e8b63cb2755ffe9",
+        "anchor": "rmSync(testDir,",
+        "scope": "Inspected imports, setup/path construction and actual filesystem mutation or cleanup boundary. Positive critical operation establishes risk; not full test correctness or cleanup acceptance."
+      }
     },
     {
       "path": "src/infrastructure/hooks/sync-hook-script.ts",
@@ -3421,13 +3491,18 @@
       "path": "src/infrastructure/migration.test.ts",
       "package": "package.json",
       "sourceHash": "88c8654aa9f753d93941d89eae6efddf7f941f54cbe2b364427948a2e2f7b1e0",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "S",
+      "rationale": "Exercises real file moves and rollback inside a mkdtemp root; teardown silently catches recursive removal failures.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "a4b80f8f2bc3facf011327d99e8b63cb2755ffe9",
+        "anchor": "rmSync(testDir,",
+        "scope": "Inspected imports, setup/path construction and actual filesystem mutation or cleanup boundary. Positive critical operation establishes risk; not full test correctness or cleanup acceptance."
+      }
     },
     {
       "path": "src/infrastructure/migration.ts",
@@ -3491,25 +3566,35 @@
       "path": "src/infrastructure/parsers/integration.test.ts",
       "package": "package.json",
       "sourceHash": "65426aace10e9fc0a12b2817ccc2c44ca9b5237d75063f3d87cfb471dfcca7f0",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "S",
+      "rationale": "afterAll recursively removes a fixed checkout scratch directory even when beforeAll merely reused an existing one.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "a4b80f8f2bc3facf011327d99e8b63cb2755ffe9",
+        "anchor": "rmSync(SCRATCHPAD,",
+        "scope": "Inspected imports, setup/path construction and actual filesystem mutation or cleanup boundary. Positive critical operation establishes risk; not full test correctness or cleanup acceptance."
+      }
     },
     {
       "path": "src/infrastructure/parsers/jsonl-parser.test.ts",
       "package": "package.json",
       "sourceHash": "9e943473093534b9a2752ef68ef6ac328e810c530a21d3c09cd9b564d46323c3",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "S",
+      "rationale": "Creates JSONL fixtures in a timestamp-derived directory and recursively removes it in afterAll.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "a4b80f8f2bc3facf011327d99e8b63cb2755ffe9",
+        "anchor": "rmSync(testDir,",
+        "scope": "Inspected imports, setup/path construction and actual filesystem mutation or cleanup boundary. Positive critical operation establishes risk; not full test correctness or cleanup acceptance."
+      }
     },
     {
       "path": "src/infrastructure/parsers/jsonl-parser.ts",
@@ -3561,13 +3646,18 @@
       "path": "src/infrastructure/paths.test.ts",
       "package": "package.json",
       "sourceHash": "a4ae92a58086acdd6c0506c5b93d2601a30c4b95dbc9f5b44dbf2234f23ce2d6",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "S",
+      "rationale": "One event-log enumeration test creates real files beneath a redirected data root and recursively deletes that root after assertions.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "a4b80f8f2bc3facf011327d99e8b63cb2755ffe9",
+        "anchor": "fs.rmSync(tempDir,",
+        "scope": "Inspected imports, setup/path construction and actual filesystem mutation or cleanup boundary. Positive critical operation establishes risk; not full test correctness or cleanup acceptance."
+      }
     },
     {
       "path": "src/infrastructure/paths.ts",
@@ -3665,13 +3755,18 @@
       "path": "src/infrastructure/remote/git-remote-event-transport.test.ts",
       "package": "package.json",
       "sourceHash": "341be31265385cfa4b936e637d56385733dbeb7dbfc98941815674cf707b8607",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "S",
+      "rationale": "Local retry helper recursively removes real Git fixture directories; tests also exercise isolated Git transport.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "a4b80f8f2bc3facf011327d99e8b63cb2755ffe9",
+        "anchor": "rmSync(path,",
+        "scope": "Inspected imports, setup/path construction and actual filesystem mutation or cleanup boundary. Positive critical operation establishes risk; not full test correctness or cleanup acceptance."
+      }
     },
     {
       "path": "src/infrastructure/remote/git-remote-event-transport.ts",
@@ -3723,13 +3818,18 @@
       "path": "src/infrastructure/security/secret-audit-service.test.ts",
       "package": "package.json",
       "sourceHash": "f8ce895ee7361776370e28bf694e168b12415340d8e9dc9449df2fde6838979f",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "S",
+      "rationale": "Creates synthetic sensitive-content event logs and performs real recursive fixture cleanup after closing the database.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "a4b80f8f2bc3facf011327d99e8b63cb2755ffe9",
+        "anchor": "rmSync(tempDir,",
+        "scope": "Inspected imports, setup/path construction and actual filesystem mutation or cleanup boundary. Positive critical operation establishes risk; not full test correctness or cleanup acceptance."
+      }
     },
     {
       "path": "src/infrastructure/security/secret-audit-service.ts",
@@ -3769,13 +3869,18 @@
       "path": "src/infrastructure/signals/checkpoint-manager.test.ts",
       "package": "package.json",
       "sourceHash": "fc2de5950623bda1a71e15bc155f2d7f812d46b8b8c606d86f5afa61f5fb64e4",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "S",
+      "rationale": "Creates real checkpoint fixtures and silently catches recursive directory cleanup failures.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "a4b80f8f2bc3facf011327d99e8b63cb2755ffe9",
+        "anchor": "rmSync(testDir,",
+        "scope": "Inspected imports, setup/path construction and actual filesystem mutation or cleanup boundary. Positive critical operation establishes risk; not full test correctness or cleanup acceptance."
+      }
     },
     {
       "path": "src/infrastructure/signals/checkpoint-manager.ts",
@@ -3851,25 +3956,35 @@
       "path": "src/infrastructure/sources/integration.test.ts",
       "package": "package.json",
       "sourceHash": "18f23a41e9dd3f1f99e32446b7c48b9b78eaa5289bef1f1a426975e0a9d83fe6",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "S",
+      "rationale": "beforeAll recursively removes a fixed checkout scratch directory before creating synthetic session fixtures.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "a4b80f8f2bc3facf011327d99e8b63cb2755ffe9",
+        "anchor": "rmSync(TEST_DIR,",
+        "scope": "Inspected imports, setup/path construction and actual filesystem mutation or cleanup boundary. Positive critical operation establishes risk; not full test correctness or cleanup acceptance."
+      }
     },
     {
       "path": "src/infrastructure/sources/memory-file-scanner.test.ts",
       "package": "package.json",
       "sourceHash": "5a85ac081b2b9c30626c4026a08f293cada17712bf9f81e1a3564b965623f732",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "S",
+      "rationale": "Creates real memory-file fixtures in a mkdtemp directory and recursively removes it through fs/promises.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "a4b80f8f2bc3facf011327d99e8b63cb2755ffe9",
+        "anchor": "await rm(tempDir,",
+        "scope": "Inspected imports, setup/path construction and actual filesystem mutation or cleanup boundary. Positive critical operation establishes risk; not full test correctness or cleanup acceptance."
+      }
     },
     {
       "path": "src/infrastructure/sources/memory-file-scanner.ts",
@@ -3892,13 +4007,18 @@
       "path": "src/infrastructure/sources/project-name-resolver.test.ts",
       "package": "package.json",
       "sourceHash": "2aeb5299875b4b661b287db150dfd664ac68fcad8f1481ea4da8c528db90c394",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "S",
+      "rationale": "Creates real directory and symlink fixtures and recursively removes the generated test root.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "a4b80f8f2bc3facf011327d99e8b63cb2755ffe9",
+        "anchor": "rmSync(testDir,",
+        "scope": "Inspected imports, setup/path construction and actual filesystem mutation or cleanup boundary. Positive critical operation establishes risk; not full test correctness or cleanup acceptance."
+      }
     },
     {
       "path": "src/infrastructure/sources/project-name-resolver.ts",
@@ -3921,13 +4041,18 @@
       "path": "src/infrastructure/sources/session-source.test.ts",
       "package": "package.json",
       "sourceHash": "8730d9fbd2a05fbc91d74c6e1bb741533484aaeff8193b2f35d134b1a0ca2278",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "S",
+      "rationale": "Creates real session discovery fixtures and recursively removes the test directory.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "a4b80f8f2bc3facf011327d99e8b63cb2755ffe9",
+        "anchor": "rmSync(testDir,",
+        "scope": "Inspected imports, setup/path construction and actual filesystem mutation or cleanup boundary. Positive critical operation establishes risk; not full test correctness or cleanup acceptance."
+      }
     },
     {
       "path": "src/infrastructure/sources/session-source.ts",

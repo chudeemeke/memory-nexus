@@ -1,5 +1,25 @@
 # Memory resilience execution journal
 
+## 2026-09-20 - B04 infrastructure test lifecycle classification
+
+- Previous goal turn was progress: presentation checkpoint a4b80f8 was committed
+  and pushed with source-bound evidence. Current source/worktree rechecked clean.
+- Proposed S tiers for 25 infrastructure test drivers after inspecting real
+  filesystem setup/cleanup boundaries: **266 proposed, 180 unclassified, zero
+  approved exclusions**. No whole-test correctness or coverage acceptance claimed.
+- Isolated extracted callbacks reproduced removal of a preexisting synthetic
+  marker in four fixed scratch-directory cases. B11.5-B11.8 own separate repairs.
+  B11.9-B11.15 own seven inspected silent-cleanup cases; those failure paths have
+  not yet been injected. All diagnostic mutations stayed in fresh .git sandboxes.
+- Ledger: 159 items, 64 delivery/gates and 95 quality candidates. B09 now waits
+  for known test fixture cleanup repairs before complete instrumented execution.
+  Source/package bindings, dependency graph and inventory rejection were checked
+  in batch-5 evidence. No executable production/test source changed.
+- Next: inspect remaining 180 test drivers and individual metric applicability,
+  then independent review. B04 active, B05 pending. Full-suite/Tier S acceptance,
+  hosted CI, quota-blocked final external review and all three inbox items remain
+  open. No model/download, real memory mutation, old worktree cleanup or adoption.
+
 ## 2026-09-20 - B04 presentation classification
 
 - Inspected and proposed tiers for 60 remaining non-test presentation candidates.

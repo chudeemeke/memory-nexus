@@ -1,0 +1,47 @@
+{
+  "kind": "Extracted lifecycle callback diagnostic; not passing regressions",
+  "sandbox": ".git\\b04-scratch-lifecycle-YsXfhf",
+  "observations": [
+    {
+      "file": "src/infrastructure/parsers/integration.test.ts",
+      "hook": "afterAll",
+      "sourceHash": "65426aace10e9fc0a12b2817ccc2c44ca9b5237d75063f3d87cfb471dfcca7f0",
+      "callback": "() => {\n    // Clean up scratchpad\n    if (existsSync(SCRATCHPAD)) {\n      rmSync(SCRATCHPAD, { recursive: true, force: true });\n    }\n  }",
+      "markerSurvived": false,
+      "removals": [
+        "existing-scratch"
+      ]
+    },
+    {
+      "file": "src/infrastructure/sources/integration.test.ts",
+      "hook": "beforeAll",
+      "sourceHash": "18f23a41e9dd3f1f99e32446b7c48b9b78eaa5289bef1f1a426975e0a9d83fe6",
+      "callback": "() => {\n    // Create mock filesystem structure\n    if (existsSync(TEST_DIR)) {\n      rmSync(TEST_DIR, { recursive: true, force: true });\n    }\n\n    // Create standard directory structure:\n    // .claude/projects/\n    //   C--Users-Test-project1/\n    //     session-1.jsonl\n    //     session-2.jsonl\n    //   C--Users-Test-project2/\n    //     session-3.jsonl\n    //     session-3/\n    //       subagents/\n    //         subagent-1.jsonl\n\n    const project1Dir = join(MOCK_CLAUDE_DIR, \"C--Users-Test-project1\");\n    const project2Dir = join(MOCK_CLAUDE_DIR, \"C--Users-Test-project2\");\n    const subagentsDir = join(project2Dir, \"session-3\", \"subagents\");\n\n    mkdirSync(project1Dir, { recursive: true });\n    mkdirSync(project2Dir, { recursive: true });\n    mkdirSync(subagentsDir, { recursive: true });\n\n    // Create session files with minimal content\n    const sessionContent = '{\"type\":\"user\",\"uuid\":\"1\",\"timestamp\":\"2026-01-28T00:00:00Z\",\"message\":{\"content\":\"test\"}}';\n\n    writeFileSync(join(project1Dir, \"session-1.jsonl\"), sessionContent);\n    writeFileSync(join(project1Dir, \"session-2.jsonl\"), sessionContent);\n    writeFileSync(join(project2Dir, \"session-3.jsonl\"), sessionContent);\n    writeFileSync(join(subagentsDir, \"subagent-1.jsonl\"), sessionContent);\n  }",
+      "markerSurvived": false,
+      "removals": [
+        "existing-scratch"
+      ]
+    },
+    {
+      "file": "src/infrastructure/hooks/settings-manager.test.ts",
+      "hook": "beforeEach",
+      "sourceHash": "e628f193cbaf280c8496a0a8069afd7e3912f96fefea10b01c445ffb86e168f2",
+      "callback": "() => {\n        // Clean test directory\n        if (existsSync(testBaseDir)) {\n            rmSync(testBaseDir, { recursive: true, force: true });\n        }\n        mkdirSync(testBaseDir, { recursive: true });\n    }",
+      "markerSurvived": false,
+      "removals": [
+        "existing-scratch"
+      ]
+    },
+    {
+      "file": "src/infrastructure/hooks/hook-runner.test.ts",
+      "hook": "beforeEach",
+      "sourceHash": "3f998a868485183a7861fa35fac6c414523af8b32b0d5fa28d56d6222d6f98e4",
+      "callback": "() => {\n        // Clean test directory\n        if (existsSync(testDir)) {\n            rmSync(testDir, { recursive: true, force: true });\n        }\n    }",
+      "markerSurvived": false,
+      "removals": [
+        "existing-scratch"
+      ]
+    }
+  ],
+  "limits": "Only freshly allocated project .git probe directories were mutated. No original test module, production memory, existing scratch directory, browser, provider or full test runner was invoked. Retained artifacts are synthetic."
+}
