@@ -47,6 +47,9 @@ function runHookScript(
                 ...process.env,
                 HOME: homeDir,
                 USERPROFILE: homeDir,
+                XDG_CONFIG_HOME: join(homeDir, ".config"),
+                XDG_DATA_HOME: join(homeDir, ".local", "share"),
+                MEMORY_HOME: join(homeDir, ".memory"),
             },
             stdio: ["pipe", "pipe", "pipe"],
         });
