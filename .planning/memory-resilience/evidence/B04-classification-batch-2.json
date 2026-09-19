@@ -1,0 +1,350 @@
+{
+  "item_id": "B04",
+  "status": "active",
+  "recorded_at": "2026-09-19T23:17:38.009Z",
+  "source_revision": "aa2c449cd2d72828e81a7ea691a12ca2b400323c",
+  "cwd": "C:\\Projects\\memory-nexus",
+  "change_scope": "Source classifications and reproduced-defect ownership; no executable source change.",
+  "counts": {
+    "candidates": 446,
+    "proposed": 120,
+    "unclassified": 326,
+    "approvedExclusions": 0,
+    "ledgerItems": 146
+  },
+  "decisions": [
+    {
+      "path": "src/application/services/ambient-context-service.ts",
+      "tier": "S",
+      "anchor": "generateAmbientContext",
+      "sourceHash": "28da89bc26a57a95695e6eeaea207da63dfa5748944b6eed2bf99e4f5272a798"
+    },
+    {
+      "path": "src/application/services/backfill-service.ts",
+      "tier": "S",
+      "anchor": "backfillStateRepo.save",
+      "sourceHash": "6ad8ef16c388863b4314b5050a9d63d57836b2ac12ee70c4ce2de5463cb00179"
+    },
+    {
+      "path": "src/application/services/dreaming-service.ts",
+      "tier": "S",
+      "anchor": "propose / redactor / approval",
+      "sourceHash": "dc2cdeed5c7552938ca23c97f8ae9248375d80bd0393b1f756c748a9daee809a"
+    },
+    {
+      "path": "src/application/services/embedding-service.ts",
+      "tier": "S",
+      "anchor": "embedBatch / prepareInputs",
+      "sourceHash": "309ee58583a3b100d8d13adcf48319bac80d6d9c37ce0655cead14d1b8572af3"
+    },
+    {
+      "path": "src/application/services/export-service.ts",
+      "tier": "S",
+      "anchor": "export redactor selection / validateExportFile",
+      "sourceHash": "37c2c8dfe5b103b09466b78cb64289cefa968e01201f319931c9bcd04513d772"
+    },
+    {
+      "path": "src/application/services/extraction-pipeline.ts",
+      "tier": "S",
+      "anchor": "extractionProvider.extract / logRepo.save",
+      "sourceHash": "bfb4545953cda882c8e9b1748169ac690690bf91aac3f09cef16be1adb4b5c15"
+    },
+    {
+      "path": "src/application/services/friction-service.ts",
+      "tier": "S",
+      "anchor": "log / redactor.redactText",
+      "sourceHash": "f4697318eb29733d35c9c265afdc1677d18c0b0c9477ca401cadb0bc8deb9799"
+    },
+    {
+      "path": "src/application/services/fts-sanitizer.ts",
+      "tier": "S",
+      "anchor": "sanitizeFtsQuery",
+      "sourceHash": "0d14a869f714f1e7df5d8f93cb9e78fc4ffb329eaefad3c8d0eabd26349c2b5c"
+    },
+    {
+      "path": "src/application/services/llm-extractor.ts",
+      "tier": "S",
+      "anchor": "parseExtractionResponse / parseTopics",
+      "sourceHash": "c8fbbe1fa338acf363e6a692b990d5d52fb686aee7b1394a126f48cfe942610e"
+    },
+    {
+      "path": "src/application/services/memory-file-sync-service.ts",
+      "tier": "S",
+      "anchor": "repository.save",
+      "sourceHash": "02b34997b1afd5277a4d49ce23036e60888e1ff78bc8afa8d3731de7a9c56301"
+    },
+    {
+      "path": "src/application/services/memory-governance-service.ts",
+      "tier": "S",
+      "anchor": "grantConsent / revokeConsent / applyControl",
+      "sourceHash": "d40aa280b0edd91b3a1d5f3a8f33115eba0073103bc111cfddd4b38dea191be3"
+    },
+    {
+      "path": "src/application/services/memory-ranking-service.ts",
+      "tier": "S",
+      "anchor": "isEligible",
+      "sourceHash": "7a064a625ef5390ace3d37741c59ada834c3ada78e98463e1705e571ab3af3b8"
+    },
+    {
+      "path": "src/application/services/pattern-extractor.ts",
+      "tier": "A",
+      "anchor": "PatternExtractor",
+      "sourceHash": "3cab490aa5bceec7e5d14e23850f9434bc03aae400fc37fbe9048404e8355f59"
+    },
+    {
+      "path": "src/application/services/persona-profile-service.ts",
+      "tier": "S",
+      "anchor": "personaRepo.saveMany / governanceRepo.save",
+      "sourceHash": "3a11605fc9d387af46451023962da30fbb4d03b288ecad41cfa3890814b5b3b8"
+    },
+    {
+      "path": "src/application/services/projection-registry.ts",
+      "tier": "S",
+      "anchor": "constructor / consumedKindsFor",
+      "sourceHash": "fcfcba34cd7dc3ec655cd9de999e939fea56040b6674a23c5d266466fbbda901"
+    },
+    {
+      "path": "src/application/services/recovery-service.ts",
+      "tier": "S",
+      "anchor": "recover",
+      "sourceHash": "13c1d09831935414c0a00f1336431646e44af70732cc8167c81dc9e18cd0cac6"
+    },
+    {
+      "path": "src/application/services/remote-event-sync-service.ts",
+      "tier": "S",
+      "anchor": "sync / validateSyncRequest / privacyPreflight",
+      "sourceHash": "b51f6282be5b336bcdc9a5e3a20ffae96f0aea3e6201d97fb0a34e7ccb9a42ec"
+    },
+    {
+      "path": "src/application/services/smart-context-service.ts",
+      "tier": "S",
+      "anchor": "filterAllowedFacts / filterAllowedPersona / filterAllowedGraph",
+      "sourceHash": "25499812db007d83b1d9de77d61986ef79d97641556cde1db5dcdd59c00dcaa9"
+    },
+    {
+      "path": "src/application/services/sync-service.ts",
+      "tier": "S",
+      "anchor": "checkpointManager.save / db.transaction",
+      "sourceHash": "cf22cc58d9b358c9c1257b4a47c0771688619d948c071ff8087de656fcd9271d"
+    },
+    {
+      "path": "src/application/services/temporal-graph-service.ts",
+      "tier": "S",
+      "anchor": "rebuildGraph / governanceRepo.save",
+      "sourceHash": "4ea31e7f24e0cd52f5c6cd73ffc57e840d6a139769598da0a557348b0c9a9914"
+    },
+    {
+      "path": "src/domain/entities/backfill-state.ts",
+      "tier": "S",
+      "anchor": "BackfillState.create",
+      "sourceHash": "e4a4387a41b2664fa8c5ea4a1130810d53218bf9a96dbb5a46dcb228f24cc573"
+    },
+    {
+      "path": "src/domain/entities/dream-entry.ts",
+      "tier": "S",
+      "anchor": "approve / reject",
+      "sourceHash": "59aea252c16edb11a09d115dc438f8a6e6416f4f162b0a58834f4a8fcd3814f8"
+    },
+    {
+      "path": "src/domain/entities/entity.ts",
+      "tier": "S",
+      "anchor": "Entity.create",
+      "sourceHash": "e57914260c13697c31971ccf78e1c19dc25964e8fbb37f493429fb56e3184e2c"
+    },
+    {
+      "path": "src/domain/entities/extraction-state.ts",
+      "tier": "S",
+      "anchor": "ExtractionState.create",
+      "sourceHash": "1d66635d998d4f253c2589e982ea150fd2dc8bf1ebf96b61b09055220d1d658b"
+    },
+    {
+      "path": "src/domain/entities/fact.ts",
+      "tier": "S",
+      "anchor": "Fact.create",
+      "sourceHash": "c56139417c78739f134cbe128fb3d243837ec3d4a0d4682dbeadf8cbf263cdd1"
+    },
+    {
+      "path": "src/domain/entities/friction-entry.ts",
+      "tier": "S",
+      "anchor": "FrictionEntry.create",
+      "sourceHash": "e14057c00d6597740fd9c8032f9827cc0960bfe26012d22b90425a26a9f4069c"
+    },
+    {
+      "path": "src/domain/entities/graph-edge.ts",
+      "tier": "S",
+      "anchor": "GraphEdge.create",
+      "sourceHash": "ae15bd0929851cccee47445f4f3bc321cf83fcc26984513ca367d7d37dbae6e6"
+    },
+    {
+      "path": "src/domain/entities/link.ts",
+      "tier": "S",
+      "anchor": "Link.create",
+      "sourceHash": "163c39c53dbbe87d767e335030f845d0a6bde980bbfb52a7d7ede7c0ddbd13f9"
+    },
+    {
+      "path": "src/domain/entities/memory-event.ts",
+      "tier": "S",
+      "anchor": "normalizePersistedRecord / validateRecordShape",
+      "sourceHash": "1b23aa30e7fee001e208b39ba6e070c74c55c28aba57d84e30f7dabc84fc5941"
+    },
+    {
+      "path": "src/domain/entities/memory-file.ts",
+      "tier": "S",
+      "anchor": "MemoryFile.create",
+      "sourceHash": "2fe6f0459ed0ce7f0504e4edb2cbd0e64bf894d8f3c6cf651a1b3f32513358b1"
+    },
+    {
+      "path": "src/domain/entities/memory-governance.ts",
+      "tier": "S",
+      "anchor": "assertMemoryGovernanceSurface / assertMemoryGovernanceControl",
+      "sourceHash": "e5646cabccb833a4ac55928f3207ec63978b4fb49b3bc81bf472799df0b0e36b"
+    },
+    {
+      "path": "src/domain/entities/memory-utility-metric.ts",
+      "tier": "S",
+      "anchor": "validateMemoryUtilityMetric",
+      "sourceHash": "6cd8602547dd43281b7f238e5914c61bd2a7923c504f9116605b672e0517e092"
+    },
+    {
+      "path": "src/domain/entities/message.ts",
+      "tier": "S",
+      "anchor": "Message.create",
+      "sourceHash": "e0eb3a889f76dd427e71b39924b474b246d19377b81a17c7f1486e8388e38c63"
+    },
+    {
+      "path": "src/domain/entities/persona-entry.ts",
+      "tier": "S",
+      "anchor": "validatePersonaEntry",
+      "sourceHash": "3c1662450d408c83698d0a05f26a746dddab1c4d5ab0150aade7749a0713de3d"
+    },
+    {
+      "path": "src/domain/entities/session.ts",
+      "tier": "S",
+      "anchor": "Session.create / complete",
+      "sourceHash": "f6e05b6347d4e508c916a5d406707512bf56b11ac652c0a3eff2c6ba35d2a9ca"
+    },
+    {
+      "path": "src/domain/entities/tool-use.ts",
+      "tier": "S",
+      "anchor": "ToolUse.create",
+      "sourceHash": "f8a993b4020ab6a73b7f7e93cd4f095ba963dcbeb070aedb4173a31bbbb686f2"
+    },
+    {
+      "path": "src/domain/errors/error-codes.ts",
+      "tier": "B",
+      "anchor": "ErrorCode",
+      "sourceHash": "aef1e36b8db020d6ee3cd540352fb1a631d6087261f5d8a4a8ac770e5c3ad6e8"
+    },
+    {
+      "path": "src/domain/errors/memory-error.ts",
+      "tier": "A",
+      "anchor": "MemoryError / toJSON",
+      "sourceHash": "d173b9709a8c0b4da50424930ad4e7158a51e3483b9980217ce62c3e3d0fe9cb"
+    },
+    {
+      "path": "src/domain/errors/unknown-error.ts",
+      "tier": "A",
+      "anchor": "unknownErrorMessage / unknownToError",
+      "sourceHash": "bc0b3d6bfec911b427b1c34887af7e66538431fd63bc532497699ddea9c46d03"
+    },
+    {
+      "path": "src/domain/ports/embedding.ts",
+      "tier": "S",
+      "anchor": "isEmbeddingProviderError / EmbeddingProviderError",
+      "sourceHash": "9ca442bc4953521a1781f253c3a82c3798a90586d062e2964b7729e0b86ab1c8"
+    },
+    {
+      "path": "src/domain/ports/extraction.ts",
+      "tier": "B",
+      "anchor": "Message / CandidateFact imports",
+      "sourceHash": "a1d94086fe201b58ee4823ea689f654c70fe2fdf87f87f93fd1986aa52b5ccb6"
+    },
+    {
+      "path": "src/domain/services/content-extractor.ts",
+      "tier": "S",
+      "anchor": "parseJson / extractToolUses",
+      "sourceHash": "dd237c43abd6c808bc4c2601b5a400bc9bceac0aa05708aa2415bfc794503f36"
+    },
+    {
+      "path": "src/domain/services/path-decoder.ts",
+      "tier": "S",
+      "anchor": "decodeProjectDirectory / resolveExistingPath",
+      "sourceHash": "c9a8f5e114d59dae315ad11b8ae9a1021aa9a2ddf4cf0d665eb6ec4790efcde7"
+    },
+    {
+      "path": "src/domain/services/query-parser.ts",
+      "tier": "S",
+      "anchor": "parse / toFts5Query",
+      "sourceHash": "f9c4532d741fcb8aafb563a36226c017fa7ca135ebf4b1f88b196d765b90b6bc"
+    },
+    {
+      "path": "src/domain/value-objects/embedding-config.ts",
+      "tier": "S",
+      "anchor": "EmbeddingConfig.create",
+      "sourceHash": "4999186165b5aeff6a0b0e11c0aae3b04c9b350bbed5184c1b7e423167872548"
+    },
+    {
+      "path": "src/domain/value-objects/embedding-result.ts",
+      "tier": "S",
+      "anchor": "EmbeddingResult.create",
+      "sourceHash": "a4a0385007d5999e01a355d0044afcc74a35c3681a4ca33a45aa778922e6be8b"
+    },
+    {
+      "path": "src/domain/value-objects/project-path.ts",
+      "tier": "S",
+      "anchor": "ProjectPath.fromDecoded / fromEncoded",
+      "sourceHash": "72b6b1398247fa3a81799229156d91f8d79aaab95eaf1233cc16f2eac6acf9e5"
+    },
+    {
+      "path": "src/domain/value-objects/search-query.ts",
+      "tier": "S",
+      "anchor": "SearchQuery.from",
+      "sourceHash": "61c76d2801522333f4e22f70a0a1c4c53cb0655fb0b3ede42ec4f8d0ea8faf27"
+    },
+    {
+      "path": "src/domain/value-objects/search-result.ts",
+      "tier": "S",
+      "anchor": "SearchResult.create",
+      "sourceHash": "58e27ad0b859c89e937d59888fe79b1940ac485d79304ca7aa6f0a42da0e1242"
+    }
+  ],
+  "sourceInputs": [
+    {
+      "path": ".planning/memory-resilience/quality-classifications.json",
+      "sourceHash": "2127e9b7d81fecd6b4ab3e66202a79f30e171b28aeb9d190af7912c6a6b3546e"
+    },
+    {
+      "path": ".planning/memory-resilience/work-items.json",
+      "sourceHash": "138c28388c498d61b31a109df42e26a0e851cc749e9bf718962ef1aa96a3c978"
+    }
+  ],
+  "diagnostic": {
+    "command": "bun .git/b04-input-probes.ts",
+    "exit": 0,
+    "source": "import { LlmExtractor } from '../src/application/services/llm-extractor.ts';\nimport { ContentExtractor } from '../src/domain/services/content-extractor.ts';\nimport { Entity } from '../src/domain/entities/entity.ts';\nimport { SearchResult } from '../src/domain/value-objects/search-result.ts';\nconst results: unknown[] = [];\nfor (const [name, invoke] of [\n ['LLM JSON null', () => LlmExtractor.parseExtractionResponse('null','synthetic')],\n ['JSONL null content block', () => ContentExtractor.extractToolUses('{\"message\":{\"content\":[null]}}')],\n] as const) {\n try { invoke(); results.push({name,observed:'returned normally'}); }\n catch(error) { results.push({name,observed:'threw',error:error instanceof Error ? error.message : String(error)}); }\n}\nresults.push({name:'Entity NaN confidence',acceptedNaN:Number.isNaN(Entity.create({type:'concept',name:'synthetic',confidence:NaN}).confidence)});\nresults.push({name:'SearchResult NaN score',acceptedNaN:Number.isNaN(SearchResult.create({sessionId:'synthetic',messageId:'synthetic',snippet:'synthetic',score:NaN,timestamp:new Date('2026-01-01T00:00:00Z'),role:'user'}).score)});\nconsole.log(JSON.stringify({kind:'diagnostic observation, not passing regression tests',results},null,2));\n",
+    "report": ".planning/memory-resilience/evidence/B04-input-probes.json",
+    "reportHash": "ddc1130ad2ce573eed2460a67fa5a0ba1195a5a1122d0f350e38a9d69e0ed73e",
+    "meaning": "Probe executed successfully and reproduced four defects; this is not a test-suite PASS."
+  },
+  "checks": [
+    {
+      "command": "bun run quality:inventory",
+      "exit": 1,
+      "meaning": "Expected incomplete inventory, 326 unknown classifications",
+      "log": ".planning/memory-resilience/evidence/B04-batch-2-gate.txt"
+    },
+    {
+      "command": "bun .git/b04-validate-batch-2.ts",
+      "exit": 0,
+      "meaning": "All 446 source and 2 package bindings current; all non-test application/domain candidates classified; 146 acyclic ledger items; new findings reach R02; B05 pending",
+      "log": ".planning/memory-resilience/evidence/B04-batch-2-validation.json",
+      "verification_source": "import { readFileSync, writeFileSync } from 'node:fs';\nimport { execFileSync } from 'node:child_process';\nimport { sourceHash, validateInventory } from '../scripts/quality-inventory.ts';\nconst root = '.planning/memory-resilience/';\nconst read = (p: string) => JSON.parse(readFileSync(p,'utf8'));\nconst assert = (condition: unknown, message: string) => { if(!condition) throw new Error(message); };\nconst catalog = read(root+'executable-catalog.json');\nconst manifest = read(root+'quality-classifications.json');\nconst ledger = read(root+'work-items.json');\nconst mapping = read(root+'package-boundary-map.json');\nfor(const input of [...catalog.files,...catalog.packages,...mapping.sourceInputs]) assert(sourceHash(readFileSync(input.path,'utf8'))===input.sourceHash,'Stale source '+input.path);\nconst issues = validateInventory(catalog,manifest);\nassert(issues.length===326 && issues.every(i=>i.startsWith('Unknown risk tier: ')),'Unexpected inventory errors');\nassert(manifest.files.filter((f:any)=>f.tier!==null).length===120,'Wrong proposed count');\nassert(manifest.files.filter((f:any)=>f.tier===null && !f.path.endsWith('.test.ts') && (f.path.startsWith('src/application/') || f.path.startsWith('src/domain/'))).length===0,'Application/domain runtime candidate omitted');\nconst byId = new Map<string,any>(ledger.items.map((i:any)=>[i.id,i]));\nassert(byId.size===146 && byId.size===ledger.items.length,'Duplicate or missing work items');\nconst visited = new Set<string>();\nfunction visit(id:string, parents = new Set<string>()) {\n assert(!parents.has(id),'Dependency cycle '+id);\n if(visited.has(id))return;\n assert(byId.has(id),'Unknown dependency '+id);\n const stack=new Set([...parents,id]);\n for(const dep of byId.get(id).depends_on) visit(dep,stack);\n visited.add(id);\n}\nfor(const id of byId.keys())visit(id);\nfunction reaches(id:string,target:string):boolean { return id===target || byId.get(id).depends_on.some((dep:string)=>reaches(dep,target)); }\nfor(const id of ['B11.1','B11.2','B11.3','B12','D05','Q091','Q092','Q093','Q094'])assert(reaches('R02',id),'Finding bypasses baseline acceptance '+id);\nassert(ledger.items.filter((i:any)=>i.status==='active').map((i:any)=>i.id).join()==='B04','Unexpected active item');\nassert(byId.get('B05').status==='pending','B05 prematurely advanced');\nconst changed=execFileSync('git',['diff','--name-only'],{encoding:'utf8'}).trim().split('\\n');\nassert(changed.every(p=>p.startsWith('.planning/')),'Unexpected executable change');\nconst record={status:'PASS',sourceBindings:catalog.files.length,packageBindings:catalog.packages.length,packageMapBindings:mapping.sourceInputs.length,proposed:120,unclassified:326,expectedGateExit:1,ledgerItems:byId.size,acyclic:true,newFindingsReachBaselineReview:true,activeItem:'B04',nextItemStatus:'B05 pending',limits:'Data/source consistency only; no independent tier approval or runtime acceptance.'};\nwriteFileSync(root+'evidence/B04-batch-2-validation.json',JSON.stringify(record,null,2)+'\\n');\nconsole.log(JSON.stringify(record));\n"
+    }
+  ],
+  "limits": [
+    "Risk and metric applicability still require independent review.",
+    "Tier S is established by an inspected critical boundary, not complete code correctness review.",
+    "No numeric coverage, full-suite, release or operational acceptance is claimed."
+  ],
+  "runtime": "Windows Bun 1.4.1"
+}

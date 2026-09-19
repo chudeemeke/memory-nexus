@@ -111,17 +111,19 @@
         ".planning/memory-resilience/B04-inventory-plan.md",
         ".planning/memory-resilience/package-boundary-map.json",
         ".planning/memory-resilience/B04-source-findings.md",
-        ".planning/memory-resilience/evidence/B04-classification-batch-1.json"
+        ".planning/memory-resilience/evidence/B04-classification-batch-1.json",
+        ".planning/memory-resilience/evidence/B04-classification-batch-2.json",
+        ".planning/memory-resilience/evidence/B04-input-probes.json"
       ],
       "acceptance_record": ".planning/memory-resilience/evidence/B04.json",
       "progress": {
         "discovery": "implemented and focused behavior verified",
         "sourceCandidates": 446,
-        "proposedClassifications": 71,
-        "unclassified": 375,
+        "proposedClassifications": 120,
+        "unclassified": 326,
         "approvedExclusions": 0,
         "independentReview": "pending",
-        "next": "Inspect remaining domain/application/infrastructure/presentation modules and test drivers; record individual metric applicability, then independent review. B05 remains pending.",
+        "next": "Inspect infrastructure/presentation modules and test drivers; resolve individual metric applicability, then independent review. B05 remains pending.",
         "packageOutputMapping": "Source-bound mapping recorded; artifact verification and independent review pending."
       }
     },
@@ -2175,7 +2177,11 @@
         "B11.1",
         "B11.2",
         "B11.3",
-        "B12"
+        "B12",
+        "Q091",
+        "Q092",
+        "Q093",
+        "Q094"
       ],
       "scope": "all Q-* work items",
       "deliverable": "Close individually verified quality work items; fix discovered defects and meaningful boundaries, not artificial counter tests.",
@@ -2252,7 +2258,8 @@
       "authorization": "authorized",
       "owner": "memory-nexus",
       "evidence": [],
-      "acceptance_record": ".planning/memory-resilience/evidence/D04.json"
+      "acceptance_record": ".planning/memory-resilience/evidence/D04.json",
+      "additional_acceptance": "Disposition the exported legacy LlmExtractor.extract empty-result method and hook caller; trace active consumers and repair or explicitly retire/document unsupported behavior with review before R02. No new inference provider/egress is implicitly authorized."
     },
     {
       "id": "F01",
@@ -3003,6 +3010,86 @@
       "acceptance_record": ".planning/memory-resilience/evidence/D05.json",
       "observed_evidence": ".planning/memory-resilience/B04-source-findings.md",
       "retirement_trigger": "Before baseline review R02; runtime regression and final applicable tier proof required."
+    },
+    {
+      "id": "Q091",
+      "title": "Reject malformed model response shapes",
+      "scope": "src/application/services/llm-extractor.ts",
+      "stage": "baseline-quality",
+      "status": "pending",
+      "depends_on": [
+        "B04"
+      ],
+      "deliverable": "Repair the reproduced input-boundary defect with RED/GREEN regression, then meet the complete per-file Tier S contract.",
+      "verification": "Malformed JSON values, null/array/primitive roots and malformed nested entity entries have defined safe results; preserve valid extraction behavior. Statements/functions/lines >=95%, branches 100%; meaningful decision checks and independent review.",
+      "risk": "S",
+      "authorization": "authorized",
+      "owner": "memory-nexus",
+      "evidence": [],
+      "observed_gap": "parseExtractionResponse(\"null\", \"synthetic\") throws while accessing parsed.topics.",
+      "observed_evidence": ".planning/memory-resilience/evidence/B04-input-probes.json",
+      "acceptance_record": ".planning/memory-resilience/evidence/Q091.json",
+      "retirement_trigger": "Before B10/R02; diagnostic reproduction is not repair acceptance."
+    },
+    {
+      "id": "Q092",
+      "title": "Handle malformed JSONL content blocks",
+      "scope": "src/domain/services/content-extractor.ts",
+      "stage": "baseline-quality",
+      "status": "pending",
+      "depends_on": [
+        "B04"
+      ],
+      "deliverable": "Repair the reproduced input-boundary defect with RED/GREEN regression, then meet the complete per-file Tier S contract.",
+      "verification": "Adversarial JSONL shapes across message/tool/result extractors cannot crash ingestion; preserve valid records and expected empty results. Statements/functions/lines >=95%, branches 100%; meaningful decision checks and independent review.",
+      "risk": "S",
+      "authorization": "authorized",
+      "owner": "memory-nexus",
+      "evidence": [],
+      "observed_gap": "extractToolUses on a message content array containing null throws while accessing block.type.",
+      "observed_evidence": ".planning/memory-resilience/evidence/B04-input-probes.json",
+      "acceptance_record": ".planning/memory-resilience/evidence/Q092.json",
+      "retirement_trigger": "Before B10/R02; diagnostic reproduction is not repair acceptance."
+    },
+    {
+      "id": "Q093",
+      "title": "Reject non-finite entity confidence",
+      "scope": "src/domain/entities/entity.ts",
+      "stage": "baseline-quality",
+      "status": "pending",
+      "depends_on": [
+        "B04"
+      ],
+      "deliverable": "Repair the reproduced input-boundary defect with RED/GREEN regression, then meet the complete per-file Tier S contract.",
+      "verification": "Reject NaN and non-finite/out-of-range confidence; exact valid boundaries continue to construct entities. Statements/functions/lines >=95%, branches 100%; meaningful decision checks and independent review.",
+      "risk": "S",
+      "authorization": "authorized",
+      "owner": "memory-nexus",
+      "evidence": [],
+      "observed_gap": "Entity.create accepts NaN confidence despite its required 0-1 range.",
+      "observed_evidence": ".planning/memory-resilience/evidence/B04-input-probes.json",
+      "acceptance_record": ".planning/memory-resilience/evidence/Q093.json",
+      "retirement_trigger": "Before B10/R02; diagnostic reproduction is not repair acceptance."
+    },
+    {
+      "id": "Q094",
+      "title": "Reject non-finite search result scores",
+      "scope": "src/domain/value-objects/search-result.ts",
+      "stage": "baseline-quality",
+      "status": "pending",
+      "depends_on": [
+        "B04"
+      ],
+      "deliverable": "Repair the reproduced input-boundary defect with RED/GREEN regression, then meet the complete per-file Tier S contract.",
+      "verification": "Reject NaN and non-finite/out-of-range scores; exact valid boundaries and valid result metadata remain supported. Statements/functions/lines >=95%, branches 100%; meaningful decision checks and independent review.",
+      "risk": "S",
+      "authorization": "authorized",
+      "owner": "memory-nexus",
+      "evidence": [],
+      "observed_gap": "SearchResult.create accepts NaN score despite its required 0-1 range.",
+      "observed_evidence": ".planning/memory-resilience/evidence/B04-input-probes.json",
+      "acceptance_record": ".planning/memory-resilience/evidence/Q094.json",
+      "retirement_trigger": "Before B10/R02; diagnostic reproduction is not repair acceptance."
     }
   ],
   "decisions": {

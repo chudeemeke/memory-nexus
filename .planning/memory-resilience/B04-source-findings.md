@@ -59,3 +59,35 @@ settings change or package publication is authorized by this finding.
 
 The source-bound package map is `package-boundary-map.json`. It describes declared
 outputs and outstanding proof; it does not establish a current tarball's contents.
+
+## Reproduced input-boundary defects (batch 2)
+
+At source `aa2c449cd2d72828e81a7ea691a12ca2b400323c`, synthetic in-memory probes
+confirmed four failures. The exact probe source and report are retained in
+`evidence/B04-classification-batch-2.json` and `evidence/B04-input-probes.json`.
+Probe exit 0 means the diagnostic ran; it does not mean these behaviors passed.
+
+- Q091: `LlmExtractor.parseExtractionResponse("null", "synthetic")` throws on
+  `parsed.topics` instead of safely handling a malformed response shape.
+- Q092: `ContentExtractor.extractToolUses` throws on a null member of the message
+  content array when reading `block.type`.
+- Q093: `Entity.create` accepts `NaN` confidence despite its documented 0-1 range.
+- Q094: `SearchResult.create` accepts `NaN` score despite its documented 0-1 range.
+
+These are individually owned baseline-quality tasks with explicit B10 dependency
+barriers. Each needs RED/GREEN regression, related malformed-input cases and full
+Tier S acceptance. No persistent memory, provider call or model download was used.
+
+## Exported legacy extraction limitation
+
+The inspected `LlmExtractor.extract` creates a prompt but returns empty entities
+and summary for nonempty input. Its comments describe future hook-context behavior;
+they do not implement it. Source references include `hook-runner.ts` calling this
+method and the library's application exports exposing the class.
+
+D04 owns consumer-contract disposition before R02: trace the current hook and
+exported API call paths, distinguish the functioning extraction pipeline from
+this legacy method, and either repair the advertised behavior within accepted
+scope or explicitly retire/document the unsupported contract with review. Do not
+count a successful call returning empty output as proof of LLM extraction. No new
+provider service, egress permission or paid inference is authorized by this finding.

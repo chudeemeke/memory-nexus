@@ -375,13 +375,18 @@
       "path": "src/application/services/ambient-context-service.ts",
       "package": "package.json",
       "sourceHash": "28da89bc26a57a95695e6eeaea207da63dfa5748944b6eed2bf99e4f5272a798",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "S",
+      "rationale": "Writes context files and updates persistent MEMORY.md blocks through the injected writer.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "aa2c449cd2d72828e81a7ea691a12ca2b400323c",
+        "anchor": "generateAmbientContext",
+        "scope": "positive critical boundary establishes highest tier; not full correctness acceptance"
+      }
     },
     {
       "path": "src/application/services/backfill-service.test.ts",
@@ -399,13 +404,18 @@
       "path": "src/application/services/backfill-service.ts",
       "package": "package.json",
       "sourceHash": "6ad8ef16c388863b4314b5050a9d63d57836b2ac12ee70c4ce2de5463cb00179",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "S",
+      "rationale": "Persists backfill success and failure checkpoints that determine resumable work.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "aa2c449cd2d72828e81a7ea691a12ca2b400323c",
+        "anchor": "backfillStateRepo.save",
+        "scope": "positive critical boundary establishes highest tier; not full correctness acceptance"
+      }
     },
     {
       "path": "src/application/services/budget-allocator.test.ts",
@@ -452,13 +462,18 @@
       "path": "src/application/services/dreaming-service.ts",
       "package": "package.json",
       "sourceHash": "dc2cdeed5c7552938ca23c97f8ae9248375d80bd0393b1f756c748a9daee809a",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "S",
+      "rationale": "Redacts proposals and manages approval-controlled canonical memory transformations.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "aa2c449cd2d72828e81a7ea691a12ca2b400323c",
+        "anchor": "propose / redactor / approval",
+        "scope": "positive critical boundary establishes highest tier; not full correctness acceptance"
+      }
     },
     {
       "path": "src/application/services/embedding-service.test.ts",
@@ -476,13 +491,18 @@
       "path": "src/application/services/embedding-service.ts",
       "package": "package.json",
       "sourceHash": "309ee58583a3b100d8d13adcf48319bac80d6d9c37ce0655cead14d1b8572af3",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "S",
+      "rationale": "Redacts text before provider egress, computes model identity and persists embedding/skip progress.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "aa2c449cd2d72828e81a7ea691a12ca2b400323c",
+        "anchor": "embedBatch / prepareInputs",
+        "scope": "positive critical boundary establishes highest tier; not full correctness acceptance"
+      }
     },
     {
       "path": "src/application/services/export-service.test.ts",
@@ -500,13 +520,18 @@
       "path": "src/application/services/export-service.ts",
       "package": "package.json",
       "sourceHash": "37c2c8dfe5b103b09466b78cb64289cefa968e01201f319931c9bcd04513d772",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "S",
+      "rationale": "Controls sensitive-data redaction and validates import data before database mutation; optional no-op redaction remains a boundary to verify, not a safety claim.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "aa2c449cd2d72828e81a7ea691a12ca2b400323c",
+        "anchor": "export redactor selection / validateExportFile",
+        "scope": "positive critical boundary establishes highest tier; not full correctness acceptance"
+      }
     },
     {
       "path": "src/application/services/extraction-pipeline.test.ts",
@@ -524,13 +549,18 @@
       "path": "src/application/services/extraction-pipeline.ts",
       "package": "package.json",
       "sourceHash": "bfb4545953cda882c8e9b1748169ac690690bf91aac3f09cef16be1adb4b5c15",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "S",
+      "rationale": "Redacts messages before provider egress, redacts candidates and persists extraction outcomes.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "aa2c449cd2d72828e81a7ea691a12ca2b400323c",
+        "anchor": "extractionProvider.extract / logRepo.save",
+        "scope": "positive critical boundary establishes highest tier; not full correctness acceptance"
+      }
     },
     {
       "path": "src/application/services/friction-service.test.ts",
@@ -548,13 +578,18 @@
       "path": "src/application/services/friction-service.ts",
       "package": "package.json",
       "sourceHash": "f4697318eb29733d35c9c265afdc1677d18c0b0c9477ca401cadb0bc8deb9799",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "S",
+      "rationale": "Redacts and persists user friction content; owns a durable memory input boundary.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "aa2c449cd2d72828e81a7ea691a12ca2b400323c",
+        "anchor": "log / redactor.redactText",
+        "scope": "positive critical boundary establishes highest tier; not full correctness acceptance"
+      }
     },
     {
       "path": "src/application/services/fts-sanitizer.test.ts",
@@ -572,13 +607,18 @@
       "path": "src/application/services/fts-sanitizer.ts",
       "package": "package.json",
       "sourceHash": "0d14a869f714f1e7df5d8f93cb9e78fc4ffb329eaefad3c8d0eabd26349c2b5c",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "S",
+      "rationale": "Transforms untrusted query syntax before FTS MATCH, including quote handling and fallback.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "aa2c449cd2d72828e81a7ea691a12ca2b400323c",
+        "anchor": "sanitizeFtsQuery",
+        "scope": "positive critical boundary establishes highest tier; not full correctness acceptance"
+      }
     },
     {
       "path": "src/application/services/index.ts",
@@ -608,13 +648,18 @@
       "path": "src/application/services/llm-extractor.ts",
       "package": "package.json",
       "sourceHash": "c8fbbe1fa338acf363e6a692b990d5d52fb686aee7b1394a126f48cfe942610e",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "S",
+      "rationale": "Parses external model response JSON and validates admitted entity fields. Diagnostic null input currently throws; Q091 owns the regression.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "aa2c449cd2d72828e81a7ea691a12ca2b400323c",
+        "anchor": "parseExtractionResponse / parseTopics",
+        "scope": "positive critical boundary establishes highest tier; not full correctness acceptance"
+      }
     },
     {
       "path": "src/application/services/memory-file-sync-service.test.ts",
@@ -632,13 +677,18 @@
       "path": "src/application/services/memory-file-sync-service.ts",
       "package": "package.json",
       "sourceHash": "02b34997b1afd5277a4d49ce23036e60888e1ff78bc8afa8d3731de7a9c56301",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "S",
+      "rationale": "Persists discovered memory-file content and indexing state.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "aa2c449cd2d72828e81a7ea691a12ca2b400323c",
+        "anchor": "repository.save",
+        "scope": "positive critical boundary establishes highest tier; not full correctness acceptance"
+      }
     },
     {
       "path": "src/application/services/memory-governance-service.test.ts",
@@ -656,13 +706,18 @@
       "path": "src/application/services/memory-governance-service.ts",
       "package": "package.json",
       "sourceHash": "d40aa280b0edd91b3a1d5f3a8f33115eba0073103bc111cfddd4b38dea191be3",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "S",
+      "rationale": "Emits canonical control events and applies consent, suppression and invalidation projections.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "aa2c449cd2d72828e81a7ea691a12ca2b400323c",
+        "anchor": "grantConsent / revokeConsent / applyControl",
+        "scope": "positive critical boundary establishes highest tier; not full correctness acceptance"
+      }
     },
     {
       "path": "src/application/services/memory-ranking-service.test.ts",
@@ -680,13 +735,18 @@
       "path": "src/application/services/memory-ranking-service.ts",
       "package": "package.json",
       "sourceHash": "7a064a625ef5390ace3d37741c59ada834c3ada78e98463e1705e571ab3af3b8",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "S",
+      "rationale": "Excludes superseded and governance-blocked candidates and enforces validity intervals before ranking; includes a governance boundary, not only scoring math.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "aa2c449cd2d72828e81a7ea691a12ca2b400323c",
+        "anchor": "isEligible",
+        "scope": "positive critical boundary establishes highest tier; not full correctness acceptance"
+      }
     },
     {
       "path": "src/application/services/pattern-extractor.test.ts",
@@ -704,13 +764,18 @@
       "path": "src/application/services/pattern-extractor.ts",
       "package": "package.json",
       "sourceHash": "3cab490aa5bceec7e5d14e23850f9434bc03aae400fc37fbe9048404e8355f59",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "A",
+      "rationale": "Full module inspected: derives file references, operation statistics and new Entity values from supplied tool records; does not execute recorded tools or perform filesystem writes.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "aa2c449cd2d72828e81a7ea691a12ca2b400323c",
+        "anchor": "PatternExtractor",
+        "scope": "complete module"
+      }
     },
     {
       "path": "src/application/services/persona-profile-service.test.ts",
@@ -728,13 +793,18 @@
       "path": "src/application/services/persona-profile-service.ts",
       "package": "package.json",
       "sourceHash": "3a11605fc9d387af46451023962da30fbb4d03b288ecad41cfa3890814b5b3b8",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "S",
+      "rationale": "Persists derived persona entries and associated governance records.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "aa2c449cd2d72828e81a7ea691a12ca2b400323c",
+        "anchor": "personaRepo.saveMany / governanceRepo.save",
+        "scope": "positive critical boundary establishes highest tier; not full correctness acceptance"
+      }
     },
     {
       "path": "src/application/services/projection-registry.test.ts",
@@ -752,13 +822,18 @@
       "path": "src/application/services/projection-registry.ts",
       "package": "package.json",
       "sourceHash": "fcfcba34cd7dc3ec655cd9de999e939fea56040b6674a23c5d266466fbbda901",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "S",
+      "rationale": "Validates projection identities and rejects duplicate/unknown projection routing, controlling event projection integrity.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "aa2c449cd2d72828e81a7ea691a12ca2b400323c",
+        "anchor": "constructor / consumedKindsFor",
+        "scope": "positive critical boundary establishes highest tier; not full correctness acceptance"
+      }
     },
     {
       "path": "src/application/services/recovery-service.test.ts",
@@ -776,13 +851,18 @@
       "path": "src/application/services/recovery-service.ts",
       "package": "package.json",
       "sourceHash": "13c1d09831935414c0a00f1336431646e44af70732cc8167c81dc9e18cd0cac6",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "S",
+      "rationale": "Controls enabled/dry-run recovery and invokes persistent sync for selected pending sessions.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "aa2c449cd2d72828e81a7ea691a12ca2b400323c",
+        "anchor": "recover",
+        "scope": "positive critical boundary establishes highest tier; not full correctness acceptance"
+      }
     },
     {
       "path": "src/application/services/remote-event-sync-service.test.ts",
@@ -800,13 +880,18 @@
       "path": "src/application/services/remote-event-sync-service.ts",
       "package": "package.json",
       "sourceHash": "b51f6282be5b336bcdc9a5e3a20ffae96f0aea3e6201d97fb0a34e7ccb9a42ec",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "S",
+      "rationale": "Validates remote requests, audits privacy and controls Git initialization, event commits, pull/rebase and push. Existing transport is not proof of the proposed desktop replication design.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "aa2c449cd2d72828e81a7ea691a12ca2b400323c",
+        "anchor": "sync / validateSyncRequest / privacyPreflight",
+        "scope": "positive critical boundary establishes highest tier; not full correctness acceptance"
+      }
     },
     {
       "path": "src/application/services/rrf-fusion.test.ts",
@@ -853,13 +938,18 @@
       "path": "src/application/services/smart-context-service.ts",
       "package": "package.json",
       "sourceHash": "25499812db007d83b1d9de77d61986ef79d97641556cde1db5dcdd59c00dcaa9",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "S",
+      "rationale": "Filters governed memory before AI-facing context assembly; optional policy fallback is part of the boundary requiring proof.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "aa2c449cd2d72828e81a7ea691a12ca2b400323c",
+        "anchor": "filterAllowedFacts / filterAllowedPersona / filterAllowedGraph",
+        "scope": "positive critical boundary establishes highest tier; not full correctness acceptance"
+      }
     },
     {
       "path": "src/application/services/sync-service.integration.test.ts",
@@ -889,13 +979,18 @@
       "path": "src/application/services/sync-service.ts",
       "package": "package.json",
       "sourceHash": "cf22cc58d9b358c9c1257b4a47c0771688619d948c071ff8087de656fcd9271d",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "S",
+      "rationale": "Persists recovery checkpoints and commits sessions, messages and extraction state transactionally.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "aa2c449cd2d72828e81a7ea691a12ca2b400323c",
+        "anchor": "checkpointManager.save / db.transaction",
+        "scope": "positive critical boundary establishes highest tier; not full correctness acceptance"
+      }
     },
     {
       "path": "src/application/services/temporal-decay.test.ts",
@@ -942,13 +1037,18 @@
       "path": "src/application/services/temporal-graph-service.ts",
       "package": "package.json",
       "sourceHash": "4ea31e7f24e0cd52f5c6cd73ffc57e840d6a139769598da0a557348b0c9a9914",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "S",
+      "rationale": "Rebuilds persistent graph projections and records their governance metadata.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "aa2c449cd2d72828e81a7ea691a12ca2b400323c",
+        "anchor": "rebuildGraph / governanceRepo.save",
+        "scope": "positive critical boundary establishes highest tier; not full correctness acceptance"
+      }
     },
     {
       "path": "src/domain/entities/backfill-state.test.ts",
@@ -966,13 +1066,18 @@
       "path": "src/domain/entities/backfill-state.ts",
       "package": "package.json",
       "sourceHash": "e4a4387a41b2664fa8c5ea4a1130810d53218bf9a96dbb5a46dcb228f24cc573",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "S",
+      "rationale": "Validates required session identity and daily-log path before representing persistent backfill state.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "aa2c449cd2d72828e81a7ea691a12ca2b400323c",
+        "anchor": "BackfillState.create",
+        "scope": "positive critical boundary establishes highest tier; not full correctness acceptance"
+      }
     },
     {
       "path": "src/domain/entities/dream-entry.test.ts",
@@ -990,13 +1095,18 @@
       "path": "src/domain/entities/dream-entry.ts",
       "package": "package.json",
       "sourceHash": "59aea252c16edb11a09d115dc438f8a6e6416f4f162b0a58834f4a8fcd3814f8",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "S",
+      "rationale": "Validates reviewer identity and permitted state transitions before approved memory changes.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "aa2c449cd2d72828e81a7ea691a12ca2b400323c",
+        "anchor": "approve / reject",
+        "scope": "positive critical boundary establishes highest tier; not full correctness acceptance"
+      }
     },
     {
       "path": "src/domain/entities/entity.test.ts",
@@ -1014,13 +1124,18 @@
       "path": "src/domain/entities/entity.ts",
       "package": "package.json",
       "sourceHash": "e57914260c13697c31971ccf78e1c19dc25964e8fbb37f493429fb56e3184e2c",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "S",
+      "rationale": "Validates extracted entity names, confidence, types and decision metadata. NaN confidence is currently admitted; Q093 owns the regression.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "aa2c449cd2d72828e81a7ea691a12ca2b400323c",
+        "anchor": "Entity.create",
+        "scope": "positive critical boundary establishes highest tier; not full correctness acceptance"
+      }
     },
     {
       "path": "src/domain/entities/extraction-state.test.ts",
@@ -1038,13 +1153,18 @@
       "path": "src/domain/entities/extraction-state.ts",
       "package": "package.json",
       "sourceHash": "1d66635d998d4f253c2589e982ea150fd2dc8bf1ebf96b61b09055220d1d658b",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "S",
+      "rationale": "Validates extraction identity, session path and status for resumable ingestion records.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "aa2c449cd2d72828e81a7ea691a12ca2b400323c",
+        "anchor": "ExtractionState.create",
+        "scope": "positive critical boundary establishes highest tier; not full correctness acceptance"
+      }
     },
     {
       "path": "src/domain/entities/fact.test.ts",
@@ -1062,13 +1182,18 @@
       "path": "src/domain/entities/fact.ts",
       "package": "package.json",
       "sourceHash": "c56139417c78739f134cbe128fb3d243837ec3d4a0d4682dbeadf8cbf263cdd1",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "S",
+      "rationale": "Validates project, content and fact type before constructing persistent knowledge.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "aa2c449cd2d72828e81a7ea691a12ca2b400323c",
+        "anchor": "Fact.create",
+        "scope": "positive critical boundary establishes highest tier; not full correctness acceptance"
+      }
     },
     {
       "path": "src/domain/entities/friction-entry.test.ts",
@@ -1086,13 +1211,18 @@
       "path": "src/domain/entities/friction-entry.ts",
       "package": "package.json",
       "sourceHash": "e14057c00d6597740fd9c8032f9827cc0960bfe26012d22b90425a26a9f4069c",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "S",
+      "rationale": "Validates required description and allowed severity values before representing user feedback records.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "aa2c449cd2d72828e81a7ea691a12ca2b400323c",
+        "anchor": "FrictionEntry.create",
+        "scope": "positive critical boundary establishes highest tier; not full correctness acceptance"
+      }
     },
     {
       "path": "src/domain/entities/graph-edge.test.ts",
@@ -1110,13 +1240,18 @@
       "path": "src/domain/entities/graph-edge.ts",
       "package": "package.json",
       "sourceHash": "ae15bd0929851cccee47445f4f3bc321cf83fcc26984513ca367d7d37dbae6e6",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "S",
+      "rationale": "Validates project visibility, source provenance and finite confidence for graph records.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "aa2c449cd2d72828e81a7ea691a12ca2b400323c",
+        "anchor": "GraphEdge.create",
+        "scope": "positive critical boundary establishes highest tier; not full correctness acceptance"
+      }
     },
     {
       "path": "src/domain/entities/index.ts",
@@ -1146,13 +1281,18 @@
       "path": "src/domain/entities/link.ts",
       "package": "package.json",
       "sourceHash": "163c39c53dbbe87d767e335030f845d0a6bde980bbfb52a7d7ede7c0ddbd13f9",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "S",
+      "rationale": "Validates source/target identities and entity types for durable relationships.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "aa2c449cd2d72828e81a7ea691a12ca2b400323c",
+        "anchor": "Link.create",
+        "scope": "positive critical boundary establishes highest tier; not full correctness acceptance"
+      }
     },
     {
       "path": "src/domain/entities/memory-event.test.ts",
@@ -1170,13 +1310,18 @@
       "path": "src/domain/entities/memory-event.ts",
       "package": "package.json",
       "sourceHash": "1b23aa30e7fee001e208b39ba6e070c74c55c28aba57d84e30f7dabc84fc5941",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "S",
+      "rationale": "Validates persisted event shape, schema version, identity and required integrity metadata at the canonical event boundary.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "aa2c449cd2d72828e81a7ea691a12ca2b400323c",
+        "anchor": "normalizePersistedRecord / validateRecordShape",
+        "scope": "positive critical boundary establishes highest tier; not full correctness acceptance"
+      }
     },
     {
       "path": "src/domain/entities/memory-file.test.ts",
@@ -1194,13 +1339,18 @@
       "path": "src/domain/entities/memory-file.ts",
       "package": "package.json",
       "sourceHash": "2fe6f0459ed0ce7f0504e4edb2cbd0e64bf894d8f3c6cf651a1b3f32513358b1",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "S",
+      "rationale": "Validates source path, content, content-hash shape and memory-file type.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "aa2c449cd2d72828e81a7ea691a12ca2b400323c",
+        "anchor": "MemoryFile.create",
+        "scope": "positive critical boundary establishes highest tier; not full correctness acceptance"
+      }
     },
     {
       "path": "src/domain/entities/memory-governance.test.ts",
@@ -1218,13 +1368,18 @@
       "path": "src/domain/entities/memory-governance.ts",
       "package": "package.json",
       "sourceHash": "e5646cabccb833a4ac55928f3207ec63978b4fb49b3bc81bf472799df0b0e36b",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "S",
+      "rationale": "Validates allowed governance surfaces and control operations; governs consent/suppression state.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "aa2c449cd2d72828e81a7ea691a12ca2b400323c",
+        "anchor": "assertMemoryGovernanceSurface / assertMemoryGovernanceControl",
+        "scope": "positive critical boundary establishes highest tier; not full correctness acceptance"
+      }
     },
     {
       "path": "src/domain/entities/memory-utility-metric.test.ts",
@@ -1242,13 +1397,18 @@
       "path": "src/domain/entities/memory-utility-metric.ts",
       "package": "package.json",
       "sourceHash": "6cd8602547dd43281b7f238e5914c61bd2a7923c504f9116605b672e0517e092",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "S",
+      "rationale": "Validates metric target identity, surface and nonnegative integer counters.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "aa2c449cd2d72828e81a7ea691a12ca2b400323c",
+        "anchor": "validateMemoryUtilityMetric",
+        "scope": "positive critical boundary establishes highest tier; not full correctness acceptance"
+      }
     },
     {
       "path": "src/domain/entities/message.test.ts",
@@ -1266,13 +1426,18 @@
       "path": "src/domain/entities/message.ts",
       "package": "package.json",
       "sourceHash": "e0eb3a889f76dd427e71b39924b474b246d19377b81a17c7f1486e8388e38c63",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "S",
+      "rationale": "Validates message identity and role before constructing ingested records.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "aa2c449cd2d72828e81a7ea691a12ca2b400323c",
+        "anchor": "Message.create",
+        "scope": "positive critical boundary establishes highest tier; not full correctness acceptance"
+      }
     },
     {
       "path": "src/domain/entities/persona-entry.test.ts",
@@ -1290,13 +1455,18 @@
       "path": "src/domain/entities/persona-entry.ts",
       "package": "package.json",
       "sourceHash": "3c1662450d408c83698d0a05f26a746dddab1c4d5ab0150aade7749a0713de3d",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "S",
+      "rationale": "Validates persona identity, kind and required content.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "aa2c449cd2d72828e81a7ea691a12ca2b400323c",
+        "anchor": "validatePersonaEntry",
+        "scope": "positive critical boundary establishes highest tier; not full correctness acceptance"
+      }
     },
     {
       "path": "src/domain/entities/session.test.ts",
@@ -1314,13 +1484,18 @@
       "path": "src/domain/entities/session.ts",
       "package": "package.json",
       "sourceHash": "f6e05b6347d4e508c916a5d406707512bf56b11ac652c0a3eff2c6ba35d2a9ca",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "S",
+      "rationale": "Validates session identity and chronological completion boundaries.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "aa2c449cd2d72828e81a7ea691a12ca2b400323c",
+        "anchor": "Session.create / complete",
+        "scope": "positive critical boundary establishes highest tier; not full correctness acceptance"
+      }
     },
     {
       "path": "src/domain/entities/tool-use.test.ts",
@@ -1338,13 +1513,18 @@
       "path": "src/domain/entities/tool-use.ts",
       "package": "package.json",
       "sourceHash": "f8a993b4020ab6a73b7f7e93cd4f095ba963dcbeb070aedb4173a31bbbb686f2",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "S",
+      "rationale": "Validates tool-use identity, name and allowed execution status.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "aa2c449cd2d72828e81a7ea691a12ca2b400323c",
+        "anchor": "ToolUse.create",
+        "scope": "positive critical boundary establishes highest tier; not full correctness acceptance"
+      }
     },
     {
       "path": "src/domain/errors/error-codes.test.ts",
@@ -1362,13 +1542,18 @@
       "path": "src/domain/errors/error-codes.ts",
       "package": "package.json",
       "sourceHash": "aef1e36b8db020d6ee3cd540352fb1a631d6087261f5d8a4a8ac770e5c3ad6e8",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "B",
+      "rationale": "Full module inspected: fixed error-code object plus an erased type alias; no local branching or transformation. Zero-counter applicability needs review.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "aa2c449cd2d72828e81a7ea691a12ca2b400323c",
+        "anchor": "ErrorCode",
+        "scope": "complete module"
+      }
     },
     {
       "path": "src/domain/errors/index.ts",
@@ -1398,13 +1583,18 @@
       "path": "src/domain/errors/memory-error.ts",
       "package": "package.json",
       "sourceHash": "d173b9709a8c0b4da50424930ad4e7158a51e3483b9980217ce62c3e3d0fe9cb",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "A",
+      "rationale": "Full module inspected: constructs structured errors, optional stack capture and conditional context serialization; caller-facing error representation, no persistence or access-control decision.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "aa2c449cd2d72828e81a7ea691a12ca2b400323c",
+        "anchor": "MemoryError / toJSON",
+        "scope": "complete module"
+      }
     },
     {
       "path": "src/domain/errors/unknown-error.test.ts",
@@ -1422,13 +1612,18 @@
       "path": "src/domain/errors/unknown-error.ts",
       "package": "package.json",
       "sourceHash": "bc0b3d6bfec911b427b1c34887af7e66538431fd63bc532497699ddea9c46d03",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "A",
+      "rationale": "Full module inspected: normalizes unknown thrown values to strings or Error objects without persistence or security admission.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "aa2c449cd2d72828e81a7ea691a12ca2b400323c",
+        "anchor": "unknownErrorMessage / unknownToError",
+        "scope": "complete module"
+      }
     },
     {
       "path": "src/domain/index.ts",
@@ -1470,25 +1665,35 @@
       "path": "src/domain/ports/embedding.ts",
       "package": "package.json",
       "sourceHash": "9ca442bc4953521a1781f253c3a82c3798a90586d062e2964b7729e0b86ab1c8",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "S",
+      "rationale": "Runtime error-kind admission influences provider retry and payload quarantine; not an interface-only module.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "aa2c449cd2d72828e81a7ea691a12ca2b400323c",
+        "anchor": "isEmbeddingProviderError / EmbeddingProviderError",
+        "scope": "positive critical boundary establishes highest tier; not full correctness acceptance"
+      }
     },
     {
       "path": "src/domain/ports/extraction.ts",
       "package": "package.json",
       "sourceHash": "a1d94086fe201b58ee4823ea689f654c70fe2fdf87f87f93fd1986aa52b5ccb6",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "B",
+      "rationale": "Full module inspected: interface declarations plus value imports. Conservative catalog retains import effects; thin contract wiring, not an approved no-runtime exclusion.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "aa2c449cd2d72828e81a7ea691a12ca2b400323c",
+        "anchor": "Message / CandidateFact imports",
+        "scope": "complete module"
+      }
     },
     {
       "path": "src/domain/ports/index.ts",
@@ -1602,13 +1807,18 @@
       "path": "src/domain/services/content-extractor.ts",
       "package": "package.json",
       "sourceHash": "dd237c43abd6c808bc4c2601b5a400bc9bceac0aa05708aa2415bfc794503f36",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "S",
+      "rationale": "Parses external JSONL and admits message/tool fields; null content blocks currently throw. Q092 owns malformed-shape regression.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "aa2c449cd2d72828e81a7ea691a12ca2b400323c",
+        "anchor": "parseJson / extractToolUses",
+        "scope": "positive critical boundary establishes highest tier; not full correctness acceptance"
+      }
     },
     {
       "path": "src/domain/services/index.ts",
@@ -1638,13 +1848,18 @@
       "path": "src/domain/services/path-decoder.ts",
       "package": "package.json",
       "sourceHash": "c9a8f5e114d59dae315ad11b8ae9a1021aa9a2ddf4cf0d665eb6ec4790efcde7",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "S",
+      "rationale": "Interprets encoded project identities and selects original versus translated source paths using an injected existence check; path/data-identity boundary. Not a containment or symlink-safety guarantee.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "aa2c449cd2d72828e81a7ea691a12ca2b400323c",
+        "anchor": "decodeProjectDirectory / resolveExistingPath",
+        "scope": "positive critical boundary establishes highest tier; not full correctness acceptance"
+      }
     },
     {
       "path": "src/domain/services/query-parser.test.ts",
@@ -1662,13 +1877,18 @@
       "path": "src/domain/services/query-parser.ts",
       "package": "package.json",
       "sourceHash": "f9c4532d741fcb8aafb563a36226c017fa7ca135ebf4b1f88b196d765b90b6bc",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "S",
+      "rationale": "Parses raw query/filter syntax and produces FTS expressions; input transformation boundary requires adversarial syntax cases.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "aa2c449cd2d72828e81a7ea691a12ca2b400323c",
+        "anchor": "parse / toFts5Query",
+        "scope": "positive critical boundary establishes highest tier; not full correctness acceptance"
+      }
     },
     {
       "path": "src/domain/value-objects/embedding-config.test.ts",
@@ -1686,13 +1906,18 @@
       "path": "src/domain/value-objects/embedding-config.ts",
       "package": "package.json",
       "sourceHash": "4999186165b5aeff6a0b0e11c0aae3b04c9b350bbed5184c1b7e423167872548",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "S",
+      "rationale": "Validates provider/model names and positive integer vector dimensions.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "aa2c449cd2d72828e81a7ea691a12ca2b400323c",
+        "anchor": "EmbeddingConfig.create",
+        "scope": "positive critical boundary establishes highest tier; not full correctness acceptance"
+      }
     },
     {
       "path": "src/domain/value-objects/embedding-result.test.ts",
@@ -1710,13 +1935,18 @@
       "path": "src/domain/value-objects/embedding-result.ts",
       "package": "package.json",
       "sourceHash": "a4a0385007d5999e01a355d0044afcc74a35c3681a4ca33a45aa778922e6be8b",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "S",
+      "rationale": "Rejects empty vectors/models and mismatched dimensions before accepting provider results.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "aa2c449cd2d72828e81a7ea691a12ca2b400323c",
+        "anchor": "EmbeddingResult.create",
+        "scope": "positive critical boundary establishes highest tier; not full correctness acceptance"
+      }
     },
     {
       "path": "src/domain/value-objects/index.ts",
@@ -1746,13 +1976,18 @@
       "path": "src/domain/value-objects/project-path.ts",
       "package": "package.json",
       "sourceHash": "72b6b1398247fa3a81799229156d91f8d79aaab95eaf1233cc16f2eac6acf9e5",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "S",
+      "rationale": "Validates and translates project path identity used to associate ingested memory with projects.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "aa2c449cd2d72828e81a7ea691a12ca2b400323c",
+        "anchor": "ProjectPath.fromDecoded / fromEncoded",
+        "scope": "positive critical boundary establishes highest tier; not full correctness acceptance"
+      }
     },
     {
       "path": "src/domain/value-objects/search-query.test.ts",
@@ -1770,13 +2005,18 @@
       "path": "src/domain/value-objects/search-query.ts",
       "package": "package.json",
       "sourceHash": "61c76d2801522333f4e22f70a0a1c4c53cb0655fb0b3ede42ec4f8d0ea8faf27",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "S",
+      "rationale": "Validates nonempty query input before constructing the search request value.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "aa2c449cd2d72828e81a7ea691a12ca2b400323c",
+        "anchor": "SearchQuery.from",
+        "scope": "positive critical boundary establishes highest tier; not full correctness acceptance"
+      }
     },
     {
       "path": "src/domain/value-objects/search-result.test.ts",
@@ -1794,13 +2034,18 @@
       "path": "src/domain/value-objects/search-result.ts",
       "package": "package.json",
       "sourceHash": "58e27ad0b859c89e937d59888fe79b1940ac485d79304ca7aa6f0a42da0e1242",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "S",
+      "rationale": "Validates returned record identity and score bounds. NaN score is currently admitted; Q094 owns the regression.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "aa2c449cd2d72828e81a7ea691a12ca2b400323c",
+        "anchor": "SearchResult.create",
+        "scope": "positive critical boundary establishes highest tier; not full correctness acceptance"
+      }
     },
     {
       "path": "src/index.ts",

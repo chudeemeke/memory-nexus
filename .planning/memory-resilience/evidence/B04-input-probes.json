@@ -1,0 +1,23 @@
+{
+  "kind": "diagnostic observation, not passing regression tests",
+  "results": [
+    {
+      "name": "LLM JSON null",
+      "observed": "threw",
+      "error": "null is not an object (evaluating 'parsed.topics')"
+    },
+    {
+      "name": "JSONL null content block",
+      "observed": "threw",
+      "error": "null is not an object (evaluating 'block.type')"
+    },
+    {
+      "name": "Entity NaN confidence",
+      "acceptedNaN": true
+    },
+    {
+      "name": "SearchResult NaN score",
+      "acceptedNaN": true
+    }
+  ]
+}

@@ -1,5 +1,23 @@
 # Memory resilience execution journal
 
+## 2026-09-20 - B04 application/domain classification and input probes
+
+- Inspected all remaining non-test application/domain candidates and proposed
+  49 additional tiers. Current inventory: **120 proposed, 326 unclassified,
+  zero approved exclusions**. Critical data/consent/input boundaries are Tier S;
+  pure record/statistics helpers and fixed error/contract wiring are distinguished.
+- Reproduced two malformed-input parser exceptions and two accepted NaN values
+  using synthetic in-memory calls. Q091-Q094 own regression, repair and Tier S
+  proof and are required B10 dependencies. Diagnostic exit 0 is not test acceptance.
+- Recorded the exported legacy LlmExtractor.extract empty-result limitation for
+  D04 consumer-contract disposition. Existing comments do not prove hook inference.
+- Ledger: 146 items (52 delivery/gates, 94 quality candidates). Source and numeric
+  coverage remain unchanged. The actual gate rejects 326 unknown classifications;
+  see `evidence/B04-classification-batch-2.json` for checks, hashes and probe source.
+- Next: infrastructure/presentation modules and test drivers, individual metric
+  applicability and independent review. B04 remains active; B05 remains pending.
+  No production data, service, runtime/model installation or old worktree cleanup.
+
 ## 2026-09-19 - B04 first source-classification batch and package mapping
 
 - Inspected and proposed tiers for 20 additional modules: remaining verification
