@@ -113,17 +113,19 @@
         ".planning/memory-resilience/B04-source-findings.md",
         ".planning/memory-resilience/evidence/B04-classification-batch-1.json",
         ".planning/memory-resilience/evidence/B04-classification-batch-2.json",
-        ".planning/memory-resilience/evidence/B04-input-probes.json"
+        ".planning/memory-resilience/evidence/B04-input-probes.json",
+        ".planning/memory-resilience/evidence/B04-classification-batch-3.json",
+        ".planning/memory-resilience/evidence/B04-timestamp-probe.json"
       ],
       "acceptance_record": ".planning/memory-resilience/evidence/B04.json",
       "progress": {
         "discovery": "implemented and focused behavior verified",
         "sourceCandidates": 446,
-        "proposedClassifications": 120,
-        "unclassified": 326,
+        "proposedClassifications": 181,
+        "unclassified": 265,
         "approvedExclusions": 0,
         "independentReview": "pending",
-        "next": "Inspect infrastructure/presentation modules and test drivers; resolve individual metric applicability, then independent review. B05 remains pending.",
+        "next": "Inspect remaining presentation modules and test drivers; resolve individual metric applicability, then independent review. B05 remains pending.",
         "packageOutputMapping": "Source-bound mapping recorded; artifact verification and independent review pending."
       }
     },
@@ -1076,14 +1078,14 @@
       "id": "Q041",
       "stage": "coverage_repair",
       "title": "Verify and repair src/infrastructure/parsers/timestamp.ts",
-      "status": "pending_rebaseline",
+      "status": "pending",
       "depends_on": [
         "B09"
       ],
       "scope": "src/infrastructure/parsers/timestamp.ts",
       "deliverable": "Reproduce uncovered behavior, add meaningful regression/boundary tests, fix demonstrated defects, satisfy this file's reviewed risk tier.",
       "verification": "Current source-bound four-metric file evidence plus tier-required decision tests. Supersede only with explicit fresh evidence that this candidate is no longer a gap.",
-      "risk": "unclassified",
+      "risk": "S",
       "authorization": "authorized",
       "owner": "memory-nexus",
       "historical_gaps": [
@@ -1091,7 +1093,10 @@
       ],
       "historical_evidence": "docs/audits/2026-09-19-repair-evidence/per-file-coverage-gaps.json",
       "evidence": [],
-      "acceptance_record": ".planning/memory-resilience/evidence/Q041.json"
+      "acceptance_record": ".planning/memory-resilience/evidence/Q041.json",
+      "confirmed_defect": "normalizeTimestamp accepts 2026-99-99Tnot-a-time unchanged; output is not a valid Date.",
+      "defect_evidence": ".planning/memory-resilience/evidence/B04-timestamp-probe.json",
+      "additional_verification": "RED/GREEN invalid ISO-looking timestamps and valid representations; preserve explicit invalid-input policy and prove normalized outputs are usable by actual ingestion consumers. Full Tier S branches and decision checks required before B10."
     },
     {
       "id": "Q042",

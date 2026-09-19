@@ -91,3 +91,16 @@ this legacy method, and either repair the advertised behavior within accepted
 scope or explicitly retire/document the unsupported contract with review. Do not
 count a successful call returning empty output as proof of LLM extraction. No new
 provider service, egress permission or paid inference is authorized by this finding.
+
+## Reproduced invalid timestamp admission (batch 3)
+
+At source `39c895b13e768bd607070efbc3496d47a821b257`, the synthetic call
+`normalizeTimestamp("2026-99-99Tnot-a-time")` returned its input unchanged, and the
+returned string did not parse as a valid Date. The ISO-looking fast path checks a
+prefix rather than timestamp validity. Exact probe source and output are retained
+in `evidence/B04-classification-batch-3.json` and `evidence/B04-timestamp-probe.json`.
+
+Q041 already owns this module and now includes the confirmed defect and stricter
+Tier S requirement. It must establish an explicit invalid-input policy, add
+RED/GREEN and valid-boundary regressions, and verify actual ingestion consumers
+before B10/R02. This diagnostic does not prove corruption of any stored record.

@@ -1,5 +1,25 @@
 # Memory resilience execution journal
 
+## 2026-09-20 - B04 infrastructure classification
+
+- Proposed tiers for the remaining 61 non-test infrastructure modules, including
+  individually inspected writes in 17 repositories, provider/consent paths,
+  parsing and runtime storage boundaries. Thin forwarding adapters and fixed
+  defaults remain distinct from the critical code they call.
+- Current inventory: **181 proposed, 265 unclassified, zero approved exclusions**.
+  Remaining null-tier entries are presentation modules and test drivers.
+- Reproduced invalid ISO-looking timestamp admission with a pure synthetic call;
+  Q041 now owns the confirmed defect and full Tier S requirements. No claim of
+  observed stored-data corruption. Ledger remains 146 items (52 delivery/gates,
+  94 quality candidates); no duplicated repair task was created.
+- Source hashes and ledger invariants checked; actual inventory gate rejects
+  265 unknown classifications. See `evidence/B04-classification-batch-3.json`.
+  No executable source changed; no numeric coverage or full-suite acceptance.
+- Next: remaining presentation modules and test drivers, individual metric
+  applicability and independent review. B04 remains active; B05 pending. Existing
+  external review and inbox obligations remain open. No provider calls, model
+  downloads, real memory mutations or old worktree cleanup.
+
 ## 2026-09-20 - B04 application/domain classification and input probes
 
 - Inspected all remaining non-test application/domain candidates and proposed
