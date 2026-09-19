@@ -96,7 +96,7 @@
       "id": "B04",
       "stage": "baseline",
       "title": "Inventory executable files and risk",
-      "status": "pending",
+      "status": "active",
       "depends_on": [],
       "scope": "src/, scripts/, test support, package boundaries",
       "deliverable": "Create complete per-file risk/applicability inventory; inspect barrels, schemas and generated files individually.",
@@ -104,8 +104,22 @@
       "risk": "S",
       "authorization": "authorized",
       "owner": "memory-nexus",
-      "evidence": [],
-      "acceptance_record": ".planning/memory-resilience/evidence/B04.json"
+      "evidence": [
+        ".planning/memory-resilience/evidence/B04.json",
+        ".planning/memory-resilience/executable-catalog.json",
+        ".planning/memory-resilience/quality-classifications.json",
+        ".planning/memory-resilience/B04-inventory-plan.md"
+      ],
+      "acceptance_record": ".planning/memory-resilience/evidence/B04.json",
+      "progress": {
+        "discovery": "implemented and focused behavior verified",
+        "sourceCandidates": 446,
+        "proposedClassifications": 51,
+        "unclassified": 395,
+        "approvedExclusions": 0,
+        "independentReview": "pending",
+        "next": "Inspect remaining files, map package entrypoints/build outputs and metric applicability, then obtain attributable independent review. Do not mark B04 verified or start B05 from this partial checkpoint."
+      }
     },
     {
       "id": "B05",
@@ -2151,7 +2165,9 @@
         "Q085",
         "Q086",
         "Q087",
-        "Q088"
+        "Q088",
+        "Q089",
+        "Q090"
       ],
       "scope": "all Q-* work items",
       "deliverable": "Close individually verified quality work items; fix discovered defects and meaningful boundaries, not artificial counter tests.",
@@ -2849,6 +2865,44 @@
       "acceptance_record": ".planning/memory-resilience/evidence/Q088.json",
       "observed_gap": "B03 behavior tests pass; native coverage is not four-metric Tier S proof. Test preload currently excluded from instrumentation.",
       "observed_evidence": ".planning/memory-resilience/evidence/B03.json"
+    },
+    {
+      "id": "Q089",
+      "stage": "baseline-quality",
+      "title": "Verify inventory discovery and admission against Tier S",
+      "status": "pending_rebaseline",
+      "depends_on": [
+        "B09"
+      ],
+      "scope": "scripts/quality-inventory.ts",
+      "deliverable": "Meet complete per-file Tier S coverage and meaningful boundary/decision checks; include omitted scripts and subprocess entrypoint execution.",
+      "verification": "Current-source statements/functions/lines >=95%, branches 100%; no missing metric or child-process evidence omitted; final independent review.",
+      "risk": "S",
+      "authorization": "authorized",
+      "owner": "memory-nexus",
+      "evidence": [],
+      "acceptance_record": ".planning/memory-resilience/evidence/Q089.json",
+      "observed_gap": "B04 focused behavior is verified. Native function/line output is not four-metric proof; actual CLI child execution is not automatically merged into parent coverage.",
+      "observed_evidence": ".planning/memory-resilience/evidence/B04.json"
+    },
+    {
+      "id": "Q090",
+      "stage": "baseline-quality",
+      "title": "Verify inventory command entrypoint against Tier S",
+      "status": "pending_rebaseline",
+      "depends_on": [
+        "B09"
+      ],
+      "scope": "scripts/check-quality-inventory.ts",
+      "deliverable": "Meet complete per-file Tier S coverage and meaningful boundary/decision checks; include omitted scripts and subprocess entrypoint execution.",
+      "verification": "Current-source statements/functions/lines >=95%, branches 100%; no missing metric or child-process evidence omitted; final independent review.",
+      "risk": "S",
+      "authorization": "authorized",
+      "owner": "memory-nexus",
+      "evidence": [],
+      "acceptance_record": ".planning/memory-resilience/evidence/Q090.json",
+      "observed_gap": "B04 focused behavior is verified. Native function/line output is not four-metric proof; actual CLI child execution is not automatically merged into parent coverage.",
+      "observed_evidence": ".planning/memory-resilience/evidence/B04.json"
     }
   ],
   "decisions": {

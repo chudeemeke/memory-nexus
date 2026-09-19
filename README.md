@@ -362,6 +362,8 @@ gitleaks detect --no-banner --redact --source .
 
 Each coverage invocation prints its own retained report path under `coverage/run-<id>/` and checks that exact summary. The runner refuses existing unowned output directories and existing working directories; it does not overwrite earlier reports. Preserve and inventory legacy coverage output before moving it aside. Working copies are removed only after ownership checks; interrupted or locked remnants are reported for verified project-owned cleanup. The standalone threshold checker needs an explicit generated summary path when inspecting these reports.
 
+`bun run quality:catalog` prints a read-only source/package catalog, including untracked source and executable test support. `bun run quality:inventory` checks the source-bound classification draft in `.planning/memory-resilience/quality-classifications.json`; missing, stale or unknown entries fail. The draft is incomplete and independently unreviewed, so that check currently fails. Structural validity never substitutes for classification review or coverage. Integration into the complete quality/CI gate follows B04-B08/R01.
+
 ### Published package smoke
 
 After publishing, verify registry metadata plus npm and Bun global installs:

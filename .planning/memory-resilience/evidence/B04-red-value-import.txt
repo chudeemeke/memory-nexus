@@ -1,0 +1,41 @@
+bun test v1.4.1 (4661e494f)
+
+scripts\quality-inventory.test.ts:
+69 |     "tests/support.ts": 'import { afterEach } from "bun:test"; export function install() { afterEach(() => {}); }',
+70 |     "tests/suite.ts": 'import { test as check, expect } from "bun:test"; check("case", () => expect(1).toBe(1));',
+71 |     "report.html": '<html><script>document.title = "fixture";</script></html>',
+72 |   });
+73 |   try {
+74 |     expect(Object.fromEntries(discoverInventory(root).files.map(file => [file.path, file.syntax]))).toEqual({
+                                                                                                         ^
+error: expect(received).toEqual(expected)
+
+  {
+    "report.html": "browser-code",
+    "src/barrel.ts": "re-export",
+-   "src/import-only.ts": "executable",
++   "src/import-only.ts": "no-local-code",
+    "src/index.ts": "executable",
+    "src/ports.ts": "no-local-code",
+    "src/types.ts": "executable",
+    "tests/suite.ts": "test-driver",
+    "tests/support.ts": "executable",
+  }
+
+- Expected  - 1
++ Received  + 1
+
+      at <anonymous> (C:\Projects\memory-nexus\scripts\quality-inventory.test.ts:74:101)
+(fail) classifies actual syntax rather than index, types or test-support names [2789.09ms]
+------------------------------|---------|---------|-------------------
+File                          | % Funcs | % Lines | Uncovered Line #s
+------------------------------|---------|---------|-------------------
+All files                     |   80.00 |   75.90 |
+ scripts\quality-inventory.ts |   80.00 |   75.90 | 30,35-70,138,145,201
+------------------------------|---------|---------|-------------------
+
+ 0 pass
+ 13 filtered out
+ 1 fail
+ 1 expect() calls
+Ran 1 test across 1 file. [4.23s]

@@ -64,3 +64,17 @@ source fingerprints, RED/GREEN logs, archive manifests and limits are in
 `.planning/memory-resilience/evidence/B03.json`. This is not current full-suite or
 complete four-metric Tier S acceptance. B04 is next; Q086-Q088 and the broader
 quality/CI/review gates remain open. The approved embedding experiment has not started.
+
+## B04 inventory foundation (incomplete)
+
+The source-bound catalog now accounts for 446 candidates across two packages,
+including test support, root tool configuration, the deprecated CLI and inline
+browser scripts. Discovery and structural admission have passing focused Windows
+(13 pass, one filesystem-specific skip) and Linux (14 pass) checks, plus matching
+platform catalog output. Typecheck and static isolation pass.
+
+There are 51 proposed classifications, 395 unclassified entries and no approved
+exclusions. `bun run quality:inventory` correctly fails on the unknown tiers.
+Source inspection, package-output mapping, metric applicability and independent
+review remain B04 work; B04 is not complete and B05 is not unlocked. Q089/Q090
+record the new scripts' full Tier S obligations. Evidence: `.planning/memory-resilience/evidence/B04.json`.

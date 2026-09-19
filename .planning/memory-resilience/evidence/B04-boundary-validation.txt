@@ -1,0 +1,28 @@
+bun test v1.4.1 (4661e494f)
+
+scripts\quality-inventory.test.ts:
+warning: in the working copy of '.gitignore', LF will be replaced by CRLF the next time Git touches it
+(pass) discovers both tracked and new source with the nearest package boundary [3599.19ms]
+(pass) includes unfamiliar executable modes and shebangs without pretending they are instrumentable JavaScript [3318.56ms]
+(pass) declaration suffixes cannot hide executable content [2045.92ms]
+(pass) rejects an omitted executable even when every listed classification looks valid [2129.74ms]
+(pass) classifies actual syntax rather than index, types or test-support names [1274.26ms]
+(pass) manifest admission rejects stale, duplicate, malformed, misplaced and falsely exempt code [1882.01ms]
+warning: unable to access 'linked/repo-alias/linked/repo-alias/linked/repo-alias/linked/repo-alias/linked/repo-alias/linked/repo-alias/linked/repo-alias/linked/repo-alias/linked/repo-alias/linked/repo-alias/linked/.gitignore': Filename too long
+warning: could not open directory 'linked/repo-alias/linked/repo-alias/linked/repo-alias/linked/repo-alias/linked/repo-alias/linked/repo-alias/linked/repo-alias/linked/repo-alias/linked/repo-alias/linked/repo-alias/linked/repo-alias/': Filename too long
+warning: unable to access 'linked/repo-alias/linked/repo-alias/linked/repo-alias/linked/repo-alias/linked/repo-alias/linked/repo-alias/linked/repo-alias/linked/repo-alias/linked/repo-alias/linked/repo-alias/src/.gitignore': Filename too long
+(pass) source directory links fail closed while a canonical repository-root alias works [1843.81ms]
+(pass) invalid input cannot produce an apparently complete catalog: package.json [1252.31ms]
+(pass) invalid input cannot produce an apparently complete catalog: src/broken.ts [866.45ms]
+(pass) a subdirectory cannot silently omit the rest of its repository [879.20ms]
+------------------------------|---------|---------|-------------------
+File                          | % Funcs | % Lines | Uncovered Line #s
+------------------------------|---------|---------|-------------------
+All files                     |  100.00 |   99.29 |
+ scripts\quality-inventory.ts |  100.00 |   99.29 | 138
+------------------------------|---------|---------|-------------------
+
+ 10 pass
+ 0 fail
+ 36 expect() calls
+Ran 10 tests across 1 file. [20.41s]

@@ -1,0 +1,28 @@
+bun test v1.3.14 (0d9b296a)
+
+scripts/quality-inventory.test.ts:
+(pass) discovers both tracked and new source with the nearest package boundary [215.41ms]
+(pass) includes unfamiliar executable modes and shebangs without pretending they are instrumentable JavaScript [41.58ms]
+(pass) declaration suffixes cannot hide executable content [28.87ms]
+(pass) rejects an omitted executable even when every listed classification looks valid [24.57ms]
+(pass) classifies actual syntax rather than index, types or test-support names [133.15ms]
+(pass) manifest admission rejects stale, duplicate, malformed, misplaced and falsely exempt code [56.20ms]
+(pass) source directory links fail closed while a canonical repository-root alias works [2361.83ms]
+(pass) invalid input cannot produce an apparently complete catalog: package.json [36.33ms]
+(pass) invalid input cannot produce an apparently complete catalog: src/broken.ts [44.56ms]
+(pass) a subdirectory cannot silently omit the rest of its repository [17.82ms]
+(pass) the actual inventory CLI emits a catalog and rejects omitted classifications [4987.07ms]
+(pass) nested ignore rules preserve tracked source and omit ignored untracked trees [47.84ms]
+(pass) case-colliding paths fail before producing a Windows-incompatible catalog [26.02ms]
+(pass) source binding tolerates checkout line endings but rejects changed content [0.25ms]
+------------------------------|---------|---------|-------------------
+File                          | % Funcs | % Lines | Uncovered Line #s
+------------------------------|---------|---------|-------------------
+All files                     |  100.00 |   99.39 |
+ scripts/quality-inventory.ts |  100.00 |   99.39 |
+------------------------------|---------|---------|-------------------
+
+ 14 pass
+ 0 fail
+ 52 expect() calls
+Ran 14 tests across 1 file. [12.32s]

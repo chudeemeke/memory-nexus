@@ -1,0 +1,248 @@
+{
+  "item_id": "B04",
+  "status": "active",
+  "completion": "Partial checkpoint: discovery and structural validation implemented; classification/application/review requirements are incomplete.",
+  "recorded_at": "2026-09-19T22:23:55.085Z",
+  "base_revision": "f10ea007b9ce8ba0ea173a6f28ec7e4cccc7a8ea",
+  "source_revision": "Candidate identified by input hashes and preserved in the containing signed commit; no baseline acceptance.",
+  "source_inputs": [
+    {
+      "path": "scripts/quality-inventory.ts",
+      "sha256": "589274b4416eb1317e5b1b955bb63a1de0106cd05c32239a9f7a33f4eb61543d"
+    },
+    {
+      "path": "scripts/quality-inventory.test.ts",
+      "sha256": "6c86908cdd89d984d58fa9df7939e190c010d8150737fdb651e0571a8ef7f4cc"
+    },
+    {
+      "path": "scripts/check-quality-inventory.ts",
+      "sha256": "e7c325581c8ac1f929df99e143a9e781789a0df9edcf7bae201ba0a0b87bc906"
+    },
+    {
+      "path": "package.json",
+      "sha256": "81656ff0e1734bccb8b6ddbb6577fc730bccaba8e10a44083eaa88e334b90ac0"
+    },
+    {
+      "path": "bun.lock",
+      "sha256": "c20e3fd095669f70357651eb2ba6a496d3b455032d8d20f7b9a5c09bf5758fff"
+    },
+    {
+      "path": "bunfig.toml",
+      "sha256": "c3310edf8a8903109c5ff36244df20aca5d285fa62f47e204f2b1cb41045286a"
+    },
+    {
+      "path": "tsconfig.scripts.json",
+      "sha256": "f03486e57a06b278bc09569ec6599ca8fa2a3b4e40235c80085aeb0c7164a228"
+    }
+  ],
+  "catalog": {
+    "path": ".planning/memory-resilience/executable-catalog.json",
+    "sha256": "920cf1aaf6e584a3f9db42e6735665a9dc7b73866596609a93bf7ec40e5d6431"
+  },
+  "classifications": {
+    "path": ".planning/memory-resilience/quality-classifications.json",
+    "sha256": "9b87483a263aa14b2e8e12a2ead7eaeabc6a85977e5ee96b277cd04125b1c6c1"
+  },
+  "counts": {
+    "files": 446,
+    "packages": 2,
+    "proposedClassifications": 51,
+    "unclassified": 395,
+    "approvedExclusions": 0
+  },
+  "commands": [
+    {
+      "command": "bun test scripts/quality-inventory.test.ts",
+      "platform": "Windows Bun 1.4.1",
+      "exit": 0,
+      "pass": 13,
+      "skip": 1,
+      "fail": 0,
+      "assertions": 51,
+      "log": ".planning/memory-resilience/evidence/B04-windows-final.txt"
+    },
+    {
+      "command": "bun test scripts/quality-inventory.test.ts",
+      "platform": "Linux/WSL Bun 1.3.14",
+      "exit": 0,
+      "pass": 14,
+      "skip": 0,
+      "fail": 0,
+      "assertions": 52,
+      "log": ".planning/memory-resilience/evidence/B04-linux-final.txt"
+    },
+    {
+      "command": "bun run quality:catalog",
+      "exit": 0,
+      "result": "446 candidates across two packages; Windows and Linux catalog contents match",
+      "log": ".planning/memory-resilience/evidence/B04-platform-catalog.txt"
+    },
+    {
+      "command": "bun run quality:inventory",
+      "exit": 1,
+      "result": "Correctly rejects 395 currently unclassified files; this is an outstanding gate, not a project PASS",
+      "log": ".planning/memory-resilience/evidence/B04-current-gate.txt"
+    },
+    {
+      "command": "bun run typecheck",
+      "exit": 0,
+      "log": ".planning/memory-resilience/evidence/B04-typecheck.txt"
+    },
+    {
+      "command": "bun run test:isolation",
+      "exit": 0,
+      "log": ".planning/memory-resilience/evidence/B04-isolation.txt"
+    }
+  ],
+  "parser_version": "5.9.3",
+  "behavior_proved": [
+    "Tracked and non-ignored untracked candidates, nested package ownership, executable modes and unfamiliar shebangs are represented.",
+    "Syntax distinguishes declarations, re-exports, test registration, reusable support and inline browser code; value imports are retained conservatively.",
+    "Malformed, omitted, duplicate, stale, wrong-package and falsely non-executable classification entries fail.",
+    "Real source edits invalidate classifications; CRLF/LF checkout normalization does not.",
+    "Canonical repository aliases work; linked source paths and subdirectory roots are rejected. Untracked junction cycles are rejected before Git recursion exposes foreign-path traversal warnings.",
+    "Actual CLI emits a useful catalog, reports missing classifications with exit 1, malformed input/flags with exit 2, and explicitly limits a structurally valid result to non-approval."
+  ],
+  "limitations": [
+    "395 source candidates still lack risk judgments; 51 proposals and all applicability decisions need independent review. B04 is not verified.",
+    "Package entrypoint/build-output mapping and complete per-metric applicability inspection remain B04 work.",
+    "Syntax observations are not runtime behavior proof. No test-driver, barrel, schema, entrypoint or browser-script exclusion is approved.",
+    "B05-B08 complete instrumentation, four-metric numeric and changed-line enforcement remain pending; Q089/Q090 own new verification-code obligations.",
+    "No hosted CI or final independent review is claimed; Fable readiness was last quota-blocked, not re-probed without changed availability evidence.",
+    "Linux uses this checkout and existing shared dependencies; no clean Linux consumer installation or full-suite acceptance.",
+    "Trusted repository/OS account assumption; not a hostile same-user filesystem race sandbox. Ignored generated artifacts/dependencies are not source candidates; installed-artifact proof remains separately required."
+  ],
+  "reports": [
+    {
+      "path": ".planning/memory-resilience/evidence/B04-boundary-validation.txt",
+      "sha256": "4aa79349b4bb98e2e5cd1fabfbeddd348f34a190dd4efa4966c2ae8e7718a5a4",
+      "raw_sha256": "ed58198dcb4959c35e306c6490747c94114495953c0cdd9d23ba8719db4a9681",
+      "raw_archive": ".cc-guardian/archives/b04-raw-logs-0fe7a229-8aca-4e3b-88b9-74f6666c3a3e/B04-boundary-validation.txt"
+    },
+    {
+      "path": ".planning/memory-resilience/evidence/B04-catalog-summary.json",
+      "sha256": "1632742f1aa6517d435017bb8caa152aa223349a11216a6d805e829c0b7002c6"
+    },
+    {
+      "path": ".planning/memory-resilience/evidence/B04-current-gate.txt",
+      "sha256": "26b6e8f486a04836e6998f439fbfeabca2dfdbb115f9d860f6ca0fceabf88867",
+      "raw_sha256": "3397eb3721320abda658a53c4e47e737e184b583b7269cb673b85443d54fcd7f",
+      "raw_archive": ".cc-guardian/archives/b04-raw-logs-0fe7a229-8aca-4e3b-88b9-74f6666c3a3e/B04-current-gate.txt"
+    },
+    {
+      "path": ".planning/memory-resilience/evidence/B04-green-candidate-kinds.txt",
+      "sha256": "09a7c64e1e88bc82aee1f1e0b0fd6509cf42efe49f570fd75d3d70b27ea1f210",
+      "raw_sha256": "e90131bb28a8807f538764aa50f7bc348f4ae9325c38e5d51ed83087e7111198",
+      "raw_archive": ".cc-guardian/archives/b04-raw-logs-0fe7a229-8aca-4e3b-88b9-74f6666c3a3e/B04-green-candidate-kinds.txt"
+    },
+    {
+      "path": ".planning/memory-resilience/evidence/B04-green-discovery.txt",
+      "sha256": "81865e331a4aee76955d1eed95394a5c0c5ac326466f7f0f45a8c721e867f1c8",
+      "raw_sha256": "79cc2469dd01035bb5241ebe56363a2aa0011d8411f56bb97bc748e4cb7a0802",
+      "raw_archive": ".cc-guardian/archives/b04-raw-logs-0fe7a229-8aca-4e3b-88b9-74f6666c3a3e/B04-green-discovery.txt"
+    },
+    {
+      "path": ".planning/memory-resilience/evidence/B04-green-omission.txt",
+      "sha256": "15ac067eec605b6d71dbb02b857a3535d62e4b807adc58c31decd0eb98adcc32",
+      "raw_sha256": "8dd2a660128ce40431ad8c01893a455fbca942a4f49a4dbd6ba7987267f57a4a",
+      "raw_archive": ".cc-guardian/archives/b04-raw-logs-0fe7a229-8aca-4e3b-88b9-74f6666c3a3e/B04-green-omission.txt"
+    },
+    {
+      "path": ".planning/memory-resilience/evidence/B04-green-syntax.txt",
+      "sha256": "03bae1a6e5c09fb0f5100142b04291126282238fa8f451cc61aa4f21914718fd",
+      "raw_sha256": "ddacbb20fcd66d0efafc8e65fd503a3fe3bc99e816b7b7c0b1030438b2ca29f4",
+      "raw_archive": ".cc-guardian/archives/b04-raw-logs-0fe7a229-8aca-4e3b-88b9-74f6666c3a3e/B04-green-syntax.txt"
+    },
+    {
+      "path": ".planning/memory-resilience/evidence/B04-green-traversal.txt",
+      "sha256": "b7474a157df475e7acccf9de9921e7760d5d34c92410d5e7e5ebe2d33c58912d",
+      "raw_sha256": "6023c63113c07b1e4b710e1cc22e31c76fda25b49615367fee38318b6d35f331",
+      "raw_archive": ".cc-guardian/archives/b04-raw-logs-0fe7a229-8aca-4e3b-88b9-74f6666c3a3e/B04-green-traversal.txt"
+    },
+    {
+      "path": ".planning/memory-resilience/evidence/B04-isolation.txt",
+      "sha256": "9a3c0a678202cd651fd3849416180970b07be1f240195607c96978fdc20cf21c",
+      "raw_sha256": "96cec0f91cb71410cd83203b1d2bebc6eb23c12e66416ccee886caf778d15889",
+      "raw_archive": ".cc-guardian/archives/b04-raw-logs-0fe7a229-8aca-4e3b-88b9-74f6666c3a3e/B04-isolation.txt"
+    },
+    {
+      "path": ".planning/memory-resilience/evidence/B04-ledger-validation.txt",
+      "sha256": "d1e24af721b307195e71775f30839a5ea110e0512986e5fa411751c66e1ea133",
+      "raw_sha256": "d1e24af721b307195e71775f30839a5ea110e0512986e5fa411751c66e1ea133",
+      "raw_archive": ".cc-guardian/archives/b04-raw-logs-0fe7a229-8aca-4e3b-88b9-74f6666c3a3e/B04-ledger-validation.txt"
+    },
+    {
+      "path": ".planning/memory-resilience/evidence/B04-linux-final.txt",
+      "sha256": "fa767cc1cae1663dfa48758f4ab434aafdeff35ab12b3d6be54f890d55ed092d",
+      "raw_sha256": "34f82614315354c4a149849cbcc998b5f70b2482ba44c29505764621e66070f6",
+      "raw_archive": ".cc-guardian/archives/b04-raw-logs-0fe7a229-8aca-4e3b-88b9-74f6666c3a3e/B04-linux-final.txt"
+    },
+    {
+      "path": ".planning/memory-resilience/evidence/B04-platform-catalog.txt",
+      "sha256": "77a0b93d0a3007275807a4299d554b4272898fb80cc7f1ea7dd473f2194a3feb",
+      "raw_sha256": "5fbe977f28b93e7230416935c7ca0a3f3a0c8c9ae2a9c3b6da342ec3250a7ae6",
+      "raw_archive": ".cc-guardian/archives/b04-raw-logs-0fe7a229-8aca-4e3b-88b9-74f6666c3a3e/B04-platform-catalog.txt"
+    },
+    {
+      "path": ".planning/memory-resilience/evidence/B04-red-candidate-kinds.txt",
+      "sha256": "84fd45935283a04ad8075de07ebe306e86c3b3dacdb46083b2e5117bfca556d9",
+      "raw_sha256": "1f8c47f6a91adea420849169cb956626fcf5703b281d5b107a6c57cf359ad975",
+      "raw_archive": ".cc-guardian/archives/b04-raw-logs-0fe7a229-8aca-4e3b-88b9-74f6666c3a3e/B04-red-candidate-kinds.txt"
+    },
+    {
+      "path": ".planning/memory-resilience/evidence/B04-red-cli.txt",
+      "sha256": "f13b5564319e2a54a09b05811d812fb1013eb2f1106e2f790cbe781c7458b7e5",
+      "raw_sha256": "bdbbc623bbdebe8eb2d7e640a23f1fb2d59fd252e64fa248590584c2eeb57f03",
+      "raw_archive": ".cc-guardian/archives/b04-raw-logs-0fe7a229-8aca-4e3b-88b9-74f6666c3a3e/B04-red-cli.txt"
+    },
+    {
+      "path": ".planning/memory-resilience/evidence/B04-red-discovery.txt",
+      "sha256": "8fdf3e5056177eb63b6307d484ba4a32644b4191161cbadb13a05b1cb6a80895",
+      "raw_sha256": "f324c74c96d200536a4e07cea609abd3a34c5e444f2fba8e5ab7324723ca18dc",
+      "raw_archive": ".cc-guardian/archives/b04-raw-logs-0fe7a229-8aca-4e3b-88b9-74f6666c3a3e/B04-red-discovery.txt"
+    },
+    {
+      "path": ".planning/memory-resilience/evidence/B04-red-omission.txt",
+      "sha256": "e773e3cd70caebbeb00fdd09663f960091086fb6c9f6300c5f0753e31c95ab04",
+      "raw_sha256": "dd68d0bf15ad8c67174042cc4204d38f6f5ba89a922b034dbb85807d6fbfc050",
+      "raw_archive": ".cc-guardian/archives/b04-raw-logs-0fe7a229-8aca-4e3b-88b9-74f6666c3a3e/B04-red-omission.txt"
+    },
+    {
+      "path": ".planning/memory-resilience/evidence/B04-red-syntax.txt",
+      "sha256": "a04300b42308a3421f627b1da6bac61497c81928ea9a9735aff72b6528d96a58",
+      "raw_sha256": "0eca5480f78bf0fefa1582277485c011c9f068ad11bc43fb4437268325e86960",
+      "raw_archive": ".cc-guardian/archives/b04-raw-logs-0fe7a229-8aca-4e3b-88b9-74f6666c3a3e/B04-red-syntax.txt"
+    },
+    {
+      "path": ".planning/memory-resilience/evidence/B04-red-traversal.txt",
+      "sha256": "247c7be151fec935805dc8ecde54ac342486ba80c655954675b302f67a14e9ee",
+      "raw_sha256": "d0d62867b56a4c5f93048426c039a2cb6a7738703c2ee915f273651c0cc0f545",
+      "raw_archive": ".cc-guardian/archives/b04-raw-logs-0fe7a229-8aca-4e3b-88b9-74f6666c3a3e/B04-red-traversal.txt"
+    },
+    {
+      "path": ".planning/memory-resilience/evidence/B04-red-value-import.txt",
+      "sha256": "c601fd74c12f2d9d184a75ecb6f1cf590a25ecf54d663be6e2118afe0790c79d",
+      "raw_sha256": "ed07ce9e99bf35efaffb980697638906649c33514cf75834a566eef090086c48",
+      "raw_archive": ".cc-guardian/archives/b04-raw-logs-0fe7a229-8aca-4e3b-88b9-74f6666c3a3e/B04-red-value-import.txt"
+    },
+    {
+      "path": ".planning/memory-resilience/evidence/B04-typecheck.txt",
+      "sha256": "980deb8c45e5b18d42ddcc242d053f084fb206d262bcb5a70d6e4b18851d9b51",
+      "raw_sha256": "db32f15dfd123bf25295828f1d526be69899702f6622d83b13c8874a0b628a09",
+      "raw_archive": ".cc-guardian/archives/b04-raw-logs-0fe7a229-8aca-4e3b-88b9-74f6666c3a3e/B04-typecheck.txt"
+    },
+    {
+      "path": ".planning/memory-resilience/evidence/B04-windows-final.txt",
+      "sha256": "2f0006d4e2e899b23775b68ba5dcf4dae1f14009f3e23a607a1bc4fc8404518c",
+      "raw_sha256": "a9e7c549b680f92343823909b080e9fdd3d722c5ff37c8c50f186ac88deacd1d",
+      "raw_archive": ".cc-guardian/archives/b04-raw-logs-0fe7a229-8aca-4e3b-88b9-74f6666c3a3e/B04-windows-final.txt"
+    },
+    {
+      "path": ".planning/memory-resilience/evidence/B04-windows-integration-timeout.txt",
+      "sha256": "91341bc8c2b21fb41e6546abc509ab9d93f93f91cfd2c8b62d93ebe0c95e6475",
+      "raw_sha256": "bfc72b6ac03da587ba2dc7630d91f77baa066a082f7d989285d3441a023ef6fc",
+      "raw_archive": ".cc-guardian/archives/b04-raw-logs-0fe7a229-8aca-4e3b-88b9-74f6666c3a3e/B04-windows-integration-timeout.txt"
+    }
+  ],
+  "evidence_normalization": "Tracked logs normalize line endings and trailing whitespace. Exact raw bytes are preserved and fingerprinted in the project-owned ignored archive."
+}

@@ -1,5 +1,33 @@
 # Memory resilience execution journal
 
+## 2026-09-19 - B04 discovery/checking foundation preserved; classification remains active
+
+- Added read-only catalog discovery and structural inventory admission with real
+  disposable-Git/CLI regressions. Tracked/new source, nested packages, shebangs,
+  executable modes, declarations/re-exports and browser code are accounted for.
+- Corrected Git traversal through Windows junctions before admission: inspect
+  tracked ancestors first and expand untracked directories only after link checks.
+  RED/GREEN logs also cover misleading suffixes, erased value imports and omission.
+- Catalog: **446 candidates, two packages** (199 executable modules, 211 test
+  drivers, 23 re-exports, 11 modules with no local code, two browser documents).
+  Windows/Linux catalog output matches. These are syntax facts, not risk approval.
+- **51 proposed classifications; 395 unclassified; zero approved exclusions.**
+  The live `quality:inventory` command correctly exits 1 with 395 issues. Its
+  structural checker never grants independent review or coverage acceptance.
+- Final focused checks: Windows 13 pass/one case-sensitive-filesystem skip;
+  Linux 14 pass; zero failures. Typecheck/static isolation pass. Source hashes,
+  raw/normalized logs and exact limits are in `evidence/B04.json`.
+- B04 remains **active**, not verified. Next: inspect the remaining null-tier
+  entries, beginning scripts and reusable test support; map package outputs and
+  metric applicability; then obtain independent review. B05 remains pending.
+- Added Q089/Q090 and B10 dependencies for the new gate modules' full Tier S
+  coverage and decision checks. Ledger: 137 items (47 delivery/gates, 90 quality
+  candidates). New actual gate invocation is available through package scripts;
+  complete quality/CI integration remains B04-B08/R01.
+- No production runtime/model, replication or external service was activated.
+  Only project evidence was archived; no old work copy or ambiguous tree deleted.
+
+
 ## 2026-09-19 - B03 owned storage and test-home lifecycle verified; B04 next
 
 - Coverage runs now exclusively claim a fresh work directory and retain separate

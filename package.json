@@ -26,6 +26,8 @@
     "test:smoke": "bun test tests/smoke",
     "verify:published": "bun run scripts/verify-published-package.ts",
     "test:isolation": "bun run scripts/check-test-isolation.ts",
+    "quality:catalog": "bun run scripts/check-quality-inventory.ts --catalog",
+    "quality:inventory": "bun run scripts/check-quality-inventory.ts --check .planning/memory-resilience/quality-classifications.json",
     "typecheck": "tsc --noEmit && tsc --project tsconfig.scripts.json",
     "lint": "bun run typecheck",
     "mutation": "stryker run",

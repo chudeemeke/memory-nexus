@@ -1,0 +1,17 @@
+bun test v1.4.1 (4661e494f)
+
+scripts\quality-inventory.test.ts:
+warning: in the working copy of '.gitignore', LF will be replaced by CRLF the next time Git touches it
+(pass) discovers both tracked and new source with the nearest package boundary [1053.45ms]
+(pass) classifies actual syntax rather than index, types or test-support names [736.01ms]
+------------------------------|---------|---------|-------------------
+File                          | % Funcs | % Lines | Uncovered Line #s
+------------------------------|---------|---------|-------------------
+All files                     |   94.12 |   97.03 |
+ scripts\quality-inventory.ts |   94.12 |   97.03 | 92,99,123
+------------------------------|---------|---------|-------------------
+
+ 2 pass
+ 0 fail
+ 4 expect() calls
+Ran 2 tests across 1 file. [2.94s]

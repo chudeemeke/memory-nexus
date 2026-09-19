@@ -1,0 +1,24 @@
+$ bun run scripts/check-quality-inventory.ts --check .planning/memory-resilience/quality-classifications.json
+Inventory structure: FAIL (395 issues)
+  - Unknown risk tier: scripts/check-test-isolation.ts
+  - Unknown risk tier: scripts/eval-v5.test.ts
+  - Unknown risk tier: scripts/eval-v5.ts
+  - Unknown risk tier: scripts/eval-v5/cli.ts
+  - Unknown risk tier: scripts/eval-v5/evaluators.ts
+  - Unknown risk tier: scripts/eval-v5/fixtures.ts
+  - Unknown risk tier: scripts/eval-v5/harness.ts
+  - Unknown risk tier: scripts/eval-v5/types.ts
+  - Unknown risk tier: scripts/run-uat-verification.ts
+  - Unknown risk tier: scripts/verify-published-package.ts
+  - Unknown risk tier: src/application/services/ambient-context-service.test.ts
+  - Unknown risk tier: src/application/services/ambient-context-service.ts
+  - Unknown risk tier: src/application/services/backfill-service.test.ts
+  - Unknown risk tier: src/application/services/backfill-service.ts
+  - Unknown risk tier: src/application/services/budget-allocator.test.ts
+  - Unknown risk tier: src/application/services/budget-allocator.ts
+  - Unknown risk tier: src/application/services/dreaming-service.test.ts
+  - Unknown risk tier: src/application/services/dreaming-service.ts
+  - Unknown risk tier: src/application/services/embedding-service.test.ts
+  - Unknown risk tier: src/application/services/embedding-service.ts
+  ... 375 more issues
+error: script "quality:inventory" exited with code 1

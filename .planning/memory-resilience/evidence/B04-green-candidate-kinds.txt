@@ -1,0 +1,20 @@
+bun test v1.4.1 (4661e494f)
+
+scripts\quality-inventory.test.ts:
+warning: in the working copy of '.gitignore', LF will be replaced by CRLF the next time Git touches it
+(pass) discovers both tracked and new source with the nearest package boundary [1574.70ms]
+(pass) includes unfamiliar executable modes and shebangs without pretending they are instrumentable JavaScript [1768.51ms]
+(pass) declaration suffixes cannot hide executable content [1823.41ms]
+(pass) rejects an omitted executable even when every listed classification looks valid [1133.55ms]
+(pass) classifies actual syntax rather than index, types or test-support names [1545.59ms]
+------------------------------|---------|---------|-------------------
+File                          | % Funcs | % Lines | Uncovered Line #s
+------------------------------|---------|---------|-------------------
+All files                     |   95.65 |   96.43 |
+ scripts\quality-inventory.ts |   95.65 |   96.43 | 37,61,138,145,171
+------------------------------|---------|---------|-------------------
+
+ 5 pass
+ 0 fail
+ 7 expect() calls
+Ran 5 tests across 1 file. [8.82s]
