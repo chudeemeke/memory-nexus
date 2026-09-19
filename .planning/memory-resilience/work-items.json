@@ -108,17 +108,21 @@
         ".planning/memory-resilience/evidence/B04.json",
         ".planning/memory-resilience/executable-catalog.json",
         ".planning/memory-resilience/quality-classifications.json",
-        ".planning/memory-resilience/B04-inventory-plan.md"
+        ".planning/memory-resilience/B04-inventory-plan.md",
+        ".planning/memory-resilience/package-boundary-map.json",
+        ".planning/memory-resilience/B04-source-findings.md",
+        ".planning/memory-resilience/evidence/B04-classification-batch-1.json"
       ],
       "acceptance_record": ".planning/memory-resilience/evidence/B04.json",
       "progress": {
         "discovery": "implemented and focused behavior verified",
         "sourceCandidates": 446,
-        "proposedClassifications": 51,
-        "unclassified": 395,
+        "proposedClassifications": 71,
+        "unclassified": 375,
         "approvedExclusions": 0,
         "independentReview": "pending",
-        "next": "Inspect remaining files, map package entrypoints/build outputs and metric applicability, then obtain attributable independent review. Do not mark B04 verified or start B05 from this partial checkpoint."
+        "next": "Inspect remaining domain/application/infrastructure/presentation modules and test drivers; record individual metric applicability, then independent review. B05 remains pending.",
+        "packageOutputMapping": "Source-bound mapping recorded; artifact verification and independent review pending."
       }
     },
     {
@@ -2167,7 +2171,11 @@
         "Q087",
         "Q088",
         "Q089",
-        "Q090"
+        "Q090",
+        "B11.1",
+        "B11.2",
+        "B11.3",
+        "B12"
       ],
       "scope": "all Q-* work items",
       "deliverable": "Close individually verified quality work items; fix discovered defects and meaningful boundaries, not artificial counter tests.",
@@ -2234,7 +2242,8 @@
       "status": "pending",
       "depends_on": [
         "D02",
-        "D03"
+        "D03",
+        "D05"
       ],
       "scope": "isolated packed artifact installs",
       "deliverable": "Test the package as a consumer, including dependency audit, CLI/API smoke and native provider path.",
@@ -2903,6 +2912,97 @@
       "acceptance_record": ".planning/memory-resilience/evidence/Q090.json",
       "observed_gap": "B04 focused behavior is verified. Native function/line output is not four-metric proof; actual CLI child execution is not automatically merged into parent coverage.",
       "observed_evidence": ".planning/memory-resilience/evidence/B04.json"
+    },
+    {
+      "id": "B11.1",
+      "title": "Make database helper cleanup owned and observable",
+      "depends_on": [
+        "B03"
+      ],
+      "scope": "tests/helpers/test-database.ts and focused lifecycle regressions",
+      "deliverable": "Guard helper-owned temporary storage and report failed cleanup with recoverable paths; correct the unsupported reboot-reclamation assumption.",
+      "verification": "RED/GREEN success, repeated cleanup, initialization/close failure, replaced/foreign path and locked-file cases; failures retain diagnostics and never remove foreign data.",
+      "stage": "baseline",
+      "status": "pending",
+      "risk": "S",
+      "authorization": "authorized",
+      "owner": "memory-nexus",
+      "evidence": [],
+      "acceptance_record": ".planning/memory-resilience/evidence/B11.1.json",
+      "observed_evidence": ".planning/memory-resilience/B04-source-findings.md",
+      "retirement_trigger": "Before baseline review R02; runtime regression and final applicable tier proof required."
+    },
+    {
+      "id": "B11.2",
+      "title": "Make integration fixture cleanup owned and observable",
+      "depends_on": [
+        "B03"
+      ],
+      "scope": "tests/integration/index.ts and callers of cleanupTestData",
+      "deliverable": "Bound recursive deletion to demonstrably owned fixture storage and expose failures without hiding the original test outcome.",
+      "verification": "RED/GREEN caller compatibility, foreign/replaced paths, failed cleanup and successful removal; every retained directory is reported.",
+      "stage": "baseline",
+      "status": "pending",
+      "risk": "S",
+      "authorization": "authorized",
+      "owner": "memory-nexus",
+      "evidence": [],
+      "acceptance_record": ".planning/memory-resilience/evidence/B11.2.json",
+      "observed_evidence": ".planning/memory-resilience/B04-source-findings.md",
+      "retirement_trigger": "Before baseline review R02; runtime regression and final applicable tier proof required."
+    },
+    {
+      "id": "B11.3",
+      "title": "Report retained UAT sandbox storage",
+      "depends_on": [
+        "B03"
+      ],
+      "scope": "scripts/run-uat-verification.ts sandbox lifecycle",
+      "deliverable": "Make UAT sandbox ownership and failed cleanup observable while preserving primary acceptance failures.",
+      "verification": "Real-process success/failure and locked or injected cleanup-failure regressions preserve the primary status and report the retained owned path.",
+      "stage": "baseline",
+      "status": "pending",
+      "risk": "S",
+      "authorization": "authorized",
+      "owner": "memory-nexus",
+      "evidence": [],
+      "acceptance_record": ".planning/memory-resilience/evidence/B11.3.json",
+      "observed_evidence": ".planning/memory-resilience/B04-source-findings.md",
+      "retirement_trigger": "Before baseline review R02; runtime regression and final applicable tier proof required."
+    },
+    {
+      "id": "B12",
+      "title": "Reject incomplete evaluation readiness evidence",
+      "depends_on": [],
+      "scope": "scripts/eval-v5/harness.ts, fixtures.ts, cli.ts and evaluation regressions",
+      "deliverable": "Reproduce missing-dimension readiness admission and make complete market-readiness acceptance fail closed; preserve useful subset evaluation without claiming full readiness. Review duplicate identities and help-only reports as part of that boundary.",
+      "verification": "Actual CLI RED/GREEN using one passing synthetic fixture must not claim complete market readiness; all required dimensions pass, missing/duplicate/invalid fixture evidence fails as specified, help is not an acceptance report.",
+      "stage": "baseline",
+      "status": "pending",
+      "risk": "S",
+      "authorization": "authorized",
+      "owner": "memory-nexus",
+      "evidence": [],
+      "acceptance_record": ".planning/memory-resilience/evidence/B12.json",
+      "observed_evidence": ".planning/memory-resilience/B04-source-findings.md",
+      "retirement_trigger": "Before baseline review R02; runtime regression and final applicable tier proof required."
+    },
+    {
+      "id": "D05",
+      "title": "Prove packaged hook construction and discovery",
+      "depends_on": [],
+      "scope": "package build chain and installed memory install hook discovery",
+      "deliverable": "Reproduce and repair the normal-build omission and installed-path discovery as needed; ensure the packed hook comes from accepted source and works outside the checkout.",
+      "verification": "Clean isolated normal build and tarball inventory contain the hook; installed CLI locates it from an unrelated working directory, writes only isolated synthetic HOME/settings, executes a synthetic hook, and supports cleanup/rollback without publishing.",
+      "stage": "baseline",
+      "status": "pending",
+      "risk": "S",
+      "authorization": "authorized",
+      "owner": "memory-nexus",
+      "evidence": [],
+      "acceptance_record": ".planning/memory-resilience/evidence/D05.json",
+      "observed_evidence": ".planning/memory-resilience/B04-source-findings.md",
+      "retirement_trigger": "Before baseline review R02; runtime regression and final applicable tier proof required."
     }
   ],
   "decisions": {

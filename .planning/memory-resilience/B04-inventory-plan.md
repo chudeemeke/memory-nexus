@@ -46,11 +46,19 @@ These are conservative syntax observations, not quality acceptance. Value import
 are preserved so possible module-loading effects are not erased by unused-import
 elision. The actual build/runtime behavior still requires verification.
 
-`quality-classifications.json` currently contains 51 proposed classifications and
-395 explicit unclassified entries. No test driver is automatically excluded. The
-actual `bun run quality:inventory` command fails on all 395 unknown tiers; the
+`quality-classifications.json` currently contains 71 proposed classifications and
+375 explicit unclassified entries. No test driver is automatically excluded. The
+actual `bun run quality:inventory` command fails on all 375 unknown tiers; the
 structural checker cannot grant independent approval even for a valid manifest.
 The complete review and numeric quality requirements remain outstanding.
+
+The first classification batch inspected the remaining verification scripts,
+reusable test support, three pure ranking/allocation modules and the hook install
+boundary. `package-boundary-map.json` binds declared build/package outputs to source;
+actual artifact and installed-path proof remains open. `B04-source-findings.md`
+records cleanup diagnostics, evaluation completeness and hook packaging concerns
+with explicit baseline tasks and dependency barriers. Independent risk/applicability
+review remains pending; these are proposed classifications, not exclusions.
 
 Regression evidence caught Windows Git following an untracked junction before
 the first scanner rejected it. Discovery now checks tracked ancestors first,

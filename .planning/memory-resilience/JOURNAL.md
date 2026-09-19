@@ -1,5 +1,28 @@
 # Memory resilience execution journal
 
+## 2026-09-19 - B04 first source-classification batch and package mapping
+
+- Inspected and proposed tiers for 20 additional modules: remaining verification
+  scripts, reusable test helpers, three pure allocation/ranking modules and the
+  hook install boundary. Current total: **71 proposed, 375 unclassified, zero
+  approved exclusions**, across the same 446 candidates and two packages.
+- Added source-bound package output mapping, including the separately declared
+  hook build and deprecated CLI. Mapping is not built-artifact or installed proof.
+- Recorded source findings for silent cleanup failures, evaluation completeness
+  and hook packaging/discovery. New B11.1-B11.3, B12 and D05 items have concrete
+  regression requirements and block baseline acceptance through B10/D04. These
+  are not claims of reproduced runtime failures. Ledger now has 142 items:
+  52 delivery/gates and 90 quality candidates.
+- No executable source changed. See `evidence/B04-classification-batch-1.json`
+  for source hashes and actual admission/binding checks. Earlier test counts
+  remain evidence of their unchanged source; no fresh full-suite acceptance.
+- B04 remains active. Next: remaining domain/application/infrastructure/presentation
+  modules and test drivers, individual metric applicability, independent review.
+  B05 remains pending. Fable's quota-blocked review is not approval and has not
+  been repeatedly retried. Other authorized ready work remains available.
+- Free disk observed at about 1.97 GiB before this small documentation checkpoint.
+  No model/runtime install, production mutation or cleanup of old work copies.
+
 ## 2026-09-19 - B04 discovery/checking foundation preserved; classification remains active
 
 - Added read-only catalog discovery and structural inventory admission with real
