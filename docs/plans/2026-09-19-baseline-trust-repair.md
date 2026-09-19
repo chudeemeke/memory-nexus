@@ -3,6 +3,8 @@
 Status: executing; owner approved the September 12 recommendations on September 19.
 Branch: `fix/baseline-trust-repair`, starting at `96742c7` with recovered work preserved.
 
+Current delivery: draft PR #1, https://github.com/chudeemeke/memory-nexus/pull/1. Implemented candidates and remaining acceptance gates are recorded in `docs/audits/2026-09-19-baseline-repair-status.md`; the plan is not complete.
+
 ## Scope and invariants
 
 Repair the existing product before beginning Phase 45. Preserve the recovered v6 requirements and roadmap, prior status evidence, and inbox work. Use focused TDD slices, explicit Git paths, independent review, and final-revision local/hosted evidence. Do not weaken thresholds or discard user data. Desktop authority cutover remains subject to its existing live-session gates.

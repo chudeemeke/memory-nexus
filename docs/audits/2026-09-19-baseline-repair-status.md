@@ -2,6 +2,8 @@
 
 Status: in progress on `fix/baseline-trust-repair`; not release acceptance. The recovered v6 requirements and roadmap remain intact, with Phase 45 unstarted. This report supersedes September 12 findings only where new evidence is listed below.
 
+Delivery: [draft PR #1](https://github.com/chudeemeke/memory-nexus/pull/1) preserves the candidate and recovered documents. The six opening commits have GitHub-verified signatures. The opening hosted query reports no checks; this is pending CI, not green CI. Local logs and the compressed runtime/log archives remain outside Git.
+
 ## Implemented candidates
 
 - Reproduced the resolver defect and repaired probing of an unlisted terminal directory. Portable junction fixtures replace tests tied to a personal cloud-directory layout.
@@ -28,7 +30,7 @@ The first full run after hardening produced 4,459 passes and one hook-fixture fa
 | Exact-ID historical friction quarantine | memory-nexus | Refresh tuple provenance, dry-run, recoverable backup, rollback proof and independent review before mutation; close before friction-driven prioritisation |
 | Atomic embedding model migration and stronger artifact/preprocessing identity | memory-nexus | Required before the proposed offline feature reuses or replaces an existing index; current initialization guard provides narrower protection |
 | Coverage runner deletion guards and temporary retention | memory-nexus | Harden path boundaries and linked destinations before enabling automatic cleanup or accepting caller-selected output paths; current prefix comparison is insufficient |
-| Draft PR, assembled-diff review, final independent code review and hosted checks | memory-nexus | Five signed code commits preserve the candidate, with dependencies separate; no merge while quality gates remain open |
+| Assembled-diff review, final independent code review and hosted checks | memory-nexus | Draft PR #1 preserves five signed code commits and recovered documentation, with dependencies separate; no merge while quality gates remain open |
 | Desktop runtime/clone/cutover verification | memory-nexus | Next successful desktop connection, before retiring its clone or changing authority; September 19 connection timed out |
 | Remaining temporary cleanup | memory-nexus | Resolve the automatic approval-review rejection before retrying the rejected removal; do not bypass it |
 
