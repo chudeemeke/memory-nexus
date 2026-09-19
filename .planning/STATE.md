@@ -3,7 +3,7 @@ gsd_state_version: 1.0
 milestone: v6.0
 milestone_name: Server Surface & Benchmark Parity
 status: planning
-last_updated: "2026-09-19T13:08:00.000Z"
+last_updated: "2026-09-19T19:59:27.479Z"
 last_activity: 2026-09-19
 progress:
   total_phases: 9
@@ -46,6 +46,8 @@ progress:
 > **V6.0 ROADMAP CREATED 2026-07-21** - Milestone v6.0 Server Surface & Benchmark Parity is roadmapped into 9 phases (45-53). Phase 45 is a de-risking concurrency spike (highest technical risk: the long-lived SQLite/WAL lifecycle on Bun/Windows has zero signal in the current open-per-invocation code). Foundation lands before any adapter: `ServerDatabaseProvider` (Phase 46) then the `MemoryQueryFacade` governance seam with the CLI refactored onto it (Phase 47). Adapters in dependency order: MCP stdio (48) -> 127.0.0.1 HTTP daemon (49) -> Streamable-HTTP streaming (50) -> `memory serve` (51). Then the public benchmark suite (52: LongMemEval MIT-load-bearing + LOCOMO CC-BY-NC comparison fetched to a gitignored cache), then the category-leader readiness/market gate (53) mirroring the Phase 43 exit-gate. Read-only-first server (query/search/context/facts/related/friction-list); server-side writes (SRVW-01) and the backward audit (AUDIT-01) are out of v6.0. 21 v6.0 requirements mapped 21/21; the REQUIREMENTS.md "20 total" summary was an off-by-one.
 
 # State: @chude/memory (memory-nexus)
+
+> **ACTIVE EXECUTION CONTRACT 2026-09-19:** Resume from `.planning/memory-resilience/EXECUTION.md`, its `work-items.json` and `JOURNAL.md`, and the native persistent goal. The ledger starts with 47 delivery/gate items and 85 historical per-file candidates, to be refreshed by current-source evidence. Next: B01, coverage-runner target containment with sentinel-preserving RED/GREEN tests. Routine approved work proceeds autonomously; baseline Tier D integration, production implementation and adoption retain concrete owner decision gates. The ratified September 2 sign-off policy supersedes mandatory human `tuicr` review. PR #1 remains draft with quality/CI/review gates open; none of the new task entries claims product acceptance.
 
 > **BASELINE REPAIR IN PROGRESS 2026-09-19:** The owner accepted baseline repair before Phase 45 and requested project-scoped disk management. Work is preserved on `fix/baseline-trust-repair`. Resolver/color defects, dependency updates, test-store isolation, embedding setup/model-change defects, and numeric coverage validation have candidate fixes. The first instrumented repair run passed 4,455 tests, but its coverage does not cover later changes; it also reveals 85 files below the ordinary per-file floor. Per-file/Tier S enforcement, historical friction quarantine, final checks, and review/CI remain open. Verified archives reclaimed 602.5 MiB and missing worktree registrations were pruned with refs preserved. See `docs/audits/2026-09-19-baseline-repair-status.md` and `docs/audits/2026-09-19-disk-ownership.md` for the current restart point. The owner approved the bounded local embedding experiment after baseline repairs; runtime/model setup and synthetic tests are authorized for that experiment once the prerequisite closes. Production feature implementation and desktop replication remain separate decisions; nothing has been activated. Older PASS, ready, and zero-inbox statements remain dated history.
 

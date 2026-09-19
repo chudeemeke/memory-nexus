@@ -12,7 +12,9 @@ Do not silently remove stated, inferred, prototype, disabled, or partial feature
 
 ## Current State
 
-For current readiness and recovery evidence, read `docs/audits/2026-09-12-project-status.md`. The historical release completion below does not establish present-day release readiness. The v6 roadmap is preserved in uncommitted planning work; Phase 45 has not started. Before a mandatory Fable review, require a live readiness smoke and substantive retained review output, as tracked in `docs/inbox/2026-07-23-remotely-fable-auth-preflight-notice.md`.
+Resume from `.planning/memory-resilience/EXECUTION.md`, `work-items.json` and `JOURNAL.md` in that directory, then reconcile the native goal, live Git and PR state. Current readiness evidence is `docs/audits/2026-09-19-baseline-repair-status.md`; September 12 evidence and release completion below are historical. Recovered v6 planning is committed; Phase 45 has not started. Baseline repair and the subsequent bounded synthetic embedding experiment are authorized; production local availability and desktop replication retain separate decisions. Before a mandatory Fable review, require a live readiness smoke and substantive retained review output, as tracked in `docs/inbox/2026-07-23-remotely-fable-auth-preflight-notice.md`.
+
+Use the ratified `C:/Projects/conversations/docs/operations/sign-off-policy.md`: Tier M may merge after required checks; Tier D needs a concrete owner decision brief. It supersedes the old mandatory human `tuicr` gate. Continue routine authorized work without asking whether to proceed. Preserve all valuable dirty/recovered work and record revision-bound evidence per work item.
 
 - v4 is published as `@chude/memory`.
 - v5 Market-Leader Memory Platform is active.

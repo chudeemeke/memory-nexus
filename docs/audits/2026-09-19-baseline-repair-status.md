@@ -36,7 +36,9 @@ The first full run after hardening produced 4,459 passes and one hook-fixture fa
 
 The three inbox items remain triaged. No historical friction rows have been changed in this repair so far. A successful live Fable READY smoke and proposal review exist, but neither closes all future review gates. Desktop source classification from September 12 does not prove runtime data migration or safe clone retirement today.
 
-The separate code packet review returned APPROVE WITH CONDITIONS. Reproduced cleanup findings were repaired; dependency/runtime compatibility and final-revision review remain open. See `2026-09-19-repair-review-disposition.md`. No tuicr review session exists; the human assembled-diff gate remains pending (`tuicr -r origin/main..HEAD -w` from the project root). No hosted workflow currently establishes the required quality contract.
+The separate code packet review returned APPROVE WITH CONDITIONS. Reproduced cleanup findings were repaired; dependency/runtime compatibility and final-revision review remain open. See `2026-09-19-repair-review-disposition.md`. The ratified September 2 policy at `C:/Projects/conversations/docs/operations/sign-off-policy.md` supersedes the former mandatory human `tuicr` gate: PR #1 is Tier D and needs a concrete owner decision brief once required checks and independent review are ready. `tuicr` remains optional diff-reading tooling. No hosted workflow currently establishes the required quality contract.
+
+The persistent execution contract is `.planning/memory-resilience/EXECUTION.md`; its ledger decomposes the remaining baseline, approved experiment and gated production stages. B01 is the next task. Historical coverage candidates must be rebaselined before treating them as current failures or acceptance.
 
 ## Disk management and separate feature proposal
 

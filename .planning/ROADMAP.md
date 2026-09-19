@@ -2,6 +2,8 @@
 
 ## Milestones
 
+**Current execution priority (2026-09-19):** [Memory resilience workstream](memory-resilience/EXECUTION.md), with its dependency/acceptance ledger and persistent goal. Complete the accepted baseline repairs, then the approved bounded local embedding experiment; production local availability and desktop replication retain their decision gates. This workstream does not renumber or mark complete any v6 phase. Phase 45 remains unstarted.
+
 - SHIPPED **v1.0 Full Vision Implementation** -- Phases 1-12 (shipped 2026-02-16) -- [Archive](milestones/v1.0-ROADMAP.md)
 - SHIPPED **v2.0 Hybrid Search and Rebrand** -- Phases 13-22 (shipped 2026-03-01)
 - SHIPPED **v3.0 Knowledge Layer + Friction Logging** -- Phases 23-29.1 (shipped 2026-04-02)

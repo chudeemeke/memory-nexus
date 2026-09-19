@@ -17,7 +17,9 @@ The owner approved the bounded local embedding experiment (Step A in the offline
 2. **Dependencies.** Refresh audit evidence, inspect affected dependency chains, select compatible patched releases, update lockfile, and prove type/build/test/security compatibility. No blind major upgrade or advisory suppression.
 3. **Quality enforcement.** Inventory executable files and package boundaries; classify file risk; reject malformed, missing, stale, below-tier, omitted-file, and changed-line evidence. Prove negative cases and wire CI. Existing coverage gaps remain failures until repaired; no fabricated compliance.
 4. **Friction integrity.** Confirm fixture provenance, retain exact-ID dry-run and recoverable backup, implement guarded cleanup/quarantine and test-store protection, then verify production counts and rollback. Never wildcard-delete descriptions or mutate before backup and review of the exact target.
-5. **Ownership and review.** Reconcile stale claims and runtime/cutover limits; preserve work in atomic commits and a draft PR. Use tuicr and substantive independent review; merge only after required gates. Update inboxes only to the state actually achieved.
+5. **Ownership and review.** Reconcile stale claims and runtime/cutover limits; preserve work in atomic commits and a draft PR. Apply the ratified September 2 sign-off policy: substantive independent review and required CI, then a concrete Tier D owner decision brief for this behavioral/data-integrity/gate repair. `tuicr` is optional diff-reading tooling, not a mandatory human gate. Update inboxes only to the state actually achieved.
+
+Execution details and dependencies now live in `.planning/memory-resilience/EXECUTION.md` and `work-items.json`. They refine this accepted scope; they do not authorize production replication.
 
 ## Test-driven diagnostic order
 

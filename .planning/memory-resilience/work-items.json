@@ -1,0 +1,2802 @@
+{
+  "schema_version": 1,
+  "workstream": "memory-resilience",
+  "goal_status": "active",
+  "starting_revision": "77d54e05be7fc24cede4a9a3e1fede6fa113ac8f",
+  "current_item": "B01",
+  "status_semantics": {
+    "pending": "Not started; authorization and dependencies must permit work.",
+    "pending_rebaseline": "Historical candidate, not a confirmed current failure or a completed task.",
+    "active": "One bounded work item currently executing.",
+    "verified": "Item acceptance proved by retained revision-bound evidence.",
+    "blocked": "Named missing dependency with owner and concrete resumption trigger.",
+    "superseded": "Explicit evidence explains replacement; not counted as verified."
+  },
+  "selection_rule": "One implementation item at a time. Choose the first authorized dependency-ready item, beginning B01. Independent read-only discovery and checks may run concurrently. If an item is externally blocked, select another ready item; do not repeatedly retry an unchanged blocker. Production stages require recorded P03 and adoption A03 decisions. P03 records independent local-compute and replication decisions. L items require local_production_implementation=approved; C items require desktop_replication_implementation=approved. A04/A05 additionally require production_adoption=approved. A partially accepted P03 cannot authorize the unaccepted branch.",
+  "completion_rule": "A05 is not verified until every end-state predicate and required ledger item is verified, including dynamically discovered gaps. B10 is a barrier over every Q item and every new gap in the complete inventory. Superseded items require explicit replacement/no-gap evidence.",
+  "known_external_limits": [
+    {
+      "id": "X01",
+      "description": "Previously policy-blocked removal of 14 MB completed coverage copy",
+      "owner": "memory-nexus",
+      "trigger": "Approval-review restriction resolved; never retry through a bypass",
+      "blocks_goal": false
+    },
+    {
+      "id": "X02",
+      "description": "Desktop connection last timed out",
+      "owner": "memory-nexus",
+      "trigger": "Next bounded readiness probe / reachable authenticated desktop",
+      "blocks_items": [
+        "A02"
+      ]
+    }
+  ],
+  "items": [
+    {
+      "id": "B01",
+      "stage": "baseline",
+      "title": "Guard coverage output ownership",
+      "status": "pending",
+      "depends_on": [],
+      "scope": "scripts/run-istanbul-bun-coverage{,.test}.ts",
+      "deliverable": "Reject project root, ancestor, sibling-prefix and escaping output paths before mutation.",
+      "verification": "RED/GREEN filesystem tests preserve sentinel files for every rejected target.",
+      "risk": "S",
+      "authorization": "authorized",
+      "owner": "memory-nexus",
+      "evidence": [],
+      "acceptance_record": ".planning/memory-resilience/evidence/B01.json"
+    },
+    {
+      "id": "B02",
+      "stage": "baseline",
+      "title": "Reject linked coverage destinations",
+      "status": "pending",
+      "depends_on": [
+        "B01"
+      ],
+      "scope": "scripts/run-istanbul-bun-coverage{,.test}.ts",
+      "deliverable": "Reject symlink/junction escapes and unsafe existing work directories; validate resolved ancestry.",
+      "verification": "Windows junction and POSIX symlink adversarial fixtures; no outside sentinel is changed.",
+      "risk": "S",
+      "authorization": "authorized",
+      "owner": "memory-nexus",
+      "evidence": [],
+      "acceptance_record": ".planning/memory-resilience/evidence/B02.json"
+    },
+    {
+      "id": "B03",
+      "stage": "baseline",
+      "title": "Bound verification storage lifecycle",
+      "status": "pending",
+      "depends_on": [
+        "B02"
+      ],
+      "scope": "coverage runner and tests/test-setup.ts",
+      "deliverable": "Track each run's owned temporary paths and process identity; retain evidence before eligible cleanup.",
+      "verification": "Crash/locked-file/foreign-directory/reused-PID tests; report retained bytes; do not retry the policy-blocked old copy.",
+      "risk": "S",
+      "authorization": "authorized",
+      "owner": "memory-nexus",
+      "evidence": [],
+      "acceptance_record": ".planning/memory-resilience/evidence/B03.json"
+    },
+    {
+      "id": "B04",
+      "stage": "baseline",
+      "title": "Inventory executable files and risk",
+      "status": "pending",
+      "depends_on": [],
+      "scope": "src/, scripts/, test support, package boundaries",
+      "deliverable": "Create complete per-file risk/applicability inventory; inspect barrels, schemas and generated files individually.",
+      "verification": "Every tracked executable accounted for; unknown or missing classification fails; classification independently reviewed.",
+      "risk": "S",
+      "authorization": "authorized",
+      "owner": "memory-nexus",
+      "evidence": [],
+      "acceptance_record": ".planning/memory-resilience/evidence/B04.json"
+    },
+    {
+      "id": "B05",
+      "stage": "baseline",
+      "title": "Instrument omitted executable code",
+      "status": "pending",
+      "depends_on": [
+        "B03",
+        "B04"
+      ],
+      "scope": "scripts/run-istanbul-bun-coverage{,.test}.ts",
+      "deliverable": "Include unimported executable source and scripts with real four-metric counters.",
+      "verification": "Real fixture with an unimported executable reports zero coverage; relative imports retain production behavior.",
+      "risk": "A",
+      "authorization": "authorized",
+      "owner": "memory-nexus",
+      "evidence": [],
+      "acceptance_record": ".planning/memory-resilience/evidence/B05.json"
+    },
+    {
+      "id": "B06",
+      "stage": "baseline",
+      "title": "Bind reports to the executed revision",
+      "status": "pending",
+      "depends_on": [
+        "B05"
+      ],
+      "scope": "coverage runner and evidence manifest",
+      "deliverable": "Record source hashes, base/head, tool versions, command, exit and report hashes; invalidate incomplete runs.",
+      "verification": "Changed source, stale report, failed run, wrong root and omitted report each fail verification.",
+      "risk": "S",
+      "authorization": "authorized",
+      "owner": "memory-nexus",
+      "evidence": [],
+      "acceptance_record": ".planning/memory-resilience/evidence/B06.json"
+    },
+    {
+      "id": "B07",
+      "stage": "baseline",
+      "title": "Enforce file and package thresholds",
+      "status": "pending",
+      "depends_on": [
+        "B04",
+        "B06"
+      ],
+      "scope": "scripts/check-coverage-thresholds{,.test}.ts and policy manifest",
+      "deliverable": "Apply 95% to each applicable metric/file/package and 100% Tier S branches; reviewed zero applicability only.",
+      "verification": "Negative cases: passing package with bad file, S at 99%, missing file, malformed metrics and unreviewed exclusion fail.",
+      "risk": "S",
+      "authorization": "authorized",
+      "owner": "memory-nexus",
+      "evidence": [],
+      "acceptance_record": ".planning/memory-resilience/evidence/B07.json"
+    },
+    {
+      "id": "B08",
+      "stage": "baseline",
+      "title": "Enforce changed-code coverage",
+      "status": "pending",
+      "depends_on": [
+        "B07"
+      ],
+      "scope": "coverage gate and source maps",
+      "deliverable": "Bind changed executable lines and decisions to the review base, including moves and newly added files.",
+      "verification": "An uncovered changed path fails despite passing file totals; unmappable evidence fails explicitly.",
+      "risk": "S",
+      "authorization": "authorized",
+      "owner": "memory-nexus",
+      "evidence": [],
+      "acceptance_record": ".planning/memory-resilience/evidence/B08.json"
+    },
+    {
+      "id": "B09",
+      "stage": "baseline",
+      "title": "Rebaseline and expand repair queue",
+      "status": "pending",
+      "depends_on": [
+        "B08"
+      ],
+      "scope": "coverage evidence and work-items.json",
+      "deliverable": "Run current instrumented suite; refresh each seeded gap and add every new gap, including scripts and stricter tiers.",
+      "verification": "Complete inventory/report reconciliation; no fixed assumption that the historical 85 are all remaining gaps.",
+      "risk": "A",
+      "authorization": "authorized",
+      "owner": "memory-nexus",
+      "evidence": [],
+      "acceptance_record": ".planning/memory-resilience/evidence/B09.json"
+    },
+    {
+      "id": "Q001",
+      "stage": "coverage_repair",
+      "title": "Verify and repair src/application/services/backfill-service.ts",
+      "status": "pending_rebaseline",
+      "depends_on": [
+        "B09"
+      ],
+      "scope": "src/application/services/backfill-service.ts",
+      "deliverable": "Reproduce uncovered behavior, add meaningful regression/boundary tests, fix demonstrated defects, satisfy this file's reviewed risk tier.",
+      "verification": "Current source-bound four-metric file evidence plus tier-required decision tests. Supersede only with explicit fresh evidence that this candidate is no longer a gap.",
+      "risk": "unclassified",
+      "authorization": "authorized",
+      "owner": "memory-nexus",
+      "historical_gaps": [
+        "branches=90.47"
+      ],
+      "historical_evidence": "docs/audits/2026-09-19-repair-evidence/per-file-coverage-gaps.json",
+      "evidence": [],
+      "acceptance_record": ".planning/memory-resilience/evidence/Q001.json"
+    },
+    {
+      "id": "Q002",
+      "stage": "coverage_repair",
+      "title": "Verify and repair src/application/services/budget-allocator.ts",
+      "status": "pending_rebaseline",
+      "depends_on": [
+        "B09"
+      ],
+      "scope": "src/application/services/budget-allocator.ts",
+      "deliverable": "Reproduce uncovered behavior, add meaningful regression/boundary tests, fix demonstrated defects, satisfy this file's reviewed risk tier.",
+      "verification": "Current source-bound four-metric file evidence plus tier-required decision tests. Supersede only with explicit fresh evidence that this candidate is no longer a gap.",
+      "risk": "unclassified",
+      "authorization": "authorized",
+      "owner": "memory-nexus",
+      "historical_gaps": [
+        "branches=90.9"
+      ],
+      "historical_evidence": "docs/audits/2026-09-19-repair-evidence/per-file-coverage-gaps.json",
+      "evidence": [],
+      "acceptance_record": ".planning/memory-resilience/evidence/Q002.json"
+    },
+    {
+      "id": "Q003",
+      "stage": "coverage_repair",
+      "title": "Verify and repair src/application/services/embedding-service.ts",
+      "status": "pending_rebaseline",
+      "depends_on": [
+        "B09"
+      ],
+      "scope": "src/application/services/embedding-service.ts",
+      "deliverable": "Reproduce uncovered behavior, add meaningful regression/boundary tests, fix demonstrated defects, satisfy this file's reviewed risk tier.",
+      "verification": "Current source-bound four-metric file evidence plus tier-required decision tests. Supersede only with explicit fresh evidence that this candidate is no longer a gap.",
+      "risk": "unclassified",
+      "authorization": "authorized",
+      "owner": "memory-nexus",
+      "historical_gaps": [
+        "functions=94.11"
+      ],
+      "historical_evidence": "docs/audits/2026-09-19-repair-evidence/per-file-coverage-gaps.json",
+      "evidence": [],
+      "acceptance_record": ".planning/memory-resilience/evidence/Q003.json"
+    },
+    {
+      "id": "Q004",
+      "stage": "coverage_repair",
+      "title": "Verify and repair src/application/services/export-service.ts",
+      "status": "pending_rebaseline",
+      "depends_on": [
+        "B09"
+      ],
+      "scope": "src/application/services/export-service.ts",
+      "deliverable": "Reproduce uncovered behavior, add meaningful regression/boundary tests, fix demonstrated defects, satisfy this file's reviewed risk tier.",
+      "verification": "Current source-bound four-metric file evidence plus tier-required decision tests. Supersede only with explicit fresh evidence that this candidate is no longer a gap.",
+      "risk": "unclassified",
+      "authorization": "authorized",
+      "owner": "memory-nexus",
+      "historical_gaps": [
+        "functions=93.75"
+      ],
+      "historical_evidence": "docs/audits/2026-09-19-repair-evidence/per-file-coverage-gaps.json",
+      "evidence": [],
+      "acceptance_record": ".planning/memory-resilience/evidence/Q004.json"
+    },
+    {
+      "id": "Q005",
+      "stage": "coverage_repair",
+      "title": "Verify and repair src/application/services/extraction-pipeline.ts",
+      "status": "pending_rebaseline",
+      "depends_on": [
+        "B09"
+      ],
+      "scope": "src/application/services/extraction-pipeline.ts",
+      "deliverable": "Reproduce uncovered behavior, add meaningful regression/boundary tests, fix demonstrated defects, satisfy this file's reviewed risk tier.",
+      "verification": "Current source-bound four-metric file evidence plus tier-required decision tests. Supersede only with explicit fresh evidence that this candidate is no longer a gap.",
+      "risk": "unclassified",
+      "authorization": "authorized",
+      "owner": "memory-nexus",
+      "historical_gaps": [
+        "branches=91.48",
+        "functions=93.75"
+      ],
+      "historical_evidence": "docs/audits/2026-09-19-repair-evidence/per-file-coverage-gaps.json",
+      "evidence": [],
+      "acceptance_record": ".planning/memory-resilience/evidence/Q005.json"
+    },
+    {
+      "id": "Q006",
+      "stage": "coverage_repair",
+      "title": "Verify and repair src/application/services/friction-service.ts",
+      "status": "pending_rebaseline",
+      "depends_on": [
+        "B09"
+      ],
+      "scope": "src/application/services/friction-service.ts",
+      "deliverable": "Reproduce uncovered behavior, add meaningful regression/boundary tests, fix demonstrated defects, satisfy this file's reviewed risk tier.",
+      "verification": "Current source-bound four-metric file evidence plus tier-required decision tests. Supersede only with explicit fresh evidence that this candidate is no longer a gap.",
+      "risk": "unclassified",
+      "authorization": "authorized",
+      "owner": "memory-nexus",
+      "historical_gaps": [
+        "functions=92.85"
+      ],
+      "historical_evidence": "docs/audits/2026-09-19-repair-evidence/per-file-coverage-gaps.json",
+      "evidence": [],
+      "acceptance_record": ".planning/memory-resilience/evidence/Q006.json"
+    },
+    {
+      "id": "Q007",
+      "stage": "coverage_repair",
+      "title": "Verify and repair src/application/services/fts-sanitizer.ts",
+      "status": "pending_rebaseline",
+      "depends_on": [
+        "B09"
+      ],
+      "scope": "src/application/services/fts-sanitizer.ts",
+      "deliverable": "Reproduce uncovered behavior, add meaningful regression/boundary tests, fix demonstrated defects, satisfy this file's reviewed risk tier.",
+      "verification": "Current source-bound four-metric file evidence plus tier-required decision tests. Supersede only with explicit fresh evidence that this candidate is no longer a gap.",
+      "risk": "unclassified",
+      "authorization": "authorized",
+      "owner": "memory-nexus",
+      "historical_gaps": [
+        "branches=85.71"
+      ],
+      "historical_evidence": "docs/audits/2026-09-19-repair-evidence/per-file-coverage-gaps.json",
+      "evidence": [],
+      "acceptance_record": ".planning/memory-resilience/evidence/Q007.json"
+    },
+    {
+      "id": "Q008",
+      "stage": "coverage_repair",
+      "title": "Verify and repair src/application/services/memory-file-sync-service.ts",
+      "status": "pending_rebaseline",
+      "depends_on": [
+        "B09"
+      ],
+      "scope": "src/application/services/memory-file-sync-service.ts",
+      "deliverable": "Reproduce uncovered behavior, add meaningful regression/boundary tests, fix demonstrated defects, satisfy this file's reviewed risk tier.",
+      "verification": "Current source-bound four-metric file evidence plus tier-required decision tests. Supersede only with explicit fresh evidence that this candidate is no longer a gap.",
+      "risk": "unclassified",
+      "authorization": "authorized",
+      "owner": "memory-nexus",
+      "historical_gaps": [
+        "branches=85.71"
+      ],
+      "historical_evidence": "docs/audits/2026-09-19-repair-evidence/per-file-coverage-gaps.json",
+      "evidence": [],
+      "acceptance_record": ".planning/memory-resilience/evidence/Q008.json"
+    },
+    {
+      "id": "Q009",
+      "stage": "coverage_repair",
+      "title": "Verify and repair src/application/services/pattern-extractor.ts",
+      "status": "pending_rebaseline",
+      "depends_on": [
+        "B09"
+      ],
+      "scope": "src/application/services/pattern-extractor.ts",
+      "deliverable": "Reproduce uncovered behavior, add meaningful regression/boundary tests, fix demonstrated defects, satisfy this file's reviewed risk tier.",
+      "verification": "Current source-bound four-metric file evidence plus tier-required decision tests. Supersede only with explicit fresh evidence that this candidate is no longer a gap.",
+      "risk": "unclassified",
+      "authorization": "authorized",
+      "owner": "memory-nexus",
+      "historical_gaps": [
+        "branches=93.33"
+      ],
+      "historical_evidence": "docs/audits/2026-09-19-repair-evidence/per-file-coverage-gaps.json",
+      "evidence": [],
+      "acceptance_record": ".planning/memory-resilience/evidence/Q009.json"
+    },
+    {
+      "id": "Q010",
+      "stage": "coverage_repair",
+      "title": "Verify and repair src/application/services/rrf-fusion.ts",
+      "status": "pending_rebaseline",
+      "depends_on": [
+        "B09"
+      ],
+      "scope": "src/application/services/rrf-fusion.ts",
+      "deliverable": "Reproduce uncovered behavior, add meaningful regression/boundary tests, fix demonstrated defects, satisfy this file's reviewed risk tier.",
+      "verification": "Current source-bound four-metric file evidence plus tier-required decision tests. Supersede only with explicit fresh evidence that this candidate is no longer a gap.",
+      "risk": "unclassified",
+      "authorization": "authorized",
+      "owner": "memory-nexus",
+      "historical_gaps": [
+        "branches=87.5"
+      ],
+      "historical_evidence": "docs/audits/2026-09-19-repair-evidence/per-file-coverage-gaps.json",
+      "evidence": [],
+      "acceptance_record": ".planning/memory-resilience/evidence/Q010.json"
+    },
+    {
+      "id": "Q011",
+      "stage": "coverage_repair",
+      "title": "Verify and repair src/application/services/smart-context-service.ts",
+      "status": "pending_rebaseline",
+      "depends_on": [
+        "B09"
+      ],
+      "scope": "src/application/services/smart-context-service.ts",
+      "deliverable": "Reproduce uncovered behavior, add meaningful regression/boundary tests, fix demonstrated defects, satisfy this file's reviewed risk tier.",
+      "verification": "Current source-bound four-metric file evidence plus tier-required decision tests. Supersede only with explicit fresh evidence that this candidate is no longer a gap.",
+      "risk": "unclassified",
+      "authorization": "authorized",
+      "owner": "memory-nexus",
+      "historical_gaps": [
+        "branches=90.56"
+      ],
+      "historical_evidence": "docs/audits/2026-09-19-repair-evidence/per-file-coverage-gaps.json",
+      "evidence": [],
+      "acceptance_record": ".planning/memory-resilience/evidence/Q011.json"
+    },
+    {
+      "id": "Q012",
+      "stage": "coverage_repair",
+      "title": "Verify and repair src/domain/errors/memory-error.ts",
+      "status": "pending_rebaseline",
+      "depends_on": [
+        "B09"
+      ],
+      "scope": "src/domain/errors/memory-error.ts",
+      "deliverable": "Reproduce uncovered behavior, add meaningful regression/boundary tests, fix demonstrated defects, satisfy this file's reviewed risk tier.",
+      "verification": "Current source-bound four-metric file evidence plus tier-required decision tests. Supersede only with explicit fresh evidence that this candidate is no longer a gap.",
+      "risk": "unclassified",
+      "authorization": "authorized",
+      "owner": "memory-nexus",
+      "historical_gaps": [
+        "branches=83.33"
+      ],
+      "historical_evidence": "docs/audits/2026-09-19-repair-evidence/per-file-coverage-gaps.json",
+      "evidence": [],
+      "acceptance_record": ".planning/memory-resilience/evidence/Q012.json"
+    },
+    {
+      "id": "Q013",
+      "stage": "coverage_repair",
+      "title": "Verify and repair src/domain/services/path-decoder.ts",
+      "status": "pending_rebaseline",
+      "depends_on": [
+        "B09"
+      ],
+      "scope": "src/domain/services/path-decoder.ts",
+      "deliverable": "Reproduce uncovered behavior, add meaningful regression/boundary tests, fix demonstrated defects, satisfy this file's reviewed risk tier.",
+      "verification": "Current source-bound four-metric file evidence plus tier-required decision tests. Supersede only with explicit fresh evidence that this candidate is no longer a gap.",
+      "risk": "unclassified",
+      "authorization": "authorized",
+      "owner": "memory-nexus",
+      "historical_gaps": [
+        "functions=87.5"
+      ],
+      "historical_evidence": "docs/audits/2026-09-19-repair-evidence/per-file-coverage-gaps.json",
+      "evidence": [],
+      "acceptance_record": ".planning/memory-resilience/evidence/Q013.json"
+    },
+    {
+      "id": "Q014",
+      "stage": "coverage_repair",
+      "title": "Verify and repair src/domain/services/query-parser.ts",
+      "status": "pending_rebaseline",
+      "depends_on": [
+        "B09"
+      ],
+      "scope": "src/domain/services/query-parser.ts",
+      "deliverable": "Reproduce uncovered behavior, add meaningful regression/boundary tests, fix demonstrated defects, satisfy this file's reviewed risk tier.",
+      "verification": "Current source-bound four-metric file evidence plus tier-required decision tests. Supersede only with explicit fresh evidence that this candidate is no longer a gap.",
+      "risk": "unclassified",
+      "authorization": "authorized",
+      "owner": "memory-nexus",
+      "historical_gaps": [
+        "branches=94.11"
+      ],
+      "historical_evidence": "docs/audits/2026-09-19-repair-evidence/per-file-coverage-gaps.json",
+      "evidence": [],
+      "acceptance_record": ".planning/memory-resilience/evidence/Q014.json"
+    },
+    {
+      "id": "Q015",
+      "stage": "coverage_repair",
+      "title": "Verify and repair src/domain/value-objects/embedding-result.ts",
+      "status": "pending_rebaseline",
+      "depends_on": [
+        "B09"
+      ],
+      "scope": "src/domain/value-objects/embedding-result.ts",
+      "deliverable": "Reproduce uncovered behavior, add meaningful regression/boundary tests, fix demonstrated defects, satisfy this file's reviewed risk tier.",
+      "verification": "Current source-bound four-metric file evidence plus tier-required decision tests. Supersede only with explicit fresh evidence that this candidate is no longer a gap.",
+      "risk": "unclassified",
+      "authorization": "authorized",
+      "owner": "memory-nexus",
+      "historical_gaps": [
+        "branches=91.66"
+      ],
+      "historical_evidence": "docs/audits/2026-09-19-repair-evidence/per-file-coverage-gaps.json",
+      "evidence": [],
+      "acceptance_record": ".planning/memory-resilience/evidence/Q015.json"
+    },
+    {
+      "id": "Q016",
+      "stage": "coverage_repair",
+      "title": "Verify and repair src/domain/value-objects/project-path.ts",
+      "status": "pending_rebaseline",
+      "depends_on": [
+        "B09"
+      ],
+      "scope": "src/domain/value-objects/project-path.ts",
+      "deliverable": "Reproduce uncovered behavior, add meaningful regression/boundary tests, fix demonstrated defects, satisfy this file's reviewed risk tier.",
+      "verification": "Current source-bound four-metric file evidence plus tier-required decision tests. Supersede only with explicit fresh evidence that this candidate is no longer a gap.",
+      "risk": "unclassified",
+      "authorization": "authorized",
+      "owner": "memory-nexus",
+      "historical_gaps": [
+        "branches=90"
+      ],
+      "historical_evidence": "docs/audits/2026-09-19-repair-evidence/per-file-coverage-gaps.json",
+      "evidence": [],
+      "acceptance_record": ".planning/memory-resilience/evidence/Q016.json"
+    },
+    {
+      "id": "Q017",
+      "stage": "coverage_repair",
+      "title": "Verify and repair src/infrastructure/paths.ts",
+      "status": "pending_rebaseline",
+      "depends_on": [
+        "B09"
+      ],
+      "scope": "src/infrastructure/paths.ts",
+      "deliverable": "Reproduce uncovered behavior, add meaningful regression/boundary tests, fix demonstrated defects, satisfy this file's reviewed risk tier.",
+      "verification": "Current source-bound four-metric file evidence plus tier-required decision tests. Supersede only with explicit fresh evidence that this candidate is no longer a gap.",
+      "risk": "unclassified",
+      "authorization": "authorized",
+      "owner": "memory-nexus",
+      "historical_gaps": [
+        "functions=92.85"
+      ],
+      "historical_evidence": "docs/audits/2026-09-19-repair-evidence/per-file-coverage-gaps.json",
+      "evidence": [],
+      "acceptance_record": ".planning/memory-resilience/evidence/Q017.json"
+    },
+    {
+      "id": "Q018",
+      "stage": "coverage_repair",
+      "title": "Verify and repair src/infrastructure/database/connection.ts",
+      "status": "pending_rebaseline",
+      "depends_on": [
+        "B09"
+      ],
+      "scope": "src/infrastructure/database/connection.ts",
+      "deliverable": "Reproduce uncovered behavior, add meaningful regression/boundary tests, fix demonstrated defects, satisfy this file's reviewed risk tier.",
+      "verification": "Current source-bound four-metric file evidence plus tier-required decision tests. Supersede only with explicit fresh evidence that this candidate is no longer a gap.",
+      "risk": "unclassified",
+      "authorization": "authorized",
+      "owner": "memory-nexus",
+      "historical_gaps": [
+        "statements=84.5",
+        "branches=68.18",
+        "lines=84.5"
+      ],
+      "historical_evidence": "docs/audits/2026-09-19-repair-evidence/per-file-coverage-gaps.json",
+      "evidence": [],
+      "acceptance_record": ".planning/memory-resilience/evidence/Q018.json"
+    },
+    {
+      "id": "Q019",
+      "stage": "coverage_repair",
+      "title": "Verify and repair src/infrastructure/database/schema.ts",
+      "status": "pending_rebaseline",
+      "depends_on": [
+        "B09"
+      ],
+      "scope": "src/infrastructure/database/schema.ts",
+      "deliverable": "Reproduce uncovered behavior, add meaningful regression/boundary tests, fix demonstrated defects, satisfy this file's reviewed risk tier.",
+      "verification": "Current source-bound four-metric file evidence plus tier-required decision tests. Supersede only with explicit fresh evidence that this candidate is no longer a gap.",
+      "risk": "unclassified",
+      "authorization": "authorized",
+      "owner": "memory-nexus",
+      "historical_gaps": [
+        "branches=92.3"
+      ],
+      "historical_evidence": "docs/audits/2026-09-19-repair-evidence/per-file-coverage-gaps.json",
+      "evidence": [],
+      "acceptance_record": ".planning/memory-resilience/evidence/Q019.json"
+    },
+    {
+      "id": "Q020",
+      "stage": "coverage_repair",
+      "title": "Verify and repair src/infrastructure/database/repositories/dream-repository.ts",
+      "status": "pending_rebaseline",
+      "depends_on": [
+        "B09"
+      ],
+      "scope": "src/infrastructure/database/repositories/dream-repository.ts",
+      "deliverable": "Reproduce uncovered behavior, add meaningful regression/boundary tests, fix demonstrated defects, satisfy this file's reviewed risk tier.",
+      "verification": "Current source-bound four-metric file evidence plus tier-required decision tests. Supersede only with explicit fresh evidence that this candidate is no longer a gap.",
+      "risk": "unclassified",
+      "authorization": "authorized",
+      "owner": "memory-nexus",
+      "historical_gaps": [
+        "branches=90.24"
+      ],
+      "historical_evidence": "docs/audits/2026-09-19-repair-evidence/per-file-coverage-gaps.json",
+      "evidence": [],
+      "acceptance_record": ".planning/memory-resilience/evidence/Q020.json"
+    },
+    {
+      "id": "Q021",
+      "stage": "coverage_repair",
+      "title": "Verify and repair src/infrastructure/database/repositories/embedding-repository.ts",
+      "status": "pending_rebaseline",
+      "depends_on": [
+        "B09"
+      ],
+      "scope": "src/infrastructure/database/repositories/embedding-repository.ts",
+      "deliverable": "Reproduce uncovered behavior, add meaningful regression/boundary tests, fix demonstrated defects, satisfy this file's reviewed risk tier.",
+      "verification": "Current source-bound four-metric file evidence plus tier-required decision tests. Supersede only with explicit fresh evidence that this candidate is no longer a gap.",
+      "risk": "unclassified",
+      "authorization": "authorized",
+      "owner": "memory-nexus",
+      "historical_gaps": [
+        "branches=77.77"
+      ],
+      "historical_evidence": "docs/audits/2026-09-19-repair-evidence/per-file-coverage-gaps.json",
+      "evidence": [],
+      "acceptance_record": ".planning/memory-resilience/evidence/Q021.json"
+    },
+    {
+      "id": "Q022",
+      "stage": "coverage_repair",
+      "title": "Verify and repair src/infrastructure/database/repositories/entity-repository.ts",
+      "status": "pending_rebaseline",
+      "depends_on": [
+        "B09"
+      ],
+      "scope": "src/infrastructure/database/repositories/entity-repository.ts",
+      "deliverable": "Reproduce uncovered behavior, add meaningful regression/boundary tests, fix demonstrated defects, satisfy this file's reviewed risk tier.",
+      "verification": "Current source-bound four-metric file evidence plus tier-required decision tests. Supersede only with explicit fresh evidence that this candidate is no longer a gap.",
+      "risk": "unclassified",
+      "authorization": "authorized",
+      "owner": "memory-nexus",
+      "historical_gaps": [
+        "branches=92.3"
+      ],
+      "historical_evidence": "docs/audits/2026-09-19-repair-evidence/per-file-coverage-gaps.json",
+      "evidence": [],
+      "acceptance_record": ".planning/memory-resilience/evidence/Q022.json"
+    },
+    {
+      "id": "Q023",
+      "stage": "coverage_repair",
+      "title": "Verify and repair src/infrastructure/database/repositories/fact-repository.ts",
+      "status": "pending_rebaseline",
+      "depends_on": [
+        "B09"
+      ],
+      "scope": "src/infrastructure/database/repositories/fact-repository.ts",
+      "deliverable": "Reproduce uncovered behavior, add meaningful regression/boundary tests, fix demonstrated defects, satisfy this file's reviewed risk tier.",
+      "verification": "Current source-bound four-metric file evidence plus tier-required decision tests. Supersede only with explicit fresh evidence that this candidate is no longer a gap.",
+      "risk": "unclassified",
+      "authorization": "authorized",
+      "owner": "memory-nexus",
+      "historical_gaps": [
+        "branches=92.59"
+      ],
+      "historical_evidence": "docs/audits/2026-09-19-repair-evidence/per-file-coverage-gaps.json",
+      "evidence": [],
+      "acceptance_record": ".planning/memory-resilience/evidence/Q023.json"
+    },
+    {
+      "id": "Q024",
+      "stage": "coverage_repair",
+      "title": "Verify and repair src/infrastructure/database/repositories/graph-repository.ts",
+      "status": "pending_rebaseline",
+      "depends_on": [
+        "B09"
+      ],
+      "scope": "src/infrastructure/database/repositories/graph-repository.ts",
+      "deliverable": "Reproduce uncovered behavior, add meaningful regression/boundary tests, fix demonstrated defects, satisfy this file's reviewed risk tier.",
+      "verification": "Current source-bound four-metric file evidence plus tier-required decision tests. Supersede only with explicit fresh evidence that this candidate is no longer a gap.",
+      "risk": "unclassified",
+      "authorization": "authorized",
+      "owner": "memory-nexus",
+      "historical_gaps": [
+        "branches=91.42"
+      ],
+      "historical_evidence": "docs/audits/2026-09-19-repair-evidence/per-file-coverage-gaps.json",
+      "evidence": [],
+      "acceptance_record": ".planning/memory-resilience/evidence/Q024.json"
+    },
+    {
+      "id": "Q025",
+      "stage": "coverage_repair",
+      "title": "Verify and repair src/infrastructure/database/repositories/link-repository.ts",
+      "status": "pending_rebaseline",
+      "depends_on": [
+        "B09"
+      ],
+      "scope": "src/infrastructure/database/repositories/link-repository.ts",
+      "deliverable": "Reproduce uncovered behavior, add meaningful regression/boundary tests, fix demonstrated defects, satisfy this file's reviewed risk tier.",
+      "verification": "Current source-bound four-metric file evidence plus tier-required decision tests. Supersede only with explicit fresh evidence that this candidate is no longer a gap.",
+      "risk": "unclassified",
+      "authorization": "authorized",
+      "owner": "memory-nexus",
+      "historical_gaps": [
+        "branches=50"
+      ],
+      "historical_evidence": "docs/audits/2026-09-19-repair-evidence/per-file-coverage-gaps.json",
+      "evidence": [],
+      "acceptance_record": ".planning/memory-resilience/evidence/Q025.json"
+    },
+    {
+      "id": "Q026",
+      "stage": "coverage_repair",
+      "title": "Verify and repair src/infrastructure/database/repositories/memory-governance-repository.ts",
+      "status": "pending_rebaseline",
+      "depends_on": [
+        "B09"
+      ],
+      "scope": "src/infrastructure/database/repositories/memory-governance-repository.ts",
+      "deliverable": "Reproduce uncovered behavior, add meaningful regression/boundary tests, fix demonstrated defects, satisfy this file's reviewed risk tier.",
+      "verification": "Current source-bound four-metric file evidence plus tier-required decision tests. Supersede only with explicit fresh evidence that this candidate is no longer a gap.",
+      "risk": "unclassified",
+      "authorization": "authorized",
+      "owner": "memory-nexus",
+      "historical_gaps": [
+        "statements=93.75",
+        "lines=93.42"
+      ],
+      "historical_evidence": "docs/audits/2026-09-19-repair-evidence/per-file-coverage-gaps.json",
+      "evidence": [],
+      "acceptance_record": ".planning/memory-resilience/evidence/Q026.json"
+    },
+    {
+      "id": "Q027",
+      "stage": "coverage_repair",
+      "title": "Verify and repair src/infrastructure/database/repositories/memory-utility-repository.ts",
+      "status": "pending_rebaseline",
+      "depends_on": [
+        "B09"
+      ],
+      "scope": "src/infrastructure/database/repositories/memory-utility-repository.ts",
+      "deliverable": "Reproduce uncovered behavior, add meaningful regression/boundary tests, fix demonstrated defects, satisfy this file's reviewed risk tier.",
+      "verification": "Current source-bound four-metric file evidence plus tier-required decision tests. Supersede only with explicit fresh evidence that this candidate is no longer a gap.",
+      "risk": "unclassified",
+      "authorization": "authorized",
+      "owner": "memory-nexus",
+      "historical_gaps": [
+        "branches=85.71",
+        "lines=94.44"
+      ],
+      "historical_evidence": "docs/audits/2026-09-19-repair-evidence/per-file-coverage-gaps.json",
+      "evidence": [],
+      "acceptance_record": ".planning/memory-resilience/evidence/Q027.json"
+    },
+    {
+      "id": "Q028",
+      "stage": "coverage_repair",
+      "title": "Verify and repair src/infrastructure/database/repositories/message-repository.ts",
+      "status": "pending_rebaseline",
+      "depends_on": [
+        "B09"
+      ],
+      "scope": "src/infrastructure/database/repositories/message-repository.ts",
+      "deliverable": "Reproduce uncovered behavior, add meaningful regression/boundary tests, fix demonstrated defects, satisfy this file's reviewed risk tier.",
+      "verification": "Current source-bound four-metric file evidence plus tier-required decision tests. Supersede only with explicit fresh evidence that this candidate is no longer a gap.",
+      "risk": "unclassified",
+      "authorization": "authorized",
+      "owner": "memory-nexus",
+      "historical_gaps": [
+        "statements=94.11",
+        "lines=93.75"
+      ],
+      "historical_evidence": "docs/audits/2026-09-19-repair-evidence/per-file-coverage-gaps.json",
+      "evidence": [],
+      "acceptance_record": ".planning/memory-resilience/evidence/Q028.json"
+    },
+    {
+      "id": "Q029",
+      "stage": "coverage_repair",
+      "title": "Verify and repair src/infrastructure/database/repositories/persona-repository.ts",
+      "status": "pending_rebaseline",
+      "depends_on": [
+        "B09"
+      ],
+      "scope": "src/infrastructure/database/repositories/persona-repository.ts",
+      "deliverable": "Reproduce uncovered behavior, add meaningful regression/boundary tests, fix demonstrated defects, satisfy this file's reviewed risk tier.",
+      "verification": "Current source-bound four-metric file evidence plus tier-required decision tests. Supersede only with explicit fresh evidence that this candidate is no longer a gap.",
+      "risk": "unclassified",
+      "authorization": "authorized",
+      "owner": "memory-nexus",
+      "historical_gaps": [
+        "branches=93.75"
+      ],
+      "historical_evidence": "docs/audits/2026-09-19-repair-evidence/per-file-coverage-gaps.json",
+      "evidence": [],
+      "acceptance_record": ".planning/memory-resilience/evidence/Q029.json"
+    },
+    {
+      "id": "Q030",
+      "stage": "coverage_repair",
+      "title": "Verify and repair src/infrastructure/database/repositories/tool-use-repository.ts",
+      "status": "pending_rebaseline",
+      "depends_on": [
+        "B09"
+      ],
+      "scope": "src/infrastructure/database/repositories/tool-use-repository.ts",
+      "deliverable": "Reproduce uncovered behavior, add meaningful regression/boundary tests, fix demonstrated defects, satisfy this file's reviewed risk tier.",
+      "verification": "Current source-bound four-metric file evidence plus tier-required decision tests. Supersede only with explicit fresh evidence that this candidate is no longer a gap.",
+      "risk": "unclassified",
+      "authorization": "authorized",
+      "owner": "memory-nexus",
+      "historical_gaps": [
+        "statements=93.33",
+        "lines=92.85"
+      ],
+      "historical_evidence": "docs/audits/2026-09-19-repair-evidence/per-file-coverage-gaps.json",
+      "evidence": [],
+      "acceptance_record": ".planning/memory-resilience/evidence/Q030.json"
+    },
+    {
+      "id": "Q031",
+      "stage": "coverage_repair",
+      "title": "Verify and repair src/infrastructure/database/services/stats-service.ts",
+      "status": "pending_rebaseline",
+      "depends_on": [
+        "B09"
+      ],
+      "scope": "src/infrastructure/database/services/stats-service.ts",
+      "deliverable": "Reproduce uncovered behavior, add meaningful regression/boundary tests, fix demonstrated defects, satisfy this file's reviewed risk tier.",
+      "verification": "Current source-bound four-metric file evidence plus tier-required decision tests. Supersede only with explicit fresh evidence that this candidate is no longer a gap.",
+      "risk": "unclassified",
+      "authorization": "authorized",
+      "owner": "memory-nexus",
+      "historical_gaps": [
+        "branches=60"
+      ],
+      "historical_evidence": "docs/audits/2026-09-19-repair-evidence/per-file-coverage-gaps.json",
+      "evidence": [],
+      "acceptance_record": ".planning/memory-resilience/evidence/Q031.json"
+    },
+    {
+      "id": "Q032",
+      "stage": "coverage_repair",
+      "title": "Verify and repair src/infrastructure/embedding/background-embedder.ts",
+      "status": "pending_rebaseline",
+      "depends_on": [
+        "B09"
+      ],
+      "scope": "src/infrastructure/embedding/background-embedder.ts",
+      "deliverable": "Reproduce uncovered behavior, add meaningful regression/boundary tests, fix demonstrated defects, satisfy this file's reviewed risk tier.",
+      "verification": "Current source-bound four-metric file evidence plus tier-required decision tests. Supersede only with explicit fresh evidence that this candidate is no longer a gap.",
+      "risk": "unclassified",
+      "authorization": "authorized",
+      "owner": "memory-nexus",
+      "historical_gaps": [
+        "branches=85.18"
+      ],
+      "historical_evidence": "docs/audits/2026-09-19-repair-evidence/per-file-coverage-gaps.json",
+      "evidence": [],
+      "acceptance_record": ".planning/memory-resilience/evidence/Q032.json"
+    },
+    {
+      "id": "Q033",
+      "stage": "coverage_repair",
+      "title": "Verify and repair src/infrastructure/embedding/ollama-provider.ts",
+      "status": "pending_rebaseline",
+      "depends_on": [
+        "B09"
+      ],
+      "scope": "src/infrastructure/embedding/ollama-provider.ts",
+      "deliverable": "Reproduce uncovered behavior, add meaningful regression/boundary tests, fix demonstrated defects, satisfy this file's reviewed risk tier.",
+      "verification": "Current source-bound four-metric file evidence plus tier-required decision tests. Supersede only with explicit fresh evidence that this candidate is no longer a gap.",
+      "risk": "unclassified",
+      "authorization": "authorized",
+      "owner": "memory-nexus",
+      "historical_gaps": [
+        "statements=93.33",
+        "branches=86.66",
+        "lines=93.33"
+      ],
+      "historical_evidence": "docs/audits/2026-09-19-repair-evidence/per-file-coverage-gaps.json",
+      "evidence": [],
+      "acceptance_record": ".planning/memory-resilience/evidence/Q033.json"
+    },
+    {
+      "id": "Q034",
+      "stage": "coverage_repair",
+      "title": "Verify and repair src/infrastructure/embedding/openai-provider.ts",
+      "status": "pending_rebaseline",
+      "depends_on": [
+        "B09"
+      ],
+      "scope": "src/infrastructure/embedding/openai-provider.ts",
+      "deliverable": "Reproduce uncovered behavior, add meaningful regression/boundary tests, fix demonstrated defects, satisfy this file's reviewed risk tier.",
+      "verification": "Current source-bound four-metric file evidence plus tier-required decision tests. Supersede only with explicit fresh evidence that this candidate is no longer a gap.",
+      "risk": "unclassified",
+      "authorization": "authorized",
+      "owner": "memory-nexus",
+      "historical_gaps": [
+        "statements=93.75",
+        "branches=88.88",
+        "lines=93.54"
+      ],
+      "historical_evidence": "docs/audits/2026-09-19-repair-evidence/per-file-coverage-gaps.json",
+      "evidence": [],
+      "acceptance_record": ".planning/memory-resilience/evidence/Q034.json"
+    },
+    {
+      "id": "Q035",
+      "stage": "coverage_repair",
+      "title": "Verify and repair src/infrastructure/hooks/hook-runner.ts",
+      "status": "pending_rebaseline",
+      "depends_on": [
+        "B09"
+      ],
+      "scope": "src/infrastructure/hooks/hook-runner.ts",
+      "deliverable": "Reproduce uncovered behavior, add meaningful regression/boundary tests, fix demonstrated defects, satisfy this file's reviewed risk tier.",
+      "verification": "Current source-bound four-metric file evidence plus tier-required decision tests. Supersede only with explicit fresh evidence that this candidate is no longer a gap.",
+      "risk": "unclassified",
+      "authorization": "authorized",
+      "owner": "memory-nexus",
+      "historical_gaps": [
+        "statements=90",
+        "branches=88.23",
+        "lines=90"
+      ],
+      "historical_evidence": "docs/audits/2026-09-19-repair-evidence/per-file-coverage-gaps.json",
+      "evidence": [],
+      "acceptance_record": ".planning/memory-resilience/evidence/Q035.json"
+    },
+    {
+      "id": "Q036",
+      "stage": "coverage_repair",
+      "title": "Verify and repair src/infrastructure/hooks/log-writer.ts",
+      "status": "pending_rebaseline",
+      "depends_on": [
+        "B09"
+      ],
+      "scope": "src/infrastructure/hooks/log-writer.ts",
+      "deliverable": "Reproduce uncovered behavior, add meaningful regression/boundary tests, fix demonstrated defects, satisfy this file's reviewed risk tier.",
+      "verification": "Current source-bound four-metric file evidence plus tier-required decision tests. Supersede only with explicit fresh evidence that this candidate is no longer a gap.",
+      "risk": "unclassified",
+      "authorization": "authorized",
+      "owner": "memory-nexus",
+      "historical_gaps": [
+        "statements=94.73",
+        "branches=90.9",
+        "lines=94.59"
+      ],
+      "historical_evidence": "docs/audits/2026-09-19-repair-evidence/per-file-coverage-gaps.json",
+      "evidence": [],
+      "acceptance_record": ".planning/memory-resilience/evidence/Q036.json"
+    },
+    {
+      "id": "Q037",
+      "stage": "coverage_repair",
+      "title": "Verify and repair src/infrastructure/hooks/settings-manager.ts",
+      "status": "pending_rebaseline",
+      "depends_on": [
+        "B09"
+      ],
+      "scope": "src/infrastructure/hooks/settings-manager.ts",
+      "deliverable": "Reproduce uncovered behavior, add meaningful regression/boundary tests, fix demonstrated defects, satisfy this file's reviewed risk tier.",
+      "verification": "Current source-bound four-metric file evidence plus tier-required decision tests. Supersede only with explicit fresh evidence that this candidate is no longer a gap.",
+      "risk": "unclassified",
+      "authorization": "authorized",
+      "owner": "memory-nexus",
+      "historical_gaps": [
+        "branches=93.47"
+      ],
+      "historical_evidence": "docs/audits/2026-09-19-repair-evidence/per-file-coverage-gaps.json",
+      "evidence": [],
+      "acceptance_record": ".planning/memory-resilience/evidence/Q037.json"
+    },
+    {
+      "id": "Q038",
+      "stage": "coverage_repair",
+      "title": "Verify and repair src/infrastructure/hooks/sync-hook-script.ts",
+      "status": "pending_rebaseline",
+      "depends_on": [
+        "B09"
+      ],
+      "scope": "src/infrastructure/hooks/sync-hook-script.ts",
+      "deliverable": "Reproduce uncovered behavior, add meaningful regression/boundary tests, fix demonstrated defects, satisfy this file's reviewed risk tier.",
+      "verification": "Current source-bound four-metric file evidence plus tier-required decision tests. Supersede only with explicit fresh evidence that this candidate is no longer a gap.",
+      "risk": "unclassified",
+      "authorization": "authorized",
+      "owner": "memory-nexus",
+      "historical_gaps": [
+        "statements=90",
+        "branches=83.33",
+        "functions=72.72",
+        "lines=90"
+      ],
+      "historical_evidence": "docs/audits/2026-09-19-repair-evidence/per-file-coverage-gaps.json",
+      "evidence": [],
+      "acceptance_record": ".planning/memory-resilience/evidence/Q038.json"
+    },
+    {
+      "id": "Q039",
+      "stage": "coverage_repair",
+      "title": "Verify and repair src/infrastructure/hooks/sync-logger-adapter.ts",
+      "status": "pending_rebaseline",
+      "depends_on": [
+        "B09"
+      ],
+      "scope": "src/infrastructure/hooks/sync-logger-adapter.ts",
+      "deliverable": "Reproduce uncovered behavior, add meaningful regression/boundary tests, fix demonstrated defects, satisfy this file's reviewed risk tier.",
+      "verification": "Current source-bound four-metric file evidence plus tier-required decision tests. Supersede only with explicit fresh evidence that this candidate is no longer a gap.",
+      "risk": "unclassified",
+      "authorization": "authorized",
+      "owner": "memory-nexus",
+      "historical_gaps": [
+        "branches=0"
+      ],
+      "historical_evidence": "docs/audits/2026-09-19-repair-evidence/per-file-coverage-gaps.json",
+      "evidence": [],
+      "acceptance_record": ".planning/memory-resilience/evidence/Q039.json"
+    },
+    {
+      "id": "Q040",
+      "stage": "coverage_repair",
+      "title": "Verify and repair src/infrastructure/llm/claude-cli-extractor.ts",
+      "status": "pending_rebaseline",
+      "depends_on": [
+        "B09"
+      ],
+      "scope": "src/infrastructure/llm/claude-cli-extractor.ts",
+      "deliverable": "Reproduce uncovered behavior, add meaningful regression/boundary tests, fix demonstrated defects, satisfy this file's reviewed risk tier.",
+      "verification": "Current source-bound four-metric file evidence plus tier-required decision tests. Supersede only with explicit fresh evidence that this candidate is no longer a gap.",
+      "risk": "unclassified",
+      "authorization": "authorized",
+      "owner": "memory-nexus",
+      "historical_gaps": [
+        "branches=75"
+      ],
+      "historical_evidence": "docs/audits/2026-09-19-repair-evidence/per-file-coverage-gaps.json",
+      "evidence": [],
+      "acceptance_record": ".planning/memory-resilience/evidence/Q040.json"
+    },
+    {
+      "id": "Q041",
+      "stage": "coverage_repair",
+      "title": "Verify and repair src/infrastructure/parsers/timestamp.ts",
+      "status": "pending_rebaseline",
+      "depends_on": [
+        "B09"
+      ],
+      "scope": "src/infrastructure/parsers/timestamp.ts",
+      "deliverable": "Reproduce uncovered behavior, add meaningful regression/boundary tests, fix demonstrated defects, satisfy this file's reviewed risk tier.",
+      "verification": "Current source-bound four-metric file evidence plus tier-required decision tests. Supersede only with explicit fresh evidence that this candidate is no longer a gap.",
+      "risk": "unclassified",
+      "authorization": "authorized",
+      "owner": "memory-nexus",
+      "historical_gaps": [
+        "branches=94.44"
+      ],
+      "historical_evidence": "docs/audits/2026-09-19-repair-evidence/per-file-coverage-gaps.json",
+      "evidence": [],
+      "acceptance_record": ".planning/memory-resilience/evidence/Q041.json"
+    },
+    {
+      "id": "Q042",
+      "stage": "coverage_repair",
+      "title": "Verify and repair src/infrastructure/providers/provider-registry.ts",
+      "status": "pending_rebaseline",
+      "depends_on": [
+        "B09"
+      ],
+      "scope": "src/infrastructure/providers/provider-registry.ts",
+      "deliverable": "Reproduce uncovered behavior, add meaningful regression/boundary tests, fix demonstrated defects, satisfy this file's reviewed risk tier.",
+      "verification": "Current source-bound four-metric file evidence plus tier-required decision tests. Supersede only with explicit fresh evidence that this candidate is no longer a gap.",
+      "risk": "unclassified",
+      "authorization": "authorized",
+      "owner": "memory-nexus",
+      "historical_gaps": [
+        "branches=93.22"
+      ],
+      "historical_evidence": "docs/audits/2026-09-19-repair-evidence/per-file-coverage-gaps.json",
+      "evidence": [],
+      "acceptance_record": ".planning/memory-resilience/evidence/Q042.json"
+    },
+    {
+      "id": "Q043",
+      "stage": "coverage_repair",
+      "title": "Verify and repair src/infrastructure/remote/git-remote-event-transport.ts",
+      "status": "pending_rebaseline",
+      "depends_on": [
+        "B09"
+      ],
+      "scope": "src/infrastructure/remote/git-remote-event-transport.ts",
+      "deliverable": "Reproduce uncovered behavior, add meaningful regression/boundary tests, fix demonstrated defects, satisfy this file's reviewed risk tier.",
+      "verification": "Current source-bound four-metric file evidence plus tier-required decision tests. Supersede only with explicit fresh evidence that this candidate is no longer a gap.",
+      "risk": "unclassified",
+      "authorization": "authorized",
+      "owner": "memory-nexus",
+      "historical_gaps": [
+        "branches=93.47"
+      ],
+      "historical_evidence": "docs/audits/2026-09-19-repair-evidence/per-file-coverage-gaps.json",
+      "evidence": [],
+      "acceptance_record": ".planning/memory-resilience/evidence/Q043.json"
+    },
+    {
+      "id": "Q044",
+      "stage": "coverage_repair",
+      "title": "Verify and repair src/infrastructure/signals/signal-handler.ts",
+      "status": "pending_rebaseline",
+      "depends_on": [
+        "B09"
+      ],
+      "scope": "src/infrastructure/signals/signal-handler.ts",
+      "deliverable": "Reproduce uncovered behavior, add meaningful regression/boundary tests, fix demonstrated defects, satisfy this file's reviewed risk tier.",
+      "verification": "Current source-bound four-metric file evidence plus tier-required decision tests. Supersede only with explicit fresh evidence that this candidate is no longer a gap.",
+      "risk": "unclassified",
+      "authorization": "authorized",
+      "owner": "memory-nexus",
+      "historical_gaps": [
+        "statements=91.13",
+        "functions=85.18",
+        "lines=91.13"
+      ],
+      "historical_evidence": "docs/audits/2026-09-19-repair-evidence/per-file-coverage-gaps.json",
+      "evidence": [],
+      "acceptance_record": ".planning/memory-resilience/evidence/Q044.json"
+    },
+    {
+      "id": "Q045",
+      "stage": "coverage_repair",
+      "title": "Verify and repair src/infrastructure/sources/session-source.ts",
+      "status": "pending_rebaseline",
+      "depends_on": [
+        "B09"
+      ],
+      "scope": "src/infrastructure/sources/session-source.ts",
+      "deliverable": "Reproduce uncovered behavior, add meaningful regression/boundary tests, fix demonstrated defects, satisfy this file's reviewed risk tier.",
+      "verification": "Current source-bound four-metric file evidence plus tier-required decision tests. Supersede only with explicit fresh evidence that this candidate is no longer a gap.",
+      "risk": "unclassified",
+      "authorization": "authorized",
+      "owner": "memory-nexus",
+      "historical_gaps": [
+        "statements=86.88",
+        "branches=90.9",
+        "lines=86.66"
+      ],
+      "historical_evidence": "docs/audits/2026-09-19-repair-evidence/per-file-coverage-gaps.json",
+      "evidence": [],
+      "acceptance_record": ".planning/memory-resilience/evidence/Q045.json"
+    },
+    {
+      "id": "Q046",
+      "stage": "coverage_repair",
+      "title": "Verify and repair src/presentation/cli/db-startup.ts",
+      "status": "pending_rebaseline",
+      "depends_on": [
+        "B09"
+      ],
+      "scope": "src/presentation/cli/db-startup.ts",
+      "deliverable": "Reproduce uncovered behavior, add meaningful regression/boundary tests, fix demonstrated defects, satisfy this file's reviewed risk tier.",
+      "verification": "Current source-bound four-metric file evidence plus tier-required decision tests. Supersede only with explicit fresh evidence that this candidate is no longer a gap.",
+      "risk": "unclassified",
+      "authorization": "authorized",
+      "owner": "memory-nexus",
+      "historical_gaps": [
+        "statements=83.01",
+        "branches=91.17",
+        "functions=50",
+        "lines=83.01"
+      ],
+      "historical_evidence": "docs/audits/2026-09-19-repair-evidence/per-file-coverage-gaps.json",
+      "evidence": [],
+      "acceptance_record": ".planning/memory-resilience/evidence/Q046.json"
+    },
+    {
+      "id": "Q047",
+      "stage": "coverage_repair",
+      "title": "Verify and repair src/presentation/cli/index.ts",
+      "status": "pending_rebaseline",
+      "depends_on": [
+        "B09"
+      ],
+      "scope": "src/presentation/cli/index.ts",
+      "deliverable": "Reproduce uncovered behavior, add meaningful regression/boundary tests, fix demonstrated defects, satisfy this file's reviewed risk tier.",
+      "verification": "Current source-bound four-metric file evidence plus tier-required decision tests. Supersede only with explicit fresh evidence that this candidate is no longer a gap.",
+      "risk": "unclassified",
+      "authorization": "authorized",
+      "owner": "memory-nexus",
+      "historical_gaps": [
+        "statements=92.5",
+        "branches=25",
+        "lines=92.5"
+      ],
+      "historical_evidence": "docs/audits/2026-09-19-repair-evidence/per-file-coverage-gaps.json",
+      "evidence": [],
+      "acceptance_record": ".planning/memory-resilience/evidence/Q047.json"
+    },
+    {
+      "id": "Q048",
+      "stage": "coverage_repair",
+      "title": "Verify and repair src/presentation/cli/commands/audit-secrets.ts",
+      "status": "pending_rebaseline",
+      "depends_on": [
+        "B09"
+      ],
+      "scope": "src/presentation/cli/commands/audit-secrets.ts",
+      "deliverable": "Reproduce uncovered behavior, add meaningful regression/boundary tests, fix demonstrated defects, satisfy this file's reviewed risk tier.",
+      "verification": "Current source-bound four-metric file evidence plus tier-required decision tests. Supersede only with explicit fresh evidence that this candidate is no longer a gap.",
+      "risk": "unclassified",
+      "authorization": "authorized",
+      "owner": "memory-nexus",
+      "historical_gaps": [
+        "functions=90.9"
+      ],
+      "historical_evidence": "docs/audits/2026-09-19-repair-evidence/per-file-coverage-gaps.json",
+      "evidence": [],
+      "acceptance_record": ".planning/memory-resilience/evidence/Q048.json"
+    },
+    {
+      "id": "Q049",
+      "stage": "coverage_repair",
+      "title": "Verify and repair src/presentation/cli/commands/backfill.ts",
+      "status": "pending_rebaseline",
+      "depends_on": [
+        "B09"
+      ],
+      "scope": "src/presentation/cli/commands/backfill.ts",
+      "deliverable": "Reproduce uncovered behavior, add meaningful regression/boundary tests, fix demonstrated defects, satisfy this file's reviewed risk tier.",
+      "verification": "Current source-bound four-metric file evidence plus tier-required decision tests. Supersede only with explicit fresh evidence that this candidate is no longer a gap.",
+      "risk": "unclassified",
+      "authorization": "authorized",
+      "owner": "memory-nexus",
+      "historical_gaps": [
+        "statements=93.97",
+        "branches=91.17",
+        "functions=66.66",
+        "lines=93.97"
+      ],
+      "historical_evidence": "docs/audits/2026-09-19-repair-evidence/per-file-coverage-gaps.json",
+      "evidence": [],
+      "acceptance_record": ".planning/memory-resilience/evidence/Q049.json"
+    },
+    {
+      "id": "Q050",
+      "stage": "coverage_repair",
+      "title": "Verify and repair src/presentation/cli/commands/backup.ts",
+      "status": "pending_rebaseline",
+      "depends_on": [
+        "B09"
+      ],
+      "scope": "src/presentation/cli/commands/backup.ts",
+      "deliverable": "Reproduce uncovered behavior, add meaningful regression/boundary tests, fix demonstrated defects, satisfy this file's reviewed risk tier.",
+      "verification": "Current source-bound four-metric file evidence plus tier-required decision tests. Supersede only with explicit fresh evidence that this candidate is no longer a gap.",
+      "risk": "unclassified",
+      "authorization": "authorized",
+      "owner": "memory-nexus",
+      "historical_gaps": [
+        "statements=94.57",
+        "branches=83.91",
+        "functions=87.5",
+        "lines=94.49"
+      ],
+      "historical_evidence": "docs/audits/2026-09-19-repair-evidence/per-file-coverage-gaps.json",
+      "evidence": [],
+      "acceptance_record": ".planning/memory-resilience/evidence/Q050.json"
+    },
+    {
+      "id": "Q051",
+      "stage": "coverage_repair",
+      "title": "Verify and repair src/presentation/cli/commands/browse.ts",
+      "status": "pending_rebaseline",
+      "depends_on": [
+        "B09"
+      ],
+      "scope": "src/presentation/cli/commands/browse.ts",
+      "deliverable": "Reproduce uncovered behavior, add meaningful regression/boundary tests, fix demonstrated defects, satisfy this file's reviewed risk tier.",
+      "verification": "Current source-bound four-metric file evidence plus tier-required decision tests. Supersede only with explicit fresh evidence that this candidate is no longer a gap.",
+      "risk": "unclassified",
+      "authorization": "authorized",
+      "owner": "memory-nexus",
+      "historical_gaps": [
+        "branches=92.3",
+        "functions=75"
+      ],
+      "historical_evidence": "docs/audits/2026-09-19-repair-evidence/per-file-coverage-gaps.json",
+      "evidence": [],
+      "acceptance_record": ".planning/memory-resilience/evidence/Q051.json"
+    },
+    {
+      "id": "Q052",
+      "stage": "coverage_repair",
+      "title": "Verify and repair src/presentation/cli/commands/completion.ts",
+      "status": "pending_rebaseline",
+      "depends_on": [
+        "B09"
+      ],
+      "scope": "src/presentation/cli/commands/completion.ts",
+      "deliverable": "Reproduce uncovered behavior, add meaningful regression/boundary tests, fix demonstrated defects, satisfy this file's reviewed risk tier.",
+      "verification": "Current source-bound four-metric file evidence plus tier-required decision tests. Supersede only with explicit fresh evidence that this candidate is no longer a gap.",
+      "risk": "unclassified",
+      "authorization": "authorized",
+      "owner": "memory-nexus",
+      "historical_gaps": [
+        "statements=80.95",
+        "branches=88.88",
+        "functions=87.5",
+        "lines=80.95"
+      ],
+      "historical_evidence": "docs/audits/2026-09-19-repair-evidence/per-file-coverage-gaps.json",
+      "evidence": [],
+      "acceptance_record": ".planning/memory-resilience/evidence/Q052.json"
+    },
+    {
+      "id": "Q053",
+      "stage": "coverage_repair",
+      "title": "Verify and repair src/presentation/cli/commands/context.ts",
+      "status": "pending_rebaseline",
+      "depends_on": [
+        "B09"
+      ],
+      "scope": "src/presentation/cli/commands/context.ts",
+      "deliverable": "Reproduce uncovered behavior, add meaningful regression/boundary tests, fix demonstrated defects, satisfy this file's reviewed risk tier.",
+      "verification": "Current source-bound four-metric file evidence plus tier-required decision tests. Supersede only with explicit fresh evidence that this candidate is no longer a gap.",
+      "risk": "unclassified",
+      "authorization": "authorized",
+      "owner": "memory-nexus",
+      "historical_gaps": [
+        "branches=94.23"
+      ],
+      "historical_evidence": "docs/audits/2026-09-19-repair-evidence/per-file-coverage-gaps.json",
+      "evidence": [],
+      "acceptance_record": ".planning/memory-resilience/evidence/Q053.json"
+    },
+    {
+      "id": "Q054",
+      "stage": "coverage_repair",
+      "title": "Verify and repair src/presentation/cli/commands/doctor.ts",
+      "status": "pending_rebaseline",
+      "depends_on": [
+        "B09"
+      ],
+      "scope": "src/presentation/cli/commands/doctor.ts",
+      "deliverable": "Reproduce uncovered behavior, add meaningful regression/boundary tests, fix demonstrated defects, satisfy this file's reviewed risk tier.",
+      "verification": "Current source-bound four-metric file evidence plus tier-required decision tests. Supersede only with explicit fresh evidence that this candidate is no longer a gap.",
+      "risk": "unclassified",
+      "authorization": "authorized",
+      "owner": "memory-nexus",
+      "historical_gaps": [
+        "branches=93.28",
+        "functions=94.73"
+      ],
+      "historical_evidence": "docs/audits/2026-09-19-repair-evidence/per-file-coverage-gaps.json",
+      "evidence": [],
+      "acceptance_record": ".planning/memory-resilience/evidence/Q054.json"
+    },
+    {
+      "id": "Q055",
+      "stage": "coverage_repair",
+      "title": "Verify and repair src/presentation/cli/commands/dream.ts",
+      "status": "pending_rebaseline",
+      "depends_on": [
+        "B09"
+      ],
+      "scope": "src/presentation/cli/commands/dream.ts",
+      "deliverable": "Reproduce uncovered behavior, add meaningful regression/boundary tests, fix demonstrated defects, satisfy this file's reviewed risk tier.",
+      "verification": "Current source-bound four-metric file evidence plus tier-required decision tests. Supersede only with explicit fresh evidence that this candidate is no longer a gap.",
+      "risk": "unclassified",
+      "authorization": "authorized",
+      "owner": "memory-nexus",
+      "historical_gaps": [
+        "branches=86.48"
+      ],
+      "historical_evidence": "docs/audits/2026-09-19-repair-evidence/per-file-coverage-gaps.json",
+      "evidence": [],
+      "acceptance_record": ".planning/memory-resilience/evidence/Q055.json"
+    },
+    {
+      "id": "Q056",
+      "stage": "coverage_repair",
+      "title": "Verify and repair src/presentation/cli/commands/export.ts",
+      "status": "pending_rebaseline",
+      "depends_on": [
+        "B09"
+      ],
+      "scope": "src/presentation/cli/commands/export.ts",
+      "deliverable": "Reproduce uncovered behavior, add meaningful regression/boundary tests, fix demonstrated defects, satisfy this file's reviewed risk tier.",
+      "verification": "Current source-bound four-metric file evidence plus tier-required decision tests. Supersede only with explicit fresh evidence that this candidate is no longer a gap.",
+      "risk": "unclassified",
+      "authorization": "authorized",
+      "owner": "memory-nexus",
+      "historical_gaps": [
+        "statements=93.33",
+        "branches=88.23",
+        "functions=80"
+      ],
+      "historical_evidence": "docs/audits/2026-09-19-repair-evidence/per-file-coverage-gaps.json",
+      "evidence": [],
+      "acceptance_record": ".planning/memory-resilience/evidence/Q056.json"
+    },
+    {
+      "id": "Q057",
+      "stage": "coverage_repair",
+      "title": "Verify and repair src/presentation/cli/commands/extract.ts",
+      "status": "pending_rebaseline",
+      "depends_on": [
+        "B09"
+      ],
+      "scope": "src/presentation/cli/commands/extract.ts",
+      "deliverable": "Reproduce uncovered behavior, add meaningful regression/boundary tests, fix demonstrated defects, satisfy this file's reviewed risk tier.",
+      "verification": "Current source-bound four-metric file evidence plus tier-required decision tests. Supersede only with explicit fresh evidence that this candidate is no longer a gap.",
+      "risk": "unclassified",
+      "authorization": "authorized",
+      "owner": "memory-nexus",
+      "historical_gaps": [
+        "branches=94.82"
+      ],
+      "historical_evidence": "docs/audits/2026-09-19-repair-evidence/per-file-coverage-gaps.json",
+      "evidence": [],
+      "acceptance_record": ".planning/memory-resilience/evidence/Q057.json"
+    },
+    {
+      "id": "Q058",
+      "stage": "coverage_repair",
+      "title": "Verify and repair src/presentation/cli/commands/facts.ts",
+      "status": "pending_rebaseline",
+      "depends_on": [
+        "B09"
+      ],
+      "scope": "src/presentation/cli/commands/facts.ts",
+      "deliverable": "Reproduce uncovered behavior, add meaningful regression/boundary tests, fix demonstrated defects, satisfy this file's reviewed risk tier.",
+      "verification": "Current source-bound four-metric file evidence plus tier-required decision tests. Supersede only with explicit fresh evidence that this candidate is no longer a gap.",
+      "risk": "unclassified",
+      "authorization": "authorized",
+      "owner": "memory-nexus",
+      "historical_gaps": [
+        "branches=91.3"
+      ],
+      "historical_evidence": "docs/audits/2026-09-19-repair-evidence/per-file-coverage-gaps.json",
+      "evidence": [],
+      "acceptance_record": ".planning/memory-resilience/evidence/Q058.json"
+    },
+    {
+      "id": "Q059",
+      "stage": "coverage_repair",
+      "title": "Verify and repair src/presentation/cli/commands/governance.ts",
+      "status": "pending_rebaseline",
+      "depends_on": [
+        "B09"
+      ],
+      "scope": "src/presentation/cli/commands/governance.ts",
+      "deliverable": "Reproduce uncovered behavior, add meaningful regression/boundary tests, fix demonstrated defects, satisfy this file's reviewed risk tier.",
+      "verification": "Current source-bound four-metric file evidence plus tier-required decision tests. Supersede only with explicit fresh evidence that this candidate is no longer a gap.",
+      "risk": "unclassified",
+      "authorization": "authorized",
+      "owner": "memory-nexus",
+      "historical_gaps": [
+        "statements=90.54",
+        "branches=91.8",
+        "functions=70",
+        "lines=90.41"
+      ],
+      "historical_evidence": "docs/audits/2026-09-19-repair-evidence/per-file-coverage-gaps.json",
+      "evidence": [],
+      "acceptance_record": ".planning/memory-resilience/evidence/Q059.json"
+    },
+    {
+      "id": "Q060",
+      "stage": "coverage_repair",
+      "title": "Verify and repair src/presentation/cli/commands/import.ts",
+      "status": "pending_rebaseline",
+      "depends_on": [
+        "B09"
+      ],
+      "scope": "src/presentation/cli/commands/import.ts",
+      "deliverable": "Reproduce uncovered behavior, add meaningful regression/boundary tests, fix demonstrated defects, satisfy this file's reviewed risk tier.",
+      "verification": "Current source-bound four-metric file evidence plus tier-required decision tests. Supersede only with explicit fresh evidence that this candidate is no longer a gap.",
+      "risk": "unclassified",
+      "authorization": "authorized",
+      "owner": "memory-nexus",
+      "historical_gaps": [
+        "statements=85.41",
+        "branches=92.85",
+        "functions=80",
+        "lines=85.41"
+      ],
+      "historical_evidence": "docs/audits/2026-09-19-repair-evidence/per-file-coverage-gaps.json",
+      "evidence": [],
+      "acceptance_record": ".planning/memory-resilience/evidence/Q060.json"
+    },
+    {
+      "id": "Q061",
+      "stage": "coverage_repair",
+      "title": "Verify and repair src/presentation/cli/commands/install.ts",
+      "status": "pending_rebaseline",
+      "depends_on": [
+        "B09"
+      ],
+      "scope": "src/presentation/cli/commands/install.ts",
+      "deliverable": "Reproduce uncovered behavior, add meaningful regression/boundary tests, fix demonstrated defects, satisfy this file's reviewed risk tier.",
+      "verification": "Current source-bound four-metric file evidence plus tier-required decision tests. Supersede only with explicit fresh evidence that this candidate is no longer a gap.",
+      "risk": "unclassified",
+      "authorization": "authorized",
+      "owner": "memory-nexus",
+      "historical_gaps": [
+        "statements=94.64",
+        "functions=83.33",
+        "lines=94.11"
+      ],
+      "historical_evidence": "docs/audits/2026-09-19-repair-evidence/per-file-coverage-gaps.json",
+      "evidence": [],
+      "acceptance_record": ".planning/memory-resilience/evidence/Q061.json"
+    },
+    {
+      "id": "Q062",
+      "stage": "coverage_repair",
+      "title": "Verify and repair src/presentation/cli/commands/migrate.ts",
+      "status": "pending_rebaseline",
+      "depends_on": [
+        "B09"
+      ],
+      "scope": "src/presentation/cli/commands/migrate.ts",
+      "deliverable": "Reproduce uncovered behavior, add meaningful regression/boundary tests, fix demonstrated defects, satisfy this file's reviewed risk tier.",
+      "verification": "Current source-bound four-metric file evidence plus tier-required decision tests. Supersede only with explicit fresh evidence that this candidate is no longer a gap.",
+      "risk": "unclassified",
+      "authorization": "authorized",
+      "owner": "memory-nexus",
+      "historical_gaps": [
+        "branches=93.44"
+      ],
+      "historical_evidence": "docs/audits/2026-09-19-repair-evidence/per-file-coverage-gaps.json",
+      "evidence": [],
+      "acceptance_record": ".planning/memory-resilience/evidence/Q062.json"
+    },
+    {
+      "id": "Q063",
+      "stage": "coverage_repair",
+      "title": "Verify and repair src/presentation/cli/commands/profile.ts",
+      "status": "pending_rebaseline",
+      "depends_on": [
+        "B09"
+      ],
+      "scope": "src/presentation/cli/commands/profile.ts",
+      "deliverable": "Reproduce uncovered behavior, add meaningful regression/boundary tests, fix demonstrated defects, satisfy this file's reviewed risk tier.",
+      "verification": "Current source-bound four-metric file evidence plus tier-required decision tests. Supersede only with explicit fresh evidence that this candidate is no longer a gap.",
+      "risk": "unclassified",
+      "authorization": "authorized",
+      "owner": "memory-nexus",
+      "historical_gaps": [
+        "statements=94.59",
+        "branches=91.22",
+        "functions=80",
+        "lines=94.44"
+      ],
+      "historical_evidence": "docs/audits/2026-09-19-repair-evidence/per-file-coverage-gaps.json",
+      "evidence": [],
+      "acceptance_record": ".planning/memory-resilience/evidence/Q063.json"
+    },
+    {
+      "id": "Q064",
+      "stage": "coverage_repair",
+      "title": "Verify and repair src/presentation/cli/commands/projections.ts",
+      "status": "pending_rebaseline",
+      "depends_on": [
+        "B09"
+      ],
+      "scope": "src/presentation/cli/commands/projections.ts",
+      "deliverable": "Reproduce uncovered behavior, add meaningful regression/boundary tests, fix demonstrated defects, satisfy this file's reviewed risk tier.",
+      "verification": "Current source-bound four-metric file evidence plus tier-required decision tests. Supersede only with explicit fresh evidence that this candidate is no longer a gap.",
+      "risk": "unclassified",
+      "authorization": "authorized",
+      "owner": "memory-nexus",
+      "historical_gaps": [
+        "branches=86.84"
+      ],
+      "historical_evidence": "docs/audits/2026-09-19-repair-evidence/per-file-coverage-gaps.json",
+      "evidence": [],
+      "acceptance_record": ".planning/memory-resilience/evidence/Q064.json"
+    },
+    {
+      "id": "Q065",
+      "stage": "coverage_repair",
+      "title": "Verify and repair src/presentation/cli/commands/purge.ts",
+      "status": "pending_rebaseline",
+      "depends_on": [
+        "B09"
+      ],
+      "scope": "src/presentation/cli/commands/purge.ts",
+      "deliverable": "Reproduce uncovered behavior, add meaningful regression/boundary tests, fix demonstrated defects, satisfy this file's reviewed risk tier.",
+      "verification": "Current source-bound four-metric file evidence plus tier-required decision tests. Supersede only with explicit fresh evidence that this candidate is no longer a gap.",
+      "risk": "unclassified",
+      "authorization": "authorized",
+      "owner": "memory-nexus",
+      "historical_gaps": [
+        "statements=93.65",
+        "functions=63.63",
+        "lines=93.65"
+      ],
+      "historical_evidence": "docs/audits/2026-09-19-repair-evidence/per-file-coverage-gaps.json",
+      "evidence": [],
+      "acceptance_record": ".planning/memory-resilience/evidence/Q065.json"
+    },
+    {
+      "id": "Q066",
+      "stage": "coverage_repair",
+      "title": "Verify and repair src/presentation/cli/commands/query.ts",
+      "status": "pending_rebaseline",
+      "depends_on": [
+        "B09"
+      ],
+      "scope": "src/presentation/cli/commands/query.ts",
+      "deliverable": "Reproduce uncovered behavior, add meaningful regression/boundary tests, fix demonstrated defects, satisfy this file's reviewed risk tier.",
+      "verification": "Current source-bound four-metric file evidence plus tier-required decision tests. Supersede only with explicit fresh evidence that this candidate is no longer a gap.",
+      "risk": "unclassified",
+      "authorization": "authorized",
+      "owner": "memory-nexus",
+      "historical_gaps": [
+        "branches=94.87"
+      ],
+      "historical_evidence": "docs/audits/2026-09-19-repair-evidence/per-file-coverage-gaps.json",
+      "evidence": [],
+      "acceptance_record": ".planning/memory-resilience/evidence/Q066.json"
+    },
+    {
+      "id": "Q067",
+      "stage": "coverage_repair",
+      "title": "Verify and repair src/presentation/cli/commands/remote.ts",
+      "status": "pending_rebaseline",
+      "depends_on": [
+        "B09"
+      ],
+      "scope": "src/presentation/cli/commands/remote.ts",
+      "deliverable": "Reproduce uncovered behavior, add meaningful regression/boundary tests, fix demonstrated defects, satisfy this file's reviewed risk tier.",
+      "verification": "Current source-bound four-metric file evidence plus tier-required decision tests. Supersede only with explicit fresh evidence that this candidate is no longer a gap.",
+      "risk": "unclassified",
+      "authorization": "authorized",
+      "owner": "memory-nexus",
+      "historical_gaps": [
+        "functions=90.62"
+      ],
+      "historical_evidence": "docs/audits/2026-09-19-repair-evidence/per-file-coverage-gaps.json",
+      "evidence": [],
+      "acceptance_record": ".planning/memory-resilience/evidence/Q067.json"
+    },
+    {
+      "id": "Q068",
+      "stage": "coverage_repair",
+      "title": "Verify and repair src/presentation/cli/commands/show.ts",
+      "status": "pending_rebaseline",
+      "depends_on": [
+        "B09"
+      ],
+      "scope": "src/presentation/cli/commands/show.ts",
+      "deliverable": "Reproduce uncovered behavior, add meaningful regression/boundary tests, fix demonstrated defects, satisfy this file's reviewed risk tier.",
+      "verification": "Current source-bound four-metric file evidence plus tier-required decision tests. Supersede only with explicit fresh evidence that this candidate is no longer a gap.",
+      "risk": "unclassified",
+      "authorization": "authorized",
+      "owner": "memory-nexus",
+      "historical_gaps": [
+        "branches=94.11"
+      ],
+      "historical_evidence": "docs/audits/2026-09-19-repair-evidence/per-file-coverage-gaps.json",
+      "evidence": [],
+      "acceptance_record": ".planning/memory-resilience/evidence/Q068.json"
+    },
+    {
+      "id": "Q069",
+      "stage": "coverage_repair",
+      "title": "Verify and repair src/presentation/cli/commands/uninstall.ts",
+      "status": "pending_rebaseline",
+      "depends_on": [
+        "B09"
+      ],
+      "scope": "src/presentation/cli/commands/uninstall.ts",
+      "deliverable": "Reproduce uncovered behavior, add meaningful regression/boundary tests, fix demonstrated defects, satisfy this file's reviewed risk tier.",
+      "verification": "Current source-bound four-metric file evidence plus tier-required decision tests. Supersede only with explicit fresh evidence that this candidate is no longer a gap.",
+      "risk": "unclassified",
+      "authorization": "authorized",
+      "owner": "memory-nexus",
+      "historical_gaps": [
+        "statements=90.47",
+        "branches=92.3",
+        "functions=66.66",
+        "lines=90.47"
+      ],
+      "historical_evidence": "docs/audits/2026-09-19-repair-evidence/per-file-coverage-gaps.json",
+      "evidence": [],
+      "acceptance_record": ".planning/memory-resilience/evidence/Q069.json"
+    },
+    {
+      "id": "Q070",
+      "stage": "coverage_repair",
+      "title": "Verify and repair src/presentation/cli/commands/friction/dashboard.ts",
+      "status": "pending_rebaseline",
+      "depends_on": [
+        "B09"
+      ],
+      "scope": "src/presentation/cli/commands/friction/dashboard.ts",
+      "deliverable": "Reproduce uncovered behavior, add meaningful regression/boundary tests, fix demonstrated defects, satisfy this file's reviewed risk tier.",
+      "verification": "Current source-bound four-metric file evidence plus tier-required decision tests. Supersede only with explicit fresh evidence that this candidate is no longer a gap.",
+      "risk": "unclassified",
+      "authorization": "authorized",
+      "owner": "memory-nexus",
+      "historical_gaps": [
+        "statements=90.9",
+        "branches=69.23",
+        "functions=50",
+        "lines=90.9"
+      ],
+      "historical_evidence": "docs/audits/2026-09-19-repair-evidence/per-file-coverage-gaps.json",
+      "evidence": [],
+      "acceptance_record": ".planning/memory-resilience/evidence/Q070.json"
+    },
+    {
+      "id": "Q071",
+      "stage": "coverage_repair",
+      "title": "Verify and repair src/presentation/cli/commands/friction/index.ts",
+      "status": "pending_rebaseline",
+      "depends_on": [
+        "B09"
+      ],
+      "scope": "src/presentation/cli/commands/friction/index.ts",
+      "deliverable": "Reproduce uncovered behavior, add meaningful regression/boundary tests, fix demonstrated defects, satisfy this file's reviewed risk tier.",
+      "verification": "Current source-bound four-metric file evidence plus tier-required decision tests. Supersede only with explicit fresh evidence that this candidate is no longer a gap.",
+      "risk": "unclassified",
+      "authorization": "authorized",
+      "owner": "memory-nexus",
+      "historical_gaps": [
+        "statements=73.91",
+        "branches=90.9",
+        "functions=25",
+        "lines=73.91"
+      ],
+      "historical_evidence": "docs/audits/2026-09-19-repair-evidence/per-file-coverage-gaps.json",
+      "evidence": [],
+      "acceptance_record": ".planning/memory-resilience/evidence/Q071.json"
+    },
+    {
+      "id": "Q072",
+      "stage": "coverage_repair",
+      "title": "Verify and repair src/presentation/cli/commands/friction/purge.ts",
+      "status": "pending_rebaseline",
+      "depends_on": [
+        "B09"
+      ],
+      "scope": "src/presentation/cli/commands/friction/purge.ts",
+      "deliverable": "Reproduce uncovered behavior, add meaningful regression/boundary tests, fix demonstrated defects, satisfy this file's reviewed risk tier.",
+      "verification": "Current source-bound four-metric file evidence plus tier-required decision tests. Supersede only with explicit fresh evidence that this candidate is no longer a gap.",
+      "risk": "unclassified",
+      "authorization": "authorized",
+      "owner": "memory-nexus",
+      "historical_gaps": [
+        "statements=93.75",
+        "branches=85",
+        "lines=93.75"
+      ],
+      "historical_evidence": "docs/audits/2026-09-19-repair-evidence/per-file-coverage-gaps.json",
+      "evidence": [],
+      "acceptance_record": ".planning/memory-resilience/evidence/Q072.json"
+    },
+    {
+      "id": "Q073",
+      "stage": "coverage_repair",
+      "title": "Verify and repair src/presentation/cli/commands/friction/wontfix.ts",
+      "status": "pending_rebaseline",
+      "depends_on": [
+        "B09"
+      ],
+      "scope": "src/presentation/cli/commands/friction/wontfix.ts",
+      "deliverable": "Reproduce uncovered behavior, add meaningful regression/boundary tests, fix demonstrated defects, satisfy this file's reviewed risk tier.",
+      "verification": "Current source-bound four-metric file evidence plus tier-required decision tests. Supersede only with explicit fresh evidence that this candidate is no longer a gap.",
+      "risk": "unclassified",
+      "authorization": "authorized",
+      "owner": "memory-nexus",
+      "historical_gaps": [
+        "statements=75",
+        "branches=75",
+        "lines=75"
+      ],
+      "historical_evidence": "docs/audits/2026-09-19-repair-evidence/per-file-coverage-gaps.json",
+      "evidence": [],
+      "acceptance_record": ".planning/memory-resilience/evidence/Q073.json"
+    },
+    {
+      "id": "Q074",
+      "stage": "coverage_repair",
+      "title": "Verify and repair src/presentation/cli/commands/sync/ambient.ts",
+      "status": "pending_rebaseline",
+      "depends_on": [
+        "B09"
+      ],
+      "scope": "src/presentation/cli/commands/sync/ambient.ts",
+      "deliverable": "Reproduce uncovered behavior, add meaningful regression/boundary tests, fix demonstrated defects, satisfy this file's reviewed risk tier.",
+      "verification": "Current source-bound four-metric file evidence plus tier-required decision tests. Supersede only with explicit fresh evidence that this candidate is no longer a gap.",
+      "risk": "unclassified",
+      "authorization": "authorized",
+      "owner": "memory-nexus",
+      "historical_gaps": [
+        "branches=87.5"
+      ],
+      "historical_evidence": "docs/audits/2026-09-19-repair-evidence/per-file-coverage-gaps.json",
+      "evidence": [],
+      "acceptance_record": ".planning/memory-resilience/evidence/Q074.json"
+    },
+    {
+      "id": "Q075",
+      "stage": "coverage_repair",
+      "title": "Verify and repair src/presentation/cli/commands/sync/background.ts",
+      "status": "pending_rebaseline",
+      "depends_on": [
+        "B09"
+      ],
+      "scope": "src/presentation/cli/commands/sync/background.ts",
+      "deliverable": "Reproduce uncovered behavior, add meaningful regression/boundary tests, fix demonstrated defects, satisfy this file's reviewed risk tier.",
+      "verification": "Current source-bound four-metric file evidence plus tier-required decision tests. Supersede only with explicit fresh evidence that this candidate is no longer a gap.",
+      "risk": "unclassified",
+      "authorization": "authorized",
+      "owner": "memory-nexus",
+      "historical_gaps": [
+        "statements=88.23",
+        "branches=90",
+        "functions=50",
+        "lines=88.23"
+      ],
+      "historical_evidence": "docs/audits/2026-09-19-repair-evidence/per-file-coverage-gaps.json",
+      "evidence": [],
+      "acceptance_record": ".planning/memory-resilience/evidence/Q075.json"
+    },
+    {
+      "id": "Q076",
+      "stage": "coverage_repair",
+      "title": "Verify and repair src/presentation/cli/commands/sync/embedding-pass.ts",
+      "status": "pending_rebaseline",
+      "depends_on": [
+        "B09"
+      ],
+      "scope": "src/presentation/cli/commands/sync/embedding-pass.ts",
+      "deliverable": "Reproduce uncovered behavior, add meaningful regression/boundary tests, fix demonstrated defects, satisfy this file's reviewed risk tier.",
+      "verification": "Current source-bound four-metric file evidence plus tier-required decision tests. Supersede only with explicit fresh evidence that this candidate is no longer a gap.",
+      "risk": "unclassified",
+      "authorization": "authorized",
+      "owner": "memory-nexus",
+      "historical_gaps": [
+        "branches=90.74"
+      ],
+      "historical_evidence": "docs/audits/2026-09-19-repair-evidence/per-file-coverage-gaps.json",
+      "evidence": [],
+      "acceptance_record": ".planning/memory-resilience/evidence/Q076.json"
+    },
+    {
+      "id": "Q077",
+      "stage": "coverage_repair",
+      "title": "Verify and repair src/presentation/cli/commands/sync/helpers.ts",
+      "status": "pending_rebaseline",
+      "depends_on": [
+        "B09"
+      ],
+      "scope": "src/presentation/cli/commands/sync/helpers.ts",
+      "deliverable": "Reproduce uncovered behavior, add meaningful regression/boundary tests, fix demonstrated defects, satisfy this file's reviewed risk tier.",
+      "verification": "Current source-bound four-metric file evidence plus tier-required decision tests. Supersede only with explicit fresh evidence that this candidate is no longer a gap.",
+      "risk": "unclassified",
+      "authorization": "authorized",
+      "owner": "memory-nexus",
+      "historical_gaps": [
+        "branches=91.17"
+      ],
+      "historical_evidence": "docs/audits/2026-09-19-repair-evidence/per-file-coverage-gaps.json",
+      "evidence": [],
+      "acceptance_record": ".planning/memory-resilience/evidence/Q077.json"
+    },
+    {
+      "id": "Q078",
+      "stage": "coverage_repair",
+      "title": "Verify and repair src/presentation/cli/commands/sync/index.ts",
+      "status": "pending_rebaseline",
+      "depends_on": [
+        "B09"
+      ],
+      "scope": "src/presentation/cli/commands/sync/index.ts",
+      "deliverable": "Reproduce uncovered behavior, add meaningful regression/boundary tests, fix demonstrated defects, satisfy this file's reviewed risk tier.",
+      "verification": "Current source-bound four-metric file evidence plus tier-required decision tests. Supersede only with explicit fresh evidence that this candidate is no longer a gap.",
+      "risk": "unclassified",
+      "authorization": "authorized",
+      "owner": "memory-nexus",
+      "historical_gaps": [
+        "statements=85.83",
+        "branches=93.5",
+        "functions=50",
+        "lines=86.2"
+      ],
+      "historical_evidence": "docs/audits/2026-09-19-repair-evidence/per-file-coverage-gaps.json",
+      "evidence": [],
+      "acceptance_record": ".planning/memory-resilience/evidence/Q078.json"
+    },
+    {
+      "id": "Q079",
+      "stage": "coverage_repair",
+      "title": "Verify and repair src/presentation/cli/commands/sync/memory-files.ts",
+      "status": "pending_rebaseline",
+      "depends_on": [
+        "B09"
+      ],
+      "scope": "src/presentation/cli/commands/sync/memory-files.ts",
+      "deliverable": "Reproduce uncovered behavior, add meaningful regression/boundary tests, fix demonstrated defects, satisfy this file's reviewed risk tier.",
+      "verification": "Current source-bound four-metric file evidence plus tier-required decision tests. Supersede only with explicit fresh evidence that this candidate is no longer a gap.",
+      "risk": "unclassified",
+      "authorization": "authorized",
+      "owner": "memory-nexus",
+      "historical_gaps": [
+        "statements=85.71",
+        "branches=84.61",
+        "lines=85.71"
+      ],
+      "historical_evidence": "docs/audits/2026-09-19-repair-evidence/per-file-coverage-gaps.json",
+      "evidence": [],
+      "acceptance_record": ".planning/memory-resilience/evidence/Q079.json"
+    },
+    {
+      "id": "Q080",
+      "stage": "coverage_repair",
+      "title": "Verify and repair src/presentation/cli/formatters/context-formatter.ts",
+      "status": "pending_rebaseline",
+      "depends_on": [
+        "B09"
+      ],
+      "scope": "src/presentation/cli/formatters/context-formatter.ts",
+      "deliverable": "Reproduce uncovered behavior, add meaningful regression/boundary tests, fix demonstrated defects, satisfy this file's reviewed risk tier.",
+      "verification": "Current source-bound four-metric file evidence plus tier-required decision tests. Supersede only with explicit fresh evidence that this candidate is no longer a gap.",
+      "risk": "unclassified",
+      "authorization": "authorized",
+      "owner": "memory-nexus",
+      "historical_gaps": [
+        "branches=94",
+        "functions=93.93"
+      ],
+      "historical_evidence": "docs/audits/2026-09-19-repair-evidence/per-file-coverage-gaps.json",
+      "evidence": [],
+      "acceptance_record": ".planning/memory-resilience/evidence/Q080.json"
+    },
+    {
+      "id": "Q081",
+      "stage": "coverage_repair",
+      "title": "Verify and repair src/presentation/cli/formatters/friction-dashboard.ts",
+      "status": "pending_rebaseline",
+      "depends_on": [
+        "B09"
+      ],
+      "scope": "src/presentation/cli/formatters/friction-dashboard.ts",
+      "deliverable": "Reproduce uncovered behavior, add meaningful regression/boundary tests, fix demonstrated defects, satisfy this file's reviewed risk tier.",
+      "verification": "Current source-bound four-metric file evidence plus tier-required decision tests. Supersede only with explicit fresh evidence that this candidate is no longer a gap.",
+      "risk": "unclassified",
+      "authorization": "authorized",
+      "owner": "memory-nexus",
+      "historical_gaps": [
+        "branches=93.75"
+      ],
+      "historical_evidence": "docs/audits/2026-09-19-repair-evidence/per-file-coverage-gaps.json",
+      "evidence": [],
+      "acceptance_record": ".planning/memory-resilience/evidence/Q081.json"
+    },
+    {
+      "id": "Q082",
+      "stage": "coverage_repair",
+      "title": "Verify and repair src/presentation/cli/formatters/list-formatter.ts",
+      "status": "pending_rebaseline",
+      "depends_on": [
+        "B09"
+      ],
+      "scope": "src/presentation/cli/formatters/list-formatter.ts",
+      "deliverable": "Reproduce uncovered behavior, add meaningful regression/boundary tests, fix demonstrated defects, satisfy this file's reviewed risk tier.",
+      "verification": "Current source-bound four-metric file evidence plus tier-required decision tests. Supersede only with explicit fresh evidence that this candidate is no longer a gap.",
+      "risk": "unclassified",
+      "authorization": "authorized",
+      "owner": "memory-nexus",
+      "historical_gaps": [
+        "statements=93.33",
+        "branches=88",
+        "functions=91.66",
+        "lines=93.15"
+      ],
+      "historical_evidence": "docs/audits/2026-09-19-repair-evidence/per-file-coverage-gaps.json",
+      "evidence": [],
+      "acceptance_record": ".planning/memory-resilience/evidence/Q082.json"
+    },
+    {
+      "id": "Q083",
+      "stage": "coverage_repair",
+      "title": "Verify and repair src/presentation/cli/formatters/related-formatter.ts",
+      "status": "pending_rebaseline",
+      "depends_on": [
+        "B09"
+      ],
+      "scope": "src/presentation/cli/formatters/related-formatter.ts",
+      "deliverable": "Reproduce uncovered behavior, add meaningful regression/boundary tests, fix demonstrated defects, satisfy this file's reviewed risk tier.",
+      "verification": "Current source-bound four-metric file evidence plus tier-required decision tests. Supersede only with explicit fresh evidence that this candidate is no longer a gap.",
+      "risk": "unclassified",
+      "authorization": "authorized",
+      "owner": "memory-nexus",
+      "historical_gaps": [
+        "functions=93.54"
+      ],
+      "historical_evidence": "docs/audits/2026-09-19-repair-evidence/per-file-coverage-gaps.json",
+      "evidence": [],
+      "acceptance_record": ".planning/memory-resilience/evidence/Q083.json"
+    },
+    {
+      "id": "Q084",
+      "stage": "coverage_repair",
+      "title": "Verify and repair src/presentation/cli/formatters/stats-formatter.ts",
+      "status": "pending_rebaseline",
+      "depends_on": [
+        "B09"
+      ],
+      "scope": "src/presentation/cli/formatters/stats-formatter.ts",
+      "deliverable": "Reproduce uncovered behavior, add meaningful regression/boundary tests, fix demonstrated defects, satisfy this file's reviewed risk tier.",
+      "verification": "Current source-bound four-metric file evidence plus tier-required decision tests. Supersede only with explicit fresh evidence that this candidate is no longer a gap.",
+      "risk": "unclassified",
+      "authorization": "authorized",
+      "owner": "memory-nexus",
+      "historical_gaps": [
+        "branches=93.02"
+      ],
+      "historical_evidence": "docs/audits/2026-09-19-repair-evidence/per-file-coverage-gaps.json",
+      "evidence": [],
+      "acceptance_record": ".planning/memory-resilience/evidence/Q084.json"
+    },
+    {
+      "id": "Q085",
+      "stage": "coverage_repair",
+      "title": "Verify and repair src/presentation/cli/pickers/session-picker.ts",
+      "status": "pending_rebaseline",
+      "depends_on": [
+        "B09"
+      ],
+      "scope": "src/presentation/cli/pickers/session-picker.ts",
+      "deliverable": "Reproduce uncovered behavior, add meaningful regression/boundary tests, fix demonstrated defects, satisfy this file's reviewed risk tier.",
+      "verification": "Current source-bound four-metric file evidence plus tier-required decision tests. Supersede only with explicit fresh evidence that this candidate is no longer a gap.",
+      "risk": "unclassified",
+      "authorization": "authorized",
+      "owner": "memory-nexus",
+      "historical_gaps": [
+        "branches=86.66"
+      ],
+      "historical_evidence": "docs/audits/2026-09-19-repair-evidence/per-file-coverage-gaps.json",
+      "evidence": [],
+      "acceptance_record": ".planning/memory-resilience/evidence/Q085.json"
+    },
+    {
+      "id": "B10",
+      "stage": "baseline",
+      "title": "Repair uncovered behavior one file at a time",
+      "status": "pending",
+      "depends_on": [
+        "B09",
+        "Q001",
+        "Q002",
+        "Q003",
+        "Q004",
+        "Q005",
+        "Q006",
+        "Q007",
+        "Q008",
+        "Q009",
+        "Q010",
+        "Q011",
+        "Q012",
+        "Q013",
+        "Q014",
+        "Q015",
+        "Q016",
+        "Q017",
+        "Q018",
+        "Q019",
+        "Q020",
+        "Q021",
+        "Q022",
+        "Q023",
+        "Q024",
+        "Q025",
+        "Q026",
+        "Q027",
+        "Q028",
+        "Q029",
+        "Q030",
+        "Q031",
+        "Q032",
+        "Q033",
+        "Q034",
+        "Q035",
+        "Q036",
+        "Q037",
+        "Q038",
+        "Q039",
+        "Q040",
+        "Q041",
+        "Q042",
+        "Q043",
+        "Q044",
+        "Q045",
+        "Q046",
+        "Q047",
+        "Q048",
+        "Q049",
+        "Q050",
+        "Q051",
+        "Q052",
+        "Q053",
+        "Q054",
+        "Q055",
+        "Q056",
+        "Q057",
+        "Q058",
+        "Q059",
+        "Q060",
+        "Q061",
+        "Q062",
+        "Q063",
+        "Q064",
+        "Q065",
+        "Q066",
+        "Q067",
+        "Q068",
+        "Q069",
+        "Q070",
+        "Q071",
+        "Q072",
+        "Q073",
+        "Q074",
+        "Q075",
+        "Q076",
+        "Q077",
+        "Q078",
+        "Q079",
+        "Q080",
+        "Q081",
+        "Q082",
+        "Q083",
+        "Q084",
+        "Q085"
+      ],
+      "scope": "all Q-* work items",
+      "deliverable": "Close individually verified quality work items; fix discovered defects and meaningful boundaries, not artificial counter tests.",
+      "verification": "All Q-* and newly discovered gaps meet their classified tier; every S decision has mutation or equivalent regression evidence.",
+      "risk": "S",
+      "authorization": "authorized",
+      "owner": "memory-nexus",
+      "evidence": [],
+      "acceptance_record": ".planning/memory-resilience/evidence/B10.json"
+    },
+    {
+      "id": "D01",
+      "stage": "baseline",
+      "title": "Review actual dependency resolutions",
+      "status": "pending",
+      "depends_on": [],
+      "scope": "package.json and bun.lock",
+      "deliverable": "Map each advisory/override to dependents and declared ranges, and review the actual lockfile.",
+      "verification": "Retained machine-readable dependency/range report; incompatible forced resolutions are corrected.",
+      "risk": "A",
+      "authorization": "authorized",
+      "owner": "memory-nexus",
+      "evidence": [],
+      "acceptance_record": ".planning/memory-resilience/evidence/D01.json"
+    },
+    {
+      "id": "D02",
+      "stage": "baseline",
+      "title": "Verify clean Linux installation",
+      "status": "pending",
+      "depends_on": [
+        "D01"
+      ],
+      "scope": "isolated Linux environment or GitHub runner",
+      "deliverable": "Install the candidate with frozen lockfile and exercise native runtime loading and build.",
+      "verification": "Clean-environment log, exact lockfile hash, bare exit zero; no assumption that Windows proves Linux.",
+      "risk": "A",
+      "authorization": "authorized",
+      "owner": "memory-nexus",
+      "evidence": [],
+      "acceptance_record": ".planning/memory-resilience/evidence/D02.json"
+    },
+    {
+      "id": "D03",
+      "stage": "baseline",
+      "title": "Check embedding runtime compatibility",
+      "status": "pending",
+      "depends_on": [
+        "D01"
+      ],
+      "scope": "existing embedding providers and isolated synthetic fixtures",
+      "deliverable": "Compare prior/candidate inference and tokenizer/preprocessing identity using a pinned fixture; avoid live index changes.",
+      "verification": "Real provider outputs and dimensions measured; drift causes an explicit migration fix or compatible dependency choice.",
+      "risk": "S",
+      "authorization": "authorized",
+      "owner": "memory-nexus",
+      "evidence": [],
+      "acceptance_record": ".planning/memory-resilience/evidence/D03.json"
+    },
+    {
+      "id": "D04",
+      "stage": "baseline",
+      "title": "Verify downstream package installation",
+      "status": "pending",
+      "depends_on": [
+        "D02",
+        "D03"
+      ],
+      "scope": "isolated packed artifact installs",
+      "deliverable": "Test the package as a consumer, including dependency audit, CLI/API smoke and native provider path.",
+      "verification": "Artifact hash and installed dependency tree retained; root-only overrides cannot stand in for consumer safety.",
+      "risk": "S",
+      "authorization": "authorized",
+      "owner": "memory-nexus",
+      "evidence": [],
+      "acceptance_record": ".planning/memory-resilience/evidence/D04.json"
+    },
+    {
+      "id": "F01",
+      "stage": "baseline",
+      "title": "Freeze exact synthetic-row provenance",
+      "status": "pending",
+      "depends_on": [],
+      "scope": "canonical friction store, read-only",
+      "deliverable": "Refresh the 27 historical IDs and full tuple fingerprints; distinguish legitimate matching descriptions.",
+      "verification": "Private exact-ID dry-run and aggregate public report; any mismatch prevents mutation.",
+      "risk": "S",
+      "authorization": "authorized",
+      "owner": "memory-nexus",
+      "evidence": [],
+      "acceptance_record": ".planning/memory-resilience/evidence/F01.json"
+    },
+    {
+      "id": "F02",
+      "stage": "baseline",
+      "title": "Prove reversible fixture quarantine",
+      "status": "pending",
+      "depends_on": [
+        "F01"
+      ],
+      "scope": "bounded repair operation and temporary databases",
+      "deliverable": "Implement exact-ID compare-and-set quarantine with durable backup, idempotence and rollback.",
+      "verification": "Changed tuple, missing ID, backup failure, interrupted transaction and unrelated-row controls all behave safely.",
+      "risk": "S",
+      "authorization": "authorized",
+      "owner": "memory-nexus",
+      "evidence": [],
+      "acceptance_record": ".planning/memory-resilience/evidence/F02.json"
+    },
+    {
+      "id": "F03",
+      "stage": "baseline",
+      "title": "Quarantine proven historical fixtures",
+      "status": "pending",
+      "depends_on": [
+        "F02"
+      ],
+      "scope": "canonical store within prior approved repair scope",
+      "deliverable": "After independent review and backup verification, apply only matching fixtures and verify resulting dashboard counts.",
+      "verification": "Before/after fingerprints, exact affected IDs, backup hash and tested rollback; no wildcard deletion.",
+      "risk": "S",
+      "authorization": "authorized",
+      "owner": "memory-nexus",
+      "evidence": [],
+      "acceptance_record": ".planning/memory-resilience/evidence/F03.json"
+    },
+    {
+      "id": "R01",
+      "stage": "baseline",
+      "title": "Wire the same gates into hosted CI",
+      "status": "pending",
+      "depends_on": [
+        "B08",
+        "D02"
+      ],
+      "scope": ".github/workflows/ and package scripts",
+      "deliverable": "Run Windows/Linux supported checks with revision-bound artifacts and no weakened policy.",
+      "verification": "A deliberately failing fixture makes the hosted gate fail; candidate final HEAD must eventually pass all required jobs.",
+      "risk": "S",
+      "authorization": "authorized",
+      "owner": "memory-nexus",
+      "evidence": [],
+      "acceptance_record": ".planning/memory-resilience/evidence/R01.json"
+    },
+    {
+      "id": "R02",
+      "stage": "baseline",
+      "title": "Close final baseline review findings",
+      "status": "pending",
+      "depends_on": [
+        "B10",
+        "D04",
+        "F03",
+        "R01"
+      ],
+      "scope": "PR #1, code, review dispositions",
+      "deliverable": "Run complete final-source checks, independent source review and dependency review; resolve findings.",
+      "verification": "Final HEAD tests, per-file/tier coverage, audit, build, package smoke and CI pass; review evidence names exact revision.",
+      "risk": "S",
+      "authorization": "authorized",
+      "owner": "memory-nexus",
+      "evidence": [],
+      "acceptance_record": ".planning/memory-resilience/evidence/R02.json"
+    },
+    {
+      "id": "R03",
+      "stage": "baseline",
+      "title": "Present one baseline decision brief",
+      "status": "pending",
+      "depends_on": [
+        "R02"
+      ],
+      "scope": "PR #1 and owner-project inbox",
+      "deliverable": "Classify Tier D and assemble changes, reviewer findings, residual risk and rollback for one owner decision.",
+      "verification": "Concrete brief and owner's answer retained; no repeated implementation permission requests.",
+      "risk": "decision",
+      "authorization": "authorized",
+      "owner": "project-owner",
+      "evidence": [],
+      "acceptance_record": ".planning/memory-resilience/evidence/R03.json"
+    },
+    {
+      "id": "R04",
+      "stage": "baseline",
+      "title": "Integrate and verify repaired baseline",
+      "status": "pending",
+      "depends_on": [
+        "R03"
+      ],
+      "scope": "main, package artifact and project state",
+      "deliverable": "Integrate only under ratified sign-off policy; reconcile checks, inboxes and artifact provenance.",
+      "verification": "Post-integration gates green; clean install/recovery proof; no known baseline acceptance gap hidden as done.",
+      "risk": "S",
+      "authorization": "authorized",
+      "owner": "memory-nexus",
+      "evidence": [],
+      "acceptance_record": ".planning/memory-resilience/evidence/R04.json"
+    },
+    {
+      "id": "S01",
+      "stage": "experiment",
+      "title": "Prepare bounded experiment footprint",
+      "status": "pending",
+      "depends_on": [
+        "R04"
+      ],
+      "scope": "isolated local runtime/model sandbox",
+      "deliverable": "Use approved local runtime/model; pin artifact/recipe and record disk, ports, processes, autostart and removal steps.",
+      "verification": "Capacity preflight before download; user data/config/index untouched; avoid permanent autostart unless separately accepted.",
+      "risk": "A",
+      "authorization": "approved-after-baseline",
+      "owner": "memory-nexus",
+      "evidence": [],
+      "acceptance_record": ".planning/memory-resilience/evidence/S01.json"
+    },
+    {
+      "id": "S02",
+      "stage": "experiment",
+      "title": "Build deterministic synthetic benchmark",
+      "status": "pending",
+      "depends_on": [
+        "S01"
+      ],
+      "scope": "benchmark harness and generated fixture corpus",
+      "deliverable": "Create fixed-seed corpus and at least 100 varied queries with expected retrieval anchors.",
+      "verification": "Repeatable corpus/query hashes, warm/cold protocol, no real-memory content, validated measurement output.",
+      "risk": "A",
+      "authorization": "approved-after-baseline",
+      "owner": "memory-nexus",
+      "evidence": [],
+      "acceptance_record": ".planning/memory-resilience/evidence/S02.json"
+    },
+    {
+      "id": "S03",
+      "stage": "experiment",
+      "title": "Measure disconnected local utility",
+      "status": "pending",
+      "depends_on": [
+        "S02"
+      ],
+      "scope": "isolated local encoder and benchmark client",
+      "deliverable": "Run cold/warm retrieval, document encoding and desktop-unavailable tests without changing shared host networking.",
+      "verification": "Retain valid raw samples/model hashes and prove queries stay local. Report pass/fail/inconclusive against p95 cold <=3s and warm <=1s; a valid negative result completes measurement and permits S04/S05, not production acceptance.",
+      "risk": "A",
+      "authorization": "approved-after-baseline",
+      "owner": "memory-nexus",
+      "evidence": [],
+      "acceptance_record": ".planning/memory-resilience/evidence/S03.json"
+    },
+    {
+      "id": "S04",
+      "stage": "experiment",
+      "title": "Measure resource and interruption behavior",
+      "status": "pending",
+      "depends_on": [
+        "S03"
+      ],
+      "scope": "experiment process and harness",
+      "deliverable": "Measure peak extra memory, foreground impact, batch yield and restart behavior; defer bulk work on battery.",
+      "verification": "Retain valid measurements and pass/fail/inconclusive against extra RAM <=2GiB, foreground p95 regression <=10%, yield <=5s. Record disk growth/cleanup and measurement limits; negative results permit the S05 verdict, not production acceptance.",
+      "risk": "A",
+      "authorization": "approved-after-baseline",
+      "owner": "memory-nexus",
+      "evidence": [],
+      "acceptance_record": ".planning/memory-resilience/evidence/S04.json"
+    },
+    {
+      "id": "S05",
+      "stage": "experiment",
+      "title": "Publish experiment verdict and cleanup proof",
+      "status": "pending",
+      "depends_on": [
+        "S04"
+      ],
+      "scope": "experiment report",
+      "deliverable": "Report pass/fail/inconclusive by criterion and restore or retain only explicitly documented experiment assets.",
+      "verification": "Evidence-backed recommendation; failed criteria never authorize silently degraded production behavior.",
+      "risk": "A",
+      "authorization": "approved-after-baseline",
+      "owner": "memory-nexus",
+      "evidence": [],
+      "acceptance_record": ".planning/memory-resilience/evidence/S05.json"
+    },
+    {
+      "id": "P01",
+      "stage": "design",
+      "title": "Inventory the replication data contract",
+      "status": "pending",
+      "depends_on": [],
+      "scope": "durable tables, events, import/export and privacy paths",
+      "deliverable": "Classify every data category as authoritative, derived, machine-local, secret or excluded; inspect mutable revision handling.",
+      "verification": "No 'all data' claim without full inventory; sessions/messages/friction/governance and deletion gaps explicit.",
+      "risk": "A",
+      "authorization": "authorized",
+      "owner": "memory-nexus",
+      "evidence": [],
+      "acceptance_record": ".planning/memory-resilience/evidence/P01.json"
+    },
+    {
+      "id": "P02",
+      "stage": "design",
+      "title": "Write implementation specification",
+      "status": "pending",
+      "depends_on": [
+        "P01"
+      ],
+      "scope": "SPECS.md and acceptance fixtures",
+      "deliverable": "Specify ownership, revisions, receiver identity/epochs, tombstones, retention, consent, protocol/version refusal and CLI outcomes.",
+      "verification": "Scenario table maps every end-state requirement to tests; reserve topology/retention/adoption choices for owner.",
+      "risk": "S",
+      "authorization": "authorized",
+      "owner": "memory-nexus",
+      "evidence": [],
+      "acceptance_record": ".planning/memory-resilience/evidence/P02.json"
+    },
+    {
+      "id": "P03",
+      "stage": "decision",
+      "title": "Resolve production scope in one decision packet",
+      "status": "pending",
+      "depends_on": [
+        "S05",
+        "P02"
+      ],
+      "scope": "reviewed SPECS.md and owner decision brief",
+      "deliverable": "Recommend local availability and desktop replication scope using measured results; confirm receiver, data classes, topology, retention and trigger.",
+      "verification": "Recorded owner decision for Steps B/C; failed experiment produces a concrete alternative, not automatic substitution.",
+      "risk": "decision",
+      "authorization": "owner-decision",
+      "owner": "project-owner",
+      "evidence": [],
+      "acceptance_record": ".planning/memory-resilience/evidence/P03.json"
+    },
+    {
+      "id": "L01",
+      "stage": "local_delivery",
+      "title": "Version embedding identity",
+      "status": "pending",
+      "depends_on": [
+        "P03"
+      ],
+      "scope": "embedding domain/application/provider adapters",
+      "deliverable": "Bind model artifact, dimensions and preprocessing recipe to each index generation.",
+      "verification": "Incompatible identities never mix; same-name different-artifact fixtures fail safely.",
+      "risk": "S",
+      "authorization": "reserved-production-decision",
+      "owner": "memory-nexus",
+      "evidence": [],
+      "acceptance_record": ".planning/memory-resilience/evidence/L01.json"
+    },
+    {
+      "id": "L02",
+      "stage": "local_delivery",
+      "title": "Build and switch index generations safely",
+      "status": "pending",
+      "depends_on": [
+        "L01"
+      ],
+      "scope": "embedding repository/migration boundaries",
+      "deliverable": "Build replacement separately and switch only after validation; preserve prior generation for rollback.",
+      "verification": "Crash/failure before switch retains usable old index; incompatible query/index combinations are refused.",
+      "risk": "S",
+      "authorization": "reserved-production-decision",
+      "owner": "memory-nexus",
+      "evidence": [],
+      "acceptance_record": ".planning/memory-resilience/evidence/L02.json"
+    },
+    {
+      "id": "L03",
+      "stage": "local_delivery",
+      "title": "Persist bounded embedding progress",
+      "status": "pending",
+      "depends_on": [
+        "L02"
+      ],
+      "scope": "embedding service and durable state",
+      "deliverable": "Commit batches only for unchanged source revisions; resume interrupted work without losing capture.",
+      "verification": "Crash/restart, edited-source and repeated-batch tests with real temporary databases.",
+      "risk": "S",
+      "authorization": "reserved-production-decision",
+      "owner": "memory-nexus",
+      "evidence": [],
+      "acceptance_record": ".planning/memory-resilience/evidence/L03.json"
+    },
+    {
+      "id": "L04",
+      "stage": "local_delivery",
+      "title": "Handle concurrent local workers",
+      "status": "pending",
+      "depends_on": [
+        "L03"
+      ],
+      "scope": "claim/lease adapter and hooks",
+      "deliverable": "Use recoverable process identity and bounded claims; enforce resource/backlog policy.",
+      "verification": "Concurrent hooks, stale owner, PID reuse, disk-full and shutdown tests preserve correctness.",
+      "risk": "S",
+      "authorization": "reserved-production-decision",
+      "owner": "memory-nexus",
+      "evidence": [],
+      "acceptance_record": ".planning/memory-resilience/evidence/L04.json"
+    },
+    {
+      "id": "L05",
+      "stage": "local_delivery",
+      "title": "Expose truthful local outcomes",
+      "status": "pending",
+      "depends_on": [
+        "L04"
+      ],
+      "scope": "sync/search/status CLI and public API",
+      "deliverable": "Separate capture, embedding and replication outcomes; keep ordinary output/exit semantics compatible with the approved contract.",
+      "verification": "Golden CLI/JSON tests plus offline user flow; no success wording for incomplete required stages.",
+      "risk": "A",
+      "authorization": "reserved-production-decision",
+      "owner": "memory-nexus",
+      "evidence": [],
+      "acceptance_record": ".planning/memory-resilience/evidence/L05.json"
+    },
+    {
+      "id": "C01",
+      "stage": "replication",
+      "title": "Validate replication envelopes",
+      "status": "pending",
+      "depends_on": [
+        "P03"
+      ],
+      "scope": "domain contract and transport boundary",
+      "deliverable": "Define bounded payloads, stable origin IDs, revision/hash, protocol version and authenticated receiver/store identity.",
+      "verification": "Malformed, oversized, wrong-peer and incompatible-version requests fail before writes.",
+      "risk": "S",
+      "authorization": "reserved-production-decision",
+      "owner": "memory-nexus",
+      "evidence": [],
+      "acceptance_record": ".planning/memory-resilience/evidence/C01.json"
+    },
+    {
+      "id": "C02",
+      "stage": "replication",
+      "title": "Apply receiver changes transactionally",
+      "status": "pending",
+      "depends_on": [
+        "C01"
+      ],
+      "scope": "receiver application service and repository",
+      "deliverable": "Apply origin-owned records idempotently; reject same-revision conflicts; issue durable receipts after commit.",
+      "verification": "Duplicate, conflict, disk-full and interrupted transaction tests; existing desktop-origin data preserved.",
+      "risk": "S",
+      "authorization": "reserved-production-decision",
+      "owner": "memory-nexus",
+      "evidence": [],
+      "acceptance_record": ".planning/memory-resilience/evidence/C02.json"
+    },
+    {
+      "id": "C03",
+      "stage": "replication",
+      "title": "Persist sender progress safely",
+      "status": "pending",
+      "depends_on": [
+        "C02"
+      ],
+      "scope": "outgoing work repository and service",
+      "deliverable": "Derive pending changes from durable authoritative records and manifests; checkpoints advance only after valid committed receipts. Do not create a second plaintext corpus queue.",
+      "verification": "Lost acknowledgement causes harmless replay; restart never silently drops accepted work.",
+      "risk": "S",
+      "authorization": "reserved-production-decision",
+      "owner": "memory-nexus",
+      "evidence": [],
+      "acceptance_record": ".planning/memory-resilience/evidence/C03.json"
+    },
+    {
+      "id": "C04",
+      "stage": "replication",
+      "title": "Propagate governance before exposure",
+      "status": "pending",
+      "depends_on": [
+        "C02"
+      ],
+      "scope": "consent, suppression, redaction and tombstone handling",
+      "deliverable": "Recheck consent at send/receive time and apply deletion/redaction precedence under the approved retention contract.",
+      "verification": "Queued-before-revocation, stale update and restore tests cannot resurrect or expose disallowed content.",
+      "risk": "S",
+      "authorization": "reserved-production-decision",
+      "owner": "memory-nexus",
+      "evidence": [],
+      "acceptance_record": ".planning/memory-resilience/evidence/C04.json"
+    },
+    {
+      "id": "C05",
+      "stage": "replication",
+      "title": "Reconcile after receiver or sender restore",
+      "status": "pending",
+      "depends_on": [
+        "C03",
+        "C04"
+      ],
+      "scope": "manifest/reconciliation application service",
+      "deliverable": "Use bounded receiver manifests and store epochs, not sender checkpoints as truth.",
+      "verification": "Both-side restore/rebuild tests converge correctly and preserve tombstone/conflict decisions.",
+      "risk": "S",
+      "authorization": "reserved-production-decision",
+      "owner": "memory-nexus",
+      "evidence": [],
+      "acceptance_record": ".planning/memory-resilience/evidence/C05.json"
+    },
+    {
+      "id": "C06",
+      "stage": "replication",
+      "title": "Connect private command transport",
+      "status": "pending",
+      "depends_on": [
+        "C05"
+      ],
+      "scope": "transport port and SSH/remotely adapter",
+      "deliverable": "Transfer approved record envelopes over authenticated command transport; keep databases local and raw corpus out of Git.",
+      "verification": "Real two-process transport test with interrupted/partial transfer; published package has no mandatory portfolio-tool dependency.",
+      "risk": "S",
+      "authorization": "reserved-production-decision",
+      "owner": "memory-nexus",
+      "evidence": [],
+      "acceptance_record": ".planning/memory-resilience/evidence/C06.json"
+    },
+    {
+      "id": "C07",
+      "stage": "replication",
+      "title": "Wire bounded catch-up triggers",
+      "status": "pending",
+      "depends_on": [
+        "C06"
+      ],
+      "scope": "existing hook/explicit sync composition",
+      "deliverable": "Retry on the approved enabled trigger with bounded backoff and truthful remote-copy status. Reuse existing CLI surfaces; replication does not require approval of laptop inference.",
+      "verification": "A subsequent enabled sync drains reachable work after outage; no claim of catch-up while machines/processes sleep.",
+      "risk": "A",
+      "authorization": "reserved-production-decision",
+      "owner": "memory-nexus",
+      "evidence": [],
+      "acceptance_record": ".planning/memory-resilience/evidence/C07.json"
+    },
+    {
+      "id": "C08",
+      "stage": "replication",
+      "title": "Prove desktop computation and retrieval",
+      "status": "pending",
+      "depends_on": [
+        "C07"
+      ],
+      "scope": "fresh receiver store and local desktop encoder",
+      "deliverable": "Desktop receives source records and computes its own embeddings while preserving native desktop-origin records.",
+      "verification": "Received records support FTS and semantic retrieval; sender receipt alone is not treated as useful desktop completion.",
+      "risk": "S",
+      "authorization": "reserved-production-decision",
+      "owner": "memory-nexus",
+      "evidence": [],
+      "acceptance_record": ".planning/memory-resilience/evidence/C08.json"
+    },
+    {
+      "id": "A01",
+      "stage": "acceptance",
+      "title": "Run the complete failure/recovery matrix",
+      "status": "pending",
+      "depends_on": [
+        "L05",
+        "C08"
+      ],
+      "scope": "two isolated stores, real processes and fault injection",
+      "deliverable": "Cover outage, duplicate delivery, lost receipt, restart, concurrent edit, revocation, disk-full, model mismatch, restore and version skew.",
+      "verification": "Every end-state requirement has positive, negative and recovery evidence at the final source/model revision.",
+      "risk": "S",
+      "authorization": "reserved-production-decision",
+      "owner": "memory-nexus",
+      "evidence": [],
+      "acceptance_record": ".planning/memory-resilience/evidence/A01.json"
+    },
+    {
+      "id": "A02",
+      "stage": "acceptance",
+      "title": "Verify actual desktop readiness",
+      "status": "pending",
+      "depends_on": [
+        "A01"
+      ],
+      "scope": "read-only desktop inspection then isolated receiver sandbox",
+      "deliverable": "Refresh runtime, storage, permissions and model identity without workspace authority cutover.",
+      "verification": "Reachable real desktop demonstrates the synthetic offline/reconnect flow; local mock tests alone do not close this item.",
+      "risk": "S",
+      "authorization": "reserved-production-decision",
+      "owner": "memory-nexus",
+      "evidence": [],
+      "acceptance_record": ".planning/memory-resilience/evidence/A02.json"
+    },
+    {
+      "id": "A03",
+      "stage": "acceptance",
+      "title": "Present production adoption decision",
+      "status": "pending",
+      "depends_on": [
+        "A02"
+      ],
+      "scope": "Tier D release/adoption brief",
+      "deliverable": "Assemble final checks, review dispositions, receiver/data consent, installation and rollback results.",
+      "verification": "Owner signs the concrete production adoption decision; no repeated request for already approved implementation details.",
+      "risk": "decision",
+      "authorization": "reserved-production-decision",
+      "owner": "project-owner",
+      "evidence": [],
+      "acceptance_record": ".planning/memory-resilience/evidence/A03.json"
+    },
+    {
+      "id": "A04",
+      "stage": "acceptance",
+      "title": "Install and observe the accepted artifact",
+      "status": "pending",
+      "depends_on": [
+        "A03"
+      ],
+      "scope": "approved machine installs and release workflow",
+      "deliverable": "Use approved installation/release route; verify actual installed artifact and perform bounded accepted-data adoption.",
+      "verification": "Two successful enabled sync cycles around an offline interval and process restart; counts/hashes/retrieval agree; rollback proven.",
+      "risk": "S",
+      "authorization": "reserved-production-decision",
+      "owner": "memory-nexus",
+      "evidence": [],
+      "acceptance_record": ".planning/memory-resilience/evidence/A04.json"
+    },
+    {
+      "id": "A05",
+      "stage": "acceptance",
+      "title": "Close the operational goal",
+      "status": "pending",
+      "depends_on": [
+        "A04"
+      ],
+      "scope": "goal ledger, reports, inboxes and roadmap pointers",
+      "deliverable": "Reconcile all required work, disclose exclusions and separate later v6/authority-cutover work.",
+      "verification": "All end-state predicates true on installed system; no open mandatory acceptance item; goal completion reports evidence.",
+      "risk": "A",
+      "authorization": "reserved-production-decision",
+      "owner": "memory-nexus",
+      "evidence": [],
+      "acceptance_record": ".planning/memory-resilience/evidence/A05.json"
+    }
+  ],
+  "decisions": {
+    "baseline_integration": "pending_R03",
+    "local_production_implementation": "pending_P03",
+    "desktop_replication_implementation": "pending_P03",
+    "production_adoption": "pending_A03"
+  },
+  "review_status": {
+    "plan_external_review": "not_performed",
+    "attempt": "Fable low-effort READY smoke failed: out of usage credits; bare exit 1",
+    "impact": "No reviewer approval claimed. Retry before applicable delivery gate when route availability changes; authorized baseline work can continue."
+  },
+  "native_goal": {
+    "thread_id": "01a09507-57c9-7441-ac18-d294f37ab075",
+    "created_at": "2026-09-19T20:02:57Z",
+    "status_at_checkpoint": "active",
+    "runtime_authority": "get_goal; this file is a recovery snapshot, not live runtime status",
+    "token_budget": "not set; none requested"
+  }
+}
