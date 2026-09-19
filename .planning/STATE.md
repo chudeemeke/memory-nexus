@@ -3,7 +3,7 @@ gsd_state_version: 1.0
 milestone: v6.0
 milestone_name: Server Surface & Benchmark Parity
 status: planning
-last_updated: "2026-09-19T19:59:27.479Z"
+last_updated: "2026-09-19T20:32:51.2940530Z"
 last_activity: 2026-09-19
 progress:
   total_phases: 9
@@ -47,7 +47,7 @@ progress:
 
 # State: @chude/memory (memory-nexus)
 
-> **ACTIVE EXECUTION CONTRACT 2026-09-19:** Resume from `.planning/memory-resilience/EXECUTION.md`, its `work-items.json` and `JOURNAL.md`, and the native persistent goal. The ledger starts with 47 delivery/gate items and 85 historical per-file candidates, to be refreshed by current-source evidence. Next: B01, coverage-runner target containment with sentinel-preserving RED/GREEN tests. Routine approved work proceeds autonomously; baseline Tier D integration, production implementation and adoption retain concrete owner decision gates. The ratified September 2 sign-off policy supersedes mandatory human `tuicr` review. PR #1 remains draft with quality/CI/review gates open; none of the new task entries claims product acceptance.
+> **ACTIVE EXECUTION CONTRACT 2026-09-19:** Resume from `.planning/memory-resilience/EXECUTION.md`, its `work-items.json` and `JOURNAL.md`, and the native persistent goal. B01 containment and B02 linked-path/source-copy behavior have focused RED/GREEN proof; final B02 Windows/Linux runs each pass 23 tests and typecheck passes. Next: B03, owned work/output directories and safe lifecycle before full instrumentation. The ledger contains 47 delivery/gate items, 85 historical per-file candidates and newly observed runner gap Q086; whole-file Tier S acceptance remains open. Routine approved work proceeds autonomously; baseline Tier D integration, production implementation and adoption retain concrete owner decision gates. The ratified September 2 sign-off policy supersedes mandatory human `tuicr` review. PR #1 remains draft with quality/CI/review gates open; scoped task proof does not claim product acceptance.
 
 > **BASELINE REPAIR IN PROGRESS 2026-09-19:** The owner accepted baseline repair before Phase 45 and requested project-scoped disk management. Work is preserved on `fix/baseline-trust-repair`. Resolver/color defects, dependency updates, test-store isolation, embedding setup/model-change defects, and numeric coverage validation have candidate fixes. The first instrumented repair run passed 4,455 tests, but its coverage does not cover later changes; it also reveals 85 files below the ordinary per-file floor. Per-file/Tier S enforcement, historical friction quarantine, final checks, and review/CI remain open. Verified archives reclaimed 602.5 MiB and missing worktree registrations were pruned with refs preserved. See `docs/audits/2026-09-19-baseline-repair-status.md` and `docs/audits/2026-09-19-disk-ownership.md` for the current restart point. The owner approved the bounded local embedding experiment after baseline repairs; runtime/model setup and synthetic tests are authorized for that experiment once the prerequisite closes. Production feature implementation and desktop replication remain separate decisions; nothing has been activated. Older PASS, ready, and zero-inbox statements remain dated history.
 

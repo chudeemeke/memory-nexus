@@ -1,0 +1,67 @@
+bun test v1.4.1 (4661e494f)
+
+scripts\run-istanbul-bun-coverage.test.ts:
+(pass) run-istanbul-bun-coverage > rejects the project root as coverage output before deleting any files [9.69ms]
+(pass) run-istanbul-bun-coverage > rejects a sibling with the project-name prefix before deleting any files [10.10ms]
+(pass) run-istanbul-bun-coverage > rejects an ancestor before deleting any files [7.01ms]
+(pass) run-istanbul-bun-coverage > rejects an output that resolves back to the project root [6.50ms]
+(pass) run-istanbul-bun-coverage > rejects traversal into a sibling before deleting any files [7.33ms]
+(pass) run-istanbul-bun-coverage > rejects a separate directory outside the project [7.41ms]
+(pass) run-istanbul-bun-coverage > rejects a linked coverage ancestor before touching its external target [9.05ms]
+bun test v1.4.1 (4661e494f)
+
+src\choose.test.ts:
+(pass) both outcomes [0.08ms]
+
+ 1 pass
+ 0 fail
+ 2 expect() calls
+Ran 1 test across 1 file. [41.00ms]
+
+=============================== Coverage summary ===============================
+Statements   : 100% ( 1/1 )
+Branches     : 100% ( 2/2 )
+Functions    : 100% ( 1/1 )
+Lines        : 100% ( 1/1 )
+================================================================================
+(pass) run-istanbul-bun-coverage > runs real instrumented tests in a strict descendant whose name begins with dots [414.85ms]
+(pass) run-istanbul-bun-coverage > rejects copied source-directory links before rewriting external source [9.70ms]
+182 |       try {
+183 |         runInstrumentedCoverage({ projectRoot, workDir, coverageDir, testArgs: [] });
+184 |       } catch (caught) {
+185 |         error = caught;
+186 |       }
+187 |       expect(existsSync(sentinel)).toBe(true);
+                                         ^
+error: expect(received).toBe(expected)
+
+Expected: true
+Received: false
+
+      at <anonymous> (C:\Projects\memory-nexus\scripts\run-istanbul-bun-coverage.test.ts:187:36)
+(fail) run-istanbul-bun-coverage > rejects a linked work directory before deleting existing reports or the link [19.64ms]
+(pass) run-istanbul-bun-coverage > ignores tests, generated output, dependency folders, and explicit coverage tests [0.21ms]
+(pass) run-istanbul-bun-coverage > instruments TypeScript with real statement and branch counters [9.77ms]
+(pass) run-istanbul-bun-coverage > returns zero-count baseline coverage for unexecuted instrumented files [11.72ms]
+(pass) run-istanbul-bun-coverage > adds the release-suite timeout to instrumented test runs by default [0.55ms]
+(pass) run-istanbul-bun-coverage > defaults instrumented discovery to project test roots [0.08ms]
+(pass) run-istanbul-bun-coverage > preserves an explicit instrumented test timeout [0.04ms]
+
+=============================== Coverage summary ===============================
+Statements   : 100% ( 1/1 )
+Branches     : 100% ( 0/0 )
+Functions    : 100% ( 0/0 )
+Lines        : 100% ( 1/1 )
+================================================================================
+(pass) run-istanbul-bun-coverage > writes Istanbul reports with all four coverage totals [16.59ms]
+--------------------------------------|---------|---------|-------------------
+File                                  | % Funcs | % Lines | Uncovered Line #s
+--------------------------------------|---------|---------|-------------------
+All files                             |   86.96 |   93.73 |
+ scripts\run-istanbul-bun-coverage.ts |   86.96 |   93.73 | 195,202-203,219,266-267,274,310,313,347-348,353-356,358
+--------------------------------------|---------|---------|-------------------
+
+ 16 pass
+ 1 fail
+ 89 expect() calls
+Ran 17 tests across 1 file. [899.00ms]

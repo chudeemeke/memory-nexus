@@ -3,7 +3,7 @@
   "workstream": "memory-resilience",
   "goal_status": "active",
   "starting_revision": "77d54e05be7fc24cede4a9a3e1fede6fa113ac8f",
-  "current_item": "B02",
+  "current_item": "B03",
   "status_semantics": {
     "pending": "Not started; authorization and dependencies must permit work.",
     "pending_rebaseline": "Historical candidate, not a confirmed current failure or a completed task.",
@@ -55,7 +55,7 @@
       "id": "B02",
       "stage": "baseline",
       "title": "Reject linked coverage destinations",
-      "status": "pending",
+      "status": "verified",
       "depends_on": [
         "B01"
       ],
@@ -65,8 +65,11 @@
       "risk": "S",
       "authorization": "authorized",
       "owner": "memory-nexus",
-      "evidence": [],
-      "acceptance_record": ".planning/memory-resilience/evidence/B02.json"
+      "evidence": [
+        ".planning/memory-resilience/evidence/B02.json"
+      ],
+      "acceptance_record": ".planning/memory-resilience/evidence/B02.json",
+      "verification_scope": "Focused Windows junction and Linux symlink safety plus successful real child runs. Ownership, concurrent replacement races and full per-file Tier S acceptance remain B03/Q086/R02 gates."
     },
     {
       "id": "B03",
@@ -77,7 +80,7 @@
         "B02"
       ],
       "scope": "coverage runner and tests/test-setup.ts",
-      "deliverable": "Track each run's owned temporary paths and process identity; retain evidence before eligible cleanup.",
+      "deliverable": "Prove ownership before replacing any work/output directory; never delete arbitrary existing project descendants or prefixed temp directories. Track run-owned paths and process identity, retain evidence and perform only eligible cleanup.",
       "verification": "Crash/locked-file/foreign-directory/reused-PID tests; report retained bytes; do not retry the policy-blocked old copy.",
       "risk": "S",
       "authorization": "authorized",
@@ -2141,7 +2144,8 @@
         "Q082",
         "Q083",
         "Q084",
-        "Q085"
+        "Q085",
+        "Q086"
       ],
       "scope": "all Q-* work items",
       "deliverable": "Close individually verified quality work items; fix discovered defects and meaningful boundaries, not artificial counter tests.",
@@ -2782,6 +2786,25 @@
       "owner": "memory-nexus",
       "evidence": [],
       "acceptance_record": ".planning/memory-resilience/evidence/A05.json"
+    },
+    {
+      "id": "Q086",
+      "stage": "baseline-quality",
+      "title": "Verify coverage runner against Tier S quality",
+      "status": "pending_rebaseline",
+      "depends_on": [
+        "B09"
+      ],
+      "scope": "scripts/run-istanbul-bun-coverage.ts",
+      "deliverable": "Meet per-file Tier S coverage with adversarial path/ownership tests and meaningful decision checks; include omitted script instrumentation.",
+      "verification": "Current-source four-metric report: at least 95% statements/functions/lines and 100% branches; no unavailable metric treated as passing. Decision checks cover destructive boundaries.",
+      "risk": "S",
+      "authorization": "authorized",
+      "owner": "memory-nexus",
+      "evidence": [],
+      "acceptance_record": ".planning/memory-resilience/evidence/Q086.json",
+      "observed_gap": "B02 focused native coverage reports functions 88.00% and lines 94.51%; statements/branches are unmeasured. This is not a complete instrumented baseline.",
+      "observed_evidence": ".planning/memory-resilience/evidence/B02-windows-final.txt"
     }
   ],
   "decisions": {

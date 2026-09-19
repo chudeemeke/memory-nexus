@@ -1,0 +1,147 @@
+{
+  "item_id": "B02",
+  "status": "verified",
+  "scope": "Focused linked-path/source-copy/disjoint-root behavior on Windows and Linux",
+  "recorded_at": "2026-09-19T20:31:51.3583947Z",
+  "base_revision": "55f92b6ac10ec055f9395e9c75dcefa432ee5577",
+  "source_revision": "Uncommitted candidate identified by source-file hashes; recorded in containing signed commit",
+  "cwd": "C:/Projects/memory-nexus",
+  "linux_cwd": "~/Projects/memory-nexus (symlink to this same checkout; no second clone)",
+  "source_inputs": [
+    {
+      "path": "scripts/run-istanbul-bun-coverage.ts",
+      "sha256": "42A691E28B5FFFC99DE505A3A5EABE29BCFB19347812DCCE5833569315E74D2B"
+    },
+    {
+      "path": "scripts/run-istanbul-bun-coverage.test.ts",
+      "sha256": "1F15B32E72347B98DFA98EE3E9D03D5A476C7A67AF882195E5EAF382A81487D2"
+    }
+  ],
+  "commands": [
+    {
+      "command": "bun test scripts/run-istanbul-bun-coverage.test.ts",
+      "platform": "Windows",
+      "exit": 0,
+      "tests": 23,
+      "assertions": 129,
+      "child_runs": 2
+    },
+    {
+      "command": "wsl --exec sh -lc 'cd ~/Projects/memory-nexus && bun test scripts/run-istanbul-bun-coverage.test.ts'",
+      "platform": "Linux/WSL",
+      "exit": 0,
+      "tests": 23,
+      "assertions": 129,
+      "child_runs": 2
+    },
+    {
+      "command": "bun run typecheck",
+      "exit": 0
+    }
+  ],
+  "tool_versions": {
+    "linux_bun": "1.3.14 (0d9b296a)",
+    "windows_bun": "1.4.1 (4661e494f)"
+  },
+  "behavior_proved": [
+    "Linked coverage ancestors rejected before deletion",
+    "Copied source-directory links rejected before instrumentation rewrites external source",
+    "Work-directory links and parent aliases cannot delete the source root",
+    "Work directory must be physically disjoint from project and coverage paths",
+    "Canonical project junction and ignored dependency junction remain usable",
+    "Successful real child runs produce all four nonzero fixture metrics"
+  ],
+  "decision_checks": "Retained RED/GREEN logs demonstrate actual sentinel deletion/source rewriting with prior candidates; mutation-quality evidence for these scoped decisions only",
+  "reports": [
+    {
+      "path": ".planning/memory-resilience/evidence/B02-green-coverage-link.txt",
+      "sha256": "E6CD6DF967C7B717D829AAB634E1685A132DA8F103BA4CC3F35AFEFFEE72F720"
+    },
+    {
+      "path": ".planning/memory-resilience/evidence/B02-green-overlap.txt",
+      "sha256": "1561A0F29BDEA835B1EDBA276366055EE2433081F3DEA6A97272C7098AE93731"
+    },
+    {
+      "path": ".planning/memory-resilience/evidence/B02-green-root-junction.txt",
+      "sha256": "FD9B4053D644C6E822621BFFB0A0229BDD794DC273EE16684B05A78CB77D873D"
+    },
+    {
+      "path": ".planning/memory-resilience/evidence/B02-green-source-link.txt",
+      "sha256": "15BF230278995553BA2BAE3B87504E3867826FBAA5A4F9F07D9AE263F68E46D1"
+    },
+    {
+      "path": ".planning/memory-resilience/evidence/B02-green-work-alias.txt",
+      "sha256": "B2C25837EE7283F4D245EDA69D020F841739D4FCC4C764C6B55CDB36334BEF9C"
+    },
+    {
+      "path": ".planning/memory-resilience/evidence/B02-green-work-in-project.txt",
+      "sha256": "E51DF48DE07F75B565329A52E6A284AB4CE898FBB9E1E7FB374755E47F52CDE3"
+    },
+    {
+      "path": ".planning/memory-resilience/evidence/B02-green-work-link.txt",
+      "sha256": "F1FD660989195763C1F4C96B7518413B0E754B61095033F90D5136AFE119628C"
+    },
+    {
+      "path": ".planning/memory-resilience/evidence/B02-linux-final.txt",
+      "sha256": "4E37083678BF27E5DC27EAD7F2E2C3DCC2131D34869F80990310AD54736616AF"
+    },
+    {
+      "path": ".planning/memory-resilience/evidence/B02-linux.txt",
+      "sha256": "C59A6768CF8FEA219FA2EF42E15FDC87CD3329C24A3BD5C60F61947C96E4D7D6"
+    },
+    {
+      "path": ".planning/memory-resilience/evidence/B02-red-coverage-link.txt",
+      "sha256": "F93ADDA9FA7D13D5C7E99714C438DDBCD9F958FC759440A0F164CF833EF87492"
+    },
+    {
+      "path": ".planning/memory-resilience/evidence/B02-red-overlap.txt",
+      "sha256": "647339C5B721755628C5B696F531148AA8301265217A0FAD758D5DBA131D48ED"
+    },
+    {
+      "path": ".planning/memory-resilience/evidence/B02-red-source-link.txt",
+      "sha256": "ED058B7EDEC958A5408BD69DE069BC1E94BB54AFD85537C2FA4E176DB47547DB"
+    },
+    {
+      "path": ".planning/memory-resilience/evidence/B02-red-work-alias.txt",
+      "sha256": "483D16D08DFD416E140E266EE9C99D6441B2A76047C4F9A4BD09CDCCD67912EA"
+    },
+    {
+      "path": ".planning/memory-resilience/evidence/B02-red-work-in-project.txt",
+      "sha256": "D83131D84FA344808C67B4DE26753BFC65D1F84305962F9E8D64D46B3D7C8DF2"
+    },
+    {
+      "path": ".planning/memory-resilience/evidence/B02-red-work-link.txt",
+      "sha256": "2D72707F3F13E6FA6ED5D2F806BADEE2260BA00AC1F65549ACF892E0684422EB"
+    },
+    {
+      "path": ".planning/memory-resilience/evidence/B02-root-junction.txt",
+      "sha256": "0FE388EC6EEA9785D378CCDC0F9FBD9D00580D431ED6ADA21188DB8B1E6922AD"
+    },
+    {
+      "path": ".planning/memory-resilience/evidence/B02-typecheck-final.txt",
+      "sha256": "DB32F15DFD123BF25295828F1D526BE69899702F6622D83B13C8874A0B628A09"
+    },
+    {
+      "path": ".planning/memory-resilience/evidence/B02-typecheck.txt",
+      "sha256": "DB32F15DFD123BF25295828F1D526BE69899702F6622D83B13C8874A0B628A09"
+    },
+    {
+      "path": ".planning/memory-resilience/evidence/B02-windows-final.txt",
+      "sha256": "94AACCFBA02E249191769A095BD058AB2DBA69B760A56E111305B6D68AA303E4"
+    },
+    {
+      "path": ".planning/memory-resilience/evidence/B02-windows.txt",
+      "sha256": "601C1D32333F953E084D6F6FD5C83CE1983BA0159BBC19104FA37E32929AC7B8"
+    }
+  ],
+  "review": "Local diff review only; final independent review still required R02",
+  "compatibility_change": "Internal coverage runner work directories must be physically outside the project; this also rejects in-project .coverage-work before mutation.",
+  "remaining_acceptance": [
+    "B03 directory ownership, process identity and run lifecycle",
+    "Concurrent path replacement is not proven race-safe by preflight alone; address under B03 and independent Tier S review",
+    "Q086 complete runner four-metric Tier S evidence; native functions 88.00%, lines 94.51% are below floor",
+    "R01 hosted required checks; WSL fixture proof is not clean Linux package installation",
+    "R02 final independent review and complete suite"
+  ],
+  "product_acceptance": false
+}

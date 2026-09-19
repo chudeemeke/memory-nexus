@@ -1,5 +1,34 @@
 # Memory resilience execution journal
 
+## 2026-09-19 - B02 linked-path safety verified; B03 next
+
+- Reproduced deletion through a coverage ancestor junction, replacement of a work
+  junction, project deletion through a work-parent alias, and external TypeScript
+  rewriting through a copied source junction. Every reproduction was confined to
+  a newly created disposable fixture; retained RED/GREEN logs document the failures.
+- Added linked-output checks, resolved work/project disjointness, source-copy
+  preflight and per-entry checks. Canonical project-root junctions remain usable by
+  copying their resolved directory; ignored dependency junctions remain linked.
+- Internal coverage work directories now must be physically outside the project.
+  In-project `.coverage-work` is rejected before mutation rather than copied into itself.
+- Final focused Windows Bun 1.4.1 and Linux/WSL Bun 1.3.14 runs each passed 23 tests,
+  129 assertions and two real child fixtures. Final typecheck passes. Evidence/input
+  hashes: `evidence/B02.json`. WSL uses a newly created `~/Projects/memory-nexus`
+  symlink to this checkout; no second clone, runtime install or dependency install.
+- This is scoped behavior acceptance, not complete Tier S acceptance. Added Q086
+  and its B10 dependency: the script's focused native report has 88.00% functions
+  and 94.51% lines; statements/branches remain unmeasured by that native report.
+  The ledger now has 133 items: 47 delivery/gate items, 85 historical candidates,
+  and this newly observed script-quality candidate.
+- Next: **B03**, ownership before any recursive work/output replacement, safe run
+  lifecycle and retained cleanup metadata. A valid name or descendant path alone
+  still must not authorize removal of an existing source/foreign directory.
+  Add a RED fixture for `coverageDir=project/src` and a foreign prefixed workdir,
+  then design exclusive owned run directories and eligible cleanup using existing
+  test-store ownership patterns. Include process-identity/PID reuse, crash/locked
+  files and concurrent replacement. Do not run full repository instrumentation
+  until this boundary is repaired. Final independent review remains R02.
+
 ## 2026-09-19 - B01 containment regression repaired
 
 - Reproduced actual deletion of disposable fixture sentinels for project-root and

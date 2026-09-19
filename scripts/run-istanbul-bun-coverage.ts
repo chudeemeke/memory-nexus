@@ -11,16 +11,18 @@ import { spawnSync } from "node:child_process";
 import {
   cpSync,
   existsSync,
+  lstatSync,
   mkdirSync,
   readFileSync,
   readdirSync,
+  realpathSync,
   rmSync,
   statSync,
   symlinkSync,
   writeFileSync,
 } from "node:fs";
 import { tmpdir } from "node:os";
-import { basename, isAbsolute, join, relative, resolve, sep } from "node:path";
+import { basename, dirname, isAbsolute, join, relative, resolve, sep } from "node:path";
 import { createCoverageMap, type CoverageMap, type CoverageMapData } from "istanbul-lib-coverage";
 import { createContext } from "istanbul-lib-report";
 import reports from "istanbul-reports";
@@ -134,14 +136,12 @@ function copyAndInstrument(projectRoot: string, workDir: string): CoverageMapDat
   rmSync(workDir, { recursive: true, force: true });
   mkdirSync(workDir, { recursive: true });
 
-  cpSync(projectRoot, workDir, {
+  const copyRoot = realpathSync(projectRoot);
+  cpSync(copyRoot, workDir, {
     recursive: true,
     dereference: false,
     filter(source) {
-      const rel = normalizePath(relative(projectRoot, source));
-      if (rel === "") return true;
-      const suffix = statSync(source).isDirectory() ? "/" : "";
-      return !isCoverageIgnored(`${rel}${suffix}`, COPY_IGNORE_PATTERNS);
+      return inspectCopyEntry(copyRoot, source) !== null;
     },
   });
 
@@ -163,6 +163,30 @@ function copyAndInstrument(projectRoot: string, workDir: string): CoverageMapDat
   }
 
   return baseline;
+}
+
+function inspectCopyEntry(projectRoot: string, source: string) {
+  const rel = normalizePath(relative(projectRoot, source));
+  // Check exclusions before inspecting dependency/output links that are never copied.
+  if (rel !== "" && isCoverageIgnored(`${rel}/`, COPY_IGNORE_PATTERNS)) return null;
+  const entry = lstatSync(source);
+  // The canonical project root may itself be the owner's workspace junction.
+  if (rel !== "" && (entry.isSymbolicLink() || (!entry.isFile() && !entry.isDirectory()))) {
+    throw new Error(`Refusing to copy linked or special source path: ${source}`);
+  }
+  return entry;
+}
+
+function assertSafeCopySource(projectRoot: string): void {
+  const directories = [projectRoot];
+  while (directories.length > 0) {
+    const directory = directories.pop()!;
+    for (const name of readdirSync(directory)) {
+      const source = join(directory, name);
+      const entry = inspectCopyEntry(projectRoot, source);
+      if (entry?.isDirectory()) directories.push(source);
+    }
+  }
 }
 
 function linkRuntimeArtifact(projectRoot: string, workDir: string, name: string): void {
@@ -265,6 +289,30 @@ function withDefaultTestTimeout(testArgs: string[]): string[] {
   return ["--timeout", String(DEFAULT_TEST_TIMEOUT_MS), ...args];
 }
 
+function assertUnlinkedDirectoryDescendant(root: string, target: string): void {
+  let current = root;
+  for (const part of relative(root, target).split(sep)) {
+    current = join(current, part);
+    const entry = lstatSync(current, { throwIfNoEntry: false });
+    if (!entry) return;
+    if (entry.isSymbolicLink() || !entry.isDirectory()) {
+      throw new Error(`Refusing to use linked or non-directory coverage path: ${current}`);
+    }
+  }
+}
+
+function resolvePhysicalPath(target: string): string {
+  if (lstatSync(target, { throwIfNoEntry: false })) return realpathSync(target);
+  const parent = dirname(target);
+  if (parent === target) throw new Error(`Refusing to use an unavailable filesystem root: ${target}`);
+  return join(resolvePhysicalPath(parent), basename(target));
+}
+
+function isSameOrDescendant(root: string, target: string): boolean {
+  const rel = relative(root, target);
+  return rel !== ".." && !rel.startsWith(`..${sep}`) && !isAbsolute(rel);
+}
+
 export function runInstrumentedCoverage(options: RunnerOptions): RunnerResult {
   const projectRoot = resolve(options.projectRoot);
   const workDir = resolve(options.workDir);
@@ -282,6 +330,19 @@ export function runInstrumentedCoverage(options: RunnerOptions): RunnerResult {
   if (coverageRelative === "" || coverageRelative === ".." || coverageRelative.startsWith(`..${sep}`) || isAbsolute(coverageRelative)) {
     throw new Error(`Refusing to use coverageDir that is not a strict descendant of project root: ${coverageDir}`);
   }
+  assertUnlinkedDirectoryDescendant(projectRoot, coverageDir);
+  const workEntry = lstatSync(workDir, { throwIfNoEntry: false });
+  if (workEntry && (workEntry.isSymbolicLink() || !workEntry.isDirectory())) {
+    throw new Error(`Refusing to use linked or non-directory workDir: ${workDir}`);
+  }
+  const physicalProjectRoot = realpathSync(projectRoot);
+  const physicalWorkDir = resolvePhysicalPath(workDir);
+  if (isSameOrDescendant(physicalWorkDir, physicalProjectRoot) || isSameOrDescendant(physicalProjectRoot, physicalWorkDir)) {
+    throw new Error(`Refusing to use workDir that physically overlaps the project root: ${workDir}`);
+  }
+  // Coverage is an unlinked strict project descendant, so disjoint project/work
+  // roots also guarantee disjoint coverage/work roots.
+  assertSafeCopySource(projectRoot);
 
   rmSync(coverageDir, { recursive: true, force: true });
   const baseline = copyAndInstrument(projectRoot, workDir);
