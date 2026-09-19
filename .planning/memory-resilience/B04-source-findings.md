@@ -104,3 +104,36 @@ Q041 already owns this module and now includes the confirmed defect and stricter
 Tier S requirement. It must establish an explicit invalid-input policy, add
 RED/GREEN and valid-boundary regressions, and verify actual ingestion consumers
 before B10/R02. This diagnostic does not prove corruption of any stored record.
+
+## Command-test cleanup diagnostics (batch 4)
+
+The reusable command-test helper `commands/_helpers/capture-json.ts` removes
+tracked temporary database files and sidecars, catches every removal failure,
+then clears the tracker. Source inspection establishes silent failure handling;
+it does not establish that a foreign path was actually removed. B11.4 owns
+ownership-bound cleanup and retained diagnostics, with partial-failure and foreign-
+path regressions before B10/R02. This helper is executable test support, not an
+automatically excluded test registration file.
+
+## Reproduced presentation defects (batch 4)
+
+At source `8719e3c36b2c73ca11f8ee4879c9f17aed4f2849`, synthetic formatter probes
+confirmed the following. Exact probe sources and hashes are retained in
+`evidence/B04-classification-batch-4.json`; reports are
+`evidence/B04-presentation-probes.json` and `evidence/B04-dashboard-tokens.json`.
+
+- Q095: JSON output with a context budget of 100 returned 672 characters and one
+  result. The fitting loop retains the final one-result serialization when none
+  fits. Define below-minimum valid-JSON budget behavior and prove it with focused
+  RED/GREEN tests, then the module's four-metric acceptance and review.
+- Q081: dashboard category markup became an HTML element, and a description
+  containing a closing script tag escaped the embedded script block. Python's
+  standard HTML tokenizer recognized both inert marker elements in generated HTML.
+  Q081 now requires Tier S context-specific escaping and actual browser regression
+  evidence for attacker-controlled fields, followed by adversarial/decision checks.
+
+Probe exit 0 means the diagnostic executed, not that the behavior passed. No
+browser JavaScript was executed and no production memory was read or changed.
+The generated synthetic HTML remains local under `.git`; the exact probe source
+allows regeneration in an isolated checkout. Both findings are mandatory baseline
+dependencies. Neither defect has been repaired by this classification checkpoint.

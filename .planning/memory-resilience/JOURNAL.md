@@ -1,5 +1,21 @@
 # Memory resilience execution journal
 
+## 2026-09-20 - B04 presentation classification
+
+- Inspected and proposed tiers for 60 remaining non-test presentation candidates.
+  All 205 unclassified entries are syntax-identified test drivers. Current total:
+  **241 proposed, 205 unclassified, zero approved exclusions**.
+- Reproduced JSON budget overflow (Q095) and dashboard HTML/script-context escape
+  (Q081) using synthetic data and an HTML tokenizer. No browser script execution
+  or real-memory access is claimed. B11.4 owns the additional command-test cleanup
+  helper finding. Ledger: 148 items, 53 delivery/gates and 95 quality candidates.
+- Source/package hashes and dependency barriers validated; actual inventory gate
+  still rejects 205 unknown classifications. See batch-4 evidence. No executable
+  source changed, numeric coverage accepted, model downloaded or worktree removed.
+- Next: inspect remaining test drivers, settle individual metric applicability,
+  and obtain independent review. B04 active, B05 pending; all three inbox reports
+  and the quota-blocked external review obligation remain open.
+
 ## 2026-09-20 - B04 infrastructure classification
 
 - Proposed tiers for the remaining 61 non-test infrastructure modules, including

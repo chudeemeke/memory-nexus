@@ -1,0 +1,8 @@
+{
+  "kind": "diagnostic observations, not passing regressions",
+  "budget": 100,
+  "outputLength": 672,
+  "returnedResults": 1,
+  "dashboardArtifact": ".git/b04-dashboard-probe.html",
+  "limits": "No browser script executed, no production memory accessed."
+}

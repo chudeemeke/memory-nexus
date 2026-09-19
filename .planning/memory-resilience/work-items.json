@@ -115,17 +115,20 @@
         ".planning/memory-resilience/evidence/B04-classification-batch-2.json",
         ".planning/memory-resilience/evidence/B04-input-probes.json",
         ".planning/memory-resilience/evidence/B04-classification-batch-3.json",
-        ".planning/memory-resilience/evidence/B04-timestamp-probe.json"
+        ".planning/memory-resilience/evidence/B04-timestamp-probe.json",
+        ".planning/memory-resilience/evidence/B04-classification-batch-4.json",
+        ".planning/memory-resilience/evidence/B04-presentation-probes.json",
+        ".planning/memory-resilience/evidence/B04-dashboard-tokens.json"
       ],
       "acceptance_record": ".planning/memory-resilience/evidence/B04.json",
       "progress": {
         "discovery": "implemented and focused behavior verified",
         "sourceCandidates": 446,
-        "proposedClassifications": 181,
-        "unclassified": 265,
+        "proposedClassifications": 241,
+        "unclassified": 205,
         "approvedExclusions": 0,
         "independentReview": "pending",
-        "next": "Inspect remaining presentation modules and test drivers; resolve individual metric applicability, then independent review. B05 remains pending.",
+        "next": "Inspect the 205 remaining test drivers individually and resolve per-file metric applicability; then obtain independent review. All non-test candidates have proposed tiers; B05 remains pending.",
         "packageOutputMapping": "Source-bound mapping recorded; artifact verification and independent review pending."
       }
     },
@@ -1978,14 +1981,14 @@
       "id": "Q081",
       "stage": "coverage_repair",
       "title": "Verify and repair src/presentation/cli/formatters/friction-dashboard.ts",
-      "status": "pending_rebaseline",
+      "status": "pending",
       "depends_on": [
         "B09"
       ],
       "scope": "src/presentation/cli/formatters/friction-dashboard.ts",
       "deliverable": "Reproduce uncovered behavior, add meaningful regression/boundary tests, fix demonstrated defects, satisfy this file's reviewed risk tier.",
       "verification": "Current source-bound four-metric file evidence plus tier-required decision tests. Supersede only with explicit fresh evidence that this candidate is no longer a gap.",
-      "risk": "unclassified",
+      "risk": "S",
       "authorization": "authorized",
       "owner": "memory-nexus",
       "historical_gaps": [
@@ -1993,7 +1996,10 @@
       ],
       "historical_evidence": "docs/audits/2026-09-19-repair-evidence/per-file-coverage-gaps.json",
       "evidence": [],
-      "acceptance_record": ".planning/memory-resilience/evidence/Q081.json"
+      "acceptance_record": ".planning/memory-resilience/evidence/Q081.json",
+      "confirmed_defect": "Generated HTML interprets a category marker as markup and permits a description to close the script block embedded via JSON.stringify.",
+      "defect_evidence": ".planning/memory-resilience/evidence/B04-dashboard-tokens.json",
+      "additional_verification": "RED/GREEN context-appropriate HTML and embedded-script escaping across every user-controlled field; actual browser inert-marker/adversarial proof plus Tier S branch/decision checks. No raw sensitive fixture data."
     },
     {
       "id": "Q082",
@@ -2186,7 +2192,9 @@
         "Q091",
         "Q092",
         "Q093",
-        "Q094"
+        "Q094",
+        "B11.4",
+        "Q095"
       ],
       "scope": "all Q-* work items",
       "deliverable": "Close individually verified quality work items; fix discovered defects and meaningful boundaries, not artificial counter tests.",
@@ -3095,6 +3103,45 @@
       "observed_evidence": ".planning/memory-resilience/evidence/B04-input-probes.json",
       "acceptance_record": ".planning/memory-resilience/evidence/Q094.json",
       "retirement_trigger": "Before B10/R02; diagnostic reproduction is not repair acceptance."
+    },
+    {
+      "id": "B11.4",
+      "stage": "baseline",
+      "title": "Make command-test DB cleanup owned and observable",
+      "status": "pending",
+      "depends_on": [
+        "B03"
+      ],
+      "scope": "src/presentation/cli/commands/_helpers/capture-json.ts and JSON command test callers",
+      "deliverable": "Prove ownership of temporary DB/WAL/SHM paths before removal and retain diagnosable failed cleanup instead of clearing the tracker silently.",
+      "verification": "RED/GREEN foreign/replaced paths, successful removal, partial/locked-file failure and repeated cleanup; preserve original command/test errors.",
+      "risk": "S",
+      "authorization": "authorized",
+      "owner": "memory-nexus",
+      "evidence": [],
+      "acceptance_record": ".planning/memory-resilience/evidence/B11.4.json",
+      "observed_evidence": ".planning/memory-resilience/B04-source-findings.md",
+      "retirement_trigger": "Before B10/R02; source inspection is not completed cleanup proof."
+    },
+    {
+      "id": "Q095",
+      "stage": "baseline-quality",
+      "title": "Enforce JSON formatter budget when no result fits",
+      "status": "pending",
+      "depends_on": [
+        "B04"
+      ],
+      "scope": "src/presentation/cli/formatters/output-formatter.ts",
+      "deliverable": "Repair the reproduced budget overrun and define below-minimum JSON budgets without changing the public JSON shape silently.",
+      "verification": "RED/GREEN oversized-first-result and boundary-budget cases, valid parseable output and preserved normal results; all four per-file metrics >=95% and independent review.",
+      "risk": "A",
+      "authorization": "authorized",
+      "owner": "memory-nexus",
+      "evidence": [],
+      "acceptance_record": ".planning/memory-resilience/evidence/Q095.json",
+      "observed_gap": "With one synthetic 500-character snippet and contextBudget 100, JSON formatter returns 672 characters and one result.",
+      "observed_evidence": ".planning/memory-resilience/evidence/B04-presentation-probes.json",
+      "retirement_trigger": "Before B10/R02; diagnostic output is not passing acceptance."
     }
   ],
   "decisions": {
