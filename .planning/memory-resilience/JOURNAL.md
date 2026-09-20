@@ -1,5 +1,37 @@
 # Memory resilience execution journal
 
+## 2026-09-20 - Weak statement ownership rejected by synthetic native pressure
+
+- Continued B11.74 from b9162eb. Retained-statement shared-close RED led to a
+  factory-owned weak registry candidate. Ten focused native tests and a 54-test
+  current-runtime group passed, but pinned Bun 1.3.14 command failures remained.
+- Reduced the failure to synthetic SELECT 1 statements under collection pressure,
+  with no real memory data, health checks or stats service. Dual weak tracking
+  failed strict close at iteration zero; paired strong-wrapper retention passed
+  20 x 500 statements. Recorded counts: 148 tracked, 78 live wrappers, 79 live
+  native objects. Exact engine destructor scheduling remains unmeasured.
+- The weak candidate is rejected. Its complete source, tests, failing/passing
+  logs and temporary runtime identity survive in
+  `evidence/B11.74-weak-tracking-rejection.json`. Restored production connection
+  to b9162eb after verifying snapshot hashes; removed only the two newly created
+  experimental source/test files. No accepted test, user work or runtime floor
+  changed. Executable inventory therefore remains 446 files / 2 packages.
+- Status catch-only observation confirmed it suppresses `database is locked`
+  and can still emit success-shaped JSON. B11.4 owns that contract repair after
+  native lifetime repair. Replacement initialization must preserve primary plus
+  cleanup errors and the discovered create:false/readwrite opening behavior.
+- All six identified temporary runtime roots were checked absent. One initial
+  hidden-directory filter found no tests; an initial oversized probe timed out.
+  These are failures, not native acceptance. The contained pressure teardown
+  EBUSY was removed by its outer owner after the child terminated.
+- Next active B11.74: complete the native factory/statement lifetime map, then
+  split caller migrations into atomic ledger children. Build explicit ownership
+  and scope disposal through one hot-loop caller; prove both deterministic close
+  and bounded outstanding resources. No GC-based promise or unbounded strong
+  registry. Detailed restart is in B11.74-plan.md.
+- Baseline, complete metrics, Linux, hosted checks and final independent review
+  remain open. The post-baseline embedding experiment has not started.
+
 ## 2026-09-20 - Native closure mechanism and runtime compatibility discovered
 
 - Previous turn progressed at 0423e45; worktree started clean. Instrumented

@@ -62,7 +62,7 @@ denominator to the historical count.
 | Stage | Ledger items | Verifiable checkpoint |
 |---|---|---|
 | Safe verification | B01-B08, including B05.1-B05.3 | Destructive output paths are guarded; complete, fresh, revision-bound evidence is measured and enforced; known violations fail. |
-| Baseline repair | B09, Q001-Q085 and discovered gaps, B10; B11.1-B11.73, B12; D01-D05 including D04.1-D04.4; F01-F03 | Every required coverage gap repaired; helper cleanup, complete evaluation admission and packaged hooks proved; actual dependency/runtime and consumer compatibility proved; exact synthetic friction cleanup recoverable and verified. |
+| Baseline repair | B09, Q001-Q085 and discovered gaps, B10; B11.1-B11.74 and discovered children, B12; D01-D05 including D04.1-D04.4; F01-F03 | Every required coverage gap repaired; helper cleanup, complete evaluation admission and packaged hooks proved; actual dependency/runtime and consumer compatibility proved; exact synthetic friction cleanup recoverable and verified. |
 | Baseline delivery | R01-R04 | Final checks and independent review; one concrete Tier D brief; accepted integration and post-merge proof. |
 | Bounded experiment | S01-S05 | Synthetic local inference measured against hard targets; pass/fail/inconclusive report and retained resource/removal evidence. |
 | Production specification and decision | P01-P03 | Complete data/topology/privacy/recovery specification; separate local-compute and replication decisions supported by evidence. P01/P02 can proceed during external waits. |
@@ -212,13 +212,10 @@ Continue authorized repairs and retry the review when availability changes befor
 the applicable delivery gate. Local plan checks found and corrected negative-spike
 deadlock and an unnecessary local-feature dependency in the replication branch.
 
-B01: inspect the current coverage runner and write RED tests proving project root,
-ancestor, sibling-prefix and escaping destinations are rejected before mutation,
-with sentinel content preserved. Start with:
-
-```powershell
-bun test scripts/run-istanbul-bun-coverage.test.ts
-```
-
-Then implement the smallest containment guard and verify the new cases. B02 covers
-linked destinations separately; do not claim complete deletion safety from B01 alone.
+The restart source is `work-items.json.current_item` and the newest JOURNAL entry,
+not the original B01 starting command. At the current checkpoint B11.74 is active:
+complete the native factory/statement lifetime map, then implement explicit
+ownership and scope disposal through a bounded, verifiable caller slice. Its
+rejected weak-tracking experiment and exact next steps are in B11.74-plan.md.
+Baseline acceptance, including the native lifecycle repair, still precedes the
+approved embedding experiment. Read the ledger again before selecting work.

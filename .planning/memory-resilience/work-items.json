@@ -3395,7 +3395,8 @@
         ".planning/memory-resilience/B11.4-plan.md",
         ".planning/memory-resilience/evidence/B11.4.json",
         ".planning/memory-resilience/evidence/B11.4-followup.json",
-        ".planning/memory-resilience/evidence/B11.4-native-discovery.json"
+        ".planning/memory-resilience/evidence/B11.4-native-discovery.json",
+        ".planning/memory-resilience/evidence/B11.74-weak-tracking-rejection.json"
       ],
       "acceptance_record": ".planning/memory-resilience/evidence/B11.4.json",
       "observed_evidence": ".planning/memory-resilience/B04-source-findings.md",
@@ -3403,7 +3404,7 @@
       "progress": {
         "current": "Owned tracker retained; experimental retries removed. Stronger absent/zero exit assertions pass; 11 current-source faults detected and both helper files show diagnostic 100% metrics.",
         "native": "Ordinary suite failed with EBUSY even after candidate bounded retries. Passing instrumented repetitions do not close this failure. Native prepared-statement lifetime is now B11.74.",
-        "caller": "Six caller driver branch diagnostics range from 36.36% to 75%; includes vacuous metadata assertion and permissive alternate error fields. B11.4 owns contract-based repair after native closure.",
+        "caller": "Six caller driver branch diagnostics range from 36.36% to 75%; includes vacuous metadata assertion and permissive alternate error fields. B11.4 owns contract-based repair after native closure. Catch-only diagnostic also confirmed status/stats suppresses database-is-locked and can emit success-shaped JSON; force this failure in the command contract test and propagate truthful failure.",
         "restart": "Complete B11.74, then tighten and verify caller contracts; retain B05/native-platform/independent review limits."
       },
       "blocker": {
@@ -4984,13 +4985,15 @@
       "evidence": [
         ".planning/memory-resilience/B11.74-plan.md",
         ".planning/memory-resilience/evidence/B11.74-discovery.json",
-        ".planning/memory-resilience/evidence/B11.4-native-discovery.json"
+        ".planning/memory-resilience/evidence/B11.4-native-discovery.json",
+        ".planning/memory-resilience/evidence/B11.74-weak-tracking-rejection.json"
       ],
       "acceptance_record": ".planning/memory-resilience/evidence/B11.74.json",
       "retirement_trigger": "Before B11.1/B11.4/B10/R02 acceptance; default close plus GC/retries is not deterministic closure proof.",
       "progress": {
-        "observed": "Both Windows Bun 1.3.14 and 1.4.1 retain prepared statements/locks after default close. Strict close fixes 1.4.1 but fails in 1.3.14. Explicit finalization releases in both.",
-        "restart": "B11.74-plan.md step 1: actual shared close regression, then lifetime/interface mapping. No production closure change or runtime-floor change made."
+        "observed": "Default close retains prepared statements. A factory weak registry passed focused tests but failed synthetic collection pressure on pinned Windows Bun 1.3.14: database is locked, 148 tracked / 78 live wrappers / 79 live native objects. Paired strong-wrapper retention passed. Candidate rejected and preserved; production source restored to b9162eb.",
+        "restart": "Complete native factory/statement lifetime map, split caller migrations into atomic children, then prove explicit connection ownership plus scope disposal through one hot-loop caller on both runtimes. Require bounded outstanding resources and immediate close/removal; no weak-reference or unbounded-registry shortcut.",
+        "limits": "No native Linux, full metrics, hosted or independent-review acceptance. Preserve primary+cleanup errors and create:false/readwrite regression in replacement. Status success-shaped output after swallowed close errors is B11.4."
       }
     }
   ],
