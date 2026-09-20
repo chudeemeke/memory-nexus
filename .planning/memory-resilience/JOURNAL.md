@@ -1,5 +1,25 @@
 # Memory resilience execution journal
 
+## 2026-09-20 - B11.3 historical checker retired; acceptance preserved
+
+- Previous turn progressed at ada5691; started clean. Audit found the historical
+  release checker has no supported package/repository invocation and mixes a
+  global CLI with checkout database code. Only its private driver imports it.
+- Retired both files with Git/hash/blob recovery. Remaining 444 JS/TS files and
+  2583 imports are identical; complete inventory446 candidates, types pass.
+  Initial post-delete inventory correctly refused unstaged missing tracked files;
+  after explicit deletion staging, discovery and verification passed.
+- B11.3 is superseded, not runtime-verified. D04.1-D04.4 preserve artifact-pinned
+  installed behavior, typed recovery and round-trip acceptance. B10 now depends
+  on D04; R02 still requires both. Negative dependency controls reject dropped
+  barriers. No required product outcome was marked complete or removed.
+- Added B11.72 for supported published-verifier isolation and B11.73 for event-log
+  regression storage gaps observed during mapping. Those tasks remain pending.
+- Next/current B11.4: read capture-json.ts and its callers; reproduce ownership,
+  tracker clearing and error-preservation failures using owned synthetic fixtures.
+  Full baseline, native Linux and independent review remain open.
+
+
 ## 2026-09-20 - B11.3 validated event admission and safe startup
 
 - Previous turn progressed at c3a46d7; started clean. Reproduced malformed JSON

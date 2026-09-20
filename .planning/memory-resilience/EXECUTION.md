@@ -62,7 +62,7 @@ denominator to the historical count.
 | Stage | Ledger items | Verifiable checkpoint |
 |---|---|---|
 | Safe verification | B01-B08, including B05.1-B05.3 | Destructive output paths are guarded; complete, fresh, revision-bound evidence is measured and enforced; known violations fail. |
-| Baseline repair | B09, Q001-Q085 and discovered gaps, B10; B11.1-B11.71, B12; D01-D05; F01-F03 | Every required coverage gap repaired; helper cleanup, complete evaluation admission and packaged hooks proved; actual dependency/runtime and consumer compatibility proved; exact synthetic friction cleanup recoverable and verified. |
+| Baseline repair | B09, Q001-Q085 and discovered gaps, B10; B11.1-B11.73, B12; D01-D05 including D04.1-D04.4; F01-F03 | Every required coverage gap repaired; helper cleanup, complete evaluation admission and packaged hooks proved; actual dependency/runtime and consumer compatibility proved; exact synthetic friction cleanup recoverable and verified. |
 | Baseline delivery | R01-R04 | Final checks and independent review; one concrete Tier D brief; accepted integration and post-merge proof. |
 | Bounded experiment | S01-S05 | Synthetic local inference measured against hard targets; pass/fail/inconclusive report and retained resource/removal evidence. |
 | Production specification and decision | P01-P03 | Complete data/topology/privacy/recovery specification; separate local-compute and replication decisions supported by evidence. P01/P02 can proceed during external waits. |
@@ -76,6 +76,12 @@ the final dependency chain. A verified negative experiment result closes S05 as 
 experiment, not E2 or the overall goal. Revise the product target only with an
 explicit owner decision; never silently substitute keyword-only operation or a
 second model to declare success.
+
+The historical standalone UAT checker was retired under B11.3 after consumer and
+purpose review. Its required product outcomes remain in D04.1-D04.4; B10 depends
+on D04 and R02 requires both. Retirement does not substitute for installed-package
+acceptance. The retained [disposition](B11.3-retirement.md) distinguishes existing
+source-level tests from pending artifact-specific proof.
 
 Measurement tasks S03/S04 are verified when their valid measurements and limits
 are retained, including a negative result; a missed target must not prevent S05

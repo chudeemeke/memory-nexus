@@ -3,7 +3,7 @@
   "workstream": "memory-resilience",
   "goal_status": "active",
   "starting_revision": "77d54e05be7fc24cede4a9a3e1fede6fa113ac8f",
-  "current_item": "B11.3",
+  "current_item": "B11.4",
   "status_semantics": {
     "pending": "Not started; authorization and dependencies must permit work.",
     "pending_rebaseline": "Historical candidate, not a confirmed current failure or a completed task.",
@@ -2375,7 +2375,10 @@
         "B11.68",
         "B11.69",
         "B11.70",
-        "B11.71"
+        "B11.71",
+        "D04",
+        "B11.72",
+        "B11.73"
       ],
       "scope": "all Q-* work items",
       "deliverable": "Close individually verified quality work items; fix discovered defects and meaningful boundaries, not artificial counter tests.",
@@ -2443,17 +2446,30 @@
       "depends_on": [
         "D02",
         "D03",
-        "D05"
+        "D05",
+        "D04.1",
+        "D04.2",
+        "D04.3",
+        "D04.4"
       ],
       "scope": "isolated packed artifact installs",
-      "deliverable": "Test the package as a consumer, including dependency audit, CLI/API smoke and native provider path.",
-      "verification": "Artifact hash and installed dependency tree retained; root-only overrides cannot stand in for consumer safety.",
+      "deliverable": "Test the package as a consumer, including dependency audit, CLI/API smoke and native provider path. D04.1-D04.4 make artifact provenance, installed commands, typed recovery and round-trip preservation independently reviewable.",
+      "verification": "Artifact hash and installed dependency tree retained; root-only overrides cannot stand in for consumer safety. All children must have actual acceptance evidence; retirement of the old UAT script is not their completion.",
       "risk": "S",
       "authorization": "authorized",
       "owner": "memory-nexus",
       "evidence": [],
       "acceptance_record": ".planning/memory-resilience/evidence/D04.json",
-      "additional_acceptance": "Disposition the exported legacy LlmExtractor.extract empty-result method and hook caller; trace active consumers and repair or explicitly retire/document unsupported behavior with review before R02. No new inference provider/egress is implicitly authorized."
+      "additional_acceptance": "Disposition the exported legacy LlmExtractor.extract empty-result method and hook caller; trace active consumers and repair or explicitly retire/document unsupported behavior with review before R02. No new inference provider/egress is implicitly authorized.",
+      "original_contract": {
+        "depends_on": [
+          "D02",
+          "D03",
+          "D05"
+        ],
+        "deliverable": "Test the package as a consumer, including dependency audit, CLI/API smoke and native provider path.",
+        "verification": "Artifact hash and installed dependency tree retained; root-only overrides cannot stand in for consumer safety."
+      }
     },
     {
       "id": "F01",
@@ -3194,15 +3210,15 @@
     },
     {
       "id": "B11.3",
-      "title": "Report retained UAT sandbox storage",
+      "title": "Retire historical UAT checker and preserve product acceptance",
       "depends_on": [
         "B03"
       ],
-      "scope": "scripts/run-uat-verification.ts sandbox lifecycle",
-      "deliverable": "Make UAT sandbox ownership and failed cleanup observable while preserving primary acceptance failures.",
-      "verification": "Real-process success/failure and locked or injected cleanup-failure regressions preserve the primary status and report the retained owned path.",
+      "scope": "scripts/run-uat-verification.ts, scripts/run-uat-verification.test.ts",
+      "deliverable": "Retire the unconsumed historical checker; preserve recoverable source and rehome required acceptance behind explicit baseline dependencies.",
+      "verification": "No repository/package consumers outside the retired pair; unchanged remaining sources/imports, source/script types, complete inventory and dependency barrier diagnostics. Replacement outcomes remain pending.",
       "stage": "baseline",
-      "status": "active",
+      "status": "superseded",
       "risk": "S",
       "authorization": "authorized",
       "owner": "memory-nexus",
@@ -3211,16 +3227,30 @@
         ".planning/memory-resilience/evidence/B11.3-checkpoint.json",
         ".planning/memory-resilience/evidence/B11.3-command-replay.json",
         ".planning/memory-resilience/evidence/B11.3-status.json",
-        ".planning/memory-resilience/evidence/B11.3-log.json"
+        ".planning/memory-resilience/evidence/B11.3-log.json",
+        ".planning/memory-resilience/B11.3-retirement.md",
+        ".planning/memory-resilience/evidence/B11.3.json"
       ],
       "acceptance_record": ".planning/memory-resilience/evidence/B11.3.json",
       "observed_evidence": ".planning/memory-resilience/B04-source-findings.md",
       "retirement_trigger": "Before baseline review R02; runtime regression and final applicable tier proof required.",
       "progress": {
-        "implemented": "Event-log admission uses the existing validating canonical/legacy reader, rejecting malformed records instead of recognizing only a type substring. Safe default startup paths tested.",
-        "verified_scope": "57 Windows tests /162 assertions, types, instrumented run with36 captures. Script branches97.76%; driver functions91.83%, branches95.83%; no final quality acceptance. WSL /bin/true probe timed out after10s.",
-        "restart": "Audit continued purpose/consumer/supersession of the historical standalone UAT checker before adding process-tree or generated-script infrastructure. If retained, remaining uncovered paths are Linux/empty PATH and intentionally refused driver callbacks; native/review/lifetime gates remain."
-      }
+        "disposition": "Historical mixed-artifact checker and private driver retired; source retained in Git with hashes/blobs.",
+        "verified_scope": "446 executable candidates; 444 JS/TS files and2583 remaining imports unchanged. Types and dependency diagnostics pass.",
+        "remaining": "D04 children retain required installed product proof. New B11.72/B11.73 own observed supported-verifier and event-test fixture gaps. No baseline acceptance."
+      },
+      "original_contract": {
+        "title": "Report retained UAT sandbox storage",
+        "scope": "scripts/run-uat-verification.ts sandbox lifecycle",
+        "deliverable": "Make UAT sandbox ownership and failed cleanup observable while preserving primary acceptance failures.",
+        "verification": "Real-process success/failure and locked or injected cleanup-failure regressions preserve the primary status and report the retained owned path."
+      },
+      "replacement_items": [
+        "D04.1",
+        "D04.2",
+        "D04.3",
+        "D04.4"
+      ]
     },
     {
       "id": "B12",
@@ -3340,7 +3370,7 @@
       "id": "B11.4",
       "stage": "baseline",
       "title": "Make command-test DB cleanup owned and observable",
-      "status": "pending",
+      "status": "active",
       "depends_on": [
         "B03"
       ],
@@ -3350,10 +3380,16 @@
       "risk": "S",
       "authorization": "authorized",
       "owner": "memory-nexus",
-      "evidence": [],
+      "evidence": [
+        ".planning/memory-resilience/B11.4-plan.md"
+      ],
       "acceptance_record": ".planning/memory-resilience/evidence/B11.4.json",
       "observed_evidence": ".planning/memory-resilience/B04-source-findings.md",
-      "retirement_trigger": "Before B10/R02; source inspection is not completed cleanup proof."
+      "retirement_trigger": "Before B10/R02; source inspection is not completed cleanup proof.",
+      "progress": {
+        "inspection": "Six JSON command callers plus the existing helper regression driver use the module. The helper authorizes deletion from tracker strings, swallows failures and clears the tracker. Library declarations currently include the helper under rootDir src.",
+        "restart": "Read the existing helper tests and all seven callers; add owned foreign/replacement/failure regressions first. Resolve the test-only build location before importing shared ownership logic."
+      }
     },
     {
       "id": "Q095",
@@ -4783,6 +4819,132 @@
         ".planning/memory-resilience/evidence/B04-counter-boundary-probe.json"
       ],
       "retirement_trigger": "Before B05 completion and numerical baseline acceptance B07/B09/R02."
+    },
+    {
+      "id": "D04.1",
+      "title": "Install and identify the exact candidate package",
+      "depends_on": [
+        "D02",
+        "D03",
+        "D05",
+        "B11.72"
+      ],
+      "scope": "isolated packed artifact and consumer dependency trees",
+      "deliverable": "Build and hash one candidate artifact; install outside the checkout under owned HOME/config/data/prefix paths. Verify CLI/library/native runtime entrypoints resolve from that artifact and audit the installed dependency tree.",
+      "verification": "Retain artifact/source/lock hashes, resolved entrypoint paths, installed tree, status codes and cleanup evidence on supported platforms. No global memory executable, checkout imports or package-version-only pass.",
+      "stage": "baseline",
+      "status": "pending",
+      "risk": "S",
+      "authorization": "authorized",
+      "owner": "memory-nexus",
+      "evidence": [
+        ".planning/memory-resilience/B11.3-retirement.md"
+      ],
+      "acceptance_record": ".planning/memory-resilience/evidence/D04.1.json",
+      "retirement_trigger": "Before final baseline review R02; no baseline acceptance while required proof is absent."
+    },
+    {
+      "id": "D04.2",
+      "title": "Prove installed capture and query command contracts",
+      "depends_on": [
+        "D04.1"
+      ],
+      "scope": "candidate installed CLI capture/status/query/legacy wrappers",
+      "deliverable": "Capture a synthetic session and retrieve known content via installed commands. Verify real success/warning/failure outcomes, JSON contracts and legacy wrapper behavior.",
+      "verification": "Actual child commands operate only on owned fixtures; known IDs/content/counts survive restart. Missing inputs and failure outputs cannot pass. Help output alone is not behavior proof.",
+      "stage": "baseline",
+      "status": "pending",
+      "risk": "S",
+      "authorization": "authorized",
+      "owner": "memory-nexus",
+      "evidence": [
+        ".planning/memory-resilience/B11.3-retirement.md"
+      ],
+      "acceptance_record": ".planning/memory-resilience/evidence/D04.2.json",
+      "retirement_trigger": "Before final baseline review R02; no baseline acceptance while required proof is absent."
+    },
+    {
+      "id": "D04.3",
+      "title": "Prove typed event and projection recovery for the candidate",
+      "depends_on": [
+        "D04.1",
+        "D04.2",
+        "B11.73"
+      ],
+      "scope": "deterministic extraction, current event format, projection/context recovery",
+      "deliverable": "Use a deterministic local provider fixture to persist typed canonical records. Prove malformed-record admission, replay, supersedence, governed context and portable recovery without relying on the deleted projection. Bind each proof to the candidate and distinguish source-level from installed execution.",
+      "verification": "Reconcile event IDs/counts/hashes and active/superseded query results before/after recovery. Exercise actual current envelope format; legacy content cannot substitute for SQL context. A missing supported packaged recovery route is failed admission or a design boundary, never permission to combine arbitrary checkout source with a global binary. No model experiment or real-data egress.",
+      "stage": "baseline",
+      "status": "pending",
+      "risk": "S",
+      "authorization": "authorized",
+      "owner": "memory-nexus",
+      "evidence": [
+        ".planning/memory-resilience/B11.3-retirement.md"
+      ],
+      "acceptance_record": ".planning/memory-resilience/evidence/D04.3.json",
+      "retirement_trigger": "Before final baseline review R02; no baseline acceptance while required proof is absent."
+    },
+    {
+      "id": "D04.4",
+      "title": "Prove installed export and import preserve permitted state",
+      "depends_on": [
+        "D04.1",
+        "D04.3"
+      ],
+      "scope": "installed candidate round trip between owned synthetic stores",
+      "deliverable": "Export and import a known governed supersedence chain with the installed artifact. Preserve permitted IDs, relationships, current values and privacy/deletion semantics; retain rollback and interrupted/failing import behavior.",
+      "verification": "Compare authoritative permitted-data inventory before/after actual commands. Explicit failure statuses and recovery must match observed store state. Simulated export/import responses are not accepted.",
+      "stage": "baseline",
+      "status": "pending",
+      "risk": "S",
+      "authorization": "authorized",
+      "owner": "memory-nexus",
+      "evidence": [
+        ".planning/memory-resilience/B11.3-retirement.md"
+      ],
+      "acceptance_record": ".planning/memory-resilience/evidence/D04.4.json",
+      "retirement_trigger": "Before final baseline review R02; no baseline acceptance while required proof is absent."
+    },
+    {
+      "id": "B11.72",
+      "title": "Repair supported published verifier storage and isolation",
+      "depends_on": [
+        "B03"
+      ],
+      "scope": "scripts/verify-published-package.ts",
+      "deliverable": "Reproduce and repair unguarded recursive cleanup and inherited user-home/config state in the supported verify:published command. Keep package/version checks distinct from behavioral acceptance.",
+      "verification": "Owned allocation covers setup/failure/cleanup; replacement paths are refused and retained failures reported. Real synthetic process tests verify explicit install/config roots and recovery before any registry installation is admitted.",
+      "stage": "baseline",
+      "status": "pending",
+      "risk": "S",
+      "authorization": "authorized",
+      "owner": "memory-nexus",
+      "evidence": [
+        ".planning/memory-resilience/B11.3-retirement.md"
+      ],
+      "acceptance_record": ".planning/memory-resilience/evidence/B11.72.json",
+      "retirement_trigger": "Before final baseline review R02; no baseline acceptance while required proof is absent."
+    },
+    {
+      "id": "B11.73",
+      "title": "Make event-log regression fixtures exclusively owned",
+      "depends_on": [
+        "B03"
+      ],
+      "scope": "tests/integration/infrastructure/database/event-log.test.ts",
+      "deliverable": "Replace nonexclusive random directory creation and unconditional recursive cleanup with existing owned fixtures. Preserve real SQLite/event tests and original failure causes.",
+      "verification": "Prove ownership/refusal, teardown and failure recovery, then run the actual event-log suite with source-bound evidence. Do not claim this current audit proves the old suite passing.",
+      "stage": "baseline",
+      "status": "pending",
+      "risk": "S",
+      "authorization": "authorized",
+      "owner": "memory-nexus",
+      "evidence": [
+        ".planning/memory-resilience/B11.3-retirement.md"
+      ],
+      "acceptance_record": ".planning/memory-resilience/evidence/B11.73.json",
+      "retirement_trigger": "Before final baseline review R02; no baseline acceptance while required proof is absent."
     }
   ],
   "decisions": {

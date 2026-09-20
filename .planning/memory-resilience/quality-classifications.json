@@ -818,47 +818,6 @@
       }
     },
     {
-      "path": "scripts/run-uat-verification.test.ts",
-      "package": "package.json",
-      "tier": "S",
-      "rationale": "Regression driver creates and replaces owned fixture storage and exercises destructive cleanup failure boundaries.",
-      "applicability": {
-        "mode": "measure",
-        "reason": "Executable failure/recovery driver; all applicable metric floors remain required."
-      },
-      "decisionStatus": "proposed - independent review pending",
-      "sourceHash": "5326d55f51b6867b52319692d6b0b10e7f7ce3204dc6fc80a98ef9d033af7b19",
-      "metricApplicability": {
-        "status": "diagnostic only - tier floors and independent applicability remain unmet",
-        "sourceHash": "5326d55f51b6867b52319692d6b0b10e7f7ce3204dc6fc80a98ef9d033af7b19",
-        "reason": "36 parent/child captures. Script branches97.76%; driver functions91.83%, branches95.83%. WSL probe timed out. B05 and generated-JS limits remain.",
-        "evidence": ".planning/memory-resilience/evidence/B11.3-log.json"
-      }
-    },
-    {
-      "path": "scripts/run-uat-verification.ts",
-      "package": "package.json",
-      "sourceHash": "f09b8ded383291faca1f4cdf3ca988eb69f9efe19c17e1b35608b0eafeaa280f",
-      "tier": "S",
-      "rationale": "Creates a sandbox, mutates synthetic memory projections and canonical event data, executes CLI acceptance checks and recursively deletes storage. Cleanup diagnostics remain B11.3.",
-      "applicability": {
-        "mode": "measure",
-        "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
-      },
-      "decisionStatus": "proposed - independent review pending",
-      "inspection": {
-        "sourceRevision": "d4ab6ffc8c5c6c5e9694910b640a8428ede38603",
-        "anchor": "run / finally cleanup",
-        "scope": "positive critical boundary establishes highest tier; not full correctness acceptance"
-      },
-      "metricApplicability": {
-        "status": "diagnostic only - tier floors and independent applicability remain unmet",
-        "sourceHash": "f09b8ded383291faca1f4cdf3ca988eb69f9efe19c17e1b35608b0eafeaa280f",
-        "reason": "36 parent/child captures. Script branches97.76%; driver functions91.83%, branches95.83%. WSL probe timed out. B05 and generated-JS limits remain.",
-        "evidence": ".planning/memory-resilience/evidence/B11.3-log.json"
-      }
-    },
-    {
       "path": "scripts/verify-published-package.ts",
       "package": "package.json",
       "sourceHash": "da73af0c4eab2c84716f62daf843615f663454243db98ae4262538f84384ab83",
@@ -18233,6 +18192,63 @@
               "proposal": "measure - completeness unverified"
             }
           }
+        }
+      }
+    },
+    {
+      "path": "scripts/run-uat-verification.ts",
+      "sourceHash": "f09b8ded383291faca1f4cdf3ca988eb69f9efe19c17e1b35608b0eafeaa280f",
+      "gitBlob": "d53479856fd7afe96de525fee8d051daa1c8f442",
+      "disposition": "Physical retirement of historical non-published checker and its private regression driver. Required product outcomes remain pending in D04.1-D04.4; no coverage exclusion or runtime acceptance.",
+      "evidence": ".planning/memory-resilience/evidence/B11.3.json",
+      "recoveryRevision": "ada569104be41d2c2333ffee58dcb983a6d01970",
+      "formerClassification": {
+        "path": "scripts/run-uat-verification.ts",
+        "package": "package.json",
+        "sourceHash": "f09b8ded383291faca1f4cdf3ca988eb69f9efe19c17e1b35608b0eafeaa280f",
+        "tier": "S",
+        "rationale": "Creates a sandbox, mutates synthetic memory projections and canonical event data, executes CLI acceptance checks and recursively deletes storage. Cleanup diagnostics remain B11.3.",
+        "applicability": {
+          "mode": "measure",
+          "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
+        },
+        "decisionStatus": "proposed - independent review pending",
+        "inspection": {
+          "sourceRevision": "d4ab6ffc8c5c6c5e9694910b640a8428ede38603",
+          "anchor": "run / finally cleanup",
+          "scope": "positive critical boundary establishes highest tier; not full correctness acceptance"
+        },
+        "metricApplicability": {
+          "status": "diagnostic only - tier floors and independent applicability remain unmet",
+          "sourceHash": "f09b8ded383291faca1f4cdf3ca988eb69f9efe19c17e1b35608b0eafeaa280f",
+          "reason": "36 parent/child captures. Script branches97.76%; driver functions91.83%, branches95.83%. WSL probe timed out. B05 and generated-JS limits remain.",
+          "evidence": ".planning/memory-resilience/evidence/B11.3-log.json"
+        }
+      }
+    },
+    {
+      "path": "scripts/run-uat-verification.test.ts",
+      "sourceHash": "5326d55f51b6867b52319692d6b0b10e7f7ce3204dc6fc80a98ef9d033af7b19",
+      "gitBlob": "da0c02756c8c51b45d8415db35de06b19a0991d0",
+      "disposition": "Physical retirement of historical non-published checker and its private regression driver. Required product outcomes remain pending in D04.1-D04.4; no coverage exclusion or runtime acceptance.",
+      "evidence": ".planning/memory-resilience/evidence/B11.3.json",
+      "recoveryRevision": "ada569104be41d2c2333ffee58dcb983a6d01970",
+      "formerClassification": {
+        "path": "scripts/run-uat-verification.test.ts",
+        "package": "package.json",
+        "tier": "S",
+        "rationale": "Regression driver creates and replaces owned fixture storage and exercises destructive cleanup failure boundaries.",
+        "applicability": {
+          "mode": "measure",
+          "reason": "Executable failure/recovery driver; all applicable metric floors remain required."
+        },
+        "decisionStatus": "proposed - independent review pending",
+        "sourceHash": "5326d55f51b6867b52319692d6b0b10e7f7ce3204dc6fc80a98ef9d033af7b19",
+        "metricApplicability": {
+          "status": "diagnostic only - tier floors and independent applicability remain unmet",
+          "sourceHash": "5326d55f51b6867b52319692d6b0b10e7f7ce3204dc6fc80a98ef9d033af7b19",
+          "reason": "36 parent/child captures. Script branches97.76%; driver functions91.83%, branches95.83%. WSL probe timed out. B05 and generated-JS limits remain.",
+          "evidence": ".planning/memory-resilience/evidence/B11.3-log.json"
         }
       }
     }
