@@ -818,9 +818,26 @@
       }
     },
     {
+      "path": "scripts/run-uat-verification.test.ts",
+      "package": "package.json",
+      "tier": "S",
+      "rationale": "Regression driver creates and replaces owned fixture storage and exercises destructive cleanup failure boundaries.",
+      "applicability": {
+        "mode": "measure",
+        "reason": "Executable failure/recovery driver; all applicable metric floors remain required."
+      },
+      "decisionStatus": "proposed - independent review pending",
+      "sourceHash": "5520bf218eda2c64ebf534fcb87567599df9fd0f1e9af8077aab8a3382101f68",
+      "metricApplicability": {
+        "status": "invalidated - current whole-file metrics and independent review pending",
+        "sourceHash": "5520bf218eda2c64ebf534fcb87567599df9fd0f1e9af8077aab8a3382101f68",
+        "reason": "B11.3 owned lifecycle, database close and process proof changed source. Nineteen focused tests and full source/script types pass; no older coverage is transferred."
+      }
+    },
+    {
       "path": "scripts/run-uat-verification.ts",
       "package": "package.json",
-      "sourceHash": "7ad84cf8c8473f5b26770a45038e3aff4972b7446d401d5185313f47e40dcffe",
+      "sourceHash": "8d92b7c0ed8510a3c5bb5d9e8f05eb3b3697e90550586881213bf34662877549",
       "tier": "S",
       "rationale": "Creates a sandbox, mutates synthetic memory projections and canonical event data, executes CLI acceptance checks and recursively deletes storage. Cleanup diagnostics remain B11.3.",
       "applicability": {
@@ -834,28 +851,9 @@
         "scope": "positive critical boundary establishes highest tier; not full correctness acceptance"
       },
       "metricApplicability": {
-        "status": "proposed - independent review pending",
-        "evidence": ".planning/memory-resilience/evidence/B04-applicability-probe.json",
-        "sourceHash": "7ad84cf8c8473f5b26770a45038e3aff4972b7446d401d5185313f47e40dcffe",
-        "disposition": "Measure every positive denominator; individually review zero branch/function denominators against runtime syntax. Observed counts do not prove instrumentation completeness.",
-        "metrics": {
-          "statements": {
-            "observedCounterTotal": 195,
-            "proposal": "measure - completeness unverified"
-          },
-          "branches": {
-            "observedCounterTotal": 112,
-            "proposal": "measure - completeness unverified"
-          },
-          "functions": {
-            "observedCounterTotal": 6,
-            "proposal": "measure - completeness unverified"
-          },
-          "lines": {
-            "observedCounterTotal": 177,
-            "proposal": "measure - completeness unverified"
-          }
-        }
+        "status": "invalidated - current whole-file metrics and independent review pending",
+        "sourceHash": "8d92b7c0ed8510a3c5bb5d9e8f05eb3b3697e90550586881213bf34662877549",
+        "reason": "B11.3 owned lifecycle, database close and process proof changed source. Nineteen focused tests and full source/script types pass; no older coverage is transferred."
       }
     },
     {

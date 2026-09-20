@@ -1,5 +1,52 @@
 # Memory resilience execution journal
 
+## 2026-09-20 - B11.3 database and process checkpoint
+
+- Previous turn progressed; continued its uncommitted owned-lifecycle candidate.
+- Closed both replay handles on either outcome; preserve primary and close errors.
+  Added real-process exit/stderr proof and explicit command injection. Nineteen
+  Windows tests / 64 assertions and full source/script types pass.
+- A discarded preload mock did not intercept Bun spawn; installed commands were
+  attempted inside synthetic HOME/XDG storage. Test failed; fixture removed.
+  Live DB main-file timestamp predates the run, no WAL/SHM observed; limited
+  impact evidence only. Replacement uses explicit injection and fixture PATH.
+  Full incident and raw failure retained in B11.3-checkpoint.json.
+- B11.3 remains active: whole-file metrics/decision proof, both replay callsite
+  tests, command lifetime and supported-platform/independent review remain.
+  Next command: read B11.3-plan.md and checkpoint, then design a synthetic
+  workflow driver; do not run installed UAT to obtain branch coverage.
+
+
+## 2026-09-20 - B11.3 owned lifecycle candidate (uncommitted)
+
+- Import guard retained. Added owned allocation spanning setup/checks/cleanup.
+  Setup error and cleanup error both remain observable; cleanup failure forces
+  false and reports the retained path. Replacement directory survives.
+- Six focused tests/17 assertions and full source/script types pass. Current
+  evidence: B11.3-checkpoint.json. Catalog/classifications refreshed for the UAT
+  source and new Tier S regression driver; old metric applicability invalidated.
+- Still uncommitted and active. Next: real-process status/diagnostics, both SQLite
+  replay handle finally blocks, complete metric/decision proof and independent
+  review. Do not run installed UAT or claim baseline acceptance.
+
+
+## 2026-09-20 - B11.3 import boundary checkpoint (uncommitted)
+
+- Resumed clean at 3c749a7. Added a real-child import regression with a fresh
+  owned temp/home and a mocked Bun spawn that refuses any UAT command execution.
+  RED confirmed import started UAT; logs: .git/b11-uat-import-red.txt.
+- Added `if (import.meta.main) await run()` to run-uat-verification.ts. The focused
+  test now passes (one test/one assertion); .git/b11-uat-import-green.txt.
+  Dependency loading also creates .bun in the isolated home; the test records
+  other directory entries and refuses unexpected UAT execution via exact output.
+- Current source changes are intentionally uncommitted: the UAT entrypoint guard
+  and new scripts/run-uat-verification.test.ts. Inventory/source classifications
+  must be refreshed; typecheck and complete lifecycle/quality proof remain open.
+- Next: replace the unsafe sandbox lifecycle with owned capability cleanup,
+  including setup failures, retained-path reporting and primary error preservation.
+  Do not run the installed-product UAT battery. B11.3 and the native goal remain
+  active; earlier Linux and independent-review gates remain unchanged.
+
 ## 2026-09-20 - B11.2 obsolete integration module removed
 
 - Previous turn progressed at 8815da5; started clean. Resolved 2599 imports and

@@ -2,17 +2,58 @@
  * Standalone UAT Verification Suite for Phase v4.0 GA Readiness
  *
  * Runs a battery of empirical verification checks against the globally
- * installed `@chude/memory` package. Ensures 100% compliance with Section 21
- * of the First-Principles Architecture Audit in an isolated temp sandbox.
+ * installed `@chude/memory` package using historical audit checks in an
+ * isolated temporary sandbox. These checks do not establish release readiness.
  */
 
 import { spawn } from "bun";
-import { mkdtempSync, writeFileSync, mkdirSync, readFileSync, existsSync, rmSync } from "node:fs";
-import { tmpdir } from "node:os";
+import { writeFileSync, mkdirSync, readFileSync, existsSync, rmSync } from "node:fs";
 import { join } from "node:path";
 import { exit } from "node:process";
 import { Database } from "bun:sqlite";
 import { rebuildProjections } from "../src/infrastructure/database/event-log.js";
+import { closeDatabase } from "../src/infrastructure/database/connection.js";
+import {createOwnedTestDirectory, type OwnedTestDirectory} from "../tests/helpers/owned-test-directory";
+
+/** Own setup, checks and teardown together; cleanup failure cannot pass UAT. */
+export async function runUatSandbox(
+  execute: (directory: string) => Promise<boolean>,
+  allocate: () => OwnedTestDirectory = () => createOwnedTestDirectory("memory-uat-"),
+  report: (message: string, error: unknown) => void = (message,error) => console.error(message,error),
+): Promise<boolean> {
+  let storage: OwnedTestDirectory;
+  try {storage=allocate();}
+  catch(error){report("UAT sandbox allocation failed:",error);return false;}
+  let passed=false;
+  try {storage.assertOwned();passed=await execute(storage.dir);}
+  catch(error){report("UAT setup or checks failed:",error);}
+  finally {
+    try {storage.cleanup();}
+    catch(error){passed=false;report(`UAT cleanup failed; retained: ${storage.dir}`,error);}
+  }
+  return passed;
+}
+
+/** Close projection handles on either outcome without hiding the replay failure. */
+export async function withUatDatabase<T>(
+  path: string,
+  execute: (database: Database) => Promise<T>,
+  open: (path: string) => Database = path => new Database(path),
+  close: (database: Database) => void = closeDatabase,
+): Promise<T> {
+  const database = open(path);
+  let result: T;
+  try { result = await execute(database); }
+  catch (error) {
+    try { close(database); }
+    catch (closeError) {
+      throw new AggregateError([error, closeError], "UAT projection and database close failed");
+    }
+    throw error;
+  }
+  close(database);
+  return result;
+}
 
 // Colors for visual reporting
 const reset = "\x1b[0m";
@@ -53,11 +94,7 @@ async function runCmd(cmd: string[], env: Record<string, string>): Promise<{ cod
   return { code: exitCode, stdout: stdoutStr, stderr: stderrStr };
 }
 
-async function run() {
-  console.log(`\n${bold}${yellow}--- Starting Empirical UAT Validation for v4.0 GA Release ---${reset}`);
-
-  // 1. Create temporary sandbox environments
-  const sandboxDir = mkdtempSync(join(tmpdir(), "memory-uat-"));
+export async function verifySandbox(sandboxDir: string, runCommand: typeof runCmd = runCmd): Promise<boolean> {
   const configHome = join(sandboxDir, "config");
   const dataHome = join(sandboxDir, "data");
   const memoryHome = join(sandboxDir, "memory");
@@ -175,41 +212,41 @@ async function run() {
     logHeader("Phase 32.5 - Surface Consolidation");
 
     // Test A: sync mock sessions to DB
-    const syncRes = await runCmd(["memory", "sync"], uatEnv);
+    const syncRes = await runCommand(["memory", "sync"], uatEnv);
     const syncSuccess = syncRes.code === 0 && syncRes.stdout.includes("Discovered: 1");
     logResult("Sync Mock Sessions", syncSuccess, `Exit: ${syncRes.code}`, syncSuccess ? "" : syncRes.stdout + syncRes.stderr);
     if (!syncSuccess) overallPassed = false;
 
     // Test B: unified status diagnostics
-    const statusRes = await runCmd(["memory", "status", "--all"], uatEnv);
+    const statusRes = await runCommand(["memory", "status", "--all"], uatEnv);
     // Exit code is expected to be 1 in sandbox due to missing Git hooks / local models, which is correct.
     const statusSuccess = statusRes.stdout.includes("=== Database Statistics ===") && statusRes.stdout.includes("Database");
     logResult("Unified Status & Health Surface", statusSuccess, "Combines stats and doctor diagnostics in memory status --all", statusSuccess ? "" : statusRes.stdout + statusRes.stderr);
     if (!statusSuccess) overallPassed = false;
 
     // Test C: unified query primitives
-    const queryStatsRes = await runCmd(["memory", "query", "--kind", "stats"], uatEnv);
+    const queryStatsRes = await runCommand(["memory", "query", "--kind", "stats"], uatEnv);
     const queryStatsSuccess = queryStatsRes.code === 0 && queryStatsRes.stdout.includes("Sessions:");
     logResult("Unified Query Primitive: stats scope", queryStatsSuccess, "", queryStatsSuccess ? "" : queryStatsRes.stdout + queryStatsRes.stderr);
     if (!queryStatsSuccess) overallPassed = false;
 
-    const querySessionRes = await runCmd(["memory", "query", "--kind", "session", mockSessionId], uatEnv);
+    const querySessionRes = await runCommand(["memory", "query", "--kind", "session", mockSessionId], uatEnv);
     const querySessionSuccess = querySessionRes.code === 0 && querySessionRes.stdout.includes("Session:") && querySessionRes.stdout.includes(mockSessionId);
     logResult("Unified Query Primitive: session details scope", querySessionSuccess, "", querySessionSuccess ? "" : querySessionRes.stdout + querySessionRes.stderr);
     if (!querySessionSuccess) overallPassed = false;
 
-    const queryMessageRes = await runCmd(["memory", "query", "relational"], uatEnv);
+    const queryMessageRes = await runCommand(["memory", "query", "relational"], uatEnv);
     const queryMessageSuccess = queryMessageRes.code === 0 && queryMessageRes.stdout.includes("session-uat-1111");
     logResult("Unified Query Primitive: message search scope", queryMessageSuccess, "", queryMessageSuccess ? "" : queryMessageRes.stdout + queryMessageRes.stderr);
     if (!queryMessageSuccess) overallPassed = false;
 
     // Test D: Legacy Compatibility Wrappers
-    const statsRes = await runCmd(["memory", "stats"], uatEnv);
+    const statsRes = await runCommand(["memory", "stats"], uatEnv);
     const statsSuccess = statsRes.code === 0 && statsRes.stdout.includes("Sessions:");
     logResult("Legacy Wrapper compatibility: memory stats", statsSuccess, "", statsSuccess ? "" : statsRes.stdout + statsRes.stderr);
     if (!statsSuccess) overallPassed = false;
 
-    const doctorRes = await runCmd(["memory", "doctor"], uatEnv);
+    const doctorRes = await runCommand(["memory", "doctor"], uatEnv);
     // Doctor will exit with 1 due to warnings, which is fine, we check output integrity
     const doctorSuccess = doctorRes.stdout.includes("Integrity: ok");
     logResult("Legacy Wrapper compatibility: memory doctor", doctorSuccess, "", doctorSuccess ? "" : doctorRes.stdout + doctorRes.stderr);
@@ -222,7 +259,7 @@ async function run() {
     logHeader("Phase 33 - Event-Log SSOT & Projection Rebuild");
 
     // Test A: Run LLM Knowledge Extraction to generate events
-    const extractRes = await runCmd(["memory", "extract", "project"], uatEnv);
+    const extractRes = await runCommand(["memory", "extract", "project"], uatEnv);
     const extractSuccess = extractRes.code === 0 && extractRes.stdout.includes("Extraction Completed Successfully");
     logResult("LLM Comparative Knowledge Extraction Run", extractSuccess, "", extractSuccess ? "" : extractRes.stdout + extractRes.stderr);
     if (!extractSuccess) overallPassed = false;
@@ -245,30 +282,27 @@ async function run() {
 
     // Test C: Projection Rebuild Test
     const dbPath = join(dataHome, "memory", "memory.db");
-    const preDeleteQuery = await runCmd(["memory", "query", "--kind", "context", "project", "--format", "ai"], uatEnv);
+    const preDeleteQuery = await runCommand(["memory", "query", "--kind", "context", "project", "--format", "ai"], uatEnv);
 
     // Delete database file
     rmSync(dbPath, { force: true });
     logResult("Delete Derived SQL Projection Database", !existsSync(dbPath));
 
     // Programmatically re-hydrate projection database from events.jsonl SSOT
-    const db = new Database(dbPath);
-    // Initialize schema
-    const { createSchema } = await import("../src/infrastructure/database/schema.js");
-    db.exec("PRAGMA foreign_keys = ON;");
-    createSchema(db);
-    
-    // Playback events
-    await rebuildProjections(db, eventLogPath);
-    db.close();
+    await withUatDatabase(dbPath, async db => {
+      const { createSchema } = await import("../src/infrastructure/database/schema.js");
+      db.exec("PRAGMA foreign_keys = ON;");
+      createSchema(db);
+      await rebuildProjections(db, eventLogPath);
+    });
 
     // Re-sync mock sessions to restore projection dependency
-    const syncPostRebuildRes = await runCmd(["memory", "sync"], uatEnv);
+    const syncPostRebuildRes = await runCommand(["memory", "sync"], uatEnv);
     if (syncPostRebuildRes.code !== 0) {
       console.error("Warning: sync post-rebuild failed:", syncPostRebuildRes.stdout + syncPostRebuildRes.stderr);
     }
 
-    const postRebuildQuery = await runCmd(["memory", "query", "--kind", "context", "project", "--format", "ai"], uatEnv);
+    const postRebuildQuery = await runCommand(["memory", "query", "--kind", "context", "project", "--format", "ai"], uatEnv);
     const rebuildSuccess = postRebuildQuery.stdout.trim() === preDeleteQuery.stdout.trim() && postRebuildQuery.stdout.includes("Use links table for relational semantic trees");
     logResult("Database Re-hydration from Plain-Text Event Log (SSOT)", rebuildSuccess, "Proves SQL is derived projection; JSONL is primary source", rebuildSuccess ? "" : `Pre: ${preDeleteQuery.stdout}\nPost: ${postRebuildQuery.stdout}`);
     if (!rebuildSuccess) overallPassed = false;
@@ -323,12 +357,10 @@ async function run() {
     writeFileSync(eventLogPath, JSON.stringify(mockFact1) + "\n" + JSON.stringify(mockFact2) + "\n" + JSON.stringify(mockSupersedence) + "\n", { flag: "a" });
 
     // Sync database projection programmatically
-    const dbProj = new Database(dbPath);
-    await rebuildProjections(dbProj, eventLogPath);
-    dbProj.close();
+    await withUatDatabase(dbPath, db => rebuildProjections(db, eventLogPath));
 
     // Test A: Default facts queries exclude superseded items
-    const factsListRes = await runCmd(["memory", "query", "--kind", "context", "project", "--format", "ai"], uatEnv);
+    const factsListRes = await runCommand(["memory", "query", "--kind", "context", "project", "--format", "ai"], uatEnv);
     const excludesSuperseded = !factsListRes.stdout.includes("Initial decision: Use spaces");
     const includesCurrent = factsListRes.stdout.includes("tabs instead of spaces");
     logResult("Default Queries Filter Out Superseded Facts", excludesSuperseded && includesCurrent, "Excludes invalidated histories", excludesSuperseded && includesCurrent ? "" : factsListRes.stdout);
@@ -336,7 +368,7 @@ async function run() {
 
     // Test B: memory export / import maintains supersedence chain round-trip
     const exportPath = join(sandboxDir, "export.json");
-    const exportRes = await runCmd(["memory", "export", exportPath], uatEnv);
+    const exportRes = await runCommand(["memory", "export", exportPath], uatEnv);
     logResult("Export facts database to file", exportRes.code === 0, `Path: ${exportPath}`);
     if (exportRes.code !== 0) overallPassed = false;
 
@@ -345,13 +377,13 @@ async function run() {
     mkdirSync(dataHomeImport, { recursive: true });
     const importEnv = { ...uatEnv, XDG_DATA_HOME: dataHomeImport };
     
-    const importRes = await runCmd(["memory", "import", "--force", exportPath], importEnv);
+    const importRes = await runCommand(["memory", "import", "--force", exportPath], importEnv);
     const importSuccess = importRes.code === 0;
     logResult("Import facts into fresh database environment", importSuccess, "", importSuccess ? "" : importRes.stdout + importRes.stderr);
     if (!importSuccess) overallPassed = false;
 
     // Verify imported database has identical facts query state
-    const importQueryRes = await runCmd(["memory", "query", "--kind", "context", "project", "--format", "ai"], importEnv);
+    const importQueryRes = await runCommand(["memory", "query", "--kind", "context", "project", "--format", "ai"], importEnv);
     const importQuerySuccess = importQueryRes.stdout.trim() === factsListRes.stdout.trim();
     logResult("Export/Import round-trip projection deep equivalence", importQuerySuccess, "Preserves supersedence lineage integrity", importQuerySuccess ? "" : `Orig: ${factsListRes.stdout}\nImported: ${importQueryRes.stdout}`);
     if (!importQuerySuccess) overallPassed = false;
@@ -385,12 +417,17 @@ async function run() {
   } catch (err) {
     console.error("UAT automation error:", err);
     overallPassed = false;
-  } finally {
-    // Cleanup UAT workspace sandbox directory
-    try {
-      rmSync(sandboxDir, { recursive: true, force: true });
-    } catch {}
   }
+
+  return overallPassed;
+}
+
+export async function runUatVerification(
+  checks: (directory: string) => Promise<boolean> = verifySandbox,
+  allocate?: () => OwnedTestDirectory,
+) {
+  console.log(`\n${bold}${yellow}--- Starting Installed-Package UAT Checks ---${reset}`);
+  const overallPassed=await runUatSandbox(checks, allocate);
 
   // -------------------------------------------------------------
   // FINAL UAT STATUS CARD
@@ -400,17 +437,14 @@ async function run() {
   console.log(`${bold}${cyan}======================================================================${reset}`);
   
   if (overallPassed) {
-    console.log(`  ${green}${bold}STATUS: APPROVED (ALL GATES PASSED SUCCESSFULLY)${reset}`);
-    console.log(`  The '@chude/memory@4.0.0-pre.1' release complies perfectly with`);
-    console.log(`  Section 21 of the First-Principles Architecture Audit.`);
-    console.log(`  Ready for GA Release.`);
+    console.log(`  ${green}${bold}STATUS: PASSED (SCRIPT CHECKS AND SANDBOX CLEANUP)${reset}`);
   } else {
     console.log(`  ${red}${bold}STATUS: REJECTED (ONE OR MORE UAT GATES FAILED)${reset}`);
-    console.log(`  Review the failure lines in stdout logs.`);
+    console.log(`  Review the failure details in stdout and stderr.`);
   }
   console.log(`${bold}${cyan}======================================================================${reset}\n`);
 
   exit(overallPassed ? 0 : 1);
 }
 
-run();
+if (import.meta.main) await runUatVerification();

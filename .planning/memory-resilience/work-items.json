@@ -3193,13 +3193,16 @@
       "authorization": "authorized",
       "owner": "memory-nexus",
       "evidence": [
-        ".planning/memory-resilience/B11.3-plan.md"
+        ".planning/memory-resilience/B11.3-plan.md",
+        ".planning/memory-resilience/evidence/B11.3-checkpoint.json"
       ],
       "acceptance_record": ".planning/memory-resilience/evidence/B11.3.json",
       "observed_evidence": ".planning/memory-resilience/B04-source-findings.md",
       "retirement_trigger": "Before baseline review R02; runtime regression and final applicable tier proof required.",
       "progress": {
-        "restart": "Inspect complete UAT setup/execute/exit lifecycle before adding owned sandbox capability and real-process failure/recovery tests. Do not execute the installed UAT battery before isolation is established."
+        "implemented": "Owned sandbox including setup; import guard; cleanup failure forces nonzero report; both projection handles close on success/failure and retain combined causes; injectable command runner avoids unreliable Bun built-in mock.",
+        "verified_scope": "19 Windows tests / 64 assertions, including seven child process cases; full source/script typechecks pass. Focused proof only.",
+        "restart": "Measure current whole script/driver with synthetic workflow branches; add decision faults and replay callsite proof; bound actual command lifetime before installed UAT. Read B11.3-plan.md and checkpoint incident before running commands."
       }
     },
     {
