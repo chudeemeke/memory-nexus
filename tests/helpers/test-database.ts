@@ -1,14 +1,13 @@
 /**
  * Test Database Helper
  *
- * Provides managed file-based SQLite databases for tests.
- * Handles platform-specific cleanup:
+ * Provides caller-managed file-based SQLite databases for tests.
+ * Cleanup verifies exclusive directory ownership before touching storage:
  *
  * 1. closeDatabase() flushes WAL and switches to DELETE journal mode,
  *    removing WAL/SHM files that hold OS locks on Windows.
- * 2. Proactive GC (if available) releases Bun's internal file descriptor
- *    before attempting directory removal. Without this, the .db file
- *    stays locked on Windows until the next GC cycle.
+ * 2. Proactive GC (if available) helps release Bun's native file handles before
+ *    removal. Failed closure or removal reports the retained path and can be retried.
  *
  * The GC call is guarded by a runtime check (globalThis.Bun?.gc) so
  * this helper remains portable if the project moves off Bun or if
@@ -25,17 +24,15 @@
  */
 
 import type { Database } from "bun:sqlite";
-import { mkdtempSync, rmSync, mkdirSync } from "node:fs";
-import { join, dirname } from "node:path";
-import { tmpdir } from "node:os";
+import { join } from "node:path";
+import { createOwnedTestDirectory, type OwnedTestDirectory } from "./owned-test-directory";
 import {
     initializeDatabase,
     closeDatabase,
-    type DatabaseInitResult,
 } from "../../src/infrastructure/database/connection.js";
 
 /**
- * A managed test database with automatic cleanup.
+ * A managed test database with explicit cleanup.
  */
 export interface TestDatabase {
     /** The initialized SQLite database instance */
@@ -53,6 +50,7 @@ export interface TestDatabase {
      * Safe to call multiple times. Handles Windows file locking via
      * closeDatabase() (journal_mode=DELETE) and proactive GC to release
      * Bun's file descriptor before directory removal.
+     * Throws with the retained path on failure; successful close is not repeated.
      */
     cleanup: () => void;
 }
@@ -66,12 +64,29 @@ export interface TestDatabaseOptions {
     applySchema?: boolean;
 }
 
+/** Local lifecycle dependencies keep failure tests isolated from other callers. */
+export interface TestDatabaseDependencies {
+    initialize: typeof initializeDatabase;
+    close: typeof closeDatabase;
+    createDirectory(prefix: string): OwnedTestDirectory;
+    collect(): void;
+}
+
+const defaultDependencies: TestDatabaseDependencies = {
+    initialize: initializeDatabase,
+    close: closeDatabase,
+    createDirectory: createOwnedTestDirectory,
+    collect() {
+        if (typeof globalThis.Bun?.gc === "function") Bun.gc(true);
+    },
+};
+
 /**
  * Create a managed file-based test database.
  *
  * Creates a unique temp directory, initializes a SQLite database
  * with the full schema (matching production), and returns a handle
- * with a cleanup() method that properly releases all file locks.
+ * with a cleanup() method that closes its handle and reports retained storage.
  *
  * @example
  * ```typescript
@@ -88,23 +103,28 @@ export interface TestDatabaseOptions {
  * });
  * ```
  */
-export function createTestDatabase(options: TestDatabaseOptions = {}): TestDatabase {
+export function createTestDatabase(options: TestDatabaseOptions = {}, overrides: Partial<TestDatabaseDependencies> = {}): TestDatabase {
     const {
         prefix = "memory-test-",
         walMode = true,
         applySchema = true,
     } = options;
 
-    const dir = mkdtempSync(join(tmpdir(), prefix));
+    const dependencies = {...defaultDependencies, ...overrides};
+    const storage = dependencies.createDirectory(prefix);
+    const dir = storage.dir;
     const path = join(dir, "test.db");
-
-    const result: DatabaseInitResult = initializeDatabase({
-        path,
-        walMode,
-        applySchema,
-    });
-
+    let result;
+    try { result = dependencies.initialize({path, walMode, applySchema}); }
+    catch (cause) {
+        try { dependencies.collect(); storage.cleanup(); }
+        catch (cleanupError) {
+            throw new AggregateError([cause, cleanupError], `Test database initialization failed; retained: ${dir}`);
+        }
+        throw cause;
+    }
     let closed = false;
+    let removed = false;
 
     return {
         db: result.db,
@@ -113,27 +133,15 @@ export function createTestDatabase(options: TestDatabaseOptions = {}): TestDatab
         walEnabled: result.walEnabled,
         sqliteVecAvailable: result.sqliteVecAvailable,
         cleanup: () => {
-            if (closed) return;
-            closed = true;
-
+            if (removed) return;
+            storage.assertOwned();
             try {
-                closeDatabase(result.db);
-            } catch {
-                // Already closed or errored -- proceed to file cleanup
-            }
-
-            // Release Bun's internal file descriptor before deleting.
-            // Bun's SQLite binding holds the .db file handle until GC,
-            // causing EBUSY on Windows. Guarded so this is a no-op if
-            // the runtime changes or Bun fixes the behavior.
-            if (typeof globalThis.Bun?.gc === "function") {
-                Bun.gc(true);
-            }
-
-            try {
-                rmSync(dir, { recursive: true, force: true });
-            } catch {
-                // Best-effort cleanup. OS will reclaim temp on reboot.
+                if (!closed) { dependencies.close(result.db); closed = true; }
+                dependencies.collect();
+                storage.cleanup();
+                removed = true;
+            } catch (cause) {
+                throw new Error(`Test database cleanup failed; retained: ${dir}`, {cause});
             }
         },
     };
@@ -160,16 +168,5 @@ export function createTestDir(prefix = "memory-test-"): {
     dir: string;
     cleanup: () => void;
 } {
-    const dir = mkdtempSync(join(tmpdir(), prefix));
-
-    return {
-        dir,
-        cleanup: () => {
-            try {
-                rmSync(dir, { recursive: true, force: true });
-            } catch {
-                // Best-effort
-            }
-        },
-    };
+    return createOwnedTestDirectory(prefix);
 }

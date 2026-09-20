@@ -1,5 +1,26 @@
 # Memory resilience execution journal
 
+## 2026-09-20 - B11.1 owned fixture cleanup candidate
+
+- Previous turn progressed: 61c7575 recorded metric/counter diagnostics. Selected
+  ready B11.1 while B04 independent review remains missing; no native goal block.
+- RED reproduced replacement-directory cleanup acceptance and missing close-failure
+  handling. Added shared directory identity/marker guards, prefix boundaries,
+  retryable close/removal and primary initialization/cleanup error preservation.
+- Windows focused helper/export/friction repository tests: 40 pass, zero fail,
+  96 assertions. Targeted helper/primitive/regression types pass. Source-bound
+  logs and command limitations are retained in evidence/B11.1.json.
+- GC stub failure exposed a retained Windows database handle. Corrected the test
+  to run GC after injected failure; reclaimed only the exact retained allocation
+  after path/device/inode/marker checks. No unrelated temp paths were removed.
+- Catalog refreshed to 448 candidates. The three changed/new source entries are
+  proposed Tier S with old applicability explicitly invalidated. No blanket
+  exclusion or transfer of prior coverage/review acceptance.
+- B11.1 remains active: allocation/restore failure decisions, full Tier S proof,
+  explicit Windows external-lock regression, Linux and independent review remain.
+  Continue those bounded checks before treating this task as verified.
+
+
 ## 2026-09-20 - B04 metric applicability and counter diagnostics
 
 - Previous turn progressed: e5c6908 completed proposed risk tiers and fixture

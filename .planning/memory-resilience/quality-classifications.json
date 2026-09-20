@@ -17329,44 +17329,54 @@
       }
     },
     {
-      "path": "tests/helpers/test-database.ts",
+      "path": "tests/helpers/owned-test-directory.ts",
       "package": "package.json",
-      "sourceHash": "a55063ac488ac8a285654906dbaae1e9758f51f6dc025e28a36e0535dbc9399e",
+      "sourceHash": "b72f5b5d1f2c7f77ee5e071fdca5d139b96e6563e7f0980f9d77f85989d64d41",
       "tier": "S",
-      "rationale": "Creates persistent test databases and recursively removes temporary directories; source currently swallows cleanup errors. B11.1 owns lifecycle repair.",
+      "rationale": "Allocates or reclaims temporary filesystem state and verifies identity/ownership. Incorrect cleanup can delete foreign data or conceal retained storage.",
       "applicability": {
         "mode": "measure",
-        "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
+        "reason": "Executable lifecycle logic requires current four-metric and Tier S decision evidence; no exclusion approved."
       },
       "decisionStatus": "proposed - independent review pending",
-      "inspection": {
-        "sourceRevision": "d4ab6ffc8c5c6c5e9694910b640a8428ede38603",
-        "anchor": "createTestDatabase / createTestDir",
-        "scope": "positive critical boundary establishes highest tier; not full correctness acceptance"
-      },
       "metricApplicability": {
-        "status": "proposed - independent review pending",
-        "evidence": ".planning/memory-resilience/evidence/B04-applicability-probe.json",
-        "sourceHash": "a55063ac488ac8a285654906dbaae1e9758f51f6dc025e28a36e0535dbc9399e",
-        "disposition": "Measure every positive denominator; individually review zero branch/function denominators against runtime syntax. Observed counts do not prove instrumentation completeness. Optional-chain syntax is present; synthetic evidence shows current instrumentation omits its decision counters. B05.1 owns source-mapped branch proof before numeric acceptance.",
-        "metrics": {
-          "statements": {
-            "observedCounterTotal": 19,
-            "proposal": "measure - completeness unverified"
-          },
-          "branches": {
-            "observedCounterTotal": 9,
-            "proposal": "measure - completeness unverified"
-          },
-          "functions": {
-            "observedCounterTotal": 4,
-            "proposal": "measure - completeness unverified"
-          },
-          "lines": {
-            "observedCounterTotal": 18,
-            "proposal": "measure - completeness unverified"
-          }
-        }
+        "status": "invalidated - new source requires measurement and review",
+        "previousSourceHash": null,
+        "reason": "B11.1 changes ownership/lifecycle behavior; prior metric evidence does not apply."
+      }
+    },
+    {
+      "path": "tests/helpers/test-database.test.ts",
+      "package": "package.json",
+      "sourceHash": "0b4f3fff7457d3b9d0bde2c64fe4ff2f48ca6b7ff72f5a788ede6012c8de16b6",
+      "tier": "S",
+      "rationale": "Runs real SQLite and owned-directory mutation/replacement/link/failure regressions. Incorrect fixture cleanup can remove filesystem state.",
+      "applicability": {
+        "mode": "measure",
+        "reason": "Executable lifecycle logic requires current four-metric and Tier S decision evidence; no exclusion approved."
+      },
+      "decisionStatus": "proposed - independent review pending",
+      "metricApplicability": {
+        "status": "invalidated - new source requires measurement and review",
+        "previousSourceHash": null,
+        "reason": "B11.1 changes ownership/lifecycle behavior; prior metric evidence does not apply."
+      }
+    },
+    {
+      "path": "tests/helpers/test-database.ts",
+      "package": "package.json",
+      "sourceHash": "662cbfd7f04f46ae8a61da1c27936d102e3fbf89c55c8268546311ea7b646710",
+      "tier": "S",
+      "rationale": "Allocates or reclaims temporary filesystem state and verifies identity/ownership. Incorrect cleanup can delete foreign data or conceal retained storage.",
+      "applicability": {
+        "mode": "measure",
+        "reason": "Executable lifecycle logic requires current four-metric and Tier S decision evidence; no exclusion approved."
+      },
+      "decisionStatus": "proposed - independent review pending",
+      "metricApplicability": {
+        "status": "invalidated - new source requires measurement and review",
+        "previousSourceHash": "a55063ac488ac8a285654906dbaae1e9758f51f6dc025e28a36e0535dbc9399e",
+        "reason": "B11.1 changes ownership/lifecycle behavior; prior metric evidence does not apply."
       }
     },
     {

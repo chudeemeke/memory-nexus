@@ -1,6 +1,11 @@
 # B04 metric applicability candidate
 
-Status: source-bound proposals and diagnostic evidence; independent approval pending.
+Status: historical 446-file source-bound diagnostic checkpoint; independent approval pending.
+
+B11.1 subsequently changed the database helper and added two files. Current
+inventory has 448 candidates. Those three entries explicitly invalidate prior
+metric evidence and require fresh measurement; the figures below describe the
+retained pre-repair checkpoint.
 
 Every one of the 446 catalog candidates has four explicit metric dispositions in
 `quality-classifications.json`. This is a proposed measurement contract, not

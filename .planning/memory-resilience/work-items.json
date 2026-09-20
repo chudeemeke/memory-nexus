@@ -3,7 +3,7 @@
   "workstream": "memory-resilience",
   "goal_status": "active",
   "starting_revision": "77d54e05be7fc24cede4a9a3e1fede6fa113ac8f",
-  "current_item": "B04",
+  "current_item": "B11.1",
   "status_semantics": {
     "pending": "Not started; authorization and dependencies must permit work.",
     "pending_rebaseline": "Historical candidate, not a confirmed current failure or a completed task.",
@@ -96,7 +96,7 @@
       "id": "B04",
       "stage": "baseline",
       "title": "Inventory executable files and risk",
-      "status": "active",
+      "status": "blocked",
       "depends_on": [],
       "scope": "src/, scripts/, test support, package boundaries",
       "deliverable": "Create complete per-file risk/applicability inventory; inspect barrels, schemas and generated files individually.",
@@ -131,14 +131,19 @@
       "acceptance_record": ".planning/memory-resilience/evidence/B04.json",
       "progress": {
         "discovery": "implemented and focused behavior verified",
-        "sourceCandidates": 446,
-        "proposedClassifications": 446,
+        "sourceCandidates": 448,
+        "proposedClassifications": 448,
         "unclassified": 0,
         "approvedExclusions": 0,
         "independentReview": "pending",
-        "next": "Independent source-bound risk/applicability review; continue ready baseline fixture repairs if reviewer remains unavailable. B05 children own confirmed counter and selection defects.",
+        "next": "Refresh changed-source measurement and obtain independent risk/applicability review; B11.1 proceeds as an independently ready baseline task.",
         "packageOutputMapping": "Source-bound mapping recorded; artifact verification and independent review pending.",
-        "metricApplicability": "Individual four-metric candidate matrix recorded for all 446 sources; 444 statically instrumented without execution. Zero metrics and independent applicability judgments remain unapproved."
+        "metricApplicability": "Prior 446-file matrix retained as historical evidence. Three B11.1 source entries now require fresh metric/applicability evidence; independent approval remains missing."
+      },
+      "blocker": {
+        "owner": "memory-nexus",
+        "condition": "Independent source-bound risk/applicability review remains missing; last recorded Fable readiness was quota-blocked.",
+        "resumption_trigger": "Reviewer readiness confirmed and current source-bound packet reviewed; refresh changed-source applicability. No B04 acceptance inherited."
       }
     },
     {
@@ -3095,14 +3100,26 @@
       "deliverable": "Guard helper-owned temporary storage and report failed cleanup with recoverable paths; correct the unsupported reboot-reclamation assumption.",
       "verification": "RED/GREEN success, repeated cleanup, initialization/close failure, replaced/foreign path and locked-file cases; failures retain diagnostics and never remove foreign data.",
       "stage": "baseline",
-      "status": "pending",
+      "status": "active",
       "risk": "S",
       "authorization": "authorized",
       "owner": "memory-nexus",
-      "evidence": [],
+      "evidence": [
+        ".planning/memory-resilience/B11.1-plan.md",
+        ".planning/memory-resilience/evidence/B11.1.json"
+      ],
       "acceptance_record": ".planning/memory-resilience/evidence/B11.1.json",
       "observed_evidence": ".planning/memory-resilience/B04-source-findings.md",
-      "retirement_trigger": "Before baseline review R02; runtime regression and final applicable tier proof required."
+      "retirement_trigger": "Before baseline review R02; runtime regression and final applicable tier proof required.",
+      "progress": {
+        "implemented": "Shared owned directory primitive; replacement/link/marker refusal; retryable close/removal; initialization error preservation.",
+        "verified_scope": "Windows 40 tests / three files, 96 assertions; focused helper typecheck. Two retained RED runs precede fixes.",
+        "remaining": [
+          "Complete Tier S branch and adversarial/decision proof, including allocation-marker failure and restoration-failure paths.",
+          "Explicit Windows external file-lock regression and Linux actual-runner proof.",
+          "Independent source-bound review and complete caller/coverage acceptance."
+        ]
+      }
     },
     {
       "id": "B11.2",

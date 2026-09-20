@@ -1,6 +1,6 @@
 # B04 - Complete executable inventory
 
-Status: active. This implements authorized baseline quality work, not production features.
+Status: awaiting independent review; B11.1 is the active repair. This implements authorized baseline quality work, not production features.
 
 The coverage set cannot be inferred from files a test happened to import. The
 repository has two package manifests; scripts, executable test support, root tool
@@ -39,14 +39,14 @@ an explicit quality obligation before B10.
 
 ## Discovery checkpoint
 
-`executable-catalog.json` records 446 candidates across the root package and the
+At the original discovery checkpoint, `executable-catalog.json` recorded 446 candidates across the root package and the
 deprecated CLI package: 199 executable modules, 211 test drivers, 23 re-export-only
 modules, 11 modules without local runtime code and two browser-code documents.
 These are conservative syntax observations, not quality acceptance. Value imports
 are preserved so possible module-loading effects are not erased by unused-import
 elision. The actual build/runtime behavior still requires verification.
 
-`quality-classifications.json` currently contains 446 proposed classifications and
+Before B11.1, `quality-classifications.json` contained 446 proposed classifications and
 zero unclassified entries. No test driver is automatically excluded. Structural
 admission now has a complete proposed risk manifest; the checker cannot grant
 independent approval even for a valid manifest.
@@ -82,3 +82,11 @@ documents retain their separate runtime obligation. Real synthetic VM probes
 confirmed default-export and optional-chain counter blind spots. B05.1-B05.3
 own repairs; neither an empty denominator nor the complete candidate matrix
 approves applicability. Independent review remains pending.
+
+## B11.1 source refresh
+
+The current catalog has 448 candidates after adding the owned-directory helper
+and its regression driver. All 448 tiers are proposed; zero exclusions approved.
+The database helper changed as well, so all three entries require fresh numerical
+applicability evidence. The retained 446-file matrix is historical evidence, not
+acceptance of these new source hashes. B04 remains independently unreviewed.
