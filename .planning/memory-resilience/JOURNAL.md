@@ -1,5 +1,28 @@
 # Memory resilience execution journal
 
+## 2026-09-20 - B04 metric applicability and counter diagnostics
+
+- Previous turn progressed: e5c6908 completed proposed risk tiers and fixture
+  repair dependencies; the working tree was clean at this turn start.
+- Ran static instrumentation on all 444 JS/TS candidates without executing them;
+  retained per-file four-metric counts/hashes. Two HTML documents need browser
+  measurement. Current runner selection covers only 210 catalog candidates.
+- Found 37 zero-counter files: 11 type-only, 23 re-export, one value-import-only
+  port and two executable configs. Zero is not automatically not-applicable.
+- Executed four synthetic in-memory VM cases. Default-export calls execute with
+  zero statements; optional access yields zero branches while an explicit null
+  conditional yields two. Library summary emits 100% for empty denominators;
+  this does not assert that the current aggregate threshold gate accepts them.
+- Added atomic B05.1 counter repair, B05.2 inventory selection and B05.3 browser
+  measurement. B05 is their completion barrier and remains pending on B04.
+  Ledger has 218 items (123 delivery/gates, 95 quality candidates).
+- Every candidate has four proposed metric dispositions. All zero decisions and
+  independent risk/applicability review remain open; no exclusions approved.
+- Next: independent review and ready fixture repairs while reviewer route is
+  quota-blocked. Verification helpers were imported; generated target code, the
+  full suite, models and production memory were not executed.
+
+
 ## 2026-09-20 - B04 risk proposal inventory complete
 
 - Inspected the final 75 test drivers using emitted-runtime inventories and

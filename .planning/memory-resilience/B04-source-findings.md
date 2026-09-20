@@ -235,3 +235,15 @@ Reuse shared owned-fixture cleanup rather than duplicating deletion logic.
 B09 also owns ordered/adjacent module-mock isolation proof for transformers,
 embedding-pass and extraction-provider drivers. No live provider/model or
 production memory operation ran for this checkpoint.
+
+## Instrumentation and applicability findings
+
+B05.1 owns experimentally confirmed default-export and optional-chain counter
+blind spots. B05.2 owns src-only selection (210 of 446 catalog candidates) and
+module-wiring/zero-only source accounting. B05.3 owns the two HTML runtime
+measurement paths. Their source-bound and synthetic evidence is retained in
+`B04-applicability-probe.json` and `B04-counter-boundary-probe.json` under evidence.
+B05 is an explicit completion barrier; B07/B09/R02 cannot bypass these tasks.
+The library reporting 100% for a zero denominator is not a claim that the current
+aggregate checker admits that individual file; it is a reason to reject such
+evidence in the planned per-file gate. No existing per-file acceptance is claimed.

@@ -72,3 +72,13 @@ Linux 14 pass. Both have zero failures. Two real-Git integration checks needed a
 explicit 30-second timeout after exceeding Bun's 5-second default under concurrent
 platform checks; behavioral assertions were retained. Full per-file four-metric
 proof and final independent review remain Q089/Q090 and B04/R02 obligations.
+
+## Metric applicability checkpoint
+
+See [B04-metric-applicability.md](B04-metric-applicability.md) and the per-file
+`metricApplicability` entries. All 444 JavaScript/TypeScript candidates were
+statically instrumented as text; verification helpers were imported. The two browser
+documents retain their separate runtime obligation. Real synthetic VM probes
+confirmed default-export and optional-chain counter blind spots. B05.1-B05.3
+own repairs; neither an empty denominator nor the complete candidate matrix
+approves applicability. Independent review remains pending.

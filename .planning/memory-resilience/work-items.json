@@ -123,7 +123,10 @@
         ".planning/memory-resilience/evidence/B04-scratch-lifecycle-probe.json",
         ".planning/memory-resilience/evidence/B04-classification-batch-6.json",
         ".planning/memory-resilience/evidence/B04-classification-batch-7.json",
-        ".planning/memory-resilience/evidence/B04-classification-batch-8.json"
+        ".planning/memory-resilience/evidence/B04-classification-batch-8.json",
+        ".planning/memory-resilience/evidence/B04-applicability-probe.json",
+        ".planning/memory-resilience/evidence/B04-counter-boundary-probe.json",
+        ".planning/memory-resilience/B04-metric-applicability.md"
       ],
       "acceptance_record": ".planning/memory-resilience/evidence/B04.json",
       "progress": {
@@ -133,8 +136,9 @@
         "unclassified": 0,
         "approvedExclusions": 0,
         "independentReview": "pending",
-        "next": "Review individual metric applicability and obtain independent source-bound tier/applicability review. All tiers remain proposed; structural admission is not B04 acceptance.",
-        "packageOutputMapping": "Source-bound mapping recorded; artifact verification and independent review pending."
+        "next": "Independent source-bound risk/applicability review; continue ready baseline fixture repairs if reviewer remains unavailable. B05 children own confirmed counter and selection defects.",
+        "packageOutputMapping": "Source-bound mapping recorded; artifact verification and independent review pending.",
+        "metricApplicability": "Individual four-metric candidate matrix recorded for all 446 sources; 444 statically instrumented without execution. Zero metrics and independent applicability judgments remain unapproved."
       }
     },
     {
@@ -144,12 +148,15 @@
       "status": "pending",
       "depends_on": [
         "B03",
-        "B04"
+        "B04",
+        "B05.1",
+        "B05.2",
+        "B05.3"
       ],
-      "scope": "scripts/run-istanbul-bun-coverage{,.test}.ts",
-      "deliverable": "Include unimported executable source and scripts with real four-metric counters.",
+      "scope": "Completion barrier for B05.1-B05.3; complete source/runtime measurement",
+      "deliverable": "Close source-accounting, zero-counter and separate-browser gaps through the individually verified child tasks; reconcile every catalog candidate before proceeding to revision-bound reports.",
       "verification": "Real fixture with an unimported executable reports zero coverage; relative imports retain production behavior.",
-      "risk": "A",
+      "risk": "S",
       "authorization": "authorized",
       "owner": "memory-nexus",
       "evidence": [],
@@ -4627,6 +4634,75 @@
       "observed_gap": "Some fetch overrides restore only after awaited work/assertions; module mocks have no explicit isolation boundary and some rejection expectations are not awaited.",
       "observed_evidence": ".planning/memory-resilience/evidence/B04-classification-batch-8.json",
       "retirement_trigger": "Before affected full-suite execution/B09 and B10/R02; source finding is not runtime failure proof."
+    },
+    {
+      "id": "B05.1",
+      "stage": "baseline",
+      "title": "Close instrumenter counter blind spots",
+      "status": "pending",
+      "depends_on": [
+        "B03",
+        "B04"
+      ],
+      "scope": "scripts/run-istanbul-bun-coverage{,.test}.ts and source mapping",
+      "deliverable": "Measure default-export expression evaluation and optional-chain decisions without changing runtime behavior or losing original source locations. Preserve thrown errors, evaluation order, receiver binding, short-circuit side effects and default export identities.",
+      "verification": "RED/GREEN synthetic runtime cases for default expressions, calls/objects/anonymous values and optional property/element/call chains, null/undefined/present and unexecuted paths. Every real decision maps to source; no counter-based 100% for omitted execution. Tier S guards and applicable per-file metrics.",
+      "risk": "S",
+      "authorization": "authorized",
+      "owner": "memory-nexus",
+      "evidence": [],
+      "acceptance_record": ".planning/memory-resilience/evidence/B05.1.json",
+      "observed_evidence": [
+        ".planning/memory-resilience/evidence/B04-applicability-probe.json",
+        ".planning/memory-resilience/evidence/B04-counter-boundary-probe.json"
+      ],
+      "retirement_trigger": "Before B05 completion and numerical baseline acceptance B07/B09/R02."
+    },
+    {
+      "id": "B05.2",
+      "stage": "baseline",
+      "title": "Select the complete source inventory for measurement",
+      "status": "pending",
+      "depends_on": [
+        "B03",
+        "B04"
+      ],
+      "scope": "coverage runner inventory selection and evidence assembly",
+      "deliverable": "Replace src-only/test-ignore selection with the reviewed source-bound inventory. Account for scripts, actual test-driver logic, root configurations, deprecated CLI, unimported code and re-export/module wiring; resolve extraction port value-import versus type-erasure behavior without assuming either.",
+      "verification": "Real isolated fixture proves all supported paths are selected, unimported executable is uncovered, relative imports and CLI entry behavior remain intact, per-file evidence binds source, zero-only files require reviewed disposition and no blanket test/script exclusion.",
+      "risk": "S",
+      "authorization": "authorized",
+      "owner": "memory-nexus",
+      "evidence": [],
+      "acceptance_record": ".planning/memory-resilience/evidence/B05.2.json",
+      "observed_evidence": [
+        ".planning/memory-resilience/evidence/B04-applicability-probe.json",
+        ".planning/memory-resilience/evidence/B04-counter-boundary-probe.json"
+      ],
+      "retirement_trigger": "Before B05 completion and numerical baseline acceptance B07/B09/R02."
+    },
+    {
+      "id": "B05.3",
+      "stage": "baseline",
+      "title": "Measure both browser-code documents",
+      "status": "pending",
+      "depends_on": [
+        "B03",
+        "B04"
+      ],
+      "scope": "two explicitly listed HTML candidates and browser measurement adapter",
+      "deliverable": "Instrument inline scripts in each documented HTML candidate and collect real browser coverage with original HTML/script positions; retain document provenance and a bounded browser invocation. Do not execute report claims as code or treat browser omission as exclusion.",
+      "verification": "Actual browser clicks exercise every section/filter/lens control; missing inline scripts, failed invocation and unmappable positions fail admission. Prove emitted counters correspond to behavior, including both sides of filter decisions; bind artifact hashes and package ownership.",
+      "risk": "S",
+      "authorization": "authorized",
+      "owner": "memory-nexus",
+      "evidence": [],
+      "acceptance_record": ".planning/memory-resilience/evidence/B05.3.json",
+      "observed_evidence": [
+        ".planning/memory-resilience/evidence/B04-applicability-probe.json",
+        ".planning/memory-resilience/evidence/B04-counter-boundary-probe.json"
+      ],
+      "retirement_trigger": "Before B05 completion and numerical baseline acceptance B07/B09/R02."
     }
   ],
   "decisions": {
