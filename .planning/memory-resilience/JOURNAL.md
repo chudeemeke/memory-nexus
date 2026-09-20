@@ -1,5 +1,31 @@
 # Memory resilience execution journal
 
+## 2026-09-20 - B11.1 local driver proof; continue B11.2
+
+- Previous turn progressed at 757125f; started from a clean worktree.
+- Five real Windows child-lifecycle cases pass: normal lock release, failed
+  startup, missing executable, and interruption before/after child termination.
+  Teardown preserves the primary error, closes the child before fixture cleanup,
+  and makes one explicit termination call when needed.
+- Replaced a brittle argument-shape mutation check with SIGTERM versus watchdog
+  SIGKILL proof. Omitted termination is killed by the signal assertion. Eleven
+  helper faults are also killed, with zero ambiguous retained allocations.
+- Current unmodified driver counters from passing Windows/Linux runs and verified
+  expected-failure helper runs meet diagnostic floors: 100% branches/functions,
+  99.71% lines and 99.79% statements. Both helpers remain 100% all four metrics.
+  Mutated helper counters are not merged. Final applicability/review remains open.
+- Final Windows grouped run: 63 pass/176 assertions; types pass. The later WSL
+  grouped invocation failed before Bun started (CreateVm 0x800705b4). Earlier
+  current-source Linux driver diagnostics passed; final Linux group is unverified.
+  No shared WSL reset or unrelated process termination was attempted.
+- B11.1 is blocked on final platform/review/measurement acceptance, with owner and
+  concrete resumption triggers. Native goal remains active; B04 blocked/B05 pending.
+- Next active item B11.2: prove references/build inclusion for integration/index.ts.
+  Named helper searches find definitions only. Remove obsolete destructive code
+  if fully unconsumed; otherwise adapt actual callers to owned capabilities.
+  See B11.2-plan.md. Catalog remains 448 candidates/two packages, no exclusions.
+
+
 ## 2026-09-20 - B11.1 timeout invocation repaired
 
 - Prior turn progressed at e449af9; resumed from a clean worktree.

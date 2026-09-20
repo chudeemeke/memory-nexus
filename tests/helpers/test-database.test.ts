@@ -1,4 +1,4 @@
-import {expect, test} from "bun:test";
+import {expect, test, spyOn} from "bun:test";
 import {Database} from "bun:sqlite";
 import {spawn} from "node:child_process";
 import {existsSync, linkSync, mkdirSync, readFileSync, renameSync, rmdirSync, rmSync, symlinkSync, unlinkSync, writeFileSync} from "node:fs";
@@ -152,36 +152,101 @@ test("cleanup unlinks a nested directory link without deleting its target", () =
   } finally {fixture.cleanup();foreign.cleanup();}
 });
 
-(process.platform === "win32" ? test : test.skip)("a real Windows file lock retains ownership until a successful retry", async () => {
+const windowsTest = process.platform === "win32" ? test : test.skip;
+
+async function withLockHolder(
+  script: string,
+  target: string,
+  exercise: (holder: {child: ReturnType<typeof spawn>; ready: Promise<void>; exited: Promise<number|null>}) => Promise<void>,
+  command = "powershell.exe",
+): Promise<void> {
+  const child=spawn(command,["-NoProfile","-NonInteractive","-File",script,target],{windowsHide:true,timeout:15000,killSignal:"SIGKILL",stdio:["pipe","pipe","pipe"]});
+  const exited=new Promise<number|null>(resolve=>child.once("close",resolve));
+  let output="", errors="";
+  child.stderr.on("data",chunk=>{errors+=String(chunk);});
+  const ready=new Promise<void>((resolve,reject)=>{
+    child.stdout.on("data",chunk=>{output+=String(chunk);if(output.includes("READY"))resolve();});
+    child.once("error",reject);
+    child.once("close",()=>{if(!output.includes("READY"))reject(new Error(`Lock holder did not become ready: ${errors}`));});
+  });
+  try { await exercise({child,ready,exited}); }
+  finally {
+    if(child.exitCode===null&&child.signalCode===null)child.kill();
+    await exited;
+  }
+}
+
+windowsTest("a real Windows file lock retains ownership until a successful retry", async () => {
   const fixture=createTestDir("memory-lock-target-"), control=createTestDir("memory-lock-control-");
   const target=join(fixture.dir,"locked.txt");
   const script=join(control.dir,"hold.ps1");
   const owner=readFileSync(join(fixture.dir,".memory-test-owner.json"),"utf8");
   writeFileSync(target,"locked content");
   writeFileSync(script, 'param([string]$Target)\n$stream = [System.IO.File]::Open($Target, "Open", "ReadWrite", "None")\ntry {\n[Console]::Out.WriteLine("READY")\n[Console]::Out.Flush()\n[Console]::In.ReadLine() | Out-Null\n} finally { $stream.Dispose() }\n');
-  const child=spawn("powershell.exe",["-NoProfile","-NonInteractive","-File",script,target],{windowsHide:true,timeout:15000,stdio:["pipe","pipe","pipe"]});
-  const exited=new Promise<number|null>(resolve=>child.once("close",resolve));
-  let output="", errors="";
-  child.stderr.on("data",chunk=>{errors+=String(chunk);});
   try {
-    await new Promise<void>((resolve,reject)=>{
-      child.stdout.on("data",chunk=>{output+=String(chunk);if(output.includes("READY"))resolve();});
-      child.once("error",reject);
-      child.once("close",()=>{if(!output.includes("READY"))reject(new Error(`Lock holder did not become ready: ${errors}`));});
+    await withLockHolder(script,target,async ({child,ready,exited})=>{
+      await ready;
+      expect(()=>fixture.cleanup()).toThrow(fixture.dir);
+      expect(existsSync(target)).toBe(true);
+      expect(readFileSync(join(fixture.dir,".memory-test-owner.json"),"utf8")).toBe(owner);
+      child.stdin!.end("\n");
+      expect(await exited).toBe(0);
+      expect(readFileSync(target,"utf8")).toBe("locked content");
+      fixture.cleanup();
+      expect(existsSync(fixture.dir)).toBe(false);
     });
-    expect(()=>fixture.cleanup()).toThrow(fixture.dir);
-    expect(existsSync(target)).toBe(true);
-    expect(readFileSync(join(fixture.dir,".memory-test-owner.json"),"utf8")).toBe(owner);
-    child.stdin.end("\n");
-    expect(await exited).toBe(0);
-    expect(readFileSync(target,"utf8")).toBe("locked content");
-    fixture.cleanup();
-    expect(existsSync(fixture.dir)).toBe(false);
   } finally {
-    if(child.exitCode===null&&child.signalCode===null)child.kill();
-    await exited;
     fixture.cleanup();control.cleanup();
   }
+},20000);
+
+windowsTest("lock-holder startup failure reports diagnostics and permits fixture recovery", async () => {
+  const control=createTestDir("memory-lock-startup-");
+  const script=join(control.dir,"fail.ps1");
+  writeFileSync(script,'[Console]::Out.WriteLine("STARTING")\n[Console]::Error.WriteLine("startup refused")\nexit 23\n');
+  try {
+    await withLockHolder(script,"unused",async ({ready,exited})=>{
+      await expect(ready).rejects.toThrow("startup refused");
+      expect(await exited).toBe(23);
+    });
+    control.cleanup();
+    expect(existsSync(control.dir)).toBe(false);
+  } finally {control.cleanup();}
+},20000);
+
+windowsTest("lock-holder process creation failure rejects readiness without hanging", async () => {
+  const control=createTestDir("memory-lock-spawn-");
+  try {
+    await withLockHolder("unused","unused",async ({child,ready,exited})=>{
+      await expect(ready).rejects.toThrow("ENOENT");
+      expect(child.pid).toBeUndefined();
+      expect(await exited).not.toBe(0);
+    },join(control.dir,"nonexistent.exe"));
+  } finally {control.cleanup();}
+},20000);
+
+windowsTest.each([false,true])("interrupted lock-holder callback preserves failure and reaps the child (already terminated: %s)", async terminated => {
+  const control=createTestDir("memory-lock-interrupted-");
+  const script=join(control.dir,"wait.ps1");
+  writeFileSync(script,'[Console]::Out.WriteLine("READY")\n[Console]::Out.Flush()\n[Console]::In.ReadLine() | Out-Null\n');
+  const primary=new Error("fixture assertion interrupted");
+  let verify!: () => void;
+  try {
+    await expect(withLockHolder(script,"unused",async ({child,ready,exited})=>{
+      await ready;
+      const kill=spyOn(child,"kill");
+      verify=()=>{
+        expect(child.killed).toBe(true);
+        expect(child.signalCode).toBe("SIGTERM");
+        expect(kill).toHaveBeenCalledTimes(1);
+      };
+      if(terminated){child.kill();await exited;}
+      throw primary;
+    })).rejects.toBe(primary);
+    verify();
+    control.cleanup();
+    expect(existsSync(control.dir)).toBe(false);
+  } finally {control.cleanup();}
 },20000);
 
 test("failed database close retains the directory and can be retried", () => {

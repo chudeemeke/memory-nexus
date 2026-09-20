@@ -3,7 +3,7 @@
   "workstream": "memory-resilience",
   "goal_status": "active",
   "starting_revision": "77d54e05be7fc24cede4a9a3e1fede6fa113ac8f",
-  "current_item": "B11.1",
+  "current_item": "B11.2",
   "status_semantics": {
     "pending": "Not started; authorization and dependencies must permit work.",
     "pending_rebaseline": "Historical candidate, not a confirmed current failure or a completed task.",
@@ -30,6 +30,16 @@
       "blocks_items": [
         "A02"
       ]
+    },
+    {
+      "id": "X03",
+      "description": "Final B11.1 Linux grouped check failed before Bun started: WSL CreateVm 0x800705b4.",
+      "owner": "memory-nexus",
+      "trigger": "Successful bounded WSL readiness, then rerun exact grouped check; do not reset shared WSL state for this project.",
+      "blocks_items": [
+        "B11.1"
+      ],
+      "blocks_goal": false
     }
   ],
   "items": [
@@ -138,7 +148,7 @@
         "independentReview": "pending",
         "next": "Refresh changed-source measurement and obtain independent risk/applicability review; B11.1 proceeds as an independently ready baseline task.",
         "packageOutputMapping": "Source-bound mapping recorded; artifact verification and independent review pending.",
-        "metricApplicability": "Current three-helper-file Windows diagnostics are retained; driver branch gap and changed export-driver applicability remain open. Historical coverage is not transferred. All 448 risk tiers remain proposed."
+        "metricApplicability": "B11.1 three-file diagnostic floors now met using unchanged-driver expected-failure recovery probes plus passing Windows/Linux maps. Independent applicability/instrumenter acceptance and final Linux grouped run remain open; B11.2 source disposition starts next."
       },
       "blocker": {
         "owner": "memory-nexus",
@@ -3100,7 +3110,7 @@
       "deliverable": "Guard helper-owned temporary storage and report failed cleanup with recoverable paths; correct the unsupported reboot-reclamation assumption.",
       "verification": "RED/GREEN success, repeated cleanup, initialization/close failure, replaced/foreign path and locked-file cases; failures retain diagnostics and never remove foreign data.",
       "stage": "baseline",
-      "status": "active",
+      "status": "blocked",
       "risk": "S",
       "authorization": "authorized",
       "owner": "memory-nexus",
@@ -3115,21 +3125,27 @@
         ".planning/memory-resilience/evidence/B11.1-decision-mutations.json",
         ".planning/memory-resilience/evidence/B11.1-timeout-invocation.json",
         ".planning/memory-resilience/evidence/B11.1-driver-linux-metrics.json",
-        ".planning/memory-resilience/evidence/B11.1-driver-platform-metrics.json"
+        ".planning/memory-resilience/evidence/B11.1-driver-platform-metrics.json",
+        ".planning/memory-resilience/evidence/B11.1-holder-proof.json",
+        ".planning/memory-resilience/evidence/B11.1-holder-platforms.json",
+        ".planning/memory-resilience/evidence/B11.1-holder-faults.json"
       ],
-      "acceptance_record": ".planning/memory-resilience/evidence/B11.1.json",
+      "acceptance_record": ".planning/memory-resilience/evidence/B11.1-holder-proof.json",
       "observed_evidence": ".planning/memory-resilience/B04-source-findings.md",
       "retirement_trigger": "Before baseline review R02; runtime regression and final applicable tier proof required.",
       "progress": {
-        "implemented": "Marker boundary regressions and export teardown event-loop yield. Existing ownership guards and bounded synchronous retry API unchanged.",
-        "verified_scope": "Current Windows 59 pass/160 assertions; Linux 58 pass/one Windows skip/154 assertions, explicit existing quality timeout 15000 ms. Expanded targeted typecheck passes. Both helpers remain 100% direct-Istanbul diagnostics; eight deliberate guard/lifecycle/retry faults killed.",
-        "repeat_scope": "Paired generated export test: synchronous teardown failed with EBUSY 2/8; event-loop yield failed 0/8. Five later Windows grouped runs passed 59 tests each at explicit 15000 ms. Final source differs from those repeats only by a TypeScript non-null assertion after an existing length assertion; final current-source Windows/Linux checks pass.",
-        "correction": "EBUSY recurred after the prior paced-retry checkpoint. Restart Manager identified the failing test Bun PID as its own lock holder. Strict-close comparisons were inconclusive. A yield mitigates the observed case but does not establish the native root cause.",
+        "implemented": "Shared private child-lifecycle exercise covers successful lock release, startup refusal, missing executable and callback interruption before/after termination. Teardown waits for closure and preserves the primary callback failure. Safety watchdog uses SIGKILL, distinct from explicit teardown SIGTERM.",
+        "verified_scope": "Final Windows affected group: 63 pass, 176 assertions. Current-source instrumented driver runs pass on Windows and Linux (five Windows cases skipped on Linux); targeted types pass. Eleven helper faults and one omitted-termination fault are killed. Helpers: 100% all four diagnostic metrics. Driver: 99.71% lines, 99.79% statements, 100% functions/branches.",
+        "measurement_scope": "Only unchanged driver counters from expected-failure helper-fault runs are merged with passing same-source/map platform counters. Helper metrics use passing unmutated source only. This is direct-Istanbul diagnostic evidence, not final B05-B08/E8 or independent acceptance.",
         "remaining": [
-          "Driver source and counter-map identical Windows/Linux diagnostics combine to 61/70 branches (87.14%); nine genuine failure/recovery outcomes remain. Both helpers have 100% on both runtimes. Address the nine outcomes listed in B11.1-driver-platform-metrics.json without deleting safety branches or adding exclusions.",
-          "Eight killed mutations remain bounded decision proof. Final B05-B08 instrumenter, applicable driver metrics, source-bound review and full baseline acceptance remain open."
-        ],
-        "timeout_resolution": "Synthetic comparisons on Windows Bun 1.4.1/Linux Bun 1.3.14 prove TOML timeout ignored despite loaded preload; CLI timeout works. Actual package invocation fails a 5.25-second test before the change and passes it on both platforms after test script explicitly uses existing quality limit 15000 ms. Quality and smoke route through that entrypoint; direct bun test still needs its explicit flag."
+          "Local candidate proof is ready. Final current-source Linux grouped run did not start because WSL CreateVm timed out; independent source/applicability review is absent (last Fable smoke quota-blocked), and final instrumenter acceptance remains required.",
+          "Successful bounded WSL readiness then exact grouped run; obtain final source-bound independent review and reconcile final measurement gates. No local metric or review acceptance transferred."
+        ]
+      },
+      "blocker": {
+        "owner": "memory-nexus",
+        "condition": "Local candidate proof is ready. Final current-source Linux grouped run did not start because WSL CreateVm timed out; independent source/applicability review is absent (last Fable smoke quota-blocked), and final instrumenter acceptance remains required.",
+        "resumption_trigger": "Successful bounded WSL readiness then exact grouped run; obtain final source-bound independent review and reconcile final measurement gates. No local metric or review acceptance transferred."
       }
     },
     {
@@ -3142,14 +3158,19 @@
       "deliverable": "Bound recursive deletion to demonstrably owned fixture storage and expose failures without hiding the original test outcome.",
       "verification": "RED/GREEN caller compatibility, foreign/replaced paths, failed cleanup and successful removal; every retained directory is reported.",
       "stage": "baseline",
-      "status": "pending",
+      "status": "active",
       "risk": "S",
       "authorization": "authorized",
       "owner": "memory-nexus",
-      "evidence": [],
+      "evidence": [
+        ".planning/memory-resilience/B11.2-plan.md"
+      ],
       "acceptance_record": ".planning/memory-resilience/evidence/B11.2.json",
       "observed_evidence": ".planning/memory-resilience/B04-source-findings.md",
-      "retirement_trigger": "Before baseline review R02; runtime regression and final applicable tier proof required."
+      "retirement_trigger": "Before baseline review R02; runtime regression and final applicable tier proof required.",
+      "progress": {
+        "restart": "Inventory all exports/imports/build inclusion of tests/integration/index.ts. Named-helper searches found no uses; prove whether removing the unused destructive utility is the correct disposition before adding new cleanup machinery."
+      }
     },
     {
       "id": "B11.3",

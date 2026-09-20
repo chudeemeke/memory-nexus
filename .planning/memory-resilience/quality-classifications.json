@@ -17331,7 +17331,7 @@
     {
       "path": "tests/helpers/test-database.test.ts",
       "package": "package.json",
-      "sourceHash": "2f25ce0dec1d0c4e46e3e8f08ca87c7fab04e34c7edeefd53bbd7bfb90618bb0",
+      "sourceHash": "b03efaeaba68fd242881977e674f4df7e516d458ae3f5e32ba65adce8250c8a9",
       "tier": "S",
       "rationale": "Runs real SQLite and owned-directory mutation/replacement/link/failure regressions. Incorrect fixture cleanup can remove filesystem state.",
       "applicability": {
@@ -17340,10 +17340,10 @@
       },
       "decisionStatus": "proposed - independent review pending",
       "metricApplicability": {
-        "status": "incomplete - current source diagnostic or acceptance gap",
-        "sourceHash": "2f25ce0dec1d0c4e46e3e8f08ca87c7fab04e34c7edeefd53bbd7bfb90618bb0",
-        "evidence": ".planning/memory-resilience/evidence/B11.1-driver-metrics.json",
-        "reason": "Windows diagnostic has 58/70 branches (82.85%); other metrics exceed 95%. No exclusion approved. Final instrumenter and independent review remain pending."
+        "status": "proposed - diagnostic floors met; independent acceptance pending",
+        "sourceHash": "b03efaeaba68fd242881977e674f4df7e516d458ae3f5e32ba65adce8250c8a9",
+        "evidence": ".planning/memory-resilience/evidence/B11.1-holder-proof.json",
+        "reason": "Current unmodified driver reaches 100% diagnostic branches by combining source/map-identical passing platform runs and verified expected-failure helper-fault runs. Other metrics exceed 95%. Mutated helper counters are excluded. Final instrumenter/applicability and independent review remain required."
       }
     },
     {
