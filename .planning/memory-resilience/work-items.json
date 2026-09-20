@@ -138,7 +138,7 @@
         "independentReview": "pending",
         "next": "Refresh changed-source measurement and obtain independent risk/applicability review; B11.1 proceeds as an independently ready baseline task.",
         "packageOutputMapping": "Source-bound mapping recorded; artifact verification and independent review pending.",
-        "metricApplicability": "Current helper diagnostics retained for two of the three B11.1 source entries. Regression-driver metrics and independent applicability review remain open; original 446-file evidence remains historical."
+        "metricApplicability": "Current three-helper-file Windows diagnostics are retained; driver branch gap and changed export-driver applicability remain open. Historical coverage is not transferred. All 448 risk tiers remain proposed."
       },
       "blocker": {
         "owner": "memory-nexus",
@@ -3109,18 +3109,23 @@
         ".planning/memory-resilience/evidence/B11.1.json",
         ".planning/memory-resilience/evidence/B11.1-platform.json",
         ".planning/memory-resilience/evidence/B11.1-helper-metrics.json",
-        ".planning/memory-resilience/evidence/B11.1-inode-mutation.json"
+        ".planning/memory-resilience/evidence/B11.1-inode-mutation.json",
+        ".planning/memory-resilience/evidence/B11.1-boundaries-runtime.json",
+        ".planning/memory-resilience/evidence/B11.1-driver-metrics.json",
+        ".planning/memory-resilience/evidence/B11.1-decision-mutations.json"
       ],
       "acceptance_record": ".planning/memory-resilience/evidence/B11.1.json",
       "observed_evidence": ".planning/memory-resilience/B04-source-findings.md",
       "retirement_trigger": "Before baseline review R02; runtime regression and final applicable tier proof required.",
       "progress": {
-        "implemented": "Exclusive ownership and marker guards, marker-write/restoration error preservation, native Windows lock recovery, bounded paced EBUSY/EPERM retries (100/200 ms) with recollection and ownership revalidation; other errors surface without retries.",
-        "verified_scope": "Final Windows 52 pass / 144 assertions; Linux 51 pass, one Windows-only skip / 138 assertions; targeted types. Both helper modules show 100% in direct-Istanbul diagnostics; inode-guard mutation killed.",
-        "repeat_scope": "Five Windows repeats passed at 51 tests each before the final additional non-Error case; helper implementation unchanged by that added test. Earlier unpaced repeats failed with EBUSY and are retained.",
+        "implemented": "Marker boundary regressions and export teardown event-loop yield. Existing ownership guards and bounded synchronous retry API unchanged.",
+        "verified_scope": "Current Windows 59 pass/160 assertions; Linux 58 pass/one Windows skip/154 assertions, explicit existing quality timeout 15000 ms. Expanded targeted typecheck passes. Both helpers remain 100% direct-Istanbul diagnostics; eight deliberate guard/lifecycle/retry faults killed.",
+        "repeat_scope": "Paired generated export test: synchronous teardown failed with EBUSY 2/8; event-loop yield failed 0/8. Five later Windows grouped runs passed 59 tests each at explicit 15000 ms. Final source differs from those repeats only by a TypeScript non-null assertion after an existing length assertion; final current-source Windows/Linux checks pass.",
+        "correction": "EBUSY recurred after the prior paced-retry checkpoint. Restart Manager identified the failing test Bun PID as its own lock holder. Strict-close comparisons were inconclusive. A yield mitigates the observed case but does not establish the native root cause.",
         "remaining": [
-          "Complete regression-driver metric applicability/coverage and broader Tier S adversarial/decision evidence; one killed mutation is not a complete mutation suite.",
-          "Independent source-bound review and final quality-gate acceptance. Direct-Istanbul helper diagnostics do not close B05-B08 or E8."
+          "Driver branch diagnostic is 58/70 (82.85%); inspect uncoveredBranches in B11.1-driver-metrics.json. Cover failure/recovery branches meaningfully and reconcile Windows/Linux applicability. No blanket test exclusion.",
+          "Bun 1.4.1 default runs twice enforced 5000 ms despite bunfig timeout=30000; explicit existing quality --timeout 15000 passes. Owner B11.1; resolve/document supported default invocation before acceptance, retaining timeout failures.",
+          "Eight killed mutations are bounded decision proof, not exhaustive coverage or independent approval. Final B05-B08 instrumenter, source-bound review and full baseline acceptance remain open."
         ]
       }
     },

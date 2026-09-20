@@ -12176,7 +12176,7 @@
     {
       "path": "src/presentation/cli/commands/export.test.ts",
       "package": "package.json",
-      "sourceHash": "aebb857404b0816f9e5bcbba39d877ef4b85609957ecf6f8d365cbccd75425cf",
+      "sourceHash": "3de23dd3c3e360311c1c0ba934fc62297024f4432cd83df6c5a0e61621e10c48",
       "tier": "S",
       "rationale": "Creates a real file database and export output through test support and invokes cleanup. B11.1 owns helper lifecycle.",
       "applicability": {
@@ -12191,28 +12191,10 @@
         "scope": "Reading aid plus targeted source inspection; not sound effect analysis, complete assertion review, execution evidence or metric applicability approval."
       },
       "metricApplicability": {
-        "status": "proposed - independent review pending",
-        "evidence": ".planning/memory-resilience/evidence/B04-applicability-probe.json",
-        "sourceHash": "aebb857404b0816f9e5bcbba39d877ef4b85609957ecf6f8d365cbccd75425cf",
-        "disposition": "Measure every positive denominator; individually review zero branch/function denominators against runtime syntax. Observed counts do not prove instrumentation completeness.",
-        "metrics": {
-          "statements": {
-            "observedCounterTotal": 117,
-            "proposal": "measure - completeness unverified"
-          },
-          "branches": {
-            "observedCounterTotal": 0,
-            "proposal": "zero requires individual review"
-          },
-          "functions": {
-            "observedCounterTotal": 28,
-            "proposal": "measure - completeness unverified"
-          },
-          "lines": {
-            "observedCounterTotal": 112,
-            "proposal": "measure - completeness unverified"
-          }
-        }
+        "status": "incomplete - current source diagnostic or acceptance gap",
+        "sourceHash": "3de23dd3c3e360311c1c0ba934fc62297024f4432cd83df6c5a0e61621e10c48",
+        "evidence": ".planning/memory-resilience/evidence/B11.1-boundaries-runtime.json",
+        "reason": "Export teardown now yields one event-loop turn; existing args length assertion justifies a TypeScript non-null assertion. Prior metric evidence is invalidated; final Tier S applicability/coverage remains open."
       }
     },
     {
@@ -17349,7 +17331,7 @@
     {
       "path": "tests/helpers/test-database.test.ts",
       "package": "package.json",
-      "sourceHash": "c2f2c2af8b38b8531228bc0e596920dd70d6886cb66ed5417b45137643f4efa3",
+      "sourceHash": "2f25ce0dec1d0c4e46e3e8f08ca87c7fab04e34c7edeefd53bbd7bfb90618bb0",
       "tier": "S",
       "rationale": "Runs real SQLite and owned-directory mutation/replacement/link/failure regressions. Incorrect fixture cleanup can remove filesystem state.",
       "applicability": {
@@ -17358,10 +17340,10 @@
       },
       "decisionStatus": "proposed - independent review pending",
       "metricApplicability": {
-        "status": "invalidated - current driver metric evidence pending",
-        "sourceHash": "c2f2c2af8b38b8531228bc0e596920dd70d6886cb66ed5417b45137643f4efa3",
-        "diagnostic": null,
-        "reason": "Regression driver changed; no prior numerical applicability or exclusion approval transferred."
+        "status": "incomplete - current source diagnostic or acceptance gap",
+        "sourceHash": "2f25ce0dec1d0c4e46e3e8f08ca87c7fab04e34c7edeefd53bbd7bfb90618bb0",
+        "evidence": ".planning/memory-resilience/evidence/B11.1-driver-metrics.json",
+        "reason": "Windows diagnostic has 58/70 branches (82.85%); other metrics exceed 95%. No exclusion approved. Final instrumenter and independent review remain pending."
       }
     },
     {

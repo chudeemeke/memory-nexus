@@ -1,5 +1,32 @@
 # Memory resilience execution journal
 
+## 2026-09-20 - B11.1 ownership boundaries and export lifecycle
+
+- Added six marker/replacement cases and a retained-statement execution check.
+  Eight isolated guard/lifecycle/retry faults are killed; zero mutant allocations
+  remain ambiguous. Both helpers retain 100% direct-Istanbul diagnostics.
+- Corrected the prior retry assessment: Windows EBUSY recurred. A validated
+  read-only Restart Manager query identified the failing Bun process as holder.
+  Strict-close probes were inconclusive; paired export runs failed 2/8 with
+  synchronous teardown and 0/8 after one event-loop turn. Export teardown now
+  awaits that turn. This is a bounded mitigation, not a native root-cause claim.
+- Two grouped runs failed at a reported 5000 ms timeout despite bunfig setting
+  30000. Retained both. The existing quality command explicitly uses 15000 ms;
+  five grouped Windows repeats pass with that limit. Current source passes
+  Windows 59 tests/160 assertions and Linux 58 tests/154 assertions plus one
+  Windows-only skip; expanded targeted types pass. No timeout configuration
+  or assertion was weakened.
+- Reclaimed five exact observed synthetic export allocations only after marker,
+  directory identity and stopped-PID verification. Other project data untouched.
+- Catalog remains 448 candidates/two packages. B11.1 is active: driver branch
+  diagnostic is 58/70 (82.85%); driver applicability, default timeout behavior,
+  complete Tier S/final instrumenter proof and independent review remain open.
+- Restart at B11.1-driver-metrics.json uncoveredBranches. Address meaningful
+  failure/recovery coverage and Windows/Linux applicability, then review the
+  supported test timeout invocation. Preserve B04 blocked/B05 pending and
+  production decision gates. No model or production replication activated.
+
+
 ## 2026-09-20 - B11.1 lock, marker and retry proof
 
 - Previous turn progressed: 59772dc added owned cleanup. Actual Windows external

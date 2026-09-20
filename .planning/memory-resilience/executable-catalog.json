@@ -17266,7 +17266,7 @@
     {
       "path": "src/presentation/cli/commands/export.test.ts",
       "package": "package.json",
-      "sourceHash": "aebb857404b0816f9e5bcbba39d877ef4b85609957ecf6f8d365cbccd75425cf",
+      "sourceHash": "3de23dd3c3e360311c1c0ba934fc62297024f4432cd83df6c5a0e61621e10c48",
       "language": ".ts",
       "syntax": "test-driver",
       "imports": [
@@ -17278,7 +17278,8 @@
         "bun:test",
         "commander",
         "node:fs",
-        "node:path"
+        "node:path",
+        "node:timers/promises"
       ],
       "declarations": [
         "args",
@@ -17332,7 +17333,8 @@
         "spyOn.mockReturnValue",
         "test",
         "testDb.cleanup",
-        "testDb.db.exec"
+        "testDb.db.exec",
+        "yieldToEventLoop"
       ]
     },
     {
@@ -25056,13 +25058,14 @@
     {
       "path": "tests/helpers/test-database.test.ts",
       "package": "package.json",
-      "sourceHash": "c2f2c2af8b38b8531228bc0e596920dd70d6886cb66ed5417b45137643f4efa3",
+      "sourceHash": "2f25ce0dec1d0c4e46e3e8f08ca87c7fab04e34c7edeefd53bbd7bfb90618bb0",
       "language": ".ts",
       "syntax": "test-driver",
       "imports": [
         "../../src/infrastructure/database/connection",
         "./owned-test-directory",
         "./test-database",
+        "bun:sqlite",
         "bun:test",
         "node:child_process",
         "node:fs",
@@ -25081,10 +25084,12 @@
         "control",
         "createDirectory",
         "database",
+        "db",
         "dir",
         "error",
         "errors",
         "exited",
+        "extra",
         "failure",
         "fixture",
         "foreign",
@@ -25105,6 +25110,7 @@
         "restoreError",
         "right",
         "script",
+        "statement",
         "storage",
         "target",
         "unexpected",
@@ -25130,6 +25136,8 @@
         "database.cleanup",
         "database.db.query",
         "database.db.query.get",
+        "db.close",
+        "db.query",
         "dirname",
         "existsSync",
         "expect",
@@ -25147,6 +25155,7 @@
         "foreign.cleanup",
         "join",
         "left.cleanup",
+        "linkSync",
         "mkdirSync",
         "output.includes",
         "owner.slice",
@@ -25158,6 +25167,8 @@
         "rmSync",
         "rmdirSync",
         "spawn",
+        "statement.finalize",
+        "statement.get",
         "storage.cleanup",
         "symlinkSync",
         "test",

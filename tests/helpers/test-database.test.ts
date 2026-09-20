@@ -1,6 +1,7 @@
 import {expect, test} from "bun:test";
+import {Database} from "bun:sqlite";
 import {spawn} from "node:child_process";
-import {existsSync, mkdirSync, readFileSync, renameSync, rmdirSync, rmSync, symlinkSync, unlinkSync, writeFileSync} from "node:fs";
+import {existsSync, linkSync, mkdirSync, readFileSync, renameSync, rmdirSync, rmSync, symlinkSync, unlinkSync, writeFileSync} from "node:fs";
 import {dirname, join} from "node:path";
 import {createTestDatabase, createTestDir} from "./test-database";
 import {closeDatabase} from "../../src/infrastructure/database/connection";
@@ -352,4 +353,60 @@ test("a non-Error cleanup failure is reported without blind retries", () => {
     expect(()=>fixture.cleanup()).toThrow("unexpected cleanup failure");
     expect(attempts).toBe(1);expect(existsSync(fixture.dir)).toBe(true);
   }finally{blocked=false;fixture.cleanup();}
+});
+
+test.each(["missing","same-length-change","directory","hard-link"])("an ownership marker that is %s cannot authorize cleanup", shape => {
+  const fixture=createTestDir(), control=createTestDir();
+  const marker=join(fixture.dir,".memory-test-owner.json"), extra=join(control.dir,"owner-copy");
+  const owner=readFileSync(marker,"utf8");
+  writeFileSync(join(fixture.dir,"keep.txt"),"preserve");
+  if(shape==="missing")unlinkSync(marker);
+  if(shape==="same-length-change")writeFileSync(marker,owner.slice(0,-1)+"!");
+  if(shape==="directory"){unlinkSync(marker);mkdirSync(marker);}
+  if(shape==="hard-link")linkSync(marker,extra);
+  try {
+    expect(()=>fixture.cleanup()).toThrow(fixture.dir);
+    expect(readFileSync(join(fixture.dir,"keep.txt"),"utf8")).toBe("preserve");
+  }finally{
+    if(existsSync(extra))unlinkSync(extra);
+    if(existsSync(fixture.dir)){
+      if(shape==="directory")rmdirSync(marker);
+      writeFileSync(marker,owner);
+    }
+    fixture.cleanup();control.cleanup();
+  }
+});
+
+test("partial cleanup never overwrites a changed owner marker", () => {
+  let attempts=0;
+  const fixture=createOwnedTestDirectory("memory-marker-changed-",{remove(path){
+    if(++attempts===1){writeFileSync(join(path,".memory-test-owner.json"),"replacement-owner");throw new Error("partial failure");}
+    rmSync(path,{recursive:true});
+  }});
+  const marker=join(fixture.dir,".memory-test-owner.json"), owner=readFileSync(marker,"utf8");
+  try {
+    expect(()=>fixture.cleanup()).toThrow("partial failure");
+    expect(readFileSync(marker,"utf8")).toBe("replacement-owner");
+    expect(()=>fixture.cleanup()).toThrow("ownership marker changed");
+    expect(attempts).toBe(1);
+  }finally{writeFileSync(marker,owner);fixture.cleanup();}
+});
+
+test("a file replacing the allocated directory is preserved", () => {
+  const fixture=createTestDir(), moved=fixture.dir+"-original";
+  renameSync(fixture.dir,moved);writeFileSync(fixture.dir,"preserve");
+  try {
+    expect(()=>fixture.cleanup()).toThrow("ownership changed");
+    expect(readFileSync(fixture.dir,"utf8")).toBe("preserve");
+  }finally{unlinkSync(fixture.dir);renameSync(moved,fixture.dir);fixture.cleanup();}
+});
+
+test("closing a database prevents execution of retained cached statements", () => {
+  const db=new Database(":memory:");
+  const statement=db.query("SELECT 1 AS value");
+  expect(statement.get()).toEqual({value:1});
+  try {
+    closeDatabase(db);
+    expect(()=>statement.get()).toThrow();
+  }finally{statement.finalize();db.close();}
 });
