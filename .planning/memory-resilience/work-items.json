@@ -3,7 +3,7 @@
   "workstream": "memory-resilience",
   "goal_status": "active",
   "starting_revision": "77d54e05be7fc24cede4a9a3e1fede6fa113ac8f",
-  "current_item": "B11.74",
+  "current_item": "B11.74.3",
   "status_semantics": {
     "pending": "Not started; authorization and dependencies must permit work.",
     "pending_rebaseline": "Historical candidate, not a confirmed current failure or a completed task.",
@@ -974,9 +974,9 @@
       "id": "Q031",
       "stage": "coverage_repair",
       "title": "Verify and repair src/infrastructure/database/services/stats-service.ts",
-      "status": "pending_rebaseline",
+      "status": "pending",
       "depends_on": [
-        "B09"
+        "B11.74.2"
       ],
       "scope": "src/infrastructure/database/services/stats-service.ts",
       "deliverable": "Reproduce uncovered behavior, add meaningful regression/boundary tests, fix demonstrated defects, satisfy this file's reviewed risk tier.",
@@ -988,8 +988,15 @@
         "branches=60"
       ],
       "historical_evidence": "docs/audits/2026-09-19-repair-evidence/per-file-coverage-gaps.json",
-      "evidence": [],
-      "acceptance_record": ".planning/memory-resilience/evidence/Q031.json"
+      "evidence": [
+        ".planning/memory-resilience/evidence/B11.74.2.json"
+      ],
+      "acceptance_record": ".planning/memory-resilience/evidence/Q031.json",
+      "progress": {
+        "current": "Confirmed 60% branch diagnostics at current stats source after disposal repair; missing alternatives are existing null-result fallbacks. Promoted from historical candidate using current scoped evidence. B09 remains required by B10, but is not a prerequisite for this now-confirmed local repair because B09 itself waits for native closure. No exclusion or meaningless coverage-only test.",
+        "owner": "memory-nexus",
+        "trigger": "Meaningful invariant/compatibility disposition and four-metric proof before B11.74.7/B10/R02."
+      }
     },
     {
       "id": "Q032",
@@ -4972,9 +4979,16 @@
       "id": "B11.74",
       "stage": "baseline",
       "title": "Make native prepared-statement closure deterministic",
-      "status": "active",
+      "status": "pending",
       "depends_on": [
-        "B03"
+        "B03",
+        "B11.74.1",
+        "B11.74.2",
+        "B11.74.3",
+        "B11.74.4",
+        "B11.74.5",
+        "B11.74.6",
+        "B11.74.7"
       ],
       "scope": "src/infrastructure/database/connection.ts and affected statement owners/callers; exact source scope follows lifetime mapping",
       "deliverable": "Release connection-owned prepared statements and native file handles deterministically, preserving committed data, rollback, diagnostics and the explicit supported runtime contract.",
@@ -4986,15 +5000,165 @@
         ".planning/memory-resilience/B11.74-plan.md",
         ".planning/memory-resilience/evidence/B11.74-discovery.json",
         ".planning/memory-resilience/evidence/B11.4-native-discovery.json",
-        ".planning/memory-resilience/evidence/B11.74-weak-tracking-rejection.json"
+        ".planning/memory-resilience/evidence/B11.74-weak-tracking-rejection.json",
+        ".planning/memory-resilience/evidence/B11.74-lifetime-map.json"
       ],
       "acceptance_record": ".planning/memory-resilience/evidence/B11.74.json",
       "retirement_trigger": "Before B11.1/B11.4/B10/R02 acceptance; default close plus GC/retries is not deterministic closure proof.",
       "progress": {
         "observed": "Default close retains prepared statements. A factory weak registry passed focused tests but failed synthetic collection pressure on pinned Windows Bun 1.3.14: database is locked, 148 tracked / 78 live wrappers / 79 live native objects. Paired strong-wrapper retention passed. Candidate rejected and preserved; production source restored to b9162eb.",
-        "restart": "Complete native factory/statement lifetime map, split caller migrations into atomic children, then prove explicit connection ownership plus scope disposal through one hot-loop caller on both runtimes. Require bounded outstanding resources and immediate close/removal; no weak-reference or unbounded-registry shortcut.",
+        "restart": "B11.74.3: migrate mapped repository one-off statements and repeated-construction ownership; .2 local ownership/stats proof complete. Do not wire main factory until .3-.5 complete; .6 integration and .7 final acceptance remain.",
         "limits": "No native Linux, full metrics, hosted or independent-review acceptance. Preserve primary+cleanup errors and create:false/readwrite regression in replacement. Status success-shaped output after swallowed close errors is B11.4."
       }
+    },
+    {
+      "id": "B11.74.1",
+      "stage": "baseline",
+      "title": "Map native resource lifetimes",
+      "status": "verified",
+      "depends_on": [
+        "B03"
+      ],
+      "scope": "Production src and scripts; resolved native signatures and injected factory seams",
+      "deliverable": "Source-bound complete scan; retained/scope/cache/controller/native owners; explicit false-positive dispositions",
+      "verification": "Reconcile all scanned hashes, source contexts and counts; manually inspect dynamic startup/purge seams",
+      "risk": "S",
+      "authorization": "authorized",
+      "owner": "memory-nexus",
+      "evidence": [
+        ".planning/memory-resilience/evidence/B11.74-lifetime-map.json"
+      ],
+      "acceptance_record": ".planning/memory-resilience/evidence/B11.74-lifetime-map.json",
+      "retirement_trigger": "Before parent B11.74/B10/R02 acceptance; child local proof does not imply factory or whole-platform acceptance."
+    },
+    {
+      "id": "B11.74.2",
+      "stage": "baseline",
+      "title": "Prove connection ownership and bounded stats disposal",
+      "status": "verified",
+      "depends_on": [
+        "B11.74.1"
+      ],
+      "scope": "New internal owned-database adapter and SqliteStatsService with lifecycle tests",
+      "deliverable": "Strong per-connection ownership, explicit deregistration on finalize, bounded stats calls; not yet default factory",
+      "verification": "RED/GREEN retained handles, close/finalize failure recovery, using success/error behavior, query overflow, transaction/iterator lifetimes and synthetic collection pressure on both runtimes",
+      "risk": "S",
+      "authorization": "authorized",
+      "owner": "memory-nexus",
+      "evidence": [
+        ".planning/memory-resilience/B11.74-plan.md",
+        ".planning/memory-resilience/evidence/B11.74.2.json"
+      ],
+      "acceptance_record": ".planning/memory-resilience/evidence/B11.74.2.json",
+      "retirement_trigger": "Before parent B11.74/B10/R02 acceptance; child local proof does not imply factory or whole-platform acceptance.",
+      "progress": {
+        "verified": "Actual native owned connection plus stats; 31 tests/527 assertions on both Windows runtimes; source/script/scoped-test types pass; ten decision faults detected.",
+        "remaining": "Factory activation remains .6 after mapped migrations; full metrics/driver/platform/review acceptance stays .7. Q031 retains existing stats branch gap."
+      }
+    },
+    {
+      "id": "B11.74.3",
+      "stage": "baseline",
+      "title": "Dispose scope-owned repository statements",
+      "status": "active",
+      "depends_on": [
+        "B11.74.2"
+      ],
+      "scope": "Mapped repository prepare/query sites and constructor-retained statements",
+      "deliverable": "Single-use statements released on success/error; retained statements last until connection close",
+      "verification": "Repository behavior suites plus repeated-call outstanding-resource checks and failed operation cleanup Trace repeated repository construction too: connection-retained fields must not accumulate when a long-lived caller recreates repository owners.",
+      "risk": "S",
+      "authorization": "authorized",
+      "owner": "memory-nexus",
+      "evidence": [
+        ".planning/memory-resilience/B11.74-plan.md"
+      ],
+      "acceptance_record": ".planning/memory-resilience/evidence/B11.74.3.json",
+      "retirement_trigger": "Before parent B11.74/B10/R02 acceptance; child local proof does not imply factory or whole-platform acceptance."
+    },
+    {
+      "id": "B11.74.4",
+      "stage": "baseline",
+      "title": "Dispose search and context service statements",
+      "status": "pending",
+      "depends_on": [
+        "B11.74.2"
+      ],
+      "scope": "Mapped context, search and hybrid-search services",
+      "deliverable": "Scope disposal preserves query results, ranking, parameterization and failure semantics",
+      "verification": "Service behavior suites; repeated calls, early returns and exceptions release all scoped statements",
+      "risk": "S",
+      "authorization": "authorized",
+      "owner": "memory-nexus",
+      "evidence": [
+        ".planning/memory-resilience/B11.74-plan.md"
+      ],
+      "acceptance_record": ".planning/memory-resilience/evidence/B11.74.4.json",
+      "retirement_trigger": "Before parent B11.74/B10/R02 acceptance; child local proof does not imply factory or whole-platform acceptance."
+    },
+    {
+      "id": "B11.74.5",
+      "stage": "baseline",
+      "title": "Dispose export, schema and event/security statements",
+      "status": "pending",
+      "depends_on": [
+        "B11.74.2"
+      ],
+      "scope": "Mapped export-service, schema, event-log and secret-audit-service",
+      "deliverable": "Function/transaction/loop scoped native statement disposal without data-integrity regression",
+      "verification": "Real synthetic export/import, rollback, schema migration and event/security behavior plus resource bounds",
+      "risk": "S",
+      "authorization": "authorized",
+      "owner": "memory-nexus",
+      "evidence": [
+        ".planning/memory-resilience/B11.74-plan.md"
+      ],
+      "acceptance_record": ".planning/memory-resilience/evidence/B11.74.5.json",
+      "retirement_trigger": "Before parent B11.74/B10/R02 acceptance; child local proof does not imply factory or whole-platform acceptance."
+    },
+    {
+      "id": "B11.74.6",
+      "stage": "baseline",
+      "title": "Activate factory ownership and reconcile native callers",
+      "status": "pending",
+      "depends_on": [
+        "B11.74.2",
+        "B11.74.3",
+        "B11.74.4",
+        "B11.74.5"
+      ],
+      "scope": "connection.ts, CLI startup/commands, health checker and eval direct-close callers",
+      "deliverable": "Factory wires owner after caller migrations; initialization preserves both errors; raw readers explicitly close",
+      "verification": "Create:false reopening, primary+cleanup error, raw database compatibility, command/helper suites, transaction/iterator and concurrent connection native cases",
+      "risk": "S",
+      "authorization": "authorized",
+      "owner": "memory-nexus",
+      "evidence": [
+        ".planning/memory-resilience/B11.74-plan.md"
+      ],
+      "acceptance_record": ".planning/memory-resilience/evidence/B11.74.6.json",
+      "retirement_trigger": "Before parent B11.74/B10/R02 acceptance; child local proof does not imply factory or whole-platform acceptance."
+    },
+    {
+      "id": "B11.74.7",
+      "stage": "baseline",
+      "title": "Accept native lifecycle repair at exact source",
+      "status": "pending",
+      "depends_on": [
+        "B11.74.6",
+        "Q031"
+      ],
+      "scope": "All B11.74 affected production/test files and native runtime targets",
+      "deliverable": "Complete per-file/package/tier/changed-line proof and independent review; dependency barriers can resume",
+      "verification": "Current source-bound evidence, negative decision checks, native Windows/Linux and exact-head integration evidence; no focused-only acceptance Include new fixture setup/teardown failure paths and Q031 stats branch disposition.",
+      "risk": "S",
+      "authorization": "authorized",
+      "owner": "memory-nexus",
+      "evidence": [
+        ".planning/memory-resilience/B11.74-plan.md"
+      ],
+      "acceptance_record": ".planning/memory-resilience/evidence/B11.74.7.json",
+      "retirement_trigger": "Before parent B11.74/B10/R02 acceptance; child local proof does not imply factory or whole-platform acceptance."
     }
   ],
   "decisions": {

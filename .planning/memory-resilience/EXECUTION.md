@@ -213,9 +213,10 @@ the applicable delivery gate. Local plan checks found and corrected negative-spi
 deadlock and an unnecessary local-feature dependency in the replication branch.
 
 The restart source is `work-items.json.current_item` and the newest JOURNAL entry,
-not the original B01 starting command. At the current checkpoint B11.74 is active:
-complete the native factory/statement lifetime map, then implement explicit
-ownership and scope disposal through a bounded, verifiable caller slice. Its
-rejected weak-tracking experiment and exact next steps are in B11.74-plan.md.
+not the original B01 starting command. At the current checkpoint B11.74.3 is active:
+migrate mapped repository statement lifetimes after the locally verified owner
+and stats slice. Factory activation follows caller migration; full acceptance
+remains B11.74.7. The source map, rejected experiment and exact next steps are in
+B11.74-plan.md.
 Baseline acceptance, including the native lifecycle repair, still precedes the
 approved embedding experiment. Read the ledger again before selecting work.

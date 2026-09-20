@@ -1,0 +1,4741 @@
+{
+  "item_id": "B11.74.2",
+  "status": "locally verified ownership/stats slice; factory activation and final acceptance remain gated",
+  "startingRevision": "fa823d118e8278c84ef74f3e16bcb7aeb9e5ad9b",
+  "recordedAt": "2026-09-20T06:42:04.028Z",
+  "cwd": "C:\\Projects\\memory-nexus",
+  "runtime": "1.4.1",
+  "sourceInputs": [
+    {
+      "path": "src/infrastructure/database/owned-database.ts",
+      "sourceHash": "3ba2a7345679316b08ede71f00a4dba3168287bd708ac2675f749b74133d3c10"
+    },
+    {
+      "path": "src/infrastructure/database/owned-database.test.ts",
+      "sourceHash": "3509570bd40d52b7a84298f2a1c2d5685ba740d5022fe9d26e25c3b3bcfc5ccf"
+    },
+    {
+      "path": "src/infrastructure/database/services/stats-service.ts",
+      "sourceHash": "a76c4a86dbef8604bb66b9b0ed2960a477a4292b39cc021f0cb8df86347523aa"
+    },
+    {
+      "path": "src/infrastructure/database/services/stats-lifecycle.test.ts",
+      "sourceHash": "1040ebd2a80424e4e09c096908a6c1949b6f1447deb0690cfbe357f79b761a70"
+    }
+  ],
+  "implementation": "Per-connection strong statement ownership; explicit finalize unregisters; close attempts all finalizers, preserves failed resources and reports aggregate failures. Uses public statement API and forwards inherited query/transaction flags. Stats uses language scope disposal for all three statements.",
+  "wiring": "OwnedDatabase is an internal infrastructure module tested with actual native SQLite and actual SqliteStatsService. It is deliberately not imported by initializeDatabase until mapped one-off caller migrations complete. Stats disposal is active independently with the existing Database API.",
+  "red": [
+    {
+      "command": "bun test --timeout 15000 src/infrastructure/database/services/stats-lifecycle.test.ts",
+      "exit": 1,
+      "output": "bun test v1.4.1 (4661e494f)\r\n\r\nsrc\\infrastructure\\database\\services\\stats-lifecycle.test.ts:\r\n30 |         expect(stats.totalSessions).toBe(1);\r\n31 |         expect(stats.totalMessages).toBe(1);\r\n32 |         expect(stats.totalToolUses).toBe(1);\r\n33 |         expect(stats.projectBreakdown).toEqual([{ projectName: \"project\", sessionCount: 1, messageCount: 1 }]);\r\n34 |         expect(owned.statements.length).toBe((call + 1) * 3);\r\n35 |         for (const statement of owned.statements.slice(-3)) expect(() => statement.get()).toThrow();\r\n                                                                                               ^\r\nerror: expect(received).toThrow()\r\n\r\nReceived function did not throw\r\nReceived value: {\r\n  size: 16384,\r\n}\r\n\r\n      at <anonymous> (C:\\Projects\\memory-nexus\\src\\infrastructure\\database\\services\\stats-lifecycle.test.ts:35:91)\r\n(fail) stats statement lifetime > releases every statement after each successful call without closing the connection [16.11ms]\r\n41 |     it(`releases earlier statements when preparation fails: ${tables}`, async () => {\r\n42 |       const owned = fixture(tables), service = new SqliteStatsService(owned.db);\r\n43 |       try {\r\n44 |         await expect(service.getStats()).rejects.toThrow(\"no such table\");\r\n45 |         expect(owned.statements.length).toBe(tables === \"missing-projects\" ? 1 : 2);\r\n46 |         for (const statement of owned.statements) expect(() => statement.get()).toThrow();\r\n                                                                                     ^\r\nerror: expect(received).toThrow()\r\n\r\nReceived function did not throw\r\nReceived value: {\r\n  size: 0,\r\n}\r\n\r\n      at <anonymous> (C:\\Projects\\memory-nexus\\src\\infrastructure\\database\\services\\stats-lifecycle.test.ts:46:81)\r\n(fail) stats statement lifetime > releases earlier statements when preparation fails: missing-projects [0.97ms]\r\n41 |     it(`releases earlier statements when preparation fails: ${tables}`, async () => {\r\n42 |       const owned = fixture(tables), service = new SqliteStatsService(owned.db);\r\n43 |       try {\r\n44 |         await expect(service.getStats()).rejects.toThrow(\"no such table\");\r\n45 |         expect(owned.statements.length).toBe(tables === \"missing-projects\" ? 1 : 2);\r\n46 |         for (const statement of owned.statements) expect(() => statement.get()).toThrow();\r\n                                                                                     ^\r\nerror: expect(received).toThrow()\r\n\r\nReceived function did not throw\r\nReceived value: {\r\n  size: 12288,\r\n}\r\n\r\n      at <anonymous> (C:\\Projects\\memory-nexus\\src\\infrastructure\\database\\services\\stats-lifecycle.test.ts:46:81)\r\n(fail) stats statement lifetime > releases earlier statements when preparation fails: missing-tools [0.73ms]\r\n-------------------------------------------------------|---------|---------|-------------------\r\nFile                                                   | % Funcs | % Lines | Uncovered Line #s\r\n-------------------------------------------------------|---------|---------|-------------------\r\nAll files                                              |  100.00 |  100.00 |\r\n src\\infrastructure\\database\\services\\stats-service.ts |  100.00 |  100.00 | \r\n-------------------------------------------------------|---------|---------|-------------------\r\n\r\n 0 pass\r\n 3 fail\r\n 12 expect() calls\r\nRan 3 tests across 1 file. [74.00ms]\r\n"
+    },
+    {
+      "command": "bun test --timeout 15000 src/infrastructure/database/owned-database.test.ts",
+      "note": "Initial test imported native Database as OwnedDatabase; actual retained-statement baseline failure, before adapter implementation.",
+      "exit": 1,
+      "output": "bun test v1.4.1 (4661e494f)\r\n\r\nsrc\\infrastructure\\database\\owned-database.test.ts:\r\n 5 |   const db = new OwnedDatabase(\":memory:\");\r\n 6 |   const statement = db.prepare(\"SELECT 1 AS value\");\r\n 7 |   try {\r\n 8 |     expect(statement.get()).toEqual({ value: 1 });\r\n 9 |     db.close();\r\n10 |     expect(() => statement.get()).toThrow();\r\n                                       ^\r\nerror: expect(received).toThrow()\r\n\r\nReceived function did not throw\r\nReceived value: {\r\n  value: 1,\r\n}\r\n\r\n      at <anonymous> (C:\\Projects\\memory-nexus\\src\\infrastructure\\database\\owned-database.test.ts:10:35)\r\n(fail) closes a connection's retained prepared statements [1.62ms]\r\n-----------|---------|---------|-------------------\r\nFile       | % Funcs | % Lines | Uncovered Line #s\r\n-----------|---------|---------|-------------------\r\nAll files  |    0.00 |    0.00 |\r\n-----------|---------|---------|-------------------\r\n\r\n 0 pass\r\n 1 fail\r\n 2 expect() calls\r\nRan 1 test across 1 file. [36.00ms]\r\n"
+    }
+  ],
+  "checks": [
+    {
+      "command": "bun test --timeout 15000 src/infrastructure/database/owned-database.test.ts src/infrastructure/database/services/stats-lifecycle.test.ts src/infrastructure/database/services/stats-service.test.ts",
+      "exit": 0,
+      "output": "bun test v1.4.1 (4661e494f)\r\n\r\nsrc\\infrastructure\\database\\owned-database.test.ts:\r\n(pass) closes a connection's retained prepared statements [2.20ms]\r\n(pass) attempts other finalizers and retains failed resources for retry: Error: finalizer failure [0.84ms]\r\n(pass) attempts other finalizers and retains failed resources for retry: non-error finalizer failure [0.28ms]\r\n(pass) releases an explicitly finalized statement while the connection stays open [149.51ms]\r\n(pass) owns query-cache overflow, transaction controllers and partially consumed iterators [4.38ms]\r\n(pass) keeps both operation and disposal errors and supports recovery [0.72ms]\r\n(pass) preserves committed data, rolls back unfinished work and leaves another connection usable [32.31ms]\r\n(pass) closes discarded statements under collection pressure and releases files immediately [388.07ms]\r\n(pass) runs bounded stats work through the owning connection and closes it immediately [101.81ms]\r\n\r\nsrc\\infrastructure\\database\\services\\stats-lifecycle.test.ts:\r\n(pass) stats statement lifetime > releases every statement after each successful call without closing the connection [10.86ms]\r\n(pass) stats statement lifetime > releases earlier statements when preparation fails: missing-projects [1.15ms]\r\n(pass) stats statement lifetime > releases earlier statements when preparation fails: missing-tools [0.94ms]\r\n(pass) stats statement lifetime > finalizes the failed statement and earlier work when query execution throws [2.23ms]\r\n\r\nsrc\\infrastructure\\database\\services\\stats-service.test.ts:\r\n(pass) SqliteStatsService > Empty Database > Test 1: returns zero totals for empty database [31.64ms]\r\n(pass) SqliteStatsService > Empty Database > Test 2: returns empty project breakdown for empty database [19.03ms]\r\n(pass) SqliteStatsService > Empty Database > Test 3: returns positive database size for empty database [15.49ms]\r\n(pass) SqliteStatsService > Total Counts > Test 4: counts sessions correctly [15.23ms]\r\n(pass) SqliteStatsService > Total Counts > Test 5: counts messages correctly [21.03ms]\r\n(pass) SqliteStatsService > Total Counts > Test 6: counts tool uses correctly [21.21ms]\r\n(pass) SqliteStatsService > Total Counts > Test 7: counts all entity types together [22.06ms]\r\n(pass) SqliteStatsService > Database Size > Test 8: database size increases with data [94.61ms]\r\n(pass) SqliteStatsService > Per-Project Breakdown > Test 9: groups stats by project name [14.94ms]\r\n(pass) SqliteStatsService > Per-Project Breakdown > Test 10: counts messages per project correctly [13.79ms]\r\n(pass) SqliteStatsService > Per-Project Breakdown > Test 11: orders projects by session count descending [23.73ms]\r\n(pass) SqliteStatsService > Per-Project Breakdown > Test 12: handles projects with no messages [20.75ms]\r\n(pass) SqliteStatsService > Project Limit > Test 13: respects projectLimit parameter [19.49ms]\r\n(pass) SqliteStatsService > Project Limit > Test 14: default limit is 10 [19.06ms]\r\n(pass) SqliteStatsService > Project Limit > Test 15: returns all projects when fewer than limit [26.86ms]\r\n(pass) SqliteStatsService > Project Limit > Test 17: totals match sum of displayed projects when limit applied [20.81ms]\r\n(pass) SqliteStatsService > Project Limit > Test 18: database size remains total even when limit applied [21.81ms]\r\n(pass) SqliteStatsService > Large Dataset > Test 16: handles large number of records efficiently [28.38ms]\r\n-------------------------------------------------------|---------|---------|-------------------\r\nFile                                                   | % Funcs | % Lines | Uncovered Line #s\r\n-------------------------------------------------------|---------|---------|-------------------\r\nAll files                                              |   26.12 |   35.73 |\r\n src\\domain\\entities\\backfill-state.ts                 |    0.00 |    6.90 | 28-32,40-88\r\n src\\domain\\entities\\dream-entry.ts                    |    0.00 |    2.19 | 8-482,486-491,495-509,513-523,527-532,536-538,542-544,548,552-558,562-567,571,575\r\n src\\domain\\entities\\entity.ts                         |    0.00 |    5.47 | 88-97,106-201,209-215,223-230\r\n src\\domain\\entities\\extraction-state.ts               |    0.00 |    7.77 | 45-57,65-186,193,201-209,217-226,234-243,251-261,269-282\r\n src\\domain\\entities\\fact.ts                           |    0.00 |    6.67 | 51-66,73-132,139-149,156-166\r\n src\\domain\\entities\\friction-entry.ts                 |    0.00 |   13.56 | 79-95,108-192\r\n src\\domain\\entities\\graph-edge.ts                     |    0.00 |   12.44 | 85-100,104-211,215-217,221-238,242-261,266-275,279-287,291-293,297-299,303,307-311,315\r\n src\\domain\\entities\\index.ts                          |  100.00 |  100.00 | \r\n src\\domain\\entities\\link.ts                           |    0.00 |    8.51 | 36-41,49-116,123,132-142\r\n src\\domain\\entities\\memory-event.ts                   |    0.00 |   10.54 | 101,105-123,127-190,194,199-214,218-247,251-257,261-266,270-276,280-286,290-302,306-335,339-355,359-374,378-386,390-399,403-409,413-422,426-428,432-435,439-442,446-449,453-456,460-462,466,470-484,488,492-495,499\r\n src\\domain\\entities\\memory-file.ts                    |    0.00 |   11.46 | 53-62,73-147\r\n src\\domain\\entities\\memory-governance.ts              |    0.00 |   15.72 | 136-157,161-242,246,250-268,272-287,291-313,317-338,343-346,350-353,357-390,394-410,415-417,421-423,427,431\r\n src\\domain\\entities\\memory-utility-metric.ts          |    0.00 |    9.14 | 63-80,84-149,153,157-162,166-170,174-190,194-211,216-235,239-241,245-247,251,255\r\n src\\domain\\entities\\message.ts                        |    0.00 |    9.21 | 32-36,44-99,106,114-120\r\n src\\domain\\entities\\persona-entry.ts                  |    0.00 |   10.06 | 75-92,96-165,169,173-191,195-212,217-249,253,257\r\n src\\domain\\entities\\session.ts                        |    0.00 |    6.90 | 35-43,51-118,125,134-142,151-162,170-178\r\n src\\domain\\entities\\tool-use.ts                       |    0.00 |    7.69 | 34-39,47-119,126,134-141,149-156\r\n src\\domain\\errors\\error-codes.ts                      |  100.00 |  100.00 | \r\n src\\domain\\errors\\index.ts                            |  100.00 |  100.00 | \r\n src\\domain\\errors\\memory-error.ts                     |    0.00 |   16.00 | 51-59,68-79\r\n src\\domain\\errors\\unknown-error.ts                    |    0.00 |   33.33 | 8,12\r\n src\\domain\\index.ts                                   |  100.00 |  100.00 | \r\n src\\domain\\ports\\index.ts                             |  100.00 |  100.00 | \r\n src\\domain\\services\\content-extractor.ts              |    0.00 |   11.25 | 56-66,75-87,96-108,117-120,129-135,139-142,147,151-168\r\n src\\domain\\services\\index.ts                          |  100.00 |  100.00 | \r\n src\\domain\\services\\path-decoder.ts                   |    0.00 |   15.71 | 33,42-56,66-67,77,87-108,121-138\r\n src\\domain\\services\\query-parser.ts                   |    0.00 |    9.86 | 27-75,84-96,105,114\r\n src\\domain\\value-objects\\embedding-config.ts          |    0.00 |    8.70 | 26-29,37-56,64-97,105-109\r\n src\\domain\\value-objects\\embedding-result.ts          |    0.00 |    8.47 | 24-26,34-72,80-91\r\n src\\domain\\value-objects\\index.ts                     |  100.00 |  100.00 | \r\n src\\domain\\value-objects\\project-path.ts              |    0.00 |   11.90 | 35-37,46-51,60-86,95,103,116-124,134-144,153-168\r\n src\\domain\\value-objects\\search-query.ts              |    0.00 |   26.32 | 15,24-35,43\r\n src\\domain\\value-objects\\search-result.ts             |    0.00 |    6.52 | 36-44,52-126,134,142\r\n src\\infrastructure\\database\\connection.ts             |   37.50 |   43.75 | 66,77,124-132,140-146,151-165,176-181,196-202,207-215,227-230,277,309-313,338-353\r\n src\\infrastructure\\database\\owned-database.ts         |   80.00 |  100.00 | \r\n src\\infrastructure\\database\\schema.ts                 |   75.00 |   92.54 | 768,792-793,795,805\r\n src\\infrastructure\\database\\services\\stats-service.ts |  100.00 |  100.00 | \r\n src\\infrastructure\\paths.ts                           |    0.00 |   29.23 | 14,34-39,52-57,69,99-101,110,119,128,137,146,155,164,173,183,193-212\r\n-------------------------------------------------------|---------|---------|-------------------\r\n\r\n 31 pass\r\n 0 fail\r\n 527 expect() calls\r\nRan 31 tests across 3 files. [1318.00ms]\r\n"
+    },
+    {
+      "command": "bun run typecheck",
+      "exit": 0,
+      "output": "$ tsc --noEmit && tsc --project tsconfig.scripts.json\r\n"
+    },
+    {
+      "command": "bun node_modules/typescript/bin/tsc --project .git/b11-owner-tests-tsconfig.json",
+      "exit": 0,
+      "config": "{\"extends\":\"../tsconfig.json\",\"compilerOptions\":{\"rootDir\":\"..\",\"noEmit\":true},\"include\":[\"../src/infrastructure/database/owned-database.test.ts\",\"../src/infrastructure/database/services/stats-lifecycle.test.ts\"],\"exclude\":[]}\r\n",
+      "output": ""
+    }
+  ],
+  "pinnedRuntime": {
+    "recordedAt": "2026-09-20T06:37:50.041Z",
+    "url": "https://github.com/oven-sh/bun/releases/download/bun-v1.3.14/bun-windows-x64.zip",
+    "digest": "0a0620930b6675d7ba440e81f4e0e00d3cfbe096c4b140d3fff02205e9e18922",
+    "bytes": 38366737,
+    "runs": [
+      {
+        "command": [
+          "C:\\Users\\Destiny\\AppData\\Local\\Temp\\memory-native-compat-MASOge\\runtime\\bun-windows-x64\\bun.exe",
+          "test",
+          "--timeout",
+          "15000",
+          "src/infrastructure/database/owned-database.test.ts",
+          "src/infrastructure/database/services/stats-lifecycle.test.ts",
+          "src/infrastructure/database/services/stats-service.test.ts"
+        ],
+        "exit": 0,
+        "output": "bun test v1.3.14 (0d9b296a)\n\nsrc\\infrastructure\\database\\owned-database.test.ts:\n(pass) closes a connection's retained prepared statements [3.15ms]\n(pass) attempts other finalizers and retains failed resources for retry: Error: finalizer failure [0.80ms]\n(pass) attempts other finalizers and retains failed resources for retry: non-error finalizer failure [0.31ms]\n(pass) releases an explicitly finalized statement while the connection stays open [181.47ms]\n(pass) owns query-cache overflow, transaction controllers and partially consumed iterators [3.33ms]\n(pass) keeps both operation and disposal errors and supports recovery [0.46ms]\n(pass) preserves committed data, rolls back unfinished work and leaves another connection usable [19.73ms]\n(pass) closes discarded statements under collection pressure and releases files immediately [230.21ms]\n(pass) runs bounded stats work through the owning connection and closes it immediately [38.93ms]\n\nsrc\\infrastructure\\database\\services\\stats-lifecycle.test.ts:\n(pass) stats statement lifetime > releases every statement after each successful call without closing the connection [3.59ms]\n(pass) stats statement lifetime > releases earlier statements when preparation fails: missing-projects [0.49ms]\n(pass) stats statement lifetime > releases earlier statements when preparation fails: missing-tools [0.32ms]\n(pass) stats statement lifetime > finalizes the failed statement and earlier work when query execution throws [0.68ms]\n\nsrc\\infrastructure\\database\\services\\stats-service.test.ts:\n(pass) SqliteStatsService > Empty Database > Test 1: returns zero totals for empty database [10.84ms]\n(pass) SqliteStatsService > Empty Database > Test 2: returns empty project breakdown for empty database [9.87ms]\n(pass) SqliteStatsService > Empty Database > Test 3: returns positive database size for empty database [7.59ms]\n(pass) SqliteStatsService > Total Counts > Test 4: counts sessions correctly [6.25ms]\n(pass) SqliteStatsService > Total Counts > Test 5: counts messages correctly [7.08ms]\n(pass) SqliteStatsService > Total Counts > Test 6: counts tool uses correctly [7.11ms]\n(pass) SqliteStatsService > Total Counts > Test 7: counts all entity types together [6.30ms]\n(pass) SqliteStatsService > Database Size > Test 8: database size increases with data [13.07ms]\n(pass) SqliteStatsService > Per-Project Breakdown > Test 9: groups stats by project name [10.07ms]\n(pass) SqliteStatsService > Per-Project Breakdown > Test 10: counts messages per project correctly [6.99ms]\n(pass) SqliteStatsService > Per-Project Breakdown > Test 11: orders projects by session count descending [9.13ms]\n(pass) SqliteStatsService > Per-Project Breakdown > Test 12: handles projects with no messages [9.37ms]\n(pass) SqliteStatsService > Project Limit > Test 13: respects projectLimit parameter [7.69ms]\n(pass) SqliteStatsService > Project Limit > Test 14: default limit is 10 [5.94ms]\n(pass) SqliteStatsService > Project Limit > Test 15: returns all projects when fewer than limit [6.18ms]\n(pass) SqliteStatsService > Project Limit > Test 17: totals match sum of displayed projects when limit applied [7.30ms]\n(pass) SqliteStatsService > Project Limit > Test 18: database size remains total even when limit applied [6.48ms]\n(pass) SqliteStatsService > Large Dataset > Test 16: handles large number of records efficiently [11.07ms]\n-------------------------------------------------------|---------|---------|-------------------\nFile                                                   | % Funcs | % Lines | Uncovered Line #s\n-------------------------------------------------------|---------|---------|-------------------\nAll files                                              |   26.12 |   35.73 |\n src\\domain\\entities\\backfill-state.ts                 |    0.00 |    6.90 | 28-32,40-88\n src\\domain\\entities\\dream-entry.ts                    |    0.00 |    2.19 | 8-482,486-491,495-509,513-523,527-532,536-538,542-544,548,552-558,562-567,571\n src\\domain\\entities\\entity.ts                         |    0.00 |    5.47 | 88-97,106-201,209-215,223-230\n src\\domain\\entities\\extraction-state.ts               |    0.00 |    7.77 | 45-57,65-186,193,201-209,217-226,234-243,251-261,269-282\n src\\domain\\entities\\fact.ts                           |    0.00 |    6.67 | 51-66,73-132,139-149,156-166\n src\\domain\\entities\\friction-entry.ts                 |    0.00 |   13.56 | 79-95,108-192\n src\\domain\\entities\\graph-edge.ts                     |    0.00 |   12.44 | 85-100,104-211,215-217,221-238,242-261,266-275,279-287,291-293,297-299,303,307-311\n src\\domain\\entities\\index.ts                          |  100.00 |  100.00 | \n src\\domain\\entities\\link.ts                           |    0.00 |    8.51 | 36-41,49-116,123,132-142\n src\\domain\\entities\\memory-event.ts                   |    0.00 |   10.54 | 101,105-123,127-190,194,199-214,218-247,251-257,261-266,270-276,280-286,290-302,306-335,339-355,359-374,378-386,390-399,403-409,413-422,426-428,432-435,439-442,446-449,453-456,460-462,466,470-484,488,492-495\n src\\domain\\entities\\memory-file.ts                    |    0.00 |   11.46 | 53-62,73-147\n src\\domain\\entities\\memory-governance.ts              |    0.00 |   15.72 | 136-157,161-242,246,250-268,272-287,291-313,317-338,343-346,350-353,357-390,394-410,415-417,421-423,427\n src\\domain\\entities\\memory-utility-metric.ts          |    0.00 |    9.14 | 63-80,84-149,153,157-162,166-170,174-190,194-211,216-235,239-241,245-247,251\n src\\domain\\entities\\message.ts                        |    0.00 |    9.21 | 32-36,44-99,106,114-120\n src\\domain\\entities\\persona-entry.ts                  |    0.00 |   10.06 | 75-92,96-165,169,173-191,195-212,217-249,253\n src\\domain\\entities\\session.ts                        |    0.00 |    6.90 | 35-43,51-118,125,134-142,151-162,170-178\n src\\domain\\entities\\tool-use.ts                       |    0.00 |    7.69 | 34-39,47-119,126,134-141,149-156\n src\\domain\\errors\\error-codes.ts                      |  100.00 |  100.00 | \n src\\domain\\errors\\index.ts                            |  100.00 |  100.00 | \n src\\domain\\errors\\memory-error.ts                     |    0.00 |   16.00 | 51-59,68-79\n src\\domain\\errors\\unknown-error.ts                    |    0.00 |   33.33 | 8\n src\\domain\\index.ts                                   |  100.00 |  100.00 | \n src\\domain\\ports\\index.ts                             |  100.00 |  100.00 | \n src\\domain\\services\\content-extractor.ts              |    0.00 |   11.25 | 56-66,75-87,96-108,117-120,129-135,139-142,147,151-168\n src\\domain\\services\\index.ts                          |  100.00 |  100.00 | \n src\\domain\\services\\path-decoder.ts                   |    0.00 |   15.71 | 33,42-56,66-67,77,87-108,121-138\n src\\domain\\services\\query-parser.ts                   |    0.00 |    9.86 | 27-75,84-96,105\n src\\domain\\value-objects\\embedding-config.ts          |    0.00 |    8.70 | 26-29,37-56,64-97,105-109\n src\\domain\\value-objects\\embedding-result.ts          |    0.00 |    8.47 | 24-26,34-72,80-91\n src\\domain\\value-objects\\index.ts                     |  100.00 |  100.00 | \n src\\domain\\value-objects\\project-path.ts              |    0.00 |   11.90 | 35-37,46-51,60-86,95,103,116-124,134-144,153-168\n src\\domain\\value-objects\\search-query.ts              |    0.00 |   26.32 | 15,24-35\n src\\domain\\value-objects\\search-result.ts             |    0.00 |    6.52 | 36-44,52-126,134\n src\\infrastructure\\database\\connection.ts             |   37.50 |   43.75 | 66,77,124-132,140-146,151-165,176-181,196-202,207-215,227-230,277,309-313,338-353\n src\\infrastructure\\database\\owned-database.ts         |   80.00 |  100.00 | \n src\\infrastructure\\database\\schema.ts                 |   75.00 |   92.54 | 768,792-793,795\n src\\infrastructure\\database\\services\\stats-service.ts |  100.00 |  100.00 | \n src\\infrastructure\\paths.ts                           |    0.00 |   29.23 | 14,34-39,52-57,69,99-101,110,119,128,137,146,155,164,173,183,193-212\n-------------------------------------------------------|---------|---------|-------------------\n\n 31 pass\n 0 fail\n 527 expect() calls\nRan 31 tests across 3 files. [745.00ms]\n"
+      }
+    ],
+    "sourceInputs": [
+      {
+        "path": "src/infrastructure/database/owned-database.ts",
+        "sourceHash": "3ba2a7345679316b08ede71f00a4dba3168287bd708ac2675f749b74133d3c10"
+      },
+      {
+        "path": "src/infrastructure/database/owned-database.test.ts",
+        "sourceHash": "3509570bd40d52b7a84298f2a1c2d5685ba740d5022fe9d26e25c3b3bcfc5ccf"
+      },
+      {
+        "path": "src/infrastructure/database/services/stats-service.ts",
+        "sourceHash": "a76c4a86dbef8604bb66b9b0ed2960a477a4292b39cc021f0cb8df86347523aa"
+      },
+      {
+        "path": "src/infrastructure/database/services/stats-lifecycle.test.ts",
+        "sourceHash": "1040ebd2a80424e4e09c096908a6c1949b6f1447deb0690cfbe357f79b761a70"
+      }
+    ],
+    "source": "import {readFileSync,writeFileSync,mkdirSync,existsSync} from 'node:fs';\nimport {createHash} from 'node:crypto';\nimport {join} from 'node:path';\nimport {createOwnedTestDirectory} from '../tests/helpers/owned-test-directory';\nimport {sourceHash} from '../scripts/quality-inventory';\nconst storage=createOwnedTestDirectory('memory-native-compat-');\nconst url='https://github.com/oven-sh/bun/releases/download/bun-v1.3.14/bun-windows-x64.zip';\nconst digest='0a0620930b6675d7ba440e81f4e0e00d3cfbe096c4b140d3fff02205e9e18922';\nconst archive=join(storage.dir,'bun.zip'),destination=join(storage.dir,'runtime');\nconst sourcePaths=['src/infrastructure/database/owned-database.ts','src/infrastructure/database/owned-database.test.ts','src/infrastructure/database/services/stats-service.ts','src/infrastructure/database/services/stats-lifecycle.test.ts'];\nconst runs:unknown[]=[];\ntry{\n const response=await fetch(url);if(!response.ok)throw Error('Runtime download HTTP '+response.status);\n const bytes=Buffer.from(await response.arrayBuffer());\n if(bytes.length!==38366737||createHash('sha256').update(bytes).digest('hex')!==digest)throw Error('Runtime release digest/size mismatch');\n writeFileSync(archive,bytes);mkdirSync(destination);\n const script=join(storage.dir,'expand.ps1');\n writeFileSync(script,'param([string]$Archive,[string]$Destination)\\n$ErrorActionPreference = \"Stop\"\\nExpand-Archive -LiteralPath $Archive -DestinationPath $Destination\\n');\n const expanded=Bun.spawnSync(['powershell.exe','-NoProfile','-NonInteractive','-File',script,archive,destination],{stdout:'pipe',stderr:'pipe',timeout:45000});\n if(expanded.exitCode!==0)throw Error(new TextDecoder().decode(expanded.stderr));\n const executable=join(destination,'bun-windows-x64/bun.exe');if(!existsSync(executable))throw Error('Missing pinned runtime');\n const passes=Number(process.argv[2]??'1');if(!Number.isInteger(passes)||passes<1||passes>5)throw Error('Invalid bounded repeat count');\n const jsonGroup=['tests/helpers/capture-json.test.ts',...['search','context','show','list','related','stats'].map(command=>`src/presentation/cli/commands/${command}.json.test.ts`)];\n const groups=[['src/infrastructure/database/owned-database.test.ts','src/infrastructure/database/services/stats-lifecycle.test.ts','src/infrastructure/database/services/stats-service.test.ts']];\n for(const group of groups){\n  const command=[executable,'test','--timeout','15000',...group];\n  const run=Bun.spawnSync(command,{env:{...process.env,TEMP:storage.dir,TMP:storage.dir,TMPDIR:storage.dir},stdout:'pipe',stderr:'pipe',timeout:60000});\n  const output=new TextDecoder().decode(run.stdout)+new TextDecoder().decode(run.stderr);\n  runs.push({command,exit:run.exitCode,output});\n  writeFileSync('.git/b11-owner-old-runtime.json',JSON.stringify({recordedAt:new Date().toISOString(),url,digest,bytes:bytes.length,runs,sourceInputs:sourcePaths.map(path=>({path,sourceHash:sourceHash(readFileSync(path,'utf8'))})),source:readFileSync('.git/b11-owner-old-runtime.ts','utf8')},null,2)+'\\n');\n  console.log(JSON.stringify({group,exit:run.exitCode,summary:output.slice(-200)}));\n  if(run.exitCode!==0)throw Error('Pinned runtime group failed');\n }\n}finally{storage.cleanup();}\n"
+  },
+  "removedRuntimeRoot": "C:\\Users\\Destiny\\AppData\\Local\\Temp\\memory-native-compat-MASOge",
+  "diagnosticCoverage": {
+    "scope": "Diagnostic only; B05 instrumenter acceptance, per-package and independent review remain open. Generated using helpers may create additional obligations.",
+    "runtime": "1.4.1",
+    "recordedAt": "2026-09-20T06:35:36.941Z",
+    "command": [
+      "C:\\Users\\Destiny\\.bun\\bin\\bun.exe",
+      "test",
+      "--timeout",
+      "15000",
+      "src/infrastructure/database/owned-database.test.ts",
+      "src/infrastructure/database/services/stats-lifecycle.test.ts",
+      "src/infrastructure/database/services/stats-service.test.ts"
+    ],
+    "exit": 0,
+    "output": "bun test v1.4.1 (4661e494f)\n\nsrc\\infrastructure\\database\\owned-database.test.ts:\n(pass) closes a connection's retained prepared statements [2.87ms]\n(pass) attempts other finalizers and retains failed resources for retry: Error: finalizer failure [0.99ms]\n(pass) attempts other finalizers and retains failed resources for retry: non-error finalizer failure [0.32ms]\n(pass) releases an explicitly finalized statement while the connection stays open [148.95ms]\n(pass) owns query-cache overflow, transaction controllers and partially consumed iterators [2.43ms]\n(pass) keeps both operation and disposal errors and supports recovery [0.44ms]\n(pass) preserves committed data, rolls back unfinished work and leaves another connection usable [105.06ms]\n(pass) closes discarded statements under collection pressure and releases files immediately [272.77ms]\n(pass) runs bounded stats work through the owning connection and closes it immediately [64.98ms]\n\nsrc\\infrastructure\\database\\services\\stats-lifecycle.test.ts:\n(pass) stats statement lifetime > releases every statement after each successful call without closing the connection [3.82ms]\n(pass) stats statement lifetime > releases earlier statements when preparation fails: missing-projects [0.63ms]\n(pass) stats statement lifetime > releases earlier statements when preparation fails: missing-tools [0.46ms]\n(pass) stats statement lifetime > finalizes the failed statement and earlier work when query execution throws [0.78ms]\n\nsrc\\infrastructure\\database\\services\\stats-service.test.ts:\n(pass) SqliteStatsService > Empty Database > Test 1: returns zero totals for empty database [13.73ms]\n(pass) SqliteStatsService > Empty Database > Test 2: returns empty project breakdown for empty database [13.20ms]\n(pass) SqliteStatsService > Empty Database > Test 3: returns positive database size for empty database [11.53ms]\n(pass) SqliteStatsService > Total Counts > Test 4: counts sessions correctly [10.99ms]\n(pass) SqliteStatsService > Total Counts > Test 5: counts messages correctly [8.58ms]\n(pass) SqliteStatsService > Total Counts > Test 6: counts tool uses correctly [12.61ms]\n(pass) SqliteStatsService > Total Counts > Test 7: counts all entity types together [11.64ms]\n(pass) SqliteStatsService > Database Size > Test 8: database size increases with data [13.13ms]\n(pass) SqliteStatsService > Per-Project Breakdown > Test 9: groups stats by project name [8.34ms]\n(pass) SqliteStatsService > Per-Project Breakdown > Test 10: counts messages per project correctly [9.21ms]\n(pass) SqliteStatsService > Per-Project Breakdown > Test 11: orders projects by session count descending [7.92ms]\n(pass) SqliteStatsService > Per-Project Breakdown > Test 12: handles projects with no messages [7.30ms]\n(pass) SqliteStatsService > Project Limit > Test 13: respects projectLimit parameter [7.07ms]\n(pass) SqliteStatsService > Project Limit > Test 14: default limit is 10 [7.01ms]\n(pass) SqliteStatsService > Project Limit > Test 15: returns all projects when fewer than limit [6.84ms]\n(pass) SqliteStatsService > Project Limit > Test 17: totals match sum of displayed projects when limit applied [8.12ms]\n(pass) SqliteStatsService > Project Limit > Test 18: database size remains total even when limit applied [7.17ms]\n(pass) SqliteStatsService > Large Dataset > Test 16: handles large number of records efficiently [21.26ms]\n\n 31 pass\n 0 fail\n 527 expect() calls\nRan 31 tests across 3 files. [861.00ms]\n",
+    "files": [
+      {
+        "path": "src/infrastructure/database/owned-database.ts",
+        "sourceHash": "3ba2a7345679316b08ede71f00a4dba3168287bd708ac2675f749b74133d3c10",
+        "metrics": {
+          "lines": {
+            "total": 16,
+            "covered": 16,
+            "skipped": 0,
+            "pct": 100
+          },
+          "functions": {
+            "total": 4,
+            "covered": 4,
+            "skipped": 0,
+            "pct": 100
+          },
+          "statements": {
+            "total": 18,
+            "covered": 18,
+            "skipped": 0,
+            "pct": 100
+          },
+          "branches": {
+            "total": 3,
+            "covered": 3,
+            "skipped": 0,
+            "pct": 100
+          }
+        },
+        "uncoveredBranches": [],
+        "uncoveredFunctions": []
+      },
+      {
+        "path": "src/infrastructure/database/owned-database.test.ts",
+        "sourceHash": "3509570bd40d52b7a84298f2a1c2d5685ba740d5022fe9d26e25c3b3bcfc5ccf",
+        "metrics": {
+          "lines": {
+            "total": 113,
+            "covered": 113,
+            "skipped": 0,
+            "pct": 100
+          },
+          "functions": {
+            "total": 22,
+            "covered": 22,
+            "skipped": 0,
+            "pct": 100
+          },
+          "statements": {
+            "total": 167,
+            "covered": 167,
+            "skipped": 0,
+            "pct": 100
+          },
+          "branches": {
+            "total": 4,
+            "covered": 4,
+            "skipped": 0,
+            "pct": 100
+          }
+        },
+        "uncoveredBranches": [],
+        "uncoveredFunctions": []
+      },
+      {
+        "path": "src/infrastructure/database/services/stats-service.ts",
+        "sourceHash": "a76c4a86dbef8604bb66b9b0ed2960a477a4292b39cc021f0cb8df86347523aa",
+        "metrics": {
+          "lines": {
+            "total": 11,
+            "covered": 11,
+            "skipped": 0,
+            "pct": 100
+          },
+          "functions": {
+            "total": 5,
+            "covered": 5,
+            "skipped": 0,
+            "pct": 100
+          },
+          "statements": {
+            "total": 13,
+            "covered": 13,
+            "skipped": 0,
+            "pct": 100
+          },
+          "branches": {
+            "total": 5,
+            "covered": 3,
+            "skipped": 0,
+            "pct": 60
+          }
+        },
+        "uncoveredBranches": [
+          {
+            "id": "1",
+            "index": 1,
+            "location": {
+              "start": {
+                "line": 102,
+                "column": 51
+              },
+              "end": {
+                "line": 102,
+                "column": 52
+              }
+            }
+          },
+          {
+            "id": "2",
+            "index": 1,
+            "location": {
+              "start": {
+                "line": 103,
+                "column": 42
+              },
+              "end": {
+                "line": 103,
+                "column": 43
+              }
+            }
+          }
+        ],
+        "uncoveredFunctions": []
+      },
+      {
+        "path": "src/infrastructure/database/services/stats-lifecycle.test.ts",
+        "sourceHash": "1040ebd2a80424e4e09c096908a6c1949b6f1447deb0690cfbe357f79b761a70",
+        "metrics": {
+          "lines": {
+            "total": 42,
+            "covered": 42,
+            "skipped": 0,
+            "pct": 100
+          },
+          "functions": {
+            "total": 10,
+            "covered": 10,
+            "skipped": 0,
+            "pct": 100
+          },
+          "statements": {
+            "total": 55,
+            "covered": 55,
+            "skipped": 0,
+            "pct": 100
+          },
+          "branches": {
+            "total": 6,
+            "covered": 6,
+            "skipped": 0,
+            "pct": 100
+          }
+        },
+        "uncoveredBranches": [],
+        "uncoveredFunctions": []
+      }
+    ],
+    "rawCoverage": {
+      "C:\\Projects\\memory-nexus\\src\\infrastructure\\database\\services\\stats-service.ts": {
+        "path": "C:\\Projects\\memory-nexus\\src\\infrastructure\\database\\services\\stats-service.ts",
+        "statementMap": {
+          "0": {
+            "start": {
+              "line": 47,
+              "column": 4
+            },
+            "end": {
+              "line": 47,
+              "column": 17
+            }
+          },
+          "1": {
+            "start": {
+              "line": 62,
+              "column": 26
+            },
+            "end": {
+              "line": 68,
+              "column": 7
+            }
+          },
+          "2": {
+            "start": {
+              "line": 69,
+              "column": 20
+            },
+            "end": {
+              "line": 69,
+              "column": 39
+            }
+          },
+          "3": {
+            "start": {
+              "line": 72,
+              "column": 29
+            },
+            "end": {
+              "line": 85,
+              "column": 7
+            }
+          },
+          "4": {
+            "start": {
+              "line": 86,
+              "column": 24
+            },
+            "end": {
+              "line": 86,
+              "column": 58
+            }
+          },
+          "5": {
+            "start": {
+              "line": 89,
+              "column": 26
+            },
+            "end": {
+              "line": 89,
+              "column": 85
+            }
+          },
+          "6": {
+            "start": {
+              "line": 89,
+              "column": 59
+            },
+            "end": {
+              "line": 89,
+              "column": 81
+            }
+          },
+          "7": {
+            "start": {
+              "line": 90,
+              "column": 26
+            },
+            "end": {
+              "line": 90,
+              "column": 85
+            }
+          },
+          "8": {
+            "start": {
+              "line": 90,
+              "column": 59
+            },
+            "end": {
+              "line": 90,
+              "column": 81
+            }
+          },
+          "9": {
+            "start": {
+              "line": 93,
+              "column": 30
+            },
+            "end": {
+              "line": 96,
+              "column": 7
+            }
+          },
+          "10": {
+            "start": {
+              "line": 97,
+              "column": 24
+            },
+            "end": {
+              "line": 97,
+              "column": 47
+            }
+          },
+          "11": {
+            "start": {
+              "line": 99,
+              "column": 4
+            },
+            "end": {
+              "line": 109,
+              "column": 6
+            }
+          },
+          "12": {
+            "start": {
+              "line": 104,
+              "column": 50
+            },
+            "end": {
+              "line": 108,
+              "column": 7
+            }
+          }
+        },
+        "fnMap": {
+          "0": {
+            "name": "(anonymous_0)",
+            "decl": {
+              "start": {
+                "line": 46,
+                "column": 2
+              },
+              "end": {
+                "line": 46,
+                "column": 3
+              }
+            },
+            "loc": {
+              "start": {
+                "line": 46,
+                "column": 28
+              },
+              "end": {
+                "line": 48,
+                "column": 3
+              }
+            },
+            "line": 46
+          },
+          "1": {
+            "name": "(anonymous_1)",
+            "decl": {
+              "start": {
+                "line": 60,
+                "column": 2
+              },
+              "end": {
+                "line": 60,
+                "column": 3
+              }
+            },
+            "loc": {
+              "start": {
+                "line": 60,
+                "column": 58
+              },
+              "end": {
+                "line": 110,
+                "column": 3
+              }
+            },
+            "line": 60
+          },
+          "2": {
+            "name": "(anonymous_2)",
+            "decl": {
+              "start": {
+                "line": 89,
+                "column": 45
+              },
+              "end": {
+                "line": 89,
+                "column": 46
+              }
+            },
+            "loc": {
+              "start": {
+                "line": 89,
+                "column": 59
+              },
+              "end": {
+                "line": 89,
+                "column": 81
+              }
+            },
+            "line": 89
+          },
+          "3": {
+            "name": "(anonymous_3)",
+            "decl": {
+              "start": {
+                "line": 90,
+                "column": 45
+              },
+              "end": {
+                "line": 90,
+                "column": 46
+              }
+            },
+            "loc": {
+              "start": {
+                "line": 90,
+                "column": 59
+              },
+              "end": {
+                "line": 90,
+                "column": 81
+              }
+            },
+            "line": 90
+          },
+          "4": {
+            "name": "(anonymous_4)",
+            "decl": {
+              "start": {
+                "line": 104,
+                "column": 40
+              },
+              "end": {
+                "line": 104,
+                "column": 41
+              }
+            },
+            "loc": {
+              "start": {
+                "line": 104,
+                "column": 50
+              },
+              "end": {
+                "line": 108,
+                "column": 7
+              }
+            },
+            "line": 104
+          }
+        },
+        "branchMap": {
+          "0": {
+            "loc": {
+              "start": {
+                "line": 60,
+                "column": 17
+              },
+              "end": {
+                "line": 60,
+                "column": 34
+              }
+            },
+            "type": "default-arg",
+            "locations": [
+              {
+                "start": {
+                  "line": 60,
+                  "column": 32
+                },
+                "end": {
+                  "line": 60,
+                  "column": 34
+                }
+              }
+            ],
+            "line": 60
+          },
+          "1": {
+            "loc": {
+              "start": {
+                "line": 102,
+                "column": 21
+              },
+              "end": {
+                "line": 102,
+                "column": 52
+              }
+            },
+            "type": "binary-expr",
+            "locations": [
+              {
+                "start": {
+                  "line": 102,
+                  "column": 21
+                },
+                "end": {
+                  "line": 102,
+                  "column": 47
+                }
+              },
+              {
+                "start": {
+                  "line": 102,
+                  "column": 51
+                },
+                "end": {
+                  "line": 102,
+                  "column": 52
+                }
+              }
+            ],
+            "line": 102
+          },
+          "2": {
+            "loc": {
+              "start": {
+                "line": 103,
+                "column": 25
+              },
+              "end": {
+                "line": 103,
+                "column": 43
+              }
+            },
+            "type": "binary-expr",
+            "locations": [
+              {
+                "start": {
+                  "line": 103,
+                  "column": 25
+                },
+                "end": {
+                  "line": 103,
+                  "column": 38
+                }
+              },
+              {
+                "start": {
+                  "line": 103,
+                  "column": 42
+                },
+                "end": {
+                  "line": 103,
+                  "column": 43
+                }
+              }
+            ],
+            "line": 103
+          }
+        },
+        "s": {
+          "0": 23,
+          "1": 148,
+          "2": 148,
+          "3": 148,
+          "4": 147,
+          "5": 146,
+          "6": 68,
+          "7": 146,
+          "8": 68,
+          "9": 146,
+          "10": 145,
+          "11": 145,
+          "12": 67
+        },
+        "f": {
+          "0": 23,
+          "1": 148,
+          "2": 68,
+          "3": 68,
+          "4": 67
+        },
+        "b": {
+          "0": [
+            143
+          ],
+          "1": [
+            145,
+            0
+          ],
+          "2": [
+            145,
+            0
+          ]
+        },
+        "_coverageSchema": "1a1c01bbd47fc00a2c39e90264f33305004495a9",
+        "hash": "ec6c3d035d7a0530ac7830ea85f590a4ad82c427"
+      },
+      "C:\\Projects\\memory-nexus\\src\\infrastructure\\database\\owned-database.ts": {
+        "path": "C:\\Projects\\memory-nexus\\src\\infrastructure\\database\\owned-database.ts",
+        "statementMap": {
+          "0": {
+            "start": {
+              "line": 9,
+              "column": 32
+            },
+            "end": {
+              "line": 9,
+              "column": 52
+            }
+          },
+          "1": {
+            "start": {
+              "line": 18,
+              "column": 22
+            },
+            "end": {
+              "line": 19,
+              "column": 65
+            }
+          },
+          "2": {
+            "start": {
+              "line": 20,
+              "column": 18
+            },
+            "end": {
+              "line": 20,
+              "column": 33
+            }
+          },
+          "3": {
+            "start": {
+              "line": 20,
+              "column": 46
+            },
+            "end": {
+              "line": 20,
+              "column": 64
+            }
+          },
+          "4": {
+            "start": {
+              "line": 21,
+              "column": 4
+            },
+            "end": {
+              "line": 24,
+              "column": 6
+            }
+          },
+          "5": {
+            "start": {
+              "line": 22,
+              "column": 6
+            },
+            "end": {
+              "line": 22,
+              "column": 26
+            }
+          },
+          "6": {
+            "start": {
+              "line": 23,
+              "column": 6
+            },
+            "end": {
+              "line": 23,
+              "column": 25
+            }
+          },
+          "7": {
+            "start": {
+              "line": 25,
+              "column": 4
+            },
+            "end": {
+              "line": 25,
+              "column": 25
+            }
+          },
+          "8": {
+            "start": {
+              "line": 26,
+              "column": 4
+            },
+            "end": {
+              "line": 26,
+              "column": 21
+            }
+          },
+          "9": {
+            "start": {
+              "line": 31,
+              "column": 32
+            },
+            "end": {
+              "line": 31,
+              "column": 34
+            }
+          },
+          "10": {
+            "start": {
+              "line": 32,
+              "column": 4
+            },
+            "end": {
+              "line": 35,
+              "column": 5
+            }
+          },
+          "11": {
+            "start": {
+              "line": 33,
+              "column": 6
+            },
+            "end": {
+              "line": 34,
+              "column": 45
+            }
+          },
+          "12": {
+            "start": {
+              "line": 33,
+              "column": 12
+            },
+            "end": {
+              "line": 33,
+              "column": 33
+            }
+          },
+          "13": {
+            "start": {
+              "line": 34,
+              "column": 22
+            },
+            "end": {
+              "line": 34,
+              "column": 43
+            }
+          },
+          "14": {
+            "start": {
+              "line": 36,
+              "column": 4
+            },
+            "end": {
+              "line": 38,
+              "column": 5
+            }
+          },
+          "15": {
+            "start": {
+              "line": 37,
+              "column": 6
+            },
+            "end": {
+              "line": 37,
+              "column": 105
+            }
+          },
+          "16": {
+            "start": {
+              "line": 42,
+              "column": 4
+            },
+            "end": {
+              "line": 42,
+              "column": 30
+            }
+          },
+          "17": {
+            "start": {
+              "line": 43,
+              "column": 4
+            },
+            "end": {
+              "line": 43,
+              "column": 30
+            }
+          }
+        },
+        "fnMap": {
+          "0": {
+            "name": "(anonymous_0)",
+            "decl": {
+              "start": {
+                "line": 11,
+                "column": 2
+              },
+              "end": {
+                "line": 11,
+                "column": 3
+              }
+            },
+            "loc": {
+              "start": {
+                "line": 15,
+                "column": 65
+              },
+              "end": {
+                "line": 27,
+                "column": 3
+              }
+            },
+            "line": 15
+          },
+          "1": {
+            "name": "(anonymous_1)",
+            "decl": {
+              "start": {
+                "line": 21,
+                "column": 25
+              },
+              "end": {
+                "line": 21,
+                "column": 26
+              }
+            },
+            "loc": {
+              "start": {
+                "line": 21,
+                "column": 58
+              },
+              "end": {
+                "line": 24,
+                "column": 5
+              }
+            },
+            "line": 21
+          },
+          "2": {
+            "name": "(anonymous_2)",
+            "decl": {
+              "start": {
+                "line": 30,
+                "column": 2
+              },
+              "end": {
+                "line": 30,
+                "column": 3
+              }
+            },
+            "loc": {
+              "start": {
+                "line": 30,
+                "column": 29
+              },
+              "end": {
+                "line": 39,
+                "column": 3
+              }
+            },
+            "line": 30
+          },
+          "3": {
+            "name": "(anonymous_3)",
+            "decl": {
+              "start": {
+                "line": 41,
+                "column": 2
+              },
+              "end": {
+                "line": 41,
+                "column": 3
+              }
+            },
+            "loc": {
+              "start": {
+                "line": 41,
+                "column": 44
+              },
+              "end": {
+                "line": 44,
+                "column": 3
+              }
+            },
+            "line": 41
+          }
+        },
+        "branchMap": {
+          "0": {
+            "loc": {
+              "start": {
+                "line": 36,
+                "column": 4
+              },
+              "end": {
+                "line": 38,
+                "column": 5
+              }
+            },
+            "type": "if",
+            "locations": [
+              {
+                "start": {
+                  "line": 36,
+                  "column": 4
+                },
+                "end": {
+                  "line": 38,
+                  "column": 5
+                }
+              },
+              {
+                "start": {},
+                "end": {}
+              }
+            ],
+            "line": 36
+          },
+          "1": {
+            "loc": {
+              "start": {
+                "line": 41,
+                "column": 17
+              },
+              "end": {
+                "line": 41,
+                "column": 36
+              }
+            },
+            "type": "default-arg",
+            "locations": [
+              {
+                "start": {
+                  "line": 41,
+                  "column": 32
+                },
+                "end": {
+                  "line": 41,
+                  "column": 36
+                }
+              }
+            ],
+            "line": 41
+          }
+        },
+        "s": {
+          "0": 30,
+          "1": 10311,
+          "2": 10311,
+          "3": 10311,
+          "4": 10311,
+          "5": 10315,
+          "6": 10315,
+          "7": 10311,
+          "8": 10311,
+          "9": 61,
+          "10": 61,
+          "11": 10010,
+          "12": 10010,
+          "13": 2,
+          "14": 61,
+          "15": 2,
+          "16": 61,
+          "17": 59
+        },
+        "f": {
+          "0": 10311,
+          "1": 10315,
+          "2": 61,
+          "3": 61
+        },
+        "b": {
+          "0": [
+            2,
+            59
+          ],
+          "1": [
+            61
+          ]
+        },
+        "_coverageSchema": "1a1c01bbd47fc00a2c39e90264f33305004495a9",
+        "hash": "a698e2c5128bd1195da867fe8d5da46b4ee2e230"
+      },
+      "C:\\Projects\\memory-nexus\\src\\infrastructure\\database\\owned-database.test.ts": {
+        "path": "C:\\Projects\\memory-nexus\\src\\infrastructure\\database\\owned-database.test.ts",
+        "statementMap": {
+          "0": {
+            "start": {
+              "line": 10,
+              "column": 0
+            },
+            "end": {
+              "line": 19,
+              "column": 3
+            }
+          },
+          "1": {
+            "start": {
+              "line": 11,
+              "column": 13
+            },
+            "end": {
+              "line": 11,
+              "column": 42
+            }
+          },
+          "2": {
+            "start": {
+              "line": 12,
+              "column": 20
+            },
+            "end": {
+              "line": 12,
+              "column": 51
+            }
+          },
+          "3": {
+            "start": {
+              "line": 13,
+              "column": 2
+            },
+            "end": {
+              "line": 18,
+              "column": 49
+            }
+          },
+          "4": {
+            "start": {
+              "line": 14,
+              "column": 4
+            },
+            "end": {
+              "line": 14,
+              "column": 50
+            }
+          },
+          "5": {
+            "start": {
+              "line": 15,
+              "column": 4
+            },
+            "end": {
+              "line": 15,
+              "column": 15
+            }
+          },
+          "6": {
+            "start": {
+              "line": 16,
+              "column": 4
+            },
+            "end": {
+              "line": 16,
+              "column": 44
+            }
+          },
+          "7": {
+            "start": {
+              "line": 16,
+              "column": 17
+            },
+            "end": {
+              "line": 16,
+              "column": 32
+            }
+          },
+          "8": {
+            "start": {
+              "line": 17,
+              "column": 4
+            },
+            "end": {
+              "line": 17,
+              "column": 43
+            }
+          },
+          "9": {
+            "start": {
+              "line": 17,
+              "column": 17
+            },
+            "end": {
+              "line": 17,
+              "column": 27
+            }
+          },
+          "10": {
+            "start": {
+              "line": 18,
+              "column": 14
+            },
+            "end": {
+              "line": 18,
+              "column": 35
+            }
+          },
+          "11": {
+            "start": {
+              "line": 18,
+              "column": 36
+            },
+            "end": {
+              "line": 18,
+              "column": 47
+            }
+          },
+          "12": {
+            "start": {
+              "line": 21,
+              "column": 0
+            },
+            "end": {
+              "line": 40,
+              "column": 1
+            }
+          },
+          "13": {
+            "start": {
+              "line": 22,
+              "column": 2
+            },
+            "end": {
+              "line": 39,
+              "column": 5
+            }
+          },
+          "14": {
+            "start": {
+              "line": 23,
+              "column": 15
+            },
+            "end": {
+              "line": 23,
+              "column": 44
+            }
+          },
+          "15": {
+            "start": {
+              "line": 23,
+              "column": 55
+            },
+            "end": {
+              "line": 23,
+              "column": 86
+            }
+          },
+          "16": {
+            "start": {
+              "line": 23,
+              "column": 98
+            },
+            "end": {
+              "line": 23,
+              "column": 129
+            }
+          },
+          "17": {
+            "start": {
+              "line": 24,
+              "column": 21
+            },
+            "end": {
+              "line": 24,
+              "column": 36
+            }
+          },
+          "18": {
+            "start": {
+              "line": 25,
+              "column": 4
+            },
+            "end": {
+              "line": 25,
+              "column": 47
+            }
+          },
+          "19": {
+            "start": {
+              "line": 25,
+              "column": 30
+            },
+            "end": {
+              "line": 25,
+              "column": 44
+            }
+          },
+          "20": {
+            "start": {
+              "line": 26,
+              "column": 4
+            },
+            "end": {
+              "line": 38,
+              "column": 76
+            }
+          },
+          "21": {
+            "start": {
+              "line": 28,
+              "column": 6
+            },
+            "end": {
+              "line": 28,
+              "column": 59
+            }
+          },
+          "22": {
+            "start": {
+              "line": 28,
+              "column": 12
+            },
+            "end": {
+              "line": 28,
+              "column": 23
+            }
+          },
+          "23": {
+            "start": {
+              "line": 28,
+              "column": 42
+            },
+            "end": {
+              "line": 28,
+              "column": 57
+            }
+          },
+          "24": {
+            "start": {
+              "line": 29,
+              "column": 6
+            },
+            "end": {
+              "line": 29,
+              "column": 52
+            }
+          },
+          "25": {
+            "start": {
+              "line": 30,
+              "column": 6
+            },
+            "end": {
+              "line": 30,
+              "column": 67
+            }
+          },
+          "26": {
+            "start": {
+              "line": 31,
+              "column": 6
+            },
+            "end": {
+              "line": 31,
+              "column": 44
+            }
+          },
+          "27": {
+            "start": {
+              "line": 31,
+              "column": 19
+            },
+            "end": {
+              "line": 31,
+              "column": 32
+            }
+          },
+          "28": {
+            "start": {
+              "line": 32,
+              "column": 6
+            },
+            "end": {
+              "line": 32,
+              "column": 49
+            }
+          },
+          "29": {
+            "start": {
+              "line": 33,
+              "column": 22
+            },
+            "end": {
+              "line": 33,
+              "column": 23
+            }
+          },
+          "30": {
+            "start": {
+              "line": 34,
+              "column": 6
+            },
+            "end": {
+              "line": 34,
+              "column": 74
+            }
+          },
+          "31": {
+            "start": {
+              "line": 34,
+              "column": 38
+            },
+            "end": {
+              "line": 34,
+              "column": 50
+            }
+          },
+          "32": {
+            "start": {
+              "line": 34,
+              "column": 51
+            },
+            "end": {
+              "line": 34,
+              "column": 71
+            }
+          },
+          "33": {
+            "start": {
+              "line": 35,
+              "column": 6
+            },
+            "end": {
+              "line": 35,
+              "column": 17
+            }
+          },
+          "34": {
+            "start": {
+              "line": 36,
+              "column": 6
+            },
+            "end": {
+              "line": 36,
+              "column": 32
+            }
+          },
+          "35": {
+            "start": {
+              "line": 37,
+              "column": 6
+            },
+            "end": {
+              "line": 37,
+              "column": 43
+            }
+          },
+          "36": {
+            "start": {
+              "line": 37,
+              "column": 19
+            },
+            "end": {
+              "line": 37,
+              "column": 31
+            }
+          },
+          "37": {
+            "start": {
+              "line": 38,
+              "column": 16
+            },
+            "end": {
+              "line": 38,
+              "column": 43
+            }
+          },
+          "38": {
+            "start": {
+              "line": 38,
+              "column": 44
+            },
+            "end": {
+              "line": 38,
+              "column": 62
+            }
+          },
+          "39": {
+            "start": {
+              "line": 38,
+              "column": 63
+            },
+            "end": {
+              "line": 38,
+              "column": 74
+            }
+          },
+          "40": {
+            "start": {
+              "line": 42,
+              "column": 0
+            },
+            "end": {
+              "line": 63,
+              "column": 3
+            }
+          },
+          "41": {
+            "start": {
+              "line": 43,
+              "column": 13
+            },
+            "end": {
+              "line": 43,
+              "column": 42
+            }
+          },
+          "42": {
+            "start": {
+              "line": 44,
+              "column": 2
+            },
+            "end": {
+              "line": 62,
+              "column": 27
+            }
+          },
+          "43": {
+            "start": {
+              "line": 45,
+              "column": 22
+            },
+            "end": {
+              "line": 48,
+              "column": 8
+            }
+          },
+          "44": {
+            "start": {
+              "line": 46,
+              "column": 24
+            },
+            "end": {
+              "line": 46,
+              "column": 55
+            }
+          },
+          "45": {
+            "start": {
+              "line": 47,
+              "column": 6
+            },
+            "end": {
+              "line": 47,
+              "column": 36
+            }
+          },
+          "46": {
+            "start": {
+              "line": 50,
+              "column": 6
+            },
+            "end": {
+              "line": 53,
+              "column": 7
+            }
+          },
+          "47": {
+            "start": {
+              "line": 50,
+              "column": 25
+            },
+            "end": {
+              "line": 50,
+              "column": 26
+            }
+          },
+          "48": {
+            "start": {
+              "line": 51,
+              "column": 8
+            },
+            "end": {
+              "line": 51,
+              "column": 29
+            }
+          },
+          "49": {
+            "start": {
+              "line": 51,
+              "column": 30
+            },
+            "end": {
+              "line": 51,
+              "column": 43
+            }
+          },
+          "50": {
+            "start": {
+              "line": 51,
+              "column": 44
+            },
+            "end": {
+              "line": 51,
+              "column": 65
+            }
+          },
+          "51": {
+            "start": {
+              "line": 52,
+              "column": 8
+            },
+            "end": {
+              "line": 52,
+              "column": 51
+            }
+          },
+          "52": {
+            "start": {
+              "line": 52,
+              "column": 45
+            },
+            "end": {
+              "line": 52,
+              "column": 51
+            }
+          },
+          "53": {
+            "start": {
+              "line": 55,
+              "column": 4
+            },
+            "end": {
+              "line": 55,
+              "column": 20
+            }
+          },
+          "54": {
+            "start": {
+              "line": 56,
+              "column": 4
+            },
+            "end": {
+              "line": 56,
+              "column": 44
+            }
+          },
+          "55": {
+            "start": {
+              "line": 57,
+              "column": 4
+            },
+            "end": {
+              "line": 57,
+              "column": 34
+            }
+          },
+          "56": {
+            "start": {
+              "line": 58,
+              "column": 4
+            },
+            "end": {
+              "line": 58,
+              "column": 20
+            }
+          },
+          "57": {
+            "start": {
+              "line": 59,
+              "column": 4
+            },
+            "end": {
+              "line": 59,
+              "column": 46
+            }
+          },
+          "58": {
+            "start": {
+              "line": 60,
+              "column": 17
+            },
+            "end": {
+              "line": 60,
+              "column": 48
+            }
+          },
+          "59": {
+            "start": {
+              "line": 61,
+              "column": 4
+            },
+            "end": {
+              "line": 61,
+              "column": 45
+            }
+          },
+          "60": {
+            "start": {
+              "line": 62,
+              "column": 14
+            },
+            "end": {
+              "line": 62,
+              "column": 25
+            }
+          },
+          "61": {
+            "start": {
+              "line": 65,
+              "column": 0
+            },
+            "end": {
+              "line": 78,
+              "column": 3
+            }
+          },
+          "62": {
+            "start": {
+              "line": 66,
+              "column": 13
+            },
+            "end": {
+              "line": 66,
+              "column": 42
+            }
+          },
+          "63": {
+            "start": {
+              "line": 66,
+              "column": 68
+            },
+            "end": {
+              "line": 66,
+              "column": 70
+            }
+          },
+          "64": {
+            "start": {
+              "line": 67,
+              "column": 2
+            },
+            "end": {
+              "line": 77,
+              "column": 83
+            }
+          },
+          "65": {
+            "start": {
+              "line": 68,
+              "column": 4
+            },
+            "end": {
+              "line": 68,
+              "column": 51
+            }
+          },
+          "66": {
+            "start": {
+              "line": 69,
+              "column": 4
+            },
+            "end": {
+              "line": 69,
+              "column": 75
+            }
+          },
+          "67": {
+            "start": {
+              "line": 69,
+              "column": 25
+            },
+            "end": {
+              "line": 69,
+              "column": 71
+            }
+          },
+          "68": {
+            "start": {
+              "line": 70,
+              "column": 4
+            },
+            "end": {
+              "line": 70,
+              "column": 97
+            }
+          },
+          "69": {
+            "start": {
+              "line": 70,
+              "column": 21
+            },
+            "end": {
+              "line": 70,
+              "column": 22
+            }
+          },
+          "70": {
+            "start": {
+              "line": 70,
+              "column": 45
+            },
+            "end": {
+              "line": 70,
+              "column": 97
+            }
+          },
+          "71": {
+            "start": {
+              "line": 71,
+              "column": 22
+            },
+            "end": {
+              "line": 71,
+              "column": 82
+            }
+          },
+          "72": {
+            "start": {
+              "line": 72,
+              "column": 21
+            },
+            "end": {
+              "line": 72,
+              "column": 40
+            }
+          },
+          "73": {
+            "start": {
+              "line": 73,
+              "column": 4
+            },
+            "end": {
+              "line": 73,
+              "column": 56
+            }
+          },
+          "74": {
+            "start": {
+              "line": 74,
+              "column": 4
+            },
+            "end": {
+              "line": 74,
+              "column": 15
+            }
+          },
+          "75": {
+            "start": {
+              "line": 75,
+              "column": 4
+            },
+            "end": {
+              "line": 75,
+              "column": 44
+            }
+          },
+          "76": {
+            "start": {
+              "line": 75,
+              "column": 17
+            },
+            "end": {
+              "line": 75,
+              "column": 32
+            }
+          },
+          "77": {
+            "start": {
+              "line": 76,
+              "column": 4
+            },
+            "end": {
+              "line": 76,
+              "column": 70
+            }
+          },
+          "78": {
+            "start": {
+              "line": 76,
+              "column": 34
+            },
+            "end": {
+              "line": 76,
+              "column": 70
+            }
+          },
+          "79": {
+            "start": {
+              "line": 76,
+              "column": 47
+            },
+            "end": {
+              "line": 76,
+              "column": 58
+            }
+          },
+          "80": {
+            "start": {
+              "line": 77,
+              "column": 14
+            },
+            "end": {
+              "line": 77,
+              "column": 69
+            }
+          },
+          "81": {
+            "start": {
+              "line": 77,
+              "column": 48
+            },
+            "end": {
+              "line": 77,
+              "column": 69
+            }
+          },
+          "82": {
+            "start": {
+              "line": 77,
+              "column": 70
+            },
+            "end": {
+              "line": 77,
+              "column": 81
+            }
+          },
+          "83": {
+            "start": {
+              "line": 80,
+              "column": 0
+            },
+            "end": {
+              "line": 93,
+              "column": 3
+            }
+          },
+          "84": {
+            "start": {
+              "line": 81,
+              "column": 13
+            },
+            "end": {
+              "line": 81,
+              "column": 42
+            }
+          },
+          "85": {
+            "start": {
+              "line": 81,
+              "column": 56
+            },
+            "end": {
+              "line": 81,
+              "column": 78
+            }
+          },
+          "86": {
+            "start": {
+              "line": 82,
+              "column": 19
+            },
+            "end": {
+              "line": 82,
+              "column": 37
+            }
+          },
+          "87": {
+            "start": {
+              "line": 82,
+              "column": 51
+            },
+            "end": {
+              "line": 82,
+              "column": 80
+            }
+          },
+          "88": {
+            "start": {
+              "line": 82,
+              "column": 92
+            },
+            "end": {
+              "line": 82,
+              "column": 119
+            }
+          },
+          "89": {
+            "start": {
+              "line": 83,
+              "column": 2
+            },
+            "end": {
+              "line": 83,
+              "column": 48
+            }
+          },
+          "90": {
+            "start": {
+              "line": 83,
+              "column": 31
+            },
+            "end": {
+              "line": 83,
+              "column": 45
+            }
+          },
+          "91": {
+            "start": {
+              "line": 84,
+              "column": 2
+            },
+            "end": {
+              "line": 92,
+              "column": 80
+            }
+          },
+          "92": {
+            "start": {
+              "line": 86,
+              "column": 4
+            },
+            "end": {
+              "line": 86,
+              "column": 105
+            }
+          },
+          "93": {
+            "start": {
+              "line": 86,
+              "column": 27
+            },
+            "end": {
+              "line": 86,
+              "column": 36
+            }
+          },
+          "94": {
+            "start": {
+              "line": 86,
+              "column": 38
+            },
+            "end": {
+              "line": 86,
+              "column": 52
+            }
+          },
+          "95": {
+            "start": {
+              "line": 86,
+              "column": 53
+            },
+            "end": {
+              "line": 86,
+              "column": 69
+            }
+          },
+          "96": {
+            "start": {
+              "line": 86,
+              "column": 88
+            },
+            "end": {
+              "line": 86,
+              "column": 103
+            }
+          },
+          "97": {
+            "start": {
+              "line": 87,
+              "column": 4
+            },
+            "end": {
+              "line": 87,
+              "column": 60
+            }
+          },
+          "98": {
+            "start": {
+              "line": 88,
+              "column": 4
+            },
+            "end": {
+              "line": 88,
+              "column": 67
+            }
+          },
+          "99": {
+            "start": {
+              "line": 89,
+              "column": 4
+            },
+            "end": {
+              "line": 89,
+              "column": 34
+            }
+          },
+          "100": {
+            "start": {
+              "line": 90,
+              "column": 4
+            },
+            "end": {
+              "line": 90,
+              "column": 15
+            }
+          },
+          "101": {
+            "start": {
+              "line": 91,
+              "column": 4
+            },
+            "end": {
+              "line": 91,
+              "column": 44
+            }
+          },
+          "102": {
+            "start": {
+              "line": 91,
+              "column": 17
+            },
+            "end": {
+              "line": 91,
+              "column": 32
+            }
+          },
+          "103": {
+            "start": {
+              "line": 92,
+              "column": 14
+            },
+            "end": {
+              "line": 92,
+              "column": 44
+            }
+          },
+          "104": {
+            "start": {
+              "line": 92,
+              "column": 45
+            },
+            "end": {
+              "line": 92,
+              "column": 66
+            }
+          },
+          "105": {
+            "start": {
+              "line": 92,
+              "column": 67
+            },
+            "end": {
+              "line": 92,
+              "column": 78
+            }
+          },
+          "106": {
+            "start": {
+              "line": 95,
+              "column": 0
+            },
+            "end": {
+              "line": 113,
+              "column": 3
+            }
+          },
+          "107": {
+            "start": {
+              "line": 96,
+              "column": 18
+            },
+            "end": {
+              "line": 96,
+              "column": 71
+            }
+          },
+          "108": {
+            "start": {
+              "line": 96,
+              "column": 80
+            },
+            "end": {
+              "line": 96,
+              "column": 112
+            }
+          },
+          "109": {
+            "start": {
+              "line": 97,
+              "column": 16
+            },
+            "end": {
+              "line": 97,
+              "column": 57
+            }
+          },
+          "110": {
+            "start": {
+              "line": 97,
+              "column": 68
+            },
+            "end": {
+              "line": 97,
+              "column": 97
+            }
+          },
+          "111": {
+            "start": {
+              "line": 99,
+              "column": 2
+            },
+            "end": {
+              "line": 112,
+              "column": 84
+            }
+          },
+          "112": {
+            "start": {
+              "line": 100,
+              "column": 4
+            },
+            "end": {
+              "line": 100,
+              "column": 54
+            }
+          },
+          "113": {
+            "start": {
+              "line": 101,
+              "column": 4
+            },
+            "end": {
+              "line": 101,
+              "column": 76
+            }
+          },
+          "114": {
+            "start": {
+              "line": 101,
+              "column": 28
+            },
+            "end": {
+              "line": 101,
+              "column": 72
+            }
+          },
+          "115": {
+            "start": {
+              "line": 102,
+              "column": 4
+            },
+            "end": {
+              "line": 102,
+              "column": 56
+            }
+          },
+          "116": {
+            "start": {
+              "line": 103,
+              "column": 4
+            },
+            "end": {
+              "line": 103,
+              "column": 18
+            }
+          },
+          "117": {
+            "start": {
+              "line": 104,
+              "column": 18
+            },
+            "end": {
+              "line": 104,
+              "column": 53
+            }
+          },
+          "118": {
+            "start": {
+              "line": 105,
+              "column": 4
+            },
+            "end": {
+              "line": 105,
+              "column": 46
+            }
+          },
+          "119": {
+            "start": {
+              "line": 106,
+              "column": 4
+            },
+            "end": {
+              "line": 106,
+              "column": 75
+            }
+          },
+          "120": {
+            "start": {
+              "line": 107,
+              "column": 22
+            },
+            "end": {
+              "line": 107,
+              "column": 67
+            }
+          },
+          "121": {
+            "start": {
+              "line": 108,
+              "column": 4
+            },
+            "end": {
+              "line": 108,
+              "column": 52
+            }
+          },
+          "122": {
+            "start": {
+              "line": 109,
+              "column": 4
+            },
+            "end": {
+              "line": 109,
+              "column": 21
+            }
+          },
+          "123": {
+            "start": {
+              "line": 110,
+              "column": 4
+            },
+            "end": {
+              "line": 110,
+              "column": 17
+            }
+          },
+          "124": {
+            "start": {
+              "line": 111,
+              "column": 4
+            },
+            "end": {
+              "line": 111,
+              "column": 41
+            }
+          },
+          "125": {
+            "start": {
+              "line": 112,
+              "column": 14
+            },
+            "end": {
+              "line": 112,
+              "column": 32
+            }
+          },
+          "126": {
+            "start": {
+              "line": 112,
+              "column": 33
+            },
+            "end": {
+              "line": 112,
+              "column": 47
+            }
+          },
+          "127": {
+            "start": {
+              "line": 112,
+              "column": 48
+            },
+            "end": {
+              "line": 112,
+              "column": 63
+            }
+          },
+          "128": {
+            "start": {
+              "line": 112,
+              "column": 64
+            },
+            "end": {
+              "line": 112,
+              "column": 82
+            }
+          },
+          "129": {
+            "start": {
+              "line": 115,
+              "column": 0
+            },
+            "end": {
+              "line": 132,
+              "column": 3
+            }
+          },
+          "130": {
+            "start": {
+              "line": 116,
+              "column": 18
+            },
+            "end": {
+              "line": 116,
+              "column": 68
+            }
+          },
+          "131": {
+            "start": {
+              "line": 117,
+              "column": 2
+            },
+            "end": {
+              "line": 131,
+              "column": 34
+            }
+          },
+          "132": {
+            "start": {
+              "line": 118,
+              "column": 4
+            },
+            "end": {
+              "line": 130,
+              "column": 5
+            }
+          },
+          "133": {
+            "start": {
+              "line": 118,
+              "column": 25
+            },
+            "end": {
+              "line": 118,
+              "column": 26
+            }
+          },
+          "134": {
+            "start": {
+              "line": 119,
+              "column": 19
+            },
+            "end": {
+              "line": 119,
+              "column": 64
+            }
+          },
+          "135": {
+            "start": {
+              "line": 119,
+              "column": 71
+            },
+            "end": {
+              "line": 119,
+              "column": 112
+            }
+          },
+          "136": {
+            "start": {
+              "line": 120,
+              "column": 6
+            },
+            "end": {
+              "line": 129,
+              "column": 31
+            }
+          },
+          "137": {
+            "start": {
+              "line": 121,
+              "column": 8
+            },
+            "end": {
+              "line": 124,
+              "column": 9
+            }
+          },
+          "138": {
+            "start": {
+              "line": 121,
+              "column": 25
+            },
+            "end": {
+              "line": 121,
+              "column": 26
+            }
+          },
+          "139": {
+            "start": {
+              "line": 122,
+              "column": 10
+            },
+            "end": {
+              "line": 122,
+              "column": 48
+            }
+          },
+          "140": {
+            "start": {
+              "line": 123,
+              "column": 10
+            },
+            "end": {
+              "line": 123,
+              "column": 73
+            }
+          },
+          "141": {
+            "start": {
+              "line": 123,
+              "column": 35
+            },
+            "end": {
+              "line": 123,
+              "column": 56
+            }
+          },
+          "142": {
+            "start": {
+              "line": 123,
+              "column": 57
+            },
+            "end": {
+              "line": 123,
+              "column": 71
+            }
+          },
+          "143": {
+            "start": {
+              "line": 125,
+              "column": 8
+            },
+            "end": {
+              "line": 125,
+              "column": 29
+            }
+          },
+          "144": {
+            "start": {
+              "line": 125,
+              "column": 30
+            },
+            "end": {
+              "line": 125,
+              "column": 44
+            }
+          },
+          "145": {
+            "start": {
+              "line": 126,
+              "column": 8
+            },
+            "end": {
+              "line": 126,
+              "column": 19
+            }
+          },
+          "146": {
+            "start": {
+              "line": 127,
+              "column": 8
+            },
+            "end": {
+              "line": 127,
+              "column": 21
+            }
+          },
+          "147": {
+            "start": {
+              "line": 128,
+              "column": 8
+            },
+            "end": {
+              "line": 128,
+              "column": 45
+            }
+          },
+          "148": {
+            "start": {
+              "line": 129,
+              "column": 18
+            },
+            "end": {
+              "line": 129,
+              "column": 29
+            }
+          },
+          "149": {
+            "start": {
+              "line": 131,
+              "column": 14
+            },
+            "end": {
+              "line": 131,
+              "column": 32
+            }
+          },
+          "150": {
+            "start": {
+              "line": 134,
+              "column": 0
+            },
+            "end": {
+              "line": 148,
+              "column": 3
+            }
+          },
+          "151": {
+            "start": {
+              "line": 135,
+              "column": 18
+            },
+            "end": {
+              "line": 135,
+              "column": 65
+            }
+          },
+          "152": {
+            "start": {
+              "line": 135,
+              "column": 74
+            },
+            "end": {
+              "line": 135,
+              "column": 106
+            }
+          },
+          "153": {
+            "start": {
+              "line": 136,
+              "column": 13
+            },
+            "end": {
+              "line": 136,
+              "column": 54
+            }
+          },
+          "154": {
+            "start": {
+              "line": 137,
+              "column": 2
+            },
+            "end": {
+              "line": 147,
+              "column": 46
+            }
+          },
+          "155": {
+            "start": {
+              "line": 138,
+              "column": 4
+            },
+            "end": {
+              "line": 138,
+              "column": 153
+            }
+          },
+          "156": {
+            "start": {
+              "line": 139,
+              "column": 20
+            },
+            "end": {
+              "line": 139,
+              "column": 46
+            }
+          },
+          "157": {
+            "start": {
+              "line": 140,
+              "column": 4
+            },
+            "end": {
+              "line": 144,
+              "column": 5
+            }
+          },
+          "158": {
+            "start": {
+              "line": 140,
+              "column": 25
+            },
+            "end": {
+              "line": 140,
+              "column": 26
+            }
+          },
+          "159": {
+            "start": {
+              "line": 141,
+              "column": 20
+            },
+            "end": {
+              "line": 141,
+              "column": 44
+            }
+          },
+          "160": {
+            "start": {
+              "line": 142,
+              "column": 6
+            },
+            "end": {
+              "line": 142,
+              "column": 42
+            }
+          },
+          "161": {
+            "start": {
+              "line": 143,
+              "column": 6
+            },
+            "end": {
+              "line": 143,
+              "column": 57
+            }
+          },
+          "162": {
+            "start": {
+              "line": 145,
+              "column": 4
+            },
+            "end": {
+              "line": 145,
+              "column": 15
+            }
+          },
+          "163": {
+            "start": {
+              "line": 145,
+              "column": 16
+            },
+            "end": {
+              "line": 145,
+              "column": 29
+            }
+          },
+          "164": {
+            "start": {
+              "line": 146,
+              "column": 4
+            },
+            "end": {
+              "line": 146,
+              "column": 41
+            }
+          },
+          "165": {
+            "start": {
+              "line": 147,
+              "column": 14
+            },
+            "end": {
+              "line": 147,
+              "column": 25
+            }
+          },
+          "166": {
+            "start": {
+              "line": 147,
+              "column": 26
+            },
+            "end": {
+              "line": 147,
+              "column": 44
+            }
+          }
+        },
+        "fnMap": {
+          "0": {
+            "name": "(anonymous_0)",
+            "decl": {
+              "start": {
+                "line": 10,
+                "column": 57
+              },
+              "end": {
+                "line": 10,
+                "column": 58
+              }
+            },
+            "loc": {
+              "start": {
+                "line": 10,
+                "column": 63
+              },
+              "end": {
+                "line": 19,
+                "column": 1
+              }
+            },
+            "line": 10
+          },
+          "1": {
+            "name": "(anonymous_1)",
+            "decl": {
+              "start": {
+                "line": 16,
+                "column": 11
+              },
+              "end": {
+                "line": 16,
+                "column": 12
+              }
+            },
+            "loc": {
+              "start": {
+                "line": 16,
+                "column": 17
+              },
+              "end": {
+                "line": 16,
+                "column": 32
+              }
+            },
+            "line": 16
+          },
+          "2": {
+            "name": "(anonymous_2)",
+            "decl": {
+              "start": {
+                "line": 17,
+                "column": 11
+              },
+              "end": {
+                "line": 17,
+                "column": 12
+              }
+            },
+            "loc": {
+              "start": {
+                "line": 17,
+                "column": 17
+              },
+              "end": {
+                "line": 17,
+                "column": 27
+              }
+            },
+            "line": 17
+          },
+          "3": {
+            "name": "(anonymous_3)",
+            "decl": {
+              "start": {
+                "line": 22,
+                "column": 93
+              },
+              "end": {
+                "line": 22,
+                "column": 94
+              }
+            },
+            "loc": {
+              "start": {
+                "line": 22,
+                "column": 99
+              },
+              "end": {
+                "line": 39,
+                "column": 3
+              }
+            },
+            "line": 22
+          },
+          "4": {
+            "name": "(anonymous_4)",
+            "decl": {
+              "start": {
+                "line": 25,
+                "column": 22
+              },
+              "end": {
+                "line": 25,
+                "column": 23
+              }
+            },
+            "loc": {
+              "start": {
+                "line": 25,
+                "column": 28
+              },
+              "end": {
+                "line": 25,
+                "column": 46
+              }
+            },
+            "line": 25
+          },
+          "5": {
+            "name": "(anonymous_5)",
+            "decl": {
+              "start": {
+                "line": 31,
+                "column": 13
+              },
+              "end": {
+                "line": 31,
+                "column": 14
+              }
+            },
+            "loc": {
+              "start": {
+                "line": 31,
+                "column": 19
+              },
+              "end": {
+                "line": 31,
+                "column": 32
+              }
+            },
+            "line": 31
+          },
+          "6": {
+            "name": "(anonymous_6)",
+            "decl": {
+              "start": {
+                "line": 34,
+                "column": 24
+              },
+              "end": {
+                "line": 34,
+                "column": 25
+              }
+            },
+            "loc": {
+              "start": {
+                "line": 34,
+                "column": 36
+              },
+              "end": {
+                "line": 34,
+                "column": 73
+              }
+            },
+            "line": 34
+          },
+          "7": {
+            "name": "(anonymous_7)",
+            "decl": {
+              "start": {
+                "line": 37,
+                "column": 13
+              },
+              "end": {
+                "line": 37,
+                "column": 14
+              }
+            },
+            "loc": {
+              "start": {
+                "line": 37,
+                "column": 19
+              },
+              "end": {
+                "line": 37,
+                "column": 31
+              }
+            },
+            "line": 37
+          },
+          "8": {
+            "name": "(anonymous_8)",
+            "decl": {
+              "start": {
+                "line": 42,
+                "column": 81
+              },
+              "end": {
+                "line": 42,
+                "column": 82
+              }
+            },
+            "loc": {
+              "start": {
+                "line": 42,
+                "column": 93
+              },
+              "end": {
+                "line": 63,
+                "column": 1
+              }
+            },
+            "line": 42
+          },
+          "9": {
+            "name": "(anonymous_9)",
+            "decl": {
+              "start": {
+                "line": 45,
+                "column": 29
+              },
+              "end": {
+                "line": 45,
+                "column": 30
+              }
+            },
+            "loc": {
+              "start": {
+                "line": 45,
+                "column": 41
+              },
+              "end": {
+                "line": 48,
+                "column": 5
+              }
+            },
+            "line": 45
+          },
+          "10": {
+            "name": "collect",
+            "decl": {
+              "start": {
+                "line": 49,
+                "column": 19
+              },
+              "end": {
+                "line": 49,
+                "column": 26
+              }
+            },
+            "loc": {
+              "start": {
+                "line": 49,
+                "column": 44
+              },
+              "end": {
+                "line": 54,
+                "column": 5
+              }
+            },
+            "line": 49
+          },
+          "11": {
+            "name": "(anonymous_11)",
+            "decl": {
+              "start": {
+                "line": 65,
+                "column": 90
+              },
+              "end": {
+                "line": 65,
+                "column": 91
+              }
+            },
+            "loc": {
+              "start": {
+                "line": 65,
+                "column": 96
+              },
+              "end": {
+                "line": 78,
+                "column": 1
+              }
+            },
+            "line": 65
+          },
+          "12": {
+            "name": "(anonymous_12)",
+            "decl": {
+              "start": {
+                "line": 69,
+                "column": 19
+              },
+              "end": {
+                "line": 69,
+                "column": 20
+              }
+            },
+            "loc": {
+              "start": {
+                "line": 69,
+                "column": 25
+              },
+              "end": {
+                "line": 69,
+                "column": 71
+              }
+            },
+            "line": 69
+          },
+          "13": {
+            "name": "(anonymous_13)",
+            "decl": {
+              "start": {
+                "line": 75,
+                "column": 11
+              },
+              "end": {
+                "line": 75,
+                "column": 12
+              }
+            },
+            "loc": {
+              "start": {
+                "line": 75,
+                "column": 17
+              },
+              "end": {
+                "line": 75,
+                "column": 32
+              }
+            },
+            "line": 75
+          },
+          "14": {
+            "name": "(anonymous_14)",
+            "decl": {
+              "start": {
+                "line": 76,
+                "column": 41
+              },
+              "end": {
+                "line": 76,
+                "column": 42
+              }
+            },
+            "loc": {
+              "start": {
+                "line": 76,
+                "column": 47
+              },
+              "end": {
+                "line": 76,
+                "column": 58
+              }
+            },
+            "line": 76
+          },
+          "15": {
+            "name": "(anonymous_15)",
+            "decl": {
+              "start": {
+                "line": 80,
+                "column": 69
+              },
+              "end": {
+                "line": 80,
+                "column": 70
+              }
+            },
+            "loc": {
+              "start": {
+                "line": 80,
+                "column": 75
+              },
+              "end": {
+                "line": 93,
+                "column": 1
+              }
+            },
+            "line": 80
+          },
+          "16": {
+            "name": "(anonymous_16)",
+            "decl": {
+              "start": {
+                "line": 83,
+                "column": 23
+              },
+              "end": {
+                "line": 83,
+                "column": 24
+              }
+            },
+            "loc": {
+              "start": {
+                "line": 83,
+                "column": 29
+              },
+              "end": {
+                "line": 83,
+                "column": 47
+              }
+            },
+            "line": 83
+          },
+          "17": {
+            "name": "(anonymous_17)",
+            "decl": {
+              "start": {
+                "line": 91,
+                "column": 11
+              },
+              "end": {
+                "line": 91,
+                "column": 12
+              }
+            },
+            "loc": {
+              "start": {
+                "line": 91,
+                "column": 17
+              },
+              "end": {
+                "line": 91,
+                "column": 32
+              }
+            },
+            "line": 91
+          },
+          "18": {
+            "name": "(anonymous_18)",
+            "decl": {
+              "start": {
+                "line": 95,
+                "column": 96
+              },
+              "end": {
+                "line": 95,
+                "column": 97
+              }
+            },
+            "loc": {
+              "start": {
+                "line": 95,
+                "column": 102
+              },
+              "end": {
+                "line": 113,
+                "column": 1
+              }
+            },
+            "line": 95
+          },
+          "19": {
+            "name": "(anonymous_19)",
+            "decl": {
+              "start": {
+                "line": 101,
+                "column": 22
+              },
+              "end": {
+                "line": 101,
+                "column": 23
+              }
+            },
+            "loc": {
+              "start": {
+                "line": 101,
+                "column": 28
+              },
+              "end": {
+                "line": 101,
+                "column": 72
+              }
+            },
+            "line": 101
+          },
+          "20": {
+            "name": "(anonymous_20)",
+            "decl": {
+              "start": {
+                "line": 115,
+                "column": 91
+              },
+              "end": {
+                "line": 115,
+                "column": 92
+              }
+            },
+            "loc": {
+              "start": {
+                "line": 115,
+                "column": 103
+              },
+              "end": {
+                "line": 132,
+                "column": 1
+              }
+            },
+            "line": 115
+          },
+          "21": {
+            "name": "(anonymous_21)",
+            "decl": {
+              "start": {
+                "line": 134,
+                "column": 86
+              },
+              "end": {
+                "line": 134,
+                "column": 87
+              }
+            },
+            "loc": {
+              "start": {
+                "line": 134,
+                "column": 98
+              },
+              "end": {
+                "line": 148,
+                "column": 1
+              }
+            },
+            "line": 134
+          }
+        },
+        "branchMap": {
+          "0": {
+            "loc": {
+              "start": {
+                "line": 52,
+                "column": 8
+              },
+              "end": {
+                "line": 52,
+                "column": 51
+              }
+            },
+            "type": "if",
+            "locations": [
+              {
+                "start": {
+                  "line": 52,
+                  "column": 8
+                },
+                "end": {
+                  "line": 52,
+                  "column": 51
+                }
+              },
+              {
+                "start": {},
+                "end": {}
+              }
+            ],
+            "line": 52
+          },
+          "1": {
+            "loc": {
+              "start": {
+                "line": 123,
+                "column": 10
+              },
+              "end": {
+                "line": 123,
+                "column": 73
+              }
+            },
+            "type": "if",
+            "locations": [
+              {
+                "start": {
+                  "line": 123,
+                  "column": 10
+                },
+                "end": {
+                  "line": 123,
+                  "column": 73
+                }
+              },
+              {
+                "start": {},
+                "end": {}
+              }
+            ],
+            "line": 123
+          }
+        },
+        "s": {
+          "0": 1,
+          "1": 1,
+          "2": 1,
+          "3": 1,
+          "4": 1,
+          "5": 1,
+          "6": 1,
+          "7": 1,
+          "8": 1,
+          "9": 1,
+          "10": 1,
+          "11": 1,
+          "12": 1,
+          "13": 2,
+          "14": 2,
+          "15": 2,
+          "16": 2,
+          "17": 2,
+          "18": 2,
+          "19": 2,
+          "20": 2,
+          "21": 2,
+          "22": 2,
+          "23": 2,
+          "24": 2,
+          "25": 2,
+          "26": 2,
+          "27": 2,
+          "28": 2,
+          "29": 2,
+          "30": 2,
+          "31": 2,
+          "32": 2,
+          "33": 2,
+          "34": 2,
+          "35": 2,
+          "36": 2,
+          "37": 2,
+          "38": 2,
+          "39": 2,
+          "40": 1,
+          "41": 1,
+          "42": 1,
+          "43": 1,
+          "44": 1,
+          "45": 1,
+          "46": 2,
+          "47": 2,
+          "48": 11,
+          "49": 11,
+          "50": 11,
+          "51": 11,
+          "52": 1,
+          "53": 1,
+          "54": 1,
+          "55": 1,
+          "56": 1,
+          "57": 1,
+          "58": 1,
+          "59": 1,
+          "60": 1,
+          "61": 1,
+          "62": 1,
+          "63": 1,
+          "64": 1,
+          "65": 1,
+          "66": 1,
+          "67": 1,
+          "68": 1,
+          "69": 1,
+          "70": 30,
+          "71": 1,
+          "72": 1,
+          "73": 1,
+          "74": 1,
+          "75": 1,
+          "76": 1,
+          "77": 1,
+          "78": 30,
+          "79": 30,
+          "80": 1,
+          "81": 30,
+          "82": 1,
+          "83": 1,
+          "84": 1,
+          "85": 1,
+          "86": 1,
+          "87": 1,
+          "88": 1,
+          "89": 1,
+          "90": 1,
+          "91": 1,
+          "92": 1,
+          "93": 1,
+          "94": 1,
+          "95": 1,
+          "96": 1,
+          "97": 1,
+          "98": 1,
+          "99": 1,
+          "100": 1,
+          "101": 1,
+          "102": 1,
+          "103": 1,
+          "104": 1,
+          "105": 1,
+          "106": 1,
+          "107": 1,
+          "108": 1,
+          "109": 1,
+          "110": 1,
+          "111": 1,
+          "112": 1,
+          "113": 1,
+          "114": 1,
+          "115": 1,
+          "116": 1,
+          "117": 1,
+          "118": 1,
+          "119": 1,
+          "120": 1,
+          "121": 1,
+          "122": 1,
+          "123": 1,
+          "124": 1,
+          "125": 1,
+          "126": 1,
+          "127": 1,
+          "128": 1,
+          "129": 1,
+          "130": 1,
+          "131": 1,
+          "132": 1,
+          "133": 1,
+          "134": 20,
+          "135": 20,
+          "136": 20,
+          "137": 20,
+          "138": 20,
+          "139": 10000,
+          "140": 10000,
+          "141": 100,
+          "142": 100,
+          "143": 20,
+          "144": 20,
+          "145": 20,
+          "146": 20,
+          "147": 20,
+          "148": 20,
+          "149": 1,
+          "150": 1,
+          "151": 1,
+          "152": 1,
+          "153": 1,
+          "154": 1,
+          "155": 1,
+          "156": 1,
+          "157": 1,
+          "158": 1,
+          "159": 100,
+          "160": 100,
+          "161": 100,
+          "162": 1,
+          "163": 1,
+          "164": 1,
+          "165": 1,
+          "166": 1
+        },
+        "f": {
+          "0": 1,
+          "1": 1,
+          "2": 1,
+          "3": 2,
+          "4": 2,
+          "5": 2,
+          "6": 2,
+          "7": 2,
+          "8": 1,
+          "9": 1,
+          "10": 2,
+          "11": 1,
+          "12": 1,
+          "13": 1,
+          "14": 30,
+          "15": 1,
+          "16": 1,
+          "17": 1,
+          "18": 1,
+          "19": 1,
+          "20": 1,
+          "21": 1
+        },
+        "b": {
+          "0": [
+            1,
+            10
+          ],
+          "1": [
+            100,
+            9900
+          ]
+        },
+        "_coverageSchema": "1a1c01bbd47fc00a2c39e90264f33305004495a9",
+        "hash": "0b30bdbf552c8c68f6786beab41954961beb71f0"
+      },
+      "C:\\Projects\\memory-nexus\\src\\infrastructure\\database\\services\\stats-lifecycle.test.ts": {
+        "path": "C:\\Projects\\memory-nexus\\src\\infrastructure\\database\\services\\stats-lifecycle.test.ts",
+        "statementMap": {
+          "0": {
+            "start": {
+              "line": 6,
+              "column": 13
+            },
+            "end": {
+              "line": 6,
+              "column": 37
+            }
+          },
+          "1": {
+            "start": {
+              "line": 7,
+              "column": 2
+            },
+            "end": {
+              "line": 10,
+              "column": 3
+            }
+          },
+          "2": {
+            "start": {
+              "line": 8,
+              "column": 4
+            },
+            "end": {
+              "line": 8,
+              "column": 120
+            }
+          },
+          "3": {
+            "start": {
+              "line": 9,
+              "column": 4
+            },
+            "end": {
+              "line": 9,
+              "column": 124
+            }
+          },
+          "4": {
+            "start": {
+              "line": 11,
+              "column": 2
+            },
+            "end": {
+              "line": 11,
+              "column": 112
+            }
+          },
+          "5": {
+            "start": {
+              "line": 11,
+              "column": 29
+            },
+            "end": {
+              "line": 11,
+              "column": 112
+            }
+          },
+          "6": {
+            "start": {
+              "line": 12,
+              "column": 34
+            },
+            "end": {
+              "line": 12,
+              "column": 36
+            }
+          },
+          "7": {
+            "start": {
+              "line": 12,
+              "column": 48
+            },
+            "end": {
+              "line": 12,
+              "column": 67
+            }
+          },
+          "8": {
+            "start": {
+              "line": 13,
+              "column": 2
+            },
+            "end": {
+              "line": 17,
+              "column": 26
+            }
+          },
+          "9": {
+            "start": {
+              "line": 14,
+              "column": 22
+            },
+            "end": {
+              "line": 14,
+              "column": 67
+            }
+          },
+          "10": {
+            "start": {
+              "line": 15,
+              "column": 4
+            },
+            "end": {
+              "line": 15,
+              "column": 31
+            }
+          },
+          "11": {
+            "start": {
+              "line": 16,
+              "column": 4
+            },
+            "end": {
+              "line": 16,
+              "column": 21
+            }
+          },
+          "12": {
+            "start": {
+              "line": 18,
+              "column": 2
+            },
+            "end": {
+              "line": 21,
+              "column": 6
+            }
+          },
+          "13": {
+            "start": {
+              "line": 19,
+              "column": 4
+            },
+            "end": {
+              "line": 19,
+              "column": 61
+            }
+          },
+          "14": {
+            "start": {
+              "line": 19,
+              "column": 40
+            },
+            "end": {
+              "line": 19,
+              "column": 61
+            }
+          },
+          "15": {
+            "start": {
+              "line": 20,
+              "column": 4
+            },
+            "end": {
+              "line": 20,
+              "column": 19
+            }
+          },
+          "16": {
+            "start": {
+              "line": 24,
+              "column": 0
+            },
+            "end": {
+              "line": 60,
+              "column": 3
+            }
+          },
+          "17": {
+            "start": {
+              "line": 25,
+              "column": 2
+            },
+            "end": {
+              "line": 38,
+              "column": 5
+            }
+          },
+          "18": {
+            "start": {
+              "line": 26,
+              "column": 18
+            },
+            "end": {
+              "line": 26,
+              "column": 37
+            }
+          },
+          "19": {
+            "start": {
+              "line": 26,
+              "column": 49
+            },
+            "end": {
+              "line": 26,
+              "column": 81
+            }
+          },
+          "20": {
+            "start": {
+              "line": 27,
+              "column": 4
+            },
+            "end": {
+              "line": 37,
+              "column": 34
+            }
+          },
+          "21": {
+            "start": {
+              "line": 28,
+              "column": 6
+            },
+            "end": {
+              "line": 36,
+              "column": 7
+            }
+          },
+          "22": {
+            "start": {
+              "line": 28,
+              "column": 22
+            },
+            "end": {
+              "line": 28,
+              "column": 23
+            }
+          },
+          "23": {
+            "start": {
+              "line": 29,
+              "column": 22
+            },
+            "end": {
+              "line": 29,
+              "column": 46
+            }
+          },
+          "24": {
+            "start": {
+              "line": 30,
+              "column": 8
+            },
+            "end": {
+              "line": 30,
+              "column": 44
+            }
+          },
+          "25": {
+            "start": {
+              "line": 31,
+              "column": 8
+            },
+            "end": {
+              "line": 31,
+              "column": 44
+            }
+          },
+          "26": {
+            "start": {
+              "line": 32,
+              "column": 8
+            },
+            "end": {
+              "line": 32,
+              "column": 44
+            }
+          },
+          "27": {
+            "start": {
+              "line": 33,
+              "column": 8
+            },
+            "end": {
+              "line": 33,
+              "column": 111
+            }
+          },
+          "28": {
+            "start": {
+              "line": 34,
+              "column": 8
+            },
+            "end": {
+              "line": 34,
+              "column": 61
+            }
+          },
+          "29": {
+            "start": {
+              "line": 35,
+              "column": 8
+            },
+            "end": {
+              "line": 35,
+              "column": 111
+            }
+          },
+          "30": {
+            "start": {
+              "line": 35,
+              "column": 60
+            },
+            "end": {
+              "line": 35,
+              "column": 111
+            }
+          },
+          "31": {
+            "start": {
+              "line": 35,
+              "column": 73
+            },
+            "end": {
+              "line": 35,
+              "column": 88
+            }
+          },
+          "32": {
+            "start": {
+              "line": 37,
+              "column": 16
+            },
+            "end": {
+              "line": 37,
+              "column": 32
+            }
+          },
+          "33": {
+            "start": {
+              "line": 40,
+              "column": 2
+            },
+            "end": {
+              "line": 49,
+              "column": 3
+            }
+          },
+          "34": {
+            "start": {
+              "line": 41,
+              "column": 4
+            },
+            "end": {
+              "line": 48,
+              "column": 7
+            }
+          },
+          "35": {
+            "start": {
+              "line": 42,
+              "column": 20
+            },
+            "end": {
+              "line": 42,
+              "column": 35
+            }
+          },
+          "36": {
+            "start": {
+              "line": 42,
+              "column": 47
+            },
+            "end": {
+              "line": 42,
+              "column": 79
+            }
+          },
+          "37": {
+            "start": {
+              "line": 43,
+              "column": 6
+            },
+            "end": {
+              "line": 47,
+              "column": 36
+            }
+          },
+          "38": {
+            "start": {
+              "line": 44,
+              "column": 8
+            },
+            "end": {
+              "line": 44,
+              "column": 74
+            }
+          },
+          "39": {
+            "start": {
+              "line": 45,
+              "column": 8
+            },
+            "end": {
+              "line": 45,
+              "column": 84
+            }
+          },
+          "40": {
+            "start": {
+              "line": 46,
+              "column": 8
+            },
+            "end": {
+              "line": 46,
+              "column": 101
+            }
+          },
+          "41": {
+            "start": {
+              "line": 46,
+              "column": 50
+            },
+            "end": {
+              "line": 46,
+              "column": 101
+            }
+          },
+          "42": {
+            "start": {
+              "line": 46,
+              "column": 63
+            },
+            "end": {
+              "line": 46,
+              "column": 78
+            }
+          },
+          "43": {
+            "start": {
+              "line": 47,
+              "column": 18
+            },
+            "end": {
+              "line": 47,
+              "column": 34
+            }
+          },
+          "44": {
+            "start": {
+              "line": 51,
+              "column": 2
+            },
+            "end": {
+              "line": 59,
+              "column": 5
+            }
+          },
+          "45": {
+            "start": {
+              "line": 52,
+              "column": 18
+            },
+            "end": {
+              "line": 52,
+              "column": 37
+            }
+          },
+          "46": {
+            "start": {
+              "line": 52,
+              "column": 49
+            },
+            "end": {
+              "line": 52,
+              "column": 81
+            }
+          },
+          "47": {
+            "start": {
+              "line": 53,
+              "column": 4
+            },
+            "end": {
+              "line": 58,
+              "column": 34
+            }
+          },
+          "48": {
+            "start": {
+              "line": 54,
+              "column": 6
+            },
+            "end": {
+              "line": 54,
+              "column": 131
+            }
+          },
+          "49": {
+            "start": {
+              "line": 55,
+              "column": 6
+            },
+            "end": {
+              "line": 55,
+              "column": 73
+            }
+          },
+          "50": {
+            "start": {
+              "line": 56,
+              "column": 6
+            },
+            "end": {
+              "line": 56,
+              "column": 46
+            }
+          },
+          "51": {
+            "start": {
+              "line": 57,
+              "column": 6
+            },
+            "end": {
+              "line": 57,
+              "column": 99
+            }
+          },
+          "52": {
+            "start": {
+              "line": 57,
+              "column": 48
+            },
+            "end": {
+              "line": 57,
+              "column": 99
+            }
+          },
+          "53": {
+            "start": {
+              "line": 57,
+              "column": 61
+            },
+            "end": {
+              "line": 57,
+              "column": 76
+            }
+          },
+          "54": {
+            "start": {
+              "line": 58,
+              "column": 16
+            },
+            "end": {
+              "line": 58,
+              "column": 32
+            }
+          }
+        },
+        "fnMap": {
+          "0": {
+            "name": "fixture",
+            "decl": {
+              "start": {
+                "line": 5,
+                "column": 9
+              },
+              "end": {
+                "line": 5,
+                "column": 16
+              }
+            },
+            "loc": {
+              "start": {
+                "line": 5,
+                "column": 76
+              },
+              "end": {
+                "line": 22,
+                "column": 1
+              }
+            },
+            "line": 5
+          },
+          "1": {
+            "name": "(anonymous_1)",
+            "decl": {
+              "start": {
+                "line": 13,
+                "column": 16
+              },
+              "end": {
+                "line": 13,
+                "column": 17
+              }
+            },
+            "loc": {
+              "start": {
+                "line": 13,
+                "column": 60
+              },
+              "end": {
+                "line": 17,
+                "column": 3
+              }
+            },
+            "line": 13
+          },
+          "2": {
+            "name": "(anonymous_2)",
+            "decl": {
+              "start": {
+                "line": 18,
+                "column": 27
+              },
+              "end": {
+                "line": 18,
+                "column": 28
+              }
+            },
+            "loc": {
+              "start": {
+                "line": 18,
+                "column": 37
+              },
+              "end": {
+                "line": 21,
+                "column": 3
+              }
+            },
+            "line": 18
+          },
+          "3": {
+            "name": "(anonymous_3)",
+            "decl": {
+              "start": {
+                "line": 24,
+                "column": 37
+              },
+              "end": {
+                "line": 24,
+                "column": 38
+              }
+            },
+            "loc": {
+              "start": {
+                "line": 24,
+                "column": 43
+              },
+              "end": {
+                "line": 60,
+                "column": 1
+              }
+            },
+            "line": 24
+          },
+          "4": {
+            "name": "(anonymous_4)",
+            "decl": {
+              "start": {
+                "line": 25,
+                "column": 91
+              },
+              "end": {
+                "line": 25,
+                "column": 92
+              }
+            },
+            "loc": {
+              "start": {
+                "line": 25,
+                "column": 103
+              },
+              "end": {
+                "line": 38,
+                "column": 3
+              }
+            },
+            "line": 25
+          },
+          "5": {
+            "name": "(anonymous_5)",
+            "decl": {
+              "start": {
+                "line": 35,
+                "column": 67
+              },
+              "end": {
+                "line": 35,
+                "column": 68
+              }
+            },
+            "loc": {
+              "start": {
+                "line": 35,
+                "column": 73
+              },
+              "end": {
+                "line": 35,
+                "column": 88
+              }
+            },
+            "line": 35
+          },
+          "6": {
+            "name": "(anonymous_6)",
+            "decl": {
+              "start": {
+                "line": 41,
+                "column": 72
+              },
+              "end": {
+                "line": 41,
+                "column": 73
+              }
+            },
+            "loc": {
+              "start": {
+                "line": 41,
+                "column": 84
+              },
+              "end": {
+                "line": 48,
+                "column": 5
+              }
+            },
+            "line": 41
+          },
+          "7": {
+            "name": "(anonymous_7)",
+            "decl": {
+              "start": {
+                "line": 46,
+                "column": 57
+              },
+              "end": {
+                "line": 46,
+                "column": 58
+              }
+            },
+            "loc": {
+              "start": {
+                "line": 46,
+                "column": 63
+              },
+              "end": {
+                "line": 46,
+                "column": 78
+              }
+            },
+            "line": 46
+          },
+          "8": {
+            "name": "(anonymous_8)",
+            "decl": {
+              "start": {
+                "line": 51,
+                "column": 84
+              },
+              "end": {
+                "line": 51,
+                "column": 85
+              }
+            },
+            "loc": {
+              "start": {
+                "line": 51,
+                "column": 96
+              },
+              "end": {
+                "line": 59,
+                "column": 3
+              }
+            },
+            "line": 51
+          },
+          "9": {
+            "name": "(anonymous_9)",
+            "decl": {
+              "start": {
+                "line": 57,
+                "column": 55
+              },
+              "end": {
+                "line": 57,
+                "column": 56
+              }
+            },
+            "loc": {
+              "start": {
+                "line": 57,
+                "column": 61
+              },
+              "end": {
+                "line": 57,
+                "column": 76
+              }
+            },
+            "line": 57
+          }
+        },
+        "branchMap": {
+          "0": {
+            "loc": {
+              "start": {
+                "line": 7,
+                "column": 2
+              },
+              "end": {
+                "line": 10,
+                "column": 3
+              }
+            },
+            "type": "if",
+            "locations": [
+              {
+                "start": {
+                  "line": 7,
+                  "column": 2
+                },
+                "end": {
+                  "line": 10,
+                  "column": 3
+                }
+              },
+              {
+                "start": {},
+                "end": {}
+              }
+            ],
+            "line": 7
+          },
+          "1": {
+            "loc": {
+              "start": {
+                "line": 11,
+                "column": 2
+              },
+              "end": {
+                "line": 11,
+                "column": 112
+              }
+            },
+            "type": "if",
+            "locations": [
+              {
+                "start": {
+                  "line": 11,
+                  "column": 2
+                },
+                "end": {
+                  "line": 11,
+                  "column": 112
+                }
+              },
+              {
+                "start": {},
+                "end": {}
+              }
+            ],
+            "line": 11
+          },
+          "2": {
+            "loc": {
+              "start": {
+                "line": 45,
+                "column": 45
+              },
+              "end": {
+                "line": 45,
+                "column": 82
+              }
+            },
+            "type": "cond-expr",
+            "locations": [
+              {
+                "start": {
+                  "line": 45,
+                  "column": 77
+                },
+                "end": {
+                  "line": 45,
+                  "column": 78
+                }
+              },
+              {
+                "start": {
+                  "line": 45,
+                  "column": 81
+                },
+                "end": {
+                  "line": 45,
+                  "column": 82
+                }
+              }
+            ],
+            "line": 45
+          }
+        },
+        "s": {
+          "0": 4,
+          "1": 4,
+          "2": 3,
+          "3": 3,
+          "4": 4,
+          "5": 2,
+          "6": 4,
+          "7": 4,
+          "8": 4,
+          "9": 82,
+          "10": 80,
+          "11": 80,
+          "12": 4,
+          "13": 4,
+          "14": 80,
+          "15": 4,
+          "16": 1,
+          "17": 1,
+          "18": 1,
+          "19": 1,
+          "20": 1,
+          "21": 1,
+          "22": 1,
+          "23": 25,
+          "24": 25,
+          "25": 25,
+          "26": 25,
+          "27": 25,
+          "28": 25,
+          "29": 25,
+          "30": 75,
+          "31": 75,
+          "32": 1,
+          "33": 1,
+          "34": 2,
+          "35": 2,
+          "36": 2,
+          "37": 2,
+          "38": 2,
+          "39": 2,
+          "40": 2,
+          "41": 3,
+          "42": 3,
+          "43": 2,
+          "44": 1,
+          "45": 1,
+          "46": 1,
+          "47": 1,
+          "48": 1,
+          "49": 1,
+          "50": 1,
+          "51": 1,
+          "52": 2,
+          "53": 2,
+          "54": 1
+        },
+        "f": {
+          "0": 4,
+          "1": 82,
+          "2": 4,
+          "3": 1,
+          "4": 1,
+          "5": 75,
+          "6": 2,
+          "7": 3,
+          "8": 1,
+          "9": 2
+        },
+        "b": {
+          "0": [
+            3,
+            1
+          ],
+          "1": [
+            2,
+            2
+          ],
+          "2": [
+            1,
+            1
+          ]
+        },
+        "_coverageSchema": "1a1c01bbd47fc00a2c39e90264f33305004495a9",
+        "hash": "2d9394fd005fd8be4f59a6bffcac9e0b4f094e76"
+      }
+    },
+    "source": "import {readFileSync,writeFileSync,mkdirSync} from 'node:fs';\nimport {join,dirname,resolve} from 'node:path';\nimport {createCoverageMap} from 'istanbul-lib-coverage';\nimport {instrumentTypeScriptWithCoverage} from '../scripts/run-istanbul-bun-coverage';\nimport {createOwnedTestDirectory} from '../tests/helpers/owned-test-directory';\nimport {sourceHash} from '../scripts/quality-inventory';\nconst root=process.cwd(),storage=createOwnedTestDirectory('memory-owner-measure-');\nconst paths=['src/infrastructure/database/owned-database.ts','src/infrastructure/database/owned-database.test.ts','src/infrastructure/database/services/stats-service.ts','src/infrastructure/database/services/stats-lifecycle.test.ts'];\nfunction put(path:string,content:string){mkdirSync(dirname(join(storage.dir,path)),{recursive:true});writeFileSync(join(storage.dir,path),content);}\ntry{\n for(const path of paths)put(path,instrumentTypeScriptWithCoverage(readFileSync(path,'utf8'),resolve(path)).code);\n put('src/infrastructure/database/services/stats-service.test.ts',readFileSync('src/infrastructure/database/services/stats-service.test.ts','utf8'));\n for(const path of ['src/infrastructure/database/connection.ts','tests/helpers/owned-test-directory.ts'])put(path,'export * from '+JSON.stringify(join(root,path).replaceAll('\\\\','/'))+';');\n put('capture.ts','import {afterAll} from \"bun:test\";import {writeFileSync} from \"node:fs\";afterAll(()=>writeFileSync(\"coverage.json\",JSON.stringify((globalThis as any).__coverage__)));');\n put('bunfig.toml','[test]\\ncoverage=false\\npreload=['+JSON.stringify(join(root,'tests/test-setup.ts').replaceAll('\\\\','/'))+',\"./capture.ts\"]\\n');\n const command=[process.execPath,'test','--timeout','15000','src/infrastructure/database/owned-database.test.ts','src/infrastructure/database/services/stats-lifecycle.test.ts','src/infrastructure/database/services/stats-service.test.ts'];\n const run=Bun.spawnSync(command,{cwd:storage.dir,env:{...process.env,TEMP:storage.dir,TMP:storage.dir,TMPDIR:storage.dir},stdout:'pipe',stderr:'pipe',timeout:60000});\n const output=new TextDecoder().decode(run.stdout)+new TextDecoder().decode(run.stderr);\n if(run.exitCode!==0)throw Error(output);\n const raw=JSON.parse(readFileSync(join(storage.dir,'coverage.json'),'utf8')),map=createCoverageMap(raw);\n const files=paths.map(path=>{const measured=map.fileCoverageFor(resolve(path)),data=measured.data;return{path,sourceHash:sourceHash(readFileSync(path,'utf8')),metrics:measured.toSummary().data,uncoveredBranches:Object.entries(data.b).flatMap(([id,hits])=>hits.flatMap((count,index)=>count===0?[{id,index,location:data.branchMap[id]?.locations[index]}]:[])),uncoveredFunctions:Object.entries(data.f).filter(([,hits])=>hits===0).map(([id])=>data.fnMap[id])};});\n writeFileSync('.git/b11-owner-measure.json',JSON.stringify({scope:'Diagnostic only; B05 instrumenter acceptance, per-package and independent review remain open. Generated using helpers may create additional obligations.',runtime:Bun.version,recordedAt:new Date().toISOString(),command,exit:run.exitCode,output,files,rawCoverage:raw,source:readFileSync('.git/b11-owner-measure.ts','utf8')},null,2)+'\\n');\n console.log(JSON.stringify(files));\n}finally{storage.cleanup();}\n"
+  },
+  "decisionChecks": {
+    "recordedAt": "2026-09-20T06:36:46.424Z",
+    "runtime": "1.4.1",
+    "scope": "Equivalent targeted decision checks; not exhaustive mutation or final independent review.",
+    "sourceInputs": [
+      {
+        "path": "src/infrastructure/database/owned-database.ts",
+        "sourceHash": "3ba2a7345679316b08ede71f00a4dba3168287bd708ac2675f749b74133d3c10"
+      },
+      {
+        "path": "src/infrastructure/database/services/stats-service.ts",
+        "sourceHash": "a76c4a86dbef8604bb66b9b0ed2960a477a4292b39cc021f0cb8df86347523aa"
+      },
+      {
+        "path": "src/infrastructure/database/owned-database.test.ts",
+        "sourceHash": "3509570bd40d52b7a84298f2a1c2d5685ba740d5022fe9d26e25c3b3bcfc5ccf"
+      },
+      {
+        "path": "src/infrastructure/database/services/stats-lifecycle.test.ts",
+        "sourceHash": "1040ebd2a80424e4e09c096908a6c1949b6f1447deb0690cfbe357f79b761a70"
+      }
+    ],
+    "runs": [
+      {
+        "fault": null,
+        "command": [
+          "C:\\Users\\Destiny\\.bun\\bin\\bun.exe",
+          "test",
+          "--timeout",
+          "15000",
+          "src/infrastructure/database/owned-database.test.ts",
+          "src/infrastructure/database/services/stats-lifecycle.test.ts"
+        ],
+        "exit": 0,
+        "output": "bun test v1.4.1 (4661e494f)\n\nsrc\\infrastructure\\database\\owned-database.test.ts:\n(pass) closes a connection's retained prepared statements [1.12ms]\n(pass) attempts other finalizers and retains failed resources for retry: Error: finalizer failure [0.52ms]\n(pass) attempts other finalizers and retains failed resources for retry: non-error finalizer failure [0.23ms]\n(pass) releases an explicitly finalized statement while the connection stays open [136.50ms]\n(pass) owns query-cache overflow, transaction controllers and partially consumed iterators [2.35ms]\n(pass) keeps both operation and disposal errors and supports recovery [0.38ms]\n(pass) preserves committed data, rolls back unfinished work and leaves another connection usable [17.97ms]\n(pass) closes discarded statements under collection pressure and releases files immediately [161.22ms]\n(pass) runs bounded stats work through the owning connection and closes it immediately [35.13ms]\n\nsrc\\infrastructure\\database\\services\\stats-lifecycle.test.ts:\n(pass) stats statement lifetime > releases every statement after each successful call without closing the connection [2.96ms]\n(pass) stats statement lifetime > releases earlier statements when preparation fails: missing-projects [0.45ms]\n(pass) stats statement lifetime > releases earlier statements when preparation fails: missing-tools [0.30ms]\n(pass) stats statement lifetime > finalizes the failed statement and earlier work when query execution throws [0.61ms]\n\n 13 pass\n 0 fail\n 488 expect() calls\nRan 13 tests across 2 files. [392.00ms]\n"
+      },
+      {
+        "fault": {
+          "name": "missing-resource-registration",
+          "path": "src/infrastructure/database/owned-database.ts",
+          "from": "owned.add(statement);",
+          "to": "void statement;"
+        },
+        "command": [
+          "C:\\Users\\Destiny\\.bun\\bin\\bun.exe",
+          "test",
+          "--timeout",
+          "15000",
+          "src/infrastructure/database/owned-database.test.ts",
+          "src/infrastructure/database/services/stats-lifecycle.test.ts"
+        ],
+        "exit": 1,
+        "output": "bun test v1.4.1 (4661e494f)\n\nsrc\\infrastructure\\database\\owned-database.test.ts:\n(pass) closes a connection's retained prepared statements [1.45ms]\n24 |     const finalize = failed.finalize;\n25 |     failed.finalize = () => { throw failure; };\n26 |     try {\n27 |       let caught: unknown;\n28 |       try { db.close(); } catch (error) { caught = error; }\n29 |       expect(caught).toBeInstanceOf(AggregateError);\n                          ^\nerror: expect(received).toBeInstanceOf(expected)\n\nExpected constructor: [class AggregateError extends Error]\nReceived value: undefined\n\n      at <anonymous> (C:\\Users\\Destiny\\AppData\\Local\\Temp\\memory-owner-faults-4TSkzn\\src\\infrastructure\\database\\owned-database.test.ts:29:22)\n(fail) attempts other finalizers and retains failed resources for retry: Error: finalizer failure [1.42ms]\n24 |     const finalize = failed.finalize;\n25 |     failed.finalize = () => { throw failure; };\n26 |     try {\n27 |       let caught: unknown;\n28 |       try { db.close(); } catch (error) { caught = error; }\n29 |       expect(caught).toBeInstanceOf(AggregateError);\n                          ^\nerror: expect(received).toBeInstanceOf(expected)\n\nExpected constructor: [class AggregateError extends Error]\nReceived value: undefined\n\n      at <anonymous> (C:\\Users\\Destiny\\AppData\\Local\\Temp\\memory-owner-faults-4TSkzn\\src\\infrastructure\\database\\owned-database.test.ts:29:22)\n(fail) attempts other finalizers and retains failed resources for retry: non-error finalizer failure [0.32ms]\n51 |         await setImmediate(); Bun.gc(true); await setTimeout(10);\n52 |         if (reference.deref() === undefined) break;\n53 |       }\n54 |     }\n55 |     await collect();\n56 |     expect(reference.deref()).toBeDefined();\n                                   ^\nerror: expect(received).toBeDefined()\n\nReceived: undefined\n\n      at <anonymous> (C:\\Users\\Destiny\\AppData\\Local\\Temp\\memory-owner-faults-4TSkzn\\src\\infrastructure\\database\\owned-database.test.ts:56:31)\n(fail) releases an explicitly finalized statement while the connection stays open [15.34ms]\n(pass) owns query-cache overflow, transaction controllers and partially consumed iterators [1.83ms]\n(pass) keeps both operation and disposal errors and supports recovery [0.30ms]\n(pass) preserves committed data, rolls back unfinished work and leaves another connection usable [19.84ms]\n(pass) closes discarded statements under collection pressure and releases files immediately [156.75ms]\n(pass) runs bounded stats work through the owning connection and closes it immediately [33.38ms]\n\nsrc\\infrastructure\\database\\services\\stats-lifecycle.test.ts:\n(pass) stats statement lifetime > releases every statement after each successful call without closing the connection [2.89ms]\n(pass) stats statement lifetime > releases earlier statements when preparation fails: missing-projects [0.55ms]\n(pass) stats statement lifetime > releases earlier statements when preparation fails: missing-tools [0.77ms]\n(pass) stats statement lifetime > finalizes the failed statement and earlier work when query execution throws [1.08ms]\n\n 10 pass\n 3 fail\n 476 expect() calls\nRan 13 tests across 2 files. [264.00ms]\n"
+      },
+      {
+        "fault": {
+          "name": "finalized-resource-retained",
+          "path": "src/infrastructure/database/owned-database.ts",
+          "from": "owned.delete(this);",
+          "to": "void this;"
+        },
+        "command": [
+          "C:\\Users\\Destiny\\.bun\\bin\\bun.exe",
+          "test",
+          "--timeout",
+          "15000",
+          "src/infrastructure/database/owned-database.test.ts",
+          "src/infrastructure/database/services/stats-lifecycle.test.ts"
+        ],
+        "exit": 1,
+        "output": "bun test v1.4.1 (4661e494f)\n\nsrc\\infrastructure\\database\\owned-database.test.ts:\n(pass) closes a connection's retained prepared statements [1.04ms]\n(pass) attempts other finalizers and retains failed resources for retry: Error: finalizer failure [0.31ms]\n(pass) attempts other finalizers and retains failed resources for retry: non-error finalizer failure [0.11ms]\n54 |     }\n55 |     await collect();\n56 |     expect(reference.deref()).toBeDefined();\n57 |     reference.deref()!.finalize();\n58 |     await collect();\n59 |     expect(reference.deref()).toBeUndefined();\n                                   ^\nerror: expect(received).toBeUndefined()\n\nReceived: Statement {\n  get: [Function: #getNoArgs],\n  all: [Function: #allNoArgs],\n  iterate: [GeneratorFunction: #iterateNoArgs],\n  values: [Function: #valuesNoArgs],\n  raw: [Function: #rawNoArgs],\n  run: [Function: #runNoArgs],\n  finalize: [Function],\n  isFinalized: [Getter],\n  toJSON: [Function: toJSON],\n  toString: [Function: toString],\n  native: [Getter],\n  safeIntegers: [Function: safeIntegers],\n  as: [Function: as],\n  columnNames: [Getter],\n  columnTypes: [Getter],\n  declaredTypes: [Getter],\n  paramsCount: [Getter],\n  [Symbol(Symbol.iterator)]: [GeneratorFunction],\n  [Symbol(Symbol.dispose)]: [Function],\n}\n\n      at <anonymous> (C:\\Users\\Destiny\\AppData\\Local\\Temp\\memory-owner-faults-4TSkzn\\src\\infrastructure\\database\\owned-database.test.ts:59:31)\n(fail) releases an explicitly finalized statement while the connection stays open [251.80ms]\n(pass) owns query-cache overflow, transaction controllers and partially consumed iterators [2.63ms]\n(pass) keeps both operation and disposal errors and supports recovery [0.34ms]\n(pass) preserves committed data, rolls back unfinished work and leaves another connection usable [18.48ms]\n(pass) closes discarded statements under collection pressure and releases files immediately [188.51ms]\n(pass) runs bounded stats work through the owning connection and closes it immediately [42.19ms]\n\nsrc\\infrastructure\\database\\services\\stats-lifecycle.test.ts:\n(pass) stats statement lifetime > releases every statement after each successful call without closing the connection [3.30ms]\n(pass) stats statement lifetime > releases earlier statements when preparation fails: missing-projects [0.49ms]\n(pass) stats statement lifetime > releases earlier statements when preparation fails: missing-tools [0.38ms]\n(pass) stats statement lifetime > finalizes the failed statement and earlier work when query execution throws [0.68ms]\n\n 12 pass\n 1 fail\n 487 expect() calls\nRan 13 tests across 2 files. [541.00ms]\n"
+      },
+      {
+        "fault": {
+          "name": "native-finalization-skipped",
+          "path": "src/infrastructure/database/owned-database.ts",
+          "from": "finalize.call(this);",
+          "to": "void finalize;"
+        },
+        "command": [
+          "C:\\Users\\Destiny\\.bun\\bin\\bun.exe",
+          "test",
+          "--timeout",
+          "15000",
+          "src/infrastructure/database/owned-database.test.ts",
+          "src/infrastructure/database/services/stats-lifecycle.test.ts"
+        ],
+        "exit": 1,
+        "output": "bun test v1.4.1 (4661e494f)\n\nsrc\\infrastructure\\database\\owned-database.test.ts:\n(pass) closes a connection's retained prepared statements [1.51ms]\n26 |     try {\n27 |       let caught: unknown;\n28 |       try { db.close(); } catch (error) { caught = error; }\n29 |       expect(caught).toBeInstanceOf(AggregateError);\n30 |       expect((caught as AggregateError).errors).toEqual([failure]);\n31 |       expect(() => healthy.get()).toThrow();\n                                       ^\nerror: expect(received).toThrow()\n\nReceived function did not throw\nReceived value: {\n  value: 2,\n}\n\n      at <anonymous> (C:\\Users\\Destiny\\AppData\\Local\\Temp\\memory-owner-faults-4TSkzn\\src\\infrastructure\\database\\owned-database.test.ts:31:35)\n(fail) attempts other finalizers and retains failed resources for retry: Error: finalizer failure [0.83ms]\n26 |     try {\n27 |       let caught: unknown;\n28 |       try { db.close(); } catch (error) { caught = error; }\n29 |       expect(caught).toBeInstanceOf(AggregateError);\n30 |       expect((caught as AggregateError).errors).toEqual([failure]);\n31 |       expect(() => healthy.get()).toThrow();\n                                       ^\nerror: expect(received).toThrow()\n\nReceived function did not throw\nReceived value: {\n  value: 2,\n}\n\n      at <anonymous> (C:\\Users\\Destiny\\AppData\\Local\\Temp\\memory-owner-faults-4TSkzn\\src\\infrastructure\\database\\owned-database.test.ts:31:35)\n(fail) attempts other finalizers and retains failed resources for retry: non-error finalizer failure [0.37ms]\n(pass) releases an explicitly finalized statement while the connection stays open [140.22ms]\n(pass) owns query-cache overflow, transaction controllers and partially consumed iterators [2.42ms]\n(pass) keeps both operation and disposal errors and supports recovery [0.54ms]\n(pass) preserves committed data, rolls back unfinished work and leaves another connection usable [18.96ms]\n(pass) closes discarded statements under collection pressure and releases files immediately [196.39ms]\n(pass) runs bounded stats work through the owning connection and closes it immediately [38.20ms]\n\nsrc\\infrastructure\\database\\services\\stats-lifecycle.test.ts:\n(pass) stats statement lifetime > releases every statement after each successful call without closing the connection [3.16ms]\n(pass) stats statement lifetime > releases earlier statements when preparation fails: missing-projects [0.52ms]\n(pass) stats statement lifetime > releases earlier statements when preparation fails: missing-tools [0.37ms]\n(pass) stats statement lifetime > finalizes the failed statement and earlier work when query execution throws [0.64ms]\n\n 11 pass\n 2 fail\n 482 expect() calls\nRan 13 tests across 2 files. [437.00ms]\n"
+      },
+      {
+        "fault": {
+          "name": "close-skips-owned-finalizers",
+          "path": "src/infrastructure/database/owned-database.ts",
+          "from": "this.finalizeStatements();",
+          "to": "void this;"
+        },
+        "command": [
+          "C:\\Users\\Destiny\\.bun\\bin\\bun.exe",
+          "test",
+          "--timeout",
+          "15000",
+          "src/infrastructure/database/owned-database.test.ts",
+          "src/infrastructure/database/services/stats-lifecycle.test.ts"
+        ],
+        "exit": 1,
+        "output": "bun test v1.4.1 (4661e494f)\n\nsrc\\infrastructure\\database\\owned-database.test.ts:\n(pass) closes a connection's retained prepared statements [1.57ms]\n24 |     const finalize = failed.finalize;\n25 |     failed.finalize = () => { throw failure; };\n26 |     try {\n27 |       let caught: unknown;\n28 |       try { db.close(); } catch (error) { caught = error; }\n29 |       expect(caught).toBeInstanceOf(AggregateError);\n                          ^\nerror: expect(received).toBeInstanceOf(expected)\n\nExpected constructor: [class AggregateError extends Error]\nReceived value: undefined\n\n      at <anonymous> (C:\\Users\\Destiny\\AppData\\Local\\Temp\\memory-owner-faults-4TSkzn\\src\\infrastructure\\database\\owned-database.test.ts:29:22)\n(fail) attempts other finalizers and retains failed resources for retry: Error: finalizer failure [0.73ms]\n24 |     const finalize = failed.finalize;\n25 |     failed.finalize = () => { throw failure; };\n26 |     try {\n27 |       let caught: unknown;\n28 |       try { db.close(); } catch (error) { caught = error; }\n29 |       expect(caught).toBeInstanceOf(AggregateError);\n                          ^\nerror: expect(received).toBeInstanceOf(expected)\n\nExpected constructor: [class AggregateError extends Error]\nReceived value: undefined\n\n      at <anonymous> (C:\\Users\\Destiny\\AppData\\Local\\Temp\\memory-owner-faults-4TSkzn\\src\\infrastructure\\database\\owned-database.test.ts:29:22)\n(fail) attempts other finalizers and retains failed resources for retry: non-error finalizer failure [0.29ms]\n(pass) releases an explicitly finalized statement while the connection stays open [139.35ms]\n(pass) owns query-cache overflow, transaction controllers and partially consumed iterators [2.32ms]\n(pass) keeps both operation and disposal errors and supports recovery [0.33ms]\n(pass) preserves committed data, rolls back unfinished work and leaves another connection usable [19.52ms]\n(pass) closes discarded statements under collection pressure and releases files immediately [181.69ms]\n(pass) runs bounded stats work through the owning connection and closes it immediately [41.11ms]\n\nsrc\\infrastructure\\database\\services\\stats-lifecycle.test.ts:\n(pass) stats statement lifetime > releases every statement after each successful call without closing the connection [2.76ms]\n(pass) stats statement lifetime > releases earlier statements when preparation fails: missing-projects [0.46ms]\n(pass) stats statement lifetime > releases earlier statements when preparation fails: missing-tools [0.34ms]\n(pass) stats statement lifetime > finalizes the failed statement and earlier work when query execution throws [0.64ms]\n\n 11 pass\n 2 fail\n 478 expect() calls\nRan 13 tests across 2 files. [425.00ms]\n"
+      },
+      {
+        "fault": {
+          "name": "finalizer-errors-swallowed",
+          "path": "src/infrastructure/database/owned-database.ts",
+          "from": "failures.push(error);",
+          "to": "void error;"
+        },
+        "command": [
+          "C:\\Users\\Destiny\\.bun\\bin\\bun.exe",
+          "test",
+          "--timeout",
+          "15000",
+          "src/infrastructure/database/owned-database.test.ts",
+          "src/infrastructure/database/services/stats-lifecycle.test.ts"
+        ],
+        "exit": 1,
+        "output": "bun test v1.4.1 (4661e494f)\n\nsrc\\infrastructure\\database\\owned-database.test.ts:\n(pass) closes a connection's retained prepared statements [2.34ms]\n24 |     const finalize = failed.finalize;\n25 |     failed.finalize = () => { throw failure; };\n26 |     try {\n27 |       let caught: unknown;\n28 |       try { db.close(); } catch (error) { caught = error; }\n29 |       expect(caught).toBeInstanceOf(AggregateError);\n                          ^\nerror: expect(received).toBeInstanceOf(expected)\n\nExpected constructor: [class AggregateError extends Error]\nReceived value: undefined\n\n      at <anonymous> (C:\\Users\\Destiny\\AppData\\Local\\Temp\\memory-owner-faults-4TSkzn\\src\\infrastructure\\database\\owned-database.test.ts:29:22)\n(fail) attempts other finalizers and retains failed resources for retry: Error: finalizer failure [1.08ms]\n24 |     const finalize = failed.finalize;\n25 |     failed.finalize = () => { throw failure; };\n26 |     try {\n27 |       let caught: unknown;\n28 |       try { db.close(); } catch (error) { caught = error; }\n29 |       expect(caught).toBeInstanceOf(AggregateError);\n                          ^\nerror: expect(received).toBeInstanceOf(expected)\n\nExpected constructor: [class AggregateError extends Error]\nReceived value: undefined\n\n      at <anonymous> (C:\\Users\\Destiny\\AppData\\Local\\Temp\\memory-owner-faults-4TSkzn\\src\\infrastructure\\database\\owned-database.test.ts:29:22)\n(fail) attempts other finalizers and retains failed resources for retry: non-error finalizer failure [0.36ms]\n(pass) releases an explicitly finalized statement while the connection stays open [142.60ms]\n(pass) owns query-cache overflow, transaction controllers and partially consumed iterators [2.75ms]\n(pass) keeps both operation and disposal errors and supports recovery [0.32ms]\n(pass) preserves committed data, rolls back unfinished work and leaves another connection usable [20.02ms]\n(pass) closes discarded statements under collection pressure and releases files immediately [205.36ms]\n(pass) runs bounded stats work through the owning connection and closes it immediately [37.22ms]\n\nsrc\\infrastructure\\database\\services\\stats-lifecycle.test.ts:\n(pass) stats statement lifetime > releases every statement after each successful call without closing the connection [2.86ms]\n(pass) stats statement lifetime > releases earlier statements when preparation fails: missing-projects [0.47ms]\n(pass) stats statement lifetime > releases earlier statements when preparation fails: missing-tools [0.37ms]\n(pass) stats statement lifetime > finalizes the failed statement and earlier work when query execution throws [0.66ms]\n\n 11 pass\n 2 fail\n 478 expect() calls\nRan 13 tests across 2 files. [450.00ms]\n"
+      },
+      {
+        "fault": {
+          "name": "failed-resource-forgotten",
+          "path": "src/infrastructure/database/owned-database.ts",
+          "from": "failures.push(error);",
+          "to": "failures.push(error); this.statements.delete(statement);"
+        },
+        "command": [
+          "C:\\Users\\Destiny\\.bun\\bin\\bun.exe",
+          "test",
+          "--timeout",
+          "15000",
+          "src/infrastructure/database/owned-database.test.ts",
+          "src/infrastructure/database/services/stats-lifecycle.test.ts"
+        ],
+        "exit": 1,
+        "output": "bun test v1.4.1 (4661e494f)\n\nsrc\\infrastructure\\database\\owned-database.test.ts:\n(pass) closes a connection's retained prepared statements [1.50ms]\n31 |       expect(() => healthy.get()).toThrow();\n32 |       expect(failed.get()).toEqual({ value: 1 });\n33 |       let recovered = 0;\n34 |       failed.finalize = function () { recovered++; finalize.call(this); };\n35 |       db.close();\n36 |       expect(recovered).toBe(1);\n                             ^\nerror: expect(received).toBe(expected)\n\nExpected: 1\nReceived: 0\n\n      at <anonymous> (C:\\Users\\Destiny\\AppData\\Local\\Temp\\memory-owner-faults-4TSkzn\\src\\infrastructure\\database\\owned-database.test.ts:36:25)\n(fail) attempts other finalizers and retains failed resources for retry: Error: finalizer failure [1.40ms]\n31 |       expect(() => healthy.get()).toThrow();\n32 |       expect(failed.get()).toEqual({ value: 1 });\n33 |       let recovered = 0;\n34 |       failed.finalize = function () { recovered++; finalize.call(this); };\n35 |       db.close();\n36 |       expect(recovered).toBe(1);\n                             ^\nerror: expect(received).toBe(expected)\n\nExpected: 1\nReceived: 0\n\n      at <anonymous> (C:\\Users\\Destiny\\AppData\\Local\\Temp\\memory-owner-faults-4TSkzn\\src\\infrastructure\\database\\owned-database.test.ts:36:25)\n(fail) attempts other finalizers and retains failed resources for retry: non-error finalizer failure [0.35ms]\n(pass) releases an explicitly finalized statement while the connection stays open [140.55ms]\n(pass) owns query-cache overflow, transaction controllers and partially consumed iterators [3.21ms]\n(pass) keeps both operation and disposal errors and supports recovery [0.54ms]\n(pass) preserves committed data, rolls back unfinished work and leaves another connection usable [20.00ms]\n(pass) closes discarded statements under collection pressure and releases files immediately [430.77ms]\n(pass) runs bounded stats work through the owning connection and closes it immediately [39.09ms]\n\nsrc\\infrastructure\\database\\services\\stats-lifecycle.test.ts:\n(pass) stats statement lifetime > releases every statement after each successful call without closing the connection [2.90ms]\n(pass) stats statement lifetime > releases earlier statements when preparation fails: missing-projects [0.43ms]\n(pass) stats statement lifetime > releases earlier statements when preparation fails: missing-tools [0.34ms]\n(pass) stats statement lifetime > finalizes the failed statement and earlier work when query execution throws [0.59ms]\n\n 11 pass\n 2 fail\n 486 expect() calls\nRan 13 tests across 2 files. [676.00ms]\n"
+      },
+      {
+        "fault": {
+          "name": "other-finalizers-not-attempted",
+          "path": "src/infrastructure/database/owned-database.ts",
+          "from": "failures.push(error);",
+          "to": "throw error;"
+        },
+        "command": [
+          "C:\\Users\\Destiny\\.bun\\bin\\bun.exe",
+          "test",
+          "--timeout",
+          "15000",
+          "src/infrastructure/database/owned-database.test.ts",
+          "src/infrastructure/database/services/stats-lifecycle.test.ts"
+        ],
+        "exit": 1,
+        "output": "bun test v1.4.1 (4661e494f)\n\nsrc\\infrastructure\\database\\owned-database.test.ts:\n(pass) closes a connection's retained prepared statements [1.18ms]\n24 |     const finalize = failed.finalize;\n25 |     failed.finalize = () => { throw failure; };\n26 |     try {\n27 |       let caught: unknown;\n28 |       try { db.close(); } catch (error) { caught = error; }\n29 |       expect(caught).toBeInstanceOf(AggregateError);\n                          ^\nerror: expect(received).toBeInstanceOf(expected)\n\nExpected constructor: [class AggregateError extends Error]\nReceived value: 16 |     expect(() => statement.get()).toThrow();\n17 |     expect(() => db.close()).not.toThrow();\n18 |   } finally { statement.finalize(); db.close(); }\n19 | });\n20 | \n21 | for (const failure of [new Error(\"finalizer failure\"), \"non-error finalizer failure\"]) {\n                                ^\nerror: finalizer failure\n      at C:\\Users\\Destiny\\AppData\\Local\\Temp\\memory-owner-faults-4TSkzn\\src\\infrastructure\\database\\owned-database.test.ts:21:28\n\n\n      at <anonymous> (C:\\Users\\Destiny\\AppData\\Local\\Temp\\memory-owner-faults-4TSkzn\\src\\infrastructure\\database\\owned-database.test.ts:29:22)\n(fail) attempts other finalizers and retains failed resources for retry: Error: finalizer failure [1.07ms]\n24 |     const finalize = failed.finalize;\n25 |     failed.finalize = () => { throw failure; };\n26 |     try {\n27 |       let caught: unknown;\n28 |       try { db.close(); } catch (error) { caught = error; }\n29 |       expect(caught).toBeInstanceOf(AggregateError);\n                          ^\nerror: expect(received).toBeInstanceOf(expected)\n\nExpected constructor: [class AggregateError extends Error]\nReceived value: \"non-error finalizer failure\"\n\n      at <anonymous> (C:\\Users\\Destiny\\AppData\\Local\\Temp\\memory-owner-faults-4TSkzn\\src\\infrastructure\\database\\owned-database.test.ts:29:22)\n(fail) attempts other finalizers and retains failed resources for retry: non-error finalizer failure [0.62ms]\n(pass) releases an explicitly finalized statement while the connection stays open [135.45ms]\n(pass) owns query-cache overflow, transaction controllers and partially consumed iterators [1.86ms]\n(pass) keeps both operation and disposal errors and supports recovery [0.28ms]\n(pass) preserves committed data, rolls back unfinished work and leaves another connection usable [19.90ms]\n(pass) closes discarded statements under collection pressure and releases files immediately [191.69ms]\n(pass) runs bounded stats work through the owning connection and closes it immediately [37.68ms]\n\nsrc\\infrastructure\\database\\services\\stats-lifecycle.test.ts:\n(pass) stats statement lifetime > releases every statement after each successful call without closing the connection [2.74ms]\n(pass) stats statement lifetime > releases earlier statements when preparation fails: missing-projects [0.42ms]\n(pass) stats statement lifetime > releases earlier statements when preparation fails: missing-tools [0.38ms]\n(pass) stats statement lifetime > finalizes the failed statement and earlier work when query execution throws [0.64ms]\n\n 11 pass\n 2 fail\n 478 expect() calls\nRan 13 tests across 2 files. [424.00ms]\n"
+      },
+      {
+        "fault": {
+          "name": "stats-retains-sizeStatement",
+          "path": "src/infrastructure/database/services/stats-service.ts",
+          "from": "using sizeStatement =",
+          "to": "const sizeStatement ="
+        },
+        "command": [
+          "C:\\Users\\Destiny\\.bun\\bin\\bun.exe",
+          "test",
+          "--timeout",
+          "15000",
+          "src/infrastructure/database/owned-database.test.ts",
+          "src/infrastructure/database/services/stats-lifecycle.test.ts"
+        ],
+        "exit": 1,
+        "output": "bun test v1.4.1 (4661e494f)\n\nsrc\\infrastructure\\database\\owned-database.test.ts:\n(pass) closes a connection's retained prepared statements [1.16ms]\n(pass) attempts other finalizers and retains failed resources for retry: Error: finalizer failure [0.38ms]\n(pass) attempts other finalizers and retains failed resources for retry: non-error finalizer failure [0.13ms]\n(pass) releases an explicitly finalized statement while the connection stays open [142.67ms]\n(pass) owns query-cache overflow, transaction controllers and partially consumed iterators [2.53ms]\n(pass) keeps both operation and disposal errors and supports recovery [0.36ms]\n(pass) preserves committed data, rolls back unfinished work and leaves another connection usable [27.87ms]\n(pass) closes discarded statements under collection pressure and releases files immediately [278.13ms]\n(pass) runs bounded stats work through the owning connection and closes it immediately [73.66ms]\n\nsrc\\infrastructure\\database\\services\\stats-lifecycle.test.ts:\n30 |         expect(stats.totalSessions).toBe(1);\n31 |         expect(stats.totalMessages).toBe(1);\n32 |         expect(stats.totalToolUses).toBe(1);\n33 |         expect(stats.projectBreakdown).toEqual([{ projectName: \"project\", sessionCount: 1, messageCount: 1 }]);\n34 |         expect(owned.statements.length).toBe((call + 1) * 3);\n35 |         for (const statement of owned.statements.slice(-3)) expect(() => statement.get()).toThrow(\"finalized\");\n                                                                                               ^\nerror: expect(received).toThrow(expected)\n\nExpected substring: \"finalized\"\n\nReceived function did not throw\nReceived value: {\n  size: 16384,\n}\n\n      at <anonymous> (C:\\Users\\Destiny\\AppData\\Local\\Temp\\memory-owner-faults-4TSkzn\\src\\infrastructure\\database\\services\\stats-lifecycle.test.ts:35:91)\n(fail) stats statement lifetime > releases every statement after each successful call without closing the connection [3.70ms]\n41 |     it(`releases earlier statements when preparation fails: ${tables}`, async () => {\n42 |       const owned = fixture(tables), service = new SqliteStatsService(owned.db);\n43 |       try {\n44 |         await expect(service.getStats()).rejects.toThrow(\"no such table\");\n45 |         expect(owned.statements.length).toBe(tables === \"missing-projects\" ? 1 : 2);\n46 |         for (const statement of owned.statements) expect(() => statement.get()).toThrow(\"finalized\");\n                                                                                     ^\nerror: expect(received).toThrow(expected)\n\nExpected substring: \"finalized\"\n\nReceived function did not throw\nReceived value: {\n  size: 0,\n}\n\n      at <anonymous> (C:\\Users\\Destiny\\AppData\\Local\\Temp\\memory-owner-faults-4TSkzn\\src\\infrastructure\\database\\services\\stats-lifecycle.test.ts:46:81)\n(fail) stats statement lifetime > releases earlier statements when preparation fails: missing-projects [1.70ms]\n41 |     it(`releases earlier statements when preparation fails: ${tables}`, async () => {\n42 |       const owned = fixture(tables), service = new SqliteStatsService(owned.db);\n43 |       try {\n44 |         await expect(service.getStats()).rejects.toThrow(\"no such table\");\n45 |         expect(owned.statements.length).toBe(tables === \"missing-projects\" ? 1 : 2);\n46 |         for (const statement of owned.statements) expect(() => statement.get()).toThrow(\"finalized\");\n                                                                                     ^\nerror: expect(received).toThrow(expected)\n\nExpected substring: \"finalized\"\n\nReceived function did not throw\nReceived value: {\n  size: 12288,\n}\n\n      at <anonymous> (C:\\Users\\Destiny\\AppData\\Local\\Temp\\memory-owner-faults-4TSkzn\\src\\infrastructure\\database\\services\\stats-lifecycle.test.ts:46:81)\n(fail) stats statement lifetime > releases earlier statements when preparation fails: missing-tools [1.54ms]\n52 |     const owned = fixture(\"complete\"), service = new SqliteStatsService(owned.db);\n53 |     try {\n54 |       owned.db.exec(\"DROP TABLE sessions; CREATE VIEW sessions AS SELECT 'id' AS id, json_extract('broken', '$') AS project_name\");\n55 |       await expect(service.getStats()).rejects.toThrow(\"malformed JSON\");\n56 |       expect(owned.statements.length).toBe(2);\n57 |       for (const statement of owned.statements) expect(() => statement.get()).toThrow(\"finalized\");\n                                                                                   ^\nerror: expect(received).toThrow(expected)\n\nExpected substring: \"finalized\"\n\nReceived function did not throw\nReceived value: {\n  size: 16384,\n}\n\n      at <anonymous> (C:\\Users\\Destiny\\AppData\\Local\\Temp\\memory-owner-faults-4TSkzn\\src\\infrastructure\\database\\services\\stats-lifecycle.test.ts:57:79)\n(fail) stats statement lifetime > finalizes the failed statement and earlier work when query execution throws [2.41ms]\n\n 9 pass\n 4 fail\n 292 expect() calls\nRan 13 tests across 2 files. [571.00ms]\n"
+      },
+      {
+        "fault": {
+          "name": "stats-retains-projectStatement",
+          "path": "src/infrastructure/database/services/stats-service.ts",
+          "from": "using projectStatement =",
+          "to": "const projectStatement ="
+        },
+        "command": [
+          "C:\\Users\\Destiny\\.bun\\bin\\bun.exe",
+          "test",
+          "--timeout",
+          "15000",
+          "src/infrastructure/database/owned-database.test.ts",
+          "src/infrastructure/database/services/stats-lifecycle.test.ts"
+        ],
+        "exit": 1,
+        "output": "bun test v1.4.1 (4661e494f)\n\nsrc\\infrastructure\\database\\owned-database.test.ts:\n(pass) closes a connection's retained prepared statements [1.48ms]\n(pass) attempts other finalizers and retains failed resources for retry: Error: finalizer failure [0.49ms]\n(pass) attempts other finalizers and retains failed resources for retry: non-error finalizer failure [0.16ms]\n(pass) releases an explicitly finalized statement while the connection stays open [143.24ms]\n(pass) owns query-cache overflow, transaction controllers and partially consumed iterators [3.55ms]\n(pass) keeps both operation and disposal errors and supports recovery [0.62ms]\n(pass) preserves committed data, rolls back unfinished work and leaves another connection usable [119.60ms]\n(pass) closes discarded statements under collection pressure and releases files immediately [337.48ms]\n(pass) runs bounded stats work through the owning connection and closes it immediately [127.40ms]\n\nsrc\\infrastructure\\database\\services\\stats-lifecycle.test.ts:\n30 |         expect(stats.totalSessions).toBe(1);\n31 |         expect(stats.totalMessages).toBe(1);\n32 |         expect(stats.totalToolUses).toBe(1);\n33 |         expect(stats.projectBreakdown).toEqual([{ projectName: \"project\", sessionCount: 1, messageCount: 1 }]);\n34 |         expect(owned.statements.length).toBe((call + 1) * 3);\n35 |         for (const statement of owned.statements.slice(-3)) expect(() => statement.get()).toThrow(\"finalized\");\n                                                                                               ^\nerror: expect(received).toThrow(expected)\n\nExpected substring: \"finalized\"\n\nReceived function did not throw\nReceived value: {\n  projectName: \"project\",\n  sessionCount: 1,\n  messageCount: 1,\n}\n\n      at <anonymous> (C:\\Users\\Destiny\\AppData\\Local\\Temp\\memory-owner-faults-4TSkzn\\src\\infrastructure\\database\\services\\stats-lifecycle.test.ts:35:91)\n(fail) stats statement lifetime > releases every statement after each successful call without closing the connection [2.41ms]\n(pass) stats statement lifetime > releases earlier statements when preparation fails: missing-projects [0.67ms]\n41 |     it(`releases earlier statements when preparation fails: ${tables}`, async () => {\n42 |       const owned = fixture(tables), service = new SqliteStatsService(owned.db);\n43 |       try {\n44 |         await expect(service.getStats()).rejects.toThrow(\"no such table\");\n45 |         expect(owned.statements.length).toBe(tables === \"missing-projects\" ? 1 : 2);\n46 |         for (const statement of owned.statements) expect(() => statement.get()).toThrow(\"finalized\");\n                                                                                     ^\nerror: expect(received).toThrow(expected)\n\nExpected substring: \"finalized\"\n\nReceived function did not throw\nReceived value: {\n  projectName: \"project\",\n  sessionCount: 1,\n  messageCount: 1,\n}\n\n      at <anonymous> (C:\\Users\\Destiny\\AppData\\Local\\Temp\\memory-owner-faults-4TSkzn\\src\\infrastructure\\database\\services\\stats-lifecycle.test.ts:46:81)\n(fail) stats statement lifetime > releases earlier statements when preparation fails: missing-tools [1.06ms]\n52 |     const owned = fixture(\"complete\"), service = new SqliteStatsService(owned.db);\n53 |     try {\n54 |       owned.db.exec(\"DROP TABLE sessions; CREATE VIEW sessions AS SELECT 'id' AS id, json_extract('broken', '$') AS project_name\");\n55 |       await expect(service.getStats()).rejects.toThrow(\"malformed JSON\");\n56 |       expect(owned.statements.length).toBe(2);\n57 |       for (const statement of owned.statements) expect(() => statement.get()).toThrow(\"finalized\");\n                                                                                   ^\nerror: expect(received).toThrow(expected)\n\nExpected substring: \"finalized\"\nReceived message: \"malformed JSON\"\n\n      at <anonymous> (C:\\Users\\Destiny\\AppData\\Local\\Temp\\memory-owner-faults-4TSkzn\\src\\infrastructure\\database\\services\\stats-lifecycle.test.ts:57:79)\n(fail) stats statement lifetime > finalizes the failed statement and earlier work when query execution throws [84.88ms]\n\n 10 pass\n 3 fail\n 295 expect() calls\nRan 13 tests across 2 files. [870.00ms]\n"
+      },
+      {
+        "fault": {
+          "name": "stats-retains-toolUsesStatement",
+          "path": "src/infrastructure/database/services/stats-service.ts",
+          "from": "using toolUsesStatement =",
+          "to": "const toolUsesStatement ="
+        },
+        "command": [
+          "C:\\Users\\Destiny\\.bun\\bin\\bun.exe",
+          "test",
+          "--timeout",
+          "15000",
+          "src/infrastructure/database/owned-database.test.ts",
+          "src/infrastructure/database/services/stats-lifecycle.test.ts"
+        ],
+        "exit": 1,
+        "output": "bun test v1.4.1 (4661e494f)\n\nsrc\\infrastructure\\database\\owned-database.test.ts:\n(pass) closes a connection's retained prepared statements [1.72ms]\n(pass) attempts other finalizers and retains failed resources for retry: Error: finalizer failure [0.50ms]\n(pass) attempts other finalizers and retains failed resources for retry: non-error finalizer failure [0.18ms]\n(pass) releases an explicitly finalized statement while the connection stays open [145.18ms]\n(pass) owns query-cache overflow, transaction controllers and partially consumed iterators [4.46ms]\n(pass) keeps both operation and disposal errors and supports recovery [0.76ms]\n(pass) preserves committed data, rolls back unfinished work and leaves another connection usable [29.40ms]\n(pass) closes discarded statements under collection pressure and releases files immediately [333.40ms]\n(pass) runs bounded stats work through the owning connection and closes it immediately [85.95ms]\n\nsrc\\infrastructure\\database\\services\\stats-lifecycle.test.ts:\n30 |         expect(stats.totalSessions).toBe(1);\n31 |         expect(stats.totalMessages).toBe(1);\n32 |         expect(stats.totalToolUses).toBe(1);\n33 |         expect(stats.projectBreakdown).toEqual([{ projectName: \"project\", sessionCount: 1, messageCount: 1 }]);\n34 |         expect(owned.statements.length).toBe((call + 1) * 3);\n35 |         for (const statement of owned.statements.slice(-3)) expect(() => statement.get()).toThrow(\"finalized\");\n                                                                                               ^\nerror: expect(received).toThrow(expected)\n\nExpected substring: \"finalized\"\n\nReceived function did not throw\nReceived value: {\n  totalToolUses: 1,\n}\n\n      at <anonymous> (C:\\Users\\Destiny\\AppData\\Local\\Temp\\memory-owner-faults-4TSkzn\\src\\infrastructure\\database\\services\\stats-lifecycle.test.ts:35:91)\n(fail) stats statement lifetime > releases every statement after each successful call without closing the connection [2.60ms]\n(pass) stats statement lifetime > releases earlier statements when preparation fails: missing-projects [0.64ms]\n(pass) stats statement lifetime > releases earlier statements when preparation fails: missing-tools [0.47ms]\n(pass) stats statement lifetime > finalizes the failed statement and earlier work when query execution throws [0.93ms]\n\n 12 pass\n 1 fail\n 296 expect() calls\nRan 13 tests across 2 files. [740.00ms]\n"
+      }
+    ],
+    "source": "import {readFileSync,writeFileSync,mkdirSync} from 'node:fs';\nimport {join,dirname} from 'node:path';\nimport {createOwnedTestDirectory} from '../tests/helpers/owned-test-directory';\nimport {sourceHash} from '../scripts/quality-inventory';\nconst root=process.cwd(),storage=createOwnedTestDirectory('memory-owner-faults-');\nconst owner='src/infrastructure/database/owned-database.ts',stats='src/infrastructure/database/services/stats-service.ts';\nconst paths=[owner,stats,'src/infrastructure/database/owned-database.test.ts','src/infrastructure/database/services/stats-lifecycle.test.ts'];\nconst originals=new Map(paths.map(path=>[path,readFileSync(path,'utf8')]));\nconst faults=[\n {name:'missing-resource-registration',path:owner,from:'owned.add(statement);',to:'void statement;'},\n {name:'finalized-resource-retained',path:owner,from:'owned.delete(this);',to:'void this;'},\n {name:'native-finalization-skipped',path:owner,from:'finalize.call(this);',to:'void finalize;'},\n {name:'close-skips-owned-finalizers',path:owner,from:'this.finalizeStatements();',to:'void this;'},\n {name:'finalizer-errors-swallowed',path:owner,from:'failures.push(error);',to:'void error;'},\n {name:'failed-resource-forgotten',path:owner,from:'failures.push(error);',to:'failures.push(error); this.statements.delete(statement);'},\n {name:'other-finalizers-not-attempted',path:owner,from:'failures.push(error);',to:'throw error;'},\n ...['sizeStatement','projectStatement','toolUsesStatement'].map(name=>({name:'stats-retains-'+name,path:stats,from:'using '+name+' =',to:'const '+name+' ='})),\n];\nconst runs:any[]=[];\nfunction put(path:string,content:string){mkdirSync(dirname(join(storage.dir,path)),{recursive:true});writeFileSync(join(storage.dir,path),content);}\ntry{\n for(const [path,content]of originals)put(path,content);\n put('tests/helpers/owned-test-directory.ts','export * from '+JSON.stringify(join(root,'tests/helpers/owned-test-directory.ts').replaceAll('\\\\','/'))+';');\n put('bunfig.toml','[test]\\ncoverage=false\\npreload=['+JSON.stringify(join(root,'tests/test-setup.ts').replaceAll('\\\\','/'))+']\\n');\n for(const fault of [null,...faults]){\n  for(const [path,content]of originals)put(path,content);\n  if(fault){const original=originals.get(fault.path)!;if(original.split(fault.from).length!==2)throw Error('Ambiguous fault '+fault.name);put(fault.path,original.replace(fault.from,fault.to));}\n  const command=[process.execPath,'test','--timeout','15000','src/infrastructure/database/owned-database.test.ts','src/infrastructure/database/services/stats-lifecycle.test.ts'];\n  const child=Bun.spawnSync(command,{cwd:storage.dir,env:{...process.env,TEMP:storage.dir,TMP:storage.dir,TMPDIR:storage.dir},stdout:'pipe',stderr:'pipe',timeout:45000});\n  const output=new TextDecoder().decode(child.stdout)+new TextDecoder().decode(child.stderr);\n  runs.push({fault,command,exit:child.exitCode,output});\n  if(fault ? child.exitCode===0||!output.includes('(fail)') : child.exitCode!==0)throw Error('Unexpected fault result '+JSON.stringify(fault)+'\\n'+output);\n }\n writeFileSync('.git/b11-owner-faults.json',JSON.stringify({recordedAt:new Date().toISOString(),runtime:Bun.version,scope:'Equivalent targeted decision checks; not exhaustive mutation or final independent review.',sourceInputs:paths.map(path=>({path,sourceHash:sourceHash(originals.get(path)!)})),runs,source:readFileSync('.git/b11-owner-faults.ts','utf8')},null,2)+'\\n');\n console.log(JSON.stringify(runs.map(run=>({name:run.fault?.name??'baseline',exit:run.exit}))));\n}finally{storage.cleanup();}\n"
+  },
+  "limits": [
+    "Not a complete native lifecycle fix: main factory unchanged; B11.74.3-.6 must dispose mapped callers and activate ownership. B11.74.7 retains full platform/metric/review acceptance.",
+    "Stats branch diagnostics remain 60% (the same historical Q031 gap); no coverage exclusion or fabricated native null-result case added. Q031 owns meaningful disposition before B10/R02; B11.74.7 also requires it.",
+    "Owner, owner test and stats lifetime test have diagnostic 100% in all four metrics. B05 optional-chain/instrumentation completeness is still open; diagnostics are not approved per-file/package/changed-line acceptance.",
+    "Ten targeted faults detected; this is equivalent scoped decision evidence, not exhaustive mutation or independent review.",
+    "Windows Bun 1.3.14 and 1.4.1 verified. Linux, declared lower runtime range, installed artifact, whole suite, hosted CI and final independent review remain unverified.",
+    "Native-constructor or synthetic teardown failure handling in new file fixtures remains within B11.74.7 driver review; the child diagnostics own an outer temporary root and remove it after termination.",
+    "Current language using success/error disposal and dual-error preservation were executed on both tested runtimes. Engine range admission remains D02/D03."
+  ],
+  "validation": {
+    "command": "bun .git/b11-owner-validate.ts",
+    "exit": 0,
+    "recordedAt": "2026-09-20T06:46:52.205Z",
+    "result": "449-file/two-package catalog reconciled; source-bound native/coverage/fault evidence verified; 223-file historical map reconciled to baseline/current unchanged sources; 232-item acyclic ledger retains activation and final-acceptance barriers; pinned runtime absent.",
+    "source": "import {strict as assert} from 'node:assert';\nimport {readFileSync,writeFileSync,existsSync} from 'node:fs';\nimport {resolve} from 'node:path';\nimport {createCoverageMap} from 'istanbul-lib-coverage';\nimport {discoverInventory,validateInventory,sourceHash} from '../scripts/quality-inventory';\nconst root='.planning/memory-resilience/',read=(path:string)=>JSON.parse(readFileSync(path,'utf8'));\nconst path=root+'evidence/B11.74.2.json',record=read(path),catalog=discoverInventory(process.cwd());\nassert.equal(catalog.files.length,449);assert.equal(catalog.packages.length,2);assert.deepEqual(catalog,read(root+'executable-catalog.json'));assert.deepEqual(validateInventory(catalog,read(root+'quality-classifications.json')),[]);\nfor(const input of record.sourceInputs){assert.equal(input.sourceHash,sourceHash(readFileSync(input.path,'utf8')));for(const rows of [record.diagnosticCoverage.files,record.decisionChecks.sourceInputs,record.pinnedRuntime.sourceInputs])assert.equal(rows.find((row:any)=>row.path===input.path).sourceHash,input.sourceHash);}\nconst coverage=createCoverageMap(record.diagnosticCoverage.rawCoverage);\nfor(const entry of record.diagnosticCoverage.files){assert.deepEqual(coverage.fileCoverageFor(resolve(entry.path)).toSummary().data,entry.metrics);for(const name of ['statements','branches','functions','lines'])assert(entry.metrics[name].total>0);}\nfor(const file of record.diagnosticCoverage.files.filter((file:any)=>!file.path.endsWith('/stats-service.ts')))for(const name of ['statements','branches','functions','lines'])assert.equal(file.metrics[name].pct,100);\nassert.equal(record.diagnosticCoverage.files.find((file:any)=>file.path.endsWith('/stats-service.ts')).metrics.branches.pct,60);\nfor(const run of [record.checks[0],...record.pinnedRuntime.runs]){assert.equal(run.exit,0);assert(run.output.includes('31 pass')&&run.output.includes('0 fail')&&run.output.includes('527 expect()'));}\nassert.equal(record.decisionChecks.runs.length,11);assert.equal(record.decisionChecks.runs[0].exit,0);for(const run of record.decisionChecks.runs.slice(1)){assert.equal(run.exit,1);assert(run.output.includes('(fail)'));}\nassert(!existsSync(record.removedRuntimeRoot));\nconst map=read(root+'evidence/B11.74-lifetime-map.json');assert.equal(map.scannedFiles.length,223);\nfor(const source of map.scannedFiles){let current=readFileSync(source.path,'utf8');if(source.path==='src/infrastructure/database/services/stats-service.ts'){const old=Bun.spawnSync(['git','show','fa823d1:'+source.path],{stdout:'pipe',stderr:'pipe'});assert.equal(old.exitCode,0);current=new TextDecoder().decode(old.stdout);}assert.equal(sourceHash(current),source.sourceHash,'Historical map drift '+source.path);}\nassert.equal(map.sites.filter((site:any)=>site.native&&site.name==='prepare').length,169);assert.equal(map.sites.filter((site:any)=>site.native&&site.name==='query').length,24);for(const site of map.sites.filter((site:any)=>site.classification==='unrelated-or-unresolved'))assert(site.disposition);\nconst ledger=read(root+'work-items.json'),items=new Map<string,any>(ledger.items.map((item:any)=>[item.id,item])),done=new Set<string>();\nfunction visit(id:string,stack=new Set<string>()){assert(items.has(id)&&!stack.has(id),'Invalid dependency '+id);if(done.has(id))return;for(const dep of items.get(id).depends_on)visit(dep,new Set([...stack,id]));done.add(id);}\nassert.equal(items.size,232);assert.equal(items.size,ledger.items.length);for(const id of items.keys())visit(id);\nassert.equal(ledger.current_item,'B11.74.3');assert.deepEqual(ledger.items.filter((item:any)=>item.status==='active').map((item:any)=>item.id),['B11.74.3']);assert.equal(items.get('B11.74').status,'pending');for(let child=1;child<=7;child++)assert(items.get('B11.74').depends_on.includes('B11.74.'+child));assert(items.get('B11.74.7').depends_on.includes('Q031'));\nassert(!readFileSync('src/infrastructure/database/connection.ts','utf8').includes('OwnedDatabase'));\nrecord.validation={command:'bun .git/b11-owner-validate.ts',exit:0,recordedAt:new Date().toISOString(),result:'449-file/two-package catalog reconciled; source-bound native/coverage/fault evidence verified; 223-file historical map reconciled to baseline/current unchanged sources; 232-item acyclic ledger retains activation and final-acceptance barriers; pinned runtime absent.',source:readFileSync('.git/b11-owner-validate.ts','utf8'),isolation:{exit:0,output:readFileSync('.git/b11-owner-isolation.txt','utf8')}};\nwriteFileSync(path,JSON.stringify(record,null,2)+'\\n');console.log(record.validation.result);\n",
+    "isolation": {
+      "exit": 0,
+      "output": "$ bun run scripts/check-test-isolation.ts\r\ntest-isolation gate: PASS (no violations)\r\n"
+    }
+  }
+}

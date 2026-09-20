@@ -6234,6 +6234,88 @@
       }
     },
     {
+      "path": "src/infrastructure/database/owned-database.test.ts",
+      "package": "package.json",
+      "tier": "S",
+      "rationale": "Owns temporary native database files and performs immediate deletion; adversarial finalization/transaction tests.",
+      "applicability": {
+        "mode": "measure",
+        "reason": "Executable resource lifecycle source/test driver. No exception approved."
+      },
+      "decisionStatus": "proposed - independent review pending",
+      "sourceHash": "3509570bd40d52b7a84298f2a1c2d5685ba740d5022fe9d26e25c3b3bcfc5ccf",
+      "inspection": {
+        "sourceRevision": "fa823d118e8278c84ef74f3e16bcb7aeb9e5ad9b + current source hash",
+        "anchor": "owned statement lifecycle",
+        "scope": "Full scoped source read and behavioral/fault diagnostics; tier and complete metric applicability require independent review."
+      },
+      "metricApplicability": {
+        "status": "diagnostic - B05 and independent review pending",
+        "evidence": ".planning/memory-resilience/evidence/B11.74.2.json",
+        "sourceHash": "3509570bd40d52b7a84298f2a1c2d5685ba740d5022fe9d26e25c3b3bcfc5ccf",
+        "disposition": "Measure every denominator. Diagnostic completeness, package and changed-line acceptance remain open; no exclusion approved.",
+        "metrics": {
+          "lines": {
+            "observedCounterTotal": 113,
+            "proposal": "measure - completeness unverified"
+          },
+          "functions": {
+            "observedCounterTotal": 22,
+            "proposal": "measure - completeness unverified"
+          },
+          "statements": {
+            "observedCounterTotal": 167,
+            "proposal": "measure - completeness unverified"
+          },
+          "branches": {
+            "observedCounterTotal": 4,
+            "proposal": "measure - completeness unverified"
+          }
+        }
+      }
+    },
+    {
+      "path": "src/infrastructure/database/owned-database.ts",
+      "package": "package.json",
+      "tier": "S",
+      "rationale": "Controls native resource ownership, finalization and connection close with retry after failure.",
+      "applicability": {
+        "mode": "measure",
+        "reason": "Executable resource lifecycle source/test driver. No exception approved."
+      },
+      "decisionStatus": "proposed - independent review pending",
+      "sourceHash": "3ba2a7345679316b08ede71f00a4dba3168287bd708ac2675f749b74133d3c10",
+      "inspection": {
+        "sourceRevision": "fa823d118e8278c84ef74f3e16bcb7aeb9e5ad9b + current source hash",
+        "anchor": "owned statement lifecycle",
+        "scope": "Full scoped source read and behavioral/fault diagnostics; tier and complete metric applicability require independent review."
+      },
+      "metricApplicability": {
+        "status": "diagnostic - B05 and independent review pending",
+        "evidence": ".planning/memory-resilience/evidence/B11.74.2.json",
+        "sourceHash": "3ba2a7345679316b08ede71f00a4dba3168287bd708ac2675f749b74133d3c10",
+        "disposition": "Measure every denominator. Diagnostic completeness, package and changed-line acceptance remain open; no exclusion approved.",
+        "metrics": {
+          "lines": {
+            "observedCounterTotal": 16,
+            "proposal": "measure - completeness unverified"
+          },
+          "functions": {
+            "observedCounterTotal": 4,
+            "proposal": "measure - completeness unverified"
+          },
+          "statements": {
+            "observedCounterTotal": 18,
+            "proposal": "measure - completeness unverified"
+          },
+          "branches": {
+            "observedCounterTotal": 3,
+            "proposal": "measure - completeness unverified"
+          }
+        }
+      }
+    },
+    {
       "path": "src/infrastructure/database/repositories/backfill-state-repository.test.ts",
       "package": "package.json",
       "sourceHash": "fcab3aec5656dd0f48c225b85cff3a80f9b2eb735e267d034bcc09bd610d81e5",
@@ -7923,6 +8005,47 @@
       }
     },
     {
+      "path": "src/infrastructure/database/services/stats-lifecycle.test.ts",
+      "package": "package.json",
+      "tier": "S",
+      "rationale": "Creates and mutates synthetic SQLite schemas while asserting disposal across operation failures.",
+      "applicability": {
+        "mode": "measure",
+        "reason": "Executable resource lifecycle source/test driver. No exception approved."
+      },
+      "decisionStatus": "proposed - independent review pending",
+      "sourceHash": "1040ebd2a80424e4e09c096908a6c1949b6f1447deb0690cfbe357f79b761a70",
+      "inspection": {
+        "sourceRevision": "fa823d118e8278c84ef74f3e16bcb7aeb9e5ad9b + current source hash",
+        "anchor": "owned statement lifecycle",
+        "scope": "Full scoped source read and behavioral/fault diagnostics; tier and complete metric applicability require independent review."
+      },
+      "metricApplicability": {
+        "status": "diagnostic - B05 and independent review pending",
+        "evidence": ".planning/memory-resilience/evidence/B11.74.2.json",
+        "sourceHash": "1040ebd2a80424e4e09c096908a6c1949b6f1447deb0690cfbe357f79b761a70",
+        "disposition": "Measure every denominator. Diagnostic completeness, package and changed-line acceptance remain open; no exclusion approved.",
+        "metrics": {
+          "lines": {
+            "observedCounterTotal": 42,
+            "proposal": "measure - completeness unverified"
+          },
+          "functions": {
+            "observedCounterTotal": 10,
+            "proposal": "measure - completeness unverified"
+          },
+          "statements": {
+            "observedCounterTotal": 55,
+            "proposal": "measure - completeness unverified"
+          },
+          "branches": {
+            "observedCounterTotal": 6,
+            "proposal": "measure - completeness unverified"
+          }
+        }
+      }
+    },
+    {
       "path": "src/infrastructure/database/services/stats-service.test.ts",
       "package": "package.json",
       "sourceHash": "4b0e6e390cd86821388ff846cfa02f382f6b38465a34282a1df39b2317b475bf",
@@ -7967,7 +8090,7 @@
     {
       "path": "src/infrastructure/database/services/stats-service.ts",
       "package": "package.json",
-      "sourceHash": "c2adca1e7498b7bc646fe486c9826c115d6a3d6ca042a4c32e36ff60a9e56994",
+      "sourceHash": "a76c4a86dbef8604bb66b9b0ed2960a477a4292b39cc021f0cb8df86347523aa",
       "tier": "A",
       "rationale": "Full module inspected: read-only prepared SELECT/PRAGMA queries, numeric aggregation and project-count formatting. No writes, provider egress or access-control decision.",
       "applicability": {
@@ -7976,30 +8099,30 @@
       },
       "decisionStatus": "proposed - independent review pending",
       "inspection": {
-        "sourceRevision": "39c895b13e768bd607070efbc3496d47a821b257",
-        "anchor": "SqliteStatsService.getStats",
-        "scope": "complete module"
+        "sourceRevision": "fa823d118e8278c84ef74f3e16bcb7aeb9e5ad9b + current source hash",
+        "anchor": "getStats scope disposal",
+        "scope": "Full scoped source read and behavioral/fault diagnostics; tier and complete metric applicability require independent review."
       },
       "metricApplicability": {
-        "status": "proposed - independent review pending",
-        "evidence": ".planning/memory-resilience/evidence/B04-applicability-probe.json",
-        "sourceHash": "c2adca1e7498b7bc646fe486c9826c115d6a3d6ca042a4c32e36ff60a9e56994",
-        "disposition": "Measure every positive denominator; individually review zero branch/function denominators against runtime syntax. Observed counts do not prove instrumentation completeness. Optional-chain syntax is present; synthetic evidence shows current instrumentation omits its decision counters. B05.1 owns source-mapped branch proof before numeric acceptance.",
+        "status": "diagnostic - B05 and independent review pending",
+        "evidence": ".planning/memory-resilience/evidence/B11.74.2.json",
+        "sourceHash": "a76c4a86dbef8604bb66b9b0ed2960a477a4292b39cc021f0cb8df86347523aa",
+        "disposition": "Measure every denominator. Diagnostic completeness, package and changed-line acceptance remain open; no exclusion approved.",
         "metrics": {
-          "statements": {
-            "observedCounterTotal": 10,
-            "proposal": "measure - completeness unverified"
-          },
-          "branches": {
-            "observedCounterTotal": 5,
+          "lines": {
+            "observedCounterTotal": 11,
             "proposal": "measure - completeness unverified"
           },
           "functions": {
             "observedCounterTotal": 5,
             "proposal": "measure - completeness unverified"
           },
-          "lines": {
-            "observedCounterTotal": 8,
+          "statements": {
+            "observedCounterTotal": 13,
+            "proposal": "measure - completeness unverified"
+          },
+          "branches": {
+            "observedCounterTotal": 5,
             "proposal": "measure - completeness unverified"
           }
         }

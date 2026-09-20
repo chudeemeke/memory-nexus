@@ -1,5 +1,37 @@
 # Memory resilience execution journal
 
+## 2026-09-20 - Explicit native owner and bounded stats slice verified locally
+
+- Previous turn was progress at fa823d1; worktree began clean. Mapped 223 production
+  and script files: 169 native prepares (30 retained fields), 24 cached queries,
+  six native constructors, 16 typed transactions and 27 shared factory calls.
+  Preserved all 27 non-native/dynamic selections with explicit dispositions.
+- Split B11.74 into seven children with the parent as an acceptance barrier.
+  B11.74.1 static mapping and B11.74.2 local owner/stats proof are verified within
+  their stated scope. B11.74.3 is active. Ledger 232; catalog 449 / two packages.
+- Actual RED: retained native statement remained usable after close; stats kept
+  statements alive after success and failed preparation. Added internal strong
+  ownership with deregistration on finalize and all-finalizer failure/retry
+  handling. Stats now uses scoped disposal. Main factory remains unchanged until
+  the other mapped one-off callers are migrated.
+- Current native group: 31 pass / 527 assertions on both Windows Bun 1.3.14 and
+  1.4.1. Includes 20 x 500 collection-pressure statements, immediate file removal,
+  transaction/iterator lifetime, rollback and dual-error disposal. Ten targeted
+  faults detected; source/script/scoped-test types pass. Pinned runtime digest
+  verified; its download and synthetic fixtures removed after the child ended.
+- Owner and both new drivers show diagnostic 100% metrics. Stats retains the
+  existing Q031 60% branch gap; B11.74.7 explicitly requires Q031. B05 completeness,
+  new fixture error-path review, per-package/changed-line proof, Linux, installed
+  behavior, hosted CI and final independent review remain open. No exclusions.
+- Ledger validation caught a proposed cycle through Q031 -> B09 -> native
+  closure. Promoted Q031 from a historical candidate to a confirmed scoped gap,
+  depending on B11.74.2 instead of the full scan. B09 remains required by B10;
+  no full-scan or quality acceptance barrier was removed.
+- Next B11.74.3: repository statement disposal and retained-owner construction
+  audit. Start from the frozen source map and current files; do not regenerate
+  historical evidence over changed source. Factory wiring is B11.74.6, complete
+  native acceptance B11.74.7. Baseline still precedes the embedding experiment.
+
 ## 2026-09-20 - Weak statement ownership rejected by synthetic native pressure
 
 - Continued B11.74 from b9162eb. Retained-statement shared-close RED led to a
