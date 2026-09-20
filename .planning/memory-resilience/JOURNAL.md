@@ -1,5 +1,27 @@
 # Memory resilience execution journal
 
+## 2026-09-20 - B11.1 lock, marker and retry proof
+
+- Previous turn progressed: 59772dc added owned cleanup. Actual Windows external
+  file-lock proof now verifies retention, unchanged owner marker and successful
+  retry after the holder exits. Linux executes the same portable helper/caller
+  tests and skips only that Windows lock case.
+- Added marker allocation/restoration failure and replaced-allocation tests,
+  copied-marker identity regression, default entrypoint and non-Error diagnostics.
+- Expanded repeats exposed real export-fixture EBUSY failures. Immediate GC-only
+  retries also reproduced the failure. Bounded recollection with 100/200 ms
+  pacing passed five repeats; all original failures and logs are retained.
+- Final source: Windows 52 pass, 144 assertions; Linux 51 pass, one Windows skip,
+  138 assertions. Targeted types pass. Both helpers have 100% direct-Istanbul
+  diagnostic metrics; bypassing the inode check causes the copied-marker test
+  to fail. This is one mutation, not complete Tier S or instrumenter acceptance.
+- Three exact failed synthetic export allocations reclaimed after identity/marker
+  verification. Small generated diagnostic snapshots stay under project .git.
+- B11.1 remains active for regression-driver applicability/coverage, broader
+  adversarial/decision proof and independent review. B04 remains unreviewed;
+  B05 and full release acceptance remain open. No production memory/model run.
+
+
 ## 2026-09-20 - B11.1 owned fixture cleanup candidate
 
 - Previous turn progressed: 61c7575 recorded metric/counter diagnostics. Selected

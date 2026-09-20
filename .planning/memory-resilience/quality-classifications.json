@@ -17331,7 +17331,7 @@
     {
       "path": "tests/helpers/owned-test-directory.ts",
       "package": "package.json",
-      "sourceHash": "b72f5b5d1f2c7f77ee5e071fdca5d139b96e6563e7f0980f9d77f85989d64d41",
+      "sourceHash": "c01eaafd0469da23d08b13fd9ac6277e8654309018f4dc4653e8b7a1892cdfe6",
       "tier": "S",
       "rationale": "Allocates or reclaims temporary filesystem state and verifies identity/ownership. Incorrect cleanup can delete foreign data or conceal retained storage.",
       "applicability": {
@@ -17340,15 +17340,16 @@
       },
       "decisionStatus": "proposed - independent review pending",
       "metricApplicability": {
-        "status": "invalidated - new source requires measurement and review",
-        "previousSourceHash": null,
-        "reason": "B11.1 changes ownership/lifecycle behavior; prior metric evidence does not apply."
+        "status": "proposed - independent review pending",
+        "sourceHash": "c01eaafd0469da23d08b13fd9ac6277e8654309018f4dc4653e8b7a1892cdfe6",
+        "diagnostic": ".planning/memory-resilience/evidence/B11.1-helper-metrics.json",
+        "reason": "Current isolated direct-Istanbul diagnostic reports all four metrics at 100%; complete decision proof, instrumenter acceptance and independent review remain required."
       }
     },
     {
       "path": "tests/helpers/test-database.test.ts",
       "package": "package.json",
-      "sourceHash": "0b4f3fff7457d3b9d0bde2c64fe4ff2f48ca6b7ff72f5a788ede6012c8de16b6",
+      "sourceHash": "c2f2c2af8b38b8531228bc0e596920dd70d6886cb66ed5417b45137643f4efa3",
       "tier": "S",
       "rationale": "Runs real SQLite and owned-directory mutation/replacement/link/failure regressions. Incorrect fixture cleanup can remove filesystem state.",
       "applicability": {
@@ -17357,15 +17358,16 @@
       },
       "decisionStatus": "proposed - independent review pending",
       "metricApplicability": {
-        "status": "invalidated - new source requires measurement and review",
-        "previousSourceHash": null,
-        "reason": "B11.1 changes ownership/lifecycle behavior; prior metric evidence does not apply."
+        "status": "invalidated - current driver metric evidence pending",
+        "sourceHash": "c2f2c2af8b38b8531228bc0e596920dd70d6886cb66ed5417b45137643f4efa3",
+        "diagnostic": null,
+        "reason": "Regression driver changed; no prior numerical applicability or exclusion approval transferred."
       }
     },
     {
       "path": "tests/helpers/test-database.ts",
       "package": "package.json",
-      "sourceHash": "662cbfd7f04f46ae8a61da1c27936d102e3fbf89c55c8268546311ea7b646710",
+      "sourceHash": "c9d9edafc637d537d53fc14c4edf0d154f303c396372638323b96bd478657d30",
       "tier": "S",
       "rationale": "Allocates or reclaims temporary filesystem state and verifies identity/ownership. Incorrect cleanup can delete foreign data or conceal retained storage.",
       "applicability": {
@@ -17374,9 +17376,10 @@
       },
       "decisionStatus": "proposed - independent review pending",
       "metricApplicability": {
-        "status": "invalidated - new source requires measurement and review",
-        "previousSourceHash": "a55063ac488ac8a285654906dbaae1e9758f51f6dc025e28a36e0535dbc9399e",
-        "reason": "B11.1 changes ownership/lifecycle behavior; prior metric evidence does not apply."
+        "status": "proposed - independent review pending",
+        "sourceHash": "c9d9edafc637d537d53fc14c4edf0d154f303c396372638323b96bd478657d30",
+        "diagnostic": ".planning/memory-resilience/evidence/B11.1-helper-metrics.json",
+        "reason": "Current isolated direct-Istanbul diagnostic reports all four metrics at 100%; complete decision proof, instrumenter acceptance and independent review remain required."
       }
     },
     {

@@ -138,7 +138,7 @@
         "independentReview": "pending",
         "next": "Refresh changed-source measurement and obtain independent risk/applicability review; B11.1 proceeds as an independently ready baseline task.",
         "packageOutputMapping": "Source-bound mapping recorded; artifact verification and independent review pending.",
-        "metricApplicability": "Prior 446-file matrix retained as historical evidence. Three B11.1 source entries now require fresh metric/applicability evidence; independent approval remains missing."
+        "metricApplicability": "Current helper diagnostics retained for two of the three B11.1 source entries. Regression-driver metrics and independent applicability review remain open; original 446-file evidence remains historical."
       },
       "blocker": {
         "owner": "memory-nexus",
@@ -3106,18 +3106,21 @@
       "owner": "memory-nexus",
       "evidence": [
         ".planning/memory-resilience/B11.1-plan.md",
-        ".planning/memory-resilience/evidence/B11.1.json"
+        ".planning/memory-resilience/evidence/B11.1.json",
+        ".planning/memory-resilience/evidence/B11.1-platform.json",
+        ".planning/memory-resilience/evidence/B11.1-helper-metrics.json",
+        ".planning/memory-resilience/evidence/B11.1-inode-mutation.json"
       ],
       "acceptance_record": ".planning/memory-resilience/evidence/B11.1.json",
       "observed_evidence": ".planning/memory-resilience/B04-source-findings.md",
       "retirement_trigger": "Before baseline review R02; runtime regression and final applicable tier proof required.",
       "progress": {
-        "implemented": "Shared owned directory primitive; replacement/link/marker refusal; retryable close/removal; initialization error preservation.",
-        "verified_scope": "Windows 40 tests / three files, 96 assertions; focused helper typecheck. Two retained RED runs precede fixes.",
+        "implemented": "Exclusive ownership and marker guards, marker-write/restoration error preservation, native Windows lock recovery, bounded paced EBUSY/EPERM retries (100/200 ms) with recollection and ownership revalidation; other errors surface without retries.",
+        "verified_scope": "Final Windows 52 pass / 144 assertions; Linux 51 pass, one Windows-only skip / 138 assertions; targeted types. Both helper modules show 100% in direct-Istanbul diagnostics; inode-guard mutation killed.",
+        "repeat_scope": "Five Windows repeats passed at 51 tests each before the final additional non-Error case; helper implementation unchanged by that added test. Earlier unpaced repeats failed with EBUSY and are retained.",
         "remaining": [
-          "Complete Tier S branch and adversarial/decision proof, including allocation-marker failure and restoration-failure paths.",
-          "Explicit Windows external file-lock regression and Linux actual-runner proof.",
-          "Independent source-bound review and complete caller/coverage acceptance."
+          "Complete regression-driver metric applicability/coverage and broader Tier S adversarial/decision evidence; one killed mutation is not a complete mutation suite.",
+          "Independent source-bound review and final quality-gate acceptance. Direct-Istanbul helper diagnostics do not close B05-B08 or E8."
         ]
       }
     },

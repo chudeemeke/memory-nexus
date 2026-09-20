@@ -1,6 +1,7 @@
 import {expect, test} from "bun:test";
-import {existsSync, mkdirSync, readFileSync, renameSync, rmSync, symlinkSync, unlinkSync, writeFileSync} from "node:fs";
-import {join} from "node:path";
+import {spawn} from "node:child_process";
+import {existsSync, mkdirSync, readFileSync, renameSync, rmdirSync, rmSync, symlinkSync, unlinkSync, writeFileSync} from "node:fs";
+import {dirname, join} from "node:path";
 import {createTestDatabase, createTestDir} from "./test-database";
 import {closeDatabase} from "../../src/infrastructure/database/connection";
 import {createOwnedTestDirectory, type OwnedTestDirectory} from "./owned-test-directory";
@@ -8,8 +9,10 @@ import {createOwnedTestDirectory, type OwnedTestDirectory} from "./owned-test-di
 test("cleanup refuses a replacement directory and preserves its contents", () => {
   const fixture = createTestDir("memory-owner-regression-");
   const moved = fixture.dir + "-original";
+  const owner=readFileSync(join(fixture.dir,".memory-test-owner.json"));
   renameSync(fixture.dir, moved);
   mkdirSync(fixture.dir);
+  writeFileSync(join(fixture.dir,".memory-test-owner.json"),owner);
   const marker = join(fixture.dir, "foreign-marker.txt");
   writeFileSync(marker, "preserve");
   try {
@@ -148,6 +151,38 @@ test("cleanup unlinks a nested directory link without deleting its target", () =
   } finally {fixture.cleanup();foreign.cleanup();}
 });
 
+(process.platform === "win32" ? test : test.skip)("a real Windows file lock retains ownership until a successful retry", async () => {
+  const fixture=createTestDir("memory-lock-target-"), control=createTestDir("memory-lock-control-");
+  const target=join(fixture.dir,"locked.txt");
+  const script=join(control.dir,"hold.ps1");
+  const owner=readFileSync(join(fixture.dir,".memory-test-owner.json"),"utf8");
+  writeFileSync(target,"locked content");
+  writeFileSync(script, 'param([string]$Target)\n$stream = [System.IO.File]::Open($Target, "Open", "ReadWrite", "None")\ntry {\n[Console]::Out.WriteLine("READY")\n[Console]::Out.Flush()\n[Console]::In.ReadLine() | Out-Null\n} finally { $stream.Dispose() }\n');
+  const child=spawn("powershell.exe",["-NoProfile","-NonInteractive","-File",script,target],{windowsHide:true,timeout:15000,stdio:["pipe","pipe","pipe"]});
+  const exited=new Promise<number|null>(resolve=>child.once("close",resolve));
+  let output="", errors="";
+  child.stderr.on("data",chunk=>{errors+=String(chunk);});
+  try {
+    await new Promise<void>((resolve,reject)=>{
+      child.stdout.on("data",chunk=>{output+=String(chunk);if(output.includes("READY"))resolve();});
+      child.once("error",reject);
+      child.once("close",()=>{if(!output.includes("READY"))reject(new Error(`Lock holder did not become ready: ${errors}`));});
+    });
+    expect(()=>fixture.cleanup()).toThrow(fixture.dir);
+    expect(existsSync(target)).toBe(true);
+    expect(readFileSync(join(fixture.dir,".memory-test-owner.json"),"utf8")).toBe(owner);
+    child.stdin.end("\n");
+    expect(await exited).toBe(0);
+    expect(readFileSync(target,"utf8")).toBe("locked content");
+    fixture.cleanup();
+    expect(existsSync(fixture.dir)).toBe(false);
+  } finally {
+    if(child.exitCode===null&&child.signalCode===null)child.kill();
+    await exited;
+    fixture.cleanup();control.cleanup();
+  }
+},20000);
+
 test("failed database close retains the directory and can be retried", () => {
   let attempts = 0;
   const fixture = createTestDatabase({}, {close(db) {
@@ -162,4 +197,159 @@ test("failed database close retains the directory and can be retried", () => {
     fixture.cleanup();
     expect(attempts).toBe(2);
   } finally { fixture.cleanup(); }
+});
+
+test.each([false,true])("ownership allocation failure preserves errors (partial write: %s)", partial => {
+  let dir="";
+  let unexpected: OwnedTestDirectory|undefined;
+  const primary=new Error("owner write failed");
+  try {
+    let failure:unknown;
+    try {
+      unexpected=createOwnedTestDirectory("memory-owner-write-",{writeOwner(path,owner) {
+        dir=dirname(path);
+        if(partial)writeFileSync(path,owner.slice(0,10),{flag:"wx"});
+        throw primary;
+      }});
+    } catch(error){failure=error;}
+    if(partial){
+      expect(failure).toBeInstanceOf(AggregateError);
+      expect((failure as AggregateError).errors[0]).toBe(primary);
+      expect((failure as Error).message).toContain(dir);
+    } else expect(failure).toBe(primary);
+    expect(dir).not.toBe("");
+    expect(existsSync(dir)).toBe(partial);
+  } finally {
+    if(unexpected)unexpected.cleanup();
+    if(dir&&existsSync(dir)){
+      // Only the synthetic partial marker was created; non-recursive retirement
+      // refuses any unexpected additional files instead of deleting them.
+      unlinkSync(join(dir,".memory-test-owner.json"));rmdirSync(dir);
+    }
+  }
+});
+
+test("marker restoration failure reports both errors and preserves the directory", () => {
+  let writes=0, removals=0, owner="";
+  const removeError=new Error("partial removal"), restoreError=new Error("restore denied");
+  const fixture=createOwnedTestDirectory("memory-owner-restore-",{
+    writeOwner(path,value){owner=value;if(++writes===2)throw restoreError;writeFileSync(path,value,{flag:"wx"});},
+    remove(path){if(++removals===1){unlinkSync(join(path,".memory-test-owner.json"));throw removeError;}rmSync(path,{recursive:true});},
+  });
+  try {
+    let failure:unknown;
+    try {fixture.cleanup();}catch(error){failure=error;}
+    expect(failure).toBeInstanceOf(AggregateError);
+    expect((failure as AggregateError).errors).toEqual([removeError,restoreError]);
+    expect((failure as Error).message).toContain(fixture.dir);
+    expect(existsSync(fixture.dir)).toBe(true);
+    expect(existsSync(join(fixture.dir,".memory-test-owner.json"))).toBe(false);
+  } finally {
+    const marker=join(fixture.dir,".memory-test-owner.json");
+    if(!existsSync(marker))writeFileSync(marker,owner,{flag:"wx"});
+    fixture.cleanup();
+  }
+});
+
+test("default helper entrypoints create independent usable fixtures", () => {
+  const storage=createOwnedTestDirectory();
+  const database=createTestDatabase();
+  try {
+    expect(database.db.query("SELECT count(*) AS count FROM sessions").get()).toEqual({count:0});
+    expect(storage.dir).not.toBe(database.dir);
+  } finally {database.cleanup();storage.cleanup();}
+});
+
+test("ownership allocation never retires a replacement after its marker write fails", () => {
+  let dir="", moved="";
+  const primary=new Error("allocation interrupted");
+  try {
+    let failure:unknown;
+    try {
+      createOwnedTestDirectory("memory-claim-replaced-",{writeOwner(path) {
+        dir=dirname(path);moved=dir+"-original";
+        renameSync(dir,moved);mkdirSync(dir);writeFileSync(join(dir,"keep.txt"),"preserve");
+        throw primary;
+      }});
+    }catch(error){failure=error;}
+    expect(failure).toBeInstanceOf(AggregateError);
+    expect((failure as AggregateError).errors[0]).toBe(primary);
+    expect((failure as Error).message).toContain(dir);
+    expect(readFileSync(join(dir,"keep.txt"),"utf8")).toBe("preserve");
+  }finally{
+    if(dir){unlinkSync(join(dir,"keep.txt"));rmdirSync(dir);rmdirSync(moved);}
+  }
+});
+
+test("transient busy removal collects again and retries without reclosing SQLite", () => {
+  let attempts=0, collections=0, closes=0, busy=true;
+  const waits:number[]=[];
+  const fixture=createTestDatabase({}, {
+    createDirectory(prefix){return createOwnedTestDirectory(prefix,{remove(path){
+      if(++attempts<3&&busy)throw Object.assign(new Error("busy"),{code:"EBUSY"});
+      rmSync(path,{recursive:true});
+    }});},
+    collect(){collections++;Bun.gc(true);},
+    waitBeforeRetry(attempt){waits.push(attempt);},
+    close(db){closes++;closeDatabase(db);},
+  });
+  try {
+    fixture.cleanup();
+    expect(attempts).toBe(3);expect(collections).toBe(3);expect(closes).toBe(1);
+    expect(waits).toEqual([1,2]);
+    expect(existsSync(fixture.dir)).toBe(false);
+  }finally{busy=false;fixture.cleanup();}
+});
+
+test.each(["EBUSY","EPERM","EIO"])("persistent removal error %s has bounded retries and remains recoverable", code => {
+  let attempts=0, blocked=true, closes=0;
+  const fixture=createTestDatabase({}, {
+    createDirectory(prefix){return createOwnedTestDirectory(prefix,{remove(path){
+      attempts++;if(blocked)throw Object.assign(new Error("injected removal failure"),{code});
+      rmSync(path,{recursive:true});
+    }});},close(db){closes++;closeDatabase(db);},
+  });
+  try {
+    expect(()=>fixture.cleanup()).toThrow(fixture.dir);
+    expect(attempts).toBe(code==="EIO"?1:3);
+    expect(existsSync(fixture.path)).toBe(true);
+    blocked=false;fixture.cleanup();expect(closes).toBe(1);
+  }finally{blocked=false;fixture.cleanup();}
+});
+
+test("a busy retry rechecks directory identity before any further removal", () => {
+  let attempts=0, moved="";
+  const fixture=createTestDatabase({}, {
+    createDirectory(prefix){return createOwnedTestDirectory(prefix,{remove(path){
+      if(++attempts===1){
+        const owner=readFileSync(join(path,".memory-test-owner.json"));
+        moved=path+"-original";renameSync(path,moved);mkdirSync(path);
+        writeFileSync(join(path,".memory-test-owner.json"),owner);writeFileSync(join(path,"keep.txt"),"preserve");
+        throw Object.assign(new Error("busy"),{code:"EBUSY"});
+      }
+      rmSync(path,{recursive:true});
+    }});},
+  });
+  try {
+    expect(()=>fixture.cleanup()).toThrow("ownership changed");
+    expect(attempts).toBe(1);
+    expect(readFileSync(join(fixture.dir,"keep.txt"),"utf8")).toBe("preserve");
+  }finally{
+    unlinkSync(join(fixture.dir,"keep.txt"));unlinkSync(join(fixture.dir,".memory-test-owner.json"));
+    rmdirSync(fixture.dir);renameSync(moved,fixture.dir);fixture.cleanup();
+  }
+});
+
+test("a non-Error cleanup failure is reported without blind retries", () => {
+  let blocked=true, attempts=0;
+  const fixture=createTestDatabase({}, {
+    createDirectory(prefix){
+      const storage=createOwnedTestDirectory(prefix);
+      return {...storage,cleanup(){attempts++;if(blocked)throw "unexpected cleanup failure";storage.cleanup();}};
+    },
+  });
+  try {
+    expect(()=>fixture.cleanup()).toThrow("unexpected cleanup failure");
+    expect(attempts).toBe(1);expect(existsSync(fixture.dir)).toBe(true);
+  }finally{blocked=false;fixture.cleanup();}
 });

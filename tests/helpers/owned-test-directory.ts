@@ -11,17 +11,20 @@ export interface OwnedTestDirectory {
   cleanup(): void;
 }
 
-/** Test-only fault injection; ownership checks always precede this operation. */
+/** Local fault injection; every removal still passes the ownership guard. */
 export interface DirectoryCleanupOperations {
   remove(path: string): void;
+  writeOwner(path: string, contents: string): void;
 }
 
 const defaults: DirectoryCleanupOperations = {
   remove: path => rmSync(path, {recursive:true, force:false, maxRetries:3, retryDelay:100}),
+  writeOwner: (path,contents) => writeFileSync(path,contents,{flag:"wx"}),
 };
 
-export function createOwnedTestDirectory(prefix = "memory-test-", operations = defaults): OwnedTestDirectory {
+export function createOwnedTestDirectory(prefix = "memory-test-", operations: Partial<DirectoryCleanupOperations> = {}): OwnedTestDirectory {
   if (!/^[A-Za-z0-9][A-Za-z0-9_-]{0,79}$/.test(prefix)) throw new Error("Invalid test directory prefix");
+  const io = {...defaults,...operations};
   const parent = realpathSync(tmpdir());
   const dir = mkdtempSync(join(parent, prefix));
   const identity = lstatSync(dir, {bigint:true});
@@ -44,7 +47,7 @@ export function createOwnedTestDirectory(prefix = "memory-test-", operations = d
       throw new Error(`Test directory ownership marker changed; retained: ${dir}`);
     }
   }
-  try { writeFileSync(markerPath, owner, {flag:"wx"}); }
+  try { io.writeOwner(markerPath, owner); }
   catch (cause) {
     try {
       if (!original()) throw new Error("Allocation identity changed");
@@ -57,18 +60,18 @@ export function createOwnedTestDirectory(prefix = "memory-test-", operations = d
   return {dir, assertOwned, cleanup() {
     if (removed) return;
     assertOwned();
-    try { operations.remove(dir); removed = true; }
+    try { io.remove(dir); removed = true; }
     catch (cause) {
       // Recursive removal may delete the marker before encountering a locked
       // file. Restore only our exact directory, never a replacement or changed marker.
       try {
         if (original() && !lstatSync(markerPath,{throwIfNoEntry:false})) {
-          writeFileSync(markerPath,owner,{flag:"wx"});
+          io.writeOwner(markerPath,owner);
         }
       } catch (restoreError) {
         throw new AggregateError([cause,restoreError], `Test cleanup failed; retained: ${dir}`);
       }
-      throw new Error(`Test cleanup failed; retained: ${dir}`, {cause});
+      throw new Error(`Test cleanup failed; retained: ${dir}; ${String(cause)}`, {cause});
     }
   }};
 }

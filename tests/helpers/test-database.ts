@@ -6,12 +6,11 @@
  *
  * 1. closeDatabase() flushes WAL and switches to DELETE journal mode,
  *    removing WAL/SHM files that hold OS locks on Windows.
- * 2. Proactive GC (if available) helps release Bun's native file handles before
+ * 2. Proactive GC helps release Bun's native file handles before
  *    removal. Failed closure or removal reports the retained path and can be retried.
  *
- * The GC call is guarded by a runtime check (globalThis.Bun?.gc) so
- * this helper remains portable if the project moves off Bun or if
- * Bun fixes the file descriptor release behavior in a future version.
+ * This helper uses Bun's SQLite adapter and requires the Bun runtime. Lifecycle
+ * dependencies can be injected locally for deterministic failure/recovery tests.
  *
  * Usage:
  *   const testDb = createTestDatabase();
@@ -70,6 +69,7 @@ export interface TestDatabaseDependencies {
     close: typeof closeDatabase;
     createDirectory(prefix: string): OwnedTestDirectory;
     collect(): void;
+    waitBeforeRetry(attempt: number): void;
 }
 
 const defaultDependencies: TestDatabaseDependencies = {
@@ -77,9 +77,16 @@ const defaultDependencies: TestDatabaseDependencies = {
     close: closeDatabase,
     createDirectory: createOwnedTestDirectory,
     collect() {
-        if (typeof globalThis.Bun?.gc === "function") Bun.gc(true);
+        Bun.gc(true);
     },
+    waitBeforeRetry(attempt) { Bun.sleepSync(attempt * 100); },
 };
+
+function isBusyRemoval(error: unknown): boolean {
+    const cause = error instanceof Error ? error.cause : undefined;
+    return cause !== null && typeof cause === "object" && "code" in cause &&
+        (cause.code === "EBUSY" || cause.code === "EPERM");
+}
 
 /**
  * Create a managed file-based test database.
@@ -137,11 +144,19 @@ export function createTestDatabase(options: TestDatabaseOptions = {}, overrides:
             storage.assertOwned();
             try {
                 if (!closed) { dependencies.close(result.db); closed = true; }
-                dependencies.collect();
-                storage.cleanup();
-                removed = true;
+                let attempts = 0;
+                while (true) {
+                    dependencies.collect();
+                    try { storage.cleanup(); removed = true; return; }
+                    catch (error) {
+                        // Recollect native handles and revalidate ownership on each
+                        // attempt. Never hide changed ownership or retry indefinitely.
+                        if (++attempts >= 3 || !isBusyRemoval(error)) throw error;
+                        dependencies.waitBeforeRetry(attempts);
+                    }
+                }
             } catch (cause) {
-                throw new Error(`Test database cleanup failed; retained: ${dir}`, {cause});
+                throw new Error(`Test database cleanup failed; retained: ${dir}; ${String(cause)}`, {cause});
             }
         },
     };
