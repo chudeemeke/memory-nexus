@@ -827,18 +827,18 @@
         "reason": "Executable failure/recovery driver; all applicable metric floors remain required."
       },
       "decisionStatus": "proposed - independent review pending",
-      "sourceHash": "e8712e920ca843a9b44188016e7ef2b3c24261e57a822e08f05ece5ba8e3e136",
+      "sourceHash": "5326d55f51b6867b52319692d6b0b10e7f7ce3204dc6fc80a98ef9d033af7b19",
       "metricApplicability": {
         "status": "diagnostic only - tier floors and independent applicability remain unmet",
-        "sourceHash": "e8712e920ca843a9b44188016e7ef2b3c24261e57a822e08f05ece5ba8e3e136",
-        "reason": "Parent/child counters measured. Script branches 89.78%; driver functions 91.48% and branches 95.83%. No Tier S acceptance; B05 instrumenter and generated-JS limits remain.",
-        "evidence": ".planning/memory-resilience/evidence/B11.3-status.json"
+        "sourceHash": "5326d55f51b6867b52319692d6b0b10e7f7ce3204dc6fc80a98ef9d033af7b19",
+        "reason": "36 parent/child captures. Script branches97.76%; driver functions91.83%, branches95.83%. WSL probe timed out. B05 and generated-JS limits remain.",
+        "evidence": ".planning/memory-resilience/evidence/B11.3-log.json"
       }
     },
     {
       "path": "scripts/run-uat-verification.ts",
       "package": "package.json",
-      "sourceHash": "85d53bb270e923d685c5daa89e74cfd11f77fcdfc6e101910bc7da6eb1ae4d91",
+      "sourceHash": "f09b8ded383291faca1f4cdf3ca988eb69f9efe19c17e1b35608b0eafeaa280f",
       "tier": "S",
       "rationale": "Creates a sandbox, mutates synthetic memory projections and canonical event data, executes CLI acceptance checks and recursively deletes storage. Cleanup diagnostics remain B11.3.",
       "applicability": {
@@ -853,9 +853,9 @@
       },
       "metricApplicability": {
         "status": "diagnostic only - tier floors and independent applicability remain unmet",
-        "sourceHash": "85d53bb270e923d685c5daa89e74cfd11f77fcdfc6e101910bc7da6eb1ae4d91",
-        "reason": "Parent/child counters measured. Script branches 89.78%; driver functions 91.48% and branches 95.83%. No Tier S acceptance; B05 instrumenter and generated-JS limits remain.",
-        "evidence": ".planning/memory-resilience/evidence/B11.3-status.json"
+        "sourceHash": "f09b8ded383291faca1f4cdf3ca988eb69f9efe19c17e1b35608b0eafeaa280f",
+        "reason": "36 parent/child captures. Script branches97.76%; driver functions91.83%, branches95.83%. WSL probe timed out. B05 and generated-JS limits remain.",
+        "evidence": ".planning/memory-resilience/evidence/B11.3-log.json"
       }
     },
     {

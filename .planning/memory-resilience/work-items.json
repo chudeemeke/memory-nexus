@@ -39,7 +39,21 @@
       "blocks_items": [
         "B11.1"
       ],
-      "blocks_goal": false
+      "blocks_goal": false,
+      "latest_probe": {
+        "command": [
+          "wsl.exe",
+          "--exec",
+          "/bin/true"
+        ],
+        "startedAt": "2026-09-20T03:55:42.655Z",
+        "endedAt": "2026-09-20T03:55:52.788Z",
+        "exit": null,
+        "signal": "SIGTERM",
+        "stdout": "",
+        "stderr": "",
+        "evidence": ".planning/memory-resilience/evidence/B11.3-log.json"
+      }
     }
   ],
   "items": [
@@ -3196,15 +3210,16 @@
         ".planning/memory-resilience/B11.3-plan.md",
         ".planning/memory-resilience/evidence/B11.3-checkpoint.json",
         ".planning/memory-resilience/evidence/B11.3-command-replay.json",
-        ".planning/memory-resilience/evidence/B11.3-status.json"
+        ".planning/memory-resilience/evidence/B11.3-status.json",
+        ".planning/memory-resilience/evidence/B11.3-log.json"
       ],
       "acceptance_record": ".planning/memory-resilience/evidence/B11.3.json",
       "observed_evidence": ".planning/memory-resilience/B04-source-findings.md",
       "retirement_trigger": "Before baseline review R02; runtime regression and final applicable tier proof required.",
       "progress": {
-        "implemented": "Seven status-related false-pass paths repaired; expected status/doctor warnings remain accepted. Previous owned storage, handle-close and bounded direct-child changes retained.",
-        "verified_scope": "48 Windows tests /135 assertions; full types. Current instrumented run passes and merges 28 parent/child snapshots. Script branches 89.78%; driver functions 91.48% and branches95.83%, so quality remains incomplete.",
-        "restart": "Use B11.3-status.json uncovered locations: safe default entrypoint/setup failures, missing/alternate event logs, legacy and recovery failures, Linux branches, and decision faults for refused driver callbacks. Keep process-tree/stream-failure and independent measurement/review gates open."
+        "implemented": "Event-log admission uses the existing validating canonical/legacy reader, rejecting malformed records instead of recognizing only a type substring. Safe default startup paths tested.",
+        "verified_scope": "57 Windows tests /162 assertions, types, instrumented run with36 captures. Script branches97.76%; driver functions91.83%, branches95.83%; no final quality acceptance. WSL /bin/true probe timed out after10s.",
+        "restart": "Audit continued purpose/consumer/supersession of the historical standalone UAT checker before adding process-tree or generated-script infrastructure. If retained, remaining uncovered paths are Linux/empty PATH and intentionally refused driver callbacks; native/review/lifetime gates remain."
       }
     },
     {

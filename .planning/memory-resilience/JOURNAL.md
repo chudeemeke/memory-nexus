@@ -1,5 +1,21 @@
 # Memory resilience execution journal
 
+## 2026-09-20 - B11.3 validated event admission and safe startup
+
+- Previous turn progressed at c3a46d7; started clean. Reproduced malformed JSON
+  passing the type-substring check; replaced it with the existing event reader's
+  validation report. Added safe default/startup and log/legacy/recovery cases.
+- 57 Windows tests /162 assertions and types pass. Instrumented run merges36
+  parent/child captures, including direct startup; probe fixture removed.
+  Script branches97.76%; driver functions91.83%, branches95.83% remain below tier.
+- WSL /bin/true readiness timed out after10s (client SIGTERM, no result); no reset.
+  Native Linux and independent measurement/review remain open.
+- Next: audit the historical standalone checker's actual consumers, continued
+  purpose and replacement coverage before expanding process-tree/generated-JS
+  machinery. Limited package/README/docs/planning references found only B04.
+  No retirement decision made. Full evidence: B11.3-log.json.
+
+
 ## 2026-09-20 - B11.3 status admission and measured gaps
 
 - Previous turn progressed at b8ae681; started clean. RED found seven false-pass

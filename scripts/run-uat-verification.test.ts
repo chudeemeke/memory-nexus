@@ -7,6 +7,34 @@ import {existsSync,writeFileSync,renameSync,mkdirSync,unlinkSync,rmdirSync} from
 import {runUatSandbox} from "./run-uat-verification";
 import * as uat from "./run-uat-verification";
 
+test("UAT default runner is not reached when sandbox setup fails", async () => {
+  const storage = createOwnedTestDirectory("memory-uat-setup-");
+  const file = join(storage.dir,"not-a-directory");
+  writeFileSync(file,"synthetic");
+  try { await expect(uat.verifySandbox(file)).rejects.toThrow(); }
+  finally { storage.cleanup(); }
+});
+
+test("direct UAT entrypoint rejects invalid temp storage before executing checks", () => {
+  const storage = createOwnedTestDirectory("memory-uat-startup-");
+  const file = join(storage.dir,"not-a-directory"), preload = join(storage.dir,"assert-temp.ts");
+  writeFileSync(file,"synthetic");
+  writeFileSync(preload,`import {tmpdir} from "node:os"; if(tmpdir()!==${JSON.stringify(file)})throw Error("Synthetic temp isolation failed");`);
+  try {
+    const child = Bun.spawnSync([process.execPath,"--preload",preload,join(import.meta.dir,"run-uat-verification.ts")],{
+      cwd:storage.dir,
+      env:{...process.env,PATH:storage.dir,TEMP:file,TMP:file,TMPDIR:file,HOME:storage.dir,USERPROFILE:storage.dir},
+      stdout:"pipe",stderr:"pipe",timeout:15000,
+    });
+    const stdout = new TextDecoder().decode(child.stdout), stderr = new TextDecoder().decode(child.stderr);
+    expect(child.exitCode).toBe(1);
+    expect(stderr).toContain("UAT sandbox allocation failed:");
+    expect(stdout).toContain("STATUS: REJECTED");
+    expect(stdout).not.toContain("UAT GATE:");
+    expect(existsSync(file)).toBe(true);
+  } finally {storage.cleanup();}
+});
+
 test("UAT command drains both pipes and preserves nonzero exit and diagnostics", async () => {
   const result = await uat.runUatCommand([process.execPath,"--eval",`
     setTimeout(()=>process.exit(91),5000);
@@ -41,28 +69,39 @@ test("UAT command reports a missing executable", async () => {
   await expect(uat.runUatCommand(["deliberately-missing-uat-command"],{})).rejects.toThrow();
 });
 
-const workflowScenarios = [
+const workflowScenarios: Array<{step:number;code:number;passed:boolean;mode?:string}> = [
   {step:0,code:0,passed:true},
   ...Array.from({length:15},(_,index)=>({step:index+1,code:7,passed:false})),
   {step:2,code:1,passed:true},
   {step:7,code:1,passed:true},
   {step:2,code:2,passed:false},
   {step:7,code:2,passed:false},
+  {step:0,code:0,passed:false,mode:"missing"},
+  {step:0,code:0,passed:false,mode:"empty"},
+  {step:0,code:0,passed:false,mode:"invalid"},
+  {step:0,code:0,passed:true,mode:"observation"},
+  {step:0,code:0,passed:true,mode:"preference"},
+  {step:0,code:0,passed:false,mode:"legacy"},
+  {step:0,code:0,passed:false,mode:"no-recoverable"},
 ];
 test.each(workflowScenarios)("synthetic UAT workflow enforces command status %j despite successful output", scenario => {
   const fixture = createOwnedTestDirectory("memory-uat-replay-");
   const target = pathToFileURL(join(import.meta.dir,"run-uat-verification.ts")).href;
   const program = `
     import {verifySandbox,runUatSandbox,withUatDatabase} from ${JSON.stringify(target)};
-    import {mkdirSync,writeFileSync,existsSync} from "node:fs";
+    import {mkdirSync,writeFileSync,existsSync,unlinkSync} from "node:fs";
     import {join} from "node:path";
     const content="Use links table for relational semantic trees";
     const failureStep=${scenario.step}, failureCode=${scenario.code}, expectedPassed=${scenario.passed};
+    const mode=${JSON.stringify(scenario.mode || "")};
+    const seed={uuid:"synthetic-seed",type:"decision",project:"project",content,metadata:{},
+      observedAt:"2026-05-25T12:00:00.000Z",supersededAt:null,supersededBy:null,version:1};
     let firstReplay=false, secondReplay=false, exportText="", imported=false, commands=0;
     const passed=await runUatSandbox(dir=>verifySandbox(dir,async(cmd,env)=>{
       commands++;
       let stdout="";
       const database=join(env.XDG_DATA_HOME,"memory","memory.db");
+      const eventLog=join(env.XDG_DATA_HOME,"memory","events","events.jsonl");
       switch(cmd[1]) {
         case "sync": {
           const events=join(env.XDG_DATA_HOME,"memory","events");
@@ -76,7 +115,13 @@ test.each(workflowScenarios)("synthetic UAT workflow enforces command status %j 
         case "status": stdout="=== Database Statistics === Database";break;
         case "stats": stdout="Sessions:";break;
         case "doctor": stdout="Integrity: ok";break;
-        case "extract": stdout="Extraction Completed Successfully";break;
+        case "extract": {
+          if(mode==="missing")unlinkSync(eventLog);
+          if(mode==="empty")writeFileSync(eventLog,"");
+          if(mode==="invalid")writeFileSync(eventLog,JSON.stringify(seed)+"\\n"+'{"type":"decision"');
+          if(mode==="observation"||mode==="preference")writeFileSync(eventLog,JSON.stringify({...seed,type:mode})+"\\n");
+          stdout="Extraction Completed Successfully";break;
+        }
         case "export": exportText=await context(database);break;
         case "import": imported=true;break;
         case "query": {
@@ -100,6 +145,13 @@ test.each(workflowScenarios)("synthetic UAT workflow enforces command status %j 
         }
         default: throw Error("Unexpected synthetic command: "+cmd[1]);
       }
+      // Restore valid replay input after the initial log-admission check, so
+      // its result cannot be masked by a later replay/parser failure.
+      if(commands===9)writeFileSync(eventLog,JSON.stringify(seed)+"\\n");
+      if(commands===15) {
+        if(mode==="legacy")mkdirSync(join(env.HOME,".memory"));
+        if(mode==="no-recoverable")writeFileSync(join(env.HOME,"..","data","memory","events","events.jsonl"),JSON.stringify({...seed,type:"observation"})+"\\n");
+      }
       return {code:commands===failureStep ? failureCode : 0,stdout,stderr:""};
     }));
     async function context(database) {
@@ -118,7 +170,7 @@ test.each(workflowScenarios)("synthetic UAT workflow enforces command status %j 
     const stdout = new TextDecoder().decode(child.stdout), stderr = new TextDecoder().decode(child.stderr);
     const failedChecks=stdout.split("\n").filter(line=>line.includes("[FAIL]"));
     expect({exit:child.exitCode,...(child.exitCode!==0 ? {stderr} : {})}).toEqual({exit:0});
-    expect(failedChecks.length===0).toBe(!scenario.passed ? false : true);
+    expect(failedChecks.length===0).toBe(scenario.passed);
     expect(stdout).toContain("REAL_REPLAY_CHECKS_PASSED");
   } finally {fixture.cleanup();}
 });

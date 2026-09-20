@@ -12,7 +12,7 @@ import { join } from "node:path";
 import { exit } from "node:process";
 import { setImmediate as yieldToEventLoop } from "node:timers/promises";
 import { Database } from "bun:sqlite";
-import { rebuildProjections } from "../src/infrastructure/database/event-log.js";
+import { readMemoryEventsWithReport, rebuildProjections } from "../src/infrastructure/database/event-log.js";
 import { closeDatabase } from "../src/infrastructure/database/connection.js";
 import {createOwnedTestDirectory, type OwnedTestDirectory} from "../tests/helpers/owned-test-directory";
 
@@ -289,12 +289,10 @@ export async function verifySandbox(sandboxDir: string, runCommand: typeof runUa
     if (!logExists) overallPassed = false;
 
     // Verify events.jsonl populated with typed facts
-    let eventsContent = "";
-    if (logExists) {
-      eventsContent = readFileSync(eventLogPath, "utf-8");
-    }
-    const hasDecisionEvent = eventsContent.includes('"type":"decision"') || eventsContent.includes('"type":"observation"') || eventsContent.includes('"type":"preference"');
-    logResult("Plain-Text Event Types populate events.jsonl", hasDecisionEvent, "Validates JSONL format & GSD scope variables", hasDecisionEvent ? "" : eventsContent);
+    const eventReport = await readMemoryEventsWithReport(eventLogPath);
+    const hasDecisionEvent = eventReport.invalidEvents.length === 0 && eventReport.events.some(event =>
+      ["decision", "observation", "preference"].includes(event.kind));
+    logResult("Plain-Text Event Types populate events.jsonl", hasDecisionEvent, "Validates canonical or legacy event records", hasDecisionEvent ? "" : `Valid events: ${eventReport.events.length}; invalid lines: ${eventReport.invalidEvents.length}`);
     if (!hasDecisionEvent) overallPassed = false;
 
     // Test C: Projection Rebuild Test
