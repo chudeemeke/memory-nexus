@@ -1,5 +1,24 @@
 # Memory resilience execution journal
 
+## 2026-09-20 - B04 remaining filesystem test classification
+
+- Previous turn was progress: e85d4d3 committed source-bound classifications and
+  isolated cleanup diagnostics. Current worktree was clean before this batch.
+- Inspected filesystem imports/deletion contexts in 55 additional test drivers.
+  Current inventory: **321 proposed, 125 unclassified, zero approved exclusions**.
+- Added 50 independently scoped cleanup repairs: three fixed scratch pre-deletes,
+  one missing fixture reclamation, 46 files with silent cleanup catches. These
+  source findings require runtime regressions; this batch does not claim them.
+- Q006 now explicitly requires genuine ingestion unlink-failure proof; the
+  existing test recreates its file before calling the service and only checks
+  the success count. That is a proof gap, not a demonstrated service failure.
+- Ledger: 209 items, 114 delivery/gates and 95 quality candidates. Each new
+  cleanup task precedes full-suite B09 and baseline acceptance B10/R02.
+- Source/package/ledger validation and expected inventory rejection recorded in
+  batch-6 evidence. No executable source changed or numeric coverage accepted.
+- Next: remaining 125 test drivers, individual metric applicability and independent
+  review. B04 active, B05 pending; existing inbox/review/CI obligations remain open.
+
 ## 2026-09-20 - B04 infrastructure test lifecycle classification
 
 - Previous goal turn was progress: presentation checkpoint a4b80f8 was committed

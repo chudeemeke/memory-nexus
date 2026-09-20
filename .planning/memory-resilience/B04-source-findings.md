@@ -186,3 +186,29 @@ Tier S proof before the affected full-suite run and B10/R02. B09 now depends on
 the test fixture cleanup tasks, so the complete instrumented run cannot precede
 their repairs. Scoped gate fixtures can proceed independently. Reuse appropriate
 owned storage primitives during repair; do not create eleven duplicate cleaners.
+
+## Remaining deletion-bearing test drivers (batch 6)
+
+Inspected filesystem imports and the first two actual deletion call contexts in
+55 additional test drivers. These have proposed Tier S classifications; the
+source-bound packet in `evidence/B04-classification-batch-6.json` retains exact
+imports, calls and surrounding lines. This is not blanket classification by test
+filename, complete assertion review or runtime failure injection.
+
+The packet lists every finding and its individual task. B11.16-B11.18 own fixed
+scratch pre-deletion in export-service, install-command and uninstall-command
+tests. B11.19 owns the fallback-ingestion fixture directories allocated without
+registered reclamation in friction-service tests. B11.20-B11.65 each own one
+file with an inspected catch that silently discards filesystem cleanup failures.
+All 50 tasks are explicit dependencies of B09 and B10/R02. Use shared owned
+fixture primitives and focused caller proof when repairing them, not 50 copies
+of deletion logic. Other deletion-bearing files are not asserted broken merely
+because they delete files; B09 and the reviewed tier policy still own their proof.
+
+Q006 additionally owns an assertion-quality gap: the friction-service test named
+`handles file delete failure gracefully` deletes its fixture, recreates it,
+then invokes ingestion and checks only a returned count of one. It never forces
+unlink failure. Its comments acknowledge the untested failure path. Replace that
+claim with an actual failure regression and explicit retry/duplicate semantics;
+do not cite the current test name as failure-recovery evidence. No production
+ingestion failure has been demonstrated by this source inspection.

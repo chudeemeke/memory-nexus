@@ -508,13 +508,19 @@
       "path": "src/application/services/export-service.test.ts",
       "package": "package.json",
       "sourceHash": "7d84465af80adef486524e617350840e1cbb4598e39440c77877ecc2dbc9d13d",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "S",
+      "rationale": "Inspected filesystem import and call context: rmSync(TEST_DIR, { recursive: true, force: true }). This test driver performs actual file/directory deletion; B11.16 owns the observed lifecycle finding.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "e85d4d3f63dfe0cfaa58198766f13c56f1e23232",
+        "anchor": "rmSync(TEST_DIR, { recursive: true, force: true })",
+        "line": 32,
+        "scope": "Filesystem import plus first two actual deletion call contexts inspected. Positive critical operation establishes risk; not full body/assertion review, symbol-resolution proof or cleanup acceptance."
+      }
     },
     {
       "path": "src/application/services/export-service.ts",
@@ -537,13 +543,19 @@
       "path": "src/application/services/extraction-pipeline.test.ts",
       "package": "package.json",
       "sourceHash": "d1f7cfb838af2c12b9ae6ca2d8df729db603dace43f498de859be9f5b34b567e",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "S",
+      "rationale": "Inspected filesystem import and call context: unlinkSync(testLogPath). This test driver performs actual file/directory deletion; numeric applicability and ownership proof remain subject to individual review.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "e85d4d3f63dfe0cfaa58198766f13c56f1e23232",
+        "anchor": "unlinkSync(testLogPath)",
+        "line": 52,
+        "scope": "Filesystem import plus first two actual deletion call contexts inspected. Positive critical operation establishes risk; not full body/assertion review, symbol-resolution proof or cleanup acceptance."
+      }
     },
     {
       "path": "src/application/services/extraction-pipeline.ts",
@@ -566,13 +578,19 @@
       "path": "src/application/services/friction-service.test.ts",
       "package": "package.json",
       "sourceHash": "8f61e101b0761ebd0b77f99ddab67646399b7e1664e73342f4f6bb7c72221120",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "S",
+      "rationale": "Inspected filesystem import and call context: unlinkSync(filePath). This test driver performs actual file/directory deletion; B11.19 owns the observed lifecycle finding.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "e85d4d3f63dfe0cfaa58198766f13c56f1e23232",
+        "anchor": "unlinkSync(filePath)",
+        "line": 653,
+        "scope": "Filesystem import plus first two actual deletion call contexts inspected. Positive critical operation establishes risk; not full body/assertion review, symbol-resolution proof or cleanup acceptance."
+      }
     },
     {
       "path": "src/application/services/friction-service.ts",
@@ -955,13 +973,19 @@
       "path": "src/application/services/sync-service.integration.test.ts",
       "package": "package.json",
       "sourceHash": "410dbd0a543a3749f8f76f04ebff65b65db1e7d53d030ac665b8a9e2e7d53a6d",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "S",
+      "rationale": "Inspected filesystem import and call context: rmSync(tempDir, { recursive: true, force: true }). This test driver performs actual file/directory deletion; B11.20 owns the observed lifecycle finding.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "e85d4d3f63dfe0cfaa58198766f13c56f1e23232",
+        "anchor": "rmSync(tempDir, { recursive: true, force: true })",
+        "line": 119,
+        "scope": "Filesystem import plus first two actual deletion call contexts inspected. Positive critical operation establishes risk; not full body/assertion review, symbol-resolution proof or cleanup acceptance."
+      }
     },
     {
       "path": "src/application/services/sync-service.test.ts",
@@ -4145,13 +4169,19 @@
       "path": "src/presentation/cli/commands/audit-secrets.test.ts",
       "package": "package.json",
       "sourceHash": "edd71a8feb372330e8a36853de836b6bb3b2f267e3ca6e2145fbed634f1ee50f",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "S",
+      "rationale": "Inspected filesystem import and call context: rmSync(tempDir, { recursive: true, force: true }). This test driver performs actual file/directory deletion; numeric applicability and ownership proof remain subject to individual review.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "e85d4d3f63dfe0cfaa58198766f13c56f1e23232",
+        "anchor": "rmSync(tempDir, { recursive: true, force: true })",
+        "line": 34,
+        "scope": "Filesystem import plus first two actual deletion call contexts inspected. Positive critical operation establishes risk; not full body/assertion review, symbol-resolution proof or cleanup acceptance."
+      }
     },
     {
       "path": "src/presentation/cli/commands/audit-secrets.ts",
@@ -4174,13 +4204,19 @@
       "path": "src/presentation/cli/commands/backfill.test.ts",
       "package": "package.json",
       "sourceHash": "71e313f70bbe5630c3aa3c3f1d7c093c50e96071b89463093f82e0d4f27470ac",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "S",
+      "rationale": "Inspected filesystem import and call context: rmSync(dir, { recursive: true, force: true, maxRetries: 10, retryDelay: 50 }). This test driver performs actual file/directory deletion; B11.21 owns the observed lifecycle finding.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "e85d4d3f63dfe0cfaa58198766f13c56f1e23232",
+        "anchor": "rmSync(dir, { recursive: true, force: true, maxRetries: 10, retryDelay: 50 })",
+        "line": 126,
+        "scope": "Filesystem import plus first two actual deletion call contexts inspected. Positive critical operation establishes risk; not full body/assertion review, symbol-resolution proof or cleanup acceptance."
+      }
     },
     {
       "path": "src/presentation/cli/commands/backfill.ts",
@@ -4203,13 +4239,19 @@
       "path": "src/presentation/cli/commands/backup.test.ts",
       "package": "package.json",
       "sourceHash": "b4eb53e0ad1a081d0ba9592e145e312e188a35b8af3cbd1934a518bb53ae204f",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "S",
+      "rationale": "Inspected filesystem import and call context: rmSync(testDir, { recursive: true, force: true, maxRetries: 50, retryDelay: 100 }). This test driver performs actual file/directory deletion; B11.22 owns the observed lifecycle finding.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "e85d4d3f63dfe0cfaa58198766f13c56f1e23232",
+        "anchor": "rmSync(testDir, { recursive: true, force: true, maxRetries: 50, retryDelay: 100 })",
+        "line": 77,
+        "scope": "Filesystem import plus first two actual deletion call contexts inspected. Positive critical operation establishes risk; not full body/assertion review, symbol-resolution proof or cleanup acceptance."
+      }
     },
     {
       "path": "src/presentation/cli/commands/backup.ts",
@@ -4232,13 +4274,19 @@
       "path": "src/presentation/cli/commands/browse.test.ts",
       "package": "package.json",
       "sourceHash": "e7f9b3c295771f9873384364a848150428c2ed20d6f313a930bad4993a059e94",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "S",
+      "rationale": "Inspected filesystem import and call context: rmSync(dir, { recursive: true, force: true }). This test driver performs actual file/directory deletion; B11.23 owns the observed lifecycle finding.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "e85d4d3f63dfe0cfaa58198766f13c56f1e23232",
+        "anchor": "rmSync(dir, { recursive: true, force: true })",
+        "line": 59,
+        "scope": "Filesystem import plus first two actual deletion call contexts inspected. Positive critical operation establishes risk; not full body/assertion review, symbol-resolution proof or cleanup acceptance."
+      }
     },
     {
       "path": "src/presentation/cli/commands/browse.ts",
@@ -4290,13 +4338,19 @@
       "path": "src/presentation/cli/commands/context.coverage.test.ts",
       "package": "package.json",
       "sourceHash": "ff772b7c1d0630948a330883877a60444dd0b31757573b4d4a0fdd9263082073",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "S",
+      "rationale": "Inspected filesystem import and call context: rmSync(tempDir, { recursive: true, force: true }). This test driver performs actual file/directory deletion; B11.24 owns the observed lifecycle finding.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "e85d4d3f63dfe0cfaa58198766f13c56f1e23232",
+        "anchor": "rmSync(tempDir, { recursive: true, force: true })",
+        "line": 84,
+        "scope": "Filesystem import plus first two actual deletion call contexts inspected. Positive critical operation establishes risk; not full body/assertion review, symbol-resolution proof or cleanup acceptance."
+      }
     },
     {
       "path": "src/presentation/cli/commands/context.json.test.ts",
@@ -4314,13 +4368,19 @@
       "path": "src/presentation/cli/commands/context.test.ts",
       "package": "package.json",
       "sourceHash": "60cb723327011b7697b51a188236880c97ef091e0d0997803bc35c93960f4422",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "S",
+      "rationale": "Inspected filesystem import and call context: rmSync(tempDir, { recursive: true, force: true }). This test driver performs actual file/directory deletion; B11.25 owns the observed lifecycle finding.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "e85d4d3f63dfe0cfaa58198766f13c56f1e23232",
+        "anchor": "rmSync(tempDir, { recursive: true, force: true })",
+        "line": 227,
+        "scope": "Filesystem import plus first two actual deletion call contexts inspected. Positive critical operation establishes risk; not full body/assertion review, symbol-resolution proof or cleanup acceptance."
+      }
     },
     {
       "path": "src/presentation/cli/commands/context.ts",
@@ -4343,25 +4403,37 @@
       "path": "src/presentation/cli/commands/doctor.portability.test.ts",
       "package": "package.json",
       "sourceHash": "9cb68a72ee73baa38722bb9bf5b5ad46593df8518d6838babf81094d610919da",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "S",
+      "rationale": "Inspected filesystem import and call context: rmSync(testDir, { recursive: true, force: true }). This test driver performs actual file/directory deletion; B11.26 owns the observed lifecycle finding.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "e85d4d3f63dfe0cfaa58198766f13c56f1e23232",
+        "anchor": "rmSync(testDir, { recursive: true, force: true })",
+        "line": 126,
+        "scope": "Filesystem import plus first two actual deletion call contexts inspected. Positive critical operation establishes risk; not full body/assertion review, symbol-resolution proof or cleanup acceptance."
+      }
     },
     {
       "path": "src/presentation/cli/commands/doctor.test.ts",
       "package": "package.json",
       "sourceHash": "f445a2609412d707ffbecab6ddea6f96158850c3648ff56c1d4a61d0672bdbd4",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "S",
+      "rationale": "Inspected filesystem import and call context: rmSync(testDir, { recursive: true, force: true }). This test driver performs actual file/directory deletion; B11.27 owns the observed lifecycle finding.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "e85d4d3f63dfe0cfaa58198766f13c56f1e23232",
+        "anchor": "rmSync(testDir, { recursive: true, force: true })",
+        "line": 149,
+        "scope": "Filesystem import plus first two actual deletion call contexts inspected. Positive critical operation establishes risk; not full body/assertion review, symbol-resolution proof or cleanup acceptance."
+      }
     },
     {
       "path": "src/presentation/cli/commands/doctor.ts",
@@ -4384,13 +4456,19 @@
       "path": "src/presentation/cli/commands/dream.test.ts",
       "package": "package.json",
       "sourceHash": "b62e9800c66e3531579c8aa5833a419a8db782e00a19ece9e0105c5469f9bac7",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "S",
+      "rationale": "Inspected filesystem import and call context: unlinkSync(dbPath). This test driver performs actual file/directory deletion; B11.28 owns the observed lifecycle finding.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "e85d4d3f63dfe0cfaa58198766f13c56f1e23232",
+        "anchor": "unlinkSync(dbPath)",
+        "line": 35,
+        "scope": "Filesystem import plus first two actual deletion call contexts inspected. Positive critical operation establishes risk; not full body/assertion review, symbol-resolution proof or cleanup acceptance."
+      }
     },
     {
       "path": "src/presentation/cli/commands/dream.ts",
@@ -4471,13 +4549,19 @@
       "path": "src/presentation/cli/commands/facts.test.ts",
       "package": "package.json",
       "sourceHash": "83e92bb9bfb1bed7d6dcc377ce700692d619cdc864233b4bb2959f4a8a04c4ce",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "S",
+      "rationale": "Inspected filesystem import and call context: unlinkSync(testDbPath). This test driver performs actual file/directory deletion; B11.29 owns the observed lifecycle finding.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "e85d4d3f63dfe0cfaa58198766f13c56f1e23232",
+        "anchor": "unlinkSync(testDbPath)",
+        "line": 39,
+        "scope": "Filesystem import plus first two actual deletion call contexts inspected. Positive critical operation establishes risk; not full body/assertion review, symbol-resolution proof or cleanup acceptance."
+      }
     },
     {
       "path": "src/presentation/cli/commands/facts.ts",
@@ -4500,13 +4584,19 @@
       "path": "src/presentation/cli/commands/friction/dashboard.test.ts",
       "package": "package.json",
       "sourceHash": "721658a7b271306f798f8b0b968cce68146b771a9115e12e794cd55137305f3e",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "S",
+      "rationale": "Inspected filesystem import and call context: rmSync(tempDir, { recursive: true, force: true }). This test driver performs actual file/directory deletion; B11.30 owns the observed lifecycle finding.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "e85d4d3f63dfe0cfaa58198766f13c56f1e23232",
+        "anchor": "rmSync(tempDir, { recursive: true, force: true })",
+        "line": 59,
+        "scope": "Filesystem import plus first two actual deletion call contexts inspected. Positive critical operation establishes risk; not full body/assertion review, symbol-resolution proof or cleanup acceptance."
+      }
     },
     {
       "path": "src/presentation/cli/commands/friction/dashboard.ts",
@@ -4529,13 +4619,19 @@
       "path": "src/presentation/cli/commands/friction/index.test.ts",
       "package": "package.json",
       "sourceHash": "49f7c24a295f6e9b8974b8afae867c6fdd52f75b50f40016427c479d1ea4b32a",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "S",
+      "rationale": "Inspected filesystem import and call context: rmSync(dir, { recursive: true, force: true, maxRetries: 10, retryDelay: 50 }). This test driver performs actual file/directory deletion; B11.31 owns the observed lifecycle finding.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "e85d4d3f63dfe0cfaa58198766f13c56f1e23232",
+        "anchor": "rmSync(dir, { recursive: true, force: true, maxRetries: 10, retryDelay: 50 })",
+        "line": 20,
+        "scope": "Filesystem import plus first two actual deletion call contexts inspected. Positive critical operation establishes risk; not full body/assertion review, symbol-resolution proof or cleanup acceptance."
+      }
     },
     {
       "path": "src/presentation/cli/commands/friction/index.ts",
@@ -4558,13 +4654,19 @@
       "path": "src/presentation/cli/commands/friction/list.test.ts",
       "package": "package.json",
       "sourceHash": "9c38747f2e64669a13a6856190ca0d17097baf95e50481bd9a7c00bcf48023f5",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "S",
+      "rationale": "Inspected filesystem import and call context: rmSync(tempDir, { recursive: true, force: true }). This test driver performs actual file/directory deletion; B11.32 owns the observed lifecycle finding.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "e85d4d3f63dfe0cfaa58198766f13c56f1e23232",
+        "anchor": "rmSync(tempDir, { recursive: true, force: true })",
+        "line": 49,
+        "scope": "Filesystem import plus first two actual deletion call contexts inspected. Positive critical operation establishes risk; not full body/assertion review, symbol-resolution proof or cleanup acceptance."
+      }
     },
     {
       "path": "src/presentation/cli/commands/friction/list.ts",
@@ -4587,13 +4689,19 @@
       "path": "src/presentation/cli/commands/friction/log.test.ts",
       "package": "package.json",
       "sourceHash": "45eec4d17c830257fa158e17f056cd35b0d9544e0e9ba8dbab89d7c89019496b",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "S",
+      "rationale": "Inspected filesystem import and call context: rmSync(tempDir, { recursive: true, force: true }). This test driver performs actual file/directory deletion; B11.33 owns the observed lifecycle finding.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "e85d4d3f63dfe0cfaa58198766f13c56f1e23232",
+        "anchor": "rmSync(tempDir, { recursive: true, force: true })",
+        "line": 47,
+        "scope": "Filesystem import plus first two actual deletion call contexts inspected. Positive critical operation establishes risk; not full body/assertion review, symbol-resolution proof or cleanup acceptance."
+      }
     },
     {
       "path": "src/presentation/cli/commands/friction/log.ts",
@@ -4616,13 +4724,19 @@
       "path": "src/presentation/cli/commands/friction/purge.test.ts",
       "package": "package.json",
       "sourceHash": "3567774bc443862d43d163762b97fb3e3acc9ae1c7b0770db55da83ce02b044b",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "S",
+      "rationale": "Inspected filesystem import and call context: rmSync(tempDir, { recursive: true, force: true }). This test driver performs actual file/directory deletion; B11.34 owns the observed lifecycle finding.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "e85d4d3f63dfe0cfaa58198766f13c56f1e23232",
+        "anchor": "rmSync(tempDir, { recursive: true, force: true })",
+        "line": 49,
+        "scope": "Filesystem import plus first two actual deletion call contexts inspected. Positive critical operation establishes risk; not full body/assertion review, symbol-resolution proof or cleanup acceptance."
+      }
     },
     {
       "path": "src/presentation/cli/commands/friction/purge.ts",
@@ -4645,13 +4759,19 @@
       "path": "src/presentation/cli/commands/friction/resolve.test.ts",
       "package": "package.json",
       "sourceHash": "3c1197803c4cb4095dec8dda26f96e5e4618d1082007f2f49c80556ff6e82b44",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "S",
+      "rationale": "Inspected filesystem import and call context: rmSync(tempDir, { recursive: true, force: true }). This test driver performs actual file/directory deletion; B11.35 owns the observed lifecycle finding.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "e85d4d3f63dfe0cfaa58198766f13c56f1e23232",
+        "anchor": "rmSync(tempDir, { recursive: true, force: true })",
+        "line": 47,
+        "scope": "Filesystem import plus first two actual deletion call contexts inspected. Positive critical operation establishes risk; not full body/assertion review, symbol-resolution proof or cleanup acceptance."
+      }
     },
     {
       "path": "src/presentation/cli/commands/friction/resolve.ts",
@@ -4686,13 +4806,19 @@
       "path": "src/presentation/cli/commands/friction/wontfix.test.ts",
       "package": "package.json",
       "sourceHash": "93a0e1c23ef66b3b007c6898ef7b3d91f133e8a1235c23df1fc2307f8dfaa0e2",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "S",
+      "rationale": "Inspected filesystem import and call context: rmSync(tempDir, { recursive: true, force: true }). This test driver performs actual file/directory deletion; B11.36 owns the observed lifecycle finding.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "e85d4d3f63dfe0cfaa58198766f13c56f1e23232",
+        "anchor": "rmSync(tempDir, { recursive: true, force: true })",
+        "line": 47,
+        "scope": "Filesystem import plus first two actual deletion call contexts inspected. Positive critical operation establishes risk; not full body/assertion review, symbol-resolution proof or cleanup acceptance."
+      }
     },
     {
       "path": "src/presentation/cli/commands/friction/wontfix.ts",
@@ -4715,13 +4841,19 @@
       "path": "src/presentation/cli/commands/governance.test.ts",
       "package": "package.json",
       "sourceHash": "d0097d35b995fe80172733af3b5d28924c3a0b47e3eee6f46f1a011e64e62c20",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "S",
+      "rationale": "Inspected filesystem import and call context: unlinkSync(dbPath). This test driver performs actual file/directory deletion; B11.37 owns the observed lifecycle finding.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "e85d4d3f63dfe0cfaa58198766f13c56f1e23232",
+        "anchor": "unlinkSync(dbPath)",
+        "line": 28,
+        "scope": "Filesystem import plus first two actual deletion call contexts inspected. Positive critical operation establishes risk; not full body/assertion review, symbol-resolution proof or cleanup acceptance."
+      }
     },
     {
       "path": "src/presentation/cli/commands/governance.ts",
@@ -4744,13 +4876,19 @@
       "path": "src/presentation/cli/commands/import.test.ts",
       "package": "package.json",
       "sourceHash": "00da045c5e8b76bb16fa053e3d69633baaae040abea6949eb5aae744320b6e65",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "S",
+      "rationale": "Inspected filesystem import and call context: rmSync(testDir, { recursive: true, force: true }). This test driver performs actual file/directory deletion; B11.38 owns the observed lifecycle finding.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "e85d4d3f63dfe0cfaa58198766f13c56f1e23232",
+        "anchor": "rmSync(testDir, { recursive: true, force: true })",
+        "line": 79,
+        "scope": "Filesystem import plus first two actual deletion call contexts inspected. Positive critical operation establishes risk; not full body/assertion review, symbol-resolution proof or cleanup acceptance."
+      }
     },
     {
       "path": "src/presentation/cli/commands/import.ts",
@@ -4785,13 +4923,19 @@
       "path": "src/presentation/cli/commands/install.test.ts",
       "package": "package.json",
       "sourceHash": "05d54487d5c137ca7cbf01b17d8d516f2ea2a3955c252f69a8d759b034723b4e",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "S",
+      "rationale": "Inspected filesystem import and call context: rmSync(testBaseDir, { recursive: true, force: true }). This test driver performs actual file/directory deletion; B11.17 owns the observed lifecycle finding.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "e85d4d3f63dfe0cfaa58198766f13c56f1e23232",
+        "anchor": "rmSync(testBaseDir, { recursive: true, force: true })",
+        "line": 52,
+        "scope": "Filesystem import plus first two actual deletion call contexts inspected. Positive critical operation establishes risk; not full body/assertion review, symbol-resolution proof or cleanup acceptance."
+      }
     },
     {
       "path": "src/presentation/cli/commands/install.ts",
@@ -4814,25 +4958,37 @@
       "path": "src/presentation/cli/commands/list.coverage.test.ts",
       "package": "package.json",
       "sourceHash": "eed01d673603e553a6bf7b945d713e6bd224bb5da3059606f2fc908df300afa2",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "S",
+      "rationale": "Inspected filesystem import and call context: rmSync(tempDir, { recursive: true, force: true }). This test driver performs actual file/directory deletion; B11.39 owns the observed lifecycle finding.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "e85d4d3f63dfe0cfaa58198766f13c56f1e23232",
+        "anchor": "rmSync(tempDir, { recursive: true, force: true })",
+        "line": 63,
+        "scope": "Filesystem import plus first two actual deletion call contexts inspected. Positive critical operation establishes risk; not full body/assertion review, symbol-resolution proof or cleanup acceptance."
+      }
     },
     {
       "path": "src/presentation/cli/commands/list.deps.test.ts",
       "package": "package.json",
       "sourceHash": "4b90494bdb6f1c886d282ec0aff699eedbb301ad32caf8a8696fc3da09133a87",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "S",
+      "rationale": "Inspected filesystem import and call context: rmSync(p, { force: true }). This test driver performs actual file/directory deletion; B11.40 owns the observed lifecycle finding.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "e85d4d3f63dfe0cfaa58198766f13c56f1e23232",
+        "anchor": "rmSync(p, { force: true })",
+        "line": 40,
+        "scope": "Filesystem import plus first two actual deletion call contexts inspected. Positive critical operation establishes risk; not full body/assertion review, symbol-resolution proof or cleanup acceptance."
+      }
     },
     {
       "path": "src/presentation/cli/commands/list.json.test.ts",
@@ -4850,13 +5006,19 @@
       "path": "src/presentation/cli/commands/list.test.ts",
       "package": "package.json",
       "sourceHash": "124f5b3a44f0bd01167b451bef08ee8bef023082c293f29b87009a6262fe8b15",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "S",
+      "rationale": "Inspected filesystem import and call context: rmSync(cli03TempDir, { recursive: true, force: true }). This test driver performs actual file/directory deletion; B11.41 owns the observed lifecycle finding.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "e85d4d3f63dfe0cfaa58198766f13c56f1e23232",
+        "anchor": "rmSync(cli03TempDir, { recursive: true, force: true })",
+        "line": 315,
+        "scope": "Filesystem import plus first two actual deletion call contexts inspected. Positive critical operation establishes risk; not full body/assertion review, symbol-resolution proof or cleanup acceptance."
+      }
     },
     {
       "path": "src/presentation/cli/commands/list.ts",
@@ -4879,13 +5041,19 @@
       "path": "src/presentation/cli/commands/migrate.test.ts",
       "package": "package.json",
       "sourceHash": "5d3abc5e691bd927be002f47d830fcfd92f46bf471ca29736066cfa90a8b7412",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "S",
+      "rationale": "Inspected filesystem import and call context: rmSync(testDir, { recursive: true, force: true }). This test driver performs actual file/directory deletion; B11.42 owns the observed lifecycle finding.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "e85d4d3f63dfe0cfaa58198766f13c56f1e23232",
+        "anchor": "rmSync(testDir, { recursive: true, force: true })",
+        "line": 68,
+        "scope": "Filesystem import plus first two actual deletion call contexts inspected. Positive critical operation establishes risk; not full body/assertion review, symbol-resolution proof or cleanup acceptance."
+      }
     },
     {
       "path": "src/presentation/cli/commands/migrate.ts",
@@ -4908,13 +5076,19 @@
       "path": "src/presentation/cli/commands/profile.test.ts",
       "package": "package.json",
       "sourceHash": "d8ca07cc8e24e7ffe05d8cb78bcdadb22d6eea5a8801ed242d74127e350b6889",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "S",
+      "rationale": "Inspected filesystem import and call context: unlinkSync(dbPath). This test driver performs actual file/directory deletion; B11.43 owns the observed lifecycle finding.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "e85d4d3f63dfe0cfaa58198766f13c56f1e23232",
+        "anchor": "unlinkSync(dbPath)",
+        "line": 36,
+        "scope": "Filesystem import plus first two actual deletion call contexts inspected. Positive critical operation establishes risk; not full body/assertion review, symbol-resolution proof or cleanup acceptance."
+      }
     },
     {
       "path": "src/presentation/cli/commands/profile.ts",
@@ -4937,13 +5111,19 @@
       "path": "src/presentation/cli/commands/projections.test.ts",
       "package": "package.json",
       "sourceHash": "19bdd85694043e21e5732b3889fc8b100319b4f673e6adfc4716f60419e2359e",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "S",
+      "rationale": "Inspected filesystem import and call context: rmSync(testDir, { recursive: true, force: true, maxRetries: 50, retryDelay: 100 }). This test driver performs actual file/directory deletion; B11.44 owns the observed lifecycle finding.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "e85d4d3f63dfe0cfaa58198766f13c56f1e23232",
+        "anchor": "rmSync(testDir, { recursive: true, force: true, maxRetries: 50, retryDelay: 100 })",
+        "line": 51,
+        "scope": "Filesystem import plus first two actual deletion call contexts inspected. Positive critical operation establishes risk; not full body/assertion review, symbol-resolution proof or cleanup acceptance."
+      }
     },
     {
       "path": "src/presentation/cli/commands/projections.ts",
@@ -4966,13 +5146,19 @@
       "path": "src/presentation/cli/commands/purge.test.ts",
       "package": "package.json",
       "sourceHash": "cb5c594b0f650ecb1799e15c3ba04666041e34ffefdb31b2178e0ee3f3c83cc0",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "S",
+      "rationale": "Inspected filesystem import and call context: fs.rmSync(testDir, { recursive: true, force: true }). This test driver performs actual file/directory deletion; B11.45 owns the observed lifecycle finding.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "e85d4d3f63dfe0cfaa58198766f13c56f1e23232",
+        "anchor": "fs.rmSync(testDir, { recursive: true, force: true })",
+        "line": 305,
+        "scope": "Filesystem import plus first two actual deletion call contexts inspected. Positive critical operation establishes risk; not full body/assertion review, symbol-resolution proof or cleanup acceptance."
+      }
     },
     {
       "path": "src/presentation/cli/commands/purge.ts",
@@ -4995,13 +5181,19 @@
       "path": "src/presentation/cli/commands/query.coverage.test.ts",
       "package": "package.json",
       "sourceHash": "e7870ab3fb9be36c4f771272f4bfb92c76262e8b726417fc3a6e13685170bae5",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "S",
+      "rationale": "Inspected filesystem import and call context: rmSync(tempDir, { recursive: true, force: true }). This test driver performs actual file/directory deletion; B11.46 owns the observed lifecycle finding.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "e85d4d3f63dfe0cfaa58198766f13c56f1e23232",
+        "anchor": "rmSync(tempDir, { recursive: true, force: true })",
+        "line": 70,
+        "scope": "Filesystem import plus first two actual deletion call contexts inspected. Positive critical operation establishes risk; not full body/assertion review, symbol-resolution proof or cleanup acceptance."
+      }
     },
     {
       "path": "src/presentation/cli/commands/query.ts",
@@ -5024,13 +5216,19 @@
       "path": "src/presentation/cli/commands/related.coverage.test.ts",
       "package": "package.json",
       "sourceHash": "abf19c93187c4236e080f7f2cebac83f23d6425b4617b4894a5faed5952183c6",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "S",
+      "rationale": "Inspected filesystem import and call context: rmSync(tempDir, { recursive: true, force: true }). This test driver performs actual file/directory deletion; B11.47 owns the observed lifecycle finding.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "e85d4d3f63dfe0cfaa58198766f13c56f1e23232",
+        "anchor": "rmSync(tempDir, { recursive: true, force: true })",
+        "line": 87,
+        "scope": "Filesystem import plus first two actual deletion call contexts inspected. Positive critical operation establishes risk; not full body/assertion review, symbol-resolution proof or cleanup acceptance."
+      }
     },
     {
       "path": "src/presentation/cli/commands/related.json.test.ts",
@@ -5048,13 +5246,19 @@
       "path": "src/presentation/cli/commands/related.test.ts",
       "package": "package.json",
       "sourceHash": "70650ef75dcad394277b525cb769e68f97f3acac537899f97ca5c7339fdecc68",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "S",
+      "rationale": "Inspected filesystem import and call context: rmSync(tempDir, { recursive: true, force: true }). This test driver performs actual file/directory deletion; B11.48 owns the observed lifecycle finding.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "e85d4d3f63dfe0cfaa58198766f13c56f1e23232",
+        "anchor": "rmSync(tempDir, { recursive: true, force: true })",
+        "line": 234,
+        "scope": "Filesystem import plus first two actual deletion call contexts inspected. Positive critical operation establishes risk; not full body/assertion review, symbol-resolution proof or cleanup acceptance."
+      }
     },
     {
       "path": "src/presentation/cli/commands/related.ts",
@@ -5077,13 +5281,19 @@
       "path": "src/presentation/cli/commands/remote.test.ts",
       "package": "package.json",
       "sourceHash": "f9e02bf7540b6a147e9a249af2b35ef493bfd7a054cdeeac24fa4ecee9c7ea3e",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "S",
+      "rationale": "Inspected filesystem import and call context: rmSync(testDir, { recursive: true, force: true, maxRetries: 10, retryDelay: 50 }). This test driver performs actual file/directory deletion; numeric applicability and ownership proof remain subject to individual review.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "e85d4d3f63dfe0cfaa58198766f13c56f1e23232",
+        "anchor": "rmSync(testDir, { recursive: true, force: true, maxRetries: 10, retryDelay: 50 })",
+        "line": 90,
+        "scope": "Filesystem import plus first two actual deletion call contexts inspected. Positive critical operation establishes risk; not full body/assertion review, symbol-resolution proof or cleanup acceptance."
+      }
     },
     {
       "path": "src/presentation/cli/commands/remote.ts",
@@ -5106,13 +5316,19 @@
       "path": "src/presentation/cli/commands/search.coverage.test.ts",
       "package": "package.json",
       "sourceHash": "1d575abfeced7484e3f0422db77d39b10b3b2cf108195c61450233141f1c892a",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "S",
+      "rationale": "Inspected filesystem import and call context: rmSync(tempDir, { recursive: true, force: true }). This test driver performs actual file/directory deletion; B11.49 owns the observed lifecycle finding.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "e85d4d3f63dfe0cfaa58198766f13c56f1e23232",
+        "anchor": "rmSync(tempDir, { recursive: true, force: true })",
+        "line": 81,
+        "scope": "Filesystem import plus first two actual deletion call contexts inspected. Positive critical operation establishes risk; not full body/assertion review, symbol-resolution proof or cleanup acceptance."
+      }
     },
     {
       "path": "src/presentation/cli/commands/search.json.test.ts",
@@ -5130,13 +5346,19 @@
       "path": "src/presentation/cli/commands/search.test.ts",
       "package": "package.json",
       "sourceHash": "761d5b555a4ed30c552d6a3e3f49f98ea7a2950feca854fa747eb9a22ccd4167",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "S",
+      "rationale": "Inspected filesystem import and call context: rmSync(searchTempDir, { recursive: true, force: true }). This test driver performs actual file/directory deletion; B11.50 owns the observed lifecycle finding.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "e85d4d3f63dfe0cfaa58198766f13c56f1e23232",
+        "anchor": "rmSync(searchTempDir, { recursive: true, force: true })",
+        "line": 346,
+        "scope": "Filesystem import plus first two actual deletion call contexts inspected. Positive critical operation establishes risk; not full body/assertion review, symbol-resolution proof or cleanup acceptance."
+      }
     },
     {
       "path": "src/presentation/cli/commands/search.ts",
@@ -5159,13 +5381,19 @@
       "path": "src/presentation/cli/commands/show.coverage.test.ts",
       "package": "package.json",
       "sourceHash": "988904273f6c149430f8386f140af269307e9f1cf15470158e7ef5c6447a543d",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "S",
+      "rationale": "Inspected filesystem import and call context: rmSync(tempDir, { recursive: true, force: true }). This test driver performs actual file/directory deletion; B11.51 owns the observed lifecycle finding.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "e85d4d3f63dfe0cfaa58198766f13c56f1e23232",
+        "anchor": "rmSync(tempDir, { recursive: true, force: true })",
+        "line": 76,
+        "scope": "Filesystem import plus first two actual deletion call contexts inspected. Positive critical operation establishes risk; not full body/assertion review, symbol-resolution proof or cleanup acceptance."
+      }
     },
     {
       "path": "src/presentation/cli/commands/show.json.test.ts",
@@ -5183,13 +5411,19 @@
       "path": "src/presentation/cli/commands/show.test.ts",
       "package": "package.json",
       "sourceHash": "f4b8775310da65dfdb3c636eac007d48e7aebbaa47b87ba85bdd3b730727a810",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "S",
+      "rationale": "Inspected filesystem import and call context: fs.rmSync(TEST_DIR, { recursive: true, force: true }). This test driver performs actual file/directory deletion; B11.52 owns the observed lifecycle finding.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "e85d4d3f63dfe0cfaa58198766f13c56f1e23232",
+        "anchor": "fs.rmSync(TEST_DIR, { recursive: true, force: true })",
+        "line": 118,
+        "scope": "Filesystem import plus first two actual deletion call contexts inspected. Positive critical operation establishes risk; not full body/assertion review, symbol-resolution proof or cleanup acceptance."
+      }
     },
     {
       "path": "src/presentation/cli/commands/show.ts",
@@ -5212,25 +5446,37 @@
       "path": "src/presentation/cli/commands/stats.coverage.test.ts",
       "package": "package.json",
       "sourceHash": "37ffc4041d1b1bcf419d4f177efc1a30a7286822da452a1fc422bb0e8cbd400e",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "S",
+      "rationale": "Inspected filesystem import and call context: rmSync(tempDir, { recursive: true, force: true }). This test driver performs actual file/directory deletion; B11.53 owns the observed lifecycle finding.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "e85d4d3f63dfe0cfaa58198766f13c56f1e23232",
+        "anchor": "rmSync(tempDir, { recursive: true, force: true })",
+        "line": 76,
+        "scope": "Filesystem import plus first two actual deletion call contexts inspected. Positive critical operation establishes risk; not full body/assertion review, symbol-resolution proof or cleanup acceptance."
+      }
     },
     {
       "path": "src/presentation/cli/commands/stats.deps.test.ts",
       "package": "package.json",
       "sourceHash": "231421bd85b518ee98e4c126170ac379bb64d75e0166a52d145c6a1093df366a",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "S",
+      "rationale": "Inspected filesystem import and call context: rmSync(p, { force: true }). This test driver performs actual file/directory deletion; B11.54 owns the observed lifecycle finding.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "e85d4d3f63dfe0cfaa58198766f13c56f1e23232",
+        "anchor": "rmSync(p, { force: true })",
+        "line": 37,
+        "scope": "Filesystem import plus first two actual deletion call contexts inspected. Positive critical operation establishes risk; not full body/assertion review, symbol-resolution proof or cleanup acceptance."
+      }
     },
     {
       "path": "src/presentation/cli/commands/stats.json.test.ts",
@@ -5248,13 +5494,19 @@
       "path": "src/presentation/cli/commands/stats.test.ts",
       "package": "package.json",
       "sourceHash": "f17487767aa816c0445107dfa4b1dd101c808a9640ceb34815e94be90d73a47a",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "S",
+      "rationale": "Inspected filesystem import and call context: rmSync(cli03TempDir, { recursive: true, force: true }). This test driver performs actual file/directory deletion; B11.55 owns the observed lifecycle finding.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "e85d4d3f63dfe0cfaa58198766f13c56f1e23232",
+        "anchor": "rmSync(cli03TempDir, { recursive: true, force: true })",
+        "line": 358,
+        "scope": "Filesystem import plus first two actual deletion call contexts inspected. Positive critical operation establishes risk; not full body/assertion review, symbol-resolution proof or cleanup acceptance."
+      }
     },
     {
       "path": "src/presentation/cli/commands/stats.ts",
@@ -5277,13 +5529,19 @@
       "path": "src/presentation/cli/commands/status.test.ts",
       "package": "package.json",
       "sourceHash": "760ea43cd39d1328bb5eabd660872015e3b1090399af6474e9bbd5b3915adcf9",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "S",
+      "rationale": "Inspected filesystem import and call context: rmSync(testBaseDir, { recursive: true, force: true, maxRetries: 10, retryDelay: 50, }). This test driver performs actual file/directory deletion; B11.56 owns the observed lifecycle finding.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "e85d4d3f63dfe0cfaa58198766f13c56f1e23232",
+        "anchor": "rmSync(testBaseDir, {\n            recursive: true,\n            force: true,\n            maxRetries: 10,\n            retryDelay: 50,\n        })",
+        "line": 66,
+        "scope": "Filesystem import plus first two actual deletion call contexts inspected. Positive critical operation establishes risk; not full body/assertion review, symbol-resolution proof or cleanup acceptance."
+      }
     },
     {
       "path": "src/presentation/cli/commands/status.ts",
@@ -5393,13 +5651,19 @@
       "path": "src/presentation/cli/commands/sync/helpers.test.ts",
       "package": "package.json",
       "sourceHash": "4683136514cc59616fe5ad53789917070be5ca552a6e5ca0a6f26b7c2ef676d9",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "S",
+      "rationale": "Inspected filesystem import and call context: rmSync(tempDir, { recursive: true, force: true }). This test driver performs actual file/directory deletion; B11.57 owns the observed lifecycle finding.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "e85d4d3f63dfe0cfaa58198766f13c56f1e23232",
+        "anchor": "rmSync(tempDir, { recursive: true, force: true })",
+        "line": 90,
+        "scope": "Filesystem import plus first two actual deletion call contexts inspected. Positive critical operation establishes risk; not full body/assertion review, symbol-resolution proof or cleanup acceptance."
+      }
     },
     {
       "path": "src/presentation/cli/commands/sync/helpers.ts",
@@ -5463,13 +5727,19 @@
       "path": "src/presentation/cli/commands/sync/memory-files.test.ts",
       "package": "package.json",
       "sourceHash": "e5e11eaa01d49b566e380fdfc549142b9fc89098d04e68b2ddf58bd55c5d1e53",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "S",
+      "rationale": "Inspected filesystem import and call context: rmSync(dir, { recursive: true, force: true }). This test driver performs actual file/directory deletion; numeric applicability and ownership proof remain subject to individual review.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "e85d4d3f63dfe0cfaa58198766f13c56f1e23232",
+        "anchor": "rmSync(dir, { recursive: true, force: true })",
+        "line": 25,
+        "scope": "Filesystem import plus first two actual deletion call contexts inspected. Positive critical operation establishes risk; not full body/assertion review, symbol-resolution proof or cleanup acceptance."
+      }
     },
     {
       "path": "src/presentation/cli/commands/sync/memory-files.ts",
@@ -5504,13 +5774,19 @@
       "path": "src/presentation/cli/commands/uninstall.test.ts",
       "package": "package.json",
       "sourceHash": "0e9bd334fc85515c54fdddf4f84ae4ce7a38bb2d06c3455087531cc5ede6a126",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "S",
+      "rationale": "Inspected filesystem import and call context: rmSync(testBaseDir, { recursive: true, force: true }). This test driver performs actual file/directory deletion; B11.18 owns the observed lifecycle finding.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "e85d4d3f63dfe0cfaa58198766f13c56f1e23232",
+        "anchor": "rmSync(testBaseDir, { recursive: true, force: true })",
+        "line": 44,
+        "scope": "Filesystem import plus first two actual deletion call contexts inspected. Positive critical operation establishes risk; not full body/assertion review, symbol-resolution proof or cleanup acceptance."
+      }
     },
     {
       "path": "src/presentation/cli/commands/uninstall.ts",
@@ -5533,13 +5809,19 @@
       "path": "src/presentation/cli/db-startup.test.ts",
       "package": "package.json",
       "sourceHash": "31f888ab58c4ff2c5d5d67899becc2293c162fac1668b05ca76f2d7e57b13294",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "S",
+      "rationale": "Inspected filesystem import and call context: rmSync(dir, { recursive: true, force: true }). This test driver performs actual file/directory deletion; B11.58 owns the observed lifecycle finding.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "e85d4d3f63dfe0cfaa58198766f13c56f1e23232",
+        "anchor": "rmSync(dir, { recursive: true, force: true })",
+        "line": 33,
+        "scope": "Filesystem import plus first two actual deletion call contexts inspected. Positive critical operation establishes risk; not full body/assertion review, symbol-resolution proof or cleanup acceptance."
+      }
     },
     {
       "path": "src/presentation/cli/db-startup.ts",
@@ -6255,13 +6537,19 @@
       "path": "tests/integration/concurrent-commands.test.ts",
       "package": "package.json",
       "sourceHash": "ef2bd3af391eb51b164688fa835b5f059006af2707485d72860560f832a4337a",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "S",
+      "rationale": "Inspected filesystem import and call context: rmSync(xdgParent, { recursive: true, force: true }). This test driver performs actual file/directory deletion; B11.59 owns the observed lifecycle finding.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "e85d4d3f63dfe0cfaa58198766f13c56f1e23232",
+        "anchor": "rmSync(xdgParent, { recursive: true, force: true })",
+        "line": 142,
+        "scope": "Filesystem import plus first two actual deletion call contexts inspected. Positive critical operation establishes risk; not full body/assertion review, symbol-resolution proof or cleanup acceptance."
+      }
     },
     {
       "path": "tests/integration/index.ts",
@@ -6284,85 +6572,127 @@
       "path": "tests/integration/infrastructure/database/event-log.test.ts",
       "package": "package.json",
       "sourceHash": "9540f935d5b3db75fc77625be502f54a148fb039cd064b16e54e3ce4ac1796d2",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "S",
+      "rationale": "Inspected filesystem import and call context: rmSync(testLogDir, { recursive: true, force: true }). This test driver performs actual file/directory deletion; numeric applicability and ownership proof remain subject to individual review.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "e85d4d3f63dfe0cfaa58198766f13c56f1e23232",
+        "anchor": "rmSync(testLogDir, { recursive: true, force: true })",
+        "line": 48,
+        "scope": "Filesystem import plus first two actual deletion call contexts inspected. Positive critical operation establishes risk; not full body/assertion review, symbol-resolution proof or cleanup acceptance."
+      }
     },
     {
       "path": "tests/integration/interrupted-sync.test.ts",
       "package": "package.json",
       "sourceHash": "bf96a4d1152cfd9b09e9b226f946dfbb2f183b8427974d879bb019ede8bfbfd3",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "S",
+      "rationale": "Inspected filesystem import and call context: rmSync(xdgParent, { recursive: true, force: true }). This test driver performs actual file/directory deletion; B11.60 owns the observed lifecycle finding.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "e85d4d3f63dfe0cfaa58198766f13c56f1e23232",
+        "anchor": "rmSync(xdgParent, { recursive: true, force: true })",
+        "line": 153,
+        "scope": "Filesystem import plus first two actual deletion call contexts inspected. Positive critical operation establishes risk; not full body/assertion review, symbol-resolution proof or cleanup acceptance."
+      }
     },
     {
       "path": "tests/integration/large-file.test.ts",
       "package": "package.json",
       "sourceHash": "f3cc9abb4d8a7ab2eff8e07cc62485a6351f437495a21cefcd7c2c9acac6358f",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "S",
+      "rationale": "Inspected filesystem import and call context: rmSync(testDir, { recursive: true, force: true }). This test driver performs actual file/directory deletion; B11.61 owns the observed lifecycle finding.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "e85d4d3f63dfe0cfaa58198766f13c56f1e23232",
+        "anchor": "rmSync(testDir, { recursive: true, force: true })",
+        "line": 178,
+        "scope": "Filesystem import plus first two actual deletion call contexts inspected. Positive critical operation establishes risk; not full body/assertion review, symbol-resolution proof or cleanup acceptance."
+      }
     },
     {
       "path": "tests/integration/programmatic-api.test.ts",
       "package": "package.json",
       "sourceHash": "c82f7c19c3c7abc5c7ed84597c5cf76c63e3e3f14678da2e000c5f6a568c1dfb",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "S",
+      "rationale": "Inspected filesystem import and call context: rmSync(exportDir, { recursive: true, force: true }). This test driver performs actual file/directory deletion; B11.62 owns the observed lifecycle finding.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "e85d4d3f63dfe0cfaa58198766f13c56f1e23232",
+        "anchor": "rmSync(exportDir, { recursive: true, force: true })",
+        "line": 133,
+        "scope": "Filesystem import plus first two actual deletion call contexts inspected. Positive critical operation establishes risk; not full body/assertion review, symbol-resolution proof or cleanup acceptance."
+      }
     },
     {
       "path": "tests/integration/query-primitive.test.ts",
       "package": "package.json",
       "sourceHash": "ef77af77e6db8abdceaad2f046a0da529dc7879574e757d71d246c0e3f744eb2",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "S",
+      "rationale": "Inspected filesystem import and call context: rmSync(exportDir, { recursive: true, force: true }). This test driver performs actual file/directory deletion; B11.63 owns the observed lifecycle finding.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "e85d4d3f63dfe0cfaa58198766f13c56f1e23232",
+        "anchor": "rmSync(exportDir, { recursive: true, force: true })",
+        "line": 92,
+        "scope": "Filesystem import plus first two actual deletion call contexts inspected. Positive critical operation establishes risk; not full body/assertion review, symbol-resolution proof or cleanup acceptance."
+      }
     },
     {
       "path": "tests/integration/sync-with-memory-files.test.ts",
       "package": "package.json",
       "sourceHash": "05c99a7429f35f1527b911aaca2c26aa4b08e0db8908e76e2dd41587941cc950",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "S",
+      "rationale": "Inspected filesystem import and call context: rmSync(memoryDir, { recursive: true, force: true }). This test driver performs actual file/directory deletion; B11.64 owns the observed lifecycle finding.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "e85d4d3f63dfe0cfaa58198766f13c56f1e23232",
+        "anchor": "rmSync(memoryDir, { recursive: true, force: true })",
+        "line": 38,
+        "scope": "Filesystem import plus first two actual deletion call contexts inspected. Positive critical operation establishes risk; not full body/assertion review, symbol-resolution proof or cleanup acceptance."
+      }
     },
     {
       "path": "tests/integration/unified-status.test.ts",
       "package": "package.json",
       "sourceHash": "ce662c69b854c97e215b128513951722f16ae2f4bdd4dacb8fed3fd827168926",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "S",
+      "rationale": "Inspected filesystem import and call context: rmSync(exportDir, { recursive: true, force: true }). This test driver performs actual file/directory deletion; B11.65 owns the observed lifecycle finding.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "e85d4d3f63dfe0cfaa58198766f13c56f1e23232",
+        "anchor": "rmSync(exportDir, { recursive: true, force: true })",
+        "line": 87,
+        "scope": "Filesystem import plus first two actual deletion call contexts inspected. Positive critical operation establishes risk; not full body/assertion review, symbol-resolution proof or cleanup acceptance."
+      }
     },
     {
       "path": "tests/presentation/cli/commands/friction.test.ts",
