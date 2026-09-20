@@ -237,7 +237,7 @@ export async function verifySandbox(sandboxDir: string, runCommand: typeof runUa
     // Test B: unified status diagnostics
     const statusRes = await runCommand(["memory", "status", "--all"], uatEnv);
     // Exit code is expected to be 1 in sandbox due to missing Git hooks / local models, which is correct.
-    const statusSuccess = statusRes.stdout.includes("=== Database Statistics ===") && statusRes.stdout.includes("Database");
+    const statusSuccess = (statusRes.code === 0 || statusRes.code === 1) && statusRes.stdout.includes("=== Database Statistics ===") && statusRes.stdout.includes("Database");
     logResult("Unified Status & Health Surface", statusSuccess, "Combines stats and doctor diagnostics in memory status --all", statusSuccess ? "" : statusRes.stdout + statusRes.stderr);
     if (!statusSuccess) overallPassed = false;
 
@@ -265,7 +265,7 @@ export async function verifySandbox(sandboxDir: string, runCommand: typeof runUa
 
     const doctorRes = await runCommand(["memory", "doctor"], uatEnv);
     // Doctor will exit with 1 due to warnings, which is fine, we check output integrity
-    const doctorSuccess = doctorRes.stdout.includes("Integrity: ok");
+    const doctorSuccess = (doctorRes.code === 0 || doctorRes.code === 1) && doctorRes.stdout.includes("Integrity: ok");
     logResult("Legacy Wrapper compatibility: memory doctor", doctorSuccess, "", doctorSuccess ? "" : doctorRes.stdout + doctorRes.stderr);
     if (!doctorSuccess) overallPassed = false;
 
@@ -315,12 +315,12 @@ export async function verifySandbox(sandboxDir: string, runCommand: typeof runUa
 
     // Re-sync mock sessions to restore projection dependency
     const syncPostRebuildRes = await runCommand(["memory", "sync"], uatEnv);
-    if (syncPostRebuildRes.code !== 0) {
-      console.error("Warning: sync post-rebuild failed:", syncPostRebuildRes.stdout + syncPostRebuildRes.stderr);
-    }
+    const syncPostRebuildSuccess = syncPostRebuildRes.code === 0;
+    logResult("Sync After Projection Rebuild", syncPostRebuildSuccess, `Exit: ${syncPostRebuildRes.code}`, syncPostRebuildSuccess ? "" : syncPostRebuildRes.stdout + syncPostRebuildRes.stderr);
+    if (!syncPostRebuildSuccess) overallPassed = false;
 
     const postRebuildQuery = await runCommand(["memory", "query", "--kind", "context", "project", "--format", "ai"], uatEnv);
-    const rebuildSuccess = postRebuildQuery.stdout.trim() === preDeleteQuery.stdout.trim() && postRebuildQuery.stdout.includes("Use links table for relational semantic trees");
+    const rebuildSuccess = preDeleteQuery.code === 0 && postRebuildQuery.code === 0 && postRebuildQuery.stdout.trim() === preDeleteQuery.stdout.trim() && postRebuildQuery.stdout.includes("Use links table for relational semantic trees");
     logResult("Database Re-hydration from Plain-Text Event Log (SSOT)", rebuildSuccess, "Proves SQL is derived projection; JSONL is primary source", rebuildSuccess ? "" : `Pre: ${preDeleteQuery.stdout}\nPost: ${postRebuildQuery.stdout}`);
     if (!rebuildSuccess) overallPassed = false;
 
@@ -380,8 +380,9 @@ export async function verifySandbox(sandboxDir: string, runCommand: typeof runUa
     const factsListRes = await runCommand(["memory", "query", "--kind", "context", "project", "--format", "ai"], uatEnv);
     const excludesSuperseded = !factsListRes.stdout.includes("Initial decision: Use spaces");
     const includesCurrent = factsListRes.stdout.includes("tabs instead of spaces");
-    logResult("Default Queries Filter Out Superseded Facts", excludesSuperseded && includesCurrent, "Excludes invalidated histories", excludesSuperseded && includesCurrent ? "" : factsListRes.stdout);
-    if (!excludesSuperseded || !includesCurrent) overallPassed = false;
+    const factsQuerySuccess = factsListRes.code === 0 && excludesSuperseded && includesCurrent;
+    logResult("Default Queries Filter Out Superseded Facts", factsQuerySuccess, "Excludes invalidated histories", factsQuerySuccess ? "" : factsListRes.stdout + factsListRes.stderr);
+    if (!factsQuerySuccess) overallPassed = false;
 
     // Test B: memory export / import maintains supersedence chain round-trip
     const exportPath = join(sandboxDir, "export.json");
@@ -401,7 +402,7 @@ export async function verifySandbox(sandboxDir: string, runCommand: typeof runUa
 
     // Verify imported database has identical facts query state
     const importQueryRes = await runCommand(["memory", "query", "--kind", "context", "project", "--format", "ai"], importEnv);
-    const importQuerySuccess = importQueryRes.stdout.trim() === factsListRes.stdout.trim();
+    const importQuerySuccess = importQueryRes.code === 0 && factsListRes.code === 0 && importQueryRes.stdout.trim() === factsListRes.stdout.trim();
     logResult("Export/Import round-trip projection deep equivalence", importQuerySuccess, "Preserves supersedence lineage integrity", importQuerySuccess ? "" : `Orig: ${factsListRes.stdout}\nImported: ${importQueryRes.stdout}`);
     if (!importQuerySuccess) overallPassed = false;
 

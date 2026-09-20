@@ -41,7 +41,15 @@ test("UAT command reports a missing executable", async () => {
   await expect(uat.runUatCommand(["deliberately-missing-uat-command"],{})).rejects.toThrow();
 });
 
-test("synthetic UAT workflow replays both real database projections", () => {
+const workflowScenarios = [
+  {step:0,code:0,passed:true},
+  ...Array.from({length:15},(_,index)=>({step:index+1,code:7,passed:false})),
+  {step:2,code:1,passed:true},
+  {step:7,code:1,passed:true},
+  {step:2,code:2,passed:false},
+  {step:7,code:2,passed:false},
+];
+test.each(workflowScenarios)("synthetic UAT workflow enforces command status %j despite successful output", scenario => {
   const fixture = createOwnedTestDirectory("memory-uat-replay-");
   const target = pathToFileURL(join(import.meta.dir,"run-uat-verification.ts")).href;
   const program = `
@@ -49,6 +57,7 @@ test("synthetic UAT workflow replays both real database projections", () => {
     import {mkdirSync,writeFileSync,existsSync} from "node:fs";
     import {join} from "node:path";
     const content="Use links table for relational semantic trees";
+    const failureStep=${scenario.step}, failureCode=${scenario.code}, expectedPassed=${scenario.passed};
     let firstReplay=false, secondReplay=false, exportText="", imported=false, commands=0;
     const passed=await runUatSandbox(dir=>verifySandbox(dir,async(cmd,env)=>{
       commands++;
@@ -91,13 +100,13 @@ test("synthetic UAT workflow replays both real database projections", () => {
         }
         default: throw Error("Unexpected synthetic command: "+cmd[1]);
       }
-      return {code:0,stdout,stderr:""};
+      return {code:commands===failureStep ? failureCode : 0,stdout,stderr:""};
     }));
     async function context(database) {
       const rows=await withUatDatabase(database,async db=>db.query("SELECT content FROM facts WHERE type = 'decision' AND superseded_at IS NULL ORDER BY observed_at").all());
       return rows.map(row=>row.content).join("\\n");
     }
-    if(!passed||!firstReplay||!secondReplay||!imported||commands!==15)throw Error(JSON.stringify({passed,firstReplay,secondReplay,imported,commands}));
+    if(passed!==expectedPassed||!firstReplay||!secondReplay||!imported||commands!==15)throw Error(JSON.stringify({passed,failureStep,failureCode,expectedPassed,firstReplay,secondReplay,imported,commands}));
     console.log("REAL_REPLAY_CHECKS_PASSED");
   `;
   try {
@@ -108,7 +117,8 @@ test("synthetic UAT workflow replays both real database projections", () => {
     });
     const stdout = new TextDecoder().decode(child.stdout), stderr = new TextDecoder().decode(child.stderr);
     const failedChecks=stdout.split("\n").filter(line=>line.includes("[FAIL]"));
-    expect({exit:child.exitCode,stderr,failedChecks}).toEqual({exit:0,stderr:"",failedChecks:[]});
+    expect({exit:child.exitCode,...(child.exitCode!==0 ? {stderr} : {})}).toEqual({exit:0});
+    expect(failedChecks.length===0).toBe(!scenario.passed ? false : true);
     expect(stdout).toContain("REAL_REPLAY_CHECKS_PASSED");
   } finally {fixture.cleanup();}
 });

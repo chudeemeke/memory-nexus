@@ -1626,7 +1626,7 @@
     {
       "path": "scripts/run-uat-verification.test.ts",
       "package": "package.json",
-      "sourceHash": "fdd208a97ad5f5855934912e1440b288a09dd7c8fbe00cd3f8d269262a5ca848",
+      "sourceHash": "e8712e920ca843a9b44188016e7ef2b3c24261e57a822e08f05ece5ba8e3e136",
       "language": ".ts",
       "syntax": "test-driver",
       "imports": [
@@ -1666,9 +1666,11 @@
         "stderr",
         "stdout",
         "storage",
-        "target"
+        "target",
+        "workflowScenarios"
       ],
       "calls": [
+        "Array.from",
         "Bun.spawnSync",
         "JSON.stringify",
         "Object.assign",
@@ -1717,7 +1719,7 @@
     {
       "path": "scripts/run-uat-verification.ts",
       "package": "package.json",
-      "sourceHash": "b09b50bad27a4224aaadd9e76135b4cdc5f2909083f9ce44476feae2e1bd3b5f",
+      "sourceHash": "85d53bb270e923d685c5daa89e74cfd11f77fcdfc6e101910bc7da6eb1ae4d91",
       "language": ".ts",
       "syntax": "executable",
       "imports": [
@@ -1755,6 +1757,7 @@
         "extractRes",
         "extractSuccess",
         "factsListRes",
+        "factsQuerySuccess",
         "finalLogData",
         "green",
         "hasDecisionEvent",
@@ -1813,6 +1816,7 @@
         "statusSuccess",
         "storage",
         "syncPostRebuildRes",
+        "syncPostRebuildSuccess",
         "syncRes",
         "syncSuccess",
         "t7RecoverySuccess",

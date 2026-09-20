@@ -1,5 +1,21 @@
 # Memory resilience execution journal
 
+## 2026-09-20 - B11.3 status admission and measured gaps
+
+- Previous turn progressed at b8ae681; started clean. RED found seven false-pass
+  paths when failed commands returned success-shaped output. Repaired their
+  status checks; status/doctor warning 1 remains valid, fatal 2 is rejected.
+- 48 Windows tests /135 assertions and full types pass. Instrumented current
+  script/driver also pass with 28 parent/child captures. Probe fixture removed.
+- Diagnostic script branches 89.78%; driver functions91.48%, branches95.83%.
+  Whole-file Tier S acceptance is not achieved. B11.3-status.json retains
+  uncovered locations, merged counters and exact source/harness/log bindings.
+- Next: cover missing/alternate log, legacy/recovery failures, safe default
+  entrypoint/setup paths and native Linux; add decision faults for callbacks
+  correctly refused by passing tests. Generated-JS measurement, process-tree
+  and stream failure checks plus independent acceptance remain open.
+
+
 ## 2026-09-20 - B11.3 bounded commands and actual replay proof
 
 - Previous turn made progress at 008f539; started from a clean tree.

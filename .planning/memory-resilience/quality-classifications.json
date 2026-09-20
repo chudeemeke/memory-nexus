@@ -827,17 +827,18 @@
         "reason": "Executable failure/recovery driver; all applicable metric floors remain required."
       },
       "decisionStatus": "proposed - independent review pending",
-      "sourceHash": "fdd208a97ad5f5855934912e1440b288a09dd7c8fbe00cd3f8d269262a5ca848",
+      "sourceHash": "e8712e920ca843a9b44188016e7ef2b3c24261e57a822e08f05ece5ba8e3e136",
       "metricApplicability": {
-        "status": "invalidated - current whole-file metrics and independent review pending",
-        "sourceHash": "fdd208a97ad5f5855934912e1440b288a09dd7c8fbe00cd3f8d269262a5ca848",
-        "reason": "B11.3 command deadline and synthetic real replay checkpoint changes source. 29 tests and types pass; previous metrics are not transferred."
+        "status": "diagnostic only - tier floors and independent applicability remain unmet",
+        "sourceHash": "e8712e920ca843a9b44188016e7ef2b3c24261e57a822e08f05ece5ba8e3e136",
+        "reason": "Parent/child counters measured. Script branches 89.78%; driver functions 91.48% and branches 95.83%. No Tier S acceptance; B05 instrumenter and generated-JS limits remain.",
+        "evidence": ".planning/memory-resilience/evidence/B11.3-status.json"
       }
     },
     {
       "path": "scripts/run-uat-verification.ts",
       "package": "package.json",
-      "sourceHash": "b09b50bad27a4224aaadd9e76135b4cdc5f2909083f9ce44476feae2e1bd3b5f",
+      "sourceHash": "85d53bb270e923d685c5daa89e74cfd11f77fcdfc6e101910bc7da6eb1ae4d91",
       "tier": "S",
       "rationale": "Creates a sandbox, mutates synthetic memory projections and canonical event data, executes CLI acceptance checks and recursively deletes storage. Cleanup diagnostics remain B11.3.",
       "applicability": {
@@ -851,9 +852,10 @@
         "scope": "positive critical boundary establishes highest tier; not full correctness acceptance"
       },
       "metricApplicability": {
-        "status": "invalidated - current whole-file metrics and independent review pending",
-        "sourceHash": "b09b50bad27a4224aaadd9e76135b4cdc5f2909083f9ce44476feae2e1bd3b5f",
-        "reason": "B11.3 command deadline and synthetic real replay checkpoint changes source. 29 tests and types pass; previous metrics are not transferred."
+        "status": "diagnostic only - tier floors and independent applicability remain unmet",
+        "sourceHash": "85d53bb270e923d685c5daa89e74cfd11f77fcdfc6e101910bc7da6eb1ae4d91",
+        "reason": "Parent/child counters measured. Script branches 89.78%; driver functions 91.48% and branches 95.83%. No Tier S acceptance; B05 instrumenter and generated-JS limits remain.",
+        "evidence": ".planning/memory-resilience/evidence/B11.3-status.json"
       }
     },
     {
