@@ -8642,7 +8642,7 @@
     {
       "path": "src/infrastructure/database/repositories/backfill-state-repository.ts",
       "package": "package.json",
-      "sourceHash": "fbf87e04f88c43c5bf7350b2d411e3671039492dfcdea3120b7d1e71d1116b05",
+      "sourceHash": "b89a99657cd121ac7164d9318e05fdc68258bb717f6cb0de4238054414d264d6",
       "language": ".ts",
       "syntax": "executable",
       "imports": [
@@ -8658,12 +8658,16 @@
         "row",
         "rows",
         "save",
+        "statement",
         "toEntity"
       ],
       "calls": [
         "BackfillState.create",
         "rows.map",
-        "state.backfilledAt.toISOString"
+        "state.backfilledAt.toISOString",
+        "statement.all",
+        "statement.get",
+        "statement.run"
       ]
     },
     {
@@ -9112,7 +9116,7 @@
     {
       "path": "src/infrastructure/database/repositories/extraction-log-repository.ts",
       "package": "package.json",
-      "sourceHash": "e56af5e8fb139c76431babd0f9da8ae1d8ca87d822e00ef56fa5280bfb863ee5",
+      "sourceHash": "08ec06dbb8c2279e458409b81723b952db1903a83ad4af8689420ae38f9c1e84",
       "language": ".ts",
       "syntax": "executable",
       "imports": [
@@ -9127,11 +9131,15 @@
         "row",
         "rows",
         "save",
+        "statement",
         "toEntry"
       ],
       "calls": [
         "entry.extractedAt.toISOString",
-        "rows.map"
+        "rows.map",
+        "statement.all",
+        "statement.get",
+        "statement.run"
       ]
     },
     {
@@ -10006,7 +10014,7 @@
     {
       "path": "src/infrastructure/database/repositories/memory-utility-repository.ts",
       "package": "package.json",
-      "sourceHash": "b2112562d111aa6afe0fae7968ddad6b776d1c82f49f7b421690d2cb4fb99c5c",
+      "sourceHash": "f78d3970033a0cd1057996164208e6cff15bf4e98e013451a1043b6365334ba8",
       "language": ".ts",
       "syntax": "executable",
       "imports": [
@@ -10023,11 +10031,11 @@
         "findByTargetIds",
         "placeholders",
         "recordAccess",
-        "result",
         "row",
         "rows",
         "save",
         "saved",
+        "statement",
         "toEntity",
         "toSqlParams"
       ],
@@ -10035,14 +10043,15 @@
         "JSON.parse",
         "JSON.stringify",
         "MemoryUtilityMetric.create",
-        "Number",
         "existing.recordAccess",
         "metric.createdAt.toISOString",
         "metric.lastAccessedAt.toISOString",
         "metric.lastRankedAt.toISOString",
         "metric.updatedAt.toISOString",
-        "metric.withId",
         "rows.map",
+        "statement.all",
+        "statement.get",
+        "statement.run",
         "targetIds.map",
         "targetIds.map.join"
       ]
@@ -25544,6 +25553,85 @@
         "repo.save",
         "repo.saveMany",
         "test"
+      ]
+    },
+    {
+      "path": "tests/infrastructure/database/repositories/record-repository-lifecycle.test.ts",
+      "package": "package.json",
+      "sourceHash": "5c2d545b5c44aec8d6d6874cccdd51d6ba08052abab7cdcdec9ed4a8a157f121",
+      "language": ".ts",
+      "syntax": "test-driver",
+      "imports": [
+        "../../../../src/domain/entities/backfill-state.js",
+        "../../../../src/domain/entities/memory-utility-metric.js",
+        "../../../../src/domain/ports/repositories.js",
+        "../../../../src/infrastructure/database/owned-database.js",
+        "../../../../src/infrastructure/database/repositories/backfill-state-repository.js",
+        "../../../../src/infrastructure/database/repositories/extraction-log-repository.js",
+        "../../../../src/infrastructure/database/repositories/memory-utility-repository.js",
+        "../../../../src/infrastructure/database/schema.js",
+        "bun:sqlite",
+        "bun:test"
+      ],
+      "declarations": [
+        "backfill",
+        "db",
+        "entry",
+        "extraction",
+        "fixture",
+        "initial",
+        "iteration",
+        "metric",
+        "owned",
+        "prepare",
+        "released",
+        "repo",
+        "saved",
+        "statement",
+        "statements",
+        "timestamp"
+      ],
+      "calls": [
+        "BackfillState.create",
+        "MemoryUtilityMetric.create",
+        "Reflect.apply",
+        "createSchema",
+        "db.exec",
+        "db.finalizeStatements",
+        "db.prepare.bind",
+        "describe",
+        "expect",
+        "expect.rejects.toBeInstanceOf",
+        "expect.rejects.toThrow",
+        "expect.toBe",
+        "expect.toBeGreaterThan",
+        "expect.toBeNull",
+        "expect.toEqual",
+        "expect.toThrow",
+        "fixture",
+        "initial.clearAll",
+        "initial.deleteByProject",
+        "initial.findByTarget",
+        "initial.findByTargetIds",
+        "initial.recordAccess",
+        "initial.save",
+        "it",
+        "metric.recordAccess",
+        "owned.db.close",
+        "owned.db.exec",
+        "owned.released",
+        "repo.clearAll",
+        "repo.countByStatus",
+        "repo.deleteByProject",
+        "repo.findAll",
+        "repo.findById",
+        "repo.findBySessionId",
+        "repo.findByTarget",
+        "repo.findByTargetIds",
+        "repo.recordAccess",
+        "repo.save",
+        "statement.get",
+        "statements.push"
       ]
     },
     {

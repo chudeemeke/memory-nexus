@@ -6360,7 +6360,7 @@
     {
       "path": "src/infrastructure/database/repositories/backfill-state-repository.ts",
       "package": "package.json",
-      "sourceHash": "fbf87e04f88c43c5bf7350b2d411e3671039492dfcdea3120b7d1e71d1116b05",
+      "sourceHash": "b89a99657cd121ac7164d9318e05fdc68258bb717f6cb0de4238054414d264d6",
       "tier": "S",
       "rationale": "Inspected SQLite INSERT/upsert statement persists backfill_state records. This establishes the data-integrity tier; transaction, conflict and deletion correctness remain separate verification obligations.",
       "applicability": {
@@ -6369,30 +6369,30 @@
       },
       "decisionStatus": "proposed - independent review pending",
       "inspection": {
-        "sourceRevision": "39c895b13e768bd607070efbc3496d47a821b257",
-        "anchor": "prepared INSERT into backfill_state",
-        "scope": "positive critical boundary establishes highest tier; not full correctness acceptance"
+        "sourceRevision": "257c7e6 + current source hash",
+        "anchor": "record repository scoped statement disposal",
+        "scope": "Current source, native behavior and targeted disposal/persistence decision checks; full tier/applicability review remains pending."
       },
       "metricApplicability": {
-        "status": "proposed - independent review pending",
-        "evidence": ".planning/memory-resilience/evidence/B04-applicability-probe.json",
-        "sourceHash": "fbf87e04f88c43c5bf7350b2d411e3671039492dfcdea3120b7d1e71d1116b05",
-        "disposition": "Measure every positive denominator; individually review zero branch/function denominators against runtime syntax. Observed counts do not prove instrumentation completeness.",
+        "status": "diagnostic - B05 and independent review pending",
+        "evidence": ".planning/memory-resilience/evidence/B11.74.3-records.json",
+        "sourceHash": "b89a99657cd121ac7164d9318e05fdc68258bb717f6cb0de4238054414d264d6",
+        "disposition": "Measure every denominator. Optional-chain completeness and zero driver branches still require B05 and individual review; no exclusion.",
         "metrics": {
-          "statements": {
-            "observedCounterTotal": 11,
-            "proposal": "measure - completeness unverified"
-          },
-          "branches": {
-            "observedCounterTotal": 12,
+          "lines": {
+            "observedCounterTotal": 13,
             "proposal": "measure - completeness unverified"
           },
           "functions": {
             "observedCounterTotal": 7,
             "proposal": "measure - completeness unverified"
           },
-          "lines": {
-            "observedCounterTotal": 9,
+          "statements": {
+            "observedCounterTotal": 15,
+            "proposal": "measure - completeness unverified"
+          },
+          "branches": {
+            "observedCounterTotal": 12,
             "proposal": "measure - completeness unverified"
           }
         }
@@ -6692,7 +6692,7 @@
     {
       "path": "src/infrastructure/database/repositories/extraction-log-repository.ts",
       "package": "package.json",
-      "sourceHash": "e56af5e8fb139c76431babd0f9da8ae1d8ca87d822e00ef56fa5280bfb863ee5",
+      "sourceHash": "08ec06dbb8c2279e458409b81723b952db1903a83ad4af8689420ae38f9c1e84",
       "tier": "S",
       "rationale": "Inspected SQLite INSERT/upsert statement persists extraction_log records. This establishes the data-integrity tier; transaction, conflict and deletion correctness remain separate verification obligations.",
       "applicability": {
@@ -6701,30 +6701,30 @@
       },
       "decisionStatus": "proposed - independent review pending",
       "inspection": {
-        "sourceRevision": "39c895b13e768bd607070efbc3496d47a821b257",
-        "anchor": "prepared INSERT into extraction_log",
-        "scope": "positive critical boundary establishes highest tier; not full correctness acceptance"
+        "sourceRevision": "257c7e6 + current source hash",
+        "anchor": "record repository scoped statement disposal",
+        "scope": "Current source, native behavior and targeted disposal/persistence decision checks; full tier/applicability review remains pending."
       },
       "metricApplicability": {
-        "status": "proposed - independent review pending",
-        "evidence": ".planning/memory-resilience/evidence/B04-applicability-probe.json",
-        "sourceHash": "e56af5e8fb139c76431babd0f9da8ae1d8ca87d822e00ef56fa5280bfb863ee5",
-        "disposition": "Measure every positive denominator; individually review zero branch/function denominators against runtime syntax. Observed counts do not prove instrumentation completeness.",
+        "status": "diagnostic - B05 and independent review pending",
+        "evidence": ".planning/memory-resilience/evidence/B11.74.3-records.json",
+        "sourceHash": "08ec06dbb8c2279e458409b81723b952db1903a83ad4af8689420ae38f9c1e84",
+        "disposition": "Measure every denominator. Optional-chain completeness and zero driver branches still require B05 and individual review; no exclusion.",
         "metrics": {
-          "statements": {
-            "observedCounterTotal": 10,
-            "proposal": "measure - completeness unverified"
-          },
-          "branches": {
-            "observedCounterTotal": 2,
+          "lines": {
+            "observedCounterTotal": 11,
             "proposal": "measure - completeness unverified"
           },
           "functions": {
             "observedCounterTotal": 7,
             "proposal": "measure - completeness unverified"
           },
-          "lines": {
-            "observedCounterTotal": 8,
+          "statements": {
+            "observedCounterTotal": 13,
+            "proposal": "measure - completeness unverified"
+          },
+          "branches": {
+            "observedCounterTotal": 2,
             "proposal": "measure - completeness unverified"
           }
         }
@@ -7308,7 +7308,7 @@
     {
       "path": "src/infrastructure/database/repositories/memory-utility-repository.ts",
       "package": "package.json",
-      "sourceHash": "b2112562d111aa6afe0fae7968ddad6b776d1c82f49f7b421690d2cb4fb99c5c",
+      "sourceHash": "f78d3970033a0cd1057996164208e6cff15bf4e98e013451a1043b6365334ba8",
       "tier": "S",
       "rationale": "Inspected SQLite INSERT/upsert statement persists memory_utility_metrics records. This establishes the data-integrity tier; transaction, conflict and deletion correctness remain separate verification obligations.",
       "applicability": {
@@ -7317,30 +7317,30 @@
       },
       "decisionStatus": "proposed - independent review pending",
       "inspection": {
-        "sourceRevision": "39c895b13e768bd607070efbc3496d47a821b257",
-        "anchor": "prepared INSERT into memory_utility_metrics",
-        "scope": "positive critical boundary establishes highest tier; not full correctness acceptance"
+        "sourceRevision": "257c7e6 + current source hash",
+        "anchor": "record repository scoped statement disposal",
+        "scope": "Current source, native behavior and targeted disposal/persistence decision checks; full tier/applicability review remains pending."
       },
       "metricApplicability": {
-        "status": "proposed - independent review pending",
-        "evidence": ".planning/memory-resilience/evidence/B04-applicability-probe.json",
-        "sourceHash": "b2112562d111aa6afe0fae7968ddad6b776d1c82f49f7b421690d2cb4fb99c5c",
-        "disposition": "Measure every positive denominator; individually review zero branch/function denominators against runtime syntax. Observed counts do not prove instrumentation completeness. Optional-chain syntax is present; synthetic evidence shows current instrumentation omits its decision counters. B05.1 owns source-mapped branch proof before numeric acceptance.",
+        "status": "diagnostic - B05 and independent review pending",
+        "evidence": ".planning/memory-resilience/evidence/B11.74.3-records.json",
+        "sourceHash": "f78d3970033a0cd1057996164208e6cff15bf4e98e013451a1043b6365334ba8",
+        "disposition": "Measure every denominator. Optional-chain completeness and zero driver branches still require B05 and individual review; no exclusion.",
         "metrics": {
-          "statements": {
-            "observedCounterTotal": 20,
-            "proposal": "measure - completeness unverified"
-          },
-          "branches": {
-            "observedCounterTotal": 28,
+          "lines": {
+            "observedCounterTotal": 24,
             "proposal": "measure - completeness unverified"
           },
           "functions": {
             "observedCounterTotal": 11,
             "proposal": "measure - completeness unverified"
           },
-          "lines": {
-            "observedCounterTotal": 18,
+          "statements": {
+            "observedCounterTotal": 27,
+            "proposal": "measure - completeness unverified"
+          },
+          "branches": {
+            "observedCounterTotal": 28,
             "proposal": "measure - completeness unverified"
           }
         }
@@ -17666,6 +17666,47 @@
           },
           "lines": {
             "observedCounterTotal": 44,
+            "proposal": "measure - completeness unverified"
+          }
+        }
+      }
+    },
+    {
+      "path": "tests/infrastructure/database/repositories/record-repository-lifecycle.test.ts",
+      "package": "package.json",
+      "tier": "S",
+      "rationale": "Creates synthetic SQLite schemas and adversarial write/delete/read fixtures to prove statement disposal and truthful persistence outcomes.",
+      "applicability": {
+        "mode": "measure",
+        "reason": "Executable data-integrity lifecycle test; no metric exclusion approved."
+      },
+      "decisionStatus": "proposed - independent review pending",
+      "sourceHash": "5c2d545b5c44aec8d6d6874cccdd51d6ba08052abab7cdcdec9ed4a8a157f121",
+      "inspection": {
+        "sourceRevision": "257c7e6 + current source hash",
+        "anchor": "record repository scoped statement disposal",
+        "scope": "Current source, native behavior and targeted disposal/persistence decision checks; full tier/applicability review remains pending."
+      },
+      "metricApplicability": {
+        "status": "diagnostic - B05 and independent review pending",
+        "evidence": ".planning/memory-resilience/evidence/B11.74.3-records.json",
+        "sourceHash": "5c2d545b5c44aec8d6d6874cccdd51d6ba08052abab7cdcdec9ed4a8a157f121",
+        "disposition": "Measure every denominator. Optional-chain completeness and zero driver branches still require B05 and individual review; no exclusion.",
+        "metrics": {
+          "lines": {
+            "observedCounterTotal": 114,
+            "proposal": "measure - completeness unverified"
+          },
+          "functions": {
+            "observedCounterTotal": 14,
+            "proposal": "measure - completeness unverified"
+          },
+          "statements": {
+            "observedCounterTotal": 167,
+            "proposal": "measure - completeness unverified"
+          },
+          "branches": {
+            "observedCounterTotal": 0,
             "proposal": "measure - completeness unverified"
           }
         }

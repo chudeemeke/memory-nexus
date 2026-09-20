@@ -27,7 +27,7 @@ export class SqliteMemoryUtilityRepository implements IMemoryUtilityRepository {
   constructor(private readonly db: Database) {}
 
   async save(metric: MemoryUtilityMetric): Promise<MemoryUtilityMetric> {
-    const result = this.db.prepare(`
+    using statement = this.db.prepare(`
       INSERT INTO memory_utility_metrics (
         surface, target_id, project, access_count, last_accessed_at,
         last_ranked_at, utility_score, importance_score, evergreen, pinned,
@@ -45,16 +45,19 @@ export class SqliteMemoryUtilityRepository implements IMemoryUtilityRepository {
         half_life_days = excluded.half_life_days,
         metadata = excluded.metadata,
         updated_at = excluded.updated_at
-    `).run(...this.toSqlParams(metric));
+    `);
+    statement.run(...this.toSqlParams(metric));
 
     const saved = await this.findByTarget(metric.surface, metric.targetId);
-    return saved ?? metric.withId(Number(result.lastInsertRowid));
+    if (!saved) throw new Error("Utility metric was not present after save");
+    return saved;
   }
 
   async findByTarget(surface: MemoryUtilitySurface, targetId: string): Promise<MemoryUtilityMetric | null> {
-    const row = this.db.prepare<MemoryUtilityMetricRow, [MemoryUtilitySurface, string]>(
+    using statement = this.db.prepare<MemoryUtilityMetricRow, [MemoryUtilitySurface, string]>(
       "SELECT * FROM memory_utility_metrics WHERE surface = ? AND target_id = ?",
-    ).get(surface, targetId);
+    );
+    const row = statement.get(surface, targetId);
     return row ? this.toEntity(row) : null;
   }
 
@@ -63,9 +66,10 @@ export class SqliteMemoryUtilityRepository implements IMemoryUtilityRepository {
       return [];
     }
     const placeholders = targetIds.map(() => "?").join(", ");
-    const rows = this.db.prepare<MemoryUtilityMetricRow, (MemoryUtilitySurface | string)[]>(
+    using statement = this.db.prepare<MemoryUtilityMetricRow, (MemoryUtilitySurface | string)[]>(
       `SELECT * FROM memory_utility_metrics WHERE surface = ? AND target_id IN (${placeholders}) ORDER BY target_id ASC`,
-    ).all(surface, ...targetIds);
+    );
+    const rows = statement.all(surface, ...targetIds);
     return rows.map((row) => this.toEntity(row));
   }
 
@@ -90,11 +94,13 @@ export class SqliteMemoryUtilityRepository implements IMemoryUtilityRepository {
   }
 
   async deleteByProject(project: string): Promise<void> {
-    this.db.prepare("DELETE FROM memory_utility_metrics WHERE project = ?").run(project);
+    using statement = this.db.prepare("DELETE FROM memory_utility_metrics WHERE project = ?");
+    statement.run(project);
   }
 
   async clearAll(): Promise<void> {
-    this.db.prepare("DELETE FROM memory_utility_metrics").run();
+    using statement = this.db.prepare("DELETE FROM memory_utility_metrics");
+    statement.run();
   }
 
   private toSqlParams(metric: MemoryUtilityMetric): [

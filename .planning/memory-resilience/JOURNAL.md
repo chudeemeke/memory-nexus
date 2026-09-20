@@ -1,5 +1,36 @@
 # Memory resilience execution journal
 
+## 2026-09-20 - Record repository disposal and false utility-save success repaired
+
+- Previous turn progressed at 257c7e6; worktree began clean. Continued B11.74.3
+  with backfill-state, extraction-log and memory-utility repositories. All twelve
+  prepares now have scope disposal. The map contains 17 repository modules,
+  128 prepares (30 retained fields) and three cached queries; 14 modules remain.
+- Each repository family had native lifecycle RED before its repair. Added
+  repeated construction/call, write/delete rejection, read execution and invalid
+  stored-data decoding cases against synthetic in-memory SQLite.
+- Utility save's missing-row fallback returned success for an absent stored row.
+  An AFTER INSERT deletion trigger reproduced that false success. Save now throws
+  a useful absence error; normal upsert, access, filtering and deletion remain
+  verified. Pinned state and ranking-date roundtrip assertions also close actual
+  missed cases rather than fabricating impossible native return values.
+- Final native group: 24 tests / 888 assertions on Windows Bun 1.3.14 and 1.4.1.
+  Source/script and scoped strict test types, isolation and owned diagnostic runs
+  pass. Thirteen current-change faults detected. Pinned runtime digest verified
+  and temporary runtime/fixtures removed after termination.
+- All four changed files show diagnostic 100% metrics. Q027 retains complete
+  instrumenter/rebaseline/decision/review acceptance; zero driver branch counters
+  with optional chaining remain a B05 limitation. New driver setup-error cleanup
+  remains in B11.74.7 review. No complete package/changed-line/native Linux/hosted
+  or independent-review acceptance claimed. Catalog450/two packages; ledger232.
+- Retained-owner discovery: exported extractEntitiesFromSession constructs
+  retained message/entity repositories on a supplied DB, but current source
+  search finds only test callers. Keep external/helper ownership in B11.74.3;
+  do not assert a proven active loop or silently remove that API.
+- Next B11.74.3: embedding-repository batch/transaction lifetimes, then remaining
+  repositories and retained-owner construction. Main factory is unchanged.
+  Baseline acceptance still precedes the approved embedding experiment.
+
 ## 2026-09-20 - Explicit native owner and bounded stats slice verified locally
 
 - Previous turn was progress at fa823d1; worktree began clean. Mapped 223 production

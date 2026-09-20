@@ -902,8 +902,16 @@
         "lines=94.44"
       ],
       "historical_evidence": "docs/audits/2026-09-19-repair-evidence/per-file-coverage-gaps.json",
-      "evidence": [],
-      "acceptance_record": ".planning/memory-resilience/evidence/Q027.json"
+      "evidence": [
+        ".planning/memory-resilience/evidence/B11.74.3-records.json"
+      ],
+      "acceptance_record": ".planning/memory-resilience/evidence/Q027.json",
+      "progress": {
+        "current": "Current scoped diagnostic metrics now 100% in all four metrics after meaningful pinned/ranking-date roundtrip and missing-row persistence regression; false-success bug repaired.",
+        "limits": "Not final acceptance: B05 complete counters, file-wide decision review, complete rebaseline and independent review remain required.",
+        "owner": "memory-nexus",
+        "trigger": "Reconcile Q027 at B09/B10/R02 using source-bound evidence; no historical metric transfer."
+      }
     },
     {
       "id": "Q028",
@@ -5071,10 +5079,154 @@
       "authorization": "authorized",
       "owner": "memory-nexus",
       "evidence": [
-        ".planning/memory-resilience/B11.74-plan.md"
+        ".planning/memory-resilience/B11.74-plan.md",
+        ".planning/memory-resilience/evidence/B11.74.3-records.json"
       ],
       "acceptance_record": ".planning/memory-resilience/evidence/B11.74.3.json",
-      "retirement_trigger": "Before parent B11.74/B10/R02 acceptance; child local proof does not imply factory or whole-platform acceptance."
+      "retirement_trigger": "Before parent B11.74/B10/R02 acceptance; child local proof does not imply factory or whole-platform acceptance.",
+      "progress": {
+        "current": "Three record repositories migrated: twelve prepared statements disposed on success/error; false utility-save success replaced with explicit absence error. Both Windows runtimes: 24 tests/888 assertions. Thirteen targeted faults detected.",
+        "repositoryInventory": [
+          {
+            "path": "src/infrastructure/database/repositories/backfill-state-repository.ts",
+            "nativePrepareSites": 4,
+            "nativeQuerySites": 0,
+            "retainedFields": 0,
+            "status": "local disposal proof; final quality pending",
+            "sourceHash": "b89a99657cd121ac7164d9318e05fdc68258bb717f6cb0de4238054414d264d6"
+          },
+          {
+            "path": "src/infrastructure/database/repositories/dream-repository.ts",
+            "nativePrepareSites": 5,
+            "nativeQuerySites": 0,
+            "retainedFields": 0,
+            "status": "pending",
+            "sourceHash": "139ad85d741a734853b0a1a19976917acee4ff6ff31b86371f1e016e586d4048"
+          },
+          {
+            "path": "src/infrastructure/database/repositories/embedding-repository.ts",
+            "nativePrepareSites": 15,
+            "nativeQuerySites": 0,
+            "retainedFields": 0,
+            "status": "pending",
+            "sourceHash": "78c09ed29af171dabf61ecb859906421e42ce2c73499716e2f1e9375558066fe"
+          },
+          {
+            "path": "src/infrastructure/database/repositories/entity-repository.ts",
+            "nativePrepareSites": 9,
+            "nativeQuerySites": 2,
+            "retainedFields": 8,
+            "status": "pending",
+            "sourceHash": "0f70a9dd80f94e157312cd8032e541fb4b0fe334ae0bfa74e888efdb9fbb0e0f"
+          },
+          {
+            "path": "src/infrastructure/database/repositories/extraction-log-repository.ts",
+            "nativePrepareSites": 3,
+            "nativeQuerySites": 0,
+            "retainedFields": 0,
+            "status": "local disposal proof; final quality pending",
+            "sourceHash": "08ec06dbb8c2279e458409b81723b952db1903a83ad4af8689420ae38f9c1e84"
+          },
+          {
+            "path": "src/infrastructure/database/repositories/extraction-state-repository.ts",
+            "nativePrepareSites": 4,
+            "nativeQuerySites": 0,
+            "retainedFields": 4,
+            "status": "pending",
+            "sourceHash": "8dad5b3cf0214d538c3d1f9c05cea677796f5a56ad032a821760525bed0ac383"
+          },
+          {
+            "path": "src/infrastructure/database/repositories/fact-repository.ts",
+            "nativePrepareSites": 12,
+            "nativeQuerySites": 0,
+            "retainedFields": 0,
+            "status": "pending",
+            "sourceHash": "d905e31541d659189f5c4f72659f17147fe20b041e72cffcf83efcaae1a1986f"
+          },
+          {
+            "path": "src/infrastructure/database/repositories/friction-repository.ts",
+            "nativePrepareSites": 19,
+            "nativeQuerySites": 1,
+            "retainedFields": 0,
+            "status": "pending",
+            "sourceHash": "7c06afe904de9089864e06f442a432a0d256d06a1269967034217306ae8e8b47"
+          },
+          {
+            "path": "src/infrastructure/database/repositories/graph-repository.ts",
+            "nativePrepareSites": 7,
+            "nativeQuerySites": 0,
+            "retainedFields": 0,
+            "status": "pending",
+            "sourceHash": "106e79297b668ce41c8fd0f2e4ae58eccdce83e854f2ccddca8251569caa4dba"
+          },
+          {
+            "path": "src/infrastructure/database/repositories/link-repository.ts",
+            "nativePrepareSites": 4,
+            "nativeQuerySites": 0,
+            "retainedFields": 3,
+            "status": "pending",
+            "sourceHash": "6b9737c12b06781c74a439ac6b937124781c6cf8c3415ed3be4140444e85f4fa"
+          },
+          {
+            "path": "src/infrastructure/database/repositories/memory-file-repository.ts",
+            "nativePrepareSites": 8,
+            "nativeQuerySites": 0,
+            "retainedFields": 0,
+            "status": "pending",
+            "sourceHash": "14107700191c8604cfd04b6064e56da54cef946ec84f92807f3d4acc9e81c3f8"
+          },
+          {
+            "path": "src/infrastructure/database/repositories/memory-governance-repository.ts",
+            "nativePrepareSites": 5,
+            "nativeQuerySites": 0,
+            "retainedFields": 0,
+            "status": "pending",
+            "sourceHash": "eefe9811bc08f04303fa8f0447b39d29fd432082f7c7d42f085913209c4b589c"
+          },
+          {
+            "path": "src/infrastructure/database/repositories/memory-utility-repository.ts",
+            "nativePrepareSites": 5,
+            "nativeQuerySites": 0,
+            "retainedFields": 0,
+            "status": "local disposal proof; final quality pending",
+            "sourceHash": "f78d3970033a0cd1057996164208e6cff15bf4e98e013451a1043b6365334ba8"
+          },
+          {
+            "path": "src/infrastructure/database/repositories/message-repository.ts",
+            "nativePrepareSites": 4,
+            "nativeQuerySites": 0,
+            "retainedFields": 4,
+            "status": "pending",
+            "sourceHash": "e53cf864415882e45cf7fff0332712cdc337a1f24aed51d89687a6800690639c"
+          },
+          {
+            "path": "src/infrastructure/database/repositories/persona-repository.ts",
+            "nativePrepareSites": 7,
+            "nativeQuerySites": 0,
+            "retainedFields": 0,
+            "status": "pending",
+            "sourceHash": "cf5877fc6fe4451d0bc3308a1d22595be18295f6a60aec1dd6e1334a69bdd336"
+          },
+          {
+            "path": "src/infrastructure/database/repositories/session-repository.ts",
+            "nativePrepareSites": 14,
+            "nativeQuerySites": 0,
+            "retainedFields": 8,
+            "status": "pending",
+            "sourceHash": "322fc36a8a28a92c21a87f74960cba1c545685c04ac06c4cac5ff449e62ac728"
+          },
+          {
+            "path": "src/infrastructure/database/repositories/tool-use-repository.ts",
+            "nativePrepareSites": 3,
+            "nativeQuerySites": 0,
+            "retainedFields": 3,
+            "status": "pending",
+            "sourceHash": "8724e4ef65746f2b079f8bf62841357dc403eafeafffcc8a6a1764d2d02f9db3"
+          }
+        ],
+        "restart": "Next embedding-repository transaction/batch statement lifetimes; add real SQL success/rollback/resource regressions before migration. Then remaining repository modules and retained-owner construction. Main factory stays unchanged until .3-.5 complete.",
+        "remaining": "B11.74.7/B05/Q027 own full metric/driver/platform/review acceptance. Hook extraction helper is not assumed active: classify exported/caller-owned repository lifetime explicitly."
+      }
     },
     {
       "id": "B11.74.4",
