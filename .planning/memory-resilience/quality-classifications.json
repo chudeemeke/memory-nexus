@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "status": "draft - incomplete and independently unreviewed",
+  "status": "draft - all risk tiers proposed; applicability and independent review incomplete",
   "owner": "memory-nexus",
   "syntaxBasis": "Installed TypeScript syntax/transpilation with value imports preserved conservatively; metadata is static evidence, not proof of runtime behavior or risk acceptance.",
   "independentReview": {
@@ -363,13 +363,19 @@
       "path": "src/application/services/ambient-context-service.test.ts",
       "package": "package.json",
       "sourceHash": "2314360bbcaafcb78e2437470f732a7e923a310db29ae686beff1ac5c7c78517",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "A",
+      "rationale": "Exercises application behavior through local domain fixtures and mock repositories/providers; inspected runtime inventory identifies no persistent storage, actual encoder or transport operation. Production module tier remains separate.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "12c188bb9cad480efc6eb87ce1760b9dc40bbb69",
+        "anchor": "Emitted-runtime import/call/constructor inventory and targeted fixture/provider/CLI source boundaries",
+        "runtimeHash": "ff58bd4d6dafb9e392302f33e8bff138bbb13e01de0fd39f6f6e94078c5418e9",
+        "scope": "Reading aid plus targeted source inspection; not sound effect analysis, complete assertion review, execution evidence or metric applicability approval."
+      }
     },
     {
       "path": "src/application/services/ambient-context-service.ts",
@@ -392,13 +398,19 @@
       "path": "src/application/services/backfill-service.test.ts",
       "package": "package.json",
       "sourceHash": "c540afa02c587847fe33e56717c03b9e2d1eb38b36b2e68bc164ea9bd51ff419",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "A",
+      "rationale": "Exercises application behavior through local domain fixtures and mock repositories/providers; inspected runtime inventory identifies no persistent storage, actual encoder or transport operation. Production module tier remains separate.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "12c188bb9cad480efc6eb87ce1760b9dc40bbb69",
+        "anchor": "Emitted-runtime import/call/constructor inventory and targeted fixture/provider/CLI source boundaries",
+        "runtimeHash": "d564f48fd6d78a432d2dff362acdef9f2ec557536d73879fa353d2d0b121adf3",
+        "scope": "Reading aid plus targeted source inspection; not sound effect analysis, complete assertion review, execution evidence or metric applicability approval."
+      }
     },
     {
       "path": "src/application/services/backfill-service.ts",
@@ -456,13 +468,19 @@
       "path": "src/application/services/dreaming-service.test.ts",
       "package": "package.json",
       "sourceHash": "6a54d39447d999db2881015de949721d69f7d77183d3954fb057c70e0c5dd4d5",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "A",
+      "rationale": "Uses real in-memory SQLite repositories and local event arrays; no explicit database teardown found. B11.66 owns lifecycle repair.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "12c188bb9cad480efc6eb87ce1760b9dc40bbb69",
+        "anchor": "Emitted-runtime import/call/constructor inventory and targeted fixture/provider/CLI source boundaries",
+        "runtimeHash": "1f63c1bd0bbef6f90a4e11027cd83e2eb5125ebb723da6b7718bb2295d87552c",
+        "scope": "Reading aid plus targeted source inspection; not sound effect analysis, complete assertion review, execution evidence or metric applicability approval."
+      }
     },
     {
       "path": "src/application/services/dreaming-service.ts",
@@ -485,13 +503,19 @@
       "path": "src/application/services/embedding-service.test.ts",
       "package": "package.json",
       "sourceHash": "11afe823197ede139ea9717409f88cff70a9420b081beda726facfc74b251dbb",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "A",
+      "rationale": "Uses mock embedding providers/repositories, synthetic vectors and local redaction/hashing; no actual encoder invocation identified.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "12c188bb9cad480efc6eb87ce1760b9dc40bbb69",
+        "anchor": "Emitted-runtime import/call/constructor inventory and targeted fixture/provider/CLI source boundaries",
+        "runtimeHash": "b5494959bcfb2774c225ccc301cf46924211fc3c13ddb6ecb9efbdd88b81e31c",
+        "scope": "Reading aid plus targeted source inspection; not sound effect analysis, complete assertion review, execution evidence or metric applicability approval."
+      }
     },
     {
       "path": "src/application/services/embedding-service.ts",
@@ -666,13 +690,19 @@
       "path": "src/application/services/llm-extractor.test.ts",
       "package": "package.json",
       "sourceHash": "e4f0851edbef961afd15a30b8f2a1b2d8604aa28a7ed2d45a7714a182eb5a35b",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "A",
+      "rationale": "Exercises prompt/response and mocked legacy extraction behavior. D04 still owns the exported empty-result contract.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "12c188bb9cad480efc6eb87ce1760b9dc40bbb69",
+        "anchor": "Emitted-runtime import/call/constructor inventory and targeted fixture/provider/CLI source boundaries",
+        "runtimeHash": "f15ce0ad175fc05c05e2fe7984483b59e94a4ce17b69e65357d89c48806dfa69",
+        "scope": "Reading aid plus targeted source inspection; not sound effect analysis, complete assertion review, execution evidence or metric applicability approval."
+      }
     },
     {
       "path": "src/application/services/llm-extractor.ts",
@@ -695,13 +725,19 @@
       "path": "src/application/services/memory-file-sync-service.test.ts",
       "package": "package.json",
       "sourceHash": "8e75d8e932c6072d75f259e2abd1d4c78a3a91bfbb8a7f0020930e06ba3c7ce2",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "A",
+      "rationale": "Exercises application behavior through local domain fixtures and mock repositories/providers; inspected runtime inventory identifies no persistent storage, actual encoder or transport operation. Production module tier remains separate.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "12c188bb9cad480efc6eb87ce1760b9dc40bbb69",
+        "anchor": "Emitted-runtime import/call/constructor inventory and targeted fixture/provider/CLI source boundaries",
+        "runtimeHash": "21cf7669fd3762d31d2f4640b7a21129719616843d20c34262c469d2c8d8bd7e",
+        "scope": "Reading aid plus targeted source inspection; not sound effect analysis, complete assertion review, execution evidence or metric applicability approval."
+      }
     },
     {
       "path": "src/application/services/memory-file-sync-service.ts",
@@ -724,13 +760,19 @@
       "path": "src/application/services/memory-governance-service.test.ts",
       "package": "package.json",
       "sourceHash": "1a44f89234fc850e50e7ea3dd7174204d9ce995fef9395a0989332af597edf1e",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "A",
+      "rationale": "Exercises application behavior through local domain fixtures and mock repositories/providers; inspected runtime inventory identifies no persistent storage, actual encoder or transport operation. Production module tier remains separate.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "12c188bb9cad480efc6eb87ce1760b9dc40bbb69",
+        "anchor": "Emitted-runtime import/call/constructor inventory and targeted fixture/provider/CLI source boundaries",
+        "runtimeHash": "fd92283aaea57ad24a8d7dd6892c031f62fc3ccf71ea36f8235a7d21304b79ea",
+        "scope": "Reading aid plus targeted source inspection; not sound effect analysis, complete assertion review, execution evidence or metric applicability approval."
+      }
     },
     {
       "path": "src/application/services/memory-governance-service.ts",
@@ -823,13 +865,19 @@
       "path": "src/application/services/persona-profile-service.test.ts",
       "package": "package.json",
       "sourceHash": "e5dac7dcc5f07bccad403727a7190e0b21844de0cffe6a096f15c4a30b74d8c4",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "A",
+      "rationale": "Exercises application behavior through local domain fixtures and mock repositories/providers; inspected runtime inventory identifies no persistent storage, actual encoder or transport operation. Production module tier remains separate.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "12c188bb9cad480efc6eb87ce1760b9dc40bbb69",
+        "anchor": "Emitted-runtime import/call/constructor inventory and targeted fixture/provider/CLI source boundaries",
+        "runtimeHash": "44f579dfe7c8f6408f115c601a086783ec684664dbba7afd46cd16edd43f9591",
+        "scope": "Reading aid plus targeted source inspection; not sound effect analysis, complete assertion review, execution evidence or metric applicability approval."
+      }
     },
     {
       "path": "src/application/services/persona-profile-service.ts",
@@ -852,13 +900,19 @@
       "path": "src/application/services/projection-registry.test.ts",
       "package": "package.json",
       "sourceHash": "b334bfcdf041259498cc859920682517cd8a2ee8fe815ddafa8a2c56bc7c0be0",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "A",
+      "rationale": "Exercises application behavior through local domain fixtures and mock repositories/providers; inspected runtime inventory identifies no persistent storage, actual encoder or transport operation. Production module tier remains separate.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "12c188bb9cad480efc6eb87ce1760b9dc40bbb69",
+        "anchor": "Emitted-runtime import/call/constructor inventory and targeted fixture/provider/CLI source boundaries",
+        "runtimeHash": "dd164c5dd1465ebeab442e12699da3c82a969301e8523bdb25540fb80bb3ab99",
+        "scope": "Reading aid plus targeted source inspection; not sound effect analysis, complete assertion review, execution evidence or metric applicability approval."
+      }
     },
     {
       "path": "src/application/services/projection-registry.ts",
@@ -881,13 +935,19 @@
       "path": "src/application/services/recovery-service.test.ts",
       "package": "package.json",
       "sourceHash": "ed8920a01f8bf1ddfca8301929802ec6e52f1477771a0f459fabdf352078e9d0",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "A",
+      "rationale": "Exercises application behavior through local domain fixtures and mock repositories/providers; inspected runtime inventory identifies no persistent storage, actual encoder or transport operation. Production module tier remains separate.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "12c188bb9cad480efc6eb87ce1760b9dc40bbb69",
+        "anchor": "Emitted-runtime import/call/constructor inventory and targeted fixture/provider/CLI source boundaries",
+        "runtimeHash": "13711f621eb2e2ec43e38317cc6b00607626fd016112fb5f3e9bdd5ea44cab93",
+        "scope": "Reading aid plus targeted source inspection; not sound effect analysis, complete assertion review, execution evidence or metric applicability approval."
+      }
     },
     {
       "path": "src/application/services/recovery-service.ts",
@@ -910,13 +970,19 @@
       "path": "src/application/services/remote-event-sync-service.test.ts",
       "package": "package.json",
       "sourceHash": "99a113ef64204f125e0946a58f9d1256a4cf4de59214b149b779ff6f93a0ddfd",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "A",
+      "rationale": "Remote transport is a local test double; event delivery assertions do not prove real transport or replication.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "12c188bb9cad480efc6eb87ce1760b9dc40bbb69",
+        "anchor": "Emitted-runtime import/call/constructor inventory and targeted fixture/provider/CLI source boundaries",
+        "runtimeHash": "1a7d4824a56979418abe710e115011c656b4c8ccaa9a6016fa53afdd083e305b",
+        "scope": "Reading aid plus targeted source inspection; not sound effect analysis, complete assertion review, execution evidence or metric applicability approval."
+      }
     },
     {
       "path": "src/application/services/remote-event-sync-service.ts",
@@ -974,13 +1040,19 @@
       "path": "src/application/services/smart-context-service.test.ts",
       "package": "package.json",
       "sourceHash": "2f3ebeb886b4906dbaa171bfd3233372ae53abe5d174b758ea5661788ac1adda",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "A",
+      "rationale": "Exercises application behavior through local domain fixtures and mock repositories/providers; inspected runtime inventory identifies no persistent storage, actual encoder or transport operation. Production module tier remains separate.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "12c188bb9cad480efc6eb87ce1760b9dc40bbb69",
+        "anchor": "Emitted-runtime import/call/constructor inventory and targeted fixture/provider/CLI source boundaries",
+        "runtimeHash": "c4166d96ddcc28b675afbf530a645a5cca756d1616b694a71dd799960f5ba2b0",
+        "scope": "Reading aid plus targeted source inspection; not sound effect analysis, complete assertion review, execution evidence or metric applicability approval."
+      }
     },
     {
       "path": "src/application/services/smart-context-service.ts",
@@ -1021,13 +1093,19 @@
       "path": "src/application/services/sync-service.test.ts",
       "package": "package.json",
       "sourceHash": "fbfb5e952619e59bbb436e3e66b68e86b362a0f1d78051302bf412ce52a4404d",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "A",
+      "rationale": "Uses a real in-memory SQLite handle; afterEach resets mock state but does not close the handle. B11.67 owns repair.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "12c188bb9cad480efc6eb87ce1760b9dc40bbb69",
+        "anchor": "Emitted-runtime import/call/constructor inventory and targeted fixture/provider/CLI source boundaries",
+        "runtimeHash": "ba4ba0676fcf9cf01e48b0cc685fa9bd1b2691b515b79a526c3607d6414f43a4",
+        "scope": "Reading aid plus targeted source inspection; not sound effect analysis, complete assertion review, execution evidence or metric applicability approval."
+      }
     },
     {
       "path": "src/application/services/sync-service.ts",
@@ -1085,13 +1163,19 @@
       "path": "src/application/services/temporal-graph-service.test.ts",
       "package": "package.json",
       "sourceHash": "f60657cd4c9874e7f96f1eefa6ba0acb57339aa1912a1985b5ad36963350528c",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "A",
+      "rationale": "Exercises application behavior through local domain fixtures and mock repositories/providers; inspected runtime inventory identifies no persistent storage, actual encoder or transport operation. Production module tier remains separate.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "12c188bb9cad480efc6eb87ce1760b9dc40bbb69",
+        "anchor": "Emitted-runtime import/call/constructor inventory and targeted fixture/provider/CLI source boundaries",
+        "runtimeHash": "8cb31884547b8e0281c411828c45113e53936773cfa78b47c05b3d40c62c3ce5",
+        "scope": "Reading aid plus targeted source inspection; not sound effect analysis, complete assertion review, execution evidence or metric applicability approval."
+      }
     },
     {
       "path": "src/application/services/temporal-graph-service.ts",
@@ -2474,13 +2558,19 @@
       "path": "src/infrastructure/database/repositories/backfill-state-repository.test.ts",
       "package": "package.json",
       "sourceHash": "fcab3aec5656dd0f48c225b85cff3a80f9b2eb735e267d034bcc09bd610d81e5",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "A",
+      "rationale": "Uses real SQLite with explicitly in-memory database configuration and registered close/closeDatabase teardown; fixture SQL is bounded to the test handle. Production repository/schema risk remains separate.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "12c188bb9cad480efc6eb87ce1760b9dc40bbb69",
+        "anchor": "Emitted-runtime import/call/constructor inventory and targeted fixture/provider/CLI source boundaries",
+        "runtimeHash": "fbba22e7061a67f6abea19f473feafc3b81eee338e7b3e75fd6c39c16fd1ae41",
+        "scope": "Reading aid plus targeted source inspection; not sound effect analysis, complete assertion review, execution evidence or metric applicability approval."
+      }
     },
     {
       "path": "src/infrastructure/database/repositories/backfill-state-repository.ts",
@@ -2503,13 +2593,19 @@
       "path": "src/infrastructure/database/repositories/dream-repository.test.ts",
       "package": "package.json",
       "sourceHash": "5b996fdeca13c0dbf23c488504a790c59e4d841f5793c752ef67294d875f38ea",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "A",
+      "rationale": "Uses real SQLite with explicitly in-memory database configuration and registered close/closeDatabase teardown; fixture SQL is bounded to the test handle. Production repository/schema risk remains separate.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "12c188bb9cad480efc6eb87ce1760b9dc40bbb69",
+        "anchor": "Emitted-runtime import/call/constructor inventory and targeted fixture/provider/CLI source boundaries",
+        "runtimeHash": "d41f8c3f8398285c0697d1abb16cd70a6793f3ca02ef3faf675bd7814a418b84",
+        "scope": "Reading aid plus targeted source inspection; not sound effect analysis, complete assertion review, execution evidence or metric applicability approval."
+      }
     },
     {
       "path": "src/infrastructure/database/repositories/dream-repository.ts",
@@ -2532,13 +2628,19 @@
       "path": "src/infrastructure/database/repositories/embedding-repository.test.ts",
       "package": "package.json",
       "sourceHash": "6ef28b30f1926ccf0c036229d03859de5d07afb5fbcb183c09de6ea6c13ae0ad",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "A",
+      "rationale": "Uses real SQLite with explicitly in-memory database configuration and registered close/closeDatabase teardown; fixture SQL is bounded to the test handle. Production repository/schema risk remains separate.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "12c188bb9cad480efc6eb87ce1760b9dc40bbb69",
+        "anchor": "Emitted-runtime import/call/constructor inventory and targeted fixture/provider/CLI source boundaries",
+        "runtimeHash": "3b96e8f3be23de6870f43e1c5e22ed7ac5e0c85410bc1ba529aa96675764133f",
+        "scope": "Reading aid plus targeted source inspection; not sound effect analysis, complete assertion review, execution evidence or metric applicability approval."
+      }
     },
     {
       "path": "src/infrastructure/database/repositories/embedding-repository.ts",
@@ -2561,13 +2663,19 @@
       "path": "src/infrastructure/database/repositories/entity-repository.test.ts",
       "package": "package.json",
       "sourceHash": "ebb45294f9ea71b2c91d4a9e3088824c6b53a69740c00db52c36b4ae7a9a65f5",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "A",
+      "rationale": "Uses real SQLite with explicitly in-memory database configuration and registered close/closeDatabase teardown; fixture SQL is bounded to the test handle. Production repository/schema risk remains separate.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "12c188bb9cad480efc6eb87ce1760b9dc40bbb69",
+        "anchor": "Emitted-runtime import/call/constructor inventory and targeted fixture/provider/CLI source boundaries",
+        "runtimeHash": "557639d91a9715198ea5deb05709f25f09064e6a9de6c07303b27bbce9e67673",
+        "scope": "Reading aid plus targeted source inspection; not sound effect analysis, complete assertion review, execution evidence or metric applicability approval."
+      }
     },
     {
       "path": "src/infrastructure/database/repositories/entity-repository.ts",
@@ -2590,13 +2698,19 @@
       "path": "src/infrastructure/database/repositories/extraction-log-repository.test.ts",
       "package": "package.json",
       "sourceHash": "d64f55ba07d2391d1d2c8b7bc09e769697326083168f89345d1141267531c9c8",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "A",
+      "rationale": "Uses real SQLite with explicitly in-memory database configuration and registered close/closeDatabase teardown; fixture SQL is bounded to the test handle. Production repository/schema risk remains separate.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "12c188bb9cad480efc6eb87ce1760b9dc40bbb69",
+        "anchor": "Emitted-runtime import/call/constructor inventory and targeted fixture/provider/CLI source boundaries",
+        "runtimeHash": "9eec68263427cd05fe0bce8d72903d1d0579d749941f35add1fac2f1d6ed6258",
+        "scope": "Reading aid plus targeted source inspection; not sound effect analysis, complete assertion review, execution evidence or metric applicability approval."
+      }
     },
     {
       "path": "src/infrastructure/database/repositories/extraction-log-repository.ts",
@@ -2619,13 +2733,19 @@
       "path": "src/infrastructure/database/repositories/extraction-state-repository.test.ts",
       "package": "package.json",
       "sourceHash": "8fcd0f7201834a11ebe9a216c6a8e24167c2490f398aa8dab34a2233dc42eb04",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "A",
+      "rationale": "Uses real SQLite with explicitly in-memory database configuration and registered close/closeDatabase teardown; fixture SQL is bounded to the test handle. Production repository/schema risk remains separate.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "12c188bb9cad480efc6eb87ce1760b9dc40bbb69",
+        "anchor": "Emitted-runtime import/call/constructor inventory and targeted fixture/provider/CLI source boundaries",
+        "runtimeHash": "68bb9eeb506b93412b27596ce291ad7304bd7c46390a0351db8bf050707f52b5",
+        "scope": "Reading aid plus targeted source inspection; not sound effect analysis, complete assertion review, execution evidence or metric applicability approval."
+      }
     },
     {
       "path": "src/infrastructure/database/repositories/extraction-state-repository.ts",
@@ -2648,13 +2768,19 @@
       "path": "src/infrastructure/database/repositories/fact-repository.test.ts",
       "package": "package.json",
       "sourceHash": "ada599691023b84922dd5bb08771eae8c06ef8bcd9f75a3672528e9b952df44a",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "A",
+      "rationale": "Uses real SQLite with explicitly in-memory database configuration and registered close/closeDatabase teardown; fixture SQL is bounded to the test handle. Production repository/schema risk remains separate.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "12c188bb9cad480efc6eb87ce1760b9dc40bbb69",
+        "anchor": "Emitted-runtime import/call/constructor inventory and targeted fixture/provider/CLI source boundaries",
+        "runtimeHash": "ceba2db3481400e0b2f8594791c0981a8da5d570b8b35fc65bfe3f40f5fbf22d",
+        "scope": "Reading aid plus targeted source inspection; not sound effect analysis, complete assertion review, execution evidence or metric applicability approval."
+      }
     },
     {
       "path": "src/infrastructure/database/repositories/fact-repository.ts",
@@ -2677,13 +2803,19 @@
       "path": "src/infrastructure/database/repositories/friction-repository.test.ts",
       "package": "package.json",
       "sourceHash": "4e474c45f676b52013f7307b5bf0ded8dc192be126da7a5f2209135e730ed7a1",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "A",
+      "rationale": "Uses real SQLite with explicitly in-memory database configuration and registered close/closeDatabase teardown; fixture SQL is bounded to the test handle. Production repository/schema risk remains separate.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "12c188bb9cad480efc6eb87ce1760b9dc40bbb69",
+        "anchor": "Emitted-runtime import/call/constructor inventory and targeted fixture/provider/CLI source boundaries",
+        "runtimeHash": "8ce757c15030725b5f5fda0210c1b3deffd315926f7c0a06de03177b87848d67",
+        "scope": "Reading aid plus targeted source inspection; not sound effect analysis, complete assertion review, execution evidence or metric applicability approval."
+      }
     },
     {
       "path": "src/infrastructure/database/repositories/friction-repository.ts",
@@ -2735,13 +2867,19 @@
       "path": "src/infrastructure/database/repositories/link-repository.test.ts",
       "package": "package.json",
       "sourceHash": "6507688e4f2e686017a66631d59e0c1fe0250cc58f371cb99efe0f9ae2daebee",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "A",
+      "rationale": "Uses real SQLite with explicitly in-memory database configuration and registered close/closeDatabase teardown; fixture SQL is bounded to the test handle. Production repository/schema risk remains separate.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "12c188bb9cad480efc6eb87ce1760b9dc40bbb69",
+        "anchor": "Emitted-runtime import/call/constructor inventory and targeted fixture/provider/CLI source boundaries",
+        "runtimeHash": "438b901c2144a86a50e237364c55bfaa9889040d7f9659c0ca7e07442ff5d3e1",
+        "scope": "Reading aid plus targeted source inspection; not sound effect analysis, complete assertion review, execution evidence or metric applicability approval."
+      }
     },
     {
       "path": "src/infrastructure/database/repositories/link-repository.ts",
@@ -2764,13 +2902,19 @@
       "path": "src/infrastructure/database/repositories/memory-file-repository.test.ts",
       "package": "package.json",
       "sourceHash": "d1137ccb77ccebe0bcce6d08377e0cdf994c488c23a21f7261ed606408dec1e5",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "A",
+      "rationale": "Uses real SQLite with explicitly in-memory database configuration and registered close/closeDatabase teardown; fixture SQL is bounded to the test handle. Production repository/schema risk remains separate.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "12c188bb9cad480efc6eb87ce1760b9dc40bbb69",
+        "anchor": "Emitted-runtime import/call/constructor inventory and targeted fixture/provider/CLI source boundaries",
+        "runtimeHash": "58e840d72403a1ce743e6e70558c87296f87b5e20be2963b8569dbac061b0d3a",
+        "scope": "Reading aid plus targeted source inspection; not sound effect analysis, complete assertion review, execution evidence or metric applicability approval."
+      }
     },
     {
       "path": "src/infrastructure/database/repositories/memory-file-repository.ts",
@@ -2793,13 +2937,19 @@
       "path": "src/infrastructure/database/repositories/memory-governance-repository.test.ts",
       "package": "package.json",
       "sourceHash": "9571b61053964478e587acaf3f38ca92abd33b7689860de6a06182fe0930fc16",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "A",
+      "rationale": "Uses real SQLite with explicitly in-memory database configuration and registered close/closeDatabase teardown; fixture SQL is bounded to the test handle. Production repository/schema risk remains separate.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "12c188bb9cad480efc6eb87ce1760b9dc40bbb69",
+        "anchor": "Emitted-runtime import/call/constructor inventory and targeted fixture/provider/CLI source boundaries",
+        "runtimeHash": "43a00443cd10cacc9ac175421ab4428ec1907db776168a63390a2a167b7d4992",
+        "scope": "Reading aid plus targeted source inspection; not sound effect analysis, complete assertion review, execution evidence or metric applicability approval."
+      }
     },
     {
       "path": "src/infrastructure/database/repositories/memory-governance-repository.ts",
@@ -2839,13 +2989,19 @@
       "path": "src/infrastructure/database/repositories/message-repository.test.ts",
       "package": "package.json",
       "sourceHash": "cb74f370d958bb57e06d70f4d4b42826ea3cdc69d12ba878efeb310317af0a79",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "A",
+      "rationale": "Uses real SQLite with explicitly in-memory database configuration and registered close/closeDatabase teardown; fixture SQL is bounded to the test handle. Production repository/schema risk remains separate.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "12c188bb9cad480efc6eb87ce1760b9dc40bbb69",
+        "anchor": "Emitted-runtime import/call/constructor inventory and targeted fixture/provider/CLI source boundaries",
+        "runtimeHash": "c88ac76af2ec7d381966eb537cb86b489ddd531b4953e11f57b46a83ef20a211",
+        "scope": "Reading aid plus targeted source inspection; not sound effect analysis, complete assertion review, execution evidence or metric applicability approval."
+      }
     },
     {
       "path": "src/infrastructure/database/repositories/message-repository.ts",
@@ -2885,13 +3041,19 @@
       "path": "src/infrastructure/database/repositories/session-repository.test.ts",
       "package": "package.json",
       "sourceHash": "0036f1aba77afbbb453e7f358f19778ffad116fddf28d00a4e15d7d95ac45147",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "A",
+      "rationale": "Uses real SQLite with explicitly in-memory database configuration and registered close/closeDatabase teardown; fixture SQL is bounded to the test handle. Production repository/schema risk remains separate.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "12c188bb9cad480efc6eb87ce1760b9dc40bbb69",
+        "anchor": "Emitted-runtime import/call/constructor inventory and targeted fixture/provider/CLI source boundaries",
+        "runtimeHash": "db8cd132fc8685517bcb499c49e5d9ab7d28a7d0543d0057737ba219c7d94d74",
+        "scope": "Reading aid plus targeted source inspection; not sound effect analysis, complete assertion review, execution evidence or metric applicability approval."
+      }
     },
     {
       "path": "src/infrastructure/database/repositories/session-repository.ts",
@@ -2914,13 +3076,19 @@
       "path": "src/infrastructure/database/repositories/tool-use-repository.test.ts",
       "package": "package.json",
       "sourceHash": "b8a9dabf2f2db02974265e6998baad12538fe45efcc0c2ddbcead526876a69db",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "A",
+      "rationale": "Uses real SQLite with explicitly in-memory database configuration and registered close/closeDatabase teardown; fixture SQL is bounded to the test handle. Production repository/schema risk remains separate.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "12c188bb9cad480efc6eb87ce1760b9dc40bbb69",
+        "anchor": "Emitted-runtime import/call/constructor inventory and targeted fixture/provider/CLI source boundaries",
+        "runtimeHash": "0839e67148034e5493a176cc32041090378557e88465c0157d7bc5ea1d742a08",
+        "scope": "Reading aid plus targeted source inspection; not sound effect analysis, complete assertion review, execution evidence or metric applicability approval."
+      }
     },
     {
       "path": "src/infrastructure/database/repositories/tool-use-repository.ts",
@@ -2943,13 +3111,19 @@
       "path": "src/infrastructure/database/schema.test.ts",
       "package": "package.json",
       "sourceHash": "81ce87dba0a9f3ac6997504ddc411b04da71e821f2e7ea3cb4e27dc06b0b11f5",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "A",
+      "rationale": "Uses real SQLite with explicitly in-memory database configuration and registered close/closeDatabase teardown; fixture SQL is bounded to the test handle. Production repository/schema risk remains separate.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "12c188bb9cad480efc6eb87ce1760b9dc40bbb69",
+        "anchor": "Emitted-runtime import/call/constructor inventory and targeted fixture/provider/CLI source boundaries",
+        "runtimeHash": "45494252b67cfb10fb4ae0b7e50b7c66df4adcd46a4bc1633748346a1d28e466",
+        "scope": "Reading aid plus targeted source inspection; not sound effect analysis, complete assertion review, execution evidence or metric applicability approval."
+      }
     },
     {
       "path": "src/infrastructure/database/schema.ts",
@@ -2972,13 +3146,19 @@
       "path": "src/infrastructure/database/services/context-service.test.ts",
       "package": "package.json",
       "sourceHash": "fcda50288bea3aadb3b9e17b63fd05acd8f31ca924e218b84a0497de752c3ba6",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "A",
+      "rationale": "Uses real SQLite with explicitly in-memory database configuration and registered close/closeDatabase teardown; fixture SQL is bounded to the test handle. Production repository/schema risk remains separate.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "12c188bb9cad480efc6eb87ce1760b9dc40bbb69",
+        "anchor": "Emitted-runtime import/call/constructor inventory and targeted fixture/provider/CLI source boundaries",
+        "runtimeHash": "a3df1cb049e3caf42c740c687843d847d562c7bbe152f04bb824e28c52e2f6b4",
+        "scope": "Reading aid plus targeted source inspection; not sound effect analysis, complete assertion review, execution evidence or metric applicability approval."
+      }
     },
     {
       "path": "src/infrastructure/database/services/context-service.ts",
@@ -3001,13 +3181,19 @@
       "path": "src/infrastructure/database/services/hybrid-search-service.test.ts",
       "package": "package.json",
       "sourceHash": "86419e238681364c4446693a20ef0dc464930d9001b4ac68b2bc66b317eda5cc",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "A",
+      "rationale": "Uses real SQLite with explicitly in-memory database configuration and registered close/closeDatabase teardown; fixture SQL is bounded to the test handle. Production repository/schema risk remains separate.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "12c188bb9cad480efc6eb87ce1760b9dc40bbb69",
+        "anchor": "Emitted-runtime import/call/constructor inventory and targeted fixture/provider/CLI source boundaries",
+        "runtimeHash": "c752238a8da4425a815b4a09564caea808c07ac74639dcb90fc5ecbf59eefc74",
+        "scope": "Reading aid plus targeted source inspection; not sound effect analysis, complete assertion review, execution evidence or metric applicability approval."
+      }
     },
     {
       "path": "src/infrastructure/database/services/hybrid-search-service.ts",
@@ -3042,13 +3228,19 @@
       "path": "src/infrastructure/database/services/search-service.test.ts",
       "package": "package.json",
       "sourceHash": "1a193ad59be95584bed8c8ac15a28daf79f0c2f8338bfd455bee1190e45eb395",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "A",
+      "rationale": "Uses real SQLite with explicitly in-memory database configuration and registered close/closeDatabase teardown; fixture SQL is bounded to the test handle. Production repository/schema risk remains separate.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "12c188bb9cad480efc6eb87ce1760b9dc40bbb69",
+        "anchor": "Emitted-runtime import/call/constructor inventory and targeted fixture/provider/CLI source boundaries",
+        "runtimeHash": "bb5f659522bfda2abd58fe1386b268b150a31481eab1c4a6f172fb556bedb643",
+        "scope": "Reading aid plus targeted source inspection; not sound effect analysis, complete assertion review, execution evidence or metric applicability approval."
+      }
     },
     {
       "path": "src/infrastructure/database/services/search-service.ts",
@@ -3071,13 +3263,19 @@
       "path": "src/infrastructure/database/services/stats-service.test.ts",
       "package": "package.json",
       "sourceHash": "4b0e6e390cd86821388ff846cfa02f382f6b38465a34282a1df39b2317b475bf",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "A",
+      "rationale": "Uses real SQLite with explicitly in-memory database configuration and registered close/closeDatabase teardown; fixture SQL is bounded to the test handle. Production repository/schema risk remains separate.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "12c188bb9cad480efc6eb87ce1760b9dc40bbb69",
+        "anchor": "Emitted-runtime import/call/constructor inventory and targeted fixture/provider/CLI source boundaries",
+        "runtimeHash": "02fe3dcffc58f212bf40a5abae12614444528896013a1097195e1decab81c67c",
+        "scope": "Reading aid plus targeted source inspection; not sound effect analysis, complete assertion review, execution evidence or metric applicability approval."
+      }
     },
     {
       "path": "src/infrastructure/database/services/stats-service.ts",
@@ -3134,13 +3332,19 @@
       "path": "src/infrastructure/embedding/embedding-provider-factory.test.ts",
       "package": "package.json",
       "sourceHash": "ace81dc97e413d01515877c01334d6e44c04714dcb6d206ef1eb48aa8a338b1c",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "A",
+      "rationale": "Constructs/disposes provider instances and overrides synthetic environment keys with restoration; no encoder initialization identified.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "12c188bb9cad480efc6eb87ce1760b9dc40bbb69",
+        "anchor": "Emitted-runtime import/call/constructor inventory and targeted fixture/provider/CLI source boundaries",
+        "runtimeHash": "539c54c94b53e2077b2df7334093e17c5639ae239002a22a8f52634c43bc9748",
+        "scope": "Reading aid plus targeted source inspection; not sound effect analysis, complete assertion review, execution evidence or metric applicability approval."
+      }
     },
     {
       "path": "src/infrastructure/embedding/embedding-provider-factory.ts",
@@ -3175,13 +3379,19 @@
       "path": "src/infrastructure/embedding/ollama-provider.test.ts",
       "package": "package.json",
       "sourceHash": "9031c6a01d4c197554cc41fc798a45125f17c1d1e116b9fe6fde2a0789438a19",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "A",
+      "rationale": "Network responses are supplied through a fetch override restored by test hooks; no live Ollama acceptance.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "12c188bb9cad480efc6eb87ce1760b9dc40bbb69",
+        "anchor": "Emitted-runtime import/call/constructor inventory and targeted fixture/provider/CLI source boundaries",
+        "runtimeHash": "b5fe43bda982cba4a7930701df55eacdaee2b01ff7dfe9c1eaeff5afcd268f52",
+        "scope": "Reading aid plus targeted source inspection; not sound effect analysis, complete assertion review, execution evidence or metric applicability approval."
+      }
     },
     {
       "path": "src/infrastructure/embedding/ollama-provider.ts",
@@ -3204,13 +3414,19 @@
       "path": "src/infrastructure/embedding/openai-provider.test.ts",
       "package": "package.json",
       "sourceHash": "574ee8ef4fa99786fce46cfa5f005be4578d927569c68b4391fb93f5b68aec22",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "A",
+      "rationale": "Network responses are supplied through a fetch override restored by test hooks; no live OpenAI acceptance.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "12c188bb9cad480efc6eb87ce1760b9dc40bbb69",
+        "anchor": "Emitted-runtime import/call/constructor inventory and targeted fixture/provider/CLI source boundaries",
+        "runtimeHash": "ceabb3148e72f8766d0038d54932ba090ee2279cd89dcd2f9e46862451d99d8e",
+        "scope": "Reading aid plus targeted source inspection; not sound effect analysis, complete assertion review, execution evidence or metric applicability approval."
+      }
     },
     {
       "path": "src/infrastructure/embedding/openai-provider.ts",
@@ -3233,13 +3449,19 @@
       "path": "src/infrastructure/embedding/transformers-js-provider.test.ts",
       "package": "package.json",
       "sourceHash": "f7dc123d8cd3bbe75cf8b8cdf74c82a70642d9192577bd0822fe4b9f261f96d7",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "A",
+      "rationale": "Registers a fake transformers module before importing the adapter; pipeline/environment fixtures are local. Module-mock isolation remains a B09 proof obligation, not actual model execution.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "12c188bb9cad480efc6eb87ce1760b9dc40bbb69",
+        "anchor": "Emitted-runtime import/call/constructor inventory and targeted fixture/provider/CLI source boundaries",
+        "runtimeHash": "23e1df2556e52c01e7ca59b83df365294a7586d3e4956c0330f18f7de6c7747d",
+        "scope": "Reading aid plus targeted source inspection; not sound effect analysis, complete assertion review, execution evidence or metric applicability approval."
+      }
     },
     {
       "path": "src/infrastructure/embedding/transformers-js-provider.ts",
@@ -3558,13 +3780,19 @@
       "path": "src/infrastructure/hooks/sync-logger-adapter.test.ts",
       "package": "package.json",
       "sourceHash": "523eaec7b0caf54232e96376023e35ea9375ef30bcbc9b202334952bdd8dd059",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "A",
+      "rationale": "Injects a logger callback that collects messages in an array; no file logger instantiated.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "12c188bb9cad480efc6eb87ce1760b9dc40bbb69",
+        "anchor": "Emitted-runtime import/call/constructor inventory and targeted fixture/provider/CLI source boundaries",
+        "runtimeHash": "0864701f5fdc88fa1cd2854f278235fd6b99b322b025f759cb8d44576b6f854f",
+        "scope": "Reading aid plus targeted source inspection; not sound effect analysis, complete assertion review, execution evidence or metric applicability approval."
+      }
     },
     {
       "path": "src/infrastructure/hooks/sync-logger-adapter.ts",
@@ -3633,13 +3861,19 @@
       "path": "src/infrastructure/llm/claude-summary-generator.test.ts",
       "package": "package.json",
       "sourceHash": "862e350ce5f1a9190dc308f5500af4097ca3a80a5f801cabfdeedd81d59ec44a",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "A",
+      "rationale": "Stubs child-process spawn with event emitters and restores the spy; does not prove actual Claude process operation.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "12c188bb9cad480efc6eb87ce1760b9dc40bbb69",
+        "anchor": "Emitted-runtime import/call/constructor inventory and targeted fixture/provider/CLI source boundaries",
+        "runtimeHash": "113aa6851f59c6613b99668cfb1b8b0852a7191719c68c0a5e430dae103fedee",
+        "scope": "Reading aid plus targeted source inspection; not sound effect analysis, complete assertion review, execution evidence or metric applicability approval."
+      }
     },
     {
       "path": "src/infrastructure/llm/claude-summary-generator.ts",
@@ -3662,13 +3896,19 @@
       "path": "src/infrastructure/llm/extraction-helper.test.ts",
       "package": "package.json",
       "sourceHash": "99c6272077746760a5938dd9e337d01d86edee6862c558de530836192e7fceb9",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "A",
+      "rationale": "Exercises prompt/response parsing with a console error spy.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "12c188bb9cad480efc6eb87ce1760b9dc40bbb69",
+        "anchor": "Emitted-runtime import/call/constructor inventory and targeted fixture/provider/CLI source boundaries",
+        "runtimeHash": "435aa77dc3759b470ba06be6120b894bb4c7afa7a81210b0927715e95ce502a1",
+        "scope": "Reading aid plus targeted source inspection; not sound effect analysis, complete assertion review, execution evidence or metric applicability approval."
+      }
     },
     {
       "path": "src/infrastructure/llm/extraction-helper.ts",
@@ -3759,13 +3999,19 @@
       "path": "src/infrastructure/parsers/event-classifier.test.ts",
       "package": "package.json",
       "sourceHash": "1065f48a3314e94d109d4f90ed68d410d9fe935ea27b0cd81dc5da7b78ec5f1e",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "A",
+      "rationale": "Exercises event classification over local JSON fixtures.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "12c188bb9cad480efc6eb87ce1760b9dc40bbb69",
+        "anchor": "Emitted-runtime import/call/constructor inventory and targeted fixture/provider/CLI source boundaries",
+        "runtimeHash": "cc7ba14edc752ed90d00dd6d28dfce1ec51e0236b5b25799af7a0a0a27e6d7b5",
+        "scope": "Reading aid plus targeted source inspection; not sound effect analysis, complete assertion review, execution evidence or metric applicability approval."
+      }
     },
     {
       "path": "src/infrastructure/parsers/event-classifier.ts",
@@ -3851,13 +4097,19 @@
       "path": "src/infrastructure/parsers/timestamp.test.ts",
       "package": "package.json",
       "sourceHash": "0c08f330cd3c2fe197cbf55614bb6f2e6b4366eff8bdd172c699ccb49fe318c5",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "A",
+      "rationale": "Exercises timestamp parsing with local values.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "12c188bb9cad480efc6eb87ce1760b9dc40bbb69",
+        "anchor": "Emitted-runtime import/call/constructor inventory and targeted fixture/provider/CLI source boundaries",
+        "runtimeHash": "600c6a91a284e7b2f5f61ef83187bcb35c428bb75902354c7846f789a477f548",
+        "scope": "Reading aid plus targeted source inspection; not sound effect analysis, complete assertion review, execution evidence or metric applicability approval."
+      }
     },
     {
       "path": "src/infrastructure/parsers/timestamp.ts",
@@ -3931,13 +4183,19 @@
       "path": "src/infrastructure/providers/provider-egress-policy.test.ts",
       "package": "package.json",
       "sourceHash": "2038eda3b1bad475e8cb17e05398f8d291a45a2195b745a092921750a1f52925",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "A",
+      "rationale": "Exercises provider policy decisions over fixture values; no network egress action identified.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "12c188bb9cad480efc6eb87ce1760b9dc40bbb69",
+        "anchor": "Emitted-runtime import/call/constructor inventory and targeted fixture/provider/CLI source boundaries",
+        "runtimeHash": "64329a29469875b0f10b78adf65522879950afbdff633be8d506697c94c61884",
+        "scope": "Reading aid plus targeted source inspection; not sound effect analysis, complete assertion review, execution evidence or metric applicability approval."
+      }
     },
     {
       "path": "src/infrastructure/providers/provider-egress-policy.ts",
@@ -3960,13 +4218,19 @@
       "path": "src/infrastructure/providers/provider-registry.test.ts",
       "package": "package.json",
       "sourceHash": "4e27de50addd8dbe24feda08c155053bde2208867887fd67e4d3a1d315498962",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "A",
+      "rationale": "Constructs provider registry/configuration fixtures without actual embed/extract invocation; synthetic environment keys are not live provider readiness.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "12c188bb9cad480efc6eb87ce1760b9dc40bbb69",
+        "anchor": "Emitted-runtime import/call/constructor inventory and targeted fixture/provider/CLI source boundaries",
+        "runtimeHash": "9ed63541f67233e4131ee736e7a133408871106ae262095181c8525de75cacf1",
+        "scope": "Reading aid plus targeted source inspection; not sound effect analysis, complete assertion review, execution evidence or metric applicability approval."
+      }
     },
     {
       "path": "src/infrastructure/providers/provider-registry.ts",
@@ -4023,13 +4287,19 @@
       "path": "src/infrastructure/security/pattern-redactor.test.ts",
       "package": "package.json",
       "sourceHash": "fa84e31116030b8de2a1a688026a8857b97c5067df40ae147ef499de5ad918dd",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "A",
+      "rationale": "Exercises pattern redaction on synthetic strings; no actual credential lookup or egress.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "12c188bb9cad480efc6eb87ce1760b9dc40bbb69",
+        "anchor": "Emitted-runtime import/call/constructor inventory and targeted fixture/provider/CLI source boundaries",
+        "runtimeHash": "b9cc7bcf83968fd5a40ea3b8ae80f45f6ade4664193a86f171b5c49005e8f568",
+        "scope": "Reading aid plus targeted source inspection; not sound effect analysis, complete assertion review, execution evidence or metric applicability approval."
+      }
     },
     {
       "path": "src/infrastructure/security/pattern-redactor.ts",
@@ -4149,13 +4419,19 @@
       "path": "src/infrastructure/signals/signal-handler.test.ts",
       "package": "package.json",
       "sourceHash": "aab582828712e8fd4d408393d00e8fdac7e322f43dd8316e1e35f82266d3ec98",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "A",
+      "rationale": "Exercises signal callbacks through test overrides and fake cleanup; listener state is reset. No actual process kill or production interruption proof.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "12c188bb9cad480efc6eb87ce1760b9dc40bbb69",
+        "anchor": "Emitted-runtime import/call/constructor inventory and targeted fixture/provider/CLI source boundaries",
+        "runtimeHash": "a3e6b87bb769cbe6c4d93978530573581ea26e2c4f58f44e54b6c88594d2289a",
+        "scope": "Reading aid plus targeted source inspection; not sound effect analysis, complete assertion review, execution evidence or metric applicability approval."
+      }
     },
     {
       "path": "src/infrastructure/signals/signal-handler.ts",
@@ -4321,13 +4597,19 @@
       "path": "src/presentation/cli/commands/_helpers/capture-json.test.ts",
       "package": "package.json",
       "sourceHash": "b4b7f8eb18f704b5bf34632ff19437547ce613bfdae84f5618328d79dfd7ae54",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "S",
+      "rationale": "Writes real scratch files and invokes the capture helper cleanup; ownership/deletion boundary is Tier S. Shared helper repair B11.4 applies.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "12c188bb9cad480efc6eb87ce1760b9dc40bbb69",
+        "anchor": "Emitted-runtime import/call/constructor inventory and targeted fixture/provider/CLI source boundaries",
+        "runtimeHash": "e0dee6aa7636fd09d7138a22d79c5fd144648f4c764a9b0eb57d3e763eb57844",
+        "scope": "Reading aid plus targeted source inspection; not sound effect analysis, complete assertion review, execution evidence or metric applicability approval."
+      }
     },
     {
       "path": "src/presentation/cli/commands/_helpers/capture-json.ts",
@@ -4350,13 +4632,19 @@
       "path": "src/presentation/cli/commands/_helpers/deprecation-warning.test.ts",
       "package": "package.json",
       "sourceHash": "3bcd628a978a5aa1606d95cdc57edd972576561e1f63e53a0163b466a2ca20f1",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "A",
+      "rationale": "Captures console warnings with a spy; no persistent mutation identified.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "12c188bb9cad480efc6eb87ce1760b9dc40bbb69",
+        "anchor": "Emitted-runtime import/call/constructor inventory and targeted fixture/provider/CLI source boundaries",
+        "runtimeHash": "2d9fa70c118e95ea1a407e2e3ce8a620747e25d0472b56f6aaee9a32063b9ffb",
+        "scope": "Reading aid plus targeted source inspection; not sound effect analysis, complete assertion review, execution evidence or metric applicability approval."
+      }
     },
     {
       "path": "src/presentation/cli/commands/_helpers/deprecation-warning.ts",
@@ -4519,13 +4807,19 @@
       "path": "src/presentation/cli/commands/completion.test.ts",
       "package": "package.json",
       "sourceHash": "a60c4e86a04904243e329b9d9bfe52251f7621516aa6974f7533e68b2e58c842",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "A",
+      "rationale": "Generates completion script strings and captures console output; no generated shell execution.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "12c188bb9cad480efc6eb87ce1760b9dc40bbb69",
+        "anchor": "Emitted-runtime import/call/constructor inventory and targeted fixture/provider/CLI source boundaries",
+        "runtimeHash": "ed1050e316e98f8c138d9ce94a240b52f79774b4c74d85d9233379f3f2990945",
+        "scope": "Reading aid plus targeted source inspection; not sound effect analysis, complete assertion review, execution evidence or metric applicability approval."
+      }
     },
     {
       "path": "src/presentation/cli/commands/completion.ts",
@@ -4566,13 +4860,19 @@
       "path": "src/presentation/cli/commands/context.json.test.ts",
       "package": "package.json",
       "sourceHash": "5dadafdff97aefa3f215b82a3e59ed41d5542113e84968dbee610f865e47bb56",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "S",
+      "rationale": "Uses actual file database/CLI capture fixtures and shared temporary-path cleanup. Filesystem ownership/deletion requires Tier S proof; B11.4 owns the shared helper and caller obligation.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "12c188bb9cad480efc6eb87ce1760b9dc40bbb69",
+        "anchor": "Emitted-runtime import/call/constructor inventory and targeted fixture/provider/CLI source boundaries",
+        "runtimeHash": "8b4ddc3c4662ae7935ba371c24711158895f26fb030c6119c6c3dfa77863b712",
+        "scope": "Reading aid plus targeted source inspection; not sound effect analysis, complete assertion review, execution evidence or metric applicability approval."
+      }
     },
     {
       "path": "src/presentation/cli/commands/context.test.ts",
@@ -4701,13 +5001,19 @@
       "path": "src/presentation/cli/commands/export.test.ts",
       "package": "package.json",
       "sourceHash": "aebb857404b0816f9e5bcbba39d877ef4b85609957ecf6f8d365cbccd75425cf",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "S",
+      "rationale": "Creates a real file database and export output through test support and invokes cleanup. B11.1 owns helper lifecycle.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "12c188bb9cad480efc6eb87ce1760b9dc40bbb69",
+        "anchor": "Emitted-runtime import/call/constructor inventory and targeted fixture/provider/CLI source boundaries",
+        "runtimeHash": "b647d2f02b3c324d2416cea3b3aeb89c78fb043837cdf8f18c5824df2c64b304",
+        "scope": "Reading aid plus targeted source inspection; not sound effect analysis, complete assertion review, execution evidence or metric applicability approval."
+      }
     },
     {
       "path": "src/presentation/cli/commands/export.ts",
@@ -4730,13 +5036,19 @@
       "path": "src/presentation/cli/commands/extract.test.ts",
       "package": "package.json",
       "sourceHash": "caeef88a1e20b615311b798dcb5bfc3ead4239cd0f04b8a13d0b3f811e255f74",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "S",
+      "rationale": "Creates file database/config/data fixtures and silently catches close/removal errors. B11.68 owns repair.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "12c188bb9cad480efc6eb87ce1760b9dc40bbb69",
+        "anchor": "Emitted-runtime import/call/constructor inventory and targeted fixture/provider/CLI source boundaries",
+        "runtimeHash": "5af8eabee4b8642ecfcbd8e5816e98c3ea0380d236ad9eaa6e19d168e65442f7",
+        "scope": "Reading aid plus targeted source inspection; not sound effect analysis, complete assertion review, execution evidence or metric applicability approval."
+      }
     },
     {
       "path": "src/presentation/cli/commands/extract.ts",
@@ -5204,13 +5516,19 @@
       "path": "src/presentation/cli/commands/list.json.test.ts",
       "package": "package.json",
       "sourceHash": "8e49c55cfa072a3f71aa7c6485b507647ebb5b0f587d138fc3ddfaea73fca630",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "S",
+      "rationale": "Uses actual file database/CLI capture fixtures and shared temporary-path cleanup. Filesystem ownership/deletion requires Tier S proof; B11.4 owns the shared helper and caller obligation.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "12c188bb9cad480efc6eb87ce1760b9dc40bbb69",
+        "anchor": "Emitted-runtime import/call/constructor inventory and targeted fixture/provider/CLI source boundaries",
+        "runtimeHash": "920ec4b93062dac453bec106b517435aea38988ba556729797e2acce63e316a2",
+        "scope": "Reading aid plus targeted source inspection; not sound effect analysis, complete assertion review, execution evidence or metric applicability approval."
+      }
     },
     {
       "path": "src/presentation/cli/commands/list.test.ts",
@@ -5444,13 +5762,19 @@
       "path": "src/presentation/cli/commands/related.json.test.ts",
       "package": "package.json",
       "sourceHash": "5401054af1b02b57aefce4b584679c3fbacfc34b1d19e35798e72cba7b928fef",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "S",
+      "rationale": "Uses actual file database/CLI capture fixtures and shared temporary-path cleanup. Filesystem ownership/deletion requires Tier S proof; B11.4 owns the shared helper and caller obligation.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "12c188bb9cad480efc6eb87ce1760b9dc40bbb69",
+        "anchor": "Emitted-runtime import/call/constructor inventory and targeted fixture/provider/CLI source boundaries",
+        "runtimeHash": "06f6910c31e20dcbf11f44647b3d7883e639ab57327bdbdc158820c34dbb5d6a",
+        "scope": "Reading aid plus targeted source inspection; not sound effect analysis, complete assertion review, execution evidence or metric applicability approval."
+      }
     },
     {
       "path": "src/presentation/cli/commands/related.test.ts",
@@ -5544,13 +5868,19 @@
       "path": "src/presentation/cli/commands/search.json.test.ts",
       "package": "package.json",
       "sourceHash": "0671aa21edcd014ca527d3d8c8ee351fc79a4943b74f83608ac97da5fcdf1428",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "S",
+      "rationale": "Uses actual file database/CLI capture fixtures and shared temporary-path cleanup. Filesystem ownership/deletion requires Tier S proof; B11.4 owns the shared helper and caller obligation.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "12c188bb9cad480efc6eb87ce1760b9dc40bbb69",
+        "anchor": "Emitted-runtime import/call/constructor inventory and targeted fixture/provider/CLI source boundaries",
+        "runtimeHash": "1667e245e460108be0c70354b8940192c1118b7679b7bd0aa6338b2fffab592c",
+        "scope": "Reading aid plus targeted source inspection; not sound effect analysis, complete assertion review, execution evidence or metric applicability approval."
+      }
     },
     {
       "path": "src/presentation/cli/commands/search.test.ts",
@@ -5609,13 +5939,19 @@
       "path": "src/presentation/cli/commands/show.json.test.ts",
       "package": "package.json",
       "sourceHash": "956c497eb065abb4d015e6ad176fc483b84f0b242e1db8df9f3508a0ca1d82c8",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "S",
+      "rationale": "Uses actual file database/CLI capture fixtures and shared temporary-path cleanup. Filesystem ownership/deletion requires Tier S proof; B11.4 owns the shared helper and caller obligation.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "12c188bb9cad480efc6eb87ce1760b9dc40bbb69",
+        "anchor": "Emitted-runtime import/call/constructor inventory and targeted fixture/provider/CLI source boundaries",
+        "runtimeHash": "a9945f44a0eaedaf350fd6475df0aac22f6093d29ab0abbfd9f0b3caba342ab5",
+        "scope": "Reading aid plus targeted source inspection; not sound effect analysis, complete assertion review, execution evidence or metric applicability approval."
+      }
     },
     {
       "path": "src/presentation/cli/commands/show.test.ts",
@@ -5692,13 +6028,19 @@
       "path": "src/presentation/cli/commands/stats.json.test.ts",
       "package": "package.json",
       "sourceHash": "801f682338b17a100454eb0d2144219930fa33a8d28e09ad9b5d42a4b6012673",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "S",
+      "rationale": "Uses actual file database/CLI capture fixtures and shared temporary-path cleanup. Filesystem ownership/deletion requires Tier S proof; B11.4 owns the shared helper and caller obligation.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "12c188bb9cad480efc6eb87ce1760b9dc40bbb69",
+        "anchor": "Emitted-runtime import/call/constructor inventory and targeted fixture/provider/CLI source boundaries",
+        "runtimeHash": "aa410152deb722cbf7cdd9858154d91f76caee0ae04d934d3560967fa4695a51",
+        "scope": "Reading aid plus targeted source inspection; not sound effect analysis, complete assertion review, execution evidence or metric applicability approval."
+      }
     },
     {
       "path": "src/presentation/cli/commands/stats.test.ts",
@@ -5774,13 +6116,19 @@
       "path": "src/presentation/cli/commands/sync/ambient.test.ts",
       "package": "package.json",
       "sourceHash": "5c331cbe1efa2f9eff3476417969953308c2ddf854d492890b35c9177513bbcb",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "A",
+      "rationale": "Inspects default ambient-service wiring using an in-memory DB closed in finally; context execution uses injected fake services.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "12c188bb9cad480efc6eb87ce1760b9dc40bbb69",
+        "anchor": "Emitted-runtime import/call/constructor inventory and targeted fixture/provider/CLI source boundaries",
+        "runtimeHash": "949ee8d70e6d8ee291c7c7a7c12f8b611cddc52ef29b061c49c1b952bb81ee86",
+        "scope": "Reading aid plus targeted source inspection; not sound effect analysis, complete assertion review, execution evidence or metric applicability approval."
+      }
     },
     {
       "path": "src/presentation/cli/commands/sync/ambient.ts",
@@ -5803,13 +6151,19 @@
       "path": "src/presentation/cli/commands/sync/background.test.ts",
       "package": "package.json",
       "sourceHash": "0b7744a2a1b0a8278b2df1884ce6da3d6796dbaae0917eec8ca12633a2bfbcc8",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "A",
+      "rationale": "Supplies fake spawn, lock reader and process-alive functions; does not launch the background worker.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "12c188bb9cad480efc6eb87ce1760b9dc40bbb69",
+        "anchor": "Emitted-runtime import/call/constructor inventory and targeted fixture/provider/CLI source boundaries",
+        "runtimeHash": "65d6272acfd979cdc5eb73f1a4b771949559a36b6bf893bfb85c95f0a739ccd8",
+        "scope": "Reading aid plus targeted source inspection; not sound effect analysis, complete assertion review, execution evidence or metric applicability approval."
+      }
     },
     {
       "path": "src/presentation/cli/commands/sync/background.ts",
@@ -5832,13 +6186,19 @@
       "path": "src/presentation/cli/commands/sync/embedding-pass.test.ts",
       "package": "package.json",
       "sourceHash": "4aa824f00d181d3f6e895cffbda4f414b6a4bff5ea71f0de237e2e35b82f1298",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "A",
+      "rationale": "Uses provider/repository/factory and readline mocks with synthetic vectors. Shared module/TTY restoration requires B09 verification; no actual model computation.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "12c188bb9cad480efc6eb87ce1760b9dc40bbb69",
+        "anchor": "Emitted-runtime import/call/constructor inventory and targeted fixture/provider/CLI source boundaries",
+        "runtimeHash": "4ceb21b3616721f3248b44dae33df72f506c0dbc033fa477636300525b37b68f",
+        "scope": "Reading aid plus targeted source inspection; not sound effect analysis, complete assertion review, execution evidence or metric applicability approval."
+      }
     },
     {
       "path": "src/presentation/cli/commands/sync/embedding-pass.ts",
@@ -5896,13 +6256,19 @@
       "path": "src/presentation/cli/commands/sync/index.test.ts",
       "package": "package.json",
       "sourceHash": "e40956e801b30f344d2bfde572ed81a9fbb96a48408bdf50e544e82a65d2ae47",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "S",
+      "rationale": "Mostly dependency-injected harnesses, with real remote-config fixture creation/removal and silent cleanup catches. B11.69 owns repair.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "12c188bb9cad480efc6eb87ce1760b9dc40bbb69",
+        "anchor": "Emitted-runtime import/call/constructor inventory and targeted fixture/provider/CLI source boundaries",
+        "runtimeHash": "3956ab3ad8f2fa7b23ae3fb2c67ace11ae912831adaa63f2b29934fa9aacafeb",
+        "scope": "Reading aid plus targeted source inspection; not sound effect analysis, complete assertion review, execution evidence or metric applicability approval."
+      }
     },
     {
       "path": "src/presentation/cli/commands/sync/index.ts",
@@ -5925,13 +6291,19 @@
       "path": "src/presentation/cli/commands/sync/integration.test.ts",
       "package": "package.json",
       "sourceHash": "4cd7c5f8d5d79e76c754b19553def3f52bcab25b2917942798c04be5a3f687de",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "S",
+      "rationale": "Spawns actual CLI processes for help/version/error cases. CLI main startup can run migration checks before parsing; B03 test-home isolation remains necessary and subprocess proof is not inferred from source.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "12c188bb9cad480efc6eb87ce1760b9dc40bbb69",
+        "anchor": "Emitted-runtime import/call/constructor inventory and targeted fixture/provider/CLI source boundaries",
+        "runtimeHash": "32d3b6fba0db06b45f469e87bfade5e376576b0ce8aee67b1c1c49e6c11c9fd9",
+        "scope": "Reading aid plus targeted source inspection; not sound effect analysis, complete assertion review, execution evidence or metric applicability approval."
+      }
     },
     {
       "path": "src/presentation/cli/commands/sync/memory-files.test.ts",
@@ -6556,13 +6928,19 @@
       "path": "src/presentation/cli/help-groups.test.ts",
       "package": "package.json",
       "sourceHash": "71dee783d40026f742a7d5d1ebbfb42d80541873448b30107ffd437bf1dfe1d6",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "A",
+      "rationale": "Imports the CLI program and inspects help; import.meta.main startup migration is not executed by import.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "12c188bb9cad480efc6eb87ce1760b9dc40bbb69",
+        "anchor": "Emitted-runtime import/call/constructor inventory and targeted fixture/provider/CLI source boundaries",
+        "runtimeHash": "607599be541b32b2a5fc2c4de930c7c55ef7f3da0369c722c5f56a25e8efab02",
+        "scope": "Reading aid plus targeted source inspection; not sound effect analysis, complete assertion review, execution evidence or metric applicability approval."
+      }
     },
     {
       "path": "src/presentation/cli/index.ts",
@@ -6585,13 +6963,19 @@
       "path": "src/presentation/cli/parsers/date-parser.test.ts",
       "package": "package.json",
       "sourceHash": "91274582745c7effc65ed3a663e0ce5d7562f45e1d0dd1d4600c798b82f0b029",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "A",
+      "rationale": "Exercises date argument parsing in memory.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "12c188bb9cad480efc6eb87ce1760b9dc40bbb69",
+        "anchor": "Emitted-runtime import/call/constructor inventory and targeted fixture/provider/CLI source boundaries",
+        "runtimeHash": "565c402816e9b69ceb95da22ad7f20110569fc0026a735d91def842cb5af322f",
+        "scope": "Reading aid plus targeted source inspection; not sound effect analysis, complete assertion review, execution evidence or metric applicability approval."
+      }
     },
     {
       "path": "src/presentation/cli/parsers/date-parser.ts",
@@ -6638,13 +7022,19 @@
       "path": "src/presentation/cli/pickers/session-picker.test.ts",
       "package": "package.json",
       "sourceHash": "9da8fc115575be1ad98c7e8fbd678c80cbf40d9a487cda799b50202dd21bfe84",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "A",
+      "rationale": "Uses picker test mocks/TTY overrides and a fake session repository; no actual user selection or persistent write.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "12c188bb9cad480efc6eb87ce1760b9dc40bbb69",
+        "anchor": "Emitted-runtime import/call/constructor inventory and targeted fixture/provider/CLI source boundaries",
+        "runtimeHash": "4e4d5ba01e0fe22d6caf18455d48396d74824b502200b2922f99c72d118bbc41",
+        "scope": "Reading aid plus targeted source inspection; not sound effect analysis, complete assertion review, execution evidence or metric applicability approval."
+      }
     },
     {
       "path": "src/presentation/cli/pickers/session-picker.ts",
@@ -6667,13 +7057,19 @@
       "path": "src/presentation/cli/progress-reporter.test.ts",
       "package": "package.json",
       "sourceHash": "e9b082bb4422132275eeccd7fd95d4056e1fbc1b131c3df7fbf7bc04ca89cad4",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "A",
+      "rationale": "Exercises progress rendering with console/TTY overrides; no provider or filesystem operation identified.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "12c188bb9cad480efc6eb87ce1760b9dc40bbb69",
+        "anchor": "Emitted-runtime import/call/constructor inventory and targeted fixture/provider/CLI source boundaries",
+        "runtimeHash": "bc40bdeaa0f3ca2843cf362243df8859bbcc7a6f9a329c076fe8d63d0ea8e2da",
+        "scope": "Reading aid plus targeted source inspection; not sound effect analysis, complete assertion review, execution evidence or metric applicability approval."
+      }
     },
     {
       "path": "src/presentation/cli/progress-reporter.ts",
@@ -6725,13 +7121,19 @@
       "path": "tests/helpers/env-overrides.test.ts",
       "package": "package.json",
       "sourceHash": "dda4620d7c290d1180631c0dc544cc56f7329f56ca1d581d51fba2d14dadef2d",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "A",
+      "rationale": "Exercises process-local environment overrides and restoration.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "12c188bb9cad480efc6eb87ce1760b9dc40bbb69",
+        "anchor": "Emitted-runtime import/call/constructor inventory and targeted fixture/provider/CLI source boundaries",
+        "runtimeHash": "2c6a317f38688ff0de08839f283c7941430278d292863557c4af22696d5492fc",
+        "scope": "Reading aid plus targeted source inspection; not sound effect analysis, complete assertion review, execution evidence or metric applicability approval."
+      }
     },
     {
       "path": "tests/helpers/env-overrides.ts",
@@ -6771,61 +7173,91 @@
       "path": "tests/infrastructure/database/repositories/friction-repository.test.ts",
       "package": "package.json",
       "sourceHash": "82c8ea8690f1bd85d5bfcb4181c0dc892695d233dc5bc096f24c9303e5c141b8",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "S",
+      "rationale": "Uses a real file-backed test database and cleanup helper; B11.1 owns shared fixture lifecycle.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "12c188bb9cad480efc6eb87ce1760b9dc40bbb69",
+        "anchor": "Emitted-runtime import/call/constructor inventory and targeted fixture/provider/CLI source boundaries",
+        "runtimeHash": "de9e3720e827e804db67f537215d1613d933f97c5b106b1ffb545ae1dc72874b",
+        "scope": "Reading aid plus targeted source inspection; not sound effect analysis, complete assertion review, execution evidence or metric applicability approval."
+      }
     },
     {
       "path": "tests/infrastructure/database/repositories/graph-repository.test.ts",
       "package": "package.json",
       "sourceHash": "e65ca88767abdb164d846d1bb54d1e6f43d3c2ec1d052a1dc5e6b849e026fda2",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "A",
+      "rationale": "Uses real SQLite with explicitly in-memory database configuration and registered close/closeDatabase teardown; fixture SQL is bounded to the test handle. Production repository/schema risk remains separate.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "12c188bb9cad480efc6eb87ce1760b9dc40bbb69",
+        "anchor": "Emitted-runtime import/call/constructor inventory and targeted fixture/provider/CLI source boundaries",
+        "runtimeHash": "d5fae052e884ede7263a6d6eaf265999d02e5986c2470d9fa57aa348cb825d0c",
+        "scope": "Reading aid plus targeted source inspection; not sound effect analysis, complete assertion review, execution evidence or metric applicability approval."
+      }
     },
     {
       "path": "tests/infrastructure/database/repositories/memory-utility-repository.test.ts",
       "package": "package.json",
       "sourceHash": "2703cda6dd8c27d0ab881a359fdff493f078189f650bda75f1258573aa8ff883",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "A",
+      "rationale": "Uses real SQLite with explicitly in-memory database configuration and registered close/closeDatabase teardown; fixture SQL is bounded to the test handle. Production repository/schema risk remains separate.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "12c188bb9cad480efc6eb87ce1760b9dc40bbb69",
+        "anchor": "Emitted-runtime import/call/constructor inventory and targeted fixture/provider/CLI source boundaries",
+        "runtimeHash": "b5ea1cb65438522d11bbb9778abe1b23dd23f38a387b7dd902b2f3aa13ac1c39",
+        "scope": "Reading aid plus targeted source inspection; not sound effect analysis, complete assertion review, execution evidence or metric applicability approval."
+      }
     },
     {
       "path": "tests/infrastructure/database/repositories/persona-repository.test.ts",
       "package": "package.json",
       "sourceHash": "1df10d63bc8d90fbe16947870ce539951a413b40422f5d5c8c665b14252b1c56",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "A",
+      "rationale": "Uses real SQLite with explicitly in-memory database configuration and registered close/closeDatabase teardown; fixture SQL is bounded to the test handle. Production repository/schema risk remains separate.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "12c188bb9cad480efc6eb87ce1760b9dc40bbb69",
+        "anchor": "Emitted-runtime import/call/constructor inventory and targeted fixture/provider/CLI source boundaries",
+        "runtimeHash": "93d3d7979eb7f064b1ed846a106ffe41ee68bac03569fba3c0b3983aaaadaf92",
+        "scope": "Reading aid plus targeted source inspection; not sound effect analysis, complete assertion review, execution evidence or metric applicability approval."
+      }
     },
     {
       "path": "tests/integration/api-consumption.test.ts",
       "package": "package.json",
       "sourceHash": "6c2d90c8453c6ef5ff1e1d79913e5bb8c306986f1647c79fb34a7f7c051df541",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "A",
+      "rationale": "Reads/imports built library artifacts and inspects exported API shapes; does not establish fresh artifact/source binding or actual consumer behavior. D04 retains that obligation.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "12c188bb9cad480efc6eb87ce1760b9dc40bbb69",
+        "anchor": "Emitted-runtime import/call/constructor inventory and targeted fixture/provider/CLI source boundaries",
+        "runtimeHash": "f69679aefb7e0b306a8d77f5953ad47a1b08a5a5a290ec00dc575149daf98189",
+        "scope": "Reading aid plus targeted source inspection; not sound effect analysis, complete assertion review, execution evidence or metric applicability approval."
+      }
     },
     {
       "path": "tests/integration/concurrent-commands.test.ts",
@@ -6992,13 +7424,19 @@
       "path": "tests/presentation/cli/commands/friction.test.ts",
       "package": "package.json",
       "sourceHash": "c5835b44ac7fa6caa49ad801908f23780acb6ec7175a79d3cfca4082a34c611f",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "S",
+      "rationale": "Creates file-backed database fixtures without registered removal and writes a home-relative fallback ingestion file. B03 redirects the test home; per-fixture ownership/isolation is unproved. B11.70 owns repair.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "12c188bb9cad480efc6eb87ce1760b9dc40bbb69",
+        "anchor": "Emitted-runtime import/call/constructor inventory and targeted fixture/provider/CLI source boundaries",
+        "runtimeHash": "25214e0a5807bcf1d02099cb9fe6b42f680ead32c6b68f26077958d12ac51483",
+        "scope": "Reading aid plus targeted source inspection; not sound effect analysis, complete assertion review, execution evidence or metric applicability approval."
+      }
     },
     {
       "path": "tests/presentation/cli/formatters/friction-dashboard.test.ts",
@@ -7022,13 +7460,19 @@
       "path": "tests/smoke/cli-commands.test.ts",
       "package": "package.json",
       "sourceHash": "2eab50aa20390f4ed11f3e93f21327454cd319ad5ba340542b85eb41a0b419a8",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "A",
+      "rationale": "Imports Commander program and parses help/version/invalid arguments with captured process output/exit; no valid data-mutating command action identified.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "12c188bb9cad480efc6eb87ce1760b9dc40bbb69",
+        "anchor": "Emitted-runtime import/call/constructor inventory and targeted fixture/provider/CLI source boundaries",
+        "runtimeHash": "2eca18da0b76134e805b59545f9a83cbcae308ba74ce8369fdd70532a0ce21c9",
+        "scope": "Reading aid plus targeted source inspection; not sound effect analysis, complete assertion review, execution evidence or metric applicability approval."
+      }
     },
     {
       "path": "tests/test-setup.ts",
@@ -7058,13 +7502,19 @@
       "path": "tests/unit/infrastructure/llm/extraction-providers.test.ts",
       "package": "package.json",
       "sourceHash": "5f59e66df2147d5a96a343707a5fa9fc5d7cc6b9354216ce2e76774efb212186",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "A",
+      "rationale": "Supplies child-process, SDK and fetch mocks with synthetic credentials. Failure-path fetch restoration and module isolation are incomplete; B11.71 owns repair. No real provider acceptance.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "12c188bb9cad480efc6eb87ce1760b9dc40bbb69",
+        "anchor": "Emitted-runtime import/call/constructor inventory and targeted fixture/provider/CLI source boundaries",
+        "runtimeHash": "974cbe3164837680a679374191fac9f4ed72c12832f76d808e6bffe9378c62f2",
+        "scope": "Reading aid plus targeted source inspection; not sound effect analysis, complete assertion review, execution evidence or metric applicability approval."
+      }
     },
     {
       "path": "vitest.config.ts",

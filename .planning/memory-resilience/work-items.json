@@ -122,17 +122,18 @@
         ".planning/memory-resilience/evidence/B04-classification-batch-5.json",
         ".planning/memory-resilience/evidence/B04-scratch-lifecycle-probe.json",
         ".planning/memory-resilience/evidence/B04-classification-batch-6.json",
-        ".planning/memory-resilience/evidence/B04-classification-batch-7.json"
+        ".planning/memory-resilience/evidence/B04-classification-batch-7.json",
+        ".planning/memory-resilience/evidence/B04-classification-batch-8.json"
       ],
       "acceptance_record": ".planning/memory-resilience/evidence/B04.json",
       "progress": {
         "discovery": "implemented and focused behavior verified",
         "sourceCandidates": 446,
-        "proposedClassifications": 371,
-        "unclassified": 75,
+        "proposedClassifications": 446,
+        "unclassified": 0,
         "approvedExclusions": 0,
         "independentReview": "pending",
-        "next": "Inspect the remaining 75 test drivers (service mocks, database/provider/process fixtures and command adapters), then individual metric applicability and independent review. No blanket exclusions or production tier reductions.",
+        "next": "Review individual metric applicability and obtain independent source-bound tier/applicability review. All tiers remain proposed; structural admission is not B04 acceptance.",
         "packageOutputMapping": "Source-bound mapping recorded; artifact verification and independent review pending."
       }
     },
@@ -276,7 +277,13 @@
         "B11.62",
         "B11.63",
         "B11.64",
-        "B11.65"
+        "B11.65",
+        "B11.66",
+        "B11.67",
+        "B11.68",
+        "B11.69",
+        "B11.70",
+        "B11.71"
       ],
       "scope": "coverage evidence and work-items.json",
       "deliverable": "Run current instrumented suite; refresh each seeded gap and add every new gap, including scripts and stricter tiers.",
@@ -286,7 +293,7 @@
       "owner": "memory-nexus",
       "evidence": [],
       "acceptance_record": ".planning/memory-resilience/evidence/B09.json",
-      "additional_acceptance": "Known test fixture cleanup repairs precede the complete instrumented run. Scoped gate fixture tests may proceed independently; no affected full-suite run before the owned-cleanup tasks are verified."
+      "additional_acceptance": "Known test fixture cleanup repairs precede the complete instrumented run. Scoped gate fixture tests may proceed independently; no affected full-suite run before the owned-cleanup tasks are verified. Verify shared module mock isolation for transformers-js-provider, sync/embedding-pass and extraction-providers test drivers, including reordered/adjacent test execution; source mocks are not proof of safe isolation or live provider operation."
     },
     {
       "id": "Q001",
@@ -2326,7 +2333,13 @@
         "B11.62",
         "B11.63",
         "B11.64",
-        "B11.65"
+        "B11.65",
+        "B11.66",
+        "B11.67",
+        "B11.68",
+        "B11.69",
+        "B11.70",
+        "B11.71"
       ],
       "scope": "all Q-* work items",
       "deliverable": "Close individually verified quality work items; fix discovered defects and meaningful boundaries, not artificial counter tests.",
@@ -4494,6 +4507,126 @@
       "observed_gap": "Source inspection: a real filesystem cleanup operation is wrapped in a catch that discards the removal failure.",
       "observed_evidence": ".planning/memory-resilience/evidence/B04-classification-batch-6.json",
       "retirement_trigger": "Before affected full-suite execution/B09 and B10/R02; source concern is not runtime regression acceptance."
+    },
+    {
+      "id": "B11.66",
+      "stage": "baseline",
+      "title": "Close dreaming-service test databases",
+      "status": "pending",
+      "depends_on": [
+        "B03"
+      ],
+      "scope": "src/application/services/dreaming-service.test.ts",
+      "deliverable": "Add deterministic handle teardown for setup/test failures; preserve the original failure and report close failures.",
+      "verification": "Focused RED/GREEN lifecycle assertions prove each allocated handle closes once after success and failure, with failure diagnostics and applicable Tier A metrics.",
+      "risk": "A",
+      "authorization": "authorized",
+      "owner": "memory-nexus",
+      "evidence": [],
+      "acceptance_record": ".planning/memory-resilience/evidence/B11.66.json",
+      "observed_gap": "The fixture allocates an in-memory SQLite database in beforeEach with no explicit teardown.",
+      "observed_evidence": ".planning/memory-resilience/evidence/B04-classification-batch-8.json",
+      "retirement_trigger": "Before affected full-suite execution/B09 and B10/R02; source finding is not runtime failure proof."
+    },
+    {
+      "id": "B11.67",
+      "stage": "baseline",
+      "title": "Close sync-service test databases",
+      "status": "pending",
+      "depends_on": [
+        "B03"
+      ],
+      "scope": "src/application/services/sync-service.test.ts",
+      "deliverable": "Close owned handles deterministically in addition to resetting mock state.",
+      "verification": "Focused RED/GREEN lifecycle assertions prove handle closure on success/setup/test failure, preserving primary errors and applicable Tier A metrics.",
+      "risk": "A",
+      "authorization": "authorized",
+      "owner": "memory-nexus",
+      "evidence": [],
+      "acceptance_record": ".planning/memory-resilience/evidence/B11.67.json",
+      "observed_gap": "afterEach resets mock state but does not close the in-memory SQLite handle.",
+      "observed_evidence": ".planning/memory-resilience/evidence/B04-classification-batch-8.json",
+      "retirement_trigger": "Before affected full-suite execution/B09 and B10/R02; source finding is not runtime failure proof."
+    },
+    {
+      "id": "B11.68",
+      "stage": "baseline",
+      "title": "Report extraction-command fixture cleanup failures",
+      "status": "pending",
+      "depends_on": [
+        "B03"
+      ],
+      "scope": "src/presentation/cli/commands/extract.test.ts",
+      "deliverable": "Use shared owned fixture cleanup and retained-path diagnostics while preserving primary failures and environment restoration.",
+      "verification": "Scoped RED/GREEN actual-runner proof plus shared ownership/replacement/close/removal failure decisions, no foreign deletion, applicable Tier S metrics.",
+      "risk": "S",
+      "authorization": "authorized",
+      "owner": "memory-nexus",
+      "evidence": [],
+      "acceptance_record": ".planning/memory-resilience/evidence/B11.68.json",
+      "observed_gap": "The fixture silently catches database-close and recursive-removal failures.",
+      "observed_evidence": ".planning/memory-resilience/evidence/B04-classification-batch-8.json",
+      "retirement_trigger": "Before affected full-suite execution/B09 and B10/R02; source finding is not runtime failure proof."
+    },
+    {
+      "id": "B11.69",
+      "stage": "baseline",
+      "title": "Report sync-command fixture cleanup failures",
+      "status": "pending",
+      "depends_on": [
+        "B03"
+      ],
+      "scope": "src/presentation/cli/commands/sync/index.test.ts",
+      "deliverable": "Use shared owned storage with diagnostics for both remote-config fixture cleanup sites.",
+      "verification": "Scoped RED/GREEN actual-runner proof for owned/concurrent fixtures, removal failure, retained paths and no foreign deletion; applicable Tier S metrics.",
+      "risk": "S",
+      "authorization": "authorized",
+      "owner": "memory-nexus",
+      "evidence": [],
+      "acceptance_record": ".planning/memory-resilience/evidence/B11.69.json",
+      "observed_gap": "Remote-config fixture cleanup silently catches recursive-removal errors.",
+      "observed_evidence": ".planning/memory-resilience/evidence/B04-classification-batch-8.json",
+      "retirement_trigger": "Before affected full-suite execution/B09 and B10/R02; source finding is not runtime failure proof."
+    },
+    {
+      "id": "B11.70",
+      "stage": "baseline",
+      "title": "Isolate and reclaim friction-command fixtures",
+      "status": "pending",
+      "depends_on": [
+        "B03"
+      ],
+      "scope": "tests/presentation/cli/commands/friction.test.ts",
+      "deliverable": "Give each test owned database and fallback paths, preserve preexisting content and reclaim only owned resources; reuse shared primitives.",
+      "verification": "Actual-runner RED/GREEN proof for fresh/preexisting fallback content, failure during ingestion, concurrent fixtures, cleanup failure, retained paths and applicable Tier S metrics.",
+      "risk": "S",
+      "authorization": "authorized",
+      "owner": "memory-nexus",
+      "evidence": [],
+      "acceptance_record": ".planning/memory-resilience/evidence/B11.70.json",
+      "observed_gap": "Database mkdtemp directories lack registered removal; fallback ingest test overwrites a home-relative file and restores only when it previously existed.",
+      "observed_evidence": ".planning/memory-resilience/evidence/B04-classification-batch-8.json",
+      "retirement_trigger": "Before affected full-suite execution/B09 and B10/R02; source finding is not runtime failure proof."
+    },
+    {
+      "id": "B11.71",
+      "stage": "baseline",
+      "title": "Restore extraction-provider test overrides on failure",
+      "status": "pending",
+      "depends_on": [
+        "B03"
+      ],
+      "scope": "tests/unit/infrastructure/llm/extraction-providers.test.ts",
+      "deliverable": "Make global restoration unconditional; isolate module mocks and await rejection checks. Establish Bun behavior through focused runner tests, not assumptions about mock.restore.",
+      "verification": "Focused RED/GREEN failing-assertion/provider-error probes verify subsequent tests see original fetch/module behavior; rejection probes demonstrably fail when expected errors are removed. No live provider calls; applicable Tier A metrics.",
+      "risk": "A",
+      "authorization": "authorized",
+      "owner": "memory-nexus",
+      "evidence": [],
+      "acceptance_record": ".planning/memory-resilience/evidence/B11.71.json",
+      "observed_gap": "Some fetch overrides restore only after awaited work/assertions; module mocks have no explicit isolation boundary and some rejection expectations are not awaited.",
+      "observed_evidence": ".planning/memory-resilience/evidence/B04-classification-batch-8.json",
+      "retirement_trigger": "Before affected full-suite execution/B09 and B10/R02; source finding is not runtime failure proof."
     }
   ],
   "decisions": {

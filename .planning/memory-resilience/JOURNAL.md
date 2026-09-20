@@ -1,5 +1,24 @@
 # Memory resilience execution journal
 
+## 2026-09-20 - B04 risk proposal inventory complete
+
+- Inspected the final 75 test drivers using emitted-runtime inventories and
+  targeted SQLite, provider mock, CLI startup and fixture lifecycle source.
+  Proposed 62 A and 13 S classifications; previous tiers remain unchanged.
+- All 446 candidates now have proposed tiers, with zero approved exclusions.
+  Structural admission is distinct from applicability and independent approval;
+  B04 remains active and B05 remains pending.
+- Added six atomic tasks B11.66-B11.71 for two missing SQLite teardowns, two
+  silent cleanup boundaries, friction fixture isolation and provider override
+  restoration. Each blocks the affected full-suite rebaseline and baseline review.
+  These are source findings, not reproduced leaks or historical data loss.
+- Ledger: 215 items (120 delivery/gates, 95 quality candidates). Batch-8 evidence
+  retains source hashes, inspection packet and structural/dependency checks.
+  No executable source changed; no model download or full-suite acceptance.
+- Next: individual metric applicability and independent review, with authorized
+  fixture repairs available while the reviewer route remains quota-blocked.
+
+
 ## 2026-09-20 - B04 in-memory test-driver classification
 
 - Previous turn was progress: f9a967b committed the deletion-bearing test packet

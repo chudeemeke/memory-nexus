@@ -46,10 +46,10 @@ These are conservative syntax observations, not quality acceptance. Value import
 are preserved so possible module-loading effects are not erased by unused-import
 elision. The actual build/runtime behavior still requires verification.
 
-`quality-classifications.json` currently contains 371 proposed classifications and
-75 explicit unclassified entries. No test driver is automatically excluded. The
-actual `bun run quality:inventory` command fails on all 75 unknown tiers; the
-structural checker cannot grant independent approval even for a valid manifest.
+`quality-classifications.json` currently contains 446 proposed classifications and
+zero unclassified entries. No test driver is automatically excluded. Structural
+admission now has a complete proposed risk manifest; the checker cannot grant
+independent approval even for a valid manifest.
 The complete review and numeric quality requirements remain outstanding.
 
 The first classification batch inspected the remaining verification scripts,

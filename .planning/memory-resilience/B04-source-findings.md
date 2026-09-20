@@ -212,3 +212,26 @@ unlink failure. Its comments acknowledge the untested failure path. Replace that
 claim with an actual failure regression and explicit retry/duplicate semantics;
 do not cite the current test name as failure-recovery evidence. No production
 ingestion failure has been demonstrated by this source inspection.
+
+## Remaining fixture and override lifecycle findings (batch 8)
+
+The final 75 risk proposals comprise 62 A and 13 S drivers. All remain
+independently unreviewed; applicability is unfinished and none is excluded.
+These additional source observations each have an owner and a gate dependency:
+
+| Owner | Source | Observation |
+|---|---|---|
+| B11.66 | src/application/services/dreaming-service.test.ts | The fixture allocates an in-memory SQLite database in beforeEach with no explicit teardown. |
+| B11.67 | src/application/services/sync-service.test.ts | afterEach resets mock state but does not close the in-memory SQLite handle. |
+| B11.68 | src/presentation/cli/commands/extract.test.ts | The fixture silently catches database-close and recursive-removal failures. |
+| B11.69 | src/presentation/cli/commands/sync/index.test.ts | Remote-config fixture cleanup silently catches recursive-removal errors. |
+| B11.70 | tests/presentation/cli/commands/friction.test.ts | Database mkdtemp directories lack registered removal; fallback ingest test overwrites a home-relative file and restores only when it previously existed. |
+| B11.71 | tests/unit/infrastructure/llm/extraction-providers.test.ts | Some fetch overrides restore only after awaited work/assertions; module mocks have no explicit isolation boundary and some rejection expectations are not awaited. |
+
+These are not runtime leak, corruption or network-egress demonstrations. B03
+still isolates the test home; it does not establish per-fixture ownership.
+Each task must supply focused failure/recovery proof before B09 and B10/R02.
+Reuse shared owned-fixture cleanup rather than duplicating deletion logic.
+B09 also owns ordered/adjacent module-mock isolation proof for transformers,
+embedding-pass and extraction-provider drivers. No live provider/model or
+production memory operation ran for this checkpoint.
