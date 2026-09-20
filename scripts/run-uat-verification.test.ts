@@ -7,6 +7,112 @@ import {existsSync,writeFileSync,renameSync,mkdirSync,unlinkSync,rmdirSync} from
 import {runUatSandbox} from "./run-uat-verification";
 import * as uat from "./run-uat-verification";
 
+test("UAT command drains both pipes and preserves nonzero exit and diagnostics", async () => {
+  const result = await uat.runUatCommand([process.execPath,"--eval",`
+    setTimeout(()=>process.exit(91),5000);
+    await new Promise(resolve=>process.stderr.write("e".repeat(2*1024*1024),resolve));
+    console.log("PIPE_DRAINED");
+    process.exitCode=7;
+    process.exit(7);
+  `],{});
+  expect(result.code).toBe(7);
+  expect(result.stdout).toBe("PIPE_DRAINED\n");
+  expect(result.stderr).toBe("e".repeat(2*1024*1024));
+});
+
+test("UAT command stops a non-terminating child before returning failure", async () => {
+  await expect(uat.runUatCommand([process.execPath,"--eval",`
+    process.on("SIGTERM",()=>{});
+    setTimeout(()=>process.exit(0),3000);
+    setInterval(()=>{},100);
+  `],{},250)).rejects.toThrow("UAT command terminated");
+});
+
+test.each([0,-1,NaN,Infinity,60_001])("UAT rejects invalid timeout %s before spawning", async timeout => {
+  await expect(uat.runUatCommand(["deliberately-missing-uat-command"],{},timeout)).rejects.toThrow("timeout");
+});
+
+test("UAT command preserves a successful exit", async () => {
+  expect(await uat.runUatCommand([process.execPath,"--eval","console.log('SYNTHETIC_SUCCESS')"],{}))
+    .toEqual({code:0,stdout:"SYNTHETIC_SUCCESS\n",stderr:""});
+});
+
+test("UAT command reports a missing executable", async () => {
+  await expect(uat.runUatCommand(["deliberately-missing-uat-command"],{})).rejects.toThrow();
+});
+
+test("synthetic UAT workflow replays both real database projections", () => {
+  const fixture = createOwnedTestDirectory("memory-uat-replay-");
+  const target = pathToFileURL(join(import.meta.dir,"run-uat-verification.ts")).href;
+  const program = `
+    import {verifySandbox,runUatSandbox,withUatDatabase} from ${JSON.stringify(target)};
+    import {mkdirSync,writeFileSync,existsSync} from "node:fs";
+    import {join} from "node:path";
+    const content="Use links table for relational semantic trees";
+    let firstReplay=false, secondReplay=false, exportText="", imported=false, commands=0;
+    const passed=await runUatSandbox(dir=>verifySandbox(dir,async(cmd,env)=>{
+      commands++;
+      let stdout="";
+      const database=join(env.XDG_DATA_HOME,"memory","memory.db");
+      switch(cmd[1]) {
+        case "sync": {
+          const events=join(env.XDG_DATA_HOME,"memory","events");
+          mkdirSync(events,{recursive:true});
+          if(!existsSync(join(events,"events.jsonl")))writeFileSync(join(events,"events.jsonl"),JSON.stringify({
+            uuid:"synthetic-seed",type:"decision",project:"project",content,metadata:{},
+            observedAt:"2026-05-25T12:00:00.000Z",supersededAt:null,supersededBy:null,version:1
+          })+"\\n");
+          stdout="Discovered: 1";break;
+        }
+        case "status": stdout="=== Database Statistics === Database";break;
+        case "stats": stdout="Sessions:";break;
+        case "doctor": stdout="Integrity: ok";break;
+        case "extract": stdout="Extraction Completed Successfully";break;
+        case "export": exportText=await context(database);break;
+        case "import": imported=true;break;
+        case "query": {
+          if(cmd[3]==="stats")stdout="Sessions:";
+          else if(cmd[3]==="session")stdout="Session: session-uat-11111";
+          else if(cmd[3]==="context") {
+            if(imported)stdout=exportText;
+            else if(!existsSync(database))stdout=content;
+            else {
+              stdout=await context(database);
+              if(!stdout.includes(content))throw Error("Initial event did not reach real SQL projection");
+              firstReplay=true;
+              if(stdout.includes("tabs instead of spaces")) {
+                const rows=await withUatDatabase(database,async db=>db.query("SELECT superseded_by FROM facts WHERE uuid = ?").all("fact-uuid-111111111111111111"));
+                if(rows.length!==1||rows[0].superseded_by!=="fact-uuid-222222222222222222")throw Error("Second replay did not persist supersedence");
+                secondReplay=true;
+              }
+            }
+          } else stdout="session-uat-11111";
+          break;
+        }
+        default: throw Error("Unexpected synthetic command: "+cmd[1]);
+      }
+      return {code:0,stdout,stderr:""};
+    }));
+    async function context(database) {
+      const rows=await withUatDatabase(database,async db=>db.query("SELECT content FROM facts WHERE type = 'decision' AND superseded_at IS NULL ORDER BY observed_at").all());
+      return rows.map(row=>row.content).join("\\n");
+    }
+    if(!passed||!firstReplay||!secondReplay||!imported||commands!==15)throw Error(JSON.stringify({passed,firstReplay,secondReplay,imported,commands}));
+    console.log("REAL_REPLAY_CHECKS_PASSED");
+  `;
+  try {
+    const child = Bun.spawnSync([process.execPath,"--eval",program], {
+      cwd:fixture.dir,
+      env:{...process.env,PATH:fixture.dir,TEMP:fixture.dir,TMP:fixture.dir,TMPDIR:fixture.dir,HOME:fixture.dir,USERPROFILE:fixture.dir},
+      stdout:"pipe",stderr:"pipe",timeout:15000,
+    });
+    const stdout = new TextDecoder().decode(child.stdout), stderr = new TextDecoder().decode(child.stderr);
+    const failedChecks=stdout.split("\n").filter(line=>line.includes("[FAIL]"));
+    expect({exit:child.exitCode,stderr,failedChecks}).toEqual({exit:0,stderr:"",failedChecks:[]});
+    expect(stdout).toContain("REAL_REPLAY_CHECKS_PASSED");
+  } finally {fixture.cleanup();}
+});
+
 test("UAT opens and closes a real projection database with its default adapters", async () => {
   let database: Database | undefined;
   expect(await uat.withUatDatabase(":memory:", async db => {

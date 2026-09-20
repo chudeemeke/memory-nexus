@@ -1,5 +1,21 @@
 # Memory resilience execution journal
 
+## 2026-09-20 - B11.3 bounded commands and actual replay proof
+
+- Previous turn made progress at 008f539; started from a clean tree.
+- RED confirmed requested timeout was ignored. Added a 1-60000 ms native
+  direct-child deadline, forced termination, concurrent pipe reads and signal
+  failure. Large dual-pipe test passed before repair; no deadlock claimed.
+- Synthetic workflow verifies both real SQLite replays and persisted supersedence.
+  It reproduced cleanup EBUSY; yield alone failed, GC plus yield removed the lock.
+  Corrected two synthetic-driver expectations; no product assertion weakened.
+- 29 tests / 77 assertions and full types pass. B11.3-command-replay.json retains
+  source hashes, RED/diagnostic/GREEN logs and limitations. No installed CLI ran.
+- B11.3 remains active. Next: whole script/driver instrumentation including child
+  counters; negative workflow/decision cases; process tree and stream failure
+  lifetime proof. Full platform, independent review and baseline gates stay open.
+
+
 ## 2026-09-20 - B11.3 database and process checkpoint
 
 - Previous turn progressed; continued its uncommitted owned-lifecycle candidate.

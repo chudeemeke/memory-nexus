@@ -827,17 +827,17 @@
         "reason": "Executable failure/recovery driver; all applicable metric floors remain required."
       },
       "decisionStatus": "proposed - independent review pending",
-      "sourceHash": "5520bf218eda2c64ebf534fcb87567599df9fd0f1e9af8077aab8a3382101f68",
+      "sourceHash": "fdd208a97ad5f5855934912e1440b288a09dd7c8fbe00cd3f8d269262a5ca848",
       "metricApplicability": {
         "status": "invalidated - current whole-file metrics and independent review pending",
-        "sourceHash": "5520bf218eda2c64ebf534fcb87567599df9fd0f1e9af8077aab8a3382101f68",
-        "reason": "B11.3 owned lifecycle, database close and process proof changed source. Nineteen focused tests and full source/script types pass; no older coverage is transferred."
+        "sourceHash": "fdd208a97ad5f5855934912e1440b288a09dd7c8fbe00cd3f8d269262a5ca848",
+        "reason": "B11.3 command deadline and synthetic real replay checkpoint changes source. 29 tests and types pass; previous metrics are not transferred."
       }
     },
     {
       "path": "scripts/run-uat-verification.ts",
       "package": "package.json",
-      "sourceHash": "8d92b7c0ed8510a3c5bb5d9e8f05eb3b3697e90550586881213bf34662877549",
+      "sourceHash": "b09b50bad27a4224aaadd9e76135b4cdc5f2909083f9ce44476feae2e1bd3b5f",
       "tier": "S",
       "rationale": "Creates a sandbox, mutates synthetic memory projections and canonical event data, executes CLI acceptance checks and recursively deletes storage. Cleanup diagnostics remain B11.3.",
       "applicability": {
@@ -852,8 +852,8 @@
       },
       "metricApplicability": {
         "status": "invalidated - current whole-file metrics and independent review pending",
-        "sourceHash": "8d92b7c0ed8510a3c5bb5d9e8f05eb3b3697e90550586881213bf34662877549",
-        "reason": "B11.3 owned lifecycle, database close and process proof changed source. Nineteen focused tests and full source/script types pass; no older coverage is transferred."
+        "sourceHash": "b09b50bad27a4224aaadd9e76135b4cdc5f2909083f9ce44476feae2e1bd3b5f",
+        "reason": "B11.3 command deadline and synthetic real replay checkpoint changes source. 29 tests and types pass; previous metrics are not transferred."
       }
     },
     {

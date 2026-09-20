@@ -10,6 +10,7 @@ import { spawn } from "bun";
 import { writeFileSync, mkdirSync, readFileSync, existsSync, rmSync } from "node:fs";
 import { join } from "node:path";
 import { exit } from "node:process";
+import { setImmediate as yieldToEventLoop } from "node:timers/promises";
 import { Database } from "bun:sqlite";
 import { rebuildProjections } from "../src/infrastructure/database/event-log.js";
 import { closeDatabase } from "../src/infrastructure/database/connection.js";
@@ -28,7 +29,12 @@ export async function runUatSandbox(
   try {storage.assertOwned();passed=await execute(storage.dir);}
   catch(error){report("UAT setup or checks failed:",error);}
   finally {
-    try {storage.cleanup();}
+    try {
+      // Release Bun's closed native handles and pending stream-close callbacks.
+      Bun.gc(true);
+      await yieldToEventLoop();
+      storage.cleanup();
+    }
     catch(error){passed=false;report(`UAT cleanup failed; retained: ${storage.dir}`,error);}
   }
   return passed;
@@ -79,22 +85,33 @@ function logResult(name: string, success: boolean, info?: string, detail?: strin
 }
 
 // Spawns binary in sandbox env
-async function runCmd(cmd: string[], env: Record<string, string>): Promise<{ code: number; stdout: string; stderr: string }> {
+export async function runUatCommand(cmd: string[], env: Record<string, string>, timeoutMs = 60_000): Promise<{ code: number; stdout: string; stderr: string }> {
+  if (!Number.isSafeInteger(timeoutMs) || timeoutMs <= 0 || timeoutMs > 60_000) {
+    throw new Error("UAT command timeout must be an integer from 1 to 60000 milliseconds");
+  }
   const proc = spawn({
     cmd,
     env: { ...process.env, ...env },
     stdout: "pipe",
     stderr: "pipe",
+    stdin: "ignore",
+    timeout: timeoutMs,
+    killSignal: "SIGKILL",
   });
 
-  const stdoutStr = await new Response(proc.stdout).text();
-  const stderrStr = await new Response(proc.stderr).text();
-  const exitCode = await proc.exited;
+  const [stdoutStr, stderrStr, exitCode] = await Promise.all([
+    new Response(proc.stdout).text(),
+    new Response(proc.stderr).text(),
+    proc.exited,
+  ]);
+  if (proc.signalCode) {
+    throw new Error(`UAT command terminated by ${proc.signalCode} (timeout limit ${timeoutMs} ms)`);
+  }
 
   return { code: exitCode, stdout: stdoutStr, stderr: stderrStr };
 }
 
-export async function verifySandbox(sandboxDir: string, runCommand: typeof runCmd = runCmd): Promise<boolean> {
+export async function verifySandbox(sandboxDir: string, runCommand: typeof runUatCommand = runUatCommand): Promise<boolean> {
   const configHome = join(sandboxDir, "config");
   const dataHome = join(sandboxDir, "data");
   const memoryHome = join(sandboxDir, "memory");

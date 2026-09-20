@@ -3194,15 +3194,16 @@
       "owner": "memory-nexus",
       "evidence": [
         ".planning/memory-resilience/B11.3-plan.md",
-        ".planning/memory-resilience/evidence/B11.3-checkpoint.json"
+        ".planning/memory-resilience/evidence/B11.3-checkpoint.json",
+        ".planning/memory-resilience/evidence/B11.3-command-replay.json"
       ],
       "acceptance_record": ".planning/memory-resilience/evidence/B11.3.json",
       "observed_evidence": ".planning/memory-resilience/B04-source-findings.md",
       "retirement_trigger": "Before baseline review R02; runtime regression and final applicable tier proof required.",
       "progress": {
-        "implemented": "Owned sandbox including setup; import guard; cleanup failure forces nonzero report; both projection handles close on success/failure and retain combined causes; injectable command runner avoids unreliable Bun built-in mock.",
-        "verified_scope": "19 Windows tests / 64 assertions, including seven child process cases; full source/script typechecks pass. Focused proof only.",
-        "restart": "Measure current whole script/driver with synthetic workflow branches; add decision faults and replay callsite proof; bound actual command lifetime before installed UAT. Read B11.3-plan.md and checkpoint incident before running commands."
+        "implemented": "Bounded direct child command timeout, concurrent pipe reads and signal failure; owned cleanup collects native handles and yields once. Existing database close/error preservation retained.",
+        "verified_scope": "29 Windows tests / 77 assertions and source/script types; synthetic workflow exercises both real database replay callsites and persisted supersedence. Export/import and CLI responses are simulated.",
+        "restart": "Read B11.3-plan.md and B11.3-command-replay.json. Measure complete script/driver including child counters; extend negative workflow and Tier S decision cases. Process tree and stream-failure lifetime remain open. Do not use installed UAT for coverage."
       }
     },
     {

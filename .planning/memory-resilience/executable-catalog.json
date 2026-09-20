@@ -1626,7 +1626,7 @@
     {
       "path": "scripts/run-uat-verification.test.ts",
       "package": "package.json",
-      "sourceHash": "5520bf218eda2c64ebf534fcb87567599df9fd0f1e9af8077aab8a3382101f68",
+      "sourceHash": "fdd208a97ad5f5855934912e1440b288a09dd7c8fbe00cd3f8d269262a5ca848",
       "language": ".ts",
       "syntax": "test-driver",
       "imports": [
@@ -1648,6 +1648,7 @@
         "database",
         "db",
         "executed",
+        "failedChecks",
         "failure",
         "fixture",
         "helper",
@@ -1680,6 +1681,7 @@
         "expect",
         "expect.not.toBe",
         "expect.rejects.toBe",
+        "expect.rejects.toThrow",
         "expect.toBe",
         "expect.toBeDefined",
         "expect.toBeInstanceOf",
@@ -1689,6 +1691,7 @@
         "fixture.cleanup",
         "handle.exec",
         "join",
+        "line.includes",
         "mkdirSync",
         "pathToFileURL",
         "renameSync",
@@ -1700,9 +1703,12 @@
         "rmdirSync",
         "runUatSandbox",
         "stdout.match",
+        "stdout.split",
+        "stdout.split.filter",
         "storage.cleanup",
         "test",
         "test.each",
+        "uat.runUatCommand",
         "uat.withUatDatabase",
         "unlinkSync",
         "writeFileSync"
@@ -1711,7 +1717,7 @@
     {
       "path": "scripts/run-uat-verification.ts",
       "package": "package.json",
-      "sourceHash": "8d92b7c0ed8510a3c5bb5d9e8f05eb3b3697e90550586881213bf34662877549",
+      "sourceHash": "b09b50bad27a4224aaadd9e76135b4cdc5f2909083f9ce44476feae2e1bd3b5f",
       "language": ".ts",
       "syntax": "executable",
       "imports": [
@@ -1722,7 +1728,8 @@
         "bun:sqlite",
         "node:fs",
         "node:path",
-        "node:process"
+        "node:process",
+        "node:timers/promises"
       ],
       "declarations": [
         "binDir",
@@ -1743,7 +1750,6 @@
         "eventsContent",
         "eventsDir",
         "excludesSuperseded",
-        "exitCode",
         "exportPath",
         "exportRes",
         "extractRes",
@@ -1798,15 +1804,13 @@
         "red",
         "reset",
         "result",
-        "runCmd",
+        "runUatCommand",
         "runUatSandbox",
         "runUatVerification",
         "statsRes",
         "statsSuccess",
         "statusRes",
         "statusSuccess",
-        "stderrStr",
-        "stdoutStr",
         "storage",
         "syncPostRebuildRes",
         "syncRes",
@@ -1818,8 +1822,11 @@
         "yellow"
       ],
       "calls": [
+        "Bun.gc",
         "JSON.parse",
         "JSON.stringify",
+        "Number.isSafeInteger",
+        "Promise.all",
         "allocate",
         "chmodSync",
         "close",
@@ -1868,7 +1875,8 @@
         "storage.cleanup",
         "syncRes.stdout.includes",
         "withUatDatabase",
-        "writeFileSync"
+        "writeFileSync",
+        "yieldToEventLoop"
       ]
     },
     {
