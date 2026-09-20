@@ -351,7 +351,7 @@ This package was previously published as `memory-nexus`. The old package name no
 ```bash
 bun run typecheck
 bun run build
-bun test --timeout 15000
+bun run test
 bun run test:isolation
 bun run test:coverage
 bun audit
@@ -362,7 +362,7 @@ gitleaks detect --no-banner --redact --source .
 
 Each coverage invocation prints its own retained report path under `coverage/run-<id>/` and checks that exact summary. The runner refuses existing unowned output directories and existing working directories; it does not overwrite earlier reports. Preserve and inventory legacy coverage output before moving it aside. Working copies are removed only after ownership checks; interrupted or locked remnants are reported for verified project-owned cleanup. The standalone threshold checker needs an explicit generated summary path when inspecting these reports.
 
-`bun run quality:catalog` prints a read-only source/package catalog, including untracked source and executable test support. `bun run quality:inventory` checks the source-bound classification draft in `.planning/memory-resilience/quality-classifications.json`; missing, stale or unknown entries fail. The draft is incomplete and independently unreviewed, so that check currently fails. Structural validity never substitutes for classification review or coverage. Integration into the complete quality/CI gate follows B04-B08/R01.
+`bun run quality:catalog` prints a read-only source/package catalog, including untracked source and executable test support. `bun run quality:inventory` checks the source-bound classification draft in `.planning/memory-resilience/quality-classifications.json`; missing, stale or unknown entries fail. A structurally valid draft can still have incomplete applicability and independent review. Structural validity never substitutes for classification review or coverage. Integration into the complete quality/CI gate follows B04-B08/R01.
 
 ### Published package smoke
 
@@ -376,21 +376,27 @@ On Windows, Bun global install creates `memory.exe` in `bun pm bin -g`. Do not a
 
 ### Running tests on Windows
 
-Current 2026-05-28 verification has `bun test --timeout 15000` passing on Windows 11 with Bun 1.3.5. A previous full-suite run crashed with Bun's `panic(main thread): integer overflow` signature at ~6.8GB peak memory pressure; keep the subdirectory workaround available if that upstream runtime crash returns.
+Use `bun run test` for the same explicit 15000 ms per-test timeout used by the
+quality gate. Direct `bun test` needs `--timeout 15000`: synthetic probes show
+that Windows Bun 1.4.1 and Linux Bun 1.3.14 ignore the TOML timeout even when
+they load the rest of the test configuration. The evidence is retained in
+`.planning/memory-resilience/evidence/B11.1-timeout-invocation.json`.
+
+Historical 2026-05-28 verification recorded `bun test --timeout 15000` passing on Windows 11 with Bun 1.3.5. It is not current baseline acceptance. A previous full-suite run crashed with Bun's `panic(main thread): integer overflow` signature at ~6.8GB peak memory pressure; keep the subdirectory workaround available if that upstream runtime crash returns.
 
 Fallback workaround: run the suite by subdirectory.
 
 ```bash
-bun test src/infrastructure/
-bun test src/presentation/
-bun test src/application src/domain
-bun test tests/helpers tests/generators tests/infrastructure tests/integration tests/smoke
+bun run test src/infrastructure/
+bun run test src/presentation/
+bun run test src/application src/domain
+bun run test tests/helpers tests/generators tests/infrastructure tests/integration tests/smoke
 ```
 
 Or run a single file directly:
 
 ```bash
-bun test src/path/to/file.test.ts
+bun run test src/path/to/file.test.ts
 ```
 
 Linux and macOS contributors should run the full suite normally.

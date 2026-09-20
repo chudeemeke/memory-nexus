@@ -1,5 +1,25 @@
 # Memory resilience execution journal
 
+## 2026-09-20 - B11.1 timeout invocation repaired
+
+- Prior turn progressed at e449af9; resumed from a clean worktree.
+- Synthetic TOML/CLI comparisons prove both installed runtimes load preload but
+  ignore the TOML timeout. A 5.25-second package-invoked test fails before repair
+  at 5000 ms and passes on Windows/Linux with explicit 15000 ms. The package test
+  script now uses that existing quality limit; quality/smoke route through it.
+  Removed the misleading TOML setting and updated direct-invocation examples.
+- Reconciled unchanged-source Windows/Linux diagnostic maps. Helpers remain 100%;
+  driver branches combine to 61/70 (87.14%). Three former gaps were platform
+  choices; nine genuine failure/recovery outcomes remain, with exact locations
+  in B11.1-driver-platform-metrics.json. This is diagnostic, not final acceptance.
+- Current catalog package binding refreshed; 448 candidates/two packages.
+  B11.1 remains active; B04 review blocked and B05 pending. No full baseline,
+  installed product, model or replication acceptance is claimed.
+- Restart: exercise lock-holder startup failure and interrupted teardown, then
+  the remaining adversarial-fixture cleanup recovery outcomes. Preserve safety
+  branches; do not exempt the driver or change the Tier S requirement.
+
+
 ## 2026-09-20 - B11.1 ownership boundaries and export lifecycle
 
 - Added six marker/replacement cases and a retained-statement execution check.

@@ -3112,7 +3112,10 @@
         ".planning/memory-resilience/evidence/B11.1-inode-mutation.json",
         ".planning/memory-resilience/evidence/B11.1-boundaries-runtime.json",
         ".planning/memory-resilience/evidence/B11.1-driver-metrics.json",
-        ".planning/memory-resilience/evidence/B11.1-decision-mutations.json"
+        ".planning/memory-resilience/evidence/B11.1-decision-mutations.json",
+        ".planning/memory-resilience/evidence/B11.1-timeout-invocation.json",
+        ".planning/memory-resilience/evidence/B11.1-driver-linux-metrics.json",
+        ".planning/memory-resilience/evidence/B11.1-driver-platform-metrics.json"
       ],
       "acceptance_record": ".planning/memory-resilience/evidence/B11.1.json",
       "observed_evidence": ".planning/memory-resilience/B04-source-findings.md",
@@ -3123,10 +3126,10 @@
         "repeat_scope": "Paired generated export test: synchronous teardown failed with EBUSY 2/8; event-loop yield failed 0/8. Five later Windows grouped runs passed 59 tests each at explicit 15000 ms. Final source differs from those repeats only by a TypeScript non-null assertion after an existing length assertion; final current-source Windows/Linux checks pass.",
         "correction": "EBUSY recurred after the prior paced-retry checkpoint. Restart Manager identified the failing test Bun PID as its own lock holder. Strict-close comparisons were inconclusive. A yield mitigates the observed case but does not establish the native root cause.",
         "remaining": [
-          "Driver branch diagnostic is 58/70 (82.85%); inspect uncoveredBranches in B11.1-driver-metrics.json. Cover failure/recovery branches meaningfully and reconcile Windows/Linux applicability. No blanket test exclusion.",
-          "Bun 1.4.1 default runs twice enforced 5000 ms despite bunfig timeout=30000; explicit existing quality --timeout 15000 passes. Owner B11.1; resolve/document supported default invocation before acceptance, retaining timeout failures.",
-          "Eight killed mutations are bounded decision proof, not exhaustive coverage or independent approval. Final B05-B08 instrumenter, source-bound review and full baseline acceptance remain open."
-        ]
+          "Driver source and counter-map identical Windows/Linux diagnostics combine to 61/70 branches (87.14%); nine genuine failure/recovery outcomes remain. Both helpers have 100% on both runtimes. Address the nine outcomes listed in B11.1-driver-platform-metrics.json without deleting safety branches or adding exclusions.",
+          "Eight killed mutations remain bounded decision proof. Final B05-B08 instrumenter, applicable driver metrics, source-bound review and full baseline acceptance remain open."
+        ],
+        "timeout_resolution": "Synthetic comparisons on Windows Bun 1.4.1/Linux Bun 1.3.14 prove TOML timeout ignored despite loaded preload; CLI timeout works. Actual package invocation fails a 5.25-second test before the change and passes it on both platforms after test script explicitly uses existing quality limit 15000 ms. Quality and smoke route through that entrypoint; direct bun test still needs its explicit flag."
       }
     },
     {

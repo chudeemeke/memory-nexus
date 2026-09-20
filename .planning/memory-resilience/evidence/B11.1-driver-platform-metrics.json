@@ -1,0 +1,444 @@
+{
+  "scope": "Source and counter-map identical Windows/Linux diagnostics combined; not independent applicability or final instrumenter acceptance.",
+  "inputs": [
+    {
+      "path": ".planning/memory-resilience/evidence/B11.1-driver-metrics.json",
+      "sourceHash": "7d9b2169c33e21d069a68c6c7417df291d032b26193a6cdac4666d6e0da2fd54"
+    },
+    {
+      "path": ".planning/memory-resilience/evidence/B11.1-driver-linux-metrics.json",
+      "sourceHash": "cfbcc106df546c9e683db0b3c91b2d2d2c4f9f377107b9a6f4f46c2c7e567243"
+    }
+  ],
+  "sourceInputs": [
+    {
+      "path": "tests/helpers/test-database.ts",
+      "sourceHash": "c9d9edafc637d537d53fc14c4edf0d154f303c396372638323b96bd478657d30"
+    },
+    {
+      "path": "tests/helpers/owned-test-directory.ts",
+      "sourceHash": "c01eaafd0469da23d08b13fd9ac6277e8654309018f4dc4653e8b7a1892cdfe6"
+    },
+    {
+      "path": "tests/helpers/test-database.test.ts",
+      "sourceHash": "2f25ce0dec1d0c4e46e3e8f08ca87c7fab04e34c7edeefd53bbd7bfb90618bb0"
+    },
+    {
+      "path": "tests/helpers/test-database.test.ts",
+      "sourceHash": "2f25ce0dec1d0c4e46e3e8f08ca87c7fab04e34c7edeefd53bbd7bfb90618bb0"
+    },
+    {
+      "path": "tests/test-setup.ts",
+      "sourceHash": "a348c68b1f5d2b1d287b604f80092f3b7310a627a2360b5eda6e45a855cd7498"
+    }
+  ],
+  "files": [
+    {
+      "path": "tests/helpers/test-database.ts",
+      "sourceHash": "c9d9edafc637d537d53fc14c4edf0d154f303c396372638323b96bd478657d30",
+      "metrics": {
+        "lines": {
+          "total": 29,
+          "covered": 29,
+          "skipped": 0,
+          "pct": 100
+        },
+        "functions": {
+          "total": 6,
+          "covered": 6,
+          "skipped": 0,
+          "pct": 100
+        },
+        "statements": {
+          "total": 39,
+          "covered": 39,
+          "skipped": 0,
+          "pct": 100
+        },
+        "branches": {
+          "total": 21,
+          "covered": 21,
+          "skipped": 0,
+          "pct": 100
+        }
+      },
+      "uncoveredBranches": []
+    },
+    {
+      "path": "tests/helpers/owned-test-directory.ts",
+      "sourceHash": "c01eaafd0469da23d08b13fd9ac6277e8654309018f4dc4653e8b7a1892cdfe6",
+      "metrics": {
+        "lines": {
+          "total": 33,
+          "covered": 33,
+          "skipped": 0,
+          "pct": 100
+        },
+        "functions": {
+          "total": 6,
+          "covered": 6,
+          "skipped": 0,
+          "pct": 100
+        },
+        "statements": {
+          "total": 40,
+          "covered": 40,
+          "skipped": 0,
+          "pct": 100
+        },
+        "branches": {
+          "total": 30,
+          "covered": 30,
+          "skipped": 0,
+          "pct": 100
+        }
+      },
+      "uncoveredBranches": []
+    },
+    {
+      "path": "tests/helpers/test-database.test.ts",
+      "sourceHash": "2f25ce0dec1d0c4e46e3e8f08ca87c7fab04e34c7edeefd53bbd7bfb90618bb0",
+      "metrics": {
+        "lines": {
+          "total": 303,
+          "covered": 302,
+          "skipped": 0,
+          "pct": 99.66
+        },
+        "functions": {
+          "total": 76,
+          "covered": 75,
+          "skipped": 0,
+          "pct": 98.68
+        },
+        "statements": {
+          "total": 432,
+          "covered": 427,
+          "skipped": 0,
+          "pct": 98.84
+        },
+        "branches": {
+          "total": 70,
+          "covered": 61,
+          "skipped": 0,
+          "pct": 87.14
+        }
+      },
+      "uncoveredBranches": [
+        {
+          "id": "0",
+          "index": 1,
+          "branch": {
+            "loc": {
+              "start": {
+                "line": 25,
+                "column": 4
+              },
+              "end": {
+                "line": 25,
+                "column": 71
+              }
+            },
+            "type": "if",
+            "locations": [
+              {
+                "start": {
+                  "line": 25,
+                  "column": 4
+                },
+                "end": {
+                  "line": 25,
+                  "column": 71
+                }
+              },
+              {
+                "start": {},
+                "end": {}
+              }
+            ],
+            "line": 25
+          }
+        },
+        {
+          "id": "7",
+          "index": 1,
+          "branch": {
+            "loc": {
+              "start": {
+                "line": 168,
+                "column": 59
+              },
+              "end": {
+                "line": 168,
+                "column": 97
+              }
+            },
+            "type": "if",
+            "locations": [
+              {
+                "start": {
+                  "line": 168,
+                  "column": 59
+                },
+                "end": {
+                  "line": 168,
+                  "column": 97
+                }
+              },
+              {
+                "start": {},
+                "end": {}
+              }
+            ],
+            "line": 168
+          }
+        },
+        {
+          "id": "8",
+          "index": 0,
+          "branch": {
+            "loc": {
+              "start": {
+                "line": 170,
+                "column": 30
+              },
+              "end": {
+                "line": 170,
+                "column": 124
+              }
+            },
+            "type": "if",
+            "locations": [
+              {
+                "start": {
+                  "line": 170,
+                  "column": 30
+                },
+                "end": {
+                  "line": 170,
+                  "column": 124
+                }
+              },
+              {
+                "start": {},
+                "end": {}
+              }
+            ],
+            "line": 170
+          }
+        },
+        {
+          "id": "9",
+          "index": 0,
+          "branch": {
+            "loc": {
+              "start": {
+                "line": 181,
+                "column": 4
+              },
+              "end": {
+                "line": 181,
+                "column": 67
+              }
+            },
+            "type": "if",
+            "locations": [
+              {
+                "start": {
+                  "line": 181,
+                  "column": 4
+                },
+                "end": {
+                  "line": 181,
+                  "column": 67
+                }
+              },
+              {
+                "start": {},
+                "end": {}
+              }
+            ],
+            "line": 181
+          }
+        },
+        {
+          "id": "10",
+          "index": 1,
+          "branch": {
+            "loc": {
+              "start": {
+                "line": 181,
+                "column": 7
+              },
+              "end": {
+                "line": 181,
+                "column": 53
+              }
+            },
+            "type": "binary-expr",
+            "locations": [
+              {
+                "start": {
+                  "line": 181,
+                  "column": 7
+                },
+                "end": {
+                  "line": 181,
+                  "column": 28
+                }
+              },
+              {
+                "start": {
+                  "line": 181,
+                  "column": 30
+                },
+                "end": {
+                  "line": 181,
+                  "column": 53
+                }
+              }
+            ],
+            "line": 181
+          }
+        },
+        {
+          "id": "14",
+          "index": 0,
+          "branch": {
+            "loc": {
+              "start": {
+                "line": 224,
+                "column": 4
+              },
+              "end": {
+                "line": 224,
+                "column": 39
+              }
+            },
+            "type": "if",
+            "locations": [
+              {
+                "start": {
+                  "line": 224,
+                  "column": 4
+                },
+                "end": {
+                  "line": 224,
+                  "column": 39
+                }
+              },
+              {
+                "start": {},
+                "end": {}
+              }
+            ],
+            "line": 224
+          }
+        },
+        {
+          "id": "19",
+          "index": 1,
+          "branch": {
+            "loc": {
+              "start": {
+                "line": 250,
+                "column": 4
+              },
+              "end": {
+                "line": 250,
+                "column": 67
+              }
+            },
+            "type": "if",
+            "locations": [
+              {
+                "start": {
+                  "line": 250,
+                  "column": 4
+                },
+                "end": {
+                  "line": 250,
+                  "column": 67
+                }
+              },
+              {
+                "start": {},
+                "end": {}
+              }
+            ],
+            "line": 250
+          }
+        },
+        {
+          "id": "20",
+          "index": 1,
+          "branch": {
+            "loc": {
+              "start": {
+                "line": 281,
+                "column": 4
+              },
+              "end": {
+                "line": 281,
+                "column": 78
+              }
+            },
+            "type": "if",
+            "locations": [
+              {
+                "start": {
+                  "line": 281,
+                  "column": 4
+                },
+                "end": {
+                  "line": 281,
+                  "column": 78
+                }
+              },
+              {
+                "start": {},
+                "end": {}
+              }
+            ],
+            "line": 281
+          }
+        },
+        {
+          "id": "32",
+          "index": 1,
+          "branch": {
+            "loc": {
+              "start": {
+                "line": 372,
+                "column": 4
+              },
+              "end": {
+                "line": 375,
+                "column": 5
+              }
+            },
+            "type": "if",
+            "locations": [
+              {
+                "start": {
+                  "line": 372,
+                  "column": 4
+                },
+                "end": {
+                  "line": 375,
+                  "column": 5
+                }
+              },
+              {
+                "start": {},
+                "end": {}
+              }
+            ],
+            "line": 372
+          }
+        }
+      ]
+    }
+  ],
+  "probeSource": "import {readFileSync,writeFileSync} from 'node:fs';\nimport {createCoverageMap} from 'istanbul-lib-coverage';\nimport {sourceHash} from '../scripts/quality-inventory';\nconst paths=['.git/b11-driver-current-windows.json','.git/b11-driver-current-linux.json'];\nconst packets=paths.map(p=>JSON.parse(readFileSync(p,'utf8')));\nconst first=packets[0], files=[];\nfor(const packet of packets)for(const input of packet.sourceInputs)if(sourceHash(readFileSync(input.path,'utf8'))!==input.sourceHash)throw Error('Stale source '+input.path);\nfor(const row of first.files){\n const counters=packets.map(packet=>{\n  const candidates=Object.values(packet.rawCoverage).filter((f:any)=>f.path.replaceAll('\\\\','/').endsWith('/'+row.path));\n  if(candidates.length!==1)throw Error('Ambiguous file '+row.path);\n  return candidates[0] as any;\n });\n for(const key of ['statementMap','fnMap','branchMap'])if(JSON.stringify(counters[0][key])!==JSON.stringify(counters[1][key]))throw Error('Maps differ '+row.path+' '+key);\n const combined=createCoverageMap({});\n for(const data of counters)combined.addFileCoverage({...data,path:row.path});\n const coverage=combined.fileCoverageFor(row.path), data=coverage.data;\n files.push({path:row.path,sourceHash:row.sourceHash,metrics:coverage.toSummary().data,uncoveredBranches:Object.entries(data.b).flatMap(([id,hits])=>(hits as number[]).flatMap((count,index)=>count?[]:[{id,index,branch:data.branchMap[id]}])),rawCoverage:data});\n}\nwriteFileSync('.git/b11-driver-combined.json',JSON.stringify({scope:'Source and counter-map identical Windows/Linux diagnostics combined; not independent applicability or final instrumenter acceptance.',inputs:paths.map(path=>({path,sourceHash:sourceHash(readFileSync(path,'utf8'))})),sourceInputs:first.sourceInputs,files,probeSource:readFileSync('.git/b11-combine-driver.ts','utf8')},null,2)+'\\n');\nconsole.log(JSON.stringify(files.map(({path,metrics,uncoveredBranches})=>({path,metrics,uncoveredBranches}))));\n"
+}
