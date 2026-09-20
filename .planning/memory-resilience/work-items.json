@@ -3,7 +3,7 @@
   "workstream": "memory-resilience",
   "goal_status": "active",
   "starting_revision": "77d54e05be7fc24cede4a9a3e1fede6fa113ac8f",
-  "current_item": "B11.2",
+  "current_item": "B11.3",
   "status_semantics": {
     "pending": "Not started; authorization and dependencies must permit work.",
     "pending_rebaseline": "Historical candidate, not a confirmed current failure or a completed task.",
@@ -148,7 +148,7 @@
         "independentReview": "pending",
         "next": "Refresh changed-source measurement and obtain independent risk/applicability review; B11.1 proceeds as an independently ready baseline task.",
         "packageOutputMapping": "Source-bound mapping recorded; artifact verification and independent review pending.",
-        "metricApplicability": "B11.1 three-file diagnostic floors now met using unchanged-driver expected-failure recovery probes plus passing Windows/Linux maps. Independent applicability/instrumenter acceptance and final Linux grouped run remain open; B11.2 source disposition starts next."
+        "metricApplicability": "B11.1 three-file diagnostic floors now met using unchanged-driver expected-failure recovery probes plus passing Windows/Linux maps. Independent applicability/instrumenter acceptance and final Linux grouped run remain open. B11.2 removed the unconsumed integration module with source-bound evidence; 447 current candidates remain."
       },
       "blocker": {
         "owner": "memory-nexus",
@@ -3158,19 +3158,25 @@
       "deliverable": "Bound recursive deletion to demonstrably owned fixture storage and expose failures without hiding the original test outcome.",
       "verification": "RED/GREEN caller compatibility, foreign/replaced paths, failed cleanup and successful removal; every retained directory is reported.",
       "stage": "baseline",
-      "status": "active",
+      "status": "verified",
       "risk": "S",
       "authorization": "authorized",
       "owner": "memory-nexus",
       "evidence": [
-        ".planning/memory-resilience/B11.2-plan.md"
+        ".planning/memory-resilience/B11.2-plan.md",
+        ".planning/memory-resilience/evidence/B11.2.json"
       ],
       "acceptance_record": ".planning/memory-resilience/evidence/B11.2.json",
       "observed_evidence": ".planning/memory-resilience/B04-source-findings.md",
       "retirement_trigger": "Before baseline review R02; runtime regression and final applicable tier proof required.",
       "progress": {
-        "restart": "Inventory all exports/imports/build inclusion of tests/integration/index.ts. Named-helper searches found no uses; prove whether removing the unused destructive utility is the correct disposition before adding new cleanup machinery."
-      }
+        "removed": "tests/integration/index.ts",
+        "reference_proof": "446 pre-removal JS/TS files, 2599 import/reference directives and zero reverse consumers. Four positive resolution controls; two computed imports resolve to dist/index.js. After removal, 445 JS/TS files and 2592 directives; all remaining source inputs and imports unchanged.",
+        "quality_disposition": "447 executable candidates/two packages. Former Tier S entry is retained as a physical-deletion record with original source hash and Git recovery revision. Every remaining file stays inventoried.",
+        "typecheck": "bun run typecheck exits 0 after deletion."
+      },
+      "disposition": "Removed unconsumed destructive integration utility module, including all ten unused exports; no replacement API needed.",
+      "verification_scope": "Physical deletion and current source/build/package non-consumption, positive resolver controls, identical remaining import graph and full source/script typecheck. No product runtime, full baseline or independent merge acceptance is claimed."
     },
     {
       "id": "B11.3",
@@ -3182,14 +3188,19 @@
       "deliverable": "Make UAT sandbox ownership and failed cleanup observable while preserving primary acceptance failures.",
       "verification": "Real-process success/failure and locked or injected cleanup-failure regressions preserve the primary status and report the retained owned path.",
       "stage": "baseline",
-      "status": "pending",
+      "status": "active",
       "risk": "S",
       "authorization": "authorized",
       "owner": "memory-nexus",
-      "evidence": [],
+      "evidence": [
+        ".planning/memory-resilience/B11.3-plan.md"
+      ],
       "acceptance_record": ".planning/memory-resilience/evidence/B11.3.json",
       "observed_evidence": ".planning/memory-resilience/B04-source-findings.md",
-      "retirement_trigger": "Before baseline review R02; runtime regression and final applicable tier proof required."
+      "retirement_trigger": "Before baseline review R02; runtime regression and final applicable tier proof required.",
+      "progress": {
+        "restart": "Inspect complete UAT setup/execute/exit lifecycle before adding owned sandbox capability and real-process failure/recovery tests. Do not execute the installed UAT battery before isolation is established."
+      }
     },
     {
       "id": "B12",

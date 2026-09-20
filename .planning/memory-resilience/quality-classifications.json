@@ -17617,47 +17617,6 @@
       }
     },
     {
-      "path": "tests/integration/index.ts",
-      "package": "package.json",
-      "sourceHash": "3ba66e85cd5feeac75ad290f49c27f8d35f9495d2b55f16c0fc2b88342b66aba",
-      "tier": "S",
-      "rationale": "Reusable helper contains real SQLite setup, fixture writes and recursive deletion of supplied directories; it is not a re-export barrel. B11.2 owns cleanup safety and diagnostics.",
-      "applicability": {
-        "mode": "measure",
-        "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
-      },
-      "decisionStatus": "proposed - independent review pending",
-      "inspection": {
-        "sourceRevision": "d4ab6ffc8c5c6c5e9694910b640a8428ede38603",
-        "anchor": "setupTestDatabase / generateTestSessions / cleanupTestData",
-        "scope": "positive critical boundary establishes highest tier; not full correctness acceptance"
-      },
-      "metricApplicability": {
-        "status": "proposed - independent review pending",
-        "evidence": ".planning/memory-resilience/evidence/B04-applicability-probe.json",
-        "sourceHash": "3ba66e85cd5feeac75ad290f49c27f8d35f9495d2b55f16c0fc2b88342b66aba",
-        "disposition": "Measure every positive denominator; individually review zero branch/function denominators against runtime syntax. Observed counts do not prove instrumentation completeness. Optional-chain syntax is present; synthetic evidence shows current instrumentation omits its decision counters. B05.1 owns source-mapped branch proof before numeric acceptance.",
-        "metrics": {
-          "statements": {
-            "observedCounterTotal": 69,
-            "proposal": "measure - completeness unverified"
-          },
-          "branches": {
-            "observedCounterTotal": 30,
-            "proposal": "measure - completeness unverified"
-          },
-          "functions": {
-            "observedCounterTotal": 17,
-            "proposal": "measure - completeness unverified"
-          },
-          "lines": {
-            "observedCounterTotal": 62,
-            "proposal": "measure - completeness unverified"
-          }
-        }
-      }
-    },
-    {
       "path": "tests/integration/infrastructure/database/event-log.test.ts",
       "package": "package.json",
       "sourceHash": "9540f935d5b3db75fc77625be502f54a148fb039cd064b16e54e3ce4ac1796d2",
@@ -18223,6 +18182,56 @@
           "lines": {
             "observedCounterTotal": 0,
             "proposal": "blocked - runtime accounting unresolved"
+          }
+        }
+      }
+    }
+  ],
+  "retiredFiles": [
+    {
+      "path": "tests/integration/index.ts",
+      "sourceHash": "3ba66e85cd5feeac75ad290f49c27f8d35f9495d2b55f16c0fc2b88342b66aba",
+      "disposition": "Physical deletion of unconsumed module; no replacement runtime or coverage exclusion.",
+      "evidence": ".planning/memory-resilience/evidence/B11.2.json",
+      "recoveryRevision": "8815da5e1500698cf620ccba5d464112cf8ba37c",
+      "formerClassification": {
+        "path": "tests/integration/index.ts",
+        "package": "package.json",
+        "sourceHash": "3ba66e85cd5feeac75ad290f49c27f8d35f9495d2b55f16c0fc2b88342b66aba",
+        "tier": "S",
+        "rationale": "Reusable helper contains real SQLite setup, fixture writes and recursive deletion of supplied directories; it is not a re-export barrel. B11.2 owns cleanup safety and diagnostics.",
+        "applicability": {
+          "mode": "measure",
+          "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
+        },
+        "decisionStatus": "proposed - independent review pending",
+        "inspection": {
+          "sourceRevision": "d4ab6ffc8c5c6c5e9694910b640a8428ede38603",
+          "anchor": "setupTestDatabase / generateTestSessions / cleanupTestData",
+          "scope": "positive critical boundary establishes highest tier; not full correctness acceptance"
+        },
+        "metricApplicability": {
+          "status": "proposed - independent review pending",
+          "evidence": ".planning/memory-resilience/evidence/B04-applicability-probe.json",
+          "sourceHash": "3ba66e85cd5feeac75ad290f49c27f8d35f9495d2b55f16c0fc2b88342b66aba",
+          "disposition": "Measure every positive denominator; individually review zero branch/function denominators against runtime syntax. Observed counts do not prove instrumentation completeness. Optional-chain syntax is present; synthetic evidence shows current instrumentation omits its decision counters. B05.1 owns source-mapped branch proof before numeric acceptance.",
+          "metrics": {
+            "statements": {
+              "observedCounterTotal": 69,
+              "proposal": "measure - completeness unverified"
+            },
+            "branches": {
+              "observedCounterTotal": 30,
+              "proposal": "measure - completeness unverified"
+            },
+            "functions": {
+              "observedCounterTotal": 17,
+              "proposal": "measure - completeness unverified"
+            },
+            "lines": {
+              "observedCounterTotal": 62,
+              "proposal": "measure - completeness unverified"
+            }
           }
         }
       }

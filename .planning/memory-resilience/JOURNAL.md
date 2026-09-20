@@ -1,5 +1,26 @@
 # Memory resilience execution journal
 
+## 2026-09-20 - B11.2 obsolete integration module removed
+
+- Previous turn progressed at 8815da5; started clean. Resolved 2599 imports and
+  reference directives across 446 JS/TS candidates: no consumers of the module
+  or its ten exports. Four positive resolver controls pass. Two computed imports
+  load dist/index.js; source/lib build roots and package allowlist exclude tests.
+- Removed tests/integration/index.ts (333 lines), including arbitrary-path deletion
+  and silent close/removal catches. No ownership registry or unused replacement
+  API was added. Original hash/blob/revision provide exact Git recovery.
+- After removal, all remaining source hashes and the 2592 remaining import records
+  match the before state. Full source/script typecheck passes. Inventory now has
+  447 candidates/two packages; a physical-deletion record preserves the old Tier S
+  entry. No remaining source was omitted and no coverage exclusion was added.
+- B11.2 is verified for this scoped deletion. Final baseline/review acceptance is
+  separate. B11.1 final Linux group and independent measurement/review remain open.
+- B11.3 is active: UAT currently writes before its try/finally, runs on import and
+  silently swallows sandbox removal errors. Read the complete lifecycle; reproduce
+  scoped process failures, reuse owned storage, preserve primary status and report
+  retained paths. Do not run installed UAT before isolation proof. See B11.3-plan.md.
+
+
 ## 2026-09-20 - B11.1 local driver proof; continue B11.2
 
 - Previous turn progressed at 757125f; started from a clean worktree.
