@@ -15245,81 +15245,6 @@
       "calls": []
     },
     {
-      "path": "src/presentation/cli/commands/_helpers/capture-json.test.ts",
-      "package": "package.json",
-      "sourceHash": "b4b7f8eb18f704b5bf34632ff19437547ce613bfdae84f5618328d79dfd7ae54",
-      "language": ".ts",
-      "syntax": "test-driver",
-      "imports": [
-        "./capture-json.js",
-        "bun:test",
-        "node:fs"
-      ],
-      "declarations": [
-        "captured",
-        "dbPath",
-        "originalError",
-        "originalLog",
-        "tempPaths"
-      ],
-      "calls": [
-        "afterEach",
-        "captureStreams",
-        "cleanupTempPaths",
-        "console.error",
-        "console.log",
-        "describe",
-        "existsSync",
-        "expect",
-        "expect.rejects.toThrow",
-        "expect.toBe",
-        "expect.toEqual",
-        "it",
-        "makeTempDbPath",
-        "writeFileSync"
-      ]
-    },
-    {
-      "path": "src/presentation/cli/commands/_helpers/capture-json.ts",
-      "package": "package.json",
-      "sourceHash": "8c83e9c21e5215e9df7c34cb6f032871360ce997b4113cc5a5207898d54c14fd",
-      "language": ".ts",
-      "syntax": "executable",
-      "imports": [
-        "node:crypto",
-        "node:fs",
-        "node:os",
-        "node:path"
-      ],
-      "declarations": [
-        "captureStreams",
-        "cleanupTempPaths",
-        "err",
-        "log",
-        "makeTempDbPath",
-        "out",
-        "p",
-        "result",
-        "stderrChunks",
-        "stdoutChunks"
-      ],
-      "calls": [
-        "String",
-        "args.map",
-        "args.map.join",
-        "fn",
-        "path.join",
-        "randomUUID",
-        "rmSync",
-        "stderrChunks.join",
-        "stderrChunks.push",
-        "stdoutChunks.join",
-        "stdoutChunks.push",
-        "tmpdir",
-        "tracker.push"
-      ]
-    },
-    {
       "path": "src/presentation/cli/commands/_helpers/deprecation-warning.test.ts",
       "package": "package.json",
       "sourceHash": "3bcd628a978a5aa1606d95cdc57edd972576561e1f63e53a0163b466a2ca20f1",
@@ -16275,11 +16200,11 @@
     {
       "path": "src/presentation/cli/commands/context.json.test.ts",
       "package": "package.json",
-      "sourceHash": "5dadafdff97aefa3f215b82a3e59ed41d5542113e84968dbee610f865e47bb56",
+      "sourceHash": "dac8d7072c4889e92c01b7078b6ddb23e6d39ff5ac76f94010a5d4cc25be55a3",
       "language": ".ts",
       "syntax": "test-driver",
       "imports": [
-        "./_helpers/capture-json.js",
+        "../../../../tests/helpers/capture-json.js",
         "./context.js",
         "bun:test"
       ],
@@ -16290,15 +16215,14 @@
         "parsed",
         "parsedA",
         "parsedB",
-        "tempPaths",
+        "tempDatabase",
         "trimmed"
       ],
       "calls": [
         "JSON.parse",
         "afterEach",
-        "beforeEach",
         "captureStreams",
-        "cleanupTempPaths",
+        "createTempDatabaseTracker",
         "describe",
         "executeContextCommand",
         "expect",
@@ -16306,8 +16230,9 @@
         "expect.toBe",
         "expect.toEqual",
         "it",
-        "makeTempDbPath",
         "stdout.trim",
+        "tempDatabase.cleanup",
+        "tempDatabase.makePath",
         "trimmed.endsWith",
         "trimmed.startsWith"
       ]
@@ -18952,11 +18877,11 @@
     {
       "path": "src/presentation/cli/commands/list.json.test.ts",
       "package": "package.json",
-      "sourceHash": "8e49c55cfa072a3f71aa7c6485b507647ebb5b0f587d138fc3ddfaea73fca630",
+      "sourceHash": "09532928fa18e3e9e94c37b03cec933c71c8af345432d292f9c87015442a82ff",
       "language": ".ts",
       "syntax": "test-driver",
       "imports": [
-        "./_helpers/capture-json.js",
+        "../../../../tests/helpers/capture-json.js",
         "./list.js",
         "bun:test"
       ],
@@ -18965,16 +18890,15 @@
         "obj",
         "parsed",
         "stripTiming",
-        "tempPaths",
+        "tempDatabase",
         "trimmed"
       ],
       "calls": [
         "Array.isArray",
         "JSON.parse",
         "afterEach",
-        "beforeEach",
         "captureStreams",
-        "cleanupTempPaths",
+        "createTempDatabaseTracker",
         "describe",
         "executeListCommand",
         "expect",
@@ -18984,9 +18908,10 @@
         "expect.toBeUndefined",
         "expect.toEqual",
         "it",
-        "makeTempDbPath",
         "stdout.trim",
         "stripTiming",
+        "tempDatabase.cleanup",
+        "tempDatabase.makePath",
         "trimmed.endsWith",
         "trimmed.startsWith"
       ]
@@ -20081,11 +20006,11 @@
     {
       "path": "src/presentation/cli/commands/related.json.test.ts",
       "package": "package.json",
-      "sourceHash": "5401054af1b02b57aefce4b584679c3fbacfc34b1d19e35798e72cba7b928fef",
+      "sourceHash": "98967cd253245d49ed4b69c51f2e390655fbe9719d931522910e9a059df7cafa",
       "language": ".ts",
       "syntax": "test-driver",
       "imports": [
-        "./_helpers/capture-json.js",
+        "../../../../tests/helpers/capture-json.js",
         "./related.js",
         "bun:test"
       ],
@@ -20097,15 +20022,14 @@
         "obj",
         "parsed",
         "stripTiming",
-        "tempPaths",
+        "tempDatabase",
         "trimmed"
       ],
       "calls": [
         "JSON.parse",
         "afterEach",
-        "beforeEach",
         "captureStreams",
-        "cleanupTempPaths",
+        "createTempDatabaseTracker",
         "describe",
         "executeRelatedCommand",
         "expect",
@@ -20114,10 +20038,11 @@
         "expect.toBeDefined",
         "expect.toEqual",
         "it",
-        "makeTempDbPath",
         "parsed.error.message.includes",
         "stdout.trim",
         "stripTiming",
+        "tempDatabase.cleanup",
+        "tempDatabase.makePath",
         "trimmed.endsWith",
         "trimmed.startsWith"
       ]
@@ -20677,11 +20602,11 @@
     {
       "path": "src/presentation/cli/commands/search.json.test.ts",
       "package": "package.json",
-      "sourceHash": "0671aa21edcd014ca527d3d8c8ee351fc79a4943b74f83608ac97da5fcdf1428",
+      "sourceHash": "f603939eacb8948378b4a2647de083dbcdf4684006aaddbe8b4165f794ed1fb7",
       "language": ".ts",
       "syntax": "test-driver",
       "imports": [
-        "./_helpers/capture-json.js",
+        "../../../../tests/helpers/capture-json.js",
         "./search.js",
         "bun:test"
       ],
@@ -20690,16 +20615,15 @@
         "obj",
         "parsed",
         "stripTiming",
-        "tempPaths",
+        "tempDatabase",
         "trimmed"
       ],
       "calls": [
         "Array.isArray",
         "JSON.parse",
         "afterEach",
-        "beforeEach",
         "captureStreams",
-        "cleanupTempPaths",
+        "createTempDatabaseTracker",
         "describe",
         "executeSearchCommand",
         "expect",
@@ -20709,9 +20633,10 @@
         "expect.toBeUndefined",
         "expect.toEqual",
         "it",
-        "makeTempDbPath",
         "stdout.trim",
         "stripTiming",
+        "tempDatabase.cleanup",
+        "tempDatabase.makePath",
         "trimmed.endsWith",
         "trimmed.startsWith"
       ]
@@ -21077,11 +21002,11 @@
     {
       "path": "src/presentation/cli/commands/show.json.test.ts",
       "package": "package.json",
-      "sourceHash": "956c497eb065abb4d015e6ad176fc483b84f0b242e1db8df9f3508a0ca1d82c8",
+      "sourceHash": "c202424142b4c0080b6576b0a71329b3c7232f14ac099c7e4d0116b1e5069f13",
       "language": ".ts",
       "syntax": "test-driver",
       "imports": [
-        "./_helpers/capture-json.js",
+        "../../../../tests/helpers/capture-json.js",
         "./show.js",
         "bun:test"
       ],
@@ -21093,15 +21018,14 @@
         "obj",
         "parsed",
         "stripTiming",
-        "tempPaths",
+        "tempDatabase",
         "trimmed"
       ],
       "calls": [
         "JSON.parse",
         "afterEach",
-        "beforeEach",
         "captureStreams",
-        "cleanupTempPaths",
+        "createTempDatabaseTracker",
         "describe",
         "executeShowCommand",
         "expect",
@@ -21111,10 +21035,11 @@
         "expect.toBeUndefined",
         "expect.toEqual",
         "it",
-        "makeTempDbPath",
         "parsed.error.message.includes",
         "stdout.trim",
         "stripTiming",
+        "tempDatabase.cleanup",
+        "tempDatabase.makePath",
         "trimmed.endsWith",
         "trimmed.startsWith"
       ]
@@ -21441,11 +21366,11 @@
     {
       "path": "src/presentation/cli/commands/stats.json.test.ts",
       "package": "package.json",
-      "sourceHash": "801f682338b17a100454eb0d2144219930fa33a8d28e09ad9b5d42a4b6012673",
+      "sourceHash": "cc8c2539616884c670a9bbcff39e9718b2b27f20b4f9924a62fdb67cd646e47e",
       "language": ".ts",
       "syntax": "test-driver",
       "imports": [
-        "./_helpers/capture-json.js",
+        "../../../../tests/helpers/capture-json.js",
         "./stats.js",
         "bun:test"
       ],
@@ -21454,15 +21379,14 @@
         "obj",
         "parsed",
         "stripVolatile",
-        "tempPaths",
+        "tempDatabase",
         "trimmed"
       ],
       "calls": [
         "JSON.parse",
         "afterEach",
-        "beforeEach",
         "captureStreams",
-        "cleanupTempPaths",
+        "createTempDatabaseTracker",
         "describe",
         "executeStatsCommand",
         "expect",
@@ -21472,9 +21396,10 @@
         "expect.toBeUndefined",
         "expect.toEqual",
         "it",
-        "makeTempDbPath",
         "stdout.trim",
         "stripVolatile",
+        "tempDatabase.cleanup",
+        "tempDatabase.makePath",
         "trimmed.endsWith",
         "trimmed.startsWith"
       ]
@@ -24785,6 +24710,132 @@
         "lines.join",
         "lines.push",
         "writeFileSync"
+      ]
+    },
+    {
+      "path": "tests/helpers/capture-json.test.ts",
+      "package": "package.json",
+      "sourceHash": "2632746c717926b2c086ca06fd44028a768eb29a8c3f1d1be9e8c06af398c60f",
+      "language": ".ts",
+      "syntax": "test-driver",
+      "imports": [
+        "./capture-json.js",
+        "./owned-test-directory.js",
+        "bun:test",
+        "node:fs",
+        "node:path"
+      ],
+      "declarations": [
+        "aggregate",
+        "captured",
+        "cleanup",
+        "db",
+        "error",
+        "failure",
+        "failures",
+        "first",
+        "foreign",
+        "healthy",
+        "item",
+        "label",
+        "locked",
+        "log",
+        "n",
+        "original",
+        "queue",
+        "remove",
+        "result",
+        "saved",
+        "second",
+        "sentinel",
+        "storage",
+        "suffix",
+        "tracker"
+      ],
+      "calls": [
+        "Reflect.apply",
+        "captureStreams",
+        "console.error",
+        "console.log",
+        "createOwnedTestDirectory",
+        "createTempDatabaseTracker",
+        "describe",
+        "dirname",
+        "existsSync",
+        "expect",
+        "expect.rejects.toBe",
+        "expect.rejects.toThrow",
+        "expect.toBe",
+        "expect.toBeInstanceOf",
+        "expect.toContain",
+        "expect.toEqual",
+        "expect.toHaveLength",
+        "expect.toThrow",
+        "failures.map",
+        "foreign.cleanup",
+        "it",
+        "item.cleanup",
+        "join",
+        "mkdirSync",
+        "queue.shift",
+        "readFileSync",
+        "renameSync",
+        "rmSync",
+        "rmdirSync",
+        "storage.entries",
+        "tracker.cleanup",
+        "tracker.makePath",
+        "unlinkSync",
+        "writeFileSync"
+      ]
+    },
+    {
+      "path": "tests/helpers/capture-json.ts",
+      "package": "package.json",
+      "sourceHash": "11814452b101fd1cd9f9c59026da8d47c970b81fce5efce7b8482da159d52040",
+      "language": ".ts",
+      "syntax": "executable",
+      "imports": [
+        "./owned-test-directory.js",
+        "node:path",
+        "node:timers/promises"
+      ],
+      "declarations": [
+        "captureStreams",
+        "cause",
+        "cleanup",
+        "createTempDatabaseTracker",
+        "err",
+        "failures",
+        "log",
+        "makePath",
+        "out",
+        "owned",
+        "pending",
+        "result",
+        "stderrChunks",
+        "stdoutChunks",
+        "storage"
+      ],
+      "calls": [
+        "Bun.gc",
+        "String",
+        "allocate",
+        "args.map",
+        "args.map.join",
+        "failures.map",
+        "failures.map.join",
+        "failures.push",
+        "fn",
+        "join",
+        "owned.add",
+        "owned.delete",
+        "setImmediate",
+        "stderrChunks.join",
+        "stderrChunks.push",
+        "stdoutChunks.join",
+        "stdoutChunks.push",
+        "storage.cleanup"
       ]
     },
     {

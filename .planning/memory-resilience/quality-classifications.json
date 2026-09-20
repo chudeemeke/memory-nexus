@@ -11177,89 +11177,6 @@
       }
     },
     {
-      "path": "src/presentation/cli/commands/_helpers/capture-json.test.ts",
-      "package": "package.json",
-      "sourceHash": "b4b7f8eb18f704b5bf34632ff19437547ce613bfdae84f5618328d79dfd7ae54",
-      "tier": "S",
-      "rationale": "Writes real scratch files and invokes the capture helper cleanup; ownership/deletion boundary is Tier S. Shared helper repair B11.4 applies.",
-      "applicability": {
-        "mode": "measure",
-        "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
-      },
-      "decisionStatus": "proposed - independent review pending",
-      "inspection": {
-        "sourceRevision": "12c188bb9cad480efc6eb87ce1760b9dc40bbb69",
-        "anchor": "Emitted-runtime import/call/constructor inventory and targeted fixture/provider/CLI source boundaries",
-        "runtimeHash": "e0dee6aa7636fd09d7138a22d79c5fd144648f4c764a9b0eb57d3e763eb57844",
-        "scope": "Reading aid plus targeted source inspection; not sound effect analysis, complete assertion review, execution evidence or metric applicability approval."
-      },
-      "metricApplicability": {
-        "status": "proposed - independent review pending",
-        "evidence": ".planning/memory-resilience/evidence/B04-applicability-probe.json",
-        "sourceHash": "b4b7f8eb18f704b5bf34632ff19437547ce613bfdae84f5618328d79dfd7ae54",
-        "disposition": "Measure every positive denominator; individually review zero branch/function denominators against runtime syntax. Observed counts do not prove instrumentation completeness.",
-        "metrics": {
-          "statements": {
-            "observedCounterTotal": 36,
-            "proposal": "measure - completeness unverified"
-          },
-          "branches": {
-            "observedCounterTotal": 0,
-            "proposal": "zero requires individual review"
-          },
-          "functions": {
-            "observedCounterTotal": 9,
-            "proposal": "measure - completeness unverified"
-          },
-          "lines": {
-            "observedCounterTotal": 36,
-            "proposal": "measure - completeness unverified"
-          }
-        }
-      }
-    },
-    {
-      "path": "src/presentation/cli/commands/_helpers/capture-json.ts",
-      "package": "package.json",
-      "sourceHash": "8c83e9c21e5215e9df7c34cb6f032871360ce997b4113cc5a5207898d54c14fd",
-      "tier": "S",
-      "rationale": "Despite its command-directory location, this is reusable test infrastructure: captures global console streams and removes tracked DB/WAL/SHM files. B11.4 owns deletion/diagnostic safety.",
-      "applicability": {
-        "mode": "measure",
-        "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
-      },
-      "decisionStatus": "proposed - independent review pending",
-      "inspection": {
-        "sourceRevision": "8719e3c36b2c73ca11f8ee4879c9f17aed4f2849",
-        "anchor": "cleanupTempPaths",
-        "scope": "positive critical boundary establishes highest tier; not full correctness acceptance"
-      },
-      "metricApplicability": {
-        "status": "proposed - independent review pending",
-        "evidence": ".planning/memory-resilience/evidence/B04-applicability-probe.json",
-        "sourceHash": "8c83e9c21e5215e9df7c34cb6f032871360ce997b4113cc5a5207898d54c14fd",
-        "disposition": "Measure every positive denominator; individually review zero branch/function denominators against runtime syntax. Observed counts do not prove instrumentation completeness. Optional-chain syntax is present; synthetic evidence shows current instrumentation omits its decision counters. B05.1 owns source-mapped branch proof before numeric acceptance.",
-        "metrics": {
-          "statements": {
-            "observedCounterTotal": 27,
-            "proposal": "measure - completeness unverified"
-          },
-          "branches": {
-            "observedCounterTotal": 6,
-            "proposal": "measure - completeness unverified"
-          },
-          "functions": {
-            "observedCounterTotal": 7,
-            "proposal": "measure - completeness unverified"
-          },
-          "lines": {
-            "observedCounterTotal": 24,
-            "proposal": "measure - completeness unverified"
-          }
-        }
-      }
-    },
-    {
       "path": "src/presentation/cli/commands/_helpers/deprecation-warning.test.ts",
       "package": "package.json",
       "sourceHash": "3bcd628a978a5aa1606d95cdc57edd972576561e1f63e53a0163b466a2ca20f1",
@@ -11802,7 +11719,7 @@
     {
       "path": "src/presentation/cli/commands/context.json.test.ts",
       "package": "package.json",
-      "sourceHash": "5dadafdff97aefa3f215b82a3e59ed41d5542113e84968dbee610f865e47bb56",
+      "sourceHash": "dac8d7072c4889e92c01b7078b6ddb23e6d39ff5ac76f94010a5d4cc25be55a3",
       "tier": "S",
       "rationale": "Uses actual file database/CLI capture fixtures and shared temporary-path cleanup. Filesystem ownership/deletion requires Tier S proof; B11.4 owns the shared helper and caller obligation.",
       "applicability": {
@@ -11811,34 +11728,15 @@
       },
       "decisionStatus": "proposed - independent review pending",
       "inspection": {
-        "sourceRevision": "12c188bb9cad480efc6eb87ce1760b9dc40bbb69",
-        "anchor": "Emitted-runtime import/call/constructor inventory and targeted fixture/provider/CLI source boundaries",
-        "runtimeHash": "8b4ddc3c4662ae7935ba371c24711158895f26fb030c6119c6c3dfa77863b712",
-        "scope": "Reading aid plus targeted source inspection; not sound effect analysis, complete assertion review, execution evidence or metric applicability approval."
+        "sourceHash": "dac8d7072c4889e92c01b7078b6ddb23e6d39ff5ac76f94010a5d4cc25be55a3",
+        "evidence": ".planning/memory-resilience/evidence/B11.4.json",
+        "scope": "B11.4 storage lifecycle and import migration; caller command/output assertions preserved. Not whole-file correctness or independent review."
       },
       "metricApplicability": {
-        "status": "proposed - independent review pending",
-        "evidence": ".planning/memory-resilience/evidence/B04-applicability-probe.json",
-        "sourceHash": "5dadafdff97aefa3f215b82a3e59ed41d5542113e84968dbee610f865e47bb56",
-        "disposition": "Measure every positive denominator; individually review zero branch/function denominators against runtime syntax. Observed counts do not prove instrumentation completeness.",
-        "metrics": {
-          "statements": {
-            "observedCounterTotal": 54,
-            "proposal": "measure - completeness unverified"
-          },
-          "branches": {
-            "observedCounterTotal": 4,
-            "proposal": "measure - completeness unverified"
-          },
-          "functions": {
-            "observedCounterTotal": 20,
-            "proposal": "measure - completeness unverified"
-          },
-          "lines": {
-            "observedCounterTotal": 53,
-            "proposal": "measure - completeness unverified"
-          }
-        }
+        "status": "proposed - final measurement and independent review pending",
+        "sourceHash": "dac8d7072c4889e92c01b7078b6ddb23e6d39ff5ac76f94010a5d4cc25be55a3",
+        "evidence": ".planning/memory-resilience/evidence/B11.4.json",
+        "disposition": "Caller fixture changes ran in the actual suite; source-bound full caller metrics remain unverified. B11.4 owns follow-up before B10/R02."
       }
     },
     {
@@ -13352,7 +13250,7 @@
     {
       "path": "src/presentation/cli/commands/list.json.test.ts",
       "package": "package.json",
-      "sourceHash": "8e49c55cfa072a3f71aa7c6485b507647ebb5b0f587d138fc3ddfaea73fca630",
+      "sourceHash": "09532928fa18e3e9e94c37b03cec933c71c8af345432d292f9c87015442a82ff",
       "tier": "S",
       "rationale": "Uses actual file database/CLI capture fixtures and shared temporary-path cleanup. Filesystem ownership/deletion requires Tier S proof; B11.4 owns the shared helper and caller obligation.",
       "applicability": {
@@ -13361,34 +13259,15 @@
       },
       "decisionStatus": "proposed - independent review pending",
       "inspection": {
-        "sourceRevision": "12c188bb9cad480efc6eb87ce1760b9dc40bbb69",
-        "anchor": "Emitted-runtime import/call/constructor inventory and targeted fixture/provider/CLI source boundaries",
-        "runtimeHash": "920ec4b93062dac453bec106b517435aea38988ba556729797e2acce63e316a2",
-        "scope": "Reading aid plus targeted source inspection; not sound effect analysis, complete assertion review, execution evidence or metric applicability approval."
+        "sourceHash": "09532928fa18e3e9e94c37b03cec933c71c8af345432d292f9c87015442a82ff",
+        "evidence": ".planning/memory-resilience/evidence/B11.4.json",
+        "scope": "B11.4 storage lifecycle and import migration; caller command/output assertions preserved. Not whole-file correctness or independent review."
       },
       "metricApplicability": {
-        "status": "proposed - independent review pending",
-        "evidence": ".planning/memory-resilience/evidence/B04-applicability-probe.json",
-        "sourceHash": "8e49c55cfa072a3f71aa7c6485b507647ebb5b0f587d138fc3ddfaea73fca630",
-        "disposition": "Measure every positive denominator; individually review zero branch/function denominators against runtime syntax. Observed counts do not prove instrumentation completeness.",
-        "metrics": {
-          "statements": {
-            "observedCounterTotal": 80,
-            "proposal": "measure - completeness unverified"
-          },
-          "branches": {
-            "observedCounterTotal": 8,
-            "proposal": "measure - completeness unverified"
-          },
-          "functions": {
-            "observedCounterTotal": 26,
-            "proposal": "measure - completeness unverified"
-          },
-          "lines": {
-            "observedCounterTotal": 78,
-            "proposal": "measure - completeness unverified"
-          }
-        }
+        "status": "proposed - final measurement and independent review pending",
+        "sourceHash": "09532928fa18e3e9e94c37b03cec933c71c8af345432d292f9c87015442a82ff",
+        "evidence": ".planning/memory-resilience/evidence/B11.4.json",
+        "disposition": "Caller fixture changes ran in the actual suite; source-bound full caller metrics remain unverified. B11.4 owns follow-up before B10/R02."
       }
     },
     {
@@ -13934,7 +13813,7 @@
     {
       "path": "src/presentation/cli/commands/related.json.test.ts",
       "package": "package.json",
-      "sourceHash": "5401054af1b02b57aefce4b584679c3fbacfc34b1d19e35798e72cba7b928fef",
+      "sourceHash": "98967cd253245d49ed4b69c51f2e390655fbe9719d931522910e9a059df7cafa",
       "tier": "S",
       "rationale": "Uses actual file database/CLI capture fixtures and shared temporary-path cleanup. Filesystem ownership/deletion requires Tier S proof; B11.4 owns the shared helper and caller obligation.",
       "applicability": {
@@ -13943,34 +13822,15 @@
       },
       "decisionStatus": "proposed - independent review pending",
       "inspection": {
-        "sourceRevision": "12c188bb9cad480efc6eb87ce1760b9dc40bbb69",
-        "anchor": "Emitted-runtime import/call/constructor inventory and targeted fixture/provider/CLI source boundaries",
-        "runtimeHash": "06f6910c31e20dcbf11f44647b3d7883e639ab57327bdbdc158820c34dbb5d6a",
-        "scope": "Reading aid plus targeted source inspection; not sound effect analysis, complete assertion review, execution evidence or metric applicability approval."
+        "sourceHash": "98967cd253245d49ed4b69c51f2e390655fbe9719d931522910e9a059df7cafa",
+        "evidence": ".planning/memory-resilience/evidence/B11.4.json",
+        "scope": "B11.4 storage lifecycle and import migration; caller command/output assertions preserved. Not whole-file correctness or independent review."
       },
       "metricApplicability": {
-        "status": "proposed - independent review pending",
-        "evidence": ".planning/memory-resilience/evidence/B04-applicability-probe.json",
-        "sourceHash": "5401054af1b02b57aefce4b584679c3fbacfc34b1d19e35798e72cba7b928fef",
-        "disposition": "Measure every positive denominator; individually review zero branch/function denominators against runtime syntax. Observed counts do not prove instrumentation completeness. Optional-chain syntax is present; synthetic evidence shows current instrumentation omits its decision counters. B05.1 owns source-mapped branch proof before numeric acceptance.",
-        "metrics": {
-          "statements": {
-            "observedCounterTotal": 50,
-            "proposal": "measure - completeness unverified"
-          },
-          "branches": {
-            "observedCounterTotal": 11,
-            "proposal": "measure - completeness unverified"
-          },
-          "functions": {
-            "observedCounterTotal": 18,
-            "proposal": "measure - completeness unverified"
-          },
-          "lines": {
-            "observedCounterTotal": 48,
-            "proposal": "measure - completeness unverified"
-          }
-        }
+        "status": "proposed - final measurement and independent review pending",
+        "sourceHash": "98967cd253245d49ed4b69c51f2e390655fbe9719d931522910e9a059df7cafa",
+        "evidence": ".planning/memory-resilience/evidence/B11.4.json",
+        "disposition": "Caller fixture changes ran in the actual suite; source-bound full caller metrics remain unverified. B11.4 owns follow-up before B10/R02."
       }
     },
     {
@@ -14184,7 +14044,7 @@
     {
       "path": "src/presentation/cli/commands/search.json.test.ts",
       "package": "package.json",
-      "sourceHash": "0671aa21edcd014ca527d3d8c8ee351fc79a4943b74f83608ac97da5fcdf1428",
+      "sourceHash": "f603939eacb8948378b4a2647de083dbcdf4684006aaddbe8b4165f794ed1fb7",
       "tier": "S",
       "rationale": "Uses actual file database/CLI capture fixtures and shared temporary-path cleanup. Filesystem ownership/deletion requires Tier S proof; B11.4 owns the shared helper and caller obligation.",
       "applicability": {
@@ -14193,34 +14053,15 @@
       },
       "decisionStatus": "proposed - independent review pending",
       "inspection": {
-        "sourceRevision": "12c188bb9cad480efc6eb87ce1760b9dc40bbb69",
-        "anchor": "Emitted-runtime import/call/constructor inventory and targeted fixture/provider/CLI source boundaries",
-        "runtimeHash": "1667e245e460108be0c70354b8940192c1118b7679b7bd0aa6338b2fffab592c",
-        "scope": "Reading aid plus targeted source inspection; not sound effect analysis, complete assertion review, execution evidence or metric applicability approval."
+        "sourceHash": "f603939eacb8948378b4a2647de083dbcdf4684006aaddbe8b4165f794ed1fb7",
+        "evidence": ".planning/memory-resilience/evidence/B11.4.json",
+        "scope": "B11.4 storage lifecycle and import migration; caller command/output assertions preserved. Not whole-file correctness or independent review."
       },
       "metricApplicability": {
-        "status": "proposed - independent review pending",
-        "evidence": ".planning/memory-resilience/evidence/B04-applicability-probe.json",
-        "sourceHash": "0671aa21edcd014ca527d3d8c8ee351fc79a4943b74f83608ac97da5fcdf1428",
-        "disposition": "Measure every positive denominator; individually review zero branch/function denominators against runtime syntax. Observed counts do not prove instrumentation completeness.",
-        "metrics": {
-          "statements": {
-            "observedCounterTotal": 105,
-            "proposal": "measure - completeness unverified"
-          },
-          "branches": {
-            "observedCounterTotal": 6,
-            "proposal": "measure - completeness unverified"
-          },
-          "functions": {
-            "observedCounterTotal": 31,
-            "proposal": "measure - completeness unverified"
-          },
-          "lines": {
-            "observedCounterTotal": 103,
-            "proposal": "measure - completeness unverified"
-          }
-        }
+        "status": "proposed - final measurement and independent review pending",
+        "sourceHash": "f603939eacb8948378b4a2647de083dbcdf4684006aaddbe8b4165f794ed1fb7",
+        "evidence": ".planning/memory-resilience/evidence/B11.4.json",
+        "disposition": "Caller fixture changes ran in the actual suite; source-bound full caller metrics remain unverified. B11.4 owns follow-up before B10/R02."
       }
     },
     {
@@ -14351,7 +14192,7 @@
     {
       "path": "src/presentation/cli/commands/show.json.test.ts",
       "package": "package.json",
-      "sourceHash": "956c497eb065abb4d015e6ad176fc483b84f0b242e1db8df9f3508a0ca1d82c8",
+      "sourceHash": "c202424142b4c0080b6576b0a71329b3c7232f14ac099c7e4d0116b1e5069f13",
       "tier": "S",
       "rationale": "Uses actual file database/CLI capture fixtures and shared temporary-path cleanup. Filesystem ownership/deletion requires Tier S proof; B11.4 owns the shared helper and caller obligation.",
       "applicability": {
@@ -14360,34 +14201,15 @@
       },
       "decisionStatus": "proposed - independent review pending",
       "inspection": {
-        "sourceRevision": "12c188bb9cad480efc6eb87ce1760b9dc40bbb69",
-        "anchor": "Emitted-runtime import/call/constructor inventory and targeted fixture/provider/CLI source boundaries",
-        "runtimeHash": "a9945f44a0eaedaf350fd6475df0aac22f6093d29ab0abbfd9f0b3caba342ab5",
-        "scope": "Reading aid plus targeted source inspection; not sound effect analysis, complete assertion review, execution evidence or metric applicability approval."
+        "sourceHash": "c202424142b4c0080b6576b0a71329b3c7232f14ac099c7e4d0116b1e5069f13",
+        "evidence": ".planning/memory-resilience/evidence/B11.4.json",
+        "scope": "B11.4 storage lifecycle and import migration; caller command/output assertions preserved. Not whole-file correctness or independent review."
       },
       "metricApplicability": {
-        "status": "proposed - independent review pending",
-        "evidence": ".planning/memory-resilience/evidence/B04-applicability-probe.json",
-        "sourceHash": "956c497eb065abb4d015e6ad176fc483b84f0b242e1db8df9f3508a0ca1d82c8",
-        "disposition": "Measure every positive denominator; individually review zero branch/function denominators against runtime syntax. Observed counts do not prove instrumentation completeness. Optional-chain syntax is present; synthetic evidence shows current instrumentation omits its decision counters. B05.1 owns source-mapped branch proof before numeric acceptance.",
-        "metrics": {
-          "statements": {
-            "observedCounterTotal": 52,
-            "proposal": "measure - completeness unverified"
-          },
-          "branches": {
-            "observedCounterTotal": 10,
-            "proposal": "measure - completeness unverified"
-          },
-          "functions": {
-            "observedCounterTotal": 18,
-            "proposal": "measure - completeness unverified"
-          },
-          "lines": {
-            "observedCounterTotal": 50,
-            "proposal": "measure - completeness unverified"
-          }
-        }
+        "status": "proposed - final measurement and independent review pending",
+        "sourceHash": "c202424142b4c0080b6576b0a71329b3c7232f14ac099c7e4d0116b1e5069f13",
+        "evidence": ".planning/memory-resilience/evidence/B11.4.json",
+        "disposition": "Caller fixture changes ran in the actual suite; source-bound full caller metrics remain unverified. B11.4 owns follow-up before B10/R02."
       }
     },
     {
@@ -14560,7 +14382,7 @@
     {
       "path": "src/presentation/cli/commands/stats.json.test.ts",
       "package": "package.json",
-      "sourceHash": "801f682338b17a100454eb0d2144219930fa33a8d28e09ad9b5d42a4b6012673",
+      "sourceHash": "cc8c2539616884c670a9bbcff39e9718b2b27f20b4f9924a62fdb67cd646e47e",
       "tier": "S",
       "rationale": "Uses actual file database/CLI capture fixtures and shared temporary-path cleanup. Filesystem ownership/deletion requires Tier S proof; B11.4 owns the shared helper and caller obligation.",
       "applicability": {
@@ -14569,34 +14391,15 @@
       },
       "decisionStatus": "proposed - independent review pending",
       "inspection": {
-        "sourceRevision": "12c188bb9cad480efc6eb87ce1760b9dc40bbb69",
-        "anchor": "Emitted-runtime import/call/constructor inventory and targeted fixture/provider/CLI source boundaries",
-        "runtimeHash": "aa410152deb722cbf7cdd9858154d91f76caee0ae04d934d3560967fa4695a51",
-        "scope": "Reading aid plus targeted source inspection; not sound effect analysis, complete assertion review, execution evidence or metric applicability approval."
+        "sourceHash": "cc8c2539616884c670a9bbcff39e9718b2b27f20b4f9924a62fdb67cd646e47e",
+        "evidence": ".planning/memory-resilience/evidence/B11.4.json",
+        "scope": "B11.4 storage lifecycle and import migration; caller command/output assertions preserved. Not whole-file correctness or independent review."
       },
       "metricApplicability": {
-        "status": "proposed - independent review pending",
-        "evidence": ".planning/memory-resilience/evidence/B04-applicability-probe.json",
-        "sourceHash": "801f682338b17a100454eb0d2144219930fa33a8d28e09ad9b5d42a4b6012673",
-        "disposition": "Measure every positive denominator; individually review zero branch/function denominators against runtime syntax. Observed counts do not prove instrumentation completeness.",
-        "metrics": {
-          "statements": {
-            "observedCounterTotal": 64,
-            "proposal": "measure - completeness unverified"
-          },
-          "branches": {
-            "observedCounterTotal": 4,
-            "proposal": "measure - completeness unverified"
-          },
-          "functions": {
-            "observedCounterTotal": 20,
-            "proposal": "measure - completeness unverified"
-          },
-          "lines": {
-            "observedCounterTotal": 63,
-            "proposal": "measure - completeness unverified"
-          }
-        }
+        "status": "proposed - final measurement and independent review pending",
+        "sourceHash": "cc8c2539616884c670a9bbcff39e9718b2b27f20b4f9924a62fdb67cd646e47e",
+        "evidence": ".planning/memory-resilience/evidence/B11.4.json",
+        "disposition": "Caller fixture changes ran in the actual suite; source-bound full caller metrics remain unverified. B11.4 owns follow-up before B10/R02."
       }
     },
     {
@@ -17187,6 +16990,104 @@
       }
     },
     {
+      "path": "tests/helpers/capture-json.test.ts",
+      "package": "package.json",
+      "sourceHash": "2632746c717926b2c086ca06fd44028a768eb29a8c3f1d1be9e8c06af398c60f",
+      "tier": "S",
+      "rationale": "Owned database fixture allocation/deletion, observable retained cleanup and adversarial lifecycle tests; moving to tests does not exclude measurement.",
+      "applicability": {
+        "mode": "measure",
+        "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
+      },
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceHash": "2632746c717926b2c086ca06fd44028a768eb29a8c3f1d1be9e8c06af398c60f",
+        "evidence": ".planning/memory-resilience/evidence/B11.4.json",
+        "scope": "B11.4 storage lifecycle and import migration; caller command/output assertions preserved. Not whole-file correctness or independent review."
+      },
+      "metricApplicability": {
+        "status": "proposed - final measurement and independent review pending",
+        "sourceHash": "2632746c717926b2c086ca06fd44028a768eb29a8c3f1d1be9e8c06af398c60f",
+        "evidence": ".planning/memory-resilience/evidence/B11.4.json",
+        "disposition": "Positive denominators measured locally in all four metrics. B05 completeness and optional-chain decision admission remain open.",
+        "diagnosticMetrics": {
+          "lines": {
+            "total": 103,
+            "covered": 103,
+            "skipped": 0,
+            "pct": 100
+          },
+          "functions": {
+            "total": 23,
+            "covered": 23,
+            "skipped": 0,
+            "pct": 100
+          },
+          "statements": {
+            "total": 122,
+            "covered": 122,
+            "skipped": 0,
+            "pct": 100
+          },
+          "branches": {
+            "total": 2,
+            "covered": 2,
+            "skipped": 0,
+            "pct": 100
+          }
+        }
+      }
+    },
+    {
+      "path": "tests/helpers/capture-json.ts",
+      "package": "package.json",
+      "sourceHash": "11814452b101fd1cd9f9c59026da8d47c970b81fce5efce7b8482da159d52040",
+      "tier": "S",
+      "rationale": "Owned database fixture allocation/deletion, observable retained cleanup and adversarial lifecycle tests; moving to tests does not exclude measurement.",
+      "applicability": {
+        "mode": "measure",
+        "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
+      },
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceHash": "11814452b101fd1cd9f9c59026da8d47c970b81fce5efce7b8482da159d52040",
+        "evidence": ".planning/memory-resilience/evidence/B11.4.json",
+        "scope": "B11.4 storage lifecycle and import migration; caller command/output assertions preserved. Not whole-file correctness or independent review."
+      },
+      "metricApplicability": {
+        "status": "proposed - final measurement and independent review pending",
+        "sourceHash": "11814452b101fd1cd9f9c59026da8d47c970b81fce5efce7b8482da159d52040",
+        "evidence": ".planning/memory-resilience/evidence/B11.4.json",
+        "disposition": "Positive denominators measured locally in all four metrics. B05 completeness and optional-chain decision admission remain open.",
+        "diagnosticMetrics": {
+          "lines": {
+            "total": 32,
+            "covered": 32,
+            "skipped": 0,
+            "pct": 100
+          },
+          "functions": {
+            "total": 9,
+            "covered": 9,
+            "skipped": 0,
+            "pct": 100
+          },
+          "statements": {
+            "total": 37,
+            "covered": 37,
+            "skipped": 0,
+            "pct": 100
+          },
+          "branches": {
+            "total": 11,
+            "covered": 11,
+            "skipped": 0,
+            "pct": 100
+          }
+        }
+      }
+    },
+    {
       "path": "tests/helpers/env-overrides.test.ts",
       "package": "package.json",
       "sourceHash": "dda4620d7c290d1180631c0dc544cc56f7329f56ca1d581d51fba2d14dadef2d",
@@ -18249,6 +18150,105 @@
           "sourceHash": "5326d55f51b6867b52319692d6b0b10e7f7ce3204dc6fc80a98ef9d033af7b19",
           "reason": "36 parent/child captures. Script branches97.76%; driver functions91.83%, branches95.83%. WSL probe timed out. B05 and generated-JS limits remain.",
           "evidence": ".planning/memory-resilience/evidence/B11.3-log.json"
+        }
+      }
+    },
+    {
+      "path": "src/presentation/cli/commands/_helpers/capture-json.ts",
+      "sourceHash": "8c83e9c21e5215e9df7c34cb6f032871360ce997b4113cc5a5207898d54c14fd",
+      "recoveryRevision": "47f993dc487e60d90ab93089573f2157a27501a4",
+      "replacement": "tests/helpers/capture-json.ts",
+      "disposition": "Moved and repaired as test-only infrastructure; remains measured Tier S. No exclusion or completed quality acceptance.",
+      "evidence": ".planning/memory-resilience/evidence/B11.4.json",
+      "formerClassification": {
+        "path": "src/presentation/cli/commands/_helpers/capture-json.ts",
+        "package": "package.json",
+        "sourceHash": "8c83e9c21e5215e9df7c34cb6f032871360ce997b4113cc5a5207898d54c14fd",
+        "tier": "S",
+        "rationale": "Despite its command-directory location, this is reusable test infrastructure: captures global console streams and removes tracked DB/WAL/SHM files. B11.4 owns deletion/diagnostic safety.",
+        "applicability": {
+          "mode": "measure",
+          "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
+        },
+        "decisionStatus": "proposed - independent review pending",
+        "inspection": {
+          "sourceRevision": "8719e3c36b2c73ca11f8ee4879c9f17aed4f2849",
+          "anchor": "cleanupTempPaths",
+          "scope": "positive critical boundary establishes highest tier; not full correctness acceptance"
+        },
+        "metricApplicability": {
+          "status": "proposed - independent review pending",
+          "evidence": ".planning/memory-resilience/evidence/B04-applicability-probe.json",
+          "sourceHash": "8c83e9c21e5215e9df7c34cb6f032871360ce997b4113cc5a5207898d54c14fd",
+          "disposition": "Measure every positive denominator; individually review zero branch/function denominators against runtime syntax. Observed counts do not prove instrumentation completeness. Optional-chain syntax is present; synthetic evidence shows current instrumentation omits its decision counters. B05.1 owns source-mapped branch proof before numeric acceptance.",
+          "metrics": {
+            "statements": {
+              "observedCounterTotal": 27,
+              "proposal": "measure - completeness unverified"
+            },
+            "branches": {
+              "observedCounterTotal": 6,
+              "proposal": "measure - completeness unverified"
+            },
+            "functions": {
+              "observedCounterTotal": 7,
+              "proposal": "measure - completeness unverified"
+            },
+            "lines": {
+              "observedCounterTotal": 24,
+              "proposal": "measure - completeness unverified"
+            }
+          }
+        }
+      }
+    },
+    {
+      "path": "src/presentation/cli/commands/_helpers/capture-json.test.ts",
+      "sourceHash": "b4b7f8eb18f704b5bf34632ff19437547ce613bfdae84f5618328d79dfd7ae54",
+      "recoveryRevision": "47f993dc487e60d90ab93089573f2157a27501a4",
+      "replacement": "tests/helpers/capture-json.test.ts",
+      "disposition": "Moved and repaired as test-only infrastructure; remains measured Tier S. No exclusion or completed quality acceptance.",
+      "evidence": ".planning/memory-resilience/evidence/B11.4.json",
+      "formerClassification": {
+        "path": "src/presentation/cli/commands/_helpers/capture-json.test.ts",
+        "package": "package.json",
+        "sourceHash": "b4b7f8eb18f704b5bf34632ff19437547ce613bfdae84f5618328d79dfd7ae54",
+        "tier": "S",
+        "rationale": "Writes real scratch files and invokes the capture helper cleanup; ownership/deletion boundary is Tier S. Shared helper repair B11.4 applies.",
+        "applicability": {
+          "mode": "measure",
+          "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
+        },
+        "decisionStatus": "proposed - independent review pending",
+        "inspection": {
+          "sourceRevision": "12c188bb9cad480efc6eb87ce1760b9dc40bbb69",
+          "anchor": "Emitted-runtime import/call/constructor inventory and targeted fixture/provider/CLI source boundaries",
+          "runtimeHash": "e0dee6aa7636fd09d7138a22d79c5fd144648f4c764a9b0eb57d3e763eb57844",
+          "scope": "Reading aid plus targeted source inspection; not sound effect analysis, complete assertion review, execution evidence or metric applicability approval."
+        },
+        "metricApplicability": {
+          "status": "proposed - independent review pending",
+          "evidence": ".planning/memory-resilience/evidence/B04-applicability-probe.json",
+          "sourceHash": "b4b7f8eb18f704b5bf34632ff19437547ce613bfdae84f5618328d79dfd7ae54",
+          "disposition": "Measure every positive denominator; individually review zero branch/function denominators against runtime syntax. Observed counts do not prove instrumentation completeness.",
+          "metrics": {
+            "statements": {
+              "observedCounterTotal": 36,
+              "proposal": "measure - completeness unverified"
+            },
+            "branches": {
+              "observedCounterTotal": 0,
+              "proposal": "zero requires individual review"
+            },
+            "functions": {
+              "observedCounterTotal": 9,
+              "proposal": "measure - completeness unverified"
+            },
+            "lines": {
+              "observedCounterTotal": 36,
+              "proposal": "measure - completeness unverified"
+            }
+          }
         }
       }
     }

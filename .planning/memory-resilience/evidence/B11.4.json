@@ -1,0 +1,3144 @@
+{
+  "item_id": "B11.4",
+  "status": "active - local ownership repair proved; final gates pending",
+  "baseRevision": "47f993dc487e60d90ab93089573f2157a27501a4",
+  "recordedAt": "2026-09-20T04:43:33.262Z",
+  "cwd": "C:\\Projects\\memory-nexus",
+  "red": {
+    "command": "bun run test src/presentation/cli/commands/_helpers/capture-json.test.ts",
+    "exit": 1,
+    "summary": "4 pass / 2 fail / 14 assertions: arbitrary foreign synthetic path deletion did not throw; traversal label did not throw. Both failures occurred before implementation. Owned synthetic foreign fixture removed in finally; no file was written at traversal path.",
+    "boundary": "The replacement API has no deletion path parameter. A runtime extra-argument foreign sentinel and substituted directory now survive cleanup."
+  },
+  "checks": {
+    "recordedAt": "2026-09-20T04:42:15.914Z",
+    "runtime": "1.4.1",
+    "checks": [
+      {
+        "command": [
+          "C:\\Users\\Destiny\\.bun\\bin\\bun.exe",
+          "run",
+          "typecheck"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": "$ tsc --noEmit && tsc --project tsconfig.scripts.json\n"
+      },
+      {
+        "command": [
+          "C:\\Users\\Destiny\\.bun\\bin\\bun.exe",
+          "node_modules/typescript/bin/tsc",
+          "-p",
+          ".git/b11-json-tsconfig.json"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": ""
+      },
+      {
+        "command": [
+          "C:\\Users\\Destiny\\.bun\\bin\\bun.exe",
+          "node_modules/typescript/bin/tsc",
+          "-p",
+          "tsconfig.lib.json",
+          "--outDir",
+          "C:\\Users\\Destiny\\AppData\\Local\\Temp\\memory-json-build-wLBXtd\\declarations"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": ""
+      },
+      {
+        "command": [
+          "C:\\Users\\Destiny\\.bun\\bin\\bun.exe",
+          "run",
+          "test",
+          "tests/helpers/capture-json.test.ts",
+          "src/presentation/cli/commands/search.json.test.ts",
+          "src/presentation/cli/commands/context.json.test.ts",
+          "src/presentation/cli/commands/show.json.test.ts",
+          "src/presentation/cli/commands/list.json.test.ts",
+          "src/presentation/cli/commands/related.json.test.ts",
+          "src/presentation/cli/commands/stats.json.test.ts"
+        ],
+        "exit": 0,
+        "stdout": "bun test v1.4.1 (4661e494f)\n",
+        "stderr": "$ bun test --timeout 15000 tests/helpers/capture-json.test.ts src/presentation/cli/commands/search.json.test.ts src/presentation/cli/commands/context.json.test.ts src/presentation/cli/commands/show.json.test.ts src/presentation/cli/commands/list.json.test.ts src/presentation/cli/commands/related.json.test.ts src/presentation/cli/commands/stats.json.test.ts\n\ntests\\helpers\\capture-json.test.ts:\n(pass) capture-json test helpers > captures both streams, non-string arguments, and returned exit code [0.49ms]\n(pass) capture-json test helpers > omits exitCode for undefined or an empty result [0.12ms]\n(pass) capture-json test helpers > restores console methods and preserves a command failure [0.20ms]\n(pass) capture-json test helpers > allocates an absent database in an owned directory and removes its sidecars [16.89ms]\n(pass) capture-json test helpers > cannot acquire deletion authority from caller-provided foreign paths [6.34ms]\n(pass) capture-json test helpers > rejects separators and oversized labels before allocating storage [0.33ms]\n(pass) capture-json test helpers > preserves allocation failures [0.30ms]\n(pass) capture-json test helpers > refuses a replaced directory and retains authority for a safe retry [19.07ms]\n(pass) capture-json test helpers > retains multiple failures and causes while cleaning independent fixtures [22.28ms]\n(pass) capture-json test helpers > does not forget allocations made while cleanup yields [15.82ms]\n\nsrc\\presentation\\cli\\commands\\context.json.test.ts:\n(pass) context --json envelope (Plan 32-02 CLI-02) > D. envelope on NOT-FOUND (empty DB → project missing) > emits envelope (or error envelope) — not bespoke shape [105.37ms]\n(pass) context --json envelope (Plan 32-02 CLI-02) > F. stdout is exactly one JSON document > parses cleanly [197.11ms]\n(pass) context --json envelope (Plan 32-02 CLI-02) > H. meta.project echoes input > includes project in meta [59.74ms]\n(pass) context --json envelope (Plan 32-02 CLI-02) > J. --json --format ai routing equivalence (Codex HIGH-5 — canonical) > deep-equals --json alone vs --json --format ai [89.98ms]\n(pass) context --json envelope (Plan 32-02 CLI-02) > J. --json --format ai routing equivalence (Codex HIGH-5 — canonical) > deep-equals --json --budget vs --json --budget --format ai [84.77ms]\n\nsrc\\presentation\\cli\\commands\\list.json.test.ts:\n(pass) list --json envelope (Plan 32-02 CLI-02) > A. valid JSON on success path > emits envelope with schema_version, command, kind, data [122.58ms]\n(pass) list --json envelope (Plan 32-02 CLI-02) > B. envelope on EMPTY result (empty DB) > emits envelope with data: [] not plain text [69.51ms]\n(pass) list --json envelope (Plan 32-02 CLI-02) > C. envelope on VALIDATION error > emits error envelope on invalid limit [10.43ms]\n(pass) list --json envelope (Plan 32-02 CLI-02) > C. envelope on VALIDATION error > emits error envelope on invalid since-date [15.27ms]\n(pass) list --json envelope (Plan 32-02 CLI-02) > F. stdout is exactly one JSON document > parses cleanly [53.86ms]\n(pass) list --json envelope (Plan 32-02 CLI-02) > H. meta.count matches data.length > includes count in meta [62.62ms]\n(pass) list --json envelope (Plan 32-02 CLI-02) > J. --json --format ai routing equivalence (HIGH-5) > deep-equals --json vs --json --format ai (list) [148.51ms]\n\nsrc\\presentation\\cli\\commands\\related.json.test.ts:\n(pass) related --json envelope (Plan 32-02 CLI-02) > D. envelope on NOT-FOUND (empty DB → no links) > emits error envelope when no links exist for the ID [73.27ms]\n(pass) related --json envelope (Plan 32-02 CLI-02) > F. stdout is exactly one JSON document > parses cleanly [62.42ms]\n(pass) related --json envelope (Plan 32-02 CLI-02) > H. error or meta echoes source_id > references the source ID in error.context or meta [65.87ms]\n(pass) related --json envelope (Plan 32-02 CLI-02) > J. --json --format ai routing equivalence (HIGH-5) > deep-equals --json vs --json --format ai (related) [140.27ms]\n\nsrc\\presentation\\cli\\commands\\search.json.test.ts:\n(pass) search --json envelope (Plan 32-02 CLI-02) > A. valid JSON on success path (empty DB → empty results) > emits envelope with schema_version, command, kind, data [82.90ms]\n(pass) search --json envelope (Plan 32-02 CLI-02) > B. envelope on EMPTY result > emits envelope with data: [] not plain text [89.21ms]\n(pass) search --json envelope (Plan 32-02 CLI-02) > C. envelope on VALIDATION error > emits error envelope on empty query [12.90ms]\n(pass) search --json envelope (Plan 32-02 CLI-02) > C. envelope on VALIDATION error > emits error envelope on invalid limit [129.14ms]\n(pass) search --json envelope (Plan 32-02 CLI-02) > C. envelope on VALIDATION error > emits error envelope on invalid since-date [63.31ms]\n(pass) search --json envelope (Plan 32-02 CLI-02) > F. stdout is EXACTLY ONE JSON document in --json mode > emits parseable JSON without preceding/trailing non-JSON lines [66.99ms]\n(pass) search --json envelope (Plan 32-02 CLI-02) > H. per-command meta assertion > includes meta.query and meta.mode for empty search [67.66ms]\n(pass) search --json envelope (Plan 32-02 CLI-02) > I. --files --json (Codex HIGH-4) > emits envelope with kind: 'file' regardless of qmd availability [40.06ms]\n(pass) search --json envelope (Plan 32-02 CLI-02) > J. --json --format ai routing equivalence (Codex HIGH-5) > deep-equals --json alone vs --json --format ai (search) [171.77ms]\n\nsrc\\presentation\\cli\\commands\\show.json.test.ts:\n(pass) show --json envelope (Plan 32-02 CLI-02) > D. envelope on NOT-FOUND > emits error envelope when session ID does not exist [127.96ms]\n(pass) show --json envelope (Plan 32-02 CLI-02) > F. stdout is exactly one JSON document > parses cleanly [64.12ms]\n(pass) show --json envelope (Plan 32-02 CLI-02) > H. meta.session_id echoes input on error envelope > includes session_id in error context [66.98ms]\n(pass) show --json envelope (Plan 32-02 CLI-02) > J. --json --format ai routing equivalence (HIGH-5) > deep-equals --json vs --json --format ai (show) [100.42ms]\n\nsrc\\presentation\\cli\\commands\\stats.json.test.ts:\n(pass) stats --json envelope (Plan 32-02 CLI-02) > A. valid JSON on success path (empty DB) > emits envelope with schema_version, command, kind, data [99.50ms]\n(pass) stats --json envelope (Plan 32-02 CLI-02) > C. envelope on VALIDATION error > emits error envelope on invalid projects count [13.47ms]\n(pass) stats --json envelope (Plan 32-02 CLI-02) > C. envelope on VALIDATION error > emits error envelope on NaN projects count [9.28ms]\n(pass) stats --json envelope (Plan 32-02 CLI-02) > F. stdout is exactly one JSON document > parses cleanly [78.15ms]\n(pass) stats --json envelope (Plan 32-02 CLI-02) > J. --json --format ai routing equivalence (HIGH-5) > deep-equals --json vs --json --format ai (stats) [205.83ms]\n--------------------------------------------------------------------------|---------|---------|-------------------\nFile                                                                      | % Funcs | % Lines | Uncovered Line #s\n--------------------------------------------------------------------------|---------|---------|-------------------\nAll files                                                                 |   29.44 |   33.31 |\n src\\application\\services\\budget-allocator.ts                             |    0.00 |    0.00 | 61-131\n src\\application\\services\\fts-sanitizer.ts                                |  100.00 |   45.83 | 35-38,51-59\n src\\application\\services\\llm-extractor.ts                                |    0.00 |    4.35 | 93-129,142-181,199-246,253-267,274-293,300-333,341-344\n src\\application\\services\\memory-governance-service.ts                    |    5.56 |    4.85 | 65-185,189-263\n src\\application\\services\\memory-ranking-service.ts                       |    5.26 |   23.05 | 116-125,129-144,148-191,195-201,206-223,227-237,241-259,263-281,285-304,308,312-315,319,323,327,331-334,338-343,347-351\n src\\application\\services\\rrf-fusion.ts                                   |    0.00 |    0.00 | 41-117\n src\\application\\services\\smart-context-service.ts                        |    8.57 |   37.79 | 145-146,153,157,161-165,169-173,177,181,239-240,357-487,494-525,530-539\n src\\domain\\entities\\backfill-state.ts                                    |    0.00 |    6.90 | 28-32,40-88\n src\\domain\\entities\\dream-entry.ts                                       |    0.00 |    2.19 | 8-482,486-491,495-509,513-523,527-532,536-538,542-544,548,552-558,562-567,571,575\n src\\domain\\entities\\entity.ts                                            |    0.00 |    5.47 | 88-97,106-201,209-215,223-230\n src\\domain\\entities\\extraction-state.ts                                  |    0.00 |    7.77 | 45-57,65-186,193,201-209,217-226,234-243,251-261,269-282\n src\\domain\\entities\\fact.ts                                              |    0.00 |    6.67 | 51-66,73-132,139-149,156-166\n src\\domain\\entities\\friction-entry.ts                                    |    0.00 |   13.56 | 79-95,108-192\n src\\domain\\entities\\graph-edge.ts                                        |    0.00 |   12.44 | 85-100,104-211,215-217,221-238,242-261,266-275,279-287,291-293,297-299,303,307-311,315\n src\\domain\\entities\\index.ts                                             |  100.00 |  100.00 | \n src\\domain\\entities\\link.ts                                              |    0.00 |    8.51 | 36-41,49-116,123,132-142\n src\\domain\\entities\\memory-event.ts                                      |    0.00 |   10.54 | 101,105-123,127-190,194,199-214,218-247,251-257,261-266,270-276,280-286,290-302,306-335,339-355,359-374,378-386,390-399,403-409,413-422,426-428,432-435,439-442,446-449,453-456,460-462,466,470-484,488,492-495,499\n src\\domain\\entities\\memory-file.ts                                       |    0.00 |   11.46 | 53-62,73-147\n src\\domain\\entities\\memory-governance.ts                                 |    0.00 |   15.72 | 136-157,161-242,246,250-268,272-287,291-313,317-338,343-346,350-353,357-390,394-410,415-417,421-423,427,431\n src\\domain\\entities\\memory-utility-metric.ts                             |    0.00 |    9.14 | 63-80,84-149,153,157-162,166-170,174-190,194-211,216-235,239-241,245-247,251,255\n src\\domain\\entities\\message.ts                                           |    0.00 |    9.21 | 32-36,44-99,106,114-120\n src\\domain\\entities\\persona-entry.ts                                     |    0.00 |   10.06 | 75-92,96-165,169,173-191,195-212,217-249,253,257\n src\\domain\\entities\\session.ts                                           |    0.00 |    6.90 | 35-43,51-118,125,134-142,151-162,170-178\n src\\domain\\entities\\tool-use.ts                                          |    0.00 |    7.69 | 34-39,47-119,126,134-141,149-156\n src\\domain\\errors\\error-codes.ts                                         |  100.00 |  100.00 | \n src\\domain\\errors\\index.ts                                               |  100.00 |  100.00 | \n src\\domain\\errors\\memory-error.ts                                        |    0.00 |   16.00 | 51-59,68-79\n src\\domain\\errors\\unknown-error.ts                                       |   50.00 |   66.67 | 12\n src\\domain\\index.ts                                                      |  100.00 |  100.00 | \n src\\domain\\ports\\embedding.ts                                            |    0.00 |   20.00 | 37-46,51-56\n src\\domain\\ports\\index.ts                                                |  100.00 |  100.00 | \n src\\domain\\services\\content-extractor.ts                                 |    0.00 |   11.25 | 56-66,75-87,96-108,117-120,129-135,139-142,147,151-168\n src\\domain\\services\\index.ts                                             |  100.00 |  100.00 | \n src\\domain\\services\\path-decoder.ts                                      |    0.00 |   15.71 | 33,42-56,66-67,77,87-108,121-138\n src\\domain\\services\\query-parser.ts                                      |    0.00 |    9.86 | 27-75,84-96,105,114\n src\\domain\\value-objects\\embedding-config.ts                             |    0.00 |    8.70 | 26-29,37-56,64-97,105-109\n src\\domain\\value-objects\\embedding-result.ts                             |    0.00 |    8.47 | 24-26,34-72,80-91\n src\\domain\\value-objects\\index.ts                                        |  100.00 |  100.00 | \n src\\domain\\value-objects\\project-path.ts                                 |    0.00 |   11.90 | 35-37,46-51,60-86,95,103,116-124,134-144,153-168\n src\\domain\\value-objects\\search-query.ts                                 |   75.00 |   92.86 | 43\n src\\domain\\value-objects\\search-result.ts                                |    0.00 |    6.52 | 36-44,52-126,134,142\n src\\infrastructure\\capabilities\\capability-status.ts                     |   40.00 |   41.44 | 74-85,97-114,125,127-129,131-143,146-153,157-158,162-177,181-195,199-205,210-216,228,245,247,254\n src\\infrastructure\\capabilities\\index.ts                                 |  100.00 |  100.00 | \n src\\infrastructure\\database\\connection.ts                                |   37.50 |   51.39 | 66,77,126-131,140-146,151-165,180,196-202,209-214,227-230,277,309-313,338-353\n src\\infrastructure\\database\\health-checker.ts                            |   89.47 |   83.60 | 230-237,260,343,347,351,355,359,363,367,371,375,379,383-385,392-398,406,412,417,423-424,428,432,434,468,522-528,543-547,724\n src\\infrastructure\\database\\index.ts                                     |  100.00 |  100.00 | \n src\\infrastructure\\database\\repositories\\backfill-state-repository.ts    |    0.00 |    6.56 | 25-74,78-84\n src\\infrastructure\\database\\repositories\\dream-repository.ts             |    0.00 |    3.74 | 40-129,133-177,181-204,209-225,229,233-261\n src\\infrastructure\\database\\repositories\\embedding-repository.ts         |   23.08 |   13.75 | 56-78,88-126,133-143,160-186,195-198,210-213,223-224,262-270,282-293,307-313\n src\\infrastructure\\database\\repositories\\entity-repository.ts            |    0.00 |    1.94 | 51-295,302-309\n src\\infrastructure\\database\\repositories\\extraction-log-repository.ts    |    0.00 |    5.26 | 28-69,73-84\n src\\infrastructure\\database\\repositories\\extraction-state-repository.ts  |   16.67 |   16.05 | 85-152\n src\\infrastructure\\database\\repositories\\fact-repository.ts              |    7.69 |    2.17 | 27-195,199-209\n src\\infrastructure\\database\\repositories\\friction-repository.ts          |    6.25 |    2.12 | 52-361,365-379,384-426,430\n src\\infrastructure\\database\\repositories\\graph-repository.ts             |    9.09 |    2.91 | 37-174,178-220,224-241,245\n src\\infrastructure\\database\\repositories\\index.ts                        |  100.00 |  100.00 | \n src\\infrastructure\\database\\repositories\\link-repository.ts              |   36.36 |   40.57 | 78-85,114-129,181-219\n src\\infrastructure\\database\\repositories\\memory-file-repository.ts       |    0.00 |    5.88 | 52-153,157-166\n src\\infrastructure\\database\\repositories\\memory-governance-repository.ts |    4.35 |    5.78 | 51-178,182-222,226-247,251-272,277-301,305-342,346-348,352-354,358,362,366-369,373,377-384,388-390,394-396,400-402,406-409\n src\\infrastructure\\database\\repositories\\memory-utility-repository.ts    |   11.11 |    4.07 | 27-96,100-130,134-150\n src\\infrastructure\\database\\repositories\\message-repository.ts           |   16.67 |   14.96 | 91-189,196-204\n src\\infrastructure\\database\\repositories\\persona-repository.ts           |   10.00 |    2.89 | 33-149,153-185,189-206\n src\\infrastructure\\database\\repositories\\session-repository.ts           |   17.65 |   20.93 | 114-122,134-299,340-368\n src\\infrastructure\\database\\repositories\\tool-use-repository.ts          |   16.67 |   14.04 | 78-167,174-181\n src\\infrastructure\\database\\schema.ts                                    |  100.00 |   92.54 | 768,792-793,795,805\n src\\infrastructure\\database\\services\\context-service.ts                  |   80.00 |   19.55 | 100-243\n src\\infrastructure\\database\\services\\hybrid-search-service.ts            |   36.36 |   26.86 | 290-293,299-308,322-331,333-381,395-412,420-680,687-697,704-713,720-721,728-774\n src\\infrastructure\\database\\services\\index.ts                            |  100.00 |  100.00 | \n src\\infrastructure\\database\\services\\search-service.ts                   |   50.00 |   60.82 | 84-91,179-208\n src\\infrastructure\\database\\services\\stats-service.ts                    |   40.00 |   87.88 | 104-107\n src\\infrastructure\\embedding\\background-embedder.ts                      |   22.22 |   13.45 | 83-86,99-101,113-116,130-134,151-177,193-250,262,275\n src\\infrastructure\\embedding\\embedding-provider-factory.ts               |   33.33 |   32.56 | 26-40,53-63,73-75\n src\\infrastructure\\embedding\\ollama-provider.ts                          |    0.00 |    5.67 | 43-113,118-152,159-185\n src\\infrastructure\\embedding\\openai-provider.ts                          |    0.00 |    4.46 | 39-140,144-148\n src\\infrastructure\\embedding\\transformers-js-provider.ts                 |    0.00 |    6.25 | 36-120,124-128\n src\\infrastructure\\external\\index.ts                                     |  100.00 |  100.00 | \n src\\infrastructure\\external\\qmd-runner.ts                                |   68.75 |   80.90 | 37,40,50-58,74,81-82,124,126,149\n src\\infrastructure\\hooks\\config-manager.ts                               |   83.33 |   69.86 | 254,256-257,260-262,265-267,272-315,372,385,424-425,475-477,483,486-490\n src\\infrastructure\\hooks\\hook-runner.ts                                  |    0.00 |    9.22 | 72,84-85,89-113,138-168,211-278,292\n src\\infrastructure\\hooks\\index.ts                                        |  100.00 |  100.00 | \n src\\infrastructure\\hooks\\log-writer.ts                                   |   42.86 |   29.69 | 77,90,107-117,124,140-155,180,182-184,186-191,193,195,198-200\n src\\infrastructure\\hooks\\settings-manager.ts                             |   45.45 |   20.96 | 155,157-160,173-186,198-211,224-277,289-331,353,357\n src\\infrastructure\\hooks\\sync-hook-script.ts                             |    0.00 |    8.13 | 81-106,110,114-121,125-184,188-203,220,226\n src\\infrastructure\\hooks\\sync-logger-adapter.ts                          |    0.00 |   80.00 | 19\n src\\infrastructure\\llm\\anthropic-extractor.ts                            |    0.00 |   17.24 | 24-47\n src\\infrastructure\\llm\\claude-cli-extractor.ts                           |    0.00 |   13.04 | 16-55\n src\\infrastructure\\llm\\extraction-helper.ts                              |    0.00 |    1.43 | 14-46,53-88\n src\\infrastructure\\llm\\ollama-extractor.ts                               |    0.00 |    9.76 | 23-59\n src\\infrastructure\\llm\\openai-extractor.ts                               |    0.00 |   10.00 | 26-61\n src\\infrastructure\\migration.ts                                          |   16.67 |    7.36 | 101,103,106,135-153,166-171,194-212,237-384,400-418\n src\\infrastructure\\paths.ts                                              |   50.00 |   50.79 | 14,38,56,99-101,119,155,164,173,183,193-212\n src\\infrastructure\\providers\\provider-defaults.ts                        |  100.00 |  100.00 | \n src\\infrastructure\\providers\\provider-egress-policy.ts                   |   50.00 |   43.88 | 61-63,98,100-126,129-141,148-153,155,161-167,172,176-189,194-198\n src\\infrastructure\\providers\\provider-registry.ts                        |   26.32 |   51.85 | 61-78,82-92,96-99,113-115,123-125,128-132,141-144,152-159,162-167,177-179,182-184,191-193,196-198,206-208,222-229,232-236,244,248,252,256,260-265,269,273,283,287,292,298-309,339,343,349,354-363\n src\\infrastructure\\security\\pattern-redactor.ts                          |    0.00 |   35.29 | 67-79,83-85,89-122,126-147,151-163,168-174,178-184\n src\\infrastructure\\sources\\index.ts                                      |  100.00 |  100.00 | \n src\\infrastructure\\sources\\memory-file-scanner.ts                        |    0.00 |   11.43 | 20-74,78-82,86-87\n src\\infrastructure\\sources\\project-name-resolver.ts                      |    0.00 |    9.68 | 27,36,44-54,65-73,81-122,136-162,170-173,181-195,203-204\n src\\infrastructure\\sources\\session-source.ts                             |   50.00 |   27.85 | 114-227\n src\\presentation\\cli\\commands\\_helpers\\deprecation-warning.ts            |    0.00 |   12.50 | 40-52,60\n src\\presentation\\cli\\commands\\context.ts                                 |   54.55 |   45.93 | 102-142,174-179,185-187,195,197-203,206-216,256-258,284-300,303-306,308-309,312-318,321-324,326-329,331-332,336\n src\\presentation\\cli\\commands\\list.ts                                    |   83.33 |   49.53 | 84-121,156-161,177,189-191,205,209-210,214-226,228-230,270,275-278,280-281,284-287,290-301,303-309,312-322\n src\\presentation\\cli\\commands\\query.ts                                   |   66.67 |   53.33 | 48-88,113,170-181,186-193,195,212-219,221,236-245,247,253\n src\\presentation\\cli\\commands\\related.ts                                 |   66.67 |   31.43 | 71-117,150-155,178-179,201-204,208-209,212-223,226,229-231,234-240,243-255,257-258,262-276,279-290,292-298,301-311\n src\\presentation\\cli\\commands\\search.ts                                  |   64.29 |   50.93 | 112,118,129-187,233-238,252,296,305-309,319-321,335,339-340,344-356,358-360,388-390,404-405,436,450-453,468,471-474,477-481,484-491,493-494,496-502,505-515,540,542-551,553,564-571,573-577,580-581,583-585,587,597,611-634,667-676\n src\\presentation\\cli\\commands\\show.ts                                    |   75.00 |   44.17 | 77-98,109-114,134,143,180-185,206-208,212,215-216,219-222,225,231-244,247-258,260-266,269-279\n src\\presentation\\cli\\commands\\stats.ts                                   |   50.00 |   43.48 | 39-64\n src\\presentation\\cli\\commands\\status.ts                                  |   20.00 |   23.09 | 173-195,239-242,270-276,301,322,325,341-346,363,386,389,397-402,414,417-438,441,444-450,452,454-462,464,467-469,472-474,477-479,481-486,490-497,499,501-510,513,516,519-527,530-538,540,542,548-565,572-582,589-599,606-649,656-670,677-689,693-704,708-732,736-747,751-773,777-782,790-793,800-807,814-820,828-842,849-858,865-903,912-984,994-1000\n src\\presentation\\cli\\formatters\\ai-formatter.ts                          |    0.00 |   33.33 | 27,41-42,55-57\n src\\presentation\\cli\\formatters\\color.ts                                 |   11.11 |   44.83 | 36,39-41,44,55-58,69,80,91,102,113,124,135\n src\\presentation\\cli\\formatters\\context-formatter.ts                     |    0.00 |   20.76 | 68-85,93,100-113,120-133,143-168,172-173,177,181,192-231,235-236,240,244,253-265,269-270,274,278,287,291-292,296,300,311,315-332,336-338,342,346,359-361,365-378,382,386,390\n src\\presentation\\cli\\formatters\\dto-helpers.ts                           |   10.00 |   20.37 | 63-86,110-118,141-150,189-193,197-203,207-214,231-235,272-275,310-323\n src\\presentation\\cli\\formatters\\envelope.ts                              |  100.00 |  100.00 | \n src\\presentation\\cli\\formatters\\error-formatter.ts                       |    0.00 |    4.85 | 36-79,91-94,105-142,162-173\n src\\presentation\\cli\\formatters\\list-formatter.ts                        |    0.00 |   23.65 | 59-72,80,90-97,101-112,116-117,121,136-147,151-152,156,165-174,178-179,183,192-196,200-201,205,216-237,241-253,257-259,263\n src\\presentation\\cli\\formatters\\output-formatter.ts                      |    4.35 |   15.82 | 118-136,145-154,164-185,189-196,200-201,205-209,224-237,241-242,246-247,261-315,319-320,324-325,334-349,353-354,358-359,372-420,424-453,457-459,463-467\n src\\presentation\\cli\\formatters\\related-formatter.ts                     |    3.57 |   32.37 | 96-111,121,131-133,143-159,163-164,168,172,183-207,211-212,216,220,229-243,247-248,252,256,265-269,273-274,278,282,293,297-309,313-315,319,323\n src\\presentation\\cli\\formatters\\show-formatter.ts                        |    0.00 |   13.92 | 67-82,90-91,101-132,140-149,156-184,191-219,233-235,239-240,244,255-267,271-272,276,285-318,322-323,327,336-343,347-348,352,363-400,404-406,410,423-455,459-460,464\n src\\presentation\\cli\\formatters\\stats-formatter.ts                       |    0.00 |   14.80 | 61-68,79,90-103,117-123,127-128,132,143-177,181-182,186,195-219,223-224,228-236,245-251,255-256,260,271-316,320-322,326\n src\\presentation\\cli\\formatters\\text-width.ts                            |    0.00 |   13.89 | 15,23-44,52-54,62,75-78\n src\\presentation\\cli\\formatters\\timestamp-formatter.ts                   |    0.00 |    9.38 | 15-61,71-77,90-93\n src\\presentation\\cli\\parsers\\date-parser.ts                              |  100.00 |   55.56 | 38-40,53,57-58,60-64,66\n--------------------------------------------------------------------------|---------|---------|-------------------\n\n 44 pass\n 0 fail\n 144 expect() calls\nRan 44 tests across 7 files. [3.37s]\n"
+      }
+    ],
+    "sourceInputs": [
+      {
+        "path": "tests/helpers/capture-json.ts",
+        "sourceHash": "11814452b101fd1cd9f9c59026da8d47c970b81fce5efce7b8482da159d52040"
+      },
+      {
+        "path": "tests/helpers/capture-json.test.ts",
+        "sourceHash": "2632746c717926b2c086ca06fd44028a768eb29a8c3f1d1be9e8c06af398c60f"
+      },
+      {
+        "path": "tests/helpers/owned-test-directory.ts",
+        "sourceHash": "c01eaafd0469da23d08b13fd9ac6277e8654309018f4dc4653e8b7a1892cdfe6"
+      },
+      {
+        "path": "src/presentation/cli/commands/search.json.test.ts",
+        "sourceHash": "f603939eacb8948378b4a2647de083dbcdf4684006aaddbe8b4165f794ed1fb7"
+      },
+      {
+        "path": "src/presentation/cli/commands/context.json.test.ts",
+        "sourceHash": "dac8d7072c4889e92c01b7078b6ddb23e6d39ff5ac76f94010a5d4cc25be55a3"
+      },
+      {
+        "path": "src/presentation/cli/commands/show.json.test.ts",
+        "sourceHash": "c202424142b4c0080b6576b0a71329b3c7232f14ac099c7e4d0116b1e5069f13"
+      },
+      {
+        "path": "src/presentation/cli/commands/list.json.test.ts",
+        "sourceHash": "09532928fa18e3e9e94c37b03cec933c71c8af345432d292f9c87015442a82ff"
+      },
+      {
+        "path": "src/presentation/cli/commands/related.json.test.ts",
+        "sourceHash": "98967cd253245d49ed4b69c51f2e390655fbe9719d931522910e9a059df7cafa"
+      },
+      {
+        "path": "src/presentation/cli/commands/stats.json.test.ts",
+        "sourceHash": "cc8c2539616884c670a9bbcff39e9718b2b27f20b4f9924a62fdb67cd646e47e"
+      }
+    ]
+  },
+  "measurement": {
+    "scope": "Local diagnostic; B05 instrumenter acceptance and independent review remain open. No package/native acceptance.",
+    "recordedAt": "2026-09-20T04:35:09.613Z",
+    "runtime": "1.4.1",
+    "files": [
+      {
+        "path": "tests/helpers/capture-json.ts",
+        "sourceHash": "11814452b101fd1cd9f9c59026da8d47c970b81fce5efce7b8482da159d52040",
+        "metrics": {
+          "lines": {
+            "total": 32,
+            "covered": 32,
+            "skipped": 0,
+            "pct": 100
+          },
+          "functions": {
+            "total": 9,
+            "covered": 9,
+            "skipped": 0,
+            "pct": 100
+          },
+          "statements": {
+            "total": 37,
+            "covered": 37,
+            "skipped": 0,
+            "pct": 100
+          },
+          "branches": {
+            "total": 11,
+            "covered": 11,
+            "skipped": 0,
+            "pct": 100
+          }
+        },
+        "uncoveredBranches": [],
+        "uncoveredFunctions": []
+      },
+      {
+        "path": "tests/helpers/capture-json.test.ts",
+        "sourceHash": "2632746c717926b2c086ca06fd44028a768eb29a8c3f1d1be9e8c06af398c60f",
+        "metrics": {
+          "lines": {
+            "total": 103,
+            "covered": 103,
+            "skipped": 0,
+            "pct": 100
+          },
+          "functions": {
+            "total": 23,
+            "covered": 23,
+            "skipped": 0,
+            "pct": 100
+          },
+          "statements": {
+            "total": 122,
+            "covered": 122,
+            "skipped": 0,
+            "pct": 100
+          },
+          "branches": {
+            "total": 2,
+            "covered": 2,
+            "skipped": 0,
+            "pct": 100
+          }
+        },
+        "uncoveredBranches": [],
+        "uncoveredFunctions": []
+      }
+    ],
+    "rawCoverage": {
+      "C:\\Projects\\memory-nexus\\tests\\helpers\\capture-json.ts": {
+        "path": "C:\\Projects\\memory-nexus\\tests\\helpers\\capture-json.ts",
+        "statementMap": {
+          "0": {
+            "start": {
+              "line": 33,
+              "column": 33
+            },
+            "end": {
+              "line": 33,
+              "column": 35
+            }
+          },
+          "1": {
+            "start": {
+              "line": 34,
+              "column": 33
+            },
+            "end": {
+              "line": 34,
+              "column": 35
+            }
+          },
+          "2": {
+            "start": {
+              "line": 35,
+              "column": 14
+            },
+            "end": {
+              "line": 35,
+              "column": 25
+            }
+          },
+          "3": {
+            "start": {
+              "line": 36,
+              "column": 14
+            },
+            "end": {
+              "line": 36,
+              "column": 27
+            }
+          },
+          "4": {
+            "start": {
+              "line": 37,
+              "column": 2
+            },
+            "end": {
+              "line": 38,
+              "column": 90
+            }
+          },
+          "5": {
+            "start": {
+              "line": 38,
+              "column": 4
+            },
+            "end": {
+              "line": 38,
+              "column": 89
+            }
+          },
+          "6": {
+            "start": {
+              "line": 38,
+              "column": 39
+            },
+            "end": {
+              "line": 38,
+              "column": 76
+            }
+          },
+          "7": {
+            "start": {
+              "line": 39,
+              "column": 2
+            },
+            "end": {
+              "line": 40,
+              "column": 90
+            }
+          },
+          "8": {
+            "start": {
+              "line": 40,
+              "column": 4
+            },
+            "end": {
+              "line": 40,
+              "column": 89
+            }
+          },
+          "9": {
+            "start": {
+              "line": 40,
+              "column": 39
+            },
+            "end": {
+              "line": 40,
+              "column": 76
+            }
+          },
+          "10": {
+            "start": {
+              "line": 41,
+              "column": 2
+            },
+            "end": {
+              "line": 52,
+              "column": 3
+            }
+          },
+          "11": {
+            "start": {
+              "line": 42,
+              "column": 19
+            },
+            "end": {
+              "line": 42,
+              "column": 29
+            }
+          },
+          "12": {
+            "start": {
+              "line": 43,
+              "column": 33
+            },
+            "end": {
+              "line": 46,
+              "column": 5
+            }
+          },
+          "13": {
+            "start": {
+              "line": 47,
+              "column": 4
+            },
+            "end": {
+              "line": 47,
+              "column": 71
+            }
+          },
+          "14": {
+            "start": {
+              "line": 47,
+              "column": 40
+            },
+            "end": {
+              "line": 47,
+              "column": 71
+            }
+          },
+          "15": {
+            "start": {
+              "line": 48,
+              "column": 4
+            },
+            "end": {
+              "line": 48,
+              "column": 15
+            }
+          },
+          "16": {
+            "start": {
+              "line": 50,
+              "column": 4
+            },
+            "end": {
+              "line": 50,
+              "column": 22
+            }
+          },
+          "17": {
+            "start": {
+              "line": 51,
+              "column": 4
+            },
+            "end": {
+              "line": 51,
+              "column": 24
+            }
+          },
+          "18": {
+            "start": {
+              "line": 62,
+              "column": 16
+            },
+            "end": {
+              "line": 62,
+              "column": 45
+            }
+          },
+          "19": {
+            "start": {
+              "line": 63,
+              "column": 2
+            },
+            "end": {
+              "line": 88,
+              "column": 4
+            }
+          },
+          "20": {
+            "start": {
+              "line": 65,
+              "column": 22
+            },
+            "end": {
+              "line": 65,
+              "column": 57
+            }
+          },
+          "21": {
+            "start": {
+              "line": 66,
+              "column": 6
+            },
+            "end": {
+              "line": 66,
+              "column": 25
+            }
+          },
+          "22": {
+            "start": {
+              "line": 67,
+              "column": 6
+            },
+            "end": {
+              "line": 67,
+              "column": 44
+            }
+          },
+          "23": {
+            "start": {
+              "line": 70,
+              "column": 22
+            },
+            "end": {
+              "line": 70,
+              "column": 32
+            }
+          },
+          "24": {
+            "start": {
+              "line": 71,
+              "column": 6
+            },
+            "end": {
+              "line": 71,
+              "column": 39
+            }
+          },
+          "25": {
+            "start": {
+              "line": 71,
+              "column": 32
+            },
+            "end": {
+              "line": 71,
+              "column": 39
+            }
+          },
+          "26": {
+            "start": {
+              "line": 73,
+              "column": 6
+            },
+            "end": {
+              "line": 73,
+              "column": 19
+            }
+          },
+          "27": {
+            "start": {
+              "line": 74,
+              "column": 6
+            },
+            "end": {
+              "line": 74,
+              "column": 27
+            }
+          },
+          "28": {
+            "start": {
+              "line": 75,
+              "column": 32
+            },
+            "end": {
+              "line": 75,
+              "column": 34
+            }
+          },
+          "29": {
+            "start": {
+              "line": 76,
+              "column": 6
+            },
+            "end": {
+              "line": 83,
+              "column": 7
+            }
+          },
+          "30": {
+            "start": {
+              "line": 77,
+              "column": 8
+            },
+            "end": {
+              "line": 82,
+              "column": 9
+            }
+          },
+          "31": {
+            "start": {
+              "line": 78,
+              "column": 10
+            },
+            "end": {
+              "line": 78,
+              "column": 28
+            }
+          },
+          "32": {
+            "start": {
+              "line": 79,
+              "column": 10
+            },
+            "end": {
+              "line": 79,
+              "column": 32
+            }
+          },
+          "33": {
+            "start": {
+              "line": 81,
+              "column": 10
+            },
+            "end": {
+              "line": 81,
+              "column": 92
+            }
+          },
+          "34": {
+            "start": {
+              "line": 84,
+              "column": 6
+            },
+            "end": {
+              "line": 86,
+              "column": 7
+            }
+          },
+          "35": {
+            "start": {
+              "line": 85,
+              "column": 8
+            },
+            "end": {
+              "line": 85,
+              "column": 92
+            }
+          },
+          "36": {
+            "start": {
+              "line": 85,
+              "column": 65
+            },
+            "end": {
+              "line": 85,
+              "column": 78
+            }
+          }
+        },
+        "fnMap": {
+          "0": {
+            "name": "captureStreams",
+            "decl": {
+              "start": {
+                "line": 30,
+                "column": 22
+              },
+              "end": {
+                "line": 30,
+                "column": 36
+              }
+            },
+            "loc": {
+              "start": {
+                "line": 32,
+                "column": 28
+              },
+              "end": {
+                "line": 53,
+                "column": 1
+              }
+            },
+            "line": 32
+          },
+          "1": {
+            "name": "(anonymous_1)",
+            "decl": {
+              "start": {
+                "line": 37,
+                "column": 16
+              },
+              "end": {
+                "line": 37,
+                "column": 17
+              }
+            },
+            "loc": {
+              "start": {
+                "line": 38,
+                "column": 4
+              },
+              "end": {
+                "line": 38,
+                "column": 89
+              }
+            },
+            "line": 38
+          },
+          "2": {
+            "name": "(anonymous_2)",
+            "decl": {
+              "start": {
+                "line": 38,
+                "column": 31
+              },
+              "end": {
+                "line": 38,
+                "column": 32
+              }
+            },
+            "loc": {
+              "start": {
+                "line": 38,
+                "column": 39
+              },
+              "end": {
+                "line": 38,
+                "column": 76
+              }
+            },
+            "line": 38
+          },
+          "3": {
+            "name": "(anonymous_3)",
+            "decl": {
+              "start": {
+                "line": 39,
+                "column": 18
+              },
+              "end": {
+                "line": 39,
+                "column": 19
+              }
+            },
+            "loc": {
+              "start": {
+                "line": 40,
+                "column": 4
+              },
+              "end": {
+                "line": 40,
+                "column": 89
+              }
+            },
+            "line": 40
+          },
+          "4": {
+            "name": "(anonymous_4)",
+            "decl": {
+              "start": {
+                "line": 40,
+                "column": 31
+              },
+              "end": {
+                "line": 40,
+                "column": 32
+              }
+            },
+            "loc": {
+              "start": {
+                "line": 40,
+                "column": 39
+              },
+              "end": {
+                "line": 40,
+                "column": 76
+              }
+            },
+            "line": 40
+          },
+          "5": {
+            "name": "createTempDatabaseTracker",
+            "decl": {
+              "start": {
+                "line": 59,
+                "column": 16
+              },
+              "end": {
+                "line": 59,
+                "column": 41
+              }
+            },
+            "loc": {
+              "start": {
+                "line": 61,
+                "column": 2
+              },
+              "end": {
+                "line": 89,
+                "column": 1
+              }
+            },
+            "line": 61
+          },
+          "6": {
+            "name": "(anonymous_6)",
+            "decl": {
+              "start": {
+                "line": 64,
+                "column": 4
+              },
+              "end": {
+                "line": 64,
+                "column": 5
+              }
+            },
+            "loc": {
+              "start": {
+                "line": 64,
+                "column": 38
+              },
+              "end": {
+                "line": 68,
+                "column": 5
+              }
+            },
+            "line": 64
+          },
+          "7": {
+            "name": "(anonymous_7)",
+            "decl": {
+              "start": {
+                "line": 69,
+                "column": 4
+              },
+              "end": {
+                "line": 69,
+                "column": 5
+              }
+            },
+            "loc": {
+              "start": {
+                "line": 69,
+                "column": 35
+              },
+              "end": {
+                "line": 87,
+                "column": 5
+              }
+            },
+            "line": 69
+          },
+          "8": {
+            "name": "(anonymous_8)",
+            "decl": {
+              "start": {
+                "line": 85,
+                "column": 56
+              },
+              "end": {
+                "line": 85,
+                "column": 57
+              }
+            },
+            "loc": {
+              "start": {
+                "line": 85,
+                "column": 65
+              },
+              "end": {
+                "line": 85,
+                "column": 78
+              }
+            },
+            "line": 85
+          }
+        },
+        "branchMap": {
+          "0": {
+            "loc": {
+              "start": {
+                "line": 38,
+                "column": 39
+              },
+              "end": {
+                "line": 38,
+                "column": 76
+              }
+            },
+            "type": "cond-expr",
+            "locations": [
+              {
+                "start": {
+                  "line": 38,
+                  "column": 63
+                },
+                "end": {
+                  "line": 38,
+                  "column": 64
+                }
+              },
+              {
+                "start": {
+                  "line": 38,
+                  "column": 67
+                },
+                "end": {
+                  "line": 38,
+                  "column": 76
+                }
+              }
+            ],
+            "line": 38
+          },
+          "1": {
+            "loc": {
+              "start": {
+                "line": 40,
+                "column": 39
+              },
+              "end": {
+                "line": 40,
+                "column": 76
+              }
+            },
+            "type": "cond-expr",
+            "locations": [
+              {
+                "start": {
+                  "line": 40,
+                  "column": 63
+                },
+                "end": {
+                  "line": 40,
+                  "column": 64
+                }
+              },
+              {
+                "start": {
+                  "line": 40,
+                  "column": 67
+                },
+                "end": {
+                  "line": 40,
+                  "column": 76
+                }
+              }
+            ],
+            "line": 40
+          },
+          "2": {
+            "loc": {
+              "start": {
+                "line": 47,
+                "column": 4
+              },
+              "end": {
+                "line": 47,
+                "column": 71
+              }
+            },
+            "type": "if",
+            "locations": [
+              {
+                "start": {
+                  "line": 47,
+                  "column": 4
+                },
+                "end": {
+                  "line": 47,
+                  "column": 71
+                }
+              },
+              {
+                "start": {},
+                "end": {}
+              }
+            ],
+            "line": 47
+          },
+          "3": {
+            "loc": {
+              "start": {
+                "line": 60,
+                "column": 2
+              },
+              "end": {
+                "line": 60,
+                "column": 77
+              }
+            },
+            "type": "default-arg",
+            "locations": [
+              {
+                "start": {
+                  "line": 60,
+                  "column": 53
+                },
+                "end": {
+                  "line": 60,
+                  "column": 77
+                }
+              }
+            ],
+            "line": 60
+          },
+          "4": {
+            "loc": {
+              "start": {
+                "line": 71,
+                "column": 6
+              },
+              "end": {
+                "line": 71,
+                "column": 39
+              }
+            },
+            "type": "if",
+            "locations": [
+              {
+                "start": {
+                  "line": 71,
+                  "column": 6
+                },
+                "end": {
+                  "line": 71,
+                  "column": 39
+                }
+              },
+              {
+                "start": {},
+                "end": {}
+              }
+            ],
+            "line": 71
+          },
+          "5": {
+            "loc": {
+              "start": {
+                "line": 84,
+                "column": 6
+              },
+              "end": {
+                "line": 86,
+                "column": 7
+              }
+            },
+            "type": "if",
+            "locations": [
+              {
+                "start": {
+                  "line": 84,
+                  "column": 6
+                },
+                "end": {
+                  "line": 86,
+                  "column": 7
+                }
+              },
+              {
+                "start": {},
+                "end": {}
+              }
+            ],
+            "line": 84
+          }
+        },
+        "s": {
+          "0": 4,
+          "1": 4,
+          "2": 4,
+          "3": 4,
+          "4": 4,
+          "5": 2,
+          "6": 4,
+          "7": 4,
+          "8": 1,
+          "9": 2,
+          "10": 4,
+          "11": 4,
+          "12": 3,
+          "13": 3,
+          "14": 1,
+          "15": 3,
+          "16": 4,
+          "17": 4,
+          "18": 7,
+          "19": 7,
+          "20": 12,
+          "21": 7,
+          "22": 7,
+          "23": 13,
+          "24": 13,
+          "25": 6,
+          "26": 7,
+          "27": 7,
+          "28": 7,
+          "29": 7,
+          "30": 10,
+          "31": 10,
+          "32": 7,
+          "33": 3,
+          "34": 7,
+          "35": 2,
+          "36": 3
+        },
+        "f": {
+          "0": 4,
+          "1": 2,
+          "2": 4,
+          "3": 1,
+          "4": 2,
+          "5": 7,
+          "6": 12,
+          "7": 13,
+          "8": 3
+        },
+        "b": {
+          "0": [
+            2,
+            2
+          ],
+          "1": [
+            1,
+            1
+          ],
+          "2": [
+            1,
+            2
+          ],
+          "3": [
+            4
+          ],
+          "4": [
+            6,
+            7
+          ],
+          "5": [
+            2,
+            5
+          ]
+        },
+        "_coverageSchema": "1a1c01bbd47fc00a2c39e90264f33305004495a9",
+        "hash": "8b70dd058fce6d084bf466730efc5a561442ccfe"
+      },
+      "C:\\Projects\\memory-nexus\\tests\\helpers\\capture-json.test.ts": {
+        "path": "C:\\Projects\\memory-nexus\\tests\\helpers\\capture-json.test.ts",
+        "statementMap": {
+          "0": {
+            "start": {
+              "line": 7,
+              "column": 0
+            },
+            "end": {
+              "line": 143,
+              "column": 3
+            }
+          },
+          "1": {
+            "start": {
+              "line": 8,
+              "column": 2
+            },
+            "end": {
+              "line": 15,
+              "column": 5
+            }
+          },
+          "2": {
+            "start": {
+              "line": 9,
+              "column": 21
+            },
+            "end": {
+              "line": 13,
+              "column": 6
+            }
+          },
+          "3": {
+            "start": {
+              "line": 10,
+              "column": 6
+            },
+            "end": {
+              "line": 10,
+              "column": 47
+            }
+          },
+          "4": {
+            "start": {
+              "line": 11,
+              "column": 6
+            },
+            "end": {
+              "line": 11,
+              "column": 38
+            }
+          },
+          "5": {
+            "start": {
+              "line": 12,
+              "column": 6
+            },
+            "end": {
+              "line": 12,
+              "column": 29
+            }
+          },
+          "6": {
+            "start": {
+              "line": 14,
+              "column": 4
+            },
+            "end": {
+              "line": 14,
+              "column": 109
+            }
+          },
+          "7": {
+            "start": {
+              "line": 17,
+              "column": 2
+            },
+            "end": {
+              "line": 20,
+              "column": 5
+            }
+          },
+          "8": {
+            "start": {
+              "line": 18,
+              "column": 4
+            },
+            "end": {
+              "line": 18,
+              "column": 92
+            }
+          },
+          "9": {
+            "start": {
+              "line": 18,
+              "column": 44
+            },
+            "end": {
+              "line": 18,
+              "column": 53
+            }
+          },
+          "10": {
+            "start": {
+              "line": 19,
+              "column": 4
+            },
+            "end": {
+              "line": 19,
+              "column": 87
+            }
+          },
+          "11": {
+            "start": {
+              "line": 19,
+              "column": 45
+            },
+            "end": {
+              "line": 19,
+              "column": 47
+            }
+          },
+          "12": {
+            "start": {
+              "line": 22,
+              "column": 2
+            },
+            "end": {
+              "line": 30,
+              "column": 5
+            }
+          },
+          "13": {
+            "start": {
+              "line": 23,
+              "column": 16
+            },
+            "end": {
+              "line": 23,
+              "column": 27
+            }
+          },
+          "14": {
+            "start": {
+              "line": 23,
+              "column": 37
+            },
+            "end": {
+              "line": 23,
+              "column": 50
+            }
+          },
+          "15": {
+            "start": {
+              "line": 23,
+              "column": 62
+            },
+            "end": {
+              "line": 23,
+              "column": 79
+            }
+          },
+          "16": {
+            "start": {
+              "line": 24,
+              "column": 4
+            },
+            "end": {
+              "line": 27,
+              "column": 30
+            }
+          },
+          "17": {
+            "start": {
+              "line": 25,
+              "column": 6
+            },
+            "end": {
+              "line": 25,
+              "column": 34
+            }
+          },
+          "18": {
+            "start": {
+              "line": 26,
+              "column": 6
+            },
+            "end": {
+              "line": 26,
+              "column": 20
+            }
+          },
+          "19": {
+            "start": {
+              "line": 28,
+              "column": 4
+            },
+            "end": {
+              "line": 28,
+              "column": 34
+            }
+          },
+          "20": {
+            "start": {
+              "line": 29,
+              "column": 4
+            },
+            "end": {
+              "line": 29,
+              "column": 38
+            }
+          },
+          "21": {
+            "start": {
+              "line": 32,
+              "column": 2
+            },
+            "end": {
+              "line": 43,
+              "column": 5
+            }
+          },
+          "22": {
+            "start": {
+              "line": 33,
+              "column": 20
+            },
+            "end": {
+              "line": 33,
+              "column": 47
+            }
+          },
+          "23": {
+            "start": {
+              "line": 34,
+              "column": 15
+            },
+            "end": {
+              "line": 34,
+              "column": 41
+            }
+          },
+          "24": {
+            "start": {
+              "line": 35,
+              "column": 4
+            },
+            "end": {
+              "line": 42,
+              "column": 42
+            }
+          },
+          "25": {
+            "start": {
+              "line": 36,
+              "column": 6
+            },
+            "end": {
+              "line": 36,
+              "column": 41
+            }
+          },
+          "26": {
+            "start": {
+              "line": 37,
+              "column": 6
+            },
+            "end": {
+              "line": 37,
+              "column": 49
+            }
+          },
+          "27": {
+            "start": {
+              "line": 38,
+              "column": 6
+            },
+            "end": {
+              "line": 38,
+              "column": 89
+            }
+          },
+          "28": {
+            "start": {
+              "line": 38,
+              "column": 49
+            },
+            "end": {
+              "line": 38,
+              "column": 89
+            }
+          },
+          "29": {
+            "start": {
+              "line": 39,
+              "column": 6
+            },
+            "end": {
+              "line": 39,
+              "column": 30
+            }
+          },
+          "30": {
+            "start": {
+              "line": 40,
+              "column": 6
+            },
+            "end": {
+              "line": 40,
+              "column": 50
+            }
+          },
+          "31": {
+            "start": {
+              "line": 41,
+              "column": 6
+            },
+            "end": {
+              "line": 41,
+              "column": 30
+            }
+          },
+          "32": {
+            "start": {
+              "line": 42,
+              "column": 16
+            },
+            "end": {
+              "line": 42,
+              "column": 40
+            }
+          },
+          "33": {
+            "start": {
+              "line": 45,
+              "column": 2
+            },
+            "end": {
+              "line": 56,
+              "column": 5
+            }
+          },
+          "34": {
+            "start": {
+              "line": 46,
+              "column": 20
+            },
+            "end": {
+              "line": 46,
+              "column": 68
+            }
+          },
+          "35": {
+            "start": {
+              "line": 47,
+              "column": 21
+            },
+            "end": {
+              "line": 47,
+              "column": 52
+            }
+          },
+          "36": {
+            "start": {
+              "line": 48,
+              "column": 4
+            },
+            "end": {
+              "line": 48,
+              "column": 54
+            }
+          },
+          "37": {
+            "start": {
+              "line": 49,
+              "column": 20
+            },
+            "end": {
+              "line": 49,
+              "column": 47
+            }
+          },
+          "38": {
+            "start": {
+              "line": 50,
+              "column": 4
+            },
+            "end": {
+              "line": 55,
+              "column": 36
+            }
+          },
+          "39": {
+            "start": {
+              "line": 52,
+              "column": 6
+            },
+            "end": {
+              "line": 52,
+              "column": 66
+            }
+          },
+          "40": {
+            "start": {
+              "line": 53,
+              "column": 6
+            },
+            "end": {
+              "line": 53,
+              "column": 76
+            }
+          },
+          "41": {
+            "start": {
+              "line": 54,
+              "column": 6
+            },
+            "end": {
+              "line": 54,
+              "column": 88
+            }
+          },
+          "42": {
+            "start": {
+              "line": 54,
+              "column": 19
+            },
+            "end": {
+              "line": 54,
+              "column": 45
+            }
+          },
+          "43": {
+            "start": {
+              "line": 55,
+              "column": 16
+            },
+            "end": {
+              "line": 55,
+              "column": 34
+            }
+          },
+          "44": {
+            "start": {
+              "line": 58,
+              "column": 2
+            },
+            "end": {
+              "line": 63,
+              "column": 5
+            }
+          },
+          "45": {
+            "start": {
+              "line": 59,
+              "column": 20
+            },
+            "end": {
+              "line": 59,
+              "column": 47
+            }
+          },
+          "46": {
+            "start": {
+              "line": 60,
+              "column": 4
+            },
+            "end": {
+              "line": 62,
+              "column": 5
+            }
+          },
+          "47": {
+            "start": {
+              "line": 61,
+              "column": 6
+            },
+            "end": {
+              "line": 61,
+              "column": 85
+            }
+          },
+          "48": {
+            "start": {
+              "line": 61,
+              "column": 19
+            },
+            "end": {
+              "line": 61,
+              "column": 42
+            }
+          },
+          "49": {
+            "start": {
+              "line": 65,
+              "column": 2
+            },
+            "end": {
+              "line": 70,
+              "column": 5
+            }
+          },
+          "50": {
+            "start": {
+              "line": 66,
+              "column": 20
+            },
+            "end": {
+              "line": 66,
+              "column": 55
+            }
+          },
+          "51": {
+            "start": {
+              "line": 67,
+              "column": 20
+            },
+            "end": {
+              "line": 67,
+              "column": 71
+            }
+          },
+          "52": {
+            "start": {
+              "line": 67,
+              "column": 54
+            },
+            "end": {
+              "line": 67,
+              "column": 68
+            }
+          },
+          "53": {
+            "start": {
+              "line": 68,
+              "column": 4
+            },
+            "end": {
+              "line": 68,
+              "column": 62
+            }
+          },
+          "54": {
+            "start": {
+              "line": 68,
+              "column": 17
+            },
+            "end": {
+              "line": 68,
+              "column": 43
+            }
+          },
+          "55": {
+            "start": {
+              "line": 69,
+              "column": 4
+            },
+            "end": {
+              "line": 69,
+              "column": 28
+            }
+          },
+          "56": {
+            "start": {
+              "line": 72,
+              "column": 2
+            },
+            "end": {
+              "line": 93,
+              "column": 5
+            }
+          },
+          "57": {
+            "start": {
+              "line": 73,
+              "column": 21
+            },
+            "end": {
+              "line": 73,
+              "column": 70
+            }
+          },
+          "58": {
+            "start": {
+              "line": 74,
+              "column": 20
+            },
+            "end": {
+              "line": 74,
+              "column": 61
+            }
+          },
+          "59": {
+            "start": {
+              "line": 74,
+              "column": 52
+            },
+            "end": {
+              "line": 74,
+              "column": 60
+            }
+          },
+          "60": {
+            "start": {
+              "line": 75,
+              "column": 15
+            },
+            "end": {
+              "line": 75,
+              "column": 41
+            }
+          },
+          "61": {
+            "start": {
+              "line": 76,
+              "column": 18
+            },
+            "end": {
+              "line": 76,
+              "column": 44
+            }
+          },
+          "62": {
+            "start": {
+              "line": 77,
+              "column": 4
+            },
+            "end": {
+              "line": 77,
+              "column": 36
+            }
+          },
+          "63": {
+            "start": {
+              "line": 78,
+              "column": 4
+            },
+            "end": {
+              "line": 78,
+              "column": 28
+            }
+          },
+          "64": {
+            "start": {
+              "line": 79,
+              "column": 21
+            },
+            "end": {
+              "line": 79,
+              "column": 54
+            }
+          },
+          "65": {
+            "start": {
+              "line": 80,
+              "column": 4
+            },
+            "end": {
+              "line": 80,
+              "column": 56
+            }
+          },
+          "66": {
+            "start": {
+              "line": 81,
+              "column": 4
+            },
+            "end": {
+              "line": 91,
+              "column": 5
+            }
+          },
+          "67": {
+            "start": {
+              "line": 82,
+              "column": 6
+            },
+            "end": {
+              "line": 82,
+              "column": 68
+            }
+          },
+          "68": {
+            "start": {
+              "line": 83,
+              "column": 6
+            },
+            "end": {
+              "line": 83,
+              "column": 78
+            }
+          },
+          "69": {
+            "start": {
+              "line": 84,
+              "column": 6
+            },
+            "end": {
+              "line": 84,
+              "column": 43
+            }
+          },
+          "70": {
+            "start": {
+              "line": 87,
+              "column": 6
+            },
+            "end": {
+              "line": 87,
+              "column": 27
+            }
+          },
+          "71": {
+            "start": {
+              "line": 88,
+              "column": 6
+            },
+            "end": {
+              "line": 88,
+              "column": 30
+            }
+          },
+          "72": {
+            "start": {
+              "line": 89,
+              "column": 6
+            },
+            "end": {
+              "line": 89,
+              "column": 38
+            }
+          },
+          "73": {
+            "start": {
+              "line": 90,
+              "column": 6
+            },
+            "end": {
+              "line": 90,
+              "column": 30
+            }
+          },
+          "74": {
+            "start": {
+              "line": 92,
+              "column": 4
+            },
+            "end": {
+              "line": 92,
+              "column": 48
+            }
+          },
+          "75": {
+            "start": {
+              "line": 95,
+              "column": 2
+            },
+            "end": {
+              "line": 128,
+              "column": 5
+            }
+          },
+          "76": {
+            "start": {
+              "line": 96,
+              "column": 17
+            },
+            "end": {
+              "line": 96,
+              "column": 21
+            }
+          },
+          "77": {
+            "start": {
+              "line": 97,
+              "column": 21
+            },
+            "end": {
+              "line": 97,
+              "column": 67
+            }
+          },
+          "78": {
+            "start": {
+              "line": 98,
+              "column": 20
+            },
+            "end": {
+              "line": 103,
+              "column": 7
+            }
+          },
+          "79": {
+            "start": {
+              "line": 98,
+              "column": 44
+            },
+            "end": {
+              "line": 103,
+              "column": 6
+            }
+          },
+          "80": {
+            "start": {
+              "line": 100,
+              "column": 8
+            },
+            "end": {
+              "line": 100,
+              "column": 34
+            }
+          },
+          "81": {
+            "start": {
+              "line": 100,
+              "column": 20
+            },
+            "end": {
+              "line": 100,
+              "column": 34
+            }
+          },
+          "82": {
+            "start": {
+              "line": 101,
+              "column": 8
+            },
+            "end": {
+              "line": 101,
+              "column": 56
+            }
+          },
+          "83": {
+            "start": {
+              "line": 104,
+              "column": 20
+            },
+            "end": {
+              "line": 104,
+              "column": 68
+            }
+          },
+          "84": {
+            "start": {
+              "line": 105,
+              "column": 18
+            },
+            "end": {
+              "line": 105,
+              "column": 39
+            }
+          },
+          "85": {
+            "start": {
+              "line": 106,
+              "column": 20
+            },
+            "end": {
+              "line": 106,
+              "column": 67
+            }
+          },
+          "86": {
+            "start": {
+              "line": 106,
+              "column": 52
+            },
+            "end": {
+              "line": 106,
+              "column": 66
+            }
+          },
+          "87": {
+            "start": {
+              "line": 107,
+              "column": 4
+            },
+            "end": {
+              "line": 107,
+              "column": 59
+            }
+          },
+          "88": {
+            "start": {
+              "line": 107,
+              "column": 17
+            },
+            "end": {
+              "line": 107,
+              "column": 18
+            }
+          },
+          "89": {
+            "start": {
+              "line": 107,
+              "column": 32
+            },
+            "end": {
+              "line": 107,
+              "column": 59
+            }
+          },
+          "90": {
+            "start": {
+              "line": 108,
+              "column": 4
+            },
+            "end": {
+              "line": 127,
+              "column": 5
+            }
+          },
+          "91": {
+            "start": {
+              "line": 110,
+              "column": 6
+            },
+            "end": {
+              "line": 110,
+              "column": 72
+            }
+          },
+          "92": {
+            "start": {
+              "line": 110,
+              "column": 12
+            },
+            "end": {
+              "line": 110,
+              "column": 36
+            }
+          },
+          "93": {
+            "start": {
+              "line": 110,
+              "column": 55
+            },
+            "end": {
+              "line": 110,
+              "column": 70
+            }
+          },
+          "94": {
+            "start": {
+              "line": 111,
+              "column": 6
+            },
+            "end": {
+              "line": 111,
+              "column": 52
+            }
+          },
+          "95": {
+            "start": {
+              "line": 112,
+              "column": 24
+            },
+            "end": {
+              "line": 112,
+              "column": 48
+            }
+          },
+          "96": {
+            "start": {
+              "line": 113,
+              "column": 6
+            },
+            "end": {
+              "line": 113,
+              "column": 47
+            }
+          },
+          "97": {
+            "start": {
+              "line": 114,
+              "column": 6
+            },
+            "end": {
+              "line": 118,
+              "column": 7
+            }
+          },
+          "98": {
+            "start": {
+              "line": 115,
+              "column": 8
+            },
+            "end": {
+              "line": 115,
+              "column": 54
+            }
+          },
+          "99": {
+            "start": {
+              "line": 116,
+              "column": 8
+            },
+            "end": {
+              "line": 116,
+              "column": 74
+            }
+          },
+          "100": {
+            "start": {
+              "line": 117,
+              "column": 8
+            },
+            "end": {
+              "line": 117,
+              "column": 48
+            }
+          },
+          "101": {
+            "start": {
+              "line": 119,
+              "column": 6
+            },
+            "end": {
+              "line": 119,
+              "column": 50
+            }
+          },
+          "102": {
+            "start": {
+              "line": 120,
+              "column": 6
+            },
+            "end": {
+              "line": 120,
+              "column": 21
+            }
+          },
+          "103": {
+            "start": {
+              "line": 121,
+              "column": 6
+            },
+            "end": {
+              "line": 121,
+              "column": 30
+            }
+          },
+          "104": {
+            "start": {
+              "line": 122,
+              "column": 6
+            },
+            "end": {
+              "line": 122,
+              "column": 75
+            }
+          },
+          "105": {
+            "start": {
+              "line": 122,
+              "column": 34
+            },
+            "end": {
+              "line": 122,
+              "column": 75
+            }
+          },
+          "106": {
+            "start": {
+              "line": 124,
+              "column": 6
+            },
+            "end": {
+              "line": 124,
+              "column": 21
+            }
+          },
+          "107": {
+            "start": {
+              "line": 125,
+              "column": 6
+            },
+            "end": {
+              "line": 125,
+              "column": 30
+            }
+          },
+          "108": {
+            "start": {
+              "line": 126,
+              "column": 6
+            },
+            "end": {
+              "line": 126,
+              "column": 63
+            }
+          },
+          "109": {
+            "start": {
+              "line": 126,
+              "column": 48
+            },
+            "end": {
+              "line": 126,
+              "column": 63
+            }
+          },
+          "110": {
+            "start": {
+              "line": 130,
+              "column": 2
+            },
+            "end": {
+              "line": 142,
+              "column": 5
+            }
+          },
+          "111": {
+            "start": {
+              "line": 131,
+              "column": 20
+            },
+            "end": {
+              "line": 131,
+              "column": 47
+            }
+          },
+          "112": {
+            "start": {
+              "line": 132,
+              "column": 18
+            },
+            "end": {
+              "line": 132,
+              "column": 43
+            }
+          },
+          "113": {
+            "start": {
+              "line": 133,
+              "column": 4
+            },
+            "end": {
+              "line": 141,
+              "column": 42
+            }
+          },
+          "114": {
+            "start": {
+              "line": 134,
+              "column": 22
+            },
+            "end": {
+              "line": 134,
+              "column": 39
+            }
+          },
+          "115": {
+            "start": {
+              "line": 135,
+              "column": 21
+            },
+            "end": {
+              "line": 135,
+              "column": 47
+            }
+          },
+          "116": {
+            "start": {
+              "line": 136,
+              "column": 6
+            },
+            "end": {
+              "line": 136,
+              "column": 20
+            }
+          },
+          "117": {
+            "start": {
+              "line": 137,
+              "column": 6
+            },
+            "end": {
+              "line": 137,
+              "column": 53
+            }
+          },
+          "118": {
+            "start": {
+              "line": 138,
+              "column": 6
+            },
+            "end": {
+              "line": 138,
+              "column": 53
+            }
+          },
+          "119": {
+            "start": {
+              "line": 139,
+              "column": 6
+            },
+            "end": {
+              "line": 139,
+              "column": 30
+            }
+          },
+          "120": {
+            "start": {
+              "line": 140,
+              "column": 6
+            },
+            "end": {
+              "line": 140,
+              "column": 54
+            }
+          },
+          "121": {
+            "start": {
+              "line": 141,
+              "column": 16
+            },
+            "end": {
+              "line": 141,
+              "column": 40
+            }
+          }
+        },
+        "fnMap": {
+          "0": {
+            "name": "(anonymous_0)",
+            "decl": {
+              "start": {
+                "line": 7,
+                "column": 38
+              },
+              "end": {
+                "line": 7,
+                "column": 39
+              }
+            },
+            "loc": {
+              "start": {
+                "line": 7,
+                "column": 44
+              },
+              "end": {
+                "line": 143,
+                "column": 1
+              }
+            },
+            "line": 7
+          },
+          "1": {
+            "name": "(anonymous_1)",
+            "decl": {
+              "start": {
+                "line": 8,
+                "column": 76
+              },
+              "end": {
+                "line": 8,
+                "column": 77
+              }
+            },
+            "loc": {
+              "start": {
+                "line": 8,
+                "column": 88
+              },
+              "end": {
+                "line": 15,
+                "column": 3
+              }
+            },
+            "line": 8
+          },
+          "2": {
+            "name": "(anonymous_2)",
+            "decl": {
+              "start": {
+                "line": 9,
+                "column": 42
+              },
+              "end": {
+                "line": 9,
+                "column": 43
+              }
+            },
+            "loc": {
+              "start": {
+                "line": 9,
+                "column": 54
+              },
+              "end": {
+                "line": 13,
+                "column": 5
+              }
+            },
+            "line": 9
+          },
+          "3": {
+            "name": "(anonymous_3)",
+            "decl": {
+              "start": {
+                "line": 17,
+                "column": 56
+              },
+              "end": {
+                "line": 17,
+                "column": 57
+              }
+            },
+            "loc": {
+              "start": {
+                "line": 17,
+                "column": 68
+              },
+              "end": {
+                "line": 20,
+                "column": 3
+              }
+            },
+            "line": 17
+          },
+          "4": {
+            "name": "(anonymous_4)",
+            "decl": {
+              "start": {
+                "line": 18,
+                "column": 32
+              },
+              "end": {
+                "line": 18,
+                "column": 33
+              }
+            },
+            "loc": {
+              "start": {
+                "line": 18,
+                "column": 44
+              },
+              "end": {
+                "line": 18,
+                "column": 53
+              }
+            },
+            "line": 18
+          },
+          "5": {
+            "name": "(anonymous_5)",
+            "decl": {
+              "start": {
+                "line": 19,
+                "column": 32
+              },
+              "end": {
+                "line": 19,
+                "column": 33
+              }
+            },
+            "loc": {
+              "start": {
+                "line": 19,
+                "column": 45
+              },
+              "end": {
+                "line": 19,
+                "column": 47
+              }
+            },
+            "line": 19
+          },
+          "6": {
+            "name": "(anonymous_6)",
+            "decl": {
+              "start": {
+                "line": 22,
+                "column": 65
+              },
+              "end": {
+                "line": 22,
+                "column": 66
+              }
+            },
+            "loc": {
+              "start": {
+                "line": 22,
+                "column": 77
+              },
+              "end": {
+                "line": 30,
+                "column": 3
+              }
+            },
+            "line": 22
+          },
+          "7": {
+            "name": "(anonymous_7)",
+            "decl": {
+              "start": {
+                "line": 24,
+                "column": 32
+              },
+              "end": {
+                "line": 24,
+                "column": 33
+              }
+            },
+            "loc": {
+              "start": {
+                "line": 24,
+                "column": 44
+              },
+              "end": {
+                "line": 27,
+                "column": 5
+              }
+            },
+            "line": 24
+          },
+          "8": {
+            "name": "(anonymous_8)",
+            "decl": {
+              "start": {
+                "line": 32,
+                "column": 84
+              },
+              "end": {
+                "line": 32,
+                "column": 85
+              }
+            },
+            "loc": {
+              "start": {
+                "line": 32,
+                "column": 96
+              },
+              "end": {
+                "line": 43,
+                "column": 3
+              }
+            },
+            "line": 32
+          },
+          "9": {
+            "name": "(anonymous_9)",
+            "decl": {
+              "start": {
+                "line": 45,
+                "column": 77
+              },
+              "end": {
+                "line": 45,
+                "column": 78
+              }
+            },
+            "loc": {
+              "start": {
+                "line": 45,
+                "column": 89
+              },
+              "end": {
+                "line": 56,
+                "column": 3
+              }
+            },
+            "line": 45
+          },
+          "10": {
+            "name": "(anonymous_10)",
+            "decl": {
+              "start": {
+                "line": 54,
+                "column": 13
+              },
+              "end": {
+                "line": 54,
+                "column": 14
+              }
+            },
+            "loc": {
+              "start": {
+                "line": 54,
+                "column": 19
+              },
+              "end": {
+                "line": 54,
+                "column": 45
+              }
+            },
+            "line": 54
+          },
+          "11": {
+            "name": "(anonymous_11)",
+            "decl": {
+              "start": {
+                "line": 58,
+                "column": 74
+              },
+              "end": {
+                "line": 58,
+                "column": 75
+              }
+            },
+            "loc": {
+              "start": {
+                "line": 58,
+                "column": 80
+              },
+              "end": {
+                "line": 63,
+                "column": 3
+              }
+            },
+            "line": 58
+          },
+          "12": {
+            "name": "(anonymous_12)",
+            "decl": {
+              "start": {
+                "line": 61,
+                "column": 13
+              },
+              "end": {
+                "line": 61,
+                "column": 14
+              }
+            },
+            "loc": {
+              "start": {
+                "line": 61,
+                "column": 19
+              },
+              "end": {
+                "line": 61,
+                "column": 42
+              }
+            },
+            "line": 61
+          },
+          "13": {
+            "name": "(anonymous_13)",
+            "decl": {
+              "start": {
+                "line": 65,
+                "column": 38
+              },
+              "end": {
+                "line": 65,
+                "column": 39
+              }
+            },
+            "loc": {
+              "start": {
+                "line": 65,
+                "column": 50
+              },
+              "end": {
+                "line": 70,
+                "column": 3
+              }
+            },
+            "line": 65
+          },
+          "14": {
+            "name": "(anonymous_14)",
+            "decl": {
+              "start": {
+                "line": 67,
+                "column": 46
+              },
+              "end": {
+                "line": 67,
+                "column": 47
+              }
+            },
+            "loc": {
+              "start": {
+                "line": 67,
+                "column": 52
+              },
+              "end": {
+                "line": 67,
+                "column": 70
+              }
+            },
+            "line": 67
+          },
+          "15": {
+            "name": "(anonymous_15)",
+            "decl": {
+              "start": {
+                "line": 68,
+                "column": 11
+              },
+              "end": {
+                "line": 68,
+                "column": 12
+              }
+            },
+            "loc": {
+              "start": {
+                "line": 68,
+                "column": 17
+              },
+              "end": {
+                "line": 68,
+                "column": 43
+              }
+            },
+            "line": 68
+          },
+          "16": {
+            "name": "(anonymous_16)",
+            "decl": {
+              "start": {
+                "line": 72,
+                "column": 76
+              },
+              "end": {
+                "line": 72,
+                "column": 77
+              }
+            },
+            "loc": {
+              "start": {
+                "line": 72,
+                "column": 88
+              },
+              "end": {
+                "line": 93,
+                "column": 3
+              }
+            },
+            "line": 72
+          },
+          "17": {
+            "name": "(anonymous_17)",
+            "decl": {
+              "start": {
+                "line": 74,
+                "column": 46
+              },
+              "end": {
+                "line": 74,
+                "column": 47
+              }
+            },
+            "loc": {
+              "start": {
+                "line": 74,
+                "column": 52
+              },
+              "end": {
+                "line": 74,
+                "column": 60
+              }
+            },
+            "line": 74
+          },
+          "18": {
+            "name": "(anonymous_18)",
+            "decl": {
+              "start": {
+                "line": 95,
+                "column": 81
+              },
+              "end": {
+                "line": 95,
+                "column": 82
+              }
+            },
+            "loc": {
+              "start": {
+                "line": 95,
+                "column": 93
+              },
+              "end": {
+                "line": 128,
+                "column": 3
+              }
+            },
+            "line": 95
+          },
+          "19": {
+            "name": "(anonymous_19)",
+            "decl": {
+              "start": {
+                "line": 98,
+                "column": 33
+              },
+              "end": {
+                "line": 98,
+                "column": 34
+              }
+            },
+            "loc": {
+              "start": {
+                "line": 98,
+                "column": 44
+              },
+              "end": {
+                "line": 103,
+                "column": 6
+              }
+            },
+            "line": 98
+          },
+          "20": {
+            "name": "(anonymous_20)",
+            "decl": {
+              "start": {
+                "line": 99,
+                "column": 6
+              },
+              "end": {
+                "line": 99,
+                "column": 7
+              }
+            },
+            "loc": {
+              "start": {
+                "line": 99,
+                "column": 19
+              },
+              "end": {
+                "line": 102,
+                "column": 7
+              }
+            },
+            "line": 99
+          },
+          "21": {
+            "name": "(anonymous_21)",
+            "decl": {
+              "start": {
+                "line": 106,
+                "column": 46
+              },
+              "end": {
+                "line": 106,
+                "column": 47
+              }
+            },
+            "loc": {
+              "start": {
+                "line": 106,
+                "column": 52
+              },
+              "end": {
+                "line": 106,
+                "column": 66
+              }
+            },
+            "line": 106
+          },
+          "22": {
+            "name": "(anonymous_22)",
+            "decl": {
+              "start": {
+                "line": 130,
+                "column": 62
+              },
+              "end": {
+                "line": 130,
+                "column": 63
+              }
+            },
+            "loc": {
+              "start": {
+                "line": 130,
+                "column": 74
+              },
+              "end": {
+                "line": 142,
+                "column": 3
+              }
+            },
+            "line": 130
+          }
+        },
+        "branchMap": {
+          "0": {
+            "loc": {
+              "start": {
+                "line": 100,
+                "column": 8
+              },
+              "end": {
+                "line": 100,
+                "column": 34
+              }
+            },
+            "type": "if",
+            "locations": [
+              {
+                "start": {
+                  "line": 100,
+                  "column": 8
+                },
+                "end": {
+                  "line": 100,
+                  "column": 34
+                }
+              },
+              {
+                "start": {},
+                "end": {}
+              }
+            ],
+            "line": 100
+          }
+        },
+        "s": {
+          "0": 1,
+          "1": 1,
+          "2": 1,
+          "3": 1,
+          "4": 1,
+          "5": 1,
+          "6": 1,
+          "7": 1,
+          "8": 1,
+          "9": 1,
+          "10": 1,
+          "11": 1,
+          "12": 1,
+          "13": 1,
+          "14": 1,
+          "15": 1,
+          "16": 1,
+          "17": 1,
+          "18": 1,
+          "19": 1,
+          "20": 1,
+          "21": 1,
+          "22": 1,
+          "23": 1,
+          "24": 1,
+          "25": 1,
+          "26": 1,
+          "27": 1,
+          "28": 3,
+          "29": 1,
+          "30": 1,
+          "31": 1,
+          "32": 1,
+          "33": 1,
+          "34": 1,
+          "35": 1,
+          "36": 1,
+          "37": 1,
+          "38": 1,
+          "39": 1,
+          "40": 1,
+          "41": 1,
+          "42": 1,
+          "43": 1,
+          "44": 1,
+          "45": 1,
+          "46": 1,
+          "47": 3,
+          "48": 3,
+          "49": 1,
+          "50": 1,
+          "51": 1,
+          "52": 1,
+          "53": 1,
+          "54": 1,
+          "55": 1,
+          "56": 1,
+          "57": 1,
+          "58": 1,
+          "59": 1,
+          "60": 1,
+          "61": 1,
+          "62": 1,
+          "63": 1,
+          "64": 1,
+          "65": 1,
+          "66": 1,
+          "67": 1,
+          "68": 1,
+          "69": 1,
+          "70": 1,
+          "71": 1,
+          "72": 1,
+          "73": 1,
+          "74": 1,
+          "75": 1,
+          "76": 1,
+          "77": 1,
+          "78": 1,
+          "79": 2,
+          "80": 4,
+          "81": 2,
+          "82": 2,
+          "83": 1,
+          "84": 1,
+          "85": 1,
+          "86": 3,
+          "87": 1,
+          "88": 1,
+          "89": 3,
+          "90": 1,
+          "91": 1,
+          "92": 1,
+          "93": 1,
+          "94": 1,
+          "95": 1,
+          "96": 1,
+          "97": 1,
+          "98": 2,
+          "99": 2,
+          "100": 2,
+          "101": 1,
+          "102": 1,
+          "103": 1,
+          "104": 1,
+          "105": 2,
+          "106": 1,
+          "107": 1,
+          "108": 1,
+          "109": 3,
+          "110": 1,
+          "111": 1,
+          "112": 1,
+          "113": 1,
+          "114": 1,
+          "115": 1,
+          "116": 1,
+          "117": 1,
+          "118": 1,
+          "119": 1,
+          "120": 1,
+          "121": 1
+        },
+        "f": {
+          "0": 1,
+          "1": 1,
+          "2": 1,
+          "3": 1,
+          "4": 1,
+          "5": 1,
+          "6": 1,
+          "7": 1,
+          "8": 1,
+          "9": 1,
+          "10": 1,
+          "11": 1,
+          "12": 3,
+          "13": 1,
+          "14": 1,
+          "15": 1,
+          "16": 1,
+          "17": 1,
+          "18": 1,
+          "19": 2,
+          "20": 4,
+          "21": 3,
+          "22": 1
+        },
+        "b": {
+          "0": [
+            2,
+            2
+          ]
+        },
+        "_coverageSchema": "1a1c01bbd47fc00a2c39e90264f33305004495a9",
+        "hash": "812af05c66f944202bb89341322e3e6ecb3f0f48"
+      }
+    },
+    "output": "bun test v1.4.1 (4661e494f)\n\ntests\\helpers\\capture-json.test.ts:\n(pass) capture-json test helpers > captures both streams, non-string arguments, and returned exit code [1.00ms]\n(pass) capture-json test helpers > omits exitCode for undefined or an empty result [0.24ms]\n(pass) capture-json test helpers > restores console methods and preserves a command failure [0.33ms]\n(pass) capture-json test helpers > allocates an absent database in an owned directory and removes its sidecars [15.78ms]\n(pass) capture-json test helpers > cannot acquire deletion authority from caller-provided foreign paths [7.50ms]\n(pass) capture-json test helpers > rejects separators and oversized labels before allocating storage [0.31ms]\n(pass) capture-json test helpers > preserves allocation failures [0.16ms]\n(pass) capture-json test helpers > refuses a replaced directory and retains authority for a safe retry [17.55ms]\n(pass) capture-json test helpers > retains multiple failures and causes while cleaning independent fixtures [24.27ms]\n(pass) capture-json test helpers > does not forget allocations made while cleanup yields [77.12ms]\n\n 10 pass\n 0 fail\n 33 expect() calls\nRan 10 tests across 1 file. [609.00ms]\n",
+    "probeSource": "import {readFileSync, writeFileSync, mkdirSync} from 'node:fs';\nimport {join, resolve} from 'node:path';\nimport {createCoverageMap} from 'istanbul-lib-coverage';\nimport {instrumentTypeScriptWithCoverage} from '../scripts/run-istanbul-bun-coverage';\nimport {createOwnedTestDirectory} from '../tests/helpers/owned-test-directory';\nimport {sourceHash} from '../scripts/quality-inventory';\nconst root=process.cwd(),storage=createOwnedTestDirectory('memory-json-measure-');\nconst paths=['tests/helpers/capture-json.ts','tests/helpers/capture-json.test.ts'];\ntry {\n mkdirSync(join(storage.dir,'tests/helpers'),{recursive:true});\n for(const path of paths){\n  const built=instrumentTypeScriptWithCoverage(readFileSync(path,'utf8'),resolve(path));\n  writeFileSync(join(storage.dir,path),built.code);\n }\n writeFileSync(join(storage.dir,'tests/helpers/owned-test-directory.ts'),readFileSync('tests/helpers/owned-test-directory.ts'));\n writeFileSync(join(storage.dir,'capture.ts'),'import {afterAll} from \"bun:test\"; import {writeFileSync} from \"node:fs\"; afterAll(()=>writeFileSync(\"coverage.json\",JSON.stringify((globalThis as any).__coverage__)));');\n writeFileSync(join(storage.dir,'bunfig.toml'),'[test]\\ncoverage = false\\npreload = ['+JSON.stringify(join(root,'tests/test-setup.ts'))+', \"./capture.ts\"]\\n');\n const result=Bun.spawnSync([process.execPath,'test','--timeout','15000','tests/helpers/capture-json.test.ts'],{cwd:storage.dir,env:{...process.env,TEMP:storage.dir,TMP:storage.dir,TMPDIR:storage.dir},stdout:'pipe',stderr:'pipe',timeout:45000});\n const output=new TextDecoder().decode(result.stdout)+new TextDecoder().decode(result.stderr);\n if(result.exitCode!==0)throw Error(output);\n const raw=JSON.parse(readFileSync(join(storage.dir,'coverage.json'),'utf8')),map=createCoverageMap(raw);\n const files=paths.map(path=>{\n  const measured=map.fileCoverageFor(resolve(path)),data=measured.data;\n  return {path,sourceHash:sourceHash(readFileSync(path,'utf8')),metrics:measured.toSummary().data,\n   uncoveredBranches:Object.entries(data.b).flatMap(([id,hits])=>hits.flatMap((count,index)=>count===0?[{id,index,location:data.branchMap[id]?.locations[index]}]:[])),\n   uncoveredFunctions:Object.entries(data.f).filter(([,hits])=>hits===0).map(([id])=>data.fnMap[id])};\n });\n writeFileSync('.git/b11-json-measure.json',JSON.stringify({scope:'Local diagnostic; B05 instrumenter acceptance and independent review remain open. No package/native acceptance.',recordedAt:new Date().toISOString(),runtime:Bun.version,files,rawCoverage:raw,output,probeSource:readFileSync('.git/b11-json-measure.ts','utf8')},null,2)+'\\n');\n console.log(JSON.stringify(files));\n} finally {storage.cleanup();}\n"
+  },
+  "faults": {
+    "recordedAt": "2026-09-20T04:36:25.092Z",
+    "sourceHash": "11814452b101fd1cd9f9c59026da8d47c970b81fce5efce7b8482da159d52040",
+    "testHash": "2632746c717926b2c086ca06fd44028a768eb29a8c3f1d1be9e8c06af398c60f",
+    "runtime": "1.4.1",
+    "scope": "Local cleanup decision fault checks, not exhaustive mutation or final review.",
+    "results": [
+      {
+        "id": "omit-ownership-registration",
+        "from": "owned.add(storage);",
+        "to": "/* omitted registration */",
+        "detected": true,
+        "exit": 1,
+        "output": "bun test v1.4.1 (4661e494f)\n\ntests\\helpers\\capture-json.test.ts:\n(pass) capture-json test helpers > captures both streams, non-string arguments, and returned exit code [0.49ms]\n(pass) capture-json test helpers > omits exitCode for undefined or an empty result [0.12ms]\n(pass) capture-json test helpers > restores console methods and preserves a command failure [0.20ms]\n35 |     try {\n36 |       expect(existsSync(db)).toBe(false);\n37 |       expect(existsSync(dirname(db))).toBe(true);\n38 |       for (const suffix of [\"\", \"-wal\", \"-shm\"]) writeFileSync(db + suffix, \"synthetic\");\n39 |       await tracker.cleanup();\n40 |       expect(existsSync(dirname(db))).toBe(false);\n                                           ^\nerror: expect(received).toBe(expected)\n\nExpected: false\nReceived: true\n\n      at <anonymous> (C:\\Users\\Destiny\\AppData\\Local\\Temp\\memory-json-fault-urZxvn\\tests\\helpers\\capture-json.test.ts:40:39)\n(fail) capture-json test helpers > allocates an absent database in an owned directory and removes its sidecars [9.06ms]\n(pass) capture-json test helpers > cannot acquire deletion authority from caller-provided foreign paths [9.24ms]\n(pass) capture-json test helpers > rejects separators and oversized labels before allocating storage [0.26ms]\n(pass) capture-json test helpers > preserves allocation failures [0.18ms]\n77 |     renameSync(original.dir, saved);\n78 |     mkdirSync(original.dir);\n79 |     const sentinel = join(original.dir, \"foreign.txt\");\n80 |     writeFileSync(sentinel, \"replacement must survive\");\n81 |     try {\n82 |       await expect(tracker.cleanup()).rejects.toThrow(original.dir);\n                                                   ^\nerror: expect(received).rejects.toThrow(expected)\n\nExpected promise that rejects\nReceived promise that resolved: Promise { <resolved> }\n\n      at <anonymous> (C:\\Users\\Destiny\\AppData\\Local\\Temp\\memory-json-fault-urZxvn\\tests\\helpers\\capture-json.test.ts:82:47)\n(fail) capture-json test helpers > refuses a replaced directory and retains authority for a safe retry [9.76ms]\n106 |     const tracker = createTempDatabaseTracker(() => queue.shift()!);\n107 |     for (let n = 0; n < 3; n++) tracker.makePath(\"helper\");\n108 |     try {\n109 |       let result: unknown;\n110 |       try { await tracker.cleanup(); } catch (error) { result = error; }\n111 |       expect(result).toBeInstanceOf(AggregateError);\n                           ^\nerror: expect(received).toBeInstanceOf(expected)\n\nExpected constructor: [class AggregateError extends Error]\nReceived value: undefined\n\n      at <anonymous> (C:\\Users\\Destiny\\AppData\\Local\\Temp\\memory-json-fault-urZxvn\\tests\\helpers\\capture-json.test.ts:111:22)\n(fail) capture-json test helpers > retains multiple failures and causes while cleaning independent fixtures [20.78ms]\n132 |     const first = tracker.makePath(\"first\");\n133 |     try {\n134 |       const cleanup = tracker.cleanup();\n135 |       const second = tracker.makePath(\"second\");\n136 |       await cleanup;\n137 |       expect(existsSync(dirname(first))).toBe(false);\n                                               ^\nerror: expect(received).toBe(expected)\n\nExpected: false\nReceived: true\n\n      at <anonymous> (C:\\Users\\Destiny\\AppData\\Local\\Temp\\memory-json-fault-urZxvn\\tests\\helpers\\capture-json.test.ts:137:42)\n(fail) capture-json test helpers > does not forget allocations made while cleanup yields [5.02ms]\n\n 6 pass\n 4 fail\n 18 expect() calls\nRan 10 tests across 1 file. [108.00ms]\n"
+      },
+      {
+        "id": "skip-nonempty-cleanup",
+        "from": "if (pending.length === 0) return;",
+        "to": "if (pending.length !== 0) return;",
+        "detected": true,
+        "exit": 1,
+        "output": "bun test v1.4.1 (4661e494f)\n\ntests\\helpers\\capture-json.test.ts:\n(pass) capture-json test helpers > captures both streams, non-string arguments, and returned exit code [0.78ms]\n(pass) capture-json test helpers > omits exitCode for undefined or an empty result [0.20ms]\n(pass) capture-json test helpers > restores console methods and preserves a command failure [0.32ms]\n35 |     try {\n36 |       expect(existsSync(db)).toBe(false);\n37 |       expect(existsSync(dirname(db))).toBe(true);\n38 |       for (const suffix of [\"\", \"-wal\", \"-shm\"]) writeFileSync(db + suffix, \"synthetic\");\n39 |       await tracker.cleanup();\n40 |       expect(existsSync(dirname(db))).toBe(false);\n                                           ^\nerror: expect(received).toBe(expected)\n\nExpected: false\nReceived: true\n\n      at <anonymous> (C:\\Users\\Destiny\\AppData\\Local\\Temp\\memory-json-fault-nlwCgy\\tests\\helpers\\capture-json.test.ts:40:39)\n(fail) capture-json test helpers > allocates an absent database in an owned directory and removes its sidecars [6.88ms]\n(pass) capture-json test helpers > cannot acquire deletion authority from caller-provided foreign paths [14.78ms]\n(pass) capture-json test helpers > rejects separators and oversized labels before allocating storage [0.32ms]\n(pass) capture-json test helpers > preserves allocation failures [2.52ms]\n77 |     renameSync(original.dir, saved);\n78 |     mkdirSync(original.dir);\n79 |     const sentinel = join(original.dir, \"foreign.txt\");\n80 |     writeFileSync(sentinel, \"replacement must survive\");\n81 |     try {\n82 |       await expect(tracker.cleanup()).rejects.toThrow(original.dir);\n                                                   ^\nerror: expect(received).rejects.toThrow(expected)\n\nExpected promise that rejects\nReceived promise that resolved: Promise { <resolved> }\n\n      at <anonymous> (C:\\Users\\Destiny\\AppData\\Local\\Temp\\memory-json-fault-nlwCgy\\tests\\helpers\\capture-json.test.ts:82:47)\n(fail) capture-json test helpers > refuses a replaced directory and retains authority for a safe retry [8.05ms]\n106 |     const tracker = createTempDatabaseTracker(() => queue.shift()!);\n107 |     for (let n = 0; n < 3; n++) tracker.makePath(\"helper\");\n108 |     try {\n109 |       let result: unknown;\n110 |       try { await tracker.cleanup(); } catch (error) { result = error; }\n111 |       expect(result).toBeInstanceOf(AggregateError);\n                           ^\nerror: expect(received).toBeInstanceOf(expected)\n\nExpected constructor: [class AggregateError extends Error]\nReceived value: undefined\n\n      at <anonymous> (C:\\Users\\Destiny\\AppData\\Local\\Temp\\memory-json-fault-nlwCgy\\tests\\helpers\\capture-json.test.ts:111:22)\n(fail) capture-json test helpers > retains multiple failures and causes while cleaning independent fixtures [19.45ms]\n132 |     const first = tracker.makePath(\"first\");\n133 |     try {\n134 |       const cleanup = tracker.cleanup();\n135 |       const second = tracker.makePath(\"second\");\n136 |       await cleanup;\n137 |       expect(existsSync(dirname(first))).toBe(false);\n                                               ^\nerror: expect(received).toBe(expected)\n\nExpected: false\nReceived: true\n\n      at <anonymous> (C:\\Users\\Destiny\\AppData\\Local\\Temp\\memory-json-fault-nlwCgy\\tests\\helpers\\capture-json.test.ts:137:42)\n(fail) capture-json test helpers > does not forget allocations made while cleanup yields [5.45ms]\n\n 6 pass\n 4 fail\n 18 expect() calls\nRan 10 tests across 1 file. [121.00ms]\n"
+      },
+      {
+        "id": "skip-owned-removal",
+        "from": "storage.cleanup();",
+        "to": "/* omitted cleanup */",
+        "detected": true,
+        "exit": 1,
+        "output": "bun test v1.4.1 (4661e494f)\n\ntests\\helpers\\capture-json.test.ts:\n(pass) capture-json test helpers > captures both streams, non-string arguments, and returned exit code [1.20ms]\n(pass) capture-json test helpers > omits exitCode for undefined or an empty result [0.31ms]\n(pass) capture-json test helpers > restores console methods and preserves a command failure [0.48ms]\n35 |     try {\n36 |       expect(existsSync(db)).toBe(false);\n37 |       expect(existsSync(dirname(db))).toBe(true);\n38 |       for (const suffix of [\"\", \"-wal\", \"-shm\"]) writeFileSync(db + suffix, \"synthetic\");\n39 |       await tracker.cleanup();\n40 |       expect(existsSync(dirname(db))).toBe(false);\n                                           ^\nerror: expect(received).toBe(expected)\n\nExpected: false\nReceived: true\n\n      at <anonymous> (C:\\Users\\Destiny\\AppData\\Local\\Temp\\memory-json-fault-Tk9nax\\tests\\helpers\\capture-json.test.ts:40:39)\n(fail) capture-json test helpers > allocates an absent database in an owned directory and removes its sidecars [16.80ms]\n(pass) capture-json test helpers > cannot acquire deletion authority from caller-provided foreign paths [7.77ms]\n(pass) capture-json test helpers > rejects separators and oversized labels before allocating storage [0.36ms]\n(pass) capture-json test helpers > preserves allocation failures [0.34ms]\n77 |     renameSync(original.dir, saved);\n78 |     mkdirSync(original.dir);\n79 |     const sentinel = join(original.dir, \"foreign.txt\");\n80 |     writeFileSync(sentinel, \"replacement must survive\");\n81 |     try {\n82 |       await expect(tracker.cleanup()).rejects.toThrow(original.dir);\n                                                   ^\nerror: expect(received).rejects.toThrow(expected)\n\nExpected promise that rejects\nReceived promise that resolved: Promise { <resolved> }\n\n      at <anonymous> (C:\\Users\\Destiny\\AppData\\Local\\Temp\\memory-json-fault-Tk9nax\\tests\\helpers\\capture-json.test.ts:82:47)\n(fail) capture-json test helpers > refuses a replaced directory and retains authority for a safe retry [17.20ms]\n106 |     const tracker = createTempDatabaseTracker(() => queue.shift()!);\n107 |     for (let n = 0; n < 3; n++) tracker.makePath(\"helper\");\n108 |     try {\n109 |       let result: unknown;\n110 |       try { await tracker.cleanup(); } catch (error) { result = error; }\n111 |       expect(result).toBeInstanceOf(AggregateError);\n                           ^\nerror: expect(received).toBeInstanceOf(expected)\n\nExpected constructor: [class AggregateError extends Error]\nReceived value: undefined\n\n      at <anonymous> (C:\\Users\\Destiny\\AppData\\Local\\Temp\\memory-json-fault-Tk9nax\\tests\\helpers\\capture-json.test.ts:111:22)\n(fail) capture-json test helpers > retains multiple failures and causes while cleaning independent fixtures [24.25ms]\n132 |     const first = tracker.makePath(\"first\");\n133 |     try {\n134 |       const cleanup = tracker.cleanup();\n135 |       const second = tracker.makePath(\"second\");\n136 |       await cleanup;\n137 |       expect(existsSync(dirname(first))).toBe(false);\n                                               ^\nerror: expect(received).toBe(expected)\n\nExpected: false\nReceived: true\n\n      at <anonymous> (C:\\Users\\Destiny\\AppData\\Local\\Temp\\memory-json-fault-Tk9nax\\tests\\helpers\\capture-json.test.ts:137:42)\n(fail) capture-json test helpers > does not forget allocations made while cleanup yields [10.53ms]\n\n 6 pass\n 4 fail\n 18 expect() calls\nRan 10 tests across 1 file. [142.00ms]\n"
+      },
+      {
+        "id": "forget-failed-capability",
+        "from": "} catch (cause) {",
+        "to": "} catch (cause) { owned.delete(storage);",
+        "detected": true,
+        "exit": 1,
+        "output": "bun test v1.4.1 (4661e494f)\n\ntests\\helpers\\capture-json.test.ts:\n(pass) capture-json test helpers > captures both streams, non-string arguments, and returned exit code [0.72ms]\n(pass) capture-json test helpers > omits exitCode for undefined or an empty result [0.17ms]\n(pass) capture-json test helpers > restores console methods and preserves a command failure [0.30ms]\n(pass) capture-json test helpers > allocates an absent database in an owned directory and removes its sidecars [18.73ms]\n(pass) capture-json test helpers > cannot acquire deletion authority from caller-provided foreign paths [8.13ms]\n(pass) capture-json test helpers > rejects separators and oversized labels before allocating storage [0.38ms]\n(pass) capture-json test helpers > preserves allocation failures [0.78ms]\n87 |       unlinkSync(sentinel);\n88 |       rmdirSync(original.dir);\n89 |       renameSync(saved, original.dir);\n90 |       await tracker.cleanup();\n91 |     }\n92 |     expect(existsSync(dirname(db))).toBe(false);\n                                         ^\nerror: expect(received).toBe(expected)\n\nExpected: false\nReceived: true\n\n      at <anonymous> (C:\\Users\\Destiny\\AppData\\Local\\Temp\\memory-json-fault-gqzt6x\\tests\\helpers\\capture-json.test.ts:92:37)\n(fail) capture-json test helpers > refuses a replaced directory and retains authority for a safe retry [14.99ms]\n117 |         expect(existsSync(item.dir)).toBe(true);\n118 |       }\n119 |       expect(existsSync(healthy.dir)).toBe(false);\n120 |       locked = false;\n121 |       await tracker.cleanup();\n122 |       for (const item of storage) expect(existsSync(item.dir)).toBe(false);\n                                                                     ^\nerror: expect(received).toBe(expected)\n\nExpected: false\nReceived: true\n\n      at <anonymous> (C:\\Users\\Destiny\\AppData\\Local\\Temp\\memory-json-fault-gqzt6x\\tests\\helpers\\capture-json.test.ts:122:64)\n(fail) capture-json test helpers > retains multiple failures and causes while cleaning independent fixtures [86.08ms]\n(pass) capture-json test helpers > does not forget allocations made while cleanup yields [19.32ms]\n\n 8 pass\n 2 fail\n 32 expect() calls\nRan 10 tests across 1 file. [203.00ms]\n"
+      },
+      {
+        "id": "swallow-cleanup-failures",
+        "from": "if (failures.length > 0) {",
+        "to": "if (false) {",
+        "detected": true,
+        "exit": 1,
+        "output": "bun test v1.4.1 (4661e494f)\n\ntests\\helpers\\capture-json.test.ts:\n(pass) capture-json test helpers > captures both streams, non-string arguments, and returned exit code [0.85ms]\n(pass) capture-json test helpers > omits exitCode for undefined or an empty result [0.36ms]\n(pass) capture-json test helpers > restores console methods and preserves a command failure [0.44ms]\n(pass) capture-json test helpers > allocates an absent database in an owned directory and removes its sidecars [72.30ms]\n(pass) capture-json test helpers > cannot acquire deletion authority from caller-provided foreign paths [5.81ms]\n(pass) capture-json test helpers > rejects separators and oversized labels before allocating storage [0.35ms]\n(pass) capture-json test helpers > preserves allocation failures [0.26ms]\n77 |     renameSync(original.dir, saved);\n78 |     mkdirSync(original.dir);\n79 |     const sentinel = join(original.dir, \"foreign.txt\");\n80 |     writeFileSync(sentinel, \"replacement must survive\");\n81 |     try {\n82 |       await expect(tracker.cleanup()).rejects.toThrow(original.dir);\n                                                   ^\nerror: expect(received).rejects.toThrow(expected)\n\nExpected promise that rejects\nReceived promise that resolved: Promise { <resolved> }\n\n      at <anonymous> (C:\\Users\\Destiny\\AppData\\Local\\Temp\\memory-json-fault-58wqX7\\tests\\helpers\\capture-json.test.ts:82:47)\n(fail) capture-json test helpers > refuses a replaced directory and retains authority for a safe retry [17.59ms]\n106 |     const tracker = createTempDatabaseTracker(() => queue.shift()!);\n107 |     for (let n = 0; n < 3; n++) tracker.makePath(\"helper\");\n108 |     try {\n109 |       let result: unknown;\n110 |       try { await tracker.cleanup(); } catch (error) { result = error; }\n111 |       expect(result).toBeInstanceOf(AggregateError);\n                           ^\nerror: expect(received).toBeInstanceOf(expected)\n\nExpected constructor: [class AggregateError extends Error]\nReceived value: undefined\n\n      at <anonymous> (C:\\Users\\Destiny\\AppData\\Local\\Temp\\memory-json-fault-58wqX7\\tests\\helpers\\capture-json.test.ts:111:22)\n(fail) capture-json test helpers > retains multiple failures and causes while cleaning independent fixtures [21.71ms]\n(pass) capture-json test helpers > does not forget allocations made while cleanup yields [16.02ms]\n\n 8 pass\n 2 fail\n 20 expect() calls\nRan 10 tests across 1 file. [183.00ms]\n"
+      },
+      {
+        "id": "consume-later-allocations",
+        "from": "for (const storage of pending) {",
+        "to": "for (const storage of owned) {",
+        "detected": true,
+        "exit": 1,
+        "output": "bun test v1.4.1 (4661e494f)\n\ntests\\helpers\\capture-json.test.ts:\n(pass) capture-json test helpers > captures both streams, non-string arguments, and returned exit code [0.45ms]\n(pass) capture-json test helpers > omits exitCode for undefined or an empty result [0.10ms]\n(pass) capture-json test helpers > restores console methods and preserves a command failure [0.17ms]\n(pass) capture-json test helpers > allocates an absent database in an owned directory and removes its sidecars [13.40ms]\n(pass) capture-json test helpers > cannot acquire deletion authority from caller-provided foreign paths [5.63ms]\n(pass) capture-json test helpers > rejects separators and oversized labels before allocating storage [0.33ms]\n(pass) capture-json test helpers > preserves allocation failures [0.39ms]\n(pass) capture-json test helpers > refuses a replaced directory and retains authority for a safe retry [12.76ms]\n(pass) capture-json test helpers > retains multiple failures and causes while cleaning independent fixtures [19.38ms]\n133 |     try {\n134 |       const cleanup = tracker.cleanup();\n135 |       const second = tracker.makePath(\"second\");\n136 |       await cleanup;\n137 |       expect(existsSync(dirname(first))).toBe(false);\n138 |       expect(existsSync(dirname(second))).toBe(true);\n                                                ^\nerror: expect(received).toBe(expected)\n\nExpected: true\nReceived: false\n\n      at <anonymous> (C:\\Users\\Destiny\\AppData\\Local\\Temp\\memory-json-fault-f9tUTp\\tests\\helpers\\capture-json.test.ts:138:43)\n(fail) capture-json test helpers > does not forget allocations made while cleanup yields [10.90ms]\n\n 9 pass\n 1 fail\n 32 expect() calls\nRan 10 tests across 1 file. [155.00ms]\n"
+      },
+      {
+        "id": "drop-underlying-cause",
+        "from": "{ cause }",
+        "to": "{}",
+        "detected": true,
+        "exit": 1,
+        "output": "bun test v1.4.1 (4661e494f)\n\ntests\\helpers\\capture-json.test.ts:\n(pass) capture-json test helpers > captures both streams, non-string arguments, and returned exit code [0.45ms]\n(pass) capture-json test helpers > omits exitCode for undefined or an empty result [0.11ms]\n(pass) capture-json test helpers > restores console methods and preserves a command failure [0.18ms]\n(pass) capture-json test helpers > allocates an absent database in an owned directory and removes its sidecars [11.24ms]\n(pass) capture-json test helpers > cannot acquire deletion authority from caller-provided foreign paths [4.34ms]\n(pass) capture-json test helpers > rejects separators and oversized labels before allocating storage [0.17ms]\n(pass) capture-json test helpers > preserves allocation failures [0.14ms]\n(pass) capture-json test helpers > refuses a replaced directory and retains authority for a safe retry [10.60ms]\n111 |       expect(result).toBeInstanceOf(AggregateError);\n112 |       const aggregate = result as AggregateError;\n113 |       expect(aggregate.errors).toHaveLength(2);\n114 |       for (const [index, item] of storage.entries()) {\n115 |         expect(aggregate.message).toContain(item.dir);\n116 |         expect(aggregate.errors[index].cause.cause).toBe(failures[index]);\n                                             ^\nTypeError: undefined is not an object (evaluating 'aggregate.errors[index].cause.cause')\n      at <anonymous> (C:\\Users\\Destiny\\AppData\\Local\\Temp\\memory-json-fault-9BKlT3\\tests\\helpers\\capture-json.test.ts:116:40)\n(fail) capture-json test helpers > retains multiple failures and causes while cleaning independent fixtures [19.90ms]\n(pass) capture-json test helpers > does not forget allocations made while cleanup yields [12.92ms]\n\n 9 pass\n 1 fail\n 25 expect() calls\nRan 10 tests across 1 file. [91.00ms]\n"
+      },
+      {
+        "id": "bypass-ownership-check",
+        "from": "storage.cleanup();",
+        "to": "require(\"node:fs\").rmSync(storage.dir, {recursive:true,force:true});",
+        "detected": true,
+        "exit": 1,
+        "output": "bun test v1.4.1 (4661e494f)\n\ntests\\helpers\\capture-json.test.ts:\n(pass) capture-json test helpers > captures both streams, non-string arguments, and returned exit code [0.43ms]\n(pass) capture-json test helpers > omits exitCode for undefined or an empty result [0.10ms]\n(pass) capture-json test helpers > restores console methods and preserves a command failure [0.19ms]\n(pass) capture-json test helpers > allocates an absent database in an owned directory and removes its sidecars [10.56ms]\n(pass) capture-json test helpers > cannot acquire deletion authority from caller-provided foreign paths [6.77ms]\n(pass) capture-json test helpers > rejects separators and oversized labels before allocating storage [0.27ms]\n(pass) capture-json test helpers > preserves allocation failures [0.19ms]\n82 |       await expect(tracker.cleanup()).rejects.toThrow(original.dir);\n83 |       expect(readFileSync(sentinel, \"utf8\")).toBe(\"replacement must survive\");\n84 |       expect(existsSync(saved)).toBe(true);\n85 |     } finally {\n86 |       // Only the exact synthetic sentinel and now-empty replacement are removed.\n87 |       unlinkSync(sentinel);\n           ^\nENOENT: no such file or directory, unlink 'C:\\Users\\Destiny\\AppData\\Local\\Temp\\memory-json-fault-fgDVtE\\memory-json-replaced-xuA2rj\\foreign.txt'\n    path: \"C:\\\\Users\\\\Destiny\\\\AppData\\\\Local\\\\Temp\\\\memory-json-fault-fgDVtE\\\\memory-json-replaced-xuA2rj\\\\foreign.txt\",\n syscall: \"unlink\",\n   errno: -4058,\n    code: \"ENOENT\"\n\n      at <anonymous> (C:\\Users\\Destiny\\AppData\\Local\\Temp\\memory-json-fault-fgDVtE\\tests\\helpers\\capture-json.test.ts:87:7)\n(fail) capture-json test helpers > refuses a replaced directory and retains authority for a safe retry [7.32ms]\n38 |     return !!stat && stat.isDirectory() && !stat.isSymbolicLink() &&\n39 |       stat.dev === identity.dev && stat.ino === identity.ino &&\n40 |       realpathSync(dir) === dir && dirname(dir) === parent && realpathSync(parent) === parent;\n41 |   }\n42 |   function assertOwned(): void {\n43 |     if (!original()) throw new Error(`Test directory ownership changed; retained: ${dir}`);\n                                    ^\nerror: Test directory ownership changed; retained: C:\\Users\\Destiny\\AppData\\Local\\Temp\\memory-json-fault-fgDVtE\\memory-json-busy-3djDzK\n      at assertOwned (C:\\Users\\Destiny\\AppData\\Local\\Temp\\memory-json-fault-fgDVtE\\tests\\helpers\\owned-test-directory.ts:43:32)\n      at cleanup (C:\\Users\\Destiny\\AppData\\Local\\Temp\\memory-json-fault-fgDVtE\\tests\\helpers\\owned-test-directory.ts:62:5)\n      at <anonymous> (C:\\Users\\Destiny\\AppData\\Local\\Temp\\memory-json-fault-fgDVtE\\tests\\helpers\\capture-json.test.ts:126:54)\n(fail) capture-json test helpers > retains multiple failures and causes while cleaning independent fixtures [7.21ms]\n(pass) capture-json test helpers > does not forget allocations made while cleanup yields [9.50ms]\n\n 8 pass\n 2 fail\n 20 expect() calls\nRan 10 tests across 1 file. [77.00ms]\n"
+      }
+    ],
+    "probeSource": "import {readFileSync,writeFileSync,mkdirSync} from 'node:fs';\nimport {join} from 'node:path';\nimport {createOwnedTestDirectory} from '../tests/helpers/owned-test-directory';\nimport {sourceHash} from '../scripts/quality-inventory';\nconst root=process.cwd(),path='tests/helpers/capture-json.ts',source=readFileSync(path,'utf8');\nconst faults=[\n {id:'omit-ownership-registration',from:'owned.add(storage);',to:'/* omitted registration */'},\n {id:'skip-nonempty-cleanup',from:'if (pending.length === 0) return;',to:'if (pending.length !== 0) return;'},\n {id:'skip-owned-removal',from:'storage.cleanup();',to:'/* omitted cleanup */'},\n {id:'forget-failed-capability',from:'} catch (cause) {',to:'} catch (cause) { owned.delete(storage);'},\n {id:'swallow-cleanup-failures',from:'if (failures.length > 0) {',to:'if (false) {'},\n {id:'consume-later-allocations',from:'for (const storage of pending) {',to:'for (const storage of owned) {'},\n {id:'drop-underlying-cause',from:'{ cause }',to:'{}'},\n {id:'bypass-ownership-check',from:'storage.cleanup();',to:'require(\"node:fs\").rmSync(storage.dir, {recursive:true,force:true});'},\n];\nconst results:unknown[]=[];\nfor(const fault of faults){\n if(source.split(fault.from).length!==2)throw Error('Nonunique fault seam '+fault.id);\n const storage=createOwnedTestDirectory('memory-json-fault-');\n try {\n  mkdirSync(join(storage.dir,'tests/helpers'),{recursive:true});\n  writeFileSync(join(storage.dir,path),source.replace(fault.from,fault.to));\n  for(const file of ['capture-json.test.ts','owned-test-directory.ts'])writeFileSync(join(storage.dir,'tests/helpers',file),readFileSync(join(root,'tests/helpers',file)));\n  writeFileSync(join(storage.dir,'bunfig.toml'),'[test]\\ncoverage = false\\npreload = ['+JSON.stringify(join(root,'tests/test-setup.ts'))+']\\n');\n  const run=Bun.spawnSync([process.execPath,'test','--timeout','15000','tests/helpers/capture-json.test.ts'],{cwd:storage.dir,env:{...process.env,TEMP:storage.dir,TMP:storage.dir,TMPDIR:storage.dir},stdout:'pipe',stderr:'pipe',timeout:30000});\n  const output=new TextDecoder().decode(run.stdout)+new TextDecoder().decode(run.stderr);\n  const detected=run.exitCode!==0 && /\\(fail\\) capture-json test helpers/.test(output) && /\\d+ fail/.test(output) && !run.signalCode;\n  results.push({...fault,detected,exit:run.exitCode,signal:run.signalCode,output});\n  writeFileSync('.git/b11-json-faults.json',JSON.stringify({recordedAt:new Date().toISOString(),sourceHash:sourceHash(source),testHash:sourceHash(readFileSync('tests/helpers/capture-json.test.ts','utf8')),runtime:Bun.version,scope:'Local cleanup decision fault checks, not exhaustive mutation or final review.',results,probeSource:readFileSync('.git/b11-json-faults.ts','utf8')},null,2)+'\\n');\n  console.log(JSON.stringify({id:fault.id,detected,exit:run.exitCode}));\n  if(!detected)throw Error('Fault not detected by completed assertions');\n }finally{storage.cleanup();}\n}\n"
+  },
+  "teardown": {
+    "recordedAt": "2026-09-20T04:42:40.018Z",
+    "runtime": "1.4.1",
+    "verified": true,
+    "exit": 1,
+    "output": "bun test v1.4.1 (4661e494f)\n\ncombined.test.ts:\n 6 | let locked=true;\n 7 | const paths:string[]=[];\n 8 | const tracker=createTempDatabaseTracker(prefix=>createOwnedTestDirectory(prefix,{remove(path){if(locked)throw Error('B114_CLEANUP_FAILURE');rmSync(path,{recursive:true,force:false});}}));\n 9 | afterEach(()=>tracker.cleanup());\n10 | afterAll(async()=>{locked=false;await tracker.cleanup();for(const path of paths)expect(existsSync(dirname(path))).toBe(false);});\n11 | it('retains primary and teardown failures',async()=>{paths.push(tracker.makePath('combined'));await captureStreams(async()=>{throw Error('B114_PRIMARY_FAILURE');});});\n                                                                                                                                        ^\nerror: B114_PRIMARY_FAILURE\n      at <anonymous> (C:\\Users\\Destiny\\AppData\\Local\\Temp\\memory-json-teardown-jih7B5\\combined.test.ts:11:132)\n      at captureStreams (C:\\Users\\Destiny\\AppData\\Local\\Temp\\memory-json-teardown-jih7B5\\tests\\helpers\\capture-json.ts:42:26)\n      at <anonymous> (C:\\Users\\Destiny\\AppData\\Local\\Temp\\memory-json-teardown-jih7B5\\combined.test.ts:11:101)\n76 |       for (const storage of pending) {\n77 |         try {\n78 |           storage.cleanup();\n79 |           owned.delete(storage);\n80 |         } catch (cause) {\n81 |           failures.push(new Error(`JSON test storage retained: ${storage.dir}`, { cause }));\n                                 ^\nerror: JSON test storage retained: C:\\Users\\Destiny\\AppData\\Local\\Temp\\memory-json-teardown-jih7B5\\memory-json-combined-ghsQPK\n      at cleanup (C:\\Users\\Destiny\\AppData\\Local\\Temp\\memory-json-teardown-jih7B5\\tests\\helpers\\capture-json.ts:81:29)\n\n69 |           io.writeOwner(markerPath,owner);\n70 |         }\n71 |       } catch (restoreError) {\n72 |         throw new AggregateError([cause,restoreError], `Test cleanup failed; retained: ${dir}`);\n73 |       }\n74 |       throw new Error(`Test cleanup failed; retained: ${dir}; ${String(cause)}`, {cause});\n                     ^\nerror: Test cleanup failed; retained: C:\\Users\\Destiny\\AppData\\Local\\Temp\\memory-json-teardown-jih7B5\\memory-json-combined-ghsQPK; Error: B114_CLEANUP_FAILURE\n      at cleanup (C:\\Users\\Destiny\\AppData\\Local\\Temp\\memory-json-teardown-jih7B5\\tests\\helpers\\owned-test-directory.ts:74:17)\n      at cleanup (C:\\Users\\Destiny\\AppData\\Local\\Temp\\memory-json-teardown-jih7B5\\tests\\helpers\\capture-json.ts:78:19)\n\n3 | import {createOwnedTestDirectory} from './tests/helpers/owned-test-directory';\n4 | import {rmSync,existsSync} from 'node:fs';\n5 | import {dirname} from 'node:path';\n6 | let locked=true;\n7 | const paths:string[]=[];\n8 | const tracker=createTempDatabaseTracker(prefix=>createOwnedTestDirectory(prefix,{remove(path){if(locked)throw Error('B114_CLEANUP_FAILURE');rmSync(path,{recursive:true,force:false});}}));\n                                                                                                                  ^\nerror: B114_CLEANUP_FAILURE\n      at remove (C:\\Users\\Destiny\\AppData\\Local\\Temp\\memory-json-teardown-jih7B5\\combined.test.ts:8:111)\n      at cleanup (C:\\Users\\Destiny\\AppData\\Local\\Temp\\memory-json-teardown-jih7B5\\tests\\helpers\\owned-test-directory.ts:63:14)\n      at cleanup (C:\\Users\\Destiny\\AppData\\Local\\Temp\\memory-json-teardown-jih7B5\\tests\\helpers\\capture-json.ts:78:19)\n(fail) retains primary and teardown failures [12.51ms]\n(pass) next test preserves the failed fixture and retries it [6.63ms]\n\n 1 pass\n 1 fail\n 2 expect() calls\nRan 2 tests across 1 file. [51.00ms]\n",
+    "driver": "import {it,expect,afterEach,afterAll} from 'bun:test';\nimport {captureStreams,createTempDatabaseTracker} from './tests/helpers/capture-json';\nimport {createOwnedTestDirectory} from './tests/helpers/owned-test-directory';\nimport {rmSync,existsSync} from 'node:fs';\nimport {dirname} from 'node:path';\nlet locked=true;\nconst paths:string[]=[];\nconst tracker=createTempDatabaseTracker(prefix=>createOwnedTestDirectory(prefix,{remove(path){if(locked)throw Error('B114_CLEANUP_FAILURE');rmSync(path,{recursive:true,force:false});}}));\nafterEach(()=>tracker.cleanup());\nafterAll(async()=>{locked=false;await tracker.cleanup();for(const path of paths)expect(existsSync(dirname(path))).toBe(false);});\nit('retains primary and teardown failures',async()=>{paths.push(tracker.makePath('combined'));await captureStreams(async()=>{throw Error('B114_PRIMARY_FAILURE');});});\nit('next test preserves the failed fixture and retries it',()=>{expect(existsSync(dirname(paths[0]!))).toBe(true);paths.push(tracker.makePath('later'));expect(paths[0]).not.toBe(paths[1]);locked=false;});\n",
+    "scope": "Actual Bun lifecycle: command and afterEach failures are both observable; next test uses the same tracker, unlocks and retries both independent fixtures. afterAll checks both are removed."
+  },
+  "isolation": {
+    "exit": 0,
+    "output": "$ bun run scripts/check-test-isolation.ts\r\ntest-isolation gate: PASS (no violations)\r\n"
+  },
+  "declarationBoundary": {
+    "libraryEntrypointEmitted": true,
+    "testOnlyHelperAbsent": true,
+    "ownedOutputRemoved": true
+  },
+  "inventory": {
+    "files": 446,
+    "packages": 2,
+    "moved": [
+      {
+        "from": "src/presentation/cli/commands/_helpers/capture-json.ts",
+        "to": "tests/helpers/capture-json.ts"
+      },
+      {
+        "from": "src/presentation/cli/commands/_helpers/capture-json.test.ts",
+        "to": "tests/helpers/capture-json.test.ts"
+      }
+    ],
+    "valid": true
+  },
+  "limitations": [
+    "Local Windows proof only; supported Linux execution remains unverified after the previous bounded WSL readiness failure. No shared WSL reset.",
+    "Direct instrumentation is diagnostic: B05 completeness, optional-chain source decisions and package-wide coverage acceptance remain open.",
+    "The six caller test drivers have fresh execution and strict types, but no fresh complete per-file four-metric admission.",
+    "Independent final-revision review, hosted checks, complete baseline and release/adoption acceptance remain open.",
+    "The test-only helper no longer emits a deep declaration under dist/presentation/cli/commands/_helpers. No repository production caller or root/library export was found; unknown external deep imports cannot be disproved."
+  ],
+  "runners": [
+    {
+      "path": ".git/b11-json-check.ts",
+      "source": "import {readFileSync, writeFileSync, mkdirSync, existsSync, readdirSync} from 'node:fs';\nimport {join, resolve} from 'node:path';\nimport {createOwnedTestDirectory} from '../tests/helpers/owned-test-directory';\nimport {sourceHash} from '../scripts/quality-inventory';\nconst root=process.cwd();\nconst commands=['search','context','show','list','related','stats'];\nconst sources=['tests/helpers/capture-json.ts','tests/helpers/capture-json.test.ts','tests/helpers/owned-test-directory.ts',...commands.map(c=>`src/presentation/cli/commands/${c}.json.test.ts`)];\nconst checks:unknown[]=[];\nasync function run(args:string[]) {\n const child=Bun.spawn([process.execPath,...args],{cwd:root,stdout:'pipe',stderr:'pipe'});\n const [exit,stdout,stderr]=await Promise.all([child.exited,new Response(child.stdout).text(),new Response(child.stderr).text()]);\n const result={command:[process.execPath,...args],exit,stdout,stderr};checks.push(result);\n writeFileSync('.git/b11-json-check.json',JSON.stringify({recordedAt:new Date().toISOString(),runtime:Bun.version,checks,sourceInputs:sources.map(path=>({path,sourceHash:sourceHash(readFileSync(path,'utf8'))}))},null,2)+'\\n');\n console.log(JSON.stringify({args,exit,summary:(stdout+stderr).slice(-350)}));\n if(exit!==0)throw Error('Check failed');\n}\nwriteFileSync('.git/b11-json-tsconfig.json',JSON.stringify({extends:'../tsconfig.json',compilerOptions:{rootDir:'..',noEmit:true},include:sources.map(path=>'../'+path),exclude:[]},null,2));\nawait run(['run','typecheck']);\nawait run(['node_modules/typescript/bin/tsc','-p','.git/b11-json-tsconfig.json']);\nconst storage=createOwnedTestDirectory('memory-json-build-');\ntry {\n const out=join(storage.dir,'declarations');mkdirSync(out);\n await run(['node_modules/typescript/bin/tsc','-p','tsconfig.lib.json','--outDir',out]);\n const testOnly=existsSync(join(out,'presentation/cli/commands/_helpers/capture-json.d.ts'));\n if(testOnly || !existsSync(join(out,'index.d.ts')))throw Error('Wrong declaration boundary');\n console.log('Declaration output contains library entrypoint and no test-only capture helper.');\n}finally{storage.cleanup();}\nawait run(['run','test','tests/helpers/capture-json.test.ts',...commands.map(c=>`src/presentation/cli/commands/${c}.json.test.ts`)]);\n"
+    },
+    {
+      "path": ".git/b11-json-measure.ts",
+      "source": "import {readFileSync, writeFileSync, mkdirSync} from 'node:fs';\nimport {join, resolve} from 'node:path';\nimport {createCoverageMap} from 'istanbul-lib-coverage';\nimport {instrumentTypeScriptWithCoverage} from '../scripts/run-istanbul-bun-coverage';\nimport {createOwnedTestDirectory} from '../tests/helpers/owned-test-directory';\nimport {sourceHash} from '../scripts/quality-inventory';\nconst root=process.cwd(),storage=createOwnedTestDirectory('memory-json-measure-');\nconst paths=['tests/helpers/capture-json.ts','tests/helpers/capture-json.test.ts'];\ntry {\n mkdirSync(join(storage.dir,'tests/helpers'),{recursive:true});\n for(const path of paths){\n  const built=instrumentTypeScriptWithCoverage(readFileSync(path,'utf8'),resolve(path));\n  writeFileSync(join(storage.dir,path),built.code);\n }\n writeFileSync(join(storage.dir,'tests/helpers/owned-test-directory.ts'),readFileSync('tests/helpers/owned-test-directory.ts'));\n writeFileSync(join(storage.dir,'capture.ts'),'import {afterAll} from \"bun:test\"; import {writeFileSync} from \"node:fs\"; afterAll(()=>writeFileSync(\"coverage.json\",JSON.stringify((globalThis as any).__coverage__)));');\n writeFileSync(join(storage.dir,'bunfig.toml'),'[test]\\ncoverage = false\\npreload = ['+JSON.stringify(join(root,'tests/test-setup.ts'))+', \"./capture.ts\"]\\n');\n const result=Bun.spawnSync([process.execPath,'test','--timeout','15000','tests/helpers/capture-json.test.ts'],{cwd:storage.dir,env:{...process.env,TEMP:storage.dir,TMP:storage.dir,TMPDIR:storage.dir},stdout:'pipe',stderr:'pipe',timeout:45000});\n const output=new TextDecoder().decode(result.stdout)+new TextDecoder().decode(result.stderr);\n if(result.exitCode!==0)throw Error(output);\n const raw=JSON.parse(readFileSync(join(storage.dir,'coverage.json'),'utf8')),map=createCoverageMap(raw);\n const files=paths.map(path=>{\n  const measured=map.fileCoverageFor(resolve(path)),data=measured.data;\n  return {path,sourceHash:sourceHash(readFileSync(path,'utf8')),metrics:measured.toSummary().data,\n   uncoveredBranches:Object.entries(data.b).flatMap(([id,hits])=>hits.flatMap((count,index)=>count===0?[{id,index,location:data.branchMap[id]?.locations[index]}]:[])),\n   uncoveredFunctions:Object.entries(data.f).filter(([,hits])=>hits===0).map(([id])=>data.fnMap[id])};\n });\n writeFileSync('.git/b11-json-measure.json',JSON.stringify({scope:'Local diagnostic; B05 instrumenter acceptance and independent review remain open. No package/native acceptance.',recordedAt:new Date().toISOString(),runtime:Bun.version,files,rawCoverage:raw,output,probeSource:readFileSync('.git/b11-json-measure.ts','utf8')},null,2)+'\\n');\n console.log(JSON.stringify(files));\n} finally {storage.cleanup();}\n"
+    },
+    {
+      "path": ".git/b11-json-faults.ts",
+      "source": "import {readFileSync,writeFileSync,mkdirSync} from 'node:fs';\nimport {join} from 'node:path';\nimport {createOwnedTestDirectory} from '../tests/helpers/owned-test-directory';\nimport {sourceHash} from '../scripts/quality-inventory';\nconst root=process.cwd(),path='tests/helpers/capture-json.ts',source=readFileSync(path,'utf8');\nconst faults=[\n {id:'omit-ownership-registration',from:'owned.add(storage);',to:'/* omitted registration */'},\n {id:'skip-nonempty-cleanup',from:'if (pending.length === 0) return;',to:'if (pending.length !== 0) return;'},\n {id:'skip-owned-removal',from:'storage.cleanup();',to:'/* omitted cleanup */'},\n {id:'forget-failed-capability',from:'} catch (cause) {',to:'} catch (cause) { owned.delete(storage);'},\n {id:'swallow-cleanup-failures',from:'if (failures.length > 0) {',to:'if (false) {'},\n {id:'consume-later-allocations',from:'for (const storage of pending) {',to:'for (const storage of owned) {'},\n {id:'drop-underlying-cause',from:'{ cause }',to:'{}'},\n {id:'bypass-ownership-check',from:'storage.cleanup();',to:'require(\"node:fs\").rmSync(storage.dir, {recursive:true,force:true});'},\n];\nconst results:unknown[]=[];\nfor(const fault of faults){\n if(source.split(fault.from).length!==2)throw Error('Nonunique fault seam '+fault.id);\n const storage=createOwnedTestDirectory('memory-json-fault-');\n try {\n  mkdirSync(join(storage.dir,'tests/helpers'),{recursive:true});\n  writeFileSync(join(storage.dir,path),source.replace(fault.from,fault.to));\n  for(const file of ['capture-json.test.ts','owned-test-directory.ts'])writeFileSync(join(storage.dir,'tests/helpers',file),readFileSync(join(root,'tests/helpers',file)));\n  writeFileSync(join(storage.dir,'bunfig.toml'),'[test]\\ncoverage = false\\npreload = ['+JSON.stringify(join(root,'tests/test-setup.ts'))+']\\n');\n  const run=Bun.spawnSync([process.execPath,'test','--timeout','15000','tests/helpers/capture-json.test.ts'],{cwd:storage.dir,env:{...process.env,TEMP:storage.dir,TMP:storage.dir,TMPDIR:storage.dir},stdout:'pipe',stderr:'pipe',timeout:30000});\n  const output=new TextDecoder().decode(run.stdout)+new TextDecoder().decode(run.stderr);\n  const detected=run.exitCode!==0 && /\\(fail\\) capture-json test helpers/.test(output) && /\\d+ fail/.test(output) && !run.signalCode;\n  results.push({...fault,detected,exit:run.exitCode,signal:run.signalCode,output});\n  writeFileSync('.git/b11-json-faults.json',JSON.stringify({recordedAt:new Date().toISOString(),sourceHash:sourceHash(source),testHash:sourceHash(readFileSync('tests/helpers/capture-json.test.ts','utf8')),runtime:Bun.version,scope:'Local cleanup decision fault checks, not exhaustive mutation or final review.',results,probeSource:readFileSync('.git/b11-json-faults.ts','utf8')},null,2)+'\\n');\n  console.log(JSON.stringify({id:fault.id,detected,exit:run.exitCode}));\n  if(!detected)throw Error('Fault not detected by completed assertions');\n }finally{storage.cleanup();}\n}\n"
+    },
+    {
+      "path": ".git/b11-json-teardown.ts",
+      "source": "import {mkdirSync,readFileSync,writeFileSync} from 'node:fs';\nimport {join} from 'node:path';\nimport {createOwnedTestDirectory} from '../tests/helpers/owned-test-directory';\nconst root=process.cwd(),storage=createOwnedTestDirectory('memory-json-teardown-');\ntry {\n mkdirSync(join(storage.dir,'tests/helpers'),{recursive:true});\n for(const file of ['capture-json.ts','owned-test-directory.ts'])writeFileSync(join(storage.dir,'tests/helpers',file),readFileSync(join(root,'tests/helpers',file)));\n const driver=`import {it,expect,afterEach,afterAll} from 'bun:test';\nimport {captureStreams,createTempDatabaseTracker} from './tests/helpers/capture-json';\nimport {createOwnedTestDirectory} from './tests/helpers/owned-test-directory';\nimport {rmSync,existsSync} from 'node:fs';\nimport {dirname} from 'node:path';\nlet locked=true;\nconst paths:string[]=[];\nconst tracker=createTempDatabaseTracker(prefix=>createOwnedTestDirectory(prefix,{remove(path){if(locked)throw Error('B114_CLEANUP_FAILURE');rmSync(path,{recursive:true,force:false});}}));\nafterEach(()=>tracker.cleanup());\nafterAll(async()=>{locked=false;await tracker.cleanup();for(const path of paths)expect(existsSync(dirname(path))).toBe(false);});\nit('retains primary and teardown failures',async()=>{paths.push(tracker.makePath('combined'));await captureStreams(async()=>{throw Error('B114_PRIMARY_FAILURE');});});\nit('next test preserves the failed fixture and retries it',()=>{expect(existsSync(dirname(paths[0]!))).toBe(true);paths.push(tracker.makePath('later'));expect(paths[0]).not.toBe(paths[1]);locked=false;});\n`;\n writeFileSync(join(storage.dir,'combined.test.ts'),driver);\n writeFileSync(join(storage.dir,'bunfig.toml'),'[test]\\ncoverage = false\\npreload = ['+JSON.stringify(join(root,'tests/test-setup.ts'))+']\\n');\n const result=Bun.spawnSync([process.execPath,'test','--timeout','15000','combined.test.ts'],{cwd:storage.dir,env:{...process.env,TEMP:storage.dir,TMP:storage.dir,TMPDIR:storage.dir},stdout:'pipe',stderr:'pipe',timeout:30000});\n const output=new TextDecoder().decode(result.stdout)+new TextDecoder().decode(result.stderr);\n const verified=result.exitCode===1 && !result.signalCode && output.includes('error: B114_PRIMARY_FAILURE') && output.includes('error: B114_CLEANUP_FAILURE') && output.includes('JSON test storage retained:') && output.includes('(pass) next test preserves the failed fixture and retries it') && output.includes('1 pass') && output.includes('1 fail');\n writeFileSync('.git/b11-json-teardown.json',JSON.stringify({recordedAt:new Date().toISOString(),runtime:Bun.version,verified,exit:result.exitCode,signal:result.signalCode,output,driver,scope:'Actual Bun lifecycle: command and afterEach failures are both observable; next test uses the same tracker, unlocks and retries both independent fixtures. afterAll checks both are removed.'},null,2)+'\\n');\n console.log(JSON.stringify({verified,exit:result.exitCode,output}));\n if(!verified)throw Error('Combined failure proof incomplete');\n}finally{storage.cleanup();}\n"
+    }
+  ],
+  "callerCorrection": "The six callers keep one private tracker per suite. Each makePath still owns a new directory. Removing beforeEach replacement preserves failed capabilities across later tests. The actual Bun two-test diagnostic proves first command/teardown errors, retained prior fixture, independent later allocation and eventual removal of both."
+}

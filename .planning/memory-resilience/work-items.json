@@ -3374,21 +3374,29 @@
       "depends_on": [
         "B03"
       ],
-      "scope": "src/presentation/cli/commands/_helpers/capture-json.ts and JSON command test callers",
+      "scope": "tests/helpers/capture-json.ts, tests/helpers/capture-json.test.ts and six JSON command test callers",
       "deliverable": "Prove ownership of temporary DB/WAL/SHM paths before removal and retain diagnosable failed cleanup instead of clearing the tracker silently.",
       "verification": "RED/GREEN foreign/replaced paths, successful removal, partial/locked-file failure and repeated cleanup; preserve original command/test errors.",
       "risk": "S",
       "authorization": "authorized",
       "owner": "memory-nexus",
       "evidence": [
-        ".planning/memory-resilience/B11.4-plan.md"
+        ".planning/memory-resilience/B11.4-plan.md",
+        ".planning/memory-resilience/evidence/B11.4.json"
       ],
       "acceptance_record": ".planning/memory-resilience/evidence/B11.4.json",
       "observed_evidence": ".planning/memory-resilience/B04-source-findings.md",
       "retirement_trigger": "Before B10/R02; source inspection is not completed cleanup proof.",
       "progress": {
-        "inspection": "Six JSON command callers plus the existing helper regression driver use the module. The helper authorizes deletion from tracker strings, swallows failures and clears the tracker. Library declarations currently include the helper under rootDir src.",
-        "restart": "Read the existing helper tests and all seven callers; add owned foreign/replacement/failure regressions first. Resolve the test-only build location before importing shared ownership logic."
+        "local": "44 tests / 144 assertions across seven files pass. Source/scripts and scoped strict test types pass; declarations exclude moved test helper; isolation passes. Both helper files report diagnostic 100% all four metrics; eight cleanup faults detected; actual Bun primary plus teardown failures remain observable.",
+        "remaining": [
+          "Local Windows proof only; supported Linux execution remains unverified after the previous bounded WSL readiness failure. No shared WSL reset.",
+          "Direct instrumentation is diagnostic: B05 completeness, optional-chain source decisions and package-wide coverage acceptance remain open.",
+          "The six caller test drivers have fresh execution and strict types, but no fresh complete per-file four-metric admission.",
+          "Independent final-revision review, hosted checks, complete baseline and release/adoption acceptance remain open.",
+          "The test-only helper no longer emits a deep declaration under dist/presentation/cli/commands/_helpers. No repository production caller or root/library export was found; unknown external deep imports cannot be disproved."
+        ],
+        "restart": "Complete source-bound caller metric and optional-chain decision diagnostics; obtain supported-platform and independent review evidence when available. Do not transfer local helper counters to package or caller acceptance. Select another ready authorized item if external gates are the only remaining work."
       }
     },
     {

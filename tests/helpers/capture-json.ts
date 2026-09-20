@@ -8,10 +8,9 @@
  * Per Codex MEDIUM-3: no shell-specific assumptions; pure JS.
  */
 
-import { tmpdir } from "node:os";
-import path from "node:path";
-import { randomUUID } from "node:crypto";
-import { rmSync } from "node:fs";
+import { join } from "node:path";
+import { setImmediate } from "node:timers/promises";
+import { createOwnedTestDirectory, type OwnedTestDirectory } from "./owned-test-directory.js";
 
 export interface CapturedStreams {
   stdout: string;
@@ -53,29 +52,38 @@ export async function captureStreams<R extends { exitCode?: number } | undefined
   }
 }
 
-/**
- * Per-test temp DB path tracker. Returns a path + a cleanup hook.
- *
- * Pattern:
- *   const tempPaths: string[] = [];
- *   const dbPath = makeTempDbPath("search", tempPaths);
- *   afterEach(() => cleanupTempPaths(tempPaths));
+/** Owns each database's container without creating the database itself.
+ * Cleanup accepts no paths and retains failed capabilities for a later retry.
+ * The allocator seam is for local fault injection, never command input.
  */
-export function makeTempDbPath(cmd: string, tracker: string[]): string {
-  const p = path.join(tmpdir(), `32-02-${cmd}-${randomUUID()}.db`);
-  tracker.push(p);
-  return p;
-}
-
-export function cleanupTempPaths(tracker: string[]): void {
-  for (const p of tracker) {
-    try {
-      rmSync(p, { force: true });
-      rmSync(`${p}-wal`, { force: true });
-      rmSync(`${p}-shm`, { force: true });
-    } catch {
-      // Best effort
+export function createTempDatabaseTracker(
+  allocate: (prefix: string) => OwnedTestDirectory = createOwnedTestDirectory,
+) {
+  const owned = new Set<OwnedTestDirectory>();
+  return {
+    makePath(command: string): string {
+      const storage = allocate(`memory-json-${command}-`);
+      owned.add(storage);
+      return join(storage.dir, "memory.db");
+    },
+    async cleanup(): Promise<void> {
+      const pending = [...owned];
+      if (pending.length === 0) return;
+      // Closed native SQLite statements can remain alive until GC and a turn.
+      Bun.gc(true);
+      await setImmediate();
+      const failures: Error[] = [];
+      for (const storage of pending) {
+        try {
+          storage.cleanup();
+          owned.delete(storage);
+        } catch (cause) {
+          failures.push(new Error(`JSON test storage retained: ${storage.dir}`, { cause }));
+        }
+      }
+      if (failures.length > 0) {
+        throw new AggregateError(failures, failures.map(error => error.message).join("\n"));
+      }
     }
-  }
-  tracker.length = 0;
+  };
 }

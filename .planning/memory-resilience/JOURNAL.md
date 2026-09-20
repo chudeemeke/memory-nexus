@@ -1,5 +1,28 @@
 # Memory resilience execution journal
 
+## 2026-09-20 - B11.4 owned JSON fixtures and local proof
+
+- Progress from clean 47f993d. RED confirmed arbitrary synthetic path deletion and
+  label traversal. Replaced string authority with a private owned-directory tracker,
+  preserving absent DB paths, multiple failures, causes and retry state. Moved the
+  helper and its driver under tests; six callers return the async cleanup hook.
+- Integration inspection caught beforeEach replacing the tracker after failed
+  cleanup. Removed that reset: one tracker per suite retains capabilities while
+  each test still allocates a separate directory. Actual Bun two-test failure/
+  retry proof passes; all 44 tests, strict types and declarations rechecked.
+- Local proof: 44 tests / 144 assertions; source/script/scoped strict test types;
+  actual declaration emission and isolation gate pass. Helper and its driver have
+  diagnostic 100% in all four metrics. Eight injected cleanup faults fail tests.
+  Actual Bun command-plus-teardown failure reports both causes and retained path.
+- Caller migration initially stopped before writes on CRLF matching; fixed the
+  exact replacement pattern. Source assertions were retained. Owned probe/build/
+  mutation fixtures were removed after evidence collection. Inventory remains
+  446 candidates / 2 packages; moved helpers remain Tier S measurement targets.
+- B11.4 remains active: full caller metrics, B05 instrumentation acceptance,
+  supported Linux execution, independent review and hosted/full baseline gates
+  remain open. No embedding experiment or production replication was activated.
+
+
 ## 2026-09-20 - B11.3 historical checker retired; acceptance preserved
 
 - Previous turn progressed at ada5691; started clean. Audit found the historical
