@@ -11733,10 +11733,36 @@
         "scope": "B11.4 storage lifecycle and import migration; caller command/output assertions preserved. Not whole-file correctness or independent review."
       },
       "metricApplicability": {
-        "status": "proposed - final measurement and independent review pending",
+        "status": "under tier - repair required",
         "sourceHash": "dac8d7072c4889e92c01b7078b6ddb23e6d39ff5ac76f94010a5d4cc25be55a3",
-        "evidence": ".planning/memory-resilience/evidence/B11.4.json",
-        "disposition": "Caller fixture changes ran in the actual suite; source-bound full caller metrics remain unverified. B11.4 owns follow-up before B10/R02."
+        "evidence": ".planning/memory-resilience/evidence/B11.4-native-discovery.json",
+        "diagnosticMetrics": {
+          "lines": {
+            "total": 51,
+            "covered": 50,
+            "skipped": 0,
+            "pct": 98.03
+          },
+          "functions": {
+            "total": 19,
+            "covered": 19,
+            "skipped": 0,
+            "pct": 100
+          },
+          "statements": {
+            "total": 52,
+            "covered": 51,
+            "skipped": 0,
+            "pct": 98.07
+          },
+          "branches": {
+            "total": 4,
+            "covered": 3,
+            "skipped": 0,
+            "pct": 75
+          }
+        },
+        "disposition": "Caller bodies unchanged; diagnostic used import relocation and the rejected retry helper. Branch gaps/vacuous assertions require contract-based repair in B11.4, not exclusions. No current acceptance."
       }
     },
     {
@@ -13264,10 +13290,36 @@
         "scope": "B11.4 storage lifecycle and import migration; caller command/output assertions preserved. Not whole-file correctness or independent review."
       },
       "metricApplicability": {
-        "status": "proposed - final measurement and independent review pending",
+        "status": "under tier - repair required",
         "sourceHash": "09532928fa18e3e9e94c37b03cec933c71c8af345432d292f9c87015442a82ff",
-        "evidence": ".planning/memory-resilience/evidence/B11.4.json",
-        "disposition": "Caller fixture changes ran in the actual suite; source-bound full caller metrics remain unverified. B11.4 owns follow-up before B10/R02."
+        "evidence": ".planning/memory-resilience/evidence/B11.4-native-discovery.json",
+        "diagnosticMetrics": {
+          "lines": {
+            "total": 76,
+            "covered": 76,
+            "skipped": 0,
+            "pct": 100
+          },
+          "functions": {
+            "total": 25,
+            "covered": 25,
+            "skipped": 0,
+            "pct": 100
+          },
+          "statements": {
+            "total": 78,
+            "covered": 78,
+            "skipped": 0,
+            "pct": 100
+          },
+          "branches": {
+            "total": 8,
+            "covered": 6,
+            "skipped": 0,
+            "pct": 75
+          }
+        },
+        "disposition": "Caller bodies unchanged; diagnostic used import relocation and the rejected retry helper. Branch gaps/vacuous assertions require contract-based repair in B11.4, not exclusions. No current acceptance."
       }
     },
     {
@@ -13827,10 +13879,36 @@
         "scope": "B11.4 storage lifecycle and import migration; caller command/output assertions preserved. Not whole-file correctness or independent review."
       },
       "metricApplicability": {
-        "status": "proposed - final measurement and independent review pending",
+        "status": "under tier - repair required",
         "sourceHash": "98967cd253245d49ed4b69c51f2e390655fbe9719d931522910e9a059df7cafa",
-        "evidence": ".planning/memory-resilience/evidence/B11.4.json",
-        "disposition": "Caller fixture changes ran in the actual suite; source-bound full caller metrics remain unverified. B11.4 owns follow-up before B10/R02."
+        "evidence": ".planning/memory-resilience/evidence/B11.4-native-discovery.json",
+        "diagnosticMetrics": {
+          "lines": {
+            "total": 46,
+            "covered": 46,
+            "skipped": 0,
+            "pct": 100
+          },
+          "functions": {
+            "total": 17,
+            "covered": 17,
+            "skipped": 0,
+            "pct": 100
+          },
+          "statements": {
+            "total": 48,
+            "covered": 47,
+            "skipped": 0,
+            "pct": 97.91
+          },
+          "branches": {
+            "total": 11,
+            "covered": 4,
+            "skipped": 0,
+            "pct": 36.36
+          }
+        },
+        "disposition": "Caller bodies unchanged; diagnostic used import relocation and the rejected retry helper. Branch gaps/vacuous assertions require contract-based repair in B11.4, not exclusions. No current acceptance."
       }
     },
     {
@@ -14058,10 +14136,36 @@
         "scope": "B11.4 storage lifecycle and import migration; caller command/output assertions preserved. Not whole-file correctness or independent review."
       },
       "metricApplicability": {
-        "status": "proposed - final measurement and independent review pending",
+        "status": "under tier - repair required",
         "sourceHash": "f603939eacb8948378b4a2647de083dbcdf4684006aaddbe8b4165f794ed1fb7",
-        "evidence": ".planning/memory-resilience/evidence/B11.4.json",
-        "disposition": "Caller fixture changes ran in the actual suite; source-bound full caller metrics remain unverified. B11.4 owns follow-up before B10/R02."
+        "evidence": ".planning/memory-resilience/evidence/B11.4-native-discovery.json",
+        "diagnosticMetrics": {
+          "lines": {
+            "total": 101,
+            "covered": 99,
+            "skipped": 0,
+            "pct": 98.01
+          },
+          "functions": {
+            "total": 30,
+            "covered": 30,
+            "skipped": 0,
+            "pct": 100
+          },
+          "statements": {
+            "total": 103,
+            "covered": 101,
+            "skipped": 0,
+            "pct": 98.05
+          },
+          "branches": {
+            "total": 6,
+            "covered": 4,
+            "skipped": 0,
+            "pct": 66.66
+          }
+        },
+        "disposition": "Caller bodies unchanged; diagnostic used import relocation and the rejected retry helper. Branch gaps/vacuous assertions require contract-based repair in B11.4, not exclusions. No current acceptance."
       }
     },
     {
@@ -14206,10 +14310,36 @@
         "scope": "B11.4 storage lifecycle and import migration; caller command/output assertions preserved. Not whole-file correctness or independent review."
       },
       "metricApplicability": {
-        "status": "proposed - final measurement and independent review pending",
+        "status": "under tier - repair required",
         "sourceHash": "c202424142b4c0080b6576b0a71329b3c7232f14ac099c7e4d0116b1e5069f13",
-        "evidence": ".planning/memory-resilience/evidence/B11.4.json",
-        "disposition": "Caller fixture changes ran in the actual suite; source-bound full caller metrics remain unverified. B11.4 owns follow-up before B10/R02."
+        "evidence": ".planning/memory-resilience/evidence/B11.4-native-discovery.json",
+        "diagnosticMetrics": {
+          "lines": {
+            "total": 48,
+            "covered": 48,
+            "skipped": 0,
+            "pct": 100
+          },
+          "functions": {
+            "total": 17,
+            "covered": 17,
+            "skipped": 0,
+            "pct": 100
+          },
+          "statements": {
+            "total": 50,
+            "covered": 49,
+            "skipped": 0,
+            "pct": 98
+          },
+          "branches": {
+            "total": 10,
+            "covered": 4,
+            "skipped": 0,
+            "pct": 40
+          }
+        },
+        "disposition": "Caller bodies unchanged; diagnostic used import relocation and the rejected retry helper. Branch gaps/vacuous assertions require contract-based repair in B11.4, not exclusions. No current acceptance."
       }
     },
     {
@@ -14396,10 +14526,36 @@
         "scope": "B11.4 storage lifecycle and import migration; caller command/output assertions preserved. Not whole-file correctness or independent review."
       },
       "metricApplicability": {
-        "status": "proposed - final measurement and independent review pending",
+        "status": "under tier - repair required",
         "sourceHash": "cc8c2539616884c670a9bbcff39e9718b2b27f20b4f9924a62fdb67cd646e47e",
-        "evidence": ".planning/memory-resilience/evidence/B11.4.json",
-        "disposition": "Caller fixture changes ran in the actual suite; source-bound full caller metrics remain unverified. B11.4 owns follow-up before B10/R02."
+        "evidence": ".planning/memory-resilience/evidence/B11.4-native-discovery.json",
+        "diagnosticMetrics": {
+          "lines": {
+            "total": 61,
+            "covered": 61,
+            "skipped": 0,
+            "pct": 100
+          },
+          "functions": {
+            "total": 19,
+            "covered": 19,
+            "skipped": 0,
+            "pct": 100
+          },
+          "statements": {
+            "total": 62,
+            "covered": 62,
+            "skipped": 0,
+            "pct": 100
+          },
+          "branches": {
+            "total": 4,
+            "covered": 2,
+            "skipped": 0,
+            "pct": 50
+          }
+        },
+        "disposition": "Caller bodies unchanged; diagnostic used import relocation and the rejected retry helper. Branch gaps/vacuous assertions require contract-based repair in B11.4, not exclusions. No current acceptance."
       }
     },
     {
@@ -16992,7 +17148,7 @@
     {
       "path": "tests/helpers/capture-json.test.ts",
       "package": "package.json",
-      "sourceHash": "2632746c717926b2c086ca06fd44028a768eb29a8c3f1d1be9e8c06af398c60f",
+      "sourceHash": "4b36d3a1f10fc7d7ed7e6a00719611bec72a482a96f9218e58963e9a5ed1709b",
       "tier": "S",
       "rationale": "Owned database fixture allocation/deletion, observable retained cleanup and adversarial lifecycle tests; moving to tests does not exclude measurement.",
       "applicability": {
@@ -17001,31 +17157,30 @@
       },
       "decisionStatus": "proposed - independent review pending",
       "inspection": {
-        "sourceHash": "2632746c717926b2c086ca06fd44028a768eb29a8c3f1d1be9e8c06af398c60f",
-        "evidence": ".planning/memory-resilience/evidence/B11.4.json",
-        "scope": "B11.4 storage lifecycle and import migration; caller command/output assertions preserved. Not whole-file correctness or independent review."
+        "sourceHash": "4b36d3a1f10fc7d7ed7e6a00719611bec72a482a96f9218e58963e9a5ed1709b",
+        "evidence": ".planning/memory-resilience/evidence/B11.4-followup.json",
+        "scope": "Owned helper and strict absent/zero result contract only; native closure remains B11.74."
       },
       "metricApplicability": {
-        "status": "proposed - final measurement and independent review pending",
-        "sourceHash": "2632746c717926b2c086ca06fd44028a768eb29a8c3f1d1be9e8c06af398c60f",
-        "evidence": ".planning/memory-resilience/evidence/B11.4.json",
-        "disposition": "Positive denominators measured locally in all four metrics. B05 completeness and optional-chain decision admission remain open.",
+        "status": "proposed - B05 and independent review pending",
+        "sourceHash": "4b36d3a1f10fc7d7ed7e6a00719611bec72a482a96f9218e58963e9a5ed1709b",
+        "evidence": ".planning/memory-resilience/evidence/B11.4-followup.json",
         "diagnosticMetrics": {
           "lines": {
-            "total": 103,
-            "covered": 103,
+            "total": 108,
+            "covered": 108,
             "skipped": 0,
             "pct": 100
           },
           "functions": {
-            "total": 23,
-            "covered": 23,
+            "total": 24,
+            "covered": 24,
             "skipped": 0,
             "pct": 100
           },
           "statements": {
-            "total": 122,
-            "covered": 122,
+            "total": 128,
+            "covered": 128,
             "skipped": 0,
             "pct": 100
           },
@@ -17035,7 +17190,8 @@
             "skipped": 0,
             "pct": 100
           }
-        }
+        },
+        "disposition": "Positive denominators measured locally; not package/native acceptance."
       }
     },
     {
@@ -17051,14 +17207,13 @@
       "decisionStatus": "proposed - independent review pending",
       "inspection": {
         "sourceHash": "11814452b101fd1cd9f9c59026da8d47c970b81fce5efce7b8482da159d52040",
-        "evidence": ".planning/memory-resilience/evidence/B11.4.json",
-        "scope": "B11.4 storage lifecycle and import migration; caller command/output assertions preserved. Not whole-file correctness or independent review."
+        "evidence": ".planning/memory-resilience/evidence/B11.4-followup.json",
+        "scope": "Owned helper and strict absent/zero result contract only; native closure remains B11.74."
       },
       "metricApplicability": {
-        "status": "proposed - final measurement and independent review pending",
+        "status": "proposed - B05 and independent review pending",
         "sourceHash": "11814452b101fd1cd9f9c59026da8d47c970b81fce5efce7b8482da159d52040",
-        "evidence": ".planning/memory-resilience/evidence/B11.4.json",
-        "disposition": "Positive denominators measured locally in all four metrics. B05 completeness and optional-chain decision admission remain open.",
+        "evidence": ".planning/memory-resilience/evidence/B11.4-followup.json",
         "diagnosticMetrics": {
           "lines": {
             "total": 32,
@@ -17084,7 +17239,8 @@
             "skipped": 0,
             "pct": 100
           }
-        }
+        },
+        "disposition": "Positive denominators measured locally; not package/native acceptance."
       }
     },
     {

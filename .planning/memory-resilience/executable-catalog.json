@@ -24715,7 +24715,7 @@
     {
       "path": "tests/helpers/capture-json.test.ts",
       "package": "package.json",
-      "sourceHash": "2632746c717926b2c086ca06fd44028a768eb29a8c3f1d1be9e8c06af398c60f",
+      "sourceHash": "4b36d3a1f10fc7d7ed7e6a00719611bec72a482a96f9218e58963e9a5ed1709b",
       "language": ".ts",
       "syntax": "test-driver",
       "imports": [
@@ -24726,10 +24726,12 @@
         "node:path"
       ],
       "declarations": [
+        "absent",
         "aggregate",
         "captured",
         "cleanup",
         "db",
+        "empty",
         "error",
         "failure",
         "failures",
@@ -24770,6 +24772,7 @@
         "expect.toContain",
         "expect.toEqual",
         "expect.toHaveLength",
+        "expect.toStrictEqual",
         "expect.toThrow",
         "failures.map",
         "foreign.cleanup",

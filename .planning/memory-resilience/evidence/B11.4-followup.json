@@ -1,0 +1,3139 @@
+{
+  "item_id": "B11.4",
+  "recordedAt": "2026-09-20T05:17:24.797Z",
+  "baseRevision": "0423e45710f9b75007113e97d4727f85595b6d18",
+  "status": "blocked on deterministic native closure B11.74; caller contracts still require repair",
+  "currentHelperMeasurement": {
+    "scope": "Local diagnostic; B05 instrumenter acceptance and independent review remain open. No package/native acceptance.",
+    "recordedAt": "2026-09-20T05:13:25.109Z",
+    "runtime": "1.4.1",
+    "files": [
+      {
+        "path": "tests/helpers/capture-json.ts",
+        "sourceHash": "11814452b101fd1cd9f9c59026da8d47c970b81fce5efce7b8482da159d52040",
+        "metrics": {
+          "lines": {
+            "total": 32,
+            "covered": 32,
+            "skipped": 0,
+            "pct": 100
+          },
+          "functions": {
+            "total": 9,
+            "covered": 9,
+            "skipped": 0,
+            "pct": 100
+          },
+          "statements": {
+            "total": 37,
+            "covered": 37,
+            "skipped": 0,
+            "pct": 100
+          },
+          "branches": {
+            "total": 11,
+            "covered": 11,
+            "skipped": 0,
+            "pct": 100
+          }
+        },
+        "uncoveredBranches": [],
+        "uncoveredFunctions": []
+      },
+      {
+        "path": "tests/helpers/capture-json.test.ts",
+        "sourceHash": "4b36d3a1f10fc7d7ed7e6a00719611bec72a482a96f9218e58963e9a5ed1709b",
+        "metrics": {
+          "lines": {
+            "total": 108,
+            "covered": 108,
+            "skipped": 0,
+            "pct": 100
+          },
+          "functions": {
+            "total": 24,
+            "covered": 24,
+            "skipped": 0,
+            "pct": 100
+          },
+          "statements": {
+            "total": 128,
+            "covered": 128,
+            "skipped": 0,
+            "pct": 100
+          },
+          "branches": {
+            "total": 2,
+            "covered": 2,
+            "skipped": 0,
+            "pct": 100
+          }
+        },
+        "uncoveredBranches": [],
+        "uncoveredFunctions": []
+      }
+    ],
+    "rawCoverage": {
+      "C:\\Projects\\memory-nexus\\tests\\helpers\\capture-json.ts": {
+        "path": "C:\\Projects\\memory-nexus\\tests\\helpers\\capture-json.ts",
+        "statementMap": {
+          "0": {
+            "start": {
+              "line": 33,
+              "column": 33
+            },
+            "end": {
+              "line": 33,
+              "column": 35
+            }
+          },
+          "1": {
+            "start": {
+              "line": 34,
+              "column": 33
+            },
+            "end": {
+              "line": 34,
+              "column": 35
+            }
+          },
+          "2": {
+            "start": {
+              "line": 35,
+              "column": 14
+            },
+            "end": {
+              "line": 35,
+              "column": 25
+            }
+          },
+          "3": {
+            "start": {
+              "line": 36,
+              "column": 14
+            },
+            "end": {
+              "line": 36,
+              "column": 27
+            }
+          },
+          "4": {
+            "start": {
+              "line": 37,
+              "column": 2
+            },
+            "end": {
+              "line": 38,
+              "column": 90
+            }
+          },
+          "5": {
+            "start": {
+              "line": 38,
+              "column": 4
+            },
+            "end": {
+              "line": 38,
+              "column": 89
+            }
+          },
+          "6": {
+            "start": {
+              "line": 38,
+              "column": 39
+            },
+            "end": {
+              "line": 38,
+              "column": 76
+            }
+          },
+          "7": {
+            "start": {
+              "line": 39,
+              "column": 2
+            },
+            "end": {
+              "line": 40,
+              "column": 90
+            }
+          },
+          "8": {
+            "start": {
+              "line": 40,
+              "column": 4
+            },
+            "end": {
+              "line": 40,
+              "column": 89
+            }
+          },
+          "9": {
+            "start": {
+              "line": 40,
+              "column": 39
+            },
+            "end": {
+              "line": 40,
+              "column": 76
+            }
+          },
+          "10": {
+            "start": {
+              "line": 41,
+              "column": 2
+            },
+            "end": {
+              "line": 52,
+              "column": 3
+            }
+          },
+          "11": {
+            "start": {
+              "line": 42,
+              "column": 19
+            },
+            "end": {
+              "line": 42,
+              "column": 29
+            }
+          },
+          "12": {
+            "start": {
+              "line": 43,
+              "column": 33
+            },
+            "end": {
+              "line": 46,
+              "column": 5
+            }
+          },
+          "13": {
+            "start": {
+              "line": 47,
+              "column": 4
+            },
+            "end": {
+              "line": 47,
+              "column": 71
+            }
+          },
+          "14": {
+            "start": {
+              "line": 47,
+              "column": 40
+            },
+            "end": {
+              "line": 47,
+              "column": 71
+            }
+          },
+          "15": {
+            "start": {
+              "line": 48,
+              "column": 4
+            },
+            "end": {
+              "line": 48,
+              "column": 15
+            }
+          },
+          "16": {
+            "start": {
+              "line": 50,
+              "column": 4
+            },
+            "end": {
+              "line": 50,
+              "column": 22
+            }
+          },
+          "17": {
+            "start": {
+              "line": 51,
+              "column": 4
+            },
+            "end": {
+              "line": 51,
+              "column": 24
+            }
+          },
+          "18": {
+            "start": {
+              "line": 62,
+              "column": 16
+            },
+            "end": {
+              "line": 62,
+              "column": 45
+            }
+          },
+          "19": {
+            "start": {
+              "line": 63,
+              "column": 2
+            },
+            "end": {
+              "line": 88,
+              "column": 4
+            }
+          },
+          "20": {
+            "start": {
+              "line": 65,
+              "column": 22
+            },
+            "end": {
+              "line": 65,
+              "column": 57
+            }
+          },
+          "21": {
+            "start": {
+              "line": 66,
+              "column": 6
+            },
+            "end": {
+              "line": 66,
+              "column": 25
+            }
+          },
+          "22": {
+            "start": {
+              "line": 67,
+              "column": 6
+            },
+            "end": {
+              "line": 67,
+              "column": 44
+            }
+          },
+          "23": {
+            "start": {
+              "line": 70,
+              "column": 22
+            },
+            "end": {
+              "line": 70,
+              "column": 32
+            }
+          },
+          "24": {
+            "start": {
+              "line": 71,
+              "column": 6
+            },
+            "end": {
+              "line": 71,
+              "column": 39
+            }
+          },
+          "25": {
+            "start": {
+              "line": 71,
+              "column": 32
+            },
+            "end": {
+              "line": 71,
+              "column": 39
+            }
+          },
+          "26": {
+            "start": {
+              "line": 73,
+              "column": 6
+            },
+            "end": {
+              "line": 73,
+              "column": 19
+            }
+          },
+          "27": {
+            "start": {
+              "line": 74,
+              "column": 6
+            },
+            "end": {
+              "line": 74,
+              "column": 27
+            }
+          },
+          "28": {
+            "start": {
+              "line": 75,
+              "column": 32
+            },
+            "end": {
+              "line": 75,
+              "column": 34
+            }
+          },
+          "29": {
+            "start": {
+              "line": 76,
+              "column": 6
+            },
+            "end": {
+              "line": 83,
+              "column": 7
+            }
+          },
+          "30": {
+            "start": {
+              "line": 77,
+              "column": 8
+            },
+            "end": {
+              "line": 82,
+              "column": 9
+            }
+          },
+          "31": {
+            "start": {
+              "line": 78,
+              "column": 10
+            },
+            "end": {
+              "line": 78,
+              "column": 28
+            }
+          },
+          "32": {
+            "start": {
+              "line": 79,
+              "column": 10
+            },
+            "end": {
+              "line": 79,
+              "column": 32
+            }
+          },
+          "33": {
+            "start": {
+              "line": 81,
+              "column": 10
+            },
+            "end": {
+              "line": 81,
+              "column": 92
+            }
+          },
+          "34": {
+            "start": {
+              "line": 84,
+              "column": 6
+            },
+            "end": {
+              "line": 86,
+              "column": 7
+            }
+          },
+          "35": {
+            "start": {
+              "line": 85,
+              "column": 8
+            },
+            "end": {
+              "line": 85,
+              "column": 92
+            }
+          },
+          "36": {
+            "start": {
+              "line": 85,
+              "column": 65
+            },
+            "end": {
+              "line": 85,
+              "column": 78
+            }
+          }
+        },
+        "fnMap": {
+          "0": {
+            "name": "captureStreams",
+            "decl": {
+              "start": {
+                "line": 30,
+                "column": 22
+              },
+              "end": {
+                "line": 30,
+                "column": 36
+              }
+            },
+            "loc": {
+              "start": {
+                "line": 32,
+                "column": 28
+              },
+              "end": {
+                "line": 53,
+                "column": 1
+              }
+            },
+            "line": 32
+          },
+          "1": {
+            "name": "(anonymous_1)",
+            "decl": {
+              "start": {
+                "line": 37,
+                "column": 16
+              },
+              "end": {
+                "line": 37,
+                "column": 17
+              }
+            },
+            "loc": {
+              "start": {
+                "line": 38,
+                "column": 4
+              },
+              "end": {
+                "line": 38,
+                "column": 89
+              }
+            },
+            "line": 38
+          },
+          "2": {
+            "name": "(anonymous_2)",
+            "decl": {
+              "start": {
+                "line": 38,
+                "column": 31
+              },
+              "end": {
+                "line": 38,
+                "column": 32
+              }
+            },
+            "loc": {
+              "start": {
+                "line": 38,
+                "column": 39
+              },
+              "end": {
+                "line": 38,
+                "column": 76
+              }
+            },
+            "line": 38
+          },
+          "3": {
+            "name": "(anonymous_3)",
+            "decl": {
+              "start": {
+                "line": 39,
+                "column": 18
+              },
+              "end": {
+                "line": 39,
+                "column": 19
+              }
+            },
+            "loc": {
+              "start": {
+                "line": 40,
+                "column": 4
+              },
+              "end": {
+                "line": 40,
+                "column": 89
+              }
+            },
+            "line": 40
+          },
+          "4": {
+            "name": "(anonymous_4)",
+            "decl": {
+              "start": {
+                "line": 40,
+                "column": 31
+              },
+              "end": {
+                "line": 40,
+                "column": 32
+              }
+            },
+            "loc": {
+              "start": {
+                "line": 40,
+                "column": 39
+              },
+              "end": {
+                "line": 40,
+                "column": 76
+              }
+            },
+            "line": 40
+          },
+          "5": {
+            "name": "createTempDatabaseTracker",
+            "decl": {
+              "start": {
+                "line": 59,
+                "column": 16
+              },
+              "end": {
+                "line": 59,
+                "column": 41
+              }
+            },
+            "loc": {
+              "start": {
+                "line": 61,
+                "column": 2
+              },
+              "end": {
+                "line": 89,
+                "column": 1
+              }
+            },
+            "line": 61
+          },
+          "6": {
+            "name": "(anonymous_6)",
+            "decl": {
+              "start": {
+                "line": 64,
+                "column": 4
+              },
+              "end": {
+                "line": 64,
+                "column": 5
+              }
+            },
+            "loc": {
+              "start": {
+                "line": 64,
+                "column": 38
+              },
+              "end": {
+                "line": 68,
+                "column": 5
+              }
+            },
+            "line": 64
+          },
+          "7": {
+            "name": "(anonymous_7)",
+            "decl": {
+              "start": {
+                "line": 69,
+                "column": 4
+              },
+              "end": {
+                "line": 69,
+                "column": 5
+              }
+            },
+            "loc": {
+              "start": {
+                "line": 69,
+                "column": 35
+              },
+              "end": {
+                "line": 87,
+                "column": 5
+              }
+            },
+            "line": 69
+          },
+          "8": {
+            "name": "(anonymous_8)",
+            "decl": {
+              "start": {
+                "line": 85,
+                "column": 56
+              },
+              "end": {
+                "line": 85,
+                "column": 57
+              }
+            },
+            "loc": {
+              "start": {
+                "line": 85,
+                "column": 65
+              },
+              "end": {
+                "line": 85,
+                "column": 78
+              }
+            },
+            "line": 85
+          }
+        },
+        "branchMap": {
+          "0": {
+            "loc": {
+              "start": {
+                "line": 38,
+                "column": 39
+              },
+              "end": {
+                "line": 38,
+                "column": 76
+              }
+            },
+            "type": "cond-expr",
+            "locations": [
+              {
+                "start": {
+                  "line": 38,
+                  "column": 63
+                },
+                "end": {
+                  "line": 38,
+                  "column": 64
+                }
+              },
+              {
+                "start": {
+                  "line": 38,
+                  "column": 67
+                },
+                "end": {
+                  "line": 38,
+                  "column": 76
+                }
+              }
+            ],
+            "line": 38
+          },
+          "1": {
+            "loc": {
+              "start": {
+                "line": 40,
+                "column": 39
+              },
+              "end": {
+                "line": 40,
+                "column": 76
+              }
+            },
+            "type": "cond-expr",
+            "locations": [
+              {
+                "start": {
+                  "line": 40,
+                  "column": 63
+                },
+                "end": {
+                  "line": 40,
+                  "column": 64
+                }
+              },
+              {
+                "start": {
+                  "line": 40,
+                  "column": 67
+                },
+                "end": {
+                  "line": 40,
+                  "column": 76
+                }
+              }
+            ],
+            "line": 40
+          },
+          "2": {
+            "loc": {
+              "start": {
+                "line": 47,
+                "column": 4
+              },
+              "end": {
+                "line": 47,
+                "column": 71
+              }
+            },
+            "type": "if",
+            "locations": [
+              {
+                "start": {
+                  "line": 47,
+                  "column": 4
+                },
+                "end": {
+                  "line": 47,
+                  "column": 71
+                }
+              },
+              {
+                "start": {},
+                "end": {}
+              }
+            ],
+            "line": 47
+          },
+          "3": {
+            "loc": {
+              "start": {
+                "line": 60,
+                "column": 2
+              },
+              "end": {
+                "line": 60,
+                "column": 77
+              }
+            },
+            "type": "default-arg",
+            "locations": [
+              {
+                "start": {
+                  "line": 60,
+                  "column": 53
+                },
+                "end": {
+                  "line": 60,
+                  "column": 77
+                }
+              }
+            ],
+            "line": 60
+          },
+          "4": {
+            "loc": {
+              "start": {
+                "line": 71,
+                "column": 6
+              },
+              "end": {
+                "line": 71,
+                "column": 39
+              }
+            },
+            "type": "if",
+            "locations": [
+              {
+                "start": {
+                  "line": 71,
+                  "column": 6
+                },
+                "end": {
+                  "line": 71,
+                  "column": 39
+                }
+              },
+              {
+                "start": {},
+                "end": {}
+              }
+            ],
+            "line": 71
+          },
+          "5": {
+            "loc": {
+              "start": {
+                "line": 84,
+                "column": 6
+              },
+              "end": {
+                "line": 86,
+                "column": 7
+              }
+            },
+            "type": "if",
+            "locations": [
+              {
+                "start": {
+                  "line": 84,
+                  "column": 6
+                },
+                "end": {
+                  "line": 86,
+                  "column": 7
+                }
+              },
+              {
+                "start": {},
+                "end": {}
+              }
+            ],
+            "line": 84
+          }
+        },
+        "s": {
+          "0": 5,
+          "1": 5,
+          "2": 5,
+          "3": 5,
+          "4": 5,
+          "5": 2,
+          "6": 4,
+          "7": 5,
+          "8": 1,
+          "9": 2,
+          "10": 5,
+          "11": 5,
+          "12": 4,
+          "13": 4,
+          "14": 2,
+          "15": 4,
+          "16": 5,
+          "17": 5,
+          "18": 7,
+          "19": 7,
+          "20": 12,
+          "21": 7,
+          "22": 7,
+          "23": 13,
+          "24": 13,
+          "25": 6,
+          "26": 7,
+          "27": 7,
+          "28": 7,
+          "29": 7,
+          "30": 10,
+          "31": 10,
+          "32": 7,
+          "33": 3,
+          "34": 7,
+          "35": 2,
+          "36": 3
+        },
+        "f": {
+          "0": 5,
+          "1": 2,
+          "2": 4,
+          "3": 1,
+          "4": 2,
+          "5": 7,
+          "6": 12,
+          "7": 13,
+          "8": 3
+        },
+        "b": {
+          "0": [
+            2,
+            2
+          ],
+          "1": [
+            1,
+            1
+          ],
+          "2": [
+            2,
+            2
+          ],
+          "3": [
+            4
+          ],
+          "4": [
+            6,
+            7
+          ],
+          "5": [
+            2,
+            5
+          ]
+        },
+        "_coverageSchema": "1a1c01bbd47fc00a2c39e90264f33305004495a9",
+        "hash": "8b70dd058fce6d084bf466730efc5a561442ccfe"
+      },
+      "C:\\Projects\\memory-nexus\\tests\\helpers\\capture-json.test.ts": {
+        "path": "C:\\Projects\\memory-nexus\\tests\\helpers\\capture-json.test.ts",
+        "statementMap": {
+          "0": {
+            "start": {
+              "line": 7,
+              "column": 0
+            },
+            "end": {
+              "line": 148,
+              "column": 3
+            }
+          },
+          "1": {
+            "start": {
+              "line": 8,
+              "column": 2
+            },
+            "end": {
+              "line": 15,
+              "column": 5
+            }
+          },
+          "2": {
+            "start": {
+              "line": 9,
+              "column": 21
+            },
+            "end": {
+              "line": 13,
+              "column": 6
+            }
+          },
+          "3": {
+            "start": {
+              "line": 10,
+              "column": 6
+            },
+            "end": {
+              "line": 10,
+              "column": 47
+            }
+          },
+          "4": {
+            "start": {
+              "line": 11,
+              "column": 6
+            },
+            "end": {
+              "line": 11,
+              "column": 38
+            }
+          },
+          "5": {
+            "start": {
+              "line": 12,
+              "column": 6
+            },
+            "end": {
+              "line": 12,
+              "column": 29
+            }
+          },
+          "6": {
+            "start": {
+              "line": 14,
+              "column": 4
+            },
+            "end": {
+              "line": 14,
+              "column": 109
+            }
+          },
+          "7": {
+            "start": {
+              "line": 17,
+              "column": 2
+            },
+            "end": {
+              "line": 25,
+              "column": 5
+            }
+          },
+          "8": {
+            "start": {
+              "line": 18,
+              "column": 19
+            },
+            "end": {
+              "line": 18,
+              "column": 62
+            }
+          },
+          "9": {
+            "start": {
+              "line": 18,
+              "column": 52
+            },
+            "end": {
+              "line": 18,
+              "column": 61
+            }
+          },
+          "10": {
+            "start": {
+              "line": 19,
+              "column": 18
+            },
+            "end": {
+              "line": 19,
+              "column": 56
+            }
+          },
+          "11": {
+            "start": {
+              "line": 19,
+              "column": 52
+            },
+            "end": {
+              "line": 19,
+              "column": 54
+            }
+          },
+          "12": {
+            "start": {
+              "line": 20,
+              "column": 4
+            },
+            "end": {
+              "line": 20,
+              "column": 61
+            }
+          },
+          "13": {
+            "start": {
+              "line": 21,
+              "column": 4
+            },
+            "end": {
+              "line": 21,
+              "column": 60
+            }
+          },
+          "14": {
+            "start": {
+              "line": 22,
+              "column": 4
+            },
+            "end": {
+              "line": 22,
+              "column": 45
+            }
+          },
+          "15": {
+            "start": {
+              "line": 23,
+              "column": 4
+            },
+            "end": {
+              "line": 23,
+              "column": 44
+            }
+          },
+          "16": {
+            "start": {
+              "line": 24,
+              "column": 4
+            },
+            "end": {
+              "line": 24,
+              "column": 119
+            }
+          },
+          "17": {
+            "start": {
+              "line": 24,
+              "column": 45
+            },
+            "end": {
+              "line": 24,
+              "column": 60
+            }
+          },
+          "18": {
+            "start": {
+              "line": 27,
+              "column": 2
+            },
+            "end": {
+              "line": 35,
+              "column": 5
+            }
+          },
+          "19": {
+            "start": {
+              "line": 28,
+              "column": 16
+            },
+            "end": {
+              "line": 28,
+              "column": 27
+            }
+          },
+          "20": {
+            "start": {
+              "line": 28,
+              "column": 37
+            },
+            "end": {
+              "line": 28,
+              "column": 50
+            }
+          },
+          "21": {
+            "start": {
+              "line": 28,
+              "column": 62
+            },
+            "end": {
+              "line": 28,
+              "column": 79
+            }
+          },
+          "22": {
+            "start": {
+              "line": 29,
+              "column": 4
+            },
+            "end": {
+              "line": 32,
+              "column": 30
+            }
+          },
+          "23": {
+            "start": {
+              "line": 30,
+              "column": 6
+            },
+            "end": {
+              "line": 30,
+              "column": 34
+            }
+          },
+          "24": {
+            "start": {
+              "line": 31,
+              "column": 6
+            },
+            "end": {
+              "line": 31,
+              "column": 20
+            }
+          },
+          "25": {
+            "start": {
+              "line": 33,
+              "column": 4
+            },
+            "end": {
+              "line": 33,
+              "column": 34
+            }
+          },
+          "26": {
+            "start": {
+              "line": 34,
+              "column": 4
+            },
+            "end": {
+              "line": 34,
+              "column": 38
+            }
+          },
+          "27": {
+            "start": {
+              "line": 37,
+              "column": 2
+            },
+            "end": {
+              "line": 48,
+              "column": 5
+            }
+          },
+          "28": {
+            "start": {
+              "line": 38,
+              "column": 20
+            },
+            "end": {
+              "line": 38,
+              "column": 47
+            }
+          },
+          "29": {
+            "start": {
+              "line": 39,
+              "column": 15
+            },
+            "end": {
+              "line": 39,
+              "column": 41
+            }
+          },
+          "30": {
+            "start": {
+              "line": 40,
+              "column": 4
+            },
+            "end": {
+              "line": 47,
+              "column": 42
+            }
+          },
+          "31": {
+            "start": {
+              "line": 41,
+              "column": 6
+            },
+            "end": {
+              "line": 41,
+              "column": 41
+            }
+          },
+          "32": {
+            "start": {
+              "line": 42,
+              "column": 6
+            },
+            "end": {
+              "line": 42,
+              "column": 49
+            }
+          },
+          "33": {
+            "start": {
+              "line": 43,
+              "column": 6
+            },
+            "end": {
+              "line": 43,
+              "column": 89
+            }
+          },
+          "34": {
+            "start": {
+              "line": 43,
+              "column": 49
+            },
+            "end": {
+              "line": 43,
+              "column": 89
+            }
+          },
+          "35": {
+            "start": {
+              "line": 44,
+              "column": 6
+            },
+            "end": {
+              "line": 44,
+              "column": 30
+            }
+          },
+          "36": {
+            "start": {
+              "line": 45,
+              "column": 6
+            },
+            "end": {
+              "line": 45,
+              "column": 50
+            }
+          },
+          "37": {
+            "start": {
+              "line": 46,
+              "column": 6
+            },
+            "end": {
+              "line": 46,
+              "column": 30
+            }
+          },
+          "38": {
+            "start": {
+              "line": 47,
+              "column": 16
+            },
+            "end": {
+              "line": 47,
+              "column": 40
+            }
+          },
+          "39": {
+            "start": {
+              "line": 50,
+              "column": 2
+            },
+            "end": {
+              "line": 61,
+              "column": 5
+            }
+          },
+          "40": {
+            "start": {
+              "line": 51,
+              "column": 20
+            },
+            "end": {
+              "line": 51,
+              "column": 68
+            }
+          },
+          "41": {
+            "start": {
+              "line": 52,
+              "column": 21
+            },
+            "end": {
+              "line": 52,
+              "column": 52
+            }
+          },
+          "42": {
+            "start": {
+              "line": 53,
+              "column": 4
+            },
+            "end": {
+              "line": 53,
+              "column": 54
+            }
+          },
+          "43": {
+            "start": {
+              "line": 54,
+              "column": 20
+            },
+            "end": {
+              "line": 54,
+              "column": 47
+            }
+          },
+          "44": {
+            "start": {
+              "line": 55,
+              "column": 4
+            },
+            "end": {
+              "line": 60,
+              "column": 36
+            }
+          },
+          "45": {
+            "start": {
+              "line": 57,
+              "column": 6
+            },
+            "end": {
+              "line": 57,
+              "column": 66
+            }
+          },
+          "46": {
+            "start": {
+              "line": 58,
+              "column": 6
+            },
+            "end": {
+              "line": 58,
+              "column": 76
+            }
+          },
+          "47": {
+            "start": {
+              "line": 59,
+              "column": 6
+            },
+            "end": {
+              "line": 59,
+              "column": 88
+            }
+          },
+          "48": {
+            "start": {
+              "line": 59,
+              "column": 19
+            },
+            "end": {
+              "line": 59,
+              "column": 45
+            }
+          },
+          "49": {
+            "start": {
+              "line": 60,
+              "column": 16
+            },
+            "end": {
+              "line": 60,
+              "column": 34
+            }
+          },
+          "50": {
+            "start": {
+              "line": 63,
+              "column": 2
+            },
+            "end": {
+              "line": 68,
+              "column": 5
+            }
+          },
+          "51": {
+            "start": {
+              "line": 64,
+              "column": 20
+            },
+            "end": {
+              "line": 64,
+              "column": 47
+            }
+          },
+          "52": {
+            "start": {
+              "line": 65,
+              "column": 4
+            },
+            "end": {
+              "line": 67,
+              "column": 5
+            }
+          },
+          "53": {
+            "start": {
+              "line": 66,
+              "column": 6
+            },
+            "end": {
+              "line": 66,
+              "column": 85
+            }
+          },
+          "54": {
+            "start": {
+              "line": 66,
+              "column": 19
+            },
+            "end": {
+              "line": 66,
+              "column": 42
+            }
+          },
+          "55": {
+            "start": {
+              "line": 70,
+              "column": 2
+            },
+            "end": {
+              "line": 75,
+              "column": 5
+            }
+          },
+          "56": {
+            "start": {
+              "line": 71,
+              "column": 20
+            },
+            "end": {
+              "line": 71,
+              "column": 55
+            }
+          },
+          "57": {
+            "start": {
+              "line": 72,
+              "column": 20
+            },
+            "end": {
+              "line": 72,
+              "column": 71
+            }
+          },
+          "58": {
+            "start": {
+              "line": 72,
+              "column": 54
+            },
+            "end": {
+              "line": 72,
+              "column": 68
+            }
+          },
+          "59": {
+            "start": {
+              "line": 73,
+              "column": 4
+            },
+            "end": {
+              "line": 73,
+              "column": 62
+            }
+          },
+          "60": {
+            "start": {
+              "line": 73,
+              "column": 17
+            },
+            "end": {
+              "line": 73,
+              "column": 43
+            }
+          },
+          "61": {
+            "start": {
+              "line": 74,
+              "column": 4
+            },
+            "end": {
+              "line": 74,
+              "column": 28
+            }
+          },
+          "62": {
+            "start": {
+              "line": 77,
+              "column": 2
+            },
+            "end": {
+              "line": 98,
+              "column": 5
+            }
+          },
+          "63": {
+            "start": {
+              "line": 78,
+              "column": 21
+            },
+            "end": {
+              "line": 78,
+              "column": 70
+            }
+          },
+          "64": {
+            "start": {
+              "line": 79,
+              "column": 20
+            },
+            "end": {
+              "line": 79,
+              "column": 61
+            }
+          },
+          "65": {
+            "start": {
+              "line": 79,
+              "column": 52
+            },
+            "end": {
+              "line": 79,
+              "column": 60
+            }
+          },
+          "66": {
+            "start": {
+              "line": 80,
+              "column": 15
+            },
+            "end": {
+              "line": 80,
+              "column": 41
+            }
+          },
+          "67": {
+            "start": {
+              "line": 81,
+              "column": 18
+            },
+            "end": {
+              "line": 81,
+              "column": 44
+            }
+          },
+          "68": {
+            "start": {
+              "line": 82,
+              "column": 4
+            },
+            "end": {
+              "line": 82,
+              "column": 36
+            }
+          },
+          "69": {
+            "start": {
+              "line": 83,
+              "column": 4
+            },
+            "end": {
+              "line": 83,
+              "column": 28
+            }
+          },
+          "70": {
+            "start": {
+              "line": 84,
+              "column": 21
+            },
+            "end": {
+              "line": 84,
+              "column": 54
+            }
+          },
+          "71": {
+            "start": {
+              "line": 85,
+              "column": 4
+            },
+            "end": {
+              "line": 85,
+              "column": 56
+            }
+          },
+          "72": {
+            "start": {
+              "line": 86,
+              "column": 4
+            },
+            "end": {
+              "line": 96,
+              "column": 5
+            }
+          },
+          "73": {
+            "start": {
+              "line": 87,
+              "column": 6
+            },
+            "end": {
+              "line": 87,
+              "column": 68
+            }
+          },
+          "74": {
+            "start": {
+              "line": 88,
+              "column": 6
+            },
+            "end": {
+              "line": 88,
+              "column": 78
+            }
+          },
+          "75": {
+            "start": {
+              "line": 89,
+              "column": 6
+            },
+            "end": {
+              "line": 89,
+              "column": 43
+            }
+          },
+          "76": {
+            "start": {
+              "line": 92,
+              "column": 6
+            },
+            "end": {
+              "line": 92,
+              "column": 27
+            }
+          },
+          "77": {
+            "start": {
+              "line": 93,
+              "column": 6
+            },
+            "end": {
+              "line": 93,
+              "column": 30
+            }
+          },
+          "78": {
+            "start": {
+              "line": 94,
+              "column": 6
+            },
+            "end": {
+              "line": 94,
+              "column": 38
+            }
+          },
+          "79": {
+            "start": {
+              "line": 95,
+              "column": 6
+            },
+            "end": {
+              "line": 95,
+              "column": 30
+            }
+          },
+          "80": {
+            "start": {
+              "line": 97,
+              "column": 4
+            },
+            "end": {
+              "line": 97,
+              "column": 48
+            }
+          },
+          "81": {
+            "start": {
+              "line": 100,
+              "column": 2
+            },
+            "end": {
+              "line": 133,
+              "column": 5
+            }
+          },
+          "82": {
+            "start": {
+              "line": 101,
+              "column": 17
+            },
+            "end": {
+              "line": 101,
+              "column": 21
+            }
+          },
+          "83": {
+            "start": {
+              "line": 102,
+              "column": 21
+            },
+            "end": {
+              "line": 102,
+              "column": 67
+            }
+          },
+          "84": {
+            "start": {
+              "line": 103,
+              "column": 20
+            },
+            "end": {
+              "line": 108,
+              "column": 7
+            }
+          },
+          "85": {
+            "start": {
+              "line": 103,
+              "column": 44
+            },
+            "end": {
+              "line": 108,
+              "column": 6
+            }
+          },
+          "86": {
+            "start": {
+              "line": 105,
+              "column": 8
+            },
+            "end": {
+              "line": 105,
+              "column": 34
+            }
+          },
+          "87": {
+            "start": {
+              "line": 105,
+              "column": 20
+            },
+            "end": {
+              "line": 105,
+              "column": 34
+            }
+          },
+          "88": {
+            "start": {
+              "line": 106,
+              "column": 8
+            },
+            "end": {
+              "line": 106,
+              "column": 56
+            }
+          },
+          "89": {
+            "start": {
+              "line": 109,
+              "column": 20
+            },
+            "end": {
+              "line": 109,
+              "column": 68
+            }
+          },
+          "90": {
+            "start": {
+              "line": 110,
+              "column": 18
+            },
+            "end": {
+              "line": 110,
+              "column": 39
+            }
+          },
+          "91": {
+            "start": {
+              "line": 111,
+              "column": 20
+            },
+            "end": {
+              "line": 111,
+              "column": 67
+            }
+          },
+          "92": {
+            "start": {
+              "line": 111,
+              "column": 52
+            },
+            "end": {
+              "line": 111,
+              "column": 66
+            }
+          },
+          "93": {
+            "start": {
+              "line": 112,
+              "column": 4
+            },
+            "end": {
+              "line": 112,
+              "column": 59
+            }
+          },
+          "94": {
+            "start": {
+              "line": 112,
+              "column": 17
+            },
+            "end": {
+              "line": 112,
+              "column": 18
+            }
+          },
+          "95": {
+            "start": {
+              "line": 112,
+              "column": 32
+            },
+            "end": {
+              "line": 112,
+              "column": 59
+            }
+          },
+          "96": {
+            "start": {
+              "line": 113,
+              "column": 4
+            },
+            "end": {
+              "line": 132,
+              "column": 5
+            }
+          },
+          "97": {
+            "start": {
+              "line": 115,
+              "column": 6
+            },
+            "end": {
+              "line": 115,
+              "column": 72
+            }
+          },
+          "98": {
+            "start": {
+              "line": 115,
+              "column": 12
+            },
+            "end": {
+              "line": 115,
+              "column": 36
+            }
+          },
+          "99": {
+            "start": {
+              "line": 115,
+              "column": 55
+            },
+            "end": {
+              "line": 115,
+              "column": 70
+            }
+          },
+          "100": {
+            "start": {
+              "line": 116,
+              "column": 6
+            },
+            "end": {
+              "line": 116,
+              "column": 52
+            }
+          },
+          "101": {
+            "start": {
+              "line": 117,
+              "column": 24
+            },
+            "end": {
+              "line": 117,
+              "column": 48
+            }
+          },
+          "102": {
+            "start": {
+              "line": 118,
+              "column": 6
+            },
+            "end": {
+              "line": 118,
+              "column": 47
+            }
+          },
+          "103": {
+            "start": {
+              "line": 119,
+              "column": 6
+            },
+            "end": {
+              "line": 123,
+              "column": 7
+            }
+          },
+          "104": {
+            "start": {
+              "line": 120,
+              "column": 8
+            },
+            "end": {
+              "line": 120,
+              "column": 54
+            }
+          },
+          "105": {
+            "start": {
+              "line": 121,
+              "column": 8
+            },
+            "end": {
+              "line": 121,
+              "column": 74
+            }
+          },
+          "106": {
+            "start": {
+              "line": 122,
+              "column": 8
+            },
+            "end": {
+              "line": 122,
+              "column": 48
+            }
+          },
+          "107": {
+            "start": {
+              "line": 124,
+              "column": 6
+            },
+            "end": {
+              "line": 124,
+              "column": 50
+            }
+          },
+          "108": {
+            "start": {
+              "line": 125,
+              "column": 6
+            },
+            "end": {
+              "line": 125,
+              "column": 21
+            }
+          },
+          "109": {
+            "start": {
+              "line": 126,
+              "column": 6
+            },
+            "end": {
+              "line": 126,
+              "column": 30
+            }
+          },
+          "110": {
+            "start": {
+              "line": 127,
+              "column": 6
+            },
+            "end": {
+              "line": 127,
+              "column": 75
+            }
+          },
+          "111": {
+            "start": {
+              "line": 127,
+              "column": 34
+            },
+            "end": {
+              "line": 127,
+              "column": 75
+            }
+          },
+          "112": {
+            "start": {
+              "line": 129,
+              "column": 6
+            },
+            "end": {
+              "line": 129,
+              "column": 21
+            }
+          },
+          "113": {
+            "start": {
+              "line": 130,
+              "column": 6
+            },
+            "end": {
+              "line": 130,
+              "column": 30
+            }
+          },
+          "114": {
+            "start": {
+              "line": 131,
+              "column": 6
+            },
+            "end": {
+              "line": 131,
+              "column": 63
+            }
+          },
+          "115": {
+            "start": {
+              "line": 131,
+              "column": 48
+            },
+            "end": {
+              "line": 131,
+              "column": 63
+            }
+          },
+          "116": {
+            "start": {
+              "line": 135,
+              "column": 2
+            },
+            "end": {
+              "line": 147,
+              "column": 5
+            }
+          },
+          "117": {
+            "start": {
+              "line": 136,
+              "column": 20
+            },
+            "end": {
+              "line": 136,
+              "column": 47
+            }
+          },
+          "118": {
+            "start": {
+              "line": 137,
+              "column": 18
+            },
+            "end": {
+              "line": 137,
+              "column": 43
+            }
+          },
+          "119": {
+            "start": {
+              "line": 138,
+              "column": 4
+            },
+            "end": {
+              "line": 146,
+              "column": 42
+            }
+          },
+          "120": {
+            "start": {
+              "line": 139,
+              "column": 22
+            },
+            "end": {
+              "line": 139,
+              "column": 39
+            }
+          },
+          "121": {
+            "start": {
+              "line": 140,
+              "column": 21
+            },
+            "end": {
+              "line": 140,
+              "column": 47
+            }
+          },
+          "122": {
+            "start": {
+              "line": 141,
+              "column": 6
+            },
+            "end": {
+              "line": 141,
+              "column": 20
+            }
+          },
+          "123": {
+            "start": {
+              "line": 142,
+              "column": 6
+            },
+            "end": {
+              "line": 142,
+              "column": 53
+            }
+          },
+          "124": {
+            "start": {
+              "line": 143,
+              "column": 6
+            },
+            "end": {
+              "line": 143,
+              "column": 53
+            }
+          },
+          "125": {
+            "start": {
+              "line": 144,
+              "column": 6
+            },
+            "end": {
+              "line": 144,
+              "column": 30
+            }
+          },
+          "126": {
+            "start": {
+              "line": 145,
+              "column": 6
+            },
+            "end": {
+              "line": 145,
+              "column": 54
+            }
+          },
+          "127": {
+            "start": {
+              "line": 146,
+              "column": 16
+            },
+            "end": {
+              "line": 146,
+              "column": 40
+            }
+          }
+        },
+        "fnMap": {
+          "0": {
+            "name": "(anonymous_0)",
+            "decl": {
+              "start": {
+                "line": 7,
+                "column": 38
+              },
+              "end": {
+                "line": 7,
+                "column": 39
+              }
+            },
+            "loc": {
+              "start": {
+                "line": 7,
+                "column": 44
+              },
+              "end": {
+                "line": 148,
+                "column": 1
+              }
+            },
+            "line": 7
+          },
+          "1": {
+            "name": "(anonymous_1)",
+            "decl": {
+              "start": {
+                "line": 8,
+                "column": 76
+              },
+              "end": {
+                "line": 8,
+                "column": 77
+              }
+            },
+            "loc": {
+              "start": {
+                "line": 8,
+                "column": 88
+              },
+              "end": {
+                "line": 15,
+                "column": 3
+              }
+            },
+            "line": 8
+          },
+          "2": {
+            "name": "(anonymous_2)",
+            "decl": {
+              "start": {
+                "line": 9,
+                "column": 42
+              },
+              "end": {
+                "line": 9,
+                "column": 43
+              }
+            },
+            "loc": {
+              "start": {
+                "line": 9,
+                "column": 54
+              },
+              "end": {
+                "line": 13,
+                "column": 5
+              }
+            },
+            "line": 9
+          },
+          "3": {
+            "name": "(anonymous_3)",
+            "decl": {
+              "start": {
+                "line": 17,
+                "column": 72
+              },
+              "end": {
+                "line": 17,
+                "column": 73
+              }
+            },
+            "loc": {
+              "start": {
+                "line": 17,
+                "column": 84
+              },
+              "end": {
+                "line": 25,
+                "column": 3
+              }
+            },
+            "line": 17
+          },
+          "4": {
+            "name": "(anonymous_4)",
+            "decl": {
+              "start": {
+                "line": 18,
+                "column": 40
+              },
+              "end": {
+                "line": 18,
+                "column": 41
+              }
+            },
+            "loc": {
+              "start": {
+                "line": 18,
+                "column": 52
+              },
+              "end": {
+                "line": 18,
+                "column": 61
+              }
+            },
+            "line": 18
+          },
+          "5": {
+            "name": "(anonymous_5)",
+            "decl": {
+              "start": {
+                "line": 19,
+                "column": 39
+              },
+              "end": {
+                "line": 19,
+                "column": 40
+              }
+            },
+            "loc": {
+              "start": {
+                "line": 19,
+                "column": 52
+              },
+              "end": {
+                "line": 19,
+                "column": 54
+              }
+            },
+            "line": 19
+          },
+          "6": {
+            "name": "(anonymous_6)",
+            "decl": {
+              "start": {
+                "line": 24,
+                "column": 32
+              },
+              "end": {
+                "line": 24,
+                "column": 33
+              }
+            },
+            "loc": {
+              "start": {
+                "line": 24,
+                "column": 45
+              },
+              "end": {
+                "line": 24,
+                "column": 60
+              }
+            },
+            "line": 24
+          },
+          "7": {
+            "name": "(anonymous_7)",
+            "decl": {
+              "start": {
+                "line": 27,
+                "column": 65
+              },
+              "end": {
+                "line": 27,
+                "column": 66
+              }
+            },
+            "loc": {
+              "start": {
+                "line": 27,
+                "column": 77
+              },
+              "end": {
+                "line": 35,
+                "column": 3
+              }
+            },
+            "line": 27
+          },
+          "8": {
+            "name": "(anonymous_8)",
+            "decl": {
+              "start": {
+                "line": 29,
+                "column": 32
+              },
+              "end": {
+                "line": 29,
+                "column": 33
+              }
+            },
+            "loc": {
+              "start": {
+                "line": 29,
+                "column": 44
+              },
+              "end": {
+                "line": 32,
+                "column": 5
+              }
+            },
+            "line": 29
+          },
+          "9": {
+            "name": "(anonymous_9)",
+            "decl": {
+              "start": {
+                "line": 37,
+                "column": 84
+              },
+              "end": {
+                "line": 37,
+                "column": 85
+              }
+            },
+            "loc": {
+              "start": {
+                "line": 37,
+                "column": 96
+              },
+              "end": {
+                "line": 48,
+                "column": 3
+              }
+            },
+            "line": 37
+          },
+          "10": {
+            "name": "(anonymous_10)",
+            "decl": {
+              "start": {
+                "line": 50,
+                "column": 77
+              },
+              "end": {
+                "line": 50,
+                "column": 78
+              }
+            },
+            "loc": {
+              "start": {
+                "line": 50,
+                "column": 89
+              },
+              "end": {
+                "line": 61,
+                "column": 3
+              }
+            },
+            "line": 50
+          },
+          "11": {
+            "name": "(anonymous_11)",
+            "decl": {
+              "start": {
+                "line": 59,
+                "column": 13
+              },
+              "end": {
+                "line": 59,
+                "column": 14
+              }
+            },
+            "loc": {
+              "start": {
+                "line": 59,
+                "column": 19
+              },
+              "end": {
+                "line": 59,
+                "column": 45
+              }
+            },
+            "line": 59
+          },
+          "12": {
+            "name": "(anonymous_12)",
+            "decl": {
+              "start": {
+                "line": 63,
+                "column": 74
+              },
+              "end": {
+                "line": 63,
+                "column": 75
+              }
+            },
+            "loc": {
+              "start": {
+                "line": 63,
+                "column": 80
+              },
+              "end": {
+                "line": 68,
+                "column": 3
+              }
+            },
+            "line": 63
+          },
+          "13": {
+            "name": "(anonymous_13)",
+            "decl": {
+              "start": {
+                "line": 66,
+                "column": 13
+              },
+              "end": {
+                "line": 66,
+                "column": 14
+              }
+            },
+            "loc": {
+              "start": {
+                "line": 66,
+                "column": 19
+              },
+              "end": {
+                "line": 66,
+                "column": 42
+              }
+            },
+            "line": 66
+          },
+          "14": {
+            "name": "(anonymous_14)",
+            "decl": {
+              "start": {
+                "line": 70,
+                "column": 38
+              },
+              "end": {
+                "line": 70,
+                "column": 39
+              }
+            },
+            "loc": {
+              "start": {
+                "line": 70,
+                "column": 50
+              },
+              "end": {
+                "line": 75,
+                "column": 3
+              }
+            },
+            "line": 70
+          },
+          "15": {
+            "name": "(anonymous_15)",
+            "decl": {
+              "start": {
+                "line": 72,
+                "column": 46
+              },
+              "end": {
+                "line": 72,
+                "column": 47
+              }
+            },
+            "loc": {
+              "start": {
+                "line": 72,
+                "column": 52
+              },
+              "end": {
+                "line": 72,
+                "column": 70
+              }
+            },
+            "line": 72
+          },
+          "16": {
+            "name": "(anonymous_16)",
+            "decl": {
+              "start": {
+                "line": 73,
+                "column": 11
+              },
+              "end": {
+                "line": 73,
+                "column": 12
+              }
+            },
+            "loc": {
+              "start": {
+                "line": 73,
+                "column": 17
+              },
+              "end": {
+                "line": 73,
+                "column": 43
+              }
+            },
+            "line": 73
+          },
+          "17": {
+            "name": "(anonymous_17)",
+            "decl": {
+              "start": {
+                "line": 77,
+                "column": 76
+              },
+              "end": {
+                "line": 77,
+                "column": 77
+              }
+            },
+            "loc": {
+              "start": {
+                "line": 77,
+                "column": 88
+              },
+              "end": {
+                "line": 98,
+                "column": 3
+              }
+            },
+            "line": 77
+          },
+          "18": {
+            "name": "(anonymous_18)",
+            "decl": {
+              "start": {
+                "line": 79,
+                "column": 46
+              },
+              "end": {
+                "line": 79,
+                "column": 47
+              }
+            },
+            "loc": {
+              "start": {
+                "line": 79,
+                "column": 52
+              },
+              "end": {
+                "line": 79,
+                "column": 60
+              }
+            },
+            "line": 79
+          },
+          "19": {
+            "name": "(anonymous_19)",
+            "decl": {
+              "start": {
+                "line": 100,
+                "column": 81
+              },
+              "end": {
+                "line": 100,
+                "column": 82
+              }
+            },
+            "loc": {
+              "start": {
+                "line": 100,
+                "column": 93
+              },
+              "end": {
+                "line": 133,
+                "column": 3
+              }
+            },
+            "line": 100
+          },
+          "20": {
+            "name": "(anonymous_20)",
+            "decl": {
+              "start": {
+                "line": 103,
+                "column": 33
+              },
+              "end": {
+                "line": 103,
+                "column": 34
+              }
+            },
+            "loc": {
+              "start": {
+                "line": 103,
+                "column": 44
+              },
+              "end": {
+                "line": 108,
+                "column": 6
+              }
+            },
+            "line": 103
+          },
+          "21": {
+            "name": "(anonymous_21)",
+            "decl": {
+              "start": {
+                "line": 104,
+                "column": 6
+              },
+              "end": {
+                "line": 104,
+                "column": 7
+              }
+            },
+            "loc": {
+              "start": {
+                "line": 104,
+                "column": 19
+              },
+              "end": {
+                "line": 107,
+                "column": 7
+              }
+            },
+            "line": 104
+          },
+          "22": {
+            "name": "(anonymous_22)",
+            "decl": {
+              "start": {
+                "line": 111,
+                "column": 46
+              },
+              "end": {
+                "line": 111,
+                "column": 47
+              }
+            },
+            "loc": {
+              "start": {
+                "line": 111,
+                "column": 52
+              },
+              "end": {
+                "line": 111,
+                "column": 66
+              }
+            },
+            "line": 111
+          },
+          "23": {
+            "name": "(anonymous_23)",
+            "decl": {
+              "start": {
+                "line": 135,
+                "column": 62
+              },
+              "end": {
+                "line": 135,
+                "column": 63
+              }
+            },
+            "loc": {
+              "start": {
+                "line": 135,
+                "column": 74
+              },
+              "end": {
+                "line": 147,
+                "column": 3
+              }
+            },
+            "line": 135
+          }
+        },
+        "branchMap": {
+          "0": {
+            "loc": {
+              "start": {
+                "line": 105,
+                "column": 8
+              },
+              "end": {
+                "line": 105,
+                "column": 34
+              }
+            },
+            "type": "if",
+            "locations": [
+              {
+                "start": {
+                  "line": 105,
+                  "column": 8
+                },
+                "end": {
+                  "line": 105,
+                  "column": 34
+                }
+              },
+              {
+                "start": {},
+                "end": {}
+              }
+            ],
+            "line": 105
+          }
+        },
+        "s": {
+          "0": 1,
+          "1": 1,
+          "2": 1,
+          "3": 1,
+          "4": 1,
+          "5": 1,
+          "6": 1,
+          "7": 1,
+          "8": 1,
+          "9": 1,
+          "10": 1,
+          "11": 1,
+          "12": 1,
+          "13": 1,
+          "14": 1,
+          "15": 1,
+          "16": 1,
+          "17": 1,
+          "18": 1,
+          "19": 1,
+          "20": 1,
+          "21": 1,
+          "22": 1,
+          "23": 1,
+          "24": 1,
+          "25": 1,
+          "26": 1,
+          "27": 1,
+          "28": 1,
+          "29": 1,
+          "30": 1,
+          "31": 1,
+          "32": 1,
+          "33": 1,
+          "34": 3,
+          "35": 1,
+          "36": 1,
+          "37": 1,
+          "38": 1,
+          "39": 1,
+          "40": 1,
+          "41": 1,
+          "42": 1,
+          "43": 1,
+          "44": 1,
+          "45": 1,
+          "46": 1,
+          "47": 1,
+          "48": 1,
+          "49": 1,
+          "50": 1,
+          "51": 1,
+          "52": 1,
+          "53": 3,
+          "54": 3,
+          "55": 1,
+          "56": 1,
+          "57": 1,
+          "58": 1,
+          "59": 1,
+          "60": 1,
+          "61": 1,
+          "62": 1,
+          "63": 1,
+          "64": 1,
+          "65": 1,
+          "66": 1,
+          "67": 1,
+          "68": 1,
+          "69": 1,
+          "70": 1,
+          "71": 1,
+          "72": 1,
+          "73": 1,
+          "74": 1,
+          "75": 1,
+          "76": 1,
+          "77": 1,
+          "78": 1,
+          "79": 1,
+          "80": 1,
+          "81": 1,
+          "82": 1,
+          "83": 1,
+          "84": 1,
+          "85": 2,
+          "86": 4,
+          "87": 2,
+          "88": 2,
+          "89": 1,
+          "90": 1,
+          "91": 1,
+          "92": 3,
+          "93": 1,
+          "94": 1,
+          "95": 3,
+          "96": 1,
+          "97": 1,
+          "98": 1,
+          "99": 1,
+          "100": 1,
+          "101": 1,
+          "102": 1,
+          "103": 1,
+          "104": 2,
+          "105": 2,
+          "106": 2,
+          "107": 1,
+          "108": 1,
+          "109": 1,
+          "110": 1,
+          "111": 2,
+          "112": 1,
+          "113": 1,
+          "114": 1,
+          "115": 3,
+          "116": 1,
+          "117": 1,
+          "118": 1,
+          "119": 1,
+          "120": 1,
+          "121": 1,
+          "122": 1,
+          "123": 1,
+          "124": 1,
+          "125": 1,
+          "126": 1,
+          "127": 1
+        },
+        "f": {
+          "0": 1,
+          "1": 1,
+          "2": 1,
+          "3": 1,
+          "4": 1,
+          "5": 1,
+          "6": 1,
+          "7": 1,
+          "8": 1,
+          "9": 1,
+          "10": 1,
+          "11": 1,
+          "12": 1,
+          "13": 3,
+          "14": 1,
+          "15": 1,
+          "16": 1,
+          "17": 1,
+          "18": 1,
+          "19": 1,
+          "20": 2,
+          "21": 4,
+          "22": 3,
+          "23": 1
+        },
+        "b": {
+          "0": [
+            2,
+            2
+          ]
+        },
+        "_coverageSchema": "1a1c01bbd47fc00a2c39e90264f33305004495a9",
+        "hash": "12526b08f9a7f502214a5634e14a4a52ba44182e"
+      }
+    },
+    "output": "bun test v1.4.1 (4661e494f)\n\ntests\\helpers\\capture-json.test.ts:\n(pass) capture-json test helpers > captures both streams, non-string arguments, and returned exit code [3.00ms]\n(pass) capture-json test helpers > omits absent exitCode and preserves a successful zero exit code [1.95ms]\n(pass) capture-json test helpers > restores console methods and preserves a command failure [1.20ms]\n(pass) capture-json test helpers > allocates an absent database in an owned directory and removes its sidecars [23.25ms]\n(pass) capture-json test helpers > cannot acquire deletion authority from caller-provided foreign paths [6.71ms]\n(pass) capture-json test helpers > rejects separators and oversized labels before allocating storage [0.25ms]\n(pass) capture-json test helpers > preserves allocation failures [2.09ms]\n(pass) capture-json test helpers > refuses a replaced directory and retains authority for a safe retry [21.50ms]\n(pass) capture-json test helpers > retains multiple failures and causes while cleaning independent fixtures [26.21ms]\n(pass) capture-json test helpers > does not forget allocations made while cleanup yields [17.77ms]\n\n 10 pass\n 0 fail\n 36 expect() calls\nRan 10 tests across 1 file. [243.00ms]\n",
+    "probeSource": "import {readFileSync, writeFileSync, mkdirSync} from 'node:fs';\nimport {join, resolve} from 'node:path';\nimport {createCoverageMap} from 'istanbul-lib-coverage';\nimport {instrumentTypeScriptWithCoverage} from '../scripts/run-istanbul-bun-coverage';\nimport {createOwnedTestDirectory} from '../tests/helpers/owned-test-directory';\nimport {sourceHash} from '../scripts/quality-inventory';\nconst root=process.cwd(),storage=createOwnedTestDirectory('memory-json-measure-');\nconst paths=['tests/helpers/capture-json.ts','tests/helpers/capture-json.test.ts'];\ntry {\n mkdirSync(join(storage.dir,'tests/helpers'),{recursive:true});\n for(const path of paths){\n  const built=instrumentTypeScriptWithCoverage(readFileSync(path,'utf8'),resolve(path));\n  writeFileSync(join(storage.dir,path),built.code);\n }\n writeFileSync(join(storage.dir,'tests/helpers/owned-test-directory.ts'),readFileSync('tests/helpers/owned-test-directory.ts'));\n writeFileSync(join(storage.dir,'capture.ts'),'import {afterAll} from \"bun:test\"; import {writeFileSync} from \"node:fs\"; afterAll(()=>writeFileSync(\"coverage.json\",JSON.stringify((globalThis as any).__coverage__)));');\n writeFileSync(join(storage.dir,'bunfig.toml'),'[test]\\ncoverage = false\\npreload = ['+JSON.stringify(join(root,'tests/test-setup.ts'))+', \"./capture.ts\"]\\n');\n const result=Bun.spawnSync([process.execPath,'test','--timeout','15000','tests/helpers/capture-json.test.ts'],{cwd:storage.dir,env:{...process.env,TEMP:storage.dir,TMP:storage.dir,TMPDIR:storage.dir},stdout:'pipe',stderr:'pipe',timeout:45000});\n const output=new TextDecoder().decode(result.stdout)+new TextDecoder().decode(result.stderr);\n if(result.exitCode!==0)throw Error(output);\n const raw=JSON.parse(readFileSync(join(storage.dir,'coverage.json'),'utf8')),map=createCoverageMap(raw);\n const files=paths.map(path=>{\n  const measured=map.fileCoverageFor(resolve(path)),data=measured.data;\n  return {path,sourceHash:sourceHash(readFileSync(path,'utf8')),metrics:measured.toSummary().data,\n   uncoveredBranches:Object.entries(data.b).flatMap(([id,hits])=>hits.flatMap((count,index)=>count===0?[{id,index,location:data.branchMap[id]?.locations[index]}]:[])),\n   uncoveredFunctions:Object.entries(data.f).filter(([,hits])=>hits===0).map(([id])=>data.fnMap[id])};\n });\n writeFileSync('.git/b11-json-measure.json',JSON.stringify({scope:'Local diagnostic; B05 instrumenter acceptance and independent review remain open. No package/native acceptance.',recordedAt:new Date().toISOString(),runtime:Bun.version,files,rawCoverage:raw,output,probeSource:readFileSync('.git/b11-json-measure.ts','utf8')},null,2)+'\\n');\n console.log(JSON.stringify(files));\n} finally {storage.cleanup();}\n"
+  },
+  "currentHelperFaults": {
+    "recordedAt": "2026-09-20T05:14:43.518Z",
+    "sourceHash": "11814452b101fd1cd9f9c59026da8d47c970b81fce5efce7b8482da159d52040",
+    "testHash": "4b36d3a1f10fc7d7ed7e6a00719611bec72a482a96f9218e58963e9a5ed1709b",
+    "runtime": "1.4.1",
+    "scope": "Local cleanup decision fault checks, not exhaustive mutation or final review.",
+    "results": [
+      {
+        "id": "omit-ownership-registration",
+        "from": "owned.add(storage);",
+        "to": "/* omitted registration */",
+        "detected": true,
+        "exit": 1,
+        "output": "bun test v1.4.1 (4661e494f)\n\ntests\\helpers\\capture-json.test.ts:\n(pass) capture-json test helpers > captures both streams, non-string arguments, and returned exit code [0.93ms]\n(pass) capture-json test helpers > omits absent exitCode and preserves a successful zero exit code [0.42ms]\n(pass) capture-json test helpers > restores console methods and preserves a command failure [0.58ms]\n40 |     try {\n41 |       expect(existsSync(db)).toBe(false);\n42 |       expect(existsSync(dirname(db))).toBe(true);\n43 |       for (const suffix of [\"\", \"-wal\", \"-shm\"]) writeFileSync(db + suffix, \"synthetic\");\n44 |       await tracker.cleanup();\n45 |       expect(existsSync(dirname(db))).toBe(false);\n                                           ^\nerror: expect(received).toBe(expected)\n\nExpected: false\nReceived: true\n\n      at <anonymous> (C:\\Users\\Destiny\\AppData\\Local\\Temp\\memory-json-fault-2VtPld\\tests\\helpers\\capture-json.test.ts:45:39)\n(fail) capture-json test helpers > allocates an absent database in an owned directory and removes its sidecars [1533.57ms]\n(pass) capture-json test helpers > cannot acquire deletion authority from caller-provided foreign paths [84.45ms]\n(pass) capture-json test helpers > rejects separators and oversized labels before allocating storage [0.31ms]\n(pass) capture-json test helpers > preserves allocation failures [0.24ms]\n82 |     renameSync(original.dir, saved);\n83 |     mkdirSync(original.dir);\n84 |     const sentinel = join(original.dir, \"foreign.txt\");\n85 |     writeFileSync(sentinel, \"replacement must survive\");\n86 |     try {\n87 |       await expect(tracker.cleanup()).rejects.toThrow(original.dir);\n                                                   ^\nerror: expect(received).rejects.toThrow(expected)\n\nExpected promise that rejects\nReceived promise that resolved: Promise { <resolved> }\n\n      at <anonymous> (C:\\Users\\Destiny\\AppData\\Local\\Temp\\memory-json-fault-2VtPld\\tests\\helpers\\capture-json.test.ts:87:47)\n(fail) capture-json test helpers > refuses a replaced directory and retains authority for a safe retry [80.52ms]\n111 |     const tracker = createTempDatabaseTracker(() => queue.shift()!);\n112 |     for (let n = 0; n < 3; n++) tracker.makePath(\"helper\");\n113 |     try {\n114 |       let result: unknown;\n115 |       try { await tracker.cleanup(); } catch (error) { result = error; }\n116 |       expect(result).toBeInstanceOf(AggregateError);\n                           ^\nerror: expect(received).toBeInstanceOf(expected)\n\nExpected constructor: [class AggregateError extends Error]\nReceived value: undefined\n\n      at <anonymous> (C:\\Users\\Destiny\\AppData\\Local\\Temp\\memory-json-fault-2VtPld\\tests\\helpers\\capture-json.test.ts:116:22)\n(fail) capture-json test helpers > retains multiple failures and causes while cleaning independent fixtures [25.29ms]\n137 |     const first = tracker.makePath(\"first\");\n138 |     try {\n139 |       const cleanup = tracker.cleanup();\n140 |       const second = tracker.makePath(\"second\");\n141 |       await cleanup;\n142 |       expect(existsSync(dirname(first))).toBe(false);\n                                               ^\nerror: expect(received).toBe(expected)\n\nExpected: false\nReceived: true\n\n      at <anonymous> (C:\\Users\\Destiny\\AppData\\Local\\Temp\\memory-json-fault-2VtPld\\tests\\helpers\\capture-json.test.ts:142:42)\n(fail) capture-json test helpers > does not forget allocations made while cleanup yields [90.68ms]\n\n 6 pass\n 4 fail\n 21 expect() calls\nRan 10 tests across 1 file. [4.70s]\n"
+      },
+      {
+        "id": "skip-nonempty-cleanup",
+        "from": "if (pending.length === 0) return;",
+        "to": "if (pending.length !== 0) return;",
+        "detected": true,
+        "exit": 1,
+        "output": "bun test v1.4.1 (4661e494f)\n\ntests\\helpers\\capture-json.test.ts:\n(pass) capture-json test helpers > captures both streams, non-string arguments, and returned exit code [4.33ms]\n(pass) capture-json test helpers > omits absent exitCode and preserves a successful zero exit code [0.35ms]\n(pass) capture-json test helpers > restores console methods and preserves a command failure [0.30ms]\n40 |     try {\n41 |       expect(existsSync(db)).toBe(false);\n42 |       expect(existsSync(dirname(db))).toBe(true);\n43 |       for (const suffix of [\"\", \"-wal\", \"-shm\"]) writeFileSync(db + suffix, \"synthetic\");\n44 |       await tracker.cleanup();\n45 |       expect(existsSync(dirname(db))).toBe(false);\n                                           ^\nerror: expect(received).toBe(expected)\n\nExpected: false\nReceived: true\n\n      at <anonymous> (C:\\Users\\Destiny\\AppData\\Local\\Temp\\memory-json-fault-hTcCLi\\tests\\helpers\\capture-json.test.ts:45:39)\n(fail) capture-json test helpers > allocates an absent database in an owned directory and removes its sidecars [7.17ms]\n(pass) capture-json test helpers > cannot acquire deletion authority from caller-provided foreign paths [21.80ms]\n(pass) capture-json test helpers > rejects separators and oversized labels before allocating storage [0.27ms]\n(pass) capture-json test helpers > preserves allocation failures [3.07ms]\n82 |     renameSync(original.dir, saved);\n83 |     mkdirSync(original.dir);\n84 |     const sentinel = join(original.dir, \"foreign.txt\");\n85 |     writeFileSync(sentinel, \"replacement must survive\");\n86 |     try {\n87 |       await expect(tracker.cleanup()).rejects.toThrow(original.dir);\n                                                   ^\nerror: expect(received).rejects.toThrow(expected)\n\nExpected promise that rejects\nReceived promise that resolved: Promise { <resolved> }\n\n      at <anonymous> (C:\\Users\\Destiny\\AppData\\Local\\Temp\\memory-json-fault-hTcCLi\\tests\\helpers\\capture-json.test.ts:87:47)\n(fail) capture-json test helpers > refuses a replaced directory and retains authority for a safe retry [14.40ms]\n111 |     const tracker = createTempDatabaseTracker(() => queue.shift()!);\n112 |     for (let n = 0; n < 3; n++) tracker.makePath(\"helper\");\n113 |     try {\n114 |       let result: unknown;\n115 |       try { await tracker.cleanup(); } catch (error) { result = error; }\n116 |       expect(result).toBeInstanceOf(AggregateError);\n                           ^\nerror: expect(received).toBeInstanceOf(expected)\n\nExpected constructor: [class AggregateError extends Error]\nReceived value: undefined\n\n      at <anonymous> (C:\\Users\\Destiny\\AppData\\Local\\Temp\\memory-json-fault-hTcCLi\\tests\\helpers\\capture-json.test.ts:116:22)\n(fail) capture-json test helpers > retains multiple failures and causes while cleaning independent fixtures [26.12ms]\n137 |     const first = tracker.makePath(\"first\");\n138 |     try {\n139 |       const cleanup = tracker.cleanup();\n140 |       const second = tracker.makePath(\"second\");\n141 |       await cleanup;\n142 |       expect(existsSync(dirname(first))).toBe(false);\n                                               ^\nerror: expect(received).toBe(expected)\n\nExpected: false\nReceived: true\n\n      at <anonymous> (C:\\Users\\Destiny\\AppData\\Local\\Temp\\memory-json-fault-hTcCLi\\tests\\helpers\\capture-json.test.ts:142:42)\n(fail) capture-json test helpers > does not forget allocations made while cleanup yields [3.84ms]\n\n 6 pass\n 4 fail\n 21 expect() calls\nRan 10 tests across 1 file. [140.00ms]\n"
+      },
+      {
+        "id": "skip-owned-removal",
+        "from": "storage.cleanup();",
+        "to": "/* omitted cleanup */",
+        "detected": true,
+        "exit": 1,
+        "output": "bun test v1.4.1 (4661e494f)\n\ntests\\helpers\\capture-json.test.ts:\n(pass) capture-json test helpers > captures both streams, non-string arguments, and returned exit code [0.98ms]\n(pass) capture-json test helpers > omits absent exitCode and preserves a successful zero exit code [0.46ms]\n(pass) capture-json test helpers > restores console methods and preserves a command failure [0.77ms]\n40 |     try {\n41 |       expect(existsSync(db)).toBe(false);\n42 |       expect(existsSync(dirname(db))).toBe(true);\n43 |       for (const suffix of [\"\", \"-wal\", \"-shm\"]) writeFileSync(db + suffix, \"synthetic\");\n44 |       await tracker.cleanup();\n45 |       expect(existsSync(dirname(db))).toBe(false);\n                                           ^\nerror: expect(received).toBe(expected)\n\nExpected: false\nReceived: true\n\n      at <anonymous> (C:\\Users\\Destiny\\AppData\\Local\\Temp\\memory-json-fault-EK6Sks\\tests\\helpers\\capture-json.test.ts:45:39)\n(fail) capture-json test helpers > allocates an absent database in an owned directory and removes its sidecars [23.91ms]\n(pass) capture-json test helpers > cannot acquire deletion authority from caller-provided foreign paths [13.00ms]\n(pass) capture-json test helpers > rejects separators and oversized labels before allocating storage [0.29ms]\n(pass) capture-json test helpers > preserves allocation failures [0.25ms]\n82 |     renameSync(original.dir, saved);\n83 |     mkdirSync(original.dir);\n84 |     const sentinel = join(original.dir, \"foreign.txt\");\n85 |     writeFileSync(sentinel, \"replacement must survive\");\n86 |     try {\n87 |       await expect(tracker.cleanup()).rejects.toThrow(original.dir);\n                                                   ^\nerror: expect(received).rejects.toThrow(expected)\n\nExpected promise that rejects\nReceived promise that resolved: Promise { <resolved> }\n\n      at <anonymous> (C:\\Users\\Destiny\\AppData\\Local\\Temp\\memory-json-fault-EK6Sks\\tests\\helpers\\capture-json.test.ts:87:47)\n(fail) capture-json test helpers > refuses a replaced directory and retains authority for a safe retry [17.26ms]\n111 |     const tracker = createTempDatabaseTracker(() => queue.shift()!);\n112 |     for (let n = 0; n < 3; n++) tracker.makePath(\"helper\");\n113 |     try {\n114 |       let result: unknown;\n115 |       try { await tracker.cleanup(); } catch (error) { result = error; }\n116 |       expect(result).toBeInstanceOf(AggregateError);\n                           ^\nerror: expect(received).toBeInstanceOf(expected)\n\nExpected constructor: [class AggregateError extends Error]\nReceived value: undefined\n\n      at <anonymous> (C:\\Users\\Destiny\\AppData\\Local\\Temp\\memory-json-fault-EK6Sks\\tests\\helpers\\capture-json.test.ts:116:22)\n(fail) capture-json test helpers > retains multiple failures and causes while cleaning independent fixtures [32.10ms]\n137 |     const first = tracker.makePath(\"first\");\n138 |     try {\n139 |       const cleanup = tracker.cleanup();\n140 |       const second = tracker.makePath(\"second\");\n141 |       await cleanup;\n142 |       expect(existsSync(dirname(first))).toBe(false);\n                                               ^\nerror: expect(received).toBe(expected)\n\nExpected: false\nReceived: true\n\n      at <anonymous> (C:\\Users\\Destiny\\AppData\\Local\\Temp\\memory-json-fault-EK6Sks\\tests\\helpers\\capture-json.test.ts:142:42)\n(fail) capture-json test helpers > does not forget allocations made while cleanup yields [17.10ms]\n\n 6 pass\n 4 fail\n 21 expect() calls\nRan 10 tests across 1 file. [312.00ms]\n"
+      },
+      {
+        "id": "forget-failed-capability",
+        "from": "} catch (cause) {",
+        "to": "} catch (cause) { owned.delete(storage);",
+        "detected": true,
+        "exit": 1,
+        "output": "bun test v1.4.1 (4661e494f)\n\ntests\\helpers\\capture-json.test.ts:\n(pass) capture-json test helpers > captures both streams, non-string arguments, and returned exit code [0.83ms]\n(pass) capture-json test helpers > omits absent exitCode and preserves a successful zero exit code [0.48ms]\n(pass) capture-json test helpers > restores console methods and preserves a command failure [0.43ms]\n(pass) capture-json test helpers > allocates an absent database in an owned directory and removes its sidecars [37.43ms]\n(pass) capture-json test helpers > cannot acquire deletion authority from caller-provided foreign paths [14.65ms]\n(pass) capture-json test helpers > rejects separators and oversized labels before allocating storage [0.49ms]\n(pass) capture-json test helpers > preserves allocation failures [0.27ms]\n92 |       unlinkSync(sentinel);\n93 |       rmdirSync(original.dir);\n94 |       renameSync(saved, original.dir);\n95 |       await tracker.cleanup();\n96 |     }\n97 |     expect(existsSync(dirname(db))).toBe(false);\n                                         ^\nerror: expect(received).toBe(expected)\n\nExpected: false\nReceived: true\n\n      at <anonymous> (C:\\Users\\Destiny\\AppData\\Local\\Temp\\memory-json-fault-EHqBYw\\tests\\helpers\\capture-json.test.ts:97:37)\n(fail) capture-json test helpers > refuses a replaced directory and retains authority for a safe retry [19.00ms]\n122 |         expect(existsSync(item.dir)).toBe(true);\n123 |       }\n124 |       expect(existsSync(healthy.dir)).toBe(false);\n125 |       locked = false;\n126 |       await tracker.cleanup();\n127 |       for (const item of storage) expect(existsSync(item.dir)).toBe(false);\n                                                                     ^\nerror: expect(received).toBe(expected)\n\nExpected: false\nReceived: true\n\n      at <anonymous> (C:\\Users\\Destiny\\AppData\\Local\\Temp\\memory-json-fault-EHqBYw\\tests\\helpers\\capture-json.test.ts:127:64)\n(fail) capture-json test helpers > retains multiple failures and causes while cleaning independent fixtures [36.15ms]\n(pass) capture-json test helpers > does not forget allocations made while cleanup yields [21.31ms]\n\n 8 pass\n 2 fail\n 35 expect() calls\nRan 10 tests across 1 file. [208.00ms]\n"
+      },
+      {
+        "id": "swallow-cleanup-failures",
+        "from": "if (failures.length > 0) {",
+        "to": "if (false) {",
+        "detected": true,
+        "exit": 1,
+        "output": "bun test v1.4.1 (4661e494f)\n\ntests\\helpers\\capture-json.test.ts:\n(pass) capture-json test helpers > captures both streams, non-string arguments, and returned exit code [0.97ms]\n(pass) capture-json test helpers > omits absent exitCode and preserves a successful zero exit code [0.36ms]\n(pass) capture-json test helpers > restores console methods and preserves a command failure [0.35ms]\n(pass) capture-json test helpers > allocates an absent database in an owned directory and removes its sidecars [70.96ms]\n(pass) capture-json test helpers > cannot acquire deletion authority from caller-provided foreign paths [21.48ms]\n(pass) capture-json test helpers > rejects separators and oversized labels before allocating storage [0.35ms]\n(pass) capture-json test helpers > preserves allocation failures [0.29ms]\n82 |     renameSync(original.dir, saved);\n83 |     mkdirSync(original.dir);\n84 |     const sentinel = join(original.dir, \"foreign.txt\");\n85 |     writeFileSync(sentinel, \"replacement must survive\");\n86 |     try {\n87 |       await expect(tracker.cleanup()).rejects.toThrow(original.dir);\n                                                   ^\nerror: expect(received).rejects.toThrow(expected)\n\nExpected promise that rejects\nReceived promise that resolved: Promise { <resolved> }\n\n      at <anonymous> (C:\\Users\\Destiny\\AppData\\Local\\Temp\\memory-json-fault-JipEuo\\tests\\helpers\\capture-json.test.ts:87:47)\n(fail) capture-json test helpers > refuses a replaced directory and retains authority for a safe retry [41.25ms]\n111 |     const tracker = createTempDatabaseTracker(() => queue.shift()!);\n112 |     for (let n = 0; n < 3; n++) tracker.makePath(\"helper\");\n113 |     try {\n114 |       let result: unknown;\n115 |       try { await tracker.cleanup(); } catch (error) { result = error; }\n116 |       expect(result).toBeInstanceOf(AggregateError);\n                           ^\nerror: expect(received).toBeInstanceOf(expected)\n\nExpected constructor: [class AggregateError extends Error]\nReceived value: undefined\n\n      at <anonymous> (C:\\Users\\Destiny\\AppData\\Local\\Temp\\memory-json-fault-JipEuo\\tests\\helpers\\capture-json.test.ts:116:22)\n(fail) capture-json test helpers > retains multiple failures and causes while cleaning independent fixtures [216.15ms]\n(pass) capture-json test helpers > does not forget allocations made while cleanup yields [63.88ms]\n\n 8 pass\n 2 fail\n 23 expect() calls\nRan 10 tests across 1 file. [760.00ms]\n"
+      },
+      {
+        "id": "consume-later-allocations",
+        "from": "for (const storage of pending) {",
+        "to": "for (const storage of owned) {",
+        "detected": true,
+        "exit": 1,
+        "output": "bun test v1.4.1 (4661e494f)\n\ntests\\helpers\\capture-json.test.ts:\n(pass) capture-json test helpers > captures both streams, non-string arguments, and returned exit code [0.80ms]\n(pass) capture-json test helpers > omits absent exitCode and preserves a successful zero exit code [0.68ms]\n(pass) capture-json test helpers > restores console methods and preserves a command failure [0.46ms]\n(pass) capture-json test helpers > allocates an absent database in an owned directory and removes its sidecars [168.13ms]\n(pass) capture-json test helpers > cannot acquire deletion authority from caller-provided foreign paths [8.96ms]\n(pass) capture-json test helpers > rejects separators and oversized labels before allocating storage [0.38ms]\n(pass) capture-json test helpers > preserves allocation failures [0.29ms]\n(pass) capture-json test helpers > refuses a replaced directory and retains authority for a safe retry [115.93ms]\n(pass) capture-json test helpers > retains multiple failures and causes while cleaning independent fixtures [290.17ms]\n138 |     try {\n139 |       const cleanup = tracker.cleanup();\n140 |       const second = tracker.makePath(\"second\");\n141 |       await cleanup;\n142 |       expect(existsSync(dirname(first))).toBe(false);\n143 |       expect(existsSync(dirname(second))).toBe(true);\n                                                ^\nerror: expect(received).toBe(expected)\n\nExpected: true\nReceived: false\n\n      at <anonymous> (C:\\Users\\Destiny\\AppData\\Local\\Temp\\memory-json-fault-H4yNGJ\\tests\\helpers\\capture-json.test.ts:143:43)\n(fail) capture-json test helpers > does not forget allocations made while cleanup yields [227.54ms]\n\n 9 pass\n 1 fail\n 35 expect() calls\nRan 10 tests across 1 file. [972.00ms]\n"
+      },
+      {
+        "id": "drop-underlying-cause",
+        "from": "{ cause }",
+        "to": "{}",
+        "detected": true,
+        "exit": 1,
+        "output": "bun test v1.4.1 (4661e494f)\n\ntests\\helpers\\capture-json.test.ts:\n(pass) capture-json test helpers > captures both streams, non-string arguments, and returned exit code [1.73ms]\n(pass) capture-json test helpers > omits absent exitCode and preserves a successful zero exit code [0.63ms]\n(pass) capture-json test helpers > restores console methods and preserves a command failure [0.81ms]\n(pass) capture-json test helpers > allocates an absent database in an owned directory and removes its sidecars [57.47ms]\n(pass) capture-json test helpers > cannot acquire deletion authority from caller-provided foreign paths [17.62ms]\n(pass) capture-json test helpers > rejects separators and oversized labels before allocating storage [0.41ms]\n(pass) capture-json test helpers > preserves allocation failures [0.34ms]\n(pass) capture-json test helpers > refuses a replaced directory and retains authority for a safe retry [300.65ms]\n116 |       expect(result).toBeInstanceOf(AggregateError);\n117 |       const aggregate = result as AggregateError;\n118 |       expect(aggregate.errors).toHaveLength(2);\n119 |       for (const [index, item] of storage.entries()) {\n120 |         expect(aggregate.message).toContain(item.dir);\n121 |         expect(aggregate.errors[index].cause.cause).toBe(failures[index]);\n                                             ^\nTypeError: undefined is not an object (evaluating 'aggregate.errors[index].cause.cause')\n      at <anonymous> (C:\\Users\\Destiny\\AppData\\Local\\Temp\\memory-json-fault-aWAey0\\tests\\helpers\\capture-json.test.ts:121:40)\n(fail) capture-json test helpers > retains multiple failures and causes while cleaning independent fixtures [199.03ms]\n(pass) capture-json test helpers > does not forget allocations made while cleanup yields [37.55ms]\n\n 9 pass\n 1 fail\n 28 expect() calls\nRan 10 tests across 1 file. [766.00ms]\n"
+      },
+      {
+        "id": "bypass-ownership-check",
+        "from": "storage.cleanup();",
+        "to": "require(\"node:fs\").rmSync(storage.dir, {recursive:true,force:true});",
+        "detected": true,
+        "exit": 1,
+        "output": "bun test v1.4.1 (4661e494f)\n\ntests\\helpers\\capture-json.test.ts:\n(pass) capture-json test helpers > captures both streams, non-string arguments, and returned exit code [0.71ms]\n(pass) capture-json test helpers > omits absent exitCode and preserves a successful zero exit code [0.29ms]\n(pass) capture-json test helpers > restores console methods and preserves a command failure [0.29ms]\n(pass) capture-json test helpers > allocates an absent database in an owned directory and removes its sidecars [111.42ms]\n(pass) capture-json test helpers > cannot acquire deletion authority from caller-provided foreign paths [9.01ms]\n(pass) capture-json test helpers > rejects separators and oversized labels before allocating storage [0.24ms]\n(pass) capture-json test helpers > preserves allocation failures [0.20ms]\n87 |       await expect(tracker.cleanup()).rejects.toThrow(original.dir);\n88 |       expect(readFileSync(sentinel, \"utf8\")).toBe(\"replacement must survive\");\n89 |       expect(existsSync(saved)).toBe(true);\n90 |     } finally {\n91 |       // Only the exact synthetic sentinel and now-empty replacement are removed.\n92 |       unlinkSync(sentinel);\n           ^\nENOENT: no such file or directory, unlink 'C:\\Users\\Destiny\\AppData\\Local\\Temp\\memory-json-fault-aYQe5s\\memory-json-replaced-SUvOYZ\\foreign.txt'\n    path: \"C:\\\\Users\\\\Destiny\\\\AppData\\\\Local\\\\Temp\\\\memory-json-fault-aYQe5s\\\\memory-json-replaced-SUvOYZ\\\\foreign.txt\",\n syscall: \"unlink\",\n   errno: -4058,\n    code: \"ENOENT\"\n\n      at <anonymous> (C:\\Users\\Destiny\\AppData\\Local\\Temp\\memory-json-fault-aYQe5s\\tests\\helpers\\capture-json.test.ts:92:7)\n(fail) capture-json test helpers > refuses a replaced directory and retains authority for a safe retry [20.22ms]\n38 |     return !!stat && stat.isDirectory() && !stat.isSymbolicLink() &&\n39 |       stat.dev === identity.dev && stat.ino === identity.ino &&\n40 |       realpathSync(dir) === dir && dirname(dir) === parent && realpathSync(parent) === parent;\n41 |   }\n42 |   function assertOwned(): void {\n43 |     if (!original()) throw new Error(`Test directory ownership changed; retained: ${dir}`);\n                                    ^\nerror: Test directory ownership changed; retained: C:\\Users\\Destiny\\AppData\\Local\\Temp\\memory-json-fault-aYQe5s\\memory-json-busy-al3aO6\n      at assertOwned (C:\\Users\\Destiny\\AppData\\Local\\Temp\\memory-json-fault-aYQe5s\\tests\\helpers\\owned-test-directory.ts:43:32)\n      at cleanup (C:\\Users\\Destiny\\AppData\\Local\\Temp\\memory-json-fault-aYQe5s\\tests\\helpers\\owned-test-directory.ts:62:5)\n      at <anonymous> (C:\\Users\\Destiny\\AppData\\Local\\Temp\\memory-json-fault-aYQe5s\\tests\\helpers\\capture-json.test.ts:131:54)\n(fail) capture-json test helpers > retains multiple failures and causes while cleaning independent fixtures [36.74ms]\n(pass) capture-json test helpers > does not forget allocations made while cleanup yields [26.74ms]\n\n 8 pass\n 2 fail\n 23 expect() calls\nRan 10 tests across 1 file. [366.00ms]\n"
+      },
+      {
+        "id": "drop-zero-exit-code",
+        "from": "result?.exitCode !== undefined",
+        "to": "result?.exitCode",
+        "detected": true,
+        "exit": 1,
+        "output": "bun test v1.4.1 (4661e494f)\n\ntests\\helpers\\capture-json.test.ts:\n(pass) capture-json test helpers > captures both streams, non-string arguments, and returned exit code [0.86ms]\n19 |     const empty = await captureStreams(async () => ({}));\n20 |     expect(absent).toStrictEqual({ stdout: \"\", stderr: \"\" });\n21 |     expect(empty).toStrictEqual({ stdout: \"\", stderr: \"\" });\n22 |     expect(\"exitCode\" in absent).toBe(false);\n23 |     expect(\"exitCode\" in empty).toBe(false);\n24 |     expect(await captureStreams(async () => ({ exitCode: 0 }))).toStrictEqual({ stdout: \"\", stderr: \"\", exitCode: 0 });\n                                                                     ^\nerror: expect(received).toStrictEqual(expected)\n\n  {\n-   \"exitCode\": 0,\n    \"stderr\": \"\",\n    \"stdout\": \"\",\n  }\n\n- Expected  - 1\n+ Received  + 0\n\n      at <anonymous> (C:\\Users\\Destiny\\AppData\\Local\\Temp\\memory-json-fault-gYigCu\\tests\\helpers\\capture-json.test.ts:24:65)\n(fail) capture-json test helpers > omits absent exitCode and preserves a successful zero exit code [84.78ms]\n(pass) capture-json test helpers > restores console methods and preserves a command failure [0.61ms]\n(pass) capture-json test helpers > allocates an absent database in an owned directory and removes its sidecars [78.38ms]\n(pass) capture-json test helpers > cannot acquire deletion authority from caller-provided foreign paths [9.31ms]\n(pass) capture-json test helpers > rejects separators and oversized labels before allocating storage [0.41ms]\n(pass) capture-json test helpers > preserves allocation failures [0.34ms]\n(pass) capture-json test helpers > refuses a replaced directory and retains authority for a safe retry [139.10ms]\n(pass) capture-json test helpers > retains multiple failures and causes while cleaning independent fixtures [269.24ms]\n(pass) capture-json test helpers > does not forget allocations made while cleanup yields [61.40ms]\n\n 9 pass\n 1 fail\n 36 expect() calls\nRan 10 tests across 1 file. [953.00ms]\n"
+      },
+      {
+        "id": "dereference-absent-result",
+        "from": "result?.exitCode !== undefined",
+        "to": "result.exitCode !== undefined",
+        "detected": true,
+        "exit": 1,
+        "output": "bun test v1.4.1 (4661e494f)\n\ntests\\helpers\\capture-json.test.ts:\n(pass) capture-json test helpers > captures both streams, non-string arguments, and returned exit code [0.65ms]\n42 |     const result = await fn();\n43 |     const out: CapturedStreams = {\n44 |       stdout: stdoutChunks.join(\"\\n\"),\n45 |       stderr: stderrChunks.join(\"\\n\"),\n46 |     };\n47 |     if (result.exitCode !== undefined) out.exitCode = result.exitCode;\n             ^\nTypeError: undefined is not an object (evaluating 'result.exitCode')\n      at captureStreams (C:\\Users\\Destiny\\AppData\\Local\\Temp\\memory-json-fault-1ziV6Z\\tests\\helpers\\capture-json.ts:47:9)\n      at async <anonymous> (C:\\Users\\Destiny\\AppData\\Local\\Temp\\memory-json-fault-1ziV6Z\\tests\\helpers\\capture-json.test.ts:18:26)\n(fail) capture-json test helpers > omits absent exitCode and preserves a successful zero exit code [0.80ms]\n(pass) capture-json test helpers > restores console methods and preserves a command failure [0.31ms]\n(pass) capture-json test helpers > allocates an absent database in an owned directory and removes its sidecars [25.51ms]\n(pass) capture-json test helpers > cannot acquire deletion authority from caller-provided foreign paths [10.55ms]\n(pass) capture-json test helpers > rejects separators and oversized labels before allocating storage [0.38ms]\n(pass) capture-json test helpers > preserves allocation failures [0.25ms]\n(pass) capture-json test helpers > refuses a replaced directory and retains authority for a safe retry [116.09ms]\n(pass) capture-json test helpers > retains multiple failures and causes while cleaning independent fixtures [39.21ms]\n(pass) capture-json test helpers > does not forget allocations made while cleanup yields [37.42ms]\n\n 9 pass\n 1 fail\n 31 expect() calls\nRan 10 tests across 1 file. [363.00ms]\n"
+      },
+      {
+        "id": "emit-absent-exit-code",
+        "from": "if (result?.exitCode !== undefined) out.exitCode = result.exitCode;",
+        "to": "out.exitCode = result?.exitCode;",
+        "detected": true,
+        "exit": 1,
+        "output": "bun test v1.4.1 (4661e494f)\n\ntests\\helpers\\capture-json.test.ts:\n(pass) capture-json test helpers > captures both streams, non-string arguments, and returned exit code [1.12ms]\n15 |   });\n16 | \n17 |   it(\"omits absent exitCode and preserves a successful zero exit code\", async () => {\n18 |     const absent = await captureStreams(async () => undefined);\n19 |     const empty = await captureStreams(async () => ({}));\n20 |     expect(absent).toStrictEqual({ stdout: \"\", stderr: \"\" });\n                        ^\nerror: expect(received).toStrictEqual(expected)\n\n  {\n+   \"exitCode\": undefined,\n    \"stderr\": \"\",\n    \"stdout\": \"\",\n  }\n\n- Expected  - 0\n+ Received  + 1\n\n      at <anonymous> (C:\\Users\\Destiny\\AppData\\Local\\Temp\\memory-json-fault-O3AyW3\\tests\\helpers\\capture-json.test.ts:20:20)\n(fail) capture-json test helpers > omits absent exitCode and preserves a successful zero exit code [1.37ms]\n(pass) capture-json test helpers > restores console methods and preserves a command failure [0.63ms]\n(pass) capture-json test helpers > allocates an absent database in an owned directory and removes its sidecars [146.15ms]\n(pass) capture-json test helpers > cannot acquire deletion authority from caller-provided foreign paths [14.56ms]\n(pass) capture-json test helpers > rejects separators and oversized labels before allocating storage [0.45ms]\n(pass) capture-json test helpers > preserves allocation failures [0.30ms]\n(pass) capture-json test helpers > refuses a replaced directory and retains authority for a safe retry [158.37ms]\n(pass) capture-json test helpers > retains multiple failures and causes while cleaning independent fixtures [418.41ms]\n(pass) capture-json test helpers > does not forget allocations made while cleanup yields [167.28ms]\n\n 9 pass\n 1 fail\n 32 expect() calls\nRan 10 tests across 1 file. [1111.00ms]\n"
+      }
+    ],
+    "probeSource": "import {readFileSync,writeFileSync,mkdirSync} from 'node:fs';\nimport {join} from 'node:path';\nimport {createOwnedTestDirectory} from '../tests/helpers/owned-test-directory';\nimport {sourceHash} from '../scripts/quality-inventory';\nconst root=process.cwd(),path='tests/helpers/capture-json.ts',source=readFileSync(path,'utf8');\nconst faults=[\n {id:'omit-ownership-registration',from:'owned.add(storage);',to:'/* omitted registration */'},\n {id:'skip-nonempty-cleanup',from:'if (pending.length === 0) return;',to:'if (pending.length !== 0) return;'},\n {id:'skip-owned-removal',from:'storage.cleanup();',to:'/* omitted cleanup */'},\n {id:'forget-failed-capability',from:'} catch (cause) {',to:'} catch (cause) { owned.delete(storage);'},\n {id:'swallow-cleanup-failures',from:'if (failures.length > 0) {',to:'if (false) {'},\n {id:'consume-later-allocations',from:'for (const storage of pending) {',to:'for (const storage of owned) {'},\n {id:'drop-underlying-cause',from:'{ cause }',to:'{}'},\n {id:'bypass-ownership-check',from:'storage.cleanup();',to:'require(\"node:fs\").rmSync(storage.dir, {recursive:true,force:true});'},\n {id:'drop-zero-exit-code',from:'result?.exitCode !== undefined',to:'result?.exitCode'},\n {id:'dereference-absent-result',from:'result?.exitCode !== undefined',to:'result.exitCode !== undefined'},\n {id:'emit-absent-exit-code',from:'if (result?.exitCode !== undefined) out.exitCode = result.exitCode;',to:'out.exitCode = result?.exitCode;'},\n];\nconst results:unknown[]=[];\nfor(const fault of faults){\n if(source.split(fault.from).length!==2)throw Error('Nonunique fault seam '+fault.id);\n const storage=createOwnedTestDirectory('memory-json-fault-');\n try {\n  mkdirSync(join(storage.dir,'tests/helpers'),{recursive:true});\n  writeFileSync(join(storage.dir,path),source.replace(fault.from,fault.to));\n  for(const file of ['capture-json.test.ts','owned-test-directory.ts'])writeFileSync(join(storage.dir,'tests/helpers',file),readFileSync(join(root,'tests/helpers',file)));\n  writeFileSync(join(storage.dir,'bunfig.toml'),'[test]\\ncoverage = false\\npreload = ['+JSON.stringify(join(root,'tests/test-setup.ts'))+']\\n');\n  const run=Bun.spawnSync([process.execPath,'test','--timeout','15000','tests/helpers/capture-json.test.ts'],{cwd:storage.dir,env:{...process.env,TEMP:storage.dir,TMP:storage.dir,TMPDIR:storage.dir},stdout:'pipe',stderr:'pipe',timeout:30000});\n  const output=new TextDecoder().decode(run.stdout)+new TextDecoder().decode(run.stderr);\n  const detected=run.exitCode!==0 && /\\(fail\\) capture-json test helpers/.test(output) && /\\d+ fail/.test(output) && !run.signalCode;\n  results.push({...fault,detected,exit:run.exitCode,signal:run.signalCode,output});\n  writeFileSync('.git/b11-json-faults.json',JSON.stringify({recordedAt:new Date().toISOString(),sourceHash:sourceHash(source),testHash:sourceHash(readFileSync('tests/helpers/capture-json.test.ts','utf8')),runtime:Bun.version,scope:'Local cleanup decision fault checks, not exhaustive mutation or final review.',results,probeSource:readFileSync('.git/b11-json-faults.ts','utf8')},null,2)+'\\n');\n  console.log(JSON.stringify({id:fault.id,detected,exit:run.exitCode}));\n  if(!detected)throw Error('Fault not detected by completed assertions');\n }finally{storage.cleanup();}\n}\n"
+  },
+  "scopedStrictTypes": {
+    "command": "bun node_modules/typescript/bin/tsc -p .git/b11-json-tsconfig.json",
+    "exit": 0,
+    "output": "",
+    "config": {
+      "extends": "../tsconfig.json",
+      "compilerOptions": {
+        "rootDir": "..",
+        "noEmit": true
+      },
+      "include": [
+        "../tests/helpers/capture-json.ts",
+        "../tests/helpers/capture-json.test.ts",
+        "../tests/helpers/owned-test-directory.ts",
+        "../src/presentation/cli/commands/search.json.test.ts",
+        "../src/presentation/cli/commands/context.json.test.ts",
+        "../src/presentation/cli/commands/show.json.test.ts",
+        "../src/presentation/cli/commands/list.json.test.ts",
+        "../src/presentation/cli/commands/related.json.test.ts",
+        "../src/presentation/cli/commands/stats.json.test.ts"
+      ],
+      "exclude": []
+    }
+  },
+  "history": ".planning/memory-resilience/evidence/B11.4.json",
+  "discovery": ".planning/memory-resilience/evidence/B11.4-native-discovery.json",
+  "sourceInputs": [
+    {
+      "path": "tests/helpers/capture-json.ts",
+      "sourceHash": "11814452b101fd1cd9f9c59026da8d47c970b81fce5efce7b8482da159d52040"
+    },
+    {
+      "path": "tests/helpers/capture-json.test.ts",
+      "sourceHash": "4b36d3a1f10fc7d7ed7e6a00719611bec72a482a96f9218e58963e9a5ed1709b"
+    }
+  ],
+  "limitations": [
+    "No full native-suite acceptance: ordinary suite failed even with the subsequently rejected retry candidate.",
+    "Caller coverage diagnostics identify under-tier branches and vacuous assertions; no exceptions granted.",
+    "Current helper counts are diagnostic only; B05 and independent review remain open."
+  ]
+}

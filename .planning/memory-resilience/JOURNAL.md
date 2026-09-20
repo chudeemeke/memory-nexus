@@ -1,5 +1,32 @@
 # Memory resilience execution journal
 
+## 2026-09-20 - Native closure mechanism and runtime compatibility discovered
+
+- Previous turn progressed at 0423e45; worktree started clean. Instrumented
+  caller measurement exposed EBUSY. A bounded retry experiment passed its own
+  tests and five repetitions but the ordinary group still failed (51/52 pass).
+  The retry candidate was removed, with its source/results retained.
+- Deterministic owned native probes: default close retains a prepared statement
+  and file lock on Windows Bun 1.3.14 and 1.4.1. Strict close only fixed 1.4.1;
+  explicit finalization worked on both. The older official runtime matched its
+  release SHA-256 and its temporary download/extraction was removed.
+- Two synthetic RED fixtures initially retained armed teardown faults; fixed
+  the experimental test finalizer, verified path/device/inode/marker/dead PID
+  and removed both. The later native-failure directory was removed by the
+  following test's successful retry; its path was checked absent.
+- Current helper code is unchanged; stricter absent/zero exit-code assertions
+  pass. Both helper files measure diagnostic 100%; 11 current-source faults
+  detected; scoped strict types pass. No native/full-suite acceptance claimed.
+- Caller branches measure 36.36%-75%; context metadata can skip all assertions.
+  B11.4 retains those contract gaps and now waits for B11.74. B11.1 also has
+  that explicit dependency. B10 includes the new gap; ledger 225 items,
+  inventory 446 executable candidates/2 packages.
+- Next active B11.74: actual closeDatabase strong-reference regression, then
+  statement-owner/caller mapping and a minimal deterministic lifetime repair.
+  Do not blindly substitute close(true), add retries, or silently change Bun's
+  supported floor. Native Linux/review and all later baseline gates remain open.
+
+
 ## 2026-09-20 - B11.4 owned JSON fixtures and local proof
 
 - Progress from clean 47f993d. RED confirmed arbitrary synthetic path deletion and

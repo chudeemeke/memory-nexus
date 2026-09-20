@@ -14,9 +14,14 @@ describe("capture-json test helpers", () => {
     expect(captured).toEqual({ stdout: "status 200 [object Object]", stderr: "warning false", exitCode: 7 });
   });
 
-  it("omits exitCode for undefined or an empty result", async () => {
-    expect(await captureStreams(async () => undefined)).toEqual({ stdout: "", stderr: "" });
-    expect(await captureStreams(async () => ({}))).toEqual({ stdout: "", stderr: "" });
+  it("omits absent exitCode and preserves a successful zero exit code", async () => {
+    const absent = await captureStreams(async () => undefined);
+    const empty = await captureStreams(async () => ({}));
+    expect(absent).toStrictEqual({ stdout: "", stderr: "" });
+    expect(empty).toStrictEqual({ stdout: "", stderr: "" });
+    expect("exitCode" in absent).toBe(false);
+    expect("exitCode" in empty).toBe(false);
+    expect(await captureStreams(async () => ({ exitCode: 0 }))).toStrictEqual({ stdout: "", stderr: "", exitCode: 0 });
   });
 
   it("restores console methods and preserves a command failure", async () => {

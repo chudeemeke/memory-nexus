@@ -3,7 +3,7 @@
   "workstream": "memory-resilience",
   "goal_status": "active",
   "starting_revision": "77d54e05be7fc24cede4a9a3e1fede6fa113ac8f",
-  "current_item": "B11.4",
+  "current_item": "B11.74",
   "status_semantics": {
     "pending": "Not started; authorization and dependencies must permit work.",
     "pending_rebaseline": "Historical candidate, not a confirmed current failure or a completed task.",
@@ -2378,7 +2378,8 @@
         "B11.71",
         "D04",
         "B11.72",
-        "B11.73"
+        "B11.73",
+        "B11.74"
       ],
       "scope": "all Q-* work items",
       "deliverable": "Close individually verified quality work items; fix discovered defects and meaningful boundaries, not artificial counter tests.",
@@ -2419,7 +2420,13 @@
       "authorization": "authorized",
       "owner": "memory-nexus",
       "evidence": [],
-      "acceptance_record": ".planning/memory-resilience/evidence/D02.json"
+      "acceptance_record": ".planning/memory-resilience/evidence/D02.json",
+      "runtimeAdmission": {
+        "owner": "memory-nexus",
+        "trigger": "Before D02/D03/R02 acceptance",
+        "requirement": "Reconcile declared bun >=1.0.0 with verified supported versions; close(true) behavior differs between actual 1.3.14 and 1.4.1 Windows probes. Do not silently raise the floor or claim the entire current range verified.",
+        "evidence": ".planning/memory-resilience/evidence/B11.4-native-discovery.json"
+      }
     },
     {
       "id": "D03",
@@ -3134,7 +3141,8 @@
       "id": "B11.1",
       "title": "Make database helper cleanup owned and observable",
       "depends_on": [
-        "B03"
+        "B03",
+        "B11.74"
       ],
       "scope": "tests/helpers/test-database.ts and focused lifecycle regressions",
       "deliverable": "Guard helper-owned temporary storage and report failed cleanup with recoverable paths; correct the unsupported reboot-reclamation assumption.",
@@ -3158,7 +3166,8 @@
         ".planning/memory-resilience/evidence/B11.1-driver-platform-metrics.json",
         ".planning/memory-resilience/evidence/B11.1-holder-proof.json",
         ".planning/memory-resilience/evidence/B11.1-holder-platforms.json",
-        ".planning/memory-resilience/evidence/B11.1-holder-faults.json"
+        ".planning/memory-resilience/evidence/B11.1-holder-faults.json",
+        ".planning/memory-resilience/evidence/B11.4-native-discovery.json"
       ],
       "acceptance_record": ".planning/memory-resilience/evidence/B11.1-holder-proof.json",
       "observed_evidence": ".planning/memory-resilience/B04-source-findings.md",
@@ -3168,13 +3177,14 @@
         "verified_scope": "Final Windows affected group: 63 pass, 176 assertions. Current-source instrumented driver runs pass on Windows and Linux (five Windows cases skipped on Linux); targeted types pass. Eleven helper faults and one omitted-termination fault are killed. Helpers: 100% all four diagnostic metrics. Driver: 99.71% lines, 99.79% statements, 100% functions/branches.",
         "measurement_scope": "Only unchanged driver counters from expected-failure helper-fault runs are merged with passing same-source/map platform counters. Helper metrics use passing unmutated source only. This is direct-Istanbul diagnostic evidence, not final B05-B08/E8 or independent acceptance.",
         "remaining": [
+          "New local dependency B11.74: prepared-statement lifetime remains GC-dependent. Earlier owned-fixture fault evidence stays source-bound, but broad native cleanup readiness is not established. Rebaseline affected source after closure repair.",
           "Local candidate proof is ready. Final current-source Linux grouped run did not start because WSL CreateVm timed out; independent source/applicability review is absent (last Fable smoke quota-blocked), and final instrumenter acceptance remains required.",
           "Successful bounded WSL readiness then exact grouped run; obtain final source-bound independent review and reconcile final measurement gates. No local metric or review acceptance transferred."
         ]
       },
       "blocker": {
         "owner": "memory-nexus",
-        "condition": "Local candidate proof is ready. Final current-source Linux grouped run did not start because WSL CreateVm timed out; independent source/applicability review is absent (last Fable smoke quota-blocked), and final instrumenter acceptance remains required.",
+        "condition": "B11.74 native lifetime repair plus supported Linux grouped proof, final instrumentation and independent review remain required.",
         "resumption_trigger": "Successful bounded WSL readiness then exact grouped run; obtain final source-bound independent review and reconcile final measurement gates. No local metric or review acceptance transferred."
       }
     },
@@ -3370,9 +3380,10 @@
       "id": "B11.4",
       "stage": "baseline",
       "title": "Make command-test DB cleanup owned and observable",
-      "status": "active",
+      "status": "blocked",
       "depends_on": [
-        "B03"
+        "B03",
+        "B11.74"
       ],
       "scope": "tests/helpers/capture-json.ts, tests/helpers/capture-json.test.ts and six JSON command test callers",
       "deliverable": "Prove ownership of temporary DB/WAL/SHM paths before removal and retain diagnosable failed cleanup instead of clearing the tracker silently.",
@@ -3382,21 +3393,23 @@
       "owner": "memory-nexus",
       "evidence": [
         ".planning/memory-resilience/B11.4-plan.md",
-        ".planning/memory-resilience/evidence/B11.4.json"
+        ".planning/memory-resilience/evidence/B11.4.json",
+        ".planning/memory-resilience/evidence/B11.4-followup.json",
+        ".planning/memory-resilience/evidence/B11.4-native-discovery.json"
       ],
       "acceptance_record": ".planning/memory-resilience/evidence/B11.4.json",
       "observed_evidence": ".planning/memory-resilience/B04-source-findings.md",
       "retirement_trigger": "Before B10/R02; source inspection is not completed cleanup proof.",
       "progress": {
-        "local": "44 tests / 144 assertions across seven files pass. Source/scripts and scoped strict test types pass; declarations exclude moved test helper; isolation passes. Both helper files report diagnostic 100% all four metrics; eight cleanup faults detected; actual Bun primary plus teardown failures remain observable.",
-        "remaining": [
-          "Local Windows proof only; supported Linux execution remains unverified after the previous bounded WSL readiness failure. No shared WSL reset.",
-          "Direct instrumentation is diagnostic: B05 completeness, optional-chain source decisions and package-wide coverage acceptance remain open.",
-          "The six caller test drivers have fresh execution and strict types, but no fresh complete per-file four-metric admission.",
-          "Independent final-revision review, hosted checks, complete baseline and release/adoption acceptance remain open.",
-          "The test-only helper no longer emits a deep declaration under dist/presentation/cli/commands/_helpers. No repository production caller or root/library export was found; unknown external deep imports cannot be disproved."
-        ],
-        "restart": "Complete source-bound caller metric and optional-chain decision diagnostics; obtain supported-platform and independent review evidence when available. Do not transfer local helper counters to package or caller acceptance. Select another ready authorized item if external gates are the only remaining work."
+        "current": "Owned tracker retained; experimental retries removed. Stronger absent/zero exit assertions pass; 11 current-source faults detected and both helper files show diagnostic 100% metrics.",
+        "native": "Ordinary suite failed with EBUSY even after candidate bounded retries. Passing instrumented repetitions do not close this failure. Native prepared-statement lifetime is now B11.74.",
+        "caller": "Six caller driver branch diagnostics range from 36.36% to 75%; includes vacuous metadata assertion and permissive alternate error fields. B11.4 owns contract-based repair after native closure.",
+        "restart": "Complete B11.74, then tighten and verify caller contracts; retain B05/native-platform/independent review limits."
+      },
+      "blocker": {
+        "owner": "memory-nexus",
+        "condition": "Prepared statements retain native handles after default close; retries do not prove release.",
+        "resumption_trigger": "B11.74 deterministic closure proof, then B11.4 caller assertion and quality work."
       }
     },
     {
@@ -4953,6 +4966,32 @@
       ],
       "acceptance_record": ".planning/memory-resilience/evidence/B11.73.json",
       "retirement_trigger": "Before final baseline review R02; no baseline acceptance while required proof is absent."
+    },
+    {
+      "id": "B11.74",
+      "stage": "baseline",
+      "title": "Make native prepared-statement closure deterministic",
+      "status": "active",
+      "depends_on": [
+        "B03"
+      ],
+      "scope": "src/infrastructure/database/connection.ts and affected statement owners/callers; exact source scope follows lifetime mapping",
+      "deliverable": "Release connection-owned prepared statements and native file handles deterministically, preserving committed data, rollback, diagnostics and the explicit supported runtime contract.",
+      "verification": "Owned strong-reference regression through actual closeDatabase; paired supported-runtime proof; repeated/error/transaction/concurrent-database cases; actual affected command/helper suites and Tier S decision/metric/review gates.",
+      "risk": "S",
+      "authorization": "authorized",
+      "owner": "memory-nexus",
+      "evidence": [
+        ".planning/memory-resilience/B11.74-plan.md",
+        ".planning/memory-resilience/evidence/B11.74-discovery.json",
+        ".planning/memory-resilience/evidence/B11.4-native-discovery.json"
+      ],
+      "acceptance_record": ".planning/memory-resilience/evidence/B11.74.json",
+      "retirement_trigger": "Before B11.1/B11.4/B10/R02 acceptance; default close plus GC/retries is not deterministic closure proof.",
+      "progress": {
+        "observed": "Both Windows Bun 1.3.14 and 1.4.1 retain prepared statements/locks after default close. Strict close fixes 1.4.1 but fails in 1.3.14. Explicit finalization releases in both.",
+        "restart": "B11.74-plan.md step 1: actual shared close regression, then lifetime/interface mapping. No production closure change or runtime-floor change made."
+      }
     }
   ],
   "decisions": {
