@@ -121,17 +121,18 @@
         ".planning/memory-resilience/evidence/B04-dashboard-tokens.json",
         ".planning/memory-resilience/evidence/B04-classification-batch-5.json",
         ".planning/memory-resilience/evidence/B04-scratch-lifecycle-probe.json",
-        ".planning/memory-resilience/evidence/B04-classification-batch-6.json"
+        ".planning/memory-resilience/evidence/B04-classification-batch-6.json",
+        ".planning/memory-resilience/evidence/B04-classification-batch-7.json"
       ],
       "acceptance_record": ".planning/memory-resilience/evidence/B04.json",
       "progress": {
         "discovery": "implemented and focused behavior verified",
         "sourceCandidates": 446,
-        "proposedClassifications": 321,
-        "unclassified": 125,
+        "proposedClassifications": 371,
+        "unclassified": 75,
         "approvedExclusions": 0,
         "independentReview": "pending",
-        "next": "Inspect the remaining 125 test drivers and individual metric applicability, then independent review. Additional 55 source-inspected deletion boundaries have proposed S tiers; no exclusion approvals.",
+        "next": "Inspect the remaining 75 test drivers (service mocks, database/provider/process fixtures and command adapters), then individual metric applicability and independent review. No blanket exclusions or production tier reductions.",
         "packageOutputMapping": "Source-bound mapping recorded; artifact verification and independent review pending."
       }
     },

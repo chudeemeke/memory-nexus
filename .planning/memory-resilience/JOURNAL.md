@@ -1,5 +1,25 @@
 # Memory resilience execution journal
 
+## 2026-09-20 - B04 in-memory test-driver classification
+
+- Previous turn was progress: f9a967b committed the deletion-bearing test packet
+  and per-file cleanup dependencies. Current source/worktree rechecked clean.
+- Proposed A tiers for 50 individually listed drivers: 29 domain/port/value tests,
+  six pure ranking/string service tests and 15 formatter tests. Inspected emitted
+  runtime imports, recursive call/constructor inventory and relevant dependency,
+  mock-provider, path-predicate and environment/console override source.
+- Current inventory: **371 proposed, 75 unclassified, zero approved exclusions**.
+  Existing production/test risk tiers are unchanged; driver A does not relax
+  tested-module S. All selected drivers remain in measure mode pending individual
+  applicability and independent review. AST inventory is a reading aid, not a
+  sound static-effect proof or completed assertion review.
+- Ledger remains 209 items (114 delivery/gates, 95 quality candidates). Source
+  and dependency validation plus expected unknown-tier rejection are retained in
+  batch-7 evidence. No executable source changed, model downloaded or test-suite
+  acceptance claimed. Existing cleanup, inbox, CI and reviewer obligations remain.
+- Next: remaining 75 service/database/provider/process/command test drivers, then
+  metric applicability and independent review. B04 active; B05 pending.
+
 ## 2026-09-20 - B04 remaining filesystem test classification
 
 - Previous turn was progress: e85d4d3 committed source-bound classifications and

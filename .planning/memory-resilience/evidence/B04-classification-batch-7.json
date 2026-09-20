@@ -1,0 +1,1965 @@
+{
+  "item_id": "B04",
+  "status": "active",
+  "recorded_at": "2026-09-20T00:13:23.600Z",
+  "source_revision": "f9a967b58bc99958ad9f1a30426051e14a42ad7d",
+  "cwd": "C:\\Projects\\memory-nexus",
+  "change_scope": "50 individual Tier A proposals for domain/value, pure ranking/string and formatter test drivers; no executable source or existing tier changed.",
+  "counts": {
+    "candidates": 446,
+    "proposed": 371,
+    "unclassified": 75,
+    "approvedExclusions": 0,
+    "ledgerItems": 209,
+    "addedTierA": 50
+  },
+  "inspection_packet": [
+    {
+      "path": "src/application/services/budget-allocator.test.ts",
+      "sourceHash": "1348b88afccd495d2c3ecd35f15a5952964ca6a1228e3fec36e34e7e4575df51",
+      "runtimeHash": "ef79d720702c07a18aa093f3ce56e1dbc1559f3bd71731de8f8242ede390e677",
+      "imports": [
+        "import { describe, expect, test } from \"bun:test\";",
+        "import { allocateBudget, } from \"./budget-allocator.js\";"
+      ],
+      "calls": [
+        "\"A\".repeat",
+        "\"B\".repeat",
+        "\"C\".repeat",
+        "\"D\".repeat",
+        "\"F\".repeat",
+        "\"H\".repeat",
+        "\"L\".repeat",
+        "\"M\".repeat",
+        "\"X\".repeat",
+        "allocateBudget",
+        "describe",
+        "expect",
+        "expect(...).toBe",
+        "expect(...).toBeGreaterThan",
+        "expect(...).toBeLessThan",
+        "expect(...).toHaveLength",
+        "keys.indexOf",
+        "original.startsWith",
+        "result.sections.find",
+        "result.sections.map",
+        "test"
+      ],
+      "constructors": [],
+      "dynamic": [],
+      "effects": []
+    },
+    {
+      "path": "src/application/services/fts-sanitizer.test.ts",
+      "sourceHash": "aab1bcf75e5abe8b5d8330a85e22dcc249f5aa2c077bcbbe7287c7b6cbb8fea4",
+      "runtimeHash": "0cb4627dc64a5a3d68a0aff4319e30b81fbf65d54f8c23ba0426d225f1b26d73",
+      "imports": [
+        "import { describe, it, expect } from \"bun:test\";",
+        "import { sanitizeFtsQuery } from \"./fts-sanitizer.js\";"
+      ],
+      "calls": [
+        "describe",
+        "expect",
+        "expect(...).toBe",
+        "it",
+        "sanitizeFtsQuery"
+      ],
+      "constructors": [],
+      "dynamic": [],
+      "effects": []
+    },
+    {
+      "path": "src/application/services/memory-ranking-service.test.ts",
+      "sourceHash": "6071ae21bfefa6ebfb5e370fffd67190eb7e08286bf92a1de83d1169d3d7b22b",
+      "runtimeHash": "cb3ee8fd03bcda44bc3d6bc95f79c0f704884e8ba4f230617ef14191a20e7e03",
+      "imports": [
+        "import { describe, expect, test } from \"bun:test\";",
+        "import { Fact } from \"../../domain/entities/fact.js\";",
+        "import { GraphEdge } from \"../../domain/entities/graph-edge.js\";",
+        "import { PersonaEntry } from \"../../domain/entities/persona-entry.js\";",
+        "import { MemoryUtilityMetric } from \"../../domain/entities/memory-utility-metric.js\";",
+        "import { MemoryRankingService, candidateFromFact, candidateFromGraphEdge, candidateFromPersonaEntry, } from \"./memory-ranking-service.js\";"
+      ],
+      "calls": [
+        "Fact.create",
+        "GraphEdge.create",
+        "MemoryUtilityMetric.create",
+        "PersonaEntry.create",
+        "byId.get",
+        "candidateFromFact",
+        "candidateFromGraphEdge",
+        "candidateFromPersonaEntry",
+        "describe",
+        "expect",
+        "expect(...).toBe",
+        "expect(...).toBeGreaterThan",
+        "expect(...).toBeLessThan",
+        "expect(...).toContain",
+        "expect(...).toEqual",
+        "expect(...).toHaveLength",
+        "item.id.endsWith",
+        "makeCandidate",
+        "makeFact",
+        "makeGraph",
+        "makeMetric",
+        "makePersona",
+        "ranked.filter",
+        "ranked.filter(...).map",
+        "ranked.find",
+        "ranked.map",
+        "service.rank",
+        "test"
+      ],
+      "constructors": [
+        "new Date(\"2026-06-07T00:00:00.000Z\")",
+        "new MemoryRankingService({ now: () => NOW })",
+        "new Date(\"2026-01-01T00:00:00.000Z\")",
+        "new Date(\"2026-06-06T00:00:00.000Z\")",
+        "new Date(\"2026-06-01T00:00:00.000Z\")",
+        "new Date(\"2026-06-08T00:00:00.000Z\")",
+        "new Map(ranked.map((item) => [item.id, item]))",
+        "new Date(\"2026-06-05T00:00:00.000Z\")",
+        "new MemoryRankingService({ now: () => NOW, policy: { defaultHalfLifeDays: 7, halfLifeByKind: { dream: undefined }, halfLifeByFactType: { decision: undefined }, halfLifeByPersonaKind: { procedure: undefined }, }, })",
+        "new Date(\"2026-07-07T00:00:00.000Z\")"
+      ],
+      "dynamic": [],
+      "effects": []
+    },
+    {
+      "path": "src/application/services/pattern-extractor.test.ts",
+      "sourceHash": "660e17301f3bc6594800185a30eb2c61b85843627844a58dca03156adb25e1f1",
+      "runtimeHash": "73f71ccaa54c8d750573c68c906fab57c32932087f06aab135e26975e2d3673a",
+      "imports": [
+        "import { describe, it, expect } from \"bun:test\";",
+        "import { PatternExtractor, } from \"./pattern-extractor.js\";",
+        "import { ToolUse } from \"../../domain/entities/tool-use.js\";"
+      ],
+      "calls": [
+        "PatternExtractor.extractFileModifications",
+        "PatternExtractor.extractFilePaths",
+        "PatternExtractor.extractToolNames",
+        "PatternExtractor.extractToolStats",
+        "PatternExtractor.toFileEntities",
+        "PatternExtractor.toFileModificationEntities",
+        "ToolUse.create",
+        "describe",
+        "entities.find",
+        "entities.forEach",
+        "expect",
+        "expect(...).not.toContain",
+        "expect(...).toBe",
+        "expect(...).toContain",
+        "expect(...).toEqual",
+        "expect(...).toHaveLength",
+        "it",
+        "modifications.find",
+        "modifications.map",
+        "stats.find"
+      ],
+      "constructors": [
+        "new Date()",
+        "new Date(\"2025-01-15T10:30:00Z\")"
+      ],
+      "dynamic": [],
+      "effects": []
+    },
+    {
+      "path": "src/application/services/rrf-fusion.test.ts",
+      "sourceHash": "94f2defcf8369f966293e47a65006930b9786594a20710a8d62384939222fbb0",
+      "runtimeHash": "b9be6eec122402feb3d374d33c7b33bc3ad3034433847f2cef20d0e16af891c9",
+      "imports": [
+        "import { describe, expect, test } from \"bun:test\";",
+        "import { reciprocalRankFusion, } from \"./rrf-fusion.js\";"
+      ],
+      "calls": [
+        "describe",
+        "expect",
+        "expect(...).toBe",
+        "expect(...).toBeCloseTo",
+        "expect(...).toBeDefined",
+        "expect(...).toBeGreaterThan",
+        "expect(...).toBeGreaterThanOrEqual",
+        "expect(...).toBeLessThanOrEqual",
+        "expect(...).toBeUndefined",
+        "expect(...).toContain",
+        "expect(...).toHaveLength",
+        "r1.sources.map",
+        "reciprocalRankFusion",
+        "result.find",
+        "test"
+      ],
+      "constructors": [],
+      "dynamic": [],
+      "effects": []
+    },
+    {
+      "path": "src/application/services/temporal-decay.test.ts",
+      "sourceHash": "5a82a76b544bffe85f3c8e585a8de0f1bf66df774762c96b9fe98e36b721c505",
+      "runtimeHash": "ab1a51cd97b6c45f1db007be8495df7e10ecd97762e126d3ab6c49418b3d87a4",
+      "imports": [
+        "import { describe, expect, test } from \"bun:test\";",
+        "import { applyTemporalDecay, applyTemporalDecayWithExemptions, CURATED_FILE_TYPES, } from \"./temporal-decay.js\";"
+      ],
+      "calls": [
+        "Math.pow",
+        "applyTemporalDecay",
+        "applyTemporalDecayWithExemptions",
+        "daysAgo",
+        "decayed.find",
+        "describe",
+        "expect",
+        "expect(...).toBe",
+        "expect(...).toBeCloseTo",
+        "expect(...).toBeGreaterThan",
+        "expect(...).toBeGreaterThanOrEqual",
+        "expect(...).toBeLessThanOrEqual",
+        "expect(...).toEqual",
+        "now.getTime",
+        "nowish.getTime",
+        "test"
+      ],
+      "constructors": [
+        "new Date(\"2026-02-27T12:00:00Z\")",
+        "new Date(now.getTime() - days * 24 * 60 * 60 * 1000)",
+        "new Map([ [1, now], ])",
+        "new Map([ [1, daysAgo(30)], ])",
+        "new Map([ [1, daysAgo(60)], ])",
+        "new Map([ [1, daysAgo(15)], ])",
+        "new Map([ [1, daysAgo(7)], ])",
+        "new Map([ [1, daysAgo(90)], [2, daysAgo(1)], ])",
+        "new Map([ [1, daysAgo(60)], [2, daysAgo(0)], [3, daysAgo(15)], ])",
+        "new Date()",
+        "new Map([ [1, new Date(nowish.getTime() - 30 * 24 * 60 * 60 * 1000)], ])",
+        "new Date(nowish.getTime() - 30 * 24 * 60 * 60 * 1000)",
+        "new Map([ [1, daysAgo(60)], [2, daysAgo(60)], ])",
+        "new Set([1, 2])",
+        "new Set()",
+        "new Map()",
+        "new Map([ [1, daysAgo(90)], [2, daysAgo(90)], [3, daysAgo(0)], ])",
+        "new Set([1])",
+        "new Map([ [1, daysAgo(30)], [2, daysAgo(15)], ])"
+      ],
+      "dynamic": [],
+      "effects": []
+    },
+    {
+      "path": "src/domain/entities/backfill-state.test.ts",
+      "sourceHash": "b28a2724f06e8bb1a14421d4caf007538b6dea1d45193e4b0625578e670ba894",
+      "runtimeHash": "deeb0838aede1b4bba472f22fd675511c8c1b3aef858d66334943d3ab3cbe498",
+      "imports": [
+        "import { describe, it, expect } from \"bun:test\";",
+        "import { BackfillState } from \"./backfill-state.js\";"
+      ],
+      "calls": [
+        "BackfillState.create",
+        "backfilledAt.setFullYear",
+        "describe",
+        "expect",
+        "expect(...).toBe",
+        "expect(...).toBeUndefined",
+        "expect(...).toThrow",
+        "it",
+        "retrieved.setFullYear",
+        "state.backfilledAt.getFullYear",
+        "state.backfilledAt.toISOString"
+      ],
+      "constructors": [
+        "new Date(\"2026-03-08T10:00:00Z\")",
+        "new Date(\"2026-03-08T11:00:00Z\")",
+        "new Date()"
+      ],
+      "dynamic": [],
+      "effects": []
+    },
+    {
+      "path": "src/domain/entities/dream-entry.test.ts",
+      "sourceHash": "2bb04b9e86c6586f663afbe31bc62be623cb1898eaba6520980e91ba4c81c968",
+      "runtimeHash": "2434836fe0d4e59a904c26dff25345697d2e3567aa133567a094dd677efb49b1",
+      "imports": [
+        "import { describe, expect, test } from \"bun:test\";",
+        "import { DreamEntry } from \"./dream-entry.js\";"
+      ],
+      "calls": [
+        "DreamEntry.create",
+        "DreamEntry.fromJSON",
+        "applied.markRolledBack",
+        "approved.approve",
+        "approved.markApplied",
+        "approved.reviewedAt.toISOString",
+        "describe",
+        "entry.toJSON",
+        "expect",
+        "expect(...).not.toHaveProperty",
+        "expect(...).toBe",
+        "expect(...).toBeInstanceOf",
+        "expect(...).toBeUndefined",
+        "expect(...).toContain",
+        "expect(...).toEqual",
+        "expect(...).toThrow",
+        "json.audit.finding_hashes.push",
+        "json.source_event_ids.push",
+        "makeDreamEntry",
+        "makeDreamEntry(...).approve",
+        "makeDreamEntry(...).approve(...).markApplied",
+        "makeDreamEntry(...).approve(...).markApplied(...).markRolledBack",
+        "makeDreamEntry(...).markApplied",
+        "makeDreamEntry(...).toJSON",
+        "pending.approve",
+        "pending.reject",
+        "rejected.reject",
+        "rolledBack.markApplied",
+        "rolledBack.markRolledBack",
+        "rolledBack.rolledBackAt.toISOString",
+        "roundTripped.toJSON",
+        "test"
+      ],
+      "constructors": [
+        "new Date(\"2026-06-07T09:00:00Z\")",
+        "new Date(\"2026-06-07T09:05:00Z\")",
+        "new Date(\"2026-06-07T09:10:00Z\")",
+        "new Date(\"invalid\")",
+        "new Date(\"2026-06-07T09:15:00Z\")",
+        "new Date(\"2026-06-07T09:01:00Z\")",
+        "new Date(\"2026-06-07T09:02:00Z\")",
+        "new Date(\"2026-06-07T09:03:00Z\")",
+        "new Date(\"2026-06-07T09:04:00Z\")",
+        "new Date(\"2026-06-07T08:00:00Z\")"
+      ],
+      "dynamic": [],
+      "effects": []
+    },
+    {
+      "path": "src/domain/entities/entity.test.ts",
+      "sourceHash": "08fa16095a47a26676967d69961cb2c7bc5b70fc43bf2efcc234bac96a30e1a3",
+      "runtimeHash": "7aa05807fe362a1a42c91765516b3b548d4fa47b2ebef5f026d6c916fc758c20",
+      "imports": [
+        "import { describe, it, expect } from \"bun:test\";",
+        "import { Entity, } from \"./entity.js\";"
+      ],
+      "calls": [
+        "Entity.create",
+        "describe",
+        "entity.createdAt.getFullYear",
+        "entity.withId",
+        "entity1.equals",
+        "expect",
+        "expect(...).toBe",
+        "expect(...).toBeUndefined",
+        "expect(...).toEqual",
+        "expect(...).toThrow",
+        "it",
+        "retrieved.setFullYear"
+      ],
+      "constructors": [
+        "new Date(\"2026-01-31T10:00:00Z\")"
+      ],
+      "dynamic": [],
+      "effects": []
+    },
+    {
+      "path": "src/domain/entities/extraction-state.test.ts",
+      "sourceHash": "23715e169ec41658c0a9f8d954d5bc9532f9eb7ba9c0d0b73869d5d5fade5ee4",
+      "runtimeHash": "10123aaa0dd10558004007658f2c88cbe5597d6dd115b882b1399604f7cbc3bb",
+      "imports": [
+        "import { describe, expect, it } from \"bun:test\";",
+        "import { ExtractionState, ExtractionStatus } from \"./extraction-state.js\";"
+      ],
+      "calls": [
+        "ExtractionState.create",
+        "describe",
+        "expect",
+        "expect(...).not.toBe",
+        "expect(...).toBe",
+        "expect(...).toBeUndefined",
+        "expect(...).toEqual",
+        "expect(...).toThrow",
+        "fileMtime.setFullYear",
+        "it",
+        "originalDate.setFullYear",
+        "originalMtime.setFullYear",
+        "startedAt.setFullYear",
+        "state.complete",
+        "state.fail",
+        "state.fileMtime.getFullYear",
+        "state.incrementMessages",
+        "state.startProcessing",
+        "state.startedAt.getFullYear",
+        "state.withFileMetadata",
+        "state1.equals"
+      ],
+      "constructors": [
+        "new Date(\"2024-01-15T10:30:00Z\")",
+        "new Date(\"2024-01-15T09:00:00Z\")",
+        "new Date(\"2024-02-01T10:00:00Z\")",
+        "new Date(\"2024-01-15T10:35:00Z\")",
+        "new Date()",
+        "new Date(\"2024-01-15T11:00:00Z\")"
+      ],
+      "dynamic": [],
+      "effects": []
+    },
+    {
+      "path": "src/domain/entities/fact.test.ts",
+      "sourceHash": "ab6b1a72226a38ba642ecbd8c348e48ddc8c7500803f1ba0dc1b131461014455",
+      "runtimeHash": "290b9dd7770ccac2989b59532cbe924fe5a293a5fe97d6582e95ba4be1f1ec8d",
+      "imports": [
+        "import { describe, test, expect } from \"bun:test\";",
+        "import { Fact } from \"./fact.js\";"
+      ],
+      "calls": [
+        "Fact.create",
+        "describe",
+        "expect",
+        "expect(...).toBe",
+        "expect(...).toBeDefined",
+        "expect(...).toBeNull",
+        "expect(...).toBeUndefined",
+        "expect(...).toEqual",
+        "expect(...).toThrow",
+        "fact.observedAt.toISOString",
+        "fact.withId",
+        "fact.withSuperseded",
+        "supersededFact.supersededAt.toISOString",
+        "supersededTime.toISOString",
+        "test"
+      ],
+      "constructors": [
+        "new Date(\"2026-05-23T08:00:00Z\")",
+        "new Date()",
+        "new Date(\"2026-05-23T09:00:00Z\")"
+      ],
+      "dynamic": [],
+      "effects": []
+    },
+    {
+      "path": "src/domain/entities/friction-entry.test.ts",
+      "sourceHash": "edbb88962d717d6427c89927cc752a18ac5ce77dd82625bc9f420e8a6175cc1e",
+      "runtimeHash": "245e7b6d3d583b326b044cd87445c8daed16ea2f837d35b7871d0cfa8f1cb4ad",
+      "imports": [
+        "import { describe, it, expect } from \"bun:test\";",
+        "import { FrictionEntry, } from \"./friction-entry.js\";"
+      ],
+      "calls": [
+        "FrictionEntry.create",
+        "date1.getTime",
+        "date1.setFullYear",
+        "date2.getTime",
+        "describe",
+        "entry.lastReviewedAt.getFullYear",
+        "entry.lastReviewedAt.getTime",
+        "entry.loggedAt.getFullYear",
+        "entry.loggedAt.getTime",
+        "entry.resolvedAt.getFullYear",
+        "expect",
+        "expect(...).not.toBe",
+        "expect(...).toBe",
+        "expect(...).toBeInstanceOf",
+        "expect(...).toBeUndefined",
+        "expect(...).toEqual",
+        "expect(...).toThrow",
+        "it",
+        "loggedAt.getTime",
+        "reviewDate.getTime",
+        "tags.push"
+      ],
+      "constructors": [
+        "new Date(\"2026-03-08T10:00:00Z\")",
+        "new Date()",
+        "new Date(\"2026-03-10T12:00:00Z\")",
+        "new Date(\"2026-03-01T08:00:00Z\")",
+        "new Date(\"2026-03-05T14:00:00Z\")",
+        "new Date(\"2026-03-01T00:00:00Z\")",
+        "new Date(\"2026-03-02T00:00:00Z\")",
+        "new Date(\"2026-03-03T00:00:00Z\")",
+        "new Date(\"2026-03-15T10:00:00Z\")",
+        "new Date(\"2026-03-09T00:00:00Z\")"
+      ],
+      "dynamic": [],
+      "effects": []
+    },
+    {
+      "path": "src/domain/entities/graph-edge.test.ts",
+      "sourceHash": "b5171604fe2a965943c3d8dac3aa89a1a4a482f24ff700961ee0acb4176415db",
+      "runtimeHash": "2b24ca3b983d17acd18ef38336c9fa03ffb5184bba9a9f347b63513537e61206",
+      "imports": [
+        "import { describe, expect, test } from \"bun:test\";",
+        "import { GraphEdge } from \"./graph-edge.js\";"
+      ],
+      "calls": [
+        "GraphEdge.create",
+        "describe",
+        "edge.isCurrent",
+        "edge.toJSON",
+        "expect",
+        "expect(...).not.toHaveProperty",
+        "expect(...).toBe",
+        "expect(...).toEqual",
+        "expect(...).toMatchObject",
+        "expect(...).toThrow",
+        "makeEdge",
+        "makeEdge(...).withId",
+        "test"
+      ],
+      "constructors": [
+        "new Date(\"2026-06-07T00:00:00.000Z\")",
+        "new Date(\"2026-05-27T00:00:00.000Z\")",
+        "new Date(\"2026-06-01T00:00:00.000Z\")",
+        "new Date(\"2026-07-01T00:00:00.000Z\")",
+        "new Date(\"2026-05-01T00:00:00.000Z\")",
+        "new Date(\"2026-04-30T00:00:00.000Z\")",
+        "new Date(\"2026-05-15T00:00:00.000Z\")",
+        "new Date(\"not a date\")",
+        "new Date(\"2026-06-06T00:00:00.000Z\")"
+      ],
+      "dynamic": [],
+      "effects": []
+    },
+    {
+      "path": "src/domain/entities/link.test.ts",
+      "sourceHash": "82a763b14fd54aff18997d2c6b9c338a9587ba55bbf3c6dcebeefb6e04b0c15b",
+      "runtimeHash": "7bdaa5df99d4162cec65ba68426878c2ff0eef26357a0a49bc985392ae603979",
+      "imports": [
+        "import { describe, expect, it } from \"bun:test\";",
+        "import { Link, LinkType, EntityType } from \"./link.js\";"
+      ],
+      "calls": [
+        "Link.create",
+        "describe",
+        "expect",
+        "expect(...).not.toBe",
+        "expect(...).toBe",
+        "expect(...).toThrow",
+        "it",
+        "link.withWeight",
+        "link1.equals"
+      ],
+      "constructors": [],
+      "dynamic": [],
+      "effects": []
+    },
+    {
+      "path": "src/domain/entities/memory-event.test.ts",
+      "sourceHash": "e736d18b7879e62f53fa0473a5fe4f376cfe468b0c9d281da14fb299e73e8692",
+      "runtimeHash": "10ed40ab3d72415076842e32c4c2663a273a7ac6e6ff2300d8a4643182646704",
+      "imports": [
+        "import { describe, expect, test } from \"bun:test\";",
+        "import { MemoryEventEnvelope } from \"./memory-event.js\";"
+      ],
+      "calls": [
+        "MemoryEventEnvelope.create",
+        "MemoryEventEnvelope.fromJSON",
+        "createEnvelope",
+        "createEnvelope(...).toJSON",
+        "describe",
+        "event.toJSON",
+        "expect",
+        "expect(...).toBe",
+        "expect(...).toBeUndefined",
+        "expect(...).toEqual",
+        "expect(...).toMatch",
+        "expect(...).toThrow",
+        "json.consent.scopes.push",
+        "json.privacy.redactedFields.push",
+        "mutate",
+        "roundTripped.toJSON",
+        "test"
+      ],
+      "constructors": [
+        "new Date(\"2026-06-05T08:00:00Z\")",
+        "new Date(\"2026-06-05T08:00:01Z\")",
+        "new Date(\"2026-06-05T07:59:00Z\")",
+        "new Date(\"invalid\")",
+        "new Date(\"2026-06-06T08:00:00Z\")"
+      ],
+      "dynamic": [],
+      "effects": []
+    },
+    {
+      "path": "src/domain/entities/memory-file.test.ts",
+      "sourceHash": "f5175e73de75c6492768f87897d814e4146503385570f882774e4b1e50550c7e",
+      "runtimeHash": "9bfddee8d45a418f84a4ddca30977b80ebe8c687579ea4a177785e2b1266cecc",
+      "imports": [
+        "import { describe, it, expect } from \"bun:test\";",
+        "import { MemoryFile } from \"./memory-file.js\";"
+      ],
+      "calls": [
+        "\"A\".repeat",
+        "\"a\".repeat",
+        "\"b\".repeat",
+        "\"c\".repeat",
+        "\"g\".repeat",
+        "MemoryFile.create",
+        "after.getTime",
+        "before.getTime",
+        "describe",
+        "expect",
+        "expect(...).toBe",
+        "expect(...).toBeGreaterThanOrEqual",
+        "expect(...).toBeLessThanOrEqual",
+        "expect(...).toBeUndefined",
+        "expect(...).toEqual",
+        "expect(...).toThrow",
+        "file.createdAt.getFullYear",
+        "file.createdAt.getTime",
+        "file.lastIndexedAt.getFullYear",
+        "it",
+        "returnedCreatedAt.setFullYear",
+        "returnedLastIndexed.setFullYear"
+      ],
+      "constructors": [
+        "new Date(\"2026-03-07T10:00:00Z\")",
+        "new Date()",
+        "new Date(\"2026-01-01T00:00:00Z\")",
+        "new Date(\"2026-03-07T12:00:00Z\")",
+        "new Date(\"2026-01-15T00:00:00Z\")"
+      ],
+      "dynamic": [],
+      "effects": []
+    },
+    {
+      "path": "src/domain/entities/memory-governance.test.ts",
+      "sourceHash": "3d169c93e16ec5b0f50cc5a3698149c37a1232c2445d2dd25fa0b054192a8196",
+      "runtimeHash": "959bfae7f359fed07fd54090f4924ec70e8c92548a26b181bdd28d13402da135",
+      "imports": [
+        "import { describe, expect, test } from \"bun:test\";",
+        "import { MemoryGovernanceEntry, assertMemoryGovernanceControl, assertMemoryGovernanceSurface, } from \"./memory-governance.js\";"
+      ],
+      "calls": [
+        "MemoryGovernanceEntry.create",
+        "active.withControl",
+        "active.withControl(...).withControl",
+        "assertMemoryGovernanceControl",
+        "assertMemoryGovernanceSurface",
+        "denied.isBlocked",
+        "describe",
+        "entry.createdAt.toISOString",
+        "entry.toJSON",
+        "entry.toParams",
+        "expect",
+        "expect(...).toBe",
+        "expect(...).toBeNull",
+        "expect(...).toEqual",
+        "expect(...).toMatchObject",
+        "expect(...).toThrow",
+        "expired.expiresAt.toISOString",
+        "expired.isBlocked",
+        "futureExpiry.isBlocked",
+        "invalidated.isBlocked",
+        "params.createdAt.setUTCFullYear",
+        "params.sourceEventIds.push",
+        "pendingReview.isBlocked",
+        "quarantined.isBlocked",
+        "reviewed.reviewedAt.toISOString",
+        "revoked.isBlocked",
+        "sourceEventIds.push",
+        "suppressed.isBlocked",
+        "suppressed.withControl",
+        "test"
+      ],
+      "constructors": [
+        "new Date(\"2026-06-06T08:00:00Z\")",
+        "new Date(\"2026-06-06T09:00:00Z\")",
+        "new Date(\"2026-06-06T08:30:00Z\")",
+        "new Date(\"2026-06-06T10:00:00Z\")",
+        "new Date(\"2026-06-06T09:15:00Z\")",
+        "new Date(\"2026-06-06T09:30:00Z\")",
+        "new Date(\"2026-06-06T09:45:00Z\")",
+        "new Date(\"2026-06-06T10:15:00Z\")",
+        "new Date(\"2026-06-06T10:20:00Z\")",
+        "new Date(\"2026-06-06T10:30:00Z\")",
+        "new Date(\"2026-06-07T09:00:00Z\")",
+        "new Date(\"not-a-date\")"
+      ],
+      "dynamic": [],
+      "effects": []
+    },
+    {
+      "path": "src/domain/entities/memory-utility-metric.test.ts",
+      "sourceHash": "ae17206296e23b0fbea713cf90378f8477eab570be8cb2d7d927140263155d30",
+      "runtimeHash": "5f72efa60456891226753241cfb33fad064f822fb08b98b2369723b607c449e0",
+      "imports": [
+        "import { describe, expect, test } from \"bun:test\";",
+        "import { MemoryUtilityMetric } from \"./memory-utility-metric.js\";"
+      ],
+      "calls": [
+        "MemoryUtilityMetric.create",
+        "NOW.toISOString",
+        "accessed.lastAccessedAt.toISOString",
+        "accessed.updatedAt.toISOString",
+        "describe",
+        "expect",
+        "expect(...).not.toBe",
+        "expect(...).not.toHaveProperty",
+        "expect(...).toBe",
+        "expect(...).toBeInstanceOf",
+        "expect(...).toBeNull",
+        "expect(...).toBeUndefined",
+        "expect(...).toEqual",
+        "expect(...).toMatchObject",
+        "expect(...).toThrow",
+        "makeMetric",
+        "metric.recordAccess",
+        "metric.toJSON",
+        "metric.withId",
+        "metric.withId(...).markRanked",
+        "ranked.lastRankedAt.toISOString",
+        "ranked.toJSON",
+        "ranked.updatedAt.toISOString",
+        "test"
+      ],
+      "constructors": [
+        "new Date(\"2026-06-07T00:00:00.000Z\")",
+        "new Date(\"2026-06-06T00:00:00.000Z\")",
+        "new Date(\"invalid\")"
+      ],
+      "dynamic": [],
+      "effects": []
+    },
+    {
+      "path": "src/domain/entities/message.test.ts",
+      "sourceHash": "d6ab17094dfea3caa27bcdeaa0f0d051b4434917ae39e094968687abf8dacaf6",
+      "runtimeHash": "05c996adb1246fbb5ce6e3347110cc1bce63449e13b7eac381f5185831bb82df",
+      "imports": [
+        "import { describe, expect, it } from \"bun:test\";",
+        "import { Message, MessageRole } from \"./message.js\";"
+      ],
+      "calls": [
+        "Message.create",
+        "describe",
+        "expect",
+        "expect(...).not.toBe",
+        "expect(...).toBe",
+        "expect(...).toEqual",
+        "expect(...).toThrow",
+        "it",
+        "message.addToolUse",
+        "message.timestamp.getFullYear",
+        "message1.equals",
+        "originalDate.setFullYear",
+        "toolUses.push",
+        "ts.setFullYear"
+      ],
+      "constructors": [
+        "new Date(\"2024-01-15T10:30:00Z\")",
+        "new Date(\"2024-02-01T10:00:00Z\")"
+      ],
+      "dynamic": [],
+      "effects": []
+    },
+    {
+      "path": "src/domain/entities/persona-entry.test.ts",
+      "sourceHash": "2255da4732c45860c23c2254453723d360fd966e0a678c1e00a65f455b405156",
+      "runtimeHash": "49e33d53868a0425cb3d57ed943e4b686b7afbf1dd9b38628af074b1c03a6671",
+      "imports": [
+        "import { describe, expect, test } from \"bun:test\";",
+        "import { PersonaEntry } from \"./persona-entry.js\";"
+      ],
+      "calls": [
+        "PersonaEntry.create",
+        "createdAt.toISOString",
+        "describe",
+        "entry.createdAt.toISOString",
+        "entry.toJSON",
+        "entry.updatedAt.toISOString",
+        "entry.withId",
+        "expect",
+        "expect(...).toBe",
+        "expect(...).toBeInstanceOf",
+        "expect(...).toBeUndefined",
+        "expect(...).toEqual",
+        "expect(...).toThrow",
+        "test",
+        "validParams",
+        "withId.expiresAt.toISOString",
+        "withId.toJSON"
+      ],
+      "constructors": [
+        "new Date(\"2026-07-07T00:00:00.000Z\")",
+        "new Date(\"2026-06-07T00:00:00.000Z\")",
+        "new Date(\"invalid\")",
+        "new Date(\"2026-08-07T00:00:00.000Z\")",
+        "new Date(\"2026-06-01T12:00:00.000Z\")"
+      ],
+      "dynamic": [],
+      "effects": []
+    },
+    {
+      "path": "src/domain/entities/session.test.ts",
+      "sourceHash": "88f6e1735e629a244d9858225f34462402fe9a04034d3810525364cb5be52186",
+      "runtimeHash": "2d03aa391149245e0998a468bf1501d6c72da71148d43dda606580e2cb86d67a",
+      "imports": [
+        "import { describe, expect, it } from \"bun:test\";",
+        "import { Session } from \"./session.js\";",
+        "import { ProjectPath } from \"../value-objects/project-path.js\";",
+        "import { Message } from \"./message.js\";"
+      ],
+      "calls": [
+        "Message.create",
+        "ProjectPath.fromDecoded",
+        "Session.create",
+        "describe",
+        "expect",
+        "expect(...).not.toBe",
+        "expect(...).toBe",
+        "expect(...).toBeUndefined",
+        "expect(...).toEqual",
+        "expect(...).toHaveLength",
+        "expect(...).toThrow",
+        "it",
+        "messages.push",
+        "session.addMessage",
+        "session.complete",
+        "session.projectPath.equals",
+        "session.withSummary",
+        "session1.equals"
+      ],
+      "constructors": [
+        "new Date(\"2024-01-15T10:00:00Z\")",
+        "new Date(\"2024-01-15T12:00:00Z\")",
+        "new Date(\"2024-01-14T10:00:00Z\")",
+        "new Date(\"2024-02-01T10:00:00Z\")",
+        "new Date(\"2024-01-15T12:30:00Z\")"
+      ],
+      "dynamic": [],
+      "effects": []
+    },
+    {
+      "path": "src/domain/entities/tool-use.test.ts",
+      "sourceHash": "69b25518ef701437c59dfdecdc6fec7ac22062d61d13474e7cbde9085ca21db5",
+      "runtimeHash": "fd4e685e3870b9d8c9c0d7add710cc6363b15f70edb3014e269e8f42c17726a9",
+      "imports": [
+        "import { describe, expect, it } from \"bun:test\";",
+        "import { ToolUse, ToolUseStatus } from \"./tool-use.js\";"
+      ],
+      "calls": [
+        "ToolUse.create",
+        "describe",
+        "expect",
+        "expect(...).not.toBe",
+        "expect(...).toBe",
+        "expect(...).toBeUndefined",
+        "expect(...).toEqual",
+        "expect(...).toThrow",
+        "it",
+        "originalDate.setFullYear",
+        "toolUse.completeError",
+        "toolUse.completeSuccess",
+        "toolUse.timestamp.getFullYear",
+        "toolUse1.equals"
+      ],
+      "constructors": [
+        "new Date(\"2024-01-15T10:30:00Z\")",
+        "new Date(\"2024-02-01T10:00:00Z\")"
+      ],
+      "dynamic": [],
+      "effects": []
+    },
+    {
+      "path": "src/domain/errors/error-codes.test.ts",
+      "sourceHash": "babf3859c9bc180564f964f4ec94f975741b9a2950f20c186b8e28c31d349bf9",
+      "runtimeHash": "200d22f932e0e04b4486a40a4ece43dd498678b4b318425f2460acd6d5213121",
+      "imports": [
+        "import { describe, expect, test } from \"bun:test\";",
+        "import { ErrorCode } from \"./error-codes.js\";"
+      ],
+      "calls": [
+        "Object.keys",
+        "Object.values",
+        "describe",
+        "expect",
+        "expect(...).toBe",
+        "expect(...).toBeGreaterThan",
+        "test"
+      ],
+      "constructors": [],
+      "dynamic": [],
+      "effects": []
+    },
+    {
+      "path": "src/domain/errors/memory-error.test.ts",
+      "sourceHash": "a9fa417acd4ac77552c9ce96e18ee4caa3e5f645bc507b2d32ca16cb7f5e796b",
+      "runtimeHash": "557a556b364b8ae4a3f02807836185a8b10d71154312755f9c018410570e872e",
+      "imports": [
+        "import { describe, expect, test } from \"bun:test\";",
+        "import { ErrorCode } from \"./error-codes.js\";",
+        "import { MemoryError } from \"./memory-error.js\";"
+      ],
+      "calls": [
+        "JSON.parse",
+        "JSON.stringify",
+        "describe",
+        "error.toJSON",
+        "expect",
+        "expect(...).toBe",
+        "expect(...).toBeDefined",
+        "expect(...).toBeInstanceOf",
+        "expect(...).toBeUndefined",
+        "expect(...).toContain",
+        "expect(...).toEqual",
+        "test"
+      ],
+      "constructors": [
+        "new MemoryError(ErrorCode.DB_CONNECTION_FAILED, \"Could not connect to database\")",
+        "new MemoryError(ErrorCode.SOURCE_INACCESSIBLE, \"Cannot read session file\", { path: \"/home/user/.claude/sessions/abc.jsonl\", permissions: \"000\" })",
+        "new MemoryError(ErrorCode.INVALID_JSON, \"Invalid JSON\")",
+        "new MemoryError(ErrorCode.SYNC_FAILED, \"Sync failed\")",
+        "new MemoryError(ErrorCode.DB_CORRUPTED, \"Database corrupted\")",
+        "new MemoryError(ErrorCode.SESSION_NOT_FOUND, \"Session abc123 not found\")",
+        "new MemoryError(ErrorCode.INVALID_JSON, \"Failed to parse line 42\", { file: \"session.jsonl\", line: 42, content: '{\"incomplete\":', })",
+        "new MemoryError(ErrorCode.DISK_FULL, \"Disk is full\", {})",
+        "new MemoryError(ErrorCode.DB_LOCKED, \"Database is locked by another process\", { pid: 12345 })",
+        "new MemoryError(ErrorCode.SYNC_INTERRUPTED, \"Sync was interrupted\", { progress: { completed: 45, total: 100, }, lastSession: \"abc123\", })",
+        "new MemoryError(ErrorCode.UNKNOWN, \"Unknown error\")"
+      ],
+      "dynamic": [],
+      "effects": []
+    },
+    {
+      "path": "src/domain/errors/unknown-error.test.ts",
+      "sourceHash": "dc0c7c73cd35b1e4b746abb6bd5aac013279843d8e98aec42dcefdf81518035b",
+      "runtimeHash": "8117c801ff33c3e37a6a791a0a52e675e9c057a60bcc460c69b84323d2a926db",
+      "imports": [
+        "import { describe, expect, it } from \"bun:test\";",
+        "import { unknownErrorMessage, unknownToError } from \"./unknown-error.js\";"
+      ],
+      "calls": [
+        "describe",
+        "expect",
+        "expect(...).toBe",
+        "expect(...).toBeInstanceOf",
+        "it",
+        "unknownErrorMessage",
+        "unknownToError"
+      ],
+      "constructors": [
+        "new Error(\"disk full\")",
+        "new Error(\"already structured\")"
+      ],
+      "dynamic": [],
+      "effects": []
+    },
+    {
+      "path": "src/domain/ports/embedding.test.ts",
+      "sourceHash": "04f79f45d058a49f99410d9461334046a6e465fa62bef69a0a63e309c1628443",
+      "runtimeHash": "f54eeed6713b76f1cdd3306943e73ef80c56b1dd926c278e6c00344661b5f11c",
+      "imports": [
+        "import { describe, it, expect } from \"bun:test\";",
+        "import { EmbeddingProviderError, isEmbeddingProviderError } from \"./embedding.js\";",
+        "import { EmbeddingResult } from \"../value-objects/embedding-result.js\";"
+      ],
+      "calls": [
+        "EmbeddingResult.create",
+        "createMockProvider",
+        "describe",
+        "expect",
+        "expect(...).not.toContain",
+        "expect(...).toBe",
+        "expect(...).toBeDefined",
+        "expect(...).toBeInstanceOf",
+        "expect(...).toBeUndefined",
+        "expect(...).toEqual",
+        "expect(...).toHaveLength",
+        "isEmbeddingProviderError",
+        "it",
+        "lifecycle.includes",
+        "lifecycle.push",
+        "new Float32Array(384).fill",
+        "onProgress",
+        "progressUpdates.push",
+        "provider.dispose",
+        "provider.embed",
+        "provider.embedBatch",
+        "provider.initialize",
+        "provider.isReady",
+        "texts.map"
+      ],
+      "constructors": [
+        "new Float32Array(384)",
+        "new EmbeddingProviderError({ kind: \"provider_error\", message: \"Embedding provider failed\", })",
+        "new Error(\"HTTP 413\")",
+        "new EmbeddingProviderError({ kind: \"payload_too_large\", message: \"Embedding payload is too large for provider request limits\", status: 413, retryable: false, metadata: { text_bytes: 1_000_000 }, cause, })"
+      ],
+      "dynamic": [],
+      "effects": []
+    },
+    {
+      "path": "src/domain/ports/ports.test.ts",
+      "sourceHash": "92b1bf9327d0ae60adaed51148732d21ce43762008201985aac89d8e0ca3c664",
+      "runtimeHash": "2883ca4afa1c3ee01e8f6dd0f250b7639df6685c7a7988ab7f8346153c5dfb3c",
+      "imports": [
+        "import { describe, it, expect } from \"bun:test\";",
+        "import { Session } from \"../entities/session.js\";",
+        "import { Message } from \"../entities/message.js\";",
+        "import { ToolUse } from \"../entities/tool-use.js\";",
+        "import { Link } from \"../entities/link.js\";",
+        "import { ExtractionState } from \"../entities/extraction-state.js\";",
+        "import { MemoryFile } from \"../entities/memory-file.js\";",
+        "import { FrictionEntry } from \"../entities/friction-entry.js\";",
+        "import { BackfillState } from \"../entities/backfill-state.js\";",
+        "import { ProjectPath } from \"../value-objects/project-path.js\";",
+        "import { SearchQuery } from \"../value-objects/search-query.js\";",
+        "import { SearchResult } from \"../value-objects/search-result.js\";",
+        "import { EmbeddingResult } from \"../value-objects/embedding-result.js\";"
+      ],
+      "calls": [
+        "\"a\".repeat",
+        "\"b\".repeat",
+        "\"c\".repeat",
+        "BackfillState.create",
+        "EmbeddingResult.create",
+        "ExtractionState.create",
+        "FrictionEntry.create",
+        "Link.create",
+        "MemoryFile.create",
+        "Message.create",
+        "ProjectPath.fromDecoded",
+        "SearchQuery.from",
+        "SearchResult.create",
+        "Session.create",
+        "ToolUse.create",
+        "describe",
+        "event.data.content.substring",
+        "expect",
+        "expect(...).not.toBeNull",
+        "expect(...).toBe",
+        "expect(...).toBeDefined",
+        "expect(...).toBeNull",
+        "expect(...).toBeUndefined",
+        "expect(...).toContain",
+        "expect(...).toHaveLength",
+        "it",
+        "mockGenerator.generateSummary",
+        "mockParser.parse",
+        "mockProvider.embed",
+        "mockProvider.embedBatch",
+        "mockProvider.isReady",
+        "mockRepo.countByStatus",
+        "mockRepo.findAll",
+        "mockRepo.findById",
+        "mockRepo.findByPath",
+        "mockRepo.findByProject",
+        "mockRepo.findBySession",
+        "mockRepo.findBySessionId",
+        "mockRepo.findBySessionPath",
+        "mockRepo.findBySource",
+        "mockRepo.findByTarget",
+        "mockRepo.findByType",
+        "mockRepo.findOpen",
+        "mockRepo.findPending",
+        "mockRepo.findRecent",
+        "mockRepo.findRelated",
+        "mockRepo.getStats",
+        "mockRepo.getWeeklyTrends",
+        "mockRepo.save",
+        "mockRepo.saveMany",
+        "mockRepo.searchContent",
+        "mockScanner.discoverFiles",
+        "mockService.search",
+        "mockSource.discoverSessions",
+        "mockSource.getSessionFile",
+        "new Date().toISOString",
+        "new Float32Array(384).fill",
+        "parsedEvents.push",
+        "processEvent",
+        "savedMessages.push",
+        "store.filter",
+        "store.find",
+        "store.findIndex",
+        "store.push",
+        "texts.map"
+      ],
+      "constructors": [
+        "new Date()",
+        "new Date(\"2026-03-08T10:00:00Z\")",
+        "new Date(\"2026-01-01\")",
+        "new Date(\"2026-12-31\")",
+        "new Float32Array(384)"
+      ],
+      "dynamic": [],
+      "effects": []
+    },
+    {
+      "path": "src/domain/services/content-extractor.test.ts",
+      "sourceHash": "081fbbd47efe328a0e923bbe86e2d09a95cb11d38533d14da02da83b8976f5c6",
+      "runtimeHash": "9179d8fe1128361de2b1ac809cb17e6b2e28cf457a1ea91b5a1e7f0e2633a656",
+      "imports": [
+        "import { describe, expect, it } from \"bun:test\";",
+        "import { ContentExtractor } from \"./content-extractor.js\";"
+      ],
+      "calls": [
+        "ContentExtractor.extractMessageContent",
+        "ContentExtractor.extractTimestamp",
+        "ContentExtractor.extractToolResults",
+        "ContentExtractor.extractToolUses",
+        "ContentExtractor.isMessageLine",
+        "JSON.stringify",
+        "describe",
+        "expect",
+        "expect(...).not.toBeNull",
+        "expect(...).toBe",
+        "expect(...).toBeNull",
+        "expect(...).toEqual",
+        "expect(...).toHaveLength",
+        "it"
+      ],
+      "constructors": [
+        "new Date(\"2024-01-15T10:30:00Z\")"
+      ],
+      "dynamic": [],
+      "effects": []
+    },
+    {
+      "path": "src/domain/services/path-decoder.test.ts",
+      "sourceHash": "ea8164e72d43b76dfb4bffee0cfeba8c23a0e36f857033173a9bb3bf197b67a4",
+      "runtimeHash": "b53a626cb8a7285365ec8a3f80d4f6370cff13837efe13e344f6043f7dbef496",
+      "imports": [
+        "import { describe, expect, it } from \"bun:test\";",
+        "import { PathDecoder } from \"./path-decoder.js\";",
+        "import { ProjectPath } from \"../value-objects/index.js\";"
+      ],
+      "calls": [
+        "PathDecoder.decodeProjectDirectory",
+        "PathDecoder.extractProjectName",
+        "PathDecoder.filterEncodedPaths",
+        "PathDecoder.isEncodedPath",
+        "PathDecoder.resolveExistingPath",
+        "PathDecoder.translatePath",
+        "describe",
+        "expect",
+        "expect(...).toBe",
+        "expect(...).toBeInstanceOf",
+        "expect(...).toHaveLength",
+        "it"
+      ],
+      "constructors": [],
+      "dynamic": [],
+      "effects": []
+    },
+    {
+      "path": "src/domain/services/query-parser.test.ts",
+      "sourceHash": "ce5785af23ef27bb0119563adf481cac055266feb192e5fe8aa165a9e36e8627",
+      "runtimeHash": "ff2e6f08c83a558f372a620dc64195fea66bd0ee8b0d0a44f7853d86a6428e78",
+      "imports": [
+        "import { describe, expect, it } from \"bun:test\";",
+        "import { QueryParser } from \"./query-parser.js\";"
+      ],
+      "calls": [
+        "QueryParser.hasFilters",
+        "QueryParser.isEmpty",
+        "QueryParser.parse",
+        "QueryParser.toFts5Query",
+        "describe",
+        "expect",
+        "expect(...).toBe",
+        "expect(...).toContain",
+        "expect(...).toEqual",
+        "expect(...).toHaveLength",
+        "it"
+      ],
+      "constructors": [],
+      "dynamic": [],
+      "effects": []
+    },
+    {
+      "path": "src/domain/value-objects/embedding-config.test.ts",
+      "sourceHash": "44cbc6406f79205a91e41fdab0ea47bde7b98c4316899eea4c2b29bb0730695b",
+      "runtimeHash": "359f0b3bfe1e4f1097d0cf6ea8dbccff31f4195c2d7f04c00ec37fcb99d2172b",
+      "imports": [
+        "import { describe, it, expect } from \"bun:test\";",
+        "import { EmbeddingConfig } from \"./embedding-config.js\";"
+      ],
+      "calls": [
+        "EmbeddingConfig.create",
+        "EmbeddingConfig.defaults",
+        "a.equals",
+        "describe",
+        "expect",
+        "expect(...).not.toBe",
+        "expect(...).toBe",
+        "expect(...).toThrow",
+        "it"
+      ],
+      "constructors": [],
+      "dynamic": [],
+      "effects": []
+    },
+    {
+      "path": "src/domain/value-objects/embedding-result.test.ts",
+      "sourceHash": "6d2bce83b64bb5b7f6d25afb6f871776be8f5a8eee1a939aeb743bfad4a49f56",
+      "runtimeHash": "095ff0f3426403bf7b2e812535500e0b16b1610a52f13f1473d7066f9128c400",
+      "imports": [
+        "import { describe, it, expect } from \"bun:test\";",
+        "import { EmbeddingResult } from \"./embedding-result.js\";"
+      ],
+      "calls": [
+        "EmbeddingResult.create",
+        "Math.random",
+        "a.equals",
+        "describe",
+        "expect",
+        "expect(...).toBe",
+        "expect(...).toBeCloseTo",
+        "expect(...).toBeInstanceOf",
+        "expect(...).toThrow",
+        "it"
+      ],
+      "constructors": [
+        "new Float32Array([0.1, 0.2, 0.3])",
+        "new Float32Array([0.5, -0.3, 0.8])",
+        "new Float32Array(384)",
+        "new Float32Array([0.1, 0.2])",
+        "new Float32Array([0.1])",
+        "new Float32Array(0)",
+        "new Float32Array([0.4, 0.5, 0.6])"
+      ],
+      "dynamic": [],
+      "effects": []
+    },
+    {
+      "path": "src/domain/value-objects/project-path.test.ts",
+      "sourceHash": "e7bb6914d49fbe18a06e36617ea7a63f4ee7f917be6bd9964adba9193c57a500",
+      "runtimeHash": "354cb798154e27fcba5566eeb42fdf9ffd58f1af8486a07e797092e6a40d8e75",
+      "imports": [
+        "import { describe, expect, it } from \"bun:test\";",
+        "import { ProjectPath } from \"./project-path.js\";"
+      ],
+      "calls": [
+        "ProjectPath.fromDecoded",
+        "ProjectPath.fromEncoded",
+        "describe",
+        "expect",
+        "expect(...).toBe",
+        "expect(...).toThrow",
+        "fixed.equals",
+        "it",
+        "original.withProjectName",
+        "path1.equals"
+      ],
+      "constructors": [],
+      "dynamic": [],
+      "effects": []
+    },
+    {
+      "path": "src/domain/value-objects/search-query.test.ts",
+      "sourceHash": "43af84d14e3ed62efae8bd7af2e7879edded4dd70097d70696d9305a736d7d87",
+      "runtimeHash": "95d1ad8c512d8af7d9e9f39225b5537ceb6f977f1361528f9b167ac507f7bc79",
+      "imports": [
+        "import { describe, expect, it } from \"bun:test\";",
+        "import { SearchQuery } from \"./search-query.js\";"
+      ],
+      "calls": [
+        "SearchQuery.from",
+        "describe",
+        "expect",
+        "expect(...).toBe",
+        "expect(...).toThrow",
+        "it",
+        "query1.equals"
+      ],
+      "constructors": [],
+      "dynamic": [],
+      "effects": []
+    },
+    {
+      "path": "src/domain/value-objects/search-result.test.ts",
+      "sourceHash": "c0aed121f39faccc4c5d69843328f4227a0dff8e18e817cc27ee6c153d617cc7",
+      "runtimeHash": "4037b36d0a9cccb0d89a3afc8f4406e89e31e279f15c3cabae50359f1c124df6",
+      "imports": [
+        "import { describe, expect, it } from \"bun:test\";",
+        "import { SearchResult } from \"./search-result.js\";"
+      ],
+      "calls": [
+        "SearchResult.create",
+        "describe",
+        "expect",
+        "expect(...).toBe",
+        "expect(...).toBeGreaterThan",
+        "expect(...).toBeLessThan",
+        "expect(...).toBeUndefined",
+        "expect(...).toEqual",
+        "expect(...).toHaveLength",
+        "expect(...).toThrow",
+        "it",
+        "originalDate.setFullYear",
+        "result.timestamp.getFullYear",
+        "result1.compareByScore",
+        "result1.equals"
+      ],
+      "constructors": [
+        "new Date(\"2024-01-15T10:30:00Z\")"
+      ],
+      "dynamic": [],
+      "effects": []
+    },
+    {
+      "path": "src/presentation/cli/formatters/ai-formatter.test.ts",
+      "sourceHash": "6c9e455e66978b354a4add41ed04f7987d33150b3af1a2a611453f1b818fe1e9",
+      "runtimeHash": "423e2ba5006afb6abb56761c7272f9fdcd318ed995eab92f947150a98630cd21",
+      "imports": [
+        "import { describe, expect, test } from \"bun:test\";",
+        "import { stripAnsi, estimateTokens, formatForAi } from \"./ai-formatter.js\";"
+      ],
+      "calls": [
+        "describe",
+        "estimateTokens",
+        "expect",
+        "expect(...).toBe",
+        "formatForAi",
+        "stripAnsi",
+        "test"
+      ],
+      "constructors": [],
+      "dynamic": [],
+      "effects": []
+    },
+    {
+      "path": "src/presentation/cli/formatters/color.test.ts",
+      "sourceHash": "fa9053b67f2765e112c38b6eeea6c666443fcefa1e39ab9389a416d214065ea6",
+      "runtimeHash": "2a651b4c95f75170d9e4b8ccbf0a557e995f6b129b0ff72b8b6d38fe9dde8b09",
+      "imports": [
+        "import { describe, it, expect, beforeEach, afterEach, mock } from \"bun:test\";",
+        "import { shouldUseColor, bold, dim, green, red, yellow, cyan, boldCyan, } from \"./color.js\";"
+      ],
+      "calls": [
+        "afterEach",
+        "beforeEach",
+        "bold",
+        "boldCyan",
+        "cyan",
+        "describe",
+        "dim",
+        "expect",
+        "expect(...).toBe",
+        "green",
+        "it",
+        "red",
+        "shouldUseColor",
+        "yellow"
+      ],
+      "constructors": [],
+      "dynamic": [],
+      "effects": [
+        "delete process.env.NO_COLOR",
+        "delete process.env.FORCE_COLOR",
+        "process.env.NO_COLOR = originalNoColor",
+        "delete process.env.NO_COLOR",
+        "process.env.FORCE_COLOR = originalForceColor",
+        "delete process.env.FORCE_COLOR",
+        "process.env.NO_COLOR = \"1\"",
+        "process.env.FORCE_COLOR = \"1\"",
+        "process.env.NO_COLOR = \"1\"",
+        "process.env.FORCE_COLOR = \"1\"",
+        "process.env.FORCE_COLOR = \"1\""
+      ]
+    },
+    {
+      "path": "src/presentation/cli/formatters/context-formatter.test.ts",
+      "sourceHash": "67a9000681481be403fe3f1f8b11dd8751791fbe38468c49513f21e7afde92e8",
+      "runtimeHash": "ddb5a3cc88015724d996f2f04791fad087cef28e2e2d3503a9b08e1f404dcc70",
+      "imports": [
+        "import { describe, it, expect } from \"bun:test\";",
+        "import { createContextFormatter, } from \"./context-formatter.js\";"
+      ],
+      "calls": [
+        "\"=\".repeat",
+        "Array.isArray",
+        "JSON.parse",
+        "aiFormatter.formatSmartContext",
+        "createContextFormatter",
+        "createTestContext",
+        "describe",
+        "expect",
+        "expect(...).not.toContain",
+        "expect(...).not.toMatch",
+        "expect(...).toBe",
+        "expect(...).toBeDefined",
+        "expect(...).toBeNull",
+        "expect(...).toContain",
+        "expect(...).toEqual",
+        "formatter.formatContext",
+        "formatter.formatEmpty",
+        "formatter.formatError",
+        "formatter.formatNoTopics",
+        "it"
+      ],
+      "constructors": [
+        "new Date(\"2026-01-30T14:23:45Z\")",
+        "new Error(\"Database connection failed\")",
+        "new Error(\"Test error\")",
+        "new Error(\"Test error with stack\")"
+      ],
+      "dynamic": [],
+      "effects": []
+    },
+    {
+      "path": "src/presentation/cli/formatters/dto-helpers.test.ts",
+      "sourceHash": "f8db3c65e1ce26ea6e6f8bbc770163e74b9b539822f36fe6e11b759db05e5d31",
+      "runtimeHash": "7f67938dd5bcb2d32ea0c5384f62371bd1ca7b11f086a8cb731afbd655f9b2e5",
+      "imports": [
+        "import { describe, expect, it } from \"bun:test\";",
+        "import { SearchResult } from \"../../../domain/value-objects/search-result.js\";",
+        "import { Session } from \"../../../domain/entities/session.js\";",
+        "import { Message } from \"../../../domain/entities/message.js\";",
+        "import { ToolUse } from \"../../../domain/entities/tool-use.js\";",
+        "import { ProjectPath } from \"../../../domain/value-objects/project-path.js\";",
+        "import { toSearchResultDto, toFileResultDto, toSessionListDto, toShowSessionDto, toRelatedDto, toStatsDto, toContextDto, } from \"./dto-helpers.js\";"
+      ],
+      "calls": [
+        "\"x\".repeat",
+        "Message.create",
+        "ProjectPath.fromEncoded",
+        "SearchResult.create",
+        "Session.create",
+        "ToolUse.create",
+        "describe",
+        "expect",
+        "expect(...).not.toBe",
+        "expect(...).toBe",
+        "expect(...).toBeNull",
+        "expect(...).toBeUndefined",
+        "expect(...).toEqual",
+        "expect(...).toHaveLength",
+        "it",
+        "makeResult",
+        "makeSession",
+        "toContextDto",
+        "toFileResultDto",
+        "toRelatedDto",
+        "toSearchResultDto",
+        "toSessionListDto",
+        "toShowSessionDto",
+        "toStatsDto"
+      ],
+      "constructors": [
+        "new Date(\"2026-01-15T12:00:00.000Z\")",
+        "new Date(\"2026-01-15T10:00:00.000Z\")",
+        "new Date(\"2026-01-15T11:00:00.000Z\")",
+        "new Date(\"2026-01-15T10:05:00.000Z\")",
+        "new Date(\"2026-01-15T10:06:00.000Z\")",
+        "new Map([[toolUse.id, toolUse]])",
+        "new Map()"
+      ],
+      "dynamic": [],
+      "effects": []
+    },
+    {
+      "path": "src/presentation/cli/formatters/envelope.test.ts",
+      "sourceHash": "1e349295aad604c2b9d4a945407fac2de1a89bd0a41432d116d019e9efd79977",
+      "runtimeHash": "75775806d03855a171bf3f1569cebe3961e83ed73bf921105b9f1c72d70a5d4a",
+      "imports": [
+        "import { describe, expect, test, beforeEach, afterEach } from \"bun:test\";",
+        "import { ENVELOPE_SCHEMA_VERSION, QUERY_COMMAND_NAMES, QUERY_RESULT_KINDS, buildEnvelope, buildErrorEnvelope, emitJsonEnvelope, emitJsonErrorEnvelope, } from \"./envelope.js\";"
+      ],
+      "calls": [
+        "Array.isArray",
+        "JSON.parse",
+        "JSON.stringify",
+        "QUERY_COMMAND_NAMES.includes",
+        "QUERY_RESULT_KINDS.includes",
+        "afterEach",
+        "args.map",
+        "args.map(...).join",
+        "beforeEach",
+        "buildEnvelope",
+        "buildErrorEnvelope",
+        "captured.push",
+        "captured[0].includes",
+        "describe",
+        "emitJsonEnvelope",
+        "emitJsonErrorEnvelope",
+        "expect",
+        "expect(...).toBe",
+        "expect(...).toBeGreaterThanOrEqual",
+        "expect(...).toBeUndefined",
+        "expect(...).toEqual",
+        "serialized.includes",
+        "test"
+      ],
+      "constructors": [],
+      "dynamic": [],
+      "effects": [
+        "console.log = (...args) => {\n                captured.push(args.map(String).join(\" \"));\n            }",
+        "console.log = originalLog",
+        "console.log = (...args) => {\n                captured.push(args.map(String).join(\" \"));\n            }",
+        "console.log = originalLog"
+      ]
+    },
+    {
+      "path": "src/presentation/cli/formatters/error-formatter.test.ts",
+      "sourceHash": "e9b8ba3beb55b563dcf8346a0c204bba3572c5f1ad0d8e1d2dab238e4917890e",
+      "runtimeHash": "077a7a8f62be53f914b50ddbb83857f6314fdd07486207b95d6f66434bb938ca",
+      "imports": [
+        "import { describe, expect, test, beforeEach, afterEach } from \"bun:test\";",
+        "import { ErrorCode, MemoryError } from \"../../../domain/index.js\";",
+        "import { formatError, formatErrorJson, getSuggestion, } from \"./error-formatter.js\";",
+        "import { getLogDir } from \"../../../infrastructure/paths.js\";"
+      ],
+      "calls": [
+        "JSON.parse",
+        "describe",
+        "expect",
+        "expect(...).not.toBeNull",
+        "expect(...).not.toContain",
+        "expect(...).not.toThrow",
+        "expect(...).toBe",
+        "expect(...).toBeNull",
+        "expect(...).toContain",
+        "expect(...).toEqual",
+        "formatError",
+        "formatErrorJson",
+        "getLogDir",
+        "getSuggestion",
+        "test"
+      ],
+      "constructors": [
+        "new MemoryError(ErrorCode.SESSION_NOT_FOUND, \"Session abc123 not found\")",
+        "new MemoryError(ErrorCode.INVALID_JSON, \"Failed to parse line 42\", { file: \"session.jsonl\", line: 42, })",
+        "new MemoryError(ErrorCode.SYNC_INTERRUPTED, \"Sync was interrupted\", { progress: { completed: 45, total: 100 }, })",
+        "new MemoryError(ErrorCode.SOURCE_INACCESSIBLE, \"Cannot read session directory\")",
+        "new MemoryError(ErrorCode.UNKNOWN, \"Something went wrong\")",
+        "new MemoryError(ErrorCode.DB_CORRUPTED, \"Database corrupted\")",
+        "new Error(\"Something went wrong\")",
+        "new MemoryError(ErrorCode.DB_LOCKED, \"Database locked\")",
+        "new MemoryError(ErrorCode.SESSION_NOT_FOUND, \"Session not found\")",
+        "new MemoryError(ErrorCode.DISK_FULL, \"Disk is full\")",
+        "new MemoryError(ErrorCode.INVALID_JSON, \"Parse error at line 5\", { file: \"test.jsonl\", line: 5, })",
+        "new Error(\"Generic error\")",
+        "new Error(\"Something broke\")",
+        "new MemoryError(ErrorCode.INVALID_JSON, 'Invalid JSON: \"unexpected token\"')",
+        "new MemoryError(ErrorCode.UNKNOWN, \"Line 1\\nLine 2\")",
+        "new MemoryError(ErrorCode.UNKNOWN, \"Error with unicode: \\u2603\")"
+      ],
+      "dynamic": [],
+      "effects": []
+    },
+    {
+      "path": "src/presentation/cli/formatters/friction-dashboard.test.ts",
+      "sourceHash": "94ebe9e06591788c2f9c7051b0e585d85c218e516c1541e7c1664ba5b8c092c1",
+      "runtimeHash": "f96430ec6d67b8cbca2cff8c771c464c0d395595f18c170a18ff5902a91eed00",
+      "imports": [
+        "import { describe, expect, it } from \"bun:test\";",
+        "import { formatFrictionDashboard, generateFrictionHtml } from \"./friction-dashboard.js\";",
+        "import { FrictionEntry } from \"../../../domain/entities/friction-entry.js\";"
+      ],
+      "calls": [
+        "Date.now",
+        "FrictionEntry.create",
+        "describe",
+        "expect",
+        "expect(...).not.toContain",
+        "expect(...).toContain",
+        "expect(...).toMatch",
+        "formatFrictionDashboard",
+        "generateFrictionHtml",
+        "it",
+        "makeOpenItems",
+        "makeStats",
+        "makeTrends"
+      ],
+      "constructors": [
+        "new Date(Date.now() - 14 * 86400000)",
+        "new Date(Date.now() - 3 * 86400000)"
+      ],
+      "dynamic": [],
+      "effects": []
+    },
+    {
+      "path": "src/presentation/cli/formatters/list-formatter.test.ts",
+      "sourceHash": "e48d143583b7c362b4367edabc6c86024e84765c0b81899855220a6062d89849",
+      "runtimeHash": "4ae0f2206a2516af306cbe3e68fce5f6fbe92ee51d18a2d7bf890fa372106683",
+      "imports": [
+        "import { describe, it, expect } from \"bun:test\";",
+        "import { createListFormatter, } from \"./list-formatter.js\";",
+        "import { Session } from \"../../../domain/entities/session.js\";",
+        "import { ProjectPath } from \"../../../domain/value-objects/project-path.js\";",
+        "import { measureWidth } from \"./text-width.js\";"
+      ],
+      "calls": [
+        "\" \".repeat",
+        "Array.isArray",
+        "JSON.parse",
+        "ProjectPath.fromDecoded",
+        "Session.create",
+        "createListFormatter",
+        "createTestSession",
+        "describe",
+        "expect",
+        "expect(...).toBe",
+        "expect(...).toBeDefined",
+        "expect(...).toBeNull",
+        "expect(...).toContain",
+        "expect(...).toHaveLength",
+        "expect(...).toHaveProperty",
+        "formatter.formatEmpty",
+        "formatter.formatError",
+        "formatter.formatSessions",
+        "it",
+        "measureWidth",
+        "output.split"
+      ],
+      "constructors": [
+        "new Date(\"2026-01-28T10:00:00Z\")",
+        "new Error(\"Database connection failed\")",
+        "new Date(\"2026-01-28T11:00:00Z\")",
+        "new Error(\"Test error\")",
+        "new Error(\"Test error with stack\")"
+      ],
+      "dynamic": [],
+      "effects": []
+    },
+    {
+      "path": "src/presentation/cli/formatters/output-formatter.test.ts",
+      "sourceHash": "7a385cd3425d8d3019bbaf5fbdda842ddf45e224de66f5d4f8607406885e3fca",
+      "runtimeHash": "e43b147a1c1e20fcf9beed0f9a7928dbb94b8c31a19058a2c052ae180f67e8ad",
+      "imports": [
+        "import { describe, it, expect } from \"bun:test\";",
+        "import { createOutputFormatter, extractHighlights, CONTEXT_BUDGET, } from \"./output-formatter.js\";"
+      ],
+      "calls": [
+        "\"A\".repeat",
+        "\"B\".repeat",
+        "\"C\".repeat",
+        "\"D\".repeat",
+        "\"V\".repeat",
+        "\"X\".repeat",
+        "Array.from",
+        "Array.isArray",
+        "JSON.parse",
+        "createOutputFormatter",
+        "describe",
+        "expect",
+        "expect(...).not.toContain",
+        "expect(...).not.toMatch",
+        "expect(...).toBe",
+        "expect(...).toBeDefined",
+        "expect(...).toBeGreaterThan",
+        "expect(...).toBeLessThan",
+        "expect(...).toBeLessThanOrEqual",
+        "expect(...).toBeUndefined",
+        "expect(...).toContain",
+        "expect(...).toEqual",
+        "expect(...).toHaveLength",
+        "extractHighlights",
+        "formatter.formatError",
+        "formatter.formatResults",
+        "formatter.formatSummary",
+        "i.toString",
+        "i.toString(...).padStart",
+        "it",
+        "l.includes",
+        "l.trimStart",
+        "l.trimStart(...).startsWith",
+        "output.split",
+        "output.split(...).find",
+        "quietFormatter.formatSummary",
+        "verboseFormatter.formatSummary"
+      ],
+      "constructors": [
+        "new Date(\"2026-01-27T14:30:00Z\")",
+        "new Date(\"2026-01-28T10:00:00Z\")",
+        "new Error(\"json failure\")",
+        "new Error(\"quiet failure\")",
+        "new Error(\"brief failure\")",
+        "new Error(\"Something went wrong\")",
+        "new Error(\"Test error\")",
+        "new Error(\"No stack available\")"
+      ],
+      "dynamic": [],
+      "effects": []
+    },
+    {
+      "path": "src/presentation/cli/formatters/related-formatter.test.ts",
+      "sourceHash": "a8a66f6e2d37df77db5fb5c6900672bfeb2c67f1e34ebaddd8bb79edb449f5c9",
+      "runtimeHash": "fac519158491f21c33d6690f3d224cc23d951badbcc45541d5765a467c34d9df",
+      "imports": [
+        "import { describe, it, expect } from \"bun:test\";",
+        "import { createRelatedFormatter, } from \"./related-formatter.js\";",
+        "import { Session } from \"../../../domain/entities/session.js\";",
+        "import { ProjectPath } from \"../../../domain/value-objects/project-path.js\";"
+      ],
+      "calls": [
+        "\"=\".repeat",
+        "Array.isArray",
+        "JSON.parse",
+        "ProjectPath.fromDecoded",
+        "Session.create",
+        "briefFormatter.formatRelated",
+        "createRelatedFormatter",
+        "createRelatedSession",
+        "createTestSession",
+        "defaultFormatter.formatRelated",
+        "describe",
+        "expect",
+        "expect(...).not.toContain",
+        "expect(...).toBe",
+        "expect(...).toBeDefined",
+        "expect(...).toContain",
+        "expect(...).toEqual",
+        "expect(...).toHaveLength",
+        "expect(...).toHaveProperty",
+        "formatter.formatEmpty",
+        "formatter.formatError",
+        "formatter.formatNoLinks",
+        "formatter.formatRelated",
+        "it",
+        "output.split",
+        "output.split(...).filter"
+      ],
+      "constructors": [
+        "new Date(\"2026-01-28T10:00:00Z\")",
+        "new Error(\"Database connection failed\")",
+        "new Date(\"2026-01-30T14:23:45Z\")",
+        "new Error(\"Connection failed\")",
+        "new Date(\"2026-01-30T14:23:45.000Z\")",
+        "new Error(\"Test error\")",
+        "new Error(\"Error message\")",
+        "new Error(\"Test error with stack\")",
+        "new Error(\"no stack\")"
+      ],
+      "dynamic": [],
+      "effects": []
+    },
+    {
+      "path": "src/presentation/cli/formatters/show-formatter.test.ts",
+      "sourceHash": "938f63484c8f6a72e5fd23c76b793bf47f5a30073e8314a8e4cf02bf6e9995ee",
+      "runtimeHash": "e76eeb25d7b5022d1f38a556683fb2818159952c851a68d022e1845fe7bf59b7",
+      "imports": [
+        "import { describe, test, expect, beforeAll } from \"bun:test\";",
+        "import { createShowFormatter, summarizeToolResult, } from \"./show-formatter.js\";",
+        "import { Session } from \"../../../domain/entities/session.js\";",
+        "import { Message } from \"../../../domain/entities/message.js\";",
+        "import { ToolUse } from \"../../../domain/entities/tool-use.js\";",
+        "import { ProjectPath } from \"../../../domain/value-objects/project-path.js\";"
+      ],
+      "calls": [
+        "\"x\".repeat",
+        "JSON.parse",
+        "Message.create",
+        "ProjectPath.fromDecoded",
+        "Session.create",
+        "ToolUse.create",
+        "afterResult.match",
+        "createSessionDetail",
+        "createShowFormatter",
+        "createTestMessage",
+        "createTestSession",
+        "createTestToolUse",
+        "describe",
+        "expect",
+        "expect(...).not.toContain",
+        "expect(...).toBe",
+        "expect(...).toBeLessThan",
+        "expect(...).toBeLessThanOrEqual",
+        "expect(...).toBeNull",
+        "expect(...).toContain",
+        "expect(...).toEqual",
+        "expect(...).toHaveLength",
+        "expect(...).toHaveProperty",
+        "formatter.formatError",
+        "formatter.formatNotFound",
+        "formatter.formatSession",
+        "output.indexOf",
+        "output.match",
+        "output.substring",
+        "summarizeToolResult",
+        "test"
+      ],
+      "constructors": [
+        "new Date(\"2026-01-15T10:00:00Z\")",
+        "new Date(\"2026-01-15T11:30:00Z\")",
+        "new Date(\"2026-01-15T10:05:00Z\")",
+        "new Date(\"2026-01-15T10:06:00Z\")",
+        "new Map()",
+        "new Date(\"2026-01-15T10:07:00Z\")",
+        "new Map([[\"tool-read-1\", toolUse]])",
+        "new Date(\"2026-01-15T10:00:30Z\")",
+        "new Date(\"2026-01-15T11:01:00Z\")",
+        "new Map([[\"tool-1\", toolUse]])",
+        "new Map([[\"tool-no-result\", toolUse]])",
+        "new Map([[\"tool-json-1\", toolUse]])",
+        "new Map([[\"tool-json-null\", toolUse]])",
+        "new Error(\"bad\")",
+        "new Map([[\"tool-empty-result\", toolUse]])",
+        "new Error(\"verbose failure\")",
+        "new Error(\"no stack\")",
+        "new Error(\"quiet failure\")",
+        "new Error(\"brief failure\")",
+        "new Error(\"tools failure\")",
+        "new Error(\"Database connection failed\")"
+      ],
+      "dynamic": [],
+      "effects": []
+    },
+    {
+      "path": "src/presentation/cli/formatters/stats-formatter.test.ts",
+      "sourceHash": "04d9ac40c871199808fb855f90967cb1c96334809fe3132558d9d5fda6b51f60",
+      "runtimeHash": "5c7dd32caed141a99907453b285c7ddc764ef3f0639d72b0f182ad1bb42d537d",
+      "imports": [
+        "import { describe, it, expect } from \"bun:test\";",
+        "import { createStatsFormatter, } from \"./stats-formatter.js\";"
+      ],
+      "calls": [
+        "JSON.parse",
+        "createStatsFormatter",
+        "describe",
+        "expect",
+        "expect(...).not.toContain",
+        "expect(...).not.toMatch",
+        "expect(...).not.toThrow",
+        "expect(...).toBe",
+        "expect(...).toBeDefined",
+        "expect(...).toBeUndefined",
+        "expect(...).toContain",
+        "expect(...).toHaveLength",
+        "formatter.formatEmpty",
+        "formatter.formatError",
+        "formatter.formatStats",
+        "it",
+        "output.split"
+      ],
+      "constructors": [
+        "new Error(\"quiet stats failure\")",
+        "new Error(\"brief stats failure\")",
+        "new Error(\"Database connection failed\")",
+        "new Error(\"Something went wrong\")",
+        "new Error(\"Test error\")"
+      ],
+      "dynamic": [],
+      "effects": []
+    },
+    {
+      "path": "src/presentation/cli/formatters/text-width.test.ts",
+      "sourceHash": "fe76fdc6719b3c78ea9bffe109ea0031dd0456620ecbfc8fed5f8e483a1723f2",
+      "runtimeHash": "74e1ff0608e41c8c47ace2897f10b704ce90af583814e966966deb19e56aaf52",
+      "imports": [
+        "import { describe, it, expect } from \"bun:test\";",
+        "import { measureWidth, truncateToWidth, padToWidth, getTerminalWidth, truncateForTerminal, } from \"./text-width.js\";"
+      ],
+      "calls": [
+        "\" \".repeat",
+        "\"A\".repeat",
+        "describe",
+        "expect",
+        "expect(...).toBe",
+        "expect(...).toBeLessThan",
+        "expect(...).toBeLessThanOrEqual",
+        "expect(...).toContain",
+        "getTerminalWidth",
+        "it",
+        "measureWidth",
+        "padToWidth",
+        "truncateForTerminal",
+        "truncateToWidth"
+      ],
+      "constructors": [],
+      "dynamic": [],
+      "effects": []
+    },
+    {
+      "path": "src/presentation/cli/formatters/timestamp-formatter.test.ts",
+      "sourceHash": "b8f21f7394bbd0a7ef2330b2ef4a4dc8dac236433bc244eed62913063e6d0ffe",
+      "runtimeHash": "9d4f825ec244a620d121146c00ec95fa81359ef4ba5725b2c7015e2162a235ad",
+      "imports": [
+        "import { describe, it, expect } from \"bun:test\";",
+        "import { formatTimestamp, formatRelativeTime, formatAbsoluteTime, } from \"./timestamp-formatter.js\";"
+      ],
+      "calls": [
+        "Date.now",
+        "describe",
+        "expect",
+        "expect(...).toBe",
+        "expect(...).toContain",
+        "expect(...).toMatch",
+        "formatAbsoluteTime",
+        "formatRelativeTime",
+        "formatTimestamp",
+        "it",
+        "referenceDate.getTime"
+      ],
+      "constructors": [
+        "new Date(\"2026-01-29T14:30:00\")",
+        "new Date(referenceDate.getTime() - 30 * 1000)",
+        "new Date(referenceDate.getTime() - 15 * 60 * 1000)",
+        "new Date(referenceDate.getTime() - 5 * 60 * 60 * 1000)",
+        "new Date(referenceDate.getTime() - 24 * 60 * 60 * 1000)",
+        "new Date(referenceDate.getTime() - 2 * 24 * 60 * 60 * 1000)",
+        "new Date(referenceDate.getTime() - 7 * 24 * 60 * 60 * 1000)",
+        "new Date(referenceDate.getTime() - 3 * 7 * 24 * 60 * 60 * 1000)",
+        "new Date(referenceDate.getTime() - 30 * 24 * 60 * 60 * 1000)",
+        "new Date(referenceDate.getTime() - 90 * 24 * 60 * 60 * 1000)",
+        "new Date(Date.now() - 60 * 1000)",
+        "new Date(\"2026-01-27T14:30:00\")",
+        "new Date(\"2026-03-05T09:05:00\")",
+        "new Date(\"2026-01-15T00:00:00\")",
+        "new Date(Date.now() - 5 * 60 * 60 * 1000)"
+      ],
+      "dynamic": [],
+      "effects": []
+    },
+    {
+      "path": "tests/presentation/cli/formatters/friction-dashboard.test.ts",
+      "sourceHash": "a917dcbde051725275823d44d2ad43c89a27c48d88aa40188405987f097adfa1",
+      "runtimeHash": "4d6fe09865ad76b2183eb7adac9f5f6304bf8f33526ac40329f952cbf58cac1c",
+      "imports": [
+        "import { describe, expect, it } from \"bun:test\";",
+        "import { formatFrictionDashboard, generateFrictionHtml, } from \"../../../../src/presentation/cli/formatters/friction-dashboard.js\";",
+        "import { FrictionEntry } from \"../../../../src/domain/entities/friction-entry.js\";"
+      ],
+      "calls": [
+        "FrictionEntry.create",
+        "describe",
+        "expect",
+        "expect(...).not.toContain",
+        "expect(...).toContain",
+        "expect(...).toMatch",
+        "formatFrictionDashboard",
+        "generateFrictionHtml",
+        "it",
+        "makeEntry",
+        "makePattern",
+        "makeStats"
+      ],
+      "constructors": [
+        "new Date()"
+      ],
+      "dynamic": [],
+      "effects": []
+    }
+  ],
+  "inspection_reader": "import fs from 'node:fs';\nimport crypto from 'node:crypto';\nimport ts from 'typescript';\nconst manifest=JSON.parse(fs.readFileSync('.planning/memory-resilience/quality-classifications.json','utf8'));\nconst rows=[];\nconst label=node=>{\n if(ts.isCallExpression(node))return label(node.expression)+'(...)';\n if(ts.isPropertyAccessExpression(node))return label(node.expression)+'.'+node.name.text;\n if(ts.isElementAccessExpression(node))return label(node.expression)+'['+node.argumentExpression.getText()+']';\n return node.getText().replaceAll(/\\s+/g,' ');\n};\nfor(const file of manifest.files.filter(f=>f.tier===null)) {\n const source=fs.readFileSync(file.path,'utf8');\n const runtime=ts.transpileModule(source,{fileName:file.path,compilerOptions:{target:ts.ScriptTarget.ESNext,module:ts.ModuleKind.ESNext,verbatimModuleSyntax:true,removeComments:true}}).outputText;\n const ast=ts.createSourceFile(file.path+'.js',runtime,ts.ScriptTarget.Latest,true,ts.ScriptKind.JS);\n const imports=ast.statements.filter(ts.isImportDeclaration).map(n=>n.getText(ast));\n const calls=new Set(),constructors=new Set(),dynamic=[],effects=[];\n const visit=node=>{\n  if(ts.isCallExpression(node)) {\n   const name=label(node.expression);\n   calls.add(name);\n   if(node.expression.kind===ts.SyntaxKind.ImportKeyword || name==='require' || name==='eval' || name==='Function')dynamic.push(node.getText(ast));\n  }\n  if(ts.isNewExpression(node))constructors.add(node.getText(ast).replaceAll(/\\s+/g,' '));\n  if(ts.isBinaryExpression(node) && ts.isAssignmentOperator(node.operatorToken.kind) && /^(process|global|globalThis|console|Date|Math)\\b/.test(node.left.getText(ast)))effects.push(node.getText(ast));\n  if(ts.isDeleteExpression(node) && /^(process|global|globalThis|console|Date|Math)\\b/.test(node.expression.getText(ast)))effects.push(node.getText(ast));\n  ts.forEachChild(node,visit);\n };\n visit(ast);\n rows.push({path:file.path,sourceHash:crypto.createHash('sha256').update(source.replaceAll('\\r\\n','\\n')).digest('hex'),runtimeHash:crypto.createHash('sha256').update(runtime).digest('hex'),imports,calls:[...calls].sort(),constructors:[...constructors],dynamic,effects});\n}\nfs.writeFileSync('.git/b04-runtime-call-index.json',JSON.stringify(rows,null,2)+'\\n');\nfor(const row of rows.filter(r=>r.path.startsWith(process.argv[2]??'src/domain/'))) console.log(JSON.stringify({...row,constructors:row.constructors.map(c=>c.length>200?c.slice(0,200)+' [arguments summarized in display]':c),calls:row.calls.filter(c=>!c.startsWith('expect('))}));\n",
+  "sourceInputs": [
+    {
+      "path": ".planning/memory-resilience/quality-classifications.json",
+      "sourceHash": "4002c4e029222150011eaf10a0d7145a5b3300e41a649afcc54518c733ecaa3d"
+    },
+    {
+      "path": ".planning/memory-resilience/work-items.json",
+      "sourceHash": "8a0876af28a0c751eeff81e97067a58278c26151f191f296fcac60241a36b543"
+    }
+  ],
+  "checks": [
+    {
+      "command": "bun .git/b04-validate-batch-7.ts",
+      "exit": 0,
+      "meaning": "All source/package bindings match; 75 unknowns are test drivers; acyclic ledger requires cleanup before full-suite rebaseline and baseline review.",
+      "log": ".planning/memory-resilience/evidence/B04-batch-7-validation.json",
+      "verification_source": "import { readFileSync, writeFileSync } from 'node:fs';\nimport { execFileSync } from 'node:child_process';\nimport { sourceHash, validateInventory } from '../scripts/quality-inventory.ts';\nconst root = '.planning/memory-resilience/';\nconst read = (p: string) => JSON.parse(readFileSync(p,'utf8'));\nconst assert = (condition: unknown, message: string) => { if(!condition) throw new Error(message); };\nconst catalog = read(root+'executable-catalog.json');\nconst manifest = read(root+'quality-classifications.json');\nconst ledger = read(root+'work-items.json');\nconst mapping = read(root+'package-boundary-map.json');\nfor(const input of [...catalog.files,...catalog.packages,...mapping.sourceInputs]) assert(sourceHash(readFileSync(input.path,'utf8'))===input.sourceHash,'Stale source '+input.path);\nconst prior=JSON.parse(execFileSync('git',['show','HEAD:.planning/memory-resilience/quality-classifications.json'],{encoding:'utf8'}));\nfor(const old of prior.files.filter((f:any)=>f.tier!==null))assert(JSON.stringify(old)===JSON.stringify(manifest.files.find((f:any)=>f.path===old.path)),'Existing tier changed '+old.path);\nconst issues = validateInventory(catalog,manifest);\nassert(issues.length===75 && issues.every(i=>i.startsWith('Unknown risk tier: ')),'Unexpected inventory errors');\nassert(manifest.files.filter((f:any)=>f.tier!==null).length===371,'Wrong proposed count');\nconst catalogByPath=new Map(catalog.files.map((f:any)=>[f.path,f]));\nassert(manifest.files.filter((f:any)=>f.tier===null).every((f:any)=>(catalogByPath.get(f.path) as any)?.syntax==='test-driver'),'Non-test candidate remains unclassified');\nconst byId = new Map<string,any>(ledger.items.map((i:any)=>[i.id,i]));\nassert(byId.size===209 && byId.size===ledger.items.length,'Duplicate or missing work items');\nconst visited = new Set<string>();\nfunction visit(id:string, parents = new Set<string>()) {\n assert(!parents.has(id),'Dependency cycle '+id);\n if(visited.has(id))return;\n assert(byId.has(id),'Unknown dependency '+id);\n const stack=new Set([...parents,id]);\n for(const dep of byId.get(id).depends_on) visit(dep,stack);\n visited.add(id);\n}\nfor(const id of byId.keys())visit(id);\nfunction reaches(id:string,target:string):boolean { return id===target || byId.get(id).depends_on.some((dep:string)=>reaches(dep,target)); }\nfor(const id of ['B11.1','B11.2','B11.3','B11.4',...Array.from({length:61},(_,i)=>'B11.'+(i+5)),'Q095','Q081','B12','D05','Q091','Q092','Q093','Q094','Q041'])assert(reaches('R02',id),'Finding bypasses baseline acceptance '+id);\nfor(const item of ledger.items.filter((i:any)=>i.id.startsWith('B11.') && i.id!=='B11.3'))assert(reaches('B09',item.id),'Full-suite rebaseline bypasses cleanup '+item.id);\nassert(ledger.items.filter((i:any)=>i.status==='active').map((i:any)=>i.id).join()==='B04','Unexpected active item');\nassert(byId.get('B05').status==='pending','B05 prematurely advanced');\nconst changed=execFileSync('git',['diff','--name-only'],{encoding:'utf8'}).trim().split('\\n');\nassert(changed.every(p=>p.startsWith('.planning/')),'Unexpected executable change');\nconst record={status:'PASS',sourceBindings:catalog.files.length,packageBindings:catalog.packages.length,packageMapBindings:mapping.sourceInputs.length,proposed:371,unclassified:75,expectedGateExit:1,ledgerItems:byId.size,acyclic:true,newFindingsReachBaselineReview:true,activeItem:'B04',nextItemStatus:'B05 pending',limits:'Data/source consistency only; no independent tier approval or runtime acceptance.'};\nwriteFileSync(root+'evidence/B04-batch-7-validation.json',JSON.stringify(record,null,2)+'\\n');\nconsole.log(JSON.stringify(record));\n",
+      "logHash": "31da3a630f88345fb91380e8e47e803ace757e229133eebf3dd5ea29c48cb903"
+    },
+    {
+      "command": "bun run quality:inventory",
+      "exit": 1,
+      "meaning": "Expected incomplete inventory, 75 unknown-tier issues.",
+      "log": ".planning/memory-resilience/evidence/B04-batch-7-gate.txt",
+      "logHash": "a0d80f900af1598cc3ca2fc8c3b6a1970e5262956fd624c25104ac8735a17fe2"
+    }
+  ],
+  "limits": [
+    "All proposed tiers require independent review. A test driver tier does not reduce its tested production module tier.",
+    "The AST inventory preserves runtime value imports and recursively inventories calls/constructors; it is a reading aid, not sound side-effect analysis or blanket exclusion authority.",
+    "Assertion arguments were summarized for display; complete call traversal is retained. No complete assertion-quality, numerical coverage or runtime failure proof claimed.",
+    "Chart generation reads installed bundle text; no browser execution or HTML publication. Domain hashing/UUID dependencies are not described as filesystem-free runtime purity.",
+    "Individual metric applicability remains open; all selected test drivers remain in measure mode."
+  ],
+  "runtime": "Windows Node v24.20.0; Bun 1.4.1"
+}

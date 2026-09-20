@@ -421,13 +421,19 @@
       "path": "src/application/services/budget-allocator.test.ts",
       "package": "package.json",
       "sourceHash": "1348b88afccd495d2c3ecd35f15a5952964ca6a1228e3fec36e34e7e4575df51",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "A",
+      "rationale": "Exercises string budget allocation and section selection in memory.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "f9a967b58bc99958ad9f1a30426051e14a42ad7d",
+        "anchor": "Complete emitted-runtime import/call/constructor inventory; targeted dependency and override source inspection",
+        "runtimeHash": "ef79d720702c07a18aa093f3ce56e1dbc1559f3bd71731de8f8242ede390e677",
+        "scope": "Risk proposal based on inspected runtime inventory and targeted source. Not a sound static-effect proof, full assertion-quality review or numeric applicability approval."
+      }
     },
     {
       "path": "src/application/services/budget-allocator.ts",
@@ -613,13 +619,19 @@
       "path": "src/application/services/fts-sanitizer.test.ts",
       "package": "package.json",
       "sourceHash": "aab1bcf75e5abe8b5d8330a85e22dcc249f5aa2c077bcbbe7287c7b6cbb8fea4",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "A",
+      "rationale": "Exercises query string sanitization without a database connection.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "f9a967b58bc99958ad9f1a30426051e14a42ad7d",
+        "anchor": "Complete emitted-runtime import/call/constructor inventory; targeted dependency and override source inspection",
+        "runtimeHash": "0cb4627dc64a5a3d68a0aff4319e30b81fbf65d54f8c23ba0426d225f1b26d73",
+        "scope": "Risk proposal based on inspected runtime inventory and targeted source. Not a sound static-effect proof, full assertion-quality review or numeric applicability approval."
+      }
     },
     {
       "path": "src/application/services/fts-sanitizer.ts",
@@ -741,13 +753,19 @@
       "path": "src/application/services/memory-ranking-service.test.ts",
       "package": "package.json",
       "sourceHash": "6071ae21bfefa6ebfb5e370fffd67190eb7e08286bf92a1de83d1169d3d7b22b",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "A",
+      "rationale": "Exercises candidate scoring/filtering over in-memory domain fixtures; no repository writes.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "f9a967b58bc99958ad9f1a30426051e14a42ad7d",
+        "anchor": "Complete emitted-runtime import/call/constructor inventory; targeted dependency and override source inspection",
+        "runtimeHash": "cb3ee8fd03bcda44bc3d6bc95f79c0f704884e8ba4f230617ef14191a20e7e03",
+        "scope": "Risk proposal based on inspected runtime inventory and targeted source. Not a sound static-effect proof, full assertion-quality review or numeric applicability approval."
+      }
     },
     {
       "path": "src/application/services/memory-ranking-service.ts",
@@ -770,13 +788,19 @@
       "path": "src/application/services/pattern-extractor.test.ts",
       "package": "package.json",
       "sourceHash": "660e17301f3bc6594800185a30eb2c61b85843627844a58dca03156adb25e1f1",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "A",
+      "rationale": "Exercises string/tool-use pattern extraction and in-memory Entity construction; no tool execution.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "f9a967b58bc99958ad9f1a30426051e14a42ad7d",
+        "anchor": "Complete emitted-runtime import/call/constructor inventory; targeted dependency and override source inspection",
+        "runtimeHash": "73f71ccaa54c8d750573c68c906fab57c32932087f06aab135e26975e2d3673a",
+        "scope": "Risk proposal based on inspected runtime inventory and targeted source. Not a sound static-effect proof, full assertion-quality review or numeric applicability approval."
+      }
     },
     {
       "path": "src/application/services/pattern-extractor.ts",
@@ -915,13 +939,19 @@
       "path": "src/application/services/rrf-fusion.test.ts",
       "package": "package.json",
       "sourceHash": "94f2defcf8369f966293e47a65006930b9786594a20710a8d62384939222fbb0",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "A",
+      "rationale": "Exercises pure ranking fusion over in-memory candidate lists.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "f9a967b58bc99958ad9f1a30426051e14a42ad7d",
+        "anchor": "Complete emitted-runtime import/call/constructor inventory; targeted dependency and override source inspection",
+        "runtimeHash": "b9be6eec122402feb3d374d33c7b33bc3ad3034433847f2cef20d0e16af891c9",
+        "scope": "Risk proposal based on inspected runtime inventory and targeted source. Not a sound static-effect proof, full assertion-quality review or numeric applicability approval."
+      }
     },
     {
       "path": "src/application/services/rrf-fusion.ts",
@@ -1020,13 +1050,19 @@
       "path": "src/application/services/temporal-decay.test.ts",
       "package": "package.json",
       "sourceHash": "5a82a76b544bffe85f3c8e585a8de0f1bf66df774762c96b9fe98e36b721c505",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "A",
+      "rationale": "Exercises numeric ranking decay with local Date/Map/Set fixtures.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "f9a967b58bc99958ad9f1a30426051e14a42ad7d",
+        "anchor": "Complete emitted-runtime import/call/constructor inventory; targeted dependency and override source inspection",
+        "runtimeHash": "ab1a51cd97b6c45f1db007be8495df7e10ecd97762e126d3ab6c49418b3d87a4",
+        "scope": "Risk proposal based on inspected runtime inventory and targeted source. Not a sound static-effect proof, full assertion-quality review or numeric applicability approval."
+      }
     },
     {
       "path": "src/application/services/temporal-decay.ts",
@@ -1078,13 +1114,19 @@
       "path": "src/domain/entities/backfill-state.test.ts",
       "package": "package.json",
       "sourceHash": "b28a2724f06e8bb1a14421d4caf007538b6dea1d45193e4b0625578e670ba894",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "A",
+      "rationale": "Runtime imports/calls/constructors show domain value assertions and local fixtures; no persistent storage, process launch or network operation identified in this driver. The tested domain module retains its separate risk tier.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "f9a967b58bc99958ad9f1a30426051e14a42ad7d",
+        "anchor": "Complete emitted-runtime import/call/constructor inventory; targeted dependency and override source inspection",
+        "runtimeHash": "deeb0838aede1b4bba472f22fd675511c8c1b3aef858d66334943d3ab3cbe498",
+        "scope": "Risk proposal based on inspected runtime inventory and targeted source. Not a sound static-effect proof, full assertion-quality review or numeric applicability approval."
+      }
     },
     {
       "path": "src/domain/entities/backfill-state.ts",
@@ -1107,13 +1149,19 @@
       "path": "src/domain/entities/dream-entry.test.ts",
       "package": "package.json",
       "sourceHash": "2bb04b9e86c6586f663afbe31bc62be623cb1898eaba6520980e91ba4c81c968",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "A",
+      "rationale": "Runtime imports/calls/constructors show domain value assertions and local fixtures; no persistent storage, process launch or network operation identified in this driver. The tested domain module retains its separate risk tier.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "f9a967b58bc99958ad9f1a30426051e14a42ad7d",
+        "anchor": "Complete emitted-runtime import/call/constructor inventory; targeted dependency and override source inspection",
+        "runtimeHash": "2434836fe0d4e59a904c26dff25345697d2e3567aa133567a094dd677efb49b1",
+        "scope": "Risk proposal based on inspected runtime inventory and targeted source. Not a sound static-effect proof, full assertion-quality review or numeric applicability approval."
+      }
     },
     {
       "path": "src/domain/entities/dream-entry.ts",
@@ -1136,13 +1184,19 @@
       "path": "src/domain/entities/entity.test.ts",
       "package": "package.json",
       "sourceHash": "08fa16095a47a26676967d69961cb2c7bc5b70fc43bf2efcc234bac96a30e1a3",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "A",
+      "rationale": "Runtime imports/calls/constructors show domain value assertions and local fixtures; no persistent storage, process launch or network operation identified in this driver. The tested domain module retains its separate risk tier.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "f9a967b58bc99958ad9f1a30426051e14a42ad7d",
+        "anchor": "Complete emitted-runtime import/call/constructor inventory; targeted dependency and override source inspection",
+        "runtimeHash": "7aa05807fe362a1a42c91765516b3b548d4fa47b2ebef5f026d6c916fc758c20",
+        "scope": "Risk proposal based on inspected runtime inventory and targeted source. Not a sound static-effect proof, full assertion-quality review or numeric applicability approval."
+      }
     },
     {
       "path": "src/domain/entities/entity.ts",
@@ -1165,13 +1219,19 @@
       "path": "src/domain/entities/extraction-state.test.ts",
       "package": "package.json",
       "sourceHash": "23715e169ec41658c0a9f8d954d5bc9532f9eb7ba9c0d0b73869d5d5fade5ee4",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "A",
+      "rationale": "Runtime imports/calls/constructors show domain value assertions and local fixtures; no persistent storage, process launch or network operation identified in this driver. The tested domain module retains its separate risk tier.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "f9a967b58bc99958ad9f1a30426051e14a42ad7d",
+        "anchor": "Complete emitted-runtime import/call/constructor inventory; targeted dependency and override source inspection",
+        "runtimeHash": "10123aaa0dd10558004007658f2c88cbe5597d6dd115b882b1399604f7cbc3bb",
+        "scope": "Risk proposal based on inspected runtime inventory and targeted source. Not a sound static-effect proof, full assertion-quality review or numeric applicability approval."
+      }
     },
     {
       "path": "src/domain/entities/extraction-state.ts",
@@ -1194,13 +1254,19 @@
       "path": "src/domain/entities/fact.test.ts",
       "package": "package.json",
       "sourceHash": "ab6b1a72226a38ba642ecbd8c348e48ddc8c7500803f1ba0dc1b131461014455",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "A",
+      "rationale": "Runtime imports/calls/constructors show domain value assertions and local fixtures; no persistent storage, process launch or network operation identified in this driver. The tested domain module retains its separate risk tier.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "f9a967b58bc99958ad9f1a30426051e14a42ad7d",
+        "anchor": "Complete emitted-runtime import/call/constructor inventory; targeted dependency and override source inspection",
+        "runtimeHash": "290b9dd7770ccac2989b59532cbe924fe5a293a5fe97d6582e95ba4be1f1ec8d",
+        "scope": "Risk proposal based on inspected runtime inventory and targeted source. Not a sound static-effect proof, full assertion-quality review or numeric applicability approval."
+      }
     },
     {
       "path": "src/domain/entities/fact.ts",
@@ -1223,13 +1289,19 @@
       "path": "src/domain/entities/friction-entry.test.ts",
       "package": "package.json",
       "sourceHash": "edbb88962d717d6427c89927cc752a18ac5ce77dd82625bc9f420e8a6175cc1e",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "A",
+      "rationale": "Runtime imports/calls/constructors show domain value assertions and local fixtures; no persistent storage, process launch or network operation identified in this driver. The tested domain module retains its separate risk tier.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "f9a967b58bc99958ad9f1a30426051e14a42ad7d",
+        "anchor": "Complete emitted-runtime import/call/constructor inventory; targeted dependency and override source inspection",
+        "runtimeHash": "245e7b6d3d583b326b044cd87445c8daed16ea2f837d35b7871d0cfa8f1cb4ad",
+        "scope": "Risk proposal based on inspected runtime inventory and targeted source. Not a sound static-effect proof, full assertion-quality review or numeric applicability approval."
+      }
     },
     {
       "path": "src/domain/entities/friction-entry.ts",
@@ -1252,13 +1324,19 @@
       "path": "src/domain/entities/graph-edge.test.ts",
       "package": "package.json",
       "sourceHash": "b5171604fe2a965943c3d8dac3aa89a1a4a482f24ff700961ee0acb4176415db",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "A",
+      "rationale": "Runtime imports/calls/constructors show domain value assertions and local fixtures; no persistent storage, process launch or network operation identified in this driver. The tested domain module retains its separate risk tier.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "f9a967b58bc99958ad9f1a30426051e14a42ad7d",
+        "anchor": "Complete emitted-runtime import/call/constructor inventory; targeted dependency and override source inspection",
+        "runtimeHash": "2b24ca3b983d17acd18ef38336c9fa03ffb5184bba9a9f347b63513537e61206",
+        "scope": "Risk proposal based on inspected runtime inventory and targeted source. Not a sound static-effect proof, full assertion-quality review or numeric applicability approval."
+      }
     },
     {
       "path": "src/domain/entities/graph-edge.ts",
@@ -1293,13 +1371,19 @@
       "path": "src/domain/entities/link.test.ts",
       "package": "package.json",
       "sourceHash": "82a763b14fd54aff18997d2c6b9c338a9587ba55bbf3c6dcebeefb6e04b0c15b",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "A",
+      "rationale": "Runtime imports/calls/constructors show domain value assertions and local fixtures; no persistent storage, process launch or network operation identified in this driver. The tested domain module retains its separate risk tier.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "f9a967b58bc99958ad9f1a30426051e14a42ad7d",
+        "anchor": "Complete emitted-runtime import/call/constructor inventory; targeted dependency and override source inspection",
+        "runtimeHash": "7bdaa5df99d4162cec65ba68426878c2ff0eef26357a0a49bc985392ae603979",
+        "scope": "Risk proposal based on inspected runtime inventory and targeted source. Not a sound static-effect proof, full assertion-quality review or numeric applicability approval."
+      }
     },
     {
       "path": "src/domain/entities/link.ts",
@@ -1322,13 +1406,19 @@
       "path": "src/domain/entities/memory-event.test.ts",
       "package": "package.json",
       "sourceHash": "e736d18b7879e62f53fa0473a5fe4f376cfe468b0c9d281da14fb299e73e8692",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "A",
+      "rationale": "Runtime imports/calls/constructors show domain value assertions and local fixtures; no persistent storage, process launch or network operation identified in this driver. The tested domain module retains its separate risk tier.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "f9a967b58bc99958ad9f1a30426051e14a42ad7d",
+        "anchor": "Complete emitted-runtime import/call/constructor inventory; targeted dependency and override source inspection",
+        "runtimeHash": "10ed40ab3d72415076842e32c4c2663a273a7ac6e6ff2300d8a4643182646704",
+        "scope": "Risk proposal based on inspected runtime inventory and targeted source. Not a sound static-effect proof, full assertion-quality review or numeric applicability approval."
+      }
     },
     {
       "path": "src/domain/entities/memory-event.ts",
@@ -1351,13 +1441,19 @@
       "path": "src/domain/entities/memory-file.test.ts",
       "package": "package.json",
       "sourceHash": "f5175e73de75c6492768f87897d814e4146503385570f882774e4b1e50550c7e",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "A",
+      "rationale": "Runtime imports/calls/constructors show domain value assertions and local fixtures; no persistent storage, process launch or network operation identified in this driver. The tested domain module retains its separate risk tier.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "f9a967b58bc99958ad9f1a30426051e14a42ad7d",
+        "anchor": "Complete emitted-runtime import/call/constructor inventory; targeted dependency and override source inspection",
+        "runtimeHash": "9bfddee8d45a418f84a4ddca30977b80ebe8c687579ea4a177785e2b1266cecc",
+        "scope": "Risk proposal based on inspected runtime inventory and targeted source. Not a sound static-effect proof, full assertion-quality review or numeric applicability approval."
+      }
     },
     {
       "path": "src/domain/entities/memory-file.ts",
@@ -1380,13 +1476,19 @@
       "path": "src/domain/entities/memory-governance.test.ts",
       "package": "package.json",
       "sourceHash": "3d169c93e16ec5b0f50cc5a3698149c37a1232c2445d2dd25fa0b054192a8196",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "A",
+      "rationale": "Runtime imports/calls/constructors show domain value assertions and local fixtures; no persistent storage, process launch or network operation identified in this driver. The tested domain module retains its separate risk tier.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "f9a967b58bc99958ad9f1a30426051e14a42ad7d",
+        "anchor": "Complete emitted-runtime import/call/constructor inventory; targeted dependency and override source inspection",
+        "runtimeHash": "959bfae7f359fed07fd54090f4924ec70e8c92548a26b181bdd28d13402da135",
+        "scope": "Risk proposal based on inspected runtime inventory and targeted source. Not a sound static-effect proof, full assertion-quality review or numeric applicability approval."
+      }
     },
     {
       "path": "src/domain/entities/memory-governance.ts",
@@ -1409,13 +1511,19 @@
       "path": "src/domain/entities/memory-utility-metric.test.ts",
       "package": "package.json",
       "sourceHash": "ae17206296e23b0fbea713cf90378f8477eab570be8cb2d7d927140263155d30",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "A",
+      "rationale": "Runtime imports/calls/constructors show domain value assertions and local fixtures; no persistent storage, process launch or network operation identified in this driver. The tested domain module retains its separate risk tier.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "f9a967b58bc99958ad9f1a30426051e14a42ad7d",
+        "anchor": "Complete emitted-runtime import/call/constructor inventory; targeted dependency and override source inspection",
+        "runtimeHash": "5f72efa60456891226753241cfb33fad064f822fb08b98b2369723b607c449e0",
+        "scope": "Risk proposal based on inspected runtime inventory and targeted source. Not a sound static-effect proof, full assertion-quality review or numeric applicability approval."
+      }
     },
     {
       "path": "src/domain/entities/memory-utility-metric.ts",
@@ -1438,13 +1546,19 @@
       "path": "src/domain/entities/message.test.ts",
       "package": "package.json",
       "sourceHash": "d6ab17094dfea3caa27bcdeaa0f0d051b4434917ae39e094968687abf8dacaf6",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "A",
+      "rationale": "Runtime imports/calls/constructors show domain value assertions and local fixtures; no persistent storage, process launch or network operation identified in this driver. The tested domain module retains its separate risk tier.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "f9a967b58bc99958ad9f1a30426051e14a42ad7d",
+        "anchor": "Complete emitted-runtime import/call/constructor inventory; targeted dependency and override source inspection",
+        "runtimeHash": "05c996adb1246fbb5ce6e3347110cc1bce63449e13b7eac381f5185831bb82df",
+        "scope": "Risk proposal based on inspected runtime inventory and targeted source. Not a sound static-effect proof, full assertion-quality review or numeric applicability approval."
+      }
     },
     {
       "path": "src/domain/entities/message.ts",
@@ -1467,13 +1581,19 @@
       "path": "src/domain/entities/persona-entry.test.ts",
       "package": "package.json",
       "sourceHash": "2255da4732c45860c23c2254453723d360fd966e0a678c1e00a65f455b405156",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "A",
+      "rationale": "Runtime imports/calls/constructors show domain value assertions and local fixtures; no persistent storage, process launch or network operation identified in this driver. The tested domain module retains its separate risk tier.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "f9a967b58bc99958ad9f1a30426051e14a42ad7d",
+        "anchor": "Complete emitted-runtime import/call/constructor inventory; targeted dependency and override source inspection",
+        "runtimeHash": "49e33d53868a0425cb3d57ed943e4b686b7afbf1dd9b38628af074b1c03a6671",
+        "scope": "Risk proposal based on inspected runtime inventory and targeted source. Not a sound static-effect proof, full assertion-quality review or numeric applicability approval."
+      }
     },
     {
       "path": "src/domain/entities/persona-entry.ts",
@@ -1496,13 +1616,19 @@
       "path": "src/domain/entities/session.test.ts",
       "package": "package.json",
       "sourceHash": "88f6e1735e629a244d9858225f34462402fe9a04034d3810525364cb5be52186",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "A",
+      "rationale": "Runtime imports/calls/constructors show domain value assertions and local fixtures; no persistent storage, process launch or network operation identified in this driver. The tested domain module retains its separate risk tier.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "f9a967b58bc99958ad9f1a30426051e14a42ad7d",
+        "anchor": "Complete emitted-runtime import/call/constructor inventory; targeted dependency and override source inspection",
+        "runtimeHash": "2d03aa391149245e0998a468bf1501d6c72da71148d43dda606580e2cb86d67a",
+        "scope": "Risk proposal based on inspected runtime inventory and targeted source. Not a sound static-effect proof, full assertion-quality review or numeric applicability approval."
+      }
     },
     {
       "path": "src/domain/entities/session.ts",
@@ -1525,13 +1651,19 @@
       "path": "src/domain/entities/tool-use.test.ts",
       "package": "package.json",
       "sourceHash": "69b25518ef701437c59dfdecdc6fec7ac22062d61d13474e7cbde9085ca21db5",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "A",
+      "rationale": "Runtime imports/calls/constructors show domain value assertions and local fixtures; no persistent storage, process launch or network operation identified in this driver. The tested domain module retains its separate risk tier.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "f9a967b58bc99958ad9f1a30426051e14a42ad7d",
+        "anchor": "Complete emitted-runtime import/call/constructor inventory; targeted dependency and override source inspection",
+        "runtimeHash": "fd4e685e3870b9d8c9c0d7add710cc6363b15f70edb3014e269e8f42c17726a9",
+        "scope": "Risk proposal based on inspected runtime inventory and targeted source. Not a sound static-effect proof, full assertion-quality review or numeric applicability approval."
+      }
     },
     {
       "path": "src/domain/entities/tool-use.ts",
@@ -1554,13 +1686,19 @@
       "path": "src/domain/errors/error-codes.test.ts",
       "package": "package.json",
       "sourceHash": "babf3859c9bc180564f964f4ec94f975741b9a2950f20c186b8e28c31d349bf9",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "A",
+      "rationale": "Runtime imports/calls/constructors show domain value assertions and local fixtures; no persistent storage, process launch or network operation identified in this driver. The tested domain module retains its separate risk tier.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "f9a967b58bc99958ad9f1a30426051e14a42ad7d",
+        "anchor": "Complete emitted-runtime import/call/constructor inventory; targeted dependency and override source inspection",
+        "runtimeHash": "200d22f932e0e04b4486a40a4ece43dd498678b4b318425f2460acd6d5213121",
+        "scope": "Risk proposal based on inspected runtime inventory and targeted source. Not a sound static-effect proof, full assertion-quality review or numeric applicability approval."
+      }
     },
     {
       "path": "src/domain/errors/error-codes.ts",
@@ -1595,13 +1733,19 @@
       "path": "src/domain/errors/memory-error.test.ts",
       "package": "package.json",
       "sourceHash": "a9fa417acd4ac77552c9ce96e18ee4caa3e5f645bc507b2d32ca16cb7f5e796b",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "A",
+      "rationale": "Runtime imports/calls/constructors show domain value assertions and local fixtures; no persistent storage, process launch or network operation identified in this driver. The tested domain module retains its separate risk tier.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "f9a967b58bc99958ad9f1a30426051e14a42ad7d",
+        "anchor": "Complete emitted-runtime import/call/constructor inventory; targeted dependency and override source inspection",
+        "runtimeHash": "557a556b364b8ae4a3f02807836185a8b10d71154312755f9c018410570e872e",
+        "scope": "Risk proposal based on inspected runtime inventory and targeted source. Not a sound static-effect proof, full assertion-quality review or numeric applicability approval."
+      }
     },
     {
       "path": "src/domain/errors/memory-error.ts",
@@ -1624,13 +1768,19 @@
       "path": "src/domain/errors/unknown-error.test.ts",
       "package": "package.json",
       "sourceHash": "dc0c7c73cd35b1e4b746abb6bd5aac013279843d8e98aec42dcefdf81518035b",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "A",
+      "rationale": "Runtime imports/calls/constructors show domain value assertions and local fixtures; no persistent storage, process launch or network operation identified in this driver. The tested domain module retains its separate risk tier.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "f9a967b58bc99958ad9f1a30426051e14a42ad7d",
+        "anchor": "Complete emitted-runtime import/call/constructor inventory; targeted dependency and override source inspection",
+        "runtimeHash": "8117c801ff33c3e37a6a791a0a52e675e9c057a60bcc460c69b84323d2a926db",
+        "scope": "Risk proposal based on inspected runtime inventory and targeted source. Not a sound static-effect proof, full assertion-quality review or numeric applicability approval."
+      }
     },
     {
       "path": "src/domain/errors/unknown-error.ts",
@@ -1677,13 +1827,19 @@
       "path": "src/domain/ports/embedding.test.ts",
       "package": "package.json",
       "sourceHash": "04f79f45d058a49f99410d9461334046a6e465fa62bef69a0a63e309c1628443",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "A",
+      "rationale": "Exercises port contracts using local arrays, value objects and mock providers/repositories; inspected calls do not invoke an actual encoder, transport or database. This driver does not inherit the risk tier of an uninstantiated adapter.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "f9a967b58bc99958ad9f1a30426051e14a42ad7d",
+        "anchor": "Complete emitted-runtime import/call/constructor inventory; targeted dependency and override source inspection",
+        "runtimeHash": "f54eeed6713b76f1cdd3306943e73ef80c56b1dd926c278e6c00344661b5f11c",
+        "scope": "Risk proposal based on inspected runtime inventory and targeted source. Not a sound static-effect proof, full assertion-quality review or numeric applicability approval."
+      }
     },
     {
       "path": "src/domain/ports/embedding.ts",
@@ -1735,13 +1891,19 @@
       "path": "src/domain/ports/ports.test.ts",
       "package": "package.json",
       "sourceHash": "92b1bf9327d0ae60adaed51148732d21ce43762008201985aac89d8e0ca3c664",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "A",
+      "rationale": "Exercises port contracts using local arrays, value objects and mock providers/repositories; inspected calls do not invoke an actual encoder, transport or database. This driver does not inherit the risk tier of an uninstantiated adapter.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "f9a967b58bc99958ad9f1a30426051e14a42ad7d",
+        "anchor": "Complete emitted-runtime import/call/constructor inventory; targeted dependency and override source inspection",
+        "runtimeHash": "2883ca4afa1c3ee01e8f6dd0f250b7639df6685c7a7988ab7f8346153c5dfb3c",
+        "scope": "Risk proposal based on inspected runtime inventory and targeted source. Not a sound static-effect proof, full assertion-quality review or numeric applicability approval."
+      }
     },
     {
       "path": "src/domain/ports/redactor.ts",
@@ -1819,13 +1981,19 @@
       "path": "src/domain/services/content-extractor.test.ts",
       "package": "package.json",
       "sourceHash": "081fbbd47efe328a0e923bbe86e2d09a95cb11d38533d14da02da83b8976f5c6",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "A",
+      "rationale": "Runtime imports/calls/constructors show domain value assertions and local fixtures; no persistent storage, process launch or network operation identified in this driver. The tested domain module retains its separate risk tier.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "f9a967b58bc99958ad9f1a30426051e14a42ad7d",
+        "anchor": "Complete emitted-runtime import/call/constructor inventory; targeted dependency and override source inspection",
+        "runtimeHash": "9179d8fe1128361de2b1ac809cb17e6b2e28cf457a1ea91b5a1e7f0e2633a656",
+        "scope": "Risk proposal based on inspected runtime inventory and targeted source. Not a sound static-effect proof, full assertion-quality review or numeric applicability approval."
+      }
     },
     {
       "path": "src/domain/services/content-extractor.ts",
@@ -1860,13 +2028,19 @@
       "path": "src/domain/services/path-decoder.test.ts",
       "package": "package.json",
       "sourceHash": "ea8164e72d43b76dfb4bffee0cfeba8c23a0e36f857033173a9bb3bf197b67a4",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "A",
+      "rationale": "Exercises path string conversion; inspected resolveExistingPath cases pass an in-memory existence predicate or an empty path. No filesystem traversal is performed by the test driver.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "f9a967b58bc99958ad9f1a30426051e14a42ad7d",
+        "anchor": "Complete emitted-runtime import/call/constructor inventory; targeted dependency and override source inspection",
+        "runtimeHash": "b53a626cb8a7285365ec8a3f80d4f6370cff13837efe13e344f6043f7dbef496",
+        "scope": "Risk proposal based on inspected runtime inventory and targeted source. Not a sound static-effect proof, full assertion-quality review or numeric applicability approval."
+      }
     },
     {
       "path": "src/domain/services/path-decoder.ts",
@@ -1889,13 +2063,19 @@
       "path": "src/domain/services/query-parser.test.ts",
       "package": "package.json",
       "sourceHash": "ce5785af23ef27bb0119563adf481cac055266feb192e5fe8aa165a9e36e8627",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "A",
+      "rationale": "Runtime imports/calls/constructors show domain value assertions and local fixtures; no persistent storage, process launch or network operation identified in this driver. The tested domain module retains its separate risk tier.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "f9a967b58bc99958ad9f1a30426051e14a42ad7d",
+        "anchor": "Complete emitted-runtime import/call/constructor inventory; targeted dependency and override source inspection",
+        "runtimeHash": "ff2e6f08c83a558f372a620dc64195fea66bd0ee8b0d0a44f7853d86a6428e78",
+        "scope": "Risk proposal based on inspected runtime inventory and targeted source. Not a sound static-effect proof, full assertion-quality review or numeric applicability approval."
+      }
     },
     {
       "path": "src/domain/services/query-parser.ts",
@@ -1918,13 +2098,19 @@
       "path": "src/domain/value-objects/embedding-config.test.ts",
       "package": "package.json",
       "sourceHash": "44cbc6406f79205a91e41fdab0ea47bde7b98c4316899eea4c2b29bb0730695b",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "A",
+      "rationale": "Runtime imports/calls/constructors show domain value assertions and local fixtures; no persistent storage, process launch or network operation identified in this driver. The tested domain module retains its separate risk tier.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "f9a967b58bc99958ad9f1a30426051e14a42ad7d",
+        "anchor": "Complete emitted-runtime import/call/constructor inventory; targeted dependency and override source inspection",
+        "runtimeHash": "359f0b3bfe1e4f1097d0cf6ea8dbccff31f4195c2d7f04c00ec37fcb99d2172b",
+        "scope": "Risk proposal based on inspected runtime inventory and targeted source. Not a sound static-effect proof, full assertion-quality review or numeric applicability approval."
+      }
     },
     {
       "path": "src/domain/value-objects/embedding-config.ts",
@@ -1947,13 +2133,19 @@
       "path": "src/domain/value-objects/embedding-result.test.ts",
       "package": "package.json",
       "sourceHash": "6d2bce83b64bb5b7f6d25afb6f871776be8f5a8eee1a939aeb743bfad4a49f56",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "A",
+      "rationale": "Runtime imports/calls/constructors show domain value assertions and local fixtures; no persistent storage, process launch or network operation identified in this driver. The tested domain module retains its separate risk tier.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "f9a967b58bc99958ad9f1a30426051e14a42ad7d",
+        "anchor": "Complete emitted-runtime import/call/constructor inventory; targeted dependency and override source inspection",
+        "runtimeHash": "095ff0f3426403bf7b2e812535500e0b16b1610a52f13f1473d7066f9128c400",
+        "scope": "Risk proposal based on inspected runtime inventory and targeted source. Not a sound static-effect proof, full assertion-quality review or numeric applicability approval."
+      }
     },
     {
       "path": "src/domain/value-objects/embedding-result.ts",
@@ -1988,13 +2180,19 @@
       "path": "src/domain/value-objects/project-path.test.ts",
       "package": "package.json",
       "sourceHash": "e7bb6914d49fbe18a06e36617ea7a63f4ee7f917be6bd9964adba9193c57a500",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "A",
+      "rationale": "Runtime imports/calls/constructors show domain value assertions and local fixtures; no persistent storage, process launch or network operation identified in this driver. The tested domain module retains its separate risk tier.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "f9a967b58bc99958ad9f1a30426051e14a42ad7d",
+        "anchor": "Complete emitted-runtime import/call/constructor inventory; targeted dependency and override source inspection",
+        "runtimeHash": "354cb798154e27fcba5566eeb42fdf9ffd58f1af8486a07e797092e6a40d8e75",
+        "scope": "Risk proposal based on inspected runtime inventory and targeted source. Not a sound static-effect proof, full assertion-quality review or numeric applicability approval."
+      }
     },
     {
       "path": "src/domain/value-objects/project-path.ts",
@@ -2017,13 +2215,19 @@
       "path": "src/domain/value-objects/search-query.test.ts",
       "package": "package.json",
       "sourceHash": "43af84d14e3ed62efae8bd7af2e7879edded4dd70097d70696d9305a736d7d87",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "A",
+      "rationale": "Runtime imports/calls/constructors show domain value assertions and local fixtures; no persistent storage, process launch or network operation identified in this driver. The tested domain module retains its separate risk tier.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "f9a967b58bc99958ad9f1a30426051e14a42ad7d",
+        "anchor": "Complete emitted-runtime import/call/constructor inventory; targeted dependency and override source inspection",
+        "runtimeHash": "95d1ad8c512d8af7d9e9f39225b5537ceb6f977f1361528f9b167ac507f7bc79",
+        "scope": "Risk proposal based on inspected runtime inventory and targeted source. Not a sound static-effect proof, full assertion-quality review or numeric applicability approval."
+      }
     },
     {
       "path": "src/domain/value-objects/search-query.ts",
@@ -2046,13 +2250,19 @@
       "path": "src/domain/value-objects/search-result.test.ts",
       "package": "package.json",
       "sourceHash": "c0aed121f39faccc4c5d69843328f4227a0dff8e18e817cc27ee6c153d617cc7",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "A",
+      "rationale": "Runtime imports/calls/constructors show domain value assertions and local fixtures; no persistent storage, process launch or network operation identified in this driver. The tested domain module retains its separate risk tier.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "f9a967b58bc99958ad9f1a30426051e14a42ad7d",
+        "anchor": "Complete emitted-runtime import/call/constructor inventory; targeted dependency and override source inspection",
+        "runtimeHash": "4037b36d0a9cccb0d89a3afc8f4406e89e31e279f15c3cabae50359f1c124df6",
+        "scope": "Risk proposal based on inspected runtime inventory and targeted source. Not a sound static-effect proof, full assertion-quality review or numeric applicability approval."
+      }
     },
     {
       "path": "src/domain/value-objects/search-result.ts",
@@ -5844,13 +6054,19 @@
       "path": "src/presentation/cli/formatters/ai-formatter.test.ts",
       "package": "package.json",
       "sourceHash": "6c9e455e66978b354a4add41ed04f7987d33150b3af1a2a611453f1b818fe1e9",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "A",
+      "rationale": "Exercises ai-formatter output using local fixture values and string/JSON assertions. No publishing or persistent mutation identified in the driver; the production formatter retains its own tier.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "f9a967b58bc99958ad9f1a30426051e14a42ad7d",
+        "anchor": "Complete emitted-runtime import/call/constructor inventory; targeted dependency and override source inspection",
+        "runtimeHash": "423e2ba5006afb6abb56761c7272f9fdcd318ed995eab92f947150a98630cd21",
+        "scope": "Risk proposal based on inspected runtime inventory and targeted source. Not a sound static-effect proof, full assertion-quality review or numeric applicability approval."
+      }
     },
     {
       "path": "src/presentation/cli/formatters/ai-formatter.ts",
@@ -5873,13 +6089,19 @@
       "path": "src/presentation/cli/formatters/color.test.ts",
       "package": "package.json",
       "sourceHash": "fa9053b67f2765e112c38b6eeea6c666443fcefa1e39ab9389a416d214065ea6",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "A",
+      "rationale": "Exercises color output using local fixture values and string/JSON assertions. No publishing or persistent mutation identified in the driver; the production formatter retains its own tier. Test hooks temporarily set/delete process-local color environment values and restore their prior values.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "f9a967b58bc99958ad9f1a30426051e14a42ad7d",
+        "anchor": "Complete emitted-runtime import/call/constructor inventory; targeted dependency and override source inspection",
+        "runtimeHash": "2a651b4c95f75170d9e4b8ccbf0a557e995f6b129b0ff72b8b6d38fe9dde8b09",
+        "scope": "Risk proposal based on inspected runtime inventory and targeted source. Not a sound static-effect proof, full assertion-quality review or numeric applicability approval."
+      }
     },
     {
       "path": "src/presentation/cli/formatters/color.ts",
@@ -5902,13 +6124,19 @@
       "path": "src/presentation/cli/formatters/context-formatter.test.ts",
       "package": "package.json",
       "sourceHash": "67a9000681481be403fe3f1f8b11dd8751791fbe38468c49513f21e7afde92e8",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "A",
+      "rationale": "Exercises context-formatter output using local fixture values and string/JSON assertions. No publishing or persistent mutation identified in the driver; the production formatter retains its own tier.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "f9a967b58bc99958ad9f1a30426051e14a42ad7d",
+        "anchor": "Complete emitted-runtime import/call/constructor inventory; targeted dependency and override source inspection",
+        "runtimeHash": "ddb5a3cc88015724d996f2f04791fad087cef28e2e2d3503a9b08e1f404dcc70",
+        "scope": "Risk proposal based on inspected runtime inventory and targeted source. Not a sound static-effect proof, full assertion-quality review or numeric applicability approval."
+      }
     },
     {
       "path": "src/presentation/cli/formatters/context-formatter.ts",
@@ -5931,13 +6159,19 @@
       "path": "src/presentation/cli/formatters/dto-helpers.test.ts",
       "package": "package.json",
       "sourceHash": "f8db3c65e1ce26ea6e6f8bbc770163e74b9b539822f36fe6e11b759db05e5d31",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "A",
+      "rationale": "Exercises dto-helpers output using local fixture values and string/JSON assertions. No publishing or persistent mutation identified in the driver; the production formatter retains its own tier.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "f9a967b58bc99958ad9f1a30426051e14a42ad7d",
+        "anchor": "Complete emitted-runtime import/call/constructor inventory; targeted dependency and override source inspection",
+        "runtimeHash": "7f67938dd5bcb2d32ea0c5384f62371bd1ca7b11f086a8cb731afbd655f9b2e5",
+        "scope": "Risk proposal based on inspected runtime inventory and targeted source. Not a sound static-effect proof, full assertion-quality review or numeric applicability approval."
+      }
     },
     {
       "path": "src/presentation/cli/formatters/dto-helpers.ts",
@@ -5960,13 +6194,19 @@
       "path": "src/presentation/cli/formatters/envelope.test.ts",
       "package": "package.json",
       "sourceHash": "1e349295aad604c2b9d4a945407fac2de1a89bd0a41432d116d019e9efd79977",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "A",
+      "rationale": "Exercises envelope output using local fixture values and string/JSON assertions. No publishing or persistent mutation identified in the driver; the production formatter retains its own tier. Console output is captured in a local array and the console function is restored by test hooks.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "f9a967b58bc99958ad9f1a30426051e14a42ad7d",
+        "anchor": "Complete emitted-runtime import/call/constructor inventory; targeted dependency and override source inspection",
+        "runtimeHash": "75775806d03855a171bf3f1569cebe3961e83ed73bf921105b9f1c72d70a5d4a",
+        "scope": "Risk proposal based on inspected runtime inventory and targeted source. Not a sound static-effect proof, full assertion-quality review or numeric applicability approval."
+      }
     },
     {
       "path": "src/presentation/cli/formatters/envelope.ts",
@@ -5989,13 +6229,19 @@
       "path": "src/presentation/cli/formatters/error-formatter.test.ts",
       "package": "package.json",
       "sourceHash": "e9b8ba3beb55b563dcf8346a0c204bba3572c5f1ad0d8e1d2dab238e4917890e",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "A",
+      "rationale": "Exercises error-formatter output using local fixture values and string/JSON assertions. No publishing or persistent mutation identified in the driver; the production formatter retains its own tier.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "f9a967b58bc99958ad9f1a30426051e14a42ad7d",
+        "anchor": "Complete emitted-runtime import/call/constructor inventory; targeted dependency and override source inspection",
+        "runtimeHash": "077a7a8f62be53f914b50ddbb83857f6314fdd07486207b95d6f66434bb938ca",
+        "scope": "Risk proposal based on inspected runtime inventory and targeted source. Not a sound static-effect proof, full assertion-quality review or numeric applicability approval."
+      }
     },
     {
       "path": "src/presentation/cli/formatters/error-formatter.ts",
@@ -6018,13 +6264,19 @@
       "path": "src/presentation/cli/formatters/friction-dashboard.test.ts",
       "package": "package.json",
       "sourceHash": "94ebe9e06591788c2f9c7051b0e585d85c218e516c1541e7c1664ba5b8c092c1",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "A",
+      "rationale": "Exercises friction-dashboard output using local fixture values and string/JSON assertions. No publishing or persistent mutation identified in the driver; the production formatter retains its own tier. HTML generation reads the installed Chart.js bundle but does not execute a browser or publish the HTML.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "f9a967b58bc99958ad9f1a30426051e14a42ad7d",
+        "anchor": "Complete emitted-runtime import/call/constructor inventory; targeted dependency and override source inspection",
+        "runtimeHash": "f96430ec6d67b8cbca2cff8c771c464c0d395595f18c170a18ff5902a91eed00",
+        "scope": "Risk proposal based on inspected runtime inventory and targeted source. Not a sound static-effect proof, full assertion-quality review or numeric applicability approval."
+      }
     },
     {
       "path": "src/presentation/cli/formatters/friction-dashboard.ts",
@@ -6059,13 +6311,19 @@
       "path": "src/presentation/cli/formatters/list-formatter.test.ts",
       "package": "package.json",
       "sourceHash": "e48d143583b7c362b4367edabc6c86024e84765c0b81899855220a6062d89849",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "A",
+      "rationale": "Exercises list-formatter output using local fixture values and string/JSON assertions. No publishing or persistent mutation identified in the driver; the production formatter retains its own tier.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "f9a967b58bc99958ad9f1a30426051e14a42ad7d",
+        "anchor": "Complete emitted-runtime import/call/constructor inventory; targeted dependency and override source inspection",
+        "runtimeHash": "4ae0f2206a2516af306cbe3e68fce5f6fbe92ee51d18a2d7bf890fa372106683",
+        "scope": "Risk proposal based on inspected runtime inventory and targeted source. Not a sound static-effect proof, full assertion-quality review or numeric applicability approval."
+      }
     },
     {
       "path": "src/presentation/cli/formatters/list-formatter.ts",
@@ -6088,13 +6346,19 @@
       "path": "src/presentation/cli/formatters/output-formatter.test.ts",
       "package": "package.json",
       "sourceHash": "7a385cd3425d8d3019bbaf5fbdda842ddf45e224de66f5d4f8607406885e3fca",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "A",
+      "rationale": "Exercises output-formatter output using local fixture values and string/JSON assertions. No publishing or persistent mutation identified in the driver; the production formatter retains its own tier.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "f9a967b58bc99958ad9f1a30426051e14a42ad7d",
+        "anchor": "Complete emitted-runtime import/call/constructor inventory; targeted dependency and override source inspection",
+        "runtimeHash": "e43b147a1c1e20fcf9beed0f9a7928dbb94b8c31a19058a2c052ae180f67e8ad",
+        "scope": "Risk proposal based on inspected runtime inventory and targeted source. Not a sound static-effect proof, full assertion-quality review or numeric applicability approval."
+      }
     },
     {
       "path": "src/presentation/cli/formatters/output-formatter.ts",
@@ -6117,13 +6381,19 @@
       "path": "src/presentation/cli/formatters/related-formatter.test.ts",
       "package": "package.json",
       "sourceHash": "a8a66f6e2d37df77db5fb5c6900672bfeb2c67f1e34ebaddd8bb79edb449f5c9",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "A",
+      "rationale": "Exercises related-formatter output using local fixture values and string/JSON assertions. No publishing or persistent mutation identified in the driver; the production formatter retains its own tier.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "f9a967b58bc99958ad9f1a30426051e14a42ad7d",
+        "anchor": "Complete emitted-runtime import/call/constructor inventory; targeted dependency and override source inspection",
+        "runtimeHash": "fac519158491f21c33d6690f3d224cc23d951badbcc45541d5765a467c34d9df",
+        "scope": "Risk proposal based on inspected runtime inventory and targeted source. Not a sound static-effect proof, full assertion-quality review or numeric applicability approval."
+      }
     },
     {
       "path": "src/presentation/cli/formatters/related-formatter.ts",
@@ -6146,13 +6416,19 @@
       "path": "src/presentation/cli/formatters/show-formatter.test.ts",
       "package": "package.json",
       "sourceHash": "938f63484c8f6a72e5fd23c76b793bf47f5a30073e8314a8e4cf02bf6e9995ee",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "A",
+      "rationale": "Exercises show-formatter output using local fixture values and string/JSON assertions. No publishing or persistent mutation identified in the driver; the production formatter retains its own tier.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "f9a967b58bc99958ad9f1a30426051e14a42ad7d",
+        "anchor": "Complete emitted-runtime import/call/constructor inventory; targeted dependency and override source inspection",
+        "runtimeHash": "e76eeb25d7b5022d1f38a556683fb2818159952c851a68d022e1845fe7bf59b7",
+        "scope": "Risk proposal based on inspected runtime inventory and targeted source. Not a sound static-effect proof, full assertion-quality review or numeric applicability approval."
+      }
     },
     {
       "path": "src/presentation/cli/formatters/show-formatter.ts",
@@ -6175,13 +6451,19 @@
       "path": "src/presentation/cli/formatters/stats-formatter.test.ts",
       "package": "package.json",
       "sourceHash": "04d9ac40c871199808fb855f90967cb1c96334809fe3132558d9d5fda6b51f60",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "A",
+      "rationale": "Exercises stats-formatter output using local fixture values and string/JSON assertions. No publishing or persistent mutation identified in the driver; the production formatter retains its own tier.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "f9a967b58bc99958ad9f1a30426051e14a42ad7d",
+        "anchor": "Complete emitted-runtime import/call/constructor inventory; targeted dependency and override source inspection",
+        "runtimeHash": "5c7dd32caed141a99907453b285c7ddc764ef3f0639d72b0f182ad1bb42d537d",
+        "scope": "Risk proposal based on inspected runtime inventory and targeted source. Not a sound static-effect proof, full assertion-quality review or numeric applicability approval."
+      }
     },
     {
       "path": "src/presentation/cli/formatters/stats-formatter.ts",
@@ -6204,13 +6486,19 @@
       "path": "src/presentation/cli/formatters/text-width.test.ts",
       "package": "package.json",
       "sourceHash": "fe76fdc6719b3c78ea9bffe109ea0031dd0456620ecbfc8fed5f8e483a1723f2",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "A",
+      "rationale": "Exercises text-width output using local fixture values and string/JSON assertions. No publishing or persistent mutation identified in the driver; the production formatter retains its own tier.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "f9a967b58bc99958ad9f1a30426051e14a42ad7d",
+        "anchor": "Complete emitted-runtime import/call/constructor inventory; targeted dependency and override source inspection",
+        "runtimeHash": "74e1ff0608e41c8c47ace2897f10b704ce90af583814e966966deb19e56aaf52",
+        "scope": "Risk proposal based on inspected runtime inventory and targeted source. Not a sound static-effect proof, full assertion-quality review or numeric applicability approval."
+      }
     },
     {
       "path": "src/presentation/cli/formatters/text-width.ts",
@@ -6233,13 +6521,19 @@
       "path": "src/presentation/cli/formatters/timestamp-formatter.test.ts",
       "package": "package.json",
       "sourceHash": "b8f21f7394bbd0a7ef2330b2ef4a4dc8dac236433bc244eed62913063e6d0ffe",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "A",
+      "rationale": "Exercises timestamp-formatter output using local fixture values and string/JSON assertions. No publishing or persistent mutation identified in the driver; the production formatter retains its own tier.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "f9a967b58bc99958ad9f1a30426051e14a42ad7d",
+        "anchor": "Complete emitted-runtime import/call/constructor inventory; targeted dependency and override source inspection",
+        "runtimeHash": "9d4f825ec244a620d121146c00ec95fa81359ef4ba5725b2c7015e2162a235ad",
+        "scope": "Risk proposal based on inspected runtime inventory and targeted source. Not a sound static-effect proof, full assertion-quality review or numeric applicability approval."
+      }
     },
     {
       "path": "src/presentation/cli/formatters/timestamp-formatter.ts",
@@ -6710,13 +7004,19 @@
       "path": "tests/presentation/cli/formatters/friction-dashboard.test.ts",
       "package": "package.json",
       "sourceHash": "a917dcbde051725275823d44d2ad43c89a27c48d88aa40188405987f097adfa1",
-      "tier": null,
-      "rationale": "Unclassified: source-level behavior and risk inspection is still required by B04.",
+      "tier": "A",
+      "rationale": "Exercises friction-dashboard output using local fixture values and string/JSON assertions. No publishing or persistent mutation identified in the driver; the production formatter retains its own tier. HTML generation reads the installed Chart.js bundle but does not execute a browser or publish the HTML.",
       "applicability": {
         "mode": "measure",
         "reason": "Include in instrumentation. Any zero denominator or test-driver exception requires explicit per-file review; none is approved here."
       },
-      "decisionStatus": "unclassified"
+      "decisionStatus": "proposed - independent review pending",
+      "inspection": {
+        "sourceRevision": "f9a967b58bc99958ad9f1a30426051e14a42ad7d",
+        "anchor": "Complete emitted-runtime import/call/constructor inventory; targeted dependency and override source inspection",
+        "runtimeHash": "4d6fe09865ad76b2183eb7adac9f5f6304bf8f33526ac40329f952cbf58cac1c",
+        "scope": "Risk proposal based on inspected runtime inventory and targeted source. Not a sound static-effect proof, full assertion-quality review or numeric applicability approval."
+      }
     },
     {
       "path": "tests/smoke/cli-commands.test.ts",
