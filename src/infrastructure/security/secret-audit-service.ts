@@ -145,14 +145,15 @@ export class SecretAuditService {
     };
 
     if (options.db) {
-      remediation.database.updatedFields = this.scanDatabase(
-        options.db,
-        options.redactDatabase === true,
-        findings,
-      );
-      if (options.redactDatabase && remediation.database.updatedFields > 0) {
-        remediation.database.rebuiltFtsIndexes = rebuildFtsIndexes(options.db);
-      }
+      const db = options.db;
+      const scan = () => {
+        const updatedFields = this.scanDatabase(db, options.redactDatabase === true, findings);
+        const rebuiltFtsIndexes = options.redactDatabase && updatedFields > 0
+          ? rebuildFtsIndexes(db)
+          : [];
+        return { requested: options.redactDatabase === true, updatedFields, rebuiltFtsIndexes };
+      };
+      remediation.database = options.redactDatabase ? db.transaction(scan).immediate() : scan();
     }
 
     if (options.eventLogPaths) {
@@ -204,9 +205,10 @@ export class SecretAuditService {
         `${quoteIdentifier(target.idColumn)} AS ${rowIdAlias}`,
         ...columns.map((column) => quoteIdentifier(column)),
       ].join(", ");
-      const rows = db.prepare<Record<string, unknown>, []>(
+      using select = db.prepare<Record<string, unknown>, []>(
         `SELECT ${selectColumns} FROM ${quoteIdentifier(target.table)}`
-      ).all();
+      );
+      const rows = select.all();
 
       for (const row of rows) {
         const rowId = row[rowIdAlias] as string | number | undefined;
@@ -226,9 +228,12 @@ export class SecretAuditService {
           })));
 
           if (redactDatabase && redacted.value !== raw && rowId !== undefined) {
-            db.prepare(
-              `UPDATE ${quoteIdentifier(target.table)} SET ${quoteIdentifier(column)} = ? WHERE ${quoteIdentifier(target.idColumn)} = ?`
-            ).run(redacted.value, rowId);
+            using update = db.prepare(
+              `UPDATE ${quoteIdentifier(target.table)} SET ${quoteIdentifier(column)} = ? WHERE ${quoteIdentifier(target.idColumn)} = ? RETURNING 1 AS updated`
+            );
+            if (!update.get(redacted.value, rowId)) {
+              throw new Error(`Secret audit could not update selected field: ${target.table}.${column}`);
+            }
             updatedFields += 1;
           }
         }
@@ -400,14 +405,15 @@ function inferRedactionPolicy(findings: RedactionFinding[]): string {
 }
 
 function tableExists(db: Database, table: string): boolean {
-  const result = db.prepare<{ name: string }, [string]>(
+  using statement = db.prepare<{ name: string }, [string]>(
     "SELECT name FROM sqlite_master WHERE name = ?"
-  ).get(table);
-  return Boolean(result);
+  );
+  return Boolean(statement.get(table));
 }
 
 function columnExists(db: Database, table: string, column: string): boolean {
-  const rows = db.prepare<{ name: string }, []>(`PRAGMA table_info(${quoteIdentifier(table)})`).all();
+  using statement = db.prepare<{ name: string }, []>(`PRAGMA table_info(${quoteIdentifier(table)})`);
+  const rows = statement.all();
   return rows.some((row) => row.name === column);
 }
 

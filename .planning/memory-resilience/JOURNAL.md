@@ -1,5 +1,39 @@
 # Memory resilience execution journal
 
+## 2026-09-22 - Secret-audit database repair; mapped lifetime migration reconciled
+
+- Event checkpoint998d8a8 is signed, pushed and GitHub signature-valid. PR #1 is
+  open/draft at that revision with no hosted checks. It is not merge-ready.
+- Native RED reproduced unreleased statements, earlier redactions surviving a
+  late update or index-rebuild error, and ignored updates reported as successful.
+  Corrected one initial test fixture trigger name before implementation. The
+  four audit prepare sites now dispose; database redaction and FTS rebuilding
+  share one synchronous immediate transaction. Ignored updates reject. Native
+  tests also preserve enclosing caller work after a redactor error and prove retry.
+- Current source passes13tests /572assertions on Windows Bun1.4.1 and1.3.14.
+  Seven scoped faults detected; production/strict driver types and isolation
+  pass. Driver diagnostic100%; production lines96.61/statements96.92/functions100/
+  branches95.89 fails Tier S. Evidence: evidence/B11.74.5-secret.json.
+- Q101 is mandatory before B11.74.7/B10/R02. It owns complete secret surfaces,
+  derived-state consistency, persisted-value and redactor-fallback policy,
+  secret-free metadata/reports, event-log quarantine/replacement and cross-surface
+  failure/recovery. These remain open security requirements; this database
+  transaction is not filesystem or complete remediation acceptance.
+- Aggregate evidence/B11.74.5.json verifies125recorded source bindings across the
+  four schema/export/event/security slices.29current prepares are scoped and
+  no cached queries remain in those modules; four injected ownership violations
+  fail the AST check. B11.74.5 local migration is verified; B11.74.6 is now active
+  for factory ownership and caller reconciliation. Main factory is still unchanged.
+  Q004/Q019/Q100/Q101, Linux/runtime-floor/full quality/installed/review remain open.
+- Catalog462files/two packages and ledger238items reconcile. The download guard
+  passed; runtime and diagnostic directories were removed by their owned cleanup.
+  Observed freeC later fell to650,989,568bytes; cause is unattributed. No cleanup
+  of other projects/shared caches, canonical data mutation, model experiment or
+  production replication occurred. Keep the existing512MiB guard for further work.
+- Next: inspect connection initialization/error/close and all direct callers,
+  write the smallest native factory regression, then implement ownership under
+  B11.74.6. Full acceptance remains B11.74.7. R04 owns final consumer notices.
+
 ## 2026-09-22 - Event lifetime/reset/admission repair; complete replay defect owned
 
 - Continued from clean 1aed0a1. Direct fact upsert and supersedence statements now

@@ -3,7 +3,7 @@
   "workstream": "memory-resilience",
   "goal_status": "active",
   "starting_revision": "77d54e05be7fc24cede4a9a3e1fede6fa113ac8f",
-  "current_item": "B11.74.5",
+  "current_item": "B11.74.6",
   "status_semantics": {
     "pending": "Not started; authorization and dependencies must permit work.",
     "pending_rebaseline": "Historical candidate, not a confirmed current failure or a completed task.",
@@ -2492,7 +2492,8 @@
         "Q097",
         "Q098",
         "Q099",
-        "Q100"
+        "Q100",
+        "Q101"
       ],
       "scope": "all Q-* work items",
       "deliverable": "Close individually verified quality work items; fix discovered defects and meaningful boundaries, not artificial counter tests.",
@@ -2726,6 +2727,11 @@
           "document": "docs/plans/2026-09-22-projection-rebuild-integrity.md",
           "owner": "memory-nexus",
           "trigger": "Before integration/adoption: notify opted-in consumers of missing-source rejection and final accepted replay contract; retain lint/delivery evidence. Uninstalled draft requires no action now."
+        },
+        "consumerSecretAuditNotice": {
+          "document": "docs/plans/2026-09-22-secret-audit-database-integrity.md",
+          "owner": "memory-nexus",
+          "trigger": "Before integration/adoption: notify opted-in consumers of final atomic database redaction and failure/report contract; retain delivery evidence."
         }
       }
     },
@@ -5402,7 +5408,7 @@
       "id": "B11.74.5",
       "stage": "baseline",
       "title": "Dispose export, schema and event/security statements",
-      "status": "active",
+      "status": "verified",
       "depends_on": [
         "B11.74.2"
       ],
@@ -5416,7 +5422,9 @@
         ".planning/memory-resilience/B11.74-plan.md",
         ".planning/memory-resilience/evidence/B11.74.5-schema.json",
         ".planning/memory-resilience/evidence/B11.74.5-export.json",
-        ".planning/memory-resilience/evidence/B11.74.5-event.json"
+        ".planning/memory-resilience/evidence/B11.74.5-event.json",
+        ".planning/memory-resilience/evidence/B11.74.5-secret.json",
+        ".planning/memory-resilience/evidence/B11.74.5.json"
       ],
       "acceptance_record": ".planning/memory-resilience/evidence/B11.74.5.json",
       "retirement_trigger": "Before parent B11.74/B10/R02 acceptance; child local proof does not imply factory or whole-platform acceptance.",
@@ -5449,7 +5457,7 @@
           "files": 34,
           "faults": 9
         },
-        "restart": "Continue secret-audit-service statement ownership and native integrity assessment. Export old-runtime check recovered. Q004/Q019/Q100 and other quality gates remain required before baseline acceptance.",
+        "restart": "Local migration verified; B11.74.6 factory ownership is active. Full Q004/Q019/Q100/Q101 and B11.74.7 remain required.",
         "export": {
           "status": "local paired-runtime proof; full Q004 acceptance pending",
           "evidence": ".planning/memory-resilience/evidence/B11.74.5-export.json",
@@ -5470,6 +5478,15 @@
           "assertions": 454,
           "files": 3,
           "faults": 8
+        },
+        "secret": {
+          "status": "local paired-runtime database proof; full security pending Q101",
+          "evidence": ".planning/memory-resilience/evidence/B11.74.5-secret.json",
+          "prepares": 4,
+          "tests": 13,
+          "assertions": 572,
+          "files": 2,
+          "faults": 7
         }
       }
     },
@@ -5477,7 +5494,7 @@
       "id": "B11.74.6",
       "stage": "baseline",
       "title": "Activate factory ownership and reconcile native callers",
-      "status": "pending",
+      "status": "active",
       "depends_on": [
         "B11.74.2",
         "B11.74.3",
@@ -5494,7 +5511,12 @@
         ".planning/memory-resilience/B11.74-plan.md"
       ],
       "acceptance_record": ".planning/memory-resilience/evidence/B11.74.6.json",
-      "retirement_trigger": "Before parent B11.74/B10/R02 acceptance; child local proof does not imply factory or whole-platform acceptance."
+      "retirement_trigger": "Before parent B11.74/B10/R02 acceptance; child local proof does not imply factory or whole-platform acceptance.",
+      "progress": {
+        "restart": "Inspect connection initialization/error cleanup and direct native callers; reproduce smallest factory ownership failure before implementation.",
+        "factory": "unchanged",
+        "prerequisite": ".planning/memory-resilience/evidence/B11.74.5.json"
+      }
     },
     {
       "id": "B11.74.7",
@@ -5522,7 +5544,8 @@
         "Q094",
         "Q019",
         "Q004",
-        "Q100"
+        "Q100",
+        "Q101"
       ],
       "scope": "All B11.74 affected production/test files and native runtime targets",
       "deliverable": "Complete per-file/package/tier/changed-line proof and independent review; dependency barriers can resume",
@@ -5662,6 +5685,28 @@
       "acceptance_record": ".planning/memory-resilience/evidence/Q100.json",
       "observed_gap": "Late fact insert failure leaves previously retained facts deleted. Current native probe1pass/1fail. Production diagnostic branches91.89%.",
       "retirement_trigger": "Before B11.74.7/B10/R02 acceptance. Do not wrap async replay in a synchronous transaction or leave an unenforced transaction open across unrelated awaits."
+    },
+    {
+      "id": "Q101",
+      "stage": "baseline-quality",
+      "title": "Complete secret-audit remediation safety and Tier S quality",
+      "status": "pending",
+      "depends_on": [
+        "B11.74.5"
+      ],
+      "scope": "SecretAuditService, quarantine/report persistence, derived data and installed audit-secrets callers",
+      "deliverable": "Complete sensitive-surface inventory; safe quarantine/replacement and truthful partial outcomes; derived-state consistency; redactor error and metadata disclosure policy; final security acceptance.",
+      "verification": "Native filesystem/database failure and retry, concurrent append, collision, persisted-value/adversarial secret-free report tests; installed public CLI and four per-file metrics>=95%, Tier S branches100%, decision checks and independent review.",
+      "risk": "S",
+      "authorization": "authorized",
+      "owner": "memory-nexus",
+      "evidence": [
+        ".planning/memory-resilience/evidence/B11.74.5-secret.json",
+        "docs/plans/2026-09-22-secret-audit-database-integrity.md"
+      ],
+      "acceptance_record": ".planning/memory-resilience/evidence/Q101.json",
+      "observed_gap": "Production branches95.89%. Database partial failures and ignored writes repaired; filesystem replacement, complete surfaces/derived data, redactor fallback and metadata disclosure require security proof.",
+      "retirement_trigger": "Before B11.74.7/B10/R02 acceptance."
     }
   ],
   "decisions": {

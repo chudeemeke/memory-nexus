@@ -10659,7 +10659,7 @@
     {
       "path": "src/infrastructure/security/secret-audit-service.ts",
       "package": "package.json",
-      "sourceHash": "e7728a6575454c68a98ff290c7d68f632a2c0e6081cfa5729fb798f183f3cf8c",
+      "sourceHash": "6cb6ab8fb57dda21b71cd4330143833ae823deea18c01772390ecb96d4041fb1",
       "tier": "S",
       "rationale": "Scans sensitive records and can redact database fields, quarantine logs and write audit reports.",
       "applicability": {
@@ -10668,30 +10668,30 @@
       },
       "decisionStatus": "proposed - independent review pending",
       "inspection": {
-        "sourceRevision": "39c895b13e768bd607070efbc3496d47a821b257",
-        "anchor": "database remediation UPDATE / report write",
-        "scope": "positive critical boundary establishes highest tier; not full correctness acceptance"
+        "sourceRevision": "998d8a8 + current source hash",
+        "anchor": "native audit database lifetime/rollback/acknowledgement",
+        "scope": "Database slice only; full security Q101 remains open."
       },
       "metricApplicability": {
-        "status": "proposed - independent review pending",
-        "evidence": ".planning/memory-resilience/evidence/B04-applicability-probe.json",
-        "sourceHash": "e7728a6575454c68a98ff290c7d68f632a2c0e6081cfa5729fb798f183f3cf8c",
-        "disposition": "Measure every positive denominator; individually review zero branch/function denominators against runtime syntax. Observed counts do not prove instrumentation completeness. Optional-chain syntax is present; synthetic evidence shows current instrumentation omits its decision counters. B05.1 owns source-mapped branch proof before numeric acceptance.",
+        "status": "diagnostic - B05/Q101/B11.74.7 and independent review pending",
+        "evidence": ".planning/memory-resilience/evidence/B11.74.5-secret.json",
+        "sourceHash": "6cb6ab8fb57dda21b71cd4330143833ae823deea18c01772390ecb96d4041fb1",
+        "disposition": "Production branches95.89% fails Tier S; driver100%. Scope is database behavior, not complete secret remediation.",
         "metrics": {
-          "statements": {
-            "observedCounterTotal": 123,
-            "proposal": "measure - completeness unverified"
-          },
-          "branches": {
-            "observedCounterTotal": 69,
+          "lines": {
+            "observedCounterTotal": 118,
             "proposal": "measure - completeness unverified"
           },
           "functions": {
-            "observedCounterTotal": 22,
+            "observedCounterTotal": 23,
             "proposal": "measure - completeness unverified"
           },
-          "lines": {
-            "observedCounterTotal": 111,
+          "statements": {
+            "observedCounterTotal": 130,
+            "proposal": "measure - completeness unverified"
+          },
+          "branches": {
+            "observedCounterTotal": 73,
             "proposal": "measure - completeness unverified"
           }
         }
@@ -18116,6 +18116,47 @@
           },
           "branches": {
             "observedCounterTotal": 4,
+            "proposal": "measure - completeness unverified"
+          }
+        }
+      }
+    },
+    {
+      "path": "tests/infrastructure/database/secret-audit-lifecycle.test.ts",
+      "package": "package.json",
+      "tier": "S",
+      "rationale": "Native security and destructive redaction regression driver.",
+      "applicability": {
+        "mode": "measure",
+        "reason": "Executable security driver; no exclusion approved."
+      },
+      "decisionStatus": "proposed - independent review pending",
+      "sourceHash": "87424313d4ae260d66e4348e8337f98e174ec5f9b7ebece6e48f1d794ed35d1a",
+      "inspection": {
+        "sourceRevision": "998d8a8 + current source hash",
+        "anchor": "native audit database lifetime/rollback/acknowledgement",
+        "scope": "Database slice only; full security Q101 remains open."
+      },
+      "metricApplicability": {
+        "status": "diagnostic - B05/Q101/B11.74.7 and independent review pending",
+        "evidence": ".planning/memory-resilience/evidence/B11.74.5-secret.json",
+        "sourceHash": "87424313d4ae260d66e4348e8337f98e174ec5f9b7ebece6e48f1d794ed35d1a",
+        "disposition": "Production branches95.89% fails Tier S; driver100%. Scope is database behavior, not complete secret remediation.",
+        "metrics": {
+          "lines": {
+            "observedCounterTotal": 82,
+            "proposal": "measure - completeness unverified"
+          },
+          "functions": {
+            "observedCounterTotal": 21,
+            "proposal": "measure - completeness unverified"
+          },
+          "statements": {
+            "observedCounterTotal": 115,
+            "proposal": "measure - completeness unverified"
+          },
+          "branches": {
+            "observedCounterTotal": 2,
             "proposal": "measure - completeness unverified"
           }
         }
