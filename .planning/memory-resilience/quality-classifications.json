@@ -1354,7 +1354,7 @@
     {
       "path": "src/application/services/export-service.ts",
       "package": "package.json",
-      "sourceHash": "37c2c8dfe5b103b09466b78cb64289cefa968e01201f319931c9bcd04513d772",
+      "sourceHash": "3258d8dfe5121e8e937b0ff59a82fe41fff1e02f0ca392757664e627821c8274",
       "tier": "S",
       "rationale": "Controls sensitive-data redaction and validates import data before database mutation; optional no-op redaction remains a boundary to verify, not a safety claim.",
       "applicability": {
@@ -1363,30 +1363,30 @@
       },
       "decisionStatus": "proposed - independent review pending",
       "inspection": {
-        "sourceRevision": "aa2c449cd2d72828e81a7ea691a12ca2b400323c",
-        "anchor": "export redactor selection / validateExportFile",
-        "scope": "positive critical boundary establishes highest tier; not full correctness acceptance"
+        "sourceRevision": "c52dc4f + current source hash",
+        "anchor": "native replacement failure and statement ownership",
+        "scope": "Current-runtime native regression/diagnostic/fault proof; compatibility and full quality remain pending."
       },
       "metricApplicability": {
-        "status": "proposed - independent review pending",
-        "evidence": ".planning/memory-resilience/evidence/B04-applicability-probe.json",
-        "sourceHash": "37c2c8dfe5b103b09466b78cb64289cefa968e01201f319931c9bcd04513d772",
-        "disposition": "Measure every positive denominator; individually review zero branch/function denominators against runtime syntax. Observed counts do not prove instrumentation completeness. Optional-chain syntax is present; synthetic evidence shows current instrumentation omits its decision counters. B05.1 owns source-mapped branch proof before numeric acceptance.",
+        "status": "diagnostic - B05/Q004/B11.74.7 and independent review pending",
+        "evidence": ".planning/memory-resilience/evidence/B11.74.5-export.json",
+        "sourceHash": "3258d8dfe5121e8e937b0ff59a82fe41fff1e02f0ca392757664e627821c8274",
+        "disposition": "Scoped100% does not establish complete backup/privacy/SQL/measurement/installed acceptance.",
         "metrics": {
-          "statements": {
-            "observedCounterTotal": 100,
-            "proposal": "measure - completeness unverified"
-          },
-          "branches": {
-            "observedCounterTotal": 44,
+          "lines": {
+            "observedCounterTotal": 109,
             "proposal": "measure - completeness unverified"
           },
           "functions": {
-            "observedCounterTotal": 16,
+            "observedCounterTotal": 15,
             "proposal": "measure - completeness unverified"
           },
-          "lines": {
-            "observedCounterTotal": 100,
+          "statements": {
+            "observedCounterTotal": 111,
+            "proposal": "measure - completeness unverified"
+          },
+          "branches": {
+            "observedCounterTotal": 54,
             "proposal": "measure - completeness unverified"
           }
         }
@@ -17500,6 +17500,47 @@
         "sourceHash": "c9d9edafc637d537d53fc14c4edf0d154f303c396372638323b96bd478657d30",
         "diagnostic": ".planning/memory-resilience/evidence/B11.1-helper-metrics.json",
         "reason": "Current isolated direct-Istanbul diagnostic reports all four metrics at 100%; complete decision proof, instrumenter acceptance and independent review remain required."
+      }
+    },
+    {
+      "path": "tests/infrastructure/database/export-lifecycle.test.ts",
+      "package": "package.json",
+      "tier": "S",
+      "rationale": "Native driver verifies destructive import replacement, rollback, counts, stale-vector invalidation and statement ownership.",
+      "applicability": {
+        "mode": "measure",
+        "reason": "Executable integrity driver; no exclusion approved."
+      },
+      "decisionStatus": "proposed - independent review pending",
+      "sourceHash": "7abf42a9b4b82c01a464305420dda32aebcdd7285aaa5d907d6292c752fecc32",
+      "inspection": {
+        "sourceRevision": "c52dc4f + current source hash",
+        "anchor": "native replacement failure and statement ownership",
+        "scope": "Current-runtime native regression/diagnostic/fault proof; compatibility and full quality remain pending."
+      },
+      "metricApplicability": {
+        "status": "diagnostic - B05/Q004/B11.74.7 and independent review pending",
+        "evidence": ".planning/memory-resilience/evidence/B11.74.5-export.json",
+        "sourceHash": "7abf42a9b4b82c01a464305420dda32aebcdd7285aaa5d907d6292c752fecc32",
+        "disposition": "Scoped100% does not establish complete backup/privacy/SQL/measurement/installed acceptance.",
+        "metrics": {
+          "lines": {
+            "observedCounterTotal": 107,
+            "proposal": "measure - completeness unverified"
+          },
+          "functions": {
+            "observedCounterTotal": 28,
+            "proposal": "measure - completeness unverified"
+          },
+          "statements": {
+            "observedCounterTotal": 167,
+            "proposal": "measure - completeness unverified"
+          },
+          "branches": {
+            "observedCounterTotal": 7,
+            "proposal": "measure - completeness unverified"
+          }
+        }
       }
     },
     {

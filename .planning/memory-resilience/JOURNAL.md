@@ -1,5 +1,45 @@
 # Memory resilience execution journal
 
+## 2026-09-21 - Export/import replacement repaired; old-runtime check disk-blocked
+
+- Continued from clean c52dc4f. Native RED reproduced retained import statements,
+  replacement clearing outside the transaction, false input-length counts, ignored
+  invalid constraints and stale vectors surviving replacement. Clearing and inserts
+  now share one immediate transaction, preserve caller foreign-key policy and
+  restore original records/FTS/vectors on failure. Duplicate conflicts still skip;
+  invalid constraints reject. Six public counts use actual row-returning writes.
+- Replacement invalidates old vectors, embedding metadata and skip decisions,
+  including when caller foreign keys are off. Successful replacement requires
+  re-embedding. Nine import prepares, ten former cached export/existence queries
+  and one optional-table presence query are scoped (twenty current prepares).
+  No-op redaction's unused JSON method was removed through a narrower internal
+  text-only type. Native COUNT SQL always yields a non-null row; its dead fallback
+  was removed. Full privacy/backup contracts remain Q004 work.
+- Current Windows Bun 1.4.1 group passes 35 tests / 747 assertions, including
+  actual SQLite/FTS/sqlite-vec, rollback, retry, clearing/preparation/redactor/output
+  failures, duplicate/ignored rows and round trips. Twenty-eight targeted faults
+  detected. Both changed executable files have diagnostic 100% four metrics;
+  production and strict driver types and isolation pass. Evidence retained in
+  evidence/B11.74.5-export.json, including three RED stages and raw diagnostics.
+- Pinned 1.3.14 execution is pending: its 512 MiB disk guard rejected before
+  download. Observed free space fell from about 1.14 GiB to 268 MiB, unattributed.
+  Project-only inventory found one registered checkout; old private JSON/text
+  evidence totals about 21 MB, with no worthwhile safe regenerable candidate.
+  Dependencies, recoverable work, backups and the policy-blocked coverage copy
+  were retained. No cleanup or guard weakening occurred.
+- Catalog 460 files / two packages and ledger 236 items reconcile. B11.74.5 stays
+  active. Restart: check free disk and run .git/b11-export-old-runtime.ts when the
+  guard passes; continue event-log/secret-audit work while disk remains constrained.
+  Governance reset/whole-replay integrity still needs native assessment. No factory
+  activation or whole-platform compatibility acceptance is claimed.
+- Q004 now explicitly owns complete format/surface/governance/reference/conflict,
+  validation/single-snapshot input/atomic output, redaction and installed consumer
+  proof before B11.74.7/B10/R02. Existing fixed-name export test storage was contained
+  by an owned outer process directory; its independent fixture/quality task remains.
+  Consumer count/re-embedding changes are documented in the September 21 import
+  integrity notice; R04 owns notifications before integration/adoption. No installed
+  or canonical data, model experiment or replication was touched.
+
 ## 2026-09-21 - Schema lifetime and summary-index upgrade verified locally
 
 - Continued from clean 32a25fb. Native RED reproduced retained schema statements,
