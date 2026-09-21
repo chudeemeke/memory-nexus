@@ -6941,7 +6941,7 @@
     {
       "path": "src/infrastructure/database/repositories/friction-repository.ts",
       "package": "package.json",
-      "sourceHash": "7c06afe904de9089864e06f442a432a0d256d06a1269967034217306ae8e8b47",
+      "sourceHash": "121d007cbc53cb02dc80847d749f2c566ec0574b2daa076f7d3337cc2024b7fb",
       "tier": "S",
       "rationale": "Inspected SQLite INSERT/upsert statement persists friction_log records. This establishes the data-integrity tier; transaction, conflict and deletion correctness remain separate verification obligations.",
       "applicability": {
@@ -6950,30 +6950,30 @@
       },
       "decisionStatus": "proposed - independent review pending",
       "inspection": {
-        "sourceRevision": "39c895b13e768bd607070efbc3496d47a821b257",
-        "anchor": "prepared INSERT into friction_log",
-        "scope": "positive critical boundary establishes highest tier; not full correctness acceptance"
+        "sourceRevision": "fd19c2b + current source hash",
+        "anchor": "friction lifecycle and native week-label correction",
+        "scope": "Scoped native behavior/metrics/targeted faults; final tier/decision/review acceptance remains pending."
       },
       "metricApplicability": {
-        "status": "proposed - independent review pending",
-        "evidence": ".planning/memory-resilience/evidence/B04-applicability-probe.json",
-        "sourceHash": "7c06afe904de9089864e06f442a432a0d256d06a1269967034217306ae8e8b47",
-        "disposition": "Measure every positive denominator; individually review zero branch/function denominators against runtime syntax. Observed counts do not prove instrumentation completeness. Optional-chain syntax is present; synthetic evidence shows current instrumentation omits its decision counters. B05.1 owns source-mapped branch proof before numeric acceptance.",
+        "status": "diagnostic - B05/B11.74.7 and independent review pending",
+        "evidence": ".planning/memory-resilience/evidence/B11.74.3-friction.json",
+        "sourceHash": "121d007cbc53cb02dc80847d749f2c566ec0574b2daa076f7d3337cc2024b7fb",
+        "disposition": "Measure every denominator; scoped100% does not establish full counter or decision completeness.",
         "metrics": {
-          "statements": {
-            "observedCounterTotal": 121,
-            "proposal": "measure - completeness unverified"
-          },
-          "branches": {
-            "observedCounterTotal": 73,
+          "lines": {
+            "observedCounterTotal": 132,
             "proposal": "measure - completeness unverified"
           },
           "functions": {
             "observedCounterTotal": 23,
             "proposal": "measure - completeness unverified"
           },
-          "lines": {
-            "observedCounterTotal": 115,
+          "statements": {
+            "observedCounterTotal": 138,
+            "proposal": "measure - completeness unverified"
+          },
+          "branches": {
+            "observedCounterTotal": 73,
             "proposal": "measure - completeness unverified"
           }
         }
@@ -17539,6 +17539,47 @@
           },
           "branches": {
             "observedCounterTotal": 1,
+            "proposal": "measure - completeness unverified"
+          }
+        }
+      }
+    },
+    {
+      "path": "tests/infrastructure/database/repositories/friction-lifecycle.test.ts",
+      "package": "package.json",
+      "tier": "S",
+      "rationale": "Synthetic SQLite driver verifies friction write/read/delete integrity, statement disposal and native calendar bucket correctness.",
+      "applicability": {
+        "mode": "measure",
+        "reason": "Executable data-integrity driver; no exclusion approved."
+      },
+      "decisionStatus": "proposed - independent review pending",
+      "sourceHash": "291bb95aae9f805b1545caa18388a211df2a057dd437332f259867c005565321",
+      "inspection": {
+        "sourceRevision": "fd19c2b + current source hash",
+        "anchor": "friction lifecycle and native week-label correction",
+        "scope": "Scoped native behavior/metrics/targeted faults; final tier/decision/review acceptance remains pending."
+      },
+      "metricApplicability": {
+        "status": "diagnostic - B05/B11.74.7 and independent review pending",
+        "evidence": ".planning/memory-resilience/evidence/B11.74.3-friction.json",
+        "sourceHash": "291bb95aae9f805b1545caa18388a211df2a057dd437332f259867c005565321",
+        "disposition": "Measure every denominator; scoped100% does not establish full counter or decision completeness.",
+        "metrics": {
+          "lines": {
+            "observedCounterTotal": 96,
+            "proposal": "measure - completeness unverified"
+          },
+          "functions": {
+            "observedCounterTotal": 21,
+            "proposal": "measure - completeness unverified"
+          },
+          "statements": {
+            "observedCounterTotal": 151,
+            "proposal": "measure - completeness unverified"
+          },
+          "branches": {
+            "observedCounterTotal": 2,
             "proposal": "measure - completeness unverified"
           }
         }

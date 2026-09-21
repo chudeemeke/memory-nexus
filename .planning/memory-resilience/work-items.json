@@ -5113,12 +5113,13 @@
         ".planning/memory-resilience/evidence/B11.74.3-records.json",
         ".planning/memory-resilience/evidence/B11.74.3-embedding.json",
         ".planning/memory-resilience/evidence/B11.74.3-knowledge.json",
-        ".planning/memory-resilience/evidence/B11.74.3-memory-state.json"
+        ".planning/memory-resilience/evidence/B11.74.3-memory-state.json",
+        ".planning/memory-resilience/evidence/B11.74.3-friction.json"
       ],
       "acceptance_record": ".planning/memory-resilience/evidence/B11.74.3.json",
       "retirement_trigger": "Before parent B11.74/B10/R02 acceptance; child local proof does not imply factory or whole-platform acceptance.",
       "progress": {
-        "current": "Eight of seventeen repository modules migrated:57prepares scoped. Memory-state group44tests/748assertions plus replay1test/4assertions on both Windows runtimes;17faults detected. Governance absent-save and audit/projection partial-state defects repaired.",
+        "current": "Nine of seventeen repository modules migrated:76prepares scoped and one original cached query eliminated. Friction group34tests/520assertions on both Windows runtimes;21faults detected. UTC week labels match native SQLite across seven boundary instants.",
         "repositoryInventory": [
           {
             "path": "src/infrastructure/database/repositories/backfill-state-repository.ts",
@@ -5181,8 +5182,9 @@
             "nativePrepareSites": 19,
             "nativeQuerySites": 1,
             "retainedFields": 0,
-            "status": "pending",
-            "sourceHash": "7c06afe904de9089864e06f442a432a0d256d06a1269967034217306ae8e8b47"
+            "status": "local disposal proof; final quality pending",
+            "sourceHash": "121d007cbc53cb02dc80847d749f2c566ec0574b2daa076f7d3337cc2024b7fb",
+            "queryDisposition": "Original nativeQuerySites count is historical: SELECT changes() eliminated in this revision; native .query calls now zero and write-result changes used directly."
           },
           {
             "path": "src/infrastructure/database/repositories/graph-repository.ts",
@@ -5257,8 +5259,8 @@
             "sourceHash": "8724e4ef65746f2b079f8bf62841357dc403eafeafffcc8a6a1764d2d02f9db3"
           }
         ],
-        "restart": "Next friction repository lifetimes, then graph/persona and retained-owner repositories/construction. Main factory stays unchanged until .3-.5 complete.",
-        "remaining": "B11.74.7/B05/Q020/Q021/Q023/Q026/Q027 own metric/driver/platform/persistence/review acceptance; B11.74.5 owns direct event-log reset integrity. Hook extraction retained-owner construction still needs disposition."
+        "restart": "Next graph/persona repository lifetimes, then retained-owner repositories and caller construction. Main factory stays unchanged until .3-.5 complete.",
+        "remaining": "B11.74.7/B05 and existing Q tasks retain metric/driver/platform/persistence/review acceptance; B11.74.5 owns event-log direct reset integrity. Canonical friction quarantine remains separate."
       }
     },
     {
@@ -5358,7 +5360,16 @@
         ".planning/memory-resilience/B11.74-plan.md"
       ],
       "acceptance_record": ".planning/memory-resilience/evidence/B11.74.7.json",
-      "retirement_trigger": "Before parent B11.74/B10/R02 acceptance; child local proof does not imply factory or whole-platform acceptance."
+      "retirement_trigger": "Before parent B11.74/B10/R02 acceptance; child local proof does not imply factory or whole-platform acceptance.",
+      "progress": {
+        "frictionAcceptance": {
+          "sourceHash": "121d007cbc53cb02dc80847d749f2c566ec0574b2daa076f7d3337cc2024b7fb",
+          "evidence": ".planning/memory-resilience/evidence/B11.74.3-friction.json",
+          "remaining": "Full-file decision review includes ignored-write/concurrent-writer acknowledgement semantics, trend argument/timezone policy and B05 optional-chain counter completeness. Scoped100% is not final acceptance.",
+          "owner": "memory-nexus",
+          "trigger": "Before B11.74.7/B10/R02 acceptance."
+        }
+      }
     }
   ],
   "decisions": {

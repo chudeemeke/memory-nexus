@@ -2,16 +2,15 @@
 
 Status: in progress on `fix/baseline-trust-repair`; not release acceptance. The recovered v6 requirements and roadmap remain intact, with Phase 45 unstarted. This report supersedes September 12 findings only where new evidence is listed below.
 
-Latest checkpoint (September 21): B11.74.3 has locally migrated eight of seventeen
-repository modules, covering 57 prepares. Memory-file/governance passes 44 tests /
-748 assertions plus one event-log replay case on Windows Bun 1.3.14 and 1.4.1;
-seventeen targeted faults are detected. Governance save rejects an absent row, and
-event application/clear now preserve audit-projection atomicity on failure.
-Governance branches 96.2% remain a Q026 Tier S failure; prior Q020/Q021/Q023/Q027
-quality/persistence obligations remain. Event-log's direct reset is separately
-owned by B11.74.5. Factory activation, full quality/platform/review acceptance and
-the post-baseline model experiment remain pending. Current authority is the ledger
-and `evidence/B11.74.3-memory-state.json`, not earlier counts in this report.
+Latest checkpoint (September 21): B11.74.3 has locally migrated nine of seventeen
+repository modules, covering 76 prepares and eliminating one cached query. Friction
+passes 34 tests / 520 assertions on Windows Bun 1.3.14 and 1.4.1, with 21 targeted
+faults detected. Its week labels now match SQLite's UTC buckets, fixing hidden
+current counts. Diagnostic metrics are 100%; full B05/decision/review acceptance
+remains open, alongside prior Q020/Q021/Q023/Q026/Q027 obligations. Canonical
+friction quarantine remains separate. Factory activation, full platform/quality
+acceptance and the post-baseline model experiment remain pending. Current authority
+is the ledger and `evidence/B11.74.3-friction.json`, not earlier counts in this report.
 
 Delivery: [draft PR #1](https://github.com/chudeemeke/memory-nexus/pull/1) preserves the candidate and recovered documents. The six opening commits have GitHub-verified signatures. The opening hosted query reports no checks; this is pending CI, not green CI. Local logs and the compressed runtime/log archives remain outside Git.
 

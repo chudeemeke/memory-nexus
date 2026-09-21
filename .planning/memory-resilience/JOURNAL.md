@@ -1,5 +1,32 @@
 # Memory resilience execution journal
 
+## 2026-09-21 - Friction statement disposal and weekly-count correction
+
+- Previous turn progressed at fd19c2b; this turn began clean. All nineteen friction
+  prepares now dispose across CRUD, statistics, trends, pattern loops, review and
+  delete. Deletion returns the native write changes count, eliminating its extra
+  cached SELECT changes query. Exact counts, no-op and rejected deletes verified.
+- Real SQLite comparison reproduced incorrect weekly labels: September 21, 2026
+  generated W39 while SQL grouped records under W38, yielding zero current counts.
+  Labels now use UTC calendar years and SQLite's Monday/week-zero convention.
+  Seven deterministic instants cover Sunday/Monday, first-Monday/week-zero and
+  cross-year buckets with current/prior-week counts checked against native SQL.
+- Synthetic in-memory tests cover repeated operations, tagged roundtrip, missing
+  rows, rejected writes, invalid stored JSON and later stats preparation failure.
+  No canonical friction rows were accessed or mutated; quarantine remains separate.
+- Final group: 34 tests / 520 assertions on Windows Bun 1.3.14 and 1.4.1. Twenty-one
+  targeted faults detected (19 disposal, week offset, deletion count). Source/script
+  and strict driver types plus isolation pass. Pinned runtime/owned diagnostics
+  removed. Evidence: evidence/B11.74.3-friction.json.
+- Both changed files have diagnostic 100% metrics. B05 optional-chain/counter
+  completeness and full-file decision/independent review remain required. .7
+  explicitly retains friction ignored-write/concurrency acknowledgement and trend
+  argument/timezone-policy review; source presence/coverage is not final acceptance.
+- Nine of seventeen modules / 76 prepares locally migrated; one historical cached
+  query eliminated. Eight modules remain. Catalog 454 files / two packages and
+  ledger 232 reconcile. Next: graph/persona, then retained-owner repositories and
+  caller construction. Main factory and the post-baseline experiment remain gated.
+
 ## 2026-09-21 - Memory-file disposal and governance transaction integrity
 
 - Previous turn progressed at 9763f74; this turn began clean. Migrated all thirteen
