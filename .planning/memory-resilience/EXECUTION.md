@@ -213,10 +213,10 @@ the applicable delivery gate. Local plan checks found and corrected negative-spi
 deadlock and an unnecessary local-feature dependency in the replication branch.
 
 The restart source is `work-items.json.current_item` and the newest JOURNAL entry,
-not the original B01 starting command. B11.74.3 repository lifetimes are locally
-verified at this checkpoint;
-B11.74.4 is active for search/context service statements. Factory activation
-follows service and event-log/schema migration; full acceptance
+not the original B01 starting command. B11.74.3 repository and B11.74.4 service
+lifetimes are locally verified. B11.74.5 is active for export/schema/event/security
+statements and the recorded native integrity findings. Factory activation
+follows this migration; full acceptance
 remains B11.74.7. The source map, rejected experiment and exact next steps are in
 B11.74-plan.md.
 Baseline acceptance, including the native lifecycle repair, still precedes the

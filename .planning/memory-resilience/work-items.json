@@ -3,7 +3,7 @@
   "workstream": "memory-resilience",
   "goal_status": "active",
   "starting_revision": "77d54e05be7fc24cede4a9a3e1fede6fa113ac8f",
-  "current_item": "B11.74.4",
+  "current_item": "B11.74.5",
   "status_semantics": {
     "pending": "Not started; authorization and dependencies must permit work.",
     "pending_rebaseline": "Historical candidate, not a confirmed current failure or a completed task.",
@@ -464,22 +464,29 @@
       "id": "Q007",
       "stage": "coverage_repair",
       "title": "Verify and repair src/application/services/fts-sanitizer.ts",
-      "status": "pending_rebaseline",
+      "status": "pending",
       "depends_on": [
-        "B09"
+        "B11.74.4"
       ],
       "scope": "src/application/services/fts-sanitizer.ts",
       "deliverable": "Reproduce uncovered behavior, add meaningful regression/boundary tests, fix demonstrated defects, satisfy this file's reviewed risk tier.",
       "verification": "Current source-bound four-metric file evidence plus tier-required decision tests. Supersede only with explicit fresh evidence that this candidate is no longer a gap.",
-      "risk": "unclassified",
+      "risk": "S",
       "authorization": "authorized",
       "owner": "memory-nexus",
       "historical_gaps": [
         "branches=85.71"
       ],
       "historical_evidence": "docs/audits/2026-09-19-repair-evidence/per-file-coverage-gaps.json",
-      "evidence": [],
-      "acceptance_record": ".planning/memory-resilience/evidence/Q007.json"
+      "evidence": [
+        ".planning/memory-resilience/evidence/B11.74.4.json"
+      ],
+      "acceptance_record": ".planning/memory-resilience/evidence/Q007.json",
+      "progress": {
+        "current": "Native FTS query !!! produces syntax error. Repair punctuation handling while preserving intended phrase/prefix/operator behavior with native RED/GREEN, then full per-file proof.",
+        "owner": "memory-nexus",
+        "trigger": "Before B11.74.7/B10/R02; historical coverage alone is not the current finding."
+      }
     },
     {
       "id": "Q008",
@@ -2466,7 +2473,11 @@
         "D04",
         "B11.72",
         "B11.73",
-        "B11.74"
+        "B11.74",
+        "Q096",
+        "Q097",
+        "Q098",
+        "Q099"
       ],
       "scope": "all Q-* work items",
       "deliverable": "Close individually verified quality work items; fix discovered defects and meaningful boundaries, not artificial counter tests.",
@@ -3445,7 +3456,7 @@
     },
     {
       "id": "Q094",
-      "title": "Reject non-finite search result scores",
+      "title": "Reject invalid search result scores and timestamps",
       "scope": "src/domain/value-objects/search-result.ts",
       "stage": "baseline-quality",
       "status": "pending",
@@ -3453,12 +3464,14 @@
         "B04"
       ],
       "deliverable": "Repair the reproduced input-boundary defect with RED/GREEN regression, then meet the complete per-file Tier S contract.",
-      "verification": "Reject NaN and non-finite/out-of-range scores; exact valid boundaries and valid result metadata remain supported. Statements/functions/lines >=95%, branches 100%; meaningful decision checks and independent review.",
+      "verification": "Reject NaN and non-finite/out-of-range scores; exact valid boundaries and valid result metadata remain supported. Statements/functions/lines >=95%, branches 100%; meaningful decision checks and independent review. Reject invalid timestamps while preserving valid date metadata; native search regression required.",
       "risk": "S",
       "authorization": "authorized",
       "owner": "memory-nexus",
-      "evidence": [],
-      "observed_gap": "SearchResult.create accepts NaN score despite its required 0-1 range.",
+      "evidence": [
+        ".planning/memory-resilience/evidence/B11.74.4.json"
+      ],
+      "observed_gap": "SearchResult.create accepts NaN score despite its required 0-1 range. Native search also constructs an Invalid Date result from an invalid persisted timestamp.",
       "observed_evidence": ".planning/memory-resilience/evidence/B04-input-probes.json",
       "acceptance_record": ".planning/memory-resilience/evidence/Q094.json",
       "retirement_trigger": "Before B10/R02; diagnostic reproduction is not repair acceptance."
@@ -5321,7 +5334,7 @@
       "id": "B11.74.4",
       "stage": "baseline",
       "title": "Dispose search and context service statements",
-      "status": "active",
+      "status": "verified",
       "depends_on": [
         "B11.74.2"
       ],
@@ -5332,16 +5345,22 @@
       "authorization": "authorized",
       "owner": "memory-nexus",
       "evidence": [
-        ".planning/memory-resilience/B11.74-plan.md"
+        ".planning/memory-resilience/B11.74-plan.md",
+        ".planning/memory-resilience/evidence/B11.74.4.json"
       ],
       "acceptance_record": ".planning/memory-resilience/evidence/B11.74.4.json",
-      "retirement_trigger": "Before parent B11.74/B10/R02 acceptance; child local proof does not imply factory or whole-platform acceptance."
+      "retirement_trigger": "Before parent B11.74/B10/R02 acceptance; child local proof does not imply factory or whole-platform acceptance.",
+      "progress": {
+        "current": "Local lifetime scope verified:14current/17original prepares,136tests/1273assertions on both Windows runtimes,14disposal faults detected.",
+        "remaining": "Q007/Q094/Q096-Q099 and B05/B11.74.7 retain correctness/full quality/platform/review acceptance.",
+        "restart": "B11.74.5 export/schema/event/security statement ownership and native integrity findings; factory remains unchanged."
+      }
     },
     {
       "id": "B11.74.5",
       "stage": "baseline",
       "title": "Dispose export, schema and event/security statements",
-      "status": "pending",
+      "status": "active",
       "depends_on": [
         "B11.74.2"
       ],
@@ -5414,7 +5433,13 @@
         "Q025",
         "Q030",
         "Q022",
-        "Q028"
+        "Q028",
+        "Q096",
+        "Q097",
+        "Q098",
+        "Q099",
+        "Q007",
+        "Q094"
       ],
       "scope": "All B11.74 affected production/test files and native runtime targets",
       "deliverable": "Complete per-file/package/tier/changed-line proof and independent review; dependency barriers can resume",
@@ -5448,6 +5473,90 @@
           "trigger": "Before B11.74.7/B10/R02 acceptance."
         }
       }
+    },
+    {
+      "id": "Q096",
+      "stage": "baseline-quality",
+      "title": "Complete context/resolver native boundary and branch proof",
+      "status": "pending",
+      "depends_on": [
+        "B11.74.4"
+      ],
+      "scope": "src/infrastructure/database/services/context-service.ts",
+      "deliverable": "Repair demonstrated gaps and complete source-bound file quality without weakening thresholds or adding unreviewed exclusions.",
+      "verification": "All four file metrics >=95%; branches100% plus adversarial and decision checks; B05 counter completeness, changed-line proof and independent review required.",
+      "risk": "S",
+      "authorization": "authorized",
+      "owner": "memory-nexus",
+      "evidence": [
+        ".planning/memory-resilience/evidence/B11.74.4.json"
+      ],
+      "acceptance_record": ".planning/memory-resilience/evidence/Q096.json",
+      "observed_gap": "Context branch diagnostic 36/37 (97.29%). Review null lastActivity, limits/date boundaries and exact/fuzzy selection; repair or prove unreachable guards before full-file decision and independent review.",
+      "retirement_trigger": "Before B11.74.7/B10/R02 acceptance."
+    },
+    {
+      "id": "Q097",
+      "stage": "baseline-quality",
+      "title": "Complete FTS service query/result and branch proof",
+      "status": "pending",
+      "depends_on": [
+        "B11.74.4"
+      ],
+      "scope": "src/infrastructure/database/services/search-service.ts",
+      "deliverable": "Repair demonstrated gaps and complete source-bound file quality without weakening thresholds or adding unreviewed exclusions.",
+      "verification": "All four file metrics >=95%; branches100% plus adversarial and decision checks; B05 counter completeness, changed-line proof and independent review required.",
+      "risk": "S",
+      "authorization": "authorized",
+      "owner": "memory-nexus",
+      "evidence": [
+        ".planning/memory-resilience/evidence/B11.74.4.json"
+      ],
+      "acceptance_record": ".planning/memory-resilience/evidence/Q097.json",
+      "observed_gap": "FTS branches 25/26 (96.15%); lines98%, statements98.18%. Review empty-row normalizer guard through caller invariant, native query/filter/ranking and complete result/error semantics. No fabricated impossible rows solely for coverage.",
+      "retirement_trigger": "Before B11.74.7/B10/R02 acceptance."
+    },
+    {
+      "id": "Q098",
+      "stage": "baseline-quality",
+      "title": "Complete hybrid search fallback and branch proof",
+      "status": "pending",
+      "depends_on": [
+        "B11.74.4"
+      ],
+      "scope": "src/infrastructure/database/services/hybrid-search-service.ts",
+      "deliverable": "Repair demonstrated gaps and complete source-bound file quality without weakening thresholds or adding unreviewed exclusions.",
+      "verification": "All four file metrics >=95%; branches100% plus adversarial and decision checks; B05 counter completeness, changed-line proof and independent review required.",
+      "risk": "S",
+      "authorization": "authorized",
+      "owner": "memory-nexus",
+      "evidence": [
+        ".planning/memory-resilience/evidence/B11.74.4.json"
+      ],
+      "acceptance_record": ".planning/memory-resilience/evidence/Q098.json",
+      "observed_gap": "Hybrid branches169/174 (97.12%); lines99.56%, statements99.61%. Review strict-provider null guard, sparse/missing metadata, fallback, dimension-read errors and full filter/ranking/model consistency decisions.",
+      "retirement_trigger": "Before B11.74.7/B10/R02 acceptance."
+    },
+    {
+      "id": "Q099",
+      "stage": "baseline-quality",
+      "title": "Repair hybrid behavior test executable coverage gaps",
+      "status": "pending",
+      "depends_on": [
+        "B11.74.4"
+      ],
+      "scope": "src/infrastructure/database/services/hybrid-search-service.test.ts",
+      "deliverable": "Repair demonstrated gaps and complete source-bound file quality without weakening thresholds or adding unreviewed exclusions.",
+      "verification": "All four file metrics >=95%; B05 counter completeness, changed-line proof and independent review required.",
+      "risk": "A",
+      "authorization": "authorized",
+      "owner": "memory-nexus",
+      "evidence": [
+        ".planning/memory-resilience/evidence/B11.74.4.json"
+      ],
+      "acceptance_record": ".planning/memory-resilience/evidence/Q099.json",
+      "observed_gap": "Behavior test branches46/78 (58.97%), functions93.42%, lines98%, statements95.27%. Review unused mock functions and sqlite-vec conditional guards; retain real behavior assertions and required native extension proof.",
+      "retirement_trigger": "Before B11.74.7/B10/R02 acceptance."
     }
   ],
   "decisions": {

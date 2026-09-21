@@ -70,7 +70,7 @@ export class Fts5SearchService implements ISearchService {
     const { sql, params } = this.buildSearchQuery(queryValue, limit, options);
 
     // Execute query
-    const stmt = this.db.prepare<SearchRow, any[]>(sql);
+    using stmt = this.db.prepare<SearchRow, any[]>(sql);
     const rows = stmt.all(...params) as SearchRow[];
 
     if (rows.length === 0) {

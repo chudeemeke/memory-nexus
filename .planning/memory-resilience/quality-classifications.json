@@ -7764,7 +7764,7 @@
     {
       "path": "src/infrastructure/database/services/context-service.ts",
       "package": "package.json",
-      "sourceHash": "6aff7d63b3a8116bffab56cca8d755cea6daea0025cc368ab0a3e04c0b29ac72",
+      "sourceHash": "bfcab913ece91eb636f5d4c3af10f182d2c0501cca8d328e8428829b720003c1",
       "tier": "S",
       "rationale": "Resolves a requested project using scoped SQL queries before returning memory context; project selection is a data-disclosure boundary.",
       "applicability": {
@@ -7773,30 +7773,30 @@
       },
       "decisionStatus": "proposed - independent review pending",
       "inspection": {
-        "sourceRevision": "39c895b13e768bd607070efbc3496d47a821b257",
-        "anchor": "project-filtered session queries",
-        "scope": "positive critical boundary establishes highest tier; not full correctness acceptance"
+        "sourceRevision": "f8977e8 + current source hash",
+        "anchor": "native search/context statement ownership",
+        "scope": "Scoped native behavior and disposal faults; full quality/review pending."
       },
       "metricApplicability": {
-        "status": "proposed - independent review pending",
-        "evidence": ".planning/memory-resilience/evidence/B04-applicability-probe.json",
-        "sourceHash": "6aff7d63b3a8116bffab56cca8d755cea6daea0025cc368ab0a3e04c0b29ac72",
-        "disposition": "Measure every positive denominator; individually review zero branch/function denominators against runtime syntax. Observed counts do not prove instrumentation completeness. Optional-chain syntax is present; synthetic evidence shows current instrumentation omits its decision counters. B05.1 owns source-mapped branch proof before numeric acceptance.",
+        "status": "diagnostic - B05/Q007/Q094/Q096-Q099 and independent review pending",
+        "evidence": ".planning/memory-resilience/evidence/B11.74.4.json",
+        "sourceHash": "bfcab913ece91eb636f5d4c3af10f182d2c0501cca8d328e8428829b720003c1",
+        "disposition": "Every denominator measured; uncovered behavior remains required work, no exception or full quality acceptance.",
         "metrics": {
-          "statements": {
-            "observedCounterTotal": 36,
-            "proposal": "measure - completeness unverified"
-          },
-          "branches": {
-            "observedCounterTotal": 37,
+          "lines": {
+            "observedCounterTotal": 45,
             "proposal": "measure - completeness unverified"
           },
           "functions": {
             "observedCounterTotal": 7,
             "proposal": "measure - completeness unverified"
           },
-          "lines": {
-            "observedCounterTotal": 34,
+          "statements": {
+            "observedCounterTotal": 47,
+            "proposal": "measure - completeness unverified"
+          },
+          "branches": {
+            "observedCounterTotal": 37,
             "proposal": "measure - completeness unverified"
           }
         }
@@ -7805,7 +7805,7 @@
     {
       "path": "src/infrastructure/database/services/hybrid-search-service.test.ts",
       "package": "package.json",
-      "sourceHash": "86419e238681364c4446693a20ef0dc464930d9001b4ac68b2bc66b317eda5cc",
+      "sourceHash": "4f92722a06fb61642530833a369e1501debc64cdfbe9c8ced8b8df4bf1d5062f",
       "tier": "A",
       "rationale": "Uses real SQLite with explicitly in-memory database configuration and registered close/closeDatabase teardown; fixture SQL is bounded to the test handle. Production repository/schema risk remains separate.",
       "applicability": {
@@ -7814,31 +7814,30 @@
       },
       "decisionStatus": "proposed - independent review pending",
       "inspection": {
-        "sourceRevision": "12c188bb9cad480efc6eb87ce1760b9dc40bbb69",
-        "anchor": "Emitted-runtime import/call/constructor inventory and targeted fixture/provider/CLI source boundaries",
-        "runtimeHash": "c752238a8da4425a815b4a09564caea808c07ac74639dcb90fc5ecbf59eefc74",
-        "scope": "Reading aid plus targeted source inspection; not sound effect analysis, complete assertion review, execution evidence or metric applicability approval."
+        "sourceRevision": "f8977e8 + current source hash",
+        "anchor": "native search/context statement ownership",
+        "scope": "Scoped native behavior and disposal faults; full quality/review pending."
       },
       "metricApplicability": {
-        "status": "proposed - independent review pending",
-        "evidence": ".planning/memory-resilience/evidence/B04-applicability-probe.json",
-        "sourceHash": "86419e238681364c4446693a20ef0dc464930d9001b4ac68b2bc66b317eda5cc",
-        "disposition": "Measure every positive denominator; individually review zero branch/function denominators against runtime syntax. Observed counts do not prove instrumentation completeness. Optional-chain syntax is present; synthetic evidence shows current instrumentation omits its decision counters. B05.1 owns source-mapped branch proof before numeric acceptance.",
+        "status": "diagnostic - B05/Q007/Q094/Q096-Q099 and independent review pending",
+        "evidence": ".planning/memory-resilience/evidence/B11.74.4.json",
+        "sourceHash": "4f92722a06fb61642530833a369e1501debc64cdfbe9c8ced8b8df4bf1d5062f",
+        "disposition": "Every denominator measured; uncovered behavior remains required work, no exception or full quality acceptance.",
         "metrics": {
+          "lines": {
+            "observedCounterTotal": 752,
+            "proposal": "measure - completeness unverified"
+          },
+          "functions": {
+            "observedCounterTotal": 152,
+            "proposal": "measure - completeness unverified"
+          },
           "statements": {
             "observedCounterTotal": 783,
             "proposal": "measure - completeness unverified"
           },
           "branches": {
             "observedCounterTotal": 78,
-            "proposal": "measure - completeness unverified"
-          },
-          "functions": {
-            "observedCounterTotal": 142,
-            "proposal": "measure - completeness unverified"
-          },
-          "lines": {
-            "observedCounterTotal": 752,
             "proposal": "measure - completeness unverified"
           }
         }
@@ -7847,7 +7846,7 @@
     {
       "path": "src/infrastructure/database/services/hybrid-search-service.ts",
       "package": "package.json",
-      "sourceHash": "bb94675380b5dc2fecbe05cbc0320095ba34df96695e51e25e09f803f88cc8aa",
+      "sourceHash": "fcfbf283ed4ce71c874f4299cecd7daecbefef69834007de004e0e35756b5230",
       "tier": "S",
       "rationale": "Sends query text to an embedding provider and joins persisted search records; includes provider egress and record-identity boundaries.",
       "applicability": {
@@ -7856,30 +7855,30 @@
       },
       "decisionStatus": "proposed - independent review pending",
       "inspection": {
-        "sourceRevision": "39c895b13e768bd607070efbc3496d47a821b257",
-        "anchor": "provider.embed / candidate retrieval",
-        "scope": "positive critical boundary establishes highest tier; not full correctness acceptance"
+        "sourceRevision": "f8977e8 + current source hash",
+        "anchor": "native search/context statement ownership",
+        "scope": "Scoped native behavior and disposal faults; full quality/review pending."
       },
       "metricApplicability": {
-        "status": "proposed - independent review pending",
-        "evidence": ".planning/memory-resilience/evidence/B04-applicability-probe.json",
-        "sourceHash": "bb94675380b5dc2fecbe05cbc0320095ba34df96695e51e25e09f803f88cc8aa",
-        "disposition": "Measure every positive denominator; individually review zero branch/function denominators against runtime syntax. Observed counts do not prove instrumentation completeness. Optional-chain syntax is present; synthetic evidence shows current instrumentation omits its decision counters. B05.1 owns source-mapped branch proof before numeric acceptance.",
+        "status": "diagnostic - B05/Q007/Q094/Q096-Q099 and independent review pending",
+        "evidence": ".planning/memory-resilience/evidence/B11.74.4.json",
+        "sourceHash": "fcfbf283ed4ce71c874f4299cecd7daecbefef69834007de004e0e35756b5230",
+        "disposition": "Every denominator measured; uncovered behavior remains required work, no exception or full quality acceptance.",
         "metrics": {
-          "statements": {
-            "observedCounterTotal": 258,
-            "proposal": "measure - completeness unverified"
-          },
-          "branches": {
-            "observedCounterTotal": 174,
+          "lines": {
+            "observedCounterTotal": 230,
             "proposal": "measure - completeness unverified"
           },
           "functions": {
             "observedCounterTotal": 34,
             "proposal": "measure - completeness unverified"
           },
-          "lines": {
-            "observedCounterTotal": 226,
+          "statements": {
+            "observedCounterTotal": 262,
+            "proposal": "measure - completeness unverified"
+          },
+          "branches": {
+            "observedCounterTotal": 174,
             "proposal": "measure - completeness unverified"
           }
         }
@@ -7966,7 +7965,7 @@
     {
       "path": "src/infrastructure/database/services/search-service.ts",
       "package": "package.json",
-      "sourceHash": "80157c619ae2863a4c5fdd1faf1d6a7c8072b80faae7a71c33c009ce5bc23f93",
+      "sourceHash": "b3ad3cf0364161511ff78d6bb16389376cdd25699b42cef2b65fc198f262e9c9",
       "tier": "S",
       "rationale": "Transforms external search syntax before FTS MATCH and applies query filters to persisted memory.",
       "applicability": {
@@ -7975,30 +7974,30 @@
       },
       "decisionStatus": "proposed - independent review pending",
       "inspection": {
-        "sourceRevision": "39c895b13e768bd607070efbc3496d47a821b257",
-        "anchor": "search / sanitizeFtsQuery",
-        "scope": "positive critical boundary establishes highest tier; not full correctness acceptance"
+        "sourceRevision": "f8977e8 + current source hash",
+        "anchor": "native search/context statement ownership",
+        "scope": "Scoped native behavior and disposal faults; full quality/review pending."
       },
       "metricApplicability": {
-        "status": "proposed - independent review pending",
-        "evidence": ".planning/memory-resilience/evidence/B04-applicability-probe.json",
-        "sourceHash": "80157c619ae2863a4c5fdd1faf1d6a7c8072b80faae7a71c33c009ce5bc23f93",
-        "disposition": "Measure every positive denominator; individually review zero branch/function denominators against runtime syntax. Observed counts do not prove instrumentation completeness. Optional-chain syntax is present; synthetic evidence shows current instrumentation omits its decision counters. B05.1 owns source-mapped branch proof before numeric acceptance.",
+        "status": "diagnostic - B05/Q007/Q094/Q096-Q099 and independent review pending",
+        "evidence": ".planning/memory-resilience/evidence/B11.74.4.json",
+        "sourceHash": "b3ad3cf0364161511ff78d6bb16389376cdd25699b42cef2b65fc198f262e9c9",
+        "disposition": "Every denominator measured; uncovered behavior remains required work, no exception or full quality acceptance.",
         "metrics": {
-          "statements": {
-            "observedCounterTotal": 55,
-            "proposal": "measure - completeness unverified"
-          },
-          "branches": {
-            "observedCounterTotal": 26,
+          "lines": {
+            "observedCounterTotal": 50,
             "proposal": "measure - completeness unverified"
           },
           "functions": {
             "observedCounterTotal": 9,
             "proposal": "measure - completeness unverified"
           },
-          "lines": {
-            "observedCounterTotal": 50,
+          "statements": {
+            "observedCounterTotal": 55,
+            "proposal": "measure - completeness unverified"
+          },
+          "branches": {
+            "observedCounterTotal": 26,
             "proposal": "measure - completeness unverified"
           }
         }
@@ -17994,6 +17993,47 @@
           },
           "branches": {
             "observedCounterTotal": 0,
+            "proposal": "measure - completeness unverified"
+          }
+        }
+      }
+    },
+    {
+      "path": "tests/infrastructure/database/services/search-context-lifecycle.test.ts",
+      "package": "package.json",
+      "tier": "S",
+      "rationale": "Native synthetic service driver verifies deterministic SQLite statement ownership through failures and recovery.",
+      "applicability": {
+        "mode": "measure",
+        "reason": "Executable integrity driver; no exclusion approved."
+      },
+      "decisionStatus": "proposed - independent review pending",
+      "sourceHash": "d03cb70f065948b27ab8c41988ff82686da3c69e7efbda33d93b4b05a746fc3f",
+      "inspection": {
+        "sourceRevision": "f8977e8 + current source hash",
+        "anchor": "native search/context statement ownership",
+        "scope": "Scoped native behavior and disposal faults; full quality/review pending."
+      },
+      "metricApplicability": {
+        "status": "diagnostic - B05/Q007/Q094/Q096-Q099 and independent review pending",
+        "evidence": ".planning/memory-resilience/evidence/B11.74.4.json",
+        "sourceHash": "d03cb70f065948b27ab8c41988ff82686da3c69e7efbda33d93b4b05a746fc3f",
+        "disposition": "Every denominator measured; uncovered behavior remains required work, no exception or full quality acceptance.",
+        "metrics": {
+          "lines": {
+            "observedCounterTotal": 105,
+            "proposal": "measure - completeness unverified"
+          },
+          "functions": {
+            "observedCounterTotal": 29,
+            "proposal": "measure - completeness unverified"
+          },
+          "statements": {
+            "observedCounterTotal": 159,
+            "proposal": "measure - completeness unverified"
+          },
+          "branches": {
+            "observedCounterTotal": 6,
             "proposal": "measure - completeness unverified"
           }
         }

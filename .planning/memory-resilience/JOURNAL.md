@@ -1,5 +1,40 @@
 # Memory resilience execution journal
 
+## 2026-09-21 - Search/context lifetime checkpoint; explicit quality gaps
+
+- Continued from f8977e8. Context/resolver, FTS and hybrid services now dispose
+  every prepared statement on success, early return and exceptions. Seventeen
+  original prepare sites become fourteen by sharing three date/no-date prepares.
+  SQL, ranking and parameters remain unchanged. Hybrid test doubles implement
+  disposal; strict checking also repaired unused bindings/index annotations.
+- The four-file group passes 136 tests / 1,273 assertions on Windows Bun 1.3.14
+  and 1.4.1. Fourteen targeted disposal faults are detected. Production and strict
+  modified-test types and test-isolation gate pass. Native driver retains actual
+  statement handles across repeated owners, preparation/execution errors, FTS
+  fallback and retry. SQLite/FTS/sqlite-vec execute; encoder vectors are synthetic.
+- Evidence: evidence/B11.74.4.json. This verifies lifetime scope, not full quality.
+  Context/FTS/hybrid branch diagnostics are 97.29/96.15/97.12%, below proposed
+  Tier S requirements. Hybrid behavior tests have 93.42% functions and 58.97%
+  branches. Q096-Q099 own full-file repairs and are dependencies of B11.74.7/B10.
+  Native punctuation-only FTS syntax failure promotes Q007; invalid native-row
+  timestamps extend Q094 alongside its known non-finite score defect. Both are
+  required before B11.74.7. The intermediate failed timestamp test is retained
+  honestly as discovery evidence, despite its historical green-log filename.
+- Validation caught two stale hashes in the prior repository aggregate: its old
+  writer refreshed only the first of three references to the core proof after
+  adding validation metadata. The proof is unchanged from Git HEAD and all its
+  inputs still match. Corrected both references, repaired the private writer and
+  retained an explicit bindingCorrection in evidence/B11.74.3.json. All seventeen
+  references are now checked; this correction does not claim new native execution.
+- Catalog 458 executable files / two packages and ledger 236 items reconcile;
+  dependency graph is acyclic. B11.74.4 verified; B11.74.5 active. Next: export,
+  schema, event-log and secret-audit statements, including governance reset
+  atomicity and clearing session-summary FTS findings. Factory remains unchanged.
+- Full B05/quality/platform/installed/CI/independent-review gates remain open.
+  No canonical memory, model experiment or replication activated. Compatibility
+  runtime removed; observed free disk approximately 1.34 GiB after checks.
+  Recheck capacity before expensive work; unrelated disk changes are unattributed.
+
 ## 2026-09-21 - Repository lifetime migration verified; search/context next
 
 - Continued from clean 569424a. Removed the final twenty constructor statements

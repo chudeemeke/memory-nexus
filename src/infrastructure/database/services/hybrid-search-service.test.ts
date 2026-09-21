@@ -16,7 +16,7 @@ import { initializeDatabase, closeDatabase } from "../connection.js";
 import { Fts5SearchService } from "./search-service.js";
 import { EmbeddingRepository } from "../repositories/embedding-repository.js";
 import { HybridSearchService } from "./hybrid-search-service.js";
-import type { HybridSearchDeps, SearchMeta } from "./hybrid-search-service.js";
+import type { HybridSearchDeps } from "./hybrid-search-service.js";
 import { SearchQuery } from "../../../domain/value-objects/search-query.js";
 import { SearchResult } from "../../../domain/value-objects/search-result.js";
 import { ErrorCode, MemoryError } from "../../../domain/index.js";
@@ -257,7 +257,7 @@ describe("HybridSearchService", () => {
       const query = SearchQuery.from("authentication");
 
       if (sqliteVecAvailable) {
-        const results = await service.search(query);
+        await service.search(query);
         const meta = service.getLastSearchMeta();
         expect(meta?.mode).toBe("hybrid");
       }
@@ -318,7 +318,7 @@ describe("HybridSearchService", () => {
       const service = new HybridSearchService(deps);
       const query = SearchQuery.from("authentication");
 
-      const results = await service.search(query, { mode: "vector" });
+      await service.search(query, { mode: "vector" });
 
       expect(mockProvider.embed).toHaveBeenCalled();
       const meta = service.getLastSearchMeta();
@@ -361,7 +361,7 @@ describe("HybridSearchService", () => {
       const service = new HybridSearchService(deps);
       const query = SearchQuery.from("authentication");
 
-      const results = await service.search(query);
+      await service.search(query);
 
       const meta = service.getLastSearchMeta();
       expect(meta?.mode).toBe("hybrid");
@@ -410,7 +410,7 @@ describe("HybridSearchService", () => {
 
       expect(hybridResults).toHaveLength(ftsResults.length);
       for (let i = 0; i < ftsResults.length; i++) {
-        expect(hybridResults[i].messageId).toBe(ftsResults[i].messageId);
+        expect(hybridResults[i]!.messageId).toBe(ftsResults[i]!.messageId);
       }
     });
 
@@ -435,7 +435,7 @@ describe("HybridSearchService", () => {
       });
 
       expect(results).toHaveLength(1);
-      expect(results[0].sessionId).toBe("session-1");
+      expect(results[0]!.sessionId).toBe("session-1");
     });
 
     it("provider is never initialized in FTS mode", async () => {
@@ -500,6 +500,7 @@ describe("HybridSearchService", () => {
     it("explicit vector mode returns an empty result set when KNN returns no rows", async () => {
       const fakeDb = {
         prepare: () => ({
+          [Symbol.dispose]: () => {},
           get: () => ({ embedding: new Float32Array(384) }),
         }),
       } as unknown as Database;
@@ -517,6 +518,7 @@ describe("HybridSearchService", () => {
     it("explicit vector mode ignores rows that cannot be hydrated", async () => {
       const fakeDb = {
         prepare: (sql: string) => ({
+          [Symbol.dispose]: () => {},
           get: () => ({ embedding: new Float32Array(384) }),
           all: () => sql.includes("messages_meta") ? [] : [],
         }),
@@ -628,9 +630,9 @@ describe("HybridSearchService", () => {
       const results = await service.search(query, { mode: "vector" });
 
       expect(results.length).toBeGreaterThan(0);
-      expect(results[0].sessionId).toBe("session-1");
-      expect(results[0].messageId).toBe("msg-1");
-      expect(results[0].role).toBe("user");
+      expect(results[0]!.sessionId).toBe("session-1");
+      expect(results[0]!.messageId).toBe("msg-1");
+      expect(results[0]!.role).toBe("user");
     });
 
     it("vector snippet uses first 200 chars of content", async () => {
@@ -653,7 +655,7 @@ describe("HybridSearchService", () => {
       const results = await service.search(query, { mode: "vector" });
 
       expect(results.length).toBeGreaterThan(0);
-      expect(results[0].snippet.length).toBeLessThanOrEqual(203); // 200 + "..."
+      expect(results[0]!.snippet.length).toBeLessThanOrEqual(203); // 200 + "..."
     });
   });
 
@@ -737,7 +739,7 @@ describe("HybridSearchService", () => {
       });
 
       expect(results).toHaveLength(1);
-      expect(results[0].source).toBe("vector");
+      expect(results[0]!.source).toBe("vector");
     });
 
     it("returns results from both FTS and vector, merged by RRF", async () => {
@@ -830,7 +832,7 @@ describe("HybridSearchService", () => {
 
       expect(results.length).toBe(2);
       // Newer message should score higher with decay enabled
-      expect(results[0].messageId).toBe("msg-new");
+      expect(results[0]!.messageId).toBe("msg-new");
     });
 
     it("noDecay option skips temporal decay", async () => {
@@ -1284,9 +1286,9 @@ describe("HybridSearchService", () => {
 
       const results = await service.search(query, { mode: "fts" });
       expect(results.length).toBeGreaterThan(0);
-      expect(results[0].source).toBe("fts");
-      expect(results[0].rawScores).toBeDefined();
-      expect(results[0].rawScores!.bm25).toBeDefined();
+      expect(results[0]!.source).toBe("fts");
+      expect(results[0]!.rawScores).toBeDefined();
+      expect(results[0]!.rawScores!.bm25).toBeDefined();
     });
 
     it("vector mode dimension mismatch throws EMBEDDING_DIMENSION_MISMATCH", async () => {
@@ -1324,16 +1326,19 @@ describe("HybridSearchService", () => {
     it("returns null when stored embedding metadata is unavailable or unrecognized", () => {
       const noRowDb = {
         prepare: () => ({
+          [Symbol.dispose]: () => {},
           get: () => undefined,
         }),
       } as unknown as Database;
       const noEmbeddingDb = {
         prepare: () => ({
+          [Symbol.dispose]: () => {},
           get: () => ({ embedding: undefined }),
         }),
       } as unknown as Database;
       const unsupportedEmbeddingDb = {
         prepare: () => ({
+          [Symbol.dispose]: () => {},
           get: () => ({ embedding: { length: 384 } }),
         }),
       } as unknown as Database;
@@ -1353,6 +1358,7 @@ describe("HybridSearchService", () => {
       const buffer = new ArrayBuffer(1536);
       const fakeDb = {
         prepare: () => ({
+          [Symbol.dispose]: () => {},
           get: () => ({ embedding: buffer }),
         }),
       } as unknown as Database;
@@ -1379,8 +1385,9 @@ describe("HybridSearchService", () => {
     it("falls back to vector snippets and default source when fused metadata has no FTS match", async () => {
       const fakeDb = {
         prepare: (sql: string) => ({
+          [Symbol.dispose]: () => {},
           get: () => ({ embedding: new Float32Array(384) }),
-          all: (...args: unknown[]) => {
+          all: () => {
             if (sql.includes("messages_meta") && sql.includes("rowid IN")) {
               return [{
                 rowid: 42,
@@ -1409,14 +1416,15 @@ describe("HybridSearchService", () => {
       });
 
       expect(results).toHaveLength(1);
-      expect(results[0].messageId).toBe("msg-vector-only");
-      expect(results[0].source).toBe("vector");
-      expect(results[0].snippet.endsWith("...")).toBe(true);
+      expect(results[0]!.messageId).toBe("msg-vector-only");
+      expect(results[0]!.source).toBe("vector");
+      expect(results[0]!.snippet.endsWith("...")).toBe(true);
     });
 
     it("skips sparse vector rows during vector hydration", async () => {
       const fakeDb = {
         prepare: (sql: string) => ({
+          [Symbol.dispose]: () => {},
           get: () => ({ embedding: new Float32Array(384) }),
           all: () => sql.includes("messages_meta")
             ? [{
@@ -1449,6 +1457,7 @@ describe("HybridSearchService", () => {
     it("returns no fused results when fusion cannot hydrate metadata", async () => {
       const fakeDb = {
         prepare: () => ({
+          [Symbol.dispose]: () => {},
           get: () => ({ embedding: new Float32Array(384) }),
           all: () => [],
         }),
@@ -1479,6 +1488,7 @@ describe("HybridSearchService", () => {
       });
       const fakeDb = {
         prepare: () => ({
+          [Symbol.dispose]: () => {},
           get: () => ({ embedding: new Float32Array(384) }),
           all: () => [{ rowid: 7, id: "msg-fts" }],
         }),
@@ -1531,7 +1541,7 @@ describe("HybridSearchService", () => {
 
       expect(results.length).toBe(2);
       // Newer message should score higher with decay enabled
-      expect(results[0].messageId).toBe("msg-new");
+      expect(results[0]!.messageId).toBe("msg-new");
     });
 
     it("FTS-only mode skips decay when noDecay option is true", async () => {
@@ -1665,7 +1675,7 @@ describe("HybridSearchService", () => {
       // Without decay: msg-old (0.95 similarity) > msg-new (0.7 similarity)
       // With decay: msg-old (0.95 * ~0.25) = ~0.24 < msg-new (0.7 * ~1.0) = ~0.7
       // This assertion can ONLY pass if decay is applied correctly.
-      expect(results[0].messageId).toBe("msg-new");
+      expect(results[0]!.messageId).toBe("msg-new");
     });
 
     it("hybrid mode still applies temporal decay (no regression)", async () => {
@@ -1704,7 +1714,7 @@ describe("HybridSearchService", () => {
 
       expect(results.length).toBe(2);
       // Newer message should score higher with decay
-      expect(results[0].messageId).toBe("msg-new");
+      expect(results[0]!.messageId).toBe("msg-new");
     });
   });
 });
