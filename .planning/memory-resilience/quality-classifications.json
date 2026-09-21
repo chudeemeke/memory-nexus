@@ -6036,7 +6036,7 @@
     {
       "path": "src/infrastructure/database/event-log.ts",
       "package": "package.json",
-      "sourceHash": "2acac2a025bcc1377adf257e5bfa959d2b78fe11da04782d3629f6045415ecda",
+      "sourceHash": "c535fa91610acbd4c2c4529bbdf85234e1391f0ec50a2d3f4847ba4b63221854",
       "tier": "S",
       "rationale": "Appends canonical memory events and validates imported legacy records; durable source and integrity boundary.",
       "applicability": {
@@ -6045,30 +6045,30 @@
       },
       "decisionStatus": "proposed - independent review pending",
       "inspection": {
-        "sourceRevision": "39c895b13e768bd607070efbc3496d47a821b257",
-        "anchor": "appendMemoryEvent / appendFile",
-        "scope": "positive critical boundary establishes highest tier; not full correctness acceptance"
+        "sourceRevision": "1aed0a1 + current source hash",
+        "anchor": "native replay lifetime and governance reset",
+        "scope": "Scoped native behavior and failures; Q100 full replay/quality remains open."
       },
       "metricApplicability": {
-        "status": "proposed - independent review pending",
-        "evidence": ".planning/memory-resilience/evidence/B04-applicability-probe.json",
-        "sourceHash": "2acac2a025bcc1377adf257e5bfa959d2b78fe11da04782d3629f6045415ecda",
-        "disposition": "Measure every positive denominator; individually review zero branch/function denominators against runtime syntax. Observed counts do not prove instrumentation completeness. Optional-chain syntax is present; synthetic evidence shows current instrumentation omits its decision counters. B05.1 owns source-mapped branch proof before numeric acceptance.",
+        "status": "diagnostic - B05/Q100/B11.74.7 and independent review pending",
+        "evidence": ".planning/memory-resilience/evidence/B11.74.5-event.json",
+        "sourceHash": "c535fa91610acbd4c2c4529bbdf85234e1391f0ec50a2d3f4847ba4b63221854",
+        "disposition": "Production branch floor fails; retain full quality and demonstrated late-replay defect as required work.",
         "metrics": {
-          "statements": {
-            "observedCounterTotal": 196,
-            "proposal": "measure - completeness unverified"
-          },
-          "branches": {
-            "observedCounterTotal": 142,
+          "lines": {
+            "observedCounterTotal": 199,
             "proposal": "measure - completeness unverified"
           },
           "functions": {
             "observedCounterTotal": 48,
             "proposal": "measure - completeness unverified"
           },
-          "lines": {
-            "observedCounterTotal": 193,
+          "statements": {
+            "observedCounterTotal": 202,
+            "proposal": "measure - completeness unverified"
+          },
+          "branches": {
+            "observedCounterTotal": 148,
             "proposal": "measure - completeness unverified"
           }
         }
@@ -17500,6 +17500,47 @@
         "sourceHash": "c9d9edafc637d537d53fc14c4edf0d154f303c396372638323b96bd478657d30",
         "diagnostic": ".planning/memory-resilience/evidence/B11.1-helper-metrics.json",
         "reason": "Current isolated direct-Istanbul diagnostic reports all four metrics at 100%; complete decision proof, instrumenter acceptance and independent review remain required."
+      }
+    },
+    {
+      "path": "tests/infrastructure/database/event-log-lifecycle.test.ts",
+      "package": "package.json",
+      "tier": "S",
+      "rationale": "Native driver verifies destructive governance reset, source admission and statement lifetime through public replay.",
+      "applicability": {
+        "mode": "measure",
+        "reason": "Executable integrity driver; no exclusion approved."
+      },
+      "decisionStatus": "proposed - independent review pending",
+      "sourceHash": "d698f7e5c11a1c887a12eb36d05d9efab30dec7531c476f56a4f9273103a9bc7",
+      "inspection": {
+        "sourceRevision": "1aed0a1 + current source hash",
+        "anchor": "native replay lifetime and governance reset",
+        "scope": "Scoped native behavior and failures; Q100 full replay/quality remains open."
+      },
+      "metricApplicability": {
+        "status": "diagnostic - B05/Q100/B11.74.7 and independent review pending",
+        "evidence": ".planning/memory-resilience/evidence/B11.74.5-event.json",
+        "sourceHash": "d698f7e5c11a1c887a12eb36d05d9efab30dec7531c476f56a4f9273103a9bc7",
+        "disposition": "Production branch floor fails; retain full quality and demonstrated late-replay defect as required work.",
+        "metrics": {
+          "lines": {
+            "observedCounterTotal": 79,
+            "proposal": "measure - completeness unverified"
+          },
+          "functions": {
+            "observedCounterTotal": 21,
+            "proposal": "measure - completeness unverified"
+          },
+          "statements": {
+            "observedCounterTotal": 104,
+            "proposal": "measure - completeness unverified"
+          },
+          "branches": {
+            "observedCounterTotal": 0,
+            "proposal": "measure - completeness unverified"
+          }
+        }
       }
     },
     {

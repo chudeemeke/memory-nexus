@@ -37,7 +37,8 @@ bun test --timeout 15000 tests/infrastructure/database/export-lifecycle.test.ts
 The existing export behavior suite additionally runs in an owned outer temporary
 directory because its historical fixture uses a fixed name. Retained commands and
 outputs are in `.planning/memory-resilience/evidence/B11.74.5-export.json`.
-Older-runtime, Linux, installed and independent acceptance remain explicit gates.
+Paired Windows runtime proof is retained; Linux, installed and independent
+acceptance remain explicit gates.
 
 R04 must notify opted-in consumers before integration/adoption, including the
 corrected count semantics and re-embedding requirement. This unmerged draft

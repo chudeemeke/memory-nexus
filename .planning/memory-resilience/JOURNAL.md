@@ -1,5 +1,43 @@
 # Memory resilience execution journal
 
+## 2026-09-22 - Event lifetime/reset/admission repair; complete replay defect owned
+
+- Continued from clean 1aed0a1. Direct fact upsert and supersedence statements now
+  dispose on success/failure. Native RED reproduced governance audit deletion
+  surviving a failed projection delete. Public replay now delegates reset to the
+  existing transactional governance repository and returns its Promise. Both
+  tables survive failure; retry and enclosing caller rollback execute natively.
+- A broader native probe reproduced two fact-loss paths: late incoming-write
+  failure, and an explicitly missing source log. Missing-source admission is now
+  repaired: rebuild rejects a missing selected file or no discovered logs before
+  reset. Read-only missing-file behavior remains intact. Existing empty files
+  retain current replay semantics. The late-write probe still fails: prior facts
+  are gone after the error. Its full source and before/after output are retained.
+- Q100 is added as required work before B11.74.7/B10/R02: preserve the complete
+  prior derived state through whole-replay failures, validated source snapshots,
+  malformed/source-change policy and concurrent-operation isolation. Do not use
+  an async callback with synchronous db.transaction or an unguarded transaction
+  across awaits. Requirements and scope are in the September 22 replay document.
+  A two-table reset fix does not close this demonstrated whole-replay defect.
+- Event group passes 33 tests / 454 assertions on Windows Bun 1.4.1 and 1.3.14;
+  eight targeted faults detected. New driver diagnostic100%; production lines
+  95.97%, statements96.03%, functions100%, branches91.89% fails Tier S and remains
+  Q100 work. Production/strict driver types and isolation pass. Evidence:
+  evidence/B11.74.5-event.json. The intentionally failing whole-replay diagnostic
+  is explicitly separate from this passing lifetime/reset/admission group.
+- Disk capacity recovered externally above the unchanged512MiB guard. The same
+  pinned runtime also verified the previously blocked export group:35tests /
+  747assertions. Export evidence now retains the original blocked checkpoint in
+  validation history plus fresh native evidence. Runtime/diagnostic roots removed;
+  free-space changes remain unattributed and no cleanup of other projects occurred.
+- Catalog461files / two packages and ledger237items reconcile; no dependency
+  cycles. B11.74.5 remains active for secret-audit-service ownership and integrity.
+  Q004/Q019/Q100 and all prior gates remain mandatory. Main factory unchanged;
+  Linux, supported floor, installed/CLI recovery, hosted CI, full measurement and
+  independent review remain open. No canonical log/database, installation,
+  replication or model experiment was changed. R04 owns consumer notifications
+  before integration/adoption for the repaired admission and final replay contract.
+
 ## 2026-09-21 - Export/import replacement repaired; old-runtime check disk-blocked
 
 - Continued from clean c52dc4f. Native RED reproduced retained import statements,

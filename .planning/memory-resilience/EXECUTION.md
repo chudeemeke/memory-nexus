@@ -215,9 +215,9 @@ deadlock and an unnecessary local-feature dependency in the replication branch.
 The restart source is `work-items.json.current_item` and the newest JOURNAL entry,
 not the original B01 starting command. B11.74.3 repository and B11.74.4 service
 lifetimes are locally verified. The B11.74.5 schema slice is locally verified;
-export has current-runtime proof with pinned old-runtime verification waiting for
-the disk guard; event/security statements and recorded native integrity findings
-remain active. Factory activation
+export has paired-runtime proof, and event lifetime/governance reset/source
+admission have local proof. Secret-audit statements remain active; Q100 owns the
+demonstrated whole-replay failure defect and complete event-log quality. Factory activation
 follows this migration; full acceptance
 remains B11.74.7. The source map, rejected experiment and exact next steps are in
 B11.74-plan.md.
