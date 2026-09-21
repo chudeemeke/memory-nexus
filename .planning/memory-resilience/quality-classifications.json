@@ -7184,7 +7184,7 @@
     {
       "path": "src/infrastructure/database/repositories/memory-file-repository.ts",
       "package": "package.json",
-      "sourceHash": "14107700191c8604cfd04b6064e56da54cef946ec84f92807f3d4acc9e81c3f8",
+      "sourceHash": "32f3a61f3c4fd4efd5724d549bbeb93a3ada6e8dae6519af02122816123512f9",
       "tier": "S",
       "rationale": "Inspected SQLite INSERT/upsert statement persists memory_files records. This establishes the data-integrity tier; transaction, conflict and deletion correctness remain separate verification obligations.",
       "applicability": {
@@ -7193,30 +7193,30 @@
       },
       "decisionStatus": "proposed - independent review pending",
       "inspection": {
-        "sourceRevision": "39c895b13e768bd607070efbc3496d47a821b257",
-        "anchor": "prepared INSERT into memory_files",
-        "scope": "positive critical boundary establishes highest tier; not full correctness acceptance"
+        "sourceRevision": "9763f74 + current source hash",
+        "anchor": "memory-file/governance native disposal and transaction integrity",
+        "scope": "Scoped native behavior/metrics/faults and caller integration; full tier/decision/review acceptance remains pending."
       },
       "metricApplicability": {
-        "status": "proposed - independent review pending",
-        "evidence": ".planning/memory-resilience/evidence/B04-applicability-probe.json",
-        "sourceHash": "14107700191c8604cfd04b6064e56da54cef946ec84f92807f3d4acc9e81c3f8",
-        "disposition": "Measure every positive denominator; individually review zero branch/function denominators against runtime syntax. Observed counts do not prove instrumentation completeness.",
+        "status": "diagnostic - B05/Q026 and independent review pending",
+        "evidence": ".planning/memory-resilience/evidence/B11.74.3-memory-state.json",
+        "sourceHash": "32f3a61f3c4fd4efd5724d549bbeb93a3ada6e8dae6519af02122816123512f9",
+        "disposition": "Measure every denominator; governance TierS branch gap remains failure.",
         "metrics": {
-          "statements": {
-            "observedCounterTotal": 30,
-            "proposal": "measure - completeness unverified"
-          },
-          "branches": {
-            "observedCounterTotal": 14,
+          "lines": {
+            "observedCounterTotal": 31,
             "proposal": "measure - completeness unverified"
           },
           "functions": {
             "observedCounterTotal": 15,
             "proposal": "measure - completeness unverified"
           },
-          "lines": {
-            "observedCounterTotal": 24,
+          "statements": {
+            "observedCounterTotal": 37,
+            "proposal": "measure - completeness unverified"
+          },
+          "branches": {
+            "observedCounterTotal": 14,
             "proposal": "measure - completeness unverified"
           }
         }
@@ -7267,7 +7267,7 @@
     {
       "path": "src/infrastructure/database/repositories/memory-governance-repository.ts",
       "package": "package.json",
-      "sourceHash": "eefe9811bc08f04303fa8f0447b39d29fd432082f7c7d42f085913209c4b589c",
+      "sourceHash": "5023c3b0a7b93d23c2bc90b1ca4362fe0badbae0cf045fc23e55aa9b72c8460c",
       "tier": "S",
       "rationale": "Inspected SQLite INSERT/upsert statement persists memory_governance records. This establishes the data-integrity tier; transaction, conflict and deletion correctness remain separate verification obligations.",
       "applicability": {
@@ -7276,30 +7276,30 @@
       },
       "decisionStatus": "proposed - independent review pending",
       "inspection": {
-        "sourceRevision": "39c895b13e768bd607070efbc3496d47a821b257",
-        "anchor": "prepared INSERT into memory_governance",
-        "scope": "positive critical boundary establishes highest tier; not full correctness acceptance"
+        "sourceRevision": "9763f74 + current source hash",
+        "anchor": "memory-file/governance native disposal and transaction integrity",
+        "scope": "Scoped native behavior/metrics/faults and caller integration; full tier/decision/review acceptance remains pending."
       },
       "metricApplicability": {
-        "status": "proposed - independent review pending",
-        "evidence": ".planning/memory-resilience/evidence/B04-applicability-probe.json",
-        "sourceHash": "eefe9811bc08f04303fa8f0447b39d29fd432082f7c7d42f085913209c4b589c",
-        "disposition": "Measure every positive denominator; individually review zero branch/function denominators against runtime syntax. Observed counts do not prove instrumentation completeness. Optional-chain syntax is present; synthetic evidence shows current instrumentation omits its decision counters. B05.1 owns source-mapped branch proof before numeric acceptance.",
+        "status": "diagnostic - B05/Q026 and independent review pending",
+        "evidence": ".planning/memory-resilience/evidence/B11.74.3-memory-state.json",
+        "sourceHash": "5023c3b0a7b93d23c2bc90b1ca4362fe0badbae0cf045fc23e55aa9b72c8460c",
+        "disposition": "Measure every denominator; governance TierS branch gap remains failure.",
         "metrics": {
+          "lines": {
+            "observedCounterTotal": 84,
+            "proposal": "measure - completeness unverified"
+          },
+          "functions": {
+            "observedCounterTotal": 31,
+            "proposal": "measure - completeness unverified"
+          },
           "statements": {
-            "observedCounterTotal": 80,
+            "observedCounterTotal": 89,
             "proposal": "measure - completeness unverified"
           },
           "branches": {
             "observedCounterTotal": 158,
-            "proposal": "measure - completeness unverified"
-          },
-          "functions": {
-            "observedCounterTotal": 27,
-            "proposal": "measure - completeness unverified"
-          },
-          "lines": {
-            "observedCounterTotal": 76,
             "proposal": "measure - completeness unverified"
           }
         }
@@ -17664,6 +17664,47 @@
           },
           "branches": {
             "observedCounterTotal": 0,
+            "proposal": "measure - completeness unverified"
+          }
+        }
+      }
+    },
+    {
+      "path": "tests/infrastructure/database/repositories/memory-state-lifecycle.test.ts",
+      "package": "package.json",
+      "tier": "S",
+      "rationale": "Synthetic native database driver verifies memory and governance writes, atomic audit/projection changes, rollback and scope disposal.",
+      "applicability": {
+        "mode": "measure",
+        "reason": "Executable data-integrity driver; no exclusion approved."
+      },
+      "decisionStatus": "proposed - independent review pending",
+      "sourceHash": "0d4f2954459ff0d52ab3aa15620f1f3d0972d714aadbd44229adf78d5a9f6b48",
+      "inspection": {
+        "sourceRevision": "9763f74 + current source hash",
+        "anchor": "memory-file/governance native disposal and transaction integrity",
+        "scope": "Scoped native behavior/metrics/faults and caller integration; full tier/decision/review acceptance remains pending."
+      },
+      "metricApplicability": {
+        "status": "diagnostic - B05/Q026 and independent review pending",
+        "evidence": ".planning/memory-resilience/evidence/B11.74.3-memory-state.json",
+        "sourceHash": "0d4f2954459ff0d52ab3aa15620f1f3d0972d714aadbd44229adf78d5a9f6b48",
+        "disposition": "Measure every denominator; governance TierS branch gap remains failure.",
+        "metrics": {
+          "lines": {
+            "observedCounterTotal": 134,
+            "proposal": "measure - completeness unverified"
+          },
+          "functions": {
+            "observedCounterTotal": 27,
+            "proposal": "measure - completeness unverified"
+          },
+          "statements": {
+            "observedCounterTotal": 193,
+            "proposal": "measure - completeness unverified"
+          },
+          "branches": {
+            "observedCounterTotal": 2,
             "proposal": "measure - completeness unverified"
           }
         }

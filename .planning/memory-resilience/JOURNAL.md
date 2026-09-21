@@ -1,5 +1,36 @@
 # Memory resilience execution journal
 
+## 2026-09-21 - Memory-file disposal and governance transaction integrity
+
+- Previous turn progressed at 9763f74; this turn began clean. Migrated all thirteen
+  memory-file/governance prepares after native lifecycle RED, retaining one batch
+  statement for memory-file upserts through commit/rollback.
+- Reproduced governance's absent-save false success and replaced the fallback
+  entity with an explicit absence error. Further real failure tests showed an
+  audit row surviving failed projection persistence, and audit deletion surviving
+  a failed projection clear. Both operations now use synchronous transactions.
+- Private synchronous governance save/read helpers preserve the public async API
+  without awaiting inside a Bun transaction. Validation and write errors roll back
+  audit insertion; clear errors preserve both tables. Retry and repeated events
+  still pass their scoped tests. This does not establish every replay policy.
+- Final group: 44 tests / 748 assertions on Windows Bun 1.3.14 and 1.4.1, plus
+  one real event-log governance replay integration / four assertions on each.
+  Seventeen faults detected (13 disposal, three transaction removal, false save).
+  Source/script and strict driver types plus isolation pass. Owned runtime/caller/
+  diagnostic roots removed. Evidence: evidence/B11.74.3-memory-state.json.
+- Diagnostic memory-file and driver metrics are 100%. Governance statements 98.87%,
+  branches 96.2%, functions 100%, lines 98.8%; Q026 is a confirmed Tier S failure and
+  required before .7. B05, full decision, replay policy and independent review
+  remain open. No whole-suite, package, changed-line, Linux or hosted acceptance.
+- Caller finding: event-log createGovernanceProjection.reset directly deletes both
+  tables and bypasses repository.clearAll. B11.74.5 now explicitly owns its native
+  failure-integrity review. This source finding was not silently called repaired.
+- Eight of seventeen modules / 57 prepares migrated; nine modules remain. Catalog 453
+  files/two packages and ledger 232 reconcile. Next: friction lifetimes, graph/persona,
+  then retained-owner repositories/construction. Factory activation stays gated.
+- Latest C-drive free observation 2.90 GiB. No external project cleanup, model
+  experiment or production replication was activated.
+
 ## 2026-09-21 - Dream/fact statement lifetime and truthful dream save
 
 - Previous turn progressed at d9736a0; this turn began with a clean tree. Migrated
