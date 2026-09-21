@@ -10,7 +10,7 @@ import { PersonaEntry } from "../../../../src/domain/entities/persona-entry.js";
 async function withFixture(run: (db: OwnedDatabase, released: (count: number) => void) => Promise<void>): Promise<void> {
   const db = new OwnedDatabase(":memory:");
   try {
-    createSchema(db); db.finalizeStatements(); db.transaction(() => {})();
+    createSchema(db); db.transaction(() => {})();
     const statements: Statement[] = [], prepare = db.prepare.bind(db);
     db.prepare = ((...args: Parameters<typeof db.prepare>) => {
       const statement = Reflect.apply(prepare, db, args) as Statement;

@@ -9,7 +9,6 @@ async function withFixture(run: (db: OwnedDatabase, repo: SqliteFrictionReposito
   const db = new OwnedDatabase(":memory:");
   try {
     createSchema(db);
-    db.finalizeStatements();
     const statements = new Set<Statement>(), prepare = db.prepare.bind(db), query = db.query.bind(db);
     db.prepare = ((...args: Parameters<typeof db.prepare>) => {
       const statement = Reflect.apply(prepare, db, args) as Statement;

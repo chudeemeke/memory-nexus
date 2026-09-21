@@ -214,8 +214,9 @@ deadlock and an unnecessary local-feature dependency in the replication branch.
 
 The restart source is `work-items.json.current_item` and the newest JOURNAL entry,
 not the original B01 starting command. B11.74.3 repository and B11.74.4 service
-lifetimes are locally verified. B11.74.5 is active for export/schema/event/security
-statements and the recorded native integrity findings. Factory activation
+lifetimes are locally verified. The B11.74.5 schema slice is locally verified;
+export/event/security statements and recorded native integrity findings remain
+active. Factory activation
 follows this migration; full acceptance
 remains B11.74.7. The source map, rejected experiment and exact next steps are in
 B11.74-plan.md.

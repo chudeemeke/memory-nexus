@@ -13,7 +13,6 @@ function fixture() {
   const db = new OwnedDatabase(":memory:");
   db.exec("PRAGMA foreign_keys = ON");
   createSchema(db);
-  db.finalizeStatements();
   const statements: Statement[] = [], prepare = db.prepare.bind(db);
   db.prepare = ((...args: Parameters<typeof db.prepare>) => {
     const statement = Reflect.apply(prepare, db, args) as Statement;

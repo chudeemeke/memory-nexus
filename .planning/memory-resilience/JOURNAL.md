@@ -1,5 +1,43 @@
 # Memory resilience execution journal
 
+## 2026-09-21 - Schema lifetime and summary-index upgrade verified locally
+
+- Continued from clean 32a25fb. Native RED reproduced retained schema statements,
+  missing inserted-summary search results and stale cleared-summary text. Added
+  scoped PRAGMA/marker statements and a transactional trigger/index upgrade.
+  Existing stale/orphan/duplicate rows reconcile from source sessions. Failure,
+  retry and enclosing caller rollback preserve the prior state; repeated schema
+  initialization does not rebuild the index. Source session rows are unchanged.
+- Final native compatibility group passes 703 tests / 8,422 assertions across
+  34 files on Windows Bun 1.3.14 and 1.4.1. Nine targeted faults detected, including
+  missing disposal, missing transaction and incorrect trigger/rebuild behavior.
+  Eleven changed executable files have diagnostic 100% four metrics. Production
+  and strict changed-driver types and test isolation pass. Evidence is retained
+  in evidence/B11.74.5-schema.json, with raw coverage and full process outputs.
+- The first old-runtime group failed 62 tests while current Bun passed. Old
+  fixture setup finalized all statements after schema initialized transaction
+  controls; Bun 1.3.14 then reused finalized cached controls. Removed only that
+  setup finalization from nine drivers, retaining transaction warm-up, all
+  assertions and final close. The new driver's inspection queries also now have
+  scoped ownership. Failed native evidence is retained; the full group was rerun
+  successfully on both runtimes. Historical adapter fault proofs remain bound to
+  their original inputs, with explicit current schema/fixture compatibility proof.
+- Catalog 459 files / two packages and ledger 236 items reconcile. B11.74.5 remains
+  active: export-service, event-log and secret-audit-service lifetimes still need
+  work. Governance reset atomicity remains a recorded source concern; complete
+  replay failure semantics also need assessment. Main factory remains unchanged.
+- Q019 is promoted from historical candidate to required full schema review,
+  dependent on B11.74.5 and required by B11.74.7/B10. It retains broad friction
+  migration catches, conflated support-probe errors, full SQL/trigger decisions,
+  marker interoperability and representative installed rebuild time/disk costs.
+  B05 counter completeness, changed-line/package, Linux, installed-artifact,
+  hosted CI and independent review acceptance remain open.
+- Consumer migration behavior and verification are documented in
+  docs/plans/2026-09-21-session-summary-index-migration.md. R04 owns broadcast to
+  opted-in consumers before integration/adoption. This draft has not changed an
+  installed database; no consumer action, real-data migration, inference experiment
+  or replication occurred. Temporary runtimes and diagnostic roots were removed.
+
 ## 2026-09-21 - Search/context lifetime checkpoint; explicit quality gaps
 
 - Continued from f8977e8. Context/resolver, FTS and hybrid services now dispose

@@ -725,22 +725,29 @@
       "id": "Q019",
       "stage": "coverage_repair",
       "title": "Verify and repair src/infrastructure/database/schema.ts",
-      "status": "pending_rebaseline",
+      "status": "pending",
       "depends_on": [
-        "B09"
+        "B11.74.5"
       ],
       "scope": "src/infrastructure/database/schema.ts",
       "deliverable": "Reproduce uncovered behavior, add meaningful regression/boundary tests, fix demonstrated defects, satisfy this file's reviewed risk tier.",
       "verification": "Current source-bound four-metric file evidence plus tier-required decision tests. Supersede only with explicit fresh evidence that this candidate is no longer a gap.",
-      "risk": "unclassified",
+      "risk": "S",
       "authorization": "authorized",
       "owner": "memory-nexus",
       "historical_gaps": [
         "branches=92.3"
       ],
       "historical_evidence": "docs/audits/2026-09-19-repair-evidence/per-file-coverage-gaps.json",
-      "evidence": [],
-      "acceptance_record": ".planning/memory-resilience/evidence/Q019.json"
+      "evidence": [
+        ".planning/memory-resilience/evidence/B11.74.5-schema.json"
+      ],
+      "acceptance_record": ".planning/memory-resilience/evidence/Q019.json",
+      "progress": {
+        "current": "Diagnostic100% four metrics. Complete friction migration error handling, FTS probe classification, whole-schema/trigger SQL decisions, marker interoperability, installed rebuild time/disk costs and independent review.",
+        "owner": "memory-nexus",
+        "trigger": "Before B11.74.7/B10/R02; full counter and changed-line/package proof required."
+      }
     },
     {
       "id": "Q020",
@@ -2695,7 +2702,14 @@
       "authorization": "authorized",
       "owner": "memory-nexus",
       "evidence": [],
-      "acceptance_record": ".planning/memory-resilience/evidence/R04.json"
+      "acceptance_record": ".planning/memory-resilience/evidence/R04.json",
+      "progress": {
+        "consumerMigrationNotice": {
+          "document": "docs/plans/2026-09-21-session-summary-index-migration.md",
+          "owner": "memory-nexus",
+          "trigger": "Before integration/adoption: enumerate opted-in consumers, file source-linked migration notifications, retain lint and delivery evidence. Draft is not installed; no consumer action now."
+        }
+      }
     },
     {
       "id": "S01",
@@ -5327,7 +5341,12 @@
           }
         ],
         "restart": "Repository migration scope verified. Continue B11.74.4 search/context service statements, then B11.74.5 before factory activation. Existing quality tasks remain explicit prerequisites to final acceptance.",
-        "remaining": "B05/Q tasks/B11.74.7 retain complete metrics, SQL/decision/caller/platform/review acceptance. No factory activation, canonical data mutation or experiment."
+        "remaining": "B05/Q tasks/B11.74.7 retain complete metrics, SQL/decision/caller/platform/review acceptance. No factory activation, canonical data mutation or experiment.",
+        "sharedSchemaRevalidation": {
+          "evidence": ".planning/memory-resilience/evidence/B11.74.5-schema.json",
+          "source": "Current schema and nine adjusted lifetime fixtures;703tests/8422assertions on both Windows runtimes. Historical per-slice mutation evidence retained at its original inputs.",
+          "scope": "Scoped compatibility only; no full quality/platform acceptance."
+        }
       }
     },
     {
@@ -5353,7 +5372,12 @@
       "progress": {
         "current": "Local lifetime scope verified:14current/17original prepares,136tests/1273assertions on both Windows runtimes,14disposal faults detected.",
         "remaining": "Q007/Q094/Q096-Q099 and B05/B11.74.7 retain correctness/full quality/platform/review acceptance.",
-        "restart": "B11.74.5 export/schema/event/security statement ownership and native integrity findings; factory remains unchanged."
+        "restart": "B11.74.5 export/schema/event/security statement ownership and native integrity findings; factory remains unchanged.",
+        "sharedSchemaRevalidation": {
+          "evidence": ".planning/memory-resilience/evidence/B11.74.5-schema.json",
+          "source": "Current schema and nine adjusted lifetime fixtures;703tests/8422assertions on both Windows runtimes. Historical per-slice mutation evidence retained at its original inputs.",
+          "scope": "Scoped compatibility only; no full quality/platform acceptance."
+        }
       }
     },
     {
@@ -5371,7 +5395,8 @@
       "authorization": "authorized",
       "owner": "memory-nexus",
       "evidence": [
-        ".planning/memory-resilience/B11.74-plan.md"
+        ".planning/memory-resilience/B11.74-plan.md",
+        ".planning/memory-resilience/evidence/B11.74.5-schema.json"
       ],
       "acceptance_record": ".planning/memory-resilience/evidence/B11.74.5.json",
       "retirement_trigger": "Before parent B11.74/B10/R02 acceptance; child local proof does not imply factory or whole-platform acceptance.",
@@ -5386,11 +5411,23 @@
           "evidence": ".planning/memory-resilience/evidence/B11.74.3-memory-state.json"
         },
         "sessionSummaryIndexReview": {
-          "finding": "Source review: sessions_fts_update only runs for non-null/non-empty new summaries. Reproduce whether clearing a summary leaves stale FTS content, and repair if confirmed.",
-          "status": "unverified source concern",
+          "status": "native reproduced and repaired; full schema quality pending Q019",
+          "evidence": ".planning/memory-resilience/evidence/B11.74.5-schema.json",
+          "finding": "Inserted summaries missing and cleared summaries stale under original trigger. Transactional trigger/index upgrade, rollback, retry and enclosing transaction proven.",
           "owner": "memory-nexus",
-          "trigger": "During schema/event-log review, before B11.74.5/factory activation acceptance."
-        }
+          "trigger": "Q019/B11.74.7 before baseline acceptance."
+        },
+        "schema": {
+          "status": "local slice verified",
+          "evidence": ".planning/memory-resilience/evidence/B11.74.5-schema.json",
+          "prepares": 3,
+          "originalPrepares": 2,
+          "tests": 703,
+          "assertions": 8422,
+          "files": 34,
+          "faults": 9
+        },
+        "restart": "Continue export-service, event-log and secret-audit-service native statement ownership; reproduce governance reset partial failure and assess whole-replay integrity before acceptance."
       }
     },
     {
@@ -5439,7 +5476,8 @@
         "Q098",
         "Q099",
         "Q007",
-        "Q094"
+        "Q094",
+        "Q019"
       ],
       "scope": "All B11.74 affected production/test files and native runtime targets",
       "deliverable": "Complete per-file/package/tier/changed-line proof and independent review; dependency barriers can resume",

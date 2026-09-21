@@ -12,7 +12,6 @@ async function withFixture(run: (db: OwnedDatabase, released: (count: number) =>
   try {
     db.exec("PRAGMA foreign_keys = ON");
     createSchema(db);
-    db.finalizeStatements();
     // Initialize connection-owned transaction controls before capturing queries.
     db.transaction(() => {})();
     const statements: Statement[] = [], prepare = db.prepare.bind(db);

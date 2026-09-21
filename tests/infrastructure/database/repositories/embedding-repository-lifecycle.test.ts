@@ -16,7 +16,6 @@ function withFixture(run: (db: OwnedDatabase, repo: EmbeddingRepository, stateme
       INSERT INTO messages_meta (id, session_id, role, content, timestamp) VALUES
       ('one', 'session', 'user', 'first synthetic message', '2026-01-01'),
       ('two', 'session', 'user', 'second synthetic message', '2026-01-01');`);
-    db.finalizeStatements();
     // Bun 1.3 prepares its cached transaction controls through prepare(); 1.4
     // does not. Initialize those connection-owned controls before measuring
     // repository statements. OwnedDatabase still releases them at close.

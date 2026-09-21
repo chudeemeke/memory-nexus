@@ -13,7 +13,6 @@ async function withFixture(run: (db: OwnedDatabase, released: (count: number) =>
   try {
     db.exec("PRAGMA foreign_keys = ON");
     createSchema(db);
-    db.finalizeStatements();
     db.transaction(() => {})();
     const statements: Statement[] = [], prepare = db.prepare.bind(db);
     db.prepare = ((...args: Parameters<typeof db.prepare>) => {

@@ -16,7 +16,6 @@ async function withFixture(run: (db: OwnedDatabase, released: (count: number) =>
     db.exec(`PRAGMA foreign_keys = ON;
       INSERT INTO sessions (id, project_path_encoded, project_path_decoded, project_name, start_time)
       VALUES ('session', 'synthetic', '/synthetic', 'synthetic', '2026-01-01T00:00:00.000Z');`);
-    db.finalizeStatements();
     db.transaction(() => {})();
     const statements: Statement[] = [], prepare = db.prepare.bind(db);
     db.prepare = ((...args: Parameters<typeof db.prepare>) => {

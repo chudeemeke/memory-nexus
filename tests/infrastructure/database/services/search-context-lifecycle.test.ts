@@ -30,7 +30,7 @@ async function withFixture(run: (db: OwnedDatabase, released: (count?: number) =
       VALUES ('session', 'session', 'topic', 'synthetic topic', 'mentions', 1);`);
     db.run("INSERT INTO message_embeddings (rowid, embedding) VALUES (1, vec_f32(?))", [vector]);
     db.exec("INSERT INTO embedding_state (message_id, embedded_at, model_hash, model_name) VALUES (1, '2026-01-01T12:00:00Z', 'synthetic', 'synthetic')");
-    db.finalizeStatements(); db.transaction(() => {})();
+    db.transaction(() => {})();
     const statements: Statement[] = [], prepare = db.prepare.bind(db);
     db.prepare = ((...args: Parameters<typeof db.prepare>) => {
       const statement = Reflect.apply(prepare, db, args) as Statement;

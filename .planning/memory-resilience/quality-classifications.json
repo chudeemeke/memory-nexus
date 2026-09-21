@@ -7681,7 +7681,7 @@
     {
       "path": "src/infrastructure/database/schema.ts",
       "package": "package.json",
-      "sourceHash": "b305279dca037f72b970c65e56f1e22d1098933b0026e9d9baf0b51bb365388f",
+      "sourceHash": "222f66552aaf53d42c9425b4c396c7e0955371b9c31f2b266c005577977f1c5c",
       "tier": "S",
       "rationale": "Creates and drops database objects and defines schema/integrity constraints.",
       "applicability": {
@@ -7690,30 +7690,30 @@
       },
       "decisionStatus": "proposed - independent review pending",
       "inspection": {
-        "sourceRevision": "39c895b13e768bd607070efbc3496d47a821b257",
-        "anchor": "checkFts5Support / createSchema",
-        "scope": "positive critical boundary establishes highest tier; not full correctness acceptance"
+        "sourceRevision": "32a25fb + current source hash",
+        "anchor": "native schema upgrade and caller fixture compatibility",
+        "scope": "Current native group, scoped migration faults and diagnostic metrics; complete quality/review pending."
       },
       "metricApplicability": {
-        "status": "proposed - independent review pending",
-        "evidence": ".planning/memory-resilience/evidence/B04-applicability-probe.json",
-        "sourceHash": "b305279dca037f72b970c65e56f1e22d1098933b0026e9d9baf0b51bb365388f",
-        "disposition": "Measure every positive denominator; individually review zero branch/function denominators against runtime syntax. Observed counts do not prove instrumentation completeness.",
+        "status": "diagnostic - B05/Q019/B11.74.7 and independent review pending",
+        "evidence": ".planning/memory-resilience/evidence/B11.74.5-schema.json",
+        "sourceHash": "222f66552aaf53d42c9425b4c396c7e0955371b9c31f2b266c005577977f1c5c",
+        "disposition": "Scoped100% does not establish complete SQL/instrumenter/changed-line/package acceptance.",
         "metrics": {
-          "statements": {
-            "observedCounterTotal": 57,
-            "proposal": "measure - completeness unverified"
-          },
-          "branches": {
-            "observedCounterTotal": 13,
+          "lines": {
+            "observedCounterTotal": 65,
             "proposal": "measure - completeness unverified"
           },
           "functions": {
-            "observedCounterTotal": 4,
+            "observedCounterTotal": 6,
             "proposal": "measure - completeness unverified"
           },
-          "lines": {
-            "observedCounterTotal": 55,
+          "statements": {
+            "observedCounterTotal": 69,
+            "proposal": "measure - completeness unverified"
+          },
+          "branches": {
+            "observedCounterTotal": 17,
             "proposal": "measure - completeness unverified"
           }
         }
@@ -17512,17 +17512,17 @@
         "reason": "Executable data-integrity driver; no exclusion approved."
       },
       "decisionStatus": "proposed - independent review pending",
-      "sourceHash": "d95141608affa3630a11d714520c7ab25e91071af5cb28030cec5e9e50bd1044",
+      "sourceHash": "3cde8f939f9a1ca7aafec880916777f648022a7e7c66652ae974cd6fb5775e7d",
       "inspection": {
-        "sourceRevision": "569424a + current source hash",
-        "anchor": "core adapter ownership and native write-result integrity",
-        "scope": "Scoped native behavior/metrics/targeted faults; final tier/decision/review acceptance remains pending."
+        "sourceRevision": "32a25fb + current source hash",
+        "anchor": "native schema upgrade and caller fixture compatibility",
+        "scope": "Current native group, scoped migration faults and diagnostic metrics; complete quality/review pending."
       },
       "metricApplicability": {
-        "status": "diagnostic - B05/Q022/Q028/B11.74.7 and independent review pending",
-        "evidence": ".planning/memory-resilience/evidence/B11.74.3-core.json",
-        "sourceHash": "d95141608affa3630a11d714520c7ab25e91071af5cb28030cec5e9e50bd1044",
-        "disposition": "Measure every denominator; scoped100% does not establish full counter or SQL/decision completeness.",
+        "status": "diagnostic - B05/Q019/B11.74.7 and independent review pending",
+        "evidence": ".planning/memory-resilience/evidence/B11.74.5-schema.json",
+        "sourceHash": "3cde8f939f9a1ca7aafec880916777f648022a7e7c66652ae974cd6fb5775e7d",
+        "disposition": "Scoped100% does not establish complete SQL/instrumenter/changed-line/package acceptance.",
         "metrics": {
           "lines": {
             "observedCounterTotal": 229,
@@ -17533,7 +17533,7 @@
             "proposal": "measure - completeness unverified"
           },
           "statements": {
-            "observedCounterTotal": 378,
+            "observedCounterTotal": 377,
             "proposal": "measure - completeness unverified"
           },
           "branches": {
@@ -17553,20 +17553,20 @@
         "reason": "Executable data-integrity driver; no exclusion approved."
       },
       "decisionStatus": "proposed - independent review pending",
-      "sourceHash": "75519052043c8caaacd0e9b3426ae11d77b449ee4489d54d8f05d39bc5fa44f3",
+      "sourceHash": "71585121140624006479f585e897b5205522ae5da298965c7b7da2554eea6758",
       "inspection": {
-        "sourceRevision": "7427dc5 + current source hash",
-        "anchor": "embedding repository scope lifetime and native batch rollback",
-        "scope": "Scoped native behavior and targeted faults; full tier/applicability review remains pending."
+        "sourceRevision": "32a25fb + current source hash",
+        "anchor": "native schema upgrade and caller fixture compatibility",
+        "scope": "Current native group, scoped migration faults and diagnostic metrics; complete quality/review pending."
       },
       "metricApplicability": {
-        "status": "diagnostic - B05/Q021 and independent review pending",
-        "evidence": ".planning/memory-resilience/evidence/B11.74.3-embedding.json",
-        "sourceHash": "75519052043c8caaacd0e9b3426ae11d77b449ee4489d54d8f05d39bc5fa44f3",
-        "disposition": "Measure all denominators; current repository branch gap is a failure, not an exclusion.",
+        "status": "diagnostic - B05/Q019/B11.74.7 and independent review pending",
+        "evidence": ".planning/memory-resilience/evidence/B11.74.5-schema.json",
+        "sourceHash": "71585121140624006479f585e897b5205522ae5da298965c7b7da2554eea6758",
+        "disposition": "Scoped100% does not establish complete SQL/instrumenter/changed-line/package acceptance.",
         "metrics": {
           "lines": {
-            "observedCounterTotal": 91,
+            "observedCounterTotal": 90,
             "proposal": "measure - completeness unverified"
           },
           "functions": {
@@ -17574,7 +17574,7 @@
             "proposal": "measure - completeness unverified"
           },
           "statements": {
-            "observedCounterTotal": 121,
+            "observedCounterTotal": 120,
             "proposal": "measure - completeness unverified"
           },
           "branches": {
@@ -17594,20 +17594,20 @@
         "reason": "Executable data-integrity driver; no exclusion approved."
       },
       "decisionStatus": "proposed - independent review pending",
-      "sourceHash": "291bb95aae9f805b1545caa18388a211df2a057dd437332f259867c005565321",
+      "sourceHash": "1a354968e88693071c1a9330d6da584c4d783d26a3f47fa0ffcf68d38fe99064",
       "inspection": {
-        "sourceRevision": "fd19c2b + current source hash",
-        "anchor": "friction lifecycle and native week-label correction",
-        "scope": "Scoped native behavior/metrics/targeted faults; final tier/decision/review acceptance remains pending."
+        "sourceRevision": "32a25fb + current source hash",
+        "anchor": "native schema upgrade and caller fixture compatibility",
+        "scope": "Current native group, scoped migration faults and diagnostic metrics; complete quality/review pending."
       },
       "metricApplicability": {
-        "status": "diagnostic - B05/B11.74.7 and independent review pending",
-        "evidence": ".planning/memory-resilience/evidence/B11.74.3-friction.json",
-        "sourceHash": "291bb95aae9f805b1545caa18388a211df2a057dd437332f259867c005565321",
-        "disposition": "Measure every denominator; scoped100% does not establish full counter or decision completeness.",
+        "status": "diagnostic - B05/Q019/B11.74.7 and independent review pending",
+        "evidence": ".planning/memory-resilience/evidence/B11.74.5-schema.json",
+        "sourceHash": "1a354968e88693071c1a9330d6da584c4d783d26a3f47fa0ffcf68d38fe99064",
+        "disposition": "Scoped100% does not establish complete SQL/instrumenter/changed-line/package acceptance.",
         "metrics": {
           "lines": {
-            "observedCounterTotal": 96,
+            "observedCounterTotal": 95,
             "proposal": "measure - completeness unverified"
           },
           "functions": {
@@ -17615,7 +17615,7 @@
             "proposal": "measure - completeness unverified"
           },
           "statements": {
-            "observedCounterTotal": 151,
+            "observedCounterTotal": 150,
             "proposal": "measure - completeness unverified"
           },
           "branches": {
@@ -17677,17 +17677,17 @@
         "reason": "Executable data-integrity driver; no exclusion approved."
       },
       "decisionStatus": "proposed - independent review pending",
-      "sourceHash": "5e7e803ab46c0757572b2451e243e6465f734e0cb568f145957f75c2e29922d8",
+      "sourceHash": "f102c7257e58b3b8d3e9a5fb03f22f1313c0197cff8535f6a48270878df816cd",
       "inspection": {
-        "sourceRevision": "4ae77f1 + current source hash",
-        "anchor": "graph/persona disposal and batch result atomicity",
-        "scope": "Scoped native behavior/metrics/targeted faults; final tier/decision/review acceptance remains pending."
+        "sourceRevision": "32a25fb + current source hash",
+        "anchor": "native schema upgrade and caller fixture compatibility",
+        "scope": "Current native group, scoped migration faults and diagnostic metrics; complete quality/review pending."
       },
       "metricApplicability": {
-        "status": "diagnostic - B05/Q024/Q029 and independent review pending",
-        "evidence": ".planning/memory-resilience/evidence/B11.74.3-graph-persona.json",
-        "sourceHash": "5e7e803ab46c0757572b2451e243e6465f734e0cb568f145957f75c2e29922d8",
-        "disposition": "Measure every denominator; scoped100% does not establish full counter or decision completeness.",
+        "status": "diagnostic - B05/Q019/B11.74.7 and independent review pending",
+        "evidence": ".planning/memory-resilience/evidence/B11.74.5-schema.json",
+        "sourceHash": "f102c7257e58b3b8d3e9a5fb03f22f1313c0197cff8535f6a48270878df816cd",
+        "disposition": "Scoped100% does not establish complete SQL/instrumenter/changed-line/package acceptance.",
         "metrics": {
           "lines": {
             "observedCounterTotal": 129,
@@ -17698,7 +17698,7 @@
             "proposal": "measure - completeness unverified"
           },
           "statements": {
-            "observedCounterTotal": 210,
+            "observedCounterTotal": 209,
             "proposal": "measure - completeness unverified"
           },
           "branches": {
@@ -17760,20 +17760,20 @@
         "reason": "Executable data-integrity driver; no exclusion approved."
       },
       "decisionStatus": "proposed - independent review pending",
-      "sourceHash": "547ad18aab771abdd9c53c97422d542979253f6954a8a4d96665f76a80e481fc",
+      "sourceHash": "5fe8051d3cea1dd46beca34648aef52ddad1397e6eecbba16f1bb47b2bb22b1f",
       "inspection": {
-        "sourceRevision": "72d2662 + current source hash",
-        "anchor": "ingestion adapter ownership and native full-rollback handling",
-        "scope": "Scoped native behavior/metrics/targeted faults; final tier/decision/review acceptance remains pending."
+        "sourceRevision": "32a25fb + current source hash",
+        "anchor": "native schema upgrade and caller fixture compatibility",
+        "scope": "Current native group, scoped migration faults and diagnostic metrics; complete quality/review pending."
       },
       "metricApplicability": {
-        "status": "diagnostic - B05/Q025/Q030 and independent review pending",
-        "evidence": ".planning/memory-resilience/evidence/B11.74.3-ingestion.json",
-        "sourceHash": "547ad18aab771abdd9c53c97422d542979253f6954a8a4d96665f76a80e481fc",
-        "disposition": "Measure every denominator; scoped100% does not establish full counter or SQL/decision completeness.",
+        "status": "diagnostic - B05/Q019/B11.74.7 and independent review pending",
+        "evidence": ".planning/memory-resilience/evidence/B11.74.5-schema.json",
+        "sourceHash": "5fe8051d3cea1dd46beca34648aef52ddad1397e6eecbba16f1bb47b2bb22b1f",
+        "disposition": "Scoped100% does not establish complete SQL/instrumenter/changed-line/package acceptance.",
         "metrics": {
           "lines": {
-            "observedCounterTotal": 133,
+            "observedCounterTotal": 132,
             "proposal": "measure - completeness unverified"
           },
           "functions": {
@@ -17781,7 +17781,7 @@
             "proposal": "measure - completeness unverified"
           },
           "statements": {
-            "observedCounterTotal": 220,
+            "observedCounterTotal": 219,
             "proposal": "measure - completeness unverified"
           },
           "branches": {
@@ -17801,20 +17801,20 @@
         "reason": "Executable data-integrity driver; no exclusion approved."
       },
       "decisionStatus": "proposed - independent review pending",
-      "sourceHash": "c8db5b2a631cad8978af438ea8ed0c6f419398e889523d65bd2c760f76c2d502",
+      "sourceHash": "a5d9a1ceae9273cdec0d4d3f04cbb759575ed52eb8526cf6e7f821aab58acc88",
       "inspection": {
-        "sourceRevision": "d9736a0 + current source hash",
-        "anchor": "dream/fact scope disposal and native failure recovery",
-        "scope": "Scoped native behavior/metrics/faults; final tier/applicability and persistence review remains pending."
+        "sourceRevision": "32a25fb + current source hash",
+        "anchor": "native schema upgrade and caller fixture compatibility",
+        "scope": "Current native group, scoped migration faults and diagnostic metrics; complete quality/review pending."
       },
       "metricApplicability": {
-        "status": "diagnostic - B05/Q020/Q023 and independent review pending",
-        "evidence": ".planning/memory-resilience/evidence/B11.74.3-knowledge.json",
-        "sourceHash": "c8db5b2a631cad8978af438ea8ed0c6f419398e889523d65bd2c760f76c2d502",
-        "disposition": "Measure every denominator. Dream branch gap remains failure; zero driver branches require instrumenter completeness review.",
+        "status": "diagnostic - B05/Q019/B11.74.7 and independent review pending",
+        "evidence": ".planning/memory-resilience/evidence/B11.74.5-schema.json",
+        "sourceHash": "a5d9a1ceae9273cdec0d4d3f04cbb759575ed52eb8526cf6e7f821aab58acc88",
+        "disposition": "Scoped100% does not establish complete SQL/instrumenter/changed-line/package acceptance.",
         "metrics": {
           "lines": {
-            "observedCounterTotal": 135,
+            "observedCounterTotal": 134,
             "proposal": "measure - completeness unverified"
           },
           "functions": {
@@ -17822,7 +17822,7 @@
             "proposal": "measure - completeness unverified"
           },
           "statements": {
-            "observedCounterTotal": 201,
+            "observedCounterTotal": 200,
             "proposal": "measure - completeness unverified"
           },
           "branches": {
@@ -17842,20 +17842,20 @@
         "reason": "Executable data-integrity driver; no exclusion approved."
       },
       "decisionStatus": "proposed - independent review pending",
-      "sourceHash": "0d4f2954459ff0d52ab3aa15620f1f3d0972d714aadbd44229adf78d5a9f6b48",
+      "sourceHash": "b7555060186325af12a5a55f9aa1ca064a8724eeb1daaa84cbb0edac80bfa8a6",
       "inspection": {
-        "sourceRevision": "9763f74 + current source hash",
-        "anchor": "memory-file/governance native disposal and transaction integrity",
-        "scope": "Scoped native behavior/metrics/faults and caller integration; full tier/decision/review acceptance remains pending."
+        "sourceRevision": "32a25fb + current source hash",
+        "anchor": "native schema upgrade and caller fixture compatibility",
+        "scope": "Current native group, scoped migration faults and diagnostic metrics; complete quality/review pending."
       },
       "metricApplicability": {
-        "status": "diagnostic - B05/Q026 and independent review pending",
-        "evidence": ".planning/memory-resilience/evidence/B11.74.3-memory-state.json",
-        "sourceHash": "0d4f2954459ff0d52ab3aa15620f1f3d0972d714aadbd44229adf78d5a9f6b48",
-        "disposition": "Measure every denominator; governance TierS branch gap remains failure.",
+        "status": "diagnostic - B05/Q019/B11.74.7 and independent review pending",
+        "evidence": ".planning/memory-resilience/evidence/B11.74.5-schema.json",
+        "sourceHash": "b7555060186325af12a5a55f9aa1ca064a8724eeb1daaa84cbb0edac80bfa8a6",
+        "disposition": "Scoped100% does not establish complete SQL/instrumenter/changed-line/package acceptance.",
         "metrics": {
           "lines": {
-            "observedCounterTotal": 134,
+            "observedCounterTotal": 133,
             "proposal": "measure - completeness unverified"
           },
           "functions": {
@@ -17863,7 +17863,7 @@
             "proposal": "measure - completeness unverified"
           },
           "statements": {
-            "observedCounterTotal": 193,
+            "observedCounterTotal": 192,
             "proposal": "measure - completeness unverified"
           },
           "branches": {
@@ -17967,20 +17967,20 @@
         "reason": "Executable data-integrity lifecycle test; no metric exclusion approved."
       },
       "decisionStatus": "proposed - independent review pending",
-      "sourceHash": "5c2d545b5c44aec8d6d6874cccdd51d6ba08052abab7cdcdec9ed4a8a157f121",
+      "sourceHash": "10c8d2ea0941bd479cb0f27f6359a96a009b8657ddbd1a16d5635972127e2db9",
       "inspection": {
-        "sourceRevision": "257c7e6 + current source hash",
-        "anchor": "record repository scoped statement disposal",
-        "scope": "Current source, native behavior and targeted disposal/persistence decision checks; full tier/applicability review remains pending."
+        "sourceRevision": "32a25fb + current source hash",
+        "anchor": "native schema upgrade and caller fixture compatibility",
+        "scope": "Current native group, scoped migration faults and diagnostic metrics; complete quality/review pending."
       },
       "metricApplicability": {
-        "status": "diagnostic - B05 and independent review pending",
-        "evidence": ".planning/memory-resilience/evidence/B11.74.3-records.json",
-        "sourceHash": "5c2d545b5c44aec8d6d6874cccdd51d6ba08052abab7cdcdec9ed4a8a157f121",
-        "disposition": "Measure every denominator. Optional-chain completeness and zero driver branches still require B05 and individual review; no exclusion.",
+        "status": "diagnostic - B05/Q019/B11.74.7 and independent review pending",
+        "evidence": ".planning/memory-resilience/evidence/B11.74.5-schema.json",
+        "sourceHash": "10c8d2ea0941bd479cb0f27f6359a96a009b8657ddbd1a16d5635972127e2db9",
+        "disposition": "Scoped100% does not establish complete SQL/instrumenter/changed-line/package acceptance.",
         "metrics": {
           "lines": {
-            "observedCounterTotal": 114,
+            "observedCounterTotal": 113,
             "proposal": "measure - completeness unverified"
           },
           "functions": {
@@ -17988,11 +17988,52 @@
             "proposal": "measure - completeness unverified"
           },
           "statements": {
-            "observedCounterTotal": 167,
+            "observedCounterTotal": 166,
             "proposal": "measure - completeness unverified"
           },
           "branches": {
             "observedCounterTotal": 0,
+            "proposal": "measure - completeness unverified"
+          }
+        }
+      }
+    },
+    {
+      "path": "tests/infrastructure/database/schema-lifecycle.test.ts",
+      "package": "package.json",
+      "tier": "S",
+      "rationale": "Native driver verifies destructive derived-index migration, rollback/retry and deterministic statement ownership.",
+      "applicability": {
+        "mode": "measure",
+        "reason": "Executable integrity driver; no exclusion approved."
+      },
+      "decisionStatus": "proposed - independent review pending",
+      "sourceHash": "40cb6d48ce425baf4b2521ce363ca6e9d187e88a8e29742860c939742aec2d62",
+      "inspection": {
+        "sourceRevision": "32a25fb + current source hash",
+        "anchor": "native schema upgrade and caller fixture compatibility",
+        "scope": "Current native group, scoped migration faults and diagnostic metrics; complete quality/review pending."
+      },
+      "metricApplicability": {
+        "status": "diagnostic - B05/Q019/B11.74.7 and independent review pending",
+        "evidence": ".planning/memory-resilience/evidence/B11.74.5-schema.json",
+        "sourceHash": "40cb6d48ce425baf4b2521ce363ca6e9d187e88a8e29742860c939742aec2d62",
+        "disposition": "Scoped100% does not establish complete SQL/instrumenter/changed-line/package acceptance.",
+        "metrics": {
+          "lines": {
+            "observedCounterTotal": 104,
+            "proposal": "measure - completeness unverified"
+          },
+          "functions": {
+            "observedCounterTotal": 31,
+            "proposal": "measure - completeness unverified"
+          },
+          "statements": {
+            "observedCounterTotal": 144,
+            "proposal": "measure - completeness unverified"
+          },
+          "branches": {
+            "observedCounterTotal": 4,
             "proposal": "measure - completeness unverified"
           }
         }
@@ -18008,17 +18049,17 @@
         "reason": "Executable integrity driver; no exclusion approved."
       },
       "decisionStatus": "proposed - independent review pending",
-      "sourceHash": "d03cb70f065948b27ab8c41988ff82686da3c69e7efbda33d93b4b05a746fc3f",
+      "sourceHash": "8694cb48db76790e01559dbeefbf3ac128bb566684012303c92c2e4470e5860e",
       "inspection": {
-        "sourceRevision": "f8977e8 + current source hash",
-        "anchor": "native search/context statement ownership",
-        "scope": "Scoped native behavior and disposal faults; full quality/review pending."
+        "sourceRevision": "32a25fb + current source hash",
+        "anchor": "native schema upgrade and caller fixture compatibility",
+        "scope": "Current native group, scoped migration faults and diagnostic metrics; complete quality/review pending."
       },
       "metricApplicability": {
-        "status": "diagnostic - B05/Q007/Q094/Q096-Q099 and independent review pending",
-        "evidence": ".planning/memory-resilience/evidence/B11.74.4.json",
-        "sourceHash": "d03cb70f065948b27ab8c41988ff82686da3c69e7efbda33d93b4b05a746fc3f",
-        "disposition": "Every denominator measured; uncovered behavior remains required work, no exception or full quality acceptance.",
+        "status": "diagnostic - B05/Q019/B11.74.7 and independent review pending",
+        "evidence": ".planning/memory-resilience/evidence/B11.74.5-schema.json",
+        "sourceHash": "8694cb48db76790e01559dbeefbf3ac128bb566684012303c92c2e4470e5860e",
+        "disposition": "Scoped100% does not establish complete SQL/instrumenter/changed-line/package acceptance.",
         "metrics": {
           "lines": {
             "observedCounterTotal": 105,
@@ -18029,7 +18070,7 @@
             "proposal": "measure - completeness unverified"
           },
           "statements": {
-            "observedCounterTotal": 159,
+            "observedCounterTotal": 158,
             "proposal": "measure - completeness unverified"
           },
           "branches": {
