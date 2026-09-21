@@ -6609,7 +6609,7 @@
     {
       "path": "src/infrastructure/database/repositories/entity-repository.ts",
       "package": "package.json",
-      "sourceHash": "0f70a9dd80f94e157312cd8032e541fb4b0fe334ae0bfa74e888efdb9fbb0e0f",
+      "sourceHash": "5972c037eae3de7ddc1a6f949293ddbfcd9b691368eebd48d54d851c06303d23",
       "tier": "S",
       "rationale": "Inspected SQLite INSERT/upsert statement persists entities records. This establishes the data-integrity tier; transaction, conflict and deletion correctness remain separate verification obligations.",
       "applicability": {
@@ -6618,30 +6618,30 @@
       },
       "decisionStatus": "proposed - independent review pending",
       "inspection": {
-        "sourceRevision": "39c895b13e768bd607070efbc3496d47a821b257",
-        "anchor": "prepared INSERT into entities",
-        "scope": "positive critical boundary establishes highest tier; not full correctness acceptance"
+        "sourceRevision": "569424a + current source hash",
+        "anchor": "core adapter ownership and native write-result integrity",
+        "scope": "Scoped native behavior/metrics/targeted faults; final tier/decision/review acceptance remains pending."
       },
       "metricApplicability": {
-        "status": "proposed - independent review pending",
-        "evidence": ".planning/memory-resilience/evidence/B04-applicability-probe.json",
-        "sourceHash": "0f70a9dd80f94e157312cd8032e541fb4b0fe334ae0bfa74e888efdb9fbb0e0f",
-        "disposition": "Measure every positive denominator; individually review zero branch/function denominators against runtime syntax. Observed counts do not prove instrumentation completeness. Optional-chain syntax is present; synthetic evidence shows current instrumentation omits its decision counters. B05.1 owns source-mapped branch proof before numeric acceptance.",
+        "status": "diagnostic - B05/Q022/Q028/B11.74.7 and independent review pending",
+        "evidence": ".planning/memory-resilience/evidence/B11.74.3-core.json",
+        "sourceHash": "5972c037eae3de7ddc1a6f949293ddbfcd9b691368eebd48d54d851c06303d23",
+        "disposition": "Measure every denominator; scoped100% does not establish full counter or SQL/decision completeness.",
         "metrics": {
-          "statements": {
-            "observedCounterTotal": 61,
-            "proposal": "measure - completeness unverified"
-          },
-          "branches": {
-            "observedCounterTotal": 26,
+          "lines": {
+            "observedCounterTotal": 67,
             "proposal": "measure - completeness unverified"
           },
           "functions": {
-            "observedCounterTotal": 13,
+            "observedCounterTotal": 16,
             "proposal": "measure - completeness unverified"
           },
-          "lines": {
-            "observedCounterTotal": 59,
+          "statements": {
+            "observedCounterTotal": 74,
+            "proposal": "measure - completeness unverified"
+          },
+          "branches": {
+            "observedCounterTotal": 36,
             "proposal": "measure - completeness unverified"
           }
         }
@@ -7391,7 +7391,7 @@
     {
       "path": "src/infrastructure/database/repositories/message-repository.ts",
       "package": "package.json",
-      "sourceHash": "e53cf864415882e45cf7fff0332712cdc337a1f24aed51d89687a6800690639c",
+      "sourceHash": "9eacf49c7d8f67a72005980a3ea80a8748ef874ef802964a0d65e19856cd8d06",
       "tier": "S",
       "rationale": "Inspected SQLite INSERT/upsert statement persists messages_meta records. This establishes the data-integrity tier; transaction, conflict and deletion correctness remain separate verification obligations.",
       "applicability": {
@@ -7400,30 +7400,30 @@
       },
       "decisionStatus": "proposed - independent review pending",
       "inspection": {
-        "sourceRevision": "39c895b13e768bd607070efbc3496d47a821b257",
-        "anchor": "prepared INSERT into messages_meta",
-        "scope": "positive critical boundary establishes highest tier; not full correctness acceptance"
+        "sourceRevision": "569424a + current source hash",
+        "anchor": "core adapter ownership and native write-result integrity",
+        "scope": "Scoped native behavior/metrics/targeted faults; final tier/decision/review acceptance remains pending."
       },
       "metricApplicability": {
-        "status": "proposed - independent review pending",
-        "evidence": ".planning/memory-resilience/evidence/B04-applicability-probe.json",
-        "sourceHash": "e53cf864415882e45cf7fff0332712cdc337a1f24aed51d89687a6800690639c",
-        "disposition": "Measure every positive denominator; individually review zero branch/function denominators against runtime syntax. Observed counts do not prove instrumentation completeness. Optional-chain syntax is present; synthetic evidence shows current instrumentation omits its decision counters. B05.1 owns source-mapped branch proof before numeric acceptance.",
+        "status": "diagnostic - B05/Q022/Q028/B11.74.7 and independent review pending",
+        "evidence": ".planning/memory-resilience/evidence/B11.74.3-core.json",
+        "sourceHash": "9eacf49c7d8f67a72005980a3ea80a8748ef874ef802964a0d65e19856cd8d06",
+        "disposition": "Measure every denominator; scoped100% does not establish full counter or SQL/decision completeness.",
         "metrics": {
-          "statements": {
-            "observedCounterTotal": 34,
-            "proposal": "measure - completeness unverified"
-          },
-          "branches": {
-            "observedCounterTotal": 10,
+          "lines": {
+            "observedCounterTotal": 36,
             "proposal": "measure - completeness unverified"
           },
           "functions": {
-            "observedCounterTotal": 8,
+            "observedCounterTotal": 10,
             "proposal": "measure - completeness unverified"
           },
-          "lines": {
-            "observedCounterTotal": 32,
+          "statements": {
+            "observedCounterTotal": 40,
+            "proposal": "measure - completeness unverified"
+          },
+          "branches": {
+            "observedCounterTotal": 14,
             "proposal": "measure - completeness unverified"
           }
         }
@@ -7515,7 +7515,7 @@
     {
       "path": "src/infrastructure/database/repositories/session-repository.ts",
       "package": "package.json",
-      "sourceHash": "322fc36a8a28a92c21a87f74960cba1c545685c04ac06c4cac5ff449e62ac728",
+      "sourceHash": "c88238ea4222e5bd16643c98358473006b5c3746087199667bf449f54fab86a3",
       "tier": "S",
       "rationale": "Inspected SQLite INSERT/upsert statement persists sessions records. This establishes the data-integrity tier; transaction, conflict and deletion correctness remain separate verification obligations.",
       "applicability": {
@@ -7524,30 +7524,30 @@
       },
       "decisionStatus": "proposed - independent review pending",
       "inspection": {
-        "sourceRevision": "39c895b13e768bd607070efbc3496d47a821b257",
-        "anchor": "prepared INSERT into sessions",
-        "scope": "positive critical boundary establishes highest tier; not full correctness acceptance"
+        "sourceRevision": "569424a + current source hash",
+        "anchor": "core adapter ownership and native write-result integrity",
+        "scope": "Scoped native behavior/metrics/targeted faults; final tier/decision/review acceptance remains pending."
       },
       "metricApplicability": {
-        "status": "proposed - independent review pending",
-        "evidence": ".planning/memory-resilience/evidence/B04-applicability-probe.json",
-        "sourceHash": "322fc36a8a28a92c21a87f74960cba1c545685c04ac06c4cac5ff449e62ac728",
-        "disposition": "Measure every positive denominator; individually review zero branch/function denominators against runtime syntax. Observed counts do not prove instrumentation completeness. Optional-chain syntax is present; synthetic evidence shows current instrumentation omits its decision counters. B05.1 owns source-mapped branch proof before numeric acceptance.",
+        "status": "diagnostic - B05/Q022/Q028/B11.74.7 and independent review pending",
+        "evidence": ".planning/memory-resilience/evidence/B11.74.3-core.json",
+        "sourceHash": "c88238ea4222e5bd16643c98358473006b5c3746087199667bf449f54fab86a3",
+        "disposition": "Measure every denominator; scoped100% does not establish full counter or SQL/decision completeness.",
         "metrics": {
-          "statements": {
-            "observedCounterTotal": 77,
-            "proposal": "measure - completeness unverified"
-          },
-          "branches": {
-            "observedCounterTotal": 25,
+          "lines": {
+            "observedCounterTotal": 65,
             "proposal": "measure - completeness unverified"
           },
           "functions": {
-            "observedCounterTotal": 23,
+            "observedCounterTotal": 24,
             "proposal": "measure - completeness unverified"
           },
-          "lines": {
-            "observedCounterTotal": 70,
+          "statements": {
+            "observedCounterTotal": 72,
+            "proposal": "measure - completeness unverified"
+          },
+          "branches": {
+            "observedCounterTotal": 23,
             "proposal": "measure - completeness unverified"
           }
         }
@@ -17501,6 +17501,47 @@
         "sourceHash": "c9d9edafc637d537d53fc14c4edf0d154f303c396372638323b96bd478657d30",
         "diagnostic": ".planning/memory-resilience/evidence/B11.1-helper-metrics.json",
         "reason": "Current isolated direct-Istanbul diagnostic reports all four metrics at 100%; complete decision proof, instrumenter acceptance and independent review remain required."
+      }
+    },
+    {
+      "path": "tests/infrastructure/database/repositories/core-lifecycle.test.ts",
+      "package": "package.json",
+      "tier": "S",
+      "rationale": "Synthetic SQLite driver verifies core persistence, native rollback, truthful results, SQL parameter binding and deterministic statement ownership.",
+      "applicability": {
+        "mode": "measure",
+        "reason": "Executable data-integrity driver; no exclusion approved."
+      },
+      "decisionStatus": "proposed - independent review pending",
+      "sourceHash": "d95141608affa3630a11d714520c7ab25e91071af5cb28030cec5e9e50bd1044",
+      "inspection": {
+        "sourceRevision": "569424a + current source hash",
+        "anchor": "core adapter ownership and native write-result integrity",
+        "scope": "Scoped native behavior/metrics/targeted faults; final tier/decision/review acceptance remains pending."
+      },
+      "metricApplicability": {
+        "status": "diagnostic - B05/Q022/Q028/B11.74.7 and independent review pending",
+        "evidence": ".planning/memory-resilience/evidence/B11.74.3-core.json",
+        "sourceHash": "d95141608affa3630a11d714520c7ab25e91071af5cb28030cec5e9e50bd1044",
+        "disposition": "Measure every denominator; scoped100% does not establish full counter or SQL/decision completeness.",
+        "metrics": {
+          "lines": {
+            "observedCounterTotal": 229,
+            "proposal": "measure - completeness unverified"
+          },
+          "functions": {
+            "observedCounterTotal": 43,
+            "proposal": "measure - completeness unverified"
+          },
+          "statements": {
+            "observedCounterTotal": 378,
+            "proposal": "measure - completeness unverified"
+          },
+          "branches": {
+            "observedCounterTotal": 6,
+            "proposal": "measure - completeness unverified"
+          }
+        }
       }
     },
     {

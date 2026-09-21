@@ -1,0 +1,1048 @@
+{
+  "item_id": "B11.74.3",
+  "status": "verified - repository statement-lifetime scope only",
+  "recordedAt": "2026-09-21T21:56:10.337Z",
+  "startingRevision": "569424a8d5a095e8080b52f5372fafa9f014653f",
+  "audit": {
+    "recordedAt": "2026-09-21T21:52:17.962Z",
+    "scope": "All seventeen mapped repository adapters. Static ownership proof plus per-file native lifecycle evidence is required; this does not accept factory/platform/full quality.",
+    "rows": [
+      {
+        "path": "src/infrastructure/database/repositories/backfill-state-repository.ts",
+        "sourceHash": "b89a99657cd121ac7164d9318e05fdc68258bb717f6cb0de4238054414d264d6",
+        "originalPrepareSites": 4,
+        "prepares": [
+          {
+            "line": 28,
+            "owner": "findBySessionId",
+            "lifetime": "using scope"
+          },
+          {
+            "line": 36,
+            "owner": "findAll",
+            "lifetime": "using scope"
+          },
+          {
+            "line": 43,
+            "owner": "save",
+            "lifetime": "using scope"
+          },
+          {
+            "line": 58,
+            "owner": "countByStatus",
+            "lifetime": "using scope"
+          }
+        ],
+        "helperCalls": [],
+        "queries": [],
+        "retained": []
+      },
+      {
+        "path": "src/infrastructure/database/repositories/dream-repository.ts",
+        "sourceHash": "936563a118406d3f75ab3b41cf97d7199c895702cd811683fe748eaac48d917d",
+        "originalPrepareSites": 5,
+        "prepares": [
+          {
+            "line": 43,
+            "owner": "save",
+            "lifetime": "using scope"
+          },
+          {
+            "line": 80,
+            "owner": "findByDreamId",
+            "lifetime": "using scope"
+          },
+          {
+            "line": 107,
+            "owner": "findAll",
+            "lifetime": "using scope"
+          },
+          {
+            "line": 130,
+            "owner": "deleteByProject",
+            "lifetime": "using scope"
+          },
+          {
+            "line": 135,
+            "owner": "clearAll",
+            "lifetime": "using scope"
+          }
+        ],
+        "helperCalls": [],
+        "queries": [],
+        "retained": []
+      },
+      {
+        "path": "src/infrastructure/database/repositories/embedding-repository.ts",
+        "sourceHash": "1dff7097ede99c1809085669cf40f2baa3190b099f655538e059ff0f9d26b4ed",
+        "originalPrepareSites": 15,
+        "prepares": [
+          {
+            "line": 58,
+            "owner": "findUnembedded",
+            "lifetime": "using scope"
+          },
+          {
+            "line": 73,
+            "owner": "findUnembedded",
+            "lifetime": "using scope"
+          },
+          {
+            "line": 96,
+            "owner": "markSkipped",
+            "lifetime": "using scope"
+          },
+          {
+            "line": 138,
+            "owner": "getSkippedCount",
+            "lifetime": "using scope"
+          },
+          {
+            "line": 145,
+            "owner": "getSkippedCount",
+            "lifetime": "using scope"
+          },
+          {
+            "line": 166,
+            "owner": "storeBatch",
+            "lifetime": "using scope"
+          },
+          {
+            "line": 169,
+            "owner": "storeBatch",
+            "lifetime": "using scope"
+          },
+          {
+            "line": 172,
+            "owner": "storeBatch",
+            "lifetime": "using scope"
+          },
+          {
+            "line": 201,
+            "owner": "getStoredModelHash",
+            "lifetime": "using scope"
+          },
+          {
+            "line": 217,
+            "owner": "getStoredModelName",
+            "lifetime": "using scope"
+          },
+          {
+            "line": 241,
+            "owner": "getEmbeddedCount",
+            "lifetime": "using scope"
+          },
+          {
+            "line": 254,
+            "owner": "getTotalMessageCount",
+            "lifetime": "using scope"
+          },
+          {
+            "line": 273,
+            "owner": "vectorKnnSearch",
+            "lifetime": "using scope"
+          },
+          {
+            "line": 292,
+            "owner": "getStoredEmbeddingDimensions",
+            "lifetime": "using scope"
+          },
+          {
+            "line": 298,
+            "owner": "getStoredEmbeddingDimensions",
+            "lifetime": "using scope"
+          }
+        ],
+        "helperCalls": [],
+        "queries": [],
+        "retained": []
+      },
+      {
+        "path": "src/infrastructure/database/repositories/entity-repository.ts",
+        "sourceHash": "5972c037eae3de7ddc1a6f949293ddbfcd9b691368eebd48d54d851c06303d23",
+        "originalPrepareSites": 9,
+        "prepares": [
+          {
+            "line": 47,
+            "owner": "findById",
+            "lifetime": "using scope"
+          },
+          {
+            "line": 68,
+            "owner": "findByName",
+            "lifetime": "using scope"
+          },
+          {
+            "line": 84,
+            "owner": "findBySession",
+            "lifetime": "using scope"
+          },
+          {
+            "line": 122,
+            "owner": "findByType",
+            "lifetime": "using scope"
+          },
+          {
+            "line": 229,
+            "owner": "linkToSession",
+            "lifetime": "using scope"
+          },
+          {
+            "line": 252,
+            "owner": "linkEntities",
+            "lifetime": "using scope"
+          },
+          {
+            "line": 279,
+            "owner": "prepareInsert",
+            "lifetime": "returned to scoped helper callers"
+          },
+          {
+            "line": 286,
+            "owner": "prepareExists",
+            "lifetime": "returned to scoped helper callers"
+          },
+          {
+            "line": 292,
+            "owner": "prepareUpdateConfidence",
+            "lifetime": "returned to scoped helper callers"
+          }
+        ],
+        "helperCalls": [
+          {
+            "helper": "prepareExists",
+            "owner": "save",
+            "line": 133
+          },
+          {
+            "helper": "prepareInsert",
+            "owner": "save",
+            "line": 134
+          },
+          {
+            "helper": "prepareUpdateConfidence",
+            "owner": "save",
+            "line": 135
+          },
+          {
+            "helper": "prepareExists",
+            "owner": "saveMany",
+            "line": 177
+          },
+          {
+            "helper": "prepareInsert",
+            "owner": "saveMany",
+            "line": 178
+          },
+          {
+            "helper": "prepareUpdateConfidence",
+            "owner": "saveMany",
+            "line": 179
+          }
+        ],
+        "queries": [],
+        "retained": []
+      },
+      {
+        "path": "src/infrastructure/database/repositories/extraction-log-repository.ts",
+        "sourceHash": "08ec06dbb8c2279e458409b81723b952db1903a83ad4af8689420ae38f9c1e84",
+        "originalPrepareSites": 3,
+        "prepares": [
+          {
+            "line": 31,
+            "owner": "findById",
+            "lifetime": "using scope"
+          },
+          {
+            "line": 39,
+            "owner": "save",
+            "lifetime": "using scope"
+          },
+          {
+            "line": 60,
+            "owner": "findAll",
+            "lifetime": "using scope"
+          }
+        ],
+        "helperCalls": [],
+        "queries": [],
+        "retained": []
+      },
+      {
+        "path": "src/infrastructure/database/repositories/extraction-state-repository.ts",
+        "sourceHash": "6bc082eb0db0bfe5a144c07a5fbce8ae5da1afa7d713df68371eecbdbeb5af4a",
+        "originalPrepareSites": 4,
+        "prepares": [
+          {
+            "line": 66,
+            "owner": "findById",
+            "lifetime": "using scope"
+          },
+          {
+            "line": 86,
+            "owner": "findBySessionPath",
+            "lifetime": "using scope"
+          },
+          {
+            "line": 106,
+            "owner": "findPending",
+            "lifetime": "using scope"
+          },
+          {
+            "line": 125,
+            "owner": "save",
+            "lifetime": "using scope"
+          }
+        ],
+        "helperCalls": [],
+        "queries": [],
+        "retained": []
+      },
+      {
+        "path": "src/infrastructure/database/repositories/fact-repository.ts",
+        "sourceHash": "783181485ab8cb69901c4075725dfb4a068d656a2fe4b7e9da5107115cb2d46b",
+        "originalPrepareSites": 12,
+        "prepares": [
+          {
+            "line": 30,
+            "owner": "findById",
+            "lifetime": "using scope"
+          },
+          {
+            "line": 38,
+            "owner": "findByUuid",
+            "lifetime": "using scope"
+          },
+          {
+            "line": 46,
+            "owner": "findByProject",
+            "lifetime": "using scope"
+          },
+          {
+            "line": 53,
+            "owner": "findRecent",
+            "lifetime": "using scope"
+          },
+          {
+            "line": 66,
+            "owner": "save",
+            "lifetime": "using scope"
+          },
+          {
+            "line": 83,
+            "owner": "save",
+            "lifetime": "using scope"
+          },
+          {
+            "line": 108,
+            "owner": "saveMany",
+            "lifetime": "using scope"
+          },
+          {
+            "line": 112,
+            "owner": "saveMany",
+            "lifetime": "using scope"
+          },
+          {
+            "line": 129,
+            "owner": "saveMany",
+            "lifetime": "using scope"
+          },
+          {
+            "line": 154,
+            "owner": "search",
+            "lifetime": "using scope"
+          },
+          {
+            "line": 167,
+            "owner": "superseded",
+            "lifetime": "using scope"
+          },
+          {
+            "line": 177,
+            "owner": "findAll",
+            "lifetime": "using scope"
+          }
+        ],
+        "helperCalls": [],
+        "queries": [],
+        "retained": []
+      },
+      {
+        "path": "src/infrastructure/database/repositories/friction-repository.ts",
+        "sourceHash": "121d007cbc53cb02dc80847d749f2c566ec0574b2daa076f7d3337cc2024b7fb",
+        "originalPrepareSites": 19,
+        "prepares": [
+          {
+            "line": 56,
+            "owner": "save",
+            "lifetime": "using scope"
+          },
+          {
+            "line": 93,
+            "owner": "findById",
+            "lifetime": "using scope"
+          },
+          {
+            "line": 101,
+            "owner": "findOpen",
+            "lifetime": "using scope"
+          },
+          {
+            "line": 143,
+            "owner": "findAll",
+            "lifetime": "using scope"
+          },
+          {
+            "line": 150,
+            "owner": "query",
+            "lifetime": "using scope"
+          },
+          {
+            "line": 161,
+            "owner": "query",
+            "lifetime": "using scope"
+          },
+          {
+            "line": 173,
+            "owner": "resolve",
+            "lifetime": "using scope"
+          },
+          {
+            "line": 184,
+            "owner": "updateStatus",
+            "lifetime": "using scope"
+          },
+          {
+            "line": 197,
+            "owner": "getStats",
+            "lifetime": "using scope"
+          },
+          {
+            "line": 216,
+            "owner": "getStats",
+            "lifetime": "using scope"
+          },
+          {
+            "line": 229,
+            "owner": "getStats",
+            "lifetime": "using scope"
+          },
+          {
+            "line": 240,
+            "owner": "getStats",
+            "lifetime": "using scope"
+          },
+          {
+            "line": 251,
+            "owner": "getStats",
+            "lifetime": "using scope"
+          },
+          {
+            "line": 303,
+            "owner": "getWeeklyTrends",
+            "lifetime": "using scope"
+          },
+          {
+            "line": 315,
+            "owner": "getWeeklyTrends",
+            "lifetime": "using scope"
+          },
+          {
+            "line": 335,
+            "owner": "markReviewed",
+            "lifetime": "using scope"
+          },
+          {
+            "line": 342,
+            "owner": "findPatterns",
+            "lifetime": "using scope"
+          },
+          {
+            "line": 357,
+            "owner": "findPatterns",
+            "lifetime": "using scope"
+          },
+          {
+            "line": 374,
+            "owner": "deleteByPattern",
+            "lifetime": "using scope"
+          }
+        ],
+        "helperCalls": [],
+        "queries": [],
+        "retained": []
+      },
+      {
+        "path": "src/infrastructure/database/repositories/graph-repository.ts",
+        "sourceHash": "412fc8cb9db4dd4f1d22217c25834f80017b2b22dba1d0e5be6b796ebae9a0fa",
+        "originalPrepareSites": 7,
+        "prepares": [
+          {
+            "line": 40,
+            "owner": "save",
+            "lifetime": "using scope"
+          },
+          {
+            "line": 76,
+            "owner": "saveMany",
+            "lifetime": "using scope"
+          },
+          {
+            "line": 120,
+            "owner": "findEdge",
+            "lifetime": "using scope"
+          },
+          {
+            "line": 160,
+            "owner": "findCurrent",
+            "lifetime": "using scope"
+          },
+          {
+            "line": 171,
+            "owner": "pruneStale",
+            "lifetime": "using scope"
+          },
+          {
+            "line": 179,
+            "owner": "deleteByProject",
+            "lifetime": "using scope"
+          },
+          {
+            "line": 184,
+            "owner": "clearAll",
+            "lifetime": "using scope"
+          }
+        ],
+        "helperCalls": [],
+        "queries": [],
+        "retained": []
+      },
+      {
+        "path": "src/infrastructure/database/repositories/link-repository.ts",
+        "sourceHash": "e17560feb0eb034fac220cc593792b35343ee28829524b64cf35c48f0ab0d7f6",
+        "originalPrepareSites": 4,
+        "prepares": [
+          {
+            "line": 69,
+            "owner": "findBySource",
+            "lifetime": "using scope"
+          },
+          {
+            "line": 88,
+            "owner": "findByTarget",
+            "lifetime": "using scope"
+          },
+          {
+            "line": 157,
+            "owner": "findRelatedWithHops",
+            "lifetime": "using scope"
+          },
+          {
+            "line": 209,
+            "owner": "prepareInsert",
+            "lifetime": "returned to scoped helper callers"
+          }
+        ],
+        "helperCalls": [
+          {
+            "helper": "prepareInsert",
+            "owner": "save",
+            "line": 175
+          },
+          {
+            "helper": "prepareInsert",
+            "owner": "saveMany",
+            "line": 191
+          }
+        ],
+        "queries": [],
+        "retained": []
+      },
+      {
+        "path": "src/infrastructure/database/repositories/memory-file-repository.ts",
+        "sourceHash": "32f3a61f3c4fd4efd5724d549bbeb93a3ada6e8dae6519af02122816123512f9",
+        "originalPrepareSites": 8,
+        "prepares": [
+          {
+            "line": 57,
+            "owner": "findByPath",
+            "lifetime": "using scope"
+          },
+          {
+            "line": 65,
+            "owner": "findByType",
+            "lifetime": "using scope"
+          },
+          {
+            "line": 73,
+            "owner": "findByProject",
+            "lifetime": "using scope"
+          },
+          {
+            "line": 81,
+            "owner": "save",
+            "lifetime": "using scope"
+          },
+          {
+            "line": 93,
+            "owner": "saveMany",
+            "lifetime": "using scope"
+          },
+          {
+            "line": 113,
+            "owner": "searchContent",
+            "lifetime": "using scope"
+          },
+          {
+            "line": 129,
+            "owner": "findCrossProjectLearnings",
+            "lifetime": "using scope"
+          },
+          {
+            "line": 141,
+            "owner": "findCrossProjectLearnings",
+            "lifetime": "using scope"
+          }
+        ],
+        "helperCalls": [],
+        "queries": [],
+        "retained": []
+      },
+      {
+        "path": "src/infrastructure/database/repositories/memory-governance-repository.ts",
+        "sourceHash": "5023c3b0a7b93d23c2bc90b1ca4362fe0badbae0cf045fc23e55aa9b72c8460c",
+        "originalPrepareSites": 5,
+        "prepares": [
+          {
+            "line": 58,
+            "owner": "saveEntry",
+            "lifetime": "using scope"
+          },
+          {
+            "line": 101,
+            "owner": "findEntry",
+            "lifetime": "using scope"
+          },
+          {
+            "line": 116,
+            "owner": "findByTargetIds",
+            "lifetime": "using scope"
+          },
+          {
+            "line": 148,
+            "owner": "findAll",
+            "lifetime": "using scope"
+          },
+          {
+            "line": 275,
+            "owner": "recordGovernanceEvent",
+            "lifetime": "using scope"
+          }
+        ],
+        "helperCalls": [],
+        "queries": [],
+        "retained": []
+      },
+      {
+        "path": "src/infrastructure/database/repositories/memory-utility-repository.ts",
+        "sourceHash": "f78d3970033a0cd1057996164208e6cff15bf4e98e013451a1043b6365334ba8",
+        "originalPrepareSites": 5,
+        "prepares": [
+          {
+            "line": 30,
+            "owner": "save",
+            "lifetime": "using scope"
+          },
+          {
+            "line": 57,
+            "owner": "findByTarget",
+            "lifetime": "using scope"
+          },
+          {
+            "line": 69,
+            "owner": "findByTargetIds",
+            "lifetime": "using scope"
+          },
+          {
+            "line": 97,
+            "owner": "deleteByProject",
+            "lifetime": "using scope"
+          },
+          {
+            "line": 102,
+            "owner": "clearAll",
+            "lifetime": "using scope"
+          }
+        ],
+        "helperCalls": [],
+        "queries": [],
+        "retained": []
+      },
+      {
+        "path": "src/infrastructure/database/repositories/message-repository.ts",
+        "sourceHash": "9eacf49c7d8f67a72005980a3ea80a8748ef874ef802964a0d65e19856cd8d06",
+        "originalPrepareSites": 4,
+        "prepares": [
+          {
+            "line": 67,
+            "owner": "findById",
+            "lifetime": "using scope"
+          },
+          {
+            "line": 83,
+            "owner": "findBySession",
+            "lifetime": "using scope"
+          },
+          {
+            "line": 195,
+            "owner": "prepareExists",
+            "lifetime": "returned to scoped helper callers"
+          },
+          {
+            "line": 201,
+            "owner": "prepareInsert",
+            "lifetime": "returned to scoped helper callers"
+          }
+        ],
+        "helperCalls": [
+          {
+            "helper": "prepareInsert",
+            "owner": "save",
+            "line": 99
+          },
+          {
+            "helper": "prepareExists",
+            "owner": "saveMany",
+            "line": 124
+          },
+          {
+            "helper": "prepareInsert",
+            "owner": "saveMany",
+            "line": 125
+          }
+        ],
+        "queries": [],
+        "retained": []
+      },
+      {
+        "path": "src/infrastructure/database/repositories/persona-repository.ts",
+        "sourceHash": "0616d95569837fdbae38392dd13b74dd8572f38e8b8b79665624d1c229e7c9c4",
+        "originalPrepareSites": 7,
+        "prepares": [
+          {
+            "line": 36,
+            "owner": "save",
+            "lifetime": "using scope"
+          },
+          {
+            "line": 67,
+            "owner": "saveMany",
+            "lifetime": "using scope"
+          },
+          {
+            "line": 106,
+            "owner": "findEntry",
+            "lifetime": "using scope"
+          },
+          {
+            "line": 133,
+            "owner": "findAll",
+            "lifetime": "using scope"
+          },
+          {
+            "line": 146,
+            "owner": "findForContext",
+            "lifetime": "using scope"
+          },
+          {
+            "line": 154,
+            "owner": "deleteByProject",
+            "lifetime": "using scope"
+          },
+          {
+            "line": 159,
+            "owner": "clearAll",
+            "lifetime": "using scope"
+          }
+        ],
+        "helperCalls": [],
+        "queries": [],
+        "retained": []
+      },
+      {
+        "path": "src/infrastructure/database/repositories/session-repository.ts",
+        "sourceHash": "c88238ea4222e5bd16643c98358473006b5c3746087199667bf449f54fab86a3",
+        "originalPrepareSites": 14,
+        "prepares": [
+          {
+            "line": 66,
+            "owner": "findById",
+            "lifetime": "using scope"
+          },
+          {
+            "line": 83,
+            "owner": "findByProject",
+            "lifetime": "using scope"
+          },
+          {
+            "line": 100,
+            "owner": "findRecent",
+            "lifetime": "using scope"
+          },
+          {
+            "line": 156,
+            "owner": "delete",
+            "lifetime": "using scope"
+          },
+          {
+            "line": 172,
+            "owner": "updateSummary",
+            "lifetime": "using scope"
+          },
+          {
+            "line": 194,
+            "owner": "findOlderThan",
+            "lifetime": "using scope"
+          },
+          {
+            "line": 212,
+            "owner": "countOlderThan",
+            "lifetime": "using scope"
+          },
+          {
+            "line": 230,
+            "owner": "deleteOlderThan",
+            "lifetime": "using scope"
+          },
+          {
+            "line": 238,
+            "owner": "updateProjectName",
+            "lifetime": "using scope"
+          },
+          {
+            "line": 253,
+            "owner": "findDistinctEncodedPaths",
+            "lifetime": "using scope"
+          },
+          {
+            "line": 298,
+            "owner": "findFiltered",
+            "lifetime": "using scope"
+          },
+          {
+            "line": 327,
+            "owner": "searchSummaries",
+            "lifetime": "using scope"
+          },
+          {
+            "line": 333,
+            "owner": "prepareInsert",
+            "lifetime": "returned to scoped helper callers"
+          }
+        ],
+        "helperCalls": [
+          {
+            "helper": "prepareInsert",
+            "owner": "save",
+            "line": 116
+          },
+          {
+            "helper": "prepareInsert",
+            "owner": "saveMany",
+            "line": 133
+          }
+        ],
+        "queries": [],
+        "retained": []
+      },
+      {
+        "path": "src/infrastructure/database/repositories/tool-use-repository.ts",
+        "sourceHash": "a069b37dcc1ff976d9f92295c1ab524d905023f1abb2dd886ad0d2f73de90a24",
+        "originalPrepareSites": 3,
+        "prepares": [
+          {
+            "line": 58,
+            "owner": "findById",
+            "lifetime": "using scope"
+          },
+          {
+            "line": 75,
+            "owner": "findBySession",
+            "lifetime": "using scope"
+          },
+          {
+            "line": 176,
+            "owner": "prepareInsert",
+            "lifetime": "returned to scoped helper callers"
+          }
+        ],
+        "helperCalls": [
+          {
+            "helper": "prepareInsert",
+            "owner": "save",
+            "line": 90
+          },
+          {
+            "helper": "prepareInsert",
+            "owner": "saveMany",
+            "line": 112
+          }
+        ],
+        "queries": [],
+        "retained": []
+      }
+    ],
+    "totalPrepares": 127,
+    "originalPrepareSites": 128,
+    "originalQuerySites": 3,
+    "currentQuerySites": 0,
+    "originalRetainedFields": 30,
+    "currentRetainedFields": 0,
+    "source": "import {readFileSync,writeFileSync} from 'node:fs';\nimport ts from 'typescript';\nimport {sourceHash} from '../scripts/quality-inventory';\nconst ledger=JSON.parse(readFileSync('.planning/memory-resilience/work-items.json','utf8'));\nconst inventory=ledger.items.find((i:any)=>i.id==='B11.74.3').progress.repositoryInventory;\nconst rows=inventory.map((entry:any)=>{\n const source=readFileSync(entry.path,'utf8'),file=ts.createSourceFile(entry.path,source,ts.ScriptTarget.Latest,true),prepares:any[]=[],queries:any[]=[],retained:any[]=[],helpers=new Set<string>();\n function scoped(call:ts.Node){return ts.isVariableDeclaration(call.parent)&&ts.isVariableDeclarationList(call.parent.parent)&&!!(call.parent.parent.flags&ts.NodeFlags.Using);}\n function method(node:ts.Node):ts.MethodDeclaration|undefined {for(let parent=node.parent;parent;parent=parent.parent)if(ts.isMethodDeclaration(parent))return parent;}\n function walk(node:ts.Node){\n  if(ts.isPropertyDeclaration(node)&&node.type?.getText(file).includes('Statement'))retained.push(node.getText(file));\n  if(ts.isCallExpression(node)&&ts.isPropertyAccessExpression(node.expression)&&node.expression.expression.getText(file)==='this.db'){\n   const name=node.expression.name.text,line=file.getLineAndCharacterOfPosition(node.getStart(file)).line+1;\n   if(name==='query')queries.push({line});\n   if(name==='prepare'){\n    const owner=method(node)?.name.getText(file);\n    if(scoped(node))prepares.push({line,owner,lifetime:'using scope'});\n    else if(ts.isReturnStatement(node.parent)&&owner){helpers.add(owner);prepares.push({line,owner,lifetime:'returned to scoped helper callers'});}\n    else throw Error('Unowned native prepare '+entry.path+':'+line);\n   }\n  }\n  ts.forEachChild(node,walk);\n }\n walk(file);\n const helperCalls:any[]=[];\n function checkHelper(node:ts.Node){if(ts.isCallExpression(node)&&ts.isPropertyAccessExpression(node.expression)&&node.expression.expression.getText(file)==='this'&&helpers.has(node.expression.name.text)){\n  if(!scoped(node))throw Error('Unscoped helper '+entry.path+':'+node.expression.name.text);\n  helperCalls.push({helper:node.expression.name.text,owner:method(node)?.name.getText(file),line:file.getLineAndCharacterOfPosition(node.getStart(file)).line+1});\n }ts.forEachChild(node,checkHelper);}\n checkHelper(file);for(const helper of helpers)if(!helperCalls.some(c=>c.helper===helper))throw Error('Unconsumed helper '+helper);\n if(queries.length||retained.length)throw Error('Retained statement/query remains '+entry.path);\n return {path:entry.path,sourceHash:sourceHash(source),originalPrepareSites:entry.nativePrepareSites,prepares,helperCalls,queries,retained};\n});\nconst total=rows.reduce((n:number,r:any)=>n+r.prepares.length,0);\nif(rows.length!==17||total!==127||rows.reduce((n:number,r:any)=>n+r.originalPrepareSites,0)!==128)throw Error('Unexpected repository map');\nconst result={recordedAt:new Date().toISOString(),scope:'All seventeen mapped repository adapters. Static ownership proof plus per-file native lifecycle evidence is required; this does not accept factory/platform/full quality.',rows,totalPrepares:total,originalPrepareSites:128,originalQuerySites:3,currentQuerySites:0,originalRetainedFields:30,currentRetainedFields:0,source:readFileSync('.git/b11-core-lifetime-audit.ts','utf8')};\nwriteFileSync('.git/b11-core-lifetime-audit.json',JSON.stringify(result,null,2)+'\\n');console.log(JSON.stringify({modules:rows.length,currentPrepareSites:total,originalPrepareSites:128,currentQuerySites:0,currentRetainedFields:0}));\n"
+  },
+  "negativeAudit": {
+    "runs": [
+      {
+        "name": "missing-disposal",
+        "exit": 1,
+        "output": "14 |    if(name==='query')queries.push({line});\n15 |    if(name==='prepare'){\n16 |     const owner=method(node)?.name.getText(file);\n17 |     if(scoped(node))prepares.push({line,owner,lifetime:'using scope'});\n18 |     else if(ts.isReturnStatement(node.parent)&&owner){helpers.add(owner);prepares.push({line,owner,lifetime:'returned to scoped helper callers'});}\n19 |     else throw Error('Unowned native prepare '+entry.path+':'+line);\n                    ^\nerror: Unowned native prepare src/infrastructure/database/repositories/message-repository.ts:67\n      at walk (C:\\Projects\\memory-nexus\\.git\\b11-core-lifetime-negative.ts:19:16)\n      at visitNode2 (C:\\Projects\\memory-nexus\\node_modules\\typescript\\lib\\typescript.js:32449:18)\n      at forEachChildInVariableDeclaration (C:\\Projects\\memory-nexus\\node_modules\\typescript\\lib\\typescript.js:32511:123)\n      at forEachChild (C:\\Projects\\memory-nexus\\node_modules\\typescript\\lib\\typescript.js:32970:35)\n      at walk (C:\\Projects\\memory-nexus\\.git\\b11-core-lifetime-negative.ts:22:6)\n      at visitNodes (C:\\Projects\\memory-nexus\\node_modules\\typescript\\lib\\typescript.js:32457:22)\n      at forEachChildInVariableDeclarationList (C:\\Projects\\memory-nexus\\node_modules\\typescript\\lib\\typescript.js:32676:12)\n      at forEachChild (C:\\Projects\\memory-nexus\\node_modules\\typescript\\lib\\typescript.js:32970:35)\n      at walk (C:\\Projects\\memory-nexus\\.git\\b11-core-lifetime-negative.ts:22:6)\n      at visitNode2 (C:\\Projects\\memory-nexus\\node_modules\\typescript\\lib\\typescript.js:32449:18)\n\nBun v1.4.1 (Windows x64)\n",
+        "source": "import {readFileSync,writeFileSync} from 'node:fs';\nimport ts from 'typescript';\nimport {sourceHash} from '../scripts/quality-inventory';\nconst ledger=JSON.parse(readFileSync('.planning/memory-resilience/work-items.json','utf8'));\nconst inventory=ledger.items.find((i:any)=>i.id==='B11.74.3').progress.repositoryInventory;\nconst rows=inventory.map((entry:any)=>{\n const raw=readFileSync(entry.path,'utf8'),source=entry.path.endsWith('/message-repository.ts')?((source:string)=>source.replace('using statement = this.db.prepare<', 'const statement = this.db.prepare<'))(raw):raw,file=ts.createSourceFile(entry.path,source,ts.ScriptTarget.Latest,true),prepares:any[]=[],queries:any[]=[],retained:any[]=[],helpers=new Set<string>();\n function scoped(call:ts.Node){return ts.isVariableDeclaration(call.parent)&&ts.isVariableDeclarationList(call.parent.parent)&&!!(call.parent.parent.flags&ts.NodeFlags.Using);}\n function method(node:ts.Node):ts.MethodDeclaration|undefined {for(let parent=node.parent;parent;parent=parent.parent)if(ts.isMethodDeclaration(parent))return parent;}\n function walk(node:ts.Node){\n  if(ts.isPropertyDeclaration(node)&&node.type?.getText(file).includes('Statement'))retained.push(node.getText(file));\n  if(ts.isCallExpression(node)&&ts.isPropertyAccessExpression(node.expression)&&node.expression.expression.getText(file)==='this.db'){\n   const name=node.expression.name.text,line=file.getLineAndCharacterOfPosition(node.getStart(file)).line+1;\n   if(name==='query')queries.push({line});\n   if(name==='prepare'){\n    const owner=method(node)?.name.getText(file);\n    if(scoped(node))prepares.push({line,owner,lifetime:'using scope'});\n    else if(ts.isReturnStatement(node.parent)&&owner){helpers.add(owner);prepares.push({line,owner,lifetime:'returned to scoped helper callers'});}\n    else throw Error('Unowned native prepare '+entry.path+':'+line);\n   }\n  }\n  ts.forEachChild(node,walk);\n }\n walk(file);\n const helperCalls:any[]=[];\n function checkHelper(node:ts.Node){if(ts.isCallExpression(node)&&ts.isPropertyAccessExpression(node.expression)&&node.expression.expression.getText(file)==='this'&&helpers.has(node.expression.name.text)){\n  if(!scoped(node))throw Error('Unscoped helper '+entry.path+':'+node.expression.name.text);\n  helperCalls.push({helper:node.expression.name.text,owner:method(node)?.name.getText(file),line:file.getLineAndCharacterOfPosition(node.getStart(file)).line+1});\n }ts.forEachChild(node,checkHelper);}\n checkHelper(file);for(const helper of helpers)if(!helperCalls.some(c=>c.helper===helper))throw Error('Unconsumed helper '+helper);\n if(queries.length||retained.length)throw Error('Retained statement/query remains '+entry.path);\n return {path:entry.path,sourceHash:sourceHash(source),originalPrepareSites:entry.nativePrepareSites,prepares,helperCalls,queries,retained};\n});\nconst total=rows.reduce((n:number,r:any)=>n+r.prepares.length,0);\nif(rows.length!==17||total!==127||rows.reduce((n:number,r:any)=>n+r.originalPrepareSites,0)!==128)throw Error('Unexpected repository map');\nconst result={recordedAt:new Date().toISOString(),scope:'All seventeen mapped repository adapters. Static ownership proof plus per-file native lifecycle evidence is required; this does not accept factory/platform/full quality.',rows,totalPrepares:total,originalPrepareSites:128,originalQuerySites:3,currentQuerySites:0,originalRetainedFields:30,currentRetainedFields:0,source:readFileSync('.git/b11-core-lifetime-audit.ts','utf8')};\nwriteFileSync('.git/b11-core-lifetime-audit.json',JSON.stringify(result,null,2)+'\\n');console.log(JSON.stringify({modules:rows.length,currentPrepareSites:total,originalPrepareSites:128,currentQuerySites:0,currentRetainedFields:0}));\n"
+      },
+      {
+        "name": "unscoped-helper",
+        "exit": 1,
+        "output": "22 |   ts.forEachChild(node,walk);\n23 |  }\n24 |  walk(file);\n25 |  const helperCalls:any[]=[];\n26 |  function checkHelper(node:ts.Node){if(ts.isCallExpression(node)&&ts.isPropertyAccessExpression(node.expression)&&node.expression.expression.getText(file)==='this'&&helpers.has(node.expression.name.text)){\n27 |   if(!scoped(node))throw Error('Unscoped helper '+entry.path+':'+node.expression.name.text);\n                              ^\nerror: Unscoped helper src/infrastructure/database/repositories/message-repository.ts:prepareInsert\n      at checkHelper (C:\\Projects\\memory-nexus\\.git\\b11-core-lifetime-negative.ts:27:26)\n      at visitNode2 (C:\\Projects\\memory-nexus\\node_modules\\typescript\\lib\\typescript.js:32449:18)\n      at forEachChildInVariableDeclaration (C:\\Projects\\memory-nexus\\node_modules\\typescript\\lib\\typescript.js:32511:123)\n      at forEachChild (C:\\Projects\\memory-nexus\\node_modules\\typescript\\lib\\typescript.js:32970:35)\n      at checkHelper (C:\\Projects\\memory-nexus\\.git\\b11-core-lifetime-negative.ts:29:6)\n      at visitNodes (C:\\Projects\\memory-nexus\\node_modules\\typescript\\lib\\typescript.js:32457:22)\n      at forEachChildInVariableDeclarationList (C:\\Projects\\memory-nexus\\node_modules\\typescript\\lib\\typescript.js:32676:12)\n      at forEachChild (C:\\Projects\\memory-nexus\\node_modules\\typescript\\lib\\typescript.js:32970:35)\n      at checkHelper (C:\\Projects\\memory-nexus\\.git\\b11-core-lifetime-negative.ts:29:6)\n      at visitNode2 (C:\\Projects\\memory-nexus\\node_modules\\typescript\\lib\\typescript.js:32449:18)\n\nBun v1.4.1 (Windows x64)\n",
+        "source": "import {readFileSync,writeFileSync} from 'node:fs';\nimport ts from 'typescript';\nimport {sourceHash} from '../scripts/quality-inventory';\nconst ledger=JSON.parse(readFileSync('.planning/memory-resilience/work-items.json','utf8'));\nconst inventory=ledger.items.find((i:any)=>i.id==='B11.74.3').progress.repositoryInventory;\nconst rows=inventory.map((entry:any)=>{\n const raw=readFileSync(entry.path,'utf8'),source=entry.path.endsWith('/message-repository.ts')?((source:string)=>source.replace('using insertStatement = this.prepareInsert()', 'const insertStatement = this.prepareInsert()'))(raw):raw,file=ts.createSourceFile(entry.path,source,ts.ScriptTarget.Latest,true),prepares:any[]=[],queries:any[]=[],retained:any[]=[],helpers=new Set<string>();\n function scoped(call:ts.Node){return ts.isVariableDeclaration(call.parent)&&ts.isVariableDeclarationList(call.parent.parent)&&!!(call.parent.parent.flags&ts.NodeFlags.Using);}\n function method(node:ts.Node):ts.MethodDeclaration|undefined {for(let parent=node.parent;parent;parent=parent.parent)if(ts.isMethodDeclaration(parent))return parent;}\n function walk(node:ts.Node){\n  if(ts.isPropertyDeclaration(node)&&node.type?.getText(file).includes('Statement'))retained.push(node.getText(file));\n  if(ts.isCallExpression(node)&&ts.isPropertyAccessExpression(node.expression)&&node.expression.expression.getText(file)==='this.db'){\n   const name=node.expression.name.text,line=file.getLineAndCharacterOfPosition(node.getStart(file)).line+1;\n   if(name==='query')queries.push({line});\n   if(name==='prepare'){\n    const owner=method(node)?.name.getText(file);\n    if(scoped(node))prepares.push({line,owner,lifetime:'using scope'});\n    else if(ts.isReturnStatement(node.parent)&&owner){helpers.add(owner);prepares.push({line,owner,lifetime:'returned to scoped helper callers'});}\n    else throw Error('Unowned native prepare '+entry.path+':'+line);\n   }\n  }\n  ts.forEachChild(node,walk);\n }\n walk(file);\n const helperCalls:any[]=[];\n function checkHelper(node:ts.Node){if(ts.isCallExpression(node)&&ts.isPropertyAccessExpression(node.expression)&&node.expression.expression.getText(file)==='this'&&helpers.has(node.expression.name.text)){\n  if(!scoped(node))throw Error('Unscoped helper '+entry.path+':'+node.expression.name.text);\n  helperCalls.push({helper:node.expression.name.text,owner:method(node)?.name.getText(file),line:file.getLineAndCharacterOfPosition(node.getStart(file)).line+1});\n }ts.forEachChild(node,checkHelper);}\n checkHelper(file);for(const helper of helpers)if(!helperCalls.some(c=>c.helper===helper))throw Error('Unconsumed helper '+helper);\n if(queries.length||retained.length)throw Error('Retained statement/query remains '+entry.path);\n return {path:entry.path,sourceHash:sourceHash(source),originalPrepareSites:entry.nativePrepareSites,prepares,helperCalls,queries,retained};\n});\nconst total=rows.reduce((n:number,r:any)=>n+r.prepares.length,0);\nif(rows.length!==17||total!==127||rows.reduce((n:number,r:any)=>n+r.originalPrepareSites,0)!==128)throw Error('Unexpected repository map');\nconst result={recordedAt:new Date().toISOString(),scope:'All seventeen mapped repository adapters. Static ownership proof plus per-file native lifecycle evidence is required; this does not accept factory/platform/full quality.',rows,totalPrepares:total,originalPrepareSites:128,originalQuerySites:3,currentQuerySites:0,originalRetainedFields:30,currentRetainedFields:0,source:readFileSync('.git/b11-core-lifetime-audit.ts','utf8')};\nwriteFileSync('.git/b11-core-lifetime-audit.json',JSON.stringify(result,null,2)+'\\n');console.log(JSON.stringify({modules:rows.length,currentPrepareSites:total,originalPrepareSites:128,currentQuerySites:0,currentRetainedFields:0}));\n"
+      },
+      {
+        "name": "cached-query",
+        "exit": 1,
+        "output": "26 |  function checkHelper(node:ts.Node){if(ts.isCallExpression(node)&&ts.isPropertyAccessExpression(node.expression)&&node.expression.expression.getText(file)==='this'&&helpers.has(node.expression.name.text)){\n27 |   if(!scoped(node))throw Error('Unscoped helper '+entry.path+':'+node.expression.name.text);\n28 |   helperCalls.push({helper:node.expression.name.text,owner:method(node)?.name.getText(file),line:file.getLineAndCharacterOfPosition(node.getStart(file)).line+1});\n29 |  }ts.forEachChild(node,checkHelper);}\n30 |  checkHelper(file);for(const helper of helpers)if(!helperCalls.some(c=>c.helper===helper))throw Error('Unconsumed helper '+helper);\n31 |  if(queries.length||retained.length)throw Error('Retained statement/query remains '+entry.path);\n                                               ^\nerror: Retained statement/query remains src/infrastructure/database/repositories/message-repository.ts\n      at <anonymous> (C:\\Projects\\memory-nexus\\.git\\b11-core-lifetime-negative.ts:31:43)\n      at map (1:11)\n      at C:\\Projects\\memory-nexus\\.git\\b11-core-lifetime-negative.ts:6:22\n\nBun v1.4.1 (Windows x64)\n",
+        "source": "import {readFileSync,writeFileSync} from 'node:fs';\nimport ts from 'typescript';\nimport {sourceHash} from '../scripts/quality-inventory';\nconst ledger=JSON.parse(readFileSync('.planning/memory-resilience/work-items.json','utf8'));\nconst inventory=ledger.items.find((i:any)=>i.id==='B11.74.3').progress.repositoryInventory;\nconst rows=inventory.map((entry:any)=>{\n const raw=readFileSync(entry.path,'utf8'),source=entry.path.endsWith('/message-repository.ts')?((source:string)=>source.replace('using statement = this.db.prepare<MessageRow, [string]>', 'using statement = this.db.query<MessageRow, [string]>'))(raw):raw,file=ts.createSourceFile(entry.path,source,ts.ScriptTarget.Latest,true),prepares:any[]=[],queries:any[]=[],retained:any[]=[],helpers=new Set<string>();\n function scoped(call:ts.Node){return ts.isVariableDeclaration(call.parent)&&ts.isVariableDeclarationList(call.parent.parent)&&!!(call.parent.parent.flags&ts.NodeFlags.Using);}\n function method(node:ts.Node):ts.MethodDeclaration|undefined {for(let parent=node.parent;parent;parent=parent.parent)if(ts.isMethodDeclaration(parent))return parent;}\n function walk(node:ts.Node){\n  if(ts.isPropertyDeclaration(node)&&node.type?.getText(file).includes('Statement'))retained.push(node.getText(file));\n  if(ts.isCallExpression(node)&&ts.isPropertyAccessExpression(node.expression)&&node.expression.expression.getText(file)==='this.db'){\n   const name=node.expression.name.text,line=file.getLineAndCharacterOfPosition(node.getStart(file)).line+1;\n   if(name==='query')queries.push({line});\n   if(name==='prepare'){\n    const owner=method(node)?.name.getText(file);\n    if(scoped(node))prepares.push({line,owner,lifetime:'using scope'});\n    else if(ts.isReturnStatement(node.parent)&&owner){helpers.add(owner);prepares.push({line,owner,lifetime:'returned to scoped helper callers'});}\n    else throw Error('Unowned native prepare '+entry.path+':'+line);\n   }\n  }\n  ts.forEachChild(node,walk);\n }\n walk(file);\n const helperCalls:any[]=[];\n function checkHelper(node:ts.Node){if(ts.isCallExpression(node)&&ts.isPropertyAccessExpression(node.expression)&&node.expression.expression.getText(file)==='this'&&helpers.has(node.expression.name.text)){\n  if(!scoped(node))throw Error('Unscoped helper '+entry.path+':'+node.expression.name.text);\n  helperCalls.push({helper:node.expression.name.text,owner:method(node)?.name.getText(file),line:file.getLineAndCharacterOfPosition(node.getStart(file)).line+1});\n }ts.forEachChild(node,checkHelper);}\n checkHelper(file);for(const helper of helpers)if(!helperCalls.some(c=>c.helper===helper))throw Error('Unconsumed helper '+helper);\n if(queries.length||retained.length)throw Error('Retained statement/query remains '+entry.path);\n return {path:entry.path,sourceHash:sourceHash(source),originalPrepareSites:entry.nativePrepareSites,prepares,helperCalls,queries,retained};\n});\nconst total=rows.reduce((n:number,r:any)=>n+r.prepares.length,0);\nif(rows.length!==17||total!==127||rows.reduce((n:number,r:any)=>n+r.originalPrepareSites,0)!==128)throw Error('Unexpected repository map');\nconst result={recordedAt:new Date().toISOString(),scope:'All seventeen mapped repository adapters. Static ownership proof plus per-file native lifecycle evidence is required; this does not accept factory/platform/full quality.',rows,totalPrepares:total,originalPrepareSites:128,originalQuerySites:3,currentQuerySites:0,originalRetainedFields:30,currentRetainedFields:0,source:readFileSync('.git/b11-core-lifetime-audit.ts','utf8')};\nwriteFileSync('.git/b11-core-lifetime-audit.json',JSON.stringify(result,null,2)+'\\n');console.log(JSON.stringify({modules:rows.length,currentPrepareSites:total,originalPrepareSites:128,currentQuerySites:0,currentRetainedFields:0}));\n"
+      }
+    ],
+    "source": "import {readFileSync,writeFileSync} from 'node:fs';\nconst source=readFileSync('.git/b11-core-lifetime-audit.ts','utf8');\nconst substitutions=[['missing-disposal',\"source.replace('using statement = this.db.prepare<', 'const statement = this.db.prepare<')\"],['unscoped-helper',\"source.replace('using insertStatement = this.prepareInsert()', 'const insertStatement = this.prepareInsert()')\"],['cached-query',\"source.replace('using statement = this.db.prepare<MessageRow, [string]>', 'using statement = this.db.query<MessageRow, [string]>')\"]];\nconst runs=[];\nfor(const [name,expression]of substitutions){\n const injected=source.replace(\"const source=readFileSync(entry.path,'utf8'),file=\",`const raw=readFileSync(entry.path,'utf8'),source=entry.path.endsWith('/message-repository.ts')?((source:string)=>${expression})(raw):raw,file=`);\n if(injected===source)throw Error('No audit fault injected');\n writeFileSync('.git/b11-core-lifetime-negative.ts',injected);\n const child=Bun.spawnSync([process.execPath,'.git/b11-core-lifetime-negative.ts'],{stdout:'pipe',stderr:'pipe',timeout:30000});\n const output=new TextDecoder().decode(child.stdout)+new TextDecoder().decode(child.stderr);\n if(child.exitCode!==1||!/(Unowned native prepare|Unscoped helper|Retained statement\\/query remains)/.test(output))throw Error('Audit fault was not rejected '+output);\n runs.push({name,exit:child.exitCode,output,source:injected});\n}\nwriteFileSync('.git/b11-core-lifetime-negative.json',JSON.stringify({runs,source:readFileSync('.git/b11-core-lifetime-negative-checks.ts','utf8')},null,2)+'\\n');console.log(JSON.stringify(runs.map(({name,exit})=>({name,exit}))));\r\n"
+  },
+  "bindings": [
+    {
+      "path": "src/infrastructure/database/repositories/backfill-state-repository.ts",
+      "sourceHash": "b89a99657cd121ac7164d9318e05fdc68258bb717f6cb0de4238054414d264d6",
+      "evidence": ".planning/memory-resilience/evidence/B11.74.3-records.json",
+      "evidenceHash": "48ea7733607abeb16ea3f771e2b3e4856aa94d05aa3a2a77fefb8f4fbbb1d18d"
+    },
+    {
+      "path": "src/infrastructure/database/repositories/dream-repository.ts",
+      "sourceHash": "936563a118406d3f75ab3b41cf97d7199c895702cd811683fe748eaac48d917d",
+      "evidence": ".planning/memory-resilience/evidence/B11.74.3-knowledge.json",
+      "evidenceHash": "edb01fce1f9e669d374aff9c6eac244964ae0f1b95a4cb7a3fdee62f83adf1bf"
+    },
+    {
+      "path": "src/infrastructure/database/repositories/embedding-repository.ts",
+      "sourceHash": "1dff7097ede99c1809085669cf40f2baa3190b099f655538e059ff0f9d26b4ed",
+      "evidence": ".planning/memory-resilience/evidence/B11.74.3-embedding.json",
+      "evidenceHash": "e542a1f8f0f5b19dfa42127deadbc931055dd037b36857c402c3bea838c3617d"
+    },
+    {
+      "path": "src/infrastructure/database/repositories/entity-repository.ts",
+      "sourceHash": "5972c037eae3de7ddc1a6f949293ddbfcd9b691368eebd48d54d851c06303d23",
+      "evidence": ".planning/memory-resilience/evidence/B11.74.3-core.json",
+      "evidenceHash": "fc9dc5d9d349d63ecaa9a0b1046b62a8ffeacedfeb5cd02ed436bc325e64c81a"
+    },
+    {
+      "path": "src/infrastructure/database/repositories/extraction-log-repository.ts",
+      "sourceHash": "08ec06dbb8c2279e458409b81723b952db1903a83ad4af8689420ae38f9c1e84",
+      "evidence": ".planning/memory-resilience/evidence/B11.74.3-records.json",
+      "evidenceHash": "48ea7733607abeb16ea3f771e2b3e4856aa94d05aa3a2a77fefb8f4fbbb1d18d"
+    },
+    {
+      "path": "src/infrastructure/database/repositories/extraction-state-repository.ts",
+      "sourceHash": "6bc082eb0db0bfe5a144c07a5fbce8ae5da1afa7d713df68371eecbdbeb5af4a",
+      "evidence": ".planning/memory-resilience/evidence/B11.74.3-ingestion.json",
+      "evidenceHash": "b9411351d2c6b2efad79478c74d8ddcb0ce347a0770616f760aea09bbf100835"
+    },
+    {
+      "path": "src/infrastructure/database/repositories/fact-repository.ts",
+      "sourceHash": "783181485ab8cb69901c4075725dfb4a068d656a2fe4b7e9da5107115cb2d46b",
+      "evidence": ".planning/memory-resilience/evidence/B11.74.3-knowledge.json",
+      "evidenceHash": "edb01fce1f9e669d374aff9c6eac244964ae0f1b95a4cb7a3fdee62f83adf1bf"
+    },
+    {
+      "path": "src/infrastructure/database/repositories/friction-repository.ts",
+      "sourceHash": "121d007cbc53cb02dc80847d749f2c566ec0574b2daa076f7d3337cc2024b7fb",
+      "evidence": ".planning/memory-resilience/evidence/B11.74.3-friction.json",
+      "evidenceHash": "8f340250888fce206d29228f43ca5e621fee3f69922bea28309ae8b891fd1b4f"
+    },
+    {
+      "path": "src/infrastructure/database/repositories/graph-repository.ts",
+      "sourceHash": "412fc8cb9db4dd4f1d22217c25834f80017b2b22dba1d0e5be6b796ebae9a0fa",
+      "evidence": ".planning/memory-resilience/evidence/B11.74.3-graph-persona.json",
+      "evidenceHash": "08371aef5f1ff5b553488bc1c0c416774818a12b9c3c780fdfa5911d3441c86f"
+    },
+    {
+      "path": "src/infrastructure/database/repositories/link-repository.ts",
+      "sourceHash": "e17560feb0eb034fac220cc593792b35343ee28829524b64cf35c48f0ab0d7f6",
+      "evidence": ".planning/memory-resilience/evidence/B11.74.3-ingestion.json",
+      "evidenceHash": "b9411351d2c6b2efad79478c74d8ddcb0ce347a0770616f760aea09bbf100835"
+    },
+    {
+      "path": "src/infrastructure/database/repositories/memory-file-repository.ts",
+      "sourceHash": "32f3a61f3c4fd4efd5724d549bbeb93a3ada6e8dae6519af02122816123512f9",
+      "evidence": ".planning/memory-resilience/evidence/B11.74.3-memory-state.json",
+      "evidenceHash": "9ae08dbc97048fcef9c7b799a6e2b580121e00936eb724537b39a375cede4188"
+    },
+    {
+      "path": "src/infrastructure/database/repositories/memory-governance-repository.ts",
+      "sourceHash": "5023c3b0a7b93d23c2bc90b1ca4362fe0badbae0cf045fc23e55aa9b72c8460c",
+      "evidence": ".planning/memory-resilience/evidence/B11.74.3-memory-state.json",
+      "evidenceHash": "9ae08dbc97048fcef9c7b799a6e2b580121e00936eb724537b39a375cede4188"
+    },
+    {
+      "path": "src/infrastructure/database/repositories/memory-utility-repository.ts",
+      "sourceHash": "f78d3970033a0cd1057996164208e6cff15bf4e98e013451a1043b6365334ba8",
+      "evidence": ".planning/memory-resilience/evidence/B11.74.3-records.json",
+      "evidenceHash": "48ea7733607abeb16ea3f771e2b3e4856aa94d05aa3a2a77fefb8f4fbbb1d18d"
+    },
+    {
+      "path": "src/infrastructure/database/repositories/message-repository.ts",
+      "sourceHash": "9eacf49c7d8f67a72005980a3ea80a8748ef874ef802964a0d65e19856cd8d06",
+      "evidence": ".planning/memory-resilience/evidence/B11.74.3-core.json",
+      "evidenceHash": "80b75e5ab85b64a951a60fb6f2e69966c8ff54ff93e3679fa80ce395c07201d4"
+    },
+    {
+      "path": "src/infrastructure/database/repositories/persona-repository.ts",
+      "sourceHash": "0616d95569837fdbae38392dd13b74dd8572f38e8b8b79665624d1c229e7c9c4",
+      "evidence": ".planning/memory-resilience/evidence/B11.74.3-graph-persona.json",
+      "evidenceHash": "08371aef5f1ff5b553488bc1c0c416774818a12b9c3c780fdfa5911d3441c86f"
+    },
+    {
+      "path": "src/infrastructure/database/repositories/session-repository.ts",
+      "sourceHash": "c88238ea4222e5bd16643c98358473006b5c3746087199667bf449f54fab86a3",
+      "evidence": ".planning/memory-resilience/evidence/B11.74.3-core.json",
+      "evidenceHash": "80b75e5ab85b64a951a60fb6f2e69966c8ff54ff93e3679fa80ce395c07201d4"
+    },
+    {
+      "path": "src/infrastructure/database/repositories/tool-use-repository.ts",
+      "sourceHash": "a069b37dcc1ff976d9f92295c1ab524d905023f1abb2dd886ad0d2f73de90a24",
+      "evidence": ".planning/memory-resilience/evidence/B11.74.3-ingestion.json",
+      "evidenceHash": "b9411351d2c6b2efad79478c74d8ddcb0ce347a0770616f760aea09bbf100835"
+    }
+  ],
+  "acceptance": [
+    "Seventeen mapped adapters source-bound to retained Windows1.3.14/1.4.1 lifecycle and behavior evidence.",
+    "Every remaining native prepare is scoped or returned by a helper exclusively consumed by scoped using declarations. No repository constructor retains statements; thirty original fields removed.",
+    "All three original cached queries removed;128historical prepares reconcile to127current sites after session pre-count retirement.",
+    "Repeated operations and reconstruction of the final six adapters are bounded; exported extraction helper executes real native persistence with synthetic inference. Failure cleanup, rollback, retry and partial preparation proven in scoped drivers."
+  ],
+  "limits": [
+    "This verifies B11.74.3 only. File-wide quality/SQL/decision and independent review remain B05/Q tasks/B11.74.7.",
+    "Search/context, event-log/schema/security and factory migration are separate required items. No default factory activation or whole-platform/installed/real-data acceptance."
+  ],
+  "validation": {
+    "command": "bun .git/b11-core-validate.ts",
+    "exit": 0,
+    "recordedAt": "2026-09-21T21:57:54.867Z",
+    "result": "457-file/two-package inventory and 232-item acyclic ledger reconcile. All seventeen repositories reconcile to127current/128original prepares, zero retained fields/queries. B11.74.3 native lifetime scope verified; B11.74.4 active. Final source/native/metric/fault evidence agrees; full acceptance and factory activation pending.",
+    "source": "import {strict as assert} from 'node:assert';\nimport {readFileSync,writeFileSync,existsSync} from 'node:fs';\nimport {resolve} from 'node:path';\nimport {createCoverageMap} from 'istanbul-lib-coverage';\nimport {discoverInventory,validateInventory,sourceHash} from '../scripts/quality-inventory';\nconst base='.planning/memory-resilience/',read=(p:string)=>JSON.parse(readFileSync(p,'utf8'));\nconst path=base+'evidence/B11.74.3-core.json',record=read(path),catalog=discoverInventory(process.cwd());\nassert.equal(catalog.files.length,457);assert.equal(catalog.packages.length,2);assert.deepEqual(catalog,read(base+'executable-catalog.json'));assert.deepEqual(validateInventory(catalog,read(base+'quality-classifications.json')),[]);\nfor(const input of [...record.sourceInputs,...record.otherInputs])assert.equal(input.sourceHash,sourceHash(readFileSync(input.path,'utf8')));\nfor(const input of record.sourceInputs)for(const rows of [record.diagnosticCoverage.sourceInputs,record.decisionChecks.sourceInputs,record.native.sourceInputs])assert.equal(rows.find((r:any)=>r.path===input.path).sourceHash,input.sourceHash);\nconst coverage=createCoverageMap(record.diagnosticCoverage.measurement.rawCoverage);\nfor(const entry of record.diagnosticCoverage.measurement.files){assert.deepEqual(coverage.fileCoverageFor(resolve(entry.path)).toSummary().data,entry.metrics);for(const metric of Object.values(entry.metrics)as any[])assert.equal(metric.pct,100);}\nfor(const run of [record.checks[0],...record.native.runs]){assert.equal(run.exit,0);assert(run.output.includes('130 pass')&&run.output.includes('0 fail')&&run.output.includes('1639 expect()'));}\nassert.equal(record.decisionChecks.runs.length,46);assert.equal(record.decisionChecks.runs[0].exit,0);for(const run of record.decisionChecks.runs.slice(1)){assert.equal(run.exit,1);assert(run.output.includes('(fail)'));}\nassert(!existsSync(record.removedRuntimeRoot));\nconst ledger=read(base+'work-items.json'),items=new Map<string,any>(ledger.items.map((i:any)=>[i.id,i])),done=new Set<string>();\nfunction visit(id:string,stack=new Set<string>()){assert(items.has(id)&&!stack.has(id),'Invalid dependency '+id);if(done.has(id))return;for(const dep of items.get(id).depends_on)visit(dep,new Set([...stack,id]));done.add(id);}\nassert.equal(items.size,232);assert.equal(items.size,ledger.items.length);for(const id of items.keys())visit(id);\nassert.equal(ledger.current_item,'B11.74.4');assert.equal(items.get('B11.74.3').status,'verified');assert.deepEqual(ledger.items.filter((i:any)=>i.status==='active').map((i:any)=>i.id),['B11.74.4']);\nconst inventory=items.get('B11.74.3').progress.repositoryInventory;assert.equal(inventory.length,17);assert.equal(inventory.filter((r:any)=>r.status.startsWith('local')).length,17);assert.equal(inventory.filter((r:any)=>r.status.startsWith('local')).reduce((n:number,r:any)=>n+r.nativePrepareSites,0),128);\nfor(const entry of inventory)assert.equal(entry.sourceHash,sourceHash(readFileSync(entry.path,'utf8')));\nfor(const [index,input]of record.sourceInputs.slice(0,3).entries()){const source=readFileSync(input.path,'utf8');assert.equal([...source.matchAll(/this\\.db\\.prepare[<(]/g)].length,[4,9,13][index]);assert.equal([...source.matchAll(/using \\w+ =/g)].length,[5,12,14][index]);assert(!source.includes('this.db.query('));assert(!/private readonly \\w+Stmt/.test(source));}\nfor(const input of record.constructorCallers.paths)assert.equal(input.sourceHash,sourceHash(readFileSync(input.path,'utf8')));\nfor(const id of ['Q022','Q028']){assert.equal(items.get(id).status,'pending');assert.deepEqual(items.get(id).depends_on,['B11.74.3']);assert(items.get('B11.74.7').depends_on.includes(id));}\nassert(items.get('B11.74.7').progress.coreAcceptance);assert(items.get('B11.74.5').progress.sessionSummaryIndexReview);\nconst acceptancePath=base+'evidence/B11.74.3.json',acceptance=read(acceptancePath);assert.equal(acceptance.bindings.length,17);\nfor(const binding of acceptance.bindings){assert.equal(binding.sourceHash,sourceHash(readFileSync(binding.path,'utf8')));assert.equal(binding.evidenceHash,sourceHash(readFileSync(binding.evidence,'utf8')));const proof=read(binding.evidence);assert(proof.sourceInputs.some((input:any)=>input.path===binding.path&&input.sourceHash===binding.sourceHash));}\nassert.equal(acceptance.audit.totalPrepares,127);assert.equal(acceptance.audit.currentQuerySites,0);assert.equal(acceptance.audit.currentRetainedFields,0);assert.equal(acceptance.negativeAudit.runs.length,3);for(const run of acceptance.negativeAudit.runs)assert.equal(run.exit,1);\nassert.equal(items.get('B11.74').status,'pending');assert.equal(items.get('B11.74.6').status,'pending');assert(!readFileSync('src/infrastructure/database/connection.ts','utf8').includes('OwnedDatabase'));\nrecord.validation={command:'bun .git/b11-core-validate.ts',exit:0,recordedAt:new Date().toISOString(),result:'457-file/two-package inventory and 232-item acyclic ledger reconcile. All seventeen repositories reconcile to127current/128original prepares, zero retained fields/queries. B11.74.3 native lifetime scope verified; B11.74.4 active. Final source/native/metric/fault evidence agrees; full acceptance and factory activation pending.',source:readFileSync('.git/b11-core-validate.ts','utf8')};\nwriteFileSync(path,JSON.stringify(record,null,2)+'\\n');acceptance.bindings.find((row:any)=>row.evidence===path).evidenceHash=sourceHash(readFileSync(path,'utf8'));acceptance.validation=record.validation;writeFileSync(acceptancePath,JSON.stringify(acceptance,null,2)+'\\n');console.log(record.validation.result);\n"
+  }
+}

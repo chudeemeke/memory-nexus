@@ -3,7 +3,7 @@
   "workstream": "memory-resilience",
   "goal_status": "active",
   "starting_revision": "77d54e05be7fc24cede4a9a3e1fede6fa113ac8f",
-  "current_item": "B11.74.3",
+  "current_item": "B11.74.4",
   "status_semantics": {
     "pending": "Not started; authorization and dependencies must permit work.",
     "pending_rebaseline": "Historical candidate, not a confirmed current failure or a completed task.",
@@ -796,22 +796,29 @@
       "id": "Q022",
       "stage": "coverage_repair",
       "title": "Verify and repair src/infrastructure/database/repositories/entity-repository.ts",
-      "status": "pending_rebaseline",
+      "status": "pending",
       "depends_on": [
-        "B09"
+        "B11.74.3"
       ],
       "scope": "src/infrastructure/database/repositories/entity-repository.ts",
       "deliverable": "Reproduce uncovered behavior, add meaningful regression/boundary tests, fix demonstrated defects, satisfy this file's reviewed risk tier.",
       "verification": "Current source-bound four-metric file evidence plus tier-required decision tests. Supersede only with explicit fresh evidence that this candidate is no longer a gap.",
-      "risk": "unclassified",
+      "risk": "S",
       "authorization": "authorized",
       "owner": "memory-nexus",
       "historical_gaps": [
         "branches=92.3"
       ],
       "historical_evidence": "docs/audits/2026-09-19-repair-evidence/per-file-coverage-gaps.json",
-      "evidence": [],
-      "acceptance_record": ".planning/memory-resilience/evidence/Q022.json"
+      "evidence": [
+        ".planning/memory-resilience/evidence/B11.74.3-core.json"
+      ],
+      "acceptance_record": ".planning/memory-resilience/evidence/Q022.json",
+      "progress": {
+        "current": "Diagnostic100% all four metrics. Complete entity metadata/result fidelity, concurrent confidence updates, parameter validation and full-file decision/independent review.",
+        "owner": "memory-nexus",
+        "trigger": "After repository migration, before B11.74.7/B10/R02 acceptance; B05 complete measurement and rebaseline remain required."
+      }
     },
     {
       "id": "Q023",
@@ -961,14 +968,14 @@
       "id": "Q028",
       "stage": "coverage_repair",
       "title": "Verify and repair src/infrastructure/database/repositories/message-repository.ts",
-      "status": "pending_rebaseline",
+      "status": "pending",
       "depends_on": [
-        "B09"
+        "B11.74.3"
       ],
       "scope": "src/infrastructure/database/repositories/message-repository.ts",
       "deliverable": "Reproduce uncovered behavior, add meaningful regression/boundary tests, fix demonstrated defects, satisfy this file's reviewed risk tier.",
       "verification": "Current source-bound four-metric file evidence plus tier-required decision tests. Supersede only with explicit fresh evidence that this candidate is no longer a gap.",
-      "risk": "unclassified",
+      "risk": "S",
       "authorization": "authorized",
       "owner": "memory-nexus",
       "historical_gaps": [
@@ -976,8 +983,15 @@
         "lines=93.75"
       ],
       "historical_evidence": "docs/audits/2026-09-19-repair-evidence/per-file-coverage-gaps.json",
-      "evidence": [],
-      "acceptance_record": ".planning/memory-resilience/evidence/Q028.json"
+      "evidence": [
+        ".planning/memory-resilience/evidence/B11.74.3-core.json"
+      ],
+      "acceptance_record": ".planning/memory-resilience/evidence/Q028.json",
+      "progress": {
+        "current": "Diagnostic100% all four metrics; full-rollback and post-insert existence proof verified. Complete single-save acknowledgement, persistence/FTS/progress/caller integration, B05 optional-chain counters and full-file decision/independent review.",
+        "owner": "memory-nexus",
+        "trigger": "After repository migration, before B11.74.7/B10/R02 acceptance; B05 complete measurement and rebaseline remain required."
+      }
     },
     {
       "id": "Q029",
@@ -5126,7 +5140,7 @@
       "id": "B11.74.3",
       "stage": "baseline",
       "title": "Dispose scope-owned repository statements",
-      "status": "active",
+      "status": "verified",
       "depends_on": [
         "B11.74.2"
       ],
@@ -5144,12 +5158,14 @@
         ".planning/memory-resilience/evidence/B11.74.3-memory-state.json",
         ".planning/memory-resilience/evidence/B11.74.3-friction.json",
         ".planning/memory-resilience/evidence/B11.74.3-graph-persona.json",
-        ".planning/memory-resilience/evidence/B11.74.3-ingestion.json"
+        ".planning/memory-resilience/evidence/B11.74.3-ingestion.json",
+        ".planning/memory-resilience/evidence/B11.74.3-core.json",
+        ".planning/memory-resilience/evidence/B11.74.3.json"
       ],
       "acceptance_record": ".planning/memory-resilience/evidence/B11.74.3.json",
       "retirement_trigger": "Before parent B11.74/B10/R02 acceptance; child local proof does not imply factory or whole-platform acceptance.",
       "progress": {
-        "current": "Fourteen of seventeen repositories migrated:101 original prepare sites scoped and one original cached query eliminated. Extraction-state/link/tool-use group92tests/815assertions on both Windows runtimes;16faults detected. Ten constructor fields removed, one insert reused per batch invocation. Native full-rollback autocommit escape repaired.",
+        "current": "All17repositories have current local lifetime proof:127current prepares reconciled to128original sites;30constructor fields and3cached queries removed. Final group130tests/1639assertions on both Windows runtimes;45targeted faults. Ownership audit rejects three injected violations.",
         "repositoryInventory": [
           {
             "path": "src/infrastructure/database/repositories/backfill-state-repository.ts",
@@ -5180,8 +5196,10 @@
             "nativePrepareSites": 9,
             "nativeQuerySites": 2,
             "retainedFields": 8,
-            "status": "pending",
-            "sourceHash": "0f70a9dd80f94e157312cd8032e541fb4b0fe334ae0bfa74e888efdb9fbb0e0f"
+            "status": "local disposal proof; final quality pending",
+            "sourceHash": "5972c037eae3de7ddc1a6f949293ddbfcd9b691368eebd48d54d851c06303d23",
+            "retainedStatementDisposition": "Historical field count retained; current source has zero retained statements and constructors prepare nothing. Batch invocations reuse operation-owned statements.",
+            "queryDisposition": "Both original cached last_insert_rowid queries eliminated; IDs come from native insert results."
           },
           {
             "path": "src/infrastructure/database/repositories/extraction-log-repository.ts",
@@ -5263,8 +5281,9 @@
             "nativePrepareSites": 4,
             "nativeQuerySites": 0,
             "retainedFields": 4,
-            "status": "pending",
-            "sourceHash": "e53cf864415882e45cf7fff0332712cdc337a1f24aed51d89687a6800690639c"
+            "status": "local disposal proof; final quality pending",
+            "sourceHash": "9eacf49c7d8f67a72005980a3ea80a8748ef874ef802964a0d65e19856cd8d06",
+            "retainedStatementDisposition": "Historical field count retained; current source has zero retained statements and constructors prepare nothing. Batch invocations reuse operation-owned statements."
           },
           {
             "path": "src/infrastructure/database/repositories/persona-repository.ts",
@@ -5279,8 +5298,10 @@
             "nativePrepareSites": 14,
             "nativeQuerySites": 0,
             "retainedFields": 8,
-            "status": "pending",
-            "sourceHash": "322fc36a8a28a92c21a87f74960cba1c545685c04ac06c4cac5ff449e62ac728"
+            "status": "local disposal proof; final quality pending",
+            "sourceHash": "c88238ea4222e5bd16643c98358473006b5c3746087199667bf449f54fab86a3",
+            "retainedStatementDisposition": "Historical field count retained; current source has zero retained statements and constructors prepare nothing. Batch invocations reuse operation-owned statements.",
+            "prepareDisposition": "Original14prepare sites retain historical count; project update pre-count removed, leaving13current sites. Native RETURNING rows count actual update/delete effects."
           },
           {
             "path": "src/infrastructure/database/repositories/tool-use-repository.ts",
@@ -5292,15 +5313,15 @@
             "retainedStatementDisposition": "Historical constructor field count retained in inventory. Current source retains zero statement fields; single operations and batch invocations own statements explicitly."
           }
         ],
-        "restart": "Next message/entity/session retained statements and caller construction, including exported extraction helper. Then reconcile the complete repository lifetime map. Main factory stays unchanged until .3-.5 complete.",
-        "remaining": "B11.74.7/B05 and Q tasks retain complete metrics, SQL/decision/caller/platform/review acceptance. Three repositories remain with20historical retained fields/27prepare sites and two entity query sites. Canonical friction quarantine remains separate."
+        "restart": "Repository migration scope verified. Continue B11.74.4 search/context service statements, then B11.74.5 before factory activation. Existing quality tasks remain explicit prerequisites to final acceptance.",
+        "remaining": "B05/Q tasks/B11.74.7 retain complete metrics, SQL/decision/caller/platform/review acceptance. No factory activation, canonical data mutation or experiment."
       }
     },
     {
       "id": "B11.74.4",
       "stage": "baseline",
       "title": "Dispose search and context service statements",
-      "status": "pending",
+      "status": "active",
       "depends_on": [
         "B11.74.2"
       ],
@@ -5344,6 +5365,12 @@
           "owner": "memory-nexus",
           "trigger": "Before B11.74.5 acceptance; preserve caller/reset semantics and prove rollback before any integrity claim.",
           "evidence": ".planning/memory-resilience/evidence/B11.74.3-memory-state.json"
+        },
+        "sessionSummaryIndexReview": {
+          "finding": "Source review: sessions_fts_update only runs for non-null/non-empty new summaries. Reproduce whether clearing a summary leaves stale FTS content, and repair if confirmed.",
+          "status": "unverified source concern",
+          "owner": "memory-nexus",
+          "trigger": "During schema/event-log review, before B11.74.5/factory activation acceptance."
         }
       }
     },
@@ -5385,7 +5412,9 @@
         "Q024",
         "Q029",
         "Q025",
-        "Q030"
+        "Q030",
+        "Q022",
+        "Q028"
       ],
       "scope": "All B11.74 affected production/test files and native runtime targets",
       "deliverable": "Complete per-file/package/tier/changed-line proof and independent review; dependency barriers can resume",
@@ -5409,6 +5438,12 @@
         "ingestionAcceptance": {
           "evidence": ".planning/memory-resilience/evidence/B11.74.3-ingestion.json",
           "remaining": "Extraction-state post-write acknowledgement and sync transaction coupling; safe actual sync caller proof including checkpoint-home isolation; installed-workload single-operation preparation costs. Q025/Q030 retain link/tool-use SQL and persistence review.",
+          "owner": "memory-nexus",
+          "trigger": "Before B11.74.7/B10/R02 acceptance."
+        },
+        "coreAcceptance": {
+          "evidence": ".planning/memory-resilience/evidence/B11.74.3-core.json",
+          "remaining": "Complete session persistence/filter/deletion and installed-workload RETURNING buffer costs; actual CLI purge proof; helper inference/partial-write workflow review remains separate. Q022/Q028 retain entity/message review.",
           "owner": "memory-nexus",
           "trigger": "Before B11.74.7/B10/R02 acceptance."
         }

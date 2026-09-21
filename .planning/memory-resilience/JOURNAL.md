@@ -1,5 +1,40 @@
 # Memory resilience execution journal
 
+## 2026-09-21 - Repository lifetime migration verified; search/context next
+
+- Continued from clean 569424a. Removed the final twenty constructor statements
+  from message/entity/session; reusable batches prepare two/three/one statements.
+  Entity IDs use the native insert result; two cached ID queries are gone.
+- Native RED reproduced message writes escaping full rollback, ignored rows counted
+  as inserted, session pre-counts overstating ignored writes, ignored entity writes
+  reported as successful and entity limits accepting SQL fragments. All repaired.
+  A rejected implementation is retained: Bun write-result counts included FTS
+  effects (two session deletions reported nine changes). Session writes now count
+  RETURNING rows; messages reuse their existence check after inserts.
+- Final group passes 130 tests / 1,639 assertions on Windows Bun 1.3.14 and 1.4.1.
+  Forty-five targeted faults detected; production/strict driver types and isolation
+  pass. Tests cover FTS cascades, partial preparation, corrupt rows, transaction and
+  progress failures, retry and repeated owners. Exported extraction helper executes
+  real persistence/linking ten times on one DB; only inference is stubbed.
+- Evidence: evidence/B11.74.3-core.json and aggregate evidence/B11.74.3.json.
+  All seventeen repository hashes bind to their retained native evidence. AST audit
+  finds 127 current prepares versus 128 original (one pre-count retired), zero
+  retained statement fields versus thirty original, and zero cached queries versus
+  three original. Every remaining prepare has a scoped owner, including helper
+  returns. Three injected ownership violations are rejected by the audit.
+- B11.74.3 is verified for its repository-lifetime scope. B11.74.4 is now active:
+  migrate search/context services, then B11.74.5 before main-factory activation.
+  Catalog 457 files / two packages and ledger 232 reconcile. No factory activation,
+  canonical data mutation, real inference, replication or experiment occurred.
+- Four changed executable files have diagnostic 100% metrics. Full B05 counter,
+  SQL/decision/platform/independent acceptance remains open. Q022/Q028 retain
+  entity/message fidelity/concurrency/acknowledgement; B11.74.7 retains session
+  semantics, RETURNING buffer cost and actual CLI purge/caller acceptance.
+  Source concern about stale FTS after clearing summaries is explicitly owned by
+  B11.74.5 for native reproduction and disposition before factory acceptance.
+  Temporary runtime/diagnostic roots removed; observed free disk fell during this
+  turn without attribution, so later expensive work must recheck capacity.
+
 ## 2026-09-21 - Ingestion ownership and transaction rollback containment
 
 - Continued from clean 72d2662. Removed ten constructor-retained statements from
