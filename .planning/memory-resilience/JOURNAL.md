@@ -1,5 +1,32 @@
 # Memory resilience execution journal
 
+## 2026-09-21 - Graph/persona lifetimes and batch result integrity
+
+- Continued from 4ae77f1 and preserved the existing active ledger. Fourteen prepares
+  now dispose on scope exit, including failing native operations and row decoding.
+- Native RED reproduced single-save fabricated success and batch missing-row
+  omission after commit. Saves now reject absent rows. Batch reads/decoding remain
+  inside a synchronous transaction, so rejected writes, missing rows and invalid
+  saved JSON roll back earlier updates. Public async signatures, input order,
+  empty batches and duplicate-ID final-value semantics are preserved.
+- The group passes 17 tests / 855 assertions on Windows Bun 1.3.14 and 1.4.1;
+  20 targeted faults detected (14 disposals, 2 transactions, 4 absence guards).
+  Current-runtime event-log projection callers pass 2 tests / 13 assertions.
+  Production and strict driver types
+  plus isolation pass. Owned temporary runtime/diagnostic/caller roots removed.
+- Evidence: evidence/B11.74.3-graph-persona.json. Three changed executable files
+  show diagnostic 100% metrics. Q024/Q029 explicitly retain single-save decoding
+  failure persistence, ignored writes against existing rows/concurrency semantics,
+  complete B05 counters and full-file decision/independent review. No acceptance
+  claimed from scoped 100%; no real canonical memory was changed.
+- Eleven of seventeen repositories / 90 prepares locally migrated. Six modules
+  with retained statements remain. Catalog 455 files / two packages and ledger
+  232 reconcile.
+  Next: extraction-state/link/tool-use, then message/entity/session and caller
+  construction. Main factory activation, baseline acceptance and the approved
+  embedding experiment remain gated. R03/P03/A03 owner decisions are unchanged.
+
+
 ## 2026-09-21 - Friction statement disposal and weekly-count correction
 
 - Previous turn progressed at fd19c2b; this turn began clean. All nineteen friction

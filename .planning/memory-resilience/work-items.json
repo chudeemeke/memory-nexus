@@ -845,22 +845,29 @@
       "id": "Q024",
       "stage": "coverage_repair",
       "title": "Verify and repair src/infrastructure/database/repositories/graph-repository.ts",
-      "status": "pending_rebaseline",
+      "status": "pending",
       "depends_on": [
-        "B09"
+        "B11.74.3"
       ],
       "scope": "src/infrastructure/database/repositories/graph-repository.ts",
       "deliverable": "Reproduce uncovered behavior, add meaningful regression/boundary tests, fix demonstrated defects, satisfy this file's reviewed risk tier.",
       "verification": "Current source-bound four-metric file evidence plus tier-required decision tests. Supersede only with explicit fresh evidence that this candidate is no longer a gap.",
-      "risk": "unclassified",
+      "risk": "S",
       "authorization": "authorized",
       "owner": "memory-nexus",
       "historical_gaps": [
         "branches=91.42"
       ],
       "historical_evidence": "docs/audits/2026-09-19-repair-evidence/per-file-coverage-gaps.json",
-      "evidence": [],
-      "acceptance_record": ".planning/memory-resilience/evidence/Q024.json"
+      "evidence": [
+        ".planning/memory-resilience/evidence/B11.74.3-graph-persona.json"
+      ],
+      "acceptance_record": ".planning/memory-resilience/evidence/Q024.json",
+      "progress": {
+        "current": "Diagnostic100% all four metrics. Full-file decision and independent review remain open, including single-save decode-failure persistence and ignored-write acknowledgement of pre-existing rows/concurrent-writer semantics.",
+        "owner": "memory-nexus",
+        "trigger": "After repository migration, before B11.74.7/B10/R02 acceptance; B05 complete measurement and rebaseline remain required."
+      }
     },
     {
       "id": "Q025",
@@ -969,22 +976,29 @@
       "id": "Q029",
       "stage": "coverage_repair",
       "title": "Verify and repair src/infrastructure/database/repositories/persona-repository.ts",
-      "status": "pending_rebaseline",
+      "status": "pending",
       "depends_on": [
-        "B09"
+        "B11.74.3"
       ],
       "scope": "src/infrastructure/database/repositories/persona-repository.ts",
       "deliverable": "Reproduce uncovered behavior, add meaningful regression/boundary tests, fix demonstrated defects, satisfy this file's reviewed risk tier.",
       "verification": "Current source-bound four-metric file evidence plus tier-required decision tests. Supersede only with explicit fresh evidence that this candidate is no longer a gap.",
-      "risk": "unclassified",
+      "risk": "S",
       "authorization": "authorized",
       "owner": "memory-nexus",
       "historical_gaps": [
         "branches=93.75"
       ],
       "historical_evidence": "docs/audits/2026-09-19-repair-evidence/per-file-coverage-gaps.json",
-      "evidence": [],
-      "acceptance_record": ".planning/memory-resilience/evidence/Q029.json"
+      "evidence": [
+        ".planning/memory-resilience/evidence/B11.74.3-graph-persona.json"
+      ],
+      "acceptance_record": ".planning/memory-resilience/evidence/Q029.json",
+      "progress": {
+        "current": "Diagnostic100% all four metrics. Full-file decision and independent review remain open, including single-save decode-failure persistence and ignored-write acknowledgement of pre-existing rows/concurrent-writer semantics.",
+        "owner": "memory-nexus",
+        "trigger": "After repository migration, before B11.74.7/B10/R02 acceptance; B05 complete measurement and rebaseline remain required."
+      }
     },
     {
       "id": "Q030",
@@ -5114,12 +5128,13 @@
         ".planning/memory-resilience/evidence/B11.74.3-embedding.json",
         ".planning/memory-resilience/evidence/B11.74.3-knowledge.json",
         ".planning/memory-resilience/evidence/B11.74.3-memory-state.json",
-        ".planning/memory-resilience/evidence/B11.74.3-friction.json"
+        ".planning/memory-resilience/evidence/B11.74.3-friction.json",
+        ".planning/memory-resilience/evidence/B11.74.3-graph-persona.json"
       ],
       "acceptance_record": ".planning/memory-resilience/evidence/B11.74.3.json",
       "retirement_trigger": "Before parent B11.74/B10/R02 acceptance; child local proof does not imply factory or whole-platform acceptance.",
       "progress": {
-        "current": "Nine of seventeen repository modules migrated:76prepares scoped and one original cached query eliminated. Friction group34tests/520assertions on both Windows runtimes;21faults detected. UTC week labels match native SQLite across seven boundary instants.",
+        "current": "Eleven of seventeen repository modules migrated:90prepares scoped and one original cached query eliminated. Graph/persona group17tests/855assertions on both Windows runtimes;20faults detected. Current-runtime projection callers2tests/13assertions. Missing-save false success and batch post-commit omission/decoding repaired.",
         "repositoryInventory": [
           {
             "path": "src/infrastructure/database/repositories/backfill-state-repository.ts",
@@ -5191,8 +5206,8 @@
             "nativePrepareSites": 7,
             "nativeQuerySites": 0,
             "retainedFields": 0,
-            "status": "pending",
-            "sourceHash": "106e79297b668ce41c8fd0f2e4ae58eccdce83e854f2ccddca8251569caa4dba"
+            "status": "local disposal proof; final quality pending",
+            "sourceHash": "412fc8cb9db4dd4f1d22217c25834f80017b2b22dba1d0e5be6b796ebae9a0fa"
           },
           {
             "path": "src/infrastructure/database/repositories/link-repository.ts",
@@ -5239,8 +5254,8 @@
             "nativePrepareSites": 7,
             "nativeQuerySites": 0,
             "retainedFields": 0,
-            "status": "pending",
-            "sourceHash": "cf5877fc6fe4451d0bc3308a1d22595be18295f6a60aec1dd6e1334a69bdd336"
+            "status": "local disposal proof; final quality pending",
+            "sourceHash": "0616d95569837fdbae38392dd13b74dd8572f38e8b8b79665624d1c229e7c9c4"
           },
           {
             "path": "src/infrastructure/database/repositories/session-repository.ts",
@@ -5259,8 +5274,8 @@
             "sourceHash": "8724e4ef65746f2b079f8bf62841357dc403eafeafffcc8a6a1764d2d02f9db3"
           }
         ],
-        "restart": "Next graph/persona repository lifetimes, then retained-owner repositories and caller construction. Main factory stays unchanged until .3-.5 complete.",
-        "remaining": "B11.74.7/B05 and existing Q tasks retain metric/driver/platform/persistence/review acceptance; B11.74.5 owns event-log direct reset integrity. Canonical friction quarantine remains separate."
+        "restart": "Next retained-owner repositories: extraction-state/link/tool-use first, then message/entity/session and caller construction. Main factory stays unchanged until .3-.5 complete.",
+        "remaining": "B11.74.7/B05 and existing Q tasks retain metric/driver/platform/persistence/review acceptance; Q024/Q029 own remaining graph/persona single-save and ignored-write/concurrency acknowledgement semantics. B11.74.5 owns event-log reset integrity. Canonical friction quarantine remains separate."
       }
     },
     {
@@ -5348,7 +5363,9 @@
         "Q021",
         "Q020",
         "Q023",
-        "Q026"
+        "Q026",
+        "Q024",
+        "Q029"
       ],
       "scope": "All B11.74 affected production/test files and native runtime targets",
       "deliverable": "Complete per-file/package/tier/changed-line proof and independent review; dependency barriers can resume",

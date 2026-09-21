@@ -6982,7 +6982,7 @@
     {
       "path": "src/infrastructure/database/repositories/graph-repository.ts",
       "package": "package.json",
-      "sourceHash": "106e79297b668ce41c8fd0f2e4ae58eccdce83e854f2ccddca8251569caa4dba",
+      "sourceHash": "412fc8cb9db4dd4f1d22217c25834f80017b2b22dba1d0e5be6b796ebae9a0fa",
       "tier": "S",
       "rationale": "Inspected SQLite INSERT/upsert statement persists graph_edges records. This establishes the data-integrity tier; transaction, conflict and deletion correctness remain separate verification obligations.",
       "applicability": {
@@ -6991,30 +6991,30 @@
       },
       "decisionStatus": "proposed - independent review pending",
       "inspection": {
-        "sourceRevision": "39c895b13e768bd607070efbc3496d47a821b257",
-        "anchor": "prepared INSERT into graph_edges",
-        "scope": "positive critical boundary establishes highest tier; not full correctness acceptance"
+        "sourceRevision": "4ae77f1 + current source hash",
+        "anchor": "graph/persona disposal and batch result atomicity",
+        "scope": "Scoped native behavior/metrics/targeted faults; final tier/decision/review acceptance remains pending."
       },
       "metricApplicability": {
-        "status": "proposed - independent review pending",
-        "evidence": ".planning/memory-resilience/evidence/B04-applicability-probe.json",
-        "sourceHash": "106e79297b668ce41c8fd0f2e4ae58eccdce83e854f2ccddca8251569caa4dba",
-        "disposition": "Measure every positive denominator; individually review zero branch/function denominators against runtime syntax. Observed counts do not prove instrumentation completeness. Optional-chain syntax is present; synthetic evidence shows current instrumentation omits its decision counters. B05.1 owns source-mapped branch proof before numeric acceptance.",
+        "status": "diagnostic - B05/Q024/Q029 and independent review pending",
+        "evidence": ".planning/memory-resilience/evidence/B11.74.3-graph-persona.json",
+        "sourceHash": "412fc8cb9db4dd4f1d22217c25834f80017b2b22dba1d0e5be6b796ebae9a0fa",
+        "disposition": "Measure every denominator; scoped100% does not establish full counter or decision completeness.",
         "metrics": {
+          "lines": {
+            "observedCounterTotal": 54,
+            "proposal": "measure - completeness unverified"
+          },
+          "functions": {
+            "observedCounterTotal": 14,
+            "proposal": "measure - completeness unverified"
+          },
           "statements": {
-            "observedCounterTotal": 46,
+            "observedCounterTotal": 57,
             "proposal": "measure - completeness unverified"
           },
           "branches": {
             "observedCounterTotal": 35,
-            "proposal": "measure - completeness unverified"
-          },
-          "functions": {
-            "observedCounterTotal": 13,
-            "proposal": "measure - completeness unverified"
-          },
-          "lines": {
-            "observedCounterTotal": 45,
             "proposal": "measure - completeness unverified"
           }
         }
@@ -7432,7 +7432,7 @@
     {
       "path": "src/infrastructure/database/repositories/persona-repository.ts",
       "package": "package.json",
-      "sourceHash": "cf5877fc6fe4451d0bc3308a1d22595be18295f6a60aec1dd6e1334a69bdd336",
+      "sourceHash": "0616d95569837fdbae38392dd13b74dd8572f38e8b8b79665624d1c229e7c9c4",
       "tier": "S",
       "rationale": "Inspected SQLite INSERT/upsert statement persists persona_entries records. This establishes the data-integrity tier; transaction, conflict and deletion correctness remain separate verification obligations.",
       "applicability": {
@@ -7441,30 +7441,30 @@
       },
       "decisionStatus": "proposed - independent review pending",
       "inspection": {
-        "sourceRevision": "39c895b13e768bd607070efbc3496d47a821b257",
-        "anchor": "prepared INSERT into persona_entries",
-        "scope": "positive critical boundary establishes highest tier; not full correctness acceptance"
+        "sourceRevision": "4ae77f1 + current source hash",
+        "anchor": "graph/persona disposal and batch result atomicity",
+        "scope": "Scoped native behavior/metrics/targeted faults; final tier/decision/review acceptance remains pending."
       },
       "metricApplicability": {
-        "status": "proposed - independent review pending",
-        "evidence": ".planning/memory-resilience/evidence/B04-applicability-probe.json",
-        "sourceHash": "cf5877fc6fe4451d0bc3308a1d22595be18295f6a60aec1dd6e1334a69bdd336",
-        "disposition": "Measure every positive denominator; individually review zero branch/function denominators against runtime syntax. Observed counts do not prove instrumentation completeness. Optional-chain syntax is present; synthetic evidence shows current instrumentation omits its decision counters. B05.1 owns source-mapped branch proof before numeric acceptance.",
+        "status": "diagnostic - B05/Q024/Q029 and independent review pending",
+        "evidence": ".planning/memory-resilience/evidence/B11.74.3-graph-persona.json",
+        "sourceHash": "0616d95569837fdbae38392dd13b74dd8572f38e8b8b79665624d1c229e7c9c4",
+        "disposition": "Measure every denominator; scoped100% does not establish full counter or decision completeness.",
         "metrics": {
+          "lines": {
+            "observedCounterTotal": 49,
+            "proposal": "measure - completeness unverified"
+          },
+          "functions": {
+            "observedCounterTotal": 14,
+            "proposal": "measure - completeness unverified"
+          },
           "statements": {
-            "observedCounterTotal": 42,
+            "observedCounterTotal": 53,
             "proposal": "measure - completeness unverified"
           },
           "branches": {
             "observedCounterTotal": 32,
-            "proposal": "measure - completeness unverified"
-          },
-          "functions": {
-            "observedCounterTotal": 13,
-            "proposal": "measure - completeness unverified"
-          },
-          "lines": {
-            "observedCounterTotal": 40,
             "proposal": "measure - completeness unverified"
           }
         }
@@ -17622,6 +17622,47 @@
           },
           "lines": {
             "observedCounterTotal": 100,
+            "proposal": "measure - completeness unverified"
+          }
+        }
+      }
+    },
+    {
+      "path": "tests/infrastructure/database/repositories/graph-persona-lifecycle.test.ts",
+      "package": "package.json",
+      "tier": "S",
+      "rationale": "Synthetic SQLite driver verifies graph/persona persistence, rollback, truthful save results and statement disposal.",
+      "applicability": {
+        "mode": "measure",
+        "reason": "Executable data-integrity driver; no exclusion approved."
+      },
+      "decisionStatus": "proposed - independent review pending",
+      "sourceHash": "5e7e803ab46c0757572b2451e243e6465f734e0cb568f145957f75c2e29922d8",
+      "inspection": {
+        "sourceRevision": "4ae77f1 + current source hash",
+        "anchor": "graph/persona disposal and batch result atomicity",
+        "scope": "Scoped native behavior/metrics/targeted faults; final tier/decision/review acceptance remains pending."
+      },
+      "metricApplicability": {
+        "status": "diagnostic - B05/Q024/Q029 and independent review pending",
+        "evidence": ".planning/memory-resilience/evidence/B11.74.3-graph-persona.json",
+        "sourceHash": "5e7e803ab46c0757572b2451e243e6465f734e0cb568f145957f75c2e29922d8",
+        "disposition": "Measure every denominator; scoped100% does not establish full counter or decision completeness.",
+        "metrics": {
+          "lines": {
+            "observedCounterTotal": 129,
+            "proposal": "measure - completeness unverified"
+          },
+          "functions": {
+            "observedCounterTotal": 28,
+            "proposal": "measure - completeness unverified"
+          },
+          "statements": {
+            "observedCounterTotal": 210,
+            "proposal": "measure - completeness unverified"
+          },
+          "branches": {
+            "observedCounterTotal": 4,
             "proposal": "measure - completeness unverified"
           }
         }
