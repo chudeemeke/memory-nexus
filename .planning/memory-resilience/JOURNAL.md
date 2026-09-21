@@ -1,5 +1,34 @@
 # Memory resilience execution journal
 
+## 2026-09-21 - Embedding repository statement disposal and rollback proof
+
+- Previous continuation inspected the next seam but made no authoritative change;
+  this turn reproduced batch/read/skip lifetime failures and migrated all fifteen
+  embedding prepare sites. Statements prepare once per batch and dispose after
+  commit, rollback or a later preparation failure. SQL and public APIs are unchanged.
+- Real synthetic sqlite-vec tests cover repeated updates, empty batches, a later
+  invalid vector, later state-write rejection, both-table rollback, retry, partial
+  preparation failure, read early returns/errors and skip upsert/write failure.
+  Fixture setup is inside try/finally and missing sqlite-vec fails the proof.
+- Both Windows Bun 1.3.14 and 1.4.1 pass 45 tests / 264 assertions. Sixteen
+  disposal/transaction faults are detected. Source/scripts and strict driver types
+  plus isolation pass. Pinned runtimes and owned diagnostic roots were removed.
+- Compatibility discovery: 1.3.14 prepares nine cached transaction controls through
+  public prepare; 1.4.1 does not. A fixture without warmup failed four tests only on
+  the older runtime. Initialize connection-owned controls before capture rather
+  than filter captured SQL; retained failure evidence and final paired passes are
+  in evidence/B11.74.3-embedding.json. No rollback assertion was relaxed.
+- Diagnostic repository metrics: statements 98.21%, branches 86.11%, functions and
+  lines 100%; driver 100% in all four metrics. Q021 is now a confirmed required
+  repair, independently reachable after .3 and explicitly required by .7. It also
+  owns clear/recreate partial-failure integrity review. B05/full-file decision,
+  driver, platform, package, changed-line and independent review remain open.
+- Four of seventeen repository modules / 27 prepares migrated locally; thirteen
+  modules and retained-owner construction remain. Main factory remains native.
+  Next: dream/fact repository scope lifetimes under B11.74.3, then remaining modules.
+- Latest C-drive observation was 2.28 GiB free; no attribution to other projects
+  or deletion outside owned roots. No model experiment or replication started.
+
 ## 2026-09-20 - Record repository disposal and false utility-save success repaired
 
 - Previous turn progressed at 257c7e6; worktree began clean. Continued B11.74.3

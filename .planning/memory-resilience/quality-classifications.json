@@ -6526,7 +6526,7 @@
     {
       "path": "src/infrastructure/database/repositories/embedding-repository.ts",
       "package": "package.json",
-      "sourceHash": "78c09ed29af171dabf61ecb859906421e42ce2c73499716e2f1e9375558066fe",
+      "sourceHash": "1dff7097ede99c1809085669cf40f2baa3190b099f655538e059ff0f9d26b4ed",
       "tier": "S",
       "rationale": "Inspected SQLite INSERT/upsert statement persists embedding_skips records. This establishes the data-integrity tier; transaction, conflict and deletion correctness remain separate verification obligations.",
       "applicability": {
@@ -6535,30 +6535,30 @@
       },
       "decisionStatus": "proposed - independent review pending",
       "inspection": {
-        "sourceRevision": "39c895b13e768bd607070efbc3496d47a821b257",
-        "anchor": "prepared INSERT into embedding_skips",
-        "scope": "positive critical boundary establishes highest tier; not full correctness acceptance"
+        "sourceRevision": "7427dc5 + current source hash",
+        "anchor": "embedding repository scope lifetime and native batch rollback",
+        "scope": "Scoped native behavior and targeted faults; full tier/applicability review remains pending."
       },
       "metricApplicability": {
-        "status": "proposed - independent review pending",
-        "evidence": ".planning/memory-resilience/evidence/B04-applicability-probe.json",
-        "sourceHash": "78c09ed29af171dabf61ecb859906421e42ce2c73499716e2f1e9375558066fe",
-        "disposition": "Measure every positive denominator; individually review zero branch/function denominators against runtime syntax. Observed counts do not prove instrumentation completeness. Optional-chain syntax is present; synthetic evidence shows current instrumentation omits its decision counters. B05.1 owns source-mapped branch proof before numeric acceptance.",
+        "status": "diagnostic - B05/Q021 and independent review pending",
+        "evidence": ".planning/memory-resilience/evidence/B11.74.3-embedding.json",
+        "sourceHash": "1dff7097ede99c1809085669cf40f2baa3190b099f655538e059ff0f9d26b4ed",
+        "disposition": "Measure all denominators; current repository branch gap is a failure, not an exclusion.",
         "metrics": {
-          "statements": {
-            "observedCounterTotal": 45,
-            "proposal": "measure - completeness unverified"
-          },
-          "branches": {
-            "observedCounterTotal": 36,
+          "lines": {
+            "observedCounterTotal": 53,
             "proposal": "measure - completeness unverified"
           },
           "functions": {
             "observedCounterTotal": 14,
             "proposal": "measure - completeness unverified"
           },
-          "lines": {
-            "observedCounterTotal": 42,
+          "statements": {
+            "observedCounterTotal": 56,
+            "proposal": "measure - completeness unverified"
+          },
+          "branches": {
+            "observedCounterTotal": 36,
             "proposal": "measure - completeness unverified"
           }
         }
@@ -17501,6 +17501,47 @@
         "sourceHash": "c9d9edafc637d537d53fc14c4edf0d154f303c396372638323b96bd478657d30",
         "diagnostic": ".planning/memory-resilience/evidence/B11.1-helper-metrics.json",
         "reason": "Current isolated direct-Istanbul diagnostic reports all four metrics at 100%; complete decision proof, instrumenter acceptance and independent review remain required."
+      }
+    },
+    {
+      "path": "tests/infrastructure/database/repositories/embedding-repository-lifecycle.test.ts",
+      "package": "package.json",
+      "tier": "S",
+      "rationale": "Synthetic native database fixture verifies vector/state atomicity, failure cleanup and statement lifetime.",
+      "applicability": {
+        "mode": "measure",
+        "reason": "Executable data-integrity driver; no exclusion approved."
+      },
+      "decisionStatus": "proposed - independent review pending",
+      "sourceHash": "75519052043c8caaacd0e9b3426ae11d77b449ee4489d54d8f05d39bc5fa44f3",
+      "inspection": {
+        "sourceRevision": "7427dc5 + current source hash",
+        "anchor": "embedding repository scope lifetime and native batch rollback",
+        "scope": "Scoped native behavior and targeted faults; full tier/applicability review remains pending."
+      },
+      "metricApplicability": {
+        "status": "diagnostic - B05/Q021 and independent review pending",
+        "evidence": ".planning/memory-resilience/evidence/B11.74.3-embedding.json",
+        "sourceHash": "75519052043c8caaacd0e9b3426ae11d77b449ee4489d54d8f05d39bc5fa44f3",
+        "disposition": "Measure all denominators; current repository branch gap is a failure, not an exclusion.",
+        "metrics": {
+          "lines": {
+            "observedCounterTotal": 91,
+            "proposal": "measure - completeness unverified"
+          },
+          "functions": {
+            "observedCounterTotal": 24,
+            "proposal": "measure - completeness unverified"
+          },
+          "statements": {
+            "observedCounterTotal": 121,
+            "proposal": "measure - completeness unverified"
+          },
+          "branches": {
+            "observedCounterTotal": 1,
+            "proposal": "measure - completeness unverified"
+          }
+        }
       }
     },
     {

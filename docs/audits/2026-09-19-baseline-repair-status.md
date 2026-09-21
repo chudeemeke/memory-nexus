@@ -2,6 +2,15 @@
 
 Status: in progress on `fix/baseline-trust-repair`; not release acceptance. The recovered v6 requirements and roadmap remain intact, with Phase 45 unstarted. This report supersedes September 12 findings only where new evidence is listed below.
 
+Latest checkpoint (September 21): B11.74.3 has locally migrated four of seventeen
+repository modules, covering 27 prepares. The embedding slice passes 45 tests /
+264 assertions on Windows Bun 1.3.14 and 1.4.1, including native rollback and
+partial preparation failure; sixteen targeted faults are detected. Its diagnostic
+86.11% branch coverage remains a required Q021 repair. Factory activation, full
+quality/platform/review acceptance and the post-baseline model experiment remain
+pending. Current authority is the execution ledger and its source-bound
+`evidence/B11.74.3-embedding.json`, not earlier counts in this historical report.
+
 Delivery: [draft PR #1](https://github.com/chudeemeke/memory-nexus/pull/1) preserves the candidate and recovered documents. The six opening commits have GitHub-verified signatures. The opening hosted query reports no checks; this is pending CI, not green CI. Local logs and the compressed runtime/log archives remain outside Git.
 
 ## Implemented candidates
