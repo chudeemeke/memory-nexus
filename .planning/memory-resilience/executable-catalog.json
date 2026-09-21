@@ -9219,7 +9219,7 @@
     {
       "path": "src/infrastructure/database/repositories/extraction-state-repository.ts",
       "package": "package.json",
-      "sourceHash": "8dad5b3cf0214d538c3d1f9c05cea677796f5a56ad032a821760525bed0ac383",
+      "sourceHash": "6bc082eb0db0bfe5a144c07a5fbce8ae5da1afa7d713df68371eecbdbeb5af4a",
       "language": ".ts",
       "syntax": "executable",
       "imports": [
@@ -9235,15 +9235,18 @@
         "row",
         "rowToExtractionState",
         "rows",
-        "save"
+        "save",
+        "statement"
       ],
       "calls": [
         "ExtractionState.create",
-        "db.prepare",
         "rows.map",
         "state.completedAt.toISOString",
         "state.fileMtime.toISOString",
-        "state.startedAt.toISOString"
+        "state.startedAt.toISOString",
+        "statement.all",
+        "statement.get",
+        "statement.run"
       ]
     },
     {
@@ -9748,7 +9751,7 @@
     {
       "path": "src/infrastructure/database/repositories/link-repository.ts",
       "package": "package.json",
-      "sourceHash": "6b9737c12b06781c74a439ac6b937124781c6cf8c3415ed3be4140444e85f4fa",
+      "sourceHash": "e17560feb0eb034fac220cc593792b35343ee28829524b64cf35c48f0ab0d7f6",
       "language": ".ts",
       "syntax": "executable",
       "imports": [
@@ -9763,6 +9766,7 @@
         "findRelated",
         "findRelatedWithHops",
         "link",
+        "prepareInsert",
         "results",
         "rowToLink",
         "rows",
@@ -9770,14 +9774,16 @@
         "saveAll",
         "saveMany",
         "sql",
+        "statement",
         "stmt"
       ],
       "calls": [
         "Link.create",
-        "db.prepare",
         "results.map",
         "rows.map",
         "saveAll.immediate",
+        "statement.all",
+        "statement.run",
         "stmt.all"
       ]
     },
@@ -10537,7 +10543,7 @@
     {
       "path": "src/infrastructure/database/repositories/tool-use-repository.ts",
       "package": "package.json",
-      "sourceHash": "8724e4ef65746f2b079f8bf62841357dc403eafeafffcc8a6a1764d2d02f9db3",
+      "sourceHash": "a069b37dcc1ff976d9f92295c1ab524d905023f1abb2dd886ad0d2f73de90a24",
       "language": ".ts",
       "syntax": "executable",
       "imports": [
@@ -10555,23 +10561,27 @@
         "findBySession",
         "i",
         "insertBatch",
+        "prepareInsert",
         "result",
         "row",
         "rowToEntity",
         "rows",
         "runResult",
         "save",
-        "saveMany"
+        "saveMany",
+        "statement"
       ],
       "calls": [
         "JSON.parse",
         "JSON.stringify",
         "ToolUse.create",
-        "db.prepare",
         "insertBatch.immediate",
         "options.onProgress",
         "result.errors.push",
         "rows.map",
+        "statement.all",
+        "statement.get",
+        "statement.run",
         "toolUse.timestamp.toISOString",
         "toolUses.slice",
         "unknownErrorMessage"
@@ -25717,6 +25727,87 @@
         "repo.save",
         "repo.saveMany",
         "test"
+      ]
+    },
+    {
+      "path": "tests/infrastructure/database/repositories/ingestion-lifecycle.test.ts",
+      "package": "package.json",
+      "sourceHash": "547ad18aab771abdd9c53c97422d542979253f6954a8a4d96665f76a80e481fc",
+      "language": ".ts",
+      "syntax": "test-driver",
+      "imports": [
+        "../../../../src/domain/entities/extraction-state.js",
+        "../../../../src/domain/entities/link.js",
+        "../../../../src/domain/entities/tool-use.js",
+        "../../../../src/infrastructure/database/owned-database.js",
+        "../../../../src/infrastructure/database/repositories/extraction-state-repository.js",
+        "../../../../src/infrastructure/database/repositories/link-repository.js",
+        "../../../../src/infrastructure/database/repositories/tool-use-repository.js",
+        "../../../../src/infrastructure/database/schema.js",
+        "bun:sqlite",
+        "bun:test"
+      ],
+      "declarations": [
+        "cyclic",
+        "db",
+        "entries",
+        "invalid",
+        "iteration",
+        "link",
+        "prepare",
+        "progress",
+        "repo",
+        "result",
+        "state",
+        "statement",
+        "statements",
+        "timestamp",
+        "tool",
+        "withFixture"
+      ],
+      "calls": [
+        "Array.from",
+        "ExtractionState.create",
+        "Link.create",
+        "Reflect.apply",
+        "ToolUse.create",
+        "createSchema",
+        "db.close",
+        "db.exec",
+        "db.finalizeStatements",
+        "db.prepare.bind",
+        "db.transaction",
+        "describe",
+        "expect",
+        "expect.not.toBe",
+        "expect.rejects.toThrow",
+        "expect.toBe",
+        "expect.toBeNull",
+        "expect.toContain",
+        "expect.toEqual",
+        "expect.toHaveLength",
+        "expect.toThrow",
+        "it",
+        "link",
+        "progress.push",
+        "released",
+        "repo.findById",
+        "repo.findBySession",
+        "repo.findBySessionPath",
+        "repo.findBySource",
+        "repo.findByTarget",
+        "repo.findPending",
+        "repo.findRelated",
+        "repo.findRelatedWithHops",
+        "repo.save",
+        "repo.saveMany",
+        "result.errors.map",
+        "run",
+        "state",
+        "statement.get",
+        "statements.push",
+        "tool",
+        "withFixture"
       ]
     },
     {

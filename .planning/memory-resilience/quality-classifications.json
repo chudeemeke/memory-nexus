@@ -6775,7 +6775,7 @@
     {
       "path": "src/infrastructure/database/repositories/extraction-state-repository.ts",
       "package": "package.json",
-      "sourceHash": "8dad5b3cf0214d538c3d1f9c05cea677796f5a56ad032a821760525bed0ac383",
+      "sourceHash": "6bc082eb0db0bfe5a144c07a5fbce8ae5da1afa7d713df68371eecbdbeb5af4a",
       "tier": "S",
       "rationale": "Inspected SQLite INSERT/upsert statement persists extraction_state records. This establishes the data-integrity tier; transaction, conflict and deletion correctness remain separate verification obligations.",
       "applicability": {
@@ -6784,30 +6784,30 @@
       },
       "decisionStatus": "proposed - independent review pending",
       "inspection": {
-        "sourceRevision": "39c895b13e768bd607070efbc3496d47a821b257",
-        "anchor": "prepared INSERT into extraction_state",
-        "scope": "positive critical boundary establishes highest tier; not full correctness acceptance"
+        "sourceRevision": "72d2662 + current source hash",
+        "anchor": "ingestion adapter ownership and native full-rollback handling",
+        "scope": "Scoped native behavior/metrics/targeted faults; final tier/decision/review acceptance remains pending."
       },
       "metricApplicability": {
-        "status": "proposed - independent review pending",
-        "evidence": ".planning/memory-resilience/evidence/B04-applicability-probe.json",
-        "sourceHash": "8dad5b3cf0214d538c3d1f9c05cea677796f5a56ad032a821760525bed0ac383",
-        "disposition": "Measure every positive denominator; individually review zero branch/function denominators against runtime syntax. Observed counts do not prove instrumentation completeness. Optional-chain syntax is present; synthetic evidence shows current instrumentation omits its decision counters. B05.1 owns source-mapped branch proof before numeric acceptance.",
+        "status": "diagnostic - B05/Q025/Q030 and independent review pending",
+        "evidence": ".planning/memory-resilience/evidence/B11.74.3-ingestion.json",
+        "sourceHash": "6bc082eb0db0bfe5a144c07a5fbce8ae5da1afa7d713df68371eecbdbeb5af4a",
+        "disposition": "Measure every denominator; scoped100% does not establish full counter or SQL/decision completeness.",
         "metrics": {
-          "statements": {
-            "observedCounterTotal": 17,
-            "proposal": "measure - completeness unverified"
-          },
-          "branches": {
-            "observedCounterTotal": 20,
+          "lines": {
+            "observedCounterTotal": 16,
             "proposal": "measure - completeness unverified"
           },
           "functions": {
             "observedCounterTotal": 7,
             "proposal": "measure - completeness unverified"
           },
-          "lines": {
-            "observedCounterTotal": 16,
+          "statements": {
+            "observedCounterTotal": 17,
+            "proposal": "measure - completeness unverified"
+          },
+          "branches": {
+            "observedCounterTotal": 20,
             "proposal": "measure - completeness unverified"
           }
         }
@@ -7101,7 +7101,7 @@
     {
       "path": "src/infrastructure/database/repositories/link-repository.ts",
       "package": "package.json",
-      "sourceHash": "6b9737c12b06781c74a439ac6b937124781c6cf8c3415ed3be4140444e85f4fa",
+      "sourceHash": "e17560feb0eb034fac220cc593792b35343ee28829524b64cf35c48f0ab0d7f6",
       "tier": "S",
       "rationale": "Inspected SQLite INSERT/upsert statement persists links records. This establishes the data-integrity tier; transaction, conflict and deletion correctness remain separate verification obligations.",
       "applicability": {
@@ -7110,30 +7110,30 @@
       },
       "decisionStatus": "proposed - independent review pending",
       "inspection": {
-        "sourceRevision": "39c895b13e768bd607070efbc3496d47a821b257",
-        "anchor": "prepared INSERT into links",
-        "scope": "positive critical boundary establishes highest tier; not full correctness acceptance"
+        "sourceRevision": "72d2662 + current source hash",
+        "anchor": "ingestion adapter ownership and native full-rollback handling",
+        "scope": "Scoped native behavior/metrics/targeted faults; final tier/decision/review acceptance remains pending."
       },
       "metricApplicability": {
-        "status": "proposed - independent review pending",
-        "evidence": ".planning/memory-resilience/evidence/B04-applicability-probe.json",
-        "sourceHash": "6b9737c12b06781c74a439ac6b937124781c6cf8c3415ed3be4140444e85f4fa",
-        "disposition": "Measure every positive denominator; individually review zero branch/function denominators against runtime syntax. Observed counts do not prove instrumentation completeness.",
+        "status": "diagnostic - B05/Q025/Q030 and independent review pending",
+        "evidence": ".planning/memory-resilience/evidence/B11.74.3-ingestion.json",
+        "sourceHash": "e17560feb0eb034fac220cc593792b35343ee28829524b64cf35c48f0ab0d7f6",
+        "disposition": "Measure every denominator; scoped100% does not establish full counter or SQL/decision completeness.",
         "metrics": {
+          "lines": {
+            "observedCounterTotal": 21,
+            "proposal": "measure - completeness unverified"
+          },
+          "functions": {
+            "observedCounterTotal": 14,
+            "proposal": "measure - completeness unverified"
+          },
           "statements": {
-            "observedCounterTotal": 24,
+            "observedCounterTotal": 25,
             "proposal": "measure - completeness unverified"
           },
           "branches": {
             "observedCounterTotal": 2,
-            "proposal": "measure - completeness unverified"
-          },
-          "functions": {
-            "observedCounterTotal": 13,
-            "proposal": "measure - completeness unverified"
-          },
-          "lines": {
-            "observedCounterTotal": 20,
             "proposal": "measure - completeness unverified"
           }
         }
@@ -7598,7 +7598,7 @@
     {
       "path": "src/infrastructure/database/repositories/tool-use-repository.ts",
       "package": "package.json",
-      "sourceHash": "8724e4ef65746f2b079f8bf62841357dc403eafeafffcc8a6a1764d2d02f9db3",
+      "sourceHash": "a069b37dcc1ff976d9f92295c1ab524d905023f1abb2dd886ad0d2f73de90a24",
       "tier": "S",
       "rationale": "Inspected SQLite INSERT/upsert statement persists tool_uses records. This establishes the data-integrity tier; transaction, conflict and deletion correctness remain separate verification obligations.",
       "applicability": {
@@ -7607,30 +7607,30 @@
       },
       "decisionStatus": "proposed - independent review pending",
       "inspection": {
-        "sourceRevision": "39c895b13e768bd607070efbc3496d47a821b257",
-        "anchor": "prepared INSERT into tool_uses",
-        "scope": "positive critical boundary establishes highest tier; not full correctness acceptance"
+        "sourceRevision": "72d2662 + current source hash",
+        "anchor": "ingestion adapter ownership and native full-rollback handling",
+        "scope": "Scoped native behavior/metrics/targeted faults; final tier/decision/review acceptance remains pending."
       },
       "metricApplicability": {
-        "status": "proposed - independent review pending",
-        "evidence": ".planning/memory-resilience/evidence/B04-applicability-probe.json",
-        "sourceHash": "8724e4ef65746f2b079f8bf62841357dc403eafeafffcc8a6a1764d2d02f9db3",
-        "disposition": "Measure every positive denominator; individually review zero branch/function denominators against runtime syntax. Observed counts do not prove instrumentation completeness. Optional-chain syntax is present; synthetic evidence shows current instrumentation omits its decision counters. B05.1 owns source-mapped branch proof before numeric acceptance.",
+        "status": "diagnostic - B05/Q025/Q030 and independent review pending",
+        "evidence": ".planning/memory-resilience/evidence/B11.74.3-ingestion.json",
+        "sourceHash": "a069b37dcc1ff976d9f92295c1ab524d905023f1abb2dd886ad0d2f73de90a24",
+        "disposition": "Measure every denominator; scoped100% does not establish full counter or SQL/decision completeness.",
         "metrics": {
-          "statements": {
+          "lines": {
             "observedCounterTotal": 30,
             "proposal": "measure - completeness unverified"
           },
-          "branches": {
-            "observedCounterTotal": 10,
-            "proposal": "measure - completeness unverified"
-          },
           "functions": {
-            "observedCounterTotal": 8,
+            "observedCounterTotal": 9,
             "proposal": "measure - completeness unverified"
           },
-          "lines": {
-            "observedCounterTotal": 28,
+          "statements": {
+            "observedCounterTotal": 33,
+            "proposal": "measure - completeness unverified"
+          },
+          "branches": {
+            "observedCounterTotal": 12,
             "proposal": "measure - completeness unverified"
           }
         }
@@ -17705,6 +17705,47 @@
           },
           "lines": {
             "observedCounterTotal": 48,
+            "proposal": "measure - completeness unverified"
+          }
+        }
+      }
+    },
+    {
+      "path": "tests/infrastructure/database/repositories/ingestion-lifecycle.test.ts",
+      "package": "package.json",
+      "tier": "S",
+      "rationale": "Synthetic SQLite driver verifies ingestion persistence, native rollback, retry and deterministic statement ownership.",
+      "applicability": {
+        "mode": "measure",
+        "reason": "Executable data-integrity driver; no exclusion approved."
+      },
+      "decisionStatus": "proposed - independent review pending",
+      "sourceHash": "547ad18aab771abdd9c53c97422d542979253f6954a8a4d96665f76a80e481fc",
+      "inspection": {
+        "sourceRevision": "72d2662 + current source hash",
+        "anchor": "ingestion adapter ownership and native full-rollback handling",
+        "scope": "Scoped native behavior/metrics/targeted faults; final tier/decision/review acceptance remains pending."
+      },
+      "metricApplicability": {
+        "status": "diagnostic - B05/Q025/Q030 and independent review pending",
+        "evidence": ".planning/memory-resilience/evidence/B11.74.3-ingestion.json",
+        "sourceHash": "547ad18aab771abdd9c53c97422d542979253f6954a8a4d96665f76a80e481fc",
+        "disposition": "Measure every denominator; scoped100% does not establish full counter or SQL/decision completeness.",
+        "metrics": {
+          "lines": {
+            "observedCounterTotal": 133,
+            "proposal": "measure - completeness unverified"
+          },
+          "functions": {
+            "observedCounterTotal": 39,
+            "proposal": "measure - completeness unverified"
+          },
+          "statements": {
+            "observedCounterTotal": 220,
+            "proposal": "measure - completeness unverified"
+          },
+          "branches": {
+            "observedCounterTotal": 5,
             "proposal": "measure - completeness unverified"
           }
         }

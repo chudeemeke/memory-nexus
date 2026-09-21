@@ -5,7 +5,7 @@
  * Supports graph-like traversal using WITH RECURSIVE CTE.
  */
 
-import type { Database, Statement } from "bun:sqlite";
+import type { Database } from "bun:sqlite";
 import type { ILinkRepository } from "../../../domain/ports/repositories.js";
 import { Link, type EntityType } from "../../../domain/entities/link.js";
 
@@ -43,34 +43,7 @@ export interface RelatedLink {
  * traversal using WITH RECURSIVE CTE with cycle prevention.
  */
 export class SqliteLinkRepository implements ILinkRepository {
-  private readonly db: Database;
-  private readonly findBySourceStmt: Statement;
-  private readonly findByTargetStmt: Statement;
-  private readonly insertStmt: Statement;
-
-  constructor(db: Database) {
-    this.db = db;
-
-    // Prepare all statements once for reuse
-    this.findBySourceStmt = db.prepare(`
-      SELECT source_type, source_id, target_type, target_id, relationship, weight
-      FROM links
-      WHERE source_type = $sourceType AND source_id = $sourceId
-    `);
-
-    this.findByTargetStmt = db.prepare(`
-      SELECT source_type, source_id, target_type, target_id, relationship, weight
-      FROM links
-      WHERE target_type = $targetType AND target_id = $targetId
-    `);
-
-    this.insertStmt = db.prepare(`
-      INSERT OR REPLACE INTO links
-        (source_type, source_id, target_type, target_id, relationship, weight)
-      VALUES
-        ($sourceType, $sourceId, $targetType, $targetId, $relationship, $weight)
-    `);
-  }
+  constructor(private readonly db: Database) {}
 
   /**
    * Map a database row to a Link entity
@@ -93,7 +66,12 @@ export class SqliteLinkRepository implements ILinkRepository {
     sourceType: EntityType,
     sourceId: string
   ): Promise<Link[]> {
-    const rows = this.findBySourceStmt.all({
+    using statement = this.db.prepare(`
+      SELECT source_type, source_id, target_type, target_id, relationship, weight
+      FROM links
+      WHERE source_type = $sourceType AND source_id = $sourceId
+    `);
+    const rows = statement.all({
       $sourceType: sourceType,
       $sourceId: sourceId,
     }) as LinkRow[];
@@ -107,7 +85,12 @@ export class SqliteLinkRepository implements ILinkRepository {
     targetType: EntityType,
     targetId: string
   ): Promise<Link[]> {
-    const rows = this.findByTargetStmt.all({
+    using statement = this.db.prepare(`
+      SELECT source_type, source_id, target_type, target_id, relationship, weight
+      FROM links
+      WHERE target_type = $targetType AND target_id = $targetId
+    `);
+    const rows = statement.all({
       $targetType: targetType,
       $targetId: targetId,
     }) as LinkRow[];
@@ -171,7 +154,7 @@ export class SqliteLinkRepository implements ILinkRepository {
       ORDER BY hop ASC, weight DESC
     `;
 
-    const stmt = this.db.prepare(sql);
+    using stmt = this.db.prepare(sql);
     const rows = stmt.all({
       $entityType: entityType,
       $entityId: entityId,
@@ -189,7 +172,8 @@ export class SqliteLinkRepository implements ILinkRepository {
    * Uses INSERT OR REPLACE for upsert behavior on unique constraint.
    */
   async save(link: Link): Promise<void> {
-    this.insertStmt.run({
+    using statement = this.prepareInsert();
+    statement.run({
       $sourceType: link.sourceType,
       $sourceId: link.sourceId,
       $targetType: link.targetType,
@@ -204,9 +188,10 @@ export class SqliteLinkRepository implements ILinkRepository {
    * Uses BEGIN IMMEDIATE for write locking.
    */
   async saveMany(links: Link[]): Promise<void> {
+    using statement = this.prepareInsert();
     const saveAll = this.db.transaction(() => {
       for (const link of links) {
-        this.insertStmt.run({
+        statement.run({
           $sourceType: link.sourceType,
           $sourceId: link.sourceId,
           $targetType: link.targetType,
@@ -218,5 +203,14 @@ export class SqliteLinkRepository implements ILinkRepository {
     });
 
     saveAll.immediate();
+  }
+
+  private prepareInsert() {
+    return this.db.prepare(`
+      INSERT OR REPLACE INTO links
+        (source_type, source_id, target_type, target_id, relationship, weight)
+      VALUES
+        ($sourceType, $sourceId, $targetType, $targetId, $relationship, $weight)
+    `);
   }
 }

@@ -1,5 +1,36 @@
 # Memory resilience execution journal
 
+## 2026-09-21 - Ingestion ownership and transaction rollback containment
+
+- Continued from clean 72d2662. Removed ten constructor-retained statements from
+  extraction-state, link and tool-use adapters. Single operations dispose locally;
+  link/tool batches reuse one prepared insert for the whole invocation, including
+  tool-use's 100-row transaction chunks. Reconstructing owners on a long-lived
+  connection no longer accumulates their statements. Eleven original prepares now
+  have explicit lifetime boundaries through thirteen disposal scopes.
+- Native RAISE(ROLLBACK) RED proved a later tool-use row escaped the failed chunk
+  and persisted in autocommit mode. The catch handler now stops when SQLite has
+  ended the transaction. Earlier committed chunks remain; failed chunk changes
+  roll back, later rows stay absent and retry succeeds. Per-row FK/serialization
+  errors still return partial results while the transaction remains active.
+- The group passes 92 tests / 815 assertions on Windows Bun 1.3.14 and 1.4.1.
+  Sixteen targeted faults detected (13 disposals, 2 transactions, rollback guard).
+  Tests also cover rejected link batches, corrupt rows, empty batches, repeated
+  owners and progress callbacks failing after a committed chunk. Production and
+  strict driver types plus isolation pass. Temporary runtime/diagnostics removed.
+- Evidence: evidence/B11.74.3-ingestion.json. Four changed executable files show
+  diagnostic 100% metrics; B05 complete counters and full-file review remain open.
+  Q025 explicitly retains link SQL traversal/identity/wildcard review; Q030 retains
+  tool-use acknowledgement/progress/caller review. B11.74.7 owns extraction-state
+  acknowledgement and transaction coupling, safe actual sync caller proof and
+  installed-workload preparation costs. No real sync or canonical data accessed.
+- Fourteen of seventeen repositories / 101 original prepares locally migrated;
+  message/entity/session remain with 20 historical retained fields, 27 prepares
+  and two entity queries. Catalog 456 files / two packages and ledger 232 reconcile.
+  Next: those three repositories and caller construction, including the exported
+  extraction helper, followed by complete repository lifetime reconciliation.
+  Factory activation, baseline acceptance and embedding experiment remain gated.
+
 ## 2026-09-21 - Graph/persona lifetimes and batch result integrity
 
 - Continued from 4ae77f1 and preserved the existing active ledger. Fourteen prepares
