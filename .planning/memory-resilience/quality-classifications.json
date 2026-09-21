@@ -6443,7 +6443,7 @@
     {
       "path": "src/infrastructure/database/repositories/dream-repository.ts",
       "package": "package.json",
-      "sourceHash": "139ad85d741a734853b0a1a19976917acee4ff6ff31b86371f1e016e586d4048",
+      "sourceHash": "936563a118406d3f75ab3b41cf97d7199c895702cd811683fe748eaac48d917d",
       "tier": "S",
       "rationale": "Inspected SQLite INSERT/upsert statement persists dream_entries records. This establishes the data-integrity tier; transaction, conflict and deletion correctness remain separate verification obligations.",
       "applicability": {
@@ -6452,30 +6452,30 @@
       },
       "decisionStatus": "proposed - independent review pending",
       "inspection": {
-        "sourceRevision": "39c895b13e768bd607070efbc3496d47a821b257",
-        "anchor": "prepared INSERT into dream_entries",
-        "scope": "positive critical boundary establishes highest tier; not full correctness acceptance"
+        "sourceRevision": "d9736a0 + current source hash",
+        "anchor": "dream/fact scope disposal and native failure recovery",
+        "scope": "Scoped native behavior/metrics/faults; final tier/applicability and persistence review remains pending."
       },
       "metricApplicability": {
-        "status": "proposed - independent review pending",
-        "evidence": ".planning/memory-resilience/evidence/B04-applicability-probe.json",
-        "sourceHash": "139ad85d741a734853b0a1a19976917acee4ff6ff31b86371f1e016e586d4048",
-        "disposition": "Measure every positive denominator; individually review zero branch/function denominators against runtime syntax. Observed counts do not prove instrumentation completeness. Optional-chain syntax is present; synthetic evidence shows current instrumentation omits its decision counters. B05.1 owns source-mapped branch proof before numeric acceptance.",
+        "status": "diagnostic - B05/Q020/Q023 and independent review pending",
+        "evidence": ".planning/memory-resilience/evidence/B11.74.3-knowledge.json",
+        "sourceHash": "936563a118406d3f75ab3b41cf97d7199c895702cd811683fe748eaac48d917d",
+        "disposition": "Measure every denominator. Dream branch gap remains failure; zero driver branches require instrumenter completeness review.",
         "metrics": {
-          "statements": {
-            "observedCounterTotal": 44,
-            "proposal": "measure - completeness unverified"
-          },
-          "branches": {
-            "observedCounterTotal": 82,
+          "lines": {
+            "observedCounterTotal": 49,
             "proposal": "measure - completeness unverified"
           },
           "functions": {
             "observedCounterTotal": 13,
             "proposal": "measure - completeness unverified"
           },
-          "lines": {
-            "observedCounterTotal": 43,
+          "statements": {
+            "observedCounterTotal": 51,
+            "proposal": "measure - completeness unverified"
+          },
+          "branches": {
+            "observedCounterTotal": 82,
             "proposal": "measure - completeness unverified"
           }
         }
@@ -6858,7 +6858,7 @@
     {
       "path": "src/infrastructure/database/repositories/fact-repository.ts",
       "package": "package.json",
-      "sourceHash": "d905e31541d659189f5c4f72659f17147fe20b041e72cffcf83efcaae1a1986f",
+      "sourceHash": "783181485ab8cb69901c4075725dfb4a068d656a2fe4b7e9da5107115cb2d46b",
       "tier": "S",
       "rationale": "Inspected SQLite INSERT/upsert statement persists facts records. This establishes the data-integrity tier; transaction, conflict and deletion correctness remain separate verification obligations.",
       "applicability": {
@@ -6867,30 +6867,30 @@
       },
       "decisionStatus": "proposed - independent review pending",
       "inspection": {
-        "sourceRevision": "39c895b13e768bd607070efbc3496d47a821b257",
-        "anchor": "prepared INSERT into facts",
-        "scope": "positive critical boundary establishes highest tier; not full correctness acceptance"
+        "sourceRevision": "d9736a0 + current source hash",
+        "anchor": "dream/fact scope disposal and native failure recovery",
+        "scope": "Scoped native behavior/metrics/faults; final tier/applicability and persistence review remains pending."
       },
       "metricApplicability": {
-        "status": "proposed - independent review pending",
-        "evidence": ".planning/memory-resilience/evidence/B04-applicability-probe.json",
-        "sourceHash": "d905e31541d659189f5c4f72659f17147fe20b041e72cffcf83efcaae1a1986f",
-        "disposition": "Measure every positive denominator; individually review zero branch/function denominators against runtime syntax. Observed counts do not prove instrumentation completeness.",
+        "status": "diagnostic - B05/Q020/Q023 and independent review pending",
+        "evidence": ".planning/memory-resilience/evidence/B11.74.3-knowledge.json",
+        "sourceHash": "783181485ab8cb69901c4075725dfb4a068d656a2fe4b7e9da5107115cb2d46b",
+        "disposition": "Measure every denominator. Dream branch gap remains failure; zero driver branches require instrumenter completeness review.",
         "metrics": {
-          "statements": {
-            "observedCounterTotal": 43,
-            "proposal": "measure - completeness unverified"
-          },
-          "branches": {
-            "observedCounterTotal": 27,
+          "lines": {
+            "observedCounterTotal": 49,
             "proposal": "measure - completeness unverified"
           },
           "functions": {
             "observedCounterTotal": 18,
             "proposal": "measure - completeness unverified"
           },
-          "lines": {
-            "observedCounterTotal": 37,
+          "statements": {
+            "observedCounterTotal": 55,
+            "proposal": "measure - completeness unverified"
+          },
+          "branches": {
+            "observedCounterTotal": 27,
             "proposal": "measure - completeness unverified"
           }
         }
@@ -17623,6 +17623,47 @@
           },
           "lines": {
             "observedCounterTotal": 48,
+            "proposal": "measure - completeness unverified"
+          }
+        }
+      }
+    },
+    {
+      "path": "tests/infrastructure/database/repositories/knowledge-repository-lifecycle.test.ts",
+      "package": "package.json",
+      "tier": "S",
+      "rationale": "Synthetic native database driver verifies persisted knowledge lifecycle, transaction rollback, failure cleanup and truthful save results.",
+      "applicability": {
+        "mode": "measure",
+        "reason": "Executable data-integrity driver; no exclusion approved."
+      },
+      "decisionStatus": "proposed - independent review pending",
+      "sourceHash": "c8db5b2a631cad8978af438ea8ed0c6f419398e889523d65bd2c760f76c2d502",
+      "inspection": {
+        "sourceRevision": "d9736a0 + current source hash",
+        "anchor": "dream/fact scope disposal and native failure recovery",
+        "scope": "Scoped native behavior/metrics/faults; final tier/applicability and persistence review remains pending."
+      },
+      "metricApplicability": {
+        "status": "diagnostic - B05/Q020/Q023 and independent review pending",
+        "evidence": ".planning/memory-resilience/evidence/B11.74.3-knowledge.json",
+        "sourceHash": "c8db5b2a631cad8978af438ea8ed0c6f419398e889523d65bd2c760f76c2d502",
+        "disposition": "Measure every denominator. Dream branch gap remains failure; zero driver branches require instrumenter completeness review.",
+        "metrics": {
+          "lines": {
+            "observedCounterTotal": 135,
+            "proposal": "measure - completeness unverified"
+          },
+          "functions": {
+            "observedCounterTotal": 24,
+            "proposal": "measure - completeness unverified"
+          },
+          "statements": {
+            "observedCounterTotal": 201,
+            "proposal": "measure - completeness unverified"
+          },
+          "branches": {
+            "observedCounterTotal": 0,
             "proposal": "measure - completeness unverified"
           }
         }

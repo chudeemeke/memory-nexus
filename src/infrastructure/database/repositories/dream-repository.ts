@@ -40,7 +40,7 @@ export class SqliteDreamRepository implements IDreamRepository {
   constructor(private readonly db: Database) {}
 
   async save(entry: DreamEntry): Promise<DreamEntry> {
-    const result = this.db.prepare(`
+    using statement = this.db.prepare(`
       INSERT INTO dream_entries (
         dream_id, schema_version, kind, status, project, visibility,
         source_event_ids, target_fact_uuid, proposed_fact, reason, confidence,
@@ -68,16 +68,19 @@ export class SqliteDreamRepository implements IDreamRepository {
         reviewed_at = excluded.reviewed_at,
         applied_at = excluded.applied_at,
         rolled_back_at = excluded.rolled_back_at
-    `).run(...this.toSqlParams(entry));
+    `);
+    statement.run(...this.toSqlParams(entry));
 
     const saved = await this.findByDreamId(entry.dreamId);
-    return saved ?? entry.withId(Number(result.lastInsertRowid));
+    if (!saved) throw new Error("Dream entry was not present after save");
+    return saved;
   }
 
   async findByDreamId(dreamId: string): Promise<DreamEntry | null> {
-    const row = this.db.prepare<DreamRow, [string]>(
+    using statement = this.db.prepare<DreamRow, [string]>(
       "SELECT * FROM dream_entries WHERE dream_id = ?",
-    ).get(dreamId);
+    );
+    const row = statement.get(dreamId);
     return row ? this.toEntity(row) : null;
   }
 
@@ -101,9 +104,10 @@ export class SqliteDreamRepository implements IDreamRepository {
     const limit = options.limit ?? 100;
     params.push(limit);
     const where = conditions.length > 0 ? `WHERE ${conditions.join(" AND ")}` : "";
-    const rows = this.db.prepare<DreamRow, (string | number)[]>(
+    using statement = this.db.prepare<DreamRow, (string | number)[]>(
       `SELECT * FROM dream_entries ${where} ORDER BY updated_at DESC, dream_id ASC LIMIT ?`,
-    ).all(...params);
+    );
+    const rows = statement.all(...params);
     return rows.map((row) => this.toEntity(row));
   }
 
@@ -123,11 +127,13 @@ export class SqliteDreamRepository implements IDreamRepository {
   }
 
   async deleteByProject(project: string): Promise<void> {
-    this.db.prepare("DELETE FROM dream_entries WHERE project = ?").run(project);
+    using statement = this.db.prepare("DELETE FROM dream_entries WHERE project = ?");
+    statement.run(project);
   }
 
   async clearAll(): Promise<void> {
-    this.db.prepare("DELETE FROM dream_entries").run();
+    using statement = this.db.prepare("DELETE FROM dream_entries");
+    statement.run();
   }
 
   private toSqlParams(entry: DreamEntry): [

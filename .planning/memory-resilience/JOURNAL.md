@@ -1,5 +1,36 @@
 # Memory resilience execution journal
 
+## 2026-09-21 - Dream/fact statement lifetime and truthful dream save
+
+- Previous turn progressed at d9736a0; this turn began with a clean tree. Migrated
+  all seventeen dream/fact prepares with native lifecycle RED before each family
+  and fact batch migration. Fact loop statements dispose on each iteration and
+  failure; the existing transaction still rolls back earlier writes.
+- Dream save reproduced the utility-style false-success defect: a native trigger
+  removed the inserted row and save returned a fabricated entity. It now throws
+  when the post-write read finds no row. Normal insert/upsert and projection state
+  roundtrips remain verified. No general concurrency/trigger atomicity is claimed.
+- Driver covers repeated owners/calls, rejected writes/deletes, FTS errors, stored
+  JSON/audit decoding failures, batch update/insert rollback/retry, empty batch,
+  global dream review/application/rollback timestamps and fact supersedence.
+- Final group: 27 tests / 693 assertions on Windows Bun 1.3.14 and 1.4.1. Nineteen
+  targeted faults detected (17 disposal, transaction removal, false-save return).
+  Source/script and strict driver types plus isolation pass; owned temporary roots
+  and pinned runtime removed. Evidence: evidence/B11.74.3-knowledge.json.
+- Dream diagnostic branches 98.78% remain below Tier S; other metrics 100%.
+  Q020 owns the remaining autoPromoted serialization branch versus the domain's
+  prohibition. Fact diagnostic metrics are 100%; Q023 retains ignored-write and
+  concurrent-writer persistence review because save/saveMany return input-derived
+  entities without post-write verification. These are explicit review obligations,
+  not a claim that those further defects were reproduced or repaired this turn.
+- Driver diagnostic metrics 100%, but zero branch counters with optional chaining
+  remain a B05 completeness limitation. Q020/Q023 are independently reachable after
+  .3 and required by .7; no final tier/review/platform acceptance implied. Catalog
+  452 executable files/two packages; ledger232. Six modules/44prepares migrated.
+- Next B11.74.3: memory-file and memory-governance, then remaining modules and
+  retained-owner construction. Eleven repository modules remain. Main factory,
+  model experiment and production replication remain unchanged/pending.
+
 ## 2026-09-21 - Embedding repository statement disposal and rollback proof
 
 - Previous continuation inspected the next seam but made no authoritative change;

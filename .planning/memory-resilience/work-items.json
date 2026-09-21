@@ -739,22 +739,29 @@
       "id": "Q020",
       "stage": "coverage_repair",
       "title": "Verify and repair src/infrastructure/database/repositories/dream-repository.ts",
-      "status": "pending_rebaseline",
+      "status": "pending",
       "depends_on": [
-        "B09"
+        "B11.74.3"
       ],
       "scope": "src/infrastructure/database/repositories/dream-repository.ts",
       "deliverable": "Reproduce uncovered behavior, add meaningful regression/boundary tests, fix demonstrated defects, satisfy this file's reviewed risk tier.",
       "verification": "Current source-bound four-metric file evidence plus tier-required decision tests. Supersede only with explicit fresh evidence that this candidate is no longer a gap.",
-      "risk": "unclassified",
+      "risk": "S",
       "authorization": "authorized",
       "owner": "memory-nexus",
       "historical_gaps": [
         "branches=90.24"
       ],
       "historical_evidence": "docs/audits/2026-09-19-repair-evidence/per-file-coverage-gaps.json",
-      "evidence": [],
-      "acceptance_record": ".planning/memory-resilience/evidence/Q020.json"
+      "evidence": [
+        ".planning/memory-resilience/evidence/B11.74.3-knowledge.json"
+      ],
+      "acceptance_record": ".planning/memory-resilience/evidence/Q020.json",
+      "progress": {
+        "current": "Dream diagnostic statements/functions/lines100%, branches98.78%. Resolve autoPromoted mapping against domain prohibition with invariant evidence; complete per-file decision and independent review.",
+        "owner": "memory-nexus",
+        "trigger": "After repository migration, before B11.74.7/B10/R02 acceptance; B05 complete measurement and rebaseline remain required."
+      }
     },
     {
       "id": "Q021",
@@ -810,22 +817,29 @@
       "id": "Q023",
       "stage": "coverage_repair",
       "title": "Verify and repair src/infrastructure/database/repositories/fact-repository.ts",
-      "status": "pending_rebaseline",
+      "status": "pending",
       "depends_on": [
-        "B09"
+        "B11.74.3"
       ],
       "scope": "src/infrastructure/database/repositories/fact-repository.ts",
       "deliverable": "Reproduce uncovered behavior, add meaningful regression/boundary tests, fix demonstrated defects, satisfy this file's reviewed risk tier.",
       "verification": "Current source-bound four-metric file evidence plus tier-required decision tests. Supersede only with explicit fresh evidence that this candidate is no longer a gap.",
-      "risk": "unclassified",
+      "risk": "S",
       "authorization": "authorized",
       "owner": "memory-nexus",
       "historical_gaps": [
         "branches=92.59"
       ],
       "historical_evidence": "docs/audits/2026-09-19-repair-evidence/per-file-coverage-gaps.json",
-      "evidence": [],
-      "acceptance_record": ".planning/memory-resilience/evidence/Q023.json"
+      "evidence": [
+        ".planning/memory-resilience/evidence/B11.74.3-knowledge.json"
+      ],
+      "acceptance_record": ".planning/memory-resilience/evidence/Q023.json",
+      "progress": {
+        "current": "Fact diagnostic100% in all four metrics. Final acceptance remains open: inspect ignored-write/concurrent-writer acknowledgement semantics in save/saveMany, run full-file decision and independent review.",
+        "owner": "memory-nexus",
+        "trigger": "After repository migration, before B11.74.7/B10/R02 acceptance; B05 complete measurement and rebaseline remain required."
+      }
     },
     {
       "id": "Q024",
@@ -5089,12 +5103,13 @@
       "evidence": [
         ".planning/memory-resilience/B11.74-plan.md",
         ".planning/memory-resilience/evidence/B11.74.3-records.json",
-        ".planning/memory-resilience/evidence/B11.74.3-embedding.json"
+        ".planning/memory-resilience/evidence/B11.74.3-embedding.json",
+        ".planning/memory-resilience/evidence/B11.74.3-knowledge.json"
       ],
       "acceptance_record": ".planning/memory-resilience/evidence/B11.74.3.json",
       "retirement_trigger": "Before parent B11.74/B10/R02 acceptance; child local proof does not imply factory or whole-platform acceptance.",
       "progress": {
-        "current": "Four of seventeen repository modules migrated: twenty-seven prepares scoped. Embedding group45 tests/264 assertions on both Windows runtimes; sixteen targeted disposal/transaction faults detected. Repository branch gap86.11% remains Q021.",
+        "current": "Six of seventeen repository modules migrated:44prepares scoped. Dream/fact group27tests/693assertions on both Windows runtimes;19targeted faults detected. Dream absent-save false success repaired. Q020/Q023 retain final quality/persistence acceptance.",
         "repositoryInventory": [
           {
             "path": "src/infrastructure/database/repositories/backfill-state-repository.ts",
@@ -5109,8 +5124,8 @@
             "nativePrepareSites": 5,
             "nativeQuerySites": 0,
             "retainedFields": 0,
-            "status": "pending",
-            "sourceHash": "139ad85d741a734853b0a1a19976917acee4ff6ff31b86371f1e016e586d4048"
+            "status": "local disposal proof; final quality pending",
+            "sourceHash": "936563a118406d3f75ab3b41cf97d7199c895702cd811683fe748eaac48d917d"
           },
           {
             "path": "src/infrastructure/database/repositories/embedding-repository.ts",
@@ -5149,8 +5164,8 @@
             "nativePrepareSites": 12,
             "nativeQuerySites": 0,
             "retainedFields": 0,
-            "status": "pending",
-            "sourceHash": "d905e31541d659189f5c4f72659f17147fe20b041e72cffcf83efcaae1a1986f"
+            "status": "local disposal proof; final quality pending",
+            "sourceHash": "783181485ab8cb69901c4075725dfb4a068d656a2fe4b7e9da5107115cb2d46b"
           },
           {
             "path": "src/infrastructure/database/repositories/friction-repository.ts",
@@ -5233,8 +5248,8 @@
             "sourceHash": "8724e4ef65746f2b079f8bf62841357dc403eafeafffcc8a6a1764d2d02f9db3"
           }
         ],
-        "restart": "Next dream/fact repository statement lifetimes, then remaining repository modules and retained-owner construction. Main factory stays unchanged until .3-.5 complete.",
-        "remaining": "B11.74.7/B05/Q021/Q027 own full metric/driver/platform/review acceptance. Q021 also owns clear/recreate failure integrity review. Hook extraction helper retained-owner construction still needs disposition."
+        "restart": "Next memory-file and memory-governance repository lifetimes, then remaining modules and retained-owner construction. Main factory stays unchanged until .3-.5 complete.",
+        "remaining": "B11.74.7/B05/Q020/Q021/Q023/Q027 own metric/driver/platform/persistence/review acceptance. Hook extraction helper retained-owner construction still needs disposition."
       }
     },
     {
@@ -5308,7 +5323,9 @@
       "depends_on": [
         "B11.74.6",
         "Q031",
-        "Q021"
+        "Q021",
+        "Q020",
+        "Q023"
       ],
       "scope": "All B11.74 affected production/test files and native runtime targets",
       "deliverable": "Complete per-file/package/tier/changed-line proof and independent review; dependency barriers can resume",
