@@ -216,8 +216,12 @@ The restart source is `work-items.json.current_item` and the newest JOURNAL entr
 not the original B01 starting command. B11.74.3 repository and B11.74.4 service
 lifetimes are locally verified. B11.74.5 now has reconciled local proof for schema,
 export, event and secret-audit statement migration: 29 scoped prepares across four
-modules, source-bound native slices and four negative ownership checks. B11.74.6
-is active for factory ownership and native caller reconciliation. Q100 owns the
+modules, source-bound native slices and four negative ownership checks. B11.74.6.1
+factory implementation/current-runtime proof is complete; the final pinned group
+repeat is disk-guarded after a type-only test import repair. B11.74.6.2 health
+readers is independently active, followed
+by B11.74.6.3 CLI/evaluation and combined caller revalidation. Q018/B11.9 retain
+factory and fixture quality gaps. Q100 owns the
 demonstrated whole-replay failure defect; Q101 owns complete secret-remediation
 safety. Full quality, platform and review acceptance remains B11.74.7; local
 migration verification does not close these gates. The source map, rejected

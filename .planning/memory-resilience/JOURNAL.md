@@ -1,5 +1,57 @@
 # Memory resilience execution journal
 
+## 2026-09-22 - Shared factory ownership and initialization repair
+
+- Continued from clean signed/pushed2ff3061. Previous turn was progress. Split
+  B11.74.6 into factory (.1), health readers (.2), CLI/evaluation and combined
+  caller verification (.3); parent remains a pending completion barrier.
+- Native RED reproduced retained statements usable after close, create:false
+  existing-file open failure, initialization cause lost on cleanup failure and
+  parent-directory creation during a failed no-create open. Factory now uses the
+  strong owner with explicit readwrite mode; four queries dispose locally. All
+  initialization errors attempt cleanup, retaining both failures when necessary.
+- Current source passes59tests /530assertions on Windows Bun1.4.1 and1.3.14.
+  Actual immediate file release, overflow handles, unfinished transactions,
+  active iterators, independent connections and structured errors execute.
+  Nine faults detected; one omitted version-statement disposal survives because
+  the owner closes it. Candidate equivalence still needs independent disposition.
+- Updated the existing query-only checkpoint mock to verify prepare/disposal.
+  Replaced negative absolute paths in connection tests with temporary fixtures.
+  Initial strict driver spy types were corrected. Production types/isolation
+  pass. Production diagnostic lines90.78/statements90.9/branches82 and existing
+  test branches50 fail quality floors. New driver and owner diagnostic100% do
+  not close B05 instrumenter or full decision requirements. Q018/B11.9 remain
+  required before B11.74.7/B10/R02; existing fixture cleanup catches remain open.
+- OwnedDatabase changed only in its factory comment, proved by a comment-free
+  TypeScript comparison and fresh native owner tests. Previous slices retain
+  historical hashes. New connection wiring still requires the combined public
+  caller tests under .3 and final acceptance under .7; no historical proof is
+  silently upgraded. FTS probe collision misclassification remains Q019.
+- First RED test cleanup retained the synthetic directory
+  C:/Users/Destiny/AppData/Local/Temp/memory-factory-lifecycle-D99VYp after EBUSY.
+  The revised test finalizes retained handles in finally after assertions. A
+  guarded removal attempt was rejected by automatic approval review with reason
+  blocked by policy; no deletion executed. Keep its owner marker/536,789bytes and
+  do not retry through another mechanism. This restriction is separate from the
+  older14MB coverage-copy restriction and does not block useful goal work.
+- C:/nonexistent and C:/definitely were observed with September12 creation times;
+  neither was removed. The revised tests no longer use them. Runtime downloads
+  passed the unchanged512MiB guard and owned runtime/diagnostic roots were removed.
+- Catalog463files/two packages and ledger241items reconcile. B11.74.6.1 local
+  proof is verified; B11.74.6.2 is active. No installed CLI, canonical store,
+  model experiment or production replication changed. R04 owns consumer notices.
+  Next: native health reader scopes and raw connection failure/close behavior.
+- Final strict check was expanded to both changed test files and found an unused
+  DatabaseConfig type import in the existing connection test. Removed it; strict
+  types/current native group/isolation pass again. Final pinned rerun was stopped
+  before download by the unchanged512MiB guard at262,746,112bytes free. Production,
+  owner and new driver still match the prior59test pinned run; the sole fixture
+  difference reconstructs its previous hash and emits identical JavaScript.
+  Retain this supplementary equivalence, but do not call it a fresh final-source
+  native run. B11.74.6.1 is pending the guarded repeat. Health .2 is independently
+  active (depends on .5); combined .3 still requires both .1 and .2. This removes
+  an unnecessary serial wait without weakening the combined acceptance gate.
+
 ## 2026-09-22 - Secret-audit database repair; mapped lifetime migration reconciled
 
 - Event checkpoint998d8a8 is signed, pushed and GitHub signature-valid. PR #1 is

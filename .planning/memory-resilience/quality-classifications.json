@@ -5913,7 +5913,7 @@
     {
       "path": "src/infrastructure/database/connection.test.ts",
       "package": "package.json",
-      "sourceHash": "dc6311aeb196a72b03273998a07fd2dc31af0e5eaf501e119656ab1a641b2402",
+      "sourceHash": "d0e3347a7a060945b3ce786a5e3722af2b57465f6da78953133e041eeca02e50",
       "tier": "S",
       "rationale": "Local cleanupTempDb derives a directory from a DB path and recursively removes it while swallowing failures.",
       "applicability": {
@@ -5922,30 +5922,30 @@
       },
       "decisionStatus": "proposed - independent review pending",
       "inspection": {
-        "sourceRevision": "a4b80f8f2bc3facf011327d99e8b63cb2755ffe9",
-        "anchor": "rmSync(dir,",
-        "scope": "Inspected imports, setup/path construction and actual filesystem mutation or cleanup boundary. Positive critical operation establishes risk; not full test correctness or cleanup acceptance."
+        "sourceRevision": "2ff3061 + current source hash",
+        "anchor": "native shared factory ownership and initialization",
+        "scope": "Scoped factory verification; complete Q018/B11.9/full-platform acceptance remains open."
       },
       "metricApplicability": {
-        "status": "proposed - independent review pending",
-        "evidence": ".planning/memory-resilience/evidence/B04-applicability-probe.json",
-        "sourceHash": "dc6311aeb196a72b03273998a07fd2dc31af0e5eaf501e119656ab1a641b2402",
-        "disposition": "Measure every positive denominator; individually review zero branch/function denominators against runtime syntax. Observed counts do not prove instrumentation completeness. Optional-chain syntax is present; synthetic evidence shows current instrumentation omits its decision counters. B05.1 owns source-mapped branch proof before numeric acceptance.",
+        "status": "diagnostic - B05/Q018/B11.9/B11.74.7 and independent review pending",
+        "evidence": ".planning/memory-resilience/evidence/B11.74.6.1.json",
+        "sourceHash": "d0e3347a7a060945b3ce786a5e3722af2b57465f6da78953133e041eeca02e50",
+        "disposition": "Production and existing test file fail floors. Driver/owner100% requires complete applicability and independent review.",
         "metrics": {
+          "lines": {
+            "observedCounterTotal": 303,
+            "proposal": "measure - completeness unverified"
+          },
+          "functions": {
+            "observedCounterTotal": 70,
+            "proposal": "measure - completeness unverified"
+          },
           "statements": {
-            "observedCounterTotal": 298,
+            "observedCounterTotal": 308,
             "proposal": "measure - completeness unverified"
           },
           "branches": {
             "observedCounterTotal": 6,
-            "proposal": "measure - completeness unverified"
-          },
-          "functions": {
-            "observedCounterTotal": 69,
-            "proposal": "measure - completeness unverified"
-          },
-          "lines": {
-            "observedCounterTotal": 293,
             "proposal": "measure - completeness unverified"
           }
         }
@@ -5954,7 +5954,7 @@
     {
       "path": "src/infrastructure/database/connection.ts",
       "package": "package.json",
-      "sourceHash": "d1ffd040104875ba982108a92bebd760e5d4fedb7194436d6a3b80193fdbf1cd",
+      "sourceHash": "c3d90f1c1d2667a2dc74f24a8e76f7ef5929cbaa876210d4d736d727bcd648b8",
       "tier": "S",
       "rationale": "Creates database directories and opens persistent SQLite databases, then controls schema/health initialization.",
       "applicability": {
@@ -5963,30 +5963,30 @@
       },
       "decisionStatus": "proposed - independent review pending",
       "inspection": {
-        "sourceRevision": "39c895b13e768bd607070efbc3496d47a821b257",
-        "anchor": "initializeDatabase",
-        "scope": "positive critical boundary establishes highest tier; not full correctness acceptance"
+        "sourceRevision": "2ff3061 + current source hash",
+        "anchor": "native shared factory ownership and initialization",
+        "scope": "Scoped factory verification; complete Q018/B11.9/full-platform acceptance remains open."
       },
       "metricApplicability": {
-        "status": "proposed - independent review pending",
-        "evidence": ".planning/memory-resilience/evidence/B04-applicability-probe.json",
-        "sourceHash": "d1ffd040104875ba982108a92bebd760e5d4fedb7194436d6a3b80193fdbf1cd",
-        "disposition": "Measure every positive denominator; individually review zero branch/function denominators against runtime syntax. Observed counts do not prove instrumentation completeness. Optional-chain syntax is present; synthetic evidence shows current instrumentation omits its decision counters. B05.1 owns source-mapped branch proof before numeric acceptance.",
+        "status": "diagnostic - B05/Q018/B11.9/B11.74.7 and independent review pending",
+        "evidence": ".planning/memory-resilience/evidence/B11.74.6.1.json",
+        "sourceHash": "c3d90f1c1d2667a2dc74f24a8e76f7ef5929cbaa876210d4d736d727bcd648b8",
+        "disposition": "Production and existing test file fail floors. Driver/owner100% requires complete applicability and independent review.",
         "metrics": {
-          "statements": {
-            "observedCounterTotal": 71,
-            "proposal": "measure - completeness unverified"
-          },
-          "branches": {
-            "observedCounterTotal": 44,
+          "lines": {
+            "observedCounterTotal": 76,
             "proposal": "measure - completeness unverified"
           },
           "functions": {
             "observedCounterTotal": 8,
             "proposal": "measure - completeness unverified"
           },
-          "lines": {
-            "observedCounterTotal": 71,
+          "statements": {
+            "observedCounterTotal": 77,
+            "proposal": "measure - completeness unverified"
+          },
+          "branches": {
+            "observedCounterTotal": 50,
             "proposal": "measure - completeness unverified"
           }
         }
@@ -6284,17 +6284,17 @@
         "reason": "Executable resource lifecycle source/test driver. No exception approved."
       },
       "decisionStatus": "proposed - independent review pending",
-      "sourceHash": "3ba2a7345679316b08ede71f00a4dba3168287bd708ac2675f749b74133d3c10",
+      "sourceHash": "232fcb9ca2cf86ade0be8fa0eee59c5bef4c05556abd2c854610c6d216e218be",
       "inspection": {
-        "sourceRevision": "fa823d118e8278c84ef74f3e16bcb7aeb9e5ad9b + current source hash",
-        "anchor": "owned statement lifecycle",
-        "scope": "Full scoped source read and behavioral/fault diagnostics; tier and complete metric applicability require independent review."
+        "sourceRevision": "2ff3061 + current source hash",
+        "anchor": "native shared factory ownership and initialization",
+        "scope": "Scoped factory verification; complete Q018/B11.9/full-platform acceptance remains open."
       },
       "metricApplicability": {
-        "status": "diagnostic - B05 and independent review pending",
-        "evidence": ".planning/memory-resilience/evidence/B11.74.2.json",
-        "sourceHash": "3ba2a7345679316b08ede71f00a4dba3168287bd708ac2675f749b74133d3c10",
-        "disposition": "Measure every denominator. Diagnostic completeness, package and changed-line acceptance remain open; no exclusion approved.",
+        "status": "diagnostic - B05/Q018/B11.9/B11.74.7 and independent review pending",
+        "evidence": ".planning/memory-resilience/evidence/B11.74.6.1.json",
+        "sourceHash": "232fcb9ca2cf86ade0be8fa0eee59c5bef4c05556abd2c854610c6d216e218be",
+        "disposition": "Production and existing test file fail floors. Driver/owner100% requires complete applicability and independent review.",
         "metrics": {
           "lines": {
             "observedCounterTotal": 16,
@@ -17579,6 +17579,47 @@
           },
           "branches": {
             "observedCounterTotal": 7,
+            "proposal": "measure - completeness unverified"
+          }
+        }
+      }
+    },
+    {
+      "path": "tests/infrastructure/database/factory-lifecycle.test.ts",
+      "package": "package.json",
+      "tier": "S",
+      "rationale": "Native database ownership, initialization/error and data-integrity regression driver.",
+      "applicability": {
+        "mode": "measure",
+        "reason": "Executable data integrity driver; no exclusion approved."
+      },
+      "decisionStatus": "proposed - independent review pending",
+      "sourceHash": "b19d774e620bd5da486c9406e4d3aae71911d2c9e635578828d9dae225c779cb",
+      "inspection": {
+        "sourceRevision": "2ff3061 + current source hash",
+        "anchor": "native shared factory ownership and initialization",
+        "scope": "Scoped factory verification; complete Q018/B11.9/full-platform acceptance remains open."
+      },
+      "metricApplicability": {
+        "status": "diagnostic - B05/Q018/B11.9/B11.74.7 and independent review pending",
+        "evidence": ".planning/memory-resilience/evidence/B11.74.6.1.json",
+        "sourceHash": "b19d774e620bd5da486c9406e4d3aae71911d2c9e635578828d9dae225c779cb",
+        "disposition": "Production and existing test file fail floors. Driver/owner100% requires complete applicability and independent review.",
+        "metrics": {
+          "lines": {
+            "observedCounterTotal": 101,
+            "proposal": "measure - completeness unverified"
+          },
+          "functions": {
+            "observedCounterTotal": 24,
+            "proposal": "measure - completeness unverified"
+          },
+          "statements": {
+            "observedCounterTotal": 149,
+            "proposal": "measure - completeness unverified"
+          },
+          "branches": {
+            "observedCounterTotal": 0,
             "proposal": "measure - completeness unverified"
           }
         }

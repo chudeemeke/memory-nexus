@@ -3,7 +3,7 @@ import { Database, type SQLQueryBindings, type Statement } from "bun:sqlite";
 /**
  * Owns prepared statements until explicit finalization or connection close.
  * One-off callers must use scope disposal; retaining all one-off work until
- * close would grow memory for a long-lived connection. Not yet the main factory.
+ * close would grow memory for a long-lived connection. Used by the shared factory.
  */
 export class OwnedDatabase extends Database {
   private readonly statements = new Set<Statement>();

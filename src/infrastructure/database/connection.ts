@@ -5,7 +5,8 @@
  * performance pragmas, busy timeout, integrity checks, and FTS5 verification.
  */
 
-import { Database } from "bun:sqlite";
+import type { Database } from "bun:sqlite";
+import { OwnedDatabase } from "./owned-database.js";
 import { existsSync, mkdirSync } from "node:fs";
 import { dirname } from "node:path";
 import { createSchema, checkFts5Support } from "./schema.js";
@@ -120,7 +121,7 @@ export function initializeDatabase(config: DatabaseConfig): DatabaseInitResult {
     const quickCheck = config.quickCheck ?? (isFileDb && fileExists);
 
     // Ensure directory exists for file-based databases
-    if (isFileDb) {
+    if (isFileDb && create) {
         try {
             mkdirSync(dirname(path), { recursive: true });
         } catch (error) {
@@ -136,7 +137,7 @@ export function initializeDatabase(config: DatabaseConfig): DatabaseInitResult {
     // Create database connection
     let db: Database;
     try {
-        db = new Database(path, { create });
+        db = new OwnedDatabase(path, { create, readwrite: true });
     } catch (error) {
         const message = unknownErrorMessage(error);
         const errno = (error as NodeJS.ErrnoException).code;
@@ -149,21 +150,27 @@ export function initializeDatabase(config: DatabaseConfig): DatabaseInitResult {
 
     // Helper to handle corrupted file errors
     const handleDbError = (error: unknown): never => {
-        db.close();
         const message = unknownErrorMessage(error);
-        // "file is not a database" or similar indicates corruption
-        if (message.includes("not a database") || message.includes("SQLITE_NOTADB")) {
-            throw new MemoryError(
-                ErrorCode.DB_CORRUPTED,
-                "Database file is corrupted or not a valid SQLite database",
-                { path }
-            );
-        }
-        throw new MemoryError(
-            ErrorCode.DB_CONNECTION_FAILED,
-            `Failed to initialize database: ${message}`,
+        const corrupted = message.includes("not a database") || message.includes("SQLITE_NOTADB");
+        const failure = error instanceof MemoryError ? error : new MemoryError(
+            corrupted ? ErrorCode.DB_CORRUPTED : ErrorCode.DB_CONNECTION_FAILED,
+            corrupted ? "Database file is corrupted or not a valid SQLite database"
+                : `Failed to initialize database: ${message}`,
             { path }
         );
+        if (failure !== error) failure.cause = error;
+        try {
+            db.close();
+        } catch (cleanupError) {
+            const combined = new MemoryError(
+                failure.code,
+                failure.message,
+                { ...failure.context, cleanupFailed: true }
+            );
+            combined.cause = new AggregateError([failure, cleanupError], "Database initialization and cleanup failed");
+            throw combined;
+        }
+        throw failure;
     };
 
     try {
@@ -174,7 +181,8 @@ export function initializeDatabase(config: DatabaseConfig): DatabaseInitResult {
         let walEnabled = false;
         if (walMode && isFileDb) {
             db.exec("PRAGMA journal_mode = WAL;");
-            const result = db.query("PRAGMA journal_mode;").get() as { journal_mode: string };
+            using statement = db.prepare<{ journal_mode: string }, []>("PRAGMA journal_mode;");
+            const result = statement.get()!;
             walEnabled = result.journal_mode === "wal";
             if (!walEnabled) {
                 console.warn(`Warning: WAL mode not enabled. Current mode: ${result.journal_mode}`);
@@ -193,8 +201,8 @@ export function initializeDatabase(config: DatabaseConfig): DatabaseInitResult {
         const fts5Available = checkFts5Support(db);
         if (!fts5Available) {
             // Get SQLite version for error context before closing
-            const versionResult = db.query<{ version: string }, []>("SELECT sqlite_version() as version").get();
-            db.close();
+            using statement = db.prepare<{ version: string }, []>("SELECT sqlite_version() as version");
+            const versionResult = statement.get();
             throw new MemoryError(
                 ErrorCode.DB_CONNECTION_FAILED,
                 "FTS5 is not available. memory requires FTS5 for full-text search.",
@@ -204,9 +212,9 @@ export function initializeDatabase(config: DatabaseConfig): DatabaseInitResult {
 
         // Run quick integrity check if enabled (for existing file databases)
         if (quickCheck) {
-            const result = db.query<{ quick_check: string }, []>("PRAGMA quick_check(1);").get();
+            using statement = db.prepare<{ quick_check: string }, []>("PRAGMA quick_check(1);");
+            const result = statement.get();
             if (result?.quick_check !== "ok") {
-                db.close();
                 throw new MemoryError(
                     ErrorCode.DB_CORRUPTED,
                     "Database integrity check failed",
@@ -225,10 +233,7 @@ export function initializeDatabase(config: DatabaseConfig): DatabaseInitResult {
 
         return { db, walEnabled, fts5Available, sqliteVecAvailable };
     } catch (error) {
-        if (error instanceof MemoryError) {
-            throw error;
-        }
-        throw handleDbError(error);
+        return handleDbError(error);
     }
 }
 
@@ -307,9 +312,10 @@ export interface CheckpointResult {
  * @returns Checkpoint result with frame counts
  */
 export function bulkOperationCheckpoint(db: Database): CheckpointResult {
-    const result = db.query<{ busy: number; log: number; checkpointed: number }, []>(
+    using statement = db.prepare<{ busy: number; log: number; checkpointed: number }, []>(
         "PRAGMA wal_checkpoint(TRUNCATE);"
-    ).get();
+    );
+    const result = statement.get();
 
     return result ?? { busy: 0, log: 0, checkpointed: 0 };
 }

@@ -3,7 +3,7 @@
   "workstream": "memory-resilience",
   "goal_status": "active",
   "starting_revision": "77d54e05be7fc24cede4a9a3e1fede6fa113ac8f",
-  "current_item": "B11.74.6",
+  "current_item": "B11.74.6.2",
   "status_semantics": {
     "pending": "Not started; authorization and dependencies must permit work.",
     "pending_rebaseline": "Historical candidate, not a confirmed current failure or a completed task.",
@@ -709,14 +709,14 @@
       "id": "Q018",
       "stage": "coverage_repair",
       "title": "Verify and repair src/infrastructure/database/connection.ts",
-      "status": "pending_rebaseline",
+      "status": "pending",
       "depends_on": [
-        "B09"
+        "B11.74.6.1"
       ],
       "scope": "src/infrastructure/database/connection.ts",
       "deliverable": "Reproduce uncovered behavior, add meaningful regression/boundary tests, fix demonstrated defects, satisfy this file's reviewed risk tier.",
       "verification": "Current source-bound four-metric file evidence plus tier-required decision tests. Supersede only with explicit fresh evidence that this candidate is no longer a gap.",
-      "risk": "unclassified",
+      "risk": "S",
       "authorization": "authorized",
       "owner": "memory-nexus",
       "historical_gaps": [
@@ -725,8 +725,15 @@
         "lines=84.5"
       ],
       "historical_evidence": "docs/audits/2026-09-19-repair-evidence/per-file-coverage-gaps.json",
-      "evidence": [],
-      "acceptance_record": ".planning/memory-resilience/evidence/Q018.json"
+      "evidence": [
+        ".planning/memory-resilience/evidence/B11.74.6.1.json"
+      ],
+      "acceptance_record": ".planning/memory-resilience/evidence/Q018.json",
+      "progress": {
+        "current": "Factory production lines90.78/statements90.9/branches82; full configuration/SQL/close/error/capability behavior, one survivor disposition and complete quality remain.",
+        "owner": "memory-nexus",
+        "trigger": "Before B11.74.7/B10/R02 acceptance."
+      }
     },
     {
       "id": "Q019",
@@ -2732,6 +2739,11 @@
           "document": "docs/plans/2026-09-22-secret-audit-database-integrity.md",
           "owner": "memory-nexus",
           "trigger": "Before integration/adoption: notify opted-in consumers of final atomic database redaction and failure/report contract; retain delivery evidence."
+        },
+        "consumerFactoryNotice": {
+          "document": "docs/plans/2026-09-22-factory-ownership.md",
+          "owner": "memory-nexus",
+          "trigger": "Before integration/adoption: notify opted-in consumers of factory ownership, create:false no-directory behavior, statement invalidation at close and combined error causes; include accepted supported runtime policy."
         }
       }
     },
@@ -3665,11 +3677,18 @@
       "risk": "S",
       "authorization": "authorized",
       "owner": "memory-nexus",
-      "evidence": [],
+      "evidence": [
+        ".planning/memory-resilience/evidence/B11.74.6.1.json"
+      ],
       "acceptance_record": ".planning/memory-resilience/evidence/B11.9.json",
       "observed_gap": "Source inspection: cleanupTempDb swallows recursive-removal errors and its caller clears the temporary path tracker.",
       "observed_evidence": ".planning/memory-resilience/B04-source-findings.md",
-      "retirement_trigger": "Before affected full-suite execution/B09 and B10/R02; diagnostic/source inspection is not completed repair acceptance."
+      "retirement_trigger": "Before affected full-suite execution/B09 and B10/R02; diagnostic/source inspection is not completed repair acceptance.",
+      "progress": {
+        "current": "Negative root paths moved to temporary fixtures; scoped prepare/dispose mock repaired. Existing cleanup catches remain; diagnostic branches50 and full fixture/decision acceptance still pending.",
+        "owner": "memory-nexus",
+        "trigger": "Before affected full-suite/B11.74.7 acceptance."
+      }
     },
     {
       "id": "B11.10",
@@ -5494,12 +5513,15 @@
       "id": "B11.74.6",
       "stage": "baseline",
       "title": "Activate factory ownership and reconcile native callers",
-      "status": "active",
+      "status": "pending",
       "depends_on": [
         "B11.74.2",
         "B11.74.3",
         "B11.74.4",
-        "B11.74.5"
+        "B11.74.5",
+        "B11.74.6.1",
+        "B11.74.6.2",
+        "B11.74.6.3"
       ],
       "scope": "connection.ts, CLI startup/commands, health checker and eval direct-close callers",
       "deliverable": "Factory wires owner after caller migrations; initialization preserves both errors; raw readers explicitly close",
@@ -5513,8 +5535,8 @@
       "acceptance_record": ".planning/memory-resilience/evidence/B11.74.6.json",
       "retirement_trigger": "Before parent B11.74/B10/R02 acceptance; child local proof does not imply factory or whole-platform acceptance.",
       "progress": {
-        "restart": "Inspect connection initialization/error cleanup and direct native callers; reproduce smallest factory ownership failure before implementation.",
-        "factory": "unchanged",
+        "restart": "Health slice .2 active; factory .1 final pinned repeat pending disk. Combined .3 still requires both.",
+        "factory": "activated in source; scoped native proof only",
         "prerequisite": ".planning/memory-resilience/evidence/B11.74.5.json"
       }
     },
@@ -5545,7 +5567,9 @@
         "Q019",
         "Q004",
         "Q100",
-        "Q101"
+        "Q101",
+        "Q018",
+        "B11.9"
       ],
       "scope": "All B11.74 affected production/test files and native runtime targets",
       "deliverable": "Complete per-file/package/tier/changed-line proof and independent review; dependency barriers can resume",
@@ -5707,6 +5731,83 @@
       "acceptance_record": ".planning/memory-resilience/evidence/Q101.json",
       "observed_gap": "Production branches95.89%. Database partial failures and ignored writes repaired; filesystem replacement, complete surfaces/derived data, redactor fallback and metadata disclosure require security proof.",
       "retirement_trigger": "Before B11.74.7/B10/R02 acceptance."
+    },
+    {
+      "id": "B11.74.6.1",
+      "stage": "baseline",
+      "title": "Factory ownership and initialization failure integrity",
+      "status": "pending",
+      "depends_on": [
+        "B11.74.2",
+        "B11.74.3",
+        "B11.74.4",
+        "B11.74.5"
+      ],
+      "scope": "connection.ts and native factory regression",
+      "deliverable": "Owned connection factory, four scoped queries, writable existing reopen and preserved primary/cleanup causes",
+      "verification": "Native retained/cache-overflow handles, transaction/iterator rollback, partial initialization/cleanup failure, retry, independent connections and immediate file removal",
+      "risk": "S",
+      "authorization": "authorized",
+      "owner": "memory-nexus",
+      "evidence": [
+        ".planning/memory-resilience/B11.74-plan.md",
+        ".planning/memory-resilience/evidence/B11.74.6.1.json"
+      ],
+      "acceptance_record": ".planning/memory-resilience/evidence/B11.74.6.1.json",
+      "retirement_trigger": "Before parent B11.74.6/B11.74.7/B10/R02 acceptance; scoped migration is not whole-platform acceptance.",
+      "progress": {
+        "status": "Current runtime verified; final pinned group repeat disk-blocked after type-only fixture repair",
+        "tests": 59,
+        "assertions": 530,
+        "files": 3,
+        "detectedFaults": 9,
+        "survivors": 1,
+        "restart": "Run guarded .git/b11-factory-old-runtime.ts when capacity permits, verify current input hashes, then close this slice. Health readers can proceed independently."
+      }
+    },
+    {
+      "id": "B11.74.6.2",
+      "stage": "baseline",
+      "title": "Health reader statement lifetime",
+      "status": "active",
+      "depends_on": [
+        "B11.74.5"
+      ],
+      "scope": "health-checker.ts and native read-only/extension regressions",
+      "deliverable": "Explicit scope disposal and raw reader close with truthful health results",
+      "verification": "Native current/older runtime success, query/load failure, repeated probes and file release",
+      "risk": "S",
+      "authorization": "authorized",
+      "owner": "memory-nexus",
+      "evidence": [
+        ".planning/memory-resilience/B11.74-plan.md"
+      ],
+      "acceptance_record": ".planning/memory-resilience/evidence/B11.74.6.2.json",
+      "retirement_trigger": "Before parent B11.74.6/B11.74.7/B10/R02 acceptance; scoped migration is not whole-platform acceptance.",
+      "progress": {
+        "restart": "Health reader disposal and native failure/recovery proof; independent of the blocked factory fixture rerun."
+      }
+    },
+    {
+      "id": "B11.74.6.3",
+      "stage": "baseline",
+      "title": "CLI and evaluation caller reconciliation",
+      "status": "pending",
+      "depends_on": [
+        "B11.74.6.1",
+        "B11.74.6.2"
+      ],
+      "scope": "backup.ts, migrate.ts, db-startup.ts, eval-v5 callers and command/helper groups",
+      "deliverable": "Scoped remaining statements and actual startup/evaluation ownership reconciliation",
+      "verification": "Paired-runtime native public command/helper failure/recovery group; all mapped callers dispositioned",
+      "risk": "S",
+      "authorization": "authorized",
+      "owner": "memory-nexus",
+      "evidence": [
+        ".planning/memory-resilience/B11.74-plan.md"
+      ],
+      "acceptance_record": ".planning/memory-resilience/evidence/B11.74.6.3.json",
+      "retirement_trigger": "Before parent B11.74.6/B11.74.7/B10/R02 acceptance; scoped migration is not whole-platform acceptance."
     }
   ],
   "decisions": {
