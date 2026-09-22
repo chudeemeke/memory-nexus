@@ -10,28 +10,23 @@
  *   NO dbPath: "/non/existent/..." (Windows file-locking).
  */
 
-import { describe, expect, it, beforeEach, afterEach } from "bun:test";
+import { describe, expect, it, afterEach } from "bun:test";
 import { executeShowCommand } from "./show.js";
 import {
   captureStreams,
-  makeTempDbPath,
-  cleanupTempPaths,
-} from "./_helpers/capture-json.js";
+  createTempDatabaseTracker,
+} from "../../../../tests/helpers/capture-json.js";
 
 describe("show --json envelope (Plan 32-02 CLI-02)", () => {
-  let tempPaths: string[] = [];
-
-  beforeEach(() => {
-    tempPaths = [];
-  });
+  const tempDatabase = createTempDatabaseTracker();
 
   afterEach(() => {
-    cleanupTempPaths(tempPaths);
+    return tempDatabase.cleanup();
   });
 
   describe("D. envelope on NOT-FOUND", () => {
     it("emits error envelope when session ID does not exist", async () => {
-      const dbPath = makeTempDbPath("show", tempPaths);
+      const dbPath = tempDatabase.makePath("show");
       const { stdout, exitCode } = await captureStreams(() =>
         executeShowCommand(
           "nonexistent-id-12345",
@@ -53,7 +48,7 @@ describe("show --json envelope (Plan 32-02 CLI-02)", () => {
 
   describe("F. stdout is exactly one JSON document", () => {
     it("parses cleanly", async () => {
-      const dbPath = makeTempDbPath("show", tempPaths);
+      const dbPath = tempDatabase.makePath("show");
       const { stdout } = await captureStreams(() =>
         executeShowCommand("any-id", { json: true }, { dbPath })
       );
@@ -66,7 +61,7 @@ describe("show --json envelope (Plan 32-02 CLI-02)", () => {
 
   describe("H. meta.session_id echoes input on error envelope", () => {
     it("includes session_id in error context", async () => {
-      const dbPath = makeTempDbPath("show", tempPaths);
+      const dbPath = tempDatabase.makePath("show");
       const { stdout } = await captureStreams(() =>
         executeShowCommand(
           "specific-session-id-for-meta",
@@ -91,7 +86,7 @@ describe("show --json envelope (Plan 32-02 CLI-02)", () => {
 
   describe("J. --json --format ai routing equivalence (HIGH-5)", () => {
     it("deep-equals --json vs --json --format ai (show)", async () => {
-      const dbPath = makeTempDbPath("show", tempPaths);
+      const dbPath = tempDatabase.makePath("show");
       const { stdout: stdoutA } = await captureStreams(() =>
         executeShowCommand("test-id", { json: true }, { dbPath })
       );

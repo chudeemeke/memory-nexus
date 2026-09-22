@@ -1,0 +1,15 @@
+{
+  "validated_at": "2026-09-19T20:03:38.6119421Z",
+  "items": 132,
+  "delivery_items": 47,
+  "historical_quality_candidates": 85,
+  "unique_ids": true,
+  "dependencies_exist": true,
+  "acyclic": true,
+  "required_task_fields_present": true,
+  "historical_source_paths_exist": true,
+  "b10_depends_on_all_quality_candidates": true,
+  "product_acceptance": false,
+  "scope": "Planning structure only; no product test or quality compliance claim",
+  "ledger_sha256": "A7CD14C9C22E33D19482BAC42980AB082B1E4DE960BC0E4EA78FA962EEB12570"
+}

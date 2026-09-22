@@ -10,6 +10,61 @@ import { EmbeddingProviderError } from "../../../../domain/ports/embedding.js";
 import type { ModelState } from "../../../../application/services/embedding-service.js";
 
 describe("runEmbeddingPass", () => {
+  it("re-embeds a fully indexed corpus when a replacement model has the same dimensions", async () => {
+    let embedded = true;
+    const clearAllEmbeddings = mock(() => { embedded = false; });
+    const storeBatch = mock(() => { embedded = true; });
+    const recreateVecTable = mock(() => {});
+    const dispose = mock(async () => {});
+    const provider = {
+      initialize: async () => {},
+      embedBatch: async () => [{ embedding: new Float32Array(384), model: "replacement", dimensions: 384 }],
+    };
+    const repository = {
+      getStoredModelHash: () => "previous-model",
+      getStoredModelName: () => "previous-model",
+      getEmbeddedCount: () => embedded ? 1 : 0,
+      getTotalMessageCount: () => 1,
+      getStoredEmbeddingDimensions: () => 384,
+      getSkippedCount: () => 0,
+      findUnembedded: () => embedded ? [] : [{ rowid: 1, content: "Synthetic model migration fixture" }],
+      recreateVecTable, clearAllEmbeddings, storeBatch,
+    };
+    await runEmbeddingPass({} as any, { force: true, quiet: true }, {
+      factory: { createFromConfig: () => provider, dispose } as any,
+      config: { embedding: { provider: "local", model: "replacement", dimensions: 384, batchSize: 8 } } as any,
+      repositoryOverride: repository as any,
+    });
+    expect(clearAllEmbeddings).toHaveBeenCalledTimes(1);
+    expect(storeBatch).toHaveBeenCalledTimes(1);
+    expect(recreateVecTable).not.toHaveBeenCalled();
+    expect(dispose).toHaveBeenCalledTimes(1);
+  });
+
+  it("preserves the existing vector table and disposes the provider when replacement initialization fails", async () => {
+    const recreateVecTable = mock(() => {});
+    const clearAllEmbeddings = mock(() => {});
+    const dispose = mock(async () => {});
+    const offline = new Error("endpoint offline");
+    const provider = { initialize: async () => { throw offline; } };
+    const repository = {
+      getStoredModelHash: () => "previous-model",
+      getStoredModelName: () => "previous-model",
+      getEmbeddedCount: () => 12,
+      getStoredEmbeddingDimensions: () => 384,
+      recreateVecTable,
+      clearAllEmbeddings,
+    };
+    await expect(runEmbeddingPass({} as any, { force: true, quiet: true }, {
+      factory: { createFromConfig: () => provider, dispose } as any,
+      config: { embedding: { provider: "ollama", model: "replacement", dimensions: 768, batchSize: 8 } } as any,
+      repositoryOverride: repository as any,
+    })).rejects.toThrow("endpoint offline");
+    expect(recreateVecTable).not.toHaveBeenCalled();
+    expect(clearAllEmbeddings).not.toHaveBeenCalled();
+    expect(dispose).toHaveBeenCalledTimes(1);
+  });
+
   it("returns without action when provider is null (embedding disabled)", async () => {
     const logSpy = spyOn(console, "error").mockImplementation(() => {});
 

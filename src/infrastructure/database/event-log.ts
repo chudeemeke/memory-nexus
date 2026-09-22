@@ -53,6 +53,7 @@ export interface ProjectionRebuildReport {
 
 interface ReadOptions {
   reportInvalidToConsole: boolean;
+  requireSourceFiles?: boolean;
 }
 
 interface ProjectionContext {
@@ -130,7 +131,7 @@ export async function rebuildProjections(db: Database, logPath?: string, eventsD
  * Rebuild derived database projections and return replay evidence.
  */
 export async function rebuildProjectionsWithReport(db: Database, logPath?: string, eventsDir?: string): Promise<ProjectionRebuildReport> {
-  const report = await collectMemoryEvents(logPath, eventsDir, { reportInvalidToConsole: false });
+  const report = await collectMemoryEvents(logPath, eventsDir, { reportInvalidToConsole: false, requireSourceFiles: true });
   const sortedEvents = sortMemoryEvents(report.events);
   const registry = new ProjectionRegistry<ProjectionContext>([
     createFactsProjection(),
@@ -150,6 +151,9 @@ export async function rebuildProjectionsWithReport(db: Database, logPath?: strin
 
 async function collectMemoryEvents(logPath: string | undefined, eventsDir: string | undefined, options: ReadOptions): Promise<EventReadReport> {
   const files = logPath ? [logPath] : getAllLogFiles(eventsDir);
+  if (options.requireSourceFiles && files.length === 0) {
+    throw new Error("No event log files available for projection rebuild");
+  }
   const events: MemoryEventEnvelope[] = [];
   const invalidEvents: InvalidEventLogLine[] = [];
 
@@ -169,6 +173,9 @@ async function readSingleLogFile(filePath: string, options: ReadOptions): Promis
   const events: MemoryEventEnvelope[] = [];
   const invalidEvents: InvalidEventLogLine[] = [];
   if (!existsSync(filePath)) {
+    if (options.requireSourceFiles) {
+      throw new Error(`Event log unavailable for projection rebuild: ${filePath}`);
+    }
     return { events, invalidEvents };
   }
 
@@ -313,7 +320,7 @@ function memoryEventToFact(event: MemoryEventEnvelope): Fact {
 
 function createFactsProjection() {
   const insertFact = (db: Database, fact: Fact) => {
-    db.prepare(`
+    using statement = db.prepare(`
       INSERT INTO facts (
         uuid, type, project, content, metadata, observed_at, superseded_at, superseded_by
       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
@@ -326,7 +333,8 @@ function createFactsProjection() {
         superseded_at = excluded.superseded_at,
         superseded_by = excluded.superseded_by,
         updated_at = datetime('now')
-    `).run(
+    `);
+    statement.run(
       fact.uuid,
       fact.type,
       fact.project,
@@ -357,11 +365,12 @@ function createFactsProjection() {
         const supersededUuid = fact.metadata?.superseded_uuid;
         const supersededByUuid = fact.metadata?.superseded_by_uuid;
         if (typeof supersededUuid === "string" && typeof supersededByUuid === "string") {
-          context.db.prepare(`
+          using statement = context.db.prepare(`
             UPDATE facts
             SET superseded_at = ?, superseded_by = ?, updated_at = datetime('now')
             WHERE uuid = ?
-          `).run(fact.observedAt.toISOString(), supersededByUuid, supersededUuid);
+          `);
+          statement.run(fact.observedAt.toISOString(), supersededByUuid, supersededUuid);
         }
       }
     },
@@ -373,7 +382,7 @@ function createGovernanceProjection() {
     name: "memory_governance",
     consumedKinds: ["governance", "consent"] as const,
     reset: (context: ProjectionContext) => {
-      context.db.run("DELETE FROM memory_governance_events; DELETE FROM memory_governance;");
+      return new SqliteMemoryGovernanceRepository(context.db).clearAll();
     },
     apply: async (event: MemoryEventEnvelope, context: ProjectionContext) => {
       const governanceRepo = new SqliteMemoryGovernanceRepository(context.db);

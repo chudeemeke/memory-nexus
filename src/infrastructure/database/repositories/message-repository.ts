@@ -5,7 +5,7 @@
  * Messages are automatically indexed via triggers when inserted.
  */
 
-import type { Database, Statement } from "bun:sqlite";
+import type { Database } from "bun:sqlite";
 import { Message, type MessageRole } from "../../../domain/entities/message.js";
 import type { IMessageRepository } from "../../../domain/ports/repositories.js";
 import { unknownErrorMessage } from "../../../domain/errors/unknown-error.js";
@@ -52,50 +52,24 @@ interface MessageRow {
  * - FTS5 indexing via automatic triggers
  */
 export class SqliteMessageRepository implements IMessageRepository {
-    private readonly db: Database;
-    private readonly findByIdStmt: Statement<MessageRow, [string]>;
-    private readonly findBySessionStmt: Statement<MessageRow, [string]>;
-    private readonly existsStmt: Statement<{ id: string } | null, [string]>;
-    private readonly insertStmt: Statement<any, any>;
 
     /**
      * Create a new SqliteMessageRepository
      *
      * @param db - Initialized SQLite database with schema applied
      */
-    constructor(db: Database) {
-        this.db = db;
-
-        // Prepare statements for reuse
-        this.findByIdStmt = db.prepare<MessageRow, [string]>(
-            `SELECT id, session_id, role, content, timestamp, tool_use_ids
-             FROM messages_meta
-             WHERE id = ?`
-        );
-
-        this.findBySessionStmt = db.prepare<MessageRow, [string]>(
-            `SELECT id, session_id, role, content, timestamp, tool_use_ids
-             FROM messages_meta
-             WHERE session_id = ?
-             ORDER BY timestamp ASC`
-        );
-
-        // Used for existence check before insert (FTS5 triggers interfere with changes count)
-        this.existsStmt = db.prepare<{ id: string } | null, [string]>(
-            `SELECT id FROM messages_meta WHERE id = ?`
-        );
-
-        this.insertStmt = db.prepare(
-            `INSERT OR IGNORE INTO messages_meta (id, session_id, role, content, timestamp, tool_use_ids)
-             VALUES ($id, $session_id, $role, $content, $timestamp, $tool_use_ids)`
-        );
-    }
+    constructor(private readonly db: Database) {}
 
     /**
      * Find a message by its unique identifier
      */
     async findById(id: string): Promise<Message | null> {
-        const row = this.findByIdStmt.get(id);
+        using statement = this.db.prepare<MessageRow, [string]>(
+            `SELECT id, session_id, role, content, timestamp, tool_use_ids
+             FROM messages_meta
+             WHERE id = ?`
+        );
+        const row = statement.get(id);
         if (!row) {
             return null;
         }
@@ -106,7 +80,13 @@ export class SqliteMessageRepository implements IMessageRepository {
      * Find all messages belonging to a session, ordered by timestamp
      */
     async findBySession(sessionId: string): Promise<Message[]> {
-        const rows = this.findBySessionStmt.all(sessionId);
+        using statement = this.db.prepare<MessageRow, [string]>(
+            `SELECT id, session_id, role, content, timestamp, tool_use_ids
+             FROM messages_meta
+             WHERE session_id = ?
+             ORDER BY timestamp ASC`
+        );
+        const rows = statement.all(sessionId);
         return rows.map((row) => this.rowToMessage(row));
     }
 
@@ -116,7 +96,8 @@ export class SqliteMessageRepository implements IMessageRepository {
      * Uses INSERT OR IGNORE for idempotent behavior - duplicates are silently skipped.
      */
     async save(message: Message, sessionId: string): Promise<void> {
-        this.insertStmt.run({
+        using insertStatement = this.prepareInsert();
+        insertStatement.run({
             $id: message.id,
             $session_id: sessionId,
             $role: message.role,
@@ -140,6 +121,8 @@ export class SqliteMessageRepository implements IMessageRepository {
         messages: Array<{ message: Message; sessionId: string }>,
         options?: BatchOptions
     ): Promise<BatchResult> {
+        using existsStatement = this.prepareExists();
+        using insertStatement = this.prepareInsert();
         const BATCH_SIZE = 100;
         const result: BatchResult = { inserted: 0, skipped: 0, errors: [] };
 
@@ -150,13 +133,13 @@ export class SqliteMessageRepository implements IMessageRepository {
                 for (const { message, sessionId } of items) {
                     try {
                         // Check existence before insert (FTS5 triggers interfere with changes count)
-                        const exists = this.existsStmt.get(message.id);
+                        const exists = existsStatement.get(message.id);
                         if (exists) {
                             result.skipped++;
                             continue;
                         }
 
-                        this.insertStmt.run({
+                        insertStatement.run({
                             $id: message.id,
                             $session_id: sessionId,
                             $role: message.role,
@@ -166,8 +149,11 @@ export class SqliteMessageRepository implements IMessageRepository {
                                 ? JSON.stringify(message.toolUses)
                                 : null,
                         });
-                        result.inserted++;
+                        // Native write counts can include FTS side effects. Confirm the row.
+                        if (existsStatement.get(message.id)) result.inserted++;
+                        else result.skipped++;
                     } catch (err) {
+                        if (!this.db.inTransaction) throw err;
                         result.skipped++;
                         result.errors.push({
                             id: message.id,
@@ -203,5 +189,18 @@ export class SqliteMessageRepository implements IMessageRepository {
             timestamp: new Date(row.timestamp),
             toolUseIds,
         });
+    }
+
+    private prepareExists() {
+        return this.db.prepare<{ id: string } | null, [string]>(
+            `SELECT id FROM messages_meta WHERE id = ?`
+        );
+    }
+
+    private prepareInsert() {
+        return this.db.prepare(
+            `INSERT OR IGNORE INTO messages_meta (id, session_id, role, content, timestamp, tool_use_ids)
+             VALUES ($id, $session_id, $role, $content, $timestamp, $tool_use_ids)`
+        );
     }
 }

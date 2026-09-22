@@ -1,0 +1,57 @@
+bun test v1.4.1 (4661e494f)
+
+scripts\quality-inventory.test.ts:
+36 | test("includes unfamiliar executable modes and shebangs without pretending they are instrumentable JavaScript", () => {
+37 |   const root = fixture({ "package.json": '{"name":"fixture"}', "tools/task": "echo fixture", "tools/probe.custom": "#!/usr/bin/env python\nprint('fixture')" });
+38 |   try {
+39 |     execFileSync("git", ["add", "tools/task"], { cwd: root });
+40 |     execFileSync("git", ["update-index", "--chmod=+x", "tools/task"], { cwd: root });
+41 |     expect(discoverInventory(root).files.map(file => [file.path, file.syntax])).toEqual([["tools/probe.custom", "unsupported"], ["tools/task", "unsupported"]]);
+                                                                                     ^
+error: expect(received).toEqual(expected)
+
+  [
+    [
+      "tools/probe.custom",
+      "unsupported",
+    ],
+-   [
+-     "tools/task",
+-     "unsupported",
+-   ],
+  ]
+
+- Expected  - 4
++ Received  + 0
+
+      at <anonymous> (C:\Projects\memory-nexus\scripts\quality-inventory.test.ts:41:81)
+(fail) includes unfamiliar executable modes and shebangs without pretending they are instrumentable JavaScript [1234.32ms]
+3849 |     debugger;
+3850 |     const e = new Error(message ? `Debug Failure. ${message}` : "Debug Failure.");
+3851 |     if (Error.captureStackTrace) {
+3852 |       Error.captureStackTrace(e, stackCrawlMark || fail);
+3853 |     }
+3854 |     throw e;
+                 ^
+error: Debug Failure. Output generation failed
+      at fail (C:\Projects\memory-nexus\node_modules\typescript\lib\typescript.js:3854:11)
+      at transpileWorker (C:\Projects\memory-nexus\node_modules\typescript\lib\typescript.js:145460:43)
+      at transpileModule (C:\Projects\memory-nexus\node_modules\typescript\lib\typescript.js:145315:10)
+      at inspectSyntax (C:\Projects\memory-nexus\scripts\quality-inventory.ts:122:23)
+      at <anonymous> (C:\Projects\memory-nexus\scripts\quality-inventory.ts:177:128)
+      at map (1:11)
+      at discoverInventory (C:\Projects\memory-nexus\scripts\quality-inventory.ts:173:122)
+      at <anonymous> (C:\Projects\memory-nexus\scripts\quality-inventory.test.ts:48:12)
+(fail) declaration suffixes cannot hide executable content [739.74ms]
+------------------------------|---------|---------|-------------------
+File                          | % Funcs | % Lines | Uncovered Line #s
+------------------------------|---------|---------|-------------------
+All files                     |   68.42 |   60.71 |
+ scripts\quality-inventory.ts |   68.42 |   60.71 | 30,35-70,83,90-96,105-106,127-131,136,143,167
+------------------------------|---------|---------|-------------------
+
+ 0 pass
+ 3 filtered out
+ 2 fail
+ 1 expect() calls
+Ran 2 tests across 1 file. [2.52s]

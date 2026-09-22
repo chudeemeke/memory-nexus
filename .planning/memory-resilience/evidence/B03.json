@@ -1,0 +1,393 @@
+{
+  "item_id": "B03",
+  "status": "verified",
+  "scope": "Scoped ownership/allocation/concurrent-run/crash/lock/teardown behavior, actual CLI wiring and Windows/Linux home isolation. Full Tier S and final independent review remain Q086-Q088/R02.",
+  "recorded_at": "2026-09-19T21:39:48.850Z",
+  "base_revision": "2988eb407fc179b5bb82e6ae45b6a5e7cd3fbc8c",
+  "source_revision": "Candidate identified by input hashes below; preserved in the containing signed commit. Full-suite and release acceptance are not implied.",
+  "cwd": "C:/Projects/memory-nexus",
+  "linux_cwd": "~/Projects/memory-nexus (same checkout via WSL symlink)",
+  "source_inputs": [
+    {
+      "path": "package.json",
+      "sha256": "257625C8C0CAC67EF0B0D88CD6370E9C0A095ACA2B28C6326DE0E36C4A9A6CDC"
+    },
+    {
+      "path": "bun.lock",
+      "sha256": "C20E3FD095669F70357651EB2BA6A496D3B455032D8D20F7B9A5C09BF5758FFF"
+    },
+    {
+      "path": "bunfig.toml",
+      "sha256": "C3310EDF8A8903109C5FF36244DF20ACA5D285FA62F47E204F2B1CB41045286A"
+    },
+    {
+      "path": "tsconfig.scripts.json",
+      "sha256": "F03486E57A06B278BC09569EC6599CA8FA2A3B4E40235C80085AEB0C7164A228"
+    },
+    {
+      "path": "scripts/coverage-run-storage.ts",
+      "sha256": "13CD572C4856244E5E7DBE4022E3838E076064337118979182E52D8E8067FA03"
+    },
+    {
+      "path": "scripts/coverage-run-storage.test.ts",
+      "sha256": "503BD67F1816467D6D209F70F82E8060BD5D8904F7326EC1C0CA44836C52BA12"
+    },
+    {
+      "path": "scripts/run-istanbul-bun-coverage.ts",
+      "sha256": "A7746E14085AB53BD9CD39926615B8961C96D426B777FA7EBFEC868319424CDE"
+    },
+    {
+      "path": "scripts/run-istanbul-bun-coverage.test.ts",
+      "sha256": "92A9B5CA4A879F701D9C79EFE64F63EA9E506E8045F747F5D9FCBEC383365400"
+    },
+    {
+      "path": "scripts/check-coverage-thresholds.ts",
+      "sha256": "1BF02E44CB4B68ACF3DC306BFA315CA0F67C23AB2854B00CE5D6CDC78FB6C4D0"
+    },
+    {
+      "path": "scripts/check-coverage-thresholds.test.ts",
+      "sha256": "127B6D9CE5B0070737DDC4BC6DA40F22BCC148F0245329C35AA3D25EDE91B44E"
+    },
+    {
+      "path": "tests/test-setup.ts",
+      "sha256": "A348C68B1F5D2B1D287B604F80092F3B7310A627A2360B5EDA6E45A855CD7498"
+    },
+    {
+      "path": "tests/test-store-isolation.test.ts",
+      "sha256": "88774C396970117285CE8F88D4E63EE99B08497CAFB9E4CA67B90EF6F75B79D0"
+    }
+  ],
+  "commands": [
+    {
+      "command": "bun test scripts/run-istanbul-bun-coverage.test.ts scripts/coverage-run-storage.test.ts scripts/check-coverage-thresholds.test.ts tests/test-store-isolation.test.ts",
+      "platform": "Windows Bun 1.4.1 (4661e494f)",
+      "exit": 0,
+      "pass": 63,
+      "skip": 0,
+      "fail": 0,
+      "assertions": 275,
+      "log": ".planning/memory-resilience/evidence/B03-windows-final.txt"
+    },
+    {
+      "command": "bun test scripts/run-istanbul-bun-coverage.test.ts scripts/coverage-run-storage.test.ts scripts/check-coverage-thresholds.test.ts tests/test-store-isolation.test.ts",
+      "platform": "Linux/WSL Bun 1.3.14 (0d9b296a)",
+      "exit": 0,
+      "pass": 62,
+      "skip": 1,
+      "fail": 0,
+      "assertions": 267,
+      "log": ".planning/memory-resilience/evidence/B03-linux-final.txt"
+    },
+    {
+      "command": "bun test src/infrastructure/hooks src/presentation/cli/commands/friction src/infrastructure/paths.test.ts",
+      "platform": "Windows Bun 1.4.1 (4661e494f)",
+      "exit": 0,
+      "pass": 302,
+      "skip": 0,
+      "fail": 0,
+      "assertions": 672,
+      "log": ".planning/memory-resilience/evidence/B03-windows-home-consumers-final.txt"
+    },
+    {
+      "command": "bun test src/infrastructure/hooks src/presentation/cli/commands/friction src/infrastructure/paths.test.ts",
+      "platform": "Linux/WSL Bun 1.3.14 (0d9b296a)",
+      "exit": 0,
+      "pass": 302,
+      "skip": 0,
+      "fail": 0,
+      "assertions": 672,
+      "log": ".planning/memory-resilience/evidence/B03-linux-home-consumers-final.txt"
+    },
+    {
+      "command": "bun run typecheck",
+      "exit": 0,
+      "log": ".planning/memory-resilience/evidence/B03-typecheck-final.txt"
+    },
+    {
+      "command": "bun run test:isolation",
+      "exit": 0,
+      "log": ".planning/memory-resilience/evidence/B03-isolation.txt"
+    }
+  ],
+  "behavior_proved": [
+    "Existing source/output and prefixed work directories are preserved; ownership is required before recursive removal.",
+    "Repeat/concurrent real processes preserve separate reports; actual CLI checks only its generated summary and fails a known 50% branch result.",
+    "Copied/replaced/malformed/missing ownership and PID reuse cannot authorize cleanup.",
+    "Abrupt process death retains attributable work without preventing a fresh generation; real Windows file lock retains/restores ownership and reports bytes.",
+    "Source/test/report-allocation failures clean eligible working copies; marker-write failure removes only still-identical empty claims and diagnoses partial ownership.",
+    "Global preload teardown cleans normal completion and protects replacement directories even under explicit process exit.",
+    "Linux startup-home caching is contained by a test-only OS adapter; inherited friction sentinel stays byte-identical, import forms and native child environment are exercised."
+  ],
+  "corrections": [
+    "Historical process-exit cleanup implementation was not proof of normal Bun lifecycle behavior; B03 reproduces and repairs the gap.",
+    "Initial Linux focused run failed inherited-home isolation; retained RED log precedes adapter repair.",
+    "A new default-import regression exposed incomplete adapter exports; repaired before final runs.",
+    "Two-run fixture exceeded default 5 seconds under concurrent checks; explicit 30-second integration limit, unchanged behavioral assertions."
+  ],
+  "decision_checks": "Retained RED/GREEN regressions kill the prior behavior at scoped ownership, lifecycle and gate decisions. This is not full module mutation acceptance.",
+  "reports": [
+    {
+      "path": ".planning/memory-resilience/evidence/B03-cli.txt",
+      "sha256": "60D117B94644AAD072482A7679DA4D4366FCEB9D3F12D276A982F637C5D89C59",
+      "raw_sha256": "06EA9CFA31704259DBE2502FAB073ADBE4B93363B680DB00FACFDC8E54F74B70",
+      "raw_archive": ".cc-guardian/archives/b03-raw-logs-9d29e28b-29ba-4260-8604-6ca0e6b01f31/B03-cli.txt"
+    },
+    {
+      "path": ".planning/memory-resilience/evidence/B03-concurrency-lock.txt",
+      "sha256": "E937ECFC5969C4AEC21469D11A878AE88E3BB4DB12A72BB01259016447FA7787",
+      "raw_sha256": "9C2B290C8D80C10329B1F19CD7CF6B1A8FF8B55F6B600321C7C8088EB46708A4",
+      "raw_archive": ".cc-guardian/archives/b03-raw-logs-9d29e28b-29ba-4260-8604-6ca0e6b01f31/B03-concurrency-lock.txt"
+    },
+    {
+      "path": ".planning/memory-resilience/evidence/B03-failure-cleanup.txt",
+      "sha256": "E135EEE2B5DC7E166BEC6D73AD5BF708F62CB92EC2102A61848DB6F63909B9FC",
+      "raw_sha256": "CC24B2D9C14AB9179CC43963C783D8394167A50C37BF9690C3ADA2D83B50D231",
+      "raw_archive": ".cc-guardian/archives/b03-raw-logs-9d29e28b-29ba-4260-8604-6ca0e6b01f31/B03-failure-cleanup.txt"
+    },
+    {
+      "path": ".planning/memory-resilience/evidence/B03-green-allocation.txt",
+      "sha256": "C966F5EBAB39BB15B0DF3E51D1A122D7F397BF01D17D176108CA0FA0F4E56EC4",
+      "raw_sha256": "F5AD9C88223CF0A0DE120F346F6B3B4317941ECB51F2AEC2C22A12AD1815F310",
+      "raw_archive": ".cc-guardian/archives/b03-raw-logs-9d29e28b-29ba-4260-8604-6ca0e6b01f31/B03-green-allocation.txt"
+    },
+    {
+      "path": ".planning/memory-resilience/evidence/B03-green-check-flag.txt",
+      "sha256": "2D85AB214057C6F3832ED5D08D88BC686030F1BD2B3F3460938C62273B461B69",
+      "raw_sha256": "939F71BE00DABDF69AD0423853EC929CA0B51E3190C03CA1B731CC822756EDAE",
+      "raw_archive": ".cc-guardian/archives/b03-raw-logs-9d29e28b-29ba-4260-8604-6ca0e6b01f31/B03-green-check-flag.txt"
+    },
+    {
+      "path": ".planning/memory-resilience/evidence/B03-green-current-report-gate.txt",
+      "sha256": "F9A6E6035B36C5396092A38B56BAEAAC0011BA60A82F598EB4DC01AEC5509215",
+      "raw_sha256": "36FD08A77DD4084B0A8ADF73EB3C738BA9AB57F18C9D4ED72DFE05A513D789AF",
+      "raw_archive": ".cc-guardian/archives/b03-raw-logs-9d29e28b-29ba-4260-8604-6ca0e6b01f31/B03-green-current-report-gate.txt"
+    },
+    {
+      "path": ".planning/memory-resilience/evidence/B03-green-marker-allocation.txt",
+      "sha256": "A30DAD91DAB9126A6BD53ADC47F1A0AF06F2B1B961506C38BC397E71B15E2AD8",
+      "raw_sha256": "492311B7A40DD25F2E964D6E2AEE9873F62895F4AD23C1A54CAE834FC7073FC3",
+      "raw_archive": ".cc-guardian/archives/b03-raw-logs-9d29e28b-29ba-4260-8604-6ca0e6b01f31/B03-green-marker-allocation.txt"
+    },
+    {
+      "path": ".planning/memory-resilience/evidence/B03-green-missing-marker.txt",
+      "sha256": "A72CD6A6B1E4D2D59C808CD723C52A7D3D4989883860A45D4E85EF0A91A7D330",
+      "raw_sha256": "E1D96DE83D1B0A83DAB341A9942C6FF960603B4F594C383E6B472E43CB761CA0",
+      "raw_archive": ".cc-guardian/archives/b03-raw-logs-9d29e28b-29ba-4260-8604-6ca0e6b01f31/B03-green-missing-marker.txt"
+    },
+    {
+      "path": ".planning/memory-resilience/evidence/B03-green-repeat.txt",
+      "sha256": "1A055ABC4C770C5CDDBEBD8E91A2F40893908754BD7E78D877E659B3AE579C83",
+      "raw_sha256": "5D3616B041C9A1DCE1801F65ADE4DCA4156DCD3EAE8831C295662F2B1F8B3186",
+      "raw_archive": ".cc-guardian/archives/b03-raw-logs-9d29e28b-29ba-4260-8604-6ca0e6b01f31/B03-green-repeat.txt"
+    },
+    {
+      "path": ".planning/memory-resilience/evidence/B03-green-source-ownership.txt",
+      "sha256": "BF14A21590D62E92C0B413F24D17CF711A6DB984E51B025B12AF1FD8AD3F8964",
+      "raw_sha256": "FD60E620C925097E4585B1C62BD3A182BF6C49733085FA3218E4A78AC89585D7",
+      "raw_archive": ".cc-guardian/archives/b03-raw-logs-9d29e28b-29ba-4260-8604-6ca0e6b01f31/B03-green-source-ownership.txt"
+    },
+    {
+      "path": ".planning/memory-resilience/evidence/B03-green-test-home-lifecycle.txt",
+      "sha256": "1151636629BBA21D1971710F150ACF6C38404741D7F48E108EE8F24B46EF86EE",
+      "raw_sha256": "7C71D4F47DAF88E1DB5952A1F1E5588F62F34E61A403EA8C9DF6A099D169E117",
+      "raw_archive": ".cc-guardian/archives/b03-raw-logs-9d29e28b-29ba-4260-8604-6ca0e6b01f31/B03-green-test-home-lifecycle.txt"
+    },
+    {
+      "path": ".planning/memory-resilience/evidence/B03-green-work-ownership.txt",
+      "sha256": "E0987224589498DE3F7A97526DFA37880A6DDA195AD8F3672F1044DDCED0265D",
+      "raw_sha256": "36EB077DB2A314614E30774DFDE0E7B5313F8CFC2C3D342498087BB26F53C653",
+      "raw_archive": ".cc-guardian/archives/b03-raw-logs-9d29e28b-29ba-4260-8604-6ca0e6b01f31/B03-green-work-ownership.txt"
+    },
+    {
+      "path": ".planning/memory-resilience/evidence/B03-home-adapter-imports-linux.txt",
+      "sha256": "87CAEF408E1775651378E69CCDC7FB457D88F27DD2731238BEE3C6F9D98266EB",
+      "raw_sha256": "CC9D3DE0D8ECEF0E4B70F74C5B80AD23D28A2633E5FACFE1B0493ABC1098CD18",
+      "raw_archive": ".cc-guardian/archives/b03-raw-logs-9d29e28b-29ba-4260-8604-6ca0e6b01f31/B03-home-adapter-imports-linux.txt"
+    },
+    {
+      "path": ".planning/memory-resilience/evidence/B03-home-adapter-imports-windows.txt",
+      "sha256": "6613974680EFD75DAF62DFF7E9A92C6A0B94F883F702DD912DCE18EBDFAAC329",
+      "raw_sha256": "BEC73543F8521C357E359D841F7CCE3AC8493B4129FAFA9FD46B70BC44581B41",
+      "raw_archive": ".cc-guardian/archives/b03-raw-logs-9d29e28b-29ba-4260-8604-6ca0e6b01f31/B03-home-adapter-imports-windows.txt"
+    },
+    {
+      "path": ".planning/memory-resilience/evidence/B03-isolation.txt",
+      "sha256": "9A3C0A678202CD651FD3849416180970B07BE1F240195607C96978FDC20CF21C",
+      "raw_sha256": "96CEC0F91CB71410CD83203B1D2BEBC6EB23C12E66416CCEE886CAF778D15889",
+      "raw_archive": ".cc-guardian/archives/b03-raw-logs-9d29e28b-29ba-4260-8604-6ca0e6b01f31/B03-isolation.txt"
+    },
+    {
+      "path": ".planning/memory-resilience/evidence/B03-ledger-validation.txt",
+      "sha256": "27CBC30EED93FFC18A1EDA46D6701C2D6694D9F2556AAE0BEC199ADA39645748",
+      "raw_sha256": "27CBC30EED93FFC18A1EDA46D6701C2D6694D9F2556AAE0BEC199ADA39645748",
+      "raw_archive": ".cc-guardian/archives/b03-raw-logs-9d29e28b-29ba-4260-8604-6ca0e6b01f31/B03-ledger-validation.txt"
+    },
+    {
+      "path": ".planning/memory-resilience/evidence/B03-legacy-coverage.json",
+      "sha256": "8854A999EF764F882D2747B506422245BBF0E7A3A3817D2E18F8AC3F7553AE28"
+    },
+    {
+      "path": ".planning/memory-resilience/evidence/B03-linux-final.txt",
+      "sha256": "9FB789F6D1F55E0BA91B7677578412E8FC91140FD4271EE50FC9AFF2C3B431C9",
+      "raw_sha256": "A08362D114F16265B046BF537785044A4F8C537A53F826239CED827AC9FC3F08",
+      "raw_archive": ".cc-guardian/archives/b03-raw-logs-9d29e28b-29ba-4260-8604-6ca0e6b01f31/B03-linux-final.txt"
+    },
+    {
+      "path": ".planning/memory-resilience/evidence/B03-linux-home-adapter.txt",
+      "sha256": "304EC6526A2CE430F3EB96425AFF0ABD3AABCE0FA3CB25F92F26D4038FA98383",
+      "raw_sha256": "F86BFF3504A36AD830C32AEF7B5A8E454A62BCD498E32304A88C57B4AA7FA298",
+      "raw_archive": ".cc-guardian/archives/b03-raw-logs-9d29e28b-29ba-4260-8604-6ca0e6b01f31/B03-linux-home-adapter.txt"
+    },
+    {
+      "path": ".planning/memory-resilience/evidence/B03-linux-home-consumers-final.txt",
+      "sha256": "207ED3663C8418F49EBFD489F5B5D1AEB45676BE14BD12E38A24706CD7B26891",
+      "raw_sha256": "E1BD62A95D7763A0B69355C0627968DA0C4B022F228206C4A6978F64D5370918",
+      "raw_archive": ".cc-guardian/archives/b03-raw-logs-9d29e28b-29ba-4260-8604-6ca0e6b01f31/B03-linux-home-consumers-final.txt"
+    },
+    {
+      "path": ".planning/memory-resilience/evidence/B03-linux-home-consumers.txt",
+      "sha256": "6F7AF477BA3E2F382E5A8320C69A55E787EFB8534DB084F8929E47E9022D058F",
+      "raw_sha256": "0AFA0020B959E574DCBCCC873F715CA04F30E9291AE73FC453EFE84569ED6212",
+      "raw_archive": ".cc-guardian/archives/b03-raw-logs-9d29e28b-29ba-4260-8604-6ca0e6b01f31/B03-linux-home-consumers.txt"
+    },
+    {
+      "path": ".planning/memory-resilience/evidence/B03-linux.txt",
+      "sha256": "C0C27E7DEAC114DB342E3E45233BF8D58E475420EF804B8D734504B06D12E8EB",
+      "raw_sha256": "36051C89964276B96C27644192E366B4D2EC4BCA6D01EA81CE2C8FF0C1362D5E",
+      "raw_archive": ".cc-guardian/archives/b03-raw-logs-9d29e28b-29ba-4260-8604-6ca0e6b01f31/B03-linux.txt"
+    },
+    {
+      "path": ".planning/memory-resilience/evidence/B03-ownership-crash.txt",
+      "sha256": "E4B9399271018CB925BD911E0703A835961AE67DAB203E8976D2E7AC2B6EB6DF",
+      "raw_sha256": "C512C2A12D4F6E2B6412D0CB1349D375B0B125A08CC0E8182588240EB7A6FE66",
+      "raw_archive": ".cc-guardian/archives/b03-raw-logs-9d29e28b-29ba-4260-8604-6ca0e6b01f31/B03-ownership-crash.txt"
+    },
+    {
+      "path": ".planning/memory-resilience/evidence/B03-probe-archive.json",
+      "sha256": "8C9C6D42623271FAD8F60789106160B7E1E934182493166456A7398741005632"
+    },
+    {
+      "path": ".planning/memory-resilience/evidence/B03-red-allocation.txt",
+      "sha256": "C78EB6DD831C37D6FEF34240F0037BBEB6C908D5294B741CDFEF7A3AC90F66C3",
+      "raw_sha256": "29A6546ECF2C46E033E7A8A2DC3B250303E8B0E8C3974B9D5858E9ED1A13A1FD",
+      "raw_archive": ".cc-guardian/archives/b03-raw-logs-9d29e28b-29ba-4260-8604-6ca0e6b01f31/B03-red-allocation.txt"
+    },
+    {
+      "path": ".planning/memory-resilience/evidence/B03-red-check-flag.txt",
+      "sha256": "25A8A4FD0118904083240D8B5BDED5E876F4975A33A61CA8D60F0D2F9F293136",
+      "raw_sha256": "5269186DCE12D5961495913703C0FB078420FD4A7CCC4220FC79952AA497F89F",
+      "raw_archive": ".cc-guardian/archives/b03-raw-logs-9d29e28b-29ba-4260-8604-6ca0e6b01f31/B03-red-check-flag.txt"
+    },
+    {
+      "path": ".planning/memory-resilience/evidence/B03-red-current-report-gate.txt",
+      "sha256": "98AC8A233A49F358788D896A4817AE5C2C20B3A838937A54A6E352E370B70E93",
+      "raw_sha256": "541EA9145BCE43F7C57E93E0499767E628B09BABC4B3DA4B78B6AAE1D2DA03C3",
+      "raw_archive": ".cc-guardian/archives/b03-raw-logs-9d29e28b-29ba-4260-8604-6ca0e6b01f31/B03-red-current-report-gate.txt"
+    },
+    {
+      "path": ".planning/memory-resilience/evidence/B03-red-home-default-import-linux.txt",
+      "sha256": "D09481C416CECCF0CBBDB1547CACCEA4F5F620F8AFF591F4679D2B25E3508795",
+      "raw_sha256": "40AF92F2C80E489D1AABF148B43D07C06AE87C92894E72D8A01768E1262BADAC",
+      "raw_archive": ".cc-guardian/archives/b03-raw-logs-9d29e28b-29ba-4260-8604-6ca0e6b01f31/B03-red-home-default-import-linux.txt"
+    },
+    {
+      "path": ".planning/memory-resilience/evidence/B03-red-home-override-windows.txt",
+      "sha256": "0BB17706C242E26B3753C0F6618D242F0F9D0F408D101C43827D05CA3E062F53",
+      "raw_sha256": "283DF27A334A9A72C3D8A1C96376D4CDB6CD3E8DAE24C9C02A26137DF565E030",
+      "raw_archive": ".cc-guardian/archives/b03-raw-logs-9d29e28b-29ba-4260-8604-6ca0e6b01f31/B03-red-home-override-windows.txt"
+    },
+    {
+      "path": ".planning/memory-resilience/evidence/B03-red-linux-home.txt",
+      "sha256": "6D038A176FB5979A8D675FBF9E838009B5AE5F37447AB1C6C4218E04A4CA9BFA",
+      "raw_sha256": "23FD74B7D01F785C6C984AA99D05BAC2ACF3A8B157328F7CE191E4535778F469",
+      "raw_archive": ".cc-guardian/archives/b03-raw-logs-9d29e28b-29ba-4260-8604-6ca0e6b01f31/B03-red-linux-home.txt"
+    },
+    {
+      "path": ".planning/memory-resilience/evidence/B03-red-marker-allocation.txt",
+      "sha256": "E3ACC5E59E6C5962309B96AA00850E2AD145316DAC25E4E4EF5EDE366ECA5784",
+      "raw_sha256": "BD127111CA05CD721BF48CCAA984E75733DB43F0953297525026D29ACE04153F",
+      "raw_archive": ".cc-guardian/archives/b03-raw-logs-9d29e28b-29ba-4260-8604-6ca0e6b01f31/B03-red-marker-allocation.txt"
+    },
+    {
+      "path": ".planning/memory-resilience/evidence/B03-red-missing-marker.txt",
+      "sha256": "41015D98804D602457B50A6EB20FB693E1FF41A0616C3CE274B7489119F0E9B6",
+      "raw_sha256": "33879DF8DC2FE02E0A6EA2062339B5EBF51DBAD85B49F00CA3AB9D0BE821EC9C",
+      "raw_archive": ".cc-guardian/archives/b03-raw-logs-9d29e28b-29ba-4260-8604-6ca0e6b01f31/B03-red-missing-marker.txt"
+    },
+    {
+      "path": ".planning/memory-resilience/evidence/B03-red-repeat.txt",
+      "sha256": "09E664E4C6EF95321BFC31E469303AE9B6F92ECED3F3E4DF75114E3340E689DC",
+      "raw_sha256": "D57D73A307BBCC37A8528E42F11258590BD0C788F3F67B60620D14B496635A1A",
+      "raw_archive": ".cc-guardian/archives/b03-raw-logs-9d29e28b-29ba-4260-8604-6ca0e6b01f31/B03-red-repeat.txt"
+    },
+    {
+      "path": ".planning/memory-resilience/evidence/B03-red-source-ownership.txt",
+      "sha256": "A887EAD361BA9AAA722A44EDDDC29E31C7CF1AEB83DCD2DF7E455719561C07D2",
+      "raw_sha256": "A5FB75612E9620DB1228A5433C7C6DA40AD8AE593240B5A255FC5809159E0FBD",
+      "raw_archive": ".cc-guardian/archives/b03-raw-logs-9d29e28b-29ba-4260-8604-6ca0e6b01f31/B03-red-source-ownership.txt"
+    },
+    {
+      "path": ".planning/memory-resilience/evidence/B03-red-test-home-lifecycle.txt",
+      "sha256": "B3D94778E7573C82993DF2CBCB6311D4E65DB4D11D37BEF080639D389AFA55C1",
+      "raw_sha256": "CC8F609ECFF17987C60D634FAD7FBB185C7B73D97B18D10C8DFB985789BACAE3",
+      "raw_archive": ".cc-guardian/archives/b03-raw-logs-9d29e28b-29ba-4260-8604-6ca0e6b01f31/B03-red-test-home-lifecycle.txt"
+    },
+    {
+      "path": ".planning/memory-resilience/evidence/B03-red-test-home-replacement.txt",
+      "sha256": "C022FB269D5FDA45C158077B7E2F7A18A7C6401A6A83A233EE7E63F9D6ACC6CE",
+      "raw_sha256": "0FF9214DDC0AE1E1EE7B16D267EA8F51529477AC334E3B5F9F57D4CD4D3CAC4A",
+      "raw_archive": ".cc-guardian/archives/b03-raw-logs-9d29e28b-29ba-4260-8604-6ca0e6b01f31/B03-red-test-home-replacement.txt"
+    },
+    {
+      "path": ".planning/memory-resilience/evidence/B03-red-work-ownership.txt",
+      "sha256": "D69D00D2829DE28882AAF29A9752FB70A03BD175CFAF79893F2274FE586867E1",
+      "raw_sha256": "794B475DC1DD15D602136FAF6F10F91475F51BB435DAB96107E4A6F5F7028D00",
+      "raw_archive": ".cc-guardian/archives/b03-raw-logs-9d29e28b-29ba-4260-8604-6ca0e6b01f31/B03-red-work-ownership.txt"
+    },
+    {
+      "path": ".planning/memory-resilience/evidence/B03-test-home-exit-probe.txt",
+      "sha256": "070EB514A26A406995B847A4A38C654F6ABEF6ECFCCEB4D671D884E8F9FEFAEC",
+      "raw_sha256": "425FF9C92E0070967D67DF42DC5D13FEAC68E3DB0BB298B052BA22A7504BFA0A",
+      "raw_archive": ".cc-guardian/archives/b03-raw-logs-9d29e28b-29ba-4260-8604-6ca0e6b01f31/B03-test-home-exit-probe.txt"
+    },
+    {
+      "path": ".planning/memory-resilience/evidence/B03-typecheck-final.txt",
+      "sha256": "980DEB8C45E5B18D42DDCC242D053F084FB206D262BCB5A70D6E4B18851D9B51",
+      "raw_sha256": "DB32F15DFD123BF25295828F1D526BE69899702F6622D83B13C8874A0B628A09",
+      "raw_archive": ".cc-guardian/archives/b03-raw-logs-9d29e28b-29ba-4260-8604-6ca0e6b01f31/B03-typecheck-final.txt"
+    },
+    {
+      "path": ".planning/memory-resilience/evidence/B03-typecheck.txt",
+      "sha256": "980DEB8C45E5B18D42DDCC242D053F084FB206D262BCB5A70D6E4B18851D9B51",
+      "raw_sha256": "DB32F15DFD123BF25295828F1D526BE69899702F6622D83B13C8874A0B628A09",
+      "raw_archive": ".cc-guardian/archives/b03-raw-logs-9d29e28b-29ba-4260-8604-6ca0e6b01f31/B03-typecheck.txt"
+    },
+    {
+      "path": ".planning/memory-resilience/evidence/B03-windows-final.txt",
+      "sha256": "A40A23726DE8446AB7E7372B27659C2A68A9B00EDE876CD6079777D1F708782E",
+      "raw_sha256": "FA46CE5F4E38078E3771A79C523DAC68B25B1644DA7465662283B475BFEFADAF",
+      "raw_archive": ".cc-guardian/archives/b03-raw-logs-9d29e28b-29ba-4260-8604-6ca0e6b01f31/B03-windows-final.txt"
+    },
+    {
+      "path": ".planning/memory-resilience/evidence/B03-windows-home-consumers-final.txt",
+      "sha256": "15906C70F0E11EE6341E63EC9D7E9A7DC2303775333460021AF8AA3D09D5704D",
+      "raw_sha256": "A5FDAC034FA3BBC45F4CEDC69CFBA955E0D4DFD5CBAA58479DE2D597C38B99F3",
+      "raw_archive": ".cc-guardian/archives/b03-raw-logs-9d29e28b-29ba-4260-8604-6ca0e6b01f31/B03-windows-home-consumers-final.txt"
+    },
+    {
+      "path": ".planning/memory-resilience/evidence/B03-windows-home-consumers.txt",
+      "sha256": "EB52EC8968891E8FD0E72C5B2133D0AEF779B2616CA17B40810A1FCDF18E48A4",
+      "raw_sha256": "7AD05B2DACE78140E0A0B88FB7197B8BE6429C5BAB202782014AE147D3AFDD14",
+      "raw_archive": ".cc-guardian/archives/b03-raw-logs-9d29e28b-29ba-4260-8604-6ca0e6b01f31/B03-windows-home-consumers.txt"
+    }
+  ],
+  "limitations": [
+    "B04-B10 and Q086-Q088 still require complete instrumentation, per-file/package four-metric and changed-line evidence, and Tier S decision checks.",
+    "Linux tests share this checkout and existing dependencies; D02 clean Linux install is not proved.",
+    "Coverage ownership is scoped to trusted repository/tests and OS account; no hostile same-user sandbox or kernel race-proof claim.",
+    "Run metadata is diagnostic; source-revision/freshness/completeness enforcement remains B06.",
+    "No full repository test/coverage run is claimed for this candidate; R02 final independent review and hosted CI remain open.",
+    "Historical legacy coverage and one synthetic probe artifact preserved with hashes; policy-blocked old work copy untouched. Disk headroom last observed about 2.13 GiB; repeat preflight before heavier work."
+  ],
+  "evidence_normalization": "Tracked text logs normalize CRLF to LF and remove line-end whitespace/extra final blank lines to pass git diff --check. Raw bytes are preserved in the project-owned ignored archive, with per-file raw hashes and paths. Test results and source inputs are unchanged."
+}

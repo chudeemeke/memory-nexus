@@ -1,0 +1,17 @@
+bun test v1.4.1 (4661e494f)
+
+scripts\coverage-run-storage.test.ts:
+Coverage report allocation incomplete: C:\Users\Destiny\AppData\Local\Temp\memory-coverage-allocation-QzjQiD\project\coverage\run-0cdf942c-e95f-4580-81f3-b2946a5e11a0
+(pass) coverage run ownership > report allocation failure releases the exclusively claimed working directory [47.72ms]
+---------------------------------|---------|---------|-------------------
+File                             | % Funcs | % Lines | Uncovered Line #s
+---------------------------------|---------|---------|-------------------
+All files                        |   71.43 |   68.18 |
+ scripts\coverage-run-storage.ts |   71.43 |   68.18 | 36,47,67-68,87-90,94-102,113,116-125
+---------------------------------|---------|---------|-------------------
+
+ 1 pass
+ 11 filtered out
+ 0 fail
+ 2 expect() calls
+Ran 1 test across 1 file. [127.00ms]

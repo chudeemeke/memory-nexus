@@ -421,11 +421,11 @@ export class HybridSearchService implements ISearchService {
     try {
       // Query the vec0 table to find what dimension the stored embeddings use
       // We can infer from the first row's embedding length
-      const row = this.db
+      using statement = this.db
         .prepare<{ embedding: Float32Array }, []>(
           "SELECT embedding FROM message_embeddings LIMIT 1"
-        )
-        .get();
+        );
+      const row = statement.get();
       if (!row || !row.embedding) return null;
       const emb = row.embedding as any;
       // Float32Array gives us the dimension count directly
@@ -689,11 +689,11 @@ export class HybridSearchService implements ISearchService {
 
     const messageIds = ftsResults.map((r) => r.messageId);
     const placeholders = messageIds.map(() => "?").join(",");
-    const rows = this.db
+    using statement = this.db
       .prepare<{ rowid: number; id: string }, string[]>(
         `SELECT rowid, id FROM messages_meta WHERE id IN (${placeholders})`
-      )
-      .all(...messageIds);
+      );
+    const rows = statement.all(...messageIds);
 
     return new Map(rows.map((r) => [r.id, r.rowid]));
   }
@@ -704,13 +704,13 @@ export class HybridSearchService implements ISearchService {
   private hydrateByRowids(rowids: number[]): Map<number, MessageMeta> {
     if (rowids.length === 0) return new Map();
     const placeholders = rowids.map(() => "?").join(",");
-    const rows = this.db
+    using statement = this.db
       .prepare<MessageMeta, number[]>(
         `SELECT rowid, id, session_id, content, timestamp, role
          FROM messages_meta
          WHERE rowid IN (${placeholders})`
-      )
-      .all(...rowids);
+      );
+    const rows = statement.all(...rowids);
     return new Map(rows.map((r) => [r.rowid, r]));
   }
 
@@ -733,11 +733,11 @@ export class HybridSearchService implements ISearchService {
 
     if (options.projectFilter) {
       // For project filter, we need to look up the session's project
-      const session = this.db
+      using statement = this.db
         .prepare<{ project_name: string }, [string]>(
           "SELECT project_name FROM sessions WHERE id = ?"
-        )
-        .get(meta.session_id);
+        );
+      const session = statement.get(meta.session_id);
       if (
         !session ||
         !session.project_name

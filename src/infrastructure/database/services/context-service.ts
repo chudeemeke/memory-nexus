@@ -123,25 +123,24 @@ export class SqliteContextService {
     }
 
     // Find project by name: exact match first, then substring ranked by session count
-    const projectRow =
-      this.db
-        .prepare<ProjectRow, [string]>(
+    using exactProject = this.db.prepare<ProjectRow, [string]>(
           `SELECT DISTINCT project_name, project_path_decoded, project_path_encoded
            FROM sessions
            WHERE LOWER(project_name) = LOWER(?)
            LIMIT 1`
-        )
-        .get(projectFilter) ??
-      this.db
-        .prepare<ProjectRow, [string]>(
+        );
+    let projectRow = exactProject.get(projectFilter);
+    if (!projectRow) {
+      using fuzzyProject = this.db.prepare<ProjectRow, [string]>(
           `SELECT project_name, project_path_decoded, project_path_encoded
            FROM sessions
            WHERE project_name LIKE '%' || ? || '%'
            GROUP BY project_name
            ORDER BY COUNT(*) DESC
            LIMIT 1`
-        )
-        .get(projectFilter);
+        );
+      projectRow = fuzzyProject.get(projectFilter);
+    }
 
     if (!projectRow) {
       return null;
@@ -167,12 +166,13 @@ export class SqliteContextService {
       ${dateFilter}
     `;
 
+    using aggregateStatement = this.db.prepare<AggregateRow, string[]>(aggregateSql);
     const aggregateRow = sinceDate
-      ? this.db.prepare<AggregateRow, [string, string]>(aggregateSql).get(
+      ? aggregateStatement.get(
           projectPathEncoded,
           sinceDate.toISOString()
         )
-      : this.db.prepare<AggregateRow, [string]>(aggregateSql).get(projectPathEncoded);
+      : aggregateStatement.get(projectPathEncoded);
 
     if (!aggregateRow || aggregateRow.sessionCount === 0) {
       // No sessions found for this project (possibly due to date filter)
@@ -195,13 +195,10 @@ export class SqliteContextService {
       LIMIT ?
     `;
 
+    using toolStatement = this.db.prepare<ToolRow, (string | number)[]>(toolSql);
     const toolRows = sinceDate
-      ? this.db
-          .prepare<ToolRow, [string, string, number]>(toolSql)
-          .all(projectPathEncoded, sinceDate.toISOString(), toolsLimit)
-      : this.db
-          .prepare<ToolRow, [string, number]>(toolSql)
-          .all(projectPathEncoded, toolsLimit);
+      ? toolStatement.all(projectPathEncoded, sinceDate.toISOString(), toolsLimit)
+      : toolStatement.all(projectPathEncoded, toolsLimit);
 
     // Get topics from links (handle empty gracefully)
     const topicDateFilter = sinceDate
@@ -221,13 +218,10 @@ export class SqliteContextService {
       LIMIT ?
     `;
 
+    using topicStatement = this.db.prepare<TopicRow, (string | number)[]>(topicSql);
     const topicRows = sinceDate
-      ? this.db
-          .prepare<TopicRow, [string, string, number]>(topicSql)
-          .all(projectPathEncoded, sinceDate.toISOString(), topicsLimit)
-      : this.db
-          .prepare<TopicRow, [string, number]>(topicSql)
-          .all(projectPathEncoded, topicsLimit);
+      ? topicStatement.all(projectPathEncoded, sinceDate.toISOString(), topicsLimit)
+      : topicStatement.all(projectPathEncoded, topicsLimit);
 
     return {
       projectName: projectRow.project_name,
@@ -267,18 +261,18 @@ export class SqliteProjectResolver implements IProjectResolver {
    */
   resolveProjectEncoded(projectFilter: string): string | null {
     // Exact match first (case-insensitive)
-    const exact = this.db
+    using exactStatement = this.db
       .prepare<{ project_path_encoded: string }, [string]>(
         `SELECT DISTINCT project_path_encoded
          FROM sessions
          WHERE LOWER(project_name) = LOWER(?)
          LIMIT 1`
-      )
-      .get(projectFilter);
+      );
+    const exact = exactStatement.get(projectFilter);
     if (exact) return exact.project_path_encoded;
 
     // Substring match ranked by session count
-    const fuzzy = this.db
+    using fuzzyStatement = this.db
       .prepare<{ project_path_encoded: string }, [string]>(
         `SELECT project_path_encoded
          FROM sessions
@@ -286,8 +280,8 @@ export class SqliteProjectResolver implements IProjectResolver {
          GROUP BY project_path_encoded
          ORDER BY COUNT(*) DESC
          LIMIT 1`
-      )
-      .get(projectFilter);
+      );
+    const fuzzy = fuzzyStatement.get(projectFilter);
     return fuzzy?.project_path_encoded ?? null;
   }
 
@@ -299,18 +293,18 @@ export class SqliteProjectResolver implements IProjectResolver {
    */
   resolveProjectName(projectFilter: string): string | null {
     // Exact match first (case-insensitive)
-    const exact = this.db
+    using exactStatement = this.db
       .prepare<{ project_name: string }, [string]>(
         `SELECT DISTINCT project_name
          FROM sessions
          WHERE LOWER(project_name) = LOWER(?)
          LIMIT 1`
-      )
-      .get(projectFilter);
+      );
+    const exact = exactStatement.get(projectFilter);
     if (exact) return exact.project_name;
 
     // Substring match ranked by session count
-    const fuzzy = this.db
+    using fuzzyStatement = this.db
       .prepare<{ project_name: string }, [string]>(
         `SELECT project_name
          FROM sessions
@@ -318,8 +312,8 @@ export class SqliteProjectResolver implements IProjectResolver {
          GROUP BY project_name
          ORDER BY COUNT(*) DESC
          LIMIT 1`
-      )
-      .get(projectFilter);
+      );
+    const fuzzy = fuzzyStatement.get(projectFilter);
     return fuzzy?.project_name ?? null;
   }
 }

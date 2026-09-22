@@ -1,0 +1,1244 @@
+{
+  "item_id": "B04",
+  "status": "active",
+  "recorded_at": "2026-09-20T00:05:17.188Z",
+  "source_revision": "e85d4d3f63dfe0cfaa58198766f13c56f1e23232",
+  "cwd": "C:\\Projects\\memory-nexus",
+  "change_scope": "55 test-driver risk proposals and owned source findings only; no executable production/test source changed.",
+  "counts": {
+    "candidates": 446,
+    "proposed": 321,
+    "unclassified": 125,
+    "approvedExclusions": 0,
+    "ledgerItems": 209,
+    "newCleanupTasks": 50
+  },
+  "inspection_packet": [
+    {
+      "path": "src/application/services/export-service.test.ts",
+      "sourceHash": "7d84465af80adef486524e617350840e1cbb4598e39440c77877ecc2dbc9d13d",
+      "imports": [
+        "import { mkdirSync, rmSync, existsSync } from \"node:fs\";"
+      ],
+      "calls": [
+        {
+          "line": 32,
+          "operation": "rmSync",
+          "call": "rmSync(TEST_DIR, { recursive: true, force: true })",
+          "context": "  let exportPath: string;\n\n  beforeEach(() => {\n    // Create fresh test directory\n    rmSync(TEST_DIR, { recursive: true, force: true });\n    mkdirSync(TEST_DIR, { recursive: true });\n    exportPath = join(TEST_DIR, \"export.json\");\n\n    // Create in-memory database with schema\n    db = new Database(\":memory:\");\n    db.exec(\"PRAGMA foreign_keys = ON;\");"
+        },
+        {
+          "line": 44,
+          "operation": "rmSync",
+          "call": "rmSync(TEST_DIR, { recursive: true, force: true })",
+          "context": "  });\n\n  afterEach(() => {\n    db.close();\n    rmSync(TEST_DIR, { recursive: true, force: true });\n  });\n\n  // ==========================================================================\n  // Export Tests\n  // ==========================================================================\n"
+        }
+      ]
+    },
+    {
+      "path": "src/application/services/extraction-pipeline.test.ts",
+      "sourceHash": "d1f7cfb838af2c12b9ae6ca2d8df729db603dace43f498de859be9f5b34b567e",
+      "imports": [
+        "import { unlinkSync, existsSync, writeFileSync } from \"fs\";"
+      ],
+      "calls": [
+        {
+          "line": 52,
+          "operation": "unlinkSync",
+          "call": "unlinkSync(testLogPath)",
+          "context": "\n  afterEach(() => {\n    db.close();\n    if (existsSync(testLogPath)) {\n      unlinkSync(testLogPath);\n    }\n  });\n\n  // Mocks\n  const mockExtractor = (candidates: any[]): IExtractionProvider => ({\n    providerId: \"mock-llm\","
+        }
+      ]
+    },
+    {
+      "path": "src/application/services/friction-service.test.ts",
+      "sourceHash": "8f61e101b0761ebd0b77f99ddab67646399b7e1664e73342f4f6bb7c72221120",
+      "imports": [
+        "import { existsSync, writeFileSync, mkdtempSync, unlinkSync, readFileSync } from \"node:fs\";"
+      ],
+      "calls": [
+        {
+          "line": 653,
+          "operation": "unlinkSync",
+          "call": "unlinkSync(filePath)",
+          "context": "                '{\"tool\":\"aidev\",\"severity\":\"high\",\"description\":\"desc\",\"project\":\"gsd\",\"date\":\"2026-03-08\"}\\n'\n            );\n\n            // Pre-delete the file so unlinkSync will fail\n            unlinkSync(filePath);\n\n            // Re-create but make it so the service reads it, then we can't test\n            // lock easily on Windows. Instead, test that ingestFallbackFile\n            // doesn't throw even if delete fails by verifying entries are saved.\n            // We'll test with a file that exists -- the delete success path is\n            // already tested above. For the failure path, mock unlinkSync behavior"
+        }
+      ]
+    },
+    {
+      "path": "src/application/services/sync-service.integration.test.ts",
+      "sourceHash": "410dbd0a543a3749f8f76f04ebff65b65db1e7d53d030ac665b8a9e2e7d53a6d",
+      "imports": [
+        "import { mkdirSync, writeFileSync, appendFileSync, rmSync } from \"node:fs\";"
+      ],
+      "calls": [
+        {
+          "line": 119,
+          "operation": "rmSync",
+          "call": "rmSync(tempDir, { recursive: true, force: true })",
+          "context": "    closeDatabase(db);\n\n    // Clean up temp directory\n    try {\n      rmSync(tempDir, { recursive: true, force: true });\n    } catch {\n      // Ignore cleanup errors\n    }\n  });\n\n  describe(\"Basic sync workflow\", () => {"
+        }
+      ]
+    },
+    {
+      "path": "src/presentation/cli/commands/audit-secrets.test.ts",
+      "sourceHash": "edd71a8feb372330e8a36853de836b6bb3b2f267e3ca6e2145fbed634f1ee50f",
+      "imports": [
+        "import { mkdtempSync, readFileSync, rmSync } from \"node:fs\";"
+      ],
+      "calls": [
+        {
+          "line": 34,
+          "operation": "rmSync",
+          "call": "rmSync(tempDir, { recursive: true, force: true })",
+          "context": "\n  afterEach(() => {\n    console.log = originalLog;\n    console.error = originalError;\n    rmSync(tempDir, { recursive: true, force: true });\n  });\n\n  it(\"creates command with the expected name and options\", () => {\n    const command = createAuditSecretsCommand();\n\n    expect(command.name()).toBe(\"audit-secrets\");"
+        }
+      ]
+    },
+    {
+      "path": "src/presentation/cli/commands/backfill.test.ts",
+      "sourceHash": "71e313f70bbe5630c3aa3c3f1d7c093c50e96071b89463093f82e0d4f27470ac",
+      "imports": [
+        "import { mkdtempSync, readFileSync, rmSync } from \"node:fs\";"
+      ],
+      "calls": [
+        {
+          "line": 126,
+          "operation": "rmSync",
+          "call": "rmSync(dir, { recursive: true, force: true, maxRetries: 10, retryDelay: 50 })",
+          "context": "        if (typeof globalThis.Bun?.gc === \"function\") {\n          Bun.gc(true);\n        }\n        try {\n          rmSync(dir, { recursive: true, force: true, maxRetries: 10, retryDelay: 50 });\n        } catch {\n          // Best-effort cleanup. Bun may release SQLite file handles after the test process exits on Windows.\n        }\n      }\n    });\n"
+        },
+        {
+          "line": 171,
+          "operation": "rmSync",
+          "call": "rmSync(dir, { recursive: true, force: true })",
+          "context": "          delete process.env.MEMORY_HOME;\n        } else {\n          process.env.MEMORY_HOME = oldMemoryHome;\n        }\n        rmSync(dir, { recursive: true, force: true });\n      }\n    });\n  });\n\n  describe(\"executeBackfillCommand\", () => {\n    it(\"dry-run displays session count and estimated cost\", async () => {"
+        }
+      ]
+    },
+    {
+      "path": "src/presentation/cli/commands/backup.test.ts",
+      "sourceHash": "b4eb53e0ad1a081d0ba9592e145e312e188a35b8af3cbd1934a518bb53ae204f",
+      "imports": [
+        "import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from \"node:fs\";"
+      ],
+      "calls": [
+        {
+          "line": 77,
+          "operation": "rmSync",
+          "call": "rmSync(testDir, { recursive: true, force: true, maxRetries: 50, retryDelay: 100 })",
+          "context": "  afterEach(() => {\n    console.log = originalLog;\n    console.error = originalError;\n    try {\n      rmSync(testDir, { recursive: true, force: true, maxRetries: 50, retryDelay: 100 });\n    } catch {\n      // Best-effort cleanup on Windows; SQLite can release handles late.\n    }\n  });\n\n  it(\"registers backup and restore command surfaces\", () => {"
+        },
+        {
+          "line": 226,
+          "operation": "rmSync",
+          "call": "rmSync(join(backupPath, \"memory.db\"), { force: true })",
+          "context": "\n  it(\"reports verification errors for missing declared files and invalid manifests\", async () => {\n    await executeBackupCreateCommand(undefined, opts(), { json: true });\n    const backupPath = JSON.parse(consoleOutput.join(\"\\n\")).data.backupPath as string;\n    rmSync(join(backupPath, \"memory.db\"), { force: true });\n    consoleOutput = [];\n\n    const missingDb = await executeBackupVerifyCommand(backupPath, opts(), {});\n    expect(missingDb.exitCode).toBe(1);\n    expect(consoleErrorOutput.join(\"\\n\")).toContain(\"Backup manifest declares database\");\n"
+        }
+      ]
+    },
+    {
+      "path": "src/presentation/cli/commands/browse.test.ts",
+      "sourceHash": "e7f9b3c295771f9873384364a848150428c2ed20d6f313a930bad4993a059e94",
+      "imports": [
+        "import { mkdtempSync, rmSync, existsSync } from \"fs\";"
+      ],
+      "calls": [
+        {
+          "line": 59,
+          "operation": "rmSync",
+          "call": "rmSync(dir, { recursive: true, force: true })",
+          "context": "// Helper to cleanup temp directory - handles Windows file locking\r\nfunction cleanupTempDir(dir: string): void {\r\n  if (existsSync(dir)) {\r\n    try {\r\n      rmSync(dir, { recursive: true, force: true });\r\n    } catch {\r\n      // Windows file locking - ignore cleanup failures in tests\r\n    }\r\n  }\r\n}\r\n\r"
+        }
+      ]
+    },
+    {
+      "path": "src/presentation/cli/commands/context.coverage.test.ts",
+      "sourceHash": "ff772b7c1d0630948a330883877a60444dd0b31757573b4d4a0fdd9263082073",
+      "imports": [
+        "import { mkdtempSync, rmSync } from \"fs\";"
+      ],
+      "calls": [
+        {
+          "line": 84,
+          "operation": "rmSync",
+          "call": "rmSync(tempDir, { recursive: true, force: true })",
+          "context": "\r\n  afterEach(() => {\r\n    consoleLogSpy.mockRestore();\r\n    consoleErrorSpy.mockRestore();\r\n    try { rmSync(tempDir, { recursive: true, force: true }); } catch {}\r\n  });\r\n\r\n  it(\"legacy text-mode brief — emits to stdout, exit 0\", async () => {\r\n    const result = await executeContextCommand(\"TestProj\", { dbPath });\r\n    expect(result.exitCode).toBe(0);\r\n    expect(consoleLogSpy).toHaveBeenCalled();\r"
+        },
+        {
+          "line": 175,
+          "operation": "rmSync",
+          "call": "rmSync(tempDir, { recursive: true, force: true })",
+          "context": "\r\n  afterEach(() => {\r\n    consoleLogSpy.mockRestore();\r\n    consoleErrorSpy.mockRestore();\r\n    try { rmSync(tempDir, { recursive: true, force: true }); } catch {}\r\n  });\r\n\r\n  it(\"smart context --budget routes correctly and exits cleanly (json)\", async () => {\r\n    const result = await executeContextCommand(\"SmartProj\", {\r\n      json: true,\r\n      budget: 1000,\r"
+        }
+      ]
+    },
+    {
+      "path": "src/presentation/cli/commands/context.test.ts",
+      "sourceHash": "60cb723327011b7697b51a188236880c97ef091e0d0997803bc35c93960f4422",
+      "imports": [
+        "import { mkdtempSync, rmSync } from \"fs\";"
+      ],
+      "calls": [
+        {
+          "line": 227,
+          "operation": "rmSync",
+          "call": "rmSync(tempDir, { recursive: true, force: true })",
+          "context": "\r\n  afterEach(() => {\r\n    consoleLogSpy.mockRestore();\r\n    consoleErrorSpy.mockRestore();\r\n    try { rmSync(tempDir, { recursive: true, force: true }); } catch {}\r\n  });\r\n\r\n  it(\"sets exit code 1 when project not found\", async () => {\r\n    const result = await executeContextCommand(\"nonexistent-project-xyz\", { dbPath });\r\n\r\n    expect(result.exitCode).toBe(1);\r"
+        },
+        {
+          "line": 309,
+          "operation": "rmSync",
+          "call": "rmSync(cli03TempDir, { recursive: true, force: true })",
+          "context": "\r\n  afterEach(() => {\r\n    consoleLogSpy.mockRestore();\r\n    consoleErrorSpy.mockRestore();\r\n    try { rmSync(cli03TempDir, { recursive: true, force: true }); } catch {}\r\n  });\r\n\r\n  // 1, 2: choices include brief, ai\r\n  it(\"accepts 'brief' in --format choices\", () => {\r\n    const cmd = createContextCommand();\r\n    const formatOpt = cmd.options.find((o) => o.long === \"--format\");\r"
+        }
+      ]
+    },
+    {
+      "path": "src/presentation/cli/commands/doctor.portability.test.ts",
+      "sourceHash": "9cb68a72ee73baa38722bb9bf5b5ad46593df8518d6838babf81094d610919da",
+      "imports": [
+        "import { existsSync, mkdirSync, rmSync, writeFileSync } from \"node:fs\";"
+      ],
+      "calls": [
+        {
+          "line": 126,
+          "operation": "rmSync",
+          "call": "rmSync(testDir, { recursive: true, force: true })",
+          "context": "    console.error = originalError;\n\n    // Clean up\n    try {\n      rmSync(testDir, { recursive: true, force: true });\n    } catch {\n      // Ignore cleanup errors\n    }\n  });\n\n  it(\"should register --portability option on the doctor command builder\", () => {"
+        }
+      ]
+    },
+    {
+      "path": "src/presentation/cli/commands/doctor.test.ts",
+      "sourceHash": "f445a2609412d707ffbecab6ddea6f96158850c3648ff56c1d4a61d0672bdbd4",
+      "imports": [
+        "import { mkdirSync, rmSync, writeFileSync } from \"node:fs\";"
+      ],
+      "calls": [
+        {
+          "line": 149,
+          "operation": "rmSync",
+          "call": "rmSync(testDir, { recursive: true, force: true })",
+          "context": "        console.log = originalLog;\n\n        // Clean up test directory\n        try {\n            rmSync(testDir, { recursive: true, force: true });\n        } catch {\n            // Ignore cleanup errors on Windows\n        }\n    });\n\n    afterEach(() => {"
+        },
+        {
+          "line": 1436,
+          "operation": "rmSync",
+          "call": "rmSync(portabilityDir, { recursive: true, force: true, maxRetries: 10, retryDelay: 50 })",
+          "context": "                expect(parsed.portability.sqliteVecAvailable).toBe(false);\n                expect(parsed.portability.fixedStaleLocks).toBe(true);\n            } finally {\n                try {\n                    rmSync(portabilityDir, { recursive: true, force: true, maxRetries: 10, retryDelay: 50 });\n                } catch {\n                    // Best-effort cleanup on Windows; SQLite can release handles late.\n                }\n            }\n        });\n"
+        }
+      ]
+    },
+    {
+      "path": "src/presentation/cli/commands/dream.test.ts",
+      "sourceHash": "b62e9800c66e3531579c8aa5833a419a8db782e00a19ece9e0105c5469f9bac7",
+      "imports": [
+        "import { existsSync, unlinkSync } from \"node:fs\";"
+      ],
+      "calls": [
+        {
+          "line": 35,
+          "operation": "unlinkSync",
+          "call": "unlinkSync(dbPath)",
+          "context": "\r\n  afterEach(() => {\r\n    try {\r\n      if (existsSync(dbPath)) {\r\n        unlinkSync(dbPath);\r\n      }\r\n    } catch {\r\n      // Windows can briefly retain SQLite handles; temp names are unique.\r\n    }\r\n  });\r\n\r"
+        }
+      ]
+    },
+    {
+      "path": "src/presentation/cli/commands/facts.test.ts",
+      "sourceHash": "83e92bb9bfb1bed7d6dcc377ce700692d619cdc864233b4bb2959f4a8a04c4ce",
+      "imports": [
+        "import { unlinkSync, existsSync } from \"fs\";"
+      ],
+      "calls": [
+        {
+          "line": 39,
+          "operation": "unlinkSync",
+          "call": "unlinkSync(testDbPath)",
+          "context": "\n  afterEach(() => {\n    db.close();\n    try {\n      if (existsSync(testDbPath)) unlinkSync(testDbPath);\n    } catch {}\n  });\n\n  test(\"createFactsCommand registers commander properties correctly\", () => {\n    const cmd = createFactsCommand();\n    expect(cmd.name()).toBe(\"facts\");"
+        }
+      ]
+    },
+    {
+      "path": "src/presentation/cli/commands/friction/dashboard.test.ts",
+      "sourceHash": "721658a7b271306f798f8b0b968cce68146b771a9115e12e794cd55137305f3e",
+      "imports": [
+        "import { existsSync, mkdtempSync, rmSync } from \"node:fs\";"
+      ],
+      "calls": [
+        {
+          "line": 59,
+          "operation": "rmSync",
+          "call": "rmSync(tempDir, { recursive: true, force: true })",
+          "context": "            delete process.env.MEMORY_HOME;\n        } else {\n            process.env.MEMORY_HOME = originalMemoryHome;\n        }\n        try { rmSync(tempDir, { recursive: true, force: true }); } catch { /* Windows file locking */ }\n    });\n\n    it(\"dashboard action returns exitCode 0 with rich output\", async () => {\n        const result = await executeFrictionCommand({\n            action: \"dashboard\",\n        }, { dbPath });"
+        }
+      ]
+    },
+    {
+      "path": "src/presentation/cli/commands/friction/index.test.ts",
+      "sourceHash": "49f7c24a295f6e9b8974b8afae867c6fdd52f75b50f40016427c479d1ea4b32a",
+      "imports": [
+        "import { mkdtempSync, rmSync } from \"node:fs\";"
+      ],
+      "calls": [
+        {
+          "line": 20,
+          "operation": "rmSync",
+          "call": "rmSync(dir, { recursive: true, force: true, maxRetries: 10, retryDelay: 50 })",
+          "context": "\n    afterEach(() => {\n        for (const dir of tempDirs.splice(0)) {\n            try {\n                rmSync(dir, { recursive: true, force: true, maxRetries: 10, retryDelay: 50 });\n            } catch {\n                // Best-effort cleanup for Windows SQLite handles.\n            }\n        }\n    });\n"
+        }
+      ]
+    },
+    {
+      "path": "src/presentation/cli/commands/friction/list.test.ts",
+      "sourceHash": "9c38747f2e64669a13a6856190ca0d17097baf95e50481bd9a7c00bcf48023f5",
+      "imports": [
+        "import { mkdtempSync, rmSync } from \"node:fs\";"
+      ],
+      "calls": [
+        {
+          "line": 49,
+          "operation": "rmSync",
+          "call": "rmSync(tempDir, { recursive: true, force: true })",
+          "context": "            delete process.env.XDG_CONFIG_HOME;\n        }\n\n        try {\n            rmSync(tempDir, { recursive: true, force: true });\n        } catch {}\n    });\n\n    it(\"list action returns exitCode 0\", async () => {\n        const result = await executeFrictionCommand({\n            action: \"list\","
+        }
+      ]
+    },
+    {
+      "path": "src/presentation/cli/commands/friction/log.test.ts",
+      "sourceHash": "45eec4d17c830257fa158e17f056cd35b0d9544e0e9ba8dbab89d7c89019496b",
+      "imports": [
+        "import { mkdtempSync, rmSync } from \"node:fs\";"
+      ],
+      "calls": [
+        {
+          "line": 47,
+          "operation": "rmSync",
+          "call": "rmSync(tempDir, { recursive: true, force: true })",
+          "context": "            delete process.env.XDG_CONFIG_HOME;\n        }\n\n        try {\n            rmSync(tempDir, { recursive: true, force: true });\n        } catch {}\n    });\n\n    it(\"log action returns exitCode 0\", async () => {\n        const result = await executeFrictionCommand({\n            action: \"log\","
+        }
+      ]
+    },
+    {
+      "path": "src/presentation/cli/commands/friction/purge.test.ts",
+      "sourceHash": "3567774bc443862d43d163762b97fb3e3acc9ae1c7b0770db55da83ce02b044b",
+      "imports": [
+        "import { mkdtempSync, rmSync } from \"node:fs\";"
+      ],
+      "calls": [
+        {
+          "line": 49,
+          "operation": "rmSync",
+          "call": "rmSync(tempDir, { recursive: true, force: true })",
+          "context": "            delete process.env.XDG_CONFIG_HOME;\n        }\n\n        try {\n            rmSync(tempDir, { recursive: true, force: true });\n        } catch {}\n    });\n\n    it(\"purge without --force requires --dry-run or --force\", async () => {\n        const result = await executeFrictionCommand({\n            action: \"purge\","
+        }
+      ]
+    },
+    {
+      "path": "src/presentation/cli/commands/friction/resolve.test.ts",
+      "sourceHash": "3c1197803c4cb4095dec8dda26f96e5e4618d1082007f2f49c80556ff6e82b44",
+      "imports": [
+        "import { mkdtempSync, rmSync } from \"node:fs\";"
+      ],
+      "calls": [
+        {
+          "line": 47,
+          "operation": "rmSync",
+          "call": "rmSync(tempDir, { recursive: true, force: true })",
+          "context": "            delete process.env.XDG_CONFIG_HOME;\n        }\n\n        try {\n            rmSync(tempDir, { recursive: true, force: true });\n        } catch {}\n    });\n\n    it(\"resolve action returns exitCode 0 after logging\", async () => {\n        // Log first\n        await executeFrictionCommand({"
+        }
+      ]
+    },
+    {
+      "path": "src/presentation/cli/commands/friction/wontfix.test.ts",
+      "sourceHash": "93a0e1c23ef66b3b007c6898ef7b3d91f133e8a1235c23df1fc2307f8dfaa0e2",
+      "imports": [
+        "import { mkdtempSync, rmSync } from \"node:fs\";"
+      ],
+      "calls": [
+        {
+          "line": 47,
+          "operation": "rmSync",
+          "call": "rmSync(tempDir, { recursive: true, force: true })",
+          "context": "            delete process.env.XDG_CONFIG_HOME;\n        }\n\n        try {\n            rmSync(tempDir, { recursive: true, force: true });\n        } catch {}\n    });\n\n    it(\"wont-fix action returns exitCode 0 after logging\", async () => {\n        // Log first\n        await executeFrictionCommand({"
+        }
+      ]
+    },
+    {
+      "path": "src/presentation/cli/commands/governance.test.ts",
+      "sourceHash": "d0097d35b995fe80172733af3b5d28924c3a0b47e3eee6f46f1a011e64e62c20",
+      "imports": [
+        "import { existsSync, unlinkSync } from \"node:fs\";"
+      ],
+      "calls": [
+        {
+          "line": 28,
+          "operation": "unlinkSync",
+          "call": "unlinkSync(dbPath)",
+          "context": "  afterEach(() => {\n    db.close();\n    try {\n      if (existsSync(dbPath)) {\n        unlinkSync(dbPath);\n      }\n    } catch {\n      // Windows can keep SQLite handles briefly after close; temp files are unique.\n    }\n  });\n"
+        }
+      ]
+    },
+    {
+      "path": "src/presentation/cli/commands/import.test.ts",
+      "sourceHash": "00da045c5e8b76bb16fa053e3d69633baaae040abea6949eb5aae744320b6e65",
+      "imports": [
+        "import { mkdirSync, rmSync, existsSync } from \"node:fs\";"
+      ],
+      "calls": [
+        {
+          "line": 79,
+          "operation": "rmSync",
+          "call": "rmSync(testDir, { recursive: true, force: true })",
+          "context": "\n  afterEach(() => {\n    // Try to clean up, ignore errors on Windows due to file locking\n    try {\n      rmSync(testDir, { recursive: true, force: true });\n    } catch {\n      // Ignore cleanup errors\n    }\n  });\n\n  describe(\"createImportCommand\", () => {"
+        }
+      ]
+    },
+    {
+      "path": "src/presentation/cli/commands/install.test.ts",
+      "sourceHash": "05d54487d5c137ca7cbf01b17d8d516f2ea2a3955c252f69a8d759b034723b4e",
+      "imports": [
+        "import {\n    existsSync,\n    mkdirSync,\n    readFileSync,\n    rmSync,\n    writeFileSync,\n} from \"node:fs\";"
+      ],
+      "calls": [
+        {
+          "line": 52,
+          "operation": "rmSync",
+          "call": "rmSync(testBaseDir, { recursive: true, force: true })",
+          "context": "\n    beforeEach(() => {\n        // Clean test directory\n        if (existsSync(testBaseDir)) {\n            rmSync(testBaseDir, { recursive: true, force: true });\n        }\n        mkdirSync(testBaseDir, { recursive: true });\n\n        // Create mock hook script source\n        mkdirSync(mockHookScriptDir, { recursive: true });\n        writeFileSync(mockHookScriptPath, \"// mock hook script\");"
+        },
+        {
+          "line": 78,
+          "operation": "rmSync",
+          "call": "rmSync(testBaseDir, { recursive: true, force: true })",
+          "context": "        consoleErrorSpy.mockRestore();\n\n        // Clean up test directory\n        if (existsSync(testBaseDir)) {\n            rmSync(testBaseDir, { recursive: true, force: true });\n        }\n    });\n\n    describe(\"executeInstallCommand\", () => {\n        test(\"installs hooks successfully when not already installed\", async () => {\n            await executeInstallCommand({}, { hookScriptSourceOverride: mockHookScriptPath, hookOverrides });"
+        }
+      ]
+    },
+    {
+      "path": "src/presentation/cli/commands/list.coverage.test.ts",
+      "sourceHash": "eed01d673603e553a6bf7b945d713e6bd224bb5da3059606f2fc908df300afa2",
+      "imports": [
+        "import { mkdtempSync, rmSync } from \"fs\";"
+      ],
+      "calls": [
+        {
+          "line": 63,
+          "operation": "rmSync",
+          "call": "rmSync(tempDir, { recursive: true, force: true })",
+          "context": "\r\n  afterEach(() => {\r\n    consoleLogSpy.mockRestore();\r\n    consoleErrorSpy.mockRestore();\r\n    try { rmSync(tempDir, { recursive: true, force: true }); } catch {}\r\n  });\r\n\r\n  it(\"text-mode default with sessions present → exit 0 + console.log\", async () => {\r\n    const result = await executeListCommand({}, { dbPath });\r\n    expect(result.exitCode).toBe(0);\r\n    expect(consoleLogSpy).toHaveBeenCalled();\r"
+        },
+        {
+          "line": 158,
+          "operation": "rmSync",
+          "call": "rmSync(tempDir, { recursive: true, force: true })",
+          "context": "\r\n  afterEach(() => {\r\n    consoleLogSpy.mockRestore();\r\n    consoleErrorSpy.mockRestore();\r\n    try { rmSync(tempDir, { recursive: true, force: true }); } catch {}\r\n  });\r\n\r\n  it(\"text-mode empty result → formatEmpty + console.log + exit 0\", async () => {\r\n    const result = await executeListCommand({}, { dbPath });\r\n    expect(result.exitCode).toBe(0);\r\n    expect(consoleLogSpy).toHaveBeenCalled();\r"
+        }
+      ]
+    },
+    {
+      "path": "src/presentation/cli/commands/list.deps.test.ts",
+      "sourceHash": "4b90494bdb6f1c886d282ec0aff699eedbb301ad32caf8a8696fc3da09133a87",
+      "imports": [
+        "import { existsSync, rmSync } from \"node:fs\";"
+      ],
+      "calls": [
+        {
+          "line": 40,
+          "operation": "rmSync",
+          "call": "rmSync(p, { force: true })",
+          "context": "    consoleErrorSpy.mockRestore();\r\n    // Cleanup temp DBs\r\n    for (const p of tempPaths) {\r\n      try {\r\n        rmSync(p, { force: true });\r\n        rmSync(`${p}-wal`, { force: true });\r\n        rmSync(`${p}-shm`, { force: true });\r\n      } catch {\r\n        // Best effort\r\n      }\r\n    }\r"
+        },
+        {
+          "line": 41,
+          "operation": "rmSync",
+          "call": "rmSync(`${p}-wal`, { force: true })",
+          "context": "    // Cleanup temp DBs\r\n    for (const p of tempPaths) {\r\n      try {\r\n        rmSync(p, { force: true });\r\n        rmSync(`${p}-wal`, { force: true });\r\n        rmSync(`${p}-shm`, { force: true });\r\n      } catch {\r\n        // Best effort\r\n      }\r\n    }\r\n  });\r"
+        }
+      ]
+    },
+    {
+      "path": "src/presentation/cli/commands/list.test.ts",
+      "sourceHash": "124f5b3a44f0bd01167b451bef08ee8bef023082c293f29b87009a6262fe8b15",
+      "imports": [
+        "import { mkdtempSync, rmSync } from \"fs\";"
+      ],
+      "calls": [
+        {
+          "line": 315,
+          "operation": "rmSync",
+          "call": "rmSync(cli03TempDir, { recursive: true, force: true })",
+          "context": "\r\n  afterEach(() => {\r\n    consoleLogSpy?.mockRestore();\r\n    consoleErrorSpy?.mockRestore();\r\n    try { rmSync(cli03TempDir, { recursive: true, force: true }); } catch {}\r\n  });\r\n\r\n  // 1, 2, 3: choices include brief, ai, default (deprecated alias parity per MEDIUM-2)\r\n  it(\"accepts 'brief' in --format choices\", () => {\r\n    const cmd = createListCommand();\r\n    const formatOpt = cmd.options.find((o) => o.long === \"--format\");\r"
+        }
+      ]
+    },
+    {
+      "path": "src/presentation/cli/commands/migrate.test.ts",
+      "sourceHash": "5d3abc5e691bd927be002f47d830fcfd92f46bf471ca29736066cfa90a8b7412",
+      "imports": [
+        "import { existsSync, mkdirSync, rmSync, writeFileSync } from \"node:fs\";"
+      ],
+      "calls": [
+        {
+          "line": 68,
+          "operation": "rmSync",
+          "call": "rmSync(testDir, { recursive: true, force: true })",
+          "context": "    console.log = originalLog;\n    console.error = originalError;\n\n    try {\n      rmSync(testDir, { recursive: true, force: true });\n    } catch {\n      // Ignore\n    }\n  });\n\n  it(\"should create a command named 'migrate'\", () => {"
+        }
+      ]
+    },
+    {
+      "path": "src/presentation/cli/commands/profile.test.ts",
+      "sourceHash": "d8ca07cc8e24e7ffe05d8cb78bcdadb22d6eea5a8801ed242d74127e350b6889",
+      "imports": [
+        "import { existsSync, unlinkSync } from \"node:fs\";"
+      ],
+      "calls": [
+        {
+          "line": 36,
+          "operation": "unlinkSync",
+          "call": "unlinkSync(dbPath)",
+          "context": "  afterEach(() => {\n    db.close();\n    try {\n      if (existsSync(dbPath)) {\n        unlinkSync(dbPath);\n      }\n    } catch {\n      // Windows can briefly retain sqlite handles; temp names are unique.\n    }\n  });\n"
+        }
+      ]
+    },
+    {
+      "path": "src/presentation/cli/commands/projections.test.ts",
+      "sourceHash": "19bdd85694043e21e5732b3889fc8b100319b4f673e6adfc4716f60419e2359e",
+      "imports": [
+        "import { existsSync, mkdirSync, rmSync, writeFileSync } from \"node:fs\";"
+      ],
+      "calls": [
+        {
+          "line": 51,
+          "operation": "rmSync",
+          "call": "rmSync(testDir, { recursive: true, force: true, maxRetries: 50, retryDelay: 100 })",
+          "context": "  afterEach(() => {\n    console.log = originalLog;\n    console.error = originalError;\n    try {\n      rmSync(testDir, { recursive: true, force: true, maxRetries: 50, retryDelay: 100 });\n    } catch {\n      // Best-effort cleanup on Windows; SQLite can release handles late.\n    }\n  });\n\n  it(\"registers rebuild with verify and confirm safety options\", () => {"
+        },
+        {
+          "line": 190,
+          "operation": "rmSync",
+          "call": "rmSync(join(eventsDir, \"events-local.jsonl\"), { force: true })",
+          "context": "    expect(out).toContain(\"Applied projections\");\n  });\n\n  it(\"prints none when a confirmed rebuild has no applicable projection events\", async () => {\n    rmSync(join(eventsDir, \"events-local.jsonl\"), { force: true });\n\n    const result = await executeProjectionsRebuildCommand(\n      { dbPathOverride: dbPath, eventsDirOverride: eventsDir },\n      { confirm: true },\n    );\n"
+        }
+      ]
+    },
+    {
+      "path": "src/presentation/cli/commands/purge.test.ts",
+      "sourceHash": "cb5c594b0f650ecb1799e15c3ba04666041e34ffefdb31b2178e0ee3f3c83cc0",
+      "imports": [
+        "import * as fs from \"fs\";"
+      ],
+      "calls": [
+        {
+          "line": 305,
+          "operation": "rmSync",
+          "call": "fs.rmSync(testDir, { recursive: true, force: true })",
+          "context": "    }\n\n    // Clean up test directory\n    try {\n      fs.rmSync(testDir, { recursive: true, force: true });\n    } catch {\n      // Ignore cleanup errors\n    }\n  });\n\n  describe(\"zero sessions found\", () => {"
+        }
+      ]
+    },
+    {
+      "path": "src/presentation/cli/commands/query.coverage.test.ts",
+      "sourceHash": "e7870ab3fb9be36c4f771272f4bfb92c76262e8b726417fc3a6e13685170bae5",
+      "imports": [
+        "import { mkdtempSync, rmSync } from \"fs\";"
+      ],
+      "calls": [
+        {
+          "line": 70,
+          "operation": "rmSync",
+          "call": "rmSync(tempDir, { recursive: true, force: true })",
+          "context": "\n  afterEach(() => {\n    consoleLogSpy.mockRestore();\n    consoleErrorSpy.mockRestore();\n    try { rmSync(tempDir, { recursive: true, force: true }); } catch {}\n  });\n\n  it(\"routes message kind correctly (FTS/Search path)\", async () => {\n    const result = await executeQueryCommand(\"test query\", {\n      kind: \"message\",\n      dbPath,"
+        },
+        {
+          "line": 270,
+          "operation": "rmSync",
+          "call": "rmSync(argTempDir, { recursive: true, force: true })",
+          "context": "      } else {\n        delete process.env.MEMORY_HOME;\n      }\n\n      try { rmSync(argTempDir, { recursive: true, force: true }); } catch {}\n    }\n  });\n});\n"
+        }
+      ]
+    },
+    {
+      "path": "src/presentation/cli/commands/related.coverage.test.ts",
+      "sourceHash": "abf19c93187c4236e080f7f2cebac83f23d6425b4617b4894a5faed5952183c6",
+      "imports": [
+        "import { mkdtempSync, rmSync } from \"fs\";"
+      ],
+      "calls": [
+        {
+          "line": 87,
+          "operation": "rmSync",
+          "call": "rmSync(tempDir, { recursive: true, force: true })",
+          "context": "\r\n  afterEach(() => {\r\n    consoleLogSpy.mockRestore();\r\n    consoleErrorSpy.mockRestore();\r\n    try { rmSync(tempDir, { recursive: true, force: true }); } catch {}\r\n  });\r\n\r\n  it(\"returns exit 0 with relatedSessions on default brief path\", async () => {\r\n    const result = await executeRelatedCommand(\"src-session\", { dbPath });\r\n    expect(result.exitCode).toBe(0);\r\n    expect(consoleLogSpy).toHaveBeenCalled();\r"
+        },
+        {
+          "line": 293,
+          "operation": "rmSync",
+          "call": "rmSync(argTempDir, { recursive: true, force: true })",
+          "context": "      } else {\r\n        delete process.env.MEMORY_HOME;\r\n      }\r\n\r\n      try { rmSync(argTempDir, { recursive: true, force: true }); } catch {}\r\n    }\r\n  });\r\n});\r\n\r\ndescribe(\"executeRelatedCommand catch branch (coverage)\", () => {\r\n  let consoleLogSpy: ReturnType<typeof spyOn>;\r"
+        }
+      ]
+    },
+    {
+      "path": "src/presentation/cli/commands/related.test.ts",
+      "sourceHash": "70650ef75dcad394277b525cb769e68f97f3acac537899f97ca5c7339fdecc68",
+      "imports": [
+        "import { mkdtempSync, rmSync } from \"fs\";"
+      ],
+      "calls": [
+        {
+          "line": 234,
+          "operation": "rmSync",
+          "call": "rmSync(tempDir, { recursive: true, force: true })",
+          "context": "\r\n  afterEach(() => {\r\n    consoleLogSpy.mockRestore();\r\n    consoleErrorSpy.mockRestore();\r\n    try { rmSync(tempDir, { recursive: true, force: true }); } catch {}\r\n  });\r\n\r\n  it(\"sets exit code 1 when session not found\", async () => {\r\n    const result = await executeRelatedCommand(\"nonexistent-session-xyz\", { dbPath });\r\n\r\n    expect(result.exitCode).toBe(1);\r"
+        },
+        {
+          "line": 280,
+          "operation": "rmSync",
+          "call": "rmSync(cli03TempDir, { recursive: true, force: true })",
+          "context": "\r\n  afterEach(() => {\r\n    consoleLogSpy.mockRestore();\r\n    consoleErrorSpy.mockRestore();\r\n    try { rmSync(cli03TempDir, { recursive: true, force: true }); } catch {}\r\n  });\r\n\r\n  // 1, 2: choices include brief, ai\r\n  it(\"accepts 'brief' in --format choices\", () => {\r\n    const cmd = createRelatedCommand();\r\n    const formatOpt = cmd.options.find((o) => o.long === \"--format\");\r"
+        }
+      ]
+    },
+    {
+      "path": "src/presentation/cli/commands/remote.test.ts",
+      "sourceHash": "f9e02bf7540b6a147e9a249af2b35ef493bfd7a054cdeeac24fa4ecee9c7ea3e",
+      "imports": [
+        "import { mkdirSync, writeFileSync, rmSync, existsSync, readFileSync, readdirSync } from \"node:fs\";"
+      ],
+      "calls": [
+        {
+          "line": 90,
+          "operation": "rmSync",
+          "call": "rmSync(testDir, { recursive: true, force: true, maxRetries: 10, retryDelay: 50 })",
+          "context": "        consoleLogSpy.mockRestore();\n        consoleErrorSpy.mockRestore();\n        consoleWarnSpy.mockRestore();\n        if (existsSync(testDir)) {\n            rmSync(testDir, { recursive: true, force: true, maxRetries: 10, retryDelay: 50 });\n        }\n    });\n\n    test(\"createRemoteCommand constructs Commander group correctly\", () => {\n        const cmd = createRemoteCommand();\n        expect(cmd.name()).toBe(\"remote\");"
+        }
+      ]
+    },
+    {
+      "path": "src/presentation/cli/commands/search.coverage.test.ts",
+      "sourceHash": "1d575abfeced7484e3f0422db77d39b10b3b2cf108195c61450233141f1c892a",
+      "imports": [
+        "import { mkdtempSync, rmSync } from \"fs\";"
+      ],
+      "calls": [
+        {
+          "line": 81,
+          "operation": "rmSync",
+          "call": "rmSync(tempDir, { recursive: true, force: true })",
+          "context": "\r\n  afterEach(() => {\r\n    consoleLogSpy.mockRestore();\r\n    consoleErrorSpy.mockRestore();\r\n    try { rmSync(tempDir, { recursive: true, force: true }); } catch {}\r\n  });\r\n\r\n  it(\"--role with comma-separated multi-value uses array branch\", async () => {\r\n    // Pass \"user,assistant\" — splits into 2 roles → roleFilter array branch.\r\n    const result = await executeSearchCommand(\"authentication\", {\r\n      role: \"user,assistant\",\r"
+        },
+        {
+          "line": 248,
+          "operation": "rmSync",
+          "call": "rmSync(tempDir, { recursive: true, force: true })",
+          "context": "\r\n  afterEach(() => {\r\n    consoleLogSpy.mockRestore();\r\n    consoleErrorSpy.mockRestore();\r\n    try { rmSync(tempDir, { recursive: true, force: true }); } catch {}\r\n  });\r\n\r\n  it(\"--json with searchMeta covered (includeSearchMetaFields branch)\", async () => {\r\n    // Stub HybridSearchService.getLastSearchMeta to return a value with\r\n    // degradationReason so line 413 (meta.degradation_reason) executes.\r\n    // Also stub loadConfig so hintShown is false (otherwise the hint\r"
+        }
+      ]
+    },
+    {
+      "path": "src/presentation/cli/commands/search.test.ts",
+      "sourceHash": "761d5b555a4ed30c552d6a3e3f49f98ea7a2950feca854fa747eb9a22ccd4167",
+      "imports": [
+        "import { mkdtempSync, rmSync } from \"fs\";"
+      ],
+      "calls": [
+        {
+          "line": 346,
+          "operation": "rmSync",
+          "call": "rmSync(searchTempDir, { recursive: true, force: true })",
+          "context": "      closeDatabase(db);\r\n    });\r\n\r\n    afterEach(() => {\r\n      try { rmSync(searchTempDir, { recursive: true, force: true }); } catch {}\r\n    });\r\n\r\n    it(\"sets exit code 1 for empty query\", async () => {\r\n      const result = await executeSearchCommand(\"\", {});\r\n\r\n      expect(result.exitCode).toBe(1);\r"
+        },
+        {
+          "line": 1050,
+          "operation": "rmSync",
+          "call": "rmSync(errTempDir, { recursive: true, force: true })",
+          "context": "      try {\r\n        const result = await executeSearchCommand(\"test\", { limit: \"-5\", dbPath: errDbPath });\r\n        expect(result.exitCode).toBe(1);\r\n      } finally {\r\n        try { rmSync(errTempDir, { recursive: true, force: true }); } catch {}\r\n      }\r\n    });\r\n  });\r\n\r\n  describe(\"hybrid search flags\", () => {\r\n    it(\"has --mode option with choices\", () => {\r"
+        }
+      ]
+    },
+    {
+      "path": "src/presentation/cli/commands/show.coverage.test.ts",
+      "sourceHash": "988904273f6c149430f8386f140af269307e9f1cf15470158e7ef5c6447a543d",
+      "imports": [
+        "import { mkdtempSync, rmSync } from \"fs\";"
+      ],
+      "calls": [
+        {
+          "line": 76,
+          "operation": "rmSync",
+          "call": "rmSync(tempDir, { recursive: true, force: true })",
+          "context": "\r\n  afterEach(() => {\r\n    consoleLogSpy.mockRestore();\r\n    consoleErrorSpy.mockRestore();\r\n    try { rmSync(tempDir, { recursive: true, force: true }); } catch {}\r\n  });\r\n\r\n  it(\"text-mode catch: wraps non-MemoryError + formatError (uses MemoryError)\", async () => {\r\n    const repoMod = await import(\"../../../infrastructure/database/repositories/session-repository.js\");\r\n    const spy = spyOn(\r\n      repoMod.SqliteSessionRepository.prototype,\r"
+        }
+      ]
+    },
+    {
+      "path": "src/presentation/cli/commands/show.test.ts",
+      "sourceHash": "f4b8775310da65dfdb3c636eac007d48e7aebbaa47b87ba85bdd3b730727a810",
+      "imports": [
+        "import * as fs from \"node:fs\";"
+      ],
+      "calls": [
+        {
+          "line": 118,
+          "operation": "rmSync",
+          "call": "fs.rmSync(TEST_DIR, { recursive: true, force: true })",
+          "context": "\r\n    // Clean up test directory\r\n    try {\r\n      if (fs.existsSync(TEST_DIR)) {\r\n        fs.rmSync(TEST_DIR, { recursive: true, force: true });\r\n      }\r\n    } catch {\r\n      // Ignore cleanup errors\r\n    }\r\n  });\r\n\r"
+        }
+      ]
+    },
+    {
+      "path": "src/presentation/cli/commands/stats.coverage.test.ts",
+      "sourceHash": "37ffc4041d1b1bcf419d4f177efc1a30a7286822da452a1fc422bb0e8cbd400e",
+      "imports": [
+        "import { mkdtempSync, rmSync } from \"fs\";"
+      ],
+      "calls": [
+        {
+          "line": 76,
+          "operation": "rmSync",
+          "call": "rmSync(tempDir, { recursive: true, force: true })",
+          "context": "\r\n  afterEach(() => {\r\n    consoleLogSpy.mockRestore();\r\n    consoleErrorSpy.mockRestore();\r\n    try { rmSync(tempDir, { recursive: true, force: true }); } catch {}\r\n  });\r\n\r\n  it(\"text-mode default → exit 0 + console.log\", async () => {\r\n    const result = await executeStatsCommand({}, { dbPath });\r\n    expect(result.exitCode).toBe(0);\r\n    expect(consoleLogSpy).toHaveBeenCalled();\r"
+        },
+        {
+          "line": 141,
+          "operation": "rmSync",
+          "call": "rmSync(tempDir, { recursive: true, force: true })",
+          "context": "\r\n  afterEach(() => {\r\n    consoleLogSpy.mockRestore();\r\n    consoleErrorSpy.mockRestore();\r\n    try { rmSync(tempDir, { recursive: true, force: true }); } catch {}\r\n  });\r\n\r\n  it(\"totalSessions === 0 → formatter.formatEmpty + console.log + exit 0\", async () => {\r\n    const result = await executeStatsCommand({}, { dbPath });\r\n    expect(result.exitCode).toBe(0);\r\n    expect(consoleLogSpy).toHaveBeenCalled();\r"
+        }
+      ]
+    },
+    {
+      "path": "src/presentation/cli/commands/stats.deps.test.ts",
+      "sourceHash": "231421bd85b518ee98e4c126170ac379bb64d75e0166a52d145c6a1093df366a",
+      "imports": [
+        "import { existsSync, rmSync } from \"node:fs\";"
+      ],
+      "calls": [
+        {
+          "line": 37,
+          "operation": "rmSync",
+          "call": "rmSync(p, { force: true })",
+          "context": "    consoleLogSpy.mockRestore();\r\n    consoleErrorSpy.mockRestore();\r\n    for (const p of tempPaths) {\r\n      try {\r\n        rmSync(p, { force: true });\r\n        rmSync(`${p}-wal`, { force: true });\r\n        rmSync(`${p}-shm`, { force: true });\r\n      } catch {\r\n        // Best effort\r\n      }\r\n    }\r"
+        },
+        {
+          "line": 38,
+          "operation": "rmSync",
+          "call": "rmSync(`${p}-wal`, { force: true })",
+          "context": "    consoleErrorSpy.mockRestore();\r\n    for (const p of tempPaths) {\r\n      try {\r\n        rmSync(p, { force: true });\r\n        rmSync(`${p}-wal`, { force: true });\r\n        rmSync(`${p}-shm`, { force: true });\r\n      } catch {\r\n        // Best effort\r\n      }\r\n    }\r\n  });\r"
+        }
+      ]
+    },
+    {
+      "path": "src/presentation/cli/commands/stats.test.ts",
+      "sourceHash": "f17487767aa816c0445107dfa4b1dd101c808a9640ceb34815e94be90d73a47a",
+      "imports": [
+        "import { mkdtempSync, rmSync } from \"fs\";"
+      ],
+      "calls": [
+        {
+          "line": 358,
+          "operation": "rmSync",
+          "call": "rmSync(cli03TempDir, { recursive: true, force: true })",
+          "context": "      helper.resetFormatDeprecationWarningsForTesting();\r\n    });\r\n\r\n    afterEach(() => {\r\n      try { rmSync(cli03TempDir, { recursive: true, force: true }); } catch {}\r\n    });\r\n\r\n    // 1, 2, 3: choices include brief, ai, default (deprecated alias parity per MEDIUM-2)\r\n    it(\"accepts 'brief' in --format choices\", () => {\r\n      const cmd = createStatsCommand();\r\n      const formatOpt = cmd.options.find((o) => o.long === \"--format\");\r"
+        }
+      ]
+    },
+    {
+      "path": "src/presentation/cli/commands/status.test.ts",
+      "sourceHash": "760ea43cd39d1328bb5eabd660872015e3b1090399af6474e9bbd5b3915adcf9",
+      "imports": [
+        "import {\n    existsSync,\n    mkdtempSync,\n    mkdirSync,\n    rmSync,\n    writeFileSync,\n} from \"node:fs\";"
+      ],
+      "calls": [
+        {
+          "line": 66,
+          "operation": "rmSync",
+          "call": "rmSync(testBaseDir, {\n            recursive: true,\n            force: true,\n            maxRetries: 10,\n            retryDelay: 50,\n        })",
+          "context": "    let consoleLogSpy: ReturnType<typeof spyOn>;\n    let logOutput: string[];\n\n    function removeTestBaseDir(): void {\n        rmSync(testBaseDir, {\n            recursive: true,\n            force: true,\n            maxRetries: 10,\n            retryDelay: 50,\n        });\n    }"
+        },
+        {
+          "line": 238,
+          "operation": "rmSync",
+          "call": "rmSync(root, { recursive: true, force: true, maxRetries: 10, retryDelay: 50 })",
+          "context": "                expect(status.hooks.sessionEnd).toBe(false);\n            } finally {\n                env.cleanup();\n                try {\n                    rmSync(root, { recursive: true, force: true, maxRetries: 10, retryDelay: 50 });\n                } catch {\n                    // Best-effort cleanup on Windows.\n                }\n            }\n        });\n"
+        }
+      ]
+    },
+    {
+      "path": "src/presentation/cli/commands/sync/helpers.test.ts",
+      "sourceHash": "4683136514cc59616fe5ad53789917070be5ca552a6e5ca0a6f26b7c2ef676d9",
+      "imports": [
+        "import { mkdtempSync, rmSync } from \"node:fs\";"
+      ],
+      "calls": [
+        {
+          "line": 90,
+          "operation": "rmSync",
+          "call": "rmSync(tempDir, { recursive: true, force: true })",
+          "context": "    process.env.HOME = oldHome;\n\n    // Cleanup temp dir\n    try {\n      rmSync(tempDir, { recursive: true, force: true });\n    } catch {\n      // Ignore cleanup failures\n    }\n  });\n\n  describe(\"createDriveResolver\", () => {"
+        }
+      ]
+    },
+    {
+      "path": "src/presentation/cli/commands/sync/memory-files.test.ts",
+      "sourceHash": "e5e11eaa01d49b566e380fdfc549142b9fc89098d04e68b2ddf58bd55c5d1e53",
+      "imports": [
+        "import { mkdtempSync, mkdirSync, rmSync, writeFileSync } from \"node:fs\";"
+      ],
+      "calls": [
+        {
+          "line": 25,
+          "operation": "rmSync",
+          "call": "rmSync(dir, { recursive: true, force: true })",
+          "context": "  consoleLogSpy = undefined;\n  testDb?.cleanup();\n  testDb = undefined;\n  for (const dir of tempDirs) {\n    rmSync(dir, { recursive: true, force: true });\n  }\n  tempDirs = [];\n  if (originalMemoryHome === undefined) delete process.env.MEMORY_HOME;\n  else process.env.MEMORY_HOME = originalMemoryHome;\n});\n"
+        }
+      ]
+    },
+    {
+      "path": "src/presentation/cli/commands/uninstall.test.ts",
+      "sourceHash": "0e9bd334fc85515c54fdddf4f84ae4ce7a38bb2d06c3455087531cc5ede6a126",
+      "imports": [
+        "import {\n    existsSync,\n    mkdirSync,\n    readFileSync,\n    rmSync,\n    writeFileSync,\n} from \"node:fs\";"
+      ],
+      "calls": [
+        {
+          "line": 44,
+          "operation": "rmSync",
+          "call": "rmSync(testBaseDir, { recursive: true, force: true })",
+          "context": "\n    beforeEach(() => {\n        // Clean test directory\n        if (existsSync(testBaseDir)) {\n            rmSync(testBaseDir, { recursive: true, force: true });\n        }\n        mkdirSync(testBaseDir, { recursive: true });\n\n        // Capture console output\n        logOutput = [];\n        consoleLogSpy = spyOn(console, \"log\").mockImplementation((...args) => {"
+        },
+        {
+          "line": 61,
+          "operation": "rmSync",
+          "call": "rmSync(testBaseDir, { recursive: true, force: true })",
+          "context": "        consoleLogSpy.mockRestore();\n\n        // Clean up test directory\n        if (existsSync(testBaseDir)) {\n            rmSync(testBaseDir, { recursive: true, force: true });\n        }\n    });\n\n    describe(\"executeUninstallCommand\", () => {\n        test(\"reports when hooks not installed\", async () => {\n            await executeUninstallCommand({}, { hookOverrides });"
+        }
+      ]
+    },
+    {
+      "path": "src/presentation/cli/db-startup.test.ts",
+      "sourceHash": "31f888ab58c4ff2c5d5d67899becc2293c162fac1668b05ca76f2d7e57b13294",
+      "imports": [
+        "import { mkdtempSync, rmSync, writeFileSync, existsSync, readdirSync } from \"node:fs\";"
+      ],
+      "calls": [
+        {
+          "line": 33,
+          "operation": "rmSync",
+          "call": "rmSync(dir, { recursive: true, force: true })",
+          "context": " */\nfunction cleanupTempDb(dbPath: string): void {\n  const dir = dirname(dbPath);\n  try {\n    rmSync(dir, { recursive: true, force: true });\n  } catch {\n    // Windows may hold locks - ignore cleanup failures\n  }\n}\n\ndescribe(\"db-startup\", () => {"
+        }
+      ]
+    },
+    {
+      "path": "tests/integration/concurrent-commands.test.ts",
+      "sourceHash": "ef2bd3af391eb51b164688fa835b5f059006af2707485d72860560f832a4337a",
+      "imports": [
+        "import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from \"node:fs\";"
+      ],
+      "calls": [
+        {
+          "line": 142,
+          "operation": "rmSync",
+          "call": "rmSync(xdgParent, { recursive: true, force: true })",
+          "context": "    resetState();\n\n    // Clean up temp directory (rm the parent so the inner memory/ dir is also removed)\n    try {\n      rmSync(xdgParent, { recursive: true, force: true });\n    } catch {\n      // Ignore cleanup errors on Windows\n    }\n  });\n\n  test(\"search during sync does not deadlock\", async () => {"
+        }
+      ]
+    },
+    {
+      "path": "tests/integration/infrastructure/database/event-log.test.ts",
+      "sourceHash": "9540f935d5b3db75fc77625be502f54a148fb039cd064b16e54e3ce4ac1796d2",
+      "imports": [
+        "import { appendFileSync, existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from \"fs\";"
+      ],
+      "calls": [
+        {
+          "line": 48,
+          "operation": "rmSync",
+          "call": "rmSync(testLogDir, { recursive: true, force: true })",
+          "context": "  });\r\n\r\n  afterEach(() => {\r\n    db.close();\r\n    rmSync(testLogDir, { recursive: true, force: true });\r\n  });\r\n\r\n  test(\"appends serialized Fact to event log\", async () => {\r\n    const fact = Fact.create({\r\n      type: \"decision\",\r\n      project: \"memory-nexus\",\r"
+        }
+      ]
+    },
+    {
+      "path": "tests/integration/interrupted-sync.test.ts",
+      "sourceHash": "bf96a4d1152cfd9b09e9b226f946dfbb2f183b8427974d879bb019ede8bfbfd3",
+      "imports": [
+        "import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from \"node:fs\";"
+      ],
+      "calls": [
+        {
+          "line": 153,
+          "operation": "rmSync",
+          "call": "rmSync(xdgParent, { recursive: true, force: true })",
+          "context": "    resetState();\n\n    // Clean up temp directory (rm the parent so the inner memory/ dir is also removed)\n    try {\n      rmSync(xdgParent, { recursive: true, force: true });\n    } catch {\n      // Ignore cleanup errors on Windows\n    }\n  });\n\n  test(\"resumes sync from checkpoint after interruption\", async () => {"
+        }
+      ]
+    },
+    {
+      "path": "tests/integration/large-file.test.ts",
+      "sourceHash": "f3cc9abb4d8a7ab2eff8e07cc62485a6351f437495a21cefcd7c2c9acac6358f",
+      "imports": [
+        "import { mkdtempSync, rmSync, writeFileSync } from \"node:fs\";"
+      ],
+      "calls": [
+        {
+          "line": 178,
+          "operation": "rmSync",
+          "call": "rmSync(testDir, { recursive: true, force: true })",
+          "context": "  });\n\n  afterAll(() => {\n    try {\n      rmSync(testDir, { recursive: true, force: true });\n    } catch {\n      // Ignore cleanup errors on Windows\n    }\n  });\n\n  test(\"parses 10,000 line file without memory spike\", async () => {"
+        }
+      ]
+    },
+    {
+      "path": "tests/integration/programmatic-api.test.ts",
+      "sourceHash": "c82f7c19c3c7abc5c7ed84597c5cf76c63e3e3f14678da2e000c5f6a568c1dfb",
+      "imports": [
+        "import { mkdtempSync, existsSync, rmSync } from \"node:fs\";"
+      ],
+      "calls": [
+        {
+          "line": 133,
+          "operation": "rmSync",
+          "call": "rmSync(exportDir, { recursive: true, force: true })",
+          "context": "      delete process.env.HOME;\n    }\n\n    try {\n      rmSync(exportDir, { recursive: true, force: true });\n    } catch {\n      // Ignore cleanup errors on Windows\n    }\n  });\n\n  describe(\"executeSyncCommand\", () => {"
+        }
+      ]
+    },
+    {
+      "path": "tests/integration/query-primitive.test.ts",
+      "sourceHash": "ef77af77e6db8abdceaad2f046a0da529dc7879574e757d71d246c0e3f744eb2",
+      "imports": [
+        "import { mkdtempSync, rmSync } from \"node:fs\";"
+      ],
+      "calls": [
+        {
+          "line": 92,
+          "operation": "rmSync",
+          "call": "rmSync(exportDir, { recursive: true, force: true })",
+          "context": "      delete process.env.HOME;\n    }\n\n    try {\n      rmSync(exportDir, { recursive: true, force: true });\n    } catch {\n      // Ignore cleanup errors on Windows\n    }\n  });\n\n  test(\"message search kind works and returns exitCode 0\", async () => {"
+        }
+      ]
+    },
+    {
+      "path": "tests/integration/sync-with-memory-files.test.ts",
+      "sourceHash": "05c99a7429f35f1527b911aaca2c26aa4b08e0db8908e76e2dd41587941cc950",
+      "imports": [
+        "import { mkdirSync, writeFileSync, rmSync, mkdtempSync } from \"node:fs\";"
+      ],
+      "calls": [
+        {
+          "line": 38,
+          "operation": "rmSync",
+          "call": "rmSync(memoryDir, { recursive: true, force: true })",
+          "context": "  afterEach(() => {\n    env.cleanup();\n    testDb.cleanup();\n    try {\n      rmSync(memoryDir, { recursive: true, force: true });\n    } catch {\n      // Best-effort\n    }\n  });\n\n  it(\"indexes all discovered files and makes them searchable via FTS5\", async () => {"
+        }
+      ]
+    },
+    {
+      "path": "tests/integration/unified-status.test.ts",
+      "sourceHash": "ce662c69b854c97e215b128513951722f16ae2f4bdd4dacb8fed3fd827168926",
+      "imports": [
+        "import { mkdtempSync, rmSync } from \"node:fs\";"
+      ],
+      "calls": [
+        {
+          "line": 87,
+          "operation": "rmSync",
+          "call": "rmSync(exportDir, { recursive: true, force: true })",
+          "context": "      delete process.env.HOME;\n    }\n\n    try {\n      rmSync(exportDir, { recursive: true, force: true });\n    } catch {\n      // Ignore cleanup errors on Windows\n    }\n  });\n\n  test(\"status with no flags returns exitCode 0\", async () => {"
+        }
+      ]
+    }
+  ],
+  "inspection_reader": "import fs from 'node:fs';\nimport ts from 'typescript';\nconst manifest=JSON.parse(fs.readFileSync('.planning/memory-resilience/quality-classifications.json','utf8'));\nconst rows=[];\nfor(const file of manifest.files.filter(f=>f.tier===null)) {\n const source=fs.readFileSync(file.path,'utf8');\n const ast=ts.createSourceFile(file.path,source,ts.ScriptTarget.Latest,true);\n const imports=[];\n const bindings=new Map();\n for(const s of ast.statements) {\n  if(!ts.isImportDeclaration(s) || !['fs','node:fs','fs/promises','node:fs/promises'].includes(s.moduleSpecifier.text))continue;\n  imports.push(s.getText(ast));\n  const clause=s.importClause;\n  if(clause?.name)bindings.set(clause.name.text,'*');\n  if(clause?.namedBindings) {\n   if(ts.isNamespaceImport(clause.namedBindings))bindings.set(clause.namedBindings.name.text,'*');\n   else for(const b of clause.namedBindings.elements)bindings.set(b.name.text,b.propertyName?.text??b.name.text);\n  }\n }\n const calls=[];\n const visit=node=>{\n  if(ts.isCallExpression(node)) {\n   const callee=node.expression;\n   let operation;\n   if(ts.isIdentifier(callee))operation=bindings.get(callee.text);\n   else if(ts.isPropertyAccessExpression(callee) && ts.isIdentifier(callee.expression) && bindings.get(callee.expression.text)==='*')operation=callee.name.text;\n   if(['rmSync','unlinkSync','rmdirSync','rm','unlink','rmdir'].includes(operation)) {\n    const line=ast.getLineAndCharacterOfPosition(node.getStart(ast)).line;\n    const lines=source.split('\\n');\n    calls.push({line:line+1,operation,call:node.getText(ast),context:lines.slice(Math.max(0,line-4),line+7).join('\\n')});\n   }\n  }\n  ts.forEachChild(node,visit);\n };\n visit(ast);\n if(calls.length)rows.push({path:file.path,sourceHash:file.sourceHash,imports,calls});\n}\nfs.writeFileSync('.git/b04-test-deletion-index.json',JSON.stringify(rows,null,2)+'\\n');\nconst start=Number(process.argv[2]??0),limit=Number(process.argv[3]??20);\nfor(const row of rows.slice(start,start+limit))console.log(JSON.stringify({...row,calls:row.calls.slice(0,2)}));\nconsole.log(JSON.stringify({totalFiles:rows.length,start,limit}));\n",
+  "sourceInputs": [
+    {
+      "path": ".planning/memory-resilience/quality-classifications.json",
+      "sourceHash": "383be36638e7dbcf16220c8940b2e580889d659da1e89bdf37829bf68087ebda"
+    },
+    {
+      "path": ".planning/memory-resilience/work-items.json",
+      "sourceHash": "5664382ddd8aa2a837980b69d6881907f77afa37ff17a18b078c910786eb93a2"
+    }
+  ],
+  "new_findings": [
+    {
+      "id": "B11.16",
+      "path": "src/application/services/export-service.test.ts",
+      "finding": "Source inspection: setup recursively deletes a fixed scratch directory before creating its fixtures."
+    },
+    {
+      "id": "B11.17",
+      "path": "src/presentation/cli/commands/install.test.ts",
+      "finding": "Source inspection: setup recursively deletes a fixed scratch directory before creating its fixtures."
+    },
+    {
+      "id": "B11.18",
+      "path": "src/presentation/cli/commands/uninstall.test.ts",
+      "finding": "Source inspection: setup recursively deletes a fixed scratch directory before creating its fixtures."
+    },
+    {
+      "id": "B11.19",
+      "path": "src/application/services/friction-service.test.ts",
+      "finding": "Source inspection: ingestFallbackFile beforeEach allocates mkdtemp directories; this test file has no registered teardown that reclaims them."
+    },
+    {
+      "id": "B11.20",
+      "path": "src/application/services/sync-service.integration.test.ts",
+      "finding": "Source inspection: a real filesystem cleanup operation is wrapped in a catch that discards the removal failure."
+    },
+    {
+      "id": "B11.21",
+      "path": "src/presentation/cli/commands/backfill.test.ts",
+      "finding": "Source inspection: a real filesystem cleanup operation is wrapped in a catch that discards the removal failure."
+    },
+    {
+      "id": "B11.22",
+      "path": "src/presentation/cli/commands/backup.test.ts",
+      "finding": "Source inspection: a real filesystem cleanup operation is wrapped in a catch that discards the removal failure."
+    },
+    {
+      "id": "B11.23",
+      "path": "src/presentation/cli/commands/browse.test.ts",
+      "finding": "Source inspection: a real filesystem cleanup operation is wrapped in a catch that discards the removal failure."
+    },
+    {
+      "id": "B11.24",
+      "path": "src/presentation/cli/commands/context.coverage.test.ts",
+      "finding": "Source inspection: a real filesystem cleanup operation is wrapped in a catch that discards the removal failure."
+    },
+    {
+      "id": "B11.25",
+      "path": "src/presentation/cli/commands/context.test.ts",
+      "finding": "Source inspection: a real filesystem cleanup operation is wrapped in a catch that discards the removal failure."
+    },
+    {
+      "id": "B11.26",
+      "path": "src/presentation/cli/commands/doctor.portability.test.ts",
+      "finding": "Source inspection: a real filesystem cleanup operation is wrapped in a catch that discards the removal failure."
+    },
+    {
+      "id": "B11.27",
+      "path": "src/presentation/cli/commands/doctor.test.ts",
+      "finding": "Source inspection: a real filesystem cleanup operation is wrapped in a catch that discards the removal failure."
+    },
+    {
+      "id": "B11.28",
+      "path": "src/presentation/cli/commands/dream.test.ts",
+      "finding": "Source inspection: a real filesystem cleanup operation is wrapped in a catch that discards the removal failure."
+    },
+    {
+      "id": "B11.29",
+      "path": "src/presentation/cli/commands/facts.test.ts",
+      "finding": "Source inspection: a real filesystem cleanup operation is wrapped in a catch that discards the removal failure."
+    },
+    {
+      "id": "B11.30",
+      "path": "src/presentation/cli/commands/friction/dashboard.test.ts",
+      "finding": "Source inspection: a real filesystem cleanup operation is wrapped in a catch that discards the removal failure."
+    },
+    {
+      "id": "B11.31",
+      "path": "src/presentation/cli/commands/friction/index.test.ts",
+      "finding": "Source inspection: a real filesystem cleanup operation is wrapped in a catch that discards the removal failure."
+    },
+    {
+      "id": "B11.32",
+      "path": "src/presentation/cli/commands/friction/list.test.ts",
+      "finding": "Source inspection: a real filesystem cleanup operation is wrapped in a catch that discards the removal failure."
+    },
+    {
+      "id": "B11.33",
+      "path": "src/presentation/cli/commands/friction/log.test.ts",
+      "finding": "Source inspection: a real filesystem cleanup operation is wrapped in a catch that discards the removal failure."
+    },
+    {
+      "id": "B11.34",
+      "path": "src/presentation/cli/commands/friction/purge.test.ts",
+      "finding": "Source inspection: a real filesystem cleanup operation is wrapped in a catch that discards the removal failure."
+    },
+    {
+      "id": "B11.35",
+      "path": "src/presentation/cli/commands/friction/resolve.test.ts",
+      "finding": "Source inspection: a real filesystem cleanup operation is wrapped in a catch that discards the removal failure."
+    },
+    {
+      "id": "B11.36",
+      "path": "src/presentation/cli/commands/friction/wontfix.test.ts",
+      "finding": "Source inspection: a real filesystem cleanup operation is wrapped in a catch that discards the removal failure."
+    },
+    {
+      "id": "B11.37",
+      "path": "src/presentation/cli/commands/governance.test.ts",
+      "finding": "Source inspection: a real filesystem cleanup operation is wrapped in a catch that discards the removal failure."
+    },
+    {
+      "id": "B11.38",
+      "path": "src/presentation/cli/commands/import.test.ts",
+      "finding": "Source inspection: a real filesystem cleanup operation is wrapped in a catch that discards the removal failure."
+    },
+    {
+      "id": "B11.39",
+      "path": "src/presentation/cli/commands/list.coverage.test.ts",
+      "finding": "Source inspection: a real filesystem cleanup operation is wrapped in a catch that discards the removal failure."
+    },
+    {
+      "id": "B11.40",
+      "path": "src/presentation/cli/commands/list.deps.test.ts",
+      "finding": "Source inspection: a real filesystem cleanup operation is wrapped in a catch that discards the removal failure."
+    },
+    {
+      "id": "B11.41",
+      "path": "src/presentation/cli/commands/list.test.ts",
+      "finding": "Source inspection: a real filesystem cleanup operation is wrapped in a catch that discards the removal failure."
+    },
+    {
+      "id": "B11.42",
+      "path": "src/presentation/cli/commands/migrate.test.ts",
+      "finding": "Source inspection: a real filesystem cleanup operation is wrapped in a catch that discards the removal failure."
+    },
+    {
+      "id": "B11.43",
+      "path": "src/presentation/cli/commands/profile.test.ts",
+      "finding": "Source inspection: a real filesystem cleanup operation is wrapped in a catch that discards the removal failure."
+    },
+    {
+      "id": "B11.44",
+      "path": "src/presentation/cli/commands/projections.test.ts",
+      "finding": "Source inspection: a real filesystem cleanup operation is wrapped in a catch that discards the removal failure."
+    },
+    {
+      "id": "B11.45",
+      "path": "src/presentation/cli/commands/purge.test.ts",
+      "finding": "Source inspection: a real filesystem cleanup operation is wrapped in a catch that discards the removal failure."
+    },
+    {
+      "id": "B11.46",
+      "path": "src/presentation/cli/commands/query.coverage.test.ts",
+      "finding": "Source inspection: a real filesystem cleanup operation is wrapped in a catch that discards the removal failure."
+    },
+    {
+      "id": "B11.47",
+      "path": "src/presentation/cli/commands/related.coverage.test.ts",
+      "finding": "Source inspection: a real filesystem cleanup operation is wrapped in a catch that discards the removal failure."
+    },
+    {
+      "id": "B11.48",
+      "path": "src/presentation/cli/commands/related.test.ts",
+      "finding": "Source inspection: a real filesystem cleanup operation is wrapped in a catch that discards the removal failure."
+    },
+    {
+      "id": "B11.49",
+      "path": "src/presentation/cli/commands/search.coverage.test.ts",
+      "finding": "Source inspection: a real filesystem cleanup operation is wrapped in a catch that discards the removal failure."
+    },
+    {
+      "id": "B11.50",
+      "path": "src/presentation/cli/commands/search.test.ts",
+      "finding": "Source inspection: a real filesystem cleanup operation is wrapped in a catch that discards the removal failure."
+    },
+    {
+      "id": "B11.51",
+      "path": "src/presentation/cli/commands/show.coverage.test.ts",
+      "finding": "Source inspection: a real filesystem cleanup operation is wrapped in a catch that discards the removal failure."
+    },
+    {
+      "id": "B11.52",
+      "path": "src/presentation/cli/commands/show.test.ts",
+      "finding": "Source inspection: a real filesystem cleanup operation is wrapped in a catch that discards the removal failure."
+    },
+    {
+      "id": "B11.53",
+      "path": "src/presentation/cli/commands/stats.coverage.test.ts",
+      "finding": "Source inspection: a real filesystem cleanup operation is wrapped in a catch that discards the removal failure."
+    },
+    {
+      "id": "B11.54",
+      "path": "src/presentation/cli/commands/stats.deps.test.ts",
+      "finding": "Source inspection: a real filesystem cleanup operation is wrapped in a catch that discards the removal failure."
+    },
+    {
+      "id": "B11.55",
+      "path": "src/presentation/cli/commands/stats.test.ts",
+      "finding": "Source inspection: a real filesystem cleanup operation is wrapped in a catch that discards the removal failure."
+    },
+    {
+      "id": "B11.56",
+      "path": "src/presentation/cli/commands/status.test.ts",
+      "finding": "Source inspection: a real filesystem cleanup operation is wrapped in a catch that discards the removal failure."
+    },
+    {
+      "id": "B11.57",
+      "path": "src/presentation/cli/commands/sync/helpers.test.ts",
+      "finding": "Source inspection: a real filesystem cleanup operation is wrapped in a catch that discards the removal failure."
+    },
+    {
+      "id": "B11.58",
+      "path": "src/presentation/cli/db-startup.test.ts",
+      "finding": "Source inspection: a real filesystem cleanup operation is wrapped in a catch that discards the removal failure."
+    },
+    {
+      "id": "B11.59",
+      "path": "tests/integration/concurrent-commands.test.ts",
+      "finding": "Source inspection: a real filesystem cleanup operation is wrapped in a catch that discards the removal failure."
+    },
+    {
+      "id": "B11.60",
+      "path": "tests/integration/interrupted-sync.test.ts",
+      "finding": "Source inspection: a real filesystem cleanup operation is wrapped in a catch that discards the removal failure."
+    },
+    {
+      "id": "B11.61",
+      "path": "tests/integration/large-file.test.ts",
+      "finding": "Source inspection: a real filesystem cleanup operation is wrapped in a catch that discards the removal failure."
+    },
+    {
+      "id": "B11.62",
+      "path": "tests/integration/programmatic-api.test.ts",
+      "finding": "Source inspection: a real filesystem cleanup operation is wrapped in a catch that discards the removal failure."
+    },
+    {
+      "id": "B11.63",
+      "path": "tests/integration/query-primitive.test.ts",
+      "finding": "Source inspection: a real filesystem cleanup operation is wrapped in a catch that discards the removal failure."
+    },
+    {
+      "id": "B11.64",
+      "path": "tests/integration/sync-with-memory-files.test.ts",
+      "finding": "Source inspection: a real filesystem cleanup operation is wrapped in a catch that discards the removal failure."
+    },
+    {
+      "id": "B11.65",
+      "path": "tests/integration/unified-status.test.ts",
+      "finding": "Source inspection: a real filesystem cleanup operation is wrapped in a catch that discards the removal failure."
+    }
+  ],
+  "checks": [
+    {
+      "command": "bun .git/b04-validate-batch-6.ts",
+      "exit": 0,
+      "meaning": "All source/package bindings match; 125 unknowns are test drivers; acyclic ledger requires cleanup before full-suite rebaseline and baseline review.",
+      "log": ".planning/memory-resilience/evidence/B04-batch-6-validation.json",
+      "verification_source": "import { readFileSync, writeFileSync } from 'node:fs';\nimport { execFileSync } from 'node:child_process';\nimport { sourceHash, validateInventory } from '../scripts/quality-inventory.ts';\nconst root = '.planning/memory-resilience/';\nconst read = (p: string) => JSON.parse(readFileSync(p,'utf8'));\nconst assert = (condition: unknown, message: string) => { if(!condition) throw new Error(message); };\nconst catalog = read(root+'executable-catalog.json');\nconst manifest = read(root+'quality-classifications.json');\nconst ledger = read(root+'work-items.json');\nconst mapping = read(root+'package-boundary-map.json');\nfor(const input of [...catalog.files,...catalog.packages,...mapping.sourceInputs]) assert(sourceHash(readFileSync(input.path,'utf8'))===input.sourceHash,'Stale source '+input.path);\nconst issues = validateInventory(catalog,manifest);\nassert(issues.length===125 && issues.every(i=>i.startsWith('Unknown risk tier: ')),'Unexpected inventory errors');\nassert(manifest.files.filter((f:any)=>f.tier!==null).length===321,'Wrong proposed count');\nconst catalogByPath=new Map(catalog.files.map((f:any)=>[f.path,f]));\nassert(manifest.files.filter((f:any)=>f.tier===null).every((f:any)=>(catalogByPath.get(f.path) as any)?.syntax==='test-driver'),'Non-test candidate remains unclassified');\nconst byId = new Map<string,any>(ledger.items.map((i:any)=>[i.id,i]));\nassert(byId.size===209 && byId.size===ledger.items.length,'Duplicate or missing work items');\nconst visited = new Set<string>();\nfunction visit(id:string, parents = new Set<string>()) {\n assert(!parents.has(id),'Dependency cycle '+id);\n if(visited.has(id))return;\n assert(byId.has(id),'Unknown dependency '+id);\n const stack=new Set([...parents,id]);\n for(const dep of byId.get(id).depends_on) visit(dep,stack);\n visited.add(id);\n}\nfor(const id of byId.keys())visit(id);\nfunction reaches(id:string,target:string):boolean { return id===target || byId.get(id).depends_on.some((dep:string)=>reaches(dep,target)); }\nfor(const id of ['B11.1','B11.2','B11.3','B11.4',...Array.from({length:61},(_,i)=>'B11.'+(i+5)),'Q095','Q081','B12','D05','Q091','Q092','Q093','Q094','Q041'])assert(reaches('R02',id),'Finding bypasses baseline acceptance '+id);\nfor(const item of ledger.items.filter((i:any)=>i.id.startsWith('B11.') && i.id!=='B11.3'))assert(reaches('B09',item.id),'Full-suite rebaseline bypasses cleanup '+item.id);\nassert(ledger.items.filter((i:any)=>i.status==='active').map((i:any)=>i.id).join()==='B04','Unexpected active item');\nassert(byId.get('B05').status==='pending','B05 prematurely advanced');\nconst changed=execFileSync('git',['diff','--name-only'],{encoding:'utf8'}).trim().split('\\n');\nassert(changed.every(p=>p.startsWith('.planning/')),'Unexpected executable change');\nconst record={status:'PASS',sourceBindings:catalog.files.length,packageBindings:catalog.packages.length,packageMapBindings:mapping.sourceInputs.length,proposed:321,unclassified:125,expectedGateExit:1,ledgerItems:byId.size,acyclic:true,newFindingsReachBaselineReview:true,activeItem:'B04',nextItemStatus:'B05 pending',limits:'Data/source consistency only; no independent tier approval or runtime acceptance.'};\nwriteFileSync(root+'evidence/B04-batch-6-validation.json',JSON.stringify(record,null,2)+'\\n');\nconsole.log(JSON.stringify(record));\n",
+      "logHash": "f2e8212773e56b455cb280880469058e3962c36a6a1fa32a4928744d4ddb07e6"
+    },
+    {
+      "command": "bun run quality:inventory",
+      "exit": 1,
+      "meaning": "Expected incomplete inventory, 125 unknown-tier issues.",
+      "log": ".planning/memory-resilience/evidence/B04-batch-6-gate.txt",
+      "logHash": "236a36bcbdf17dbf1903fb0f5884b9e1702fb0cf977c363ff7a27ca083f9ffa9"
+    }
+  ],
+  "limits": [
+    "Source inspection only in this batch; no injected failure, full-runner test or historical data loss claimed.",
+    "Positive imported filesystem deletion justifies a proposed S tier; complete correctness and assertion quality remain unverified.",
+    "No automatic risk classification or blanket test exclusions. Each listed proposal and metric applicability requires independent review.",
+    "Q006 test-name mismatch is a proof gap, not observed production ingestion failure."
+  ],
+  "runtime": "Windows Node v24.20.0; Bun 1.4.1"
+}

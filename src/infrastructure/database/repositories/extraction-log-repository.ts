@@ -28,40 +28,37 @@ export class SqliteExtractionLogRepository implements IExtractionLogRepository {
   constructor(private readonly db: Database) {}
 
   async findById(sessionId: string): Promise<ExtractionLogEntry | null> {
-    const row = this.db
-      .prepare("SELECT * FROM extraction_log WHERE session_id = ?")
-      .get(sessionId) as ExtractionLogRow | null;
+    using statement = this.db.prepare("SELECT * FROM extraction_log WHERE session_id = ?");
+    const row = statement.get(sessionId) as ExtractionLogRow | null;
 
     if (!row) return null;
     return this.toEntry(row);
   }
 
   async save(entry: ExtractionLogEntry): Promise<void> {
-    this.db
-      .prepare(`
+    using statement = this.db.prepare(`
         INSERT OR REPLACE INTO extraction_log (
           session_id, mode, facts_added, facts_updated, facts_superseded,
           facts_skipped, provider, model, tokens_consumed, extracted_at
         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-      `)
-      .run(
-        entry.sessionId,
-        entry.mode,
-        entry.factsAdded,
-        entry.factsUpdated,
-        entry.factsSuperseded,
-        entry.factsSkipped,
-        entry.provider,
-        entry.model,
-        entry.tokensConsumed,
-        entry.extractedAt.toISOString()
-      );
+    `);
+    statement.run(
+      entry.sessionId,
+      entry.mode,
+      entry.factsAdded,
+      entry.factsUpdated,
+      entry.factsSuperseded,
+      entry.factsSkipped,
+      entry.provider,
+      entry.model,
+      entry.tokensConsumed,
+      entry.extractedAt.toISOString()
+    );
   }
 
   async findAll(): Promise<ExtractionLogEntry[]> {
-    const rows = this.db
-      .prepare("SELECT * FROM extraction_log ORDER BY extracted_at DESC")
-      .all() as ExtractionLogRow[];
+    using statement = this.db.prepare("SELECT * FROM extraction_log ORDER BY extracted_at DESC");
+    const rows = statement.all() as ExtractionLogRow[];
 
     return rows.map(row => this.toEntry(row));
   }

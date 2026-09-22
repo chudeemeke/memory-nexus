@@ -1,0 +1,277 @@
+{
+  "item_id": "B11.74.5",
+  "status": "local mapped statement migration verified; full quality and factory acceptance remain open",
+  "recordedAt": "2026-09-21T23:31:38.255Z",
+  "cwd": "C:\\Projects\\memory-nexus",
+  "startingRevision": "998d8a8da8d0d76cdfe70eb1d6a75f452cabd44b",
+  "sourceInputs": [
+    {
+      "path": "src/infrastructure/database/schema.ts",
+      "sourceHash": "222f66552aaf53d42c9425b4c396c7e0955371b9c31f2b266c005577977f1c5c"
+    },
+    {
+      "path": "src/application/services/export-service.ts",
+      "sourceHash": "3258d8dfe5121e8e937b0ff59a82fe41fff1e02f0ca392757664e627821c8274"
+    },
+    {
+      "path": "src/infrastructure/database/event-log.ts",
+      "sourceHash": "c535fa91610acbd4c2c4529bbdf85234e1391f0ec50a2d3f4847ba4b63221854"
+    },
+    {
+      "path": "src/infrastructure/security/secret-audit-service.ts",
+      "sourceHash": "6cb6ab8fb57dda21b71cd4330143833ae823deea18c01772390ecb96d4041fb1"
+    }
+  ],
+  "inspection": [
+    {
+      "path": "src/infrastructure/database/schema.ts",
+      "sourceHash": "222f66552aaf53d42c9425b4c396c7e0955371b9c31f2b266c005577977f1c5c",
+      "prepares": [
+        {
+          "kind": "prepare",
+          "line": 701,
+          "owned": true
+        },
+        {
+          "kind": "prepare",
+          "line": 822,
+          "owned": true
+        },
+        {
+          "kind": "prepare",
+          "line": 840,
+          "owned": true
+        }
+      ],
+      "violations": []
+    },
+    {
+      "path": "src/application/services/export-service.ts",
+      "sourceHash": "3258d8dfe5121e8e937b0ff59a82fe41fff1e02f0ca392757664e627821c8274",
+      "prepares": [
+        {
+          "kind": "prepare",
+          "line": 249,
+          "owned": true
+        },
+        {
+          "kind": "prepare",
+          "line": 262,
+          "owned": true
+        },
+        {
+          "kind": "prepare",
+          "line": 272,
+          "owned": true
+        },
+        {
+          "kind": "prepare",
+          "line": 282,
+          "owned": true
+        },
+        {
+          "kind": "prepare",
+          "line": 292,
+          "owned": true
+        },
+        {
+          "kind": "prepare",
+          "line": 299,
+          "owned": true
+        },
+        {
+          "kind": "prepare",
+          "line": 304,
+          "owned": true
+        },
+        {
+          "kind": "prepare",
+          "line": 309,
+          "owned": true
+        },
+        {
+          "kind": "prepare",
+          "line": 323,
+          "owned": true
+        },
+        {
+          "kind": "prepare",
+          "line": 472,
+          "owned": true
+        },
+        {
+          "kind": "prepare",
+          "line": 494,
+          "owned": true
+        },
+        {
+          "kind": "prepare",
+          "line": 513,
+          "owned": true
+        },
+        {
+          "kind": "prepare",
+          "line": 533,
+          "owned": true
+        },
+        {
+          "kind": "prepare",
+          "line": 545,
+          "owned": true
+        },
+        {
+          "kind": "prepare",
+          "line": 565,
+          "owned": true
+        },
+        {
+          "kind": "prepare",
+          "line": 579,
+          "owned": true
+        },
+        {
+          "kind": "prepare",
+          "line": 598,
+          "owned": true
+        },
+        {
+          "kind": "prepare",
+          "line": 623,
+          "owned": true
+        },
+        {
+          "kind": "prepare",
+          "line": 667,
+          "owned": true
+        },
+        {
+          "kind": "prepare",
+          "line": 701,
+          "owned": true
+        }
+      ],
+      "violations": []
+    },
+    {
+      "path": "src/infrastructure/database/event-log.ts",
+      "sourceHash": "c535fa91610acbd4c2c4529bbdf85234e1391f0ec50a2d3f4847ba4b63221854",
+      "prepares": [
+        {
+          "kind": "prepare",
+          "line": 323,
+          "owned": true
+        },
+        {
+          "kind": "prepare",
+          "line": 368,
+          "owned": true
+        }
+      ],
+      "violations": []
+    },
+    {
+      "path": "src/infrastructure/security/secret-audit-service.ts",
+      "sourceHash": "6cb6ab8fb57dda21b71cd4330143833ae823deea18c01772390ecb96d4041fb1",
+      "prepares": [
+        {
+          "kind": "prepare",
+          "line": 208,
+          "owned": true
+        },
+        {
+          "kind": "prepare",
+          "line": 231,
+          "owned": true
+        },
+        {
+          "kind": "prepare",
+          "line": 408,
+          "owned": true
+        },
+        {
+          "kind": "prepare",
+          "line": 415,
+          "owned": true
+        }
+      ],
+      "violations": []
+    }
+  ],
+  "negativeAudit": [
+    {
+      "path": "src/infrastructure/database/schema.ts",
+      "detected": [
+        {
+          "kind": "prepare",
+          "line": 701,
+          "owned": false
+        }
+      ]
+    },
+    {
+      "path": "src/application/services/export-service.ts",
+      "detected": [
+        {
+          "kind": "prepare",
+          "line": 249,
+          "owned": false
+        }
+      ]
+    },
+    {
+      "path": "src/infrastructure/database/event-log.ts",
+      "detected": [
+        {
+          "kind": "prepare",
+          "line": 323,
+          "owned": false
+        }
+      ]
+    },
+    {
+      "path": "src/infrastructure/security/secret-audit-service.ts",
+      "detected": [
+        {
+          "kind": "prepare",
+          "line": 208,
+          "owned": false
+        }
+      ]
+    }
+  ],
+  "proofs": [
+    {
+      "path": ".planning/memory-resilience/evidence/B11.74.5-schema.json",
+      "evidenceHash": "d48c3baa6a8154e5919cc55ad09448aa1fc8111a262d0c34a9322b616e684548",
+      "bindings": 82,
+      "status": "schema slice locally verified; export/event/security and full acceptance remain open"
+    },
+    {
+      "path": ".planning/memory-resilience/evidence/B11.74.5-export.json",
+      "evidenceHash": "0af648514ab5ebd211b47e3b812c4791da995ab680eb3e5d1c988389ec5e628b",
+      "bindings": 12,
+      "status": "export/import lifetime and demonstrated replacement integrity locally verified on both Windows runtimes; full quality pending"
+    },
+    {
+      "path": ".planning/memory-resilience/evidence/B11.74.5-event.json",
+      "evidenceHash": "64c3d8732645c29d22c49c3e73f34c2e5860b77a07b997eab62b652029f51ffa",
+      "bindings": 16,
+      "status": "event statement lifetime, governance reset and missing-source admission locally verified; whole replay defect/full quality remain open"
+    },
+    {
+      "path": ".planning/memory-resilience/evidence/B11.74.5-secret.json",
+      "evidenceHash": "3f005e45d6311423742382a875ffb135bdcbcd619187ced572c0c65797df5711",
+      "bindings": 15,
+      "status": "secret-audit database lifetime and demonstrated rollback/acknowledgement repairs locally verified; full Q101 security acceptance remains open"
+    }
+  ],
+  "command": "bun .git/b11-other-audit.ts",
+  "exit": 0,
+  "source": "import {strict as assert} from 'node:assert';\nimport {readFileSync,writeFileSync} from 'node:fs';\nimport ts from 'typescript';\nimport {sourceHash} from '../scripts/quality-inventory';\nconst base='.planning/memory-resilience/',read=(p:string)=>JSON.parse(readFileSync(p,'utf8'));\nconst paths=['src/infrastructure/database/schema.ts','src/application/services/export-service.ts','src/infrastructure/database/event-log.ts','src/infrastructure/security/secret-audit-service.ts'];\nfunction audit(path:string,source:string){const tree=ts.createSourceFile(path,source,ts.ScriptTarget.Latest,true);const prepares:any[]=[],violations:any[]=[];\n function visit(node:ts.Node){if(ts.isCallExpression(node)&&ts.isPropertyAccessExpression(node.expression)&&['prepare','query'].includes(node.expression.name.text)){\n  const kind=node.expression.name.text,position=tree.getLineAndCharacterOfPosition(node.getStart(tree));let p:ts.Node|undefined=node.parent;\n  while(p&&!ts.isStatement(p)&&!ts.isVariableDeclarationList(p))p=p.parent;\n  const owned=kind==='prepare'&&!!p&&ts.isVariableDeclarationList(p)&&Boolean(p.flags&ts.NodeFlags.Using);\n  const row={kind,line:position.line+1,owned};prepares.push(row);if(!owned)violations.push(row);\n }ts.forEachChild(node,visit);}visit(tree);return{path,sourceHash:sourceHash(source),prepares,violations};}\nconst inspected=paths.map(path=>audit(path,readFileSync(path,'utf8')));\nassert.deepEqual(inspected.map(row=>row.prepares.length),[3,20,2,4]);for(const row of inspected)assert.deepEqual(row.violations,[]);\nconst negative=paths.map(path=>{const source=readFileSync(path,'utf8'),changed=source.replace(/using (\\w+) =/, 'const $1 =');assert.notEqual(changed,source);const result=audit(path,changed);assert.equal(result.violations.length,1);return{path,detected:result.violations};});\nconst proofs=['schema','export','event','secret'].map(name=>{const path=base+'evidence/B11.74.5-'+name+'.json',record=read(path);let bindings=0;\n for(const input of [...record.sourceInputs,...record.otherInputs,...record.checks[0].sourceInputs,...record.native.sourceInputs]){assert.equal(input.sourceHash,sourceHash(readFileSync(input.path,'utf8')),path+' stale '+input.path);bindings++;}\n assert(record.checks[0].exit===0);for(const run of record.native.runs)assert.equal(run.exit,0);\n return{path,evidenceHash:sourceHash(readFileSync(path,'utf8')),bindings,status:record.status};});\nassert(!readFileSync('src/infrastructure/database/connection.ts','utf8').includes('OwnedDatabase'));\nconst result={item_id:'B11.74.5',status:'local mapped statement migration verified; full quality and factory acceptance remain open',recordedAt:new Date().toISOString(),cwd:process.cwd(),startingRevision:'998d8a8da8d0d76cdfe70eb1d6a75f452cabd44b',sourceInputs:inspected.map(({path,sourceHash})=>({path,sourceHash})),inspection:inspected,negativeAudit:negative,proofs,command:'bun .git/b11-other-audit.ts',exit:0,source:readFileSync('.git/b11-other-audit.ts','utf8'),limits:['Static ownership checks alone are not native acceptance; the four linked native slices establish only their scoped behaviors.','29 current prepares (3schema,20export,2event,4secret); no cached queries in these modules. Historical map had17prepares and10cached export queries. Two added prepares support migration and optional-table checks.','All four slices have paired Windows runtime proof. No full Linux/platform, counter completeness, package/changed-line, installed/CLI or independent acceptance.','Required Q004/Q019/Q100/Q101 and B11.74.7 remain open; Q100 retains a failing whole-replay preservation probe. Factory is unchanged.']};\nwriteFileSync(base+'evidence/B11.74.5.json',JSON.stringify(result,null,2)+'\\n');\nconsole.log(JSON.stringify({prepares:inspected.map(row=>({path:row.path,count:row.prepares.length})),negative:negative.length,proofBindings:proofs.map(p=>p.bindings)}));\n",
+  "limits": [
+    "Static ownership checks alone are not native acceptance; the four linked native slices establish only their scoped behaviors.",
+    "29 current prepares (3schema,20export,2event,4secret); no cached queries in these modules. Historical map had17prepares and10cached export queries. Two added prepares support migration and optional-table checks.",
+    "All four slices have paired Windows runtime proof. No full Linux/platform, counter completeness, package/changed-line, installed/CLI or independent acceptance.",
+    "Required Q004/Q019/Q100/Q101 and B11.74.7 remain open; Q100 retains a failing whole-replay preservation probe. Factory is unchanged."
+  ]
+}

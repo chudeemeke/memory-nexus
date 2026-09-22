@@ -1,0 +1,218 @@
+{
+  "sourceInputs": [
+    {
+      "path": "tests/helpers/owned-test-directory.ts",
+      "sourceHash": "c01eaafd0469da23d08b13fd9ac6277e8654309018f4dc4653e8b7a1892cdfe6"
+    },
+    {
+      "path": "tests/helpers/test-database.ts",
+      "sourceHash": "c9d9edafc637d537d53fc14c4edf0d154f303c396372638323b96bd478657d30"
+    },
+    {
+      "path": "tests/helpers/test-database.test.ts",
+      "sourceHash": "2f25ce0dec1d0c4e46e3e8f08ca87c7fab04e34c7edeefd53bbd7bfb90618bb0"
+    },
+    {
+      "path": "tests/test-setup.ts",
+      "sourceHash": "a348c68b1f5d2b1d287b604f80092f3b7310a627a2360b5eda6e45a855cd7498"
+    }
+  ],
+  "cwd": "C:\\Projects\\memory-nexus\\.git\\b11-decisions-FXwJdj",
+  "runtime": "1.4.1",
+  "records": [
+    {
+      "id": "inode",
+      "path": "tests/helpers/owned-test-directory.ts",
+      "needle": "stat.ino === identity.ino",
+      "replacement": "true",
+      "pattern": "cleanup refuses a replacement directory",
+      "exit": 1,
+      "status": "KILLED",
+      "output": "bun test v1.4.1 (4661e494f)\n\ntests\\helpers\\test-database.test.ts:\n15 |   mkdirSync(fixture.dir);\n16 |   writeFileSync(join(fixture.dir,\".memory-test-owner.json\"),owner);\n17 |   const marker = join(fixture.dir, \"foreign-marker.txt\");\n18 |   writeFileSync(marker, \"preserve\");\n19 |   try {\n20 |     expect(() => fixture.cleanup()).toThrow();\n                                         ^\nerror: expect(received).toThrow()\n\nReceived function did not throw\nReceived value: undefined\n\n      at <anonymous> (C:\\Projects\\memory-nexus\\.git\\b11-decisions-FXwJdj\\tests\\helpers\\test-database.test.ts:20:37)\n(fail) cleanup refuses a replacement directory and preserves its contents [27.05ms]\n\n 0 pass\n 30 filtered out\n 1 fail\n 1 expect() calls\nRan 1 test across 1 file. [134.00ms]\n",
+      "recovery": [
+        {
+          "path": "C:\\Users\\Destiny\\AppData\\Local\\Temp\\memory-owner-regression-43hQH1",
+          "status": "reclaimed after process exit and ownership verification"
+        }
+      ]
+    },
+    {
+      "id": "marker-content",
+      "path": "tests/helpers/owned-test-directory.ts",
+      "needle": "readFileSync(markerPath,\"utf8\") !== owner",
+      "replacement": "false",
+      "pattern": "an ownership marker that is",
+      "exit": 1,
+      "status": "KILLED",
+      "output": "bun test v1.4.1 (4661e494f)\n\ntests\\helpers\\test-database.test.ts:\n(pass) an ownership marker that is missing cannot authorize cleanup [11.78ms]\n363 |   if(shape===\"missing\")unlinkSync(marker);\n364 |   if(shape===\"same-length-change\")writeFileSync(marker,owner.slice(0,-1)+\"!\");\n365 |   if(shape===\"directory\"){unlinkSync(marker);mkdirSync(marker);}\n366 |   if(shape===\"hard-link\")linkSync(marker,extra);\n367 |   try {\n368 |     expect(()=>fixture.cleanup()).toThrow(fixture.dir);\n                                        ^\nerror: expect(received).toThrow(expected)\n\nExpected substring: \"C:\\\\Users\\\\Destiny\\\\AppData\\\\Local\\\\Temp\\\\memory-test-NTeNxG\"\n\nReceived function did not throw\nReceived value: undefined\n\n      at <anonymous> (C:\\Projects\\memory-nexus\\.git\\b11-decisions-FXwJdj\\tests\\helpers\\test-database.test.ts:368:35)\n(fail) an ownership marker that is same-length-change cannot authorize cleanup [16.54ms]\n(pass) an ownership marker that is directory cannot authorize cleanup [13.90ms]\n(pass) an ownership marker that is hard-link cannot authorize cleanup [17.71ms]\n\n 3 pass\n 27 filtered out\n 1 fail\n 7 expect() calls\nRan 4 tests across 1 file. [105.00ms]\n",
+      "recovery": [
+        {
+          "path": "C:\\Users\\Destiny\\AppData\\Local\\Temp\\memory-test-dgK7kK",
+          "status": "already absent"
+        },
+        {
+          "path": "C:\\Users\\Destiny\\AppData\\Local\\Temp\\memory-test-yRJaiW",
+          "status": "already absent"
+        },
+        {
+          "path": "C:\\Users\\Destiny\\AppData\\Local\\Temp\\memory-test-NTeNxG",
+          "status": "already absent"
+        },
+        {
+          "path": "C:\\Users\\Destiny\\AppData\\Local\\Temp\\memory-test-7BefTZ",
+          "status": "already absent"
+        },
+        {
+          "path": "C:\\Users\\Destiny\\AppData\\Local\\Temp\\memory-test-WFI75R",
+          "status": "already absent"
+        },
+        {
+          "path": "C:\\Users\\Destiny\\AppData\\Local\\Temp\\memory-test-67ofRR",
+          "status": "already absent"
+        },
+        {
+          "path": "C:\\Users\\Destiny\\AppData\\Local\\Temp\\memory-test-iPd0om",
+          "status": "already absent"
+        },
+        {
+          "path": "C:\\Users\\Destiny\\AppData\\Local\\Temp\\memory-test-l3E4Sn",
+          "status": "already absent"
+        }
+      ]
+    },
+    {
+      "id": "marker-links",
+      "path": "tests/helpers/owned-test-directory.ts",
+      "needle": "marker.nlink !== 1",
+      "replacement": "false",
+      "pattern": "an ownership marker that is",
+      "exit": 1,
+      "status": "KILLED",
+      "output": "bun test v1.4.1 (4661e494f)\n\ntests\\helpers\\test-database.test.ts:\n(pass) an ownership marker that is missing cannot authorize cleanup [22.47ms]\n(pass) an ownership marker that is same-length-change cannot authorize cleanup [22.06ms]\n(pass) an ownership marker that is directory cannot authorize cleanup [19.10ms]\n363 |   if(shape===\"missing\")unlinkSync(marker);\n364 |   if(shape===\"same-length-change\")writeFileSync(marker,owner.slice(0,-1)+\"!\");\n365 |   if(shape===\"directory\"){unlinkSync(marker);mkdirSync(marker);}\n366 |   if(shape===\"hard-link\")linkSync(marker,extra);\n367 |   try {\n368 |     expect(()=>fixture.cleanup()).toThrow(fixture.dir);\n                                        ^\nerror: expect(received).toThrow(expected)\n\nExpected substring: \"C:\\\\Users\\\\Destiny\\\\AppData\\\\Local\\\\Temp\\\\memory-test-KupUFs\"\n\nReceived function did not throw\nReceived value: undefined\n\n      at <anonymous> (C:\\Projects\\memory-nexus\\.git\\b11-decisions-FXwJdj\\tests\\helpers\\test-database.test.ts:368:35)\n(fail) an ownership marker that is hard-link cannot authorize cleanup [22.82ms]\n\n 3 pass\n 27 filtered out\n 1 fail\n 7 expect() calls\nRan 4 tests across 1 file. [130.00ms]\n",
+      "recovery": [
+        {
+          "path": "C:\\Users\\Destiny\\AppData\\Local\\Temp\\memory-test-OZ6V0O",
+          "status": "already absent"
+        },
+        {
+          "path": "C:\\Users\\Destiny\\AppData\\Local\\Temp\\memory-test-WbH8aM",
+          "status": "already absent"
+        },
+        {
+          "path": "C:\\Users\\Destiny\\AppData\\Local\\Temp\\memory-test-217Tm5",
+          "status": "already absent"
+        },
+        {
+          "path": "C:\\Users\\Destiny\\AppData\\Local\\Temp\\memory-test-7T79Dc",
+          "status": "already absent"
+        },
+        {
+          "path": "C:\\Users\\Destiny\\AppData\\Local\\Temp\\memory-test-VpI9ch",
+          "status": "already absent"
+        },
+        {
+          "path": "C:\\Users\\Destiny\\AppData\\Local\\Temp\\memory-test-A8e0Bm",
+          "status": "already absent"
+        },
+        {
+          "path": "C:\\Users\\Destiny\\AppData\\Local\\Temp\\memory-test-KupUFs",
+          "status": "already absent"
+        },
+        {
+          "path": "C:\\Users\\Destiny\\AppData\\Local\\Temp\\memory-test-oGsnH0",
+          "status": "already absent"
+        }
+      ]
+    },
+    {
+      "id": "directory-completion",
+      "path": "tests/helpers/owned-test-directory.ts",
+      "needle": "try { io.remove(dir); removed = true; }",
+      "replacement": "try { removed = true; io.remove(dir); }",
+      "pattern": "partial removal restores ownership",
+      "exit": 1,
+      "status": "KILLED",
+      "output": "bun test v1.4.1 (4661e494f)\n\ntests\\helpers\\test-database.test.ts:\n83 |   try {\n84 |     expect(()=>fixture.cleanup()).toThrow(fixture.dir);\n85 |     expect(existsSync(join(fixture.dir,\".memory-test-owner.json\"))).toBe(true);\n86 |     fixture.cleanup();\n87 |     expect(closes).toBe(1);\n88 |     expect(attempts).toBe(2);\n                          ^\nerror: expect(received).toBe(expected)\n\nExpected: 2\nReceived: 1\n\n      at <anonymous> (C:\\Projects\\memory-nexus\\.git\\b11-decisions-FXwJdj\\tests\\helpers\\test-database.test.ts:88:22)\n(fail) partial removal restores ownership and retry does not close SQLite twice [70.73ms]\n\n 0 pass\n 30 filtered out\n 1 fail\n 4 expect() calls\nRan 1 test across 1 file. [227.00ms]\n",
+      "recovery": [
+        {
+          "path": "C:\\Users\\Destiny\\AppData\\Local\\Temp\\memory-test-xmXyBB",
+          "status": "reclaimed after process exit and ownership verification"
+        }
+      ]
+    },
+    {
+      "id": "close-completion",
+      "path": "tests/helpers/test-database.ts",
+      "needle": "dependencies.close(result.db); closed = true;",
+      "replacement": "closed = true; dependencies.close(result.db);",
+      "pattern": "failed database close retains",
+      "exit": 1,
+      "status": "KILLED",
+      "output": "bun test v1.4.1 (4661e494f)\n\ntests\\helpers\\test-database.test.ts:\n154 |                         if (++attempts >= 3 || !isBusyRemoval(error)) throw error;\n155 |                         dependencies.waitBeforeRetry(attempts);\n156 |                     }\n157 |                 }\n158 |             } catch (cause) {\n159 |                 throw new Error(`Test database cleanup failed; retained: ${dir}; ${String(cause)}`, {cause});\n                                                                                                                 ^\nerror: Test database cleanup failed; retained: C:\\Users\\Destiny\\AppData\\Local\\Temp\\memory-test-M2bUD4; Error: Test cleanup failed; retained: C:\\Users\\Destiny\\AppData\\Local\\Temp\\memory-test-M2bUD4; Error: EBUSY: resource busy or locked, rm 'C:\\Users\\Destiny\\AppData\\Local\\Temp\\memory-test-M2bUD4'\n      at cleanup (C:\\Projects\\memory-nexus\\.git\\b11-decisions-FXwJdj\\tests\\helpers\\test-database.ts:159:108)\n      at <anonymous> (C:\\Projects\\memory-nexus\\.git\\b11-decisions-FXwJdj\\tests\\helpers\\test-database.test.ts:200:23)\n(fail) failed database close retains the directory and can be retried [696.47ms]\n\n 0 pass\n 30 filtered out\n 1 fail\n 2 expect() calls\nRan 1 test across 1 file. [743.00ms]\n",
+      "recovery": [
+        {
+          "path": "C:\\Users\\Destiny\\AppData\\Local\\Temp\\memory-test-M2bUD4",
+          "status": "reclaimed after process exit and ownership verification"
+        }
+      ]
+    },
+    {
+      "id": "retry-limit",
+      "path": "tests/helpers/test-database.ts",
+      "needle": "++attempts >= 3",
+      "replacement": "++attempts >= 4",
+      "pattern": "persistent removal error",
+      "exit": 1,
+      "status": "KILLED",
+      "output": "bun test v1.4.1 (4661e494f)\n\ntests\\helpers\\test-database.test.ts:\n310 |       rmSync(path,{recursive:true});\n311 |     }});},close(db){closes++;closeDatabase(db);},\n312 |   });\n313 |   try {\n314 |     expect(()=>fixture.cleanup()).toThrow(fixture.dir);\n315 |     expect(attempts).toBe(code===\"EIO\"?1:3);\n                           ^\nerror: expect(received).toBe(expected)\n\nExpected: 3\nReceived: 4\n\n      at <anonymous> (C:\\Projects\\memory-nexus\\.git\\b11-decisions-FXwJdj\\tests\\helpers\\test-database.test.ts:315:22)\n(fail) persistent removal error EBUSY has bounded retries and remains recoverable [670.74ms]\n310 |       rmSync(path,{recursive:true});\n311 |     }});},close(db){closes++;closeDatabase(db);},\n312 |   });\n313 |   try {\n314 |     expect(()=>fixture.cleanup()).toThrow(fixture.dir);\n315 |     expect(attempts).toBe(code===\"EIO\"?1:3);\n                           ^\nerror: expect(received).toBe(expected)\n\nExpected: 3\nReceived: 4\n\n      at <anonymous> (C:\\Projects\\memory-nexus\\.git\\b11-decisions-FXwJdj\\tests\\helpers\\test-database.test.ts:315:22)\n(fail) persistent removal error EPERM has bounded retries and remains recoverable [664.76ms]\n(pass) persistent removal error EIO has bounded retries and remains recoverable [299.47ms]\n\n 1 pass\n 28 filtered out\n 2 fail\n 8 expect() calls\nRan 3 tests across 1 file. [1.72s]\n",
+      "recovery": [
+        {
+          "path": "C:\\Users\\Destiny\\AppData\\Local\\Temp\\memory-test-0rPLFw",
+          "status": "already absent"
+        },
+        {
+          "path": "C:\\Users\\Destiny\\AppData\\Local\\Temp\\memory-test-YgeHB9",
+          "status": "already absent"
+        },
+        {
+          "path": "C:\\Users\\Destiny\\AppData\\Local\\Temp\\memory-test-sYPITd",
+          "status": "already absent"
+        }
+      ]
+    },
+    {
+      "id": "retry-classification",
+      "path": "tests/helpers/test-database.ts",
+      "needle": "!isBusyRemoval(error)",
+      "replacement": "false",
+      "pattern": "a non-Error cleanup failure",
+      "exit": 1,
+      "status": "KILLED",
+      "output": "bun test v1.4.1 (4661e494f)\n\ntests\\helpers\\test-database.test.ts:\n349 |       return {...storage,cleanup(){attempts++;if(blocked)throw \"unexpected cleanup failure\";storage.cleanup();}};\n350 |     },\n351 |   });\n352 |   try {\n353 |     expect(()=>fixture.cleanup()).toThrow(\"unexpected cleanup failure\");\n354 |     expect(attempts).toBe(1);expect(existsSync(fixture.dir)).toBe(true);\n                           ^\nerror: expect(received).toBe(expected)\n\nExpected: 1\nReceived: 3\n\n      at <anonymous> (C:\\Projects\\memory-nexus\\.git\\b11-decisions-FXwJdj\\tests\\helpers\\test-database.test.ts:354:22)\n(fail) a non-Error cleanup failure is reported without blind retries [362.40ms]\n\n 0 pass\n 30 filtered out\n 1 fail\n 2 expect() calls\nRan 1 test across 1 file. [399.00ms]\n",
+      "recovery": [
+        {
+          "path": "C:\\Users\\Destiny\\AppData\\Local\\Temp\\memory-test-YtgMea",
+          "status": "already absent"
+        }
+      ]
+    },
+    {
+      "id": "retry-pacing",
+      "path": "tests/helpers/test-database.ts",
+      "needle": "dependencies.waitBeforeRetry(attempts);",
+      "replacement": "void attempts;",
+      "pattern": "transient busy removal",
+      "exit": 1,
+      "status": "KILLED",
+      "output": "bun test v1.4.1 (4661e494f)\n\ntests\\helpers\\test-database.test.ts:\n295 |     close(db){closes++;closeDatabase(db);},\n296 |   });\n297 |   try {\n298 |     fixture.cleanup();\n299 |     expect(attempts).toBe(3);expect(collections).toBe(3);expect(closes).toBe(1);\n300 |     expect(waits).toEqual([1,2]);\n                        ^\nerror: expect(received).toEqual(expected)\n\n- [\n-   1,\n-   2,\n- ]\n+ []\n\n- Expected  - 4\n+ Received  + 1\n\n      at <anonymous> (C:\\Projects\\memory-nexus\\.git\\b11-decisions-FXwJdj\\tests\\helpers\\test-database.test.ts:300:19)\n(fail) transient busy removal collects again and retries without reclosing SQLite [65.54ms]\n\n 0 pass\n 30 filtered out\n 1 fail\n 4 expect() calls\nRan 1 test across 1 file. [108.00ms]\n",
+      "recovery": [
+        {
+          "path": "C:\\Users\\Destiny\\AppData\\Local\\Temp\\memory-test-ONKOmk",
+          "status": "already absent"
+        }
+      ]
+    }
+  ],
+  "probeSource": "import {existsSync,lstatSync,mkdirSync,mkdtempSync,readFileSync,realpathSync,rmSync,symlinkSync,writeFileSync} from 'node:fs';\nimport {dirname,join} from 'node:path';\nimport {tmpdir} from 'node:os';\nimport {sourceHash} from '../scripts/quality-inventory';\nconst root=process.cwd(), work=mkdtempSync(join(root,'.git','b11-decisions-'));\nconst ownerFile='tests/helpers/owned-test-directory.ts', dbFile='tests/helpers/test-database.ts', testFile='tests/helpers/test-database.test.ts';\nconst inputs=[ownerFile,dbFile,testFile,'tests/test-setup.ts'].map(path=>({path,sourceHash:sourceHash(readFileSync(path,'utf8'))}));\nmkdirSync(join(work,'tests/helpers'),{recursive:true});\nsymlinkSync(join(root,'src'),join(work,'src'),process.platform==='win32'?'junction':'dir');\nwriteFileSync(join(work,testFile),readFileSync(testFile));\nwriteFileSync(join(work,'bunfig.toml'),'[test]\\ncoverage = false\\ntimeout = 30000\\npreload = ['+JSON.stringify(join(root,'tests/test-setup.ts'))+']\\n');\nconst originals=new Map([ownerFile,dbFile].map(path=>[path,readFileSync(path,'utf8')]));\nconst cases=[\n ['inode',ownerFile,'stat.ino === identity.ino','true','cleanup refuses a replacement directory'],\n ['marker-content',ownerFile,'readFileSync(markerPath,\"utf8\") !== owner','false','an ownership marker that is'],\n ['marker-links',ownerFile,'marker.nlink !== 1','false','an ownership marker that is'],\n ['directory-completion',ownerFile,'try { io.remove(dir); removed = true; }','try { removed = true; io.remove(dir); }','partial removal restores ownership'],\n ['close-completion',dbFile,'dependencies.close(result.db); closed = true;','closed = true; dependencies.close(result.db);','failed database close retains'],\n ['retry-limit',dbFile,'++attempts >= 3','++attempts >= 4','persistent removal error'],\n ['retry-classification',dbFile,'!isBusyRemoval(error)','false','a non-Error cleanup failure'],\n ['retry-pacing',dbFile,'dependencies.waitBeforeRetry(attempts);','void attempts;','transient busy removal'],\n];\nconst records=[];\nfor(const [id,path,needle,replacement,pattern] of cases){\n const allocationLog=join(work,id+'-allocations.jsonl');\n for(const [sourcePath,source] of originals){\n  let code=source;\n  if(sourcePath===path){if(code.split(needle!).length!==2)throw Error('Ambiguous mutation '+id);code=code.replace(needle!,replacement!);}\n  if(sourcePath===ownerFile)code=code.replace('let removed = false;','let removed = false;\\n  writeFileSync('+JSON.stringify(allocationLog)+',owner+\"\\\\n\",{flag:\"a\"});');\n  writeFileSync(join(work,sourcePath),code);\n }\n const result=Bun.spawnSync([process.execPath,'test',testFile,'--test-name-pattern',pattern!],{cwd:work,stdout:'pipe',stderr:'pipe',timeout:20000});\n const output=new TextDecoder().decode(result.stdout)+new TextDecoder().decode(result.stderr);\n const recovery=[];\n if(existsSync(allocationLog))for(const line of readFileSync(allocationLog,'utf8').trim().split('\\n')){\n  const owner=JSON.parse(line), stat=lstatSync(owner.dir,{bigint:true,throwIfNoEntry:false});\n  if(!stat){recovery.push({path:owner.dir,status:'already absent'});continue;}\n  const marker=join(owner.dir,'.memory-test-owner.json');\n  const ms=lstatSync(marker,{throwIfNoEntry:false});\n  if(!stat.isDirectory()||stat.isSymbolicLink()||realpathSync(owner.dir)!==owner.dir||dirname(owner.dir)!==realpathSync(tmpdir())||owner.project!=='memory-nexus'||stat.dev.toString()!==owner.device||stat.ino.toString()!==owner.inode||!ms||!ms.isFile()||ms.isSymbolicLink()||ms.nlink!==1||readFileSync(marker,'utf8')!==line){recovery.push({path:owner.dir,status:'retained - ownership not verified'});continue;}\n  rmSync(owner.dir,{recursive:true,force:false});recovery.push({path:owner.dir,status:'reclaimed after process exit and ownership verification'});\n }\n const killed=result.exitCode===1&&output.includes('(fail)')&&output.includes('expect(');\n records.push({id,path,needle,replacement,pattern,exit:result.exitCode,status:killed?'KILLED':'UNRESOLVED',output,recovery});\n console.log(JSON.stringify({id,exit:result.exitCode,status:killed?'KILLED':'UNRESOLVED',retained:recovery.filter(x=>x.status.startsWith('retained')).length}));\n}\nfor(const [path,source] of originals)writeFileSync(join(work,path),source);\nwriteFileSync('.git/b11-decision-mutations.json',JSON.stringify({sourceInputs:inputs,cwd:work,runtime:Bun.version,records,probeSource:readFileSync('.git/b11-decision-mutations.ts','utf8'),scope:'Eight deliberate faults in isolated generated helper copies; original source remains untouched. Allocations are logged for identity-verified recovery after each child exits. Not exhaustive mutation or review acceptance.'},null,2)+'\\n');\nif(records.some(x=>x.status!=='KILLED'||x.recovery.some(r=>r.status.startsWith('retained'))))process.exitCode=1;\n",
+  "scope": "Eight deliberate faults in isolated generated helper copies; original source remains untouched. Allocations are logged for identity-verified recovery after each child exits. Not exhaustive mutation or review acceptance."
+}

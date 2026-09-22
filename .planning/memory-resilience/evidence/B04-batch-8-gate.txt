@@ -1,0 +1,3 @@
+$ bun run scripts/check-quality-inventory.ts --check .planning/memory-resilience/quality-classifications.json
+Inventory structure: valid (446 files, 2 packages)
+Structural validation does not approve classifications, exclusions or coverage. Independent review remains required.

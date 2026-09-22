@@ -18,14 +18,16 @@
     "build:cli": "bun build src/presentation/cli/index.ts --outdir dist/presentation/cli --target bun --packages=external --minify --sourcemap=none",
     "build": "bun run clean:dist && bun run build:types && bun run build:lib && bun run build:cli",
     "build:hook": "bun build src/infrastructure/hooks/sync-hook-script.ts --outfile=dist/sync-hook.js --target=bun",
-    "test": "bun test",
-    "test:coverage": "bun run scripts/run-istanbul-bun-coverage.ts --coverage-dir coverage && bun run scripts/check-coverage-thresholds.ts --summary coverage/coverage-summary.json --threshold 95",
+    "test": "bun test --timeout 15000",
+    "test:coverage": "bun run scripts/run-istanbul-bun-coverage.ts --coverage-dir coverage --check",
     "eval:v5": "bun run scripts/eval-v5.ts",
     "eval:v5:market": "bun run scripts/eval-v5.ts --market-ready",
-    "quality": "bun run typecheck && bun run build && bun test --timeout 15000 && bun run test:isolation && bun run eval:v5 && bun run test:coverage && bun audit",
-    "test:smoke": "bun test tests/smoke",
+    "quality": "bun run typecheck && bun run build && bun run test && bun run test:isolation && bun run eval:v5 && bun run test:coverage && bun audit",
+    "test:smoke": "bun run test tests/smoke",
     "verify:published": "bun run scripts/verify-published-package.ts",
     "test:isolation": "bun run scripts/check-test-isolation.ts",
+    "quality:catalog": "bun run scripts/check-quality-inventory.ts --catalog",
+    "quality:inventory": "bun run scripts/check-quality-inventory.ts --check .planning/memory-resilience/quality-classifications.json",
     "typecheck": "tsc --noEmit && tsc --project tsconfig.scripts.json",
     "lint": "bun run typecheck",
     "mutation": "stryker run",
@@ -48,7 +50,7 @@
     "istanbul-lib-report": "^3.0.1",
     "istanbul-reports": "^3.2.0",
     "typescript": "^5.5.0",
-    "vitest": "4.1.9"
+    "vitest": "4.1.11"
   },
   "engines": {
     "bun": ">=1.0.0"
@@ -68,7 +70,7 @@
   "dependencies": {
     "@anthropic-ai/claude-code": "2.1.185",
     "@anthropic-ai/sdk": "0.98.1",
-    "@huggingface/transformers": "4.2.0",
+    "@huggingface/transformers": "4.3.0",
     "@inquirer/search": "4.2.0",
     "@inquirer/select": "5.2.0",
     "chart.js": "^4.5.1",
@@ -81,13 +83,18 @@
   },
   "overrides": {
     "@protobufjs/utf8": "1.1.1",
-    "fast-uri": "3.1.2",
+    "adm-zip": "0.6.1",
+    "baseline-browser-mapping": "2.11.25",
+    "brace-expansion": "5.0.12",
+    "browserslist": "4.29.0",
+    "fast-uri": "3.1.8",
+    "nanoid": "3.3.19",
     "picomatch": "4.0.4",
-    "postcss": "8.5.15",
-    "protobufjs": "8.6.4",
-    "qs": "6.15.2",
+    "postcss": "8.5.28",
+    "protobufjs": "8.8.0",
+    "qs": "6.16.0",
     "rollup": "4.60.4",
-    "vite": "8.0.16",
+    "vite": "8.3.0",
     "yaml": "2.9.0"
   },
   "trustedDependencies": [

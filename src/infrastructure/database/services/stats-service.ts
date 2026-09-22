@@ -59,17 +59,17 @@ export class SqliteStatsService implements IStatsService {
    */
   async getStats(projectLimit = 10): Promise<StatsResult> {
     // Get database size using table-valued PRAGMA (always database-wide)
-    const sizeRow = this.db
+    using sizeStatement = this.db
       .prepare<SizeRow, []>(
         `
         SELECT page_size * page_count as size
         FROM pragma_page_count(), pragma_page_size()
         `
-      )
-      .get();
+      );
+    const sizeRow = sizeStatement.get();
 
     // Get per-project breakdown (limited)
-    const projectRows = this.db
+    using projectStatement = this.db
       .prepare<ProjectStatsRow, [number]>(
         `
         SELECT
@@ -82,19 +82,19 @@ export class SqliteStatsService implements IStatsService {
         ORDER BY sessionCount DESC
         LIMIT ?
         `
-      )
-      .all(projectLimit);
+      );
+    const projectRows = projectStatement.all(projectLimit);
 
     // Compute totals from filtered breakdown (so totals match displayed projects)
     const totalSessions = projectRows.reduce((sum, row) => sum + row.sessionCount, 0);
     const totalMessages = projectRows.reduce((sum, row) => sum + row.messageCount, 0);
 
     // Get total tool uses (database-wide, not per-project breakdown)
-    const toolUsesRow = this.db
+    using toolUsesStatement = this.db
       .prepare<{ totalToolUses: number }, []>(
         `SELECT COUNT(*) as totalToolUses FROM tool_uses`
-      )
-      .get();
+      );
+    const toolUsesRow = toolUsesStatement.get();
 
     return {
       totalSessions,

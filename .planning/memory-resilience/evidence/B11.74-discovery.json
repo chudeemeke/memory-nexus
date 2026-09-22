@@ -1,0 +1,278 @@
+{
+  "item_id": "B11.74",
+  "recordedAt": "2026-09-20T05:17:25.099Z",
+  "status": "active - implementation not started",
+  "nativeEvidence": ".planning/memory-resilience/evidence/B11.4-native-discovery.json",
+  "closeDatabaseReferences": [
+    {
+      "path": "src/application/services/sync-service.integration.test.ts",
+      "sourceHash": "410dbd0a543a3749f8f76f04ebff65b65db1e7d53d030ac665b8a9e2e7d53a6d"
+    },
+    {
+      "path": "src/infrastructure/database/connection.test.ts",
+      "sourceHash": "dc6311aeb196a72b03273998a07fd2dc31af0e5eaf501e119656ab1a641b2402"
+    },
+    {
+      "path": "src/infrastructure/database/connection.ts",
+      "sourceHash": "d1ffd040104875ba982108a92bebd760e5d4fedb7194436d6a3b80193fdbf1cd"
+    },
+    {
+      "path": "src/infrastructure/database/health-checker.test.ts",
+      "sourceHash": "2ff2e504e60ce6ff386cbc6d0f5775be704658867f29a11be04abcea037ebfc4"
+    },
+    {
+      "path": "src/infrastructure/database/index.ts",
+      "sourceHash": "004316993580b99608737ec67ae35f37682609a6eaa4b596d61d44dd1dad5d26"
+    },
+    {
+      "path": "src/infrastructure/database/integration.test.ts",
+      "sourceHash": "72731717dafd74d9086f38cc35b9ba7ae25a7fdede3a6a0f8c708cae2f5d6b2a"
+    },
+    {
+      "path": "src/infrastructure/database/repositories/embedding-repository.test.ts",
+      "sourceHash": "6ef28b30f1926ccf0c036229d03859de5d07afb5fbcb183c09de6ea6c13ae0ad"
+    },
+    {
+      "path": "src/infrastructure/database/repositories/message-repository.test.ts",
+      "sourceHash": "cb74f370d958bb57e06d70f4d4b42826ea3cdc69d12ba878efeb310317af0a79"
+    },
+    {
+      "path": "src/infrastructure/database/services/context-service.test.ts",
+      "sourceHash": "fcda50288bea3aadb3b9e17b63fd05acd8f31ca924e218b84a0497de752c3ba6"
+    },
+    {
+      "path": "src/infrastructure/database/services/hybrid-search-service.test.ts",
+      "sourceHash": "86419e238681364c4446693a20ef0dc464930d9001b4ac68b2bc66b317eda5cc"
+    },
+    {
+      "path": "src/infrastructure/database/services/search-service.test.ts",
+      "sourceHash": "1a193ad59be95584bed8c8ac15a28daf79f0c2f8338bfd455bee1190e45eb395"
+    },
+    {
+      "path": "src/infrastructure/database/services/stats-service.test.ts",
+      "sourceHash": "4b0e6e390cd86821388ff846cfa02f382f6b38465a34282a1df39b2317b475bf"
+    },
+    {
+      "path": "src/infrastructure/hooks/hook-runner.test.ts",
+      "sourceHash": "3f998a868485183a7861fa35fac6c414523af8b32b0d5fa28d56d6222d6f98e4"
+    },
+    {
+      "path": "src/presentation/cli/commands/audit-secrets.test.ts",
+      "sourceHash": "edd71a8feb372330e8a36853de836b6bb3b2f267e3ca6e2145fbed634f1ee50f"
+    },
+    {
+      "path": "src/presentation/cli/commands/audit-secrets.ts",
+      "sourceHash": "d8164e2fda8c5e7f1302add52f74d89f59b3b00d908c4f3165c8f437db4cd54d"
+    },
+    {
+      "path": "src/presentation/cli/commands/backfill.ts",
+      "sourceHash": "405067062dfda8da48746647e3aa7beadd616329febfba8c635bcccfa0ab163b"
+    },
+    {
+      "path": "src/presentation/cli/commands/backup.test.ts",
+      "sourceHash": "b4eb53e0ad1a081d0ba9592e145e312e188a35b8af3cbd1934a518bb53ae204f"
+    },
+    {
+      "path": "src/presentation/cli/commands/backup.ts",
+      "sourceHash": "3c296e493f689184b7bc1d1f010bec51be150e333fe6e8844410e75b4e3a9c14"
+    },
+    {
+      "path": "src/presentation/cli/commands/browse.test.ts",
+      "sourceHash": "e7f9b3c295771f9873384364a848150428c2ed20d6f313a930bad4993a059e94"
+    },
+    {
+      "path": "src/presentation/cli/commands/browse.ts",
+      "sourceHash": "e5653e00b301c788172946abddf436b1bd8fc6b975625e85973001e15a5c9e74"
+    },
+    {
+      "path": "src/presentation/cli/commands/context.coverage.test.ts",
+      "sourceHash": "ff772b7c1d0630948a330883877a60444dd0b31757573b4d4a0fdd9263082073"
+    },
+    {
+      "path": "src/presentation/cli/commands/context.test.ts",
+      "sourceHash": "60cb723327011b7697b51a188236880c97ef091e0d0997803bc35c93960f4422"
+    },
+    {
+      "path": "src/presentation/cli/commands/context.ts",
+      "sourceHash": "3cfd050bd6629ae267fc819e9b37484aaef6314dd8dd8bbd74950ad481c1e73f"
+    },
+    {
+      "path": "src/presentation/cli/commands/doctor.portability.test.ts",
+      "sourceHash": "9cb68a72ee73baa38722bb9bf5b5ad46593df8518d6838babf81094d610919da"
+    },
+    {
+      "path": "src/presentation/cli/commands/doctor.test.ts",
+      "sourceHash": "f445a2609412d707ffbecab6ddea6f96158850c3648ff56c1d4a61d0672bdbd4"
+    },
+    {
+      "path": "src/presentation/cli/commands/doctor.ts",
+      "sourceHash": "0c312acbcdb9262610cd5bf6499b4cbbc3b0e338cf5f7d949e2a4144791d8e87"
+    },
+    {
+      "path": "src/presentation/cli/commands/dream.ts",
+      "sourceHash": "7277044420b0ec9bf2600da8db77b19da85da5d4928636a988a85009c47daad3"
+    },
+    {
+      "path": "src/presentation/cli/commands/export.test.ts",
+      "sourceHash": "3de23dd3c3e360311c1c0ba934fc62297024f4432cd83df6c5a0e61621e10c48"
+    },
+    {
+      "path": "src/presentation/cli/commands/export.ts",
+      "sourceHash": "2d46bbb56ad07067f337df6025247270fbd2bc403bb6b564825421e1312d2a9d"
+    },
+    {
+      "path": "src/presentation/cli/commands/extract.ts",
+      "sourceHash": "a40fcf2dc58f1c7009b316a69a8e7790b0308b9890f2496566d0b7389c059970"
+    },
+    {
+      "path": "src/presentation/cli/commands/facts.ts",
+      "sourceHash": "ece4b5cfaaabfec787fecfe4bb8edc335bc71cef128bd67d41f7398f4278dfff"
+    },
+    {
+      "path": "src/presentation/cli/commands/friction/dashboard.test.ts",
+      "sourceHash": "721658a7b271306f798f8b0b968cce68146b771a9115e12e794cd55137305f3e"
+    },
+    {
+      "path": "src/presentation/cli/commands/friction/index.ts",
+      "sourceHash": "de11ab43b126201b93df76f0126772869cc5bccf73e96ac68166299c469ee5ca"
+    },
+    {
+      "path": "src/presentation/cli/commands/governance.ts",
+      "sourceHash": "95fce7ab0a9b00c04eaf3a9b0fe33f3127becab61f27f70a7f43a8b3ee513027"
+    },
+    {
+      "path": "src/presentation/cli/commands/import.test.ts",
+      "sourceHash": "00da045c5e8b76bb16fa053e3d69633baaae040abea6949eb5aae744320b6e65"
+    },
+    {
+      "path": "src/presentation/cli/commands/import.ts",
+      "sourceHash": "b4304ebd5ba572e749e7ed3e7a4187b0c103a2267d02fae7eba02745371b0bf6"
+    },
+    {
+      "path": "src/presentation/cli/commands/list.coverage.test.ts",
+      "sourceHash": "eed01d673603e553a6bf7b945d713e6bd224bb5da3059606f2fc908df300afa2"
+    },
+    {
+      "path": "src/presentation/cli/commands/list.test.ts",
+      "sourceHash": "124f5b3a44f0bd01167b451bef08ee8bef023082c293f29b87009a6262fe8b15"
+    },
+    {
+      "path": "src/presentation/cli/commands/list.ts",
+      "sourceHash": "15395f91b1e2754b0dfeb29e27c15fd540cc072c103d6e3528f0ef0472b98404"
+    },
+    {
+      "path": "src/presentation/cli/commands/migrate.test.ts",
+      "sourceHash": "5d3abc5e691bd927be002f47d830fcfd92f46bf471ca29736066cfa90a8b7412"
+    },
+    {
+      "path": "src/presentation/cli/commands/migrate.ts",
+      "sourceHash": "cf83867260ef30cfa8b3f1712fffba382e5e392ba6e9431405cc8f14199e9871"
+    },
+    {
+      "path": "src/presentation/cli/commands/profile.ts",
+      "sourceHash": "ea59ac5c79e9ed26aefdddf08ff43b5ef151bc243f89ba5775633105149e83b8"
+    },
+    {
+      "path": "src/presentation/cli/commands/projections.ts",
+      "sourceHash": "1a259c8ad36ae35fc43d27f2c8b450356efeeb01fd9806d96ca3621e73bff986"
+    },
+    {
+      "path": "src/presentation/cli/commands/purge.test.ts",
+      "sourceHash": "cb5c594b0f650ecb1799e15c3ba04666041e34ffefdb31b2178e0ee3f3c83cc0"
+    },
+    {
+      "path": "src/presentation/cli/commands/purge.ts",
+      "sourceHash": "f0eecf0b7b9eb7f5bfbaf654b35f192c96e7bbbf0b00fcaa1e66084889d56d12"
+    },
+    {
+      "path": "src/presentation/cli/commands/query.coverage.test.ts",
+      "sourceHash": "e7870ab3fb9be36c4f771272f4bfb92c76262e8b726417fc3a6e13685170bae5"
+    },
+    {
+      "path": "src/presentation/cli/commands/related.coverage.test.ts",
+      "sourceHash": "abf19c93187c4236e080f7f2cebac83f23d6425b4617b4894a5faed5952183c6"
+    },
+    {
+      "path": "src/presentation/cli/commands/related.test.ts",
+      "sourceHash": "70650ef75dcad394277b525cb769e68f97f3acac537899f97ca5c7339fdecc68"
+    },
+    {
+      "path": "src/presentation/cli/commands/related.ts",
+      "sourceHash": "c465ea522390ef13274b0500b52fdb0cadaad77cb99199339ef325be98044b0a"
+    },
+    {
+      "path": "src/presentation/cli/commands/search.coverage.test.ts",
+      "sourceHash": "1d575abfeced7484e3f0422db77d39b10b3b2cf108195c61450233141f1c892a"
+    },
+    {
+      "path": "src/presentation/cli/commands/search.test.ts",
+      "sourceHash": "761d5b555a4ed30c552d6a3e3f49f98ea7a2950feca854fa747eb9a22ccd4167"
+    },
+    {
+      "path": "src/presentation/cli/commands/search.ts",
+      "sourceHash": "907de35d5c3f8ad2823bda728916344757d62a4c824dfcd69d471bc177a26a47"
+    },
+    {
+      "path": "src/presentation/cli/commands/show.coverage.test.ts",
+      "sourceHash": "988904273f6c149430f8386f140af269307e9f1cf15470158e7ef5c6447a543d"
+    },
+    {
+      "path": "src/presentation/cli/commands/show.test.ts",
+      "sourceHash": "f4b8775310da65dfdb3c636eac007d48e7aebbaa47b87ba85bdd3b730727a810"
+    },
+    {
+      "path": "src/presentation/cli/commands/show.ts",
+      "sourceHash": "6b7161f56747e774cbdb34dcf67a076b8a0ea357fe5525877d2b6c93ec889998"
+    },
+    {
+      "path": "src/presentation/cli/commands/stats.coverage.test.ts",
+      "sourceHash": "37ffc4041d1b1bcf419d4f177efc1a30a7286822da452a1fc422bb0e8cbd400e"
+    },
+    {
+      "path": "src/presentation/cli/commands/stats.test.ts",
+      "sourceHash": "f17487767aa816c0445107dfa4b1dd101c808a9640ceb34815e94be90d73a47a"
+    },
+    {
+      "path": "src/presentation/cli/commands/status.test.ts",
+      "sourceHash": "760ea43cd39d1328bb5eabd660872015e3b1090399af6474e9bbd5b3915adcf9"
+    },
+    {
+      "path": "src/presentation/cli/commands/status.ts",
+      "sourceHash": "8594a26327ed13bf477245d411c258d3ff15ceb62899fab0b82330e1d0327d49"
+    },
+    {
+      "path": "src/presentation/cli/commands/sync/ambient.test.ts",
+      "sourceHash": "5c331cbe1efa2f9eff3476417969953308c2ddf854d492890b35c9177513bbcb"
+    },
+    {
+      "path": "src/presentation/cli/commands/sync/index.test.ts",
+      "sourceHash": "e40956e801b30f344d2bfde572ed81a9fbb96a48408bdf50e544e82a65d2ae47"
+    },
+    {
+      "path": "src/presentation/cli/commands/sync/index.ts",
+      "sourceHash": "ed1610dbc64749328b9c8df310dc33034f6b8a7006e7965eaac2a1f8f14bef77"
+    },
+    {
+      "path": "src/presentation/cli/commands/sync/types.ts",
+      "sourceHash": "df75763708c91da4a13dc69ba6a5897aea0a30747a8040cb6731302e7417a971"
+    },
+    {
+      "path": "src/presentation/cli/db-startup.test.ts",
+      "sourceHash": "31f888ab58c4ff2c5d5d67899becc2293c162fac1668b05ca76f2d7e57b13294"
+    },
+    {
+      "path": "tests/helpers/test-database.test.ts",
+      "sourceHash": "b03efaeaba68fd242881977e674f4df7e516d458ae3f5e32ba65adce8250c8a9"
+    },
+    {
+      "path": "tests/helpers/test-database.ts",
+      "sourceHash": "c9d9edafc637d537d53fc14c4edf0d154f303c396372638323b96bd478657d30"
+    },
+    {
+      "path": "tests/presentation/cli/commands/friction.test.ts",
+      "sourceHash": "c5835b44ac7fa6caa49ad801908f23780acb6ec7175a79d3cfca4082a34c611f"
+    }
+  ],
+  "scope": "Text-reference discovery only, not complete call-graph or runtime-lifetime analysis.",
+  "next": "Prove actual closeDatabase retains a strongly referenced statement in an owned fixture. Map factories and ownership before selecting an explicit lifecycle design; preserve rollback and the honest supported runtime contract."
+}

@@ -1,0 +1,19 @@
+bun test v1.4.1 (4661e494f)
+
+scripts\quality-inventory.test.ts:
+
+# Unhandled error between tests
+-------------------------------
+SyntaxError: Export named 'validateInventory' not found in module 'C:\Projects\memory-nexus\scripts\quality-inventory.ts'.
+-------------------------------
+
+-----------|---------|---------|-------------------
+File       | % Funcs | % Lines | Uncovered Line #s
+-----------|---------|---------|-------------------
+All files  |    0.00 |    0.00 |
+-----------|---------|---------|-------------------
+
+ 0 pass
+ 1 fail
+ 1 error
+Ran 1 test across 1 file. [774.00ms]

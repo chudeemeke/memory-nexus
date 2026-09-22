@@ -1,0 +1,15 @@
+{
+  "status": "PASS",
+  "sourceBindings": 446,
+  "packageBindings": 2,
+  "packageMapBindings": 6,
+  "proposed": 181,
+  "unclassified": 265,
+  "expectedGateExit": 1,
+  "ledgerItems": 146,
+  "acyclic": true,
+  "newFindingsReachBaselineReview": true,
+  "activeItem": "B04",
+  "nextItemStatus": "B05 pending",
+  "limits": "Data/source consistency only; no independent tier approval or runtime acceptance."
+}

@@ -1,0 +1,33 @@
+bun test v1.4.1 (4661e494f)
+
+scripts\quality-inventory.test.ts:
+warning: unable to access 'linked/repo-alias/linked/repo-alias/linked/repo-alias/linked/repo-alias/linked/repo-alias/linked/repo-alias/linked/repo-alias/linked/repo-alias/linked/repo-alias/linked/repo-alias/linked/.gitignore': Filename too long
+warning: could not open directory 'linked/repo-alias/linked/repo-alias/linked/repo-alias/linked/repo-alias/linked/repo-alias/linked/repo-alias/linked/repo-alias/linked/repo-alias/linked/repo-alias/linked/repo-alias/linked/repo-alias/': Filename too long
+warning: unable to access 'linked/repo-alias/linked/repo-alias/linked/repo-alias/linked/repo-alias/linked/repo-alias/linked/repo-alias/linked/repo-alias/linked/repo-alias/linked/repo-alias/linked/repo-alias/src/.gitignore': Filename too long
+127 |     symlinkSync(outside, join(root, "linked"), process.platform === "win32" ? "junction" : "dir");
+128 |     // Git reports a directory link itself rather than traversing its target.
+129 |     expect(() => discoverInventory(root)).toThrow("linked or special files");
+130 |     const cli = spawnSync(process.execPath, [resolve(import.meta.dir, "check-quality-inventory.ts"), "--catalog"], { cwd: root, encoding: "utf8" });
+131 |     expect(cli.status).toBe(2);
+132 |     expect(cli.stderr).not.toContain("Filename too long");
+                                 ^
+error: expect(received).not.toContain(expected)
+
+Expected to not contain: "Filename too long"
+Received: "warning: unable to access 'linked/repo-alias/linked/repo-alias/linked/repo-alias/linked/repo-alias/linked/repo-alias/linked/repo-alias/linked/repo-alias/linked/repo-alias/linked/repo-alias/linked/repo-alias/linked/.gitignore': Filename too long\nwarning: could not open directory 'linked/repo-alias/linked/repo-alias/linked/repo-alias/linked/repo-alias/linked/repo-alias/linked/repo-alias/linked/repo-alias/linked/repo-alias/linked/repo-alias/linked/repo-alias/linked/repo-alias/': Filename too long\nwarning: unable to access 'linked/repo-alias/linked/repo-alias/linked/repo-alias/linked/repo-alias/linked/repo-alias/linked/repo-alias/linked/repo-alias/linked/repo-alias/linked/repo-alias/linked/repo-alias/src/.gitignore': Filename too long\nInventory: ERROR Inventory refuses linked or special files: linked/repo-alias/linked/repo-alias/linked/repo-alias/linked/repo-alias/linked/repo-alias/linked/repo-alias/linked/repo-alias/linked/repo-alias/linked/repo-alias/linked/repo-alias/linked/sentinel.ts\n"
+
+      at <anonymous> (C:\Projects\memory-nexus\scripts\quality-inventory.test.ts:132:28)
+(fail) source directory links fail closed while a canonical repository-root alias works [4745.83ms]
+(pass) the actual inventory CLI emits a catalog and rejects omitted classifications [3935.40ms]
+------------------------------|---------|---------|-------------------
+File                          | % Funcs | % Lines | Uncovered Line #s
+------------------------------|---------|---------|-------------------
+All files                     |   71.43 |   58.45 |
+ scripts\quality-inventory.ts |   71.43 |   58.45 | 30,35-70,83,90-96,100-106,113-117,138,171
+------------------------------|---------|---------|-------------------
+
+ 1 pass
+ 9 filtered out
+ 1 fail
+ 8 expect() calls
+Ran 2 tests across 1 file. [9.31s]

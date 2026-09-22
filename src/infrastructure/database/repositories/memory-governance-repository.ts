@@ -51,7 +51,11 @@ export class SqliteMemoryGovernanceRepository implements IMemoryGovernanceReposi
   constructor(private readonly db: Database) {}
 
   async save(entry: MemoryGovernanceEntry): Promise<MemoryGovernanceEntry> {
-    const result = this.db.prepare(`
+    return this.saveEntry(entry);
+  }
+
+  private saveEntry(entry: MemoryGovernanceEntry): MemoryGovernanceEntry {
+    using statement = this.db.prepare(`
       INSERT INTO memory_governance (
         surface, target_id, project, visibility, source_event_ids,
         transformation_method, actor, confidence, redaction_state,
@@ -75,23 +79,29 @@ export class SqliteMemoryGovernanceRepository implements IMemoryGovernanceReposi
         reviewed_at = excluded.reviewed_at,
         expires_at = excluded.expires_at,
         last_event_id = excluded.last_event_id
-    `).run(...this.toSqlParams(entry));
+    `);
+    statement.run(...this.toSqlParams(entry));
 
-    const saved = await this.findByTarget(entry.surface, entry.targetId);
-    if (saved) {
-      return saved;
-    }
-
-    return entry.withId(Number(result.lastInsertRowid));
+    const saved = this.findEntry(entry.surface, entry.targetId);
+    if (!saved) throw new Error("Governance entry was not present after save");
+    return saved;
   }
 
   async findByTarget(
     surface: MemoryGovernanceSurface,
     targetId: string,
   ): Promise<MemoryGovernanceEntry | null> {
-    const row = this.db.prepare<GovernanceRow, [string, string]>(
+    return this.findEntry(surface, targetId);
+  }
+
+  private findEntry(
+    surface: MemoryGovernanceSurface,
+    targetId: string,
+  ): MemoryGovernanceEntry | null {
+    using statement = this.db.prepare<GovernanceRow, [string, string]>(
       "SELECT * FROM memory_governance WHERE surface = ? AND target_id = ?",
-    ).get(surface, targetId);
+    );
+    const row = statement.get(surface, targetId);
     return row ? this.toEntity(row) : null;
   }
 
@@ -103,9 +113,10 @@ export class SqliteMemoryGovernanceRepository implements IMemoryGovernanceReposi
       return [];
     }
     const placeholders = targetIds.map(() => "?").join(", ");
-    const rows = this.db.prepare<GovernanceRow, string[]>(
+    using statement = this.db.prepare<GovernanceRow, string[]>(
       `SELECT * FROM memory_governance WHERE surface = ? AND target_id IN (${placeholders})`,
-    ).all(surface, ...targetIds);
+    );
+    const rows = statement.all(surface, ...targetIds);
     return rows.map((row) => this.toEntity(row));
   }
 
@@ -134,9 +145,10 @@ export class SqliteMemoryGovernanceRepository implements IMemoryGovernanceReposi
     const limit = options.limit ?? 100;
     params.push(limit);
 
-    const rows = this.db.prepare<GovernanceRow, (string | number)[]>(
+    using statement = this.db.prepare<GovernanceRow, (string | number)[]>(
       `SELECT * FROM memory_governance ${where} ORDER BY updated_at DESC LIMIT ?`,
-    ).all(...params);
+    );
+    const rows = statement.all(...params);
 
     return rows.map((row) => this.toEntity(row));
   }
@@ -154,29 +166,34 @@ export class SqliteMemoryGovernanceRepository implements IMemoryGovernanceReposi
       throw new Error("Governance event targetId is required");
     }
 
-    this.recordGovernanceEvent(event, control, surface, targetId, governance);
+    // Bun transactions must stay synchronous through both audit and projection.
+    return this.db.transaction(() => {
+      this.recordGovernanceEvent(event, control, surface, targetId, governance);
 
-    if (control === "register") {
-      return this.save(entryFromEvent(event, governance, surface, targetId));
-    }
+      if (control === "register") {
+        return this.saveEntry(entryFromEvent(event, governance, surface, targetId));
+      }
 
-    const existing = await this.findByTarget(surface, targetId);
-    const base = existing ?? entryFromEvent(event, governance, surface, targetId);
-    const updated = base.withControl({
-      control,
-      actor: stringValue(governance.actor, event.provenance.actor),
-      reason: optionalString(governance.reason),
-      occurredAt: event.occurredAt,
-      expiresAt: optionalDate(governance.expiresAt ?? governance.expires_at),
-      consentStatus: optionalConsentStatus(governance.consentStatus ?? governance.consent_status),
-      consentScopes: optionalStringArray(governance.consentScopes ?? governance.consent_scopes),
-      lastEventId: event.eventId,
-    });
-    return this.save(updated);
+      const existing = this.findEntry(surface, targetId);
+      const base = existing ?? entryFromEvent(event, governance, surface, targetId);
+      const updated = base.withControl({
+        control,
+        actor: stringValue(governance.actor, event.provenance.actor),
+        reason: optionalString(governance.reason),
+        occurredAt: event.occurredAt,
+        expiresAt: optionalDate(governance.expiresAt ?? governance.expires_at),
+        consentStatus: optionalConsentStatus(governance.consentStatus ?? governance.consent_status),
+        consentScopes: optionalStringArray(governance.consentScopes ?? governance.consent_scopes),
+        lastEventId: event.eventId,
+      });
+      return this.saveEntry(updated);
+    })();
   }
 
   async clearAll(): Promise<void> {
-    this.db.exec("DELETE FROM memory_governance_events; DELETE FROM memory_governance;");
+    this.db.transaction(() => {
+      this.db.exec("DELETE FROM memory_governance_events; DELETE FROM memory_governance;");
+    })();
   }
 
   private toSqlParams(entry: MemoryGovernanceEntry): [
@@ -255,12 +272,13 @@ export class SqliteMemoryGovernanceRepository implements IMemoryGovernanceReposi
     targetId: string,
     payload: Record<string, unknown>,
   ): void {
-    this.db.prepare(`
+    using statement = this.db.prepare(`
       INSERT INTO memory_governance_events (
         event_id, kind, control, surface, target_id, actor, reason, occurred_at, payload
       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
       ON CONFLICT(event_id) DO NOTHING
-    `).run(
+    `);
+    statement.run(
       event.eventId,
       event.kind,
       control,

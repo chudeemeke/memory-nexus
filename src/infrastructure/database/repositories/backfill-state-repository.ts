@@ -25,48 +25,44 @@ export class SqliteBackfillStateRepository implements IBackfillStateRepository {
     constructor(private readonly db: Database) {}
 
     async findBySessionId(sessionId: string): Promise<BackfillState | null> {
-        const row = this.db
-            .prepare("SELECT * FROM backfill_state WHERE session_id = ?")
-            .get(sessionId) as BackfillStateRow | null;
+        using statement = this.db.prepare("SELECT * FROM backfill_state WHERE session_id = ?");
+        const row = statement.get(sessionId) as BackfillStateRow | null;
 
         if (!row) return null;
         return this.toEntity(row);
     }
 
     async findAll(): Promise<BackfillState[]> {
-        const rows = this.db
-            .prepare("SELECT * FROM backfill_state ORDER BY backfilled_at DESC")
-            .all() as BackfillStateRow[];
+        using statement = this.db.prepare("SELECT * FROM backfill_state ORDER BY backfilled_at DESC");
+        const rows = statement.all() as BackfillStateRow[];
 
         return rows.map((row) => this.toEntity(row));
     }
 
     async save(state: BackfillState): Promise<void> {
-        this.db
-            .prepare(
-                `INSERT OR REPLACE INTO backfill_state
+        using statement = this.db.prepare(
+            `INSERT OR REPLACE INTO backfill_state
                  (session_id, backfilled_at, daily_log_path, success, error_message)
                  VALUES (?, ?, ?, ?, ?)`
-            )
-            .run(
-                state.sessionId,
-                state.backfilledAt.toISOString(),
-                state.dailyLogPath,
-                state.success ? 1 : 0,
-                state.errorMessage ?? null,
-            );
+        );
+        statement.run(
+            state.sessionId,
+            state.backfilledAt.toISOString(),
+            state.dailyLogPath,
+            state.success ? 1 : 0,
+            state.errorMessage ?? null,
+        );
     }
 
     async countByStatus(): Promise<BackfillStatusCounts> {
-        const row = this.db
-            .prepare(
-                `SELECT
+        using statement = this.db.prepare(
+            `SELECT
                      COUNT(*) as total,
                      SUM(CASE WHEN success = 1 THEN 1 ELSE 0 END) as succeeded,
                      SUM(CASE WHEN success = 0 THEN 1 ELSE 0 END) as failed
                  FROM backfill_state`
-            )
-            .get() as { total: number; succeeded: number; failed: number };
+        );
+        const row = statement.get() as { total: number; succeeded: number; failed: number };
 
         return {
             total: row.total,

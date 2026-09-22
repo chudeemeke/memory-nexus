@@ -37,7 +37,7 @@ export class SqliteGraphRepository implements IGraphRepository {
   constructor(private readonly db: Database) {}
 
   async save(edge: GraphEdge): Promise<GraphEdge> {
-    const result = this.db.prepare(`
+    using statement = this.db.prepare(`
       INSERT INTO graph_edges (
         edge_id, source_type, source_id, source_label, target_type, target_id,
         target_label, relationship, project, visibility, source_event_ids,
@@ -62,16 +62,18 @@ export class SqliteGraphRepository implements IGraphRepository {
         why = excluded.why,
         metadata = excluded.metadata,
         updated_at = excluded.updated_at
-    `).run(...this.toSqlParams(edge));
+    `);
+    statement.run(...this.toSqlParams(edge));
 
-    const saved = await this.findByEdgeId(edge.edgeId);
-    return saved ?? edge.withId(Number(result.lastInsertRowid));
+    const saved = this.findEdge(edge.edgeId);
+    if (!saved) throw new Error("Graph edge was not present after save");
+    return saved;
   }
 
   async saveMany(edges: GraphEdge[]): Promise<GraphEdge[]> {
     const transaction = this.db.transaction((items: GraphEdge[]) => {
       for (const edge of items) {
-        this.db.prepare(`
+        using statement = this.db.prepare(`
           INSERT INTO graph_edges (
             edge_id, source_type, source_id, source_label, target_type, target_id,
             target_label, relationship, project, visibility, source_event_ids,
@@ -96,25 +98,29 @@ export class SqliteGraphRepository implements IGraphRepository {
             why = excluded.why,
             metadata = excluded.metadata,
             updated_at = excluded.updated_at
-        `).run(...this.toSqlParams(edge));
+        `);
+        statement.run(...this.toSqlParams(edge));
       }
-    });
-    transaction(edges);
-
-    const saved: GraphEdge[] = [];
-    for (const edge of edges) {
-      const current = await this.findByEdgeId(edge.edgeId);
-      if (current) {
+      const saved: GraphEdge[] = [];
+      for (const edge of items) {
+        const current = this.findEdge(edge.edgeId);
+        if (!current) throw new Error("Graph edge was not present after batch save");
         saved.push(current);
       }
-    }
-    return saved;
+      return saved;
+    });
+    return transaction(edges);
   }
 
   async findByEdgeId(edgeId: string): Promise<GraphEdge | null> {
-    const row = this.db.prepare<GraphEdgeRow, [string]>(
+    return this.findEdge(edgeId);
+  }
+
+  private findEdge(edgeId: string): GraphEdge | null {
+    using statement = this.db.prepare<GraphEdgeRow, [string]>(
       "SELECT * FROM graph_edges WHERE edge_id = ?",
-    ).get(edgeId);
+    );
+    const row = statement.get(edgeId);
     return row ? this.toEntity(row) : null;
   }
 
@@ -151,28 +157,32 @@ export class SqliteGraphRepository implements IGraphRepository {
     }
 
     params.push(limit);
-    const rows = this.db.prepare<GraphEdgeRow, (string | number)[]>(`
+    using statement = this.db.prepare<GraphEdgeRow, (string | number)[]>(`
       SELECT * FROM graph_edges
       WHERE ${conditions.join(" AND ")}
       ORDER BY confidence DESC, updated_at DESC, edge_id ASC
       LIMIT ?
-    `).all(...params);
+    `);
+    const rows = statement.all(...params);
     return rows.map((row) => this.toEntity(row));
   }
 
   async pruneStale(cutoff: Date): Promise<number> {
-    const result = this.db.prepare(
+    using statement = this.db.prepare(
       "DELETE FROM graph_edges WHERE valid_to IS NOT NULL AND valid_to < ?",
-    ).run(cutoff.toISOString());
+    );
+    const result = statement.run(cutoff.toISOString());
     return result.changes;
   }
 
   async deleteByProject(project: string): Promise<void> {
-    this.db.prepare("DELETE FROM graph_edges WHERE project = ?").run(project);
+    using statement = this.db.prepare("DELETE FROM graph_edges WHERE project = ?");
+    statement.run(project);
   }
 
   async clearAll(): Promise<void> {
-    this.db.prepare("DELETE FROM graph_edges").run();
+    using statement = this.db.prepare("DELETE FROM graph_edges");
+    statement.run();
   }
 
   private toSqlParams(edge: GraphEdge): [

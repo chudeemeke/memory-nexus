@@ -1,0 +1,24 @@
+$ bun run scripts/check-quality-inventory.ts --check .planning/memory-resilience/quality-classifications.json
+Inventory structure: FAIL (75 issues)
+  - Unknown risk tier: src/application/services/ambient-context-service.test.ts
+  - Unknown risk tier: src/application/services/backfill-service.test.ts
+  - Unknown risk tier: src/application/services/dreaming-service.test.ts
+  - Unknown risk tier: src/application/services/embedding-service.test.ts
+  - Unknown risk tier: src/application/services/llm-extractor.test.ts
+  - Unknown risk tier: src/application/services/memory-file-sync-service.test.ts
+  - Unknown risk tier: src/application/services/memory-governance-service.test.ts
+  - Unknown risk tier: src/application/services/persona-profile-service.test.ts
+  - Unknown risk tier: src/application/services/projection-registry.test.ts
+  - Unknown risk tier: src/application/services/recovery-service.test.ts
+  - Unknown risk tier: src/application/services/remote-event-sync-service.test.ts
+  - Unknown risk tier: src/application/services/smart-context-service.test.ts
+  - Unknown risk tier: src/application/services/sync-service.test.ts
+  - Unknown risk tier: src/application/services/temporal-graph-service.test.ts
+  - Unknown risk tier: src/infrastructure/database/repositories/backfill-state-repository.test.ts
+  - Unknown risk tier: src/infrastructure/database/repositories/dream-repository.test.ts
+  - Unknown risk tier: src/infrastructure/database/repositories/embedding-repository.test.ts
+  - Unknown risk tier: src/infrastructure/database/repositories/entity-repository.test.ts
+  - Unknown risk tier: src/infrastructure/database/repositories/extraction-log-repository.test.ts
+  - Unknown risk tier: src/infrastructure/database/repositories/extraction-state-repository.test.ts
+  ... 55 more issues
+error: script "quality:inventory" exited with code 1

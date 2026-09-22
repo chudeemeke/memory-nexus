@@ -125,17 +125,18 @@ export function parseCoverageSummary(content: string): CoverageMetrics {
     const source = parsed.total?.[name];
     if (!source) continue;
 
-    const total = Number(source.total);
-    const covered = Number(source.covered);
-    const pct = Number(source.pct);
-    if (!Number.isFinite(total) || !Number.isFinite(covered) || !Number.isFinite(pct) || total <= 0) {
+    const { total, covered, pct } = source;
+    if (typeof total !== "number" || typeof covered !== "number" || typeof pct !== "number" ||
+        !Number.isSafeInteger(total) || !Number.isSafeInteger(covered) || !Number.isFinite(pct) ||
+        total <= 0 || covered < 0 || covered > total || pct < 0 || pct > 100 ||
+        Math.abs(pct - (covered / total) * 100) > 0.011) {
       continue;
     }
 
     metrics[name] = {
       total,
       covered,
-      pct,
+      pct: (covered / total) * 100,
       available: true,
     };
   }

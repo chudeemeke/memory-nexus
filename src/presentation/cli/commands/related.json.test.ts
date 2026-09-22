@@ -12,28 +12,23 @@
  *   NO dbPath: "/non/existent/..." (Windows file-locking).
  */
 
-import { describe, expect, it, beforeEach, afterEach } from "bun:test";
+import { describe, expect, it, afterEach } from "bun:test";
 import { executeRelatedCommand } from "./related.js";
 import {
   captureStreams,
-  makeTempDbPath,
-  cleanupTempPaths,
-} from "./_helpers/capture-json.js";
+  createTempDatabaseTracker,
+} from "../../../../tests/helpers/capture-json.js";
 
 describe("related --json envelope (Plan 32-02 CLI-02)", () => {
-  let tempPaths: string[] = [];
-
-  beforeEach(() => {
-    tempPaths = [];
-  });
+  const tempDatabase = createTempDatabaseTracker();
 
   afterEach(() => {
-    cleanupTempPaths(tempPaths);
+    return tempDatabase.cleanup();
   });
 
   describe("D. envelope on NOT-FOUND (empty DB → no links)", () => {
     it("emits error envelope when no links exist for the ID", async () => {
-      const dbPath = makeTempDbPath("related", tempPaths);
+      const dbPath = tempDatabase.makePath("related");
       const { stdout, exitCode } = await captureStreams(() =>
         executeRelatedCommand("nonexistent-id", {
           json: true,
@@ -52,7 +47,7 @@ describe("related --json envelope (Plan 32-02 CLI-02)", () => {
 
   describe("F. stdout is exactly one JSON document", () => {
     it("parses cleanly", async () => {
-      const dbPath = makeTempDbPath("related", tempPaths);
+      const dbPath = tempDatabase.makePath("related");
       const { stdout } = await captureStreams(() =>
         executeRelatedCommand("some-id", { json: true, dbPath })
       );
@@ -65,7 +60,7 @@ describe("related --json envelope (Plan 32-02 CLI-02)", () => {
 
   describe("H. error or meta echoes source_id", () => {
     it("references the source ID in error.context or meta", async () => {
-      const dbPath = makeTempDbPath("related", tempPaths);
+      const dbPath = tempDatabase.makePath("related");
       const { stdout } = await captureStreams(() =>
         executeRelatedCommand("specific-id-for-meta", {
           json: true,
@@ -87,7 +82,7 @@ describe("related --json envelope (Plan 32-02 CLI-02)", () => {
 
   describe("J. --json --format ai routing equivalence (HIGH-5)", () => {
     it("deep-equals --json vs --json --format ai (related)", async () => {
-      const dbPath = makeTempDbPath("related", tempPaths);
+      const dbPath = tempDatabase.makePath("related");
       const { stdout: stdoutA } = await captureStreams(() =>
         executeRelatedCommand("test-id", { json: true, dbPath })
       );

@@ -1,0 +1,30 @@
+bun test v1.4.1 (4661e494f)
+
+scripts\quality-inventory.test.ts:
+155 | test("the actual inventory CLI emits a catalog and rejects omitted classifications", () => {
+156 |   const root = fixture({ "package.json": '{"name":"fixture"}', "src/value.ts": "export const value = 1;" });
+157 |   const cli = resolve(import.meta.dir, "check-quality-inventory.ts");
+158 |   try {
+159 |     const catalogRun = spawnSync(process.execPath, [cli, "--catalog"], { cwd: root, encoding: "utf8" });
+160 |     expect(catalogRun.status, catalogRun.stderr).toBe(0);
+                                                       ^
+error: error: Module not found "C:\Projects\memory-nexus\scripts\check-quality-inventory.ts"
+
+
+Expected: 0
+Received: 1
+
+      at <anonymous> (C:\Projects\memory-nexus\scripts\quality-inventory.test.ts:160:50)
+(fail) the actual inventory CLI emits a catalog and rejects omitted classifications [1036.80ms]
+------------------------------|---------|---------|-------------------
+File                          | % Funcs | % Lines | Uncovered Line #s
+------------------------------|---------|---------|-------------------
+All files                     |    0.00 |    5.52 |
+ scripts\quality-inventory.ts |    0.00 |    5.52 | 30,35-70,74,78-132,136-147,151-182
+------------------------------|---------|---------|-------------------
+
+ 0 pass
+ 10 filtered out
+ 1 fail
+ 1 expect() calls
+Ran 1 test across 1 file. [2.28s]

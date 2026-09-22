@@ -8,23 +8,27 @@
  */
 
 import { spawnSync } from "node:child_process";
+import { randomUUID } from "node:crypto";
 import {
   cpSync,
   existsSync,
+  lstatSync,
   mkdirSync,
   readFileSync,
   readdirSync,
-  rmSync,
+  realpathSync,
   statSync,
   symlinkSync,
   writeFileSync,
 } from "node:fs";
 import { tmpdir } from "node:os";
-import { basename, join, relative, resolve, sep } from "node:path";
+import { basename, dirname, isAbsolute, join, relative, resolve, sep } from "node:path";
 import { createCoverageMap, type CoverageMap, type CoverageMapData } from "istanbul-lib-coverage";
 import { createContext } from "istanbul-lib-report";
 import reports from "istanbul-reports";
 import { createInstrumenter } from "istanbul-lib-instrument";
+import { openCoverageRun, recordCoverageRun, releaseCoverageWork } from "./coverage-run-storage";
+import { runCoverageGate } from "./check-coverage-thresholds";
 
 export const COVERAGE_IGNORE_PATTERNS = [
   "node_modules/",
@@ -61,7 +65,7 @@ const COPY_IGNORE_PATTERNS = [
 
 const PROJECT_ROOT = resolve(import.meta.dir, "..");
 const SAFE_WORK_DIR_PREFIX = "memory-nexus-coverage-work-";
-const DEFAULT_WORK_DIR = join(tmpdir(), `${SAFE_WORK_DIR_PREFIX}${process.pid}`);
+const DEFAULT_WORK_DIR = join(tmpdir(), `${SAFE_WORK_DIR_PREFIX}${process.pid}-${randomUUID()}`);
 const DEFAULT_COVERAGE_DIR = join(PROJECT_ROOT, "coverage");
 const DEFAULT_TEST_TIMEOUT_MS = 15_000;
 const DEFAULT_TEST_TARGETS = ["src", "tests", "scripts"] as const;
@@ -73,6 +77,7 @@ export interface RunnerOptions {
   workDir: string;
   coverageDir: string;
   testArgs: string[];
+  checkCoverage?: boolean;
 }
 
 export interface RunnerResult {
@@ -130,18 +135,18 @@ export function writeCoverageReports(coverageMap: CoverageMap, coverageDir: stri
   reports.create("text-summary").execute(context);
 }
 
-function copyAndInstrument(projectRoot: string, workDir: string): CoverageMapData {
-  rmSync(workDir, { recursive: true, force: true });
-  mkdirSync(workDir, { recursive: true });
+function copyAndInstrument(projectRoot: string, workDir: string, coverageDir: string): CoverageMapData {
+  mkdirSync(dirname(workDir), { recursive: true });
+  mkdirSync(workDir);
 
-  cpSync(projectRoot, workDir, {
+  const copyRoot = realpathSync(projectRoot);
+  const reportRoot = realpathSync(coverageDir);
+  cpSync(copyRoot, workDir, {
     recursive: true,
     dereference: false,
     filter(source) {
-      const rel = normalizePath(relative(projectRoot, source));
-      if (rel === "") return true;
-      const suffix = statSync(source).isDirectory() ? "/" : "";
-      return !isCoverageIgnored(`${rel}${suffix}`, COPY_IGNORE_PATTERNS);
+      if (isSameOrDescendant(reportRoot, source)) return false;
+      return inspectCopyEntry(copyRoot, source) !== null;
     },
   });
 
@@ -163,6 +168,30 @@ function copyAndInstrument(projectRoot: string, workDir: string): CoverageMapDat
   }
 
   return baseline;
+}
+
+function inspectCopyEntry(projectRoot: string, source: string) {
+  const rel = normalizePath(relative(projectRoot, source));
+  // Check exclusions before inspecting dependency/output links that are never copied.
+  if (rel !== "" && isCoverageIgnored(`${rel}/`, COPY_IGNORE_PATTERNS)) return null;
+  const entry = lstatSync(source);
+  // The canonical project root may itself be the owner's workspace junction.
+  if (rel !== "" && (entry.isSymbolicLink() || (!entry.isFile() && !entry.isDirectory()))) {
+    throw new Error(`Refusing to copy linked or special source path: ${source}`);
+  }
+  return entry;
+}
+
+function assertSafeCopySource(projectRoot: string): void {
+  const directories = [projectRoot];
+  while (directories.length > 0) {
+    const directory = directories.pop()!;
+    for (const name of readdirSync(directory)) {
+      const source = join(directory, name);
+      const entry = inspectCopyEntry(projectRoot, source);
+      if (entry?.isDirectory()) directories.push(source);
+    }
+  }
 }
 
 function linkRuntimeArtifact(projectRoot: string, workDir: string, name: string): void {
@@ -240,7 +269,9 @@ export function parseRunnerArgs(argv: string[]): RunnerOptions {
     const next = argv[i + 1];
     if (!arg) continue;
 
-    if (arg === "--work-dir" && next) {
+    if (arg === "--check") {
+      options.checkCoverage = true;
+    } else if (arg === "--work-dir" && next) {
       options.workDir = resolve(PROJECT_ROOT, next);
       i++;
     } else if (arg === "--coverage-dir" && next) {
@@ -265,12 +296,34 @@ function withDefaultTestTimeout(testArgs: string[]): string[] {
   return ["--timeout", String(DEFAULT_TEST_TIMEOUT_MS), ...args];
 }
 
+function assertUnlinkedDirectoryDescendant(root: string, target: string): void {
+  let current = root;
+  for (const part of relative(root, target).split(sep)) {
+    current = join(current, part);
+    const entry = lstatSync(current, { throwIfNoEntry: false });
+    if (!entry) return;
+    if (entry.isSymbolicLink() || !entry.isDirectory()) {
+      throw new Error(`Refusing to use linked or non-directory coverage path: ${current}`);
+    }
+  }
+}
+
+function resolvePhysicalPath(target: string): string {
+  if (lstatSync(target, { throwIfNoEntry: false })) return realpathSync(target);
+  const parent = dirname(target);
+  if (parent === target) throw new Error(`Refusing to use an unavailable filesystem root: ${target}`);
+  return join(resolvePhysicalPath(parent), basename(target));
+}
+
+function isSameOrDescendant(root: string, target: string): boolean {
+  const rel = relative(root, target);
+  return rel !== ".." && !rel.startsWith(`..${sep}`) && !isAbsolute(rel);
+}
+
 export function runInstrumentedCoverage(options: RunnerOptions): RunnerResult {
   const projectRoot = resolve(options.projectRoot);
   const workDir = resolve(options.workDir);
   const coverageDir = resolve(options.coverageDir);
-  const coverageJsonPath = join(coverageDir, COVERAGE_JSON);
-  const baselineJsonPath = join(workDir, BASELINE_JSON);
 
   if (workDir === projectRoot || projectRoot.startsWith(`${workDir}${sep}`)) {
     throw new Error(`Refusing to use workDir that contains the project root: ${workDir}`);
@@ -278,37 +331,67 @@ export function runInstrumentedCoverage(options: RunnerOptions): RunnerResult {
   if (!basename(workDir).startsWith(SAFE_WORK_DIR_PREFIX) && basename(workDir) !== ".coverage-work") {
     throw new Error(`Refusing to use unsafe workDir name: ${workDir}`);
   }
-  if (!coverageDir.startsWith(projectRoot)) {
-    throw new Error(`Refusing to use coverageDir outside project root: ${coverageDir}`);
+  const coverageRelative = relative(projectRoot, coverageDir);
+  if (coverageRelative === "" || coverageRelative === ".." || coverageRelative.startsWith(`..${sep}`) || isAbsolute(coverageRelative)) {
+    throw new Error(`Refusing to use coverageDir that is not a strict descendant of project root: ${coverageDir}`);
   }
-
-  rmSync(coverageDir, { recursive: true, force: true });
-  const baseline = copyAndInstrument(projectRoot, workDir);
-  writeFileSync(baselineJsonPath, JSON.stringify(baseline), "utf-8");
-  const preloadPath = writeCoveragePreload(workDir, coverageJsonPath, baselineJsonPath);
-
-  const result = spawnSync("bun", ["test", "--preload", preloadPath, ...options.testArgs], {
-    cwd: workDir,
-    env: process.env,
-    stdio: "inherit",
-    shell: false,
-  });
-
-  if (existsSync(coverageJsonPath)) {
-    const coverageData = JSON.parse(readFileSync(coverageJsonPath, "utf-8")) as CoverageMapData;
-    const { coverageMap } = createCoverageSummary(coverageData);
-    writeCoverageReports(coverageMap, coverageDir);
+  assertUnlinkedDirectoryDescendant(projectRoot, coverageDir);
+  const workEntry = lstatSync(workDir, { throwIfNoEntry: false });
+  if (workEntry && (workEntry.isSymbolicLink() || !workEntry.isDirectory())) {
+    throw new Error(`Refusing to use linked or non-directory workDir: ${workDir}`);
   }
+  const physicalProjectRoot = realpathSync(projectRoot);
+  const physicalWorkDir = resolvePhysicalPath(workDir);
+  if (isSameOrDescendant(physicalWorkDir, physicalProjectRoot) || isSameOrDescendant(physicalProjectRoot, physicalWorkDir)) {
+    throw new Error(`Refusing to use workDir that physically overlaps the project root: ${workDir}`);
+  }
+  // Coverage is an unlinked strict project descendant, so disjoint project/work
+  // roots also guarantee disjoint coverage/work roots.
+  assertSafeCopySource(projectRoot);
 
-  return {
-    exitCode: typeof result.status === "number" ? result.status : 1,
-    coverageJsonPath,
-    coverageSummaryPath: join(coverageDir, "coverage-summary.json"),
-  };
+  const run = openCoverageRun(projectRoot, workDir, coverageDir);
+  const coverageJsonPath = join(run.reportDir, COVERAGE_JSON);
+  const baselineJsonPath = join(run.workDir, BASELINE_JSON);
+  let exitCode: number | null = null;
+  let failed = false;
+  try {
+    const baseline = copyAndInstrument(projectRoot, run.checkoutDir, coverageDir);
+    writeFileSync(baselineJsonPath, JSON.stringify(baseline), "utf-8");
+    const preloadPath = writeCoveragePreload(run.workDir, coverageJsonPath, baselineJsonPath);
+    const result = spawnSync("bun", ["test", "--preload", preloadPath, ...options.testArgs], {
+      cwd: run.checkoutDir, env: process.env, stdio: "inherit", shell: false,
+    });
+    if (existsSync(coverageJsonPath)) {
+      const coverageData = JSON.parse(readFileSync(coverageJsonPath, "utf-8")) as CoverageMapData;
+      const { coverageMap } = createCoverageSummary(coverageData);
+      writeCoverageReports(coverageMap, run.reportDir);
+    }
+    exitCode = typeof result.status === "number" ? result.status : 1;
+    if (exitCode === 0 && options.checkCoverage) {
+      const gate = runCoverageGate({
+        summaryPath: join(run.reportDir, "coverage-summary.json"),
+        lcovPath: join(run.reportDir, "lcov.info"), threshold: 95,
+      });
+      for (const line of gate.stdout) console.log(line);
+      for (const line of gate.stderr) console.error(line);
+      exitCode = gate.exitCode;
+    }
+    return { exitCode, coverageJsonPath, coverageSummaryPath: join(run.reportDir, "coverage-summary.json") };
+  } catch (error) {
+    failed = true;
+    throw error;
+  } finally {
+    try { recordCoverageRun(run, exitCode); }
+    catch (error) {
+      if (!failed) throw error;
+      process.stderr.write(`Coverage run status could not be saved: ${String(error)}\n`);
+    } finally { releaseCoverageWork(run); }
+  }
 }
 
 async function main(): Promise<number> {
   const result = runInstrumentedCoverage(parseRunnerArgs(process.argv.slice(2)));
+  console.log(`Coverage report: ${result.coverageSummaryPath}`);
   return result.exitCode;
 }
 

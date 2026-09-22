@@ -1,0 +1,13 @@
+worktree C:/Projects/memory-nexus
+HEAD 96742c74e190837bf8c00ab2bcbc35053b676837
+branch refs/heads/fix/baseline-trust-repair
+
+worktree C:/Users/Destiny/iCloudDrive/Documents/AI Tools/Anthropic Solution/Projects/memory-nexus/.claude/worktrees/agent-aa39fad9
+HEAD 4c552707a8943145380c9641a8b2003797e7c9ec
+branch refs/heads/worktree-agent-aa39fad9
+prunable gitdir file points to non-existent location
+
+worktree C:/Users/Destiny/iCloudDrive/Documents/AI Tools/Anthropic Solution/Projects/memory-nexus/.claude/worktrees/phase-32.5-discuss
+HEAD 1b0bbc9718ece8532f3cf49f7ca9a29e46684335
+branch refs/heads/worktree-phase-32.5-discuss
+prunable gitdir file points to non-existent location

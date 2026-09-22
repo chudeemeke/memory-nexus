@@ -1,0 +1,17 @@
+bun test v1.4.1 (4661e494f)
+
+scripts\coverage-run-storage.test.ts:
+(pass) coverage run ownership > owner-marker write failure cleans only an empty claim (partial marker: %s) [28.25ms]
+(pass) coverage run ownership > owner-marker write failure cleans only an empty claim (partial marker: %s) [19.93ms]
+---------------------------------|---------|---------|-------------------
+File                             | % Funcs | % Lines | Uncovered Line #s
+---------------------------------|---------|---------|-------------------
+All files                        |   42.86 |   43.30 |
+ scripts\coverage-run-storage.ts |   42.86 |   43.30 | 32-48,78-79,91-93,98-101,105-113,117-136
+---------------------------------|---------|---------|-------------------
+
+ 2 pass
+ 12 filtered out
+ 0 fail
+ 7 expect() calls
+Ran 2 tests across 1 file. [147.00ms]

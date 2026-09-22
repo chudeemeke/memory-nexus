@@ -674,21 +674,41 @@ CREATE VIRTUAL TABLE IF NOT EXISTS sessions_fts USING fts5(
  * Sessions FTS5 synchronization triggers
  * Keep sessions_fts index in sync with sessions summary updates
  *
- * Note: INSERT trigger does not index since summary is NULL on insert.
- * Only UPDATE trigger handles FTS indexing when summary is set.
+ * Index provided summaries on insert and remove old text even when an update
+ * clears the summary. The insert trigger also identifies the upgraded schema.
  */
 export const SESSIONS_FTS_TRIGGERS = `
 CREATE TRIGGER IF NOT EXISTS sessions_fts_update AFTER UPDATE OF summary ON sessions
-WHEN new.summary IS NOT NULL AND new.summary != ''
 BEGIN
     DELETE FROM sessions_fts WHERE session_id = old.id;
-    INSERT INTO sessions_fts(session_id, summary) VALUES (new.id, new.summary);
+    INSERT INTO sessions_fts(session_id, summary)
+        SELECT new.id, new.summary WHERE new.summary IS NOT NULL AND new.summary != '';
 END;
 
 CREATE TRIGGER IF NOT EXISTS sessions_fts_delete AFTER DELETE ON sessions BEGIN
     DELETE FROM sessions_fts WHERE session_id = old.id;
 END;
+
+CREATE TRIGGER IF NOT EXISTS sessions_fts_insert AFTER INSERT ON sessions
+WHEN new.summary IS NOT NULL AND new.summary != ''
+BEGIN
+    INSERT INTO sessions_fts(session_id, summary) VALUES (new.id, new.summary);
+END;
 `;
+
+/** Upgrade legacy triggers and their derived index together, once per database. */
+function ensureSessionsFtsTriggers(db: Database): void {
+    using marker = db.prepare("SELECT name FROM sqlite_master WHERE type = 'trigger' AND name = 'sessions_fts_insert'");
+    if (marker.get()) return;
+
+    db.transaction(() => {
+        db.exec("DROP TRIGGER IF EXISTS sessions_fts_update; DROP TRIGGER IF EXISTS sessions_fts_delete;");
+        db.exec(SESSIONS_FTS_TRIGGERS);
+        db.exec("DELETE FROM sessions_fts;");
+        db.exec(`INSERT INTO sessions_fts(session_id, summary)
+            SELECT id, summary FROM sessions WHERE summary IS NOT NULL AND summary != ''`);
+    })();
+}
 
 /**
  * Complete schema SQL statements in dependency order
@@ -799,7 +819,8 @@ export function createSchema(db: Database, options?: SchemaOptions): void {
     // Must run before SCHEMA_SQL loop because FRICTION_LOG_TABLE includes
     // idx_friction_tool index which requires the tool column to exist.
     try {
-        const frictionColumns = db.prepare("PRAGMA table_info(friction_log)").all() as Array<{ name: string }>;
+        using frictionStatement = db.prepare("PRAGMA table_info(friction_log)");
+        const frictionColumns = frictionStatement.all() as Array<{ name: string }>;
         const hasTool = frictionColumns.some(c => c.name === "tool");
         if (!hasTool && frictionColumns.length > 0) {
             db.exec(FRICTION_LOG_UNIVERSALIZE_MIGRATION);
@@ -811,11 +832,13 @@ export function createSchema(db: Database, options?: SchemaOptions): void {
     // Execute all schema statements in order
     // (includes embedding_state which is always created)
     for (const sql of SCHEMA_SQL) {
-        db.exec(sql);
+        if (sql === SESSIONS_FTS_TRIGGERS) ensureSessionsFtsTriggers(db);
+        else db.exec(sql);
     }
 
     // Migration: add model_name column to embedding_state if not present
-    const columns = db.prepare("PRAGMA table_info(embedding_state)").all() as Array<{ name: string }>;
+    using embeddingStatement = db.prepare("PRAGMA table_info(embedding_state)");
+    const columns = embeddingStatement.all() as Array<{ name: string }>;
     const hasModelName = columns.some(c => c.name === "model_name");
     if (!hasModelName) {
         db.exec(EMBEDDING_STATE_ADD_MODEL_NAME);

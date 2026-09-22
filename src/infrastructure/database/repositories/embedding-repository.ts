@@ -55,7 +55,7 @@ export class EmbeddingRepository implements IEmbeddingRepository {
      */
     findUnembedded(limit: number, modelHash?: string): UnembeddedMessage[] {
         if (modelHash) {
-            return this.db.prepare<UnembeddedMessage, [string, number]>(`
+            using statement = this.db.prepare<UnembeddedMessage, [string, number]>(`
                 SELECT m.rowid AS rowid, m.content AS content
                 FROM messages_meta m
                 LEFT JOIN embedding_state es ON m.rowid = es.message_id
@@ -66,17 +66,19 @@ export class EmbeddingRepository implements IEmbeddingRepository {
                   AND esk.message_id IS NULL
                 ORDER BY m.rowid ASC
                 LIMIT ?
-            `).all(modelHash, limit);
+            `);
+            return statement.all(modelHash, limit);
         }
 
-        return this.db.prepare<UnembeddedMessage, [number]>(`
+        using statement = this.db.prepare<UnembeddedMessage, [number]>(`
             SELECT m.rowid AS rowid, m.content AS content
             FROM messages_meta m
             LEFT JOIN embedding_state es ON m.rowid = es.message_id
             WHERE es.message_id IS NULL
             ORDER BY m.rowid ASC
             LIMIT ?
-        `).all(limit);
+        `);
+        return statement.all(limit);
     }
 
     /**
@@ -91,7 +93,7 @@ export class EmbeddingRepository implements IEmbeddingRepository {
                 ? record.skippedAt.toISOString()
                 : record.skippedAt ?? new Date().toISOString();
 
-        this.db.prepare(`
+        using statement = this.db.prepare(`
             INSERT INTO embedding_skips (
                 message_id,
                 model_hash,
@@ -113,7 +115,8 @@ export class EmbeddingRepository implements IEmbeddingRepository {
                 content_bytes = excluded.content_bytes,
                 safe_error = excluded.safe_error,
                 skipped_at = excluded.skipped_at
-        `).run(
+        `);
+        statement.run(
             record.messageId,
             record.modelHash,
             record.modelName,
@@ -132,15 +135,17 @@ export class EmbeddingRepository implements IEmbeddingRepository {
      */
     getSkippedCount(modelHash?: string): number {
         if (modelHash) {
-            const row = this.db.prepare<{ count: number }, [string]>(
+            using statement = this.db.prepare<{ count: number }, [string]>(
                 "SELECT COUNT(*) as count FROM embedding_skips WHERE model_hash = ?"
-            ).get(modelHash);
+            );
+            const row = statement.get(modelHash);
             return row?.count ?? 0;
         }
 
-        const row = this.db.prepare<{ count: number }, []>(
+        using statement = this.db.prepare<{ count: number }, []>(
             "SELECT COUNT(*) as count FROM embedding_skips"
-        ).get();
+        );
+        const row = statement.get();
         return row?.count ?? 0;
     }
 
@@ -158,13 +163,13 @@ export class EmbeddingRepository implements IEmbeddingRepository {
      * @param modelName Human-readable model name (e.g., "Xenova/all-MiniLM-L6-v2")
      */
     storeBatch(items: EmbeddingBatchItem[], modelHash: string, modelName: string): void {
-        const updateVec = this.db.prepare(
+        using updateVec = this.db.prepare(
             "UPDATE message_embeddings SET embedding = vec_f32(?) WHERE rowid = ?"
         );
-        const insertVec = this.db.prepare(
+        using insertVec = this.db.prepare(
             "INSERT INTO message_embeddings(rowid, embedding) VALUES (?, vec_f32(?))"
         );
-        const insertState = this.db.prepare(
+        using insertState = this.db.prepare(
             `INSERT INTO embedding_state(message_id, embedded_at, model_hash, model_name)
              VALUES (?, ?, ?, ?)
              ON CONFLICT(message_id) DO UPDATE SET
@@ -193,9 +198,10 @@ export class EmbeddingRepository implements IEmbeddingRepository {
      * @returns The model hash string, or null if no embeddings exist
      */
     getStoredModelHash(): string | null {
-        const row = this.db.prepare<{ model_hash: string }, []>(
+        using statement = this.db.prepare<{ model_hash: string }, []>(
             "SELECT DISTINCT model_hash FROM embedding_state LIMIT 1"
-        ).get();
+        );
+        const row = statement.get();
         return row?.model_hash ?? null;
     }
 
@@ -208,9 +214,10 @@ export class EmbeddingRepository implements IEmbeddingRepository {
      * @returns The model name string, or null if unavailable
      */
     getStoredModelName(): string | null {
-        const row = this.db.prepare<{ model_name: string }, []>(
+        using statement = this.db.prepare<{ model_name: string }, []>(
             "SELECT DISTINCT model_name FROM embedding_state WHERE model_name != '' LIMIT 1"
-        ).get();
+        );
+        const row = statement.get();
         return row?.model_name ?? null;
     }
 
@@ -231,9 +238,10 @@ export class EmbeddingRepository implements IEmbeddingRepository {
      * @returns The number of rows in embedding_state
      */
     getEmbeddedCount(): number {
-        const row = this.db.prepare<{ count: number }, []>(
+        using statement = this.db.prepare<{ count: number }, []>(
             "SELECT COUNT(*) as count FROM embedding_state"
-        ).get();
+        );
+        const row = statement.get();
         return row?.count ?? 0;
     }
 
@@ -243,9 +251,10 @@ export class EmbeddingRepository implements IEmbeddingRepository {
      * @returns The number of rows in messages_meta
      */
     getTotalMessageCount(): number {
-        const row = this.db.prepare<{ count: number }, []>(
+        using statement = this.db.prepare<{ count: number }, []>(
             "SELECT COUNT(*) as count FROM messages_meta"
-        ).get();
+        );
+        const row = statement.get();
         return row?.count ?? 0;
     }
 
@@ -261,7 +270,7 @@ export class EmbeddingRepository implements IEmbeddingRepository {
      */
     vectorKnnSearch(queryEmbedding: Float32Array, limit: number): VectorSearchRow[] {
         if (limit <= 0) return [];
-        const stmt = this.db.prepare<VectorSearchRow, [Float32Array, number]>(`
+        using stmt = this.db.prepare<VectorSearchRow, [Float32Array, number]>(`
             SELECT rowid, distance
             FROM message_embeddings
             WHERE embedding MATCH ?
@@ -280,14 +289,16 @@ export class EmbeddingRepository implements IEmbeddingRepository {
      * @returns The dimension count, or null if no embeddings are stored
      */
     getStoredEmbeddingDimensions(): number | null {
-        const countRow = this.db.prepare<{ count: number }, []>(
+        using countStatement = this.db.prepare<{ count: number }, []>(
             "SELECT COUNT(*) as count FROM message_embeddings"
-        ).get();
+        );
+        const countRow = countStatement.get();
         if (!countRow || countRow.count === 0) return null;
 
-        const row = this.db.prepare<{ embedding: Uint8Array }, []>(
+        using statement = this.db.prepare<{ embedding: Uint8Array }, []>(
             "SELECT embedding FROM message_embeddings LIMIT 1"
-        ).get();
+        );
+        const row = statement.get();
         if (!row || !row.embedding) return null;
 
         // Float32 = 4 bytes per dimension

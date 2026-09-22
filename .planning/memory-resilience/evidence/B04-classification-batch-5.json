@@ -1,0 +1,208 @@
+{
+  "item_id": "B04",
+  "status": "active",
+  "recorded_at": "2026-09-19T23:55:18.693Z",
+  "source_revision": "a4b80f8f2bc3facf011327d99e8b63cb2755ffe9",
+  "cwd": "C:\\Projects\\memory-nexus",
+  "change_scope": "Twenty-five test-driver classifications, isolated callback diagnostic and eleven atomic cleanup repair tasks; no production/test executable source changed.",
+  "counts": {
+    "candidates": 446,
+    "proposed": 266,
+    "unclassified": 180,
+    "approvedExclusions": 0,
+    "ledgerItems": 159
+  },
+  "decisions": [
+    {
+      "path": "src/infrastructure/capabilities/capability-status.test.ts",
+      "tier": "S",
+      "anchor": "rmSync(dir,",
+      "sourceHash": "b2ab916220bf65c1d27e9da742c7d71bd20b4fb61742ac2a00a9995eddf9794b"
+    },
+    {
+      "path": "src/infrastructure/database/connection.test.ts",
+      "tier": "S",
+      "anchor": "rmSync(dir,",
+      "sourceHash": "dc6311aeb196a72b03273998a07fd2dc31af0e5eaf501e119656ab1a641b2402"
+    },
+    {
+      "path": "src/infrastructure/database/event-log.dream.test.ts",
+      "tier": "S",
+      "anchor": "unlinkSync(logPath)",
+      "sourceHash": "732ed937df7ce60fcfcbec0d14fae190674d01f9d56ea2557f2a736e66b0b1dc"
+    },
+    {
+      "path": "src/infrastructure/database/health-checker.test.ts",
+      "tier": "S",
+      "anchor": "rmSync(testDir,",
+      "sourceHash": "2ff2e504e60ce6ff386cbc6d0f5775be704658867f29a11be04abcea037ebfc4"
+    },
+    {
+      "path": "src/infrastructure/database/integration.test.ts",
+      "tier": "S",
+      "anchor": "unlinkSync(dbPath)",
+      "sourceHash": "72731717dafd74d9086f38cc35b9ba7ae25a7fdede3a6a0f8c708cae2f5d6b2a"
+    },
+    {
+      "path": "src/infrastructure/embedding/background-embedder.test.ts",
+      "tier": "S",
+      "anchor": "rmSync(testDir,",
+      "sourceHash": "1cee22c1cbd8083e4e80a9d2749c56df6e5cb45c2481be0e64a20acf8a34330b"
+    },
+    {
+      "path": "src/infrastructure/external/qmd-runner.test.ts",
+      "tier": "S",
+      "anchor": "rmSync(dir,",
+      "sourceHash": "3f3970b050266ee24bcd1cd807d03c9c3a47e947d2d120fb6d61144df1efa9b7"
+    },
+    {
+      "path": "src/infrastructure/hooks/auto-memory-writer.test.ts",
+      "tier": "S",
+      "anchor": "rmSync(testDir,",
+      "sourceHash": "791cf42df33af0e382baa73a84af9dcb153fb981bb01b303ed2db87fcaed6bb8"
+    },
+    {
+      "path": "src/infrastructure/hooks/config-manager.test.ts",
+      "tier": "S",
+      "anchor": "rmSync(testDir,",
+      "sourceHash": "8f2b49a6b52de344c4570fddff35467d1865c6c76d5a319b04f842827fdecc70"
+    },
+    {
+      "path": "src/infrastructure/hooks/git-syncer.test.ts",
+      "tier": "S",
+      "anchor": "rmSync(path,",
+      "sourceHash": "c38c574fc189fbd52b56dc8b94b37a318be86d80ead7da788b29c07477151920"
+    },
+    {
+      "path": "src/infrastructure/hooks/hook-runner.test.ts",
+      "tier": "S",
+      "anchor": "rmSync(testDir,",
+      "sourceHash": "3f998a868485183a7861fa35fac6c414523af8b32b0d5fa28d56d6222d6f98e4"
+    },
+    {
+      "path": "src/infrastructure/hooks/log-writer.test.ts",
+      "tier": "S",
+      "anchor": "rmSync(testDir,",
+      "sourceHash": "1af8fa897b6db5965a2b40552007520d26c888a3e0bf15afce87fed8c11b8940"
+    },
+    {
+      "path": "src/infrastructure/hooks/settings-manager.test.ts",
+      "tier": "S",
+      "anchor": "rmSync(testBaseDir,",
+      "sourceHash": "e628f193cbaf280c8496a0a8069afd7e3912f96fefea10b01c445ffb86e168f2"
+    },
+    {
+      "path": "src/infrastructure/hooks/sync-hook-script.test.ts",
+      "tier": "S",
+      "anchor": "rmSync(testDir,",
+      "sourceHash": "6d703ec0a4c9f14eed75381021a62771b280306b87b07b1437ebbe3e602c9e72"
+    },
+    {
+      "path": "src/infrastructure/migration.test.ts",
+      "tier": "S",
+      "anchor": "rmSync(testDir,",
+      "sourceHash": "88c8654aa9f753d93941d89eae6efddf7f941f54cbe2b364427948a2e2f7b1e0"
+    },
+    {
+      "path": "src/infrastructure/parsers/integration.test.ts",
+      "tier": "S",
+      "anchor": "rmSync(SCRATCHPAD,",
+      "sourceHash": "65426aace10e9fc0a12b2817ccc2c44ca9b5237d75063f3d87cfb471dfcca7f0"
+    },
+    {
+      "path": "src/infrastructure/parsers/jsonl-parser.test.ts",
+      "tier": "S",
+      "anchor": "rmSync(testDir,",
+      "sourceHash": "9e943473093534b9a2752ef68ef6ac328e810c530a21d3c09cd9b564d46323c3"
+    },
+    {
+      "path": "src/infrastructure/paths.test.ts",
+      "tier": "S",
+      "anchor": "fs.rmSync(tempDir,",
+      "sourceHash": "a4ae92a58086acdd6c0506c5b93d2601a30c4b95dbc9f5b44dbf2234f23ce2d6"
+    },
+    {
+      "path": "src/infrastructure/remote/git-remote-event-transport.test.ts",
+      "tier": "S",
+      "anchor": "rmSync(path,",
+      "sourceHash": "341be31265385cfa4b936e637d56385733dbeb7dbfc98941815674cf707b8607"
+    },
+    {
+      "path": "src/infrastructure/security/secret-audit-service.test.ts",
+      "tier": "S",
+      "anchor": "rmSync(tempDir,",
+      "sourceHash": "f8ce895ee7361776370e28bf694e168b12415340d8e9dc9449df2fde6838979f"
+    },
+    {
+      "path": "src/infrastructure/signals/checkpoint-manager.test.ts",
+      "tier": "S",
+      "anchor": "rmSync(testDir,",
+      "sourceHash": "fc2de5950623bda1a71e15bc155f2d7f812d46b8b8c606d86f5afa61f5fb64e4"
+    },
+    {
+      "path": "src/infrastructure/sources/integration.test.ts",
+      "tier": "S",
+      "anchor": "rmSync(TEST_DIR,",
+      "sourceHash": "18f23a41e9dd3f1f99e32446b7c48b9b78eaa5289bef1f1a426975e0a9d83fe6"
+    },
+    {
+      "path": "src/infrastructure/sources/memory-file-scanner.test.ts",
+      "tier": "S",
+      "anchor": "await rm(tempDir,",
+      "sourceHash": "5a85ac081b2b9c30626c4026a08f293cada17712bf9f81e1a3564b965623f732"
+    },
+    {
+      "path": "src/infrastructure/sources/project-name-resolver.test.ts",
+      "tier": "S",
+      "anchor": "rmSync(testDir,",
+      "sourceHash": "2aeb5299875b4b661b287db150dfd664ac68fcad8f1481ea4da8c528db90c394"
+    },
+    {
+      "path": "src/infrastructure/sources/session-source.test.ts",
+      "tier": "S",
+      "anchor": "rmSync(testDir,",
+      "sourceHash": "8730d9fbd2a05fbc91d74c6e1bb741533484aaeff8193b2f35d134b1a0ca2278"
+    }
+  ],
+  "sourceInputs": [
+    {
+      "path": ".planning/memory-resilience/quality-classifications.json",
+      "sourceHash": "6ae4a21edba5d71bab8e965ae30a9d704b0874b1553e80bb78a277e5687f365b"
+    },
+    {
+      "path": ".planning/memory-resilience/work-items.json",
+      "sourceHash": "6e377b803ed8cd79ed7d68971234ab51e38f8a43a786efaef95e62b514199d86"
+    }
+  ],
+  "diagnostic": {
+    "command": "node .git/b04-scratch-lifecycle-probe.mjs",
+    "exit": 0,
+    "source": "import fs from 'node:fs';\nimport path from 'node:path';\nimport vm from 'node:vm';\nimport crypto from 'node:crypto';\nimport ts from 'typescript';\n\nconst repository=fs.realpathSync('.');\nconst parent=fs.realpathSync('.git');\nif(parent!==path.join(repository,'.git'))throw new Error('Unexpected probe parent');\nconst sandbox=fs.mkdtempSync(path.join(parent,'b04-scratch-lifecycle-'));\nconst cases=[\n ['src/infrastructure/parsers/integration.test.ts','afterAll','SCRATCHPAD'],\n ['src/infrastructure/sources/integration.test.ts','beforeAll','TEST_DIR'],\n ['src/infrastructure/hooks/settings-manager.test.ts','beforeEach','testBaseDir'],\n ['src/infrastructure/hooks/hook-runner.test.ts','beforeEach','testDir'],\n];\nconst observations=[];\nfor(const [file,hook,binding] of cases) {\n const source=fs.readFileSync(file,'utf8');\n const ast=ts.createSourceFile(file,source,ts.ScriptTarget.Latest,true);\n let callback;\n const visit=node=>{\n  if(!callback && ts.isCallExpression(node) && node.expression.getText(ast)===hook) callback=node.arguments[0];\n  ts.forEachChild(node,visit);\n };\n visit(ast);\n if(!callback || !ts.isArrowFunction(callback))throw new Error('Missing callback '+file);\n const extracted=callback.getText(ast);\n const js=ts.transpileModule('('+extracted+')()',{\n  compilerOptions:{target:ts.ScriptTarget.ESNext,module:ts.ModuleKind.ESNext}\n }).outputText;\n const caseRoot=fs.mkdtempSync(path.join(sandbox,'case-'));\n const target=path.join(caseRoot,'existing-scratch');\n fs.mkdirSync(target);\n const marker=path.join(target,'preexisting-synthetic-marker.txt');\n fs.writeFileSync(marker,'Owned by the probe, preexisting relative to the extracted test callback.',{flag:'wx'});\n const checked=p=>{\n  const absolute=path.resolve(p);\n  if(!absolute.startsWith(caseRoot+path.sep))throw new Error('Probe boundary escape');\n  let ancestor=absolute;\n  while(ancestor!==caseRoot) {\n   if(fs.existsSync(ancestor) && fs.lstatSync(ancestor).isSymbolicLink())throw new Error('Probe link');\n   ancestor=path.dirname(ancestor);\n  }\n  return absolute;\n };\n const removals=[];\n vm.runInNewContext(js,{\n  [binding]:target,\n  MOCK_CLAUDE_DIR:path.join(target,'.claude','projects'),\n  join:path.join,\n  existsSync:p=>fs.existsSync(checked(p)),\n  mkdirSync:(p,options)=>fs.mkdirSync(checked(p),options),\n  writeFileSync:(p,data,...options)=>fs.writeFileSync(checked(p),data,...options),\n  rmSync:(p,options)=>{const absolute=checked(p);removals.push(path.relative(caseRoot,absolute));fs.rmSync(absolute,options);},\n },{timeout:2000});\n observations.push({file,hook,sourceHash:crypto.createHash('sha256').update(source.replaceAll('\\r\\n','\\n')).digest('hex'),\n  callback:extracted,markerSurvived:fs.existsSync(marker),removals});\n}\nconsole.log(JSON.stringify({kind:'Extracted lifecycle callback diagnostic; not passing regressions',\n sandbox:path.relative(repository,sandbox),observations,\n limits:'Only freshly allocated project .git probe directories were mutated. No original test module, production memory, existing scratch directory, browser, provider or full test runner was invoked. Retained artifacts are synthetic.'},null,2));\n",
+    "report": ".planning/memory-resilience/evidence/B04-scratch-lifecycle-probe.json",
+    "reportHash": "5d056da257781e4070d0ab737be7e0a6daa8f4c0f4ae857df433a3da0f05d2a3"
+  },
+  "checks": [
+    {
+      "command": "bun .git/b04-validate-batch-5.ts",
+      "exit": 0,
+      "meaning": "All source/package bindings match; 180 unknowns are test drivers; acyclic ledger requires cleanup before full-suite rebaseline and baseline review.",
+      "log": ".planning/memory-resilience/evidence/B04-batch-5-validation.json",
+      "verification_source": "import { readFileSync, writeFileSync } from 'node:fs';\nimport { execFileSync } from 'node:child_process';\nimport { sourceHash, validateInventory } from '../scripts/quality-inventory.ts';\nconst root = '.planning/memory-resilience/';\nconst read = (p: string) => JSON.parse(readFileSync(p,'utf8'));\nconst assert = (condition: unknown, message: string) => { if(!condition) throw new Error(message); };\nconst catalog = read(root+'executable-catalog.json');\nconst manifest = read(root+'quality-classifications.json');\nconst ledger = read(root+'work-items.json');\nconst mapping = read(root+'package-boundary-map.json');\nfor(const input of [...catalog.files,...catalog.packages,...mapping.sourceInputs]) assert(sourceHash(readFileSync(input.path,'utf8'))===input.sourceHash,'Stale source '+input.path);\nconst issues = validateInventory(catalog,manifest);\nassert(issues.length===180 && issues.every(i=>i.startsWith('Unknown risk tier: ')),'Unexpected inventory errors');\nassert(manifest.files.filter((f:any)=>f.tier!==null).length===266,'Wrong proposed count');\nconst catalogByPath=new Map(catalog.files.map((f:any)=>[f.path,f]));\nassert(manifest.files.filter((f:any)=>f.tier===null).every((f:any)=>(catalogByPath.get(f.path) as any)?.syntax==='test-driver'),'Non-test candidate remains unclassified');\nconst byId = new Map<string,any>(ledger.items.map((i:any)=>[i.id,i]));\nassert(byId.size===159 && byId.size===ledger.items.length,'Duplicate or missing work items');\nconst visited = new Set<string>();\nfunction visit(id:string, parents = new Set<string>()) {\n assert(!parents.has(id),'Dependency cycle '+id);\n if(visited.has(id))return;\n assert(byId.has(id),'Unknown dependency '+id);\n const stack=new Set([...parents,id]);\n for(const dep of byId.get(id).depends_on) visit(dep,stack);\n visited.add(id);\n}\nfor(const id of byId.keys())visit(id);\nfunction reaches(id:string,target:string):boolean { return id===target || byId.get(id).depends_on.some((dep:string)=>reaches(dep,target)); }\nfor(const id of ['B11.1','B11.2','B11.3','B11.4',...Array.from({length:11},(_,i)=>'B11.'+(i+5)),'Q095','Q081','B12','D05','Q091','Q092','Q093','Q094','Q041'])assert(reaches('R02',id),'Finding bypasses baseline acceptance '+id);\nfor(const item of ledger.items.filter((i:any)=>i.id.startsWith('B11.') && i.id!=='B11.3'))assert(reaches('B09',item.id),'Full-suite rebaseline bypasses cleanup '+item.id);\nassert(ledger.items.filter((i:any)=>i.status==='active').map((i:any)=>i.id).join()==='B04','Unexpected active item');\nassert(byId.get('B05').status==='pending','B05 prematurely advanced');\nconst changed=execFileSync('git',['diff','--name-only'],{encoding:'utf8'}).trim().split('\\n');\nassert(changed.every(p=>p.startsWith('.planning/')),'Unexpected executable change');\nconst record={status:'PASS',sourceBindings:catalog.files.length,packageBindings:catalog.packages.length,packageMapBindings:mapping.sourceInputs.length,proposed:266,unclassified:180,expectedGateExit:1,ledgerItems:byId.size,acyclic:true,newFindingsReachBaselineReview:true,activeItem:'B04',nextItemStatus:'B05 pending',limits:'Data/source consistency only; no independent tier approval or runtime acceptance.'};\nwriteFileSync(root+'evidence/B04-batch-5-validation.json',JSON.stringify(record,null,2)+'\\n');\nconsole.log(JSON.stringify(record));\n",
+      "logHash": "e1da9cb1143e8eaa16c63281be61ceea8284a23b3a13617cdb95daa940ede2bf"
+    },
+    {
+      "command": "bun run quality:inventory",
+      "exit": 1,
+      "meaning": "Expected incomplete inventory, 180 unknown-tier issues.",
+      "log": ".planning/memory-resilience/evidence/B04-batch-5-gate.txt",
+      "logHash": "ab8fed1cb71adfb60722afb167e460c3632c6954ef5bd5da150d8714e091e817"
+    }
+  ],
+  "limits": [
+    "Positive filesystem mutation is sufficient for proposed S risk; whole test bodies and assertion quality are not claimed fully reviewed.",
+    "Extracted callbacks ran against freshly allocated project .git sandboxes; this is not full Bun test-runner evidence or proof of historical data loss.",
+    "Silent catches were inspected, not injected in this checkpoint; individual repair tasks require failure regressions.",
+    "Individual numeric applicability and independent review remain open. No test-driver blanket exclusions or full-suite/coverage acceptance."
+  ],
+  "runtime": "Windows Node v24.20.0; Bun 1.4.1"
+}

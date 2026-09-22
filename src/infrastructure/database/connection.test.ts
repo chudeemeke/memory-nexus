@@ -18,7 +18,6 @@ import {
     bulkOperationCheckpoint,
     getDefaultDbPath,
     loadSqliteVecExtension,
-    type DatabaseConfig,
 } from "./connection.js";
 import { ErrorCode, MemoryError } from "../../domain/index.js";
 
@@ -266,9 +265,11 @@ describe("Database Connection", () => {
         });
 
         test("falls back to zero counts when SQLite returns no row", () => {
+            let disposed = false;
             const fakeDb = {
-                query: () => ({
+                prepare: () => ({
                     get: () => null,
+                    [Symbol.dispose]: () => { disposed = true; },
                 }),
             };
 
@@ -277,6 +278,7 @@ describe("Database Connection", () => {
                 log: 0,
                 checkpointed: 0,
             });
+            expect(disposed).toBe(true);
         });
     });
 
@@ -461,9 +463,11 @@ describe("Database Connection", () => {
         });
 
         test("wraps errors in MemoryError", () => {
+            const missingPath = createTempDbPath();
+            tempPaths.push(missingPath);
             // Try to open a path that doesn't exist with create: false
             expect(() => initializeDatabaseSafe({
-                path: "/nonexistent/path/to/database.db",
+                path: missingPath,
                 create: false,
             })).toThrow(MemoryError);
         });
@@ -487,31 +491,36 @@ describe("Database Connection", () => {
         });
 
         test("includes path in error context", () => {
+            const missingPath = createTempDbPath();
+            tempPaths.push(missingPath);
             try {
                 initializeDatabaseSafe({
-                    path: "/definitely/not/a/real/path/database.db",
+                    path: missingPath,
                     create: false,
                 });
                 expect(false).toBe(true); // Should not reach here
             } catch (error) {
                 expect(error).toBeInstanceOf(MemoryError);
                 const mnError = error as MemoryError;
-                expect(mnError.context?.path).toBe("/definitely/not/a/real/path/database.db");
+                expect(mnError.context?.path).toBe(missingPath);
             }
         });
     });
 
     describe("error handling", () => {
         test("throws MemoryError for connection failure", () => {
+            const missingPath = createTempDbPath();
+            tempPaths.push(missingPath);
             // Try to open a path that doesn't exist with create: false
             expect(() => initializeDatabase({
-                path: "/nonexistent/path/to/database.db",
+                path: missingPath,
                 create: false,
             })).toThrow(MemoryError);
         });
 
         test("error includes path context", () => {
-            const badPath = "/nonexistent/path/to/database.db";
+            const badPath = createTempDbPath();
+            tempPaths.push(badPath);
             try {
                 initializeDatabase({
                     path: badPath,

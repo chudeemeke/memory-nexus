@@ -17,28 +17,23 @@
  *   NO dbPath: "/non/existent/..." (Windows file-locking non-deterministic).
  */
 
-import { describe, expect, it, beforeEach, afterEach } from "bun:test";
+import { describe, expect, it, afterEach } from "bun:test";
 import { executeSearchCommand } from "./search.js";
 import {
   captureStreams,
-  makeTempDbPath,
-  cleanupTempPaths,
-} from "./_helpers/capture-json.js";
+  createTempDatabaseTracker,
+} from "../../../../tests/helpers/capture-json.js";
 
 describe("search --json envelope (Plan 32-02 CLI-02)", () => {
-  let tempPaths: string[] = [];
-
-  beforeEach(() => {
-    tempPaths = [];
-  });
+  const tempDatabase = createTempDatabaseTracker();
 
   afterEach(() => {
-    cleanupTempPaths(tempPaths);
+    return tempDatabase.cleanup();
   });
 
   describe("A. valid JSON on success path (empty DB → empty results)", () => {
     it("emits envelope with schema_version, command, kind, data", async () => {
-      const dbPath = makeTempDbPath("search", tempPaths);
+      const dbPath = tempDatabase.makePath("search");
       const { stdout, exitCode } = await captureStreams(() =>
         executeSearchCommand("query", { json: true, dbPath })
       );
@@ -54,7 +49,7 @@ describe("search --json envelope (Plan 32-02 CLI-02)", () => {
 
   describe("B. envelope on EMPTY result", () => {
     it("emits envelope with data: [] not plain text", async () => {
-      const dbPath = makeTempDbPath("search", tempPaths);
+      const dbPath = tempDatabase.makePath("search");
       const { stdout, exitCode } = await captureStreams(() =>
         executeSearchCommand("definitely-no-results-zxqv-12345", {
           json: true,
@@ -73,7 +68,7 @@ describe("search --json envelope (Plan 32-02 CLI-02)", () => {
 
   describe("C. envelope on VALIDATION error", () => {
     it("emits error envelope on empty query", async () => {
-      const dbPath = makeTempDbPath("search", tempPaths);
+      const dbPath = tempDatabase.makePath("search");
       const { stdout, exitCode } = await captureStreams(() =>
         executeSearchCommand("", { json: true, dbPath })
       );
@@ -88,7 +83,7 @@ describe("search --json envelope (Plan 32-02 CLI-02)", () => {
     });
 
     it("emits error envelope on invalid limit", async () => {
-      const dbPath = makeTempDbPath("search", tempPaths);
+      const dbPath = tempDatabase.makePath("search");
       const { stdout, exitCode } = await captureStreams(() =>
         executeSearchCommand("q", { json: true, dbPath, limit: "-1" })
       );
@@ -100,7 +95,7 @@ describe("search --json envelope (Plan 32-02 CLI-02)", () => {
     });
 
     it("emits error envelope on invalid since-date", async () => {
-      const dbPath = makeTempDbPath("search", tempPaths);
+      const dbPath = tempDatabase.makePath("search");
       const { stdout, exitCode } = await captureStreams(() =>
         executeSearchCommand("q", {
           json: true,
@@ -118,7 +113,7 @@ describe("search --json envelope (Plan 32-02 CLI-02)", () => {
 
   describe("F. stdout is EXACTLY ONE JSON document in --json mode", () => {
     it("emits parseable JSON without preceding/trailing non-JSON lines", async () => {
-      const dbPath = makeTempDbPath("search", tempPaths);
+      const dbPath = tempDatabase.makePath("search");
       const { stdout } = await captureStreams(() =>
         executeSearchCommand("query", { json: true, dbPath })
       );
@@ -133,7 +128,7 @@ describe("search --json envelope (Plan 32-02 CLI-02)", () => {
 
   describe("H. per-command meta assertion", () => {
     it("includes meta.query and meta.mode for empty search", async () => {
-      const dbPath = makeTempDbPath("search", tempPaths);
+      const dbPath = tempDatabase.makePath("search");
       const { stdout } = await captureStreams(() =>
         executeSearchCommand("specific-query-for-meta", {
           json: true,
@@ -148,7 +143,7 @@ describe("search --json envelope (Plan 32-02 CLI-02)", () => {
 
   describe("I. --files --json (Codex HIGH-4)", () => {
     it("emits envelope with kind: 'file' regardless of qmd availability", async () => {
-      const dbPath = makeTempDbPath("search", tempPaths);
+      const dbPath = tempDatabase.makePath("search");
       const { stdout, exitCode } = await captureStreams(() =>
         executeSearchCommand("foo", { json: true, files: true, dbPath })
       );
@@ -171,7 +166,7 @@ describe("search --json envelope (Plan 32-02 CLI-02)", () => {
 
   describe("J. --json --format ai routing equivalence (Codex HIGH-5)", () => {
     it("deep-equals --json alone vs --json --format ai (search)", async () => {
-      const dbPath = makeTempDbPath("search", tempPaths);
+      const dbPath = tempDatabase.makePath("search");
       // Run with --json alone
       const { stdout: stdoutA } = await captureStreams(() =>
         executeSearchCommand("equivalence-test", { json: true, dbPath })
