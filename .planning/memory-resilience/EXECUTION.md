@@ -219,8 +219,10 @@ export, event and secret-audit statement migration: 29 scoped prepares across fo
 modules, source-bound native slices and four negative ownership checks. B11.74.6.1
 factory implementation/current-runtime proof is complete; the final pinned group
 repeat is disk-guarded after a type-only test import repair. B11.74.6.2 health
-readers is independently active, followed
-by B11.74.6.3 CLI/evaluation and combined caller revalidation. Q018/B11.9 retain
+readers has current-runtime proof; its pinned repeat is also disk-guarded.
+B11.74.6.3.1 CLI/evaluation ownership is independently active. Combined caller
+revalidation in .3.2 requires factory, health and CLI slices; no native gate was
+removed to avoid the disk wait. Q018/B11.9 and Q102/B11.10 retain
 factory and fixture quality gaps. Q100 owns the
 demonstrated whole-replay failure defect; Q101 owns complete secret-remediation
 safety. Full quality, platform and review acceptance remains B11.74.7; local

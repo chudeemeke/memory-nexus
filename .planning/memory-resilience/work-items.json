@@ -3,7 +3,7 @@
   "workstream": "memory-resilience",
   "goal_status": "active",
   "starting_revision": "77d54e05be7fc24cede4a9a3e1fede6fa113ac8f",
-  "current_item": "B11.74.6.2",
+  "current_item": "B11.74.6.3.1",
   "status_semantics": {
     "pending": "Not started; authorization and dependencies must permit work.",
     "pending_rebaseline": "Historical candidate, not a confirmed current failure or a completed task.",
@@ -2500,7 +2500,8 @@
         "Q098",
         "Q099",
         "Q100",
-        "Q101"
+        "Q101",
+        "Q102"
       ],
       "scope": "all Q-* work items",
       "deliverable": "Close individually verified quality work items; fix discovered defects and meaningful boundaries, not artificial counter tests.",
@@ -2744,6 +2745,11 @@
           "document": "docs/plans/2026-09-22-factory-ownership.md",
           "owner": "memory-nexus",
           "trigger": "Before integration/adoption: notify opted-in consumers of factory ownership, create:false no-directory behavior, statement invalidation at close and combined error causes; include accepted supported runtime policy."
+        },
+        "consumerHealthNotice": {
+          "document": "docs/plans/2026-09-22-health-reader-integrity.md",
+          "owner": "memory-nexus",
+          "trigger": "Before integration/adoption: notify opted-in consumers of partial-count false-ready repair and final accepted health/diagnostic contract."
         }
       }
     },
@@ -3704,11 +3710,18 @@
       "risk": "S",
       "authorization": "authorized",
       "owner": "memory-nexus",
-      "evidence": [],
+      "evidence": [
+        ".planning/memory-resilience/evidence/B11.74.6.2.json"
+      ],
       "acceptance_record": ".planning/memory-resilience/evidence/B11.10.json",
       "observed_gap": "Source inspection: afterAll silently catches recursive test directory removal failures.",
       "observed_evidence": ".planning/memory-resilience/B04-source-findings.md",
-      "retirement_trigger": "Before affected full-suite execution/B09 and B10/R02; diagnostic/source inspection is not completed repair acceptance."
+      "retirement_trigger": "Before affected full-suite execution/B09 and B10/R02; diagnostic/source inspection is not completed repair acceptance.",
+      "progress": {
+        "current": "Four mock paths explicitly verify prepare/read/dispose behavior; unused type import removed. Existing fixture cleanup catches remain; branch coverage60% fails.",
+        "owner": "memory-nexus",
+        "trigger": "Before B11.74.7/B10/R02 acceptance."
+      }
     },
     {
       "id": "B11.11",
@@ -5535,7 +5548,7 @@
       "acceptance_record": ".planning/memory-resilience/evidence/B11.74.6.json",
       "retirement_trigger": "Before parent B11.74/B10/R02 acceptance; child local proof does not imply factory or whole-platform acceptance.",
       "progress": {
-        "restart": "Health slice .2 active; factory .1 final pinned repeat pending disk. Combined .3 still requires both.",
+        "restart": "CLI/evaluation .3.1 active independently; factory .1 and health .2 await pinned runtime capacity. Combined .3.2 requires all three.",
         "factory": "activated in source; scoped native proof only",
         "prerequisite": ".planning/memory-resilience/evidence/B11.74.5.json"
       }
@@ -5569,7 +5582,9 @@
         "Q100",
         "Q101",
         "Q018",
-        "B11.9"
+        "B11.9",
+        "Q102",
+        "B11.10"
       ],
       "scope": "All B11.74 affected production/test files and native runtime targets",
       "deliverable": "Complete per-file/package/tier/changed-line proof and independent review; dependency barriers can resume",
@@ -5769,7 +5784,7 @@
       "id": "B11.74.6.2",
       "stage": "baseline",
       "title": "Health reader statement lifetime",
-      "status": "active",
+      "status": "pending",
       "depends_on": [
         "B11.74.5"
       ],
@@ -5780,12 +5795,17 @@
       "authorization": "authorized",
       "owner": "memory-nexus",
       "evidence": [
-        ".planning/memory-resilience/B11.74-plan.md"
+        ".planning/memory-resilience/B11.74-plan.md",
+        ".planning/memory-resilience/evidence/B11.74.6.2.json"
       ],
       "acceptance_record": ".planning/memory-resilience/evidence/B11.74.6.2.json",
       "retirement_trigger": "Before parent B11.74.6/B11.74.7/B10/R02 acceptance; scoped migration is not whole-platform acceptance.",
       "progress": {
-        "restart": "Health reader disposal and native failure/recovery proof; independent of the blocked factory fixture rerun."
+        "status": "Current native proof verified; pinned runtime disk-blocked",
+        "tests": 70,
+        "assertions": 299,
+        "faults": 7,
+        "restart": "Run guarded .git/b11-health-old-runtime.ts after capacity recovery; it verifies factory and health together. Retain Q102/B11.10 gates."
       }
     },
     {
@@ -5794,8 +5814,8 @@
       "title": "CLI and evaluation caller reconciliation",
       "status": "pending",
       "depends_on": [
-        "B11.74.6.1",
-        "B11.74.6.2"
+        "B11.74.6.3.1",
+        "B11.74.6.3.2"
       ],
       "scope": "backup.ts, migrate.ts, db-startup.ts, eval-v5 callers and command/helper groups",
       "deliverable": "Scoped remaining statements and actual startup/evaluation ownership reconciliation",
@@ -5807,7 +5827,74 @@
         ".planning/memory-resilience/B11.74-plan.md"
       ],
       "acceptance_record": ".planning/memory-resilience/evidence/B11.74.6.3.json",
-      "retirement_trigger": "Before parent B11.74.6/B11.74.7/B10/R02 acceptance; scoped migration is not whole-platform acceptance."
+      "retirement_trigger": "Before parent B11.74.6/B11.74.7/B10/R02 acceptance; scoped migration is not whole-platform acceptance.",
+      "progress": {
+        "restart": "Implement remaining CLI/evaluation owners independently in .3.1; combined .3.2 requires factory, health and CLI proof."
+      }
+    },
+    {
+      "id": "Q102",
+      "stage": "baseline-quality",
+      "title": "Complete truthful health/readiness admission and Tier S proof",
+      "status": "pending",
+      "depends_on": [
+        "B11.74.6.2"
+      ],
+      "scope": "health-checker.ts, readiness semantics and actual doctor/status callers",
+      "deliverable": "Define and prove unknown/error versus healthy state; actual FTS/vector readiness and count consistency; full configuration/provider policy and complete quality.",
+      "verification": "Native malformed/missing/inconsistent store, permission/query/close failures, configured versus operational readiness and actual installed CLI recovery; per-file/package/changed-line metrics,100% Tier S branches, negative decision/adversarial and independent review.",
+      "risk": "S",
+      "authorization": "authorized",
+      "owner": "memory-nexus",
+      "evidence": [
+        ".planning/memory-resilience/evidence/B11.74.6.2.json",
+        "docs/plans/2026-09-22-health-reader-integrity.md"
+      ],
+      "acceptance_record": ".planning/memory-resilience/evidence/Q102.json",
+      "observed_gap": "Partial count-read false readiness repaired; health branches96.26% fails Tier S. Broader readiness/error policies remain unverified.",
+      "retirement_trigger": "Before B11.74.7/B10/R02 acceptance."
+    },
+    {
+      "id": "B11.74.6.3.1",
+      "stage": "baseline",
+      "title": "Migrate remaining CLI and evaluation statement owners",
+      "status": "active",
+      "depends_on": [
+        "B11.74.5"
+      ],
+      "scope": "backup.ts,migrate.ts,db-startup.ts and eval-v5 direct-close callers",
+      "deliverable": "Scope remaining native statements and reconcile actual startup/evaluation ownership without data-integrity regression.",
+      "verification": "Current-runtime native public backup/migrate/startup/eval failure/recovery and retained handle/file release proof. Final paired runtime and shared caller acceptance remain required by .3.2.",
+      "risk": "S",
+      "authorization": "authorized",
+      "owner": "memory-nexus",
+      "evidence": [
+        ".planning/memory-resilience/B11.74-plan.md"
+      ],
+      "acceptance_record": ".planning/memory-resilience/evidence/B11.74.6.3.1.json",
+      "retirement_trigger": "Before parent .3/.6/.7/B10/R02 acceptance."
+    },
+    {
+      "id": "B11.74.6.3.2",
+      "stage": "baseline",
+      "title": "Verify combined native factory, health and public callers",
+      "status": "pending",
+      "depends_on": [
+        "B11.74.6.1",
+        "B11.74.6.2",
+        "B11.74.6.3.1"
+      ],
+      "scope": "All factory/health/CLI/eval native callers and earlier affected repository/service groups",
+      "deliverable": "Source-bound combined native proof for both Windows runtimes after all ownership changes; retained historical proof is not relabeled.",
+      "verification": "Complete relevant command/helper/repository/service groups at final hashes, resource/failure/recovery regressions and all mapped caller dispositions; broader Linux/quality/review acceptance remains .7.",
+      "risk": "S",
+      "authorization": "authorized",
+      "owner": "memory-nexus",
+      "evidence": [
+        ".planning/memory-resilience/B11.74-plan.md"
+      ],
+      "acceptance_record": ".planning/memory-resilience/evidence/B11.74.6.3.2.json",
+      "retirement_trigger": "Before parent .3/.6/.7/B10/R02 acceptance."
     }
   ],
   "decisions": {

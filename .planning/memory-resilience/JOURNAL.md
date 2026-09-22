@@ -1,5 +1,42 @@
 # Memory resilience execution journal
 
+## 2026-09-22 - Health reader lifetime and partial-count readiness repair
+
+- Continued from clean signed/pushed0a7a3bb; previous turn was progress. Native
+  RED reproduced cached statements retained after integrity checks/raw reader
+  calls and partial embedding counts reporting vectorReady:true after the message
+  table read failed. Five cached queries are now four scoped prepares; related
+  counts come from one SQL statement before either public count is assigned.
+- Current source passes70tests /299assertions on Windows Bun1.4.1. Native repeated
+  public checks, immediate file removal, corrupt read and failed extension loading
+  execute. Seven faults detected. Two negative lifetime-verifier tests reject live
+  readable handles and native query errors masquerading as finalization.
+- Existing health mocks now implement prepare/disposal and assert the actual
+  attempted/read/dispose path, avoiding false passes from missing-method errors.
+  Removed unused HealthCheckResult type import found by strict checks. Production
+  and both changed-test strict types plus isolation pass. Driver diagnostic100%;
+  production lines96.79/statements96.85/functions100/branches96.26 and existing
+  test branches60 retain Tier S failures. Q102/B11.10 are mandatory before .7/B10.
+- Q102 owns complete unknown/error/ready semantics, actual index/query readiness,
+  inconsistent counts/config/provider admission, installed doctor/status and
+  final quality/decision/review proof. Count tables and extension presence alone
+  are not proof of useful vector retrieval. Existing cleanup catches remain B11.10.
+- Free disk remained below the unchanged512MiB runtime guard (342,450,176bytes at
+  the retained check); no pinned download ran. Prepared one owned runner to check
+  factory and health groups together after capacity recovery. Factory .1 and
+  health .2 remain pending exact pinned proof. Neither policy-blocked directory
+  removal was retried, and no other project/shared cache was changed.
+- Split .3 into independent CLI/eval owner implementation (.3.1 active, depends
+  on .5) and combined final-source native caller verification (.3.2, depends on
+  factory .1, health .2 and CLI .3.1). Parent .3/.6/.7 remain pending barriers;
+  useful local work continues without weakening or dropping native acceptance.
+- Catalog464files/two packages and ledger244items reconcile. Evidence:
+  evidence/B11.74.6.2.json. No installed CLI, canonical memory, model acquisition,
+  provider egress or production replication changed. R04 owns consumer notices.
+- Next: native backup/migrate statement release and startup/evaluation close
+  reconciliation; preserve rollback/failure behavior. Retry the combined pinned
+  runner only when the capacity guard permits, then reconcile both pending slices.
+
 ## 2026-09-22 - Shared factory ownership and initialization repair
 
 - Continued from clean signed/pushed2ff3061. Previous turn was progress. Split

@@ -6077,7 +6077,7 @@
     {
       "path": "src/infrastructure/database/health-checker.test.ts",
       "package": "package.json",
-      "sourceHash": "2ff2e504e60ce6ff386cbc6d0f5775be704658867f29a11be04abcea037ebfc4",
+      "sourceHash": "a3e4735ffbaffa4ae57accdd29e63983e201bf647cfd0c2dd58550f8ca5838b4",
       "tier": "S",
       "rationale": "Creates disk-backed database/config fixtures and recursively deletes the test directory with a silent catch.",
       "applicability": {
@@ -6086,30 +6086,30 @@
       },
       "decisionStatus": "proposed - independent review pending",
       "inspection": {
-        "sourceRevision": "a4b80f8f2bc3facf011327d99e8b63cb2755ffe9",
-        "anchor": "rmSync(testDir,",
-        "scope": "Inspected imports, setup/path construction and actual filesystem mutation or cleanup boundary. Positive critical operation establishes risk; not full test correctness or cleanup acceptance."
+        "sourceRevision": "0a7a3bb + current source hash",
+        "anchor": "native health reader lifetime and consistent counts",
+        "scope": "Current-runtime scoped proof; complete Q102/B11.10/full-platform acceptance open."
       },
       "metricApplicability": {
-        "status": "proposed - independent review pending",
-        "evidence": ".planning/memory-resilience/evidence/B04-applicability-probe.json",
-        "sourceHash": "2ff2e504e60ce6ff386cbc6d0f5775be704658867f29a11be04abcea037ebfc4",
-        "disposition": "Measure every positive denominator; individually review zero branch/function denominators against runtime syntax. Observed counts do not prove instrumentation completeness. Optional-chain syntax is present; synthetic evidence shows current instrumentation omits its decision counters. B05.1 owns source-mapped branch proof before numeric acceptance.",
+        "status": "diagnostic - B05/Q102/B11.10/B11.74.7 and independent review pending",
+        "evidence": ".planning/memory-resilience/evidence/B11.74.6.2.json",
+        "sourceHash": "a3e4735ffbaffa4ae57accdd29e63983e201bf647cfd0c2dd58550f8ca5838b4",
+        "disposition": "Production/existing driver branch floors fail; new driver100%. Complete health contracts and applicability remain open.",
         "metrics": {
-          "statements": {
+          "lines": {
             "observedCounterTotal": 472,
+            "proposal": "measure - completeness unverified"
+          },
+          "functions": {
+            "observedCounterTotal": 98,
+            "proposal": "measure - completeness unverified"
+          },
+          "statements": {
+            "observedCounterTotal": 490,
             "proposal": "measure - completeness unverified"
           },
           "branches": {
             "observedCounterTotal": 10,
-            "proposal": "measure - completeness unverified"
-          },
-          "functions": {
-            "observedCounterTotal": 96,
-            "proposal": "measure - completeness unverified"
-          },
-          "lines": {
-            "observedCounterTotal": 460,
             "proposal": "measure - completeness unverified"
           }
         }
@@ -6118,7 +6118,7 @@
     {
       "path": "src/infrastructure/database/health-checker.ts",
       "package": "package.json",
-      "sourceHash": "d047743d1bace8e566387221820046c1d77605f85c1b64b16be876e89ba735a2",
+      "sourceHash": "446f80bd79dd4f1911eabcb4ea44e935e7fb66f4ad85561c4bc88c9d9a960d58",
       "tier": "S",
       "rationale": "Validates configuration and reports database integrity and provider-egress readiness. Incorrect admission can misrepresent unsafe configuration as ready.",
       "applicability": {
@@ -6127,30 +6127,30 @@
       },
       "decisionStatus": "proposed - independent review pending",
       "inspection": {
-        "sourceRevision": "39c895b13e768bd607070efbc3496d47a821b257",
-        "anchor": "checkConfigValidity / checkQuickIntegrity",
-        "scope": "positive critical boundary establishes highest tier; not full correctness acceptance"
+        "sourceRevision": "0a7a3bb + current source hash",
+        "anchor": "native health reader lifetime and consistent counts",
+        "scope": "Current-runtime scoped proof; complete Q102/B11.10/full-platform acceptance open."
       },
       "metricApplicability": {
-        "status": "proposed - independent review pending",
-        "evidence": ".planning/memory-resilience/evidence/B04-applicability-probe.json",
-        "sourceHash": "d047743d1bace8e566387221820046c1d77605f85c1b64b16be876e89ba735a2",
-        "disposition": "Measure every positive denominator; individually review zero branch/function denominators against runtime syntax. Observed counts do not prove instrumentation completeness. Optional-chain syntax is present; synthetic evidence shows current instrumentation omits its decision counters. B05.1 owns source-mapped branch proof before numeric acceptance.",
+        "status": "diagnostic - B05/Q102/B11.10/B11.74.7 and independent review pending",
+        "evidence": ".planning/memory-resilience/evidence/B11.74.6.2.json",
+        "sourceHash": "446f80bd79dd4f1911eabcb4ea44e935e7fb66f4ad85561c4bc88c9d9a960d58",
+        "disposition": "Production/existing driver branch floors fail; new driver100%. Complete health contracts and applicability remain open.",
         "metrics": {
-          "statements": {
+          "lines": {
             "observedCounterTotal": 156,
-            "proposal": "measure - completeness unverified"
-          },
-          "branches": {
-            "observedCounterTotal": 111,
             "proposal": "measure - completeness unverified"
           },
           "functions": {
             "observedCounterTotal": 19,
             "proposal": "measure - completeness unverified"
           },
-          "lines": {
-            "observedCounterTotal": 153,
+          "statements": {
+            "observedCounterTotal": 159,
+            "proposal": "measure - completeness unverified"
+          },
+          "branches": {
+            "observedCounterTotal": 107,
             "proposal": "measure - completeness unverified"
           }
         }
@@ -17620,6 +17620,47 @@
           },
           "branches": {
             "observedCounterTotal": 0,
+            "proposal": "measure - completeness unverified"
+          }
+        }
+      }
+    },
+    {
+      "path": "tests/infrastructure/database/health-lifecycle.test.ts",
+      "package": "package.json",
+      "tier": "S",
+      "rationale": "Native health resource and readiness verifier with failure/negative proof.",
+      "applicability": {
+        "mode": "measure",
+        "reason": "Executable integrity/readiness driver; no exclusion approved."
+      },
+      "decisionStatus": "proposed - independent review pending",
+      "sourceHash": "ba6d1988a82c391ec2ed045520cddbce3fc39918d90cbacb7559be5fe4fafd67",
+      "inspection": {
+        "sourceRevision": "0a7a3bb + current source hash",
+        "anchor": "native health reader lifetime and consistent counts",
+        "scope": "Current-runtime scoped proof; complete Q102/B11.10/full-platform acceptance open."
+      },
+      "metricApplicability": {
+        "status": "diagnostic - B05/Q102/B11.10/B11.74.7 and independent review pending",
+        "evidence": ".planning/memory-resilience/evidence/B11.74.6.2.json",
+        "sourceHash": "ba6d1988a82c391ec2ed045520cddbce3fc39918d90cbacb7559be5fe4fafd67",
+        "disposition": "Production/existing driver branch floors fail; new driver100%. Complete health contracts and applicability remain open.",
+        "metrics": {
+          "lines": {
+            "observedCounterTotal": 91,
+            "proposal": "measure - completeness unverified"
+          },
+          "functions": {
+            "observedCounterTotal": 25,
+            "proposal": "measure - completeness unverified"
+          },
+          "statements": {
+            "observedCounterTotal": 124,
+            "proposal": "measure - completeness unverified"
+          },
+          "branches": {
+            "observedCounterTotal": 6,
             "proposal": "measure - completeness unverified"
           }
         }
