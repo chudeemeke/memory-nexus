@@ -19628,16 +19628,16 @@
         "reason": "No local runtime implementation; no coverage percentage claimed."
       },
       "decisionStatus": "proposed - independent review pending",
-      "sourceHash": "957a28669a97e15319a875b6e06609d40fc57efae29c88ed9ce6b704327bc65e",
+      "sourceHash": "2f701bef6ea5b60921145390e5dc85796c600a059846a86ffe4239b3ee01c299",
       "inspection": {
-        "sourceRevision": "2a4ac2a + current source hash",
-        "anchor": "Q100.4.2 reservation backend",
-        "scope": "Backend only; root authority and command adoption remain unproved."
+        "sourceRevision": "e293ecc + current source hash",
+        "anchor": "Q100.4.2 explicit nested source leases",
+        "scope": "Scoped capability qualification; lower writer adoption incomplete."
       },
       "metricApplicability": {
         "status": "Declaration-only applicability proposed; no percentage claimed",
-        "sourceHash": "957a28669a97e15319a875b6e06609d40fc57efae29c88ed9ce6b704327bc65e",
-        "evidence": ".planning/memory-resilience/evidence/Q100.4.2-admission.json",
+        "sourceHash": "2f701bef6ea5b60921145390e5dc85796c600a059846a86ffe4239b3ee01c299",
+        "evidence": ".planning/memory-resilience/evidence/Q100.4.2-leases.json",
         "metrics": {
           "statements": {
             "observedCounterTotal": 0,
@@ -19670,14 +19670,14 @@
       "decisionStatus": "proposed - independent review pending",
       "sourceHash": "62d6c1834375d5d5de197818cdd4e36f08924380d41ef7e4f14ee9595d4c8d15",
       "inspection": {
-        "sourceRevision": "964cf20 + current source hash",
-        "anchor": "Q100.4.2 source admission and bounded command activation",
-        "scope": "Scoped source-bound diagnostics; complete writer adoption and quality acceptance open."
+        "sourceRevision": "e293ecc + current source hash",
+        "anchor": "Q100.4.2 explicit nested source leases",
+        "scope": "Scoped capability qualification; lower writer adoption incomplete."
       },
       "metricApplicability": {
-        "status": "Diagnostic only; gaps remain open, child coverage unaggregated and applicability/platform/package/changed-line/review incomplete",
+        "status": "Scoped diagnostic; full platform/package/changed-line/instrumenter/review and remaining gaps open",
         "sourceHash": "62d6c1834375d5d5de197818cdd4e36f08924380d41ef7e4f14ee9595d4c8d15",
-        "evidence": ".planning/memory-resilience/evidence/Q100.4.2-source-admission.json",
+        "evidence": ".planning/memory-resilience/evidence/Q100.4.2-leases.json",
         "metrics": {
           "statements": {
             "observedCounterTotal": 39,
@@ -19714,14 +19714,14 @@
       "decisionStatus": "proposed - independent review pending",
       "sourceHash": "36d55b0a8dbe2f0ad49a8b23c0fe22a3cd67c4bd5ac0bc2c20d66bc388ad013b",
       "inspection": {
-        "sourceRevision": "964cf20 + current source hash",
-        "anchor": "Q100.4.2 source admission and bounded command activation",
-        "scope": "Scoped source-bound diagnostics; complete writer adoption and quality acceptance open."
+        "sourceRevision": "e293ecc + current source hash",
+        "anchor": "Q100.4.2 explicit nested source leases",
+        "scope": "Scoped capability qualification; lower writer adoption incomplete."
       },
       "metricApplicability": {
-        "status": "Diagnostic only; gaps remain open, child coverage unaggregated and applicability/platform/package/changed-line/review incomplete",
+        "status": "Scoped diagnostic; full platform/package/changed-line/instrumenter/review and remaining gaps open",
         "sourceHash": "36d55b0a8dbe2f0ad49a8b23c0fe22a3cd67c4bd5ac0bc2c20d66bc388ad013b",
-        "evidence": ".planning/memory-resilience/evidence/Q100.4.2-source-admission.json",
+        "evidence": ".planning/memory-resilience/evidence/Q100.4.2-leases.json",
         "metrics": {
           "statements": {
             "observedCounterTotal": 124,
@@ -19756,35 +19756,35 @@
         "reason": "Executable source reservation and failure/recovery tests; no exclusion approved."
       },
       "decisionStatus": "proposed - independent review pending",
-      "sourceHash": "22def5503d3b9361164189b73145adc9c36d224bc67bb974230a8c6c76e529c8",
+      "sourceHash": "51a83b2181aa13b86cb45040daf2aa3c89da89b678f76448797f9420cd65307c",
       "inspection": {
-        "sourceRevision": "964cf20 + current source hash",
-        "anchor": "Q100.4.2 source admission and bounded command activation",
-        "scope": "Scoped source-bound diagnostics; complete writer adoption and quality acceptance open."
+        "sourceRevision": "e293ecc + current source hash",
+        "anchor": "Q100.4.2 explicit nested source leases",
+        "scope": "Scoped capability qualification; lower writer adoption incomplete."
       },
       "metricApplicability": {
-        "status": "Diagnostic only; gaps remain open, child coverage unaggregated and applicability/platform/package/changed-line/review incomplete",
-        "sourceHash": "22def5503d3b9361164189b73145adc9c36d224bc67bb974230a8c6c76e529c8",
-        "evidence": ".planning/memory-resilience/evidence/Q100.4.2-source-admission.json",
+        "status": "Scoped diagnostic; full platform/package/changed-line/instrumenter/review and remaining gaps open",
+        "sourceHash": "51a83b2181aa13b86cb45040daf2aa3c89da89b678f76448797f9420cd65307c",
+        "evidence": ".planning/memory-resilience/evidence/Q100.4.2-leases.json",
         "metrics": {
           "statements": {
-            "observedCounterTotal": 77,
-            "observedPercent": 93.5,
+            "observedCounterTotal": 83,
+            "observedPercent": 95.18,
             "proposal": "measure - completeness unverified"
           },
           "branches": {
-            "observedCounterTotal": 40,
-            "observedPercent": 82.5,
+            "observedCounterTotal": 44,
+            "observedPercent": 84.09,
             "proposal": "measure - completeness unverified"
           },
           "functions": {
-            "observedCounterTotal": 10,
+            "observedCounterTotal": 11,
             "observedPercent": 100,
             "proposal": "measure - completeness unverified"
           },
           "lines": {
-            "observedCounterTotal": 49,
-            "observedPercent": 95.91,
+            "observedCounterTotal": 55,
+            "observedPercent": 96.36,
             "proposal": "measure - completeness unverified"
           }
         }
@@ -19802,14 +19802,14 @@
       "decisionStatus": "proposed - independent review pending",
       "sourceHash": "6d73c668706039532a56042cda441fa6f6be6eba95077aa2c95226395938f3db",
       "inspection": {
-        "sourceRevision": "964cf20 + current source hash",
-        "anchor": "Q100.4.2 source admission and bounded command activation",
-        "scope": "Scoped source-bound diagnostics; complete writer adoption and quality acceptance open."
+        "sourceRevision": "e293ecc + current source hash",
+        "anchor": "Q100.4.2 explicit nested source leases",
+        "scope": "Scoped capability qualification; lower writer adoption incomplete."
       },
       "metricApplicability": {
-        "status": "Diagnostic only; gaps remain open, child coverage unaggregated and applicability/platform/package/changed-line/review incomplete",
+        "status": "Scoped diagnostic; full platform/package/changed-line/instrumenter/review and remaining gaps open",
         "sourceHash": "6d73c668706039532a56042cda441fa6f6be6eba95077aa2c95226395938f3db",
-        "evidence": ".planning/memory-resilience/evidence/Q100.4.2-source-admission.json",
+        "evidence": ".planning/memory-resilience/evidence/Q100.4.2-leases.json",
         "metrics": {
           "statements": {
             "observedCounterTotal": 146,
@@ -19916,6 +19916,94 @@
           },
           "lines": {
             "observedCounterTotal": 63,
+            "observedPercent": 100,
+            "proposal": "measure - completeness unverified"
+          }
+        }
+      }
+    },
+    {
+      "path": "src/infrastructure/database/leased-operation-admission.ts",
+      "package": "package.json",
+      "tier": "S",
+      "rationale": "Explicit nested operation authority/lifetime and adversarial data-integrity proof.",
+      "applicability": {
+        "mode": "measure",
+        "reason": "Executable authority scope and failure/recovery tests; no exclusion approved."
+      },
+      "decisionStatus": "proposed - independent review pending",
+      "sourceHash": "d834bad3572884ce3e56430cd549555976f092365119627274be9420da2106f9",
+      "inspection": {
+        "sourceRevision": "e293ecc + current source hash",
+        "anchor": "Q100.4.2 explicit nested source leases",
+        "scope": "Scoped capability qualification; lower writer adoption incomplete."
+      },
+      "metricApplicability": {
+        "status": "Scoped diagnostic; full platform/package/changed-line/instrumenter/review and remaining gaps open",
+        "sourceHash": "d834bad3572884ce3e56430cd549555976f092365119627274be9420da2106f9",
+        "evidence": ".planning/memory-resilience/evidence/Q100.4.2-leases.json",
+        "metrics": {
+          "statements": {
+            "observedCounterTotal": 50,
+            "observedPercent": 100,
+            "proposal": "measure - completeness unverified"
+          },
+          "branches": {
+            "observedCounterTotal": 20,
+            "observedPercent": 100,
+            "proposal": "measure - completeness unverified"
+          },
+          "functions": {
+            "observedCounterTotal": 10,
+            "observedPercent": 100,
+            "proposal": "measure - completeness unverified"
+          },
+          "lines": {
+            "observedCounterTotal": 35,
+            "observedPercent": 100,
+            "proposal": "measure - completeness unverified"
+          }
+        }
+      }
+    },
+    {
+      "path": "src/infrastructure/database/leased-operation-admission.test.ts",
+      "package": "package.json",
+      "tier": "S",
+      "rationale": "Explicit nested operation authority/lifetime and adversarial data-integrity proof.",
+      "applicability": {
+        "mode": "measure",
+        "reason": "Executable authority scope and failure/recovery tests; no exclusion approved."
+      },
+      "decisionStatus": "proposed - independent review pending",
+      "sourceHash": "d36f14fd3d8475b27bd47dd3649e46f8dc7fb8863f36abc86f2b133017182d92",
+      "inspection": {
+        "sourceRevision": "e293ecc + current source hash",
+        "anchor": "Q100.4.2 explicit nested source leases",
+        "scope": "Scoped capability qualification; lower writer adoption incomplete."
+      },
+      "metricApplicability": {
+        "status": "Scoped diagnostic; full platform/package/changed-line/instrumenter/review and remaining gaps open",
+        "sourceHash": "d36f14fd3d8475b27bd47dd3649e46f8dc7fb8863f36abc86f2b133017182d92",
+        "evidence": ".planning/memory-resilience/evidence/Q100.4.2-leases.json",
+        "metrics": {
+          "statements": {
+            "observedCounterTotal": 224,
+            "observedPercent": 98.21,
+            "proposal": "measure - completeness unverified"
+          },
+          "branches": {
+            "observedCounterTotal": 6,
+            "observedPercent": 50,
+            "proposal": "measure - completeness unverified"
+          },
+          "functions": {
+            "observedCounterTotal": 55,
+            "observedPercent": 96.36,
+            "proposal": "measure - completeness unverified"
+          },
+          "lines": {
+            "observedCounterTotal": 169,
             "observedPercent": 100,
             "proposal": "measure - completeness unverified"
           }

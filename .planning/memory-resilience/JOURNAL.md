@@ -1,5 +1,52 @@
 # Memory resilience execution journal
 
+## 2026-09-28 - Qualified explicit nested source leases
+
+- Previous turn made progress at signed/pushed `e293ecc`; started clean. Full
+  E1-E10 goal and Q100.4.2 remain active. Implemented the planned lease contract
+  through a declaration-only domain port and a separate infrastructure scope
+  wrapper around the existing SQLite root reservation.
+- Source factories issue opaque scopes and accept explicit children across
+  independently constructed factories/aliases for the same source identity.
+  Wrong source, unknown/copied/stale scope, implicit reentry and parallel sibling
+  admission fail before callback. No ambient async inheritance or second scheduler.
+- Initial detached-child RED exposed premature release. The wrapper now revokes
+  further descendants when the callback settles, drains admitted child/grandchild
+  work before release, and reports unawaited work as failure. A caught child error
+  still fails its outer operation. Primary, child and post-validation errors survive.
+- Review found a second concrete RED: an unrelated generic wrapper using a known
+  identity string could mint an accepted source lease without the real reservation.
+  A private source-factory WeakSet now proves issuance under source admission;
+  matching identity strings alone do not confer authority. Guard omission is detected.
+- Tightened identity proof: renaming a directory with an open SQLite file may be
+  refused by Windows before application validation. New tests actually redirect a
+  junction and require the specific alias-validation error before nested entry and
+  at completion, including simultaneous operation failure. Historical broad toThrow
+  rename tests alone are not proof of that branch.
+- Focused10tests/61assertions; final affected15-file group245tests/1185assertions,
+  zero failures on Windows Bun1.4.1 and pinned1.3.14. Ten deliberately broken
+  authority/lifetime/drain/error/issuer checks detected. Production types, four
+  changed/source/native test strict types and isolation pass. Retained evidence:
+  `evidence/Q100.4.2-leases.json`, including three meaningful REDs and exact inputs.
+- Wrapper diagnostics100all4; backend unchanged100all4. Source factory branches
+  84.09 remain below TierS; lease-test platform alternatives yield50branches and
+  success continuations remain unexecuted. No exclusion or full package/changed-line/
+  instrumenter/Linux/final independent review acceptance. Q100.4.3 remains open.
+- **Next:** carry explicit lease through raw append, recover/rebuild and projected
+  writer, then from dream/governance callers. Prove standalone acquisition, nested
+  non-reacquisition, wrong-source/stale refusal and real process contention. Existing
+  root commands still ignore the issued callback argument; lower writers, extraction,
+  remote/maintenance and direct DB topology remain uncoordinated. Preserve optimistic
+  replay/source fences and capture-first/no-egress behavior while adopting each family.
+- Scope is cooperating APIs, not a JavaScript sandbox: arbitrary raw I/O cannot be
+  cancelled, callbacks must settle, and no timeout steals a live reservation. All
+  provisioning interruption, compound command reporting, partial append/fsync,
+  caller transaction/candidate/multi-event/reconciliation/scaling gates remain open.
+- Inventory493 files/two packages;255 acyclic items, one active; owned fixtures
+  cleaned and10.96GiB free. No canonical data/model/provider/hook/replication/new
+  worktree or blocked cleanup changed. Three inboxes, hosted/Linux/desktop/review
+  and R03/P03/A03 remain open. Embedding experiment still follows baseline acceptance.
+
 ## 2026-09-28 - Writer inventory exposed remote authority lifecycle gap
 
 - Previous turn made progress at signed/pushed `241acc5`; started clean. Full

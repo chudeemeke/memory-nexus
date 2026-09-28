@@ -1,11 +1,13 @@
-import type { OperationAdmission } from "../../domain/ports/operation-admission.js";
+import type { LeasedOperationAdmission as AdmissionPort, OperationLease } from "../../domain/ports/operation-admission.js";
 import { mkdirSync, realpathSync, lstatSync, existsSync, mkdtempSync, openSync, closeSync, linkSync, unlinkSync, rmdirSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { getEventsDir } from "../paths.js";
 import { OwnedDatabase } from "./owned-database.js";
 import { SqliteOperationAdmission } from "./sqlite-operation-admission.js";
+import { LeasedOperationAdmission } from "./leased-operation-admission.js";
 
 export const LOCAL_EVENT_STATE_DIRECTORY = ".memory-local";
+const issuedSourceLeases = new WeakSet<OperationLease>();
 type Identity = { dev: bigint; ino: bigint };
 function identity(path: string): Identity { return lstatSync(path, { bigint: true }); }
 function assertIdentity(path: string, expected: Identity): void {
@@ -42,7 +44,7 @@ function provision(path: string, root: string, rootIdentity: Identity): void {
 }
 
 /** Same real event root shares admission across profiles and path aliases. */
-export function createSourceOperationAdmission(logPath?: string): OperationAdmission {
+export function createSourceOperationAdmission(logPath?: string): AdmissionPort {
   if (logPath && existsSync(logPath)) {
     const file = lstatSync(logPath);
     if (!file.isFile() || file.nlink !== 1) throw new Error("Event log must be a regular file with one link for operation admission");
@@ -69,5 +71,15 @@ export function createSourceOperationAdmission(logPath?: string): OperationAdmis
       throw new Error("Source operation authority belongs to a different root; reconciliation required");
     }
   });
-  return { async run(operation) { validateIdentity(); return backend.run(operation); } };
+  const authority = JSON.stringify([rootKey, rootIdentity.dev.toString(), rootIdentity.ino.toString(),
+    localIdentity.dev.toString(), localIdentity.ino.toString(), fileIdentity.dev.toString(), fileIdentity.ino.toString()]);
+  const admission = new LeasedOperationAdmission(backend, authority, validateIdentity);
+  return {
+    run(operation, parent) {
+      if (parent !== undefined && !issuedSourceLeases.has(parent)) {
+        return Promise.reject(new Error("Invalid operation lease: not issued under source admission"));
+      }
+      return admission.run(lease => { issuedSourceLeases.add(lease); return operation(lease); }, parent);
+    },
+  };
 }

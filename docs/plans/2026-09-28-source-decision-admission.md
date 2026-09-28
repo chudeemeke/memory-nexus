@@ -171,11 +171,27 @@ and reservation preservation, post-release reacquisition and link alias refusal.
 All three deliberate copy/clear/alias faults are detected. Remote maintenance still
 does not acquire admission; content ordering and atomic restore remain open.
 
-Nested contract to qualify next: an explicitly passed, unforgeable, source-bound
+Nested contract implemented in scope: an explicitly passed, opaque, source-bound
 operation capability with a bounded lifetime; no process-global boolean or ambient
 async-context inheritance. Each nested call gets a child scope, so a retained parent
 cannot admit concurrent sibling work while its child is active. Root completion
 revokes every descendant, including detached work; it must not release while an
 already admitted child still runs. Wrong source, stale/copy/forged capability and
-parallel sibling invocation must fail before mutation. This contract still needs
-executable proof and may be simplified if equivalent invariants can be demonstrated.
+parallel sibling invocation must fail before callback. Ten focused tests exercise
+these boundaries against the real backend on both tested Windows runtimes. Lower
+writer adoption, platform/package/changed-line quality and independent review remain.
+
+Lease implementation slice: keep the existing SQLite backend as root admission and
+add an explicit scope wrapper, with opaque leases in a private WeakMap. A source
+factory binds its canonical path/root/namespace/file identity tuple, validates it
+before nested entry and after completion, and accepts only leases it has issued
+under real source admission. A matching identity string in an unrelated injected
+wrapper is insufficient provenance. No ambient async permission or new scheduler.
+
+Every admitted child is observed internally. Returning from a callback with a live
+child revokes further descendants, drains admitted work while holding the backend,
+and reports misuse; it never steals or expires a live reservation. A child failure
+remains an operation failure even if caught by its parent. Primary, child and final
+identity-validation failures are retained together. This cannot preempt arbitrary
+JavaScript or cancel raw I/O already started outside cooperating APIs; callbacks
+must settle, and writer adoption still has to carry the explicit lease end to end.
