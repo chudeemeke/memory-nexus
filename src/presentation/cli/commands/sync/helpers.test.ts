@@ -175,6 +175,7 @@ describe("helpers", () => {
       };
       try {
         const mockResult = {
+          durationMs: 0,
           success: true,
           aborted: false,
           sessionsDiscovered: 5,
@@ -202,6 +203,7 @@ describe("helpers", () => {
       };
       try {
         const mockResult = {
+          durationMs: 0,
           success: true,
           aborted: false,
           sessionsDiscovered: 5,
@@ -227,6 +229,7 @@ describe("helpers", () => {
       };
       try {
         const mockResult = {
+          durationMs: 0,
           success: true,
           aborted: false,
           sessionsDiscovered: 5,
@@ -254,6 +257,7 @@ describe("helpers", () => {
       };
       try {
         const mockResult = {
+          durationMs: 0,
           success: false,
           aborted: true,
           sessionsDiscovered: 5,
@@ -279,6 +283,7 @@ describe("helpers", () => {
       };
       try {
         const mockResult = {
+          durationMs: 0,
           success: true,
           sessionsDiscovered: 1,
           sessionsProcessed: 1,

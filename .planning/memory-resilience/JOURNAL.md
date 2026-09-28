@@ -1,5 +1,63 @@
 # Memory resilience execution journal
 
+## 2026-09-28 - Ordinary local recovery and final completion reporting
+
+- Previous goal turn made progress at signed/pushed `5d3c400`; this turn started
+  clean. Q100.4.2 and the full E1-E10 goal remain active.
+- Ordinary sync now finishes session/message capture first, then attempts bounded
+  local replay even with unchanged or empty discovery. It reuses automatic source/
+  content admission and read-only Git readiness without constructing a remote sync
+  service unless requested. Failed/pending recovery retains capture, returns nonzero
+  and blocks remote/derived output that could use stale governance. Abort stops
+  subsequent work; dry-run/background dispatch do not run foreground recovery.
+- JSON completion now follows later work and cleanup. Existing capture counters
+  remain; separate capture/projection/remote states, completion errors and returned
+  memory-file results distinguish partial progress. Incidental JSON-mode progress
+  is suppressed. Legacy reportResults callers without metadata retain their shape.
+  Known offline transport failure can still permit local embedding when projections
+  are current; unknown state after started remote execution blocks derived output.
+  Remote factory failure before execution preserves independent local work.
+- Cleanup registration is inside the failure boundary. Both unregister and close
+  are attempted, compound failures are retained, and final output follows cleanup
+  so a close failure cannot follow an already printed success. This does not close
+  the separate swallowed fixture-cleanup debts B11.57/B11.69.
+- Five fresh processes use actual default session source/parser, SQLite/FTS and
+  local recovery. A replay trigger fails after a real synthetic session is captured;
+  its message stays searchable. Unchanged-session retry and empty discovery recover
+  retained events; idle retry keeps the receipt; direct deletion is not resurrected.
+  Configured remote service is never constructed and no event Git repository is
+  created. The existing six-process remote driver separately retains actual default
+  remote-adapter proof by injecting only the newly added local recovery seam.
+- Windows Bun 1.4.1 and pinned 1.3.14 each pass 306 tests / 933 assertions across
+  13 command/service/transport/public-API files. The pinned harness verifies child
+  PATH selects 1.3.14 so CLI subprocess tests use that runtime too. Production,
+  four changed-test strict compilation and isolation pass. All 12 targeted faults
+  are detected, including skipping recovery when zero sessions were processed,
+  implicit remote execution, premature success and omitted close/Git readiness.
+- RED: seven command recovery/reporting regressions, plus cleanup-registration
+  failure. Corrections retained: older memory-file mocks lacked real result fields;
+  helper result fixtures lacked durationMs. Fixed fixtures/types, preserved the
+  meaningful failures and changed the pending-governance expectation deliberately.
+- Diagnostic helpers: statements98.64/branches93.87/functions100/lines100; helper
+  tests functions93.75. CLI source statements88.2/branches93.22/functions58.82/
+  lines88.88; command tests branches78.78. These fail required floors. Child-process
+  coverage is not aggregated and native-driver zero denominators need review.
+  Q077/Q078/Q100.4.3 retain quality ownership; no exceptions or final acceptance.
+- **Next:** close optional-stage return contracts before final command-status
+  acceptance. Embedding currently returns void for disabled/declined/finished work;
+  ambient catches errors; memory-file exceptions collapse to null/no-work. Recorded
+  these under Q074/Q076/Q079 and Q100.4.2, with retirement before E7/B10. Current
+  capture/projection/remote metadata does not claim complete semantic readiness.
+  Then finish concurrent source/writer ordering, stale targets, partial append,
+  caller transactions, pre-append candidate admission and operational reconciliation.
+- `evidence/Q100.4.2-local.json` retains matching hashes, full outputs, REDs,
+  corrections, scoped coverage and faults. Catalog 481 files / two packages; 255
+  acyclic ledger items; one active item. Free disk 10.76 GiB, owned fixtures cleaned,
+  one registered worktree. Canonical data/model/provider/hook/replication and blocked
+  cleanup untouched. Prior scaling concerns, three inboxes, final review/hosted/
+  Linux/desktop and R03/P03/A03 gates remain open. Baseline acceptance still precedes
+  the approved bounded embedding experiment.
+
 ## 2026-09-28 - Explicit remote recovery and restart admission checkpoint
 
 - Previous goal turn made progress at signed/pushed `4a81668`. This turn started

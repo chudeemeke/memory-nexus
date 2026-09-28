@@ -315,3 +315,32 @@ directory for unfinished rebase/merge/cherry-pick/revert/sequencer operations an
 check for unmerged paths. Unavailable Git state fails closed. This read-only
 admission prevents a later invocation from replaying a retained unfinished working
 tree; it is not a lock against a concurrent Git operation starting after admission.
+
+Ordinary sync contract: session/message capture is independent of the six event
+projection tables and completes first. A bounded local recovery follows even when
+discovery finds no sessions or incremental capture has no new work. Use the same
+automatic content/source and read-only Git admission as explicit remote recovery;
+no remote configuration, fetch, push, or remote service construction is required.
+An aborted capture stops subsequent stages. Failed/pending local recovery retains
+captured sessions, returns nonzero, and stops remote work plus derived ambient or
+embedding output that could use stale governance. Dry-run/background dispatch do
+not perform foreground recovery.
+
+Completion reporting moves after requested work. Keep existing capture counters
+and fields, add separate capture/projection/remote states, and report overall
+failure when later requested work fails. JSON stdout is one completion object
+after capture, including on projection, remote, embedding or later orchestration
+failure. JSON mode suppresses incidental progress and folds memory-file results
+into that object. Existing helper callers without completion metadata retain
+their current report shape. This slice must not claim desktop replication or
+semantic readiness from a successful legacy embedding handler; its void-return
+skip/completion distinction remains an explicit acceptance obligation.
+
+Registration and both database-cleanup operations must be inside the command's
+failure boundary. Attempt close even if unregister fails, preserve compound
+errors, and emit the final capture/completion report after cleanup so a close
+failure cannot follow an already printed success. Known optional-stage contract
+gaps remain owned: ambient failures are swallowed, memory-file exceptions can
+return the same null as no work, and embedding returns void for disabled/declined
+and finished outcomes. Q074/Q076/Q079/Q100.4.2 must resolve these before final E7
+acceptance; new capture/projection/remote fields do not establish semantic readiness.

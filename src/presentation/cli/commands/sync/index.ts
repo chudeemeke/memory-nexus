@@ -7,8 +7,8 @@
 
 import { Command, Option } from "commander";
 import type { CommandResult } from "../../command-result.js";
-import type { SyncCommandDeps, SyncCommandOptions } from "./types.js";
-import { SyncService, type SyncOptions } from "../../../../application/services/index.js";
+import type { SyncCommandDeps, SyncCommandOptions, SyncCompletionMetadata } from "./types.js";
+import { SyncService, type SyncOptions, type SyncResult } from "../../../../application/services/index.js";
 import { createProgressReporter } from "../../progress-reporter.js";
 import { initializeDatabase, closeDatabase, bulkOperationCheckpoint, getDefaultDbPath, SqliteSessionRepository, SqliteMessageRepository, SqliteToolUseRepository, SqliteExtractionStateRepository } from "../../../../infrastructure/database/index.js";
 import { FileSystemSessionSource } from "../../../../infrastructure/sources/index.js";
@@ -67,6 +67,7 @@ function resolveSyncCommandDeps(deps: SyncCommandDeps): ResolvedSyncCommandDeps 
     registerCleanup,
     unregisterCleanup,
     createSyncService: createDefaultSyncService,
+    recoverProjections: recoverDefaultProjections,
     loadConfig,
     createRemoteEventSyncService: createDefaultRemoteEventSyncService,
     runMemoryFileSync,
@@ -112,10 +113,11 @@ export async function executeSyncCommand(
 
   resolved.setupSignalHandlers();
   const startTime = Date.now();
-  const reporter = resolved.createProgressReporter(options);
+  const workOptions = options.json ? { ...options, quiet: true } : options;
+  const reporter = resolved.createProgressReporter(workOptions);
 
   // Check for recovery from previous interrupted sync
-  if (!options.quiet && resolved.hasCheckpoint()) {
+  if (!workOptions.quiet && resolved.hasCheckpoint()) {
     const checkpoint = resolved.loadCheckpoint();
     if (checkpoint) {
       console.log(
@@ -139,16 +141,21 @@ export async function executeSyncCommand(
   }
 
   const cleanupFn = async (): Promise<void> => { resolved.closeDatabase(db); };
-  resolved.registerCleanup(cleanupFn);
+  let captureResult: SyncResult | undefined;
+  const completion: SyncCompletionMetadata = { success: false, projections: { status: "not_run" },
+    remote: { status: options.remote ? "not_run" : "not_requested" }, errors: [] };
+  const outcome: CommandResult = { exitCode: 1 };
+  const finish = (exitCode: number): CommandResult => { outcome.exitCode = exitCode; return outcome; };
 
   try {
+    resolved.registerCleanup(cleanupFn);
     const resolver = resolved.createDriveResolver();
     const syncService = resolved.createSyncService({ db, resolver });
 
     if (options.fixNames) {
       reporter.log("Fixing project names...");
       const fixedCount = await syncService.fixProjectNames(resolver);
-      if (!options.quiet) {
+      if (!workOptions.quiet) {
         console.log(`Fixed project names: ${fixedCount} sessions updated`);
       }
     }
@@ -168,10 +175,27 @@ export async function executeSyncCommand(
       },
     } as any;
 
-    const result = await syncService.sync(syncOptions);
+    const result = captureResult = await syncService.sync(syncOptions);
     resolved.bulkOperationCheckpoint(db);
     reporter.stop();
-    resolved.reportResults(result, startTime, options);
+    if (result.aborted) return finish(1);
+
+    try {
+      const recovery = await resolved.recoverProjections(db);
+      if (!recovery || typeof recovery.rebuilt !== "boolean" || typeof recovery.pending !== "boolean") {
+        throw new Error("Projection recovery returned an invalid result");
+      }
+      completion.projections = { status: recovery.pending ? "pending" : "current", rebuilt: recovery.rebuilt };
+      if (recovery.pending) {
+        completion.projections.error = "Projection recovery remains pending; retry sync before derived output or remote synchronization";
+        console.error(completion.projections.error);
+        return finish(1);
+      }
+    } catch (error) {
+      completion.projections = { status: "failed", error: unknownErrorMessage(error) };
+      resolved.handleError(error, options);
+      return finish(1);
+    }
 
     // Git remote sync is explicit to avoid hidden data egress from an ordinary
     // local session sync.
@@ -183,28 +207,35 @@ export async function executeSyncCommand(
       typeof remoteUrl === "string" &&
       remoteUrl.trim().length > 0;
     if (remoteConfigured && options.remote === true) {
-      if (!options.quiet) {
+      if (!workOptions.quiet) {
         console.log("Synchronizing events with remote Git repository...");
       }
+      let remoteStarted = false;
       try {
         const remoteSyncService = await resolved.createRemoteEventSyncService({ db });
+        remoteStarted = true;
         const syncResult = await remoteSyncService.sync({
           machineId: config.machineId,
           repositoryUrl: remoteUrl,
           autoPull: config.remoteSync.autoPull,
           autoPush: config.remoteSync.autoPush,
         });
+        completion.remote = { status: syncResult.status, result: syncResult };
+        if (syncResult.projectionRebuilt) completion.projections.rebuilt = true;
+        if (syncResult.projectionPending || (syncResult.rebuildNeeded && !syncResult.projectionRebuilt)) {
+          completion.projections.status = "pending";
+        }
 
         if (syncResult.success) {
           if (syncResult.projectionPending || (syncResult.rebuildNeeded && !syncResult.projectionRebuilt)) {
             remoteFailed = true;
             console.error("Projection recovery remains pending; retry sync before treating remote synchronization as complete.");
           } else if (syncResult.projectionRebuilt) {
-            if (!options.quiet) {
+            if (!workOptions.quiet) {
               console.log("Database projections recovered from recorded events.");
             }
           } else {
-            if (!options.quiet) {
+            if (!workOptions.quiet) {
               console.log("Git events are already up to date.");
             }
           }
@@ -214,21 +245,25 @@ export async function executeSyncCommand(
             "Run 'memory audit-secrets --skip-db --quarantine-events' and retry after reviewing the quarantine output.",
           ].join(" ");
           console.error(message);
-          return { exitCode: 1 };
+          return finish(1);
         } else {
           remoteFailed = true;
           console.error(`Warning: Remote synchronization failed: ${syncResult.error}`);
         }
       } catch (err: any) {
         remoteFailed = true;
+        completion.remote = { status: "failed", error: unknownErrorMessage(err) };
+        if (remoteStarted) completion.projections.status = "pending";
         console.error(`Warning: Remote synchronization failed to execute: ${unknownErrorMessage(err)}`);
       }
     } else if (options.remote === true) {
+      completion.remote = { status: "not_configured" };
       console.error("Remote synchronization requested but no remote repository is configured. Run 'memory remote set <repository-url>' first.");
-      return { exitCode: 1 };
-    } else if (remoteConfigured && !options.quiet) {
+      return finish(1);
+    } else if (remoteConfigured && !workOptions.quiet) {
       console.warn("Remote synchronization is configured but skipped. Run 'memory sync --remote' to synchronize canonical event logs.");
     }
+    if (completion.projections.status !== "current") return finish(1);
 
     const legacyMemoryFilesEnabled =
       options.includeMemoryFiles === true ||
@@ -236,23 +271,27 @@ export async function executeSyncCommand(
       process.env.MEMORY_LEGACY_MEMORY_FILES === "1";
 
     if (legacyMemoryFilesEnabled) {
-      const memoryResult = await resolved.runMemoryFileSync(db, options);
-      if (memoryResult) resolved.reportMemoryFileResults(memoryResult, options);
-    } else if (options.verbose && !options.quiet) {
+      const memoryResult = await resolved.runMemoryFileSync(db, workOptions);
+      if (memoryResult) {
+        completion.memoryFiles = memoryResult;
+        if (!options.json) resolved.reportMemoryFileResults(memoryResult, options);
+      }
+    } else if (options.verbose && !workOptions.quiet) {
       console.log("  Memory files: skipped (legacy opt-in disabled)");
     }
 
     // Ambient context generation (after facts/session projections are updated)
-    if (!options.dryRun) await resolved.runAmbientContextGeneration(db, options);
+    if (!options.dryRun) await resolved.runAmbientContextGeneration(db, workOptions);
 
-    const syncExitCode = (result.errors.length > 0 || result.aborted || remoteFailed) ? 1 : 0;
+    const syncExitCode = (!result.success || result.errors.length > 0 || remoteFailed || (completion.memoryFiles?.errors.length ?? 0) > 0) ? 1 : 0;
 
     // Run embedding pass if requested (after sync completes)
     if (options.embed && !options.dryRun) {
       const isBackground = process.env.MEMORY_EMBED_BACKGROUND === "1";
       try {
-        await resolved.runEmbeddingPass(db, options);
+        await resolved.runEmbeddingPass(db, workOptions);
       } catch (embeddingError) {
+        completion.errors.push(unknownErrorMessage(embeddingError));
         if (options.json) {
           console.error(formatErrorJson(
             unknownToError(embeddingError)
@@ -263,7 +302,7 @@ export async function executeSyncCommand(
             { verbose: options.verbose } as any
           ));
         }
-        return { exitCode: 1 };
+        return finish(1);
       } finally {
         if (isBackground) {
           if (resolved.removeBackgroundLock) {
@@ -276,14 +315,22 @@ export async function executeSyncCommand(
       }
     }
 
-    return { exitCode: syncExitCode };
+    return finish(syncExitCode);
   } catch (error) {
     reporter.stop();
+    completion.errors.push(unknownErrorMessage(error));
     resolved.handleError(error, options);
-    return { exitCode: 1 };
+    return finish(1);
   } finally {
-    resolved.unregisterCleanup(cleanupFn);
-    resolved.closeDatabase(db);
+    for (const cleanup of [() => resolved.unregisterCleanup(cleanupFn), () => resolved.closeDatabase(db)]) {
+      try { cleanup(); }
+      catch (error) {
+        outcome.exitCode = 1;
+        completion.errors.push(unknownErrorMessage(error));
+        resolved.handleError(error, options);
+      }
+    }
+    if (captureResult) resolved.reportResults(captureResult, startTime, options, { ...completion, success: outcome.exitCode === 0 });
   }
 }
 
@@ -297,14 +344,10 @@ async function createDefaultRemoteEventSyncService({ db }: { db: ReturnType<type
   const { RemoteEventSyncService } = await import("../../../../application/services/remote-event-sync-service.js");
   const { GitRemoteEventTransport } = await import("../../../../infrastructure/remote/git-remote-event-transport.js");
   const { getEventsDir } = await import("../../../../infrastructure/paths.js");
-  const { recoverPendingProjections } = await import("../../../../infrastructure/database/projection-recovery.js");
   const { SecretAuditService } = await import("../../../../infrastructure/security/secret-audit-service.js");
   const { getAllLogFiles } = await import("../../../../infrastructure/paths.js");
   const transport = new GitRemoteEventTransport(getEventsDir());
-  const recover = async () => {
-    await transport.assertProjectionSourceSettled();
-    return recoverPendingProjections(db);
-  };
+  const recover = () => recoverDefaultProjections(db);
   return new RemoteEventSyncService({
     transport,
     privacyPreflight: {
@@ -322,4 +365,12 @@ async function createDefaultRemoteEventSyncService({ db }: { db: ReturnType<type
       },
     },
   });
+}
+
+async function recoverDefaultProjections(db: ReturnType<typeof initializeDatabase>["db"]) {
+  const { GitRemoteEventTransport } = await import("../../../../infrastructure/remote/git-remote-event-transport.js");
+  const { getEventsDir } = await import("../../../../infrastructure/paths.js");
+  const { recoverPendingProjections } = await import("../../../../infrastructure/database/projection-recovery.js");
+  await new GitRemoteEventTransport(getEventsDir()).assertProjectionSourceSettled();
+  return recoverPendingProjections(db);
 }
