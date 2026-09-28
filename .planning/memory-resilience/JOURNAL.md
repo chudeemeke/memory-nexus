@@ -1,5 +1,39 @@
 # Memory resilience execution journal
 
+## 2026-09-28 - Fresh packaged consumer proof; D05 hook packaging now active
+
+- Previous goal turn was progress. Resumed clean at signed/pushed 74175fc.
+  No executable changed. Current consumer item now waits on existing D05; no
+  duplicate item added. Ledger 277 acyclic items, sole active D05, inventory 511.
+- Executed declared normal build stages into empty owned staging and packed a
+  411,705-byte tarball. Two attempts produced identical SHA-256:
+  90066cf36777c80a7d022058cd999c3ec1dd7c1e24db3d6877e86659cfa3b887.
+  All 230 installed package files match. Fresh private consumer/cache/home;
+  dependency resolution did not inherit checkout root overrides.
+- Initial install succeeded with 81 packages, but collector failed because it
+  expected bun.lock from production install. Retained failure; final run explicitly
+  generated text lock then installed frozen. Dependency scripts disabled; no
+  native embedding/postinstall/full D04 acceptance. Final audit exits 0 with {}.
+- Generated installed memory.exe correctly creates new-fact from the batch and
+  refuses local/remote backup event fences and paired sync fence without DB changes.
+  Library resolves installed dist/index.js and expected function exports; no
+  claim that library behavior, full typed API or every command has been exercised.
+- Tarball lacks dist/sync-hook.js, confirming existing D05. Added D05 prerequisite
+  to consumer qualification. Pending semantics now explicitly include partly
+  completed work waiting on dependencies; no item was falsely marked verified.
+- Evidence: evidence/Q100.4.2.2.2.2.2-package.json. Temporary artifact, dependency
+  tree/cache and homes cleaned. Hash proof does not retain an adoption artifact.
+  No live install, hook, canonical memory, provider/model or batch writer changed.
+- Existing install-command baseline: 14 tests / 26 assertions pass in an owned
+  temp environment; this suite misses the packaging defect. Output retained with
+  the package evidence. Next edit: add normal-build hook inclusion and installed
+  unrelated-cwd discovery REDs. Focused command: bun test
+  src/presentation/cli/commands/install.test.ts --timeout 15000 (under owned temp).
+  Repair D05 and prove installed synthetic hook execution before migration.
+  Full reader/native retry/quality/platform/hosted/review/desktop gates and three
+  inboxes remain open. Embedding experiment follows baseline acceptance. Native
+  E1-E10 goal remains active with R03/P03/A03 decisions unchanged.
+
 ## 2026-09-28 - Maintenance refuses invalid targets before DB/config mutation
 
 - Previous goal turn was progress. Resumed clean at signed/pushed ec3b5e3;

@@ -1,6 +1,7 @@
 # Batch consumer boundary investigation
 
-Owner: memory-nexus. Active item: Q100.4.2.2.2.2.2.
+Owner: memory-nexus. Consumer item: Q100.4.2.2.2.2.2.
+Current prerequisite: D05, packaged hook construction and discovery.
 Starting revision:9c79913. Status: synthetic investigation and reader repair;
 no format activation, installation or authority migration.
 
@@ -115,6 +116,34 @@ is explicitly not an acceptable refusal.
 
 Evidence: `.planning/memory-resilience/evidence/Q100.4.2.2.2.2.2-installed.json`.
 No live migration, installation change, format emission or consumer acceptance.
+
+### Current package probe at 74175fc
+
+The declared normal build stages (declarations, library bundle and CLI bundle)
+were executed into an empty owned staging directory. Bun packed a 411,705-byte
+tarball with SHA-256
+`90066cf36777c80a7d022058cd999c3ec1dd7c1e24db3d6877e86659cfa3b887`.
+All 230 staged package files matched a fresh isolated installation. The consumer
+resolved its own dependency lock without the checkout's root overrides, then
+installed with that frozen lock. Its generated `memory.exe` correctly rebuilt the
+synthetic batch, refused local/remote backups at the event fence without changing
+the DB, and refused sync at paired fences. The library resolved from the installed
+package and exposed the expected function exports; library behavior was not invoked.
+
+Bun reported 81 installed packages and zero audit findings for that temporary
+consumer. Dependency scripts were disabled, so this is not native embedding or
+full installation acceptance. The first collector assumed the production install
+would emit `bun.lock`; it failed after installation. The final run generated the
+text lock explicitly before the frozen install. Both builds produced the same
+tarball hash. Initial failure, final commands, lock, tree, audit and source hashes
+are retained in `evidence/Q100.4.2.2.2.2.2-package.json` under the execution directory.
+
+The tarball has no `dist/sync-hook.js`, matching the already identified D05 gap.
+D05 must repair normal-build inclusion and installed-path discovery, then prove
+the hook from an unrelated working directory and isolated settings/home. It is
+now the active prerequisite; this consumer item waits without claiming acceptance.
+The probe's package, dependency cache and homes were cleaned. No release artifact
+was retained for adoption, and no live installation was modified.
 
 ### Remaining sequence
 
