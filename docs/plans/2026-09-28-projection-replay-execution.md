@@ -357,3 +357,18 @@ Only known primitive fields enter the report. An embedding pass completion repor
 processed/skipped counts, not model/index/query readiness or concurrent-source
 exhaustion. Those remain separate acceptance gates. No model is installed or new
 fallback/provider/egress policy activated by this reporting repair.
+
+Concurrent admission investigation: first prove existing database/source fences
+across processes, using explicit stage/promotion barriers rather than timing races.
+A losing replay must preserve another connection's committed content and receipt.
+An append after the final source check may leave a bounded older projection, but
+its receipt must describe only that cutoff and subsequent recovery must consume
+the append. No operation may claim that its cutoff is the latest source forever.
+
+Separately test the command decision boundary: pause a proposal after its initial
+read, approve or change it in another process, then resume the stale command.
+Source replay integrity is insufficient if a stale command can append a snapshot
+that resets an approved proposal or silently changes its immutable recipe. Retain
+any counterexample as an unresolved acceptance failure. Derive shared admission
+around read/validate/append, including all cooperating writers and crash recovery;
+do not treat a second unprotected read or replay-only lock as a concurrency fix.

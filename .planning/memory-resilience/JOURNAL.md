@@ -1,5 +1,48 @@
 # Memory resilience execution journal
 
+## 2026-09-28 - Process races and confirmed stale proposal overwrite
+
+- Previous goal turn made progress at signed/pushed `ae4d091`; this turn started
+  clean. Full E1-E10 goal and Q100.4.2 remain active. Production source is unchanged.
+- Added a real-process driver with explicit barriers after replay staging and
+  during promotion. A replay loses safely to another process's committed replay;
+  an append before promotion rejects stale source; an append during promotion
+  leaves an honest older cutoff/pending result and is recovered on the next call.
+  The losing attempts retain source and the appropriate prior content/receipt.
+- Current replay/atomicity/source/writer group passes 86 tests / 657 assertions
+  across four files on Windows Bun 1.4.1 and pinned 1.3.14. All three deliberately
+  broken database/source/pending checks are detected. New driver strict compilation
+  and isolation pass. Inferred spawn pipe types fixed without weakening types.
+- **Confirmed unresolved defect:** a real dream command child reads no proposal
+  and pauses. Another process proposes the identical recipe and approves it. The
+  resumed child returns success, appends a duplicate fifth event, and resets
+  `approved` to `pending_review`. Reproduced on both runtimes; this is a RED
+  acceptance failure, not a passing concurrency claim. Source remains replayable,
+  so receipt/replay correctness cannot protect a stale application decision.
+- Private RED driver, generated child source, exact before/after source and state,
+  runtime outputs and input hashes are retained in `evidence/Q100.4.2-races.json`.
+  Q100.4.2 owns repair before E4/E5/B10/R02. The failing reproducer is not silently
+  converted into a normal test that blesses the overwrite.
+- `docs/plans/2026-09-28-source-decision-admission.md` derives the missing boundary:
+  shared admission from recovery/first decision read through validation and append.
+  Re-read-only and replay-only locks leave the race. A local SQLite reservation
+  is the preferred bounded prototype, with real killed-owner/contender proof
+  required before adoption; it is not implemented or installed here.
+- **Next:** qualify reservation contention, normal/error release and process death
+  with synthetic files on both runtimes. Then root/alias/local-only lifecycle and
+  explicit nested ownership, actual command regression, all writer/remote-source
+  adoption, partial append/caller transaction/candidate/reconciliation proof.
+  No new service or owner approval needed for authorized baseline investigation.
+- New driver diagnostic statements95.16/branches87.5/functions100/lines100 fails
+  TierS branches. Generated child counters are unaggregated and timeout/cleanup
+  failure paths require proof. Full source/package/platform/review quality remains
+  open; narrow parent-only measurements do not supersede prior broader evidence.
+- Inventory 484 files / two packages; 255 acyclic ledger items, one active item.
+  Owned fixtures cleaned; 10.99 GiB free at checkpoint. Canonical data/providers/
+  models/hooks/replication and blocked cleanup untouched. Three inboxes, final
+  review/hosted/Linux/desktop and R03/P03/A03 remain open. Baseline acceptance still
+  precedes the authorized bounded embedding experiment.
+
 ## 2026-09-28 - Explicit optional-stage outcomes
 
 - Started from clean signed/pushed `55d4392`. The full E1-E10 native goal and

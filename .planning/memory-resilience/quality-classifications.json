@@ -19554,6 +19554,46 @@
           }
         }
       }
+    },
+    {
+      "path": "tests/infrastructure/database/projection-process-races.test.ts",
+      "package": "package.json",
+      "tier": "S",
+      "rationale": "Native overlapping replay/source admission and retained append tests; process barriers and cleanup need full integrity qualification.",
+      "applicability": {
+        "mode": "measure",
+        "reason": "Executable process driver; generated child source and timeout/cleanup branches require instrumenter and failure-path review. No exclusion approved."
+      },
+      "decisionStatus": "proposed - independent review pending",
+      "sourceHash": "9955733d3595ab7fb1f01d5febde056c9058f4f339c17b3ca4bbb306e44a452b",
+      "inspection": {
+        "sourceRevision": "ae4d091 + current source hash",
+        "anchor": "Q100.4.2 deterministic process races",
+        "scope": "Three native schedules and negative controls; stale command failure separate and unresolved."
+      },
+      "metricApplicability": {
+        "status": "diagnostic - branch87.5 fails TierS; child counters unaggregated",
+        "sourceHash": "9955733d3595ab7fb1f01d5febde056c9058f4f339c17b3ca4bbb306e44a452b",
+        "evidence": ".planning/memory-resilience/evidence/Q100.4.2-races.json",
+        "metrics": {
+          "lines": {
+            "observedCounterTotal": 44,
+            "proposal": "measure - complete child instrumentation and failure paths pending"
+          },
+          "functions": {
+            "observedCounterTotal": 5,
+            "proposal": "measure - complete child instrumentation and failure paths pending"
+          },
+          "statements": {
+            "observedCounterTotal": 62,
+            "proposal": "measure - complete child instrumentation and failure paths pending"
+          },
+          "branches": {
+            "observedCounterTotal": 16,
+            "proposal": "measure - complete child instrumentation and failure paths pending"
+          }
+        }
+      }
     }
   ],
   "retiredFiles": [
