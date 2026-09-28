@@ -22,7 +22,7 @@ Use the ratified `C:/Projects/conversations/docs/operations/sign-off-policy.md`:
 - Phase 43 is complete with scoped local-first CLI/API market readiness approved.
 - Phase 44 is complete: `@chude/memory@4.0.3` is published and registry-backed npm/Bun installs are verified.
 - The real `4.0.3` publish was performed manually/directly with `npm publish --access public --otp=<code>`, not through `aidev release`. The release gates were already run and recorded before publish.
-- Current npm `latest`, local Windows `memory.exe`, npm global smoke, Bun global smoke, and `C:\Users\Destiny\package.json` all resolve to `4.0.3`.
+- Phase 44 verified npm `latest`, Windows `memory.exe`, npm/Bun global smokes and the user package at `4.0.3`; this is historical release evidence. The September 28 isolated check finds Bun `memory.exe --version` still returns `4.0.3`, while npm `memory.cmd` fails through a stale broken junction. The installed user package matches the registry artifact; Bun fallback attribution and live route repair remain open in D04/D04.1. See `docs/plans/2026-09-28-batch-consumer-boundary.md`.
 - Do not use local Bun tarball/path global install as a release gate for this package on Bun 1.3.5; Phase 44 observed a dependency-loop failure and a Bun segmentation fault in that path.
 
 Do not claim broad market-leader status unless MCP/local-server and public benchmark gaps are either implemented or explicitly dispositioned with user sign-off. Scoped market readiness for the local-first CLI/API product is a separate, narrower claim.

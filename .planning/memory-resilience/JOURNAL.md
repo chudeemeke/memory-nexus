@@ -1,5 +1,36 @@
 # Memory resilience execution journal
 
+## 2026-09-28 - Installed consumer and maintenance boundary counterexamples
+
+- Started clean at signed/pushed a4b44b7. No executable source changed. Active
+  Q100.4.2.2.2.2.2 remains open; ledger 277 acyclic items, one active.
+- Integrity-checked registry 4.0.3 artifact matches all 214 installed package
+  files. Six real CLI rebuild cases: installed CLI reports success but empties
+  batch-only facts; current source correctly creates new-fact. Both report 4.0.3.
+  Existing installed dependencies were reused; current control is not packaged.
+- Event-only rebuild fence preserves facts but changes DB bytes. Twelve further
+  maintenance cases show backup success with includesEvents:false and restore
+  error after replacing existing with donor-fact. Paired DB/event fences stop
+  backup, restore and verify with fences intact; ancillary directories may exist.
+  Partial restore is owned by existing Q100.4.2.4/Q050 and reconciliation Q100.4.2.12.
+- Bun launcher version succeeds; npm route has a stale broken junction. Actual
+  user package matches registry; Bun fallback attribution remains unverified.
+  Corrected historical global-install claim in CLAUDE.md. No live route repaired.
+  Four known Claude config paths show no direct memory commands, not hook absence.
+- Initial archive listing failed with PortableGit tar; native Windows tar passed
+  integrity/member/type validation. Maintenance harness initially compared raw
+  against normalized hashes; corrected before CLI cases. Equal donor fixture was
+  insufficient to expose replacement; final distinct-donor repeat retained.
+  Final collector rechecked all installed and current executable hashes unchanged.
+- Evidence: evidence/Q100.4.2.2.2.2.2-installed.json. All owned fixtures cleaned.
+  No canonical memory, installed CLI, hooks, provider/model, emission or replication
+  changed. Protected cleanup targets/shared-temp authority/Git object preserved.
+- Next: complete entrypoint/override inventory; synthetic paired-fence sync and
+  source-only checks; packaged candidate capability; recoverable migration and
+  compatible rollback. No path-fence security claim, consumer acceptance or real
+  cutover. Full quality/platform/hosted/review/desktop and native retry remain open.
+  Three inbox items remain; embedding experiment follows baseline acceptance.
+
 ## 2026-09-28 - Consumer alternatives measured; standalone batch-owner defect fixed
 
 - Began clean at signed/pushed9c79913. Previous turn made verified progress.

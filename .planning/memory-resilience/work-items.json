@@ -1550,11 +1550,18 @@
       "historical_evidence": "docs/audits/2026-09-19-repair-evidence/per-file-coverage-gaps.json",
       "evidence": [
         ".planning/memory-resilience/evidence/B11.74.6.3.1.json",
-        ".planning/memory-resilience/evidence/Q100.4.2-source-admission.json"
+        ".planning/memory-resilience/evidence/Q100.4.2-source-admission.json",
+        ".planning/memory-resilience/evidence/Q100.4.2.2.2.2.2-installed.json"
       ],
       "acceptance_record": ".planning/memory-resilience/evidence/Q050.json",
       "observed_gap": "Replace checkpoint-then-file-copy with a coherent native SQLite snapshot; prove concurrent writer inclusion policy, complete authoritative data surfaces, rollback and atomic restore, malformed manifest/path/symlink refusal, full Tier S quality. Busy-checkpoint refusal alone does not close the writer race. Admission namespace excluded from backup/restore; restore preserves existing local authority and manifest declares exclusion. Event traversal rejects symbolic/hard links including authority aliases. Atomic snapshots/restore, concurrent path swaps/source writers and cleanup integrity remain unproved; these guards do not close Q050.",
-      "retirement_trigger": "Before B11.74.7/B10/R02 acceptance."
+      "retirement_trigger": "Before B11.74.7/B10/R02 acceptance.",
+      "installed_counterexample": {
+        "evidence": ".planning/memory-resilience/evidence/Q100.4.2.2.2.2.2-installed.json",
+        "finding": "Both installed4.0.3and current-source restore replace destination existing fact with donor-fact before EEXIST at event-file fence. Backup create omits fenced events with exit0. Paired path fences stop tested maintenance commands; no transactional restore proof.",
+        "owner": "memory-nexus",
+        "trigger": "Repair before consumer-boundary activation and Q100/B10/R02 acceptance; add distinct donor/target regression and interruption/recovery proof."
+      }
     },
     {
       "id": "Q051",
@@ -2658,7 +2665,9 @@
       "risk": "S",
       "authorization": "authorized",
       "owner": "memory-nexus",
-      "evidence": [],
+      "evidence": [
+        ".planning/memory-resilience/evidence/Q100.4.2.2.2.2.2-installed.json"
+      ],
       "acceptance_record": ".planning/memory-resilience/evidence/D04.json",
       "additional_acceptance": "Disposition the exported legacy LlmExtractor.extract empty-result method and hook caller; trace active consumers and repair or explicitly retire/document unsupported behavior with review before R02. No new inference provider/egress is implicitly authorized.",
       "original_contract": {
@@ -2669,6 +2678,12 @@
         ],
         "deliverable": "Test the package as a consumer, including dependency audit, CLI/API smoke and native provider path.",
         "verification": "Artifact hash and installed dependency tree retained; root-only overrides cannot stand in for consumer safety."
+      },
+      "local_route_observation": {
+        "evidence": ".planning/memory-resilience/evidence/Q100.4.2.2.2.2.2-installed.json",
+        "finding": "Bun memory.exe version works; npm memory.cmd fails through stale broken junction. Matched installed user package is distinct proof; Bun fallback attribution unverified.",
+        "owner": "memory-nexus",
+        "trigger": "Complete consumer route qualification before R02; present live repair with applicable integration/adoption decision."
       }
     },
     {
@@ -2759,7 +2774,8 @@
         ".planning/memory-resilience/evidence/Q100.4.2.2.2.2-reader.json",
         ".planning/memory-resilience/evidence/Q100.4.2.2.2.2.1.json",
         ".planning/memory-resilience/evidence/Q100.4.2.2.2.2.2-investigation.json",
-        "docs/plans/2026-09-28-batch-consumer-boundary.md"
+        "docs/plans/2026-09-28-batch-consumer-boundary.md",
+        ".planning/memory-resilience/evidence/Q100.4.2.2.2.2.2-installed.json"
       ],
       "acceptance_record": ".planning/memory-resilience/evidence/R02.json"
     },
@@ -2777,7 +2793,9 @@
       "risk": "decision",
       "authorization": "authorized",
       "owner": "project-owner",
-      "evidence": [],
+      "evidence": [
+        ".planning/memory-resilience/evidence/Q100.4.2.2.2.2.2-installed.json"
+      ],
       "acceptance_record": ".planning/memory-resilience/evidence/R03.json"
     },
     {
@@ -3265,7 +3283,9 @@
       "risk": "decision",
       "authorization": "reserved-production-decision",
       "owner": "project-owner",
-      "evidence": [],
+      "evidence": [
+        ".planning/memory-resilience/evidence/Q100.4.2.2.2.2.2-installed.json"
+      ],
       "acceptance_record": ".planning/memory-resilience/evidence/A03.json"
     },
     {
@@ -5141,10 +5161,17 @@
       "authorization": "authorized",
       "owner": "memory-nexus",
       "evidence": [
-        ".planning/memory-resilience/B11.3-retirement.md"
+        ".planning/memory-resilience/B11.3-retirement.md",
+        ".planning/memory-resilience/evidence/Q100.4.2.2.2.2.2-installed.json"
       ],
       "acceptance_record": ".planning/memory-resilience/evidence/D04.1.json",
-      "retirement_trigger": "Before final baseline review R02; no baseline acceptance while required proof is absent."
+      "retirement_trigger": "Before final baseline review R02; no baseline acceptance while required proof is absent.",
+      "local_route_observation": {
+        "evidence": ".planning/memory-resilience/evidence/Q100.4.2.2.2.2.2-installed.json",
+        "finding": "Bun memory.exe version works; npm memory.cmd fails through stale broken junction. Matched installed user package is distinct proof; Bun fallback attribution unverified.",
+        "owner": "memory-nexus",
+        "trigger": "Complete consumer route qualification before R02; present live repair with applicable integration/adoption decision."
+      }
     },
     {
       "id": "D04.2",
@@ -6551,11 +6578,18 @@
       "owner": "memory-nexus",
       "evidence": [
         ".planning/memory-resilience/evidence/Q100.4.2-extraction-admission.json",
-        "docs/plans/2026-09-28-source-decision-admission.md"
+        "docs/plans/2026-09-28-source-decision-admission.md",
+        ".planning/memory-resilience/evidence/Q100.4.2.2.2.2.2-installed.json"
       ],
       "acceptance_record": ".planning/memory-resilience/evidence/Q100.4.2.4.json",
       "retirement_trigger": "Before Q100.4.2/Q100/B10/R02 acceptance.",
-      "observed_gap": "Unverified obligation from source inspection and retained Q100.4.2 evidence; split further before implementation if this outcome requires independent acceptance slices."
+      "observed_gap": "Unverified obligation from source inspection and retained Q100.4.2 evidence; split further before implementation if this outcome requires independent acceptance slices.",
+      "installed_counterexample": {
+        "evidence": ".planning/memory-resilience/evidence/Q100.4.2.2.2.2.2-installed.json",
+        "finding": "Both installed4.0.3and current-source restore replace destination existing fact with donor-fact before EEXIST at event-file fence. Backup create omits fenced events with exit0. Paired path fences stop tested maintenance commands; no transactional restore proof.",
+        "owner": "memory-nexus",
+        "trigger": "Repair before consumer-boundary activation and Q100/B10/R02 acceptance; add distinct donor/target regression and interruption/recovery proof."
+      }
     },
     {
       "id": "Q100.4.2.5",
@@ -6739,11 +6773,18 @@
         "docs/plans/2026-09-28-source-decision-admission.md",
         ".planning/memory-resilience/evidence/Q100.4.2.2.2.2-reader.json",
         ".planning/memory-resilience/evidence/Q100.4.2.2.2.2.2-investigation.json",
-        "docs/plans/2026-09-28-batch-consumer-boundary.md"
+        "docs/plans/2026-09-28-batch-consumer-boundary.md",
+        ".planning/memory-resilience/evidence/Q100.4.2.2.2.2.2-installed.json"
       ],
       "acceptance_record": ".planning/memory-resilience/evidence/Q100.4.2.12.json",
       "retirement_trigger": "Before Q100.4.2/Q100/B10/R02 acceptance.",
-      "observed_gap": "Unverified obligation from source inspection and retained Q100.4.2 evidence; split further before implementation if this outcome requires independent acceptance slices. Reader checkpoint: Reader implementation progress only. Shared derived graph RED: an existing edge keeps not_required consent and prior-only provenance after a denied batch derives the same identity. Tagged v4.0.3 runtime accepts the new wrapper, clears projections and ignores batch contents. Unsupported-consumer refusal is disproved; enforceable consumer-version/source-access and rollback boundaries are required before emission. Audit/pipeline still emits ordinary events; original native interrupted-chain defect remains."
+      "observed_gap": "Unverified obligation from source inspection and retained Q100.4.2 evidence; split further before implementation if this outcome requires independent acceptance slices. Reader checkpoint: Reader implementation progress only. Shared derived graph RED: an existing edge keeps not_required consent and prior-only provenance after a denied batch derives the same identity. Tagged v4.0.3 runtime accepts the new wrapper, clears projections and ignores batch contents. Unsupported-consumer refusal is disproved; enforceable consumer-version/source-access and rollback boundaries are required before emission. Audit/pipeline still emits ordinary events; original native interrupted-chain defect remains.",
+      "installed_counterexample": {
+        "evidence": ".planning/memory-resilience/evidence/Q100.4.2.2.2.2.2-installed.json",
+        "finding": "Both installed4.0.3and current-source restore replace destination existing fact with donor-fact before EEXIST at event-file fence. Backup create omits fenced events with exit0. Paired path fences stop tested maintenance commands; no transactional restore proof.",
+        "owner": "memory-nexus",
+        "trigger": "Repair before consumer-boundary activation and Q100/B10/R02 acceptance; add distinct donor/target regression and interruption/recovery proof."
+      }
     },
     {
       "id": "Q100.4.2.13",
@@ -6887,7 +6928,8 @@
         ".planning/memory-resilience/evidence/Q100.4.2.2.2.2-reader.json",
         ".planning/memory-resilience/evidence/Q100.4.2.2.2.2.1.json",
         ".planning/memory-resilience/evidence/Q100.4.2.2.2.2.2-investigation.json",
-        "docs/plans/2026-09-28-batch-consumer-boundary.md"
+        "docs/plans/2026-09-28-batch-consumer-boundary.md",
+        ".planning/memory-resilience/evidence/Q100.4.2.2.2.2.2-installed.json"
       ],
       "acceptance_record": ".planning/memory-resilience/evidence/Q100.4.2.2.2.2.json",
       "retirement_trigger": "Before Q100.4.2/Q100/B10/R02 acceptance.",
@@ -7006,16 +7048,17 @@
         ".planning/memory-resilience/evidence/Q100.4.2.2.2.2-reader.json",
         ".planning/memory-resilience/evidence/Q100.4.2.2.2.2.1.json",
         ".planning/memory-resilience/evidence/Q100.4.2.2.2.2.2-investigation.json",
-        "docs/plans/2026-09-28-batch-consumer-boundary.md"
+        "docs/plans/2026-09-28-batch-consumer-boundary.md",
+        ".planning/memory-resilience/evidence/Q100.4.2.2.2.2.2-installed.json"
       ],
       "acceptance_record": ".planning/memory-resilience/evidence/Q100.4.2.2.2.2.2.json",
       "retirement_trigger": "Before Q100.4.2/Q100/B10/R02 acceptance.",
-      "observed_gap": "No enforced production consumer boundary yet. New flags/inventory alone cannot change old code. Mirrored flat effects preserve the old fact chain only with reserved sequences and still lose denied graph consent. A versioned-root path fence is not an ACL: explicit legacy overrides bypass it. Installed entrypoints, complete migration/recovery/rollback and activation checks remain unqualified. No batch emission.",
+      "observed_gap": "Installed4.0.3CLI returns success and empties batch-only projection. Same version string cannot establish capability. Event-only fences allow initialization and partial restore; paired fences refuse tested CLI maintenance only. No enforced consumer boundary, complete inventory, migration/rollback or activation checks. No batch emission.",
       "progress": {
-        "status": "Compatibility alternatives measured; standalone batch-effect ownership repaired; consumer boundary remains open",
-        "completed": "Tagged v4.0.3/current six-case representation matrix and one paired-path fence probe retained. Mirroring fails old governance; path fences stop conventional routes but explicit overrides bypass. Current reader now rejects standalone mirrors in either order/across files; identical whole-wrapper copies remain idempotent.202tests/2226assertions/6files per Windows runtime;3targeted faults detected.",
-        "next": "Inventory supported installed/project-hook/desktop/source-only/backup/import/remote consumers and persisted overrides. Qualify versioned paired-store routing and explicit limits with installed artifacts; design recoverable migration and compatible rollback retaining all acknowledged writes. No actual authority cutover or emission before applicable owner decision. Final reader gates remain.",
-        "evidence": ".planning/memory-resilience/evidence/Q100.4.2.2.2.2.2-investigation.json"
+        "status": "Installed legacy data-loss and maintenance counterexamples retained; consumer boundary remains open",
+        "completed": "Registry integrity checked; all214installed files match. Six actual CLI rebuild cases plus12maintenance cases retained. Same4.0.3version reports incompatible behavior. Event-only restore replaces facts before error; paired fences refuse tested maintenance routes. Bun version works, npm junction is broken; no live repair.",
+        "next": "Complete supported entrypoint/override inventory and synthetic paired-fence sync/source-only checks. Bind a packaged candidate to its capabilities; design and fault-test one recoverable paired-store migration plus compatible rollback. Q100.4.2.4/Q050 own demonstrated partial restore. No emission, live installation change or authority cutover before applicable gates.",
+        "evidence": ".planning/memory-resilience/evidence/Q100.4.2.2.2.2.2-installed.json"
       }
     },
     {

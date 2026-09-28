@@ -71,6 +71,53 @@ separate live canonical queue is not justified by the evidence gathered here.
 
 ## Atomic qualification still required
 
+### Installed Windows evidence at a4b44b7
+
+The installed `C:/Users/Destiny/node_modules/@chude/memory` package matches all
+214 files in the integrity-checked registry artifact for `@chude/memory@4.0.3`.
+Executing that CLI directly with its existing dependencies reproduces silent
+projection loss: one valid batch record yields exit 0/status `ok` and an empty
+fact table. Current source yields the new fact. Both report version `4.0.3`;
+capability must be bound to artifact content, not that version string.
+
+Six isolated CLI rebuild cases and twelve maintenance cases establish:
+
+| Fixture / command | Installed 4.0.3 and current source behavior | Consequence |
+|---|---|---|
+| Event file fence / rebuild confirm | Error; existing fact survives; DB bytes change | Source discovery is too late to promise no database mutation |
+| Database directory fence / rebuild confirm | Error; directory remains | Tested database open refuses |
+| Event file fence / backup create | Success; reports `includesEvents:false`; DB bytes change | A source fence can be treated as absent source, so backup success does not establish completeness |
+| Event file fence / restore confirm | Error after `existing` is replaced by `donor-fact`; source fence remains | Demonstrated partial restore; owned by Q100.4.2.4 and Q050 |
+| Event file fence / rebuild verify | Error; existing fact and DB bytes preserved | Scoped nonmutating refusal |
+| Paired fences / backup, restore, rebuild verify | All error; both fences remain intact | Supports paired routing only for these commands; not complete entrypoint qualification |
+
+The restore donor uses a different fact identity from the destination so a
+replacement before error is observable. Retained initial probes include a hash
+normalization harness failure and an equal-donor fixture that could not expose
+this replacement. Final runs recheck all installed artifact and source hashes.
+Temporary homes are owned and cleaned. Existing installed dependencies were used;
+the current control is source execution, not a fresh installed candidate.
+
+Local route inventory found a working Bun `memory.exe --version` and a failing
+npm `memory.cmd --version` backed by a stale broken junction. The Bun launcher
+fallback has not been attributed to the matched package by a trace; do not equate
+the two proofs. No live launcher was repaired. D04/D04.1 own route qualification
+and the applicable adoption decision owns live repair. Four known Claude config
+paths yielded no direct memory hook command strings; indirect scripts, plugins,
+portfolio hooks, desktop consumers and persisted overrides remain unqualified.
+
+Current path helpers derive database and events together from XDG data home.
+That is reusable routing infrastructure, not a capability boundary: giving an old
+process the new XDG root also gives it the new store. Backup/restore, import/export,
+remote transport, source-only verification and generated hooks must be included
+in the supported-consumer contract. An old restore failing after DB replacement
+is explicitly not an acceptable refusal.
+
+Evidence: `.planning/memory-resilience/evidence/Q100.4.2.2.2.2.2-installed.json`.
+No live migration, installation change, format emission or consumer acceptance.
+
+### Remaining sequence
+
 1. Inventory supported entrypoints and persisted overrides: installed binaries,
    project hooks, desktop consumers, source-only tools, backup/restore, import,
    remote, and downgrade paths. Bind capability to the actual artifact and root.
