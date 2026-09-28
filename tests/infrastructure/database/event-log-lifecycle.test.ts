@@ -76,7 +76,7 @@ describe("event-log statement lifetime and governance reset", () => {
       await writeFacts(path);
       db.exec("CREATE TRIGGER reject_fact BEFORE INSERT ON facts BEGIN SELECT RAISE(ABORT,'synthetic fact failure'); END");
       await expect(rebuildProjectionsWithReport(db, path)).rejects.toThrow("synthetic fact failure"); released();
-      db.exec("DROP TRIGGER reject_fact; CREATE TRIGGER reject_supersedence BEFORE UPDATE OF superseded_by ON facts BEGIN SELECT RAISE(ABORT,'synthetic supersedence failure'); END");
+      db.exec("DROP TRIGGER reject_fact; CREATE TRIGGER reject_supersedence BEFORE INSERT ON facts WHEN new.superseded_by IS NOT NULL BEGIN SELECT RAISE(ABORT,'synthetic supersedence failure'); END");
       await expect(rebuildProjectionsWithReport(db, path)).rejects.toThrow("synthetic supersedence failure"); released();
       db.exec("DROP TRIGGER reject_supersedence");
       expect((await rebuildProjectionsWithReport(db, path)).replay.processedEvents).toBe(3); released();
@@ -108,12 +108,13 @@ describe("event-log statement lifetime and governance reset", () => {
     });
   });
 
-  it("keeps governance clearing inside an enclosing caller transaction", async () => {
+  it("refuses replay inside an enclosing caller transaction without changing its governance state", async () => {
     await withFixture(async (db, path, released) => {
       governanceSeed(db); const before = all(db, "SELECT * FROM memory_governance_events"); released();
-      db.exec("BEGIN"); await rebuildProjectionsWithReport(db, path);
+      db.exec("BEGIN");
+      await expect(rebuildProjectionsWithReport(db, path)).rejects.toThrow("caller transaction");
       expect(db.inTransaction).toBe(true);
-      expect(all(db, "SELECT * FROM memory_governance_events")).toEqual([]);
+      expect(all(db, "SELECT * FROM memory_governance_events")).toEqual(before);
       db.exec("ROLLBACK");
       expect(all(db, "SELECT * FROM memory_governance_events")).toEqual(before);
       expect(all(db, "SELECT * FROM memory_governance")).toHaveLength(1); released();

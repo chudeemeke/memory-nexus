@@ -228,16 +228,19 @@ no-op extraction replay, and reconciled missing versus empty projection fixtures
 Parent .3/.6 are scoped verified. Q100.1 now shares required existence/parse
 admission between verify and rebuild; malformed sources preserve projections and
 the void API throws. Paired Windows proof passes93tests/663assertions across seven
-files; all five targeted admission faults fail. Q100.2 is active for whole-replay
-failure safety; the late-write data-loss probe still fails. Q100.3 snapshot/cutoff
-and Q100.4 caller recovery/full quality remain mandatory. Narrow diagnostic
-production coverage fails;34 existing strict integration-test type errors are
+files; all five targeted admission faults fail. Q100.2 now stages replay separately
+and promotes all six projection tables atomically with conflict admission, stable
+IDs and FTS validation. Both Windows runtimes pass132tests/1855assertions; all nine
+targeted faults fail. The retained late-write/missing-source probes all pass.
+Q100.3 is active for complete source snapshots/cutoffs; Q100.4 actual caller
+recovery/full quality remains mandatory. New replacement diagnostic branches100;
+event-log/driver gaps and34 existing strict integration-test type errors remain
 owned by Q100.4. Q005/Q068 and B11.44/B11.52
 retain the newly confirmed caller quality gaps. Q050/Q062 and
 B11.22/B11.42/B11.58 remain in the mandatory .7 barrier;
 full snapshot safety and stale-lock admission remain unresolved. Q018/B11.9 and Q102/B11.10 retain
-factory and fixture quality gaps. Q100 owns the
-demonstrated whole-replay failure defect; Q101 owns complete secret-remediation
+factory and fixture quality gaps. Q100 owns complete source/caller replay
+acceptance beyond this atomic replacement checkpoint; Q101 owns complete secret-remediation
 safety. Full quality, platform and review acceptance remains B11.74.7; local
 migration verification does not close these gates. The source map, rejected
 experiment and exact next steps are in

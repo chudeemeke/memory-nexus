@@ -6033,7 +6033,7 @@
     {
       "path": "src/infrastructure/database/event-log.ts",
       "package": "package.json",
-      "sourceHash": "be5a026c403fe6446f3720f5580851000e8fe9971ec623ce7ae76499fc753043",
+      "sourceHash": "1bc9637ddd3722f0e8573813b0375df8f85c9fb4e40e1d2de343cd632089281f",
       "tier": "S",
       "rationale": "Appends canonical memory events and validates imported legacy records; durable source and integrity boundary.",
       "applicability": {
@@ -6042,17 +6042,17 @@
       },
       "decisionStatus": "proposed - independent review pending",
       "inspection": {
-        "sourceRevision": "b2e99bb + current source hash",
-        "anchor": "Q100.1 required source admission",
-        "scope": "Scoped native existence/parse refusal; complete replay, source snapshot, quality/platform/review remain Q100.2-Q100.4."
+        "sourceRevision": "b5895ac + current source hash",
+        "anchor": "Q100.2 isolated replay and atomic promotion",
+        "scope": "Paired native atomic replacement proof; source snapshot, full caller recovery and quality/platform/review remain Q100.3-Q100.4."
       },
       "metricApplicability": {
         "status": "diagnostic - complete Q100.4/B11.74.7 acceptance pending",
-        "sourceHash": "be5a026c403fe6446f3720f5580851000e8fe9971ec623ce7ae76499fc753043",
-        "evidence": ".planning/memory-resilience/evidence/Q100.1.json",
+        "sourceHash": "1bc9637ddd3722f0e8573813b0375df8f85c9fb4e40e1d2de343cd632089281f",
+        "evidence": ".planning/memory-resilience/evidence/Q100.2.json",
         "metrics": {
           "lines": {
-            "observedCounterTotal": 206,
+            "observedCounterTotal": 216,
             "proposal": "measure - completeness unverified"
           },
           "functions": {
@@ -6060,11 +6060,11 @@
             "proposal": "measure - completeness unverified"
           },
           "statements": {
-            "observedCounterTotal": 209,
+            "observedCounterTotal": 222,
             "proposal": "measure - completeness unverified"
           },
           "branches": {
-            "observedCounterTotal": 152,
+            "observedCounterTotal": 154,
             "proposal": "measure - completeness unverified"
           }
         }
@@ -6306,6 +6306,46 @@
           },
           "branches": {
             "observedCounterTotal": 3,
+            "proposal": "measure - completeness unverified"
+          }
+        }
+      }
+    },
+    {
+      "path": "src/infrastructure/database/projection-replacement.ts",
+      "package": "package.json",
+      "tier": "S",
+      "rationale": "Atomic projection replacement, conflict admission, data identity and native adversarial regression driver.",
+      "applicability": {
+        "mode": "measure",
+        "reason": "Executable Tier S replacement/driver; no exclusion approved."
+      },
+      "decisionStatus": "proposed - independent review pending",
+      "sourceHash": "9adf98ed02804f2967bf9dcd59825b103f2dccd9e0c6fd81f188aa9014b9771d",
+      "inspection": {
+        "sourceRevision": "b5895ac + current source hash",
+        "anchor": "Q100.2 isolated replay and atomic promotion",
+        "scope": "Paired native atomic replacement proof; source snapshot, full caller recovery and quality/platform/review remain Q100.3-Q100.4."
+      },
+      "metricApplicability": {
+        "status": "diagnostic - complete Q100.4/B11.74.7 acceptance pending",
+        "sourceHash": "9adf98ed02804f2967bf9dcd59825b103f2dccd9e0c6fd81f188aa9014b9771d",
+        "evidence": ".planning/memory-resilience/evidence/Q100.2.json",
+        "metrics": {
+          "lines": {
+            "observedCounterTotal": 63,
+            "proposal": "measure - completeness unverified"
+          },
+          "functions": {
+            "observedCounterTotal": 22,
+            "proposal": "measure - completeness unverified"
+          },
+          "statements": {
+            "observedCounterTotal": 85,
+            "proposal": "measure - completeness unverified"
+          },
+          "branches": {
+            "observedCounterTotal": 39,
             "proposal": "measure - completeness unverified"
           }
         }
@@ -17500,20 +17540,19 @@
         "reason": "Executable integrity driver; no exclusion approved."
       },
       "decisionStatus": "proposed - independent review pending",
-      "sourceHash": "d698f7e5c11a1c887a12eb36d05d9efab30dec7531c476f56a4f9273103a9bc7",
+      "sourceHash": "079c79ca986a70634c19bcbf678037d7f1091371ea0c5e1d222c97fe99fb4212",
       "inspection": {
-        "sourceRevision": "1aed0a1 + current source hash",
-        "anchor": "native replay lifetime and governance reset",
-        "scope": "Scoped native behavior and failures; Q100 full replay/quality remains open."
+        "sourceRevision": "b5895ac + current source hash",
+        "anchor": "Q100.2 isolated replay and atomic promotion",
+        "scope": "Paired native atomic replacement proof; source snapshot, full caller recovery and quality/platform/review remain Q100.3-Q100.4."
       },
       "metricApplicability": {
-        "status": "diagnostic - B05/Q100/B11.74.7 and independent review pending",
-        "evidence": ".planning/memory-resilience/evidence/B11.74.5-event.json",
-        "sourceHash": "d698f7e5c11a1c887a12eb36d05d9efab30dec7531c476f56a4f9273103a9bc7",
-        "disposition": "Production branch floor fails; retain full quality and demonstrated late-replay defect as required work.",
+        "status": "diagnostic - complete Q100.4/B11.74.7 acceptance pending",
+        "sourceHash": "079c79ca986a70634c19bcbf678037d7f1091371ea0c5e1d222c97fe99fb4212",
+        "evidence": ".planning/memory-resilience/evidence/Q100.2.json",
         "metrics": {
           "lines": {
-            "observedCounterTotal": 79,
+            "observedCounterTotal": 80,
             "proposal": "measure - completeness unverified"
           },
           "functions": {
@@ -17729,6 +17768,46 @@
           },
           "branches": {
             "observedCounterTotal": 0,
+            "proposal": "measure - completeness unverified"
+          }
+        }
+      }
+    },
+    {
+      "path": "tests/infrastructure/database/projection-atomicity.test.ts",
+      "package": "package.json",
+      "tier": "S",
+      "rationale": "Atomic projection replacement, conflict admission, data identity and native adversarial regression driver.",
+      "applicability": {
+        "mode": "measure",
+        "reason": "Executable Tier S replacement/driver; no exclusion approved."
+      },
+      "decisionStatus": "proposed - independent review pending",
+      "sourceHash": "5e8590431848ee059dadc3f8d9563f4dc9cdbc72509c4c3e5a7409eae16c1bb8",
+      "inspection": {
+        "sourceRevision": "b5895ac + current source hash",
+        "anchor": "Q100.2 isolated replay and atomic promotion",
+        "scope": "Paired native atomic replacement proof; source snapshot, full caller recovery and quality/platform/review remain Q100.3-Q100.4."
+      },
+      "metricApplicability": {
+        "status": "diagnostic - complete Q100.4/B11.74.7 acceptance pending",
+        "sourceHash": "5e8590431848ee059dadc3f8d9563f4dc9cdbc72509c4c3e5a7409eae16c1bb8",
+        "evidence": ".planning/memory-resilience/evidence/Q100.2.json",
+        "metrics": {
+          "lines": {
+            "observedCounterTotal": 133,
+            "proposal": "measure - completeness unverified"
+          },
+          "functions": {
+            "observedCounterTotal": 37,
+            "proposal": "measure - completeness unverified"
+          },
+          "statements": {
+            "observedCounterTotal": 175,
+            "proposal": "measure - completeness unverified"
+          },
+          "branches": {
+            "observedCounterTotal": 35,
             "proposal": "measure - completeness unverified"
           }
         }

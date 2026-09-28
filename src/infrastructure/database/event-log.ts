@@ -32,6 +32,7 @@ import {
 import { MemoryGovernanceEntry } from "../../domain/entities/memory-governance.js";
 import { getMachineLogPath, getAllLogFiles } from "../paths.js";
 import { loadConfig } from "../hooks/config-manager.js";
+import { captureProjectionFence, createProjectionStage, promoteProjections } from "./projection-replacement.js";
 
 export interface InvalidEventLogLine {
   filePath: string;
@@ -148,6 +149,7 @@ export async function rebuildProjections(db: Database, logPath?: string, eventsD
  * Rebuild derived database projections and return replay evidence.
  */
 export async function rebuildProjectionsWithReport(db: Database, logPath?: string, eventsDir?: string): Promise<ProjectionRebuildReport> {
+  const fence = captureProjectionFence(db);
   const report = await readProjectionEventsWithReport(logPath, eventsDir);
   if (report.invalidEvents.length > 0) {
     return {
@@ -164,13 +166,21 @@ export async function rebuildProjectionsWithReport(db: Database, logPath?: strin
     createDreamProjection(),
     createGovernanceProjection(),
   ]);
-  const replay = await registry.replay(sortedEvents, { db });
-
-  return {
-    invalidEvents: report.invalidEvents.length,
-    invalidEventLines: report.invalidEvents,
-    replay,
-  };
+  const stage = createProjectionStage();
+  let failed = false, failure: unknown;
+  try {
+    const replay = await registry.replay(sortedEvents, { db: stage });
+    promoteProjections(db, stage, fence);
+    return { invalidEvents: 0, invalidEventLines: [], replay };
+  } catch (error) {
+    failed = true; failure = error;
+    throw error;
+  } finally {
+    try { stage.close(); } catch (cleanup) {
+      if (failed) throw new AggregateError([failure, cleanup], "Projection replay and stage cleanup failed");
+      throw cleanup;
+    }
+  }
 }
 
 async function collectMemoryEvents(logPath: string | undefined, eventsDir: string | undefined, options: ReadOptions): Promise<EventReadReport> {

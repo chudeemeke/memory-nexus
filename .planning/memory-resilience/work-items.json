@@ -3,7 +3,7 @@
   "workstream": "memory-resilience",
   "goal_status": "active",
   "starting_revision": "77d54e05be7fc24cede4a9a3e1fede6fa113ac8f",
-  "current_item": "Q100.2",
+  "current_item": "Q100.3",
   "status_semantics": {
     "pending": "Not started; authorization and dependencies must permit work.",
     "pending_rebaseline": "Historical candidate, not a confirmed current failure or a completed task.",
@@ -2781,6 +2781,11 @@
           "document": "docs/plans/2026-09-28-projection-replay-execution.md",
           "owner": "memory-nexus",
           "trigger": "Before integration/adoption: notify consumers that malformed projection sources refuse replacement and the void API throws; verify missing sources returns ready:false."
+        },
+        "projectionReplacementNotice": {
+          "document": "docs/plans/2026-09-28-projection-replay-execution.md",
+          "owner": "memory-nexus",
+          "trigger": "Before integration/adoption: communicate atomic replacement, preserved surviving identities, conflict retry and rejection of caller-owned transactions."
         }
       }
     },
@@ -5773,14 +5778,15 @@
         "docs/plans/2026-09-22-projection-rebuild-integrity.md",
         ".planning/memory-resilience/evidence/B11.74.6.3.2.json",
         "docs/plans/2026-09-28-projection-replay-execution.md",
-        ".planning/memory-resilience/evidence/Q100.1.json"
+        ".planning/memory-resilience/evidence/Q100.1.json",
+        ".planning/memory-resilience/evidence/Q100.2.json"
       ],
       "acceptance_record": ".planning/memory-resilience/evidence/Q100.json",
       "observed_gap": "Late fact insert failure leaves previously retained facts deleted. Current native probe1pass/1fail. Production diagnostic branches91.89%.",
       "retirement_trigger": "Before B11.74.7/B10/R02 acceptance. Do not wrap async replay in a synchronous transaction or leave an unenforced transaction open across unrelated awaits.",
       "progress": {
-        "status": "Required existence/parse admission repaired; whole-replay late-write data loss remains reproduced.",
-        "next": "Q100.2 isolated staging and atomic promotion; Q100.3 snapshot/cutoff and Q100.4 caller recovery/full acceptance mandatory.",
+        "status": "Required admission and native atomic replacement repaired. All three retained late-write/missing-source probes now pass.",
+        "next": "Q100.3 source snapshot/cutoff; Q100.4 actual pending-event caller retry, full quality/platform/review.",
         "owner": "memory-nexus",
         "trigger": "Before B11.74.7/B10/R02."
       }
@@ -6004,7 +6010,7 @@
       "id": "Q100.2",
       "stage": "baseline-quality",
       "title": "Stage and atomically promote complete projections",
-      "status": "active",
+      "status": "verified",
       "depends_on": [
         "Q100.1"
       ],
@@ -6015,20 +6021,24 @@
       "authorization": "authorized",
       "owner": "memory-nexus",
       "evidence": [
-        "docs/plans/2026-09-28-projection-replay-execution.md"
+        "docs/plans/2026-09-28-projection-replay-execution.md",
+        ".planning/memory-resilience/evidence/Q100.2.json"
       ],
       "acceptance_record": ".planning/memory-resilience/evidence/Q100.2.json",
       "retirement_trigger": "Before parent Q100/B11.74.7/B10/R02 acceptance.",
       "progress": {
-        "next": "First inventory six projection tables, FTS and stable IDs/references. Prove conflict-fence semantics with native same/other-connection writes and caller transaction tests, then implement isolated replay and synchronous atomic promotion.",
-        "requiredFailure": "Q100.1 evidence retains late-write data loss on current source; replacement must preserve complete old state and permit retry."
+        "status": "Scoped atomic replacement, native conflict admission and cleanup/retry verified; full original Q100 acceptance remains Q100.3-Q100.4.",
+        "testsPerRuntime": 132,
+        "assertionsPerRuntime": 1855,
+        "testFiles": 8,
+        "decisionFaultsDetected": 9
       }
     },
     {
       "id": "Q100.3",
       "stage": "baseline-quality",
       "title": "Validate complete source snapshot and cutoff",
-      "status": "pending",
+      "status": "active",
       "depends_on": [
         "Q100.2"
       ],
@@ -6042,7 +6052,11 @@
         "docs/plans/2026-09-28-projection-replay-execution.md"
       ],
       "acceptance_record": ".planning/memory-resilience/evidence/Q100.3.json",
-      "retirement_trigger": "Before parent Q100/B11.74.7/B10/R02 acceptance."
+      "retirement_trigger": "Before parent Q100/B11.74.7/B10/R02 acceptance.",
+      "progress": {
+        "next": "Establish complete source-set/content snapshot and cutoff; adversarial append/truncate/replace/new-file races, semantic payload and conflicting duplicate IDs. Retain usable prior projections on refusal. Use actual sync/extraction call paths for source-authority requirements.",
+        "limits": "DB replacement is atomic. Parsing current streams does not establish coherent complete source input, and verify is still existence/parse admission only."
+      }
     },
     {
       "id": "Q100.4",
@@ -6060,11 +6074,12 @@
       "owner": "memory-nexus",
       "evidence": [
         "docs/plans/2026-09-28-projection-replay-execution.md",
-        ".planning/memory-resilience/evidence/Q100.1.json"
+        ".planning/memory-resilience/evidence/Q100.1.json",
+        ".planning/memory-resilience/evidence/Q100.2.json"
       ],
       "acceptance_record": ".planning/memory-resilience/evidence/Q100.4.json",
       "retirement_trigger": "Before parent Q100/B11.74.7/B10/R02 acceptance.",
-      "observed_gap": "Scoped diagnostic: event-log statements59.33/lines60.19/functions72/branches49.34; projections CLI branches87.5. These narrow-suite metrics are not complete module measurement and fail acceptance. Full strict integration test compilation reports34 unchecked-array-access errors on unchanged baseline lines. Full original Q100, test fixture/quality, supported-platform and review acceptance remains required."
+      "observed_gap": "Q100.2 narrow diagnostic: new replacement statements98.82/lines100/functions100/branches100; atomicity driver branches97.14 misses Tier S. Event-log statements68.01/lines67.59/functions76/branches55.19 is not complete module measurement and fails acceptance. Q100.1 CLI branches87.5 and34 unchanged integration strict-type errors remain. Explicitly cover primary+stage-cleanup combined failure and post-commit cleanup reporting; complete actual caller recovery, fixture quality, package/changed-line/platform/review."
     }
   ],
   "decisions": {

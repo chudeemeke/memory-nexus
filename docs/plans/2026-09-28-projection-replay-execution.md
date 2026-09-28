@@ -62,3 +62,48 @@ Primary references consulted: SQLite's
 [transaction documentation](https://www.sqlite.org/lang_transaction.html),
 [data_version pragma](https://www.sqlite.org/pragma.html#pragma_data_version), and
 [total_changes contract](https://www.sqlite.org/c3ref/total_changes.html).
+
+## Q100.2 replacement inventory and contract
+
+The six replayed tables are facts, persona_entries, graph_edges, dream_entries,
+memory_governance and memory_governance_events. Their stable keys are respectively
+uuid, entry_id, edge_id, dream_id, (surface,target_id) and event_id. The first five
+also have local autoincrement IDs. Preserve IDs of surviving keys; allocate new
+IDs through the live database sequence. Do not import staging-local numeric IDs.
+Facts FTS uses facts.id through the three existing insert/delete/update triggers;
+promote facts through those triggers inside the same transaction. All six tables,
+FTS state and sequence updates must roll back together on failure.
+
+Source inspection: schema.ts defines these tables without foreign keys to one
+another. Dream targets and supersedence use fact UUIDs, governance/utility use
+surface logical IDs, and graph endpoints use semantic IDs. FactRepository exposes
+numeric findById, so retaining existing numeric identities avoids incidental churn.
+Session/message/entity/extraction/utility/vector data is outside this replacement.
+The stage needs only the six projection schemas; do not clone sensitive unrelated
+tables or load vector extensions. Enumerate stage columns from its trusted schema,
+require matching live columns, and qualify live table access with main.
+
+Capture the fence before source-reading awaits. Compare same-connection
+total_changes, main data_version, main/temp schema_version within BEGIN IMMEDIATE;
+reject a caller-owned transaction both before reading and before promotion. Same
+connection rollback may conservatively invalidate work. Never compare data_version
+between connections. Native concurrent write/DDL/temp-trigger tests must prove
+these assumptions. A conflict returns a retryable failure without erasing the
+concurrent work. Full source-file cutoff validation remains Q100.3.
+
+The native test matrix covers every table's delete/insert failure, deferred foreign
+key commit failure, invalid staging payload, ignored insert, stable identities,
+all-table and FTS preservation, same/other-connection conflicts and caller-owned
+transactions. Broader fixture compatibility, cleanup/decision tests and final
+quality remain mandatory before this item is accepted.
+
+Q100.2 scoped verification: both Windows Bun1.4.1/1.3.14 runtimes pass132tests/
+1855assertions across eight files, nine injected faults fail, and the retained
+late-write/missing-source probes all pass. Stage initialization/reset/success
+release actual native resources. Final source and full outputs are retained in
+`.planning/memory-resilience/evidence/Q100.2.json`. Additional current-runtime sync
+compatibility passes64tests/162assertions; mocked orchestration/help tests do not
+establish pending-event recovery. The new replacement module diagnoses100% branches
+and98.82% statements; the atomicity driver97.14% branches and larger event-log
+quality gaps remain mandatory Q100.4 work, including combined cleanup failures.
+Q100.3 is active for coherent source admission. No full baseline acceptance.

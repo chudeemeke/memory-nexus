@@ -1,5 +1,50 @@
 # Memory resilience execution journal
 
+## 2026-09-28 - Atomic projection replacement
+
+- Previous turn: progress, signed/pushed b5895ac with required source admission.
+  This turn began clean. Q100.2 inventoried facts/persona/graph/dream/governance
+  plus governance audit, FTS dependencies and logical versus numeric references.
+- New production adapter stages only six projection schemas in owned memory,
+  runs existing async handlers there, then promotes synchronously under an
+  immediate live transaction. Fence captured before source awaits; checks native
+  same-connection changes, other-connection data_version, main/temp schema and
+  constraint/trigger policy flags. Caller transactions refuse without rollback.
+- Surviving logical keys retain their numeric IDs, including64-bit IDs without
+  JavaScript rounding. New identities use live sequences. Deletes/inserts check
+  SQLite direct changes; final rows/content/identity and FTS consistency are
+  checked before commit. Bun run().changes includes trigger effects, so it could
+  not serve as the direct-row admission count; a native probe confirmed this.
+- RED:1pass/23fail after correcting the new fixture's session-column names.
+  Final native matrix covers every table delete/insert failure, deferred FK
+  commit failure, ignored/altered/late cross-table triggers, missing FTS trigger,
+  schema mismatch, unavailable fence, concurrent reads/writes/DDL/temp triggers,
+  rollback, busy writer, caller transactions, stage init/reset/success disposal,
+  invalid payload and retry. All three original late-write/missing-source probes
+  now pass. Two lifecycle expectations changed: supersedence failure targets the
+  promoted row; caller transactions are refused with prior state intact.
+- Paired Windows Bun1.4.1/1.3.14 group:132tests/1855assertions across eight files,
+  exact source hashes agree. Additional current-runtime sync tests64/162 pass;
+  these include mocked orchestration/help smoke, not pending-event recovery proof.
+  Nine targeted faults all fail, including non-atomic promotion, missing conflict
+  signals, lost identities, skipped content/FTS checks, stage leak and live replay.
+- New replacement diagnostic:statements98.82,lines100,functions100,branches100.
+  Atomicity driver branches97.14 fails Tier S; event-log scoped metrics remain
+  statements68.01,lines67.59,functions76,branches55.19. No full quality acceptance.
+  Q100.4 retains these gaps,34 prior strict integration errors, combined primary/
+  cleanup failure and truthful post-commit cleanup reporting. Production types,
+  both changed native-test strict types, isolation and whitespace pass.
+- Q100.2 scoped verified; Q100.3 active. Next: complete source-set/content snapshot
+  and explicit cutoff, append/truncate/replace/new-file races, semantic payload
+  admission and conflicting duplicate IDs. Parse success alone is insufficient.
+  Q100.4 must then prove actual sync/extraction pending-event retry and full
+  quality/platform/review. Baseline acceptance still precedes the approved model
+  experiment. No production replication/adoption gate changed.
+- evidence/Q100.2.json retains complete outputs, faults, diagnostics and source
+  bindings. Catalog470files/two packages;248-item acyclic ledger. Owned runtime/
+  test containers cleaned; roughly11GiB free. Single canonical worktree retained;
+  no policy-blocked cleanup retried, canonical data touched or new services used.
+
 ## 2026-09-28 - Required projection source admission
 
 - Previous turn delivered b2e99bb. Split Q100 into four mandatory atomic children:
