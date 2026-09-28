@@ -12,7 +12,7 @@ import {
   initializeDatabase,
 } from "../../../infrastructure/database/index.js";
 import { SqliteMemoryGovernanceRepository } from "../../../infrastructure/database/repositories/memory-governance-repository.js";
-import { appendMemoryEvent } from "../../../infrastructure/database/event-log.js";
+import { createProjectedEventWriter, recoverPendingProjections } from "../../../infrastructure/database/projection-recovery.js";
 import { MemoryGovernanceService } from "../../../application/services/memory-governance-service.js";
 import {
   MEMORY_GOVERNANCE_SURFACES,
@@ -47,6 +47,7 @@ export interface GovernanceCommandOptions {
 export interface GovernanceCommandDeps {
   dbPath?: string | undefined;
   writeEvents?: boolean | undefined;
+  eventLogPath?: string | undefined;
 }
 
 const SURFACE_CHOICES = [...MEMORY_GOVERNANCE_SURFACES];
@@ -131,9 +132,14 @@ export async function executeGovernanceCommand(
 
   try {
     const repo = new SqliteMemoryGovernanceRepository(db);
+    if (deps.writeEvents !== false && options.action !== "list" && options.action !== "show") {
+      if ((await recoverPendingProjections(db, deps.eventLogPath)).pending) {
+        throw new Error("Projection recovery remains pending; retry the command");
+      }
+    }
     const service = new MemoryGovernanceService({
       repository: repo,
-      writeEvent: deps.writeEvents === false ? undefined : appendMemoryEvent,
+      writeEvent: deps.writeEvents === false ? undefined : createProjectedEventWriter(db, deps.eventLogPath),
     });
 
     if (options.action === "list") {

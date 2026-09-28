@@ -15,8 +15,8 @@ import { captureProjectionFence, createProjectionStage, promoteProjections } fro
 
 const tables = ["facts", "persona_entries", "graph_edges", "dream_entries", "memory_governance", "memory_governance_events"];
 function receipt(db: OwnedDatabase) { using s = db.prepare<{ manifest: string }, []>("SELECT manifest FROM projection_replay_state WHERE id=1"); return s.get()?.manifest; }
-async function corpus(path: string, prefix: string) {
-  writeFileSync(path, "");
+async function corpus(path: string, prefix: string, append = false) {
+  if (!append) writeFileSync(path, "");
   const time = new Date("2026-01-01T00:00:00Z");
   await appendEvent(Fact.create({ uuid: prefix, type: "preference", project: "synthetic", content: prefix + "needle",
     observedAt: time, metadata: { confidence: 0.9, graph_edges: [{ id: prefix + "edge",
@@ -135,7 +135,7 @@ describe("automatic projection replay authority", () => {
       await rebuildProjectionsWithReport(db, path); const first=receipt(db);
       db.exec("CREATE TABLE unrelated(value TEXT); INSERT INTO unrelated VALUES('synthetic')");
       const reopened=new OwnedDatabase(dbPath);
-      try { await corpus(path,"new"); expect((await rebuildProjectionsWithReport(reopened,path,undefined,"automatic")).replay.processedEvents).toBe(3); expect(receipt(reopened)).not.toBe(first); }
+      try { await corpus(path,"new",true); expect((await rebuildProjectionsWithReport(reopened,path,undefined,"automatic")).replay.processedEvents).toBe(6); expect(receipt(reopened)).not.toBe(first); }
       finally { reopened.close(); }
     });
   });
@@ -143,7 +143,7 @@ describe("automatic projection replay authority", () => {
     await fixture(async (db,path) => {
       await rebuildProjectionsWithReport(db,path);
       db.exec("CREATE TRIGGER receipt_side_effect AFTER UPDATE ON projection_replay_state BEGIN UPDATE facts SET content='tampered'; END");
-      const before=db.serialize(); await corpus(path,"new");
+      const before=db.serialize(); await corpus(path,"new",true);
       await expect(rebuildProjectionsWithReport(db,path)).rejects.toThrow("content identity"); expect(db.serialize().equals(before)).toBe(true);
       db.exec("DROP TRIGGER receipt_side_effect"); await rebuildProjectionsWithReport(db,path,undefined,"automatic");
       expect(JSON.parse(receipt(db)!).projectionState).toMatch(/^v1:[a-f0-9]{64}$/);
@@ -153,7 +153,7 @@ describe("automatic projection replay authority", () => {
     await fixture(async (db,path) => {
       await rebuildProjectionsWithReport(db,path);
       db.exec("CREATE TRIGGER receipt_index_effect AFTER UPDATE ON projection_replay_state BEGIN INSERT INTO facts_fts(facts_fts) VALUES('delete-all'); END");
-      const before=db.serialize(); await corpus(path,"new");
+      const before=db.serialize(); await corpus(path,"new",true);
       await expect(rebuildProjectionsWithReport(db,path)).rejects.toThrow();
       expect(db.serialize().equals(before)).toBe(true);
       db.exec("DROP TRIGGER receipt_index_effect"); await rebuildProjectionsWithReport(db,path,undefined,"automatic");

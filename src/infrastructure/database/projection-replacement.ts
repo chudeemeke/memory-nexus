@@ -67,7 +67,7 @@ export function promoteProjections(db: Database, stage: Database, fence: Fence, 
       throw new Error("Database changed during projection rebuild; retry with current state");
     }
     assertProjectionSource(source);
-    assertProjectionSourceAuthority(db, source);
+    assertProjectionSourceAuthority(db, source, automatic);
     if (automatic) assertAutomaticProjectionReplay(db);
     const identities = new Map<string, Map<string, string>>();
     for (const { table, keys } of projections) {

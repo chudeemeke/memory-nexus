@@ -1,5 +1,58 @@
 # Memory resilience execution journal
 
+## 2026-09-28 - Canonical writer recovery checkpoint; Q100.4.2 stays active
+
+- Started from signed/pushed de75bb5. Recovered the in-progress canonical writer
+  changes and continued Q100.4.2. The native goal remains active. No adoption,
+  replication or embedding experiment was activated; baseline acceptance remains
+  the experiment prerequisite.
+- Governance/dream command writers append then perform guarded replay. Services
+  accept an optional projected-success result and read back the committed entry;
+  append-only injected writers remain compatible. Mutating commands recover before
+  reading state, and refuse known pending recovery. List/show and unconfirmed
+  dream apply/rollback do not replay. Confirmed already-completed dream operations
+  return recorded event IDs without another append.
+- Native RED exposed automatic acceptance of truncated/rewritten acknowledged
+  source history. Automatic promotion now hashes and preserves the prior prefixes;
+  deliberate reconciliation remains explicit. Missing acknowledged sources fail.
+  Absent/zero-byte sources without receipts remain idle, preserving unlogged data.
+- Final matching Windows Bun1.4.1/1.3.14 groups each pass474tests/3432assertions
+  across20files. New writer driver covers19 native tests, including interruption
+  at replacement, supersedence, applied snapshot, restore and rolled-back snapshot
+  boundaries through fresh CLI database connections. It is not a separate-process
+  restart or whole-action atomicity proof. Production/strict changed-driver types
+  and isolation pass. New recovery module and driver diagnose100% all four metrics;
+  complete shared quality acceptance remains open.
+- Seven of eight injected faults are detected. `reapply-after-projected-writer`
+  survives: existing events happen to tolerate the redundant repository write.
+  No equivalence waiver or quality acceptance is granted. **Next:** add a native
+  side-effect regression proving projected-success handling does not perform a
+  second governance write; reassess this fault before expanding caller recovery.
+- Then finish proposal/governance interruption, concurrent ordering/stale target
+  decisions, append failure and post-write cutoff reporting. Extraction and remote
+  sync remain unwired: reproduce failed replay followed by no-op candidates or
+  unchanged transport, include process restart and truthful partial status, retain
+  no-unlogged-data-loss/no-resurrection behavior and measure replay cost. Q100.4.3
+  still owns complete module/package/changed-line/platform/cleanup/review gates.
+- Retained corrections: initial review-control assertion used the wrong domain
+  behavior; suppression retention now retries consent-revoke. Byte-identical
+  read-only assertions were inappropriate because current initialization changes
+  WAL/schema and creates/drops the FTS probe; tests prove projection/receipt
+  preservation, while Q019 retains the initialization issue. Empty bootstrap had
+  left derived governance rows; replaced with a fresh empty DB. Three older retry
+  fixtures rewrote history; changed them to append independent events. Parallel
+  120s runtime attempts timed out; sequential180s-bounded reruns completed. No
+  failed/incomplete run is represented as a pass.
+- `evidence/Q100.4.2-writers.json` retains matching source hashes, outputs,
+  diagnostics, surviving fault, failures and corrections. Ledger255items remains
+  acyclic with Q100.4.2 the only active item; catalog479files/two packages. Replaced
+  stale mutable status in `.planning/STATE.md` with the canonical recovery pointer.
+  Draft PR wording is refreshed around current evidence and explicit remaining work.
+- Free disk10.78GiB at checkpoint; owned synthetic/runtime fixtures cleaned.
+  One registered canonical worktree; no new worktree, canonical data, model,
+  provider, hook, replication or previously blocked cleanup touched. Three inbox
+  reports, independent-review/hosted/Linux/desktop gates and R03/P03/A03 remain open.
+
 ## 2026-09-28 - Durable authority for automatic replay
 
 - Previous turn made progress: signed/pushed57fb7b9 strict payload admission.

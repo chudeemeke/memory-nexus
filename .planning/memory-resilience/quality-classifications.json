@@ -1188,7 +1188,7 @@
     {
       "path": "src/application/services/dreaming-service.ts",
       "package": "package.json",
-      "sourceHash": "dc2cdeed5c7552938ca23c97f8ae9248375d80bd0393b1f756c748a9daee809a",
+      "sourceHash": "49bf4d8355617381838470687de6992f2184a0216b620aa2b66866b85a225b97",
       "tier": "S",
       "rationale": "Redacts proposals and manages approval-controlled canonical memory transformations.",
       "applicability": {
@@ -1197,30 +1197,29 @@
       },
       "decisionStatus": "proposed - independent review pending",
       "inspection": {
-        "sourceRevision": "aa2c449cd2d72828e81a7ea691a12ca2b400323c",
-        "anchor": "propose / redactor / approval",
-        "scope": "positive critical boundary establishes highest tier; not full correctness acceptance"
+        "sourceRevision": "de75bb5 + current source hash",
+        "anchor": "Q100.4.2 writer subset",
+        "scope": "Paired native proof; full Q100.4.2 and Q100.4.3 acceptance remains open."
       },
       "metricApplicability": {
-        "status": "proposed - independent review pending",
-        "evidence": ".planning/memory-resilience/evidence/B04-applicability-probe.json",
-        "sourceHash": "dc2cdeed5c7552938ca23c97f8ae9248375d80bd0393b1f756c748a9daee809a",
-        "disposition": "Measure every positive denominator; individually review zero branch/function denominators against runtime syntax. Observed counts do not prove instrumentation completeness. Optional-chain syntax is present; synthetic evidence shows current instrumentation omits its decision counters. B05.1 owns source-mapped branch proof before numeric acceptance.",
+        "status": "diagnostic - final Q100.4.3 acceptance pending",
+        "sourceHash": "49bf4d8355617381838470687de6992f2184a0216b620aa2b66866b85a225b97",
+        "evidence": ".planning/memory-resilience/evidence/Q100.4.2-writers.json",
         "metrics": {
-          "statements": {
-            "observedCounterTotal": 83,
-            "proposal": "measure - completeness unverified"
-          },
-          "branches": {
-            "observedCounterTotal": 83,
+          "lines": {
+            "observedCounterTotal": 87,
             "proposal": "measure - completeness unverified"
           },
           "functions": {
             "observedCounterTotal": 23,
             "proposal": "measure - completeness unverified"
           },
-          "lines": {
-            "observedCounterTotal": 79,
+          "statements": {
+            "observedCounterTotal": 92,
+            "proposal": "measure - completeness unverified"
+          },
+          "branches": {
+            "observedCounterTotal": 91,
             "proposal": "measure - completeness unverified"
           }
         }
@@ -1885,7 +1884,7 @@
     {
       "path": "src/application/services/memory-governance-service.ts",
       "package": "package.json",
-      "sourceHash": "d40aa280b0edd91b3a1d5f3a8f33115eba0073103bc111cfddd4b38dea191be3",
+      "sourceHash": "1a29dcf1487991220a560c91e88d0a206bb548b0b505135b26e105d105d80a3f",
       "tier": "S",
       "rationale": "Emits canonical control events and applies consent, suppression and invalidation projections.",
       "applicability": {
@@ -1894,30 +1893,29 @@
       },
       "decisionStatus": "proposed - independent review pending",
       "inspection": {
-        "sourceRevision": "aa2c449cd2d72828e81a7ea691a12ca2b400323c",
-        "anchor": "grantConsent / revokeConsent / applyControl",
-        "scope": "positive critical boundary establishes highest tier; not full correctness acceptance"
+        "sourceRevision": "de75bb5 + current source hash",
+        "anchor": "Q100.4.2 writer subset",
+        "scope": "Paired native proof; full Q100.4.2 and Q100.4.3 acceptance remains open."
       },
       "metricApplicability": {
-        "status": "proposed - independent review pending",
-        "evidence": ".planning/memory-resilience/evidence/B04-applicability-probe.json",
-        "sourceHash": "d40aa280b0edd91b3a1d5f3a8f33115eba0073103bc111cfddd4b38dea191be3",
-        "disposition": "Measure every positive denominator; individually review zero branch/function denominators against runtime syntax. Observed counts do not prove instrumentation completeness. Optional-chain syntax is present; synthetic evidence shows current instrumentation omits its decision counters. B05.1 owns source-mapped branch proof before numeric acceptance.",
+        "status": "diagnostic - final Q100.4.3 acceptance pending",
+        "sourceHash": "1a29dcf1487991220a560c91e88d0a206bb548b0b505135b26e105d105d80a3f",
+        "evidence": ".planning/memory-resilience/evidence/Q100.4.2-writers.json",
         "metrics": {
-          "statements": {
-            "observedCounterTotal": 44,
-            "proposal": "measure - completeness unverified"
-          },
-          "branches": {
-            "observedCounterTotal": 73,
+          "lines": {
+            "observedCounterTotal": 38,
             "proposal": "measure - completeness unverified"
           },
           "functions": {
             "observedCounterTotal": 21,
             "proposal": "measure - completeness unverified"
           },
-          "lines": {
-            "observedCounterTotal": 39,
+          "statements": {
+            "observedCounterTotal": 43,
+            "proposal": "measure - completeness unverified"
+          },
+          "branches": {
+            "observedCounterTotal": 75,
             "proposal": "measure - completeness unverified"
           }
         }
@@ -6352,6 +6350,46 @@
       }
     },
     {
+      "path": "src/infrastructure/database/projection-recovery.ts",
+      "package": "package.json",
+      "tier": "S",
+      "rationale": "Automatic projection recovery and canonical writer data integrity; native failure/retry driver.",
+      "applicability": {
+        "mode": "measure",
+        "reason": "Executable Tier S; no exclusion approved."
+      },
+      "decisionStatus": "proposed - independent review pending",
+      "sourceHash": "9557e8cefc2e5d43a8937bf0fed651e8d3a7f3e1d1474eb0b2930352714e6c5b",
+      "inspection": {
+        "sourceRevision": "de75bb5 + current source hash",
+        "anchor": "Q100.4.2 writer subset",
+        "scope": "Paired native proof; full Q100.4.2 and Q100.4.3 acceptance remains open."
+      },
+      "metricApplicability": {
+        "status": "diagnostic - final Q100.4.3 acceptance pending",
+        "sourceHash": "9557e8cefc2e5d43a8937bf0fed651e8d3a7f3e1d1474eb0b2930352714e6c5b",
+        "evidence": ".planning/memory-resilience/evidence/Q100.4.2-writers.json",
+        "metrics": {
+          "lines": {
+            "observedCounterTotal": 22,
+            "proposal": "measure - completeness unverified"
+          },
+          "functions": {
+            "observedCounterTotal": 6,
+            "proposal": "measure - completeness unverified"
+          },
+          "statements": {
+            "observedCounterTotal": 27,
+            "proposal": "measure - completeness unverified"
+          },
+          "branches": {
+            "observedCounterTotal": 14,
+            "proposal": "measure - completeness unverified"
+          }
+        }
+      }
+    },
+    {
       "path": "src/infrastructure/database/projection-replacement.ts",
       "package": "package.json",
       "tier": "S",
@@ -6361,16 +6399,16 @@
         "reason": "Executable Tier S replacement/driver; no exclusion approved."
       },
       "decisionStatus": "proposed - independent review pending",
-      "sourceHash": "4d40f5bf5873dc7ead945ab20cc10c435449ee771b5fe12978a08622b3a3029b",
+      "sourceHash": "530344eb15ca4fb73a3ea8b5b998cbde8c0ffeef4f83b98d3f14675c28bcfcf2",
       "inspection": {
-        "sourceRevision": "57fb7b9 + current source hash",
-        "anchor": "Q100.4.1 automatic replay authority",
-        "scope": "Paired native/cross-runtime proof; actual callers and full quality remain mandatory."
+        "sourceRevision": "de75bb5 + current source hash",
+        "anchor": "Q100.4.2 writer subset",
+        "scope": "Paired native proof; full Q100.4.2 and Q100.4.3 acceptance remains open."
       },
       "metricApplicability": {
         "status": "diagnostic - final Q100.4.3 acceptance pending",
-        "sourceHash": "4d40f5bf5873dc7ead945ab20cc10c435449ee771b5fe12978a08622b3a3029b",
-        "evidence": ".planning/memory-resilience/evidence/Q100.4.1.json",
+        "sourceHash": "530344eb15ca4fb73a3ea8b5b998cbde8c0ffeef4f83b98d3f14675c28bcfcf2",
+        "evidence": ".planning/memory-resilience/evidence/Q100.4.2-writers.json",
         "metrics": {
           "lines": {
             "observedCounterTotal": 74,
@@ -6401,31 +6439,31 @@
         "reason": "Executable Tier S source/driver; no exclusion approved."
       },
       "decisionStatus": "proposed - independent review pending",
-      "sourceHash": "565f63e0caf646854806752715800e725509f44dc8ead1c14d50f20cd46a4a6d",
+      "sourceHash": "8d8d37ad2fe94a85ab062723edf81665363cf66b3bad4ac8a06acc0fc498b56b",
       "inspection": {
-        "sourceRevision": "57fb7b9 + current source hash",
-        "anchor": "Q100.4.1 automatic replay authority",
-        "scope": "Paired native/cross-runtime proof; actual callers and full quality remain mandatory."
+        "sourceRevision": "de75bb5 + current source hash",
+        "anchor": "Q100.4.2 writer subset",
+        "scope": "Paired native proof; full Q100.4.2 and Q100.4.3 acceptance remains open."
       },
       "metricApplicability": {
         "status": "diagnostic - final Q100.4.3 acceptance pending",
-        "sourceHash": "565f63e0caf646854806752715800e725509f44dc8ead1c14d50f20cd46a4a6d",
-        "evidence": ".planning/memory-resilience/evidence/Q100.4.1.json",
+        "sourceHash": "8d8d37ad2fe94a85ab062723edf81665363cf66b3bad4ac8a06acc0fc498b56b",
+        "evidence": ".planning/memory-resilience/evidence/Q100.4.2-writers.json",
         "metrics": {
           "lines": {
-            "observedCounterTotal": 89,
+            "observedCounterTotal": 104,
             "proposal": "measure - completeness unverified"
           },
           "functions": {
-            "observedCounterTotal": 20,
+            "observedCounterTotal": 21,
             "proposal": "measure - completeness unverified"
           },
           "statements": {
-            "observedCounterTotal": 131,
+            "observedCounterTotal": 152,
             "proposal": "measure - completeness unverified"
           },
           "branches": {
-            "observedCounterTotal": 73,
+            "observedCounterTotal": 82,
             "proposal": "measure - completeness unverified"
           }
         }
@@ -12256,7 +12294,7 @@
     {
       "path": "src/presentation/cli/commands/dream.ts",
       "package": "package.json",
-      "sourceHash": "7277044420b0ec9bf2600da8db77b19da85da5d4928636a988a85009c47daad3",
+      "sourceHash": "553fe7e232e22f6461b83e15c6b5fd944bd4265c97aa858bc1412d03327ae163",
       "tier": "S",
       "rationale": "Initializes persistent dream state and exposes approval/apply/rollback controls.",
       "applicability": {
@@ -12265,30 +12303,29 @@
       },
       "decisionStatus": "proposed - independent review pending",
       "inspection": {
-        "sourceRevision": "8719e3c36b2c73ca11f8ee4879c9f17aed4f2849",
-        "anchor": "initializeDatabase / dream command dispatch",
-        "scope": "positive critical boundary establishes highest tier; not full correctness acceptance"
+        "sourceRevision": "de75bb5 + current source hash",
+        "anchor": "Q100.4.2 writer subset",
+        "scope": "Paired native proof; full Q100.4.2 and Q100.4.3 acceptance remains open."
       },
       "metricApplicability": {
-        "status": "proposed - independent review pending",
-        "evidence": ".planning/memory-resilience/evidence/B04-applicability-probe.json",
-        "sourceHash": "7277044420b0ec9bf2600da8db77b19da85da5d4928636a988a85009c47daad3",
-        "disposition": "Measure every positive denominator; individually review zero branch/function denominators against runtime syntax. Observed counts do not prove instrumentation completeness.",
+        "status": "diagnostic - final Q100.4.3 acceptance pending",
+        "sourceHash": "553fe7e232e22f6461b83e15c6b5fd944bd4265c97aa858bc1412d03327ae163",
+        "evidence": ".planning/memory-resilience/evidence/Q100.4.2-writers.json",
         "metrics": {
-          "statements": {
-            "observedCounterTotal": 99,
-            "proposal": "measure - completeness unverified"
-          },
-          "branches": {
-            "observedCounterTotal": 74,
+          "lines": {
+            "observedCounterTotal": 102,
             "proposal": "measure - completeness unverified"
           },
           "functions": {
             "observedCounterTotal": 22,
             "proposal": "measure - completeness unverified"
           },
-          "lines": {
-            "observedCounterTotal": 98,
+          "statements": {
+            "observedCounterTotal": 103,
+            "proposal": "measure - completeness unverified"
+          },
+          "branches": {
+            "observedCounterTotal": 85,
             "proposal": "measure - completeness unverified"
           }
         }
@@ -13187,7 +13224,7 @@
     {
       "path": "src/presentation/cli/commands/governance.ts",
       "package": "package.json",
-      "sourceHash": "95fce7ab0a9b00c04eaf3a9b0fe33f3127becab61f27f70a7f43a8b3ee513027",
+      "sourceHash": "7d686b023654c2653a644613702ff29461f5eecac3a582d058a9a1ddae62639b",
       "tier": "S",
       "rationale": "Initializes storage and exposes consent/suppression/governance controls.",
       "applicability": {
@@ -13196,30 +13233,29 @@
       },
       "decisionStatus": "proposed - independent review pending",
       "inspection": {
-        "sourceRevision": "8719e3c36b2c73ca11f8ee4879c9f17aed4f2849",
-        "anchor": "initializeDatabase / governance dispatch",
-        "scope": "positive critical boundary establishes highest tier; not full correctness acceptance"
+        "sourceRevision": "de75bb5 + current source hash",
+        "anchor": "Q100.4.2 writer subset",
+        "scope": "Paired native proof; full Q100.4.2 and Q100.4.3 acceptance remains open."
       },
       "metricApplicability": {
-        "status": "proposed - independent review pending",
-        "evidence": ".planning/memory-resilience/evidence/B04-applicability-probe.json",
-        "sourceHash": "95fce7ab0a9b00c04eaf3a9b0fe33f3127becab61f27f70a7f43a8b3ee513027",
-        "disposition": "Measure every positive denominator; individually review zero branch/function denominators against runtime syntax. Observed counts do not prove instrumentation completeness.",
+        "status": "diagnostic - final Q100.4.3 acceptance pending",
+        "sourceHash": "7d686b023654c2653a644613702ff29461f5eecac3a582d058a9a1ddae62639b",
+        "evidence": ".planning/memory-resilience/evidence/Q100.4.2-writers.json",
         "metrics": {
-          "statements": {
-            "observedCounterTotal": 74,
-            "proposal": "measure - completeness unverified"
-          },
-          "branches": {
-            "observedCounterTotal": 61,
+          "lines": {
+            "observedCounterTotal": 76,
             "proposal": "measure - completeness unverified"
           },
           "functions": {
             "observedCounterTotal": 20,
             "proposal": "measure - completeness unverified"
           },
-          "lines": {
-            "observedCounterTotal": 73,
+          "statements": {
+            "observedCounterTotal": 77,
+            "proposal": "measure - completeness unverified"
+          },
+          "branches": {
+            "observedCounterTotal": 68,
             "proposal": "measure - completeness unverified"
           }
         }
@@ -17797,6 +17833,46 @@
       }
     },
     {
+      "path": "tests/infrastructure/database/projected-writer.test.ts",
+      "package": "package.json",
+      "tier": "S",
+      "rationale": "Automatic projection recovery and canonical writer data integrity; native failure/retry driver.",
+      "applicability": {
+        "mode": "measure",
+        "reason": "Executable Tier S; no exclusion approved."
+      },
+      "decisionStatus": "proposed - independent review pending",
+      "sourceHash": "766d09e22bc4d28a6b805c2044b50b0c1f14cd87f9f53144f5d866b50b3e3219",
+      "inspection": {
+        "sourceRevision": "de75bb5 + current source hash",
+        "anchor": "Q100.4.2 writer subset",
+        "scope": "Paired native proof; full Q100.4.2 and Q100.4.3 acceptance remains open."
+      },
+      "metricApplicability": {
+        "status": "diagnostic - final Q100.4.3 acceptance pending",
+        "sourceHash": "766d09e22bc4d28a6b805c2044b50b0c1f14cd87f9f53144f5d866b50b3e3219",
+        "evidence": ".planning/memory-resilience/evidence/Q100.4.2-writers.json",
+        "metrics": {
+          "lines": {
+            "observedCounterTotal": 115,
+            "proposal": "measure - completeness unverified"
+          },
+          "functions": {
+            "observedCounterTotal": 53,
+            "proposal": "measure - completeness unverified"
+          },
+          "statements": {
+            "observedCounterTotal": 179,
+            "proposal": "measure - completeness unverified"
+          },
+          "branches": {
+            "observedCounterTotal": 24,
+            "proposal": "measure - completeness unverified"
+          }
+        }
+      }
+    },
+    {
       "path": "tests/infrastructure/database/projection-admission.test.ts",
       "package": "package.json",
       "tier": "S",
@@ -17970,34 +18046,16 @@
         "reason": "Executable Tier S; no exclusion approved."
       },
       "decisionStatus": "proposed - independent review pending",
-      "sourceHash": "7b50dd1876a6e27a692779ecc261ec32b4ee96928c64ccc0ca4a725efbbb6a0a",
+      "sourceHash": "26c83bfafc47cdb4819642141027576f1f902bf54ba8255cc01826fd4128249a",
       "inspection": {
-        "sourceRevision": "57fb7b9 + current source hash",
-        "anchor": "Q100.4.1 automatic replay authority",
-        "scope": "Paired native/cross-runtime proof; actual callers and full quality remain mandatory."
+        "sourceRevision": "de75bb5 + current source hash",
+        "anchor": "Q100.4.2 writer subset",
+        "scope": "Paired native proof; full Q100.4.2 and Q100.4.3 acceptance remains open."
       },
       "metricApplicability": {
-        "status": "diagnostic - final Q100.4.3 acceptance pending",
-        "sourceHash": "7b50dd1876a6e27a692779ecc261ec32b4ee96928c64ccc0ca4a725efbbb6a0a",
-        "evidence": ".planning/memory-resilience/evidence/Q100.4.1.json",
-        "metrics": {
-          "lines": {
-            "observedCounterTotal": 99,
-            "proposal": "measure - completeness unverified"
-          },
-          "functions": {
-            "observedCounterTotal": 33,
-            "proposal": "measure - completeness unverified"
-          },
-          "statements": {
-            "observedCounterTotal": 139,
-            "proposal": "measure - completeness unverified"
-          },
-          "branches": {
-            "observedCounterTotal": 0,
-            "proposal": "Review zero denominator and instrumenter completeness"
-          }
-        }
+        "status": "pending current-source measurement",
+        "sourceHash": "26c83bfafc47cdb4819642141027576f1f902bf54ba8255cc01826fd4128249a",
+        "evidence": ".planning/memory-resilience/evidence/Q100.4.2-writers.json"
       }
     },
     {

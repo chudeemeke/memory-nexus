@@ -764,7 +764,8 @@
       "progress": {
         "current": "Diagnostic100% four metrics. Complete friction migration error handling, FTS probe classification, whole-schema/trigger SQL decisions, marker interoperability, installed rebuild time/disk costs and independent review.",
         "owner": "memory-nexus",
-        "trigger": "Before B11.74.7/B10/R02; full counter and changed-line/package proof required."
+        "trigger": "Before B11.74.7/B10/R02; full counter and changed-line/package proof required.",
+        "writerObservation": "Read-only commands still initialize WAL/schema and create/drop the FTS probe, changing physical DB bytes. Writer tests prove projected content/receipt unchanged, not read-only connection initialization. Own classification/repair under existing Q019 FTS probe obligation."
       }
     },
     {
@@ -2795,7 +2796,7 @@
         "projectionContentNotice": {
           "document": "docs/plans/2026-09-28-projection-replay-execution.md",
           "owner": "memory-nexus",
-          "trigger": "Before caller adoption: communicate projectionState receipt field, old receipt reconciliation and event-backed direct writer compatibility; no DDL migration or data cutover."
+          "trigger": "Before integration/adoption: notify opted-in consumers of projectionState receipts, explicit legacy/divergent/source-rewrite reconciliation, canonical projected writer return contract and confirmed idempotent dream retries. Draft remains uninstalled; no consumer action requested now."
         }
       }
     },
@@ -6262,13 +6263,22 @@
       "owner": "memory-nexus",
       "evidence": [
         "docs/plans/2026-09-28-projection-replay-execution.md",
-        ".planning/memory-resilience/evidence/Q100.4.1.json"
+        ".planning/memory-resilience/evidence/Q100.4.1.json",
+        ".planning/memory-resilience/evidence/Q100.4.2-writers.json"
       ],
       "acceptance_record": ".planning/memory-resilience/evidence/Q100.4.2.json",
       "retirement_trigger": "Before Q100.4/Q100/B11.74.7/B10/R02 acceptance.",
       "progress": {
-        "next": "Reproduce retained-event retry through real extraction/remote sync with no new source/candidates. First account for governance and dreaming event-backed direct repository writes using a transactional checkpoint protocol or verified reconciliation; do not bless unrelated divergence.",
-        "constraints": "Automatic mode is not wired into actual callers. Preserve unlogged/imported data and direct deletions; old receipts require reconciliation. Source freshness is not projection/index health. Measure fingerprint cost.",
+        "status": "Canonical governance/dream writer subset has paired native proof; full item not accepted.",
+        "completed": "Append plus guarded replay with projected readback, acknowledged-prefix preservation, idle absent/empty unacknowledged sources, bounded pending refusal and confirmed completed apply/rollback retries.",
+        "next": "First add a native side-effect regression for redundant governance application after projected writer success; the reapply-after-projected-writer fault survived. Then finish proposal/governance interruption, concurrent decisions, append failure and post-write cutoff status. Wire no-op extraction and unchanged-transport remote retry with process restart and truthful partial status. Preserve unlogged/imported data and direct edits/deletes. Measure replay cost.",
+        "testsPerRuntime": 474,
+        "assertionsPerRuntime": 3432,
+        "testFiles": 20,
+        "decisionFaultsDetected": 7,
+        "survivingDecisionFaults": [
+          "reapply-after-projected-writer"
+        ],
         "owner": "memory-nexus",
         "trigger": "Before Q100.4/Q100/B11.74.7/B10/R02 acceptance."
       }
@@ -6292,7 +6302,7 @@
       ],
       "acceptance_record": ".planning/memory-resilience/evidence/Q100.4.3.json",
       "retirement_trigger": "Before Q100.4/Q100/B11.74.7/B10/R02 acceptance.",
-      "observed_gap": "New state module diagnoses100%; driver zero branch denominator requires final applicability review. Changed event-log/source/replacement full metrics, cleanup and mode admission, fingerprint cost and supported-platform proof remain mandatory."
+      "observed_gap": "Writer subset has scoped diagnostics, not complete module/package/changed-line enforcement. Retain source-prefix concurrent short-read/cleanup admission, full writer/command/service decision coverage and judgment review; all prior Q100.4.3 obligations remain."
     }
   ],
   "decisions": {

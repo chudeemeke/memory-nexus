@@ -16,7 +16,7 @@ import {
   getDefaultDbPath,
   initializeDatabase,
 } from "../../../infrastructure/database/index.js";
-import { appendMemoryEvent } from "../../../infrastructure/database/event-log.js";
+import { createProjectedEventWriter, recoverPendingProjections } from "../../../infrastructure/database/projection-recovery.js";
 import { SqliteDreamRepository } from "../../../infrastructure/database/repositories/dream-repository.js";
 import { SqliteFactRepository } from "../../../infrastructure/database/repositories/fact-repository.js";
 import { SqliteMemoryGovernanceRepository } from "../../../infrastructure/database/repositories/memory-governance-repository.js";
@@ -51,6 +51,7 @@ export interface DreamCommandOptions {
 export interface DreamCommandDeps {
   dbPath?: string | undefined;
   writeEvents?: boolean | undefined;
+  eventLogPath?: string | undefined;
   now?: (() => Date) | undefined;
   nextSequence?: (() => number) | undefined;
 }
@@ -140,7 +141,13 @@ export async function executeDreamCommand(
     const dreamRepo = new SqliteDreamRepository(db);
     const factRepo = new SqliteFactRepository(db);
     const governanceRepo = new SqliteMemoryGovernanceRepository(db);
-    const writeEvent = deps.writeEvents === false ? undefined : appendMemoryEvent;
+    const writeEvent = deps.writeEvents === false ? undefined : createProjectedEventWriter(db, deps.eventLogPath);
+    const needsConfirmation = options.action === "apply" || options.action === "rollback";
+    if (writeEvent && options.action !== "list" && options.action !== "show" && (!needsConfirmation || options.confirm === true)) {
+      if ((await recoverPendingProjections(db, deps.eventLogPath)).pending) {
+        throw new Error("Projection recovery remains pending; retry the command");
+      }
+    }
     const service = new DreamingService({
       dreamRepo,
       factRepo,

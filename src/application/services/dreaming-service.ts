@@ -11,7 +11,7 @@ import type {
   IDreamRepository,
   IFactRepository,
 } from "../../domain/ports/repositories.js";
-import type { MemoryEventWriter, MemoryGovernanceService } from "./memory-governance-service.js";
+import type { MemoryEventWriter, MemoryEventWriteResult, MemoryGovernanceService } from "./memory-governance-service.js";
 
 export interface ProposeSupersedenceParams {
   project: string;
@@ -146,6 +146,9 @@ export class DreamingService {
       throw new Error("Dream apply requires confirm=true");
     }
     const entry = await this.requireDream(dreamId);
+    if (entry.status === "applied") {
+      return { entry, canonicalEventIds: entry.appliedEventIds };
+    }
     if (entry.status !== "approved") {
       throw new Error("Dream proposal must be approved before apply");
     }
@@ -209,6 +212,9 @@ export class DreamingService {
       throw new Error("Dream rollback requires confirm=true");
     }
     const entry = await this.requireDream(dreamId);
+    if (entry.status === "rolled_back") {
+      return { entry, rollbackEventIds: entry.rollbackEventIds };
+    }
     if (entry.status !== "applied") {
       throw new Error("Dream proposal must be applied before rollback");
     }
@@ -307,7 +313,12 @@ export class DreamingService {
         },
       },
     });
-    await this.writeEvent(event);
+    const written = await this.writeEvent(event);
+    if (written?.projectionCommitted) {
+      const projected = await this.deps.dreamRepo.findByDreamId(entry.dreamId);
+      if (!projected) throw new Error("Committed dream event did not produce a projection entry");
+      return projected;
+    }
     return await this.deps.dreamRepo.applyMemoryEvent(event) ?? entry;
   }
 
@@ -359,8 +370,8 @@ export class DreamingService {
     });
   }
 
-  private async writeEvent(event: MemoryEventEnvelope): Promise<void> {
-    await this.deps.writeEvent?.(event);
+  private async writeEvent(event: MemoryEventEnvelope): Promise<void | MemoryEventWriteResult> {
+    return this.deps.writeEvent?.(event);
   }
 }
 

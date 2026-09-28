@@ -108,7 +108,7 @@ export function assertProjectionSource(snapshot: ProjectionSourceSnapshot): void
 }
 
 /** Established source authority may widen from a file, but cannot silently narrow. */
-export function assertProjectionSourceAuthority(db: Database, snapshot: ProjectionSourceSnapshot): void {
+export function assertProjectionSourceAuthority(db: Database, snapshot: ProjectionSourceSnapshot, appendOnly = false): void {
   using exists = db.prepare("SELECT 1 FROM main.sqlite_master WHERE type='table' AND name='projection_replay_state'");
   if (!exists.get()) return;
   using receipt = db.prepare<{ manifest: string }, []>("SELECT manifest FROM main.projection_replay_state WHERE id=1");
@@ -127,6 +127,25 @@ export function assertProjectionSourceAuthority(db: Database, snapshot: Projecti
   if (!unchanged && !widened) throw new Error("Projection source authority cannot narrow or switch roots during rebuild");
   if (prior.files.some(file => !next.files.some(candidate => samePath(file.path, candidate.path)))) {
     throw new Error("Projection source selection omits previously applied files; restore complete sources before rebuilding");
+  }
+  if (appendOnly) {
+    for (const file of prior.files) {
+      const candidate = next.files.find(current => samePath(file.path, current.path))!;
+      if (candidate.bytes < file.bytes) throw new Error("Acknowledged projection source was truncated; explicit reconciliation required");
+      const fd = openSync(candidate.path, "r");
+      try {
+        const hash = createHash("sha256"), buffer = Buffer.alloc(64 * 1024);
+        let position = 0;
+        while (position < file.bytes) {
+          const bytes = readSync(fd, buffer, 0, Math.min(buffer.length, file.bytes - position), position);
+          if (bytes === 0) changed();
+          hash.update(buffer.subarray(0, bytes)); position += bytes;
+        }
+        if (hash.digest("hex") !== file.sha256) throw new Error("Acknowledged projection source was rewritten; explicit reconciliation required");
+      } finally { closeSync(fd); }
+    }
+    // Prefix reads add another opportunity for concurrent filesystem mutation.
+    assertProjectionSource(snapshot);
   }
 }
 

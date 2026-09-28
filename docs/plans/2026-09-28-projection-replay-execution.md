@@ -235,3 +235,39 @@ the conservative fingerprint. Establish a transactional checkpoint protocol or
 verified event-backed reconciliation before caller adoption, without blessing
 unrelated divergence. Fingerprinting is linear in projected rows; measure its
 operational cost during caller proof and retain bounded-memory iteration.
+
+Q100.4.2 writer decision: route canonical governance/dream writes through append
+plus guarded replay. The existing writer port may report that projection committed;
+services then read the real projected result instead of applying the event twice.
+Append-only injected writers keep their existing behavior. Canonical command paths
+recover pending sources before reading state for a mutation; unconfirmed dream
+apply/rollback must not trigger recovery. A shared recovery helper treats absent
+sources without a receipt as idle, missing acknowledged sources as an error, and
+uses both content admission and source receipts before replay. It must preserve
+truthful pending status if more source arrives after the committed cutoff.
+
+This avoids a second per-repository checkpoint protocol. Multi-event dream apply
+and rollback still require failure/retry validation: do not infer atomic file
+append or whole-workflow completion from individual event replay. Final actual
+sync/extraction wiring and that failure matrix remain mandatory before Q100.4.2
+acceptance, not a reason to declare the full recovery goal complete early.
+
+Writer recovery refinement: automatic replay must preserve every previously
+acknowledged source prefix, in addition to preserving source scope and projected
+content. Truncation or replacement requires explicit reconciliation. Zero-byte
+sources without a receipt remain idle and must not erase unlogged projections.
+Commands stop before generating a new event when a bounded recovery attempt
+reports additional pending input. Completed apply/rollback retries return their
+recorded event IDs without appending duplicate events; confirmation is still
+required. Failed individual replays retain the appended source for the next
+enabled mutating command. This is not atomicity of the complete multi-event action.
+
+Native writer proof must cover failure at replacement, supersedence, applied
+snapshot, restore and rolled-back snapshot boundaries. Remaining Q100.4.2 work
+includes process restart, proposal/governance multi-event interruption, concurrent
+writer ordering and stale target decisions, append failure, post-write cutoff
+status, actual extraction/remote recovery and measured replay cost. Q100.4.3 owns
+full module/package/changed-line/platform and independent review proof. Schema
+initialization currently creates/drops an FTS probe and can change database bytes
+even on list/show; Q019 owns that existing behavior. Writer tests assert unchanged
+projected content and receipt, not byte-identical command initialization.
