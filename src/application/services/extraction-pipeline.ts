@@ -13,6 +13,8 @@
  */
 
 import type { Database } from "bun:sqlite";
+import type { OperationLease, LeasedOperationAdmission } from "../../domain/ports/operation-admission.js";
+import { createSourceOperationAdmission } from "../../infrastructure/database/source-operation-admission.js";
 import { Fact } from "../../domain/entities/fact.js";
 import type { IExtractionProvider } from "../../domain/ports/extraction.js";
 import type { IEmbeddingProvider } from "../../domain/ports/embedding.js";
@@ -51,6 +53,7 @@ export class ExtractionPipeline {
     private readonly embeddingProvider?: IEmbeddingProvider,
     private readonly eventLogPath?: string,
     private readonly redactor: IRedactor = NOOP_REDACTOR,
+    private readonly admission?: LeasedOperationAdmission,
   ) {}
 
   /**
@@ -101,30 +104,6 @@ export class ExtractionPipeline {
       content: this.redactor.redactText(candidate.content).text,
       metadata: this.redactor.redactJson(candidate.metadata).value,
     }));
-    if (candidates.length === 0) {
-      // Log empty run
-      await this.logRepo.save({
-        sessionId,
-        mode: "manual",
-        factsAdded: 0,
-        factsUpdated: 0,
-        factsSuperseded: 0,
-        factsSkipped: 0,
-        provider: this.extractionProvider.providerId,
-        model: this.extractionProvider.modelName,
-        tokensConsumed: 0,
-        extractedAt: new Date()
-      });
-
-      return {
-        skippedSession: false,
-        added: 0,
-        updated: 0,
-        superseded: 0,
-        skipped: 0
-      };
-    }
-
     // 4. Load active project facts
     const allProjectFacts = await this.factRepo.findByProject(projectName);
     const activeFacts = allProjectFacts.filter((f) => f.supersededAt === null);
@@ -134,7 +113,7 @@ export class ExtractionPipeline {
     let activeEmbeddings: Float32Array[] = [];
     let candidateEmbeddings: Float32Array[] = [];
 
-    if (useEmbeddings && this.embeddingProvider) {
+    if (candidates.length > 0 && useEmbeddings && this.embeddingProvider) {
       try {
         const activeRes = await this.embeddingProvider.embedBatch(activeFacts.map((f) => this.redactor.redactText(f.content).text));
         activeEmbeddings = activeRes.map((r) => r.embedding);
@@ -147,135 +126,150 @@ export class ExtractionPipeline {
       }
     }
 
-    let factsAdded = 0;
-    let factsUpdated = 0;
-    let factsSuperseded = 0;
-    let factsSkipped = 0;
+    return (this.admission ?? createSourceOperationAdmission(this.eventLogPath)).run(async lease => {
+      if ((await recoverPendingProjections(this.db, this.eventLogPath, undefined, lease)).pending) {
+        throw new Error("Projection recovery remains pending; retry extraction");
+      }
+      if (await this.logRepo.findById(sessionId) && !options?.force) {
+        return { skippedSession: true, added: 0, updated: 0, superseded: 0, skipped: 0 };
+      }
+      const currentFacts = (await this.factRepo.findByProject(projectName)).filter(f => f.supersededAt === null);
+      const comparisonIdentity = (facts: Fact[]) => JSON.stringify(
+        facts.map(f => [f.uuid, f.content]).sort(([left], [right]) => left!.localeCompare(right!)));
+      if (candidates.length > 0 && comparisonIdentity(currentFacts) !== comparisonIdentity(activeFacts)) {
+        throw new Error("Active facts changed during extraction computation; retry extraction");
+      }
 
-    // 6. Compare and classify each candidate
-    for (let cIdx = 0; cIdx < candidates.length; cIdx++) {
-      const candidate = candidates[cIdx];
-      if (!candidate) continue;
+      let factsAdded = 0;
+      let factsUpdated = 0;
+      let factsSuperseded = 0;
+      let factsSkipped = 0;
 
-      let maxSimilarity = 0;
-      let bestMatch: Fact | null = null;
+      // 6. Compare and classify each candidate
+      for (let cIdx = 0; cIdx < candidates.length; cIdx++) {
+        const candidate = candidates[cIdx];
+        if (!candidate) continue;
 
-      for (let fIdx = 0; fIdx < activeFacts.length; fIdx++) {
-        const activeFact = activeFacts[fIdx];
-        if (!activeFact) continue;
+        let maxSimilarity = 0;
+        let bestMatch: Fact | null = null;
 
-        let similarity = 0;
+        for (let fIdx = 0; fIdx < activeFacts.length; fIdx++) {
+          const activeFact = activeFacts[fIdx];
+          if (!activeFact) continue;
 
-        // Perfect string match bypasses all vector math
-        if (candidate.content.trim().toLowerCase() === activeFact.content.trim().toLowerCase()) {
-          similarity = 1.0;
-        } else {
-          const candidateEmb = candidateEmbeddings[cIdx];
-          const activeEmb = activeEmbeddings[fIdx];
-          if (useEmbeddings && candidateEmb && activeEmb) {
-            similarity = this.cosineSimilarity(candidateEmb, activeEmb);
+          let similarity = 0;
+
+          // Perfect string match bypasses all vector math
+          if (candidate.content.trim().toLowerCase() === activeFact.content.trim().toLowerCase()) {
+            similarity = 1.0;
           } else {
-            similarity = this.jaccardWordSimilarity(candidate.content, activeFact.content);
+            const candidateEmb = candidateEmbeddings[cIdx];
+            const activeEmb = activeEmbeddings[fIdx];
+            if (useEmbeddings && candidateEmb && activeEmb) {
+              similarity = this.cosineSimilarity(candidateEmb, activeEmb);
+            } else {
+              similarity = this.jaccardWordSimilarity(candidate.content, activeFact.content);
+            }
+          }
+
+          if (similarity > maxSimilarity) {
+            maxSimilarity = similarity;
+            bestMatch = activeFact;
           }
         }
 
-        if (similarity > maxSimilarity) {
-          maxSimilarity = similarity;
-          bestMatch = activeFact;
+        // Classification
+        if (maxSimilarity >= 0.95 || (bestMatch && candidate.content.trim().toLowerCase() === bestMatch.content.trim().toLowerCase())) {
+          // DUPLICATE / NOOP
+          factsSkipped++;
+        } else if (maxSimilarity >= 0.85 && bestMatch) {
+          // SUPERSEDES / UPDATES
+          factsAdded++;
+          factsUpdated++;
+          factsSuperseded++;
+
+          // Append replacement fact event to events.jsonl
+          const newFact = Fact.create({
+            type: candidate.type,
+            project: projectName,
+            content: candidate.content,
+            metadata: {
+              confidence: candidate.confidence,
+              ...candidate.metadata
+            },
+            observedAt: new Date()
+          });
+          await this.appendProjectionEvent(newFact, lease);
+
+          // Append supersedence event to events.jsonl
+          const supersedenceFact = Fact.create({
+            type: "supersedence",
+            project: projectName,
+            content: `Superseded ${bestMatch.uuid} by ${newFact.uuid}`,
+            metadata: {
+              superseded_uuid: bestMatch.uuid,
+              superseded_by_uuid: newFact.uuid
+            },
+            observedAt: new Date()
+          });
+          await this.appendProjectionEvent(supersedenceFact, lease);
+        } else {
+          // NEW FACT
+          factsAdded++;
+
+          // Append new fact event to events.jsonl
+          const newFact = Fact.create({
+            type: candidate.type,
+            project: projectName,
+            content: candidate.content,
+            metadata: {
+              confidence: candidate.confidence,
+              ...candidate.metadata
+            },
+            observedAt: new Date()
+          });
+          await this.appendProjectionEvent(newFact, lease);
         }
       }
 
-      // Classification
-      if (maxSimilarity >= 0.95 || (bestMatch && candidate.content.trim().toLowerCase() === bestMatch.content.trim().toLowerCase())) {
-        // DUPLICATE / NOOP
-        factsSkipped++;
-      } else if (maxSimilarity >= 0.85 && bestMatch) {
-        // SUPERSEDES / UPDATES
-        factsAdded++;
-        factsUpdated++;
-        factsSuperseded++;
-
-        // Append replacement fact event to events.jsonl
-        const newFact = Fact.create({
-          type: candidate.type,
-          project: projectName,
-          content: candidate.content,
-          metadata: {
-            confidence: candidate.confidence,
-            ...candidate.metadata
-          },
-          observedAt: new Date()
-        });
-        await this.appendProjectionEvent(newFact);
-
-        // Append supersedence event to events.jsonl
-        const supersedenceFact = Fact.create({
-          type: "supersedence",
-          project: projectName,
-          content: `Superseded ${bestMatch.uuid} by ${newFact.uuid}`,
-          metadata: {
-            superseded_uuid: bestMatch.uuid,
-            superseded_by_uuid: newFact.uuid
-          },
-          observedAt: new Date()
-        });
-        await this.appendProjectionEvent(supersedenceFact);
-      } else {
-        // NEW FACT
-        factsAdded++;
-
-        // Append new fact event to events.jsonl
-        const newFact = Fact.create({
-          type: candidate.type,
-          project: projectName,
-          content: candidate.content,
-          metadata: {
-            confidence: candidate.confidence,
-            ...candidate.metadata
-          },
-          observedAt: new Date()
-        });
-        await this.appendProjectionEvent(newFact);
-      }
-    }
-
-    // New durable events must project before recording a successful extraction.
-    if (factsAdded > 0) {
-      try {
-        if ((await recoverPendingProjections(this.db, this.eventLogPath)).pending) {
-          throw new Error("Newer source remains pending");
+      // New durable events must project before recording a successful extraction.
+      if (factsAdded > 0) {
+        try {
+          if ((await recoverPendingProjections(this.db, this.eventLogPath, undefined, lease)).pending) {
+            throw new Error("Newer source remains pending");
+          }
+        } catch (cause) {
+          throw new Error("Extraction events recorded; projection recovery remains pending", { cause });
         }
-      } catch (cause) {
-        throw new Error("Extraction events recorded; projection recovery remains pending", { cause });
       }
-    }
 
-    // 8. Record the extraction log
-    await this.logRepo.save({
-      sessionId,
-      mode: "manual",
-      factsAdded,
-      factsUpdated,
-      factsSuperseded,
-      factsSkipped,
-      provider: this.extractionProvider.providerId,
-      model: this.extractionProvider.modelName,
-      tokensConsumed: 0,
-      extractedAt: new Date()
+      // 8. Record the extraction log
+      await this.logRepo.save({
+        sessionId,
+        mode: "manual",
+        factsAdded,
+        factsUpdated,
+        factsSuperseded,
+        factsSkipped,
+        provider: this.extractionProvider.providerId,
+        model: this.extractionProvider.modelName,
+        tokensConsumed: 0,
+        extractedAt: new Date()
+      });
+
+      return {
+        skippedSession: false,
+        added: factsAdded,
+        updated: factsUpdated,
+        superseded: factsSuperseded,
+        skipped: factsSkipped
+      };
     });
-
-    return {
-      skippedSession: false,
-      added: factsAdded,
-      updated: factsUpdated,
-      superseded: factsSuperseded,
-      skipped: factsSkipped
-    };
   }
 
-  private async appendProjectionEvent(fact: Fact): Promise<void> {
+  private async appendProjectionEvent(fact: Fact, lease: OperationLease): Promise<void> {
     assertAutomaticProjectionReplay(this.db);
-    await appendEvent(fact, this.eventLogPath);
+    await appendEvent(fact, this.eventLogPath, lease);
   }
 
   /**

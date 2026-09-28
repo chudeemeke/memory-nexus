@@ -1,5 +1,54 @@
 # Memory resilience execution journal
 
+## 2026-09-28 - Qualified extraction decision admission and refined remaining work
+
+- Previous turn made progress at signed/pushed `4fb9ec2`; started clean. The full
+  E1-E10 goal remains active. Native RED reproduced a waiting worker overwriting
+  a completed extraction's audit; a second RED reproduced stale fact comparison
+  after another writer committed while embedding computation was waiting.
+- Extraction and embedding provider computation stay outside source admission.
+  Final recovery, idempotency recheck, active UUID/content validation, comparison,
+  append/replay and audit save now share one explicit lease. Empty extraction also
+  rechecks completion. Stale comparison rejects before writing with retry guidance;
+  fresh retry detects the newly committed duplicate and succeeds without append.
+- Four actual process schedules cover completed/empty extraction, changed facts
+  during embedding and a contender at the final decision read. Provider barriers
+  allow another process to complete; admitted decision barriers deny the contender
+  with unchanged DB/source. Existing force/recovery/supersedence/CLI tests pass.
+- Affected six-file group:83tests/434assertions per Windows Bun1.4.1 and pinned
+  1.3.14, zero failures. Six omitted recheck/admission/lease faults detected.
+  Production types, strict compilation of both changed tests and isolation pass. Strict typing found
+  a broad subprocess stream type in the test; a narrowed running-process binding
+  fixed it. Evidence: `evidence/Q100.4.2-extraction-admission.json`.
+- Diagnostics remain below policy: pipeline96.63statements/92.18branches/
+  100functions/97.02lines; existing test functions80 and branches91.66; new process
+  driver branches90. Child counters are unaggregated. No exclusion, full quality,
+  Linux/hosted/install/desktop or independent-review acceptance is claimed.
+- Q100.4.2 had accumulated independent obligations and is now a pending completion
+  barrier over13 explicit children, each with scope, outcome and proof. This does
+  not erase its prior evidence or mark those obligations complete. The sole active
+  item is **Q100.4.2.1**, session input/audit identity. Subsequent children cover
+  within-batch decisions, remote/Git, backup, remediation, DB topology, provisioning,
+  compound errors, candidate validation, durability, multi-event recovery,
+  reconciliation and scaling. Q100.4.3 remains the final quality barrier.
+- **Next:** reproduce changed/additional/deleted session input during a paused
+  synthetic provider. Bind accepted candidates and audit identity to the input
+  actually read; reject stale work before append/audit and prove fresh retry.
+  Current admission protects cooperating fact decisions, not mutable message input
+  or arbitrary direct SQL. Within-batch activeFacts also remains an initial snapshot;
+  Q100.4.2.2 must qualify duplicate/conflicting candidates and accurate audit counts.
+- Inventory495 files/two packages;268 acyclic items, one active;11.03GiB free.
+  Owned fixtures and pinned runtime cleaned. No canonical data/model/provider/hook/
+  replication/new worktree or rejected cleanup changed. Three inboxes and
+  R03/P03/A03 remain open; experiment still follows baseline acceptance.
+- Final inspection found historical extraction tests created source authority in
+  the shared OS temp directory. Each test now owns its complete source directory
+  and cleans it through the existing ownership helper; final compatibility/fault/
+  diagnostic checks rerun. The existing shared-temp `.memory-local/admission.sqlite`
+  is12KiB and remains preserved: exclusive ownership/use is unproved. Memory Nexus
+  owns process/ownership inventory and exact quarantine/cleanup disposition before
+  Q100.4.2.7 acceptance. No arbitrary recursive cleanup was attempted.
+
 ## 2026-09-28 - Adopted source admission in low-level writers
 
 - Started clean at signed/pushed `196d52c`. Q100.4.2 and the E1-E10 goal remain

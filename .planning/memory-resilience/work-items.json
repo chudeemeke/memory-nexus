@@ -3,7 +3,7 @@
   "workstream": "memory-resilience",
   "goal_status": "active",
   "starting_revision": "77d54e05be7fc24cede4a9a3e1fede6fa113ac8f",
-  "current_item": "Q100.4.2",
+  "current_item": "Q100.4.2.1",
   "status_semantics": {
     "pending": "Not started; authorization and dependencies must permit work.",
     "pending_rebaseline": "Historical candidate, not a confirmed current failure or a completed task.",
@@ -444,11 +444,12 @@
       "evidence": [
         ".planning/memory-resilience/evidence/B11.74.6.3.2.json",
         ".planning/memory-resilience/evidence/Q100.4.2-callers.json",
-        ".planning/memory-resilience/evidence/Q100.4.2-writer-admission.json"
+        ".planning/memory-resilience/evidence/Q100.4.2-writer-admission.json",
+        ".planning/memory-resilience/evidence/Q100.4.2-extraction-admission.json"
       ],
       "acceptance_record": ".planning/memory-resilience/evidence/Q005.json",
       "retirement_trigger": "Before B11.74.7/B10/R02 acceptance.",
-      "observed_gap": "Serial extraction recovery now executes before early returns and deduplication, with unlogged-data preservation and fresh-process retry. Diagnostic source statements99.08/branches96.22/functions100/lines100 still fails Tier S. Existing test statements98.57/branches92.30/functions80/lines98.46 fails quality. Complete extraction audit/event atomicity, concurrency, append/transaction/candidate admission, privacy and final quality remain mandatory; coordinate Q100. Low-level extraction append/recovery is admitted and current extraction tests pass, but provider/idempotency/comparison/supersedence decisions remain outside shared admission. Qualify candidate computation followed by admitted revalidation before mutations; native concurrent extraction proof and full quality remain open."
+      "observed_gap": "Extraction admission83tests/434assertions per Windows runtime and6faults detected. Current metric percentages are retained in evidence/Q100.4.2-extraction-admission.json; diagnostics still fail TierS, child counters unaggregated. Both changed tests strict-compile; older extraction fixture now owns its complete temporary source authority. Session input/audit identity, within-batch decisions, event/audit atomicity, privacy and final full quality remain; see mandatory Q100.4.2 children. No exclusion approved."
     },
     {
       "id": "Q006",
@@ -6146,7 +6147,7 @@
       "retirement_trigger": "Before parent Q100/B11.74.7/B10/R02 acceptance.",
       "observed_gap": "Q100.2 narrow diagnostic: new replacement statements98.82/lines100/functions100/branches100; atomicity driver branches97.14 misses Tier S. Event-log statements68.01/lines67.59/functions76/branches55.19 is not complete module measurement and fails acceptance. Q100.1 CLI branches87.5 and34 unchanged integration strict-type errors remain. Explicitly cover primary+stage-cleanup combined failure and post-commit cleanup reporting; complete actual caller recovery, fixture quality, package/changed-line/platform/review. Q100.3.1 source module diagnostic statements88.88/branches80/lines98.41/functions100 fails Tier S; final source driver diagnoses100%. Re-measure changed schema/CLI and replacement/event-log after semantic work. Wire isProjectionSourceCurrent into actual caller retry and verify post-cutoff pending reporting; cover compound file-handle cleanup errors without hiding primary failures. Before source receipt can skip replay, verify or implement invalidation across direct projection writes/import/restore; source match alone does not prove projected rows unchanged. Q100.3.2.1 adds shared staging and readonly verification; complete measurement must cover semantic guards, receipt validation, cross-platform path authority and primary-plus-readonly-close failures. A matched source receipt still cannot certify projection health. Narrow semantic suite metrics are diagnostic, not final quality.",
       "progress": {
-        "status": "Q100.4.1 scoped verified; Q100.4.2 active; Q100.4.3 mandatory quality remains.",
+        "status": "Q100.4.1 scoped verified; Q100.4.2 is a barrier over13 remaining children; Q100.4.2.1 active; Q100.4.3 final quality remains.",
         "owner": "memory-nexus"
       }
     },
@@ -6290,9 +6291,22 @@
       "id": "Q100.4.2",
       "stage": "baseline-quality",
       "title": "Recover pending events through actual enabled callers",
-      "status": "active",
+      "status": "pending",
       "depends_on": [
-        "Q100.4.1"
+        "Q100.4.1",
+        "Q100.4.2.1",
+        "Q100.4.2.2",
+        "Q100.4.2.3",
+        "Q100.4.2.4",
+        "Q100.4.2.5",
+        "Q100.4.2.6",
+        "Q100.4.2.7",
+        "Q100.4.2.8",
+        "Q100.4.2.9",
+        "Q100.4.2.10",
+        "Q100.4.2.11",
+        "Q100.4.2.12",
+        "Q100.4.2.13"
       ],
       "scope": "src/infrastructure/database/event-log.ts and actual projection replay callers",
       "deliverable": "Real extraction/remote sync retries even with no new candidates or transport changes.",
@@ -6314,24 +6328,25 @@
         ".planning/memory-resilience/evidence/Q100.4.2-source-admission.json",
         ".planning/memory-resilience/evidence/Q100.4.2-remote-authority.json",
         ".planning/memory-resilience/evidence/Q100.4.2-leases.json",
-        ".planning/memory-resilience/evidence/Q100.4.2-writer-admission.json"
+        ".planning/memory-resilience/evidence/Q100.4.2-writer-admission.json",
+        ".planning/memory-resilience/evidence/Q100.4.2-extraction-admission.json"
       ],
       "acceptance_record": ".planning/memory-resilience/evidence/Q100.4.2.json",
       "retirement_trigger": "Before Q100.4/Q100/B11.74.7/B10/R02 acceptance.",
       "progress": {
-        "status": "Raw append/recovery/replay/projected writer admission adopted and threaded from dream/governance; broader decision/source operations remain open.",
-        "completed": "Standalone append, recovery and replay acquire a source lease; explicit children share it across projected recovery/append/replay. Directory replay binds supplied eventsDir. Dream/governance pass root scopes; retained writers reject expired scopes. All six entrypoints reject wrong-source/stale leases with unchanged source/projections. Process tests distinguish denied cooperating append/recovery from external raw-file/database edits still caught by optimistic fences. Aggregate messages retain recorded/pending guidance. Core250/1229 plus supplemental275/2716 pass on both Windows runtimes;8admission/reporting and3replay-fence faults detected.",
-        "next": "Acquire before extraction idempotency/comparison/supersedence decisions, with provider candidate computation outside admission and revalidation inside; prove two-process stale-candidate schedules. Then qualify explicit remote/Git/maintenance source mutation and database-direct topology/lock order. Preserve raw/projection admission, optimistic fences and capture-first/no-egress behavior. Continue source provisioning crash, partial append/candidate/caller transaction/multi-event/reconciliation/scaling and full quality gates.",
-        "testsPerRuntime": 525,
-        "assertionsPerRuntime": 3945,
-        "testFiles": 28,
-        "decisionFaultsDetected": 11,
+        "status": "Extraction decision admission implemented; remaining independent obligations split into numbered children.",
+        "completed": "Extraction computes candidates/comparison embeddings outside admission, then recovers/rechecks session idempotency and active UUID/content identity under one scope before compare/append/replay/audit. Empty output also rechecks. Concurrent completed audit survives; stale comparison refuses without writes and fresh retry succeeds. Actual decision-read barrier denies a contender.83tests/434assertions in6files per Windows runtime;6faults detected.",
+        "next": "Q100.4.2.1: qualify mutable session input and extraction audit identity before accepting candidate work. Then independently close every numbered child; parent remains a barrier.",
+        "testsPerRuntime": 83,
+        "assertionsPerRuntime": 434,
+        "testFiles": 6,
+        "decisionFaultsDetected": 6,
         "survivingDecisionFaults": [],
         "costEvidence": ".planning/memory-resilience/evidence/Q100.4.2-callers.json",
         "scalingConstraint": "Synthetic1000-event guarded write took814ms; idle checks30-67ms. Full replay remains proportional to retained history. Assess representative corpus limits and address scaling before integration/adoption; these small measurements are not an acceptance target or peak-memory proof.",
         "owner": "memory-nexus",
         "trigger": "Before Q100.4/Q100/B11.74.7/B10/R02 acceptance.",
-        "scope": "Two disjoint affected groups, actual native command/replay races and narrow diagnostic instrumentation on Windows Bun1.4.1/1.3.14. No full-suite/whole quality/Linux/install/desktop acceptance.",
+        "scope": "Affected extraction/CLI/writer/race group on Windows Bun1.4.1/1.3.14; no full-suite/platform/quality acceptance.",
         "remoteEvidence": ".planning/memory-resilience/evidence/Q100.4.2-remote.json",
         "localEvidence": ".planning/memory-resilience/evidence/Q100.4.2-local.json",
         "outcomeEvidence": ".planning/memory-resilience/evidence/Q100.4.2-outcomes.json",
@@ -6341,9 +6356,10 @@
         "sourceAdmissionEvidence": ".planning/memory-resilience/evidence/Q100.4.2-source-admission.json",
         "remoteAuthorityEvidence": ".planning/memory-resilience/evidence/Q100.4.2-remote-authority.json",
         "leaseEvidence": ".planning/memory-resilience/evidence/Q100.4.2-leases.json",
-        "writerAdmissionEvidence": ".planning/memory-resilience/evidence/Q100.4.2-writer-admission.json"
+        "writerAdmissionEvidence": ".planning/memory-resilience/evidence/Q100.4.2-writer-admission.json",
+        "extractionAdmissionEvidence": ".planning/memory-resilience/evidence/Q100.4.2-extraction-admission.json"
       },
-      "observed_gap": "Raw append, recovery/replay and projected writer now acquire or delegate explicit leases; dream/governance cover recovery/first decision through their event writes. Extraction still reads/compares between separately admitted low-level operations, so whole extraction decision scope is unsafe. Remote/Git/maintenance source changes and database-direct topology are not coordinated. Provisioning races/crash, external path swaps, prepared command plus reservation-release failures, partial append/fsync, complete candidate validation, multi-event atomicity/recovery, caller transactions, reconciliation and scaling remain mandatory. Owner memory-nexus; retire before Q100.4.2/E4/E5/B10/R02."
+      "observed_gap": "Selected cooperating extraction decisions now run under admission, with stale active-fact refusal and audit recheck. Session messages may change during provider work without input fingerprint validation; activeFacts are not updated after each candidate, so within-batch comparisons need qualification. Remote/Git/maintenance/direct-DB, source provisioning, compound reporting, preappend validation, durability, multi-event actions, reconciliation and scaling are now explicit mandatory child tasks. No whole baseline/E4/E5 acceptance."
     },
     {
       "id": "Q100.4.3",
@@ -6370,11 +6386,298 @@
         ".planning/memory-resilience/evidence/Q100.4.2-source-admission.json",
         ".planning/memory-resilience/evidence/Q100.4.2-remote-authority.json",
         ".planning/memory-resilience/evidence/Q100.4.2-leases.json",
-        ".planning/memory-resilience/evidence/Q100.4.2-writer-admission.json"
+        ".planning/memory-resilience/evidence/Q100.4.2-writer-admission.json",
+        ".planning/memory-resilience/evidence/Q100.4.2-extraction-admission.json"
       ],
       "acceptance_record": ".planning/memory-resilience/evidence/Q100.4.3.json",
       "retirement_trigger": "Before Q100.4/Q100/B11.74.7/B10/R02 acceptance.",
-      "observed_gap": "Current writer evidence:525tests/3945assertions per Windows runtime;11decision faults detected; narrow recovery/scope/projected-writer-test instrumentation100all4. Event-log, command, source-factory and driver/test diagnostics remain below policy or incomplete; broader compatibility tests were not all instrumented in this diagnostic and earlier rows are not fresh full-suite coverage. New admitted-writer test zero branch denominator requires individual review. Child-process counters, complete instrumenter/applicability, package/changed-line, Linux, cleanup and final independent review remain open; no exclusion approved."
+      "observed_gap": "Current writer evidence:525tests/3945assertions per Windows runtime;11decision faults detected; narrow recovery/scope/projected-writer-test instrumentation100all4. Event-log, command, source-factory and driver/test diagnostics remain below policy or incomplete; broader compatibility tests were not all instrumented in this diagnostic and earlier rows are not fresh full-suite coverage. New admitted-writer test zero branch denominator requires individual review. Child-process counters, complete instrumenter/applicability, package/changed-line, Linux, cleanup and final independent review remain open; no exclusion approved. Current extraction checkpoint:83tests/434assertions on both Windows runtimes and6faults detected. Pipeline96.63/92.18/100/97.02, extraction-test98.57/91.66/80/98.45, process-test95.89/90/100/100 (statements/branches/functions/lines). Child counters unaggregated; no full-quality acceptance. Final owned-fixture rerun source and metrics supersede earlier extraction-test rows in the same checkpoint; both changed tests strict-compile. Shared-temp12KiB authority preserved pending exclusive ownership disposition under Q100.4.2.7."
+    },
+    {
+      "id": "Q100.4.2.1",
+      "stage": "baseline-quality",
+      "title": "Qualify extraction session input identity",
+      "status": "active",
+      "depends_on": [
+        "Q100.4.1"
+      ],
+      "scope": "ExtractionPipeline, message input and extraction audit identity",
+      "deliverable": "A candidate is bound to the session input actually read; changed/deleted input cannot be recorded as a current extraction.",
+      "verification": "Pause synthetic provider; edit/add/delete session input in another process; stale result must not append or certify current audit, and a fresh bounded retry must succeed. Preserve privacy/redaction and force behavior.",
+      "risk": "S",
+      "authorization": "authorized",
+      "owner": "memory-nexus",
+      "evidence": [
+        ".planning/memory-resilience/evidence/Q100.4.2-extraction-admission.json",
+        "docs/plans/2026-09-28-source-decision-admission.md"
+      ],
+      "acceptance_record": ".planning/memory-resilience/evidence/Q100.4.2.1.json",
+      "retirement_trigger": "Before Q100.4.2/Q100/B10/R02 acceptance.",
+      "observed_gap": "Unverified obligation from source inspection and retained Q100.4.2 evidence; split further before implementation if this outcome requires independent acceptance slices."
+    },
+    {
+      "id": "Q100.4.2.2",
+      "stage": "baseline-quality",
+      "title": "Qualify within-batch extraction decisions",
+      "status": "pending",
+      "depends_on": [
+        "Q100.4.1"
+      ],
+      "scope": "ExtractionPipeline candidate comparison and supersedence",
+      "deliverable": "Later candidates see preceding accepted effects; no duplicate or conflicting supersedence from one batch.",
+      "verification": "Duplicate and overlapping replacement candidates, deterministic ordering and interrupted batch retry through real source/projections; compare resulting active facts and audit counts.",
+      "risk": "S",
+      "authorization": "authorized",
+      "owner": "memory-nexus",
+      "evidence": [
+        ".planning/memory-resilience/evidence/Q100.4.2-extraction-admission.json",
+        "docs/plans/2026-09-28-source-decision-admission.md"
+      ],
+      "acceptance_record": ".planning/memory-resilience/evidence/Q100.4.2.2.json",
+      "retirement_trigger": "Before Q100.4.2/Q100/B10/R02 acceptance.",
+      "observed_gap": "Unverified obligation from source inspection and retained Q100.4.2 evidence; split further before implementation if this outcome requires independent acceptance slices."
+    },
+    {
+      "id": "Q100.4.2.3",
+      "stage": "baseline-quality",
+      "title": "Coordinate explicit remote and Git source mutation",
+      "status": "pending",
+      "depends_on": [
+        "Q100.4.1"
+      ],
+      "scope": "RemoteEventSyncService, GitRemoteEventTransport and legacy GitSyncer",
+      "deliverable": "Explicit transport shares source admission across audit/source decisions, Git mutation and recovery.",
+      "verification": "Real synthetic Git repositories/processes: contenders denied, failed/interrupted transport retried, no ordinary-sync egress, no authority namespace transfer.",
+      "risk": "S",
+      "authorization": "authorized",
+      "owner": "memory-nexus",
+      "evidence": [
+        ".planning/memory-resilience/evidence/Q100.4.2-extraction-admission.json",
+        "docs/plans/2026-09-28-source-decision-admission.md"
+      ],
+      "acceptance_record": ".planning/memory-resilience/evidence/Q100.4.2.3.json",
+      "retirement_trigger": "Before Q100.4.2/Q100/B10/R02 acceptance.",
+      "observed_gap": "Unverified obligation from source inspection and retained Q100.4.2 evidence; split further before implementation if this outcome requires independent acceptance slices."
+    },
+    {
+      "id": "Q100.4.2.4",
+      "stage": "baseline-quality",
+      "title": "Coordinate coherent backup and restore",
+      "status": "pending",
+      "depends_on": [
+        "Q100.4.1"
+      ],
+      "scope": "Local and remote backup/restore/rollback; Q050",
+      "deliverable": "Coherent admitted backup and recoverable restore preserve authority and all required data.",
+      "verification": "Concurrent append vs snapshot; interrupted restore and rollback; sparse/foreign/link inputs; byte/identity reconciliation and actual contention. Complete Q050 obligations too.",
+      "risk": "S",
+      "authorization": "authorized",
+      "owner": "memory-nexus",
+      "evidence": [
+        ".planning/memory-resilience/evidence/Q100.4.2-extraction-admission.json",
+        "docs/plans/2026-09-28-source-decision-admission.md"
+      ],
+      "acceptance_record": ".planning/memory-resilience/evidence/Q100.4.2.4.json",
+      "retirement_trigger": "Before Q100.4.2/Q100/B10/R02 acceptance.",
+      "observed_gap": "Unverified obligation from source inspection and retained Q100.4.2 evidence; split further before implementation if this outcome requires independent acceptance slices."
+    },
+    {
+      "id": "Q100.4.2.5",
+      "stage": "baseline-quality",
+      "title": "Coordinate source audit remediation",
+      "status": "pending",
+      "depends_on": [
+        "Q100.4.1"
+      ],
+      "scope": "SecretAuditService quarantine and sanitized replacement",
+      "deliverable": "Remediation shares admission and preserves recoverable source plus valid projection receipt semantics.",
+      "verification": "Concurrent writer vs remediation; invalid/partial replacement and crash between quarantine/install; verify no leakage, lost acknowledged events or silent receipt acceptance.",
+      "risk": "S",
+      "authorization": "authorized",
+      "owner": "memory-nexus",
+      "evidence": [
+        ".planning/memory-resilience/evidence/Q100.4.2-extraction-admission.json",
+        "docs/plans/2026-09-28-source-decision-admission.md"
+      ],
+      "acceptance_record": ".planning/memory-resilience/evidence/Q100.4.2.5.json",
+      "retirement_trigger": "Before Q100.4.2/Q100/B10/R02 acceptance.",
+      "observed_gap": "Unverified obligation from source inspection and retained Q100.4.2 evidence; split further before implementation if this outcome requires independent acceptance slices."
+    },
+    {
+      "id": "Q100.4.2.6",
+      "stage": "baseline-quality",
+      "title": "Resolve direct-database topology and lock ordering",
+      "status": "pending",
+      "depends_on": [
+        "Q100.4.1"
+      ],
+      "scope": "Projection/source mapping, imports, migrations, direct repository writes",
+      "deliverable": "Document and enforce authority mapping and deterministic lock order; divergent unlogged writes are reconciled explicitly.",
+      "verification": "Distinct DBs sharing source and sources sharing DB; concurrent import/migration/direct mutation; deadlock/refusal/recovery and no unlogged data loss.",
+      "risk": "S",
+      "authorization": "authorized",
+      "owner": "memory-nexus",
+      "evidence": [
+        ".planning/memory-resilience/evidence/Q100.4.2-extraction-admission.json",
+        "docs/plans/2026-09-28-source-decision-admission.md"
+      ],
+      "acceptance_record": ".planning/memory-resilience/evidence/Q100.4.2.6.json",
+      "retirement_trigger": "Before Q100.4.2/Q100/B10/R02 acceptance.",
+      "observed_gap": "Unverified obligation from source inspection and retained Q100.4.2 evidence; split further before implementation if this outcome requires independent acceptance slices."
+    },
+    {
+      "id": "Q100.4.2.7",
+      "stage": "baseline-quality",
+      "title": "Qualify source authority provisioning interruption",
+      "status": "pending",
+      "depends_on": [
+        "Q100.4.1"
+      ],
+      "scope": "source-operation-admission.ts provisioning and identity",
+      "deliverable": "Interrupted/concurrent authority creation and path changes preserve a single verifiable authority or fail recoverably.",
+      "verification": "Real process kill around publication/unlink, competing creators, aliases/path swaps and copied authorities; exact identities and subsequent safe acquisition.",
+      "risk": "S",
+      "authorization": "authorized",
+      "owner": "memory-nexus",
+      "evidence": [
+        ".planning/memory-resilience/evidence/Q100.4.2-extraction-admission.json",
+        "docs/plans/2026-09-28-source-decision-admission.md"
+      ],
+      "acceptance_record": ".planning/memory-resilience/evidence/Q100.4.2.7.json",
+      "retirement_trigger": "Before Q100.4.2/Q100/B10/R02 acceptance.",
+      "observed_gap": "Unverified obligation from source inspection and retained Q100.4.2 evidence; split further before implementation if this outcome requires independent acceptance slices. Shared-temp .memory-local/admission.sqlite (12KiB) created by historical extraction test layout is preserved; establish exclusive ownership and active-process state before exact quarantine/cleanup disposition. Current extraction tests now own their complete source directory."
+    },
+    {
+      "id": "Q100.4.2.8",
+      "stage": "baseline-quality",
+      "title": "Preserve compound command and admission-release failures",
+      "status": "pending",
+      "depends_on": [
+        "Q100.4.1"
+      ],
+      "scope": "dream/governance prepared response and reservation release",
+      "deliverable": "Operation and cleanup failures remain observable together; no success after failed release.",
+      "verification": "Prepared command failure plus actual/injected release/close failure; stdout/JSON/exit and preserved primary+cleanup errors, retry ownership proof.",
+      "risk": "S",
+      "authorization": "authorized",
+      "owner": "memory-nexus",
+      "evidence": [
+        ".planning/memory-resilience/evidence/Q100.4.2-extraction-admission.json",
+        "docs/plans/2026-09-28-source-decision-admission.md"
+      ],
+      "acceptance_record": ".planning/memory-resilience/evidence/Q100.4.2.8.json",
+      "retirement_trigger": "Before Q100.4.2/Q100/B10/R02 acceptance.",
+      "observed_gap": "Unverified obligation from source inspection and retained Q100.4.2 evidence; split further before implementation if this outcome requires independent acceptance slices."
+    },
+    {
+      "id": "Q100.4.2.9",
+      "stage": "baseline-quality",
+      "title": "Validate complete event candidates before append",
+      "status": "pending",
+      "depends_on": [
+        "Q100.4.1"
+      ],
+      "scope": "Raw event append and projection payload/candidate admission",
+      "deliverable": "Unsupported or invalid candidate semantics cannot become newly acknowledged source.",
+      "verification": "Every event kind and adversarial payload through public writers; invalid candidate leaves source/projections unchanged; valid replay compatibility.",
+      "risk": "S",
+      "authorization": "authorized",
+      "owner": "memory-nexus",
+      "evidence": [
+        ".planning/memory-resilience/evidence/Q100.4.2-extraction-admission.json",
+        "docs/plans/2026-09-28-source-decision-admission.md"
+      ],
+      "acceptance_record": ".planning/memory-resilience/evidence/Q100.4.2.9.json",
+      "retirement_trigger": "Before Q100.4.2/Q100/B10/R02 acceptance.",
+      "observed_gap": "Unverified obligation from source inspection and retained Q100.4.2 evidence; split further before implementation if this outcome requires independent acceptance slices."
+    },
+    {
+      "id": "Q100.4.2.10",
+      "stage": "baseline-quality",
+      "title": "Qualify append durability and partial-record recovery",
+      "status": "pending",
+      "depends_on": [
+        "Q100.4.1"
+      ],
+      "scope": "JSONL append lifecycle and durability boundary",
+      "deliverable": "Precisely bounded acknowledgment/durability contract with recoverable partial writes.",
+      "verification": "Disk-full/short write/process kill, truncation and sync failure; acknowledged records survive required restart boundary, damaged tails never silently discarded.",
+      "risk": "S",
+      "authorization": "authorized",
+      "owner": "memory-nexus",
+      "evidence": [
+        ".planning/memory-resilience/evidence/Q100.4.2-extraction-admission.json",
+        "docs/plans/2026-09-28-source-decision-admission.md"
+      ],
+      "acceptance_record": ".planning/memory-resilience/evidence/Q100.4.2.10.json",
+      "retirement_trigger": "Before Q100.4.2/Q100/B10/R02 acceptance.",
+      "observed_gap": "Unverified obligation from source inspection and retained Q100.4.2 evidence; split further before implementation if this outcome requires independent acceptance slices."
+    },
+    {
+      "id": "Q100.4.2.11",
+      "stage": "baseline-quality",
+      "title": "Qualify multi-event actions and caller transactions",
+      "status": "pending",
+      "depends_on": [
+        "Q100.4.1"
+      ],
+      "scope": "Extraction supersedence/audit plus other multi-event commands",
+      "deliverable": "Interrupted actions resume without duplicate effects, contradictory supersedence or false successful audit.",
+      "verification": "Kill/fail between each durable effect and audit; caller-open transaction and replay failure; idempotent retry and all retained data reconciled.",
+      "risk": "S",
+      "authorization": "authorized",
+      "owner": "memory-nexus",
+      "evidence": [
+        ".planning/memory-resilience/evidence/Q100.4.2-extraction-admission.json",
+        "docs/plans/2026-09-28-source-decision-admission.md"
+      ],
+      "acceptance_record": ".planning/memory-resilience/evidence/Q100.4.2.11.json",
+      "retirement_trigger": "Before Q100.4.2/Q100/B10/R02 acceptance.",
+      "observed_gap": "Unverified obligation from source inspection and retained Q100.4.2 evidence; split further before implementation if this outcome requires independent acceptance slices."
+    },
+    {
+      "id": "Q100.4.2.12",
+      "stage": "baseline-quality",
+      "title": "Qualify legacy/import/restore reconciliation",
+      "status": "pending",
+      "depends_on": [
+        "Q100.4.1"
+      ],
+      "scope": "Legacy source, import and restored projection/source receipts",
+      "deliverable": "Explicit reconciliation preserves intentional data and prevents resurrection or silent loss.",
+      "verification": "Divergent legacy/direct/restore fixtures and governance tombstones; inspect preview, interruption, retry and final content/receipt identity.",
+      "risk": "S",
+      "authorization": "authorized",
+      "owner": "memory-nexus",
+      "evidence": [
+        ".planning/memory-resilience/evidence/Q100.4.2-extraction-admission.json",
+        "docs/plans/2026-09-28-source-decision-admission.md"
+      ],
+      "acceptance_record": ".planning/memory-resilience/evidence/Q100.4.2.12.json",
+      "retirement_trigger": "Before Q100.4.2/Q100/B10/R02 acceptance.",
+      "observed_gap": "Unverified obligation from source inspection and retained Q100.4.2 evidence; split further before implementation if this outcome requires independent acceptance slices."
+    },
+    {
+      "id": "Q100.4.2.13",
+      "stage": "baseline-quality",
+      "title": "Measure and bound replay scaling",
+      "status": "pending",
+      "depends_on": [
+        "Q100.4.1"
+      ],
+      "scope": "Full-history replay, guarded writers and idle recovery",
+      "deliverable": "Representative corpus latency/memory/disk budgets and a tested implementation meeting accepted bounds.",
+      "verification": "Bounded synthetic corpus sizes with cold/warm timing, peak memory/disk, concurrent contention and interruption; evidence identifies limits, no fabricated production guarantees.",
+      "risk": "S",
+      "authorization": "authorized",
+      "owner": "memory-nexus",
+      "evidence": [
+        ".planning/memory-resilience/evidence/Q100.4.2-extraction-admission.json",
+        "docs/plans/2026-09-28-source-decision-admission.md"
+      ],
+      "acceptance_record": ".planning/memory-resilience/evidence/Q100.4.2.13.json",
+      "retirement_trigger": "Before Q100.4.2/Q100/B10/R02 acceptance.",
+      "observed_gap": "Unverified obligation from source inspection and retained Q100.4.2 evidence; split further before implementation if this outcome requires independent acceptance slices."
     }
   ],
   "decisions": {

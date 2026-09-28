@@ -1394,7 +1394,7 @@
     {
       "path": "src/application/services/extraction-pipeline.test.ts",
       "package": "package.json",
-      "sourceHash": "2a77a8f821259a7f538da8b16e8d2d129d680fe48ef2b656bfb6f06058fe21e7",
+      "sourceHash": "cabf4263afcd9289965dc4ea7b2e751d1a9cbc2cde0d3995f01c6470ec593b4f",
       "tier": "S",
       "rationale": "Inspected filesystem import and call context: unlinkSync(testLogPath). This test driver performs actual file/directory deletion; numeric applicability and ownership proof remain subject to individual review.",
       "applicability": {
@@ -1403,29 +1403,33 @@
       },
       "decisionStatus": "proposed - independent review pending",
       "inspection": {
-        "sourceRevision": "5159a7e + current source hash",
-        "anchor": "Q100.4.2 serial caller recovery",
-        "scope": "Paired native/fresh-process proof; complete caller and quality acceptance remains open."
+        "sourceRevision": "4fb9ec2 + source hash",
+        "anchor": "Q100.4.2 extraction admission",
+        "scope": "Scoped diagnostic; full quality incomplete"
       },
       "metricApplicability": {
-        "status": "diagnostic - final Q005/Q100.4.3 acceptance pending",
-        "sourceHash": "2a77a8f821259a7f538da8b16e8d2d129d680fe48ef2b656bfb6f06058fe21e7",
-        "evidence": ".planning/memory-resilience/evidence/Q100.4.2-callers.json",
+        "status": "Narrow diagnostic; native child counters not aggregated; final quality pending",
+        "sourceHash": "cabf4263afcd9289965dc4ea7b2e751d1a9cbc2cde0d3995f01c6470ec593b4f",
+        "evidence": ".planning/memory-resilience/evidence/Q100.4.2-extraction-admission.json",
         "metrics": {
-          "lines": {
-            "observedCounterTotal": 325,
+          "statements": {
+            "observedCounterTotal": 351,
+            "observedPercent": 98.57,
+            "proposal": "measure - completeness unverified"
+          },
+          "branches": {
+            "observedCounterTotal": 24,
+            "observedPercent": 91.66,
             "proposal": "measure - completeness unverified"
           },
           "functions": {
             "observedCounterTotal": 60,
+            "observedPercent": 80,
             "proposal": "measure - completeness unverified"
           },
-          "statements": {
-            "observedCounterTotal": 350,
-            "proposal": "measure - completeness unverified"
-          },
-          "branches": {
-            "observedCounterTotal": 26,
+          "lines": {
+            "observedCounterTotal": 324,
+            "observedPercent": 98.45,
             "proposal": "measure - completeness unverified"
           }
         }
@@ -1434,7 +1438,7 @@
     {
       "path": "src/application/services/extraction-pipeline.ts",
       "package": "package.json",
-      "sourceHash": "a00a2cb744dabe628049ead3fd6f9f111404d120e301713d6b917b77b71a0ebf",
+      "sourceHash": "61176923601122db0bc72e21f5568e20078b13b94af130ce03a4bd42accc4e2b",
       "tier": "S",
       "rationale": "Redacts messages before provider egress, redacts candidates and persists extraction outcomes.",
       "applicability": {
@@ -1443,29 +1447,33 @@
       },
       "decisionStatus": "proposed - independent review pending",
       "inspection": {
-        "sourceRevision": "5159a7e + current source hash",
-        "anchor": "Q100.4.2 serial caller recovery",
-        "scope": "Paired native/fresh-process proof; complete caller and quality acceptance remains open."
+        "sourceRevision": "4fb9ec2 + source hash",
+        "anchor": "Q100.4.2 extraction admission",
+        "scope": "Scoped diagnostic; full quality incomplete"
       },
       "metricApplicability": {
-        "status": "diagnostic - final Q005/Q100.4.3 acceptance pending",
-        "sourceHash": "a00a2cb744dabe628049ead3fd6f9f111404d120e301713d6b917b77b71a0ebf",
-        "evidence": ".planning/memory-resilience/evidence/Q100.4.2-callers.json",
+        "status": "Narrow diagnostic; native child counters not aggregated; final quality pending",
+        "sourceHash": "61176923601122db0bc72e21f5568e20078b13b94af130ce03a4bd42accc4e2b",
+        "evidence": ".planning/memory-resilience/evidence/Q100.4.2-extraction-admission.json",
         "metrics": {
-          "lines": {
-            "observedCounterTotal": 94,
-            "proposal": "measure - completeness unverified"
-          },
-          "functions": {
-            "observedCounterTotal": 17,
-            "proposal": "measure - completeness unverified"
-          },
           "statements": {
-            "observedCounterTotal": 109,
+            "observedCounterTotal": 119,
+            "observedPercent": 96.63,
             "proposal": "measure - completeness unverified"
           },
           "branches": {
-            "observedCounterTotal": 53,
+            "observedCounterTotal": 64,
+            "observedPercent": 92.18,
+            "proposal": "measure - completeness unverified"
+          },
+          "functions": {
+            "observedCounterTotal": 22,
+            "observedPercent": 100,
+            "proposal": "measure - completeness unverified"
+          },
+          "lines": {
+            "observedCounterTotal": 101,
+            "observedPercent": 97.02,
             "proposal": "measure - completeness unverified"
           }
         }
@@ -20064,6 +20072,50 @@
           },
           "lines": {
             "observedCounterTotal": 77,
+            "observedPercent": 100,
+            "proposal": "measure - completeness unverified"
+          }
+        }
+      }
+    },
+    {
+      "path": "tests/infrastructure/database/extraction-process-admission.test.ts",
+      "package": "package.json",
+      "tier": "S",
+      "rationale": "Real-process extraction decision and source/audit integrity tests.",
+      "applicability": {
+        "mode": "measure",
+        "reason": "Executable process test; child counters need aggregation; no exclusion approved."
+      },
+      "decisionStatus": "proposed - independent review pending",
+      "sourceHash": "151539e812049e5d6ec00f761a62ce1bf00c8aeb53d1f04e861f0ddd31ff2adc",
+      "inspection": {
+        "sourceRevision": "4fb9ec2 + source hash",
+        "anchor": "Q100.4.2 extraction admission",
+        "scope": "Scoped diagnostic; full quality incomplete"
+      },
+      "metricApplicability": {
+        "status": "Narrow diagnostic; native child counters not aggregated; final quality pending",
+        "sourceHash": "151539e812049e5d6ec00f761a62ce1bf00c8aeb53d1f04e861f0ddd31ff2adc",
+        "evidence": ".planning/memory-resilience/evidence/Q100.4.2-extraction-admission.json",
+        "metrics": {
+          "statements": {
+            "observedCounterTotal": 73,
+            "observedPercent": 95.89,
+            "proposal": "measure - completeness unverified"
+          },
+          "branches": {
+            "observedCounterTotal": 20,
+            "observedPercent": 90,
+            "proposal": "measure - completeness unverified"
+          },
+          "functions": {
+            "observedCounterTotal": 3,
+            "observedPercent": 100,
+            "proposal": "measure - completeness unverified"
+          },
+          "lines": {
+            "observedCounterTotal": 57,
             "observedPercent": 100,
             "proposal": "measure - completeness unverified"
           }

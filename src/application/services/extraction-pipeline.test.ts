@@ -7,9 +7,9 @@
 
 import { describe, test, expect, beforeEach, afterEach, spyOn } from "bun:test";
 import { Database } from "bun:sqlite";
-import { unlinkSync, existsSync, writeFileSync, readFileSync, appendFileSync } from "fs";
+import { existsSync, writeFileSync, readFileSync, appendFileSync } from "fs";
 import { join } from "path";
-import { tmpdir } from "os";
+import { createOwnedTestDirectory } from "../../../tests/helpers/owned-test-directory.js";
 import { createSchema } from "../../infrastructure/database/schema.js";
 import { Fact, type CandidateFact } from "../../domain/entities/fact.js";
 import { Session } from "../../domain/entities/session.js";
@@ -34,6 +34,7 @@ describe("ExtractionPipeline", () => {
   let sessionRepo: SqliteSessionRepository;
   let messageRepo: SqliteMessageRepository;
   let testLogPath: string;
+  let storage: ReturnType<typeof createOwnedTestDirectory>;
 
   beforeEach(() => {
     db = new Database(":memory:");
@@ -45,14 +46,12 @@ describe("ExtractionPipeline", () => {
     sessionRepo = new SqliteSessionRepository(db);
     messageRepo = new SqliteMessageRepository(db);
 
-    testLogPath = join(tmpdir(), `memory-nexus-pipeline-test-${Math.random().toString(36).slice(2)}.jsonl`);
+    storage = createOwnedTestDirectory("memory-extraction-pipeline-");
+    testLogPath = join(storage.dir, "events-synthetic.jsonl");
   });
 
   afterEach(() => {
-    db.close();
-    if (existsSync(testLogPath)) {
-      unlinkSync(testLogPath);
-    }
+    try { db.close(); } finally { storage.cleanup(); }
   });
 
   // Mocks

@@ -219,3 +219,29 @@ The retained evidence is
 the bounded wiring slice, not Q100.4.2, complete quality or baseline acceptance.
 Next, qualify extraction candidate computation outside admission followed by
 admitted recovery and decision revalidation, using real concurrent processes.
+
+Extraction admission slice: preserve a cheap initial recovery/idempotency check,
+compute candidates and comparison embeddings outside the reservation, then acquire
+one explicit scope for recovery, a fresh idempotency check, active-fact validation,
+append/replay and audit save. If the active facts changed during comparison
+computation, refuse before writing and request a fresh bounded invocation; never
+reuse stale vectors or silently change comparison semantics. A competing completed
+session must be skipped without overwriting its audit. Empty extraction also
+rechecks idempotency before its audit write. Thread the issued lease into all lower
+writes/recovery. Preserve force semantics. Real child-process barriers must prove
+provider computation leaves admission available and that stale work cannot commit.
+
+This extraction decision slice passes four real-process schedules and the affected
+six-file group (83 tests, 434 assertions) on both Windows runtimes. Six deliberately
+omitted guards/delegations fail. Evidence and coverage limits are retained in
+`evidence/Q100.4.2-extraction-admission.json` under the execution directory.
+
+Q100.4.2 is now an incomplete barrier over thirteen explicit remaining children in
+`work-items.json`, rather than one indefinitely expanding active item. Current
+Q100.4.2.1 owns mutable session input and audit identity: messages may change while
+the provider computes, even though fact decisions are now admitted. Q100.4.2.2
+owns within-batch comparison against preceding accepted candidates. The remaining
+children separately qualify remote/Git, backup/restore, source remediation, direct
+DB topology, provisioning, compound cleanup, preappend candidates, durability,
+multi-event recovery, reconciliation and scaling. Each retains mandatory proof;
+split a child again before implementation if it contains independent outcomes.
