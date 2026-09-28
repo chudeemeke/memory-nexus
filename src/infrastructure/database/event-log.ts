@@ -34,6 +34,7 @@ import { getMachineLogPath, getAllLogFiles } from "../paths.js";
 import { loadConfig } from "../hooks/config-manager.js";
 import { captureProjectionFence, createProjectionStage, promoteProjections } from "./projection-replacement.js";
 import { captureProjectionSource, assertProjectionSource, assertProjectionSourceAuthority, type ProjectionSourceSnapshot, type ProjectionSourceManifest } from "./projection-source.js";
+import { assertLegacyProjectionPayload, assertProjectionPayload } from "./projection-payload.js";
 
 export interface InvalidEventLogLine {
   filePath: string;
@@ -114,6 +115,7 @@ export async function readProjectionEventsWithReport(logPath?: string, eventsDir
     if (!line.trim()) return;
     try {
       const record: unknown = JSON.parse(line);
+      if (!isObject(record) || record.schemaVersion !== 2) assertLegacyProjectionPayload(record);
       const event = parseMemoryEventRecord(record, filePath, lineNumber);
       const identity = isObject(record) && record.schemaVersion === 2 ? event.integrity.envelopeHash
         : MemoryEventEnvelope.create({ ...event.toJSON(), machineId: "legacy", sequence: legacySequence(record as Record<string, unknown>, 1),
@@ -200,11 +202,7 @@ async function withProjectionStage<T>(report: ProjectionSourceReadReport,
     let replay: ProjectionReplayResult;
     try {
       for (const event of report.events) {
-        if (!["add", "update", "supersede"].includes(event.operation) ||
-          (!FACT_EVENT_KINDS.includes(event.kind) && !["governance", "consent", "dream"].includes(event.kind)) ||
-          ((event.kind === "governance" || event.kind === "consent") && !isObject(event.payload.governance))) {
-          throw new Error("Unsupported projection event semantics");
-        }
+        assertProjectionPayload(event);
       }
       replay = await registry.replay(sortMemoryEvents(report.events), { db: stage });
     } catch (cause) {

@@ -1,5 +1,42 @@
 # Memory resilience execution journal
 
+## 2026-09-28 - Strict authoritative payload admission
+
+- Previous goal turn made progress: signed/pushed23c7f4e preserved shared native
+  staging and source authority. This turn started clean at Q100.3.2.2.
+- Native RED:23pass/63fail across86tests. Fact optional fields, governance
+  strings/arrays/dates/enums/aliases and dream false-valued dates could silently
+  default/coerce. Added an infrastructure admission validator before raw legacy
+  adaptation and before shared v2 staging. Malformed explicit values reject;
+  legitimate absence/nulls, valid legacy/v2 records and unknown extensions remain.
+- Legacy privacy fields and explicit sequence survive valid adaptation; malformed
+  privacy values reject rather than defaulting. Governance duplicate spellings
+  must agree. Non-fact supersede operations reject; actual supported producers use
+  add/update. Existing domain/staging checks remain. Deliberate optional graph
+  candidate skipping and persona enrichment behavior are unchanged; their separate
+  quality obligations are not claimed complete.
+- Final Windows Bun1.4.1 and1.3.14 each pass411tests/2840assertions across16files,
+  including real projection and governance/dream/persona/graph service suites.
+  The new native driver contains89tests; both validator and driver diagnose100%
+  statements/branches/functions/lines. Eight injected validation faults fail.
+  The original one-case coercion probe now passes. Production and strict driver
+  types, isolation and whitespace pass. Full event-log/package/changed-line/
+  platform/independent-review acceptance remains mandatory.
+- Q100.3.2.2 and its semantic/source parents are scoped verified. Q100.4 ACTIVE:
+  actual caller recovery and final quality. Inspection locates extraction early
+  returns and its factsAdded-only replay guard, plus remote sync's pre/post
+  transport-only comparison. Next reproduce an earlier failed projection followed
+  by unchanged transport or no new extracted facts; require recovery through the
+  real caller. Inspect direct projection writes/import/restore before relying on
+  receipt equality. Preserve unlogged facts and governance/deletion semantics;
+  avoid resurrecting data. Split Q100.4 when that contract is established.
+- Complete outputs, input hashes, diagnostic counters and faults are retained in
+  evidence/Q100.3.2.2.json, with parent evidence links. Catalog475files/two packages,
+  252 acyclic ledger items and exactly one active item. Free disk10.95GiB; owned
+  synthetic/runtime containers cleaned. No canonical data/models/providers/hooks/
+  replication/new worktrees or blocked cleanup touched. Three inbox items and
+  baseline/experiment/adoption gates remain open. Native goal stays active.
+
 ## 2026-09-28 - Shared staging, event identity and source authority
 
 - Recovered the existing active native goal and six uncommitted paths. Preserved

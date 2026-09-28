@@ -238,10 +238,12 @@ commits the source receipt atomically with projections. Both Windows runtimes pa
 input is detected as pending after reopening the database. Q100.3.2.1 now shares
 real native staging between verify/rebuild and rejects conflicting event IDs and
 incomplete source authority. Both Windows runtimes pass294tests/2426assertions;
-eight injected faults fail. Q100.3.2.2 is active: a retained native RED demonstrates
-malformed explicit optional fields silently becoming defaults. Finish strict field
-and per-kind transition validation before parent semantic acceptance.
-Q100.4 actual caller recovery/full
+eight injected faults fail. Q100.3.2.2 now validates authoritative raw legacy/v2
+fields before tolerant adapters, including governance aliases and privacy metadata.
+Both Windows runtimes pass411tests/2840assertions across16files; eight validation
+faults fail; the new validator and driver diagnose100% in all four metrics.
+Q100.3 source/semantic contract is scoped verified. Q100.4 is active for actual
+caller recovery/full
 quality remains mandatory. Earlier replacement diagnostic branches100;
 event-log/driver gaps and34 existing strict integration-test type errors remain
 owned by Q100.4, alongside source module statements88.88/branches80. The freshness

@@ -3,7 +3,7 @@
   "workstream": "memory-resilience",
   "goal_status": "active",
   "starting_revision": "77d54e05be7fc24cede4a9a3e1fede6fa113ac8f",
-  "current_item": "Q100.3.2.2",
+  "current_item": "Q100.4",
   "status_semantics": {
     "pending": "Not started; authorization and dependencies must permit work.",
     "pending_rebaseline": "Historical candidate, not a confirmed current failure or a completed task.",
@@ -6044,7 +6044,7 @@
       "id": "Q100.3",
       "stage": "baseline-quality",
       "title": "Validate complete source snapshot and cutoff",
-      "status": "pending",
+      "status": "verified",
       "depends_on": [
         "Q100.2",
         "Q100.3.1",
@@ -6058,21 +6058,24 @@
       "owner": "memory-nexus",
       "evidence": [
         "docs/plans/2026-09-28-projection-replay-execution.md",
-        ".planning/memory-resilience/evidence/Q100.3.1.json"
+        ".planning/memory-resilience/evidence/Q100.3.1.json",
+        ".planning/memory-resilience/evidence/Q100.3.2.2.json"
       ],
       "acceptance_record": ".planning/memory-resilience/evidence/Q100.3.json",
       "retirement_trigger": "Before parent Q100/B11.74.7/B10/R02 acceptance.",
       "progress": {
-        "status": "Q100.3.1 exact capture/receipt scoped verified; semantic payload/identity and scope authority remain Q100.3.2.",
-        "owner": "memory-nexus",
-        "trigger": "Before Q100.3/Q100/B11.74.7/B10/R02 acceptance."
+        "status": "Scoped source admission/cutoff/identity/payload contract verified; actual caller retry and full quality/platform/review remain mandatory Q100.4.",
+        "testsPerRuntime": 411,
+        "assertionsPerRuntime": 2840,
+        "testFiles": 16,
+        "decisionFaultsDetected": 8
       }
     },
     {
       "id": "Q100.4",
       "stage": "baseline-quality",
       "title": "Complete projection caller recovery and quality",
-      "status": "pending",
+      "status": "active",
       "depends_on": [
         "Q100.3"
       ],
@@ -6087,11 +6090,22 @@
         ".planning/memory-resilience/evidence/Q100.1.json",
         ".planning/memory-resilience/evidence/Q100.2.json",
         ".planning/memory-resilience/evidence/Q100.3.1.json",
-        ".planning/memory-resilience/evidence/Q100.3.2.1.json"
+        ".planning/memory-resilience/evidence/Q100.3.2.1.json",
+        ".planning/memory-resilience/evidence/Q100.3.2.2.json"
       ],
       "acceptance_record": ".planning/memory-resilience/evidence/Q100.4.json",
       "retirement_trigger": "Before parent Q100/B11.74.7/B10/R02 acceptance.",
-      "observed_gap": "Q100.2 narrow diagnostic: new replacement statements98.82/lines100/functions100/branches100; atomicity driver branches97.14 misses Tier S. Event-log statements68.01/lines67.59/functions76/branches55.19 is not complete module measurement and fails acceptance. Q100.1 CLI branches87.5 and34 unchanged integration strict-type errors remain. Explicitly cover primary+stage-cleanup combined failure and post-commit cleanup reporting; complete actual caller recovery, fixture quality, package/changed-line/platform/review. Q100.3.1 source module diagnostic statements88.88/branches80/lines98.41/functions100 fails Tier S; final source driver diagnoses100%. Re-measure changed schema/CLI and replacement/event-log after semantic work. Wire isProjectionSourceCurrent into actual caller retry and verify post-cutoff pending reporting; cover compound file-handle cleanup errors without hiding primary failures. Before source receipt can skip replay, verify or implement invalidation across direct projection writes/import/restore; source match alone does not prove projected rows unchanged. Q100.3.2.1 adds shared staging and readonly verification; complete measurement must cover semantic guards, receipt validation, cross-platform path authority and primary-plus-readonly-close failures. A matched source receipt still cannot certify projection health. Narrow semantic suite metrics are diagnostic, not final quality."
+      "observed_gap": "Q100.2 narrow diagnostic: new replacement statements98.82/lines100/functions100/branches100; atomicity driver branches97.14 misses Tier S. Event-log statements68.01/lines67.59/functions76/branches55.19 is not complete module measurement and fails acceptance. Q100.1 CLI branches87.5 and34 unchanged integration strict-type errors remain. Explicitly cover primary+stage-cleanup combined failure and post-commit cleanup reporting; complete actual caller recovery, fixture quality, package/changed-line/platform/review. Q100.3.1 source module diagnostic statements88.88/branches80/lines98.41/functions100 fails Tier S; final source driver diagnoses100%. Re-measure changed schema/CLI and replacement/event-log after semantic work. Wire isProjectionSourceCurrent into actual caller retry and verify post-cutoff pending reporting; cover compound file-handle cleanup errors without hiding primary failures. Before source receipt can skip replay, verify or implement invalidation across direct projection writes/import/restore; source match alone does not prove projected rows unchanged. Q100.3.2.1 adds shared staging and readonly verification; complete measurement must cover semantic guards, receipt validation, cross-platform path authority and primary-plus-readonly-close failures. A matched source receipt still cannot certify projection health. Narrow semantic suite metrics are diagnostic, not final quality.",
+      "progress": {
+        "next": "Reproduce retained-event recovery through actual extraction and remote sync when the current invocation adds no events or the transport source hashes are unchanged. Inspect all early returns and all direct projection writers before using receipts to skip replay.",
+        "constraints": "Source receipt equality is not projection health. No-op extraction must not erase unlogged facts; governance/deletions/import/restore must not resurrect data. Split implementation into independently testable children after determining the actual invalidation and retry contract.",
+        "observedCallers": [
+          "ExtractionPipeline: early returns for existing extraction log, no messages and no candidates; final rebuild only if factsAdded>0.",
+          "RemoteEventSyncService.rebuildIfNeeded: compares pre/post transport fingerprints only. Retained source after failed rebuild is not a new transport change."
+        ],
+        "owner": "memory-nexus",
+        "trigger": "Before Q100/B11.74.7/B10/R02 acceptance."
+      }
     },
     {
       "id": "Q100.3.1",
@@ -6125,7 +6139,7 @@
       "id": "Q100.3.2",
       "stage": "baseline-quality",
       "title": "Unify semantic replay admission and event identity",
-      "status": "pending",
+      "status": "verified",
       "depends_on": [
         "Q100.3.1",
         "Q100.3.2.1",
@@ -6139,14 +6153,17 @@
       "owner": "memory-nexus",
       "evidence": [
         "docs/plans/2026-09-28-projection-replay-execution.md",
-        ".planning/memory-resilience/evidence/Q100.3.2.1.json"
+        ".planning/memory-resilience/evidence/Q100.3.2.1.json",
+        ".planning/memory-resilience/evidence/Q100.3.2.2.json"
       ],
       "acceptance_record": ".planning/memory-resilience/evidence/Q100.3.2.json",
       "retirement_trigger": "Before Q100.3/Q100/B11.74.7/B10/R02 acceptance.",
       "progress": {
-        "status": "Mandatory children preserve original acceptance. Shared staging/identity/authority scoped verified; malformed explicit optional fields remain active.",
-        "owner": "memory-nexus",
-        "trigger": "Both children plus Q100.4 final quality before parent acceptance."
+        "status": "Scoped source admission/cutoff/identity/payload contract verified; actual caller retry and full quality/platform/review remain mandatory Q100.4.",
+        "testsPerRuntime": 411,
+        "assertionsPerRuntime": 2840,
+        "testFiles": 16,
+        "decisionFaultsDetected": 8
       }
     },
     {
@@ -6173,7 +6190,7 @@
       "id": "Q100.3.2.2",
       "stage": "baseline-quality",
       "title": "Reject malformed explicit payload fields and unsupported transitions",
-      "status": "active",
+      "status": "verified",
       "depends_on": [
         "Q100.3.2.1"
       ],
@@ -6184,15 +6201,17 @@
       "authorization": "authorized",
       "owner": "memory-nexus",
       "evidence": [
-        ".planning/memory-resilience/evidence/Q100.3.2.1.json"
+        ".planning/memory-resilience/evidence/Q100.3.2.1.json",
+        ".planning/memory-resilience/evidence/Q100.3.2.2.json"
       ],
       "acceptance_record": ".planning/memory-resilience/evidence/Q100.3.2.2.json",
       "retirement_trigger": "Before Q100.3.2/Q100.3/Q100/B11.74.7/B10/R02 acceptance.",
       "progress": {
-        "reproduced": "Signed v2 fact payload project:123 is silently replaced by envelope scope. Native RED probe resolves instead of rejecting.",
-        "next": "Promote retained synthetic coercion probe to durable regression tests; inspect all recognized optional fields and actual producer operation contracts before strict validation.",
-        "probe": ".git/q100-semantic-coercion-probe.test.ts",
-        "limits": "No acceptance of optional-field semantics, cross-version duplicate equivalence or source receipt schema completeness from the shared-stage checkpoint."
+        "status": "Scoped source admission/cutoff/identity/payload contract verified; actual caller retry and full quality/platform/review remain mandatory Q100.4.",
+        "testsPerRuntime": 411,
+        "assertionsPerRuntime": 2840,
+        "testFiles": 16,
+        "decisionFaultsDetected": 8
       }
     }
   ],

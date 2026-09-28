@@ -177,3 +177,22 @@ Split the semantic work into mandatory acceptance slices:
 
 Q100.3.2 remains a parent barrier requiring both slices. Q100.4 still owns actual
 caller retry, receipt invalidation and complete quality/platform/review evidence.
+
+Q100.3.2.2 admission contract: validate raw legacy fact fields before adaptation
+can discard them; validate v2 payload fields in the shared stage. Required fact
+identity/content must be nonblank. Present optional type/project/date/metadata/id
+fields must have their declared type and range; nullable supersedence fields keep
+their existing null meaning. Governance recognized aliases must each be valid and
+agree when both spellings are supplied. Governance scope, arrays, dates, enum
+values and confidence reject coercion. Dream optional dates accept absent/null or
+valid date strings, never false/zero; project and numeric identity are validated.
+Fact events support add/update/supersede; governance/consent/dream support add/update.
+
+Unknown metadata stays extensible. Confidence and legacy privacy metadata are
+validated because they directly govern projected trust/privacy. Existing optional
+graph/persona enrichment remains governed by its own documented candidate rules;
+this change does not convert deliberately skipped graph candidates into a rejected
+source fact, nor claim complete graph/persona quality. Actual handler/domain
+validation remains in staging; the boundary validator supplements it rather than
+reimplementing every domain invariant. Read-only tolerant log-reader APIs retain
+their compatibility behavior. Full release acceptance remains Q100.4/B11.74.7.

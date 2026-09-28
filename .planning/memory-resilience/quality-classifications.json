@@ -6033,7 +6033,7 @@
     {
       "path": "src/infrastructure/database/event-log.ts",
       "package": "package.json",
-      "sourceHash": "86a7436a510fd3dd7e3d171804cd6a96ae39372b65ea598295726b228d25f007",
+      "sourceHash": "80704c23a8955ef87e2a247362ef2b5c46e013171c449947e14ab3f946619622",
       "tier": "S",
       "rationale": "Appends canonical memory events and validates imported legacy records; durable source and integrity boundary.",
       "applicability": {
@@ -6042,14 +6042,32 @@
       },
       "decisionStatus": "proposed - independent review pending",
       "inspection": {
-        "sourceRevision": "702dbe0 + current source hash",
-        "anchor": "Q100.3.2.1 shared staging and source authority",
-        "scope": "Scoped behavior; Q100.3.2.2 strict field semantics and Q100.4 full quality remain mandatory."
+        "sourceRevision": "23c7f4e + current source hash",
+        "anchor": "Q100.3.2.2 payload admission",
+        "scope": "Paired native compatibility; new module/driver diagnose100%; full package/platform/changed-line/review acceptance remains Q100.4."
       },
       "metricApplicability": {
-        "status": "diagnostic only - full per-file/package/changed-line acceptance pending",
-        "sourceHash": "86a7436a510fd3dd7e3d171804cd6a96ae39372b65ea598295726b228d25f007",
-        "evidence": ".planning/memory-resilience/evidence/Q100.3.2.1.json"
+        "status": "diagnostic only - final acceptance pending Q100.4",
+        "sourceHash": "80704c23a8955ef87e2a247362ef2b5c46e013171c449947e14ab3f946619622",
+        "evidence": ".planning/memory-resilience/evidence/Q100.3.2.2.json",
+        "metrics": {
+          "lines": {
+            "observedCounterTotal": 234,
+            "proposal": "measure - completeness unverified"
+          },
+          "functions": {
+            "observedCounterTotal": 54,
+            "proposal": "measure - completeness unverified"
+          },
+          "statements": {
+            "observedCounterTotal": 246,
+            "proposal": "measure - completeness unverified"
+          },
+          "branches": {
+            "observedCounterTotal": 166,
+            "proposal": "measure - completeness unverified"
+          }
+        }
       }
     },
     {
@@ -6288,6 +6306,46 @@
           },
           "branches": {
             "observedCounterTotal": 3,
+            "proposal": "measure - completeness unverified"
+          }
+        }
+      }
+    },
+    {
+      "path": "src/infrastructure/database/projection-payload.ts",
+      "package": "package.json",
+      "tier": "S",
+      "rationale": "Authoritative serialized projection input validation and native data-integrity regression driver.",
+      "applicability": {
+        "mode": "measure",
+        "reason": "Executable Tier S source/driver; no exclusion approved."
+      },
+      "decisionStatus": "proposed - independent review pending",
+      "sourceHash": "5bf0e141efd13a14280c08ec678a302f0ac00b64034ef6a4838ee7346af8854c",
+      "inspection": {
+        "sourceRevision": "23c7f4e + current source hash",
+        "anchor": "Q100.3.2.2 payload admission",
+        "scope": "Paired native compatibility; new module/driver diagnose100%; full package/platform/changed-line/review acceptance remains Q100.4."
+      },
+      "metricApplicability": {
+        "status": "diagnostic only - final acceptance pending Q100.4",
+        "sourceHash": "5bf0e141efd13a14280c08ec678a302f0ac00b64034ef6a4838ee7346af8854c",
+        "evidence": ".planning/memory-resilience/evidence/Q100.3.2.2.json",
+        "metrics": {
+          "lines": {
+            "observedCounterTotal": 60,
+            "proposal": "measure - completeness unverified"
+          },
+          "functions": {
+            "observedCounterTotal": 22,
+            "proposal": "measure - completeness unverified"
+          },
+          "statements": {
+            "observedCounterTotal": 81,
+            "proposal": "measure - completeness unverified"
+          },
+          "branches": {
+            "observedCounterTotal": 47,
             "proposal": "measure - completeness unverified"
           }
         }
@@ -17722,6 +17780,46 @@
         "status": "diagnostic only - full per-file/package/changed-line acceptance pending",
         "sourceHash": "6755c9ea2acd173910634688f8f6c1405cdb4b707d9fc3e23102abe022bb24a8",
         "evidence": ".planning/memory-resilience/evidence/Q100.3.2.1.json"
+      }
+    },
+    {
+      "path": "tests/infrastructure/database/projection-payload.test.ts",
+      "package": "package.json",
+      "tier": "S",
+      "rationale": "Authoritative serialized projection input validation and native data-integrity regression driver.",
+      "applicability": {
+        "mode": "measure",
+        "reason": "Executable Tier S source/driver; no exclusion approved."
+      },
+      "decisionStatus": "proposed - independent review pending",
+      "sourceHash": "93a57ae6cee29c36c6037f69ba20506ed01f6e7c56ab3502371dc43d4e92e6bd",
+      "inspection": {
+        "sourceRevision": "23c7f4e + current source hash",
+        "anchor": "Q100.3.2.2 payload admission",
+        "scope": "Paired native compatibility; new module/driver diagnose100%; full package/platform/changed-line/review acceptance remains Q100.4."
+      },
+      "metricApplicability": {
+        "status": "diagnostic only - final acceptance pending Q100.4",
+        "sourceHash": "93a57ae6cee29c36c6037f69ba20506ed01f6e7c56ab3502371dc43d4e92e6bd",
+        "evidence": ".planning/memory-resilience/evidence/Q100.3.2.2.json",
+        "metrics": {
+          "lines": {
+            "observedCounterTotal": 42,
+            "proposal": "measure - completeness unverified"
+          },
+          "functions": {
+            "observedCounterTotal": 14,
+            "proposal": "measure - completeness unverified"
+          },
+          "statements": {
+            "observedCounterTotal": 50,
+            "proposal": "measure - completeness unverified"
+          },
+          "branches": {
+            "observedCounterTotal": 1,
+            "proposal": "measure - completeness unverified"
+          }
+        }
       }
     },
     {
