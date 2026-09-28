@@ -138,3 +138,44 @@ error response must not be discarded if release subsequently fails.
 
 No owner decision is needed for this authorized baseline investigation. R03/P03/A03
 remain the integration, production implementation and adoption decision boundaries.
+
+## Writer inventory at 241acc5
+
+This is source inspection, not a claim that every entry is coordinated. Scope
+includes projection replacement because it can invalidate a command's prior read.
+
+| Family / entrypoint | Current boundary | Required adoption and proof |
+|---|---|---|
+| `dream.ts`, `governance.ts` mutating command executors | Source admission before recovery/read; injected writer and recovery do not acquire independently | Pass explicit authority through nested recovery/append/replay; all action and cleanup paths |
+| `event-log.ts` `appendEvent`, `appendMemoryEvent` | Unadmitted raw async append | Acquire for standalone invocation; require a valid source-bound lease when nested; retain partial-record and durability gates |
+| `event-log.ts` `rebuildProjections[WithReport]` | Optimistic source/database fences, no shared admission | Standalone and nested replay ownership; preserve existing promotion checks |
+| `projection-recovery.ts` recovery and projected writer | Recover/read/append/replay without admission | Explicit lease across the whole sequence, never only append |
+| `extraction-pipeline.ts` `extractFromSession` | Idempotency, similarity and supersedence decisions precede raw append | Recover/read/validate/append under one authority; avoid holding it across provider calls by revalidating after candidate computation |
+| `sync/index.ts` default local recovery | Calls recovery directly after durable session capture | Acquire only for event/projection work; preserve capture-first/no-egress semantics |
+| `sync/index.ts` remote composition, `RemoteEventSyncService`, `GitRemoteEventTransport`, legacy `GitSyncer` | Explicit source/Git mutation plus optional recovery, no shared admission | Hold authority over audit/source decision and Git mutation/recovery; no accidental nested lock or implicit remote work |
+| `backup.ts` create/restore | Local namespace excluded/preserved; content traversal still uncoordinated | Coherent snapshot, restore admission and atomicity; existing Q050 obligations |
+| `remote.ts` backup/restore/rollback | Separate copy/clear helpers still copy/delete local authority at 241acc5 | Immediate local-only namespace repair, then source admission and atomic restore |
+| `projections.ts` confirmed rebuild | Direct replay helper | Acquire before source admission/target fence, keep verification non-mutating |
+| `SecretAuditService` event remediation | Renames original logs to quarantine and writes sanitized replacements | Source admission across read/remediation; explicit receipt/reconciliation policy |
+| Legacy migration, schema migration, import/purge/direct repository edits | Different authorities/DB replacement or unlogged projection edits | Inventory database/source relationship, order locks deterministically, fail closed for unlogged divergence; no claim that event lease alone covers these |
+
+Immediate vertical slice: prove remote backup omits `.memory-local`, confirmed
+restore/rollback preserve the exact live authority even with foreign backup state,
+and link aliases cannot copy it. Run actual SQLite reservation across restore and
+show a contender remains denied until release. Record this as namespace protection,
+not remote restore coordination. Keep sparse-backup clearing in the matrix.
+
+This namespace slice is now implemented with real SQLite authority tests: both
+restore and rollback, populated/sparse backups, foreign authority, exact identity
+and reservation preservation, post-release reacquisition and link alias refusal.
+All three deliberate copy/clear/alias faults are detected. Remote maintenance still
+does not acquire admission; content ordering and atomic restore remain open.
+
+Nested contract to qualify next: an explicitly passed, unforgeable, source-bound
+operation capability with a bounded lifetime; no process-global boolean or ambient
+async-context inheritance. Each nested call gets a child scope, so a retained parent
+cannot admit concurrent sibling work while its child is active. Root completion
+revokes every descendant, including detached work; it must not release while an
+already admitted child still runs. Wrong source, stale/copy/forged capability and
+parallel sibling invocation must fail before mutation. This contract still needs
+executable proof and may be simplified if equivalent invariants can be demonstrated.

@@ -14269,31 +14269,33 @@
       },
       "decisionStatus": "proposed - independent review pending",
       "inspection": {
-        "sourceRevision": "e85d4d3f63dfe0cfaa58198766f13c56f1e23232",
-        "anchor": "rmSync(testDir, { recursive: true, force: true, maxRetries: 10, retryDelay: 50 })",
-        "line": 90,
-        "scope": "Filesystem import plus first two actual deletion call contexts inspected. Positive critical operation establishes risk; not full body/assertion review, symbol-resolution proof or cleanup acceptance."
+        "sourceRevision": "241acc5 + current source hash",
+        "anchor": "Q100.4.2 remote local-authority preservation",
+        "scope": "Namespace protection only; content admission and atomic maintenance unproved."
       },
       "metricApplicability": {
-        "status": "proposed - independent review pending",
-        "evidence": ".planning/memory-resilience/evidence/B04-applicability-probe.json",
+        "status": "Scoped diagnostic with below-policy metrics; full platform/package/changed-line/instrumenter/review acceptance pending",
         "sourceHash": "f9e02bf7540b6a147e9a249af2b35ef493bfd7a054cdeeac24fa4ecee9c7ea3e",
-        "disposition": "Measure every positive denominator; individually review zero branch/function denominators against runtime syntax. Observed counts do not prove instrumentation completeness. Optional-chain syntax is present; synthetic evidence shows current instrumentation omits its decision counters. B05.1 owns source-mapped branch proof before numeric acceptance.",
+        "evidence": ".planning/memory-resilience/evidence/Q100.4.2-remote-authority.json",
         "metrics": {
           "statements": {
             "observedCounterTotal": 653,
+            "observedPercent": 91.27,
             "proposal": "measure - completeness unverified"
           },
           "branches": {
             "observedCounterTotal": 2,
+            "observedPercent": 50,
             "proposal": "measure - completeness unverified"
           },
           "functions": {
             "observedCounterTotal": 239,
+            "observedPercent": 76.15,
             "proposal": "measure - completeness unverified"
           },
           "lines": {
             "observedCounterTotal": 612,
+            "observedPercent": 90.68,
             "proposal": "measure - completeness unverified"
           }
         }
@@ -14302,7 +14304,7 @@
     {
       "path": "src/presentation/cli/commands/remote.ts",
       "package": "package.json",
-      "sourceHash": "e195155e159018f3486ee1b1f43bcacc22c3609d60e23ff94c6726a210f4d4f3",
+      "sourceHash": "0f8543de15e89a6561e5918bb68c6eac60ef26b7e192a7ed1738ac885cd8c55c",
       "tier": "S",
       "rationale": "Controls remote sync configuration, backup/restore and removal of persistent configuration.",
       "applicability": {
@@ -14311,30 +14313,33 @@
       },
       "decisionStatus": "proposed - independent review pending",
       "inspection": {
-        "sourceRevision": "8719e3c36b2c73ca11f8ee4879c9f17aed4f2849",
-        "anchor": "backup manifest / rmSync config",
-        "scope": "positive critical boundary establishes highest tier; not full correctness acceptance"
+        "sourceRevision": "241acc5 + current source hash",
+        "anchor": "Q100.4.2 remote local-authority preservation",
+        "scope": "Namespace protection only; content admission and atomic maintenance unproved."
       },
       "metricApplicability": {
-        "status": "proposed - independent review pending",
-        "evidence": ".planning/memory-resilience/evidence/B04-applicability-probe.json",
-        "sourceHash": "e195155e159018f3486ee1b1f43bcacc22c3609d60e23ff94c6726a210f4d4f3",
-        "disposition": "Measure every positive denominator; individually review zero branch/function denominators against runtime syntax. Observed counts do not prove instrumentation completeness. Optional-chain syntax is present; synthetic evidence shows current instrumentation omits its decision counters. B05.1 owns source-mapped branch proof before numeric acceptance.",
+        "status": "Scoped diagnostic with below-policy metrics; full platform/package/changed-line/instrumenter/review acceptance pending",
+        "sourceHash": "0f8543de15e89a6561e5918bb68c6eac60ef26b7e192a7ed1738ac885cd8c55c",
+        "evidence": ".planning/memory-resilience/evidence/Q100.4.2-remote-authority.json",
         "metrics": {
           "statements": {
-            "observedCounterTotal": 318,
+            "observedCounterTotal": 320,
+            "observedPercent": 98.12,
             "proposal": "measure - completeness unverified"
           },
           "branches": {
-            "observedCounterTotal": 241,
+            "observedCounterTotal": 250,
+            "observedPercent": 95.2,
             "proposal": "measure - completeness unverified"
           },
           "functions": {
             "observedCounterTotal": 32,
+            "observedPercent": 90.62,
             "proposal": "measure - completeness unverified"
           },
           "lines": {
-            "observedCounterTotal": 303,
+            "observedCounterTotal": 305,
+            "observedPercent": 98.68,
             "proposal": "measure - completeness unverified"
           }
         }
@@ -19867,6 +19872,50 @@
           },
           "lines": {
             "observedCounterTotal": 51,
+            "observedPercent": 100,
+            "proposal": "measure - completeness unverified"
+          }
+        }
+      }
+    },
+    {
+      "path": "tests/infrastructure/database/remote-authority-preservation.test.ts",
+      "package": "package.json",
+      "tier": "S",
+      "rationale": "Remote maintenance authority preservation and adversarial data-integrity proof.",
+      "applicability": {
+        "mode": "measure",
+        "reason": "Executable backup/restore tests with real SQLite reservation; no exclusion approved."
+      },
+      "decisionStatus": "proposed - independent review pending",
+      "sourceHash": "f0449ad82b273067bfd6c24f1adf9bf2ee5e01a22509057ee47539982c25f5b2",
+      "inspection": {
+        "sourceRevision": "241acc5 + current source hash",
+        "anchor": "Q100.4.2 remote local-authority preservation",
+        "scope": "Namespace protection only; content admission and atomic maintenance unproved."
+      },
+      "metricApplicability": {
+        "status": "Scoped diagnostic with below-policy metrics; full platform/package/changed-line/instrumenter/review acceptance pending",
+        "sourceHash": "f0449ad82b273067bfd6c24f1adf9bf2ee5e01a22509057ee47539982c25f5b2",
+        "evidence": ".planning/memory-resilience/evidence/Q100.4.2-remote-authority.json",
+        "metrics": {
+          "statements": {
+            "observedCounterTotal": 77,
+            "observedPercent": 100,
+            "proposal": "measure - completeness unverified"
+          },
+          "branches": {
+            "observedCounterTotal": 8,
+            "observedPercent": 87.5,
+            "proposal": "measure - completeness unverified"
+          },
+          "functions": {
+            "observedCounterTotal": 10,
+            "observedPercent": 100,
+            "proposal": "measure - completeness unverified"
+          },
+          "lines": {
+            "observedCounterTotal": 63,
             "observedPercent": 100,
             "proposal": "measure - completeness unverified"
           }

@@ -1,5 +1,47 @@
 # Memory resilience execution journal
 
+## 2026-09-28 - Writer inventory exposed remote authority lifecycle gap
+
+- Previous turn made progress at signed/pushed `241acc5`; started clean. Full
+  E1-E10 goal and Q100.4.2 remain active. Source inspection mapped raw append,
+  replay/recovery, dream/governance, extraction, local/remote sync, Git transport,
+  backup/restore and secret remediation. Database-direct topology still needs
+  reconciliation; this is a first inventory, not a complete coordination claim.
+- Inspection found remote.ts has separate copy/clear helpers still copying and
+  deleting `.memory-local`. Repaired this before nested writer adoption. Remote
+  backup now omits the namespace and declares exclusion; restore/rollback ignore
+  foreign backup authority and preserve the live one even for sparse backups.
+  Symbolic/hard-link aliases fail closed instead of copying authority under an alias.
+- Public-command tests use a real provisioned SQLite authority and hold its
+  reservation across restore/rollback. Exact bytes/device/inode survive, a second
+  admission remains busy with no callback entry, and acquisition succeeds after
+  release. This proves authority preservation; event content still changes during
+  the held reservation because remote maintenance admission is NOT wired yet.
+- Vertical REDs: backup1fail, restore/rollback4fail, alias2fail. Final focused group
+  7pass/54assertions. Affected source/remote/backup/transport group166pass/717assertions
+  in8files on Windows Bun1.4.1 and pinned1.3.14. Three deliberate copy/clear/alias
+  faults detected. Production/strict new-test types and isolation pass. Full retained
+  source-bound evidence: `evidence/Q100.4.2-remote-authority.json`.
+- Diagnostics still fail: remote.ts98.12 statements/95.2 branches/90.62 functions/
+  98.68 lines; remote.test.ts91.27/50/76.15/90.68; preservation test100/87.5/100/100.
+  No exclusion approved for the platform branch. Q067/Q100.4.3 own complete
+  per-file/package/changed-line/instrumenter/platform/final review obligations.
+- Plan now records a proposed explicit source-bound nested capability contract:
+  bounded lifetime, no ambient inheritance, scoped child ownership, no parallel
+  sibling admission and no release while admitted child work is still running.
+  **Next:** executable qualification of this contract against the actual backend,
+  including wrong-source/stale/forged capability and detached child failure cases.
+  Then adopt raw/recovery/projected writer before extraction/remote/maintenance.
+- Coherent/atomic backup and restore, prevalidation, concurrent path swaps,
+  destructive cleanup, provisioning interruption, prepared error plus reservation
+  release reporting, partial append/fsync, caller transactions, complete candidates,
+  legacy/import reconciliation and scaling remain open. No new acceptance claim.
+- Inventory491 files/two packages;255 acyclic ledger items, exactly one active;
+  owned fixtures cleaned and11.00GiB free. No canonical data/model/provider/hook/
+  replication/new worktree or blocked cleanup changed. Three inboxes, final review,
+  hosted/Linux/desktop and R03/P03/A03 remain open. Embedding experiment still waits
+  for baseline acceptance. Draft PR must retain these limits.
+
 ## 2026-09-28 - Source-bound command admission and local-only backup boundary
 
 - Started from signed/pushed `964cf20`; retained the recovered uncommitted source

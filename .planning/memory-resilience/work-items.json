@@ -1932,8 +1932,12 @@
         "functions=90.62"
       ],
       "historical_evidence": "docs/audits/2026-09-19-repair-evidence/per-file-coverage-gaps.json",
-      "evidence": [],
-      "acceptance_record": ".planning/memory-resilience/evidence/Q067.json"
+      "evidence": [
+        ".planning/memory-resilience/evidence/Q100.4.2-remote-authority.json"
+      ],
+      "acceptance_record": ".planning/memory-resilience/evidence/Q067.json",
+      "observed_gap": "Remote backup/restore namespace exclusion and alias rejection now have real authority preservation proof, including sparse restore/rollback and held reservation. Command module functions90.62 and branches95.2 fail TierS; test-file gaps remain. Source admission, coherent snapshot, atomic restore/prevalidation, hostile path swaps and cleanup integrity still require repair. Owner memory-nexus; retire before B10/R02.",
+      "retirement_trigger": "Before B10/R02 acceptance."
     },
     {
       "id": "Q068",
@@ -6304,33 +6308,35 @@
         ".planning/memory-resilience/evidence/Q100.4.2-races.json",
         "docs/plans/2026-09-28-source-decision-admission.md",
         ".planning/memory-resilience/evidence/Q100.4.2-admission.json",
-        ".planning/memory-resilience/evidence/Q100.4.2-source-admission.json"
+        ".planning/memory-resilience/evidence/Q100.4.2-source-admission.json",
+        ".planning/memory-resilience/evidence/Q100.4.2-remote-authority.json"
       ],
       "acceptance_record": ".planning/memory-resilience/evidence/Q100.4.2.json",
       "retirement_trigger": "Before Q100.4/Q100/B11.74.7/B10/R02 acceptance.",
       "progress": {
-        "status": "Shared source authority and bounded dream/governance admission implemented; complete writer coordination and quality remain open.",
-        "completed": "Local SQLite authority is bound to canonical root and file incarnation across profiles/aliases. Copied/moved/replaced authority and redirected namespace fail closed. Default Git commits omit authority. Backup excludes/preserves local namespace, records exclusion and refuses symbolic/hard link aliases. Mutating dream/governance acquire before recovery/first decision read and print only after cleanup; native regression proves busy contenders append nothing, retry retains approval and different recipe is refused. Eight deliberately broken guards detected.",
-        "next": "Inventory every source mutation/decision entrypoint and define explicit nested lease ownership before adopting another writer family. First qualify unrelated async denial and intentional nesting, then wire raw/extraction/replay/remote/maintenance one family at a time with native barriers and retained-source recovery. Add provisioning publication/interruption races, operation plus reservation-release compound reporting, partial append/candidate/caller transaction/reconciliation and source replacement coverage. Do not remove optimistic source/replay fences.",
-        "testsPerRuntime": 155,
-        "assertionsPerRuntime": 739,
-        "testFiles": 11,
-        "decisionFaultsDetected": 8,
+        "status": "Source writer inventory and remote maintenance namespace repair; nested lease implementation and complete writer coordination remain open.",
+        "completed": "Inspected canonical append/replay, command, extraction, sync, Git, backup/restore and remediation entrypoints. Found separate remote backup/restore helpers still copying/deleting local authority. Remote backup now omits and declares .memory-local; restore and rollback preserve exact authority bytes/device/inode and live SQLite reservation for populated and sparse backups, ignoring foreign authority. Symbolic/hard-link aliases rejected. Three deliberate copy/clear/alias faults detected.",
+        "next": "Qualify explicit source-bound nested operation capabilities with real admission backend. Prove intentional nesting, wrong-source/stale/forged rejection, no ambient async inheritance or parallel sibling admission, and no release while admitted child work remains. Then adopt raw/recovery/projected writer before extraction/remote/maintenance. Retain provisioning crash, compound reporting and all prior integrity/quality gates.",
+        "testsPerRuntime": 166,
+        "assertionsPerRuntime": 717,
+        "testFiles": 8,
+        "decisionFaultsDetected": 3,
         "survivingDecisionFaults": [],
         "costEvidence": ".planning/memory-resilience/evidence/Q100.4.2-callers.json",
         "scalingConstraint": "Synthetic1000-event guarded write took814ms; idle checks30-67ms. Full replay remains proportional to retained history. Assess representative corpus limits and address scaling before integration/adoption; these small measurements are not an acceptance target or peak-memory proof.",
         "owner": "memory-nexus",
         "trigger": "Before Q100.4/Q100/B11.74.7/B10/R02 acceptance.",
-        "scope": "Windows Bun1.4.1 and pinned1.3.14 source/command/backup/transport/replay group. Global concurrency, Linux, package/changed-line/instrumenter/final review remain open.",
+        "scope": "Namespace preservation only: maintenance still mutates event content without admission. Two Windows runtime source/remote/backup groups; no Linux/whole quality/atomic restore/adoption claim.",
         "remoteEvidence": ".planning/memory-resilience/evidence/Q100.4.2-remote.json",
         "localEvidence": ".planning/memory-resilience/evidence/Q100.4.2-local.json",
         "outcomeEvidence": ".planning/memory-resilience/evidence/Q100.4.2-outcomes.json",
         "raceEvidence": ".planning/memory-resilience/evidence/Q100.4.2-races.json",
         "decisionAdmissionPlan": "docs/plans/2026-09-28-source-decision-admission.md",
         "admissionEvidence": ".planning/memory-resilience/evidence/Q100.4.2-admission.json",
-        "sourceAdmissionEvidence": ".planning/memory-resilience/evidence/Q100.4.2-source-admission.json"
+        "sourceAdmissionEvidence": ".planning/memory-resilience/evidence/Q100.4.2-source-admission.json",
+        "remoteAuthorityEvidence": ".planning/memory-resilience/evidence/Q100.4.2-remote-authority.json"
       },
-      "observed_gap": "Current: source-bound admission repairs the retained stale-decision schedule for cooperating dream/governance commands; prior counterexample remains historical RED in races evidence. Raw append/extraction/replay/remote/maintenance are not admitted, so global ordering is incomplete. Explicit nested leases, concurrent provisioning and interruption after hard-link publication need proof. Prepared operation errors can be displaced by reservation-release failure. Filesystem identity checks are optimistic against external swaps. Partial append/fsync, caller transactions, complete candidate validation, multi-event recovery, reconciliation and scaling remain mandatory. Owner memory-nexus; retire before Q100.4.2/E4/E5/B10/R02 acceptance."
+      "observed_gap": "Current: source-bound admission repairs the retained stale-decision schedule for cooperating dream/governance commands; prior counterexample remains historical RED in races evidence. Raw append/extraction/replay/remote/maintenance are not admitted, so global ordering is incomplete. Explicit nested leases, concurrent provisioning and interruption after hard-link publication need proof. Prepared operation errors can be displaced by reservation-release failure. Filesystem identity checks are optimistic against external swaps. Partial append/fsync, caller transactions, complete candidate validation, multi-event recovery, reconciliation and scaling remain mandatory. Owner memory-nexus; retire before Q100.4.2/E4/E5/B10/R02 acceptance. Remote maintenance now preserves local authority namespace; it still bypasses source admission and can change event content during an admitted command. Nested capability contract is documented, not implemented or qualified. Full writer inventory of database-direct paths and topology/order remains open."
     },
     {
       "id": "Q100.4.3",
@@ -6354,11 +6360,12 @@
         ".planning/memory-resilience/evidence/Q100.4.2-races.json",
         "docs/plans/2026-09-28-source-decision-admission.md",
         ".planning/memory-resilience/evidence/Q100.4.2-admission.json",
-        ".planning/memory-resilience/evidence/Q100.4.2-source-admission.json"
+        ".planning/memory-resilience/evidence/Q100.4.2-source-admission.json",
+        ".planning/memory-resilience/evidence/Q100.4.2-remote-authority.json"
       ],
       "acceptance_record": ".planning/memory-resilience/evidence/Q100.4.3.json",
       "retirement_trigger": "Before Q100.4/Q100/B11.74.7/B10/R02 acceptance.",
-      "observed_gap": "Current source-admission evidence retains complete scoped rows: factory, dream, governance, backup and test files fail required metrics. Backend module/test diagnostics remain100all4. Child-process coverage is unaggregated; zero denominators, instrumenter/applicability, package and changed-line evidence, Linux, cleanup and final independent review remain open. Prior optional-stage/extraction/remote/transport gaps remain in their separately source-bound evidence; earlier counts do not certify current source. Bounded command regression repairs the former stale-decision schedule, but complete writer adoption is still a correctness obligation, never a coverage exception. No exclusion approved."
+      "observed_gap": "Current source-admission evidence retains complete scoped rows: factory, dream, governance, backup and test files fail required metrics. Backend module/test diagnostics remain100all4. Child-process coverage is unaggregated; zero denominators, instrumenter/applicability, package and changed-line evidence, Linux, cleanup and final independent review remain open. Prior optional-stage/extraction/remote/transport gaps remain in their separately source-bound evidence; earlier counts do not certify current source. Bounded command regression repairs the former stale-decision schedule, but complete writer adoption is still a correctness obligation, never a coverage exception. No exclusion approved. Remote checkpoint diagnostic remote.ts functions90.62/branches95.2, remote.test.ts lines90.68/functions76.15/branches50, native preservation driver branch87.5 fail policy. Platform alternative branch is not automatically excluded. Three targeted namespace faults detected, not complete remote decision coverage."
     }
   ],
   "decisions": {
