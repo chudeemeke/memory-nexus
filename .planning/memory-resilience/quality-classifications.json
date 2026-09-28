@@ -19594,6 +19594,126 @@
           }
         }
       }
+    },
+    {
+      "path": "src/domain/ports/operation-admission.ts",
+      "package": "package.json",
+      "tier": "B",
+      "rationale": "Declaration-only async admission port; applicability needs independent review.",
+      "applicability": {
+        "mode": "no-local-code",
+        "reason": "No local runtime implementation; no coverage percentage claimed."
+      },
+      "decisionStatus": "proposed - independent review pending",
+      "sourceHash": "957a28669a97e15319a875b6e06609d40fc57efae29c88ed9ce6b704327bc65e",
+      "inspection": {
+        "sourceRevision": "2a4ac2a + current source hash",
+        "anchor": "Q100.4.2 reservation backend",
+        "scope": "Backend only; root authority and command adoption remain unproved."
+      },
+      "metricApplicability": {
+        "status": "Declaration-only applicability proposed; no percentage claimed",
+        "sourceHash": "957a28669a97e15319a875b6e06609d40fc57efae29c88ed9ce6b704327bc65e",
+        "evidence": ".planning/memory-resilience/evidence/Q100.4.2-admission.json",
+        "metrics": {
+          "statements": {
+            "observedCounterTotal": 0,
+            "proposal": "zero requires individual review"
+          },
+          "branches": {
+            "observedCounterTotal": 0,
+            "proposal": "zero requires individual review"
+          },
+          "functions": {
+            "observedCounterTotal": 0,
+            "proposal": "zero requires individual review"
+          },
+          "lines": {
+            "observedCounterTotal": 0,
+            "proposal": "zero requires individual review"
+          }
+        }
+      }
+    },
+    {
+      "path": "src/infrastructure/database/sqlite-operation-admission.ts",
+      "package": "package.json",
+      "tier": "S",
+      "rationale": "Cross-process operation admission and release/error integrity, with adversarial authority validation.",
+      "applicability": {
+        "mode": "measure",
+        "reason": "Executable lock boundary and failure/recovery tests; no exclusion approved."
+      },
+      "decisionStatus": "proposed - independent review pending",
+      "sourceHash": "61694ae1a006d91394178ac67488a898ebedbd9c6732d610fcd0d1e61b7fe697",
+      "inspection": {
+        "sourceRevision": "2a4ac2a + current source hash",
+        "anchor": "Q100.4.2 reservation backend",
+        "scope": "Backend only; root authority and command adoption remain unproved."
+      },
+      "metricApplicability": {
+        "status": "Scoped diagnostics100all4; full instrumenter/package/changed-line/platform/final review pending",
+        "sourceHash": "61694ae1a006d91394178ac67488a898ebedbd9c6732d610fcd0d1e61b7fe697",
+        "evidence": ".planning/memory-resilience/evidence/Q100.4.2-admission.json",
+        "metrics": {
+          "statements": {
+            "observedCounterTotal": 37,
+            "proposal": "measure - completeness unverified"
+          },
+          "branches": {
+            "observedCounterTotal": 20,
+            "proposal": "measure - completeness unverified"
+          },
+          "functions": {
+            "observedCounterTotal": 2,
+            "proposal": "measure - completeness unverified"
+          },
+          "lines": {
+            "observedCounterTotal": 26,
+            "proposal": "measure - completeness unverified"
+          }
+        }
+      }
+    },
+    {
+      "path": "src/infrastructure/database/sqlite-operation-admission.test.ts",
+      "package": "package.json",
+      "tier": "S",
+      "rationale": "Cross-process operation admission and release/error integrity, with adversarial authority validation.",
+      "applicability": {
+        "mode": "measure",
+        "reason": "Executable lock boundary and failure/recovery tests; no exclusion approved."
+      },
+      "decisionStatus": "proposed - independent review pending",
+      "sourceHash": "36d55b0a8dbe2f0ad49a8b23c0fe22a3cd67c4bd5ac0bc2c20d66bc388ad013b",
+      "inspection": {
+        "sourceRevision": "2a4ac2a + current source hash",
+        "anchor": "Q100.4.2 reservation backend",
+        "scope": "Backend only; root authority and command adoption remain unproved."
+      },
+      "metricApplicability": {
+        "status": "Scoped diagnostics100all4; full instrumenter/package/changed-line/platform/final review pending",
+        "sourceHash": "36d55b0a8dbe2f0ad49a8b23c0fe22a3cd67c4bd5ac0bc2c20d66bc388ad013b",
+        "evidence": ".planning/memory-resilience/evidence/Q100.4.2-admission.json",
+        "metrics": {
+          "statements": {
+            "observedCounterTotal": 124,
+            "proposal": "measure - completeness unverified"
+          },
+          "branches": {
+            "observedCounterTotal": 41,
+            "proposal": "measure - completeness unverified"
+          },
+          "functions": {
+            "observedCounterTotal": 14,
+            "proposal": "measure - completeness unverified"
+          },
+          "lines": {
+            "observedCounterTotal": 88,
+            "proposal": "measure - completeness unverified"
+          }
+        }
+      }
     }
   ],
   "retiredFiles": [

@@ -1,5 +1,48 @@
 # Memory resilience execution journal
 
+## 2026-09-28 - Qualified reservation backend; authority binding still required
+
+- Started from clean signed/pushed `2a4ac2a`; previous turn made progress with
+  native replay evidence and the confirmed lost-approval counterexample. Full
+  E1-E10 goal and Q100.4.2 remain active. That command defect is not fixed here.
+- A bounded SQLite reservation prototype passes on Windows Bun 1.4.1 and 1.3.14:
+  the contender receives SQLITE_BUSY and never enters its operation; normal/error
+  release and owner termination permit fresh acquisition without unlinking or
+  replacing the same 8 KiB authority file. Killed owners exit143 with no success
+  output, so this is actual termination recovery, not a timeout-mediated release.
+- Added a declaration-only domain OperationAdmission port and a separate
+  SqliteOperationAdmission backend. It opens an existing absolute regular file
+  with one link, validates the application/format marker under BEGIN IMMEDIATE,
+  holds admission across async work and attempts rollback plus close on every
+  outcome. It preserves primary and compound cleanup failures. Missing/invalid/
+  relative/hardlinked files and implicit nesting fail before callback invocation.
+- The actual adapter repeats the same native contention/normal/error/killed-owner
+  schedules successfully on both runtimes. Combined adapter/OwnedDatabase group:
+  23 tests / 314 assertions per runtime. Production, changed-test strict types and
+  isolation pass. Six initial tests fail against an unguarded pass-through backend.
+  All nine decision faults are detected, including early async release, omitted
+  reservation/close, invalid authority/format admission and lost compound errors.
+- Source and test diagnostics each show100% statements/branches/functions/lines.
+  This is scoped evidence; complete instrumenter/applicability, package/changed-line,
+  platform and final independent review still apply. No quality exception added.
+- **Not activated:** no command, raw writer, extraction or remote/maintenance path
+  calls this backend. It does not provision authority, bind source roots, protect
+  identity against replacement, or grant nested capabilities. Constructor path is
+  not authority proof. The prior stale approval RED remains an open acceptance
+  failure; backend success does not remove it.
+- **Next:** resolve and prove stable source authority placement. A configurable
+  per-process XDG namespace can split locks for the same source; an in-events file
+  would be copied by current backup/restore, which excludes only .git. Qualify
+  aliases, differing profiles, replacement, local-only placement, owned fixture
+  retirement and explicit nesting before command adoption. Then cover recovery/
+  first read through append and all cooperating writers, retaining existing fences.
+- `evidence/Q100.4.2-admission.json` retains source hashes, RED, full grouped/native
+  outputs, prototype/adapter drivers and coverage/fault evidence. Inventory487 files/
+  two packages;255 acyclic ledger items, one active. Owned probe artifacts cleaned;
+  10.99 GiB free at checkpoint. No canonical data/model/provider/hook/replication or
+  blocked cleanup changed. Three inboxes, final review/hosted/Linux/desktop and
+  R03/P03/A03 remain open; the embedding experiment still follows baseline acceptance.
+
 ## 2026-09-28 - Process races and confirmed stale proposal overwrite
 
 - Previous goal turn made progress at signed/pushed `ae4d091`; this turn started

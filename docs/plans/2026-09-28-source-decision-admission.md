@@ -3,6 +3,16 @@
 Status: baseline repair design; counterexample confirmed on Windows Bun 1.4.1 and 1.3.14.
 Owner: memory-nexus. Parent: Q100.4.2. No production replication or new service.
 
+Backend checkpoint: synthetic reservation qualification and the separate
+`SqliteOperationAdmission` adapter now pass contention, normal/error release and
+owner-termination recovery on both tested Windows runtimes. The adapter accepts
+only an already-provisioned absolute regular file with one link, application ID
+1296122957 and exactly one `admission_format` version 1 row. It creates/migrates no
+authority, grants no implicit nested permission, and preserves cleanup failures.
+It is not connected to commands; the stale proposal counterexample remains open.
+Source-root identity, provisioning, replacement protection and writer adoption are
+still required before activating it. A constructor path is not an authority proof.
+
 ## Observed failure and irreducible requirements
 
 A real child process reads a missing proposal and pauses. The parent process uses
@@ -50,7 +60,7 @@ must not inherit permission merely because it uses the same process or database.
 |---|---|---|---|---|
 | Re-read before append | Still has a read/append gap | No ownership | Small code, fails required invariant | Reject as the fix |
 | PID/age lock file | Can cover the scope | Needs stale-owner recovery | PID reuse, replacement and age stealing need a second ownership protocol | Avoid adding another such protocol |
-| SQLite reservation on a local coordination file | Can cover the scope independently of projection transactions | Must prove release through real process termination | Existing dependency; root identity, file lifecycle, nested calls and complete adoption still need proof | Preferred bounded prototype, not yet accepted or installed |
+| SQLite reservation on a local coordination file | Can cover the scope independently of projection transactions | Synthetic adapter process-termination proof passes on both tested Windows runtimes | Existing dependency; root identity, file lifecycle, nested calls and complete adoption still need proof | Backend qualified in scope; command activation pending |
 
 SQLite documents one simultaneous write transaction and immediate acquisition
 with `BEGIN IMMEDIATE`, which may return `SQLITE_BUSY`; closing a connection rolls
@@ -83,6 +93,15 @@ coordination file locally and never unlink/replace it while an owner may exist.
 6. **Acceptance:** final source-bound per-file/package/changed-line quality, process
    negative controls, Windows/Linux compatibility and independent review. None of
    the preceding scoped checks alone closes Q100.4.2, Q100.4.3, E4, E5 or baseline.
+
+Authority placement constraint discovered during implementation: using each
+process's configurable data directory as the coordination namespace can split
+admission for the same source when profiles or environment variables differ.
+Conversely, placing it inside the event root would enter the current recursive
+backup/restore path, which excludes only `.git`. Do not activate either shortcut.
+Next, qualify one stable local namespace derived from the real source authority,
+including alias and replacement behavior, and prove backup/restore/Git separation.
+Tests must keep any adjacent coordination artifacts within owned fixture lifetimes.
 
 No owner decision is needed for this authorized baseline investigation. R03/P03/A03
 remain the integration, production implementation and adoption decision boundaries.
