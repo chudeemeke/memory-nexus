@@ -3,6 +3,8 @@ import { Command } from "commander";
 
 import { createSyncCommand, executeSyncCommand } from "./index.js";
 import type { SyncCommandDeps } from "./types.js";
+import { DEFAULT_CONFIG, type MemoryConfig } from "../../../../infrastructure/hooks/config-manager.js";
+import type { RemoteEventSyncRequest } from "../../../../application/services/remote-event-sync-service.js";
 
 describe("Sync Command", () => {
   function createHarness(overrides: Partial<SyncCommandDeps> = {}) {
@@ -33,10 +35,11 @@ describe("Sync Command", () => {
         return syncResult;
       }),
     };
-    const config = {
+    const config: MemoryConfig = {
+      ...DEFAULT_CONFIG,
       machineId: "test-machine-id",
       remoteSync: { enabled: false, repositoryUrl: "", autoPull: true, autoPush: true },
-      embedding: { enabled: false, provider: "local" as const, model: "Xenova/all-MiniLM-L6-v2", dimensions: 384, batchSize: 100 },
+      embedding: { ...DEFAULT_CONFIG.embedding, enabled: false, provider: "local" as const, model: "Xenova/all-MiniLM-L6-v2", dimensions: 384, batchSize: 100 },
       ambientContext: { enabled: false, budget: 800 },
       autoSync: true,
       recoveryOnStartup: true,
@@ -59,7 +62,7 @@ describe("Sync Command", () => {
       createDriveResolver: mock(() => ({ resolve: mock(() => "memory") }) as any),
       initializeDatabase: mock(() => ({ db, sqliteVecAvailable: true }) as any),
       closeDatabase: mock(() => undefined),
-      bulkOperationCheckpoint: mock(() => undefined),
+      bulkOperationCheckpoint: mock(() => ({ busy: 0, log: 0, checkpointed: 0 })),
       registerCleanup: mock(() => undefined),
       unregisterCleanup: mock(() => undefined),
       createSyncService: mock(() => syncService),
@@ -713,7 +716,7 @@ describe("Sync Command", () => {
         })),
       });
       await executeSyncCommand({ remote: true }, harness.deps);
-      expect(logs.join("\n")).toContain("Remote events pulled. Rebuilding database projections");
+      expect(logs.join("\n")).toContain("Database projections recovered from recorded events.");
 
       logs = [];
       harness = createHarness({
@@ -751,8 +754,10 @@ describe("Sync Command", () => {
           })),
         })),
       });
-      await executeSyncCommand({ remote: true }, harness.deps);
+      expect((await executeSyncCommand({ remote: true, embed: true }, harness.deps)).exitCode).toBe(1);
       expect(errors.join("\n")).toContain("push rejected");
+      expect(harness.deps.runAmbientContextGeneration).toHaveBeenCalledTimes(1);
+      expect(harness.deps.runEmbeddingPass).toHaveBeenCalledTimes(1);
 
       harness = createHarness({
         loadConfig: mock(remoteConfig as any),
@@ -760,14 +765,31 @@ describe("Sync Command", () => {
           throw new Error("git missing");
         }),
       });
-      await executeSyncCommand({ remote: true }, harness.deps);
+      expect((await executeSyncCommand({ remote: true, embed: true }, harness.deps)).exitCode).toBe(1);
       expect(errors.join("\n")).toContain("git missing");
+      expect(harness.deps.runEmbeddingPass).toHaveBeenCalledTimes(1);
 
       harness = createHarness({
         loadConfig: mock(remoteConfig as any),
       });
       await executeSyncCommand({}, harness.deps);
       expect(warnings.join("\n")).toContain("Remote synchronization is configured but skipped");
+    });
+
+    it.each([false, true])("fails incomplete projection results despite nominal transport success (rebuilt: %s)", async projectionRebuilt => {
+      const harness = createHarness({
+        createRemoteEventSyncService: async () => ({ sync: async () => ({
+          success: true, status: "synced", rebuildNeeded: true, projectionRebuilt,
+          ...(projectionRebuilt ? { projectionPending: true } : {}),
+          pulled: true, pushed: true, configuredRemote: false, initializedRepository: false, error: undefined,
+        }) }),
+      });
+      harness.config.remoteSync.enabled = true;
+      harness.config.remoteSync.repositoryUrl = "https://example.invalid/events.git";
+      const result = await executeSyncCommand({ remote: true, quiet: true, embed: true }, harness.deps);
+      expect(result.exitCode).toBe(1);
+      expect(errors.join("\n")).toContain("Projection recovery remains pending");
+      expect(harness.deps.runEmbeddingPass).toHaveBeenCalledTimes(1);
     });
 
     it("blocks explicit remote sync when event-log secret findings remain", async () => {
@@ -881,7 +903,8 @@ describe("Sync Command", () => {
 
     it("falls back to the default background lock cleanup when no seam is injected", async () => {
       process.env.MEMORY_EMBED_BACKGROUND = "1";
-      const { deps } = createHarness({ removeBackgroundLock: undefined });
+      const { deps } = createHarness();
+      delete deps.removeBackgroundLock;
 
       const result = await executeSyncCommand({ embed: true }, deps);
 
@@ -895,8 +918,9 @@ describe("Sync Command", () => {
     const { join } = require("node:path");
     const { tmpdir } = require("node:os");
 
-    function remoteSyncConfig() {
+    function remoteSyncConfig(): MemoryConfig {
       return {
+        ...DEFAULT_CONFIG,
         machineId: "test-machine-id",
         remoteSync: {
           enabled: true,
@@ -905,6 +929,7 @@ describe("Sync Command", () => {
           autoPush: true,
         },
         embedding: {
+          ...DEFAULT_CONFIG.embedding,
           enabled: false,
           provider: "local" as const,
           model: "Xenova/all-MiniLM-L6-v2",
@@ -919,7 +944,7 @@ describe("Sync Command", () => {
         recoveryOnStartup: true,
         syncOnCompaction: true,
         timeout: 5000,
-        logLevel: "info",
+        logLevel: "info" as const,
         logRetentionDays: 7,
         showFailures: false,
         search: {
@@ -933,7 +958,7 @@ describe("Sync Command", () => {
     }
 
     it("calls RemoteEventSyncService.sync when remoteSync is enabled and configured", async () => {
-      const mockRemoteSync = mock(async () => ({
+      const mockRemoteSync = mock(async (_request: RemoteEventSyncRequest) => ({
         success: true,
         status: "synced" as const,
         rebuildNeeded: false,

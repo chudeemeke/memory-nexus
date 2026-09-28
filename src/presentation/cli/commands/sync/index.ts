@@ -176,6 +176,7 @@ export async function executeSyncCommand(
     // Git remote sync is explicit to avoid hidden data egress from an ordinary
     // local session sync.
     const config = resolved.loadConfig();
+    let remoteFailed = false;
     const remoteUrl = config.remoteSync?.repositoryUrl;
     const remoteConfigured =
       config.remoteSync?.enabled === true &&
@@ -195,9 +196,12 @@ export async function executeSyncCommand(
         });
 
         if (syncResult.success) {
-          if (syncResult.rebuildNeeded) {
+          if (syncResult.projectionPending || (syncResult.rebuildNeeded && !syncResult.projectionRebuilt)) {
+            remoteFailed = true;
+            console.error("Projection recovery remains pending; retry sync before treating remote synchronization as complete.");
+          } else if (syncResult.projectionRebuilt) {
             if (!options.quiet) {
-              console.log("Remote events pulled. Rebuilding database projections...");
+              console.log("Database projections recovered from recorded events.");
             }
           } else {
             if (!options.quiet) {
@@ -212,9 +216,11 @@ export async function executeSyncCommand(
           console.error(message);
           return { exitCode: 1 };
         } else {
+          remoteFailed = true;
           console.error(`Warning: Remote synchronization failed: ${syncResult.error}`);
         }
       } catch (err: any) {
+        remoteFailed = true;
         console.error(`Warning: Remote synchronization failed to execute: ${unknownErrorMessage(err)}`);
       }
     } else if (options.remote === true) {
@@ -239,7 +245,7 @@ export async function executeSyncCommand(
     // Ambient context generation (after facts/session projections are updated)
     if (!options.dryRun) await resolved.runAmbientContextGeneration(db, options);
 
-    const syncExitCode = (result.errors.length > 0 || result.aborted) ? 1 : 0;
+    const syncExitCode = (result.errors.length > 0 || result.aborted || remoteFailed) ? 1 : 0;
 
     // Run embedding pass if requested (after sync completes)
     if (options.embed && !options.dryRun) {
@@ -291,11 +297,16 @@ async function createDefaultRemoteEventSyncService({ db }: { db: ReturnType<type
   const { RemoteEventSyncService } = await import("../../../../application/services/remote-event-sync-service.js");
   const { GitRemoteEventTransport } = await import("../../../../infrastructure/remote/git-remote-event-transport.js");
   const { getEventsDir } = await import("../../../../infrastructure/paths.js");
-  const { rebuildProjections } = await import("../../../../infrastructure/database/event-log.js");
+  const { recoverPendingProjections } = await import("../../../../infrastructure/database/projection-recovery.js");
   const { SecretAuditService } = await import("../../../../infrastructure/security/secret-audit-service.js");
   const { getAllLogFiles } = await import("../../../../infrastructure/paths.js");
+  const transport = new GitRemoteEventTransport(getEventsDir());
+  const recover = async () => {
+    await transport.assertProjectionSourceSettled();
+    return recoverPendingProjections(db);
+  };
   return new RemoteEventSyncService({
-    transport: new GitRemoteEventTransport(getEventsDir()),
+    transport,
     privacyPreflight: {
       audit: async () => {
         const report = await new SecretAuditService(new PatternRedactor()).audit({
@@ -305,8 +316,9 @@ async function createDefaultRemoteEventSyncService({ db }: { db: ReturnType<type
       },
     },
     projectionRebuilder: {
+      recover,
       rebuild: async () => {
-        await rebuildProjections(db);
+        if ((await recover()).pending) throw new Error("Projection recovery remains pending; retry sync");
       },
     },
   });

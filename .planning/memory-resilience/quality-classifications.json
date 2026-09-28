@@ -2339,7 +2339,7 @@
     {
       "path": "src/application/services/remote-event-sync-service.test.ts",
       "package": "package.json",
-      "sourceHash": "99a113ef64204f125e0946a58f9d1256a4cf4de59214b149b779ff6f93a0ddfd",
+      "sourceHash": "c77910e23b0cd279f0c9e42f084f1e105693ebd9dca546f332d438449e4ac77a",
       "tier": "A",
       "rationale": "Remote transport is a local test double; event delivery assertions do not prove real transport or replication.",
       "applicability": {
@@ -2348,31 +2348,29 @@
       },
       "decisionStatus": "proposed - independent review pending",
       "inspection": {
-        "sourceRevision": "12c188bb9cad480efc6eb87ce1760b9dc40bbb69",
-        "anchor": "Emitted-runtime import/call/constructor inventory and targeted fixture/provider/CLI source boundaries",
-        "runtimeHash": "1a7d4824a56979418abe710e115011c656b4c8ccaa9a6016fa53afdd083e305b",
-        "scope": "Reading aid plus targeted source inspection; not sound effect analysis, complete assertion review, execution evidence or metric applicability approval."
+        "sourceRevision": "4a81668 + current source hash",
+        "anchor": "Q100.4.2 explicit remote receipt recovery",
+        "scope": "Scoped Windows native and fresh-process proof; final caller/quality/review acceptance open."
       },
       "metricApplicability": {
-        "status": "proposed - independent review pending",
-        "evidence": ".planning/memory-resilience/evidence/B04-applicability-probe.json",
-        "sourceHash": "99a113ef64204f125e0946a58f9d1256a4cf4de59214b149b779ff6f93a0ddfd",
-        "disposition": "Measure every positive denominator; individually review zero branch/function denominators against runtime syntax. Observed counts do not prove instrumentation completeness. Optional-chain syntax is present; synthetic evidence shows current instrumentation omits its decision counters. B05.1 owns source-mapped branch proof before numeric acceptance.",
+        "status": "diagnostic - Q100.4.3/Q043/Q078 acceptance pending",
+        "sourceHash": "c77910e23b0cd279f0c9e42f084f1e105693ebd9dca546f332d438449e4ac77a",
+        "evidence": ".planning/memory-resilience/evidence/Q100.4.2-remote.json",
         "metrics": {
-          "statements": {
-            "observedCounterTotal": 190,
-            "proposal": "measure - completeness unverified"
-          },
-          "branches": {
-            "observedCounterTotal": 19,
+          "lines": {
+            "observedCounterTotal": 275,
             "proposal": "measure - completeness unverified"
           },
           "functions": {
-            "observedCounterTotal": 45,
+            "observedCounterTotal": 77,
             "proposal": "measure - completeness unverified"
           },
-          "lines": {
-            "observedCounterTotal": 186,
+          "statements": {
+            "observedCounterTotal": 288,
+            "proposal": "measure - completeness unverified"
+          },
+          "branches": {
+            "observedCounterTotal": 35,
             "proposal": "measure - completeness unverified"
           }
         }
@@ -2381,7 +2379,7 @@
     {
       "path": "src/application/services/remote-event-sync-service.ts",
       "package": "package.json",
-      "sourceHash": "b51f6282be5b336bcdc9a5e3a20ffae96f0aea3e6201d97fb0a34e7ccb9a42ec",
+      "sourceHash": "7a1c5c975608cb90e0942ff293cb1191473868e06479d9e1800befd20bcf55e8",
       "tier": "S",
       "rationale": "Validates remote requests, audits privacy and controls Git initialization, event commits, pull/rebase and push. Existing transport is not proof of the proposed desktop replication design.",
       "applicability": {
@@ -2390,30 +2388,29 @@
       },
       "decisionStatus": "proposed - independent review pending",
       "inspection": {
-        "sourceRevision": "aa2c449cd2d72828e81a7ea691a12ca2b400323c",
-        "anchor": "sync / validateSyncRequest / privacyPreflight",
-        "scope": "positive critical boundary establishes highest tier; not full correctness acceptance"
+        "sourceRevision": "4a81668 + current source hash",
+        "anchor": "Q100.4.2 explicit remote receipt recovery",
+        "scope": "Scoped Windows native and fresh-process proof; final caller/quality/review acceptance open."
       },
       "metricApplicability": {
-        "status": "proposed - independent review pending",
-        "evidence": ".planning/memory-resilience/evidence/B04-applicability-probe.json",
-        "sourceHash": "b51f6282be5b336bcdc9a5e3a20ffae96f0aea3e6201d97fb0a34e7ccb9a42ec",
-        "disposition": "Measure every positive denominator; individually review zero branch/function denominators against runtime syntax. Observed counts do not prove instrumentation completeness. Optional-chain syntax is present; synthetic evidence shows current instrumentation omits its decision counters. B05.1 owns source-mapped branch proof before numeric acceptance.",
+        "status": "diagnostic - Q100.4.3/Q043/Q078 acceptance pending",
+        "sourceHash": "7a1c5c975608cb90e0942ff293cb1191473868e06479d9e1800befd20bcf55e8",
+        "evidence": ".planning/memory-resilience/evidence/Q100.4.2-remote.json",
         "metrics": {
-          "statements": {
-            "observedCounterTotal": 129,
-            "proposal": "measure - completeness unverified"
-          },
-          "branches": {
-            "observedCounterTotal": 131,
+          "lines": {
+            "observedCounterTotal": 157,
             "proposal": "measure - completeness unverified"
           },
           "functions": {
-            "observedCounterTotal": 15,
+            "observedCounterTotal": 17,
             "proposal": "measure - completeness unverified"
           },
-          "lines": {
-            "observedCounterTotal": 123,
+          "statements": {
+            "observedCounterTotal": 171,
+            "proposal": "measure - completeness unverified"
+          },
+          "branches": {
+            "observedCounterTotal": 162,
             "proposal": "measure - completeness unverified"
           }
         }
@@ -10608,7 +10605,7 @@
     {
       "path": "src/infrastructure/remote/git-remote-event-transport.test.ts",
       "package": "package.json",
-      "sourceHash": "341be31265385cfa4b936e637d56385733dbeb7dbfc98941815674cf707b8607",
+      "sourceHash": "1ff2be943ac69fb7efde1024fbc2197d4dcb0d4e81af61b2d22e4f5708cee339",
       "tier": "S",
       "rationale": "Local retry helper recursively removes real Git fixture directories; tests also exercise isolated Git transport.",
       "applicability": {
@@ -10617,30 +10614,29 @@
       },
       "decisionStatus": "proposed - independent review pending",
       "inspection": {
-        "sourceRevision": "a4b80f8f2bc3facf011327d99e8b63cb2755ffe9",
-        "anchor": "rmSync(path,",
-        "scope": "Inspected imports, setup/path construction and actual filesystem mutation or cleanup boundary. Positive critical operation establishes risk; not full test correctness or cleanup acceptance."
+        "sourceRevision": "4a81668 + current source hash",
+        "anchor": "Q100.4.2 explicit remote receipt recovery",
+        "scope": "Scoped Windows native and fresh-process proof; final caller/quality/review acceptance open."
       },
       "metricApplicability": {
-        "status": "proposed - independent review pending",
-        "evidence": ".planning/memory-resilience/evidence/B04-applicability-probe.json",
-        "sourceHash": "341be31265385cfa4b936e637d56385733dbeb7dbfc98941815674cf707b8607",
-        "disposition": "Measure every positive denominator; individually review zero branch/function denominators against runtime syntax. Observed counts do not prove instrumentation completeness. Optional-chain syntax is present; synthetic evidence shows current instrumentation omits its decision counters. B05.1 owns source-mapped branch proof before numeric acceptance.",
+        "status": "diagnostic - Q100.4.3/Q043/Q078 acceptance pending",
+        "sourceHash": "1ff2be943ac69fb7efde1024fbc2197d4dcb0d4e81af61b2d22e4f5708cee339",
+        "evidence": ".planning/memory-resilience/evidence/Q100.4.2-remote.json",
         "metrics": {
-          "statements": {
-            "observedCounterTotal": 179,
-            "proposal": "measure - completeness unverified"
-          },
-          "branches": {
-            "observedCounterTotal": 37,
+          "lines": {
+            "observedCounterTotal": 191,
             "proposal": "measure - completeness unverified"
           },
           "functions": {
-            "observedCounterTotal": 53,
+            "observedCounterTotal": 62,
             "proposal": "measure - completeness unverified"
           },
-          "lines": {
-            "observedCounterTotal": 171,
+          "statements": {
+            "observedCounterTotal": 205,
+            "proposal": "measure - completeness unverified"
+          },
+          "branches": {
+            "observedCounterTotal": 55,
             "proposal": "measure - completeness unverified"
           }
         }
@@ -10649,7 +10645,7 @@
     {
       "path": "src/infrastructure/remote/git-remote-event-transport.ts",
       "package": "package.json",
-      "sourceHash": "7ee815a54e7bc35d65bb0bacd459ebbf1d48f8b004124f2db70a90d9df28585b",
+      "sourceHash": "18e991b7b3f02c974b2b70923d1322d2325e1c611f393dd5774dfa55e579f729",
       "tier": "S",
       "rationale": "Executes Git commands that configure remotes and synchronize persistent event storage.",
       "applicability": {
@@ -10658,30 +10654,29 @@
       },
       "decisionStatus": "proposed - independent review pending",
       "inspection": {
-        "sourceRevision": "39c895b13e768bd607070efbc3496d47a821b257",
-        "anchor": "runGitCommand / setRemoteUrl",
-        "scope": "positive critical boundary establishes highest tier; not full correctness acceptance"
+        "sourceRevision": "4a81668 + current source hash",
+        "anchor": "Q100.4.2 explicit remote receipt recovery",
+        "scope": "Scoped Windows native and fresh-process proof; final caller/quality/review acceptance open."
       },
       "metricApplicability": {
-        "status": "proposed - independent review pending",
-        "evidence": ".planning/memory-resilience/evidence/B04-applicability-probe.json",
-        "sourceHash": "7ee815a54e7bc35d65bb0bacd459ebbf1d48f8b004124f2db70a90d9df28585b",
-        "disposition": "Measure every positive denominator; individually review zero branch/function denominators against runtime syntax. Observed counts do not prove instrumentation completeness.",
+        "status": "diagnostic - Q100.4.3/Q043/Q078 acceptance pending",
+        "sourceHash": "18e991b7b3f02c974b2b70923d1322d2325e1c611f393dd5774dfa55e579f729",
+        "evidence": ".planning/memory-resilience/evidence/Q100.4.2-remote.json",
         "metrics": {
-          "statements": {
-            "observedCounterTotal": 74,
-            "proposal": "measure - completeness unverified"
-          },
-          "branches": {
-            "observedCounterTotal": 46,
+          "lines": {
+            "observedCounterTotal": 79,
             "proposal": "measure - completeness unverified"
           },
           "functions": {
-            "observedCounterTotal": 18,
+            "observedCounterTotal": 19,
             "proposal": "measure - completeness unverified"
           },
-          "lines": {
-            "observedCounterTotal": 68,
+          "statements": {
+            "observedCounterTotal": 86,
+            "proposal": "measure - completeness unverified"
+          },
+          "branches": {
+            "observedCounterTotal": 59,
             "proposal": "measure - completeness unverified"
           }
         }
@@ -15308,7 +15303,7 @@
     {
       "path": "src/presentation/cli/commands/sync/index.test.ts",
       "package": "package.json",
-      "sourceHash": "e40956e801b30f344d2bfde572ed81a9fbb96a48408bdf50e544e82a65d2ae47",
+      "sourceHash": "e0a5f304463c3f06c2e23dd58c7666f87807972b19daceed195071738690c653",
       "tier": "S",
       "rationale": "Mostly dependency-injected harnesses, with real remote-config fixture creation/removal and silent cleanup catches. B11.69 owns repair.",
       "applicability": {
@@ -15317,31 +15312,29 @@
       },
       "decisionStatus": "proposed - independent review pending",
       "inspection": {
-        "sourceRevision": "12c188bb9cad480efc6eb87ce1760b9dc40bbb69",
-        "anchor": "Emitted-runtime import/call/constructor inventory and targeted fixture/provider/CLI source boundaries",
-        "runtimeHash": "3956ab3ad8f2fa7b23ae3fb2c67ace11ae912831adaa63f2b29934fa9aacafeb",
-        "scope": "Reading aid plus targeted source inspection; not sound effect analysis, complete assertion review, execution evidence or metric applicability approval."
+        "sourceRevision": "4a81668 + current source hash",
+        "anchor": "Q100.4.2 explicit remote receipt recovery",
+        "scope": "Scoped Windows native and fresh-process proof; final caller/quality/review acceptance open."
       },
       "metricApplicability": {
-        "status": "proposed - independent review pending",
-        "evidence": ".planning/memory-resilience/evidence/B04-applicability-probe.json",
-        "sourceHash": "e40956e801b30f344d2bfde572ed81a9fbb96a48408bdf50e544e82a65d2ae47",
-        "disposition": "Measure every positive denominator; individually review zero branch/function denominators against runtime syntax. Observed counts do not prove instrumentation completeness. Optional-chain syntax is present; synthetic evidence shows current instrumentation omits its decision counters. B05.1 owns source-mapped branch proof before numeric acceptance.",
+        "status": "diagnostic - Q100.4.3/Q043/Q078 acceptance pending",
+        "sourceHash": "e0a5f304463c3f06c2e23dd58c7666f87807972b19daceed195071738690c653",
+        "evidence": ".planning/memory-resilience/evidence/Q100.4.2-remote.json",
         "metrics": {
-          "statements": {
-            "observedCounterTotal": 529,
-            "proposal": "measure - completeness unverified"
-          },
-          "branches": {
-            "observedCounterTotal": 25,
+          "lines": {
+            "observedCounterTotal": 528,
             "proposal": "measure - completeness unverified"
           },
           "functions": {
-            "observedCounterTotal": 174,
+            "observedCounterTotal": 177,
             "proposal": "measure - completeness unverified"
           },
-          "lines": {
-            "observedCounterTotal": 515,
+          "statements": {
+            "observedCounterTotal": 543,
+            "proposal": "measure - completeness unverified"
+          },
+          "branches": {
+            "observedCounterTotal": 27,
             "proposal": "measure - completeness unverified"
           }
         }
@@ -15350,7 +15343,7 @@
     {
       "path": "src/presentation/cli/commands/sync/index.ts",
       "package": "package.json",
-      "sourceHash": "ed1610dbc64749328b9c8df310dc33034f6b8a7006e7965eaac2a1f8f14bef77",
+      "sourceHash": "e9ca3f1f4f76b8e7e6b3d70468f88f77dd7521bbb3e0c72b260dcf7801ffc413",
       "tier": "S",
       "rationale": "Composes the sync runtime and dispatches durable ingestion.",
       "applicability": {
@@ -15359,30 +15352,29 @@
       },
       "decisionStatus": "proposed - independent review pending",
       "inspection": {
-        "sourceRevision": "8719e3c36b2c73ca11f8ee4879c9f17aed4f2849",
-        "anchor": "resolved.initializeDatabase / service.sync",
-        "scope": "positive critical boundary establishes highest tier; not full correctness acceptance"
+        "sourceRevision": "4a81668 + current source hash",
+        "anchor": "Q100.4.2 explicit remote receipt recovery",
+        "scope": "Scoped Windows native and fresh-process proof; final caller/quality/review acceptance open."
       },
       "metricApplicability": {
-        "status": "proposed - independent review pending",
-        "evidence": ".planning/memory-resilience/evidence/B04-applicability-probe.json",
-        "sourceHash": "ed1610dbc64749328b9c8df310dc33034f6b8a7006e7965eaac2a1f8f14bef77",
-        "disposition": "Measure every positive denominator; individually review zero branch/function denominators against runtime syntax. Observed counts do not prove instrumentation completeness. Optional-chain syntax is present; synthetic evidence shows current instrumentation omits its decision counters. B05.1 owns source-mapped branch proof before numeric acceptance.",
+        "status": "diagnostic - Q100.4.3/Q043/Q078 acceptance pending",
+        "sourceHash": "e9ca3f1f4f76b8e7e6b3d70468f88f77dd7521bbb3e0c72b260dcf7801ffc413",
+        "evidence": ".planning/memory-resilience/evidence/Q100.4.2-remote.json",
         "metrics": {
-          "statements": {
-            "observedCounterTotal": 120,
-            "proposal": "measure - completeness unverified"
-          },
-          "branches": {
-            "observedCounterTotal": 77,
+          "lines": {
+            "observedCounterTotal": 126,
             "proposal": "measure - completeness unverified"
           },
           "functions": {
-            "observedCounterTotal": 12,
+            "observedCounterTotal": 13,
             "proposal": "measure - completeness unverified"
           },
-          "lines": {
-            "observedCounterTotal": 116,
+          "statements": {
+            "observedCounterTotal": 131,
+            "proposal": "measure - completeness unverified"
+          },
+          "branches": {
+            "observedCounterTotal": 85,
             "proposal": "measure - completeness unverified"
           }
         }
@@ -19406,6 +19398,46 @@
           "lines": {
             "observedCounterTotal": 0,
             "proposal": "blocked - runtime accounting unresolved"
+          }
+        }
+      }
+    },
+    {
+      "path": "tests/infrastructure/database/remote-recovery.test.ts",
+      "package": "package.json",
+      "tier": "S",
+      "rationale": "Native default remote recovery and no-resurrection integrity driver with owned fresh-process fixtures.",
+      "applicability": {
+        "mode": "measure",
+        "reason": "Executable TierS; no exclusion approved. Child-process code and zero branch denominator require full instrumenter review."
+      },
+      "decisionStatus": "proposed - independent review pending",
+      "sourceHash": "208db515f38d1f318482d3ca3d8a7c7fc2ab65ad223c6b503347beb013dc0e51",
+      "inspection": {
+        "sourceRevision": "4a81668 + current source hash",
+        "anchor": "Q100.4.2 explicit remote receipt recovery",
+        "scope": "Scoped Windows native and fresh-process proof; final caller/quality/review acceptance open."
+      },
+      "metricApplicability": {
+        "status": "diagnostic - Q100.4.3/Q043/Q078 acceptance pending",
+        "sourceHash": "208db515f38d1f318482d3ca3d8a7c7fc2ab65ad223c6b503347beb013dc0e51",
+        "evidence": ".planning/memory-resilience/evidence/Q100.4.2-remote.json",
+        "metrics": {
+          "lines": {
+            "observedCounterTotal": 36,
+            "proposal": "measure - completeness unverified"
+          },
+          "functions": {
+            "observedCounterTotal": 4,
+            "proposal": "measure - completeness unverified"
+          },
+          "statements": {
+            "observedCounterTotal": 39,
+            "proposal": "measure - completeness unverified"
+          },
+          "branches": {
+            "observedCounterTotal": 0,
+            "proposal": "Review zero denominator and child-process/instrumenter completeness"
           }
         }
       }

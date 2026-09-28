@@ -97,6 +97,135 @@ function createTransport(options: {
   return { transport, calls };
 }
 
+describe("receipt-based remote projection recovery", () => {
+  const request = { machineId: "machine-1234", repositoryUrl: "https://example.invalid/events.git" };
+
+  it("recovers retained source before unchanged transport and verifies again afterward", async () => {
+    const { transport, calls } = createTransport({ snapshots: [{ a: "same" }, { a: "same" }] });
+    const rebuild = mock(async () => {});
+    const recover = mock(async () => {
+      calls.push("recover");
+      return { rebuilt: calls.length === 1, pending: false };
+    });
+    const result = await new RemoteEventSyncService({ transport, projectionRebuilder: { rebuild, recover } }).sync(request);
+    expect(result).toMatchObject({ success: true, rebuildNeeded: true, projectionRebuilt: true, projectionPending: false });
+    expect(calls[0]).toBe("recover");
+    expect(calls.at(-1)).toBe("recover");
+    expect(recover).toHaveBeenCalledTimes(2);
+    expect(rebuild).not.toHaveBeenCalled();
+  });
+
+  it("recovers local work despite offline fetch and retains the transport failure", async () => {
+    const { transport, calls } = createTransport({ failures: { fetch: fail("offline") } });
+    const recover = mock(async () => ({ rebuilt: true, pending: false }));
+    const result = await new RemoteEventSyncService({ transport, projectionRebuilder: { rebuild: async () => {}, recover } }).sync(request);
+    expect(result).toMatchObject({ success: false, configuredRemote: true, pulled: false,
+      error: "Git fetch failed: offline", rebuildNeeded: true, projectionRebuilt: true, projectionPending: false });
+    expect(recover).toHaveBeenCalledTimes(2);
+    expect(calls).not.toContain("push");
+  });
+
+  it.each(["pending", "throws", "malformed"])("stops transport when pre-recovery %s", async mode => {
+    const { transport, calls } = createTransport();
+    const recover = mock(async () => {
+      if (mode === "throws") throw new Error("content diverged");
+      return mode === "pending" ? { rebuilt: true, pending: true } : {} as { rebuilt: boolean; pending: boolean };
+    });
+    const result = await new RemoteEventSyncService({ transport, projectionRebuilder: { rebuild: async () => {}, recover } }).sync(request);
+    expect(result).toMatchObject({ success: false, status: "failed", rebuildNeeded: true,
+      projectionRebuilt: mode === "pending", projectionPending: true });
+    expect(result.error).toBeTruthy();
+    expect(calls).toEqual([]);
+    expect(recover).toHaveBeenCalledTimes(1);
+  });
+
+  it.each([false, true])("retains completed progress when final recovery fails (transport fails: %s)", async transportFails => {
+    const { transport } = createTransport({ failures: transportFails ? { push: fail("offline") } : {} });
+    let attempts = 0;
+    const recover = mock(async () => {
+      if (++attempts === 2) throw new Error("projection write failed");
+      return { rebuilt: true, pending: false };
+    });
+    const result = await new RemoteEventSyncService({ transport, projectionRebuilder: { rebuild: async () => {}, recover } }).sync(request);
+    expect(result).toMatchObject({ success: false, pulled: true, pushed: !transportFails,
+      configuredRemote: true, rebuildNeeded: true, projectionRebuilt: true, projectionPending: true });
+    expect(result.error).toContain("projection write failed");
+    if (transportFails) expect(result.error).toContain("Git push failed: offline");
+  });
+
+  it("does not recover or transport before validation and privacy admission", async () => {
+    const { transport, calls } = createTransport();
+    const recover = mock(async () => ({ rebuilt: false, pending: false }));
+    const audit = mock(async () => ({ eventLogFindings: 1 }));
+    const service = new RemoteEventSyncService({ transport, privacyPreflight: { audit }, projectionRebuilder: { rebuild: async () => {}, recover } });
+    expect((await service.sync({ ...request, machineId: "local" })).status).toBe("blocked");
+    expect(audit).not.toHaveBeenCalled();
+    expect((await service.sync(request)).status).toBe("blocked");
+    expect(recover).not.toHaveBeenCalled();
+    expect(calls).toEqual([]);
+  });
+
+  it.each(["failed", "throws", "pull throws"])("does not replay an unsettled rebase (%s)", async mode => {
+    const { transport, calls } = createTransport({
+      failures: { pullRebase: fail("conflict"), abortRebase: fail("abort failed") },
+      ...(mode === "throws" ? { throwOn: "abortRebase" as const } : mode === "pull throws" ? { throwOn: "pullRebase" as const } : {}),
+    });
+    const recover = mock(async () => ({ rebuilt: false, pending: false }));
+    const result = await new RemoteEventSyncService({ transport, projectionRebuilder: { rebuild: async () => {}, recover } }).sync(request);
+    expect(result).toMatchObject({ success: false, pulled: false, pushed: false, rebuildNeeded: true, projectionPending: true });
+    expect(recover).toHaveBeenCalledTimes(1);
+    expect(calls).not.toContain("push");
+  });
+
+  it("retains a legacy replay requirement after a throwing rebuild", async () => {
+    const { transport } = createTransport({ snapshots: [{ a: "before" }, { a: "after" }] });
+    const result = await new RemoteEventSyncService({ transport, projectionRebuilder: {
+      rebuild: async () => { throw new Error("replay failed"); },
+    } }).sync(request);
+    expect(result).toMatchObject({ success: false, pulled: true, pushed: true,
+      rebuildNeeded: true, projectionRebuilt: false, error: "replay failed" });
+  });
+
+  it("preserves both legacy push and projection errors", async () => {
+    const { transport } = createTransport({ failures: { push: fail("offline") }, snapshots: [{ a: "before" }, { a: "after" }] });
+    const result = await new RemoteEventSyncService({ transport, projectionRebuilder: {
+      rebuild: async () => { throw new Error("replay failed"); },
+    } }).sync(request);
+    expect(result).toMatchObject({ success: false, pulled: true, pushed: false, rebuildNeeded: true, projectionRebuilt: false });
+    expect(result.error).toContain("Git push failed: offline");
+    expect(result.error).toContain("replay failed");
+  });
+
+  it("retains a completed replay and pending status at the final cutoff", async () => {
+    const { transport } = createTransport();
+    let attempt = 0;
+    const recover = async () => ++attempt === 1 ? { rebuilt: false, pending: false } : { rebuilt: true, pending: true };
+    const result = await new RemoteEventSyncService({ transport, projectionRebuilder: { rebuild: async () => {}, recover } }).sync(request);
+    expect(result).toMatchObject({ success: false, pulled: true, pushed: true,
+      rebuildNeeded: true, projectionRebuilt: true, projectionPending: true });
+    expect(result.error).toContain("remains pending");
+  });
+
+  it("fails closed on a throwing privacy audit before recovery or transport", async () => {
+    const { transport, calls } = createTransport();
+    const recover = mock(async () => ({ rebuilt: false, pending: false }));
+    const result = await new RemoteEventSyncService({ transport,
+      privacyPreflight: { audit: async () => { throw new Error("audit unavailable"); } },
+      projectionRebuilder: { rebuild: async () => {}, recover },
+    }).sync(request);
+    expect(result).toMatchObject({ success: false, error: "audit unavailable" });
+    expect(calls).toEqual([]);
+    expect(recover).not.toHaveBeenCalled();
+  });
+
+  it("reports failed pull and abort even without transport error messages", async () => {
+    const { transport } = createTransport({ failures: { pullRebase: failWithoutError(), abortRebase: failWithoutError() } });
+    const result = await new RemoteEventSyncService({ transport }).sync(request);
+    expect(result).toMatchObject({ success: false, projectionPending: true,
+      error: "Git pull failed: unknown error; Git rebase abort failed: unknown error" });
+  });
+});
+
 describe("remote sync validation", () => {
   it("accepts https, ssh, and scp-style Git remotes", () => {
     expect(validateRemoteRepositoryUrl("https://github.com/chude/memory-events.git")).toEqual({ valid: true });

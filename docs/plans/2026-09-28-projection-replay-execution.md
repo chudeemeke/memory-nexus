@@ -292,3 +292,26 @@ written extraction events use guarded automatic replay; failure reports retained
 events as pending and must not record a successful extraction audit. Established
 event-backed fixtures require an explicit baseline receipt, not an exception to
 unlogged-data admission. Pending work after the bounded cutoff stops extraction.
+
+Remote recovery contract: the optional projection adapter gains receipt-based
+`recover()` alongside the legacy `rebuild()` method. Validate the explicit remote
+request and privacy preflight first, then recover retained local source before
+transport and again after its outcome, including an offline fetch. Unchanged Git
+fingerprints do not prove current projections. Pending or failed pre-recovery stops
+transport. Preserve completed replay and transport flags when later steps fail;
+expose `projectionPending` for recovery-capable attempts. Failed/throwing rebase
+without a successful abort leaves source unsettled: do not replay that working
+tree or push it. Report pending recovery and the transport failure instead.
+
+The default remote factory must use guarded automatic recovery, never implicit
+explicit rebuild. An explicit remote failure makes the CLI exit nonzero while
+independent local ambient/embedding work may still finish. Report completed replay
+in past tense and never claim success for pending projections. Ordinary local sync
+must retain its no-egress contract. This slice does not implement replication,
+concurrent Git admission, or ordinary local-sync recovery by itself.
+
+Restart refinement: before each default recovery, check Git's actual metadata
+directory for unfinished rebase/merge/cherry-pick/revert/sequencer operations and
+check for unmerged paths. Unavailable Git state fails closed. This read-only
+admission prevents a later invocation from replaying a retained unfinished working
+tree; it is not a lock against a concurrent Git operation starting after admission.

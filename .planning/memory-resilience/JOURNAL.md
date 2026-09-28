@@ -1,5 +1,60 @@
 # Memory resilience execution journal
 
+## 2026-09-28 - Explicit remote recovery and restart admission checkpoint
+
+- Previous goal turn made progress at signed/pushed `4a81668`. This turn started
+  clean; Q100.4.2 and the full E1-E10 native goal remain active.
+- Remote projection adapters may recover from receipts before transport and after
+  safe outcomes, including offline fetch and unchanged fingerprints. Validation and
+  privacy admission still precede recovery. Pending pre-recovery stops transport;
+  later failures preserve completed replay/transport flags and compound errors.
+  Legacy rebuild-only injection remains supported. Invalid recovery results fail
+  closed; validation results now require an error for their invalid variant.
+- Default remote wiring uses guarded automatic recovery. Failed rebase/abort cannot
+  trigger post-transport replay. Review found that this alone missed a later
+  invocation: added read-only Git metadata/unmerged-path admission before each
+  default recovery. Retained rebase/merge/cherry-pick/revert/sequencer state blocks
+  replay. This is not a lock against concurrent Git changes after admission.
+- Six fresh child invocations exercise actual default SQLite/Git wiring: replay
+  failure retains source, retry without new source recovers, idle retry keeps the
+  receipt, a synthetic unfinished-rebase marker blocks later source, removing that
+  marker permits recovery, and direct database deletion is not resurrected. Fetch
+  and push are disabled; only owned synthetic data/local Git operations are used.
+  The retained marker is synthetic, not proof of a real rebase killed mid-operation.
+- Explicit remote failed/pending outcomes now make the CLI exit nonzero while
+  independently requested local ambient/embedding work can finish. Completed replay
+  is reported in past tense. Ordinary sync still cannot trigger remote egress.
+- Final matching source: Windows Bun 1.4.1 and pinned 1.3.14 each pass 126 tests /
+  383 assertions across four affected files. Ten targeted faults are detected,
+  including omitted default receipt recovery and omitted Git readiness. Production,
+  all four changed-test strict compilations, and isolation pass. A broader Windows
+  1.4.1 run passed 614 tests / 3,925 assertions across 24 files before fixture-only
+  type repairs; production source is unchanged from that broad run. These scopes
+  are retained separately, not called a fresh full-suite or hosted acceptance.
+- Corrections: strict compilation exposed older sync harness issues (checkpoint
+  result, policy/embedding defaults, optional cleanup property, mock argument).
+  Repaired them using actual types/defaults. A broad rerun overlapped the final
+  harness correction and its source-binding guard rejected the result; it is not
+  accepted proof. Final affected suites were rerun at matching hashes.
+- Diagnostic service coverage is 100% all four metrics. Transport branches 94.91%,
+  service-test functions 87.01%, CLI source 83.2% statements / 90.58% branches /
+  46.15% functions / 84.12% lines, CLI-test branches 74.07% / functions 94.35%, and
+  transport-test branches 90.9% still fail required floors. Child instrumentation
+  is not aggregated; the native driver's zero branch denominator needs completeness
+  review. Q043/Q078/Q100.4.3 own these before acceptance; no quality waiver added.
+- **Next:** RED ordinary local sync with retained projection source and no new
+  sessions/work; wire guarded recovery and truthful local/projection/remote results
+  without egress. Concurrent writer/source ordering, stale targets, partial append,
+  caller transactions, complete pre-append candidate validation and operational
+  legacy/import reconciliation remain mandatory in Q100.4.2. Prior scaling concern
+  remains before adoption. Q100.4.3 retains full quality/platform/cleanup/review.
+- `evidence/Q100.4.2-remote.json` retains hashes, outputs, REDs, corrections, scoped
+  coverage and faults. Catalog 480 files / two packages; 255 acyclic ledger items;
+  one active item. Free disk 10.77 GiB, owned fixtures cleaned, one registered
+  canonical worktree. No canonical data/model/provider/hook/replication or blocked
+  cleanup changed. Three inboxes, hosted/Linux/desktop/review and R03/P03/A03 remain
+  open. The bounded embedding experiment still follows baseline acceptance.
+
 ## 2026-09-28 - Serial proposal and extraction recovery; remote retry next
 
 - Previous goal turn made progress: signed and pushed `5159a7e` with canonical writer

@@ -1,6 +1,6 @@
 import { createHash } from "node:crypto";
 import { existsSync, mkdirSync, readFileSync } from "node:fs";
-import { basename, join } from "node:path";
+import { basename, isAbsolute, join } from "node:path";
 import { spawn } from "bun";
 
 import type {
@@ -103,6 +103,25 @@ export class GitRemoteEventTransport implements RemoteEventTransport {
 
   async isRepository(): Promise<boolean> {
     return this.deps.existsSync(join(this.eventsDir, ".git"));
+  }
+
+  /** Read-only admission for replay, including an operation retained after restart. */
+  async assertProjectionSourceSettled(): Promise<void> {
+    if (!await this.isRepository()) return;
+    const metadata = await this.runGit(["rev-parse", "--absolute-git-dir"], this.eventsDir);
+    const gitDir = metadata.stdout.trim();
+    if (!metadata.success || !isAbsolute(gitDir) || /[\r\n]/.test(gitDir)) {
+      throw new Error("Cannot verify Git source state; resolve the repository before projection recovery");
+    }
+    for (const marker of ["rebase-merge", "rebase-apply", "MERGE_HEAD", "CHERRY_PICK_HEAD", "REVERT_HEAD", "sequencer"]) {
+      if (this.deps.existsSync(join(gitDir, marker))) {
+        throw new Error("Projection recovery blocked by an unfinished Git operation; resolve or abort it before retrying sync");
+      }
+    }
+    const unmerged = await this.runGit(["diff", "--no-ext-diff", "--name-only", "--diff-filter=U", "--"], this.eventsDir);
+    if (!unmerged.success || unmerged.stdout.trim()) {
+      throw new Error("Cannot admit Git source with unverified or unresolved conflicts; resolve them before projection recovery");
+    }
   }
 
   async initRepository(identity: RemoteGitIdentity): Promise<RemoteTransportCommandResult> {

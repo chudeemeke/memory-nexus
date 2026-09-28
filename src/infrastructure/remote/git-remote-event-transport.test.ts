@@ -59,6 +59,34 @@ describe("git transport environment hardening", () => {
 });
 
 describe("GitRemoteEventTransport unit behavior", () => {
+  it.each(["rebase-merge", "rebase-apply", "MERGE_HEAD", "CHERRY_PICK_HEAD", "REVERT_HEAD", "sequencer"])("rejects source during a retained %s operation", async marker => {
+    const metadata = join(tmpdir(), "synthetic-git-metadata");
+    const runGit = mock(async () => gitOk(metadata));
+    const transport = new GitRemoteEventTransport("synthetic-events", {
+      existsSync: path => path.endsWith(".git") || path === join(metadata, marker), runGit,
+    });
+    await expect(transport.assertProjectionSourceSettled()).rejects.toThrow("unfinished Git operation");
+    expect(runGit).toHaveBeenCalledTimes(1);
+  });
+
+  it("allows an uninitialized event source without running Git", async () => {
+    const runGit = mock(async () => gitFail());
+    const transport = new GitRemoteEventTransport("synthetic-events", { existsSync: () => false, runGit });
+    await expect(transport.assertProjectionSourceSettled()).resolves.toBeUndefined();
+    expect(runGit).not.toHaveBeenCalled();
+  });
+
+  it.each(["metadata failure", "empty path", "relative path", "multiline path", "unmerged", "diff failure", "settled"])("checks retained Git source: %s", async mode => {
+    const metadata = join(tmpdir(), "synthetic-git-metadata");
+    const runGit = mock(async (args: string[]) => {
+      if (args[0] === "rev-parse") return mode === "metadata failure" ? gitFail() : gitOk(mode === "empty path" ? "" : mode === "relative path" ? ".git" : mode === "multiline path" ? metadata + "\nextra" : metadata);
+      return mode === "diff failure" ? gitFail() : gitOk(mode === "unmerged" ? "events-synthetic.jsonl" : "");
+    });
+    const transport = new GitRemoteEventTransport("synthetic-events", { existsSync: path => path.endsWith(".git"), runGit });
+    if (mode === "settled") await expect(transport.assertProjectionSourceSettled()).resolves.toBeUndefined();
+    else await expect(transport.assertProjectionSourceSettled()).rejects.toThrow("Git");
+  });
+
   it("initializes a repository with durable Git identity and main branch", async () => {
     const calls: string[][] = [];
     const madeDirs: Array<{ path: string; recursive: boolean | undefined }> = [];
