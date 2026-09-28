@@ -107,3 +107,35 @@ establish pending-event recovery. The new replacement module diagnoses100% branc
 and98.82% statements; the atomicity driver97.14% branches and larger event-log
 quality gaps remain mandatory Q100.4 work, including combined cleanup failures.
 Q100.3 is active for coherent source admission. No full baseline acceptance.
+
+## Q100.3 source cutoff contract
+
+SQLite cannot atomically commit the independently written event files. The receipt
+must therefore identify the exact selected file set, byte lengths and SHA-256
+digests used for this replay, never promise that no later source data exists.
+Capture every selected regular file's identity/size/timestamps before reading;
+read only its captured byte length, decode UTF-8 strictly, and refuse missing,
+replaced, truncated, appended or newly discovered sources before promotion.
+Immediately inside the synchronous promotion transaction, recheck identities,
+content hashes and selected file set. Commit the receipt in that same transaction
+as the projections. A later append differs from the receipt and remains pending.
+No filesystem lock, background service or second corpus queue is introduced.
+
+Q100.3.1 implements that bounded capture, observed-stability check and durable
+receipt, with a current-source comparison for Q100.4 callers. Receipt write failure
+must roll back projection replacement; prior receipts survive failed replay.
+Q100.3.2 must additionally reconcile semantic payload admission/verification,
+conflicting duplicate IDs and explicit-file versus all-log authority. Identical
+event duplicates remain idempotent. Legacy synthetic sequence/machine metadata
+needs deliberate normalization before using full envelope hashes as identity.
+Q100.4 wires actual pending-source retry after failed replacement, including cases
+where remote transport has no new changes. These are mandatory dependencies,
+not optional enhancements or a relaxation of the original Q100.3 acceptance.
+
+Q100.3.1 checkpoint: paired Windows native272tests/2297assertions pass at matching
+source hashes; seven injected faults fail. evidence/Q100.3.1.json under the active
+execution directory retains complete outputs. The source module's narrow
+statements88.88/branches80 still fails quality; Q100.4 retains this obligation.
+Before a caller uses the source receipt to skip replay, verify or implement receipt
+invalidation for direct projection changes/import/restore. Source match alone is
+not projection health. Q100.3.2 semantic/identity/scope admission remains active.

@@ -33,6 +33,7 @@ import { MemoryGovernanceEntry } from "../../domain/entities/memory-governance.j
 import { getMachineLogPath, getAllLogFiles } from "../paths.js";
 import { loadConfig } from "../hooks/config-manager.js";
 import { captureProjectionFence, createProjectionStage, promoteProjections } from "./projection-replacement.js";
+import { captureProjectionSource, type ProjectionSourceSnapshot, type ProjectionSourceManifest } from "./projection-source.js";
 
 export interface InvalidEventLogLine {
   filePath: string;
@@ -50,11 +51,12 @@ export interface ProjectionRebuildReport {
   invalidEvents: number;
   invalidEventLines: InvalidEventLogLine[];
   replay: ProjectionReplayResult;
+  source: ProjectionSourceManifest;
 }
+export interface ProjectionSourceReadReport extends EventReadReport { snapshot: ProjectionSourceSnapshot; }
 
 interface ReadOptions {
   reportInvalidToConsole: boolean;
-  requireSourceFiles?: boolean;
 }
 
 interface ProjectionContext {
@@ -105,17 +107,14 @@ export async function readMemoryEventsWithReport(logPath?: string, eventsDir?: s
 }
 
 /** Required-source admission shared by projection verification and mutation. */
-export async function readProjectionEventsWithReport(logPath?: string, eventsDir?: string): Promise<EventReadReport> {
-  const report = await collectMemoryEvents(logPath, eventsDir, { reportInvalidToConsole: false, requireSourceFiles: true });
-  return {
-    events: report.events,
-    invalidEvents: report.invalidEvents.map(({ filePath, lineNumber }) => ({
-      filePath,
-      lineNumber,
-      line: "",
-      reason: `Invalid event log record at line ${lineNumber} in ${filePath}`,
-    })),
-  };
+export async function readProjectionEventsWithReport(logPath?: string, eventsDir?: string): Promise<ProjectionSourceReadReport> {
+  const events: MemoryEventEnvelope[] = [], invalidEvents: InvalidEventLogLine[] = [];
+  const snapshot = await captureProjectionSource(logPath, eventsDir, (line, filePath, lineNumber) => {
+    if (!line.trim()) return;
+    try { events.push(parseMemoryEventRecord(JSON.parse(line), filePath, lineNumber)); }
+    catch { invalidEvents.push({ filePath, lineNumber, line: "", reason: `Invalid event log record at line ${lineNumber} in ${filePath}` }); }
+  });
+  return { events, invalidEvents, snapshot };
 }
 
 /**
@@ -156,6 +155,7 @@ export async function rebuildProjectionsWithReport(db: Database, logPath?: strin
       invalidEvents: report.invalidEvents.length,
       invalidEventLines: report.invalidEvents,
       replay: { processedEvents: 0, skippedDuplicateEvents: 0, appliedProjections: [] },
+      source: report.snapshot.manifest,
     };
   }
   const sortedEvents = sortMemoryEvents(report.events);
@@ -170,8 +170,8 @@ export async function rebuildProjectionsWithReport(db: Database, logPath?: strin
   let failed = false, failure: unknown;
   try {
     const replay = await registry.replay(sortedEvents, { db: stage });
-    promoteProjections(db, stage, fence);
-    return { invalidEvents: 0, invalidEventLines: [], replay };
+    promoteProjections(db, stage, fence, report.snapshot);
+    return { invalidEvents: 0, invalidEventLines: [], replay, source: report.snapshot.manifest };
   } catch (error) {
     failed = true; failure = error;
     throw error;
@@ -185,9 +185,6 @@ export async function rebuildProjectionsWithReport(db: Database, logPath?: strin
 
 async function collectMemoryEvents(logPath: string | undefined, eventsDir: string | undefined, options: ReadOptions): Promise<EventReadReport> {
   const files = logPath ? [logPath] : getAllLogFiles(eventsDir);
-  if (options.requireSourceFiles && files.length === 0) {
-    throw new Error("No event log files available for projection rebuild");
-  }
   const events: MemoryEventEnvelope[] = [];
   const invalidEvents: InvalidEventLogLine[] = [];
 
@@ -207,9 +204,6 @@ async function readSingleLogFile(filePath: string, options: ReadOptions): Promis
   const events: MemoryEventEnvelope[] = [];
   const invalidEvents: InvalidEventLogLine[] = [];
   if (!existsSync(filePath)) {
-    if (options.requireSourceFiles) {
-      throw new Error(`Event log unavailable for projection rebuild: ${filePath}`);
-    }
     return { events, invalidEvents };
   }
 

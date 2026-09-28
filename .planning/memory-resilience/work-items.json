@@ -3,7 +3,7 @@
   "workstream": "memory-resilience",
   "goal_status": "active",
   "starting_revision": "77d54e05be7fc24cede4a9a3e1fede6fa113ac8f",
-  "current_item": "Q100.3",
+  "current_item": "Q100.3.2",
   "status_semantics": {
     "pending": "Not started; authorization and dependencies must permit work.",
     "pending_rebaseline": "Historical candidate, not a confirmed current failure or a completed task.",
@@ -2786,6 +2786,11 @@
           "document": "docs/plans/2026-09-28-projection-replay-execution.md",
           "owner": "memory-nexus",
           "trigger": "Before integration/adoption: communicate atomic replacement, preserved surviving identities, conflict retry and rejection of caller-owned transactions."
+        },
+        "projectionSourceNotice": {
+          "document": "docs/plans/2026-09-28-projection-replay-execution.md",
+          "owner": "memory-nexus",
+          "trigger": "Before integration/adoption: communicate exact-cutoff receipt table, source JSON metadata, changed-source retry and compatibility of derived receipt through backup/import/schema initialization."
         }
       }
     },
@@ -5779,14 +5784,15 @@
         ".planning/memory-resilience/evidence/B11.74.6.3.2.json",
         "docs/plans/2026-09-28-projection-replay-execution.md",
         ".planning/memory-resilience/evidence/Q100.1.json",
-        ".planning/memory-resilience/evidence/Q100.2.json"
+        ".planning/memory-resilience/evidence/Q100.2.json",
+        ".planning/memory-resilience/evidence/Q100.3.1.json"
       ],
       "acceptance_record": ".planning/memory-resilience/evidence/Q100.json",
       "observed_gap": "Late fact insert failure leaves previously retained facts deleted. Current native probe1pass/1fail. Production diagnostic branches91.89%.",
       "retirement_trigger": "Before B11.74.7/B10/R02 acceptance. Do not wrap async replay in a synchronous transaction or leave an unenforced transaction open across unrelated awaits.",
       "progress": {
-        "status": "Required admission and native atomic replacement repaired. All three retained late-write/missing-source probes now pass.",
-        "next": "Q100.3 source snapshot/cutoff; Q100.4 actual pending-event caller retry, full quality/platform/review.",
+        "status": "Required admission, atomic promotion and durable source cutoff repaired in scoped checkpoints.",
+        "next": "Q100.3.2 semantic/identity/scope admission; Q100.4 actual retry and complete quality/platform/review.",
         "owner": "memory-nexus",
         "trigger": "Before B11.74.7/B10/R02."
       }
@@ -6038,9 +6044,11 @@
       "id": "Q100.3",
       "stage": "baseline-quality",
       "title": "Validate complete source snapshot and cutoff",
-      "status": "active",
+      "status": "pending",
       "depends_on": [
-        "Q100.2"
+        "Q100.2",
+        "Q100.3.1",
+        "Q100.3.2"
       ],
       "scope": "src/infrastructure/database/event-log.ts and actual projection replay callers",
       "deliverable": "Retained source-set/content snapshot, changed-source refusal or explicit cutoff and completeness policy.",
@@ -6049,13 +6057,15 @@
       "authorization": "authorized",
       "owner": "memory-nexus",
       "evidence": [
-        "docs/plans/2026-09-28-projection-replay-execution.md"
+        "docs/plans/2026-09-28-projection-replay-execution.md",
+        ".planning/memory-resilience/evidence/Q100.3.1.json"
       ],
       "acceptance_record": ".planning/memory-resilience/evidence/Q100.3.json",
       "retirement_trigger": "Before parent Q100/B11.74.7/B10/R02 acceptance.",
       "progress": {
-        "next": "Establish complete source-set/content snapshot and cutoff; adversarial append/truncate/replace/new-file races, semantic payload and conflicting duplicate IDs. Retain usable prior projections on refusal. Use actual sync/extraction call paths for source-authority requirements.",
-        "limits": "DB replacement is atomic. Parsing current streams does not establish coherent complete source input, and verify is still existence/parse admission only."
+        "status": "Q100.3.1 exact capture/receipt scoped verified; semantic payload/identity and scope authority remain Q100.3.2.",
+        "owner": "memory-nexus",
+        "trigger": "Before Q100.3/Q100/B11.74.7/B10/R02 acceptance."
       }
     },
     {
@@ -6075,11 +6085,64 @@
       "evidence": [
         "docs/plans/2026-09-28-projection-replay-execution.md",
         ".planning/memory-resilience/evidence/Q100.1.json",
-        ".planning/memory-resilience/evidence/Q100.2.json"
+        ".planning/memory-resilience/evidence/Q100.2.json",
+        ".planning/memory-resilience/evidence/Q100.3.1.json"
       ],
       "acceptance_record": ".planning/memory-resilience/evidence/Q100.4.json",
       "retirement_trigger": "Before parent Q100/B11.74.7/B10/R02 acceptance.",
-      "observed_gap": "Q100.2 narrow diagnostic: new replacement statements98.82/lines100/functions100/branches100; atomicity driver branches97.14 misses Tier S. Event-log statements68.01/lines67.59/functions76/branches55.19 is not complete module measurement and fails acceptance. Q100.1 CLI branches87.5 and34 unchanged integration strict-type errors remain. Explicitly cover primary+stage-cleanup combined failure and post-commit cleanup reporting; complete actual caller recovery, fixture quality, package/changed-line/platform/review."
+      "observed_gap": "Q100.2 narrow diagnostic: new replacement statements98.82/lines100/functions100/branches100; atomicity driver branches97.14 misses Tier S. Event-log statements68.01/lines67.59/functions76/branches55.19 is not complete module measurement and fails acceptance. Q100.1 CLI branches87.5 and34 unchanged integration strict-type errors remain. Explicitly cover primary+stage-cleanup combined failure and post-commit cleanup reporting; complete actual caller recovery, fixture quality, package/changed-line/platform/review. Q100.3.1 source module diagnostic statements88.88/branches80/lines98.41/functions100 fails Tier S; final source driver diagnoses100%. Re-measure changed schema/CLI and replacement/event-log after semantic work. Wire isProjectionSourceCurrent into actual caller retry and verify post-cutoff pending reporting; cover compound file-handle cleanup errors without hiding primary failures. Before source receipt can skip replay, verify or implement invalidation across direct projection writes/import/restore; source match alone does not prove projected rows unchanged."
+    },
+    {
+      "id": "Q100.3.1",
+      "stage": "baseline-quality",
+      "title": "Capture exact projection source cutoff and durable receipt",
+      "status": "verified",
+      "depends_on": [
+        "Q100.2"
+      ],
+      "scope": "src/infrastructure/database/event-log.ts and actual projection replay callers",
+      "deliverable": "Bounded immutable source capture; pre-promotion observed-stability check; atomic receipt and current-source comparison.",
+      "verification": "Native append/truncate/replace/new-file races, safe diagnostics, descriptor cleanup, receipt rollback/restart and post-cutoff pending-source detection.",
+      "risk": "S",
+      "authorization": "authorized",
+      "owner": "memory-nexus",
+      "evidence": [
+        "docs/plans/2026-09-28-projection-replay-execution.md",
+        ".planning/memory-resilience/evidence/Q100.3.1.json"
+      ],
+      "acceptance_record": ".planning/memory-resilience/evidence/Q100.3.1.json",
+      "retirement_trigger": "Before Q100.3/Q100/B11.74.7/B10/R02 acceptance.",
+      "progress": {
+        "status": "Scoped exact source cutoff, observed drift rejection and atomic durable receipt verified; full Q100.3 semantics remain mandatory.",
+        "testsPerRuntime": 272,
+        "assertionsPerRuntime": 2297,
+        "testFiles": 10,
+        "decisionFaultsDetected": 7
+      }
+    },
+    {
+      "id": "Q100.3.2",
+      "stage": "baseline-quality",
+      "title": "Unify semantic replay admission and event identity",
+      "status": "active",
+      "depends_on": [
+        "Q100.3.1"
+      ],
+      "scope": "src/infrastructure/database/event-log.ts and actual projection replay callers",
+      "deliverable": "Actual semantic staging readiness, conflicting duplicate IDs, explicit-file versus all-log authority.",
+      "verification": "Verify and mutate reject same unusable payloads; identical duplicates idempotent, conflicting identity fails closed; legacy metadata normalization and scope coverage.",
+      "risk": "S",
+      "authorization": "authorized",
+      "owner": "memory-nexus",
+      "evidence": [
+        "docs/plans/2026-09-28-projection-replay-execution.md"
+      ],
+      "acceptance_record": ".planning/memory-resilience/evidence/Q100.3.2.json",
+      "retirement_trigger": "Before Q100.3/Q100/B11.74.7/B10/R02 acceptance.",
+      "progress": {
+        "next": "Reproduce verify accepting syntactically valid but unprojectable governance/dream/fact payloads; reject conflicting duplicate IDs without treating identical legacy records as conflicts solely because synthetic line/filename metadata differs. Reconcile explicit file authority before full replacement.",
+        "limits": "Source receipt detects bytes and scope, not semantic readiness. isProjectionSourceCurrent is not yet wired into actual sync/extraction retry; Q100.4 owns this mandatory integration."
+      }
     }
   ],
   "decisions": {

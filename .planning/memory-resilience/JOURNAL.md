@@ -1,5 +1,47 @@
 # Memory resilience execution journal
 
+## 2026-09-28 - Exact source cutoff and durable receipt
+
+- Previous turn: progress, signed/pushed27a0eb9 with atomic projection promotion.
+  This turn began clean. Split Q100.3 into mandatory Q100.3.1 source capture/receipt
+  and Q100.3.2 semantic/identity/scope admission; parent acceptance is retained.
+- The filesystem and SQLite cannot share a transaction. The implemented contract
+  records exact source scope, file set, byte lengths and SHA-256 hashes. Capture
+  identities/sizes before asynchronous reads, read only captured bytes in64KiB
+  buffers, decode UTF-8 strictly, and reject observed file/content/set changes.
+  Synchronous final validation runs inside the promotion transaction. One receipt
+  row commits with projections; ignored/altered receipt writes roll back everything.
+- Initial meaningful RED:1pass/12fail. Native cases cover append/truncate/replace/
+  remove/new-file changes during capture and staging, exact multi-file receipts,
+  same-size changed bytes despite apparently unchanged metadata, UTF-8 chunk
+  boundaries and complete final records without newlines, invalid UTF-8, non-files,
+  receipt failure/rollback/retry and reopened-database source comparison.
+- A real append injected after the final source check leaves the recorded cutoff
+  unchanged and makes source freshness false after reopening. Next replay includes
+  the later event. This proves explicit cutoff semantics, not a claim of latest
+  source data or process-level restart. Actual caller retry remains Q100.4.
+- Correction retained: an intermediate update inferred success from the following
+  production typecheck's exit status. Detailed test output showed unsupported
+  db.function in a new fixture. Replaced it with an append at the native delete
+  boundary; strict test compilation and final native runs pass. The broader run
+  also caught the expected schema-array change; added the receipt table explicitly.
+- Final Windows1.4.1/1.3.14 runs each pass272tests/2297assertions across ten files.
+  Seven injected source/receipt faults fail. Source and admission test drivers
+  diagnose100%; production source diagnostics statements88.88/branches80 still
+  fail required quality. Event-log/replacement narrow metrics are retained without
+  full-module claims. Production types, strict new-driver types, isolation pass.
+- Q100.3.1 scoped verified; Q100.3.2 active. Next: shared semantic readiness using
+  actual projection behavior, conflicting IDs versus identical duplicates, legacy
+  synthetic metadata normalization and explicit/all-log authority. Q100.4 must
+  wire real pending-source retry, verify receipt invalidation across other writes/
+  import/restore, and finish quality/platform/review. Receipt/source match alone is
+  not a claim that projected rows are unchanged or healthy.
+- evidence/Q100.3.1.json retains full outputs, initial failures/correction,
+  diagnostic counters and final source hashes. Catalog472files/two packages,
+  250-item acyclic ledger. Roughly11GiB free; owned runtime/test containers cleaned;
+  no new worktree, canonical data, providers/models, hooks, replication or blocked
+  cleanup used. Three inbox items and baseline/experiment/adoption gates remain open.
+
 ## 2026-09-28 - Atomic projection replacement
 
 - Previous turn: progress, signed/pushed b5895ac with required source admission.

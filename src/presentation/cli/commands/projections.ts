@@ -61,6 +61,7 @@ export async function executeProjectionsRebuildCommand(
         events: report.events.length,
         invalidEvents: report.invalidEvents.length,
         ready: report.invalidEvents.length === 0,
+        source: report.snapshot.manifest,
       };
       if (commandOptions.json) {
         writeProjectionsJson("projections.rebuild", report.invalidEvents.length === 0 ? "ok" : "error", report.invalidEvents.length === 0 ? PROJECTIONS_EXIT_OK : PROJECTIONS_EXIT_ERROR, data, report.invalidEvents.map((event) => event.reason));
@@ -93,6 +94,7 @@ export async function executeProjectionsRebuildCommand(
         skippedDuplicateEvents: report.replay.skippedDuplicateEvents,
         invalidEvents: report.invalidEvents,
         appliedProjections: report.replay.appliedProjections,
+        source: report.source,
       };
       if (commandOptions.json) {
         writeProjectionsJson("projections.rebuild", report.invalidEvents === 0 ? "ok" : "error", report.invalidEvents === 0 ? PROJECTIONS_EXIT_OK : PROJECTIONS_EXIT_ERROR, data, report.invalidEventLines.map((event) => event.reason));

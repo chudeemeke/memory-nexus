@@ -32,6 +32,7 @@ import {
     FRICTION_LOG_UNIVERSALIZE_MIGRATION,
     BACKFILL_STATE_TABLE,
     FACTS_TABLE,
+    PROJECTION_REPLAY_STATE_TABLE,
     FACTS_FTS_TABLE,
     FACTS_FTS_TRIGGERS,
     EXTRACTION_LOG_TABLE,
@@ -75,6 +76,7 @@ describe("Database Schema", () => {
             expect(SESSIONS_FTS_TABLE).toBeDefined();
             expect(SESSIONS_FTS_TRIGGERS).toBeDefined();
             expect(FACTS_TABLE).toBeDefined();
+            expect(PROJECTION_REPLAY_STATE_TABLE).toBeDefined();
             expect(FACTS_FTS_TABLE).toBeDefined();
             expect(FACTS_FTS_TRIGGERS).toBeDefined();
             expect(EXTRACTION_LOG_TABLE).toBeDefined();
@@ -90,7 +92,7 @@ describe("Database Schema", () => {
 
         it("should have SCHEMA_SQL as an array with correct order", () => {
             expect(Array.isArray(SCHEMA_SQL)).toBe(true);
-            expect(SCHEMA_SQL.length).toBe(30);
+            expect(SCHEMA_SQL.length).toBe(31);
             expect(SCHEMA_SQL[0]).toBe(SESSIONS_TABLE);
             expect(SCHEMA_SQL[1]).toBe(MESSAGES_META_TABLE);
             expect(SCHEMA_SQL[2]).toBe(MESSAGES_FTS_TABLE);
@@ -121,6 +123,7 @@ describe("Database Schema", () => {
             expect(SCHEMA_SQL[27]).toBe(MEMORY_UTILITY_METRICS_TABLE);
             expect(SCHEMA_SQL[28]).toBe(EMBEDDING_SKIPS_TABLE);
             expect(SCHEMA_SQL[29]).toBe(DREAM_ENTRIES_TABLE);
+            expect(SCHEMA_SQL[30]).toBe(PROJECTION_REPLAY_STATE_TABLE);
         });
 
     });

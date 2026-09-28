@@ -232,10 +232,16 @@ files; all five targeted admission faults fail. Q100.2 now stages replay separat
 and promotes all six projection tables atomically with conflict admission, stable
 IDs and FTS validation. Both Windows runtimes pass132tests/1855assertions; all nine
 targeted faults fail. The retained late-write/missing-source probes all pass.
-Q100.3 is active for complete source snapshots/cutoffs; Q100.4 actual caller
-recovery/full quality remains mandatory. New replacement diagnostic branches100;
+Q100.3.1 now captures exact source bytes/file sets, rejects observed drift, and
+commits the source receipt atomically with projections. Both Windows runtimes pass
+272tests/2297assertions across ten files; seven targeted faults fail. Post-cutoff
+input is detected as pending after reopening the database. Q100.3.2 is active for
+semantic payload/identity/scope admission; Q100.4 actual caller recovery/full
+quality remains mandatory. Earlier replacement diagnostic branches100;
 event-log/driver gaps and34 existing strict integration-test type errors remain
-owned by Q100.4. Q005/Q068 and B11.44/B11.52
+owned by Q100.4, alongside source module statements88.88/branches80. The freshness
+helper is not yet wired into actual callers and does not establish projection
+health or import/restore invalidation. Q005/Q068 and B11.44/B11.52
 retain the newly confirmed caller quality gaps. Q050/Q062 and
 B11.22/B11.42/B11.58 remain in the mandatory .7 barrier;
 full snapshot safety and stale-lock admission remain unresolved. Q018/B11.9 and Q102/B11.10 retain

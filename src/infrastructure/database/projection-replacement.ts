@@ -2,6 +2,7 @@ import type { Database, SQLQueryBindings } from "bun:sqlite";
 import { OwnedDatabase } from "./owned-database.js";
 import { FACTS_TABLE, PERSONA_ENTRIES_TABLE, GRAPH_EDGES_TABLE, DREAM_ENTRIES_TABLE,
   MEMORY_GOVERNANCE_TABLE, MEMORY_GOVERNANCE_EVENTS_TABLE } from "./schema.js";
+import { assertProjectionSource, type ProjectionSourceSnapshot } from "./projection-source.js";
 
 const projections = [
   { table: "facts", keys: ["uuid"] },
@@ -64,13 +65,14 @@ function directChanges(db: Database): number {
 }
 
 /** No await is permitted between the conflict check, replacement and commit. */
-export function promoteProjections(db: Database, stage: Database, fence: Fence): void {
+export function promoteProjections(db: Database, stage: Database, fence: Fence, source: ProjectionSourceSnapshot): void {
   if (db.inTransaction) throw new Error("Projection rebuild cannot use a caller transaction");
   db.transaction(() => {
     const current = readFence(db);
     if (current.length !== fence.length || current.some((value, index) => value !== fence[index])) {
       throw new Error("Database changed during projection rebuild; retry with current state");
     }
+    assertProjectionSource(source);
     const identities = new Map<string, Map<string, string>>();
     for (const { table, keys } of projections) {
       const names = columns(stage, table);
@@ -118,5 +120,11 @@ export function promoteProjections(db: Database, stage: Database, fence: Fence):
     }
     // External-content FTS integrity check includes comparison with facts content.
     db.run("INSERT INTO main.facts_fts(facts_fts,rank) VALUES ('integrity-check',1)");
+    const manifest = JSON.stringify(source.manifest);
+    using receipt = db.prepare("INSERT INTO main.projection_replay_state(id,manifest) VALUES(1,?) ON CONFLICT(id) DO UPDATE SET manifest=excluded.manifest");
+    receipt.run(manifest);
+    if (directChanges(db) !== 1) throw new Error("Projection source receipt was not committed");
+    using verify = db.prepare<{ manifest: string }, []>("SELECT manifest FROM main.projection_replay_state WHERE id=1");
+    if (verify.get()?.manifest !== manifest) throw new Error("Projection source receipt mismatch");
   }).immediate();
 }

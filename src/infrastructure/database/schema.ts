@@ -360,8 +360,16 @@ CREATE TABLE IF NOT EXISTS backfill_state (
 `;
 
 /**
- * Facts table - derived projection of the plain-text event log.
+ * Exact source cutoff committed atomically with successful projection replay.
  */
+export const PROJECTION_REPLAY_STATE_TABLE = `
+CREATE TABLE IF NOT EXISTS projection_replay_state (
+    id INTEGER PRIMARY KEY CHECK (id = 1),
+    manifest TEXT NOT NULL
+);
+`;
+
+/** Facts table - derived projection of the plain-text event log. */
 export const FACTS_TABLE = `
 CREATE TABLE IF NOT EXISTS facts (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -771,6 +779,7 @@ export const SCHEMA_SQL: readonly string[] = [
     MEMORY_UTILITY_METRICS_TABLE,
     EMBEDDING_SKIPS_TABLE,
     DREAM_ENTRIES_TABLE,
+    PROJECTION_REPLAY_STATE_TABLE,
 ];
 
 
