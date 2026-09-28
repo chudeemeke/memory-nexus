@@ -442,11 +442,12 @@
       ],
       "historical_evidence": "docs/audits/2026-09-19-repair-evidence/per-file-coverage-gaps.json",
       "evidence": [
-        ".planning/memory-resilience/evidence/B11.74.6.3.2.json"
+        ".planning/memory-resilience/evidence/B11.74.6.3.2.json",
+        ".planning/memory-resilience/evidence/Q100.4.2-callers.json"
       ],
       "acceptance_record": ".planning/memory-resilience/evidence/Q005.json",
       "retirement_trigger": "Before B11.74.7/B10/R02 acceptance.",
-      "observed_gap": "No-op replay/data-loss regression repaired. Production functions93.75/branches91.83 and existing test functions76.92/branches75 fail quality. Complete source-scope replay, extraction log/event atomicity, privacy and failure/recovery remain unverified; coordinate Q100."
+      "observed_gap": "Serial extraction recovery now executes before early returns and deduplication, with unlogged-data preservation and fresh-process retry. Diagnostic source statements99.08/branches96.22/functions100/lines100 still fails Tier S. Existing test statements98.57/branches92.30/functions80/lines98.46 fails quality. Complete extraction audit/event atomicity, concurrency, append/transaction/candidate admission, privacy and final quality remain mandatory; coordinate Q100."
     },
     {
       "id": "Q006",
@@ -2796,7 +2797,7 @@
         "projectionContentNotice": {
           "document": "docs/plans/2026-09-28-projection-replay-execution.md",
           "owner": "memory-nexus",
-          "trigger": "Before integration/adoption: notify opted-in consumers of projectionState receipts, explicit legacy/divergent/source-rewrite reconciliation, canonical projected writer return contract and confirmed idempotent dream retries. Draft remains uninstalled; no consumer action requested now."
+          "trigger": "Before integration/adoption: notify opted-in consumers of receipts and explicit reconciliation, serial proposal retry/conflict behavior, source-freshness pending errors, no-op extraction recovery and final partial-status contract. Draft remains uninstalled; no consumer action requested now."
         }
       }
     },
@@ -6264,21 +6265,22 @@
       "evidence": [
         "docs/plans/2026-09-28-projection-replay-execution.md",
         ".planning/memory-resilience/evidence/Q100.4.1.json",
-        ".planning/memory-resilience/evidence/Q100.4.2-writers.json"
+        ".planning/memory-resilience/evidence/Q100.4.2-writers.json",
+        ".planning/memory-resilience/evidence/Q100.4.2-callers.json"
       ],
       "acceptance_record": ".planning/memory-resilience/evidence/Q100.4.2.json",
       "retirement_trigger": "Before Q100.4/Q100/B11.74.7/B10/R02 acceptance.",
       "progress": {
-        "status": "Canonical governance/dream writer subset has paired native proof; full item not accepted.",
-        "completed": "Append plus guarded replay with projected readback, acknowledged-prefix preservation, idle absent/empty unacknowledged sources, bounded pending refusal and confirmed completed apply/rollback retries.",
-        "next": "First add a native side-effect regression for redundant governance application after projected writer success; the reapply-after-projected-writer fault survived. Then finish proposal/governance interruption, concurrent decisions, append failure and post-write cutoff status. Wire no-op extraction and unchanged-transport remote retry with process restart and truthful partial status. Preserve unlogged/imported data and direct edits/deletes. Measure replay cost.",
-        "testsPerRuntime": 474,
-        "assertionsPerRuntime": 3432,
+        "status": "Serial writer and extraction recovery have paired native proof; full item remains active.",
+        "completed": "Native side-effect test detects the prior surviving reapplication fault. Writers report post-commit pending source. Proposal retries preserve immutable recipe, lifecycle and existing governance; missing registration resumes. Extraction recovers before all early returns, guards appends over unlogged projections, withholds success audit on pending recovery, and resumes in fresh child processes.",
+        "next": "Implement receipt-based recovery in RemoteEventSyncService/default adapter even when transport fingerprints do not change; retain truthful partial progress and no new egress. Then finish shared concurrent writer/stale target admission, partial append/caller transaction/candidate validation, actual local-sync reporting and operational reconciliation.",
+        "testsPerRuntime": 488,
+        "assertionsPerRuntime": 3542,
         "testFiles": 20,
-        "decisionFaultsDetected": 7,
-        "survivingDecisionFaults": [
-          "reapply-after-projected-writer"
-        ],
+        "decisionFaultsDetected": 14,
+        "survivingDecisionFaults": [],
+      "costEvidence": ".planning/memory-resilience/evidence/Q100.4.2-callers.json",
+      "scalingConstraint": "Synthetic1000-event guarded write took814ms; idle checks30-67ms. Full replay remains proportional to retained history. Assess representative corpus limits and address scaling before integration/adoption; these small measurements are not an acceptance target or peak-memory proof.",
         "owner": "memory-nexus",
         "trigger": "Before Q100.4/Q100/B11.74.7/B10/R02 acceptance."
       }
@@ -6302,7 +6304,7 @@
       ],
       "acceptance_record": ".planning/memory-resilience/evidence/Q100.4.3.json",
       "retirement_trigger": "Before Q100.4/Q100/B11.74.7/B10/R02 acceptance.",
-      "observed_gap": "Writer subset has scoped diagnostics, not complete module/package/changed-line enforcement. Retain source-prefix concurrent short-read/cleanup admission, full writer/command/service decision coverage and judgment review; all prior Q100.4.3 obligations remain."
+      "observed_gap": "Serial writer/extraction subset detects14 selected faults; recovery module/native writer driver diagnose100%. Full source/command/service/test metrics, supported-platform/changed-line/package proof, compound cleanup and independent review remain mandatory. Q005 extraction source/tests fail their floors; this checkpoint is not final quality acceptance."
     }
   ],
   "decisions": {

@@ -22,7 +22,9 @@ import type {
   IExtractionLogRepository,
   IMessageRepository,
 } from "../../domain/ports/repositories.js";
-import { appendEvent, rebuildProjections } from "../../infrastructure/database/event-log.js";
+import { appendEvent } from "../../infrastructure/database/event-log.js";
+import { recoverPendingProjections } from "../../infrastructure/database/projection-recovery.js";
+import { assertAutomaticProjectionReplay } from "../../infrastructure/database/projection-state.js";
 import { Message } from "../../domain/entities/message.js";
 import { unknownErrorMessage } from "../../domain/errors/unknown-error.js";
 
@@ -59,6 +61,9 @@ export class ExtractionPipeline {
     projectName: string,
     options?: { force?: boolean }
   ): Promise<ExtractionPipelineResult> {
+    if ((await recoverPendingProjections(this.db, this.eventLogPath)).pending) {
+      throw new Error("Projection recovery remains pending; retry extraction");
+    }
     // 1. Idempotency Check
     const existingLog = await this.logRepo.findById(sessionId);
     if (existingLog && !options?.force) {
@@ -201,7 +206,7 @@ export class ExtractionPipeline {
           },
           observedAt: new Date()
         });
-        await appendEvent(newFact, this.eventLogPath);
+        await this.appendProjectionEvent(newFact);
 
         // Append supersedence event to events.jsonl
         const supersedenceFact = Fact.create({
@@ -214,7 +219,7 @@ export class ExtractionPipeline {
           },
           observedAt: new Date()
         });
-        await appendEvent(supersedenceFact, this.eventLogPath);
+        await this.appendProjectionEvent(supersedenceFact);
       } else {
         // NEW FACT
         factsAdded++;
@@ -230,13 +235,19 @@ export class ExtractionPipeline {
           },
           observedAt: new Date()
         });
-        await appendEvent(newFact, this.eventLogPath);
+        await this.appendProjectionEvent(newFact);
       }
     }
 
-    // A no-op extraction must not reset projections from an absent or partial log.
+    // New durable events must project before recording a successful extraction.
     if (factsAdded > 0) {
-      await rebuildProjections(this.db, this.eventLogPath);
+      try {
+        if ((await recoverPendingProjections(this.db, this.eventLogPath)).pending) {
+          throw new Error("Newer source remains pending");
+        }
+      } catch (cause) {
+        throw new Error("Extraction events recorded; projection recovery remains pending", { cause });
+      }
     }
 
     // 8. Record the extraction log
@@ -260,6 +271,11 @@ export class ExtractionPipeline {
       superseded: factsSuperseded,
       skipped: factsSkipped
     };
+  }
+
+  private async appendProjectionEvent(fact: Fact): Promise<void> {
+    assertAutomaticProjectionReplay(this.db);
+    await appendEvent(fact, this.eventLogPath);
   }
 
   /**

@@ -103,6 +103,40 @@ describe("canonical projected command writers",()=>{
       expect(readFileSync(eventLogPath,"utf8").trim().split("\n")).toHaveLength(3);
     });
   });
+  it("does not repeat governance side effects after canonical replay has committed",async()=>{
+    await fixture(async(db,dbPath,eventLogPath)=>{
+      db.exec("CREATE TABLE governance_write_audit(hits INTEGER NOT NULL); INSERT INTO governance_write_audit VALUES(0); CREATE TRIGGER observe_governance_update AFTER UPDATE ON memory_governance BEGIN UPDATE governance_write_audit SET hits=hits+1; END");
+      const deps={dbPath,eventLogPath};
+      expect((await captureStreams(()=>executeGovernanceCommand({action:"suppress",surface:"fact",targetId:"target",json:true},deps))).exitCode).toBe(0);
+      expect((await captureStreams(()=>executeDreamCommand({action:"propose-supersedence",project:"synthetic",targetFactUuid:"target",sourceEventIds:["target"],proposedContent:"replacement",reason:"synthetic",json:true},deps))).exitCode).toBe(0);
+      using audit=db.prepare<{hits:number},[]>("SELECT hits FROM governance_write_audit");
+      expect(audit.get()?.hits).toBe(0);
+      expect(()=>assertAutomaticProjectionReplay(db)).not.toThrow();
+    });
+  });
+  for(const change of ["append","remove"] as const) it(`reports committed work and pending source after post-cutoff ${change}`,async()=>{
+    await fixture(async(db,dbPath,eventLogPath)=>{
+      const run=OwnedDatabase.prototype.run;let changed=false,retained="";
+      const hook=spyOn(OwnedDatabase.prototype,"run").mockImplementation(function(this:OwnedDatabase,...args){
+        const result=Reflect.apply(run,this,args);
+        if(!changed && args[0]==='DELETE FROM main."facts"') {
+          changed=true;retained=readFileSync(eventLogPath,"utf8");
+          if(change==="append") appendFileSync(eventLogPath,JSON.stringify({uuid:"later",type:"learning",project:"synthetic",content:"later",observedAt:"2026-01-03T00:00:00Z"})+"\n");
+          else unlinkSync(eventLogPath);
+        }
+        return result;
+      });
+      try {
+        const result=await captureStreams(()=>executeGovernanceCommand({action:"suppress",surface:"fact",targetId:"target",json:true},{dbPath,eventLogPath}));
+        expect(changed).toBe(true);expect(result.exitCode).not.toBe(0);
+        expect(result.stdout).toContain("recorded and projected");expect(result.stdout).toContain("pending");
+        expect(()=>assertAutomaticProjectionReplay(db)).not.toThrow();
+        using state=db.prepare<{status:string},[]>("SELECT status FROM memory_governance WHERE surface='fact' AND target_id='target'");
+        expect(state.get()?.status).toBe("suppressed");
+      } finally {hook.mockRestore();if(change==="remove")writeFileSync(eventLogPath,retained);}
+      expect((await recoverPendingProjections(db,eventLogPath)).pending).toBe(false);
+    });
+  });
   it("reports a retained event after failed replay and recovers on the next mutating command",async()=>{
     await fixture(async(db,dbPath,eventLogPath)=>{
       db.exec("CREATE TRIGGER refuse_projection BEFORE DELETE ON facts BEGIN SELECT RAISE(ABORT,'synthetic failure'); END");
@@ -123,6 +157,38 @@ describe("canonical projected command writers",()=>{
       expect(result.exitCode).not.toBe(0);expect(result.stdout).toContain("reconciliation");expect(readFileSync(eventLogPath,"utf8")).toBe(before);
     });
   });
+  it("recovers retained source during no-message extraction in a fresh process",async()=>{
+    await fixture(async(db,dbPath,eventLogPath)=>{
+      await appendEvent(Fact.create({uuid:"restart",type:"learning",project:"synthetic",content:"restart retained",observedAt:new Date("2026-01-02T00:00:00Z")}),eventLogPath);
+      db.exec("CREATE TRIGGER reject_restart BEFORE DELETE ON facts BEGIN SELECT RAISE(ABORT,'synthetic failure'); END");
+      await expect(rebuildProjectionsWithReport(db,eventLogPath,undefined,"automatic")).rejects.toThrow("synthetic failure");
+      db.exec("DROP TRIGGER reject_restart");
+      const program=join(dirname(eventLogPath),"synthetic-recovery.ts"),source=(path:string)=>JSON.stringify(join(process.cwd(),path).replaceAll("\\","/"));
+      writeFileSync(program,`
+import {OwnedDatabase} from ${source("src/infrastructure/database/owned-database.ts")};
+import {ExtractionPipeline} from ${source("src/application/services/extraction-pipeline.ts")};
+import {SqliteFactRepository} from ${source("src/infrastructure/database/repositories/fact-repository.ts")};
+import {SqliteExtractionLogRepository} from ${source("src/infrastructure/database/repositories/extraction-log-repository.ts")};
+import {SqliteMessageRepository} from ${source("src/infrastructure/database/repositories/message-repository.ts")};
+const db=new OwnedDatabase(process.argv[2]);
+try {
+  const facts=new SqliteFactRepository(db);
+  const pipeline=new ExtractionPipeline(db,facts,new SqliteExtractionLogRepository(db),new SqliteMessageRepository(db),{providerId:"synthetic",modelName:"synthetic",extract:async()=>{throw Error("No-message retry must not call inference");}},undefined,process.argv[3]);
+  const result=await pipeline.extractFromSession("no-messages","synthetic");
+  console.log(JSON.stringify({pid:process.pid,result,present:(await facts.findByUuid("restart"))?.content}));
+} finally {db.close();}
+`);
+      const retained=readFileSync(eventLogPath,"utf8");
+      for(let attempt=0;attempt<2;attempt++) {
+        const child=Bun.spawnSync([process.execPath,program,dbPath,eventLogPath],{stdout:"pipe",stderr:"pipe",timeout:15000});
+        expect(child.exitCode).toBe(0);
+        const output=JSON.parse(new TextDecoder().decode(child.stdout));
+        expect(output.pid).not.toBe(process.pid);expect(output.result.added).toBe(0);expect(output.present).toBe("restart retained");
+        expect(readFileSync(eventLogPath,"utf8")).toBe(retained);
+      }
+      expect(()=>assertAutomaticProjectionReplay(db)).not.toThrow();
+    });
+  });
   it("replays real dream propose, approve, apply and rollback through canonical writers",async()=>{
     await fixture(async(db,dbPath,eventLogPath)=>{
       let tick=0;const deps={dbPath,eventLogPath,now:()=>new Date(Date.UTC(2026,5,1,0,0,++tick)),nextSequence:()=>++tick};
@@ -134,6 +200,41 @@ describe("canonical projected command writers",()=>{
         expect(result.exitCode).toBe(0);expect(()=>assertAutomaticProjectionReplay(db)).not.toThrow();
       }
       using state=db.prepare<{superseded_by:string|null},[]>("SELECT superseded_by FROM facts WHERE uuid='target'");expect(state.get()?.superseded_by).toBeNull();
+    });
+  });
+  for(const boundary of ["proposal","governance"] as const) it(`resumes proposal registration after ${boundary} failure without duplicating source`,async()=>{
+    await fixture(async(db,dbPath,eventLogPath)=>{
+      const deps={dbPath,eventLogPath},options={action:"propose-supersedence" as const,project:"synthetic",targetFactUuid:"target",sourceEventIds:["target"],proposedContent:"replacement",reason:"synthetic",json:true};
+      db.exec(boundary==="proposal"
+        ? "CREATE TRIGGER reject_proposal BEFORE INSERT ON dream_entries BEGIN SELECT RAISE(ABORT,'synthetic failure'); END"
+        : "CREATE TRIGGER reject_proposal BEFORE INSERT ON memory_governance WHEN NEW.surface='dream' BEGIN SELECT RAISE(ABORT,'synthetic failure'); END");
+      const failed=await captureStreams(()=>executeDreamCommand(options,deps));
+      expect(failed.exitCode).not.toBe(0);expect(failed.stdout).toContain("pending");
+      db.exec("DROP TRIGGER reject_proposal");
+      const retry=await captureStreams(()=>executeDreamCommand(options,deps));
+      expect(retry.exitCode).toBe(0);expect(readFileSync(eventLogPath,"utf8").trim().split("\n")).toHaveLength(3);
+      const dreamId=JSON.parse(retry.stdout).data.dream_id as string;
+      using state=db.prepare<{status:string},[string]>("SELECT status FROM memory_governance WHERE surface='dream' AND target_id=?");
+      expect(state.get(dreamId)?.status).toBe("active");expect(()=>assertAutomaticProjectionReplay(db)).not.toThrow();
+    });
+  });
+  it("preserves reviewed proposals and governance controls on retry and rejects conflicting recipes",async()=>{
+    await fixture(async(db,dbPath,eventLogPath)=>{
+      const deps={dbPath,eventLogPath},options={action:"propose-supersedence" as const,project:"synthetic",targetFactUuid:"target",sourceEventIds:["target","support"],proposedContent:"replacement",reason:"synthetic",json:true};
+      const proposed=await captureStreams(()=>executeDreamCommand(options,deps));expect(proposed.exitCode).toBe(0);
+      const dreamId=JSON.parse(proposed.stdout).data.dream_id as string;
+      expect((await captureStreams(()=>executeDreamCommand({action:"approve",dreamId,json:true},deps))).exitCode).toBe(0);
+      expect((await captureStreams(()=>executeGovernanceCommand({action:"suppress",surface:"dream",targetId:dreamId,json:true},deps))).exitCode).toBe(0);
+      const before=readFileSync(eventLogPath,"utf8");
+      const retry=await captureStreams(()=>executeDreamCommand({...options,sourceEventIds:["support","target"]},deps));
+      expect(retry.exitCode).toBe(0);expect(JSON.parse(retry.stdout).data.status).toBe("approved");
+      expect(readFileSync(eventLogPath,"utf8")).toBe(before);
+      using state=db.prepare<{status:string},[string]>("SELECT status FROM memory_governance WHERE surface='dream' AND target_id=?");expect(state.get(dreamId)?.status).toBe("suppressed");
+      for(const conflict of [{reason:"different"},{confidence:0.5},{sourceEventIds:["other"]},{proposedFactType:"learning" as const}]) {
+        const rejected=await captureStreams(()=>executeDreamCommand({...options,...conflict},deps));
+        expect(rejected.exitCode).not.toBe(0);expect(rejected.stdout).toContain("conflicts");expect(readFileSync(eventLogPath,"utf8")).toBe(before);
+      }
+      expect(()=>assertAutomaticProjectionReplay(db)).not.toThrow();
     });
   });
   for(const failure of ["replacement","supersedence","applied","restore","rolled_back"] as const) {

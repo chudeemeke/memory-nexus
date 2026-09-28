@@ -1,4 +1,5 @@
 import { createHash } from "node:crypto";
+import { isDeepStrictEqual } from "node:util";
 import { Fact, type FactType } from "../../domain/entities/fact.js";
 import {
   DreamEntry,
@@ -114,8 +115,13 @@ export class DreamingService {
       updatedAt: occurredAt,
     });
 
-    const saved = await this.persistDreamEvent(entry, "propose", "add");
-    await this.deps.governanceService?.registerDerivedMemory({
+    const existing = await this.deps.dreamRepo.findByDreamId(entry.dreamId);
+    if (existing && !isDeepStrictEqual(proposalRecipe(existing), proposalRecipe(entry))) {
+      throw new Error("Existing dream proposal conflicts with the requested proposal recipe");
+    }
+    const saved = existing ?? await this.persistDreamEvent(entry, "propose", "add");
+    const governance = this.deps.governanceService;
+    if (governance && !await governance.show("dream", saved.dreamId)) await governance.registerDerivedMemory({
       surface: "dream",
       targetId: saved.dreamId,
       project: saved.project,
@@ -373,6 +379,18 @@ export class DreamingService {
   private async writeEvent(event: MemoryEventEnvelope): Promise<void | MemoryEventWriteResult> {
     return this.deps.writeEvent?.(event);
   }
+}
+
+/** Compare immutable intent; retries cannot reset lifecycle or governance state. */
+function proposalRecipe(entry: DreamEntry) {
+  const audit = entry.audit;
+  return {
+    kind: entry.kind, project: entry.project, visibility: entry.visibility,
+    sourceEventIds: entry.sourceEventIds.sort(), targetFactUuid: entry.targetFactUuid,
+    proposedFact: entry.proposedFact, reason: entry.reason, confidence: entry.confidence,
+    rollbackEventKind: entry.rollbackEventKind,
+    privacy: { redactionState: audit.redactionState, redactedFields: audit.redactedFields.sort(), findingHashes: audit.findingHashes.sort() },
+  };
 }
 
 function validateProposal(params: ProposeSupersedenceParams): void {

@@ -1,5 +1,65 @@
 # Memory resilience execution journal
 
+## 2026-09-28 - Serial proposal and extraction recovery; remote retry next
+
+- Previous goal turn made progress: signed and pushed `5159a7e` with canonical writer
+  recovery. This turn started clean. Native goal and Q100.4.2 remain active.
+- Closed the surviving second-write fault using a native governance UPDATE-trigger
+  audit. Correct projected readback has no extra side effect; the injected redundant
+  application fails. All 14 selected current-source faults are now detected. No
+  equivalence waiver was used.
+- RED exposed unqualified writer success when a source was appended or removed
+  after the committed cutoff. Writer now distinguishes recorded-and-projected work
+  from pending/unverifiable source. RED also exposed serial proposal duplication
+  and resetting approved state. Existing immutable proposal recipes now retain
+  their lifecycle and governance controls; only missing registration is supplied.
+  Conflicting reason, confidence, provenance, fact or privacy details are rejected.
+- Extraction now attempts guarded recovery before already-extracted, no-message,
+  no-candidate and duplicate-only returns, and before deduplication. New appends
+  require content authority; pending replay cannot record a successful extraction
+  audit. Tests preserve missing/empty unlogged duplicate no-ops and reject new
+  appends over unlogged data. Actual failed extraction followed by each no-op path
+  resumes without duplicate facts/events. A separate native test starts two fresh
+  child processes and verifies no-message extraction resumes retained source then
+  remains idempotent; no inference is called. This is not a mid-append crash test.
+- Final matching Windows Bun 1.4.1/1.3.14 each pass 488 tests / 3,542 assertions
+  across 20 files. Production and strict changed-driver types and isolation pass.
+  New recovery module and writer driver diagnose 100% in all four metrics. Extraction
+  source: 99.08% statements, 96.22% branches, 100% functions/lines fails Tier S.
+  Its existing test file: 98.57% statements, 92.30% branches, 80% functions and
+  98.46% lines also fails quality.
+  Q005 and Q100.4.3 remain mandatory, with no full quality acceptance claimed.
+- Corrections retained: initial no-message RED used a nonexistent messages table;
+  corrected to messages_meta before a meaningful 0 pass / 5 fail RED. Eight older
+  event-backed extraction fixtures lacked receipts; added explicit baseline replay
+  rather than weakening automatic admission. Initial mixed group 52 pass / 8 fail and
+  final corrected outputs are retained. Prior surviving fault evidence is retained
+  and superseded by the final 14-fault report.
+- Small synthetic WAL-backed cost observation (Bun 1.4.1): guarded writes at
+  10/100/1,000 retained events took 51/110/814 ms. Three idle checks at 1,000 events
+  took 30-67 ms; source after write was 136,693 bytes. Setup is excluded from these
+  timings; RSS snapshots are not peaks and machine load is uncontrolled. Full
+  replay per write remains a scaling concern, owned before integration/adoption.
+  These measurements are not a production SLA, large-corpus or supported-platform
+  acceptance claim.
+- **Next:** extend the optional remote projection adapter to recover from its
+  receipt even when transport fingerprints do not change. Prove retained-event
+  failure/retry with actual default wiring, preserve partial progress and avoid
+  introducing egress into ordinary local sync. Reconcile CLI reporting rather
+  than printing that a rebuild is about to happen after it has already completed.
+- Q100.4.2 still owns concurrent compare-and-append/stale target decisions, partial
+  append, caller-transaction admission, complete candidate validation before append,
+  actual local-sync reporting and operational legacy/import reconciliation. Serial
+  proposal repair does not prove concurrent writer safety or whole-action atomicity.
+  Q100.4.3 retains package/changed-line/instrumenter/platform/cleanup/review proof.
+- `evidence/Q100.4.2-callers.json` retains source bindings, full outputs, REDs,
+  corrections, child-process proof, 14 faults and cost observations. Catalog 479 files /
+  two packages and 255 acyclic ledger items remain valid; one active item. Free disk
+  10.77 GiB; owned synthetic/runtime fixtures cleaned. No new worktree, canonical
+  data/model/provider/hook/replication or blocked cleanup touched. Three inboxes,
+  hosted/Linux/desktop/review and R03/P03/A03 gates remain open. Baseline acceptance
+  still precedes the already authorized bounded embedding experiment.
+
 ## 2026-09-28 - Canonical writer recovery checkpoint; Q100.4.2 stays active
 
 - Started from signed/pushed de75bb5. Recovered the in-progress canonical writer

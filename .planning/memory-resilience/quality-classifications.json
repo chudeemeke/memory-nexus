@@ -1188,7 +1188,7 @@
     {
       "path": "src/application/services/dreaming-service.ts",
       "package": "package.json",
-      "sourceHash": "49bf4d8355617381838470687de6992f2184a0216b620aa2b66866b85a225b97",
+      "sourceHash": "d37f185698c6876c969c0ef776fbd43dd8779db3a191761def280c93ca1c411f",
       "tier": "S",
       "rationale": "Redacts proposals and manages approval-controlled canonical memory transformations.",
       "applicability": {
@@ -1197,29 +1197,29 @@
       },
       "decisionStatus": "proposed - independent review pending",
       "inspection": {
-        "sourceRevision": "de75bb5 + current source hash",
-        "anchor": "Q100.4.2 writer subset",
-        "scope": "Paired native proof; full Q100.4.2 and Q100.4.3 acceptance remains open."
+        "sourceRevision": "5159a7e + current source hash",
+        "anchor": "Q100.4.2 serial caller recovery",
+        "scope": "Paired native/fresh-process proof; complete caller and quality acceptance remains open."
       },
       "metricApplicability": {
-        "status": "diagnostic - final Q100.4.3 acceptance pending",
-        "sourceHash": "49bf4d8355617381838470687de6992f2184a0216b620aa2b66866b85a225b97",
-        "evidence": ".planning/memory-resilience/evidence/Q100.4.2-writers.json",
+        "status": "diagnostic - final Q005/Q100.4.3 acceptance pending",
+        "sourceHash": "d37f185698c6876c969c0ef776fbd43dd8779db3a191761def280c93ca1c411f",
+        "evidence": ".planning/memory-resilience/evidence/Q100.4.2-callers.json",
         "metrics": {
           "lines": {
-            "observedCounterTotal": 87,
+            "observedCounterTotal": 93,
             "proposal": "measure - completeness unverified"
           },
           "functions": {
-            "observedCounterTotal": 23,
+            "observedCounterTotal": 24,
             "proposal": "measure - completeness unverified"
           },
           "statements": {
-            "observedCounterTotal": 92,
+            "observedCounterTotal": 99,
             "proposal": "measure - completeness unverified"
           },
           "branches": {
-            "observedCounterTotal": 91,
+            "observedCounterTotal": 101,
             "proposal": "measure - completeness unverified"
           }
         }
@@ -1394,7 +1394,7 @@
     {
       "path": "src/application/services/extraction-pipeline.test.ts",
       "package": "package.json",
-      "sourceHash": "533a32e1899ff516a610760e291aae9921bb1cd9442ff71524eb8a156212ffa5",
+      "sourceHash": "2a77a8f821259a7f538da8b16e8d2d129d680fe48ef2b656bfb6f06058fe21e7",
       "tier": "S",
       "rationale": "Inspected filesystem import and call context: unlinkSync(testLogPath). This test driver performs actual file/directory deletion; numeric applicability and ownership proof remain subject to individual review.",
       "applicability": {
@@ -1403,29 +1403,29 @@
       },
       "decisionStatus": "proposed - independent review pending",
       "inspection": {
-        "sourceRevision": "edc079d + current source hash",
-        "anchor": "combined caller regression",
-        "scope": "Paired Windows native proof; full tier/privacy/platform/review acceptance pending."
+        "sourceRevision": "5159a7e + current source hash",
+        "anchor": "Q100.4.2 serial caller recovery",
+        "scope": "Paired native/fresh-process proof; complete caller and quality acceptance remains open."
       },
       "metricApplicability": {
-        "status": "diagnostic - Q005/Q068/B11.74.7 acceptance pending",
-        "sourceHash": "533a32e1899ff516a610760e291aae9921bb1cd9442ff71524eb8a156212ffa5",
-        "evidence": ".planning/memory-resilience/evidence/B11.74.6.3.2.json",
+        "status": "diagnostic - final Q005/Q100.4.3 acceptance pending",
+        "sourceHash": "2a77a8f821259a7f538da8b16e8d2d129d680fe48ef2b656bfb6f06058fe21e7",
+        "evidence": ".planning/memory-resilience/evidence/Q100.4.2-callers.json",
         "metrics": {
           "lines": {
-            "observedCounterTotal": 262,
+            "observedCounterTotal": 325,
             "proposal": "measure - completeness unverified"
           },
           "functions": {
-            "observedCounterTotal": 52,
+            "observedCounterTotal": 60,
             "proposal": "measure - completeness unverified"
           },
           "statements": {
-            "observedCounterTotal": 269,
+            "observedCounterTotal": 350,
             "proposal": "measure - completeness unverified"
           },
           "branches": {
-            "observedCounterTotal": 8,
+            "observedCounterTotal": 26,
             "proposal": "measure - completeness unverified"
           }
         }
@@ -1434,7 +1434,7 @@
     {
       "path": "src/application/services/extraction-pipeline.ts",
       "package": "package.json",
-      "sourceHash": "97789c70379ccc3fb77183ab23c97ba5cfcacc5b3e707fa2d9265258b2abf72e",
+      "sourceHash": "a00a2cb744dabe628049ead3fd6f9f111404d120e301713d6b917b77b71a0ebf",
       "tier": "S",
       "rationale": "Redacts messages before provider egress, redacts candidates and persists extraction outcomes.",
       "applicability": {
@@ -1443,29 +1443,29 @@
       },
       "decisionStatus": "proposed - independent review pending",
       "inspection": {
-        "sourceRevision": "edc079d + current source hash",
-        "anchor": "combined caller regression",
-        "scope": "Paired Windows native proof; full tier/privacy/platform/review acceptance pending."
+        "sourceRevision": "5159a7e + current source hash",
+        "anchor": "Q100.4.2 serial caller recovery",
+        "scope": "Paired native/fresh-process proof; complete caller and quality acceptance remains open."
       },
       "metricApplicability": {
-        "status": "diagnostic - Q005/Q068/B11.74.7 acceptance pending",
-        "sourceHash": "97789c70379ccc3fb77183ab23c97ba5cfcacc5b3e707fa2d9265258b2abf72e",
-        "evidence": ".planning/memory-resilience/evidence/B11.74.6.3.2.json",
+        "status": "diagnostic - final Q005/Q100.4.3 acceptance pending",
+        "sourceHash": "a00a2cb744dabe628049ead3fd6f9f111404d120e301713d6b917b77b71a0ebf",
+        "evidence": ".planning/memory-resilience/evidence/Q100.4.2-callers.json",
         "metrics": {
           "lines": {
-            "observedCounterTotal": 87,
+            "observedCounterTotal": 94,
             "proposal": "measure - completeness unverified"
           },
           "functions": {
-            "observedCounterTotal": 16,
+            "observedCounterTotal": 17,
             "proposal": "measure - completeness unverified"
           },
           "statements": {
-            "observedCounterTotal": 102,
+            "observedCounterTotal": 109,
             "proposal": "measure - completeness unverified"
           },
           "branches": {
-            "observedCounterTotal": 49,
+            "observedCounterTotal": 53,
             "proposal": "measure - completeness unverified"
           }
         }
@@ -6359,19 +6359,19 @@
         "reason": "Executable Tier S; no exclusion approved."
       },
       "decisionStatus": "proposed - independent review pending",
-      "sourceHash": "9557e8cefc2e5d43a8937bf0fed651e8d3a7f3e1d1474eb0b2930352714e6c5b",
+      "sourceHash": "3115bf2b947958a6ea0a44e3bcf37519e344533c76938e1629e5e064393db5d1",
       "inspection": {
-        "sourceRevision": "de75bb5 + current source hash",
-        "anchor": "Q100.4.2 writer subset",
-        "scope": "Paired native proof; full Q100.4.2 and Q100.4.3 acceptance remains open."
+        "sourceRevision": "5159a7e + current source hash",
+        "anchor": "Q100.4.2 serial caller recovery",
+        "scope": "Paired native/fresh-process proof; complete caller and quality acceptance remains open."
       },
       "metricApplicability": {
-        "status": "diagnostic - final Q100.4.3 acceptance pending",
-        "sourceHash": "9557e8cefc2e5d43a8937bf0fed651e8d3a7f3e1d1474eb0b2930352714e6c5b",
-        "evidence": ".planning/memory-resilience/evidence/Q100.4.2-writers.json",
+        "status": "diagnostic - final Q005/Q100.4.3 acceptance pending",
+        "sourceHash": "3115bf2b947958a6ea0a44e3bcf37519e344533c76938e1629e5e064393db5d1",
+        "evidence": ".planning/memory-resilience/evidence/Q100.4.2-callers.json",
         "metrics": {
           "lines": {
-            "observedCounterTotal": 22,
+            "observedCounterTotal": 25,
             "proposal": "measure - completeness unverified"
           },
           "functions": {
@@ -6379,11 +6379,11 @@
             "proposal": "measure - completeness unverified"
           },
           "statements": {
-            "observedCounterTotal": 27,
+            "observedCounterTotal": 32,
             "proposal": "measure - completeness unverified"
           },
           "branches": {
-            "observedCounterTotal": 14,
+            "observedCounterTotal": 16,
             "proposal": "measure - completeness unverified"
           }
         }
@@ -17842,31 +17842,31 @@
         "reason": "Executable Tier S; no exclusion approved."
       },
       "decisionStatus": "proposed - independent review pending",
-      "sourceHash": "766d09e22bc4d28a6b805c2044b50b0c1f14cd87f9f53144f5d866b50b3e3219",
+      "sourceHash": "0d879fdb753bcbfb26898d0ce3ff8c95162b8475e561577ffd77d479304bc0df",
       "inspection": {
-        "sourceRevision": "de75bb5 + current source hash",
-        "anchor": "Q100.4.2 writer subset",
-        "scope": "Paired native proof; full Q100.4.2 and Q100.4.3 acceptance remains open."
+        "sourceRevision": "5159a7e + current source hash",
+        "anchor": "Q100.4.2 serial caller recovery",
+        "scope": "Paired native/fresh-process proof; complete caller and quality acceptance remains open."
       },
       "metricApplicability": {
-        "status": "diagnostic - final Q100.4.3 acceptance pending",
-        "sourceHash": "766d09e22bc4d28a6b805c2044b50b0c1f14cd87f9f53144f5d866b50b3e3219",
-        "evidence": ".planning/memory-resilience/evidence/Q100.4.2-writers.json",
+        "status": "diagnostic - final Q005/Q100.4.3 acceptance pending",
+        "sourceHash": "0d879fdb753bcbfb26898d0ce3ff8c95162b8475e561577ffd77d479304bc0df",
+        "evidence": ".planning/memory-resilience/evidence/Q100.4.2-callers.json",
         "metrics": {
           "lines": {
-            "observedCounterTotal": 115,
+            "observedCounterTotal": 187,
             "proposal": "measure - completeness unverified"
           },
           "functions": {
-            "observedCounterTotal": 53,
+            "observedCounterTotal": 80,
             "proposal": "measure - completeness unverified"
           },
           "statements": {
-            "observedCounterTotal": 179,
+            "observedCounterTotal": 291,
             "proposal": "measure - completeness unverified"
           },
           "branches": {
-            "observedCounterTotal": 24,
+            "observedCounterTotal": 34,
             "proposal": "measure - completeness unverified"
           }
         }

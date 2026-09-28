@@ -40,6 +40,10 @@ export function createProjectedEventWriter(db: Database, logPath?: string): Memo
     await appendMemoryEvent(event, logPath);
     try { await rebuildProjections(db, logPath, undefined, "automatic"); }
     catch (cause) { throw new Error("Event recorded; projection replay failed and remains pending", { cause }); }
+    let current: boolean;
+    try { current = await isProjectionSourceCurrent(db, logPath); }
+    catch (cause) { throw new Error("Event recorded and projected; source verification failed and recovery remains pending", { cause }); }
+    if (!current) throw new Error("Event recorded and projected; newer source remains pending; retry the command");
     return { projectionCommitted: true };
   };
 }

@@ -271,3 +271,24 @@ full module/package/changed-line/platform and independent review proof. Schema
 initialization currently creates/drops an FTS probe and can change database bytes
 even on list/show; Q019 owns that existing behavior. Writer tests assert unchanged
 projected content and receipt, not byte-identical command initialization.
+
+Proposal retry contract: the deterministic dream ID identifies one immutable
+proposal recipe. A serial retry with the same recipe returns its existing review,
+apply or rollback state, and only supplies a missing governance registration.
+It must not reset existing governance controls or append another proposal.
+Different reason, confidence, provenance, fact proposal or privacy metadata under
+the same ID is a conflict, not permission to overwrite. Comparison ignores lifecycle
+timestamps/reviewer and treats provenance/privacy lists as sets. Concurrent
+compare-and-append admission remains a separate mandatory writer boundary.
+
+After a writer commits, it rechecks source freshness. Newly appended or unavailable
+source yields explicit recorded-and-projected but pending status, rather than
+unqualified success or a false claim that the committed projection failed.
+
+Extraction adoption: recover pending source before idempotency, message or candidate
+early returns and before deduplication. Preserve absent/empty unacknowledged source
+no-ops, but require automatic content authority before any new append. Newly
+written extraction events use guarded automatic replay; failure reports retained
+events as pending and must not record a successful extraction audit. Established
+event-backed fixtures require an explicit baseline receipt, not an exception to
+unlogged-data admission. Pending work after the bounded cutoff stops extraction.
