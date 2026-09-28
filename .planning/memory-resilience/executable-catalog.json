@@ -2729,7 +2729,7 @@
     {
       "path": "src/application/services/extraction-pipeline.ts",
       "package": "package.json",
-      "sourceHash": "61176923601122db0bc72e21f5568e20078b13b94af130ce03a4bd42accc4e2b",
+      "sourceHash": "2049d1c4e16abf781961a8a97ea6e8baa12bac45a1ab998f0607296edd663458",
       "language": ".ts",
       "syntax": "executable",
       "imports": [
@@ -2779,6 +2779,8 @@
         "factsSuperseded",
         "factsUpdated",
         "i",
+        "inputIdentity",
+        "inputSnapshot",
         "intersection",
         "jaccardWordSimilarity",
         "maxSimilarity",
@@ -2822,6 +2824,9 @@
         "createSourceOperationAdmission",
         "facts.map",
         "facts.map.sort",
+        "input.map",
+        "inputIdentity",
+        "message.timestamp.toISOString",
         "messages.map",
         "recoverPendingProjections",
         "set2.has",
@@ -26825,7 +26830,7 @@
     {
       "path": "tests/infrastructure/database/extraction-process-admission.test.ts",
       "package": "package.json",
-      "sourceHash": "151539e812049e5d6ec00f761a62ce1bf00c8aeb53d1f04e861f0ddd31ff2adc",
+      "sourceHash": "e44ae7b4dc7e6ae2f5a5b0a8b95a11b9292429276eebe61a9190626ac0209445",
       "language": ".ts",
       "syntax": "test-driver",
       "imports": [
@@ -26853,6 +26858,7 @@
         "dbPath",
         "deadline",
         "facts",
+        "field",
         "log",
         "messages",
         "mode",
@@ -26868,7 +26874,9 @@
         "source",
         "stderr",
         "stdout",
-        "storage"
+        "storage",
+        "update",
+        "value"
       ],
       "calls": [
         "Bun.sleep",
@@ -26886,12 +26894,15 @@
         "createSchema",
         "db.close",
         "db.exec",
+        "db.prepare",
         "db.serialize",
         "existsSync",
         "expect",
         "expect.not.toBe",
+        "expect.not.toContain",
         "expect.rejects.toThrow",
         "expect.toBe",
+        "expect.toBeNull",
         "expect.toBeUndefined",
         "expect.toContain",
         "expect.toEqual",
@@ -26899,11 +26910,13 @@
         "it",
         "join",
         "messages.save",
+        "mode.startsWith",
         "readFileSync",
         "resolve",
         "resolve.replaceAll",
         "source",
         "storage.cleanup",
+        "update.run",
         "writeFileSync"
       ]
     },

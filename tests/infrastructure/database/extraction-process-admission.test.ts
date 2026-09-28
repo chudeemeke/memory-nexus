@@ -13,7 +13,7 @@ import { ProjectPath } from "../../../src/domain/value-objects/project-path.js";
 import { ExtractionPipeline } from "../../../src/application/services/extraction-pipeline.js";
 import { createOwnedTestDirectory } from "../../helpers/owned-test-directory.js";
 
-for (const mode of ["completed", "empty", "active-change", "decision"] as const) {
+for (const mode of ["completed", "empty", "active-change", "decision", "input-add", "input-edit", "input-delete", "input-role", "input-time", "input-tools", "input-id", "input-empty", "input-redacted"] as const) {
 it(`extraction revalidates concurrent ${mode} before writing`, async () => {
   const storage = createOwnedTestDirectory("memory-extraction-admission-");
   const dbPath = join(storage.dir, "synthetic.db"), log = join(storage.dir, "events", "events-a.jsonl");
@@ -34,8 +34,8 @@ async function barrier(){
  while(!existsSync(release)){if(Date.now()>deadline)throw Error('Provider barrier timed out');await Bun.sleep(5);}
 }
 const provider={providerId:'synthetic-child',modelName:'synthetic',extract:async()=>{
- if(mode==='completed'||mode==='empty')await barrier();
- return mode==='empty'?[]:[{type:'learning',content:'synthetic identical candidate',confidence:0.9,metadata:{}}];
+ if(mode==='completed'||mode==='empty'||mode.startsWith('input-'))await barrier();
+ return mode==='empty'||mode==='input-empty'?[]:[{type:'learning',content:'synthetic identical candidate',confidence:0.9,metadata:{}}];
 }};
 let waiting=true;
 const embedding={name:'synthetic',model:'synthetic',dimensions:2,isReady:()=>true,initialize:async()=>{},dispose:async()=>{},embed:async()=>{throw Error('Unused');},embedBatch:async(texts)=>{
@@ -44,8 +44,9 @@ const embedding={name:'synthetic',model:'synthetic',dimensions:2,isReady:()=>tru
 }};
 const audits=new SqliteExtractionLogRepository(db);const find=audits.findById.bind(audits);let reads=0;
 audits.findById=async(...args)=>{reads++;if(mode==='decision'&&reads===2)await barrier();return find(...args);};
+const redactor=mode==='input-redacted'?{redactText:()=>({text:'masked synthetic',findings:[]}),redactJson:value=>({value,findings:[]})}:undefined;
 let result,error;
-try{result=await new ExtractionPipeline(db,new SqliteFactRepository(db),audits,new SqliteMessageRepository(db),provider,mode==='active-change'?embedding:undefined,log).extractFromSession('session','synthetic');}
+try{result=await new ExtractionPipeline(db,new SqliteFactRepository(db),audits,new SqliteMessageRepository(db),provider,mode==='active-change'?embedding:undefined,log,redactor).extractFromSession('session','synthetic');}
 catch(cause){error=String(cause);}finally{db.close();}
 console.log(JSON.stringify({result,error}));
 `;
@@ -69,6 +70,25 @@ console.log(JSON.stringify({result,error}));
     }
     expect(JSON.parse(readFileSync(ready,"utf8")).pid).not.toBe(process.pid);
     const provider = {providerId:"synthetic-parent",modelName:"synthetic",extract:async()=>[{type:"learning" as const,content:"synthetic identical candidate",confidence:0.9,metadata:{}}]};
+    if(mode.startsWith('input-')) {
+      if(mode==='input-add') await messages.save(Message.create({id:'additional',role:'assistant',content:'new synthetic input',timestamp:new Date('2026-01-02T00:00:00Z')}),'session');
+      else if(mode==='input-delete') db.exec("DELETE FROM messages_meta WHERE id='message'");
+      else {
+        const field={ 'input-edit':'content','input-role':'role','input-time':'timestamp','input-tools':'tool_use_ids','input-id':'id','input-empty':'content','input-redacted':'content' }[mode as 'input-edit'|'input-role'|'input-time'|'input-tools'|'input-id'|'input-empty'|'input-redacted'];
+        const value={ 'input-edit':'changed synthetic input','input-role':'assistant','input-time':'2026-01-02T00:00:00.000Z','input-tools':'["synthetic-tool"]','input-id':'replacement-id','input-empty':'changed synthetic input','input-redacted':'changed private synthetic input' }[mode as 'input-edit'|'input-role'|'input-time'|'input-tools'|'input-id'|'input-empty'|'input-redacted'];
+        using update=db.prepare('UPDATE messages_meta SET '+field+'=? WHERE id=?');update.run(value,'message');
+      }
+      writeFileSync(release,'continue');expect(await child.exited,await stderr).toBe(0);
+      const outcome=JSON.parse(await stdout);
+      expect(outcome.error).not.toContain('synthetic input');
+      expect(outcome.error).not.toContain('private');
+      expect(outcome.error).toContain('Session input changed');expect(outcome.result).toBeUndefined();
+      expect(existsSync(log)).toBe(false);expect(await audits.findById('session')).toBeNull();expect(await facts.findByProject('synthetic')).toEqual([]);
+      const retry=await new ExtractionPipeline(db,facts,audits,messages,provider,undefined,log).extractFromSession('session','synthetic');
+      expect(retry.added).toBe(mode==='input-delete'?0:1);
+      expect((await facts.findByProject('synthetic')).length).toBe(mode==='input-delete'?0:1);
+      return;
+    }
     if(mode==='decision') {
       const beforeDb=db.serialize();
       await expect(new ExtractionPipeline(db,facts,audits,messages,provider,undefined,log).extractFromSession("session","synthetic")).rejects.toThrow("busy");

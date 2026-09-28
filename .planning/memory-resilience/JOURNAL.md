@@ -1,5 +1,44 @@
 # Memory resilience execution journal
 
+## 2026-09-28 - Refused changed extraction input before candidate decisions
+
+- Previous turn made progress at signed/pushed `c67f1e4`; started clean. Full
+  E1-E10 goal and Q100.4.2.1 remain active. Native RED reproduced candidate commit
+  after a message changed while a synthetic provider was paused.
+- Pipeline now snapshots ordered raw message ID, role, content, timestamp and
+  tool references before provider work, then compares a fresh read under its final
+  source lease before candidate decisions, append or audit save. Snapshot stays in
+  memory; generic retry errors contain no source input. Redaction-equivalent changes
+  still invalidate work, and empty candidate results also revalidate.
+- Nine added native scenarios cover additions, edits, deletion, each input field,
+  empty output and redaction masking. Refused runs leave event source absent,
+  facts empty and audit absent; fresh retries succeed (deleted-all input returns
+  the existing empty-session result). Four earlier native schedules remain green.
+- Current and pinned Windows affected groups each pass92tests/533assertions across
+  six files. Eight deliberate validation/field/redaction/empty-output faults fail.
+  Production types, strict extraction tests and isolation pass. Full output/input
+  hashes: `evidence/Q100.4.2.1-input-validation.json`.
+- Scoped diagnostics remain below policy: pipeline96statements/90.9branches/
+  100functions/96.19lines; existing source-test98.57/91.66/80/98.45; process driver
+  96.87/93.33/100/100. Native child counters are not aggregated. Order-only mutation,
+  complete instrumentation, platform and final quality/review remain unproved.
+- **Counterexample retained, not repaired:** extract one message, add a second,
+  then invoke again. Existing audit shortcut returns skippedSession=true and the
+  provider call count remains1. A real SQLite synthetic diagnostic exits1 at the
+  intended assertion. Source/output are embedded in the evidence as an unresolved
+  requirement, separate from the passing compatibility suite.
+- **Next:** promote that counterexample into the regular regression suite and
+  persist a versioned input identity with each extraction audit. Qualify unbound
+  legacy audits without inventing history; test changed input, restart, force and
+  provider/redaction behavior. Also coordinate direct message mutation after the
+  final recheck with Q100.4.2.6/.11 before accepting the whole input/audit task.
+  This checkpoint does not close Q100.4.2.1 or certify old audits as current.
+-495 executable files/two packages;268 acyclic items, one active;11.02GiB free.
+  Owned fixtures/runtime cleaned. No canonical schema/data/model/provider/hook/
+  replication/worktree or rejected cleanup changed. Historical shared-temp12KiB
+  authority stays preserved under Q100.4.2.7. Three inboxes, hosted/Linux/review/
+  desktop and R03/P03/A03 remain open; experiment follows baseline acceptance.
+
 ## 2026-09-28 - Qualified extraction decision admission and refined remaining work
 
 - Previous turn made progress at signed/pushed `4fb9ec2`; started clean. The full

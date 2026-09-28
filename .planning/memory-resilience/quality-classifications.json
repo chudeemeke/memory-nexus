@@ -1403,14 +1403,14 @@
       },
       "decisionStatus": "proposed - independent review pending",
       "inspection": {
-        "sourceRevision": "4fb9ec2 + source hash",
-        "anchor": "Q100.4.2 extraction admission",
-        "scope": "Scoped diagnostic; full quality incomplete"
+        "sourceRevision": "c67f1e4 + current source hash",
+        "anchor": "Q100.4.2.1 input validation",
+        "scope": "Pre-decision boundary only; persistent audit/input mutation interval unresolved"
       },
       "metricApplicability": {
-        "status": "Narrow diagnostic; native child counters not aggregated; final quality pending",
+        "status": "Scoped diagnostic; native child counters unaggregated and full quality pending",
         "sourceHash": "cabf4263afcd9289965dc4ea7b2e751d1a9cbc2cde0d3995f01c6470ec593b4f",
-        "evidence": ".planning/memory-resilience/evidence/Q100.4.2-extraction-admission.json",
+        "evidence": ".planning/memory-resilience/evidence/Q100.4.2.1-input-validation.json",
         "metrics": {
           "statements": {
             "observedCounterTotal": 351,
@@ -1438,7 +1438,7 @@
     {
       "path": "src/application/services/extraction-pipeline.ts",
       "package": "package.json",
-      "sourceHash": "61176923601122db0bc72e21f5568e20078b13b94af130ce03a4bd42accc4e2b",
+      "sourceHash": "2049d1c4e16abf781961a8a97ea6e8baa12bac45a1ab998f0607296edd663458",
       "tier": "S",
       "rationale": "Redacts messages before provider egress, redacts candidates and persists extraction outcomes.",
       "applicability": {
@@ -1447,33 +1447,33 @@
       },
       "decisionStatus": "proposed - independent review pending",
       "inspection": {
-        "sourceRevision": "4fb9ec2 + source hash",
-        "anchor": "Q100.4.2 extraction admission",
-        "scope": "Scoped diagnostic; full quality incomplete"
+        "sourceRevision": "c67f1e4 + current source hash",
+        "anchor": "Q100.4.2.1 input validation",
+        "scope": "Pre-decision boundary only; persistent audit/input mutation interval unresolved"
       },
       "metricApplicability": {
-        "status": "Narrow diagnostic; native child counters not aggregated; final quality pending",
-        "sourceHash": "61176923601122db0bc72e21f5568e20078b13b94af130ce03a4bd42accc4e2b",
-        "evidence": ".planning/memory-resilience/evidence/Q100.4.2-extraction-admission.json",
+        "status": "Scoped diagnostic; native child counters unaggregated and full quality pending",
+        "sourceHash": "2049d1c4e16abf781961a8a97ea6e8baa12bac45a1ab998f0607296edd663458",
+        "evidence": ".planning/memory-resilience/evidence/Q100.4.2.1-input-validation.json",
         "metrics": {
           "statements": {
-            "observedCounterTotal": 119,
-            "observedPercent": 96.63,
+            "observedCounterTotal": 125,
+            "observedPercent": 96,
             "proposal": "measure - completeness unverified"
           },
           "branches": {
-            "observedCounterTotal": 64,
-            "observedPercent": 92.18,
+            "observedCounterTotal": 66,
+            "observedPercent": 90.9,
             "proposal": "measure - completeness unverified"
           },
           "functions": {
-            "observedCounterTotal": 22,
+            "observedCounterTotal": 24,
             "observedPercent": 100,
             "proposal": "measure - completeness unverified"
           },
           "lines": {
-            "observedCounterTotal": 101,
-            "observedPercent": 97.02,
+            "observedCounterTotal": 105,
+            "observedPercent": 96.19,
             "proposal": "measure - completeness unverified"
           }
         }
@@ -20088,25 +20088,25 @@
         "reason": "Executable process test; child counters need aggregation; no exclusion approved."
       },
       "decisionStatus": "proposed - independent review pending",
-      "sourceHash": "151539e812049e5d6ec00f761a62ce1bf00c8aeb53d1f04e861f0ddd31ff2adc",
+      "sourceHash": "e44ae7b4dc7e6ae2f5a5b0a8b95a11b9292429276eebe61a9190626ac0209445",
       "inspection": {
-        "sourceRevision": "4fb9ec2 + source hash",
-        "anchor": "Q100.4.2 extraction admission",
-        "scope": "Scoped diagnostic; full quality incomplete"
+        "sourceRevision": "c67f1e4 + current source hash",
+        "anchor": "Q100.4.2.1 input validation",
+        "scope": "Pre-decision boundary only; persistent audit/input mutation interval unresolved"
       },
       "metricApplicability": {
-        "status": "Narrow diagnostic; native child counters not aggregated; final quality pending",
-        "sourceHash": "151539e812049e5d6ec00f761a62ce1bf00c8aeb53d1f04e861f0ddd31ff2adc",
-        "evidence": ".planning/memory-resilience/evidence/Q100.4.2-extraction-admission.json",
+        "status": "Scoped diagnostic; native child counters unaggregated and full quality pending",
+        "sourceHash": "e44ae7b4dc7e6ae2f5a5b0a8b95a11b9292429276eebe61a9190626ac0209445",
+        "evidence": ".planning/memory-resilience/evidence/Q100.4.2.1-input-validation.json",
         "metrics": {
           "statements": {
-            "observedCounterTotal": 73,
-            "observedPercent": 95.89,
+            "observedCounterTotal": 96,
+            "observedPercent": 96.87,
             "proposal": "measure - completeness unverified"
           },
           "branches": {
-            "observedCounterTotal": 20,
-            "observedPercent": 90,
+            "observedCounterTotal": 30,
+            "observedPercent": 93.33,
             "proposal": "measure - completeness unverified"
           },
           "functions": {
@@ -20115,7 +20115,7 @@
             "proposal": "measure - completeness unverified"
           },
           "lines": {
-            "observedCounterTotal": 57,
+            "observedCounterTotal": 73,
             "observedPercent": 100,
             "proposal": "measure - completeness unverified"
           }

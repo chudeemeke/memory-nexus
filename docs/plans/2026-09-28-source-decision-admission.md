@@ -245,3 +245,24 @@ children separately qualify remote/Git, backup/restore, source remediation, dire
 DB topology, provisioning, compound cleanup, preappend candidates, durability,
 multi-event recovery, reconciliation and scaling. Each retains mandatory proof;
 split a child again before implementation if it contains independent outcomes.
+
+Q100.4.2.1 first boundary: snapshot the ordered raw message fields before provider
+work, then compare a fresh read under the existing final source lease before any
+candidate decision, append or audit save. Include ID, role, content, timestamp and
+tool references; redaction-equivalent changes must still invalidate stale work.
+Changed, additional or deleted input refuses with retry guidance. Do not serialize
+the snapshot into logs/errors. This check alone does not bind historical audits
+to input revisions or exclude direct message writes after the check: persistent
+audit identity and the direct-database mutation interval remain required proof.
+
+This first input boundary is implemented: nine added native scenarios and eight
+detected faults; affected compatibility92tests/533assertions per Windows runtime.
+Evidence: `.planning/memory-resilience/evidence/Q100.4.2.1-input-validation.json`.
+The same evidence retains a failing audit counterexample: successful extraction
+followed by a new message still skips on the old audit. Next, promote that failure
+to regression coverage and add a versioned durable input identity to audit records.
+Do not fabricate identities for legacy audits. Qualify migration, restart, new
+input, force and provider/redaction semantics using synthetic databases only.
+The post-recheck direct message-write interval remains a separate required seam;
+a stored digest alone does not exclude concurrent mutation or make event/audit
+writes crash-atomic. Q100.4.2.1 remains active until all its outcomes are proved.

@@ -445,11 +445,12 @@
         ".planning/memory-resilience/evidence/B11.74.6.3.2.json",
         ".planning/memory-resilience/evidence/Q100.4.2-callers.json",
         ".planning/memory-resilience/evidence/Q100.4.2-writer-admission.json",
-        ".planning/memory-resilience/evidence/Q100.4.2-extraction-admission.json"
+        ".planning/memory-resilience/evidence/Q100.4.2-extraction-admission.json",
+        ".planning/memory-resilience/evidence/Q100.4.2.1-input-validation.json"
       ],
       "acceptance_record": ".planning/memory-resilience/evidence/Q005.json",
       "retirement_trigger": "Before B11.74.7/B10/R02 acceptance.",
-      "observed_gap": "Extraction admission83tests/434assertions per Windows runtime and6faults detected. Current metric percentages are retained in evidence/Q100.4.2-extraction-admission.json; diagnostics still fail TierS, child counters unaggregated. Both changed tests strict-compile; older extraction fixture now owns its complete temporary source authority. Session input/audit identity, within-batch decisions, event/audit atomicity, privacy and final full quality remain; see mandatory Q100.4.2 children. No exclusion approved."
+      "observed_gap": "Latest input validation:92tests/533assertions per Windows runtime,8faults. Pipeline diagnostic statements96/branches90.9/functions100/lines96.19; source-test98.57/91.66/80/98.45; process-test96.87/93.33/100/100. Child counters unaggregated, no full TierS acceptance. Ordered raw input recheck before candidate decisions is implemented, but historical audit revision identity demonstrably fails after new messages. Post-check direct writes, within-batch decisions, multi-event/audit crash atomicity, privacy and full quality remain."
     },
     {
       "id": "Q006",
@@ -6329,14 +6330,15 @@
         ".planning/memory-resilience/evidence/Q100.4.2-remote-authority.json",
         ".planning/memory-resilience/evidence/Q100.4.2-leases.json",
         ".planning/memory-resilience/evidence/Q100.4.2-writer-admission.json",
-        ".planning/memory-resilience/evidence/Q100.4.2-extraction-admission.json"
+        ".planning/memory-resilience/evidence/Q100.4.2-extraction-admission.json",
+        ".planning/memory-resilience/evidence/Q100.4.2.1-input-validation.json"
       ],
       "acceptance_record": ".planning/memory-resilience/evidence/Q100.4.2.json",
       "retirement_trigger": "Before Q100.4/Q100/B11.74.7/B10/R02 acceptance.",
       "progress": {
         "status": "Extraction decision admission implemented; remaining independent obligations split into numbered children.",
         "completed": "Extraction computes candidates/comparison embeddings outside admission, then recovers/rechecks session idempotency and active UUID/content identity under one scope before compare/append/replay/audit. Empty output also rechecks. Concurrent completed audit survives; stale comparison refuses without writes and fresh retry succeeds. Actual decision-read barrier denies a contender.83tests/434assertions in6files per Windows runtime;6faults detected.",
-        "next": "Q100.4.2.1: qualify mutable session input and extraction audit identity before accepting candidate work. Then independently close every numbered child; parent remains a barrier.",
+        "next": "Promote retained new-message/old-audit counterexample to a regression. Persist versioned input identity with extraction audit, qualify legacy/unbound audit behavior and migration without inventing historical identity, then prove restart/new-input/force and provider/redaction compatibility. Resolve direct message mutation after final recheck with Q100.4.2.6/.11 before full acceptance.",
         "testsPerRuntime": 83,
         "assertionsPerRuntime": 434,
         "testFiles": 6,
@@ -6357,9 +6359,10 @@
         "remoteAuthorityEvidence": ".planning/memory-resilience/evidence/Q100.4.2-remote-authority.json",
         "leaseEvidence": ".planning/memory-resilience/evidence/Q100.4.2-leases.json",
         "writerAdmissionEvidence": ".planning/memory-resilience/evidence/Q100.4.2-writer-admission.json",
-        "extractionAdmissionEvidence": ".planning/memory-resilience/evidence/Q100.4.2-extraction-admission.json"
+        "extractionAdmissionEvidence": ".planning/memory-resilience/evidence/Q100.4.2-extraction-admission.json",
+        "inputValidationEvidence": ".planning/memory-resilience/evidence/Q100.4.2.1-input-validation.json"
       },
-      "observed_gap": "Selected cooperating extraction decisions now run under admission, with stale active-fact refusal and audit recheck. Session messages may change during provider work without input fingerprint validation; activeFacts are not updated after each candidate, so within-batch comparisons need qualification. Remote/Git/maintenance/direct-DB, source provisioning, compound reporting, preappend validation, durability, multi-event actions, reconciliation and scaling are now explicit mandatory child tasks. No whole baseline/E4/E5 acceptance."
+      "observed_gap": "Selected cooperating extraction decisions now run under admission, with stale active-fact refusal and audit recheck. Session messages may change during provider work without input fingerprint validation; activeFacts are not updated after each candidate, so within-batch comparisons need qualification. Remote/Git/maintenance/direct-DB, source provisioning, compound reporting, preappend validation, durability, multi-event actions, reconciliation and scaling are now explicit mandatory child tasks. No whole baseline/E4/E5 acceptance. Q100.4.2.1 now refuses changed provider input before decisions, but a retained old-audit/new-message counterexample still fails; persistent revision identity and post-check mutation coordination remain mandatory."
     },
     {
       "id": "Q100.4.3",
@@ -6387,11 +6390,12 @@
         ".planning/memory-resilience/evidence/Q100.4.2-remote-authority.json",
         ".planning/memory-resilience/evidence/Q100.4.2-leases.json",
         ".planning/memory-resilience/evidence/Q100.4.2-writer-admission.json",
-        ".planning/memory-resilience/evidence/Q100.4.2-extraction-admission.json"
+        ".planning/memory-resilience/evidence/Q100.4.2-extraction-admission.json",
+        ".planning/memory-resilience/evidence/Q100.4.2.1-input-validation.json"
       ],
       "acceptance_record": ".planning/memory-resilience/evidence/Q100.4.3.json",
       "retirement_trigger": "Before Q100.4/Q100/B11.74.7/B10/R02 acceptance.",
-      "observed_gap": "Current writer evidence:525tests/3945assertions per Windows runtime;11decision faults detected; narrow recovery/scope/projected-writer-test instrumentation100all4. Event-log, command, source-factory and driver/test diagnostics remain below policy or incomplete; broader compatibility tests were not all instrumented in this diagnostic and earlier rows are not fresh full-suite coverage. New admitted-writer test zero branch denominator requires individual review. Child-process counters, complete instrumenter/applicability, package/changed-line, Linux, cleanup and final independent review remain open; no exclusion approved. Current extraction checkpoint:83tests/434assertions on both Windows runtimes and6faults detected. Pipeline96.63/92.18/100/97.02, extraction-test98.57/91.66/80/98.45, process-test95.89/90/100/100 (statements/branches/functions/lines). Child counters unaggregated; no full-quality acceptance. Final owned-fixture rerun source and metrics supersede earlier extraction-test rows in the same checkpoint; both changed tests strict-compile. Shared-temp12KiB authority preserved pending exclusive ownership disposition under Q100.4.2.7."
+      "observed_gap": "Current writer evidence:525tests/3945assertions per Windows runtime;11decision faults detected; narrow recovery/scope/projected-writer-test instrumentation100all4. Event-log, command, source-factory and driver/test diagnostics remain below policy or incomplete; broader compatibility tests were not all instrumented in this diagnostic and earlier rows are not fresh full-suite coverage. New admitted-writer test zero branch denominator requires individual review. Child-process counters, complete instrumenter/applicability, package/changed-line, Linux, cleanup and final independent review remain open; no exclusion approved. Current extraction checkpoint:83tests/434assertions on both Windows runtimes and6faults detected. Pipeline96.63/92.18/100/97.02, extraction-test98.57/91.66/80/98.45, process-test95.89/90/100/100 (statements/branches/functions/lines). Child counters unaggregated; no full-quality acceptance. Final owned-fixture rerun source and metrics supersede earlier extraction-test rows in the same checkpoint; both changed tests strict-compile. Shared-temp12KiB authority preserved pending exclusive ownership disposition under Q100.4.2.7. Latest input-recheck source-bound evidence supersedes prior pipeline rows:96statements/90.9branches/100functions/96.19lines; process-driver96.87/93.33/100/100.92tests/533assertions per Windows runtime,8faults. No full TierS/platform/child-counter acceptance; unresolved audit counterexample remains explicit."
     },
     {
       "id": "Q100.4.2.1",
@@ -6409,11 +6413,21 @@
       "owner": "memory-nexus",
       "evidence": [
         ".planning/memory-resilience/evidence/Q100.4.2-extraction-admission.json",
-        "docs/plans/2026-09-28-source-decision-admission.md"
+        "docs/plans/2026-09-28-source-decision-admission.md",
+        ".planning/memory-resilience/evidence/Q100.4.2.1-input-validation.json"
       ],
       "acceptance_record": ".planning/memory-resilience/evidence/Q100.4.2.1.json",
       "retirement_trigger": "Before Q100.4.2/Q100/B10/R02 acceptance.",
-      "observed_gap": "Unverified obligation from source inspection and retained Q100.4.2 evidence; split further before implementation if this outcome requires independent acceptance slices."
+      "observed_gap": "Initial existing-log shortcut still ignores input revision. A retained real SQLite counterexample extracts one message, adds another, then observes skippedSession=true and no second provider call. No persisted audit identity exists. Direct message writes after the new check remain outside source admission, and order-only/remaining cleanup/platform/instrumenter/full quality proof is incomplete. No Q100.4.2.1 acceptance yet.",
+      "progress": {
+        "status": "Pre-decision input revalidation implemented; durable audit identity and remaining mutation interval still open.",
+        "completed": "Ordered raw input snapshot before provider computation is compared with a fresh read under the final source lease. Native additions, edits, deletion, role, time, tool references, ID changes, empty output and redaction-equivalent changes refuse before new append/audit. Fresh retry succeeds; errors disclose no input.92tests/533assertions per Windows runtime;8faults detected.",
+        "next": "Promote retained new-message/old-audit counterexample to a regression. Persist versioned input identity with extraction audit, qualify legacy/unbound audit behavior and migration without inventing historical identity, then prove restart/new-input/force and provider/redaction compatibility. Resolve direct message mutation after final recheck with Q100.4.2.6/.11 before full acceptance.",
+        "evidence": ".planning/memory-resilience/evidence/Q100.4.2.1-input-validation.json",
+        "testsPerRuntime": 92,
+        "assertionsPerRuntime": 533,
+        "decisionFaultsDetected": 8
+      }
     },
     {
       "id": "Q100.4.2.2",

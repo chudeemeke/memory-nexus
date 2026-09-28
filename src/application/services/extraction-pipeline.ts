@@ -91,6 +91,13 @@ export class ExtractionPipeline {
       };
     }
 
+    // Compare every ordered input field, including changes masked by redaction.
+    // This snapshot stays in memory and must never be included in error output.
+    const inputIdentity = (input: Message[]) => JSON.stringify(input.map(message => [
+      message.id, message.role, message.content, message.timestamp.toISOString(), message.toolUses,
+    ]));
+    const inputSnapshot = inputIdentity(messages);
+
     // 3. Extract candidate facts via LLM
     const providerMessages = messages.map((message) => Message.create({
       id: message.id,
@@ -129,6 +136,9 @@ export class ExtractionPipeline {
     return (this.admission ?? createSourceOperationAdmission(this.eventLogPath)).run(async lease => {
       if ((await recoverPendingProjections(this.db, this.eventLogPath, undefined, lease)).pending) {
         throw new Error("Projection recovery remains pending; retry extraction");
+      }
+      if (inputIdentity(await this.messageRepo.findBySession(sessionId)) !== inputSnapshot) {
+        throw new Error("Session input changed during extraction computation; retry extraction");
       }
       if (await this.logRepo.findById(sessionId) && !options?.force) {
         return { skippedSession: true, added: 0, updated: 0, superseded: 0, skipped: 0 };
