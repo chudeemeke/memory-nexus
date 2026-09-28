@@ -1,5 +1,40 @@
 # Memory resilience execution journal
 
+## 2026-09-28 - Maintenance refuses invalid targets before DB/config mutation
+
+- Previous goal turn was progress. Resumed clean at signed/pushed ec3b5e3;
+  current Q100.4.2.2.2.2.2 remains active. Ledger 277 acyclic items, one active.
+- Twelve installed/current source routing cases: sync and default source audit
+  refuse paired fences; explicit events override bypasses them. Remote backup
+  reports success without source; remote restore changes config before error.
+  Legacy --version fixture leaves observed paths intact, not full startup proof.
+- Four meaningful command REDs preceded the repair. Shared read-only leaf-type
+  preflight now runs before any local/remote snapshot creation or DB/config write.
+  Missing targets remain valid; existing wrong types, symbolic/file hard links
+  and inspection errors refuse. Parent links and concurrent path swaps remain open.
+- Final 82 tests / 388 assertions / four files pass on Windows Bun 1.4.1 and
+  checksum-pinned 1.3.14; nine deliberate guard faults detected. Helper and two
+  new tests measure 100% all four metrics. Narrow backup/remote measurements
+  remain below policy; no full file/package/changed-line quality acceptance.
+  Production/strict new-test types and isolation pass with retained commands.
+- Twelve final actual source-CLI cases preserve database/config/fences on refusal.
+  Existing installed CLI bytes remain unchanged; its prior defects still apply.
+  Evidence: evidence/Q100.4.2.2.2.2.2-maintenance.json. Catalog now 511 files/two
+  packages; proposed classifications updated without exclusions or weaker gates.
+- Migration contract now includes source, DB and policy configuration, managed
+  legacy writer quiescence, durable transition identity, conservative recovery
+  and compatible rollback preserving later writes. It is a contract to implement,
+  not an implemented migration or new authority. Existing Q100.4.2.4/Q050/Q067
+  retain full backup/restore and quality obligations; no duplicate task added.
+- Next: managed route/override inventory and packaged candidate qualification,
+  then fault-test the source/DB/config migration contract. Batch writer remains
+  disabled; native interrupted-chain retry/final reader/platform/hosted/review/
+  installed/desktop gates remain. Three inbox items still open. Embedding follows
+  baseline acceptance. Full E1-E10 goal remains active, with owner gates unchanged.
+- Owned fixtures and pinned runtime cleaned; protected cleanup targets, shared
+  temp authority and Git object retained. No real corpus or live installation,
+  hooks, provider, model or replication changed.
+
 ## 2026-09-28 - Installed consumer and maintenance boundary counterexamples
 
 - Started clean at signed/pushed a4b44b7. No executable source changed. Active

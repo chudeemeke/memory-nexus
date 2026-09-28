@@ -118,6 +118,51 @@ No live migration, installation change, format emission or consumer acceptance.
 
 ### Remaining sequence
 
+Demonstrated prerequisite: both local and source-only remote backup/restore previously
+accepted an event path that is a regular file. Source-only remote restore additionally
+replaced config before refusing that path, even with paired database/event fences.
+Current repair adds a shared read-only target-type preflight before any
+snapshot creation, checkpoint, config copy or data replacement. Missing targets
+remain valid for first use; existing database/config must be regular files with one link
+and events must be a real directory. Reject leaf symlinks, file hard links, wrong
+types and inspection errors. Preserve valid backup/restore behavior. Prove this
+through actual command functions and a final CLI repeat, with source hashes.
+This is a bounded prerequisite under the active consumer item and existing
+Q100.4.2.4/Q050 obligations, not full snapshot/restore atomicity. Parent links,
+concurrent path replacement, cross-file transaction and crash recovery remain open.
+
+### Migration contract for the next implementation
+
+The source, derived database and privacy/provider configuration form one authority
+set. Keeping the configuration outside the boundary permits partial restore and
+could apply stale egress policy to a new store. Reuse one versioned store and one
+small durable migration record; do not add a broker, daemon or another live corpus
+queue. The record identifies original paths, store identity, format, source hashes,
+candidate artifact, transition state and retained recovery locations. It must not
+contain transcript content or secrets.
+
+| Transition | Required invariant and proof |
+|---|---|
+| Prepare | Keep the old authority usable; verify the candidate artifact, complete data/config inventory and recoverable snapshot. Reject foreign, linked or ambiguous targets. No batch emission. |
+| Quiesce and fence | Stop or drain every managed legacy writer before moving authority. New admission locks alone cannot constrain old binaries. Retain the original source/DB/config and fence their conventional paths; never discard data recreated during a transition. Inject an old contender in each gap. An unexpected writer must leave retained evidence and a refused migration, not silently lose its writes. |
+| Validate | Reconcile hashes, identities, projections and governance under the candidate reader. Every supported default route must select the same store; explicit external roots require separate admission. Validate hooks, CLI, library, maintenance, import/export and remote receiver capabilities. |
+| Activate | Publish one validated active-store selection after all prerequisites pass. Unknown/incomplete migration state refuses mutation. Test process termination before and after each filesystem transition and selector publication. Activation remains disabled until applicable owner sign-off. |
+| Recover / roll back | Before activation, restore the retained original only after reconciling any intervening writes. After batch emission, rollback means a retained compatible reader that preserves later records and policy; old 4.0.3 plus an old snapshot is forbidden. Interrupted rollback must remain recoverable too. |
+
+The contract promises managed routing, not control over arbitrary same-user old
+code pointed explicitly at the new root. Tested `audit-secrets --events-dir`
+bypasses conventional fences, as expected. Unsupported external consumers and an
+offline unqualified desktop must prevent format activation or new-format transfer;
+they are not assumed upgraded. Merely changing XDG data home exposes the new root
+to old code and therefore cannot implement capability admission.
+
+The current preflight repair is only one prerequisite: 82 tests on each of two
+Windows runtimes, nine detected guard faults, and twelve final source-CLI cases.
+The helper and two new tests reach 100% all four metrics in the scoped diagnostic;
+the containing command files and full quality remain open. Earlier installed
+4.0.3 counterexamples remain applicable because no live installation changed.
+No migration transaction, selector or activation check has been implemented yet.
+
 1. Inventory supported entrypoints and persisted overrides: installed binaries,
    project hooks, desktop consumers, source-only tools, backup/restore, import,
    remote, and downgrade paths. Bind capability to the actual artifact and root.

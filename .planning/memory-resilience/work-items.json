@@ -327,7 +327,9 @@
       "risk": "A",
       "authorization": "authorized",
       "owner": "memory-nexus",
-      "evidence": [],
+      "evidence": [
+        ".planning/memory-resilience/evidence/Q100.4.2.2.2.2.2-maintenance.json"
+      ],
       "acceptance_record": ".planning/memory-resilience/evidence/B09.json",
       "additional_acceptance": "Known test fixture cleanup repairs precede the complete instrumented run. Scoped gate fixture tests may proceed independently; no affected full-suite run before the owned-cleanup tasks are verified. Verify shared module mock isolation for transformers-js-provider, sync/embedding-pass and extraction-providers test drivers, including reordered/adjacent test execution; source mocks are not proof of safe isolation or live provider operation."
     },
@@ -1551,7 +1553,8 @@
       "evidence": [
         ".planning/memory-resilience/evidence/B11.74.6.3.1.json",
         ".planning/memory-resilience/evidence/Q100.4.2-source-admission.json",
-        ".planning/memory-resilience/evidence/Q100.4.2.2.2.2.2-installed.json"
+        ".planning/memory-resilience/evidence/Q100.4.2.2.2.2.2-installed.json",
+        ".planning/memory-resilience/evidence/Q100.4.2.2.2.2.2-maintenance.json"
       ],
       "acceptance_record": ".planning/memory-resilience/evidence/Q050.json",
       "observed_gap": "Replace checkpoint-then-file-copy with a coherent native SQLite snapshot; prove concurrent writer inclusion policy, complete authoritative data surfaces, rollback and atomic restore, malformed manifest/path/symlink refusal, full Tier S quality. Busy-checkpoint refusal alone does not close the writer race. Admission namespace excluded from backup/restore; restore preserves existing local authority and manifest declares exclusion. Event traversal rejects symbolic/hard links including authority aliases. Atomic snapshots/restore, concurrent path swaps/source writers and cleanup integrity remain unproved; these guards do not close Q050.",
@@ -1561,6 +1564,13 @@
         "finding": "Both installed4.0.3and current-source restore replace destination existing fact with donor-fact before EEXIST at event-file fence. Backup create omits fenced events with exit0. Paired path fences stop tested maintenance commands; no transactional restore proof.",
         "owner": "memory-nexus",
         "trigger": "Repair before consumer-boundary activation and Q100/B10/R02 acceptance; add distinct donor/target regression and interruption/recovery proof."
+      },
+      "maintenance_preflight": {
+        "status": "scoped repaired; larger obligation pending",
+        "evidence": ".planning/memory-resilience/evidence/Q100.4.2.2.2.2.2-maintenance.json",
+        "remaining": "Coherent snapshot/admission, parent links and concurrent path replacement, manifest validation, interruption/rollback and complete Tier S quality.",
+        "owner": "memory-nexus",
+        "trigger": "Before Q100/B10/R02 and format activation."
       }
     },
     {
@@ -1953,7 +1963,8 @@
       ],
       "historical_evidence": "docs/audits/2026-09-19-repair-evidence/per-file-coverage-gaps.json",
       "evidence": [
-        ".planning/memory-resilience/evidence/Q100.4.2-remote-authority.json"
+        ".planning/memory-resilience/evidence/Q100.4.2-remote-authority.json",
+        ".planning/memory-resilience/evidence/Q100.4.2.2.2.2.2-maintenance.json"
       ],
       "acceptance_record": ".planning/memory-resilience/evidence/Q067.json",
       "observed_gap": "Remote backup/restore namespace exclusion and alias rejection now have real authority preservation proof, including sparse restore/rollback and held reservation. Command module functions90.62 and branches95.2 fail TierS; test-file gaps remain. Source admission, coherent snapshot, atomic restore/prevalidation, hostile path swaps and cleanup integrity still require repair. Owner memory-nexus; retire before B10/R02.",
@@ -2586,7 +2597,8 @@
         ".planning/memory-resilience/evidence/Q100.4.2.2.2.2-reader.json",
         ".planning/memory-resilience/evidence/Q100.4.2.2.2.2.1.json",
         ".planning/memory-resilience/evidence/Q100.4.2.2.2.2.2-investigation.json",
-        "docs/plans/2026-09-28-batch-consumer-boundary.md"
+        "docs/plans/2026-09-28-batch-consumer-boundary.md",
+        ".planning/memory-resilience/evidence/Q100.4.2.2.2.2.2-maintenance.json"
       ],
       "acceptance_record": ".planning/memory-resilience/evidence/B10.json"
     },
@@ -2775,7 +2787,8 @@
         ".planning/memory-resilience/evidence/Q100.4.2.2.2.2.1.json",
         ".planning/memory-resilience/evidence/Q100.4.2.2.2.2.2-investigation.json",
         "docs/plans/2026-09-28-batch-consumer-boundary.md",
-        ".planning/memory-resilience/evidence/Q100.4.2.2.2.2.2-installed.json"
+        ".planning/memory-resilience/evidence/Q100.4.2.2.2.2.2-installed.json",
+        ".planning/memory-resilience/evidence/Q100.4.2.2.2.2.2-maintenance.json"
       ],
       "acceptance_record": ".planning/memory-resilience/evidence/R02.json"
     },
@@ -6579,7 +6592,8 @@
       "evidence": [
         ".planning/memory-resilience/evidence/Q100.4.2-extraction-admission.json",
         "docs/plans/2026-09-28-source-decision-admission.md",
-        ".planning/memory-resilience/evidence/Q100.4.2.2.2.2.2-installed.json"
+        ".planning/memory-resilience/evidence/Q100.4.2.2.2.2.2-installed.json",
+        ".planning/memory-resilience/evidence/Q100.4.2.2.2.2.2-maintenance.json"
       ],
       "acceptance_record": ".planning/memory-resilience/evidence/Q100.4.2.4.json",
       "retirement_trigger": "Before Q100.4.2/Q100/B10/R02 acceptance.",
@@ -6589,6 +6603,13 @@
         "finding": "Both installed4.0.3and current-source restore replace destination existing fact with donor-fact before EEXIST at event-file fence. Backup create omits fenced events with exit0. Paired path fences stop tested maintenance commands; no transactional restore proof.",
         "owner": "memory-nexus",
         "trigger": "Repair before consumer-boundary activation and Q100/B10/R02 acceptance; add distinct donor/target regression and interruption/recovery proof."
+      },
+      "maintenance_preflight": {
+        "status": "scoped repaired; larger obligation pending",
+        "evidence": ".planning/memory-resilience/evidence/Q100.4.2.2.2.2.2-maintenance.json",
+        "remaining": "Coherent snapshot/admission, parent links and concurrent path replacement, manifest validation, interruption/rollback and complete Tier S quality.",
+        "owner": "memory-nexus",
+        "trigger": "Before Q100/B10/R02 and format activation."
       }
     },
     {
@@ -6774,7 +6795,8 @@
         ".planning/memory-resilience/evidence/Q100.4.2.2.2.2-reader.json",
         ".planning/memory-resilience/evidence/Q100.4.2.2.2.2.2-investigation.json",
         "docs/plans/2026-09-28-batch-consumer-boundary.md",
-        ".planning/memory-resilience/evidence/Q100.4.2.2.2.2.2-installed.json"
+        ".planning/memory-resilience/evidence/Q100.4.2.2.2.2.2-installed.json",
+        ".planning/memory-resilience/evidence/Q100.4.2.2.2.2.2-maintenance.json"
       ],
       "acceptance_record": ".planning/memory-resilience/evidence/Q100.4.2.12.json",
       "retirement_trigger": "Before Q100.4.2/Q100/B10/R02 acceptance.",
@@ -6784,6 +6806,13 @@
         "finding": "Both installed4.0.3and current-source restore replace destination existing fact with donor-fact before EEXIST at event-file fence. Backup create omits fenced events with exit0. Paired path fences stop tested maintenance commands; no transactional restore proof.",
         "owner": "memory-nexus",
         "trigger": "Repair before consumer-boundary activation and Q100/B10/R02 acceptance; add distinct donor/target regression and interruption/recovery proof."
+      },
+      "maintenance_preflight": {
+        "status": "scoped repaired; larger obligation pending",
+        "evidence": ".planning/memory-resilience/evidence/Q100.4.2.2.2.2.2-maintenance.json",
+        "remaining": "Coherent snapshot/admission, parent links and concurrent path replacement, manifest validation, interruption/rollback and complete Tier S quality.",
+        "owner": "memory-nexus",
+        "trigger": "Before Q100/B10/R02 and format activation."
       }
     },
     {
@@ -6929,7 +6958,8 @@
         ".planning/memory-resilience/evidence/Q100.4.2.2.2.2.1.json",
         ".planning/memory-resilience/evidence/Q100.4.2.2.2.2.2-investigation.json",
         "docs/plans/2026-09-28-batch-consumer-boundary.md",
-        ".planning/memory-resilience/evidence/Q100.4.2.2.2.2.2-installed.json"
+        ".planning/memory-resilience/evidence/Q100.4.2.2.2.2.2-installed.json",
+        ".planning/memory-resilience/evidence/Q100.4.2.2.2.2.2-maintenance.json"
       ],
       "acceptance_record": ".planning/memory-resilience/evidence/Q100.4.2.2.2.2.json",
       "retirement_trigger": "Before Q100.4.2/Q100/B10/R02 acceptance.",
@@ -7049,16 +7079,17 @@
         ".planning/memory-resilience/evidence/Q100.4.2.2.2.2.1.json",
         ".planning/memory-resilience/evidence/Q100.4.2.2.2.2.2-investigation.json",
         "docs/plans/2026-09-28-batch-consumer-boundary.md",
-        ".planning/memory-resilience/evidence/Q100.4.2.2.2.2.2-installed.json"
+        ".planning/memory-resilience/evidence/Q100.4.2.2.2.2.2-installed.json",
+        ".planning/memory-resilience/evidence/Q100.4.2.2.2.2.2-maintenance.json"
       ],
       "acceptance_record": ".planning/memory-resilience/evidence/Q100.4.2.2.2.2.2.json",
       "retirement_trigger": "Before Q100.4.2/Q100/B10/R02 acceptance.",
-      "observed_gap": "Installed4.0.3CLI returns success and empties batch-only projection. Same version string cannot establish capability. Event-only fences allow initialization and partial restore; paired fences refuse tested CLI maintenance only. No enforced consumer boundary, complete inventory, migration/rollback or activation checks. No batch emission.",
+      "observed_gap": "Old installed 4.0.3 remains incompatible with batches. Current maintenance preflight now rejects wrong leaf types before DB/config mutation, but paired fences alone do not establish source/DB/config migration, complete consumer inventory or compatible rollback. Explicit overrides bypass conventional routing. Batch emission disabled.",
       "progress": {
-        "status": "Installed legacy data-loss and maintenance counterexamples retained; consumer boundary remains open",
-        "completed": "Registry integrity checked; all214installed files match. Six actual CLI rebuild cases plus12maintenance cases retained. Same4.0.3version reports incompatible behavior. Event-only restore replaces facts before error; paired fences refuse tested maintenance routes. Bun version works, npm junction is broken; no live repair.",
-        "next": "Complete supported entrypoint/override inventory and synthetic paired-fence sync/source-only checks. Bind a packaged candidate to its capabilities; design and fault-test one recoverable paired-store migration plus compatible rollback. Q100.4.2.4/Q050 own demonstrated partial restore. No emission, live installation change or authority cutover before applicable gates.",
-        "evidence": ".planning/memory-resilience/evidence/Q100.4.2.2.2.2.2-installed.json"
+        "status": "Maintenance target preflight repaired with scoped proof; migration/consumer boundary remains open",
+        "completed": "Added shared read-only leaf-type admission before local/remote backup and restore snapshot mutation. Four behavioral REDs; final 82 tests / 388 assertions / four files on each Windows Bun 1.4.1 and pinned 1.3.14. Nine deliberate faults detected. Helper and two new tests measure 100% all four metrics; twelve final source-CLI cases preserve DB/config/fences on refusal. Installed old behavior remains unchanged.",
+        "next": "Implement and qualify the source/DB/config migration contract in the plan, beginning complete managed route/override inventory and a packaged candidate. Prove quiescence, interruption recovery, coherent snapshot and compatible rollback before activation. Full command quality, final reader and native interrupted-chain retry remain open.",
+        "evidence": ".planning/memory-resilience/evidence/Q100.4.2.2.2.2.2-maintenance.json"
       }
     },
     {

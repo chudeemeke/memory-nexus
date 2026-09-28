@@ -11800,7 +11800,7 @@
     {
       "path": "src/presentation/cli/commands/backup.ts",
       "package": "package.json",
-      "sourceHash": "5fe86ecfd0788130d9b096ce41232b2a330d377ec58aa07341c32b46375a9b8e",
+      "sourceHash": "b507111323a77c2210c3de08af7646fbcb3ead9c9c58a05e4dd00f20113a7386",
       "tier": "S",
       "rationale": "Creates backup manifests and checkpoints the database; backup integrity and storage mutation boundary.",
       "applicability": {
@@ -11809,34 +11809,34 @@
       },
       "decisionStatus": "proposed - independent review pending",
       "inspection": {
-        "sourceRevision": "964cf20 + current source hash",
-        "anchor": "Q100.4.2 source admission and bounded command activation",
-        "scope": "Scoped source-bound diagnostics; complete writer adoption and quality acceptance open."
+        "sourceRevision": "ec3b5e3 + current source hash",
+        "anchor": "Q100.4.2.2.2.2.2 maintenance preflight",
+        "scope": "Scoped preflight behavior only; full restore and consumer gates open."
       },
       "metricApplicability": {
-        "status": "Diagnostic only; gaps remain open, child coverage unaggregated and applicability/platform/package/changed-line/review incomplete",
-        "sourceHash": "5fe86ecfd0788130d9b096ce41232b2a330d377ec58aa07341c32b46375a9b8e",
-        "evidence": ".planning/memory-resilience/evidence/Q100.4.2-source-admission.json",
+        "status": "Scoped diagnostic; full file/package and final review pending",
+        "sourceHash": "b507111323a77c2210c3de08af7646fbcb3ead9c9c58a05e4dd00f20113a7386",
+        "evidence": ".planning/memory-resilience/evidence/Q100.4.2.2.2.2.2-maintenance.json",
         "metrics": {
           "statements": {
-            "observedCounterTotal": 227,
-            "observedPercent": 94.27,
-            "proposal": "measure - completeness unverified"
+            "observedCounterTotal": 228,
+            "observedPercent": 42.98,
+            "proposal": "measure - complete acceptance unverified"
           },
           "branches": {
             "observedCounterTotal": 156,
-            "observedPercent": 84.61,
-            "proposal": "measure - completeness unverified"
+            "observedPercent": 29.48,
+            "proposal": "measure - complete acceptance unverified"
           },
           "functions": {
             "observedCounterTotal": 24,
-            "observedPercent": 87.5,
-            "proposal": "measure - completeness unverified"
+            "observedPercent": 50,
+            "proposal": "measure - complete acceptance unverified"
           },
           "lines": {
-            "observedCounterTotal": 224,
-            "observedPercent": 94.19,
-            "proposal": "measure - completeness unverified"
+            "observedCounterTotal": 225,
+            "observedPercent": 43.55,
+            "proposal": "measure - complete acceptance unverified"
           }
         }
       }
@@ -14365,7 +14365,7 @@
     {
       "path": "src/presentation/cli/commands/remote.ts",
       "package": "package.json",
-      "sourceHash": "0f8543de15e89a6561e5918bb68c6eac60ef26b7e192a7ed1738ac885cd8c55c",
+      "sourceHash": "226fe5b0f8a9149b58ea778a1f51d84c60bda1cfc1ce7ed39dd999e4c78efa61",
       "tier": "S",
       "rationale": "Controls remote sync configuration, backup/restore and removal of persistent configuration.",
       "applicability": {
@@ -14374,34 +14374,34 @@
       },
       "decisionStatus": "proposed - independent review pending",
       "inspection": {
-        "sourceRevision": "241acc5 + current source hash",
-        "anchor": "Q100.4.2 remote local-authority preservation",
-        "scope": "Namespace protection only; content admission and atomic maintenance unproved."
+        "sourceRevision": "ec3b5e3 + current source hash",
+        "anchor": "Q100.4.2.2.2.2.2 maintenance preflight",
+        "scope": "Scoped preflight behavior only; full restore and consumer gates open."
       },
       "metricApplicability": {
-        "status": "Scoped diagnostic with below-policy metrics; full platform/package/changed-line/instrumenter/review acceptance pending",
-        "sourceHash": "0f8543de15e89a6561e5918bb68c6eac60ef26b7e192a7ed1738ac885cd8c55c",
-        "evidence": ".planning/memory-resilience/evidence/Q100.4.2-remote-authority.json",
+        "status": "Scoped diagnostic; full file/package and final review pending",
+        "sourceHash": "226fe5b0f8a9149b58ea778a1f51d84c60bda1cfc1ce7ed39dd999e4c78efa61",
+        "evidence": ".planning/memory-resilience/evidence/Q100.4.2.2.2.2.2-maintenance.json",
         "metrics": {
           "statements": {
-            "observedCounterTotal": 320,
-            "observedPercent": 98.12,
-            "proposal": "measure - completeness unverified"
+            "observedCounterTotal": 321,
+            "observedPercent": 18.69,
+            "proposal": "measure - complete acceptance unverified"
           },
           "branches": {
             "observedCounterTotal": 250,
-            "observedPercent": 95.2,
-            "proposal": "measure - completeness unverified"
+            "observedPercent": 10.4,
+            "proposal": "measure - complete acceptance unverified"
           },
           "functions": {
             "observedCounterTotal": 32,
-            "observedPercent": 90.62,
-            "proposal": "measure - completeness unverified"
+            "observedPercent": 28.12,
+            "proposal": "measure - complete acceptance unverified"
           },
           "lines": {
-            "observedCounterTotal": 305,
-            "observedPercent": 98.68,
-            "proposal": "measure - completeness unverified"
+            "observedCounterTotal": 306,
+            "observedPercent": 19.6,
+            "proposal": "measure - complete acceptance unverified"
           }
         }
       }
@@ -20736,6 +20736,138 @@
             "observedCounterTotal": 22,
             "observedPercent": 100,
             "proposal": "measure - completeness unverified"
+          }
+        }
+      }
+    },
+    {
+      "path": "src/infrastructure/maintenance-targets.test.ts",
+      "package": "package.json",
+      "tier": "S",
+      "rationale": "Data-integrity maintenance target admission and adversarial/refusal proof.",
+      "applicability": {
+        "mode": "measure",
+        "reason": "Executable validation or integrity test; no exclusion approved."
+      },
+      "decisionStatus": "proposed - independent review pending",
+      "sourceHash": "c2cb42bb660e7f95f318f0f3e94e321b2a054ad1032c2f5205ae183e35deca7d",
+      "inspection": {
+        "sourceRevision": "ec3b5e3 + current source hash",
+        "anchor": "Q100.4.2.2.2.2.2 maintenance preflight",
+        "scope": "Scoped preflight behavior only; full restore and consumer gates open."
+      },
+      "metricApplicability": {
+        "status": "Scoped diagnostic; full file/package and final review pending",
+        "sourceHash": "c2cb42bb660e7f95f318f0f3e94e321b2a054ad1032c2f5205ae183e35deca7d",
+        "evidence": ".planning/memory-resilience/evidence/Q100.4.2.2.2.2.2-maintenance.json",
+        "metrics": {
+          "statements": {
+            "observedCounterTotal": 44,
+            "observedPercent": 100,
+            "proposal": "measure - complete acceptance unverified"
+          },
+          "branches": {
+            "observedCounterTotal": 2,
+            "observedPercent": 100,
+            "proposal": "measure - complete acceptance unverified"
+          },
+          "functions": {
+            "observedCounterTotal": 14,
+            "observedPercent": 100,
+            "proposal": "measure - complete acceptance unverified"
+          },
+          "lines": {
+            "observedCounterTotal": 32,
+            "observedPercent": 100,
+            "proposal": "measure - complete acceptance unverified"
+          }
+        }
+      }
+    },
+    {
+      "path": "src/infrastructure/maintenance-targets.ts",
+      "package": "package.json",
+      "tier": "S",
+      "rationale": "Data-integrity maintenance target admission and adversarial/refusal proof.",
+      "applicability": {
+        "mode": "measure",
+        "reason": "Executable validation or integrity test; no exclusion approved."
+      },
+      "decisionStatus": "proposed - independent review pending",
+      "sourceHash": "d0561183bcc93bb9f218608fea943d4baa5bf0347203431bb0e277b0f48da227",
+      "inspection": {
+        "sourceRevision": "ec3b5e3 + current source hash",
+        "anchor": "Q100.4.2.2.2.2.2 maintenance preflight",
+        "scope": "Scoped preflight behavior only; full restore and consumer gates open."
+      },
+      "metricApplicability": {
+        "status": "Scoped diagnostic; full file/package and final review pending",
+        "sourceHash": "d0561183bcc93bb9f218608fea943d4baa5bf0347203431bb0e277b0f48da227",
+        "evidence": ".planning/memory-resilience/evidence/Q100.4.2.2.2.2.2-maintenance.json",
+        "metrics": {
+          "statements": {
+            "observedCounterTotal": 9,
+            "observedPercent": 100,
+            "proposal": "measure - complete acceptance unverified"
+          },
+          "branches": {
+            "observedCounterTotal": 15,
+            "observedPercent": 100,
+            "proposal": "measure - complete acceptance unverified"
+          },
+          "functions": {
+            "observedCounterTotal": 1,
+            "observedPercent": 100,
+            "proposal": "measure - complete acceptance unverified"
+          },
+          "lines": {
+            "observedCounterTotal": 9,
+            "observedPercent": 100,
+            "proposal": "measure - complete acceptance unverified"
+          }
+        }
+      }
+    },
+    {
+      "path": "src/presentation/cli/commands/maintenance-path-fence.test.ts",
+      "package": "package.json",
+      "tier": "S",
+      "rationale": "Data-integrity maintenance target admission and adversarial/refusal proof.",
+      "applicability": {
+        "mode": "measure",
+        "reason": "Executable validation or integrity test; no exclusion approved."
+      },
+      "decisionStatus": "proposed - independent review pending",
+      "sourceHash": "d69bc4eb0118f28c8ee78598973fee191902cf4376c5d7649fdda7ac0cfa7124",
+      "inspection": {
+        "sourceRevision": "ec3b5e3 + current source hash",
+        "anchor": "Q100.4.2.2.2.2.2 maintenance preflight",
+        "scope": "Scoped preflight behavior only; full restore and consumer gates open."
+      },
+      "metricApplicability": {
+        "status": "Scoped diagnostic; full file/package and final review pending",
+        "sourceHash": "d69bc4eb0118f28c8ee78598973fee191902cf4376c5d7649fdda7ac0cfa7124",
+        "evidence": ".planning/memory-resilience/evidence/Q100.4.2.2.2.2.2-maintenance.json",
+        "metrics": {
+          "statements": {
+            "observedCounterTotal": 62,
+            "observedPercent": 100,
+            "proposal": "measure - complete acceptance unverified"
+          },
+          "branches": {
+            "observedCounterTotal": 11,
+            "observedPercent": 100,
+            "proposal": "measure - complete acceptance unverified"
+          },
+          "functions": {
+            "observedCounterTotal": 9,
+            "observedPercent": 100,
+            "proposal": "measure - complete acceptance unverified"
+          },
+          "lines": {
+            "observedCounterTotal": 61,
+            "observedPercent": 100,
+            "proposal": "measure - complete acceptance unverified"
           }
         }
       }

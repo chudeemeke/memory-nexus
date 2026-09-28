@@ -31,6 +31,7 @@ import { SecretAuditService } from "../../../infrastructure/security/secret-audi
 import { PatternRedactor } from "../../../infrastructure/security/pattern-redactor.js";
 import { getAllLogFiles, getBackupDir, getConfigPath, getEventsDir } from "../../../infrastructure/paths.js";
 import { LOCAL_EVENT_STATE_DIRECTORY } from "../../../infrastructure/database/source-operation-admission.js";
+import { assertMaintenanceTargets } from "../../../infrastructure/maintenance-targets.js";
 
 const REMOTE_SCHEMA_VERSION = 1;
 const REMOTE_EXIT_OK = 0;
@@ -580,6 +581,12 @@ function createRemoteBackupSnapshot(
     outputDir: string | undefined,
     opts: RemoteCommandOptions,
 ): RemoteBackupSnapshot {
+    const configPath = opts.configPathOverride ?? getConfigPath();
+    const eventsDir = opts.eventsDirOverride ?? getEventsDir();
+    assertMaintenanceTargets([
+        { path: configPath, kind: "file" },
+        { path: eventsDir, kind: "directory" },
+    ]);
     const now = opts.now?.() ?? new Date();
     const createdAt = now.toISOString();
     const backupId = `remote-sync-${formatBackupTimestamp(now)}`;
@@ -588,8 +595,6 @@ function createRemoteBackupSnapshot(
     const backupPath = uniqueBackupPath(root, backupId);
     mkdirSync(backupPath, { recursive: true, mode: 0o700 });
 
-    const configPath = opts.configPathOverride ?? getConfigPath();
-    const eventsDir = opts.eventsDirOverride ?? getEventsDir();
     const backupConfigPath = join(backupPath, "config.json");
     const backupEventsDir = join(backupPath, "events");
     const includesConfig = existsSync(configPath);

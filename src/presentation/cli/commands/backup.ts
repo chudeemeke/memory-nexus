@@ -27,6 +27,7 @@ import { closeDatabase, initializeDatabase } from "../../../infrastructure/datab
 import { getBackupDir, getConfigPath, getDbPath, getEventsDir } from "../../../infrastructure/paths.js";
 import { unknownErrorMessage } from "../../../domain/errors/unknown-error.js";
 import { LOCAL_EVENT_STATE_DIRECTORY } from "../../../infrastructure/database/source-operation-admission.js";
+import { assertMaintenanceTargets } from "../../../infrastructure/maintenance-targets.js";
 
 const BACKUP_SCHEMA_VERSION = 1;
 const BACKUP_EXIT_OK = 0;
@@ -264,6 +265,14 @@ function createLocalBackupSnapshot(
   outputDir: string | undefined,
   opts: LocalBackupCommandOptions,
 ): LocalBackupSnapshot {
+  const dbPath = opts.dbPathOverride ?? getDbPath();
+  const configPath = opts.configPathOverride ?? getConfigPath();
+  const eventsDir = opts.eventsDirOverride ?? getEventsDir();
+  assertMaintenanceTargets([
+    { path: dbPath, kind: "file" },
+    { path: configPath, kind: "file" },
+    { path: eventsDir, kind: "directory" },
+  ]);
   const now = opts.now?.() ?? new Date();
   const createdAt = now.toISOString();
   const backupId = `local-${formatBackupTimestamp(now)}`;
@@ -272,9 +281,6 @@ function createLocalBackupSnapshot(
   const backupPath = uniqueBackupPath(root, backupId);
   mkdirSync(backupPath, { recursive: true, mode: 0o700 });
 
-  const dbPath = opts.dbPathOverride ?? getDbPath();
-  const configPath = opts.configPathOverride ?? getConfigPath();
-  const eventsDir = opts.eventsDirOverride ?? getEventsDir();
   const backupDbPath = join(backupPath, "memory.db");
   const backupConfigPath = join(backupPath, "config.json");
   const backupEventsDir = join(backupPath, "events");
