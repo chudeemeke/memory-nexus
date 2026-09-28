@@ -2,7 +2,7 @@ import type { Database, SQLQueryBindings } from "bun:sqlite";
 import { OwnedDatabase } from "./owned-database.js";
 import { FACTS_TABLE, PERSONA_ENTRIES_TABLE, GRAPH_EDGES_TABLE, DREAM_ENTRIES_TABLE,
   MEMORY_GOVERNANCE_TABLE, MEMORY_GOVERNANCE_EVENTS_TABLE } from "./schema.js";
-import { assertProjectionSource, type ProjectionSourceSnapshot } from "./projection-source.js";
+import { assertProjectionSource, assertProjectionSourceAuthority, type ProjectionSourceSnapshot } from "./projection-source.js";
 
 const projections = [
   { table: "facts", keys: ["uuid"] },
@@ -73,6 +73,7 @@ export function promoteProjections(db: Database, stage: Database, fence: Fence, 
       throw new Error("Database changed during projection rebuild; retry with current state");
     }
     assertProjectionSource(source);
+    assertProjectionSourceAuthority(db, source);
     const identities = new Map<string, Map<string, string>>();
     for (const { table, keys } of projections) {
       const names = columns(stage, table);

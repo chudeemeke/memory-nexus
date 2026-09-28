@@ -6,10 +6,12 @@
  */
 
 import { Command } from "commander";
+import { existsSync } from "node:fs";
+import { OwnedDatabase } from "../../../infrastructure/database/owned-database.js";
 import type { CommandResult } from "../command-result.js";
 import { closeDatabase, initializeDatabase, getDefaultDbPath } from "../../../infrastructure/database/index.js";
 import {
-  readProjectionEventsWithReport,
+  verifyProjectionRebuild,
   rebuildProjectionsWithReport,
 } from "../../../infrastructure/database/event-log.js";
 import { getEventsDir } from "../../../infrastructure/paths.js";
@@ -55,7 +57,11 @@ export async function executeProjectionsRebuildCommand(
   try {
     const eventsDir = opts.eventsDirOverride ?? getEventsDir();
     if (commandOptions.verify === true) {
-      const report = await readProjectionEventsWithReport(undefined, eventsDir);
+      const targetPath = opts.dbPathOverride ?? getDefaultDbPath();
+      const target = existsSync(targetPath) ? new OwnedDatabase(targetPath, { readonly: true, create: false }) : undefined;
+      let report;
+      try { report = await verifyProjectionRebuild(undefined, eventsDir, target); }
+      finally { target?.close(); }
       const data = {
         mode: "verify",
         events: report.events.length,

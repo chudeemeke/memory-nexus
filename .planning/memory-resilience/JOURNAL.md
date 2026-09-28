@@ -1,5 +1,43 @@
 # Memory resilience execution journal
 
+## 2026-09-28 - Shared staging, event identity and source authority
+
+- Recovered the existing active native goal and six uncommitted paths. Preserved
+  and completed the shared-stage candidate rather than discarding prior work.
+- Verification now runs the same native projection registry as rebuild, using an
+  isolated stage and a readonly existing target. Missing target databases are not
+  created. Missing/unimplemented payloads and unsupported operations reject with
+  safe diagnostics before live promotion.
+- Conflicting event IDs reject the whole rebuild. Identical v2 records and legacy
+  duplicates remain idempotent; generated legacy machine/line metadata normalizes,
+  while explicit sequence and actual v2 provenance remain significant.
+- Explicit-file selection cannot omit canonical sibling logs. Established source
+  authority cannot narrow/switch roots or omit prior files; file-to-directory
+  widening is allowed. Corrupt receipts reject. Promotion rechecks authority.
+- Final Windows Bun1.4.1 and1.3.14 runs each pass294tests/2426assertions in11files.
+  The new driver passes22tests/97assertions and diagnoses100% in all four metrics.
+  Eight injected decision faults fail. Production types, strict new-driver types
+  and isolation pass. Broader initial failure was an outdated targetId diagnostic
+  expectation; state-preservation and successful-retry assertions remain intact.
+- Do not mistake actual staging for complete payload validation: a fresh native
+  RED proves explicit fact project:123 silently becomes envelope scope. Split
+  Q100.3.2 into mandatory children: .1 scoped staging/identity/authority verified;
+  .2 strict recognized-field/transition validation ACTIVE. Parent remains pending.
+  Retained failing probe source/output is in evidence/Q100.3.2.1.json; next command
+  is `bun test ./.git/q100-semantic-coercion-probe.test.ts` (expected current failure).
+  Promote it to durable tests, then cover malformed optional fact fields,
+  governance coercions, dream dates and unsupported per-kind operations, retaining
+  legitimate legacy/v2 producer compatibility. Do not reject unknown metadata
+  merely because it is unknown.
+- Q100.4 still owns real pending-event retry, receipt invalidation, compound
+  cleanup failures and full Tier S/per-file/package/platform/review acceptance.
+  Current narrow production coverage remains insufficient. Hosted checks and
+  independent review are still absent; PR remains draft, no integration/adoption.
+- Catalog473files/two packages;252-item acyclic ledger with one active item.
+  Free disk10.95GiB; owned synthetic/runtime containers cleaned, one registered
+  worktree. No canonical data/model/provider/hooks/replication or blocked cleanup
+  touched. Three inbox items and the baseline-before-experiment gate remain open.
+
 ## 2026-09-28 - Exact source cutoff and durable receipt
 
 - Previous turn: progress, signed/pushed27a0eb9 with atomic projection promotion.

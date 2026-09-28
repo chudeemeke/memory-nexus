@@ -6033,7 +6033,7 @@
     {
       "path": "src/infrastructure/database/event-log.ts",
       "package": "package.json",
-      "sourceHash": "adebb015a386f16adddde1d86d0358fad55a269faa4a790fbfecd283c730eddd",
+      "sourceHash": "86a7436a510fd3dd7e3d171804cd6a96ae39372b65ea598295726b228d25f007",
       "tier": "S",
       "rationale": "Appends canonical memory events and validates imported legacy records; durable source and integrity boundary.",
       "applicability": {
@@ -6042,32 +6042,14 @@
       },
       "decisionStatus": "proposed - independent review pending",
       "inspection": {
-        "sourceRevision": "27a0eb9 + current source hash",
-        "anchor": "Q100.3.1 source cutoff and atomic receipt",
-        "scope": "Paired native source/receipt proof; semantic identity, actual caller recovery and full quality/platform/review remain mandatory."
+        "sourceRevision": "702dbe0 + current source hash",
+        "anchor": "Q100.3.2.1 shared staging and source authority",
+        "scope": "Scoped behavior; Q100.3.2.2 strict field semantics and Q100.4 full quality remain mandatory."
       },
       "metricApplicability": {
-        "status": "diagnostic - full Q100.4/B11.74.7 acceptance pending",
-        "sourceHash": "adebb015a386f16adddde1d86d0358fad55a269faa4a790fbfecd283c730eddd",
-        "evidence": ".planning/memory-resilience/evidence/Q100.3.1.json",
-        "metrics": {
-          "lines": {
-            "observedCounterTotal": 215,
-            "proposal": "measure - completeness unverified"
-          },
-          "functions": {
-            "observedCounterTotal": 50,
-            "proposal": "measure - completeness unverified"
-          },
-          "statements": {
-            "observedCounterTotal": 224,
-            "proposal": "measure - completeness unverified"
-          },
-          "branches": {
-            "observedCounterTotal": 150,
-            "proposal": "measure - completeness unverified"
-          }
-        }
+        "status": "diagnostic only - full per-file/package/changed-line acceptance pending",
+        "sourceHash": "86a7436a510fd3dd7e3d171804cd6a96ae39372b65ea598295726b228d25f007",
+        "evidence": ".planning/memory-resilience/evidence/Q100.3.2.1.json"
       }
     },
     {
@@ -6321,34 +6303,16 @@
         "reason": "Executable Tier S replacement/driver; no exclusion approved."
       },
       "decisionStatus": "proposed - independent review pending",
-      "sourceHash": "7559191dca6a0126de45f5c779a33b456d34b176286b0f4cb666837f66c21f8a",
+      "sourceHash": "ed214d680ed14392a834d14397406b32c43243e08a81124d99c9288ade153ef9",
       "inspection": {
-        "sourceRevision": "27a0eb9 + current source hash",
-        "anchor": "Q100.3.1 source cutoff and atomic receipt",
-        "scope": "Paired native source/receipt proof; semantic identity, actual caller recovery and full quality/platform/review remain mandatory."
+        "sourceRevision": "702dbe0 + current source hash",
+        "anchor": "Q100.3.2.1 shared staging and source authority",
+        "scope": "Scoped behavior; Q100.3.2.2 strict field semantics and Q100.4 full quality remain mandatory."
       },
       "metricApplicability": {
-        "status": "diagnostic - full Q100.4/B11.74.7 acceptance pending",
-        "sourceHash": "7559191dca6a0126de45f5c779a33b456d34b176286b0f4cb666837f66c21f8a",
-        "evidence": ".planning/memory-resilience/evidence/Q100.3.1.json",
-        "metrics": {
-          "lines": {
-            "observedCounterTotal": 70,
-            "proposal": "measure - completeness unverified"
-          },
-          "functions": {
-            "observedCounterTotal": 22,
-            "proposal": "measure - completeness unverified"
-          },
-          "statements": {
-            "observedCounterTotal": 94,
-            "proposal": "measure - completeness unverified"
-          },
-          "branches": {
-            "observedCounterTotal": 43,
-            "proposal": "measure - completeness unverified"
-          }
-        }
+        "status": "diagnostic only - full per-file/package/changed-line acceptance pending",
+        "sourceHash": "ed214d680ed14392a834d14397406b32c43243e08a81124d99c9288ade153ef9",
+        "evidence": ".planning/memory-resilience/evidence/Q100.3.2.1.json"
       }
     },
     {
@@ -6361,34 +6325,16 @@
         "reason": "Executable Tier S source/driver; no exclusion approved."
       },
       "decisionStatus": "proposed - independent review pending",
-      "sourceHash": "73a7fce4a5104e0702e4e38273ef3cd06695ecd615691557344b7b326a79cffa",
+      "sourceHash": "86483396dfb0c02f02e72a0270b76939c3d892f5243dcc645a545d3e93fdfdbe",
       "inspection": {
-        "sourceRevision": "27a0eb9 + current source hash",
-        "anchor": "Q100.3.1 source cutoff and atomic receipt",
-        "scope": "Paired native source/receipt proof; semantic identity, actual caller recovery and full quality/platform/review remain mandatory."
+        "sourceRevision": "702dbe0 + current source hash",
+        "anchor": "Q100.3.2.1 shared staging and source authority",
+        "scope": "Scoped behavior; Q100.3.2.2 strict field semantics and Q100.4 full quality remain mandatory."
       },
       "metricApplicability": {
-        "status": "diagnostic - full Q100.4/B11.74.7 acceptance pending",
-        "sourceHash": "73a7fce4a5104e0702e4e38273ef3cd06695ecd615691557344b7b326a79cffa",
-        "evidence": ".planning/memory-resilience/evidence/Q100.3.1.json",
-        "metrics": {
-          "lines": {
-            "observedCounterTotal": 63,
-            "proposal": "measure - completeness unverified"
-          },
-          "functions": {
-            "observedCounterTotal": 13,
-            "proposal": "measure - completeness unverified"
-          },
-          "statements": {
-            "observedCounterTotal": 99,
-            "proposal": "measure - completeness unverified"
-          },
-          "branches": {
-            "observedCounterTotal": 40,
-            "proposal": "measure - completeness unverified"
-          }
-        }
+        "status": "diagnostic only - full per-file/package/changed-line acceptance pending",
+        "sourceHash": "86483396dfb0c02f02e72a0270b76939c3d892f5243dcc645a545d3e93fdfdbe",
+        "evidence": ".planning/memory-resilience/evidence/Q100.3.2.1.json"
       }
     },
     {
@@ -13769,7 +13715,7 @@
     {
       "path": "src/presentation/cli/commands/projections.ts",
       "package": "package.json",
-      "sourceHash": "6c45f9894a7edb8a60a50bc871c544f5723c8f2c699c1e5e1b658cfab8c2ff87",
+      "sourceHash": "d17cca5ecfedbc67d059cf5e29759a1c5ff9d9c231170b730081d5679e562b7b",
       "tier": "S",
       "rationale": "Initializes storage and controls reconstruction of derived projections.",
       "applicability": {
@@ -13778,14 +13724,14 @@
       },
       "decisionStatus": "proposed - independent review pending",
       "inspection": {
-        "sourceRevision": "27a0eb9 + current source hash",
-        "anchor": "Q100.3.1 source cutoff and atomic receipt",
-        "scope": "Paired native source/receipt proof; semantic identity, actual caller recovery and full quality/platform/review remain mandatory."
+        "sourceRevision": "702dbe0 + current source hash",
+        "anchor": "Q100.3.2.1 shared staging and source authority",
+        "scope": "Scoped behavior; Q100.3.2.2 strict field semantics and Q100.4 full quality remain mandatory."
       },
       "metricApplicability": {
-        "status": "changed source - complete numeric applicability pending Q100.4/Q019/B11.74.7",
-        "sourceHash": "6c45f9894a7edb8a60a50bc871c544f5723c8f2c699c1e5e1b658cfab8c2ff87",
-        "evidence": ".planning/memory-resilience/evidence/Q100.3.1.json"
+        "status": "diagnostic only - full per-file/package/changed-line acceptance pending",
+        "sourceHash": "d17cca5ecfedbc67d059cf5e29759a1c5ff9d9c231170b730081d5679e562b7b",
+        "evidence": ".planning/memory-resilience/evidence/Q100.3.2.1.json"
       }
     },
     {
@@ -17766,34 +17712,38 @@
         "reason": "Executable Tier S replacement/driver; no exclusion approved."
       },
       "decisionStatus": "proposed - independent review pending",
-      "sourceHash": "5e8590431848ee059dadc3f8d9563f4dc9cdbc72509c4c3e5a7409eae16c1bb8",
+      "sourceHash": "6755c9ea2acd173910634688f8f6c1405cdb4b707d9fc3e23102abe022bb24a8",
       "inspection": {
-        "sourceRevision": "b5895ac + current source hash",
-        "anchor": "Q100.2 isolated replay and atomic promotion",
-        "scope": "Paired native atomic replacement proof; source snapshot, full caller recovery and quality/platform/review remain Q100.3-Q100.4."
+        "sourceRevision": "702dbe0 + current source hash",
+        "anchor": "Q100.3.2.1 shared staging and source authority",
+        "scope": "Scoped behavior; Q100.3.2.2 strict field semantics and Q100.4 full quality remain mandatory."
       },
       "metricApplicability": {
-        "status": "diagnostic - complete Q100.4/B11.74.7 acceptance pending",
-        "sourceHash": "5e8590431848ee059dadc3f8d9563f4dc9cdbc72509c4c3e5a7409eae16c1bb8",
-        "evidence": ".planning/memory-resilience/evidence/Q100.2.json",
-        "metrics": {
-          "lines": {
-            "observedCounterTotal": 133,
-            "proposal": "measure - completeness unverified"
-          },
-          "functions": {
-            "observedCounterTotal": 37,
-            "proposal": "measure - completeness unverified"
-          },
-          "statements": {
-            "observedCounterTotal": 175,
-            "proposal": "measure - completeness unverified"
-          },
-          "branches": {
-            "observedCounterTotal": 35,
-            "proposal": "measure - completeness unverified"
-          }
-        }
+        "status": "diagnostic only - full per-file/package/changed-line acceptance pending",
+        "sourceHash": "6755c9ea2acd173910634688f8f6c1405cdb4b707d9fc3e23102abe022bb24a8",
+        "evidence": ".planning/memory-resilience/evidence/Q100.3.2.1.json"
+      }
+    },
+    {
+      "path": "tests/infrastructure/database/projection-semantics.test.ts",
+      "package": "package.json",
+      "tier": "S",
+      "rationale": "Native data-integrity projection admission and regression evidence.",
+      "applicability": {
+        "mode": "measure",
+        "reason": "Executable Tier S source/driver; no exclusion approved."
+      },
+      "decisionStatus": "proposed - independent review pending",
+      "sourceHash": "be1d8081e5d6263cfb31bd22c06e03127c681fc97fb1076f2d96d5ff82de1f9f",
+      "inspection": {
+        "sourceRevision": "702dbe0 + current source hash",
+        "anchor": "Q100.3.2.1 shared staging and source authority",
+        "scope": "Scoped behavior; Q100.3.2.2 strict field semantics and Q100.4 full quality remain mandatory."
+      },
+      "metricApplicability": {
+        "status": "diagnostic only - full per-file/package/changed-line acceptance pending",
+        "sourceHash": "be1d8081e5d6263cfb31bd22c06e03127c681fc97fb1076f2d96d5ff82de1f9f",
+        "evidence": ".planning/memory-resilience/evidence/Q100.3.2.1.json"
       }
     },
     {

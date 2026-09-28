@@ -1,7 +1,7 @@
 import { createHash } from "node:crypto";
 import { lstatSync, openSync, fstatSync, readSync, closeSync, type BigIntStats } from "node:fs";
 import { open } from "node:fs/promises";
-import { resolve } from "node:path";
+import { resolve, dirname } from "node:path";
 import { getAllLogFiles, getEventsDir } from "../paths.js";
 import type { Database } from "bun:sqlite";
 
@@ -21,6 +21,14 @@ function signature(stat: BigIntStats): string {
 function selected(scope: ProjectionSourceManifest["scope"]): string[] {
   return scope.kind === "file" ? [scope.path] : getAllLogFiles(scope.path).map(path => resolve(path)).sort();
 }
+function samePath(left: string, right: string): boolean {
+  return process.platform === "win32" ? resolve(left).toLowerCase() === resolve(right).toLowerCase() : resolve(left) === resolve(right);
+}
+function assertCompleteSelection(scope: ProjectionSourceManifest["scope"]): void {
+  if (scope.kind === "file" && getAllLogFiles(dirname(scope.path)).some(path => !samePath(path, scope.path))) {
+    throw new Error("Projection source selection omits sibling event logs; select their directory");
+  }
+}
 function changed(): never { throw new Error("Projection source changed during rebuild; retry with current sources"); }
 function requireMetadata(path: string, identity: string): void {
   try { if (signature(lstatSync(path, { bigint: true })) !== identity) changed(); }
@@ -32,6 +40,7 @@ export async function captureProjectionSource(logPath: string | undefined, event
   consume: (line: string, path: string, lineNumber: number) => void): Promise<ProjectionSourceSnapshot> {
   const scope: ProjectionSourceManifest["scope"] = logPath
     ? { kind: "file", path: resolve(logPath) } : { kind: "directory", path: resolve(eventsDir ?? getEventsDir()) };
+  assertCompleteSelection(scope);
   const paths = selected(scope);
   if (paths.length === 0) throw new Error("No event log files available for projection rebuild");
   const identities: string[] = [];
@@ -76,6 +85,7 @@ export async function captureProjectionSource(logPath: string | undefined, event
 /** Synchronous final fence; the manifest remains an exact cutoff, not a latest-data claim. */
 export function assertProjectionSource(snapshot: ProjectionSourceSnapshot): void {
   const { manifest, identities } = snapshot;
+  assertCompleteSelection(manifest.scope);
   if (JSON.stringify(selected(manifest.scope)) !== JSON.stringify(manifest.files.map(file => file.path))) changed();
   for (const [index, file] of manifest.files.entries()) {
     requireMetadata(file.path, identities[index]!);
@@ -95,6 +105,29 @@ export function assertProjectionSource(snapshot: ProjectionSourceSnapshot): void
     } finally { closeSync(fd); }
   }
   if (JSON.stringify(selected(manifest.scope)) !== JSON.stringify(manifest.files.map(file => file.path))) changed();
+}
+
+/** Established source authority may widen from a file, but cannot silently narrow. */
+export function assertProjectionSourceAuthority(db: Database, snapshot: ProjectionSourceSnapshot): void {
+  using exists = db.prepare("SELECT 1 FROM main.sqlite_master WHERE type='table' AND name='projection_replay_state'");
+  if (!exists.get()) return;
+  using receipt = db.prepare<{ manifest: string }, []>("SELECT manifest FROM main.projection_replay_state WHERE id=1");
+  const row = receipt.get();
+  if (!row) return;
+  let prior: ProjectionSourceManifest;
+  try {
+    prior = JSON.parse(row.manifest) as ProjectionSourceManifest;
+    if (prior.version !== 1 || !["file", "directory"].includes(prior.scope.kind) || typeof prior.scope.path !== "string" ||
+      !Array.isArray(prior.files) || prior.files.length === 0 || prior.files.some(file => typeof file.path !== "string" ||
+        !Number.isSafeInteger(file.bytes) || file.bytes < 0 || !/^[a-f0-9]{64}$/.test(file.sha256))) throw new Error();
+  } catch { throw new Error("Projection source receipt is invalid; recovery required before replacement"); }
+  const next = snapshot.manifest;
+  const unchanged = prior.scope.kind === next.scope.kind && samePath(prior.scope.path, next.scope.path);
+  const widened = prior.scope.kind === "file" && next.scope.kind === "directory" && samePath(dirname(prior.scope.path), next.scope.path);
+  if (!unchanged && !widened) throw new Error("Projection source authority cannot narrow or switch roots during rebuild");
+  if (prior.files.some(file => !next.files.some(candidate => samePath(file.path, candidate.path)))) {
+    throw new Error("Projection source selection omits previously applied files; restore complete sources before rebuilding");
+  }
 }
 
 /** Source freshness only. Actual projection health and retry belong to callers. */

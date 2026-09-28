@@ -139,7 +139,7 @@ describe("atomic projection replacement", () => {
         consent: { status: "not_required", scopes: [] }, causality: { parentEventIds: [], supersedesEventIds: [], relatedEventIds: [] },
         payload: { governance: { control: "suppress" } } }), path);
       const before = snapshot(db);
-      await expect(rebuildProjectionsWithReport(db, path)).rejects.toThrow("targetId");
+      await expect(rebuildProjectionsWithReport(db, path)).rejects.toThrow("source cannot be replayed");
       expect(snapshot(db)).toEqual(before);
       await corpus(path, "new"); await rebuildProjectionsWithReport(db, path);
     });

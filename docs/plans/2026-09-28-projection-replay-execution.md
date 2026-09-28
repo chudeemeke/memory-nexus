@@ -139,3 +139,41 @@ statements88.88/branches80 still fails quality; Q100.4 retains this obligation.
 Before a caller uses the source receipt to skip replay, verify or implement receipt
 invalidation for direct projection changes/import/restore. Source match alone is
 not projection health. Q100.3.2 semantic/identity/scope admission remains active.
+
+## Q100.3.2 semantic and authority contract
+
+Verification and mutation must run the same actual staging registry. Parsing and
+hash integrity alone do not establish a usable projection. Missing payloads,
+unimplemented event kinds and unsupported operations must refuse replacement;
+staging diagnostics must not print event payloads or IDs. Existing add/update/
+supersede handlers remain; delete/noop/migrate and privacy/projection kinds require
+implemented semantics before they can be accepted, rather than silent omission.
+
+Within a source, the same event ID with identical canonical identity is idempotent.
+Different canonical records sharing an ID are a conflict, not first-writer-wins.
+For v2 compare validated envelope hashes. For legacy records normalize generated
+machine/line-sequence metadata while retaining explicit sequence and all projected
+semantics; never normalize away real v2 provenance or privacy differences.
+
+A file selection is not authority to omit sibling canonical logs or previously
+applied source files. Established directory authority cannot narrow to a file or
+switch directory; an established file may widen to its containing directory while
+retaining all prior source paths. Receipt corruption refuses scope inference.
+Recheck authority inside promotion; verification may read an existing target DB
+read-only but must not create or initialize it. Full authority cutover requires
+the separate adoption decision; these checks do not authorize one.
+
+Split the semantic work into mandatory acceptance slices:
+
+- Q100.3.2.1: shared real staging, safe failure reporting, duplicate identity and
+  source authority. A scoped checkpoint does not certify every payload field.
+- Q100.3.2.2: strict recognized-field admission before tolerant projection adapters.
+  Reproduce malformed optional fact fields falling back to envelope values;
+  inspect governance string/array/date/number coercions and dream optional dates.
+  Distinguish absent optional values from malformed explicit values, and restrict
+  operations by the state transitions actually implemented for each event kind.
+  Verify legitimate legacy and v2 producer records remain compatible. Unknown
+  extension metadata alone is not a reason to discard a valid event.
+
+Q100.3.2 remains a parent barrier requiring both slices. Q100.4 still owns actual
+caller retry, receipt invalidation and complete quality/platform/review evidence.

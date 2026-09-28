@@ -3,7 +3,7 @@
   "workstream": "memory-resilience",
   "goal_status": "active",
   "starting_revision": "77d54e05be7fc24cede4a9a3e1fede6fa113ac8f",
-  "current_item": "Q100.3.2",
+  "current_item": "Q100.3.2.2",
   "status_semantics": {
     "pending": "Not started; authorization and dependencies must permit work.",
     "pending_rebaseline": "Historical candidate, not a confirmed current failure or a completed task.",
@@ -6086,11 +6086,12 @@
         "docs/plans/2026-09-28-projection-replay-execution.md",
         ".planning/memory-resilience/evidence/Q100.1.json",
         ".planning/memory-resilience/evidence/Q100.2.json",
-        ".planning/memory-resilience/evidence/Q100.3.1.json"
+        ".planning/memory-resilience/evidence/Q100.3.1.json",
+        ".planning/memory-resilience/evidence/Q100.3.2.1.json"
       ],
       "acceptance_record": ".planning/memory-resilience/evidence/Q100.4.json",
       "retirement_trigger": "Before parent Q100/B11.74.7/B10/R02 acceptance.",
-      "observed_gap": "Q100.2 narrow diagnostic: new replacement statements98.82/lines100/functions100/branches100; atomicity driver branches97.14 misses Tier S. Event-log statements68.01/lines67.59/functions76/branches55.19 is not complete module measurement and fails acceptance. Q100.1 CLI branches87.5 and34 unchanged integration strict-type errors remain. Explicitly cover primary+stage-cleanup combined failure and post-commit cleanup reporting; complete actual caller recovery, fixture quality, package/changed-line/platform/review. Q100.3.1 source module diagnostic statements88.88/branches80/lines98.41/functions100 fails Tier S; final source driver diagnoses100%. Re-measure changed schema/CLI and replacement/event-log after semantic work. Wire isProjectionSourceCurrent into actual caller retry and verify post-cutoff pending reporting; cover compound file-handle cleanup errors without hiding primary failures. Before source receipt can skip replay, verify or implement invalidation across direct projection writes/import/restore; source match alone does not prove projected rows unchanged."
+      "observed_gap": "Q100.2 narrow diagnostic: new replacement statements98.82/lines100/functions100/branches100; atomicity driver branches97.14 misses Tier S. Event-log statements68.01/lines67.59/functions76/branches55.19 is not complete module measurement and fails acceptance. Q100.1 CLI branches87.5 and34 unchanged integration strict-type errors remain. Explicitly cover primary+stage-cleanup combined failure and post-commit cleanup reporting; complete actual caller recovery, fixture quality, package/changed-line/platform/review. Q100.3.1 source module diagnostic statements88.88/branches80/lines98.41/functions100 fails Tier S; final source driver diagnoses100%. Re-measure changed schema/CLI and replacement/event-log after semantic work. Wire isProjectionSourceCurrent into actual caller retry and verify post-cutoff pending reporting; cover compound file-handle cleanup errors without hiding primary failures. Before source receipt can skip replay, verify or implement invalidation across direct projection writes/import/restore; source match alone does not prove projected rows unchanged. Q100.3.2.1 adds shared staging and readonly verification; complete measurement must cover semantic guards, receipt validation, cross-platform path authority and primary-plus-readonly-close failures. A matched source receipt still cannot certify projection health. Narrow semantic suite metrics are diagnostic, not final quality."
     },
     {
       "id": "Q100.3.1",
@@ -6124,9 +6125,11 @@
       "id": "Q100.3.2",
       "stage": "baseline-quality",
       "title": "Unify semantic replay admission and event identity",
-      "status": "active",
+      "status": "pending",
       "depends_on": [
-        "Q100.3.1"
+        "Q100.3.1",
+        "Q100.3.2.1",
+        "Q100.3.2.2"
       ],
       "scope": "src/infrastructure/database/event-log.ts and actual projection replay callers",
       "deliverable": "Actual semantic staging readiness, conflicting duplicate IDs, explicit-file versus all-log authority.",
@@ -6135,13 +6138,61 @@
       "authorization": "authorized",
       "owner": "memory-nexus",
       "evidence": [
-        "docs/plans/2026-09-28-projection-replay-execution.md"
+        "docs/plans/2026-09-28-projection-replay-execution.md",
+        ".planning/memory-resilience/evidence/Q100.3.2.1.json"
       ],
       "acceptance_record": ".planning/memory-resilience/evidence/Q100.3.2.json",
       "retirement_trigger": "Before Q100.3/Q100/B11.74.7/B10/R02 acceptance.",
       "progress": {
-        "next": "Reproduce verify accepting syntactically valid but unprojectable governance/dream/fact payloads; reject conflicting duplicate IDs without treating identical legacy records as conflicts solely because synthetic line/filename metadata differs. Reconcile explicit file authority before full replacement.",
-        "limits": "Source receipt detects bytes and scope, not semantic readiness. isProjectionSourceCurrent is not yet wired into actual sync/extraction retry; Q100.4 owns this mandatory integration."
+        "status": "Mandatory children preserve original acceptance. Shared staging/identity/authority scoped verified; malformed explicit optional fields remain active.",
+        "owner": "memory-nexus",
+        "trigger": "Both children plus Q100.4 final quality before parent acceptance."
+      }
+    },
+    {
+      "id": "Q100.3.2.1",
+      "stage": "baseline-quality",
+      "title": "Share real staging and enforce event identity/source authority",
+      "status": "verified",
+      "depends_on": [
+        "Q100.3.1"
+      ],
+      "scope": "src/infrastructure/database/event-log.ts and actual projection replay callers",
+      "deliverable": "Shared native staging for verify and rebuild, safe diagnostics, conflict-aware duplicate identity and monotonic source selection.",
+      "verification": "Paired Windows native 294 tests/2426 assertions;22 new tests/97 assertions;8 injected faults rejected. Scoped behavior only, final quality remains mandatory.",
+      "risk": "S",
+      "authorization": "authorized",
+      "owner": "memory-nexus",
+      "evidence": [
+        ".planning/memory-resilience/evidence/Q100.3.2.1.json"
+      ],
+      "acceptance_record": ".planning/memory-resilience/evidence/Q100.3.2.1.json",
+      "retirement_trigger": "Before Q100.3.2/Q100.3/Q100/B11.74.7/B10/R02 acceptance."
+    },
+    {
+      "id": "Q100.3.2.2",
+      "stage": "baseline-quality",
+      "title": "Reject malformed explicit payload fields and unsupported transitions",
+      "status": "active",
+      "depends_on": [
+        "Q100.3.2.1"
+      ],
+      "scope": "src/infrastructure/database/event-log.ts and actual projection replay callers",
+      "deliverable": "Recognized fact/governance/dream field validation distinguishes absent optional values from malformed explicit values; supported per-kind operations follow actual producers.",
+      "verification": "RED first for fact optional project/type/date/metadata coercions, governance arrays/dates/numbers/control defaults, dream optional dates and unsupported supersede operations; legitimate legacy/v2 producer compatibility; both verify and rebuild preserve existing target on rejection.",
+      "risk": "S",
+      "authorization": "authorized",
+      "owner": "memory-nexus",
+      "evidence": [
+        ".planning/memory-resilience/evidence/Q100.3.2.1.json"
+      ],
+      "acceptance_record": ".planning/memory-resilience/evidence/Q100.3.2.2.json",
+      "retirement_trigger": "Before Q100.3.2/Q100.3/Q100/B11.74.7/B10/R02 acceptance.",
+      "progress": {
+        "reproduced": "Signed v2 fact payload project:123 is silently replaced by envelope scope. Native RED probe resolves instead of rejecting.",
+        "next": "Promote retained synthetic coercion probe to durable regression tests; inspect all recognized optional fields and actual producer operation contracts before strict validation.",
+        "probe": ".git/q100-semantic-coercion-probe.test.ts",
+        "limits": "No acceptance of optional-field semantics, cross-version duplicate equivalence or source receipt schema completeness from the shared-stage checkpoint."
       }
     }
   ],

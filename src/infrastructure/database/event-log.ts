@@ -33,7 +33,7 @@ import { MemoryGovernanceEntry } from "../../domain/entities/memory-governance.j
 import { getMachineLogPath, getAllLogFiles } from "../paths.js";
 import { loadConfig } from "../hooks/config-manager.js";
 import { captureProjectionFence, createProjectionStage, promoteProjections } from "./projection-replacement.js";
-import { captureProjectionSource, type ProjectionSourceSnapshot, type ProjectionSourceManifest } from "./projection-source.js";
+import { captureProjectionSource, assertProjectionSource, assertProjectionSourceAuthority, type ProjectionSourceSnapshot, type ProjectionSourceManifest } from "./projection-source.js";
 
 export interface InvalidEventLogLine {
   filePath: string;
@@ -109,12 +109,33 @@ export async function readMemoryEventsWithReport(logPath?: string, eventsDir?: s
 /** Required-source admission shared by projection verification and mutation. */
 export async function readProjectionEventsWithReport(logPath?: string, eventsDir?: string): Promise<ProjectionSourceReadReport> {
   const events: MemoryEventEnvelope[] = [], invalidEvents: InvalidEventLogLine[] = [];
+  const identities = new Map<string, string>();
   const snapshot = await captureProjectionSource(logPath, eventsDir, (line, filePath, lineNumber) => {
     if (!line.trim()) return;
-    try { events.push(parseMemoryEventRecord(JSON.parse(line), filePath, lineNumber)); }
+    try {
+      const record: unknown = JSON.parse(line);
+      const event = parseMemoryEventRecord(record, filePath, lineNumber);
+      const identity = isObject(record) && record.schemaVersion === 2 ? event.integrity.envelopeHash
+        : MemoryEventEnvelope.create({ ...event.toJSON(), machineId: "legacy", sequence: legacySequence(record as Record<string, unknown>, 1),
+          occurredAt: event.occurredAt, observedAt: event.observedAt }).integrity.envelopeHash;
+      const existing = identities.get(event.eventId);
+      if (existing !== undefined && existing !== identity) throw new Error("Conflicting event identity");
+      identities.set(event.eventId, identity); events.push(event);
+    }
     catch { invalidEvents.push({ filePath, lineNumber, line: "", reason: `Invalid event log record at line ${lineNumber} in ${filePath}` }); }
   });
   return { events, invalidEvents, snapshot };
+}
+
+/** Exercise real handlers in an isolated DB; never mutate or initialize the target. */
+export async function verifyProjectionRebuild(logPath?: string, eventsDir?: string, target?: Database): Promise<ProjectionSourceReadReport> {
+  const report = await readProjectionEventsWithReport(logPath, eventsDir);
+  if (report.invalidEvents.length === 0) {
+    await withProjectionStage(report, () => {
+      if (target) assertProjectionSourceAuthority(target, report.snapshot);
+    });
+  }
+  return report;
 }
 
 /**
@@ -158,7 +179,14 @@ export async function rebuildProjectionsWithReport(db: Database, logPath?: strin
       source: report.snapshot.manifest,
     };
   }
-  const sortedEvents = sortMemoryEvents(report.events);
+  return withProjectionStage(report, (stage, replay) => {
+    promoteProjections(db, stage, fence, report.snapshot);
+    return { invalidEvents: 0, invalidEventLines: [], replay, source: report.snapshot.manifest };
+  });
+}
+
+async function withProjectionStage<T>(report: ProjectionSourceReadReport,
+  complete: (stage: Database, replay: ProjectionReplayResult) => T): Promise<T> {
   const registry = new ProjectionRegistry<ProjectionContext>([
     createFactsProjection(),
     createPersonaProjection(),
@@ -169,9 +197,21 @@ export async function rebuildProjectionsWithReport(db: Database, logPath?: strin
   const stage = createProjectionStage();
   let failed = false, failure: unknown;
   try {
-    const replay = await registry.replay(sortedEvents, { db: stage });
-    promoteProjections(db, stage, fence, report.snapshot);
-    return { invalidEvents: 0, invalidEventLines: [], replay, source: report.snapshot.manifest };
+    let replay: ProjectionReplayResult;
+    try {
+      for (const event of report.events) {
+        if (!["add", "update", "supersede"].includes(event.operation) ||
+          (!FACT_EVENT_KINDS.includes(event.kind) && !["governance", "consent", "dream"].includes(event.kind)) ||
+          ((event.kind === "governance" || event.kind === "consent") && !isObject(event.payload.governance))) {
+          throw new Error("Unsupported projection event semantics");
+        }
+      }
+      replay = await registry.replay(sortMemoryEvents(report.events), { db: stage });
+    } catch (cause) {
+      throw new Error("Projection source cannot be replayed; validate event payloads and supported operations", { cause });
+    }
+    assertProjectionSource(report.snapshot);
+    return complete(stage, replay);
   } catch (error) {
     failed = true; failure = error;
     throw error;
