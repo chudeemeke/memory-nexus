@@ -15,6 +15,7 @@
 import type { Database } from "bun:sqlite";
 import { createHash } from "node:crypto";
 import type { OperationLease, LeasedOperationAdmission } from "../../domain/ports/operation-admission.js";
+import { runDatabaseWrite } from "../../infrastructure/database/database-write-admission.js";
 import { createSourceOperationAdmission } from "../../infrastructure/database/source-operation-admission.js";
 import { Fact } from "../../domain/entities/fact.js";
 import type { IExtractionProvider } from "../../domain/ports/extraction.js";
@@ -124,8 +125,8 @@ export class ExtractionPipeline {
       }
     }
 
-    return (this.admission ?? createSourceOperationAdmission(this.eventLogPath)).run(async lease => {
-      if ((await recoverPendingProjections(this.db, this.eventLogPath, undefined, lease)).pending) {
+    return (this.admission ?? createSourceOperationAdmission(this.eventLogPath)).run(lease => runDatabaseWrite(this.db, async databaseLease => {
+      if ((await recoverPendingProjections(this.db, this.eventLogPath, undefined, lease, databaseLease)).pending) {
         throw new Error("Projection recovery remains pending; retry extraction");
       }
       if (inputIdentity(await this.messageRepo.findBySession(sessionId)) !== inputSnapshot) {
@@ -236,7 +237,7 @@ export class ExtractionPipeline {
       // New durable events must project before recording a successful extraction.
       if (factsAdded > 0) {
         try {
-          if ((await recoverPendingProjections(this.db, this.eventLogPath, undefined, lease)).pending) {
+          if ((await recoverPendingProjections(this.db, this.eventLogPath, undefined, lease, databaseLease)).pending) {
             throw new Error("Newer source remains pending");
           }
         } catch (cause) {
@@ -266,7 +267,7 @@ export class ExtractionPipeline {
         superseded: factsSuperseded,
         skipped: factsSkipped
       };
-    });
+    }));
   }
 
   private async appendProjectionEvent(fact: Fact, lease: OperationLease): Promise<void> {

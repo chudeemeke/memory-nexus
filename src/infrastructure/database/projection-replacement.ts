@@ -1,4 +1,6 @@
 import type { Database, SQLQueryBindings } from "bun:sqlite";
+import type { DatabaseWriteLease } from "../../domain/ports/operation-admission.js";
+import { assertDatabaseWriteLease } from "./database-write-admission.js";
 import { OwnedDatabase } from "./owned-database.js";
 import { FACTS_TABLE, PERSONA_ENTRIES_TABLE, GRAPH_EDGES_TABLE, DREAM_ENTRIES_TABLE,
   MEMORY_GOVERNANCE_TABLE, MEMORY_GOVERNANCE_EVENTS_TABLE } from "./schema.js";
@@ -11,8 +13,8 @@ type Fence = readonly number[];
 const quote = (identifier: string) => '"' + identifier.replaceAll('"', '""') + '"';
 
 /** Connection-local signals; compare only on the same live connection. */
-export function captureProjectionFence(db: Database): Fence {
-  if (db.inTransaction) throw new Error("Projection rebuild cannot use a caller transaction");
+export function captureProjectionFence(db: Database, lease?: DatabaseWriteLease): Fence {
+  assertDatabaseWriteLease(db, lease);
   return readFence(db);
 }
 
@@ -59,8 +61,8 @@ function directChanges(db: Database): number {
 }
 
 /** No await is permitted between the conflict check, replacement and commit. */
-export function promoteProjections(db: Database, stage: Database, fence: Fence, source: ProjectionSourceSnapshot, automatic = false): void {
-  if (db.inTransaction) throw new Error("Projection rebuild cannot use a caller transaction");
+export function promoteProjections(db: Database, stage: Database, fence: Fence, source: ProjectionSourceSnapshot, automatic = false, lease?: DatabaseWriteLease): void {
+  assertDatabaseWriteLease(db, lease);
   db.transaction(() => {
     const current = readFence(db);
     if (current.length !== fence.length || current.some((value, index) => value !== fence[index])) {

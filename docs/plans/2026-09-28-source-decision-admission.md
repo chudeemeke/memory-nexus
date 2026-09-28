@@ -1,6 +1,6 @@
 # Source decision admission
 
-Status: baseline repair in progress; dream/governance admission implemented, complete writer adoption pending.
+Status: baseline repair in progress; selected writers and extraction input admission implemented, complete adoption and quality pending.
 Owner: memory-nexus. Parent: Q100.4.2. No production replication or new service.
 
 Backend checkpoint: synthetic reservation qualification and the separate
@@ -12,8 +12,10 @@ authority, grants no implicit nested permission, and preserves cleanup failures.
 The current slice binds that backend to the real event root and acquires it before
 mutating dream/governance recovery and decision reads. The native command regression
 now requires contention without append, followed by a fresh retry preserving approval.
-Raw append, extraction, replay, remote and maintenance adoption remain incomplete;
-global command concurrency is not accepted. A constructor path is not authority proof.
+Raw append/replay and extraction input admission now have scoped evidence in the
+checkpoints below. Within-batch decisions, remote and maintenance adoption remain
+incomplete; global command concurrency is not accepted. A constructor path is not
+authority proof.
 
 ## Observed failure and irreducible requirements
 
@@ -293,3 +295,34 @@ current rejection of caller transactions must remain for arbitrary callers; any
 internal nested transaction path needs explicit authority and failure/recovery
 proof. Do not weaken those guards or add repeated optimistic checks as a substitute
 for excluding the competing writer. Coordinate this boundary with Q100.4.2.6/.11.
+
+Owned database scope contract: acquire source admission first, then BEGIN IMMEDIATE
+on the borrowed target connection. Keep the reservation across asynchronous source
+append and replay until audit completion; commit only after all admitted children
+settle. Use the existing explicit lease/drain wrapper with private database-issued
+bindings. Validate database identity, active ancestry and transaction presence.
+An arbitrary pre-existing caller transaction remains forbidden. No callback or
+replay may gain authority from db.inTransaction alone. Preserve primary plus
+rollback failures and report any reservation left open without closing the borrowed
+connection. Explicit nested replay may use a savepoint inside this owned scope;
+standalone replay keeps its existing transaction boundary. This does not make
+JSONL plus SQLite crash-atomic or authorize raw SQL to terminate an owned scope.
+
+## Owned database scope implementation checkpoint
+
+Q100.4.2.1 now has scoped behavioral acceptance recorded in
+`.planning/memory-resilience/evidence/Q100.4.2.1.json`. Explicit private database
+leases preserve caller-transaction rejection while allowing nested replay under
+the source-before-database extraction scope. Other-connection contention and
+same-connection message mutation refusal are exercised, including batch chunk
+boundaries, rollback, process kill before audit, source recovery and retry.
+Compatibility passed 267 tests / 1,147 assertions across 12 files on each Windows
+Bun 1.4.1 and pinned 1.3.14; 15 injected faults were detected. The new admission
+helper measured 100% in all four metrics. Surrounding quality gaps, native child
+counter aggregation, other database topology and final review remain open.
+
+Q100.4.2.2 is next: a retained real-store RED shows two identical candidates in
+one batch create two facts. Later decisions must observe preceding accepted
+effects. Acceptance must cover duplicates, overlapping replacements, ordering and
+interrupted retry, not only exact-string filtering. This does not establish
+cross-resource atomicity between JSONL and SQLite.

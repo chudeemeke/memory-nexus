@@ -36,7 +36,8 @@ import { captureProjectionFence, createProjectionStage, promoteProjections } fro
 import { captureProjectionSource, assertProjectionSource, assertProjectionSourceAuthority, type ProjectionSourceSnapshot, type ProjectionSourceManifest } from "./projection-source.js";
 import { assertLegacyProjectionPayload, assertProjectionPayload } from "./projection-payload.js";
 import { assertAutomaticProjectionReplay } from "./projection-state.js";
-import type { OperationLease } from "../../domain/ports/operation-admission.js";
+import type { OperationLease, DatabaseWriteLease } from "../../domain/ports/operation-admission.js";
+import { runDatabaseWrite } from "./database-write-admission.js";
 import { createSourceOperationAdmission } from "./source-operation-admission.js";
 
 export interface InvalidEventLogLine {
@@ -165,8 +166,8 @@ export async function* readEvents(logPath?: string, eventsDir?: string): AsyncGe
 /**
  * Rebuild derived database projections from the canonical event log.
  */
-export async function rebuildProjections(db: Database, logPath?: string, eventsDir?: string, mode: "explicit" | "automatic" = "explicit", parent?: OperationLease): Promise<void> {
-  const report = await rebuildProjectionsWithReport(db, logPath, eventsDir, mode, parent);
+export async function rebuildProjections(db: Database, logPath?: string, eventsDir?: string, mode: "explicit" | "automatic" = "explicit", parent?: OperationLease, databaseLease?: DatabaseWriteLease): Promise<void> {
+  const report = await rebuildProjectionsWithReport(db, logPath, eventsDir, mode, parent, databaseLease);
   if (report.invalidEvents > 0) {
     throw new Error(`Projection rebuild refused: ${report.invalidEvents} invalid event log record(s)`);
   }
@@ -175,14 +176,16 @@ export async function rebuildProjections(db: Database, logPath?: string, eventsD
 /**
  * Rebuild derived database projections and return replay evidence.
  */
-export async function rebuildProjectionsWithReport(db: Database, logPath?: string, eventsDir?: string, mode: "explicit" | "automatic" = "explicit", parent?: OperationLease): Promise<ProjectionRebuildReport> {
+export async function rebuildProjectionsWithReport(db: Database, logPath?: string, eventsDir?: string, mode: "explicit" | "automatic" = "explicit", parent?: OperationLease, databaseLease?: DatabaseWriteLease): Promise<ProjectionRebuildReport> {
   const sourceDirectory = eventsDir ?? getEventsDir();
   return createSourceOperationAdmission(logPath, sourceDirectory).run(
-    () => rebuildAdmittedProjections(db, logPath, sourceDirectory, mode), parent);
+    () => databaseLease === undefined
+      ? rebuildAdmittedProjections(db, logPath, sourceDirectory, mode)
+      : runDatabaseWrite(db, child => rebuildAdmittedProjections(db, logPath, sourceDirectory, mode, child), databaseLease), parent);
 }
 
-async function rebuildAdmittedProjections(db: Database, logPath: string | undefined, eventsDir: string, mode: "explicit" | "automatic"): Promise<ProjectionRebuildReport> {
-  const fence = captureProjectionFence(db);
+async function rebuildAdmittedProjections(db: Database, logPath: string | undefined, eventsDir: string, mode: "explicit" | "automatic", databaseLease?: DatabaseWriteLease): Promise<ProjectionRebuildReport> {
+  const fence = captureProjectionFence(db, databaseLease);
   if (mode === "automatic") assertAutomaticProjectionReplay(db);
   const report = await readProjectionEventsWithReport(logPath, eventsDir);
   if (report.invalidEvents.length > 0) {
@@ -194,7 +197,7 @@ async function rebuildAdmittedProjections(db: Database, logPath: string | undefi
     };
   }
   return withProjectionStage(report, (stage, replay) => {
-    promoteProjections(db, stage, fence, report.snapshot, mode === "automatic");
+    promoteProjections(db, stage, fence, report.snapshot, mode === "automatic", databaseLease);
     return { invalidEvents: 0, invalidEventLines: [], replay, source: report.snapshot.manifest };
   });
 }

@@ -1,5 +1,47 @@
 # Memory resilience execution journal
 
+## 2026-09-28 - Owned extraction database scope; next batch RED
+
+- Started at signed/pushed `65b21ef`. The full E1-E10 native goal remains active.
+  Q100.4.2.1 is now verified for its scoped session-input/audit behavior;
+  Q100.4.2.2 is the sole active item. Final quality and parent acceptance remain
+  mandatory. Ledger: 268 acyclic items; inventory: 499 files, two packages.
+- Extraction acquires source admission before an owned SQLite write reservation,
+  holding it from final input/audit/fact validation through event/replay/audit
+  completion. Private, connection-bound leases permit explicit nested replay;
+  arbitrary caller transactions remain refused and untouched. Lease ancestry,
+  expiry, acquisition/commit state, detached work draining and compound rollback
+  failures are checked. A borrowed connection is never closed.
+- Real second-connection message writes are denied during the final scope.
+  Same-connection message save/saveMany also refuse, including between batch
+  chunks. A partial message batch retries without duplicating completed rows.
+  Real process kill before audit rolls back SQLite but retains source; retry
+  replays it, writes the audit and does not append a duplicate event.
+- Final compatibility: 267 tests, 1,147 assertions, 12 files per Windows
+  Bun 1.4.1 and checksum-pinned 1.3.14. All 15 targeted faults detected.
+  Production types, strict new/changed tests and isolation pass. Full output,
+  hashes, REDs and limitations: `evidence/Q100.4.2.1-database-write.json`.
+- New database admission helper diagnostics: 100% all four metrics, 38 branches.
+  Other changed production/test metrics still fail policy or require complete
+  evidence. Native child counters remain unaggregated; replay test has zero
+  branch denominator requiring review. No whole-quality/platform/review claim.
+- SQLite and JSONL remain separate resources. Cooperating APIs do not sandbox
+  raw SQL or a callback manually replacing a transaction. Other repository
+  topology, broader multi-event recovery, durability and reconciliation remain
+  under Q100.4.2.6/.10/.11/.12 and final Q100.4.3 acceptance.
+- **Next retained RED:** two identical candidates in one provider batch yield
+  added=2 and two facts with one unique content. Promote the retained synthetic
+  counterexample to regression coverage, then update the comparison working set
+  after accepted effects. Qualify duplicates, overlapping replacements,
+  deterministic ordering and interrupted retry; exact-string dedup alone is
+  insufficient. No Q100.4.2.2 implementation is claimed in this checkpoint.
+- Free disk at evidence checkpoint: 11.00 GiB. Owned fixtures/runtime cleaned;
+  shared-temp 12KiB authority and previously rejected targets remain untouched.
+  Three inboxes and final hosted/independent review remain open. No production
+  model, replication, canonical migration, installation or authority cutover.
+  Approved synthetic embedding experiment still follows baseline acceptance;
+  R03/P03/A03 retain their recorded owner decisions.
+
 ## 2026-09-28 - Persisted extraction audit input identity
 
 - Previous turn made progress at signed/pushed `04f29a8`; started clean. Full

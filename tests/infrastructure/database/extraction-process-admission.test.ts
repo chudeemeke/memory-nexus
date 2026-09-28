@@ -13,7 +13,7 @@ import { ProjectPath } from "../../../src/domain/value-objects/project-path.js";
 import { ExtractionPipeline } from "../../../src/application/services/extraction-pipeline.js";
 import { createOwnedTestDirectory } from "../../helpers/owned-test-directory.js";
 
-for (const mode of ["completed", "empty", "active-change", "decision", "input-add", "input-edit", "input-delete", "input-role", "input-time", "input-tools", "input-id", "input-empty", "input-redacted"] as const) {
+for (const mode of ["completed", "empty", "active-change", "decision", "input-add", "input-edit", "input-delete", "input-role", "input-time", "input-tools", "input-id", "input-empty", "input-redacted", "late-input", "killed-before-audit"] as const) {
 it(`extraction revalidates concurrent ${mode} before writing`, async () => {
   const storage = createOwnedTestDirectory("memory-extraction-admission-");
   const dbPath = join(storage.dir, "synthetic.db"), log = join(storage.dir, "events", "events-a.jsonl");
@@ -43,8 +43,9 @@ const embedding={name:'synthetic',model:'synthetic',dimensions:2,isReady:()=>tru
  return texts.map(()=>({embedding:new Float32Array([1,0])}));
 }};
 const audits=new SqliteExtractionLogRepository(db);const find=audits.findById.bind(audits);let reads=0;
-audits.findById=async(...args)=>{reads++;if(mode==='decision'&&reads===2)await barrier();return find(...args);};
+audits.findById=async(...args)=>{reads++;if((mode==='decision'||mode==='late-input')&&reads===2)await barrier();return find(...args);};
 const redactor=mode==='input-redacted'?{redactText:()=>({text:'masked synthetic',findings:[]}),redactJson:value=>({value,findings:[]})}:undefined;
+const save=audits.save.bind(audits);audits.save=async entry=>{if(mode==='killed-before-audit')await barrier();return save(entry);};
 let result,error;
 try{result=await new ExtractionPipeline(db,new SqliteFactRepository(db),audits,new SqliteMessageRepository(db),provider,mode==='active-change'?embedding:undefined,log,redactor).extractFromSession('session','synthetic');}
 catch(cause){error=String(cause);}finally{db.close();}
@@ -89,9 +90,18 @@ console.log(JSON.stringify({result,error}));
       expect((await facts.findByProject('synthetic')).length).toBe(mode==='input-delete'?0:1);
       return;
     }
-    if(mode==='decision') {
+    if(mode==='killed-before-audit') {
+      const retained=readFileSync(log,'utf8');expect(await facts.findByProject('synthetic')).toEqual([]);expect(await audits.findById('session')).toBeNull();
+      child.kill();expect(await child.exited).not.toBe(0);await stdout;await stderr;
+      const retry=await new ExtractionPipeline(db,facts,audits,messages,provider,undefined,log).extractFromSession('session','synthetic');
+      expect(retry).toEqual({skippedSession:false,added:0,updated:0,superseded:0,skipped:1});
+      expect(readFileSync(log,'utf8')).toBe(retained);expect((await facts.findByProject('synthetic')).length).toBe(1);expect((await audits.findById('session'))?.factsSkipped).toBe(1);
+      expect((await new ExtractionPipeline(db,facts,audits,messages,provider,undefined,log).extractFromSession('session','synthetic')).skippedSession).toBe(true);return;
+    }
+    if(mode==='decision'||mode==='late-input') {
       const beforeDb=db.serialize();
-      await expect(new ExtractionPipeline(db,facts,audits,messages,provider,undefined,log).extractFromSession("session","synthetic")).rejects.toThrow("busy");
+      if(mode==='late-input') await expect(messages.save(Message.create({id:'late',role:'user',content:'late synthetic input',timestamp:new Date('2026-01-02T00:00:00Z')}),'session')).rejects.toThrow('database is locked');
+      else await expect(new ExtractionPipeline(db,facts,audits,messages,provider,undefined,log).extractFromSession("session","synthetic")).rejects.toThrow("busy");
       expect(db.serialize()).toEqual(beforeDb);
       expect(existsSync(log)).toBe(false);
       writeFileSync(release,"continue");
@@ -100,6 +110,12 @@ console.log(JSON.stringify({result,error}));
       expect(outcome.error).toBeUndefined();expect(outcome.result.added).toBe(1);
       expect((await audits.findById("session"))?.factsAdded).toBe(1);
       expect((await new ExtractionPipeline(db,facts,audits,messages,provider,undefined,log).extractFromSession("session","synthetic")).skippedSession).toBe(true);
+      if(mode==='late-input') {
+        const beforeIdentity=(await audits.findById('session'))?.inputIdentity;
+        await messages.save(Message.create({id:'late',role:'user',content:'late synthetic input',timestamp:new Date('2026-01-02T00:00:00Z')}),'session');
+        expect((await new ExtractionPipeline(db,facts,audits,messages,provider,undefined,log).extractFromSession('session','synthetic')).skippedSession).toBe(false);
+        expect((await audits.findById('session'))?.inputIdentity).not.toBe(beforeIdentity);
+      }
       return;
     }
     const result = await new ExtractionPipeline(db,facts,audits,messages,provider,undefined,log).extractFromSession(mode==="active-change"?"parent":"session","synthetic");

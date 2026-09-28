@@ -9,6 +9,7 @@ import type { Database } from "bun:sqlite";
 import { Message, type MessageRole } from "../../../domain/entities/message.js";
 import type { IMessageRepository } from "../../../domain/ports/repositories.js";
 import { unknownErrorMessage } from "../../../domain/errors/unknown-error.js";
+import { assertNoDatabaseWriteScope } from "../database-write-admission.js";
 
 /**
  * Result of a batch save operation
@@ -96,6 +97,7 @@ export class SqliteMessageRepository implements IMessageRepository {
      * Uses INSERT OR IGNORE for idempotent behavior - duplicates are silently skipped.
      */
     async save(message: Message, sessionId: string): Promise<void> {
+        assertNoDatabaseWriteScope(this.db);
         using insertStatement = this.prepareInsert();
         insertStatement.run({
             $id: message.id,
@@ -121,6 +123,7 @@ export class SqliteMessageRepository implements IMessageRepository {
         messages: Array<{ message: Message; sessionId: string }>,
         options?: BatchOptions
     ): Promise<BatchResult> {
+        assertNoDatabaseWriteScope(this.db);
         using existsStatement = this.prepareExists();
         using insertStatement = this.prepareInsert();
         const BATCH_SIZE = 100;
@@ -164,6 +167,7 @@ export class SqliteMessageRepository implements IMessageRepository {
             });
 
             // Use immediate mode to prevent SQLITE_BUSY
+            assertNoDatabaseWriteScope(this.db);
             insertBatch.immediate(batch);
 
             // Report progress after each batch

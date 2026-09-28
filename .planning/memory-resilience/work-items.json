@@ -3,7 +3,7 @@
   "workstream": "memory-resilience",
   "goal_status": "active",
   "starting_revision": "77d54e05be7fc24cede4a9a3e1fede6fa113ac8f",
-  "current_item": "Q100.4.2.1",
+  "current_item": "Q100.4.2.2",
   "status_semantics": {
     "pending": "Not started; authorization and dependencies must permit work.",
     "pending_rebaseline": "Historical candidate, not a confirmed current failure or a completed task.",
@@ -447,11 +447,12 @@
         ".planning/memory-resilience/evidence/Q100.4.2-writer-admission.json",
         ".planning/memory-resilience/evidence/Q100.4.2-extraction-admission.json",
         ".planning/memory-resilience/evidence/Q100.4.2.1-input-validation.json",
-        ".planning/memory-resilience/evidence/Q100.4.2.1-audit-identity.json"
+        ".planning/memory-resilience/evidence/Q100.4.2.1-audit-identity.json",
+        ".planning/memory-resilience/evidence/Q100.4.2.1-database-write.json"
       ],
       "acceptance_record": ".planning/memory-resilience/evidence/Q005.json",
       "retirement_trigger": "Before B11.74.7/B10/R02 acceptance.",
-      "observed_gap": "Audit identity and pre-decision validation implemented;223tests/951assertions per Windows runtime,11faults. Pipeline diagnostics96.18statements/91.17branches/100functions/96.36lines; source-test98.44/92.3/79.68/98.56. Old-audit shortcut repaired; late direct-message race, within-batch decisions, privacy and multi-event/audit recovery remain. Child counters unaggregated and no full TierS/package/platform acceptance."
+      "observed_gap": "Session input/audit behavior verified across provider and late-write schedules;267tests/1147assertions per Windows runtime and15detected faults. Pipeline diagnostics96.21/91.17/100/96.36 remain below Tier S. Same-batch duplicate facts have retained RED; overlapping replacement, privacy, multi-event recovery and full quality remain."
     },
     {
       "id": "Q006",
@@ -6338,14 +6339,15 @@
         ".planning/memory-resilience/evidence/Q100.4.2-writer-admission.json",
         ".planning/memory-resilience/evidence/Q100.4.2-extraction-admission.json",
         ".planning/memory-resilience/evidence/Q100.4.2.1-input-validation.json",
-        ".planning/memory-resilience/evidence/Q100.4.2.1-audit-identity.json"
+        ".planning/memory-resilience/evidence/Q100.4.2.1-audit-identity.json",
+        ".planning/memory-resilience/evidence/Q100.4.2.1-database-write.json"
       ],
       "acceptance_record": ".planning/memory-resilience/evidence/Q100.4.2.json",
       "retirement_trigger": "Before Q100.4/Q100/B11.74.7/B10/R02 acceptance.",
       "progress": {
-        "status": "Extraction decision admission implemented; remaining independent obligations split into numbered children.",
+        "status": "Session input/audit child verified behaviorally; within-batch child active; parent remains pending.",
         "completed": "Extraction computes candidates/comparison embeddings outside admission, then recovers/rechecks session idempotency and active UUID/content identity under one scope before compare/append/replay/audit. Empty output also rechecks. Concurrent completed audit survives; stale comparison refuses without writes and fresh retry succeeds. Actual decision-read barrier denies a contender.83tests/434assertions in6files per Windows runtime;6faults detected.",
-        "next": "Promote retained late-input native RED. Qualify an explicitly owned database write scope from final input recheck through projection/event/audit completion, with source-before-database lock order and explicit nested replay authority. Preserve rejection of arbitrary caller transactions; current projection-replacement.ts rejects db.inTransaction at fence capture and promotion. Prove competing direct message writers, failure/rollback, retained source recovery and process kill before accepting this item. Coordinate Q100.4.2.6/.11.",
+        "next": "Promote the real duplicate-batch counterexample to regression coverage, then make later candidates observe preceding accepted effects. Qualify duplicates, overlapping replacements, deterministic ordering and interrupted retry; do not fix only exact strings.",
         "testsPerRuntime": 83,
         "assertionsPerRuntime": 434,
         "testFiles": 6,
@@ -6368,9 +6370,10 @@
         "writerAdmissionEvidence": ".planning/memory-resilience/evidence/Q100.4.2-writer-admission.json",
         "extractionAdmissionEvidence": ".planning/memory-resilience/evidence/Q100.4.2-extraction-admission.json",
         "inputValidationEvidence": ".planning/memory-resilience/evidence/Q100.4.2.1-input-validation.json",
-        "auditIdentityEvidence": ".planning/memory-resilience/evidence/Q100.4.2.1-audit-identity.json"
+        "auditIdentityEvidence": ".planning/memory-resilience/evidence/Q100.4.2.1-audit-identity.json",
+        "databaseWriteEvidence": ".planning/memory-resilience/evidence/Q100.4.2.1-database-write.json"
       },
-      "observed_gap": "Selected source/command/extraction admission and versioned audit identity are implemented; earlier old-audit shortcut failure is repaired. The retained late-message race still commits after a direct message change. All thirteen children remain mandatory for whole acceptance, including direct DB coordination, caller transactions, within-batch decisions, remote/Git/maintenance, durability/reconciliation/scaling. Parent remains pending."
+      "observed_gap": "Selected source/command/extraction admission and audit identity are implemented. The late-message race is repaired with owned database admission. Q100.4.2.1 is behaviorally verified; Q100.4.2.2 has a retained duplicate-batch RED. All remaining child obligations and final quality are still required; no parent acceptance."
     },
     {
       "id": "Q100.4.3",
@@ -6400,17 +6403,18 @@
         ".planning/memory-resilience/evidence/Q100.4.2-writer-admission.json",
         ".planning/memory-resilience/evidence/Q100.4.2-extraction-admission.json",
         ".planning/memory-resilience/evidence/Q100.4.2.1-input-validation.json",
-        ".planning/memory-resilience/evidence/Q100.4.2.1-audit-identity.json"
+        ".planning/memory-resilience/evidence/Q100.4.2.1-audit-identity.json",
+        ".planning/memory-resilience/evidence/Q100.4.2.1-database-write.json"
       ],
       "acceptance_record": ".planning/memory-resilience/evidence/Q100.4.3.json",
       "retirement_trigger": "Before Q100.4/Q100/B11.74.7/B10/R02 acceptance.",
-      "observed_gap": "Current writer evidence:525tests/3945assertions per Windows runtime;11decision faults detected; narrow recovery/scope/projected-writer-test instrumentation100all4. Event-log, command, source-factory and driver/test diagnostics remain below policy or incomplete; broader compatibility tests were not all instrumented in this diagnostic and earlier rows are not fresh full-suite coverage. New admitted-writer test zero branch denominator requires individual review. Child-process counters, complete instrumenter/applicability, package/changed-line, Linux, cleanup and final independent review remain open; no exclusion approved. Current extraction checkpoint:83tests/434assertions on both Windows runtimes and6faults detected. Pipeline96.63/92.18/100/97.02, extraction-test98.57/91.66/80/98.45, process-test95.89/90/100/100 (statements/branches/functions/lines). Child counters unaggregated; no full-quality acceptance. Final owned-fixture rerun source and metrics supersede earlier extraction-test rows in the same checkpoint; both changed tests strict-compile. Shared-temp12KiB authority preserved pending exclusive ownership disposition under Q100.4.2.7. Latest input-recheck source-bound evidence supersedes prior pipeline rows:96statements/90.9branches/100functions/96.19lines; process-driver96.87/93.33/100/100.92tests/533assertions per Windows runtime,8faults. No full TierS/platform/child-counter acceptance; unresolved audit counterexample remains explicit. Latest audit checkpoint223tests/951assertions per Windows runtime with11detected faults. Audit repository/test100all4diagnostic; pipeline/schema/CLI/test gaps and unaggregated child counters remain. Legacy CLI behavior is intentionally explicit --force refusal, existing exit2. Retained late-message RED is unresolved; no final quality/operational acceptance."
+      "observed_gap": "Current writer evidence:525tests/3945assertions per Windows runtime;11decision faults detected; narrow recovery/scope/projected-writer-test instrumentation100all4. Event-log, command, source-factory and driver/test diagnostics remain below policy or incomplete; broader compatibility tests were not all instrumented in this diagnostic and earlier rows are not fresh full-suite coverage. New admitted-writer test zero branch denominator requires individual review. Child-process counters, complete instrumenter/applicability, package/changed-line, Linux, cleanup and final independent review remain open; no exclusion approved. Current extraction checkpoint:83tests/434assertions on both Windows runtimes and6faults detected. Pipeline96.63/92.18/100/97.02, extraction-test98.57/91.66/80/98.45, process-test95.89/90/100/100 (statements/branches/functions/lines). Child counters unaggregated; no full-quality acceptance. Final owned-fixture rerun source and metrics supersede earlier extraction-test rows in the same checkpoint; both changed tests strict-compile. Shared-temp12KiB authority preserved pending exclusive ownership disposition under Q100.4.2.7. Latest input-recheck source-bound evidence supersedes prior pipeline rows:96statements/90.9branches/100functions/96.19lines; process-driver96.87/93.33/100/100.92tests/533assertions per Windows runtime,8faults. No full TierS/platform/child-counter acceptance; unresolved audit counterexample remains explicit. Latest audit checkpoint223tests/951assertions per Windows runtime with11detected faults. Audit repository/test100all4diagnostic; pipeline/schema/CLI/test gaps and unaggregated child counters remain. Legacy CLI behavior is intentionally explicit --force refusal, existing exit2. Retained late-message RED is unresolved; no final quality/operational acceptance. Database-write checkpoint:267tests/1147assertions per Windows runtime;15faults detected; new database admission helper100all4 with38branches. Other changed production/test metrics remain below policy or incomplete, child counters unaggregated, and replay test has zero branch denominator pending review. Behavioral child acceptance does not satisfy this final quality barrier."
     },
     {
       "id": "Q100.4.2.1",
       "stage": "baseline-quality",
       "title": "Qualify extraction session input identity",
-      "status": "active",
+      "status": "verified",
       "depends_on": [
         "Q100.4.1"
       ],
@@ -6424,26 +6428,29 @@
         ".planning/memory-resilience/evidence/Q100.4.2-extraction-admission.json",
         "docs/plans/2026-09-28-source-decision-admission.md",
         ".planning/memory-resilience/evidence/Q100.4.2.1-input-validation.json",
-        ".planning/memory-resilience/evidence/Q100.4.2.1-audit-identity.json"
+        ".planning/memory-resilience/evidence/Q100.4.2.1-audit-identity.json",
+        ".planning/memory-resilience/evidence/Q100.4.2.1-database-write.json",
+        ".planning/memory-resilience/evidence/Q100.4.2.1.json"
       ],
       "acceptance_record": ".planning/memory-resilience/evidence/Q100.4.2.1.json",
       "retirement_trigger": "Before Q100.4.2/Q100/B10/R02 acceptance.",
-      "observed_gap": "Old-audit/new-message counterexample is repaired through both pipeline and CLI. A new real two-process counterexample pauses after final input check, inserts a message directly through the repository, then observes one old-input fact and audit committed. Stored digest remains bound to old input but does not exclude this mutation interval. Database write coordination, caller-transaction semantics, multi-event/audit atomicity and complete quality remain required; no Q100.4.2.1 acceptance.",
+      "observed_gap": "The specified session input/audit behavioral outcome is verified for the covered APIs and real-process schedules. Late direct-message mutation now refuses during the owned write scope; same-connection save/saveMany also refuse. Broader topology, arbitrary SQL, multi-event durability and final quality are separate mandatory obligations, not certified by this item.",
       "progress": {
-        "status": "Durable audit input identity and CLI routing implemented; late-message race remains open.",
-        "completed": "Versioned SHA256 input identity binds session/project/raw ordered fields/redacted provider text. Nullable migration preserves legacy values without invented identity; unbound audit requires existing --force. Matching input skips across restart; changed input re-extracts via pipeline and real CLI. Force/provider/redaction/project behavior, invalid write/read and migration failure verified.223tests/951assertions across9files per Windows runtime;11faults detected. Repository+test diagnostics100all4.",
-        "next": "Promote retained late-input native RED. Qualify an explicitly owned database write scope from final input recheck through projection/event/audit completion, with source-before-database lock order and explicit nested replay authority. Preserve rejection of arbitrary caller transactions; current projection-replacement.ts rejects db.inTransaction at fence capture and promotion. Prove competing direct message writers, failure/rollback, retained source recovery and process kill before accepting this item. Coordinate Q100.4.2.6/.11.",
-        "evidence": ".planning/memory-resilience/evidence/Q100.4.2.1-audit-identity.json",
-        "testsPerRuntime": 223,
-        "assertionsPerRuntime": 951,
-        "decisionFaultsDetected": 11
+        "status": "Scoped session input/audit behavior verified; final quality acceptance remains gated.",
+        "completed": "Provider-paused input changes refuse; durable audit identity detects new input across restart and CLI. Final source-before-database scope excludes competing message writes through commit, preserves arbitrary caller transactions, and delegates explicit nested replay authority. Kill before audit leaves source for successful retry without duplicate effects. Same-connection batch writes refuse at each chunk and retry idempotently.",
+        "next": "Execute Q100.4.2.2 from the retained duplicate-candidate RED; retain Q100.4.3 quality and Q100.4.2.6/.11 obligations.",
+        "evidence": ".planning/memory-resilience/evidence/Q100.4.2.1-database-write.json",
+        "testsPerRuntime": 267,
+        "assertionsPerRuntime": 1147,
+        "decisionFaultsDetected": 15,
+        "testFiles": 12
       }
     },
     {
       "id": "Q100.4.2.2",
       "stage": "baseline-quality",
       "title": "Qualify within-batch extraction decisions",
-      "status": "pending",
+      "status": "active",
       "depends_on": [
         "Q100.4.1"
       ],
@@ -6455,11 +6462,17 @@
       "owner": "memory-nexus",
       "evidence": [
         ".planning/memory-resilience/evidence/Q100.4.2-extraction-admission.json",
-        "docs/plans/2026-09-28-source-decision-admission.md"
+        "docs/plans/2026-09-28-source-decision-admission.md",
+        ".planning/memory-resilience/evidence/Q100.4.2.1-database-write.json"
       ],
       "acceptance_record": ".planning/memory-resilience/evidence/Q100.4.2.2.json",
       "retirement_trigger": "Before Q100.4.2/Q100/B10/R02 acceptance.",
-      "observed_gap": "Unverified obligation from source inspection and retained Q100.4.2 evidence; split further before implementation if this outcome requires independent acceptance slices."
+      "observed_gap": "Retained real SQLite/source counterexample: a provider returns two identical candidates in one batch; extraction reports added=2 and stores two facts with one unique content. Later decisions currently compare against the initial working set.",
+      "progress": {
+        "status": "RED retained; implementation not started",
+        "next": "Promote the real duplicate-batch counterexample to regression coverage, then make later candidates observe preceding accepted effects. Qualify duplicates, overlapping replacements, deterministic ordering and interrupted retry; do not fix only exact strings.",
+        "evidence": ".planning/memory-resilience/evidence/Q100.4.2.1-database-write.json"
+      }
     },
     {
       "id": "Q100.4.2.3",
@@ -6544,11 +6557,12 @@
       "evidence": [
         ".planning/memory-resilience/evidence/Q100.4.2-extraction-admission.json",
         "docs/plans/2026-09-28-source-decision-admission.md",
-        ".planning/memory-resilience/evidence/Q100.4.2.1-audit-identity.json"
+        ".planning/memory-resilience/evidence/Q100.4.2.1-audit-identity.json",
+        ".planning/memory-resilience/evidence/Q100.4.2.1-database-write.json"
       ],
       "acceptance_record": ".planning/memory-resilience/evidence/Q100.4.2.6.json",
       "retirement_trigger": "Before Q100.4.2/Q100/B10/R02 acceptance.",
-      "observed_gap": "Unverified obligation from source inspection and retained Q100.4.2 evidence; split further before implementation if this outcome requires independent acceptance slices. Concrete native late-input RED is retained: source admission does not block messages_meta writes. Qualify source-before-database lock order and owned transaction capability; do not weaken caller-transaction rejection merely to enable nesting."
+      "observed_gap": "Owned source-before-database scope now protects final extraction message input across event/replay/audit completion. Real other-connection contention, same-connection message save/saveMany refusal and retry pass. Inventory and qualify remaining direct repository/raw SQL callers, shared-connection topology and lock order; this helper does not sandbox arbitrary SQL."
     },
     {
       "id": "Q100.4.2.7",
@@ -6655,11 +6669,12 @@
       "evidence": [
         ".planning/memory-resilience/evidence/Q100.4.2-extraction-admission.json",
         "docs/plans/2026-09-28-source-decision-admission.md",
-        ".planning/memory-resilience/evidence/Q100.4.2.1-audit-identity.json"
+        ".planning/memory-resilience/evidence/Q100.4.2.1-audit-identity.json",
+        ".planning/memory-resilience/evidence/Q100.4.2.1-database-write.json"
       ],
       "acceptance_record": ".planning/memory-resilience/evidence/Q100.4.2.11.json",
       "retirement_trigger": "Before Q100.4.2/Q100/B10/R02 acceptance.",
-      "observed_gap": "Unverified obligation from source inspection and retained Q100.4.2 evidence; split further before implementation if this outcome requires independent acceptance slices. Versioned audit identity is now persisted, but no cross-resource atomicity follows. Late message insert still commits before old-input event/audit. Retained source after failed DB commit and audit persistence must be qualified with owned transaction semantics."
+      "observed_gap": "Explicit database lease allows nested replay/savepoints while preserving refusal of arbitrary caller transactions. Outer failure rolls back projections/receipt; real process kill before audit retains source and retry recovers without duplicate event. Broader multi-event action/audit atomicity and interrupted-batch retry remain unverified; JSONL plus SQLite is not one transaction."
     },
     {
       "id": "Q100.4.2.12",

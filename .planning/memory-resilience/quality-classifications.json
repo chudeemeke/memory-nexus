@@ -1403,14 +1403,14 @@
       },
       "decisionStatus": "proposed - independent review pending",
       "inspection": {
-        "sourceRevision": "04f29a8 + current source hash",
-        "anchor": "Q100.4.2.1 audit identity",
-        "scope": "Scoped behavior and diagnostic; late message interval remains open"
+        "sourceRevision": "65b21ef + current source hash",
+        "anchor": "Q100.4.2.1 owned database write scope",
+        "scope": "Scoped behavioral proof and diagnostic; final quality remains open"
       },
       "metricApplicability": {
-        "status": "Scoped diagnostic; child counters unaggregated and full quality pending",
+        "status": "Scoped diagnostic; child counters and full quality pending",
         "sourceHash": "1355531e755d34fe0a02858521681ff52cac474a82061bda004b43bb6ad48dbb",
-        "evidence": ".planning/memory-resilience/evidence/Q100.4.2.1-audit-identity.json",
+        "evidence": ".planning/memory-resilience/evidence/Q100.4.2.1-database-write.json",
         "metrics": {
           "statements": {
             "observedCounterTotal": 385,
@@ -1438,7 +1438,7 @@
     {
       "path": "src/application/services/extraction-pipeline.ts",
       "package": "package.json",
-      "sourceHash": "1256ad5d2817f083d4af4e393f1a15bbbe93e19b3c34102a2bf51e2c27166c3c",
+      "sourceHash": "df27d54fc832ad9376e8e55619f10ca28279bb417bfc354c16b119182eda9e82",
       "tier": "S",
       "rationale": "Redacts messages before provider egress, redacts candidates and persists extraction outcomes.",
       "applicability": {
@@ -1447,18 +1447,18 @@
       },
       "decisionStatus": "proposed - independent review pending",
       "inspection": {
-        "sourceRevision": "04f29a8 + current source hash",
-        "anchor": "Q100.4.2.1 audit identity",
-        "scope": "Scoped behavior and diagnostic; late message interval remains open"
+        "sourceRevision": "65b21ef + current source hash",
+        "anchor": "Q100.4.2.1 owned database write scope",
+        "scope": "Scoped behavioral proof and diagnostic; final quality remains open"
       },
       "metricApplicability": {
-        "status": "Scoped diagnostic; child counters unaggregated and full quality pending",
-        "sourceHash": "1256ad5d2817f083d4af4e393f1a15bbbe93e19b3c34102a2bf51e2c27166c3c",
-        "evidence": ".planning/memory-resilience/evidence/Q100.4.2.1-audit-identity.json",
+        "status": "Scoped diagnostic; child counters and full quality pending",
+        "sourceHash": "df27d54fc832ad9376e8e55619f10ca28279bb417bfc354c16b119182eda9e82",
+        "evidence": ".planning/memory-resilience/evidence/Q100.4.2.1-database-write.json",
         "metrics": {
           "statements": {
-            "observedCounterTotal": 131,
-            "observedPercent": 96.18,
+            "observedCounterTotal": 132,
+            "observedPercent": 96.21,
             "proposal": "measure - completeness unverified"
           },
           "branches": {
@@ -1467,7 +1467,7 @@
             "proposal": "measure - completeness unverified"
           },
           "functions": {
-            "observedCounterTotal": 26,
+            "observedCounterTotal": 27,
             "observedPercent": 100,
             "proposal": "measure - completeness unverified"
           },
@@ -6036,7 +6036,7 @@
     {
       "path": "src/infrastructure/database/event-log.ts",
       "package": "package.json",
-      "sourceHash": "97f78e19cafd14a2f421a5656da6148881fea4e4f9efbbf1403788a6098b7d49",
+      "sourceHash": "6ce2d58f2ac4d2b247655842999273b552b7cbed5defc076571095c7f2de29ca",
       "tier": "S",
       "rationale": "Appends canonical memory events and validates imported legacy records; durable source and integrity boundary.",
       "applicability": {
@@ -6045,33 +6045,33 @@
       },
       "decisionStatus": "proposed - independent review pending",
       "inspection": {
-        "sourceRevision": "196d52c + current source hash",
-        "anchor": "Q100.4.2 writer admission",
-        "scope": "Narrow diagnostic subset of broader compatibility groups; whole quality/adoption incomplete."
+        "sourceRevision": "65b21ef + current source hash",
+        "anchor": "Q100.4.2.1 owned database write scope",
+        "scope": "Scoped behavioral proof and diagnostic; final quality remains open"
       },
       "metricApplicability": {
-        "status": "Scoped diagnostic only; broader event/command compatibility suites and native child counters not all instrumented; final quality pending",
-        "sourceHash": "97f78e19cafd14a2f421a5656da6148881fea4e4f9efbbf1403788a6098b7d49",
-        "evidence": ".planning/memory-resilience/evidence/Q100.4.2-writer-admission.json",
+        "status": "Scoped diagnostic; child counters and full quality pending",
+        "sourceHash": "6ce2d58f2ac4d2b247655842999273b552b7cbed5defc076571095c7f2de29ca",
+        "evidence": ".planning/memory-resilience/evidence/Q100.4.2.1-database-write.json",
         "metrics": {
           "statements": {
-            "observedCounterTotal": 252,
-            "observedPercent": 72.22,
+            "observedCounterTotal": 253,
+            "observedPercent": 61.26,
             "proposal": "measure - completeness unverified"
           },
           "branches": {
-            "observedCounterTotal": 172,
-            "observedPercent": 58.72,
+            "observedCounterTotal": 174,
+            "observedPercent": 56.32,
             "proposal": "measure - completeness unverified"
           },
           "functions": {
-            "observedCounterTotal": 57,
-            "observedPercent": 89.47,
+            "observedCounterTotal": 58,
+            "observedPercent": 81.03,
             "proposal": "measure - completeness unverified"
           },
           "lines": {
-            "observedCounterTotal": 239,
-            "observedPercent": 72.38,
+            "observedCounterTotal": 240,
+            "observedPercent": 61.25,
             "proposal": "measure - completeness unverified"
           }
         }
@@ -6368,35 +6368,35 @@
         "reason": "Executable Tier S; no exclusion approved."
       },
       "decisionStatus": "proposed - independent review pending",
-      "sourceHash": "77b90062c262faceb3eff65f59a0306ca43b0b3004f46c1073afcdef319af92d",
+      "sourceHash": "e880f0ac95499a19c32d2f5592ea20c806264f8c074540d2d64fa16c8b4c7aa2",
       "inspection": {
-        "sourceRevision": "196d52c + current source hash",
-        "anchor": "Q100.4.2 writer admission",
-        "scope": "Narrow diagnostic subset of broader compatibility groups; whole quality/adoption incomplete."
+        "sourceRevision": "65b21ef + current source hash",
+        "anchor": "Q100.4.2.1 owned database write scope",
+        "scope": "Scoped behavioral proof and diagnostic; final quality remains open"
       },
       "metricApplicability": {
-        "status": "Scoped diagnostic only; broader event/command compatibility suites and native child counters not all instrumented; final quality pending",
-        "sourceHash": "77b90062c262faceb3eff65f59a0306ca43b0b3004f46c1073afcdef319af92d",
-        "evidence": ".planning/memory-resilience/evidence/Q100.4.2-writer-admission.json",
+        "status": "Scoped diagnostic; child counters and full quality pending",
+        "sourceHash": "e880f0ac95499a19c32d2f5592ea20c806264f8c074540d2d64fa16c8b4c7aa2",
+        "evidence": ".planning/memory-resilience/evidence/Q100.4.2.1-database-write.json",
         "metrics": {
           "statements": {
-            "observedCounterTotal": 36,
-            "observedPercent": 100,
+            "observedCounterTotal": 38,
+            "observedPercent": 55.26,
             "proposal": "measure - completeness unverified"
           },
           "branches": {
-            "observedCounterTotal": 18,
-            "observedPercent": 100,
+            "observedCounterTotal": 20,
+            "observedPercent": 70,
             "proposal": "measure - completeness unverified"
           },
           "functions": {
-            "observedCounterTotal": 9,
-            "observedPercent": 100,
+            "observedCounterTotal": 10,
+            "observedPercent": 70,
             "proposal": "measure - completeness unverified"
           },
           "lines": {
-            "observedCounterTotal": 28,
-            "observedPercent": 100,
+            "observedCounterTotal": 30,
+            "observedPercent": 60,
             "proposal": "measure - completeness unverified"
           }
         }
@@ -6412,31 +6412,35 @@
         "reason": "Executable Tier S replacement/driver; no exclusion approved."
       },
       "decisionStatus": "proposed - independent review pending",
-      "sourceHash": "530344eb15ca4fb73a3ea8b5b998cbde8c0ffeef4f83b98d3f14675c28bcfcf2",
+      "sourceHash": "c20a87dadde8a38116bc58b9ae4c78d7bec387e27bb0c85ed1091bb49d4733e2",
       "inspection": {
-        "sourceRevision": "de75bb5 + current source hash",
-        "anchor": "Q100.4.2 writer subset",
-        "scope": "Paired native proof; full Q100.4.2 and Q100.4.3 acceptance remains open."
+        "sourceRevision": "65b21ef + current source hash",
+        "anchor": "Q100.4.2.1 owned database write scope",
+        "scope": "Scoped behavioral proof and diagnostic; final quality remains open"
       },
       "metricApplicability": {
-        "status": "diagnostic - final Q100.4.3 acceptance pending",
-        "sourceHash": "530344eb15ca4fb73a3ea8b5b998cbde8c0ffeef4f83b98d3f14675c28bcfcf2",
-        "evidence": ".planning/memory-resilience/evidence/Q100.4.2-writers.json",
+        "status": "Scoped diagnostic; child counters and full quality pending",
+        "sourceHash": "c20a87dadde8a38116bc58b9ae4c78d7bec387e27bb0c85ed1091bb49d4733e2",
+        "evidence": ".planning/memory-resilience/evidence/Q100.4.2.1-database-write.json",
         "metrics": {
-          "lines": {
-            "observedCounterTotal": 74,
+          "statements": {
+            "observedCounterTotal": 98,
+            "observedPercent": 85.71,
+            "proposal": "measure - completeness unverified"
+          },
+          "branches": {
+            "observedCounterTotal": 44,
+            "observedPercent": 72.72,
             "proposal": "measure - completeness unverified"
           },
           "functions": {
             "observedCounterTotal": 22,
+            "observedPercent": 100,
             "proposal": "measure - completeness unverified"
           },
-          "statements": {
-            "observedCounterTotal": 100,
-            "proposal": "measure - completeness unverified"
-          },
-          "branches": {
-            "observedCounterTotal": 48,
+          "lines": {
+            "observedCounterTotal": 74,
+            "observedPercent": 90.54,
             "proposal": "measure - completeness unverified"
           }
         }
@@ -7570,31 +7574,33 @@
       },
       "decisionStatus": "proposed - independent review pending",
       "inspection": {
-        "sourceRevision": "12c188bb9cad480efc6eb87ce1760b9dc40bbb69",
-        "anchor": "Emitted-runtime import/call/constructor inventory and targeted fixture/provider/CLI source boundaries",
-        "runtimeHash": "c88ac76af2ec7d381966eb537cb86b489ddd531b4953e11f57b46a83ef20a211",
-        "scope": "Reading aid plus targeted source inspection; not sound effect analysis, complete assertion review, execution evidence or metric applicability approval."
+        "sourceRevision": "65b21ef + current source hash",
+        "anchor": "Q100.4.2.1 owned database write scope",
+        "scope": "Scoped behavioral proof and diagnostic; final quality remains open"
       },
       "metricApplicability": {
-        "status": "proposed - independent review pending",
-        "evidence": ".planning/memory-resilience/evidence/B04-applicability-probe.json",
+        "status": "Scoped diagnostic; child counters and full quality pending",
         "sourceHash": "cb74f370d958bb57e06d70f4d4b42826ea3cdc69d12ba878efeb310317af0a79",
-        "disposition": "Measure every positive denominator; individually review zero branch/function denominators against runtime syntax. Observed counts do not prove instrumentation completeness. Optional-chain syntax is present; synthetic evidence shows current instrumentation omits its decision counters. B05.1 owns source-mapped branch proof before numeric acceptance.",
+        "evidence": ".planning/memory-resilience/evidence/Q100.4.2.1-database-write.json",
         "metrics": {
           "statements": {
             "observedCounterTotal": 180,
+            "observedPercent": 100,
             "proposal": "measure - completeness unverified"
           },
           "branches": {
             "observedCounterTotal": 6,
+            "observedPercent": 66.66,
             "proposal": "measure - completeness unverified"
           },
           "functions": {
             "observedCounterTotal": 40,
+            "observedPercent": 100,
             "proposal": "measure - completeness unverified"
           },
           "lines": {
             "observedCounterTotal": 173,
+            "observedPercent": 100,
             "proposal": "measure - completeness unverified"
           }
         }
@@ -7603,7 +7609,7 @@
     {
       "path": "src/infrastructure/database/repositories/message-repository.ts",
       "package": "package.json",
-      "sourceHash": "9eacf49c7d8f67a72005980a3ea80a8748ef874ef802964a0d65e19856cd8d06",
+      "sourceHash": "7d478ea4f7c3f7e2a21158a6854887fd29b534c91d91844a829e22e244a7714d",
       "tier": "S",
       "rationale": "Inspected SQLite INSERT/upsert statement persists messages_meta records. This establishes the data-integrity tier; transaction, conflict and deletion correctness remain separate verification obligations.",
       "applicability": {
@@ -7612,30 +7618,33 @@
       },
       "decisionStatus": "proposed - independent review pending",
       "inspection": {
-        "sourceRevision": "569424a + current source hash",
-        "anchor": "core adapter ownership and native write-result integrity",
-        "scope": "Scoped native behavior/metrics/targeted faults; final tier/decision/review acceptance remains pending."
+        "sourceRevision": "65b21ef + current source hash",
+        "anchor": "Q100.4.2.1 owned database write scope",
+        "scope": "Scoped behavioral proof and diagnostic; final quality remains open"
       },
       "metricApplicability": {
-        "status": "diagnostic - B05/Q022/Q028/B11.74.7 and independent review pending",
-        "evidence": ".planning/memory-resilience/evidence/B11.74.3-core.json",
-        "sourceHash": "9eacf49c7d8f67a72005980a3ea80a8748ef874ef802964a0d65e19856cd8d06",
-        "disposition": "Measure every denominator; scoped100% does not establish full counter or SQL/decision completeness.",
+        "status": "Scoped diagnostic; child counters and full quality pending",
+        "sourceHash": "7d478ea4f7c3f7e2a21158a6854887fd29b534c91d91844a829e22e244a7714d",
+        "evidence": ".planning/memory-resilience/evidence/Q100.4.2.1-database-write.json",
         "metrics": {
-          "lines": {
-            "observedCounterTotal": 36,
-            "proposal": "measure - completeness unverified"
-          },
-          "functions": {
-            "observedCounterTotal": 10,
-            "proposal": "measure - completeness unverified"
-          },
           "statements": {
-            "observedCounterTotal": 40,
+            "observedCounterTotal": 43,
+            "observedPercent": 88.37,
             "proposal": "measure - completeness unverified"
           },
           "branches": {
             "observedCounterTotal": 14,
+            "observedPercent": 71.42,
+            "proposal": "measure - completeness unverified"
+          },
+          "functions": {
+            "observedCounterTotal": 10,
+            "observedPercent": 100,
+            "proposal": "measure - completeness unverified"
+          },
+          "lines": {
+            "observedCounterTotal": 39,
+            "observedPercent": 89.74,
             "proposal": "measure - completeness unverified"
           }
         }
@@ -19684,7 +19693,7 @@
         "reason": "No local runtime implementation; no coverage percentage claimed."
       },
       "decisionStatus": "proposed - independent review pending",
-      "sourceHash": "2f701bef6ea5b60921145390e5dc85796c600a059846a86ffe4239b3ee01c299",
+      "sourceHash": "3567279c2bf7b69fb6244e05366aa8b20d6424b238c45a2879001eef3ab9b91b",
       "inspection": {
         "sourceRevision": "e293ecc + current source hash",
         "anchor": "Q100.4.2 explicit nested source leases",
@@ -19692,8 +19701,8 @@
       },
       "metricApplicability": {
         "status": "Declaration-only applicability proposed; no percentage claimed",
-        "sourceHash": "2f701bef6ea5b60921145390e5dc85796c600a059846a86ffe4239b3ee01c299",
-        "evidence": ".planning/memory-resilience/evidence/Q100.4.2-leases.json",
+        "sourceHash": "3567279c2bf7b69fb6244e05366aa8b20d6424b238c45a2879001eef3ab9b91b",
+        "evidence": ".planning/memory-resilience/evidence/Q100.4.2.1-database-write.json",
         "metrics": {
           "statements": {
             "observedCounterTotal": 0,
@@ -19711,7 +19720,8 @@
             "observedCounterTotal": 0,
             "proposal": "zero requires individual review"
           }
-        }
+        },
+        "disposition": "Current transpilation emits no JavaScript; declaration-only applicability remains proposed pending independent review. No measured percentage claimed."
       }
     },
     {
@@ -20120,25 +20130,25 @@
         "reason": "Executable process test; child counters need aggregation; no exclusion approved."
       },
       "decisionStatus": "proposed - independent review pending",
-      "sourceHash": "e44ae7b4dc7e6ae2f5a5b0a8b95a11b9292429276eebe61a9190626ac0209445",
+      "sourceHash": "5555a311d054faec70262095ff8a78238500faebcecda2fd40b30f7896407f91",
       "inspection": {
-        "sourceRevision": "04f29a8 + current source hash",
-        "anchor": "Q100.4.2.1 audit identity",
-        "scope": "Scoped behavior and diagnostic; late message interval remains open"
+        "sourceRevision": "65b21ef + current source hash",
+        "anchor": "Q100.4.2.1 owned database write scope",
+        "scope": "Scoped behavioral proof and diagnostic; final quality remains open"
       },
       "metricApplicability": {
-        "status": "Scoped diagnostic; child counters unaggregated and full quality pending",
-        "sourceHash": "e44ae7b4dc7e6ae2f5a5b0a8b95a11b9292429276eebe61a9190626ac0209445",
-        "evidence": ".planning/memory-resilience/evidence/Q100.4.2.1-audit-identity.json",
+        "status": "Scoped diagnostic; child counters and full quality pending",
+        "sourceHash": "5555a311d054faec70262095ff8a78238500faebcecda2fd40b30f7896407f91",
+        "evidence": ".planning/memory-resilience/evidence/Q100.4.2.1-database-write.json",
         "metrics": {
           "statements": {
-            "observedCounterTotal": 96,
-            "observedPercent": 96.87,
+            "observedCounterTotal": 118,
+            "observedPercent": 99.15,
             "proposal": "measure - completeness unverified"
           },
           "branches": {
-            "observedCounterTotal": 30,
-            "observedPercent": 93.33,
+            "observedCounterTotal": 38,
+            "observedPercent": 97.36,
             "proposal": "measure - completeness unverified"
           },
           "functions": {
@@ -20147,7 +20157,7 @@
             "proposal": "measure - completeness unverified"
           },
           "lines": {
-            "observedCounterTotal": 73,
+            "observedCounterTotal": 86,
             "observedPercent": 100,
             "proposal": "measure - completeness unverified"
           }
@@ -20192,6 +20202,138 @@
           },
           "lines": {
             "observedCounterTotal": 29,
+            "observedPercent": 100,
+            "proposal": "measure - completeness unverified"
+          }
+        }
+      }
+    },
+    {
+      "path": "src/infrastructure/database/database-write-admission.ts",
+      "package": "package.json",
+      "tier": "S",
+      "rationale": "Database transaction authority and extraction/replay integrity.",
+      "applicability": {
+        "mode": "measure",
+        "reason": "Executable database integrity code/test; no exclusion approved."
+      },
+      "decisionStatus": "proposed - independent review pending",
+      "sourceHash": "e320d9391c7573036e8418b75e4bb608c36fdd0fbc96c38cbd7f8aaeb2458061",
+      "inspection": {
+        "sourceRevision": "65b21ef + current source hash",
+        "anchor": "Q100.4.2.1 owned database write scope",
+        "scope": "Scoped behavioral proof and diagnostic; final quality remains open"
+      },
+      "metricApplicability": {
+        "status": "Scoped diagnostic; child counters and full quality pending",
+        "sourceHash": "e320d9391c7573036e8418b75e4bb608c36fdd0fbc96c38cbd7f8aaeb2458061",
+        "evidence": ".planning/memory-resilience/evidence/Q100.4.2.1-database-write.json",
+        "metrics": {
+          "statements": {
+            "observedCounterTotal": 62,
+            "observedPercent": 100,
+            "proposal": "measure - completeness unverified"
+          },
+          "branches": {
+            "observedCounterTotal": 38,
+            "observedPercent": 100,
+            "proposal": "measure - completeness unverified"
+          },
+          "functions": {
+            "observedCounterTotal": 7,
+            "observedPercent": 100,
+            "proposal": "measure - completeness unverified"
+          },
+          "lines": {
+            "observedCounterTotal": 45,
+            "observedPercent": 100,
+            "proposal": "measure - completeness unverified"
+          }
+        }
+      }
+    },
+    {
+      "path": "tests/infrastructure/database/database-write-admission.test.ts",
+      "package": "package.json",
+      "tier": "S",
+      "rationale": "Database transaction authority and extraction/replay integrity.",
+      "applicability": {
+        "mode": "measure",
+        "reason": "Executable database integrity code/test; no exclusion approved."
+      },
+      "decisionStatus": "proposed - independent review pending",
+      "sourceHash": "5719374f2f63d9798b52773394911ce21eae2e16444e3acb1c3f1ffc75ea3970",
+      "inspection": {
+        "sourceRevision": "65b21ef + current source hash",
+        "anchor": "Q100.4.2.1 owned database write scope",
+        "scope": "Scoped behavioral proof and diagnostic; final quality remains open"
+      },
+      "metricApplicability": {
+        "status": "Scoped diagnostic; child counters and full quality pending",
+        "sourceHash": "5719374f2f63d9798b52773394911ce21eae2e16444e3acb1c3f1ffc75ea3970",
+        "evidence": ".planning/memory-resilience/evidence/Q100.4.2.1-database-write.json",
+        "metrics": {
+          "statements": {
+            "observedCounterTotal": 141,
+            "observedPercent": 97.87,
+            "proposal": "measure - completeness unverified"
+          },
+          "branches": {
+            "observedCounterTotal": 56,
+            "observedPercent": 96.42,
+            "proposal": "measure - completeness unverified"
+          },
+          "functions": {
+            "observedCounterTotal": 28,
+            "observedPercent": 82.14,
+            "proposal": "measure - completeness unverified"
+          },
+          "lines": {
+            "observedCounterTotal": 83,
+            "observedPercent": 100,
+            "proposal": "measure - completeness unverified"
+          }
+        }
+      }
+    },
+    {
+      "path": "tests/infrastructure/database/database-write-replay.test.ts",
+      "package": "package.json",
+      "tier": "S",
+      "rationale": "Database transaction authority and extraction/replay integrity.",
+      "applicability": {
+        "mode": "measure",
+        "reason": "Executable database integrity code/test; no exclusion approved."
+      },
+      "decisionStatus": "proposed - independent review pending",
+      "sourceHash": "5b083d17ac39518b4d8bcd57d8bea134c0dbab31a844cd1dd977c1ee75806b06",
+      "inspection": {
+        "sourceRevision": "65b21ef + current source hash",
+        "anchor": "Q100.4.2.1 owned database write scope",
+        "scope": "Scoped behavioral proof and diagnostic; final quality remains open"
+      },
+      "metricApplicability": {
+        "status": "Scoped diagnostic; child counters and full quality pending",
+        "sourceHash": "5b083d17ac39518b4d8bcd57d8bea134c0dbab31a844cd1dd977c1ee75806b06",
+        "evidence": ".planning/memory-resilience/evidence/Q100.4.2.1-database-write.json",
+        "metrics": {
+          "statements": {
+            "observedCounterTotal": 93,
+            "observedPercent": 100,
+            "proposal": "measure - completeness unverified"
+          },
+          "branches": {
+            "observedCounterTotal": 0,
+            "observedPercent": 100,
+            "proposal": "measure - completeness unverified"
+          },
+          "functions": {
+            "observedCounterTotal": 18,
+            "observedPercent": 100,
+            "proposal": "measure - completeness unverified"
+          },
+          "lines": {
+            "observedCounterTotal": 57,
             "observedPercent": 100,
             "proposal": "measure - completeness unverified"
           }

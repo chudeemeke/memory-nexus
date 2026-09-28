@@ -2,7 +2,8 @@ import { existsSync } from "node:fs";
 import type { Database } from "bun:sqlite";
 import type { MemoryEventWriter } from "../../application/services/memory-governance-service.js";
 import { getAllLogFiles, getEventsDir } from "../paths.js";
-import type { OperationLease } from "../../domain/ports/operation-admission.js";
+import type { OperationLease, DatabaseWriteLease } from "../../domain/ports/operation-admission.js";
+import { runDatabaseWrite, assertDatabaseWriteLease } from "./database-write-admission.js";
 import { createSourceOperationAdmission } from "./source-operation-admission.js";
 import { appendMemoryEvent, rebuildProjections } from "./event-log.js";
 import { captureProjectionSource, isProjectionSourceCurrent } from "./projection-source.js";
@@ -15,13 +16,16 @@ function hasReceipt(db: Database): boolean {
 }
 
 /** One bounded recovery attempt; later appends remain explicitly pending. */
-export async function recoverPendingProjections(db: Database, logPath?: string, eventsDir?: string, parent?: OperationLease): Promise<{ rebuilt: boolean; pending: boolean }> {
+export async function recoverPendingProjections(db: Database, logPath?: string, eventsDir?: string, parent?: OperationLease, databaseLease?: DatabaseWriteLease): Promise<{ rebuilt: boolean; pending: boolean }> {
   const sourceDirectory = eventsDir ?? getEventsDir();
   return createSourceOperationAdmission(logPath, sourceDirectory).run(
-    lease => recoverAdmittedProjections(db, logPath, sourceDirectory, lease), parent);
+    lease => databaseLease === undefined
+      ? recoverAdmittedProjections(db, logPath, sourceDirectory, lease)
+      : runDatabaseWrite(db, child => recoverAdmittedProjections(db, logPath, sourceDirectory, lease, child), databaseLease), parent);
 }
 
-async function recoverAdmittedProjections(db: Database, logPath: string | undefined, eventsDir: string, lease: OperationLease): Promise<{ rebuilt: boolean; pending: boolean }> {
+async function recoverAdmittedProjections(db: Database, logPath: string | undefined, eventsDir: string, lease: OperationLease, databaseLease?: DatabaseWriteLease): Promise<{ rebuilt: boolean; pending: boolean }> {
+  assertDatabaseWriteLease(db, databaseLease);
   const available = logPath ? existsSync(logPath) : getAllLogFiles(eventsDir).length > 0;
   if (!available) {
     if (hasReceipt(db)) throw new Error("Recorded projection source is unavailable; restore the source before replay");
@@ -33,7 +37,7 @@ async function recoverAdmittedProjections(db: Database, logPath: string | undefi
   }
   assertAutomaticProjectionReplay(db);
   if (await isProjectionSourceCurrent(db, logPath, eventsDir)) return { rebuilt: false, pending: false };
-  await rebuildProjections(db, logPath, eventsDir, "automatic", lease);
+  await rebuildProjections(db, logPath, eventsDir, "automatic", lease, databaseLease);
   return { rebuilt: true, pending: !await isProjectionSourceCurrent(db, logPath, eventsDir) };
 }
 
