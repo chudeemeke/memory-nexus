@@ -11700,7 +11700,7 @@
     {
       "path": "src/presentation/cli/commands/backup.test.ts",
       "package": "package.json",
-      "sourceHash": "b4eb53e0ad1a081d0ba9592e145e312e188a35b8af3cbd1934a518bb53ae204f",
+      "sourceHash": "1eb26d2b232865fb8c4ae464aefa2dced596fb1c590c8d15c00647106a66b190",
       "tier": "S",
       "rationale": "Inspected filesystem import and call context: rmSync(testDir, { recursive: true, force: true, maxRetries: 50, retryDelay: 100 }). This test driver performs actual file/directory deletion; B11.22 owns the observed lifecycle finding.",
       "applicability": {
@@ -11709,31 +11709,33 @@
       },
       "decisionStatus": "proposed - independent review pending",
       "inspection": {
-        "sourceRevision": "e85d4d3f63dfe0cfaa58198766f13c56f1e23232",
-        "anchor": "rmSync(testDir, { recursive: true, force: true, maxRetries: 50, retryDelay: 100 })",
-        "line": 77,
-        "scope": "Filesystem import plus first two actual deletion call contexts inspected. Positive critical operation establishes risk; not full body/assertion review, symbol-resolution proof or cleanup acceptance."
+        "sourceRevision": "964cf20 + current source hash",
+        "anchor": "Q100.4.2 source admission and bounded command activation",
+        "scope": "Scoped source-bound diagnostics; complete writer adoption and quality acceptance open."
       },
       "metricApplicability": {
-        "status": "proposed - independent review pending",
-        "evidence": ".planning/memory-resilience/evidence/B04-applicability-probe.json",
-        "sourceHash": "b4eb53e0ad1a081d0ba9592e145e312e188a35b8af3cbd1934a518bb53ae204f",
-        "disposition": "Measure every positive denominator; individually review zero branch/function denominators against runtime syntax. Observed counts do not prove instrumentation completeness. Optional-chain syntax is present; synthetic evidence shows current instrumentation omits its decision counters. B05.1 owns source-mapped branch proof before numeric acceptance.",
+        "status": "Diagnostic only; gaps remain open, child coverage unaggregated and applicability/platform/package/changed-line/review incomplete",
+        "sourceHash": "1eb26d2b232865fb8c4ae464aefa2dced596fb1c590c8d15c00647106a66b190",
+        "evidence": ".planning/memory-resilience/evidence/Q100.4.2-source-admission.json",
         "metrics": {
           "statements": {
-            "observedCounterTotal": 347,
+            "observedCounterTotal": 376,
+            "observedPercent": 100,
             "proposal": "measure - completeness unverified"
           },
           "branches": {
-            "observedCounterTotal": 0,
-            "proposal": "zero requires individual review"
+            "observedCounterTotal": 4,
+            "observedPercent": 75,
+            "proposal": "measure - completeness unverified"
           },
           "functions": {
-            "observedCounterTotal": 35,
+            "observedCounterTotal": 37,
+            "observedPercent": 100,
             "proposal": "measure - completeness unverified"
           },
           "lines": {
-            "observedCounterTotal": 344,
+            "observedCounterTotal": 373,
+            "observedPercent": 100,
             "proposal": "measure - completeness unverified"
           }
         }
@@ -11742,7 +11744,7 @@
     {
       "path": "src/presentation/cli/commands/backup.ts",
       "package": "package.json",
-      "sourceHash": "7ed441c044e40e5e3e2783dbc69cd48470db6e33cebd62d87534240eae4434d3",
+      "sourceHash": "5fe86ecfd0788130d9b096ce41232b2a330d377ec58aa07341c32b46375a9b8e",
       "tier": "S",
       "rationale": "Creates backup manifests and checkpoints the database; backup integrity and storage mutation boundary.",
       "applicability": {
@@ -11751,29 +11753,33 @@
       },
       "decisionStatus": "proposed - independent review pending",
       "inspection": {
-        "sourceRevision": "ac9b3c0 + current source hash",
-        "anchor": "Native busy checkpoint, read-only statement and startup/evaluation owner proof",
-        "scope": "Scoped Windows paired-runtime proof; full Q050/Q062/B11.42/platform/quality acceptance open."
+        "sourceRevision": "964cf20 + current source hash",
+        "anchor": "Q100.4.2 source admission and bounded command activation",
+        "scope": "Scoped source-bound diagnostics; complete writer adoption and quality acceptance open."
       },
       "metricApplicability": {
-        "status": "diagnostic - full quality and independent review pending",
-        "evidence": ".planning/memory-resilience/evidence/B11.74.6.3.1.json",
-        "sourceHash": "7ed441c044e40e5e3e2783dbc69cd48470db6e33cebd62d87534240eae4434d3",
+        "status": "Diagnostic only; gaps remain open, child coverage unaggregated and applicability/platform/package/changed-line/review incomplete",
+        "sourceHash": "5fe86ecfd0788130d9b096ce41232b2a330d377ec58aa07341c32b46375a9b8e",
+        "evidence": ".planning/memory-resilience/evidence/Q100.4.2-source-admission.json",
         "metrics": {
-          "lines": {
-            "observedCounterTotal": 222,
+          "statements": {
+            "observedCounterTotal": 227,
+            "observedPercent": 94.27,
+            "proposal": "measure - completeness unverified"
+          },
+          "branches": {
+            "observedCounterTotal": 156,
+            "observedPercent": 84.61,
             "proposal": "measure - completeness unverified"
           },
           "functions": {
             "observedCounterTotal": 24,
+            "observedPercent": 87.5,
             "proposal": "measure - completeness unverified"
           },
-          "statements": {
-            "observedCounterTotal": 225,
-            "proposal": "measure - completeness unverified"
-          },
-          "branches": {
-            "observedCounterTotal": 147,
+          "lines": {
+            "observedCounterTotal": 224,
+            "observedPercent": 94.19,
             "proposal": "measure - completeness unverified"
           }
         }
@@ -12256,31 +12262,33 @@
       },
       "decisionStatus": "proposed - independent review pending",
       "inspection": {
-        "sourceRevision": "e85d4d3f63dfe0cfaa58198766f13c56f1e23232",
-        "anchor": "unlinkSync(dbPath)",
-        "line": 35,
-        "scope": "Filesystem import plus first two actual deletion call contexts inspected. Positive critical operation establishes risk; not full body/assertion review, symbol-resolution proof or cleanup acceptance."
+        "sourceRevision": "964cf20 + current source hash",
+        "anchor": "Q100.4.2 source admission and bounded command activation",
+        "scope": "Scoped source-bound diagnostics; complete writer adoption and quality acceptance open."
       },
       "metricApplicability": {
-        "status": "proposed - independent review pending",
-        "evidence": ".planning/memory-resilience/evidence/B04-applicability-probe.json",
+        "status": "Diagnostic only; gaps remain open, child coverage unaggregated and applicability/platform/package/changed-line/review incomplete",
         "sourceHash": "b62e9800c66e3531579c8aa5833a419a8db782e00a19ece9e0105c5469f9bac7",
-        "disposition": "Measure every positive denominator; individually review zero branch/function denominators against runtime syntax. Observed counts do not prove instrumentation completeness. Optional-chain syntax is present; synthetic evidence shows current instrumentation omits its decision counters. B05.1 owns source-mapped branch proof before numeric acceptance.",
+        "evidence": ".planning/memory-resilience/evidence/Q100.4.2-source-admission.json",
         "metrics": {
           "statements": {
             "observedCounterTotal": 192,
+            "observedPercent": 98.43,
             "proposal": "measure - completeness unverified"
           },
           "branches": {
             "observedCounterTotal": 10,
+            "observedPercent": 40,
             "proposal": "measure - completeness unverified"
           },
           "functions": {
             "observedCounterTotal": 50,
+            "observedPercent": 96,
             "proposal": "measure - completeness unverified"
           },
           "lines": {
             "observedCounterTotal": 168,
+            "observedPercent": 98.21,
             "proposal": "measure - completeness unverified"
           }
         }
@@ -12289,7 +12297,7 @@
     {
       "path": "src/presentation/cli/commands/dream.ts",
       "package": "package.json",
-      "sourceHash": "553fe7e232e22f6461b83e15c6b5fd944bd4265c97aa858bc1412d03327ae163",
+      "sourceHash": "bcfcb66d2fb07af2713ceb04ce46cd8975fda64a85bb71e97e17a8c6409aba34",
       "tier": "S",
       "rationale": "Initializes persistent dream state and exposes approval/apply/rollback controls.",
       "applicability": {
@@ -12298,29 +12306,33 @@
       },
       "decisionStatus": "proposed - independent review pending",
       "inspection": {
-        "sourceRevision": "de75bb5 + current source hash",
-        "anchor": "Q100.4.2 writer subset",
-        "scope": "Paired native proof; full Q100.4.2 and Q100.4.3 acceptance remains open."
+        "sourceRevision": "964cf20 + current source hash",
+        "anchor": "Q100.4.2 source admission and bounded command activation",
+        "scope": "Scoped source-bound diagnostics; complete writer adoption and quality acceptance open."
       },
       "metricApplicability": {
-        "status": "diagnostic - final Q100.4.3 acceptance pending",
-        "sourceHash": "553fe7e232e22f6461b83e15c6b5fd944bd4265c97aa858bc1412d03327ae163",
-        "evidence": ".planning/memory-resilience/evidence/Q100.4.2-writers.json",
+        "status": "Diagnostic only; gaps remain open, child coverage unaggregated and applicability/platform/package/changed-line/review incomplete",
+        "sourceHash": "bcfcb66d2fb07af2713ceb04ce46cd8975fda64a85bb71e97e17a8c6409aba34",
+        "evidence": ".planning/memory-resilience/evidence/Q100.4.2-source-admission.json",
         "metrics": {
-          "lines": {
-            "observedCounterTotal": 102,
-            "proposal": "measure - completeness unverified"
-          },
-          "functions": {
-            "observedCounterTotal": 22,
-            "proposal": "measure - completeness unverified"
-          },
           "statements": {
-            "observedCounterTotal": 103,
+            "observedCounterTotal": 122,
+            "observedPercent": 98.36,
             "proposal": "measure - completeness unverified"
           },
           "branches": {
-            "observedCounterTotal": 85,
+            "observedCounterTotal": 97,
+            "observedPercent": 90.72,
+            "proposal": "measure - completeness unverified"
+          },
+          "functions": {
+            "observedCounterTotal": 28,
+            "observedPercent": 100,
+            "proposal": "measure - completeness unverified"
+          },
+          "lines": {
+            "observedCounterTotal": 113,
+            "observedPercent": 98.23,
             "proposal": "measure - completeness unverified"
           }
         }
@@ -13186,31 +13198,33 @@
       },
       "decisionStatus": "proposed - independent review pending",
       "inspection": {
-        "sourceRevision": "e85d4d3f63dfe0cfaa58198766f13c56f1e23232",
-        "anchor": "unlinkSync(dbPath)",
-        "line": 28,
-        "scope": "Filesystem import plus first two actual deletion call contexts inspected. Positive critical operation establishes risk; not full body/assertion review, symbol-resolution proof or cleanup acceptance."
+        "sourceRevision": "964cf20 + current source hash",
+        "anchor": "Q100.4.2 source admission and bounded command activation",
+        "scope": "Scoped source-bound diagnostics; complete writer adoption and quality acceptance open."
       },
       "metricApplicability": {
-        "status": "proposed - independent review pending",
-        "evidence": ".planning/memory-resilience/evidence/B04-applicability-probe.json",
+        "status": "Diagnostic only; gaps remain open, child coverage unaggregated and applicability/platform/package/changed-line/review incomplete",
         "sourceHash": "d0097d35b995fe80172733af3b5d28924c3a0b47e3eee6f46f1a011e64e62c20",
-        "disposition": "Measure every positive denominator; individually review zero branch/function denominators against runtime syntax. Observed counts do not prove instrumentation completeness. Optional-chain syntax is present; synthetic evidence shows current instrumentation omits its decision counters. B05.1 owns source-mapped branch proof before numeric acceptance.",
+        "evidence": ".planning/memory-resilience/evidence/Q100.4.2-source-admission.json",
         "metrics": {
           "statements": {
             "observedCounterTotal": 157,
+            "observedPercent": 98.72,
             "proposal": "measure - completeness unverified"
           },
           "branches": {
             "observedCounterTotal": 7,
+            "observedPercent": 85.71,
             "proposal": "measure - completeness unverified"
           },
           "functions": {
             "observedCounterTotal": 39,
+            "observedPercent": 94.87,
             "proposal": "measure - completeness unverified"
           },
           "lines": {
             "observedCounterTotal": 135,
+            "observedPercent": 100,
             "proposal": "measure - completeness unverified"
           }
         }
@@ -13219,7 +13233,7 @@
     {
       "path": "src/presentation/cli/commands/governance.ts",
       "package": "package.json",
-      "sourceHash": "7d686b023654c2653a644613702ff29461f5eecac3a582d058a9a1ddae62639b",
+      "sourceHash": "8970c7a2aec7f59829d3370429e027fabec0ca314771fee241dc2e318e3175bc",
       "tier": "S",
       "rationale": "Initializes storage and exposes consent/suppression/governance controls.",
       "applicability": {
@@ -13228,29 +13242,33 @@
       },
       "decisionStatus": "proposed - independent review pending",
       "inspection": {
-        "sourceRevision": "de75bb5 + current source hash",
-        "anchor": "Q100.4.2 writer subset",
-        "scope": "Paired native proof; full Q100.4.2 and Q100.4.3 acceptance remains open."
+        "sourceRevision": "964cf20 + current source hash",
+        "anchor": "Q100.4.2 source admission and bounded command activation",
+        "scope": "Scoped source-bound diagnostics; complete writer adoption and quality acceptance open."
       },
       "metricApplicability": {
-        "status": "diagnostic - final Q100.4.3 acceptance pending",
-        "sourceHash": "7d686b023654c2653a644613702ff29461f5eecac3a582d058a9a1ddae62639b",
-        "evidence": ".planning/memory-resilience/evidence/Q100.4.2-writers.json",
+        "status": "Diagnostic only; gaps remain open, child coverage unaggregated and applicability/platform/package/changed-line/review incomplete",
+        "sourceHash": "8970c7a2aec7f59829d3370429e027fabec0ca314771fee241dc2e318e3175bc",
+        "evidence": ".planning/memory-resilience/evidence/Q100.4.2-source-admission.json",
         "metrics": {
-          "lines": {
-            "observedCounterTotal": 76,
-            "proposal": "measure - completeness unverified"
-          },
-          "functions": {
-            "observedCounterTotal": 20,
-            "proposal": "measure - completeness unverified"
-          },
           "statements": {
-            "observedCounterTotal": 77,
+            "observedCounterTotal": 96,
+            "observedPercent": 90.62,
             "proposal": "measure - completeness unverified"
           },
           "branches": {
-            "observedCounterTotal": 68,
+            "observedCounterTotal": 77,
+            "observedPercent": 92.2,
+            "proposal": "measure - completeness unverified"
+          },
+          "functions": {
+            "observedCounterTotal": 26,
+            "observedPercent": 76.92,
+            "proposal": "measure - completeness unverified"
+          },
+          "lines": {
+            "observedCounterTotal": 87,
+            "observedPercent": 89.65,
             "proposal": "measure - completeness unverified"
           }
         }
@@ -19645,31 +19663,35 @@
         "reason": "Executable lock boundary and failure/recovery tests; no exclusion approved."
       },
       "decisionStatus": "proposed - independent review pending",
-      "sourceHash": "61694ae1a006d91394178ac67488a898ebedbd9c6732d610fcd0d1e61b7fe697",
+      "sourceHash": "62d6c1834375d5d5de197818cdd4e36f08924380d41ef7e4f14ee9595d4c8d15",
       "inspection": {
-        "sourceRevision": "2a4ac2a + current source hash",
-        "anchor": "Q100.4.2 reservation backend",
-        "scope": "Backend only; root authority and command adoption remain unproved."
+        "sourceRevision": "964cf20 + current source hash",
+        "anchor": "Q100.4.2 source admission and bounded command activation",
+        "scope": "Scoped source-bound diagnostics; complete writer adoption and quality acceptance open."
       },
       "metricApplicability": {
-        "status": "Scoped diagnostics100all4; full instrumenter/package/changed-line/platform/final review pending",
-        "sourceHash": "61694ae1a006d91394178ac67488a898ebedbd9c6732d610fcd0d1e61b7fe697",
-        "evidence": ".planning/memory-resilience/evidence/Q100.4.2-admission.json",
+        "status": "Diagnostic only; gaps remain open, child coverage unaggregated and applicability/platform/package/changed-line/review incomplete",
+        "sourceHash": "62d6c1834375d5d5de197818cdd4e36f08924380d41ef7e4f14ee9595d4c8d15",
+        "evidence": ".planning/memory-resilience/evidence/Q100.4.2-source-admission.json",
         "metrics": {
           "statements": {
-            "observedCounterTotal": 37,
+            "observedCounterTotal": 39,
+            "observedPercent": 100,
             "proposal": "measure - completeness unverified"
           },
           "branches": {
             "observedCounterTotal": 20,
+            "observedPercent": 100,
             "proposal": "measure - completeness unverified"
           },
           "functions": {
             "observedCounterTotal": 2,
+            "observedPercent": 100,
             "proposal": "measure - completeness unverified"
           },
           "lines": {
-            "observedCounterTotal": 26,
+            "observedCounterTotal": 28,
+            "observedPercent": 100,
             "proposal": "measure - completeness unverified"
           }
         }
@@ -19687,29 +19709,165 @@
       "decisionStatus": "proposed - independent review pending",
       "sourceHash": "36d55b0a8dbe2f0ad49a8b23c0fe22a3cd67c4bd5ac0bc2c20d66bc388ad013b",
       "inspection": {
-        "sourceRevision": "2a4ac2a + current source hash",
-        "anchor": "Q100.4.2 reservation backend",
-        "scope": "Backend only; root authority and command adoption remain unproved."
+        "sourceRevision": "964cf20 + current source hash",
+        "anchor": "Q100.4.2 source admission and bounded command activation",
+        "scope": "Scoped source-bound diagnostics; complete writer adoption and quality acceptance open."
       },
       "metricApplicability": {
-        "status": "Scoped diagnostics100all4; full instrumenter/package/changed-line/platform/final review pending",
+        "status": "Diagnostic only; gaps remain open, child coverage unaggregated and applicability/platform/package/changed-line/review incomplete",
         "sourceHash": "36d55b0a8dbe2f0ad49a8b23c0fe22a3cd67c4bd5ac0bc2c20d66bc388ad013b",
-        "evidence": ".planning/memory-resilience/evidence/Q100.4.2-admission.json",
+        "evidence": ".planning/memory-resilience/evidence/Q100.4.2-source-admission.json",
         "metrics": {
           "statements": {
             "observedCounterTotal": 124,
+            "observedPercent": 100,
             "proposal": "measure - completeness unverified"
           },
           "branches": {
             "observedCounterTotal": 41,
+            "observedPercent": 100,
             "proposal": "measure - completeness unverified"
           },
           "functions": {
             "observedCounterTotal": 14,
+            "observedPercent": 100,
             "proposal": "measure - completeness unverified"
           },
           "lines": {
             "observedCounterTotal": 88,
+            "observedPercent": 100,
+            "proposal": "measure - completeness unverified"
+          }
+        }
+      }
+    },
+    {
+      "path": "src/infrastructure/database/source-operation-admission.ts",
+      "package": "package.json",
+      "tier": "S",
+      "rationale": "Source admission authority and command data-integrity boundary or adversarial native proof.",
+      "applicability": {
+        "mode": "measure",
+        "reason": "Executable source reservation and failure/recovery tests; no exclusion approved."
+      },
+      "decisionStatus": "proposed - independent review pending",
+      "sourceHash": "22def5503d3b9361164189b73145adc9c36d224bc67bb974230a8c6c76e529c8",
+      "inspection": {
+        "sourceRevision": "964cf20 + current source hash",
+        "anchor": "Q100.4.2 source admission and bounded command activation",
+        "scope": "Scoped source-bound diagnostics; complete writer adoption and quality acceptance open."
+      },
+      "metricApplicability": {
+        "status": "Diagnostic only; gaps remain open, child coverage unaggregated and applicability/platform/package/changed-line/review incomplete",
+        "sourceHash": "22def5503d3b9361164189b73145adc9c36d224bc67bb974230a8c6c76e529c8",
+        "evidence": ".planning/memory-resilience/evidence/Q100.4.2-source-admission.json",
+        "metrics": {
+          "statements": {
+            "observedCounterTotal": 77,
+            "observedPercent": 93.5,
+            "proposal": "measure - completeness unverified"
+          },
+          "branches": {
+            "observedCounterTotal": 40,
+            "observedPercent": 82.5,
+            "proposal": "measure - completeness unverified"
+          },
+          "functions": {
+            "observedCounterTotal": 10,
+            "observedPercent": 100,
+            "proposal": "measure - completeness unverified"
+          },
+          "lines": {
+            "observedCounterTotal": 49,
+            "observedPercent": 95.91,
+            "proposal": "measure - completeness unverified"
+          }
+        }
+      }
+    },
+    {
+      "path": "src/infrastructure/database/source-operation-admission.test.ts",
+      "package": "package.json",
+      "tier": "S",
+      "rationale": "Source admission authority and command data-integrity boundary or adversarial native proof.",
+      "applicability": {
+        "mode": "measure",
+        "reason": "Executable source reservation and failure/recovery tests; no exclusion approved."
+      },
+      "decisionStatus": "proposed - independent review pending",
+      "sourceHash": "6d73c668706039532a56042cda441fa6f6be6eba95077aa2c95226395938f3db",
+      "inspection": {
+        "sourceRevision": "964cf20 + current source hash",
+        "anchor": "Q100.4.2 source admission and bounded command activation",
+        "scope": "Scoped source-bound diagnostics; complete writer adoption and quality acceptance open."
+      },
+      "metricApplicability": {
+        "status": "Diagnostic only; gaps remain open, child coverage unaggregated and applicability/platform/package/changed-line/review incomplete",
+        "sourceHash": "6d73c668706039532a56042cda441fa6f6be6eba95077aa2c95226395938f3db",
+        "evidence": ".planning/memory-resilience/evidence/Q100.4.2-source-admission.json",
+        "metrics": {
+          "statements": {
+            "observedCounterTotal": 146,
+            "observedPercent": 98.63,
+            "proposal": "measure - completeness unverified"
+          },
+          "branches": {
+            "observedCounterTotal": 6,
+            "observedPercent": 50,
+            "proposal": "measure - completeness unverified"
+          },
+          "functions": {
+            "observedCounterTotal": 23,
+            "observedPercent": 100,
+            "proposal": "measure - completeness unverified"
+          },
+          "lines": {
+            "observedCounterTotal": 94,
+            "observedPercent": 100,
+            "proposal": "measure - completeness unverified"
+          }
+        }
+      }
+    },
+    {
+      "path": "tests/infrastructure/database/source-admission-command.test.ts",
+      "package": "package.json",
+      "tier": "S",
+      "rationale": "Source admission authority and command data-integrity boundary or adversarial native proof.",
+      "applicability": {
+        "mode": "measure",
+        "reason": "Executable source reservation and failure/recovery tests; no exclusion approved."
+      },
+      "decisionStatus": "proposed - independent review pending",
+      "sourceHash": "3753d915f14e73b8b04f17a306abe9cdbd40c41f44349be8b3bdc818ac7c8e47",
+      "inspection": {
+        "sourceRevision": "964cf20 + current source hash",
+        "anchor": "Q100.4.2 source admission and bounded command activation",
+        "scope": "Scoped source-bound diagnostics; complete writer adoption and quality acceptance open."
+      },
+      "metricApplicability": {
+        "status": "Diagnostic only; gaps remain open, child coverage unaggregated and applicability/platform/package/changed-line/review incomplete",
+        "sourceHash": "3753d915f14e73b8b04f17a306abe9cdbd40c41f44349be8b3bdc818ac7c8e47",
+        "evidence": ".planning/memory-resilience/evidence/Q100.4.2-source-admission.json",
+        "metrics": {
+          "statements": {
+            "observedCounterTotal": 119,
+            "observedPercent": 97.47,
+            "proposal": "measure - completeness unverified"
+          },
+          "branches": {
+            "observedCounterTotal": 14,
+            "observedPercent": 85.71,
+            "proposal": "measure - completeness unverified"
+          },
+          "functions": {
+            "observedCounterTotal": 17,
+            "observedPercent": 100,
+            "proposal": "measure - completeness unverified"
+          },
+          "lines": {
+            "observedCounterTotal": 51,
+            "observedPercent": 100,
             "proposal": "measure - completeness unverified"
           }
         }

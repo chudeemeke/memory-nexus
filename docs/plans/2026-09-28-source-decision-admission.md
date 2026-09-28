@@ -1,6 +1,6 @@
 # Source decision admission
 
-Status: baseline repair design; counterexample confirmed on Windows Bun 1.4.1 and 1.3.14.
+Status: baseline repair in progress; dream/governance admission implemented, complete writer adoption pending.
 Owner: memory-nexus. Parent: Q100.4.2. No production replication or new service.
 
 Backend checkpoint: synthetic reservation qualification and the separate
@@ -9,9 +9,11 @@ owner-termination recovery on both tested Windows runtimes. The adapter accepts
 only an already-provisioned absolute regular file with one link, application ID
 1296122957 and exactly one `admission_format` version 1 row. It creates/migrates no
 authority, grants no implicit nested permission, and preserves cleanup failures.
-It is not connected to commands; the stale proposal counterexample remains open.
-Source-root identity, provisioning, replacement protection and writer adoption are
-still required before activating it. A constructor path is not an authority proof.
+The current slice binds that backend to the real event root and acquires it before
+mutating dream/governance recovery and decision reads. The native command regression
+now requires contention without append, followed by a fresh retry preserving approval.
+Raw append, extraction, replay, remote and maintenance adoption remain incomplete;
+global command concurrency is not accepted. A constructor path is not authority proof.
 
 ## Observed failure and irreducible requirements
 
@@ -60,7 +62,7 @@ must not inherit permission merely because it uses the same process or database.
 |---|---|---|---|---|
 | Re-read before append | Still has a read/append gap | No ownership | Small code, fails required invariant | Reject as the fix |
 | PID/age lock file | Can cover the scope | Needs stale-owner recovery | PID reuse, replacement and age stealing need a second ownership protocol | Avoid adding another such protocol |
-| SQLite reservation on a local coordination file | Can cover the scope independently of projection transactions | Synthetic adapter process-termination proof passes on both tested Windows runtimes | Existing dependency; root identity, file lifecycle, nested calls and complete adoption still need proof | Backend qualified in scope; command activation pending |
+| SQLite reservation on a local coordination file | Covers mutating dream/governance before the first read independently of projection transactions | Synthetic adapter process-termination proof passes on both tested Windows runtimes | Existing dependency; provisioning races, nested calls and complete writer adoption still need proof | Backend and bounded command activation implemented; full acceptance pending |
 
 SQLite documents one simultaneous write transaction and immediate acquisition
 with `BEGIN IMMEDIATE`, which may return `SQLITE_BUSY`; closing a connection rolls
@@ -97,11 +99,42 @@ coordination file locally and never unlink/replace it while an owner may exist.
 Authority placement constraint discovered during implementation: using each
 process's configurable data directory as the coordination namespace can split
 admission for the same source when profiles or environment variables differ.
-Conversely, placing it inside the event root would enter the current recursive
-backup/restore path, which excludes only `.git`. Do not activate either shortcut.
-Next, qualify one stable local namespace derived from the real source authority,
-including alias and replacement behavior, and prove backup/restore/Git separation.
+The old recursive backup/restore path excluded only `.git` and would copy an
+in-events authority. The current slice explicitly excludes the reserved namespace
+and records it in the backup manifest. Event traversal rejects symbolic/hard links
+so aliases cannot bypass this exclusion. Concurrent filesystem replacement and
+atomic backup/restore remain Q050 obligations, not guarantees of this traversal.
 Tests must keep any adjacent coordination artifacts within owned fixture lifetimes.
+
+Activation slice: use a reserved `.memory-local` directory inside the real event
+root, with an explicit backup/restore exclusion added before command activation.
+This resolves differing-profile namespaces and keeps temporary test artifacts
+inside their existing owned roots. Default Git commits already select only the
+machine event file; prove that real transport does not stage the reserved directory.
+Do not add a tracked ignore file or claim arbitrary external Git/file operations
+are coordinated. Complete remote-source admission remains a required later seam.
+
+Provision an initialized SQLite file privately, publish by an exclusive hard link,
+and remove only the exact temporary file/directory allocated by this attempt.
+Never overwrite or repair an existing authority implicitly. Bind it to the real
+root path/device/inode and the authority's own device/inode, and check root, reserved-directory and authority-file
+identity before admission, under the acquired reservation, and after the operation.
+Copied or replaced authorities require reconciliation; no timestamp-based stealing.
+These optimistic filesystem checks do not make hostile external rename/unlink
+atomic with a callback. Cooperating operations must preserve the authority.
+
+Wrap mutating dream/governance commands before database initialization/recovery or
+decision reads; list/show and unconfirmed destructive requests remain unadmitted.
+Prepare command responses internally and print only after database and reservation
+cleanup. All remaining writers still require adoption before global safety claims.
+
+Next independently verifiable steps: inventory every source mutation and decision
+entrypoint; define an explicit lease for intentional nesting; prove unrelated async
+work cannot inherit it; then adopt one writer family at a time with real process
+barriers and retained-source recovery. Provisioning races and interruption around
+hard-link publication/temporary cleanup also require native tests. Track command
+operation plus reservation-release compound failure reporting explicitly: a prepared
+error response must not be discarded if release subsequently fails.
 
 No owner decision is needed for this authorized baseline investigation. R03/P03/A03
 remain the integration, production implementation and adoption decision boundaries.

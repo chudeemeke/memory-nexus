@@ -2,10 +2,11 @@ import type { OperationAdmission } from "../../domain/ports/operation-admission.
 import { lstatSync } from "node:fs";
 import { isAbsolute } from "node:path";
 import { OwnedDatabase } from "./owned-database.js";
+import type { Database } from "bun:sqlite";
 
 /** Backend only; source authority provisioning and command adoption are separate. */
 export class SqliteOperationAdmission implements OperationAdmission {
-  constructor(private readonly path: string) {}
+  constructor(private readonly path: string, private readonly validate?: (db: Database) => void) {}
 
   async run<T>(operation: () => Promise<T>): Promise<T> {
     if (!isAbsolute(this.path)) throw new Error("Operation admission requires an absolute authority path");
@@ -30,7 +31,9 @@ export class SqliteOperationAdmission implements OperationAdmission {
       using format = db.prepare<{ version: number }, []>("SELECT version FROM admission_format");
       const versions = format.all();
       if (versions.length !== 1 || versions[0]?.version !== 1) throw new Error("Unsupported operation admission format");
+      this.validate?.(db);
       result = await operation();
+      this.validate?.(db);
     } catch (error) { failures.push(error); }
     // Attempt every release and retain primary plus cleanup failures.
     if (held) {

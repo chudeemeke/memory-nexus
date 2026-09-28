@@ -1,5 +1,49 @@
 # Memory resilience execution journal
 
+## 2026-09-28 - Source-bound command admission and local-only backup boundary
+
+- Started from signed/pushed `964cf20`; retained the recovered uncommitted source
+  slice and completed its bounded checks. Full E1-E10 goal and Q100.4.2 stay active.
+- Added a source authority factory under the real event root's `.memory-local`.
+  It provisions privately with exclusive hard-link publication, binds root and
+  authority file device/inode, and checks identity before/under/after reservation.
+  Aliased roots and different profiles contend; copied/moved/replaced authorities,
+  redirected namespaces and hardlinked event sources fail closed. No stale stealing.
+- Mutating event-backed dream/governance now acquire before initialization,
+  recovery and first decision read. Responses print after database/reservation
+  cleanup. Native child/parent regression proves denied contenders append nothing;
+  serial retry retains approval and a different immutable recipe is refused.
+- Backup omits the local namespace; restore preserves its existing authority and
+  ignores a foreign backup authority. Default actual Git transport commit contains
+  only the machine event file. Two additional RED cases exposed symbolic/hard-link
+  aliases bypassing name exclusion; traversal now rejects them. Backup manifest
+  reports the exclusion. Concurrent traversal and atomic restore are still Q050.
+- Final group: 155 tests / 739 assertions / 11 files, zero failures on Windows
+  Bun 1.4.1 and pinned 1.3.14. Eight deliberate admission/root/file/backup guard
+  faults detected. Production types, four changed-test strict types and isolation
+  pass. Source-bound outputs, REDs and driver source retained in
+  `evidence/Q100.4.2-source-admission.json`. No full-suite/hosted/release claim.
+- Quality remains below policy: source factory 93.5 statements / 82.5 branches;
+  dream 90.72 branches; governance 76.92 functions / 89.65 lines; backup 84.61
+  branches / 87.5 functions. Test-file gaps and child-process coverage aggregation
+  remain open too. No threshold relaxed or exclusion approved; Q100.4.3 and
+  Q050/Q055/Q059 own complete final source/package/changed-line/platform review.
+- **Next bounded outcome:** inventory all source mutation/decision entrypoints,
+  define explicit nested lease ownership, then prove intentional nesting works
+  while unrelated async work cannot inherit authority. Adopt one writer family
+  at a time with native barriers and retained-source recovery. Raw append,
+  extraction, replay, remote and maintenance remain uncoordinated today.
+- Also retain provisioning races and process interruption around publish/unlink,
+  optimistic external path replacement, partial append/fsync, caller transactions,
+  complete candidate validation, reconciliation and scaling. A prepared operation
+  error can be displaced by reservation-release failure; compound reporting remains
+  explicitly owned by Q100.4.2/Q055/Q059. Backend proof alone cannot close these.
+- Inventory490 files/two packages;255 acyclic items, exactly one active. Owned
+  fixtures cleaned, 10.99 GiB free, one canonical worktree. No canonical data,
+  model/provider/hook/replication or previously rejected cleanup changed. Three
+  inboxes, final review/hosted/Linux/desktop and R03/P03/A03 remain open. The approved
+  bounded embedding experiment still follows baseline acceptance.
+
 ## 2026-09-28 - Qualified reservation backend; authority binding still required
 
 - Started from clean signed/pushed `2a4ac2a`; previous turn made progress with

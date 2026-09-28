@@ -1541,10 +1541,11 @@
       ],
       "historical_evidence": "docs/audits/2026-09-19-repair-evidence/per-file-coverage-gaps.json",
       "evidence": [
-        ".planning/memory-resilience/evidence/B11.74.6.3.1.json"
+        ".planning/memory-resilience/evidence/B11.74.6.3.1.json",
+        ".planning/memory-resilience/evidence/Q100.4.2-source-admission.json"
       ],
       "acceptance_record": ".planning/memory-resilience/evidence/Q050.json",
-      "observed_gap": "Replace checkpoint-then-file-copy with a coherent native SQLite snapshot; prove concurrent writer inclusion policy, complete authoritative data surfaces, rollback and atomic restore, malformed manifest/path/symlink refusal, full Tier S quality. Busy-checkpoint refusal alone does not close the writer race.",
+      "observed_gap": "Replace checkpoint-then-file-copy with a coherent native SQLite snapshot; prove concurrent writer inclusion policy, complete authoritative data surfaces, rollback and atomic restore, malformed manifest/path/symlink refusal, full Tier S quality. Busy-checkpoint refusal alone does not close the writer race. Admission namespace excluded from backup/restore; restore preserves existing local authority and manifest declares exclusion. Event traversal rejects symbolic/hard links including authority aliases. Atomic snapshots/restore, concurrent path swaps/source writers and cleanup integrity remain unproved; these guards do not close Q050.",
       "retirement_trigger": "Before B11.74.7/B10/R02 acceptance."
     },
     {
@@ -1654,8 +1655,11 @@
         "branches=86.48"
       ],
       "historical_evidence": "docs/audits/2026-09-19-repair-evidence/per-file-coverage-gaps.json",
-      "evidence": [],
-      "acceptance_record": ".planning/memory-resilience/evidence/Q055.json"
+      "evidence": [
+        ".planning/memory-resilience/evidence/Q100.4.2-source-admission.json"
+      ],
+      "acceptance_record": ".planning/memory-resilience/evidence/Q055.json",
+      "observed_gap": "Command now acquires source admission before recovery/decision read and defers output until database/reservation cleanup. Native contention/retry and compound database failure proof is scoped. Reservation-release plus prepared operation error reporting, all action paths and full TierS coverage remain open."
     },
     {
       "id": "Q056",
@@ -1743,8 +1747,11 @@
         "lines=90.41"
       ],
       "historical_evidence": "docs/audits/2026-09-19-repair-evidence/per-file-coverage-gaps.json",
-      "evidence": [],
-      "acceptance_record": ".planning/memory-resilience/evidence/Q059.json"
+      "evidence": [
+        ".planning/memory-resilience/evidence/Q100.4.2-source-admission.json"
+      ],
+      "acceptance_record": ".planning/memory-resilience/evidence/Q059.json",
+      "observed_gap": "Command now acquires source admission before recovery/decision read and defers output until database/reservation cleanup. Native contention/retry and compound database failure proof is scoped. Reservation-release plus prepared operation error reporting, all action paths and full TierS coverage remain open."
     },
     {
       "id": "Q060",
@@ -6296,32 +6303,34 @@
         ".planning/memory-resilience/evidence/Q100.4.2-outcomes.json",
         ".planning/memory-resilience/evidence/Q100.4.2-races.json",
         "docs/plans/2026-09-28-source-decision-admission.md",
-        ".planning/memory-resilience/evidence/Q100.4.2-admission.json"
+        ".planning/memory-resilience/evidence/Q100.4.2-admission.json",
+        ".planning/memory-resilience/evidence/Q100.4.2-source-admission.json"
       ],
       "acceptance_record": ".planning/memory-resilience/evidence/Q100.4.2.json",
       "retirement_trigger": "Before Q100.4/Q100/B11.74.7/B10/R02 acceptance.",
       "progress": {
-        "status": "SQLite reservation backend qualified and implemented separately; command race remains unfixed and admission is not activated.",
-        "completed": "Native prototype and actual adapter both exclude a second process, release after normal/error completion and allow reacquisition after owner termination without deleting/replacing the8KiB file. New domain OperationAdmission port and SqliteOperationAdmission adapter hold reservation across async work, reject unprovisioned/invalid/relative/hardlinked authorities, disallow implicit nesting and retain compound operation/release errors. Both module and test diagnostics100all4;9decision faults detected. No command invokes the adapter yet.",
-        "next": "Complete source-decision-admission.md step2: define/provision a stable local authority for each real event root across aliases and differing process configuration. Avoid per-process XDG namespaces that split authority and in-events storage copied by existing backup/restore. Prove root/file replacement, local-only placement, owned fixture retirement and explicit nested ownership. Then adopt before command recovery/first decision read and convert stale approval RED to normal regression; complete all cooperating writers before claiming E4/E5.",
-        "testsPerRuntime": 23,
-        "assertionsPerRuntime": 314,
-        "testFiles": 2,
-        "decisionFaultsDetected": 9,
+        "status": "Shared source authority and bounded dream/governance admission implemented; complete writer coordination and quality remain open.",
+        "completed": "Local SQLite authority is bound to canonical root and file incarnation across profiles/aliases. Copied/moved/replaced authority and redirected namespace fail closed. Default Git commits omit authority. Backup excludes/preserves local namespace, records exclusion and refuses symbolic/hard link aliases. Mutating dream/governance acquire before recovery/first decision read and print only after cleanup; native regression proves busy contenders append nothing, retry retains approval and different recipe is refused. Eight deliberately broken guards detected.",
+        "next": "Inventory every source mutation/decision entrypoint and define explicit nested lease ownership before adopting another writer family. First qualify unrelated async denial and intentional nesting, then wire raw/extraction/replay/remote/maintenance one family at a time with native barriers and retained-source recovery. Add provisioning publication/interruption races, operation plus reservation-release compound reporting, partial append/candidate/caller transaction/reconciliation and source replacement coverage. Do not remove optimistic source/replay fences.",
+        "testsPerRuntime": 155,
+        "assertionsPerRuntime": 739,
+        "testFiles": 11,
+        "decisionFaultsDetected": 8,
         "survivingDecisionFaults": [],
         "costEvidence": ".planning/memory-resilience/evidence/Q100.4.2-callers.json",
         "scalingConstraint": "Synthetic1000-event guarded write took814ms; idle checks30-67ms. Full replay remains proportional to retained history. Assess representative corpus limits and address scaling before integration/adoption; these small measurements are not an acceptance target or peak-memory proof.",
         "owner": "memory-nexus",
         "trigger": "Before Q100.4/Q100/B11.74.7/B10/R02 acceptance.",
-        "scope": "Two-file reservation/statement-owner group plus prototype and actual-adapter three-process schedules on two Windows runtimes. Authority provisioning, command adoption, Linux, full package/changed-line/review and end-to-end concurrency remain open.",
+        "scope": "Windows Bun1.4.1 and pinned1.3.14 source/command/backup/transport/replay group. Global concurrency, Linux, package/changed-line/instrumenter/final review remain open.",
         "remoteEvidence": ".planning/memory-resilience/evidence/Q100.4.2-remote.json",
         "localEvidence": ".planning/memory-resilience/evidence/Q100.4.2-local.json",
         "outcomeEvidence": ".planning/memory-resilience/evidence/Q100.4.2-outcomes.json",
         "raceEvidence": ".planning/memory-resilience/evidence/Q100.4.2-races.json",
         "decisionAdmissionPlan": "docs/plans/2026-09-28-source-decision-admission.md",
-        "admissionEvidence": ".planning/memory-resilience/evidence/Q100.4.2-admission.json"
+        "admissionEvidence": ".planning/memory-resilience/evidence/Q100.4.2-admission.json",
+        "sourceAdmissionEvidence": ".planning/memory-resilience/evidence/Q100.4.2-source-admission.json"
       },
-      "observed_gap": "HIGH: a concurrently resumed identical proposal can append stale pending_review state over a completed approval. Reproduced through actual dream commands in separate processes on Windows Bun1.4.1/1.3.14, with deterministic read barrier and4->5source records. Owner memory-nexus; fix shared read/validate/append admission before Q100.4.2/E4/E5/B10/R02. Complete writer/source authority adoption, partial append/caller transactions/candidate validation/reconciliation and scaling remain mandatory. Reservation backend now separately qualified; shared authority root/path/provisioning and command/writer wiring are not implemented. Do not remove the stale approval failure merely because backend tests pass."
+      "observed_gap": "Current: source-bound admission repairs the retained stale-decision schedule for cooperating dream/governance commands; prior counterexample remains historical RED in races evidence. Raw append/extraction/replay/remote/maintenance are not admitted, so global ordering is incomplete. Explicit nested leases, concurrent provisioning and interruption after hard-link publication need proof. Prepared operation errors can be displaced by reservation-release failure. Filesystem identity checks are optimistic against external swaps. Partial append/fsync, caller transactions, complete candidate validation, multi-event recovery, reconciliation and scaling remain mandatory. Owner memory-nexus; retire before Q100.4.2/E4/E5/B10/R02 acceptance."
     },
     {
       "id": "Q100.4.3",
@@ -6344,11 +6353,12 @@
         ".planning/memory-resilience/evidence/Q100.4.2-outcomes.json",
         ".planning/memory-resilience/evidence/Q100.4.2-races.json",
         "docs/plans/2026-09-28-source-decision-admission.md",
-        ".planning/memory-resilience/evidence/Q100.4.2-admission.json"
+        ".planning/memory-resilience/evidence/Q100.4.2-admission.json",
+        ".planning/memory-resilience/evidence/Q100.4.2-source-admission.json"
       ],
       "acceptance_record": ".planning/memory-resilience/evidence/Q100.4.3.json",
       "retirement_trigger": "Before Q100.4/Q100/B11.74.7/B10/R02 acceptance.",
-      "observed_gap": "Optional-stage outcome proof:332tests/1023assertions on two Windows runtimes,11 detected faults, production/eight changed-test strict compilation/isolation. Stage-outcome and memory-files source diagnostic all four metrics100, but CLI/helpers/ambient/embedding source and test metrics still fail required floors (full rows in outcomes evidence). Native child coverage unaggregated; zero denominators need review. Prior extraction/remote/transport, package/changed-line/platform/cleanup and independent review remain mandatory. New process-race driver diagnostic statements95.16/branches87.5/functions100/lines100 fails TierS branch requirement; child instrumentation remains unaggregated. Three production decision faults are detected, but stale command admission is a confirmed unresolved defect, not a coverage exception. New admission module/test diagnostics100all4 with9faults detected and two-runtime native release proof. Domain admission port is declaration-only proposed. Complete instrumenter/applicability review, package/changed-line/platform, authority adoption and existing gaps remain open."
+      "observed_gap": "Current source-admission evidence retains complete scoped rows: factory, dream, governance, backup and test files fail required metrics. Backend module/test diagnostics remain100all4. Child-process coverage is unaggregated; zero denominators, instrumenter/applicability, package and changed-line evidence, Linux, cleanup and final independent review remain open. Prior optional-stage/extraction/remote/transport gaps remain in their separately source-bound evidence; earlier counts do not certify current source. Bounded command regression repairs the former stale-decision schedule, but complete writer adoption is still a correctness obligation, never a coverage exception. No exclusion approved."
     }
   ],
   "decisions": {
