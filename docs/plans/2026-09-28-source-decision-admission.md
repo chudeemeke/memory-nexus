@@ -363,3 +363,9 @@ identity/completion contract. Before implementation, derive durable ordered
 decision and completion/recovery requirements from the source, governance and
 audit contracts. Preserve changed-input/force semantics and qualify each event
 boundary; stable fact IDs or content matches alone do not prove batch completion.
+
+The resulting recovery design and required slices are now recorded in
+`docs/plans/2026-09-28-extraction-batch-recovery.md`. Its domain descriptor is
+scoped-verified; reader/replay support is active on a real-source RED. The
+pipeline does not emit the new format, and the original interrupted-chain
+counterexample remains unresolved until the complete recovery path is wired.

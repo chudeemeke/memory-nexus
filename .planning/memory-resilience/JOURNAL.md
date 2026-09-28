@@ -1,5 +1,59 @@
 # Memory resilience execution journal
 
+## 2026-09-28 - Durable batch descriptor; reader integration RED
+
+- Previous turn made progress at signed/pushed `2afa560`; began clean. Full
+  E1-E10 native goal remains active. The interrupted-chain defect remains open.
+  Derived the minimum recovery structure from durable ordered decisions,
+  identity, completion, privacy and legacy compatibility. Selected one canonical
+  integrity-protected batch record over re-comparison, stable IDs alone or a
+  separate journal store. Plan: `docs/plans/2026-09-28-extraction-batch-recovery.md`.
+- Split Q100.4.2.2.2 into four required slices: descriptor, source/replay,
+  audit/pipeline, native interruption acceptance. Q100.4.2.2.2.1 now has scoped
+  domain acceptance; Q100.4.2.2.2.2 is the sole active item. Parent barriers remain
+  pending. Ledger274acyclic items; inventory502files across two packages.
+- New dependency-free domain codec validates versioned session/input/project,
+  provider/model, canonical timestamp, exact outcome counts and ordered effects.
+  Rejects unknown structural fields, control-event injection, duplicate IDs,
+  impossible/forward/self/repeated supersedence and serialization that would
+  silently erase/coerce data. Plain finite dense JSON, cycle/accessor/prototype
+  refusal and exact depth64 boundary are exercised. Copies do not alias callers.
+- The outer envelope will own batch identity/integrity. Effects are fact
+  descriptors rather than nested hash envelopes. This avoids creating nested
+  hashes that a future recursive privacy rewrite would leave stale; actual
+  remediation and consumer proof still belongs to the next slice. Codec does
+  not authenticate source, authorize external targets or validate all metadata
+  projection semantics. No product writer emits this format yet.
+- Final four-file group104tests/341assertions on each Windows Bun1.4.1 and
+  checksum-pinned1.3.14. Codec77tests are included. Production types, strict new
+  tests and isolation pass. Codec diagnostic100all4,102branches;20targeted faults
+  detected. New test98.47statements/100branches(0total)/97.43functions/100lines;
+  zero branch denominator needs applicability review. Two adversarial callable
+  bodies intentionally never run. No final review/package/platform acceptance.
+- Initial missing-module RED is labeled tracer-only. Initial duplicate-ID fault
+  survived because the fixture also invalidated a replacement link; replaced it
+  with otherwise valid duplicated facts. Added two array-key rejection cases
+  and exact depth boundary tests. Final fault suite now catches all20. Initial
+  evidence and corrections retained in `evidence/Q100.4.2.2.2.1.json`.
+- Final inspection found that JSON erases negative zero. Added a behavioral RED,
+  rejected that lossy value and added a targeted mutation; final counts above
+  reflect the repeated final collectors after this correction.
+- **Next real-source RED:** a valid v2 projection/add envelope with a validated
+  extractionBatch descriptor is appended to an owned synthetic log, but actual
+  rebuild rejects with Unsupported projection event kind. The codec is not
+  wired to readers/replay. Promote `nextCounterexample` from the evidence into
+  source/replay tests. Validate whole wrapper and source identity collisions
+  before ordered expansion or staging; preserve provenance, Fact readers,
+  canonical wrapper readers, governance/persona/graph and privacy remediation.
+- The earlier kill-before-audit alpha->beta->gamma counterexample still resumes
+  to beta with duplicate effects. It must become GREEN through actual pipeline
+  and durable audit recovery, not by claiming this codec fixes it. Force and
+  changed-input/competing-attempt handling remain required in the following slice.
+- Free disk10.98GiB; owned fixtures/runtime cleaned. No canonical data/model,
+  hooks, replication, installation or workspace authority changed. Three inboxes,
+  previously rejected cleanup, shared-temp12KiB authority, hosted/Linux/desktop
+  gates and R03/P03/A03 remain. Approved embedding experiment follows baseline.
+
 ## 2026-09-28 - Evolving batch comparisons; interrupted-chain RED
 
 - Previous turn made progress at signed/pushed `21dd22c`; began clean. Full

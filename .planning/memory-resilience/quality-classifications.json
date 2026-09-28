@@ -20383,6 +20383,94 @@
           }
         }
       }
+    },
+    {
+      "path": "src/domain/entities/extraction-batch.ts",
+      "package": "package.json",
+      "tier": "S",
+      "rationale": "Durable extraction batch integrity and adversarial descriptor validation.",
+      "applicability": {
+        "mode": "measure",
+        "reason": "Executable integrity validation/test; no exclusion approved."
+      },
+      "decisionStatus": "proposed - independent review pending",
+      "sourceHash": "d8be20f9a1b13f840bbf4ae3feed08adaebbf179a578a00dfa3946914d8ee1d8",
+      "inspection": {
+        "sourceRevision": "2afa560 + current source hash",
+        "anchor": "Q100.4.2.2.2.1",
+        "scope": "Domain descriptor validation; product source/replay/audit wiring not implemented"
+      },
+      "metricApplicability": {
+        "status": "Scoped diagnostic; denominator and final review pending",
+        "sourceHash": "d8be20f9a1b13f840bbf4ae3feed08adaebbf179a578a00dfa3946914d8ee1d8",
+        "evidence": ".planning/memory-resilience/evidence/Q100.4.2.2.2.1.json",
+        "metrics": {
+          "statements": {
+            "observedCounterTotal": 95,
+            "observedPercent": 100,
+            "proposal": "measure - completeness unverified"
+          },
+          "branches": {
+            "observedCounterTotal": 102,
+            "observedPercent": 100,
+            "proposal": "measure - completeness unverified"
+          },
+          "functions": {
+            "observedCounterTotal": 11,
+            "observedPercent": 100,
+            "proposal": "measure - completeness unverified"
+          },
+          "lines": {
+            "observedCounterTotal": 53,
+            "observedPercent": 100,
+            "proposal": "measure - completeness unverified"
+          }
+        }
+      }
+    },
+    {
+      "path": "src/domain/entities/extraction-batch.test.ts",
+      "package": "package.json",
+      "tier": "S",
+      "rationale": "Durable extraction batch integrity and adversarial descriptor validation.",
+      "applicability": {
+        "mode": "measure",
+        "reason": "Executable integrity validation/test; no exclusion approved."
+      },
+      "decisionStatus": "proposed - independent review pending",
+      "sourceHash": "72eaaada9a523c55d53329253d3f6a80e65ad8b56424cae9b9465bfb7e4398d9",
+      "inspection": {
+        "sourceRevision": "2afa560 + current source hash",
+        "anchor": "Q100.4.2.2.2.1",
+        "scope": "Domain descriptor validation; product source/replay/audit wiring not implemented"
+      },
+      "metricApplicability": {
+        "status": "Scoped diagnostic; denominator and final review pending",
+        "sourceHash": "72eaaada9a523c55d53329253d3f6a80e65ad8b56424cae9b9465bfb7e4398d9",
+        "evidence": ".planning/memory-resilience/evidence/Q100.4.2.2.2.1.json",
+        "metrics": {
+          "statements": {
+            "observedCounterTotal": 131,
+            "observedPercent": 98.47,
+            "proposal": "measure - completeness unverified"
+          },
+          "branches": {
+            "observedCounterTotal": 0,
+            "observedPercent": 100,
+            "proposal": "measure - completeness unverified"
+          },
+          "functions": {
+            "observedCounterTotal": 78,
+            "observedPercent": 97.43,
+            "proposal": "measure - completeness unverified"
+          },
+          "lines": {
+            "observedCounterTotal": 99,
+            "observedPercent": 100,
+            "proposal": "measure - completeness unverified"
+          }
+        }
+      }
     }
   ],
   "retiredFiles": [
