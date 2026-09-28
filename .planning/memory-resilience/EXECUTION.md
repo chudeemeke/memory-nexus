@@ -221,9 +221,14 @@ factory and B11.74.6.2 health final pinned repeats passed after disk recovery on
 September 28. B11.74.6.3.1 CLI/evaluation ownership is scoped verified: busy or
 missing checkpoints refuse backup/migration progression; five direct statements
 dispose, and native startup/evaluation owners close correctly. Both Windows
-runtimes pass the 85-test caller group. Combined caller revalidation in .3.2 is
-active; it must include earlier affected repository/service groups, not just the
-latest six files. Q050/Q062 and B11.22/B11.42/B11.58 join the mandatory .7 barrier;
+runtimes pass the 85-test caller group. Combined caller revalidation in .3.2 now
+passes3170tests across151 database,CLI and application files on each Windows
+runtime. It found and repaired the unscoped show-prefix reader and destructive
+no-op extraction replay, and reconciled missing versus empty projection fixtures.
+Parent .3/.6 are scoped verified. Q100 is active next for whole-replay failure
+safety and missing-source verification readiness. Q005/Q068 and B11.44/B11.52
+retain the newly confirmed caller quality gaps. Q050/Q062 and
+B11.22/B11.42/B11.58 remain in the mandatory .7 barrier;
 full snapshot safety and stale-lock admission remain unresolved. Q018/B11.9 and Q102/B11.10 retain
 factory and fixture quality gaps. Q100 owns the
 demonstrated whole-replay failure defect; Q101 owns complete secret-remediation

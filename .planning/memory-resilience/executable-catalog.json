@@ -2573,7 +2573,7 @@
     {
       "path": "src/application/services/extraction-pipeline.test.ts",
       "package": "package.json",
-      "sourceHash": "d1f7cfb838af2c12b9ae6ca2d8df729db603dace43f498de859be9f5b34b567e",
+      "sourceHash": "533a32e1899ff516a610760e291aae9921bb1cd9442ff71524eb8a156212ffa5",
       "language": ".ts",
       "syntax": "test-driver",
       "imports": [
@@ -2605,11 +2605,13 @@
         "embeddedTexts",
         "embeddingsMap",
         "eventLogContent",
+        "existing",
         "extractor",
         "factRepo",
         "fs",
         "incompleteEmbedder",
         "logRepo",
+        "logState",
         "logs",
         "messageRepo",
         "mockEmbedder",
@@ -2617,6 +2619,7 @@
         "msg",
         "notReadyEmbedder",
         "oldFactDb",
+        "other",
         "output",
         "pipeline",
         "providerPayload",
@@ -2693,7 +2696,7 @@
     {
       "path": "src/application/services/extraction-pipeline.ts",
       "package": "package.json",
-      "sourceHash": "bfb4545953cda882c8e9b1748169ac690690bf91aac3f09cef16be1adb4b5c15",
+      "sourceHash": "97789c70379ccc3fb77183ab23c97ba5cfcacc5b3e707fa2d9265258b2abf72e",
       "language": ".ts",
       "syntax": "executable",
       "imports": [
@@ -19817,7 +19820,7 @@
     {
       "path": "src/presentation/cli/commands/projections.test.ts",
       "package": "package.json",
-      "sourceHash": "19bdd85694043e21e5732b3889fc8b100319b4f673e6adfc4716f60419e2359e",
+      "sourceHash": "859a58b8f4bc9f85bdd500b19326afd5fce37152d3f3b22add1dbd9633d5cccb",
       "language": ".ts",
       "syntax": "test-driver",
       "imports": [
@@ -19837,6 +19840,7 @@
         "eventsDir",
         "eventsFile",
         "jsonResult",
+        "opts",
         "originalError",
         "originalExitCode",
         "originalLog",
@@ -19845,6 +19849,7 @@
         "rebuild",
         "result",
         "row",
+        "statement",
         "testDir",
         "textResult"
       ],
@@ -19868,6 +19873,7 @@
         "consoleOutput.push",
         "createProjectionsCommand",
         "db.close",
+        "db.prepare",
         "db.query",
         "db.query.get",
         "describe",
@@ -19877,11 +19883,13 @@
         "expect.toBe",
         "expect.toBeDefined",
         "expect.toContain",
+        "expect.toEqual",
         "it",
         "join",
         "mkdirSync",
         "rebuild.options.some",
         "rmSync",
+        "statement.all",
         "subcommand.name",
         "tmpdir",
         "writeFileSync"
@@ -21516,7 +21524,7 @@
     {
       "path": "src/presentation/cli/commands/show.ts",
       "package": "package.json",
-      "sourceHash": "6b7161f56747e774cbdb34dcf67a076b8a0ea357fe5525877d2b6c93ec889998",
+      "sourceHash": "67428a8bba20b9778ecfc859a568734366204901564eb7e0ce11291437948a69",
       "language": ".ts",
       "syntax": "executable",
       "imports": [
@@ -27014,6 +27022,64 @@
         "statement.get",
         "statements.push",
         "withFixture"
+      ]
+    },
+    {
+      "path": "tests/infrastructure/database/show-lifecycle.test.ts",
+      "package": "package.json",
+      "sourceHash": "e22166f9c0fb69f4085ac20f0487acf8c943c755bed0a18ce5423dfedef29aa1",
+      "language": ".ts",
+      "syntax": "test-driver",
+      "imports": [
+        "../../../src/domain/entities/session.js",
+        "../../../src/domain/value-objects/project-path.js",
+        "../../../src/infrastructure/database/connection.js",
+        "../../../src/infrastructure/database/repositories/session-repository.js",
+        "../../../src/presentation/cli/commands/show.js",
+        "../../helpers/capture-json.js",
+        "../../helpers/owned-test-directory.js",
+        "bun:sqlite",
+        "bun:test",
+        "node:fs",
+        "node:path"
+      ],
+      "declarations": [
+        "capture",
+        "dispose",
+        "disposed",
+        "outcome",
+        "output",
+        "path",
+        "prepare",
+        "retained",
+        "statement",
+        "storage",
+        "value"
+      ],
+      "calls": [
+        "JSON.parse",
+        "Object.defineProperty",
+        "ProjectPath.fromDecoded",
+        "Reflect.apply",
+        "Session.create",
+        "capture.mockRestore",
+        "captureStreams",
+        "closeDatabase",
+        "createOwnedTestDirectory",
+        "executeShowCommand",
+        "expect",
+        "expect.toBe",
+        "expect.toBeDefined",
+        "expect.toContain",
+        "expect.toThrow",
+        "initializeDatabase",
+        "it",
+        "join",
+        "retained.finalize",
+        "spyOn",
+        "spyOn.mockImplementation",
+        "storage.cleanup",
+        "unlinkSync"
       ]
     },
     {

@@ -198,6 +198,25 @@ describe("ExtractionPipeline", () => {
     expect(await logRepo.findById("session-empty")).toBeNull();
   });
 
+  for (const logState of ["missing", "empty"] as const) {
+    test(`preserves existing facts when all candidates are duplicates and the log is ${logState}`, async () => {
+      const session = Session.create({ id: "session-noop", projectPath: ProjectPath.fromDecoded("C:\\Projects\\nexus"), startTime: new Date() });
+      await sessionRepo.save(session);
+      await messageRepo.save(Message.create({ id: "msg-noop", role: "user", content: "Use native tests", timestamp: new Date() }), session.id);
+      const existing = Fact.create({ type: "learning", project: "nexus", content: "Use native tests", observedAt: new Date() });
+      const other = Fact.create({ type: "decision", project: "other", content: "Preserve unrelated memory", observedAt: new Date() });
+      await factRepo.save(existing); await factRepo.save(other);
+      if (logState === "empty") writeFileSync(testLogPath, "");
+      const pipeline = new ExtractionPipeline(db, factRepo, logRepo, messageRepo,
+        mockExtractor([{ type: "learning", content: existing.content, confidence: 0.95 }]), undefined, testLogPath);
+      const result = await pipeline.extractFromSession(session.id, "nexus");
+      expect(result).toEqual({ skippedSession: false, added: 0, updated: 0, superseded: 0, skipped: 1 });
+      expect((await factRepo.findAll()).map(fact => fact.uuid).sort()).toEqual([existing.uuid, other.uuid].sort());
+      expect((await logRepo.findById(session.id))?.factsSkipped).toBe(1);
+      expect(existsSync(testLogPath)).toBe(logState === "empty");
+    });
+  }
+
   test("extracts new fact if similarity is low (< 0.85)", async () => {
     const session = Session.create({
       id: "session-abc",

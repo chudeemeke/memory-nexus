@@ -1,5 +1,48 @@
 # Memory resilience execution journal
 
+## 2026-09-28 - Combined native caller verification and integration repairs
+
+- Previous turn: progress, signed/pushed edc079d with maintenance fixes and
+  pinned factory/health catch-up. This turn began clean and refreshed the complete
+  map rather than inheriting the earlier individual-suite acceptance.
+- Refreshed map:224 production/script modules,57 modules with selected calls,
+  187 native prepares. Current AST/consumer audit verifies179 local scopes and
+  eight returns to scoped helper callers. It found the missing show-prefix scope;
+  native match/not-found/SQLite-error RED cases reproduced missing disposal.
+  Scope repaired; removal fails both the native test and negative ownership check.
+- Broader CLI execution found one obsolete projection test that deleted the only
+  event log but expected successful rebuild. The success case now uses an explicit
+  empty log. A separate native public-command test proves absent logs refuse reset
+  and preserve previously projected facts. Existing fixture cleanup remains B11.44.
+- Application execution exposed three extraction failures. New RED cases also
+  showed duplicate-only extraction could erase both local and unrelated facts
+  from an empty log. Extraction now rebuilds only after appending facts, preserving
+  no-op state while recording its extraction outcome. Both replay-always and
+  replay-never mutations are detected; this does not make non-empty replay atomic.
+- Final source passes3170tests/16622assertions in151 files on each of Windows
+  Bun1.4.1 and1.3.14:database922/11141,CLI1788/4183,application460/1298.
+  Full outputs and earlier failures are retained in evidence/B11.74.6.3.2.json.
+  Production types, strict changed-test types and isolation pass. Source bindings
+  agree across both runs. Owned temporary fixtures/runtime downloads were removed;
+  approximately11.1GiB remained free. No policy-blocked removal was retried.
+- New show driver diagnoses100%. Show production statements94.11/functions83.33/
+  branches79.41 and extraction functions93.75/branches91.83 fail required floors;
+  existing extraction test functions76.92/branches75 also fail. Q005/Q068 are now
+  confirmed Tier S tasks, dependent on this scoped checkpoint rather than B09 to
+  avoid a cycle. Full B09 remains mandatory. B11.44/B11.52 join the .7 barrier.
+- .3.2 and parent .3/.6 are verified for scoped native ownership/caller behavior.
+  .7, full quality, declared runtime floor, Linux, hosted checks, installed artifact
+  and independent review remain unverified. No baseline or experiment acceptance.
+- Current item:Q100. A new native diagnostic proves missing source returns
+  ready:true under projections --verify, while confirmed rebuild rejects it.
+  Retained alongside the earlier late-write replay data-loss regression. Next:
+  prove a complete admitted source snapshot and failure-safe projection replacement,
+  align verify/mutation/extraction callers, and test failure/retry/concurrent work.
+  Source admission and pending-event recovery are required, not deferred options.
+- Catalog467files/two packages and244-item acyclic ledger reconcile. No installed
+  CLI, canonical memory, model acquisition, provider egress or replication changed.
+
+
 ## 2026-09-28 - Native checkpoint refusal and pinned-runtime catch-up
 
 - Previous turn: progress through source discovery, interrupted before edits.

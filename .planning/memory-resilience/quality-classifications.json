@@ -1395,7 +1395,7 @@
     {
       "path": "src/application/services/extraction-pipeline.test.ts",
       "package": "package.json",
-      "sourceHash": "d1f7cfb838af2c12b9ae6ca2d8df729db603dace43f498de859be9f5b34b567e",
+      "sourceHash": "533a32e1899ff516a610760e291aae9921bb1cd9442ff71524eb8a156212ffa5",
       "tier": "S",
       "rationale": "Inspected filesystem import and call context: unlinkSync(testLogPath). This test driver performs actual file/directory deletion; numeric applicability and ownership proof remain subject to individual review.",
       "applicability": {
@@ -1404,31 +1404,29 @@
       },
       "decisionStatus": "proposed - independent review pending",
       "inspection": {
-        "sourceRevision": "e85d4d3f63dfe0cfaa58198766f13c56f1e23232",
-        "anchor": "unlinkSync(testLogPath)",
-        "line": 52,
-        "scope": "Filesystem import plus first two actual deletion call contexts inspected. Positive critical operation establishes risk; not full body/assertion review, symbol-resolution proof or cleanup acceptance."
+        "sourceRevision": "edc079d + current source hash",
+        "anchor": "combined caller regression",
+        "scope": "Paired Windows native proof; full tier/privacy/platform/review acceptance pending."
       },
       "metricApplicability": {
-        "status": "proposed - independent review pending",
-        "evidence": ".planning/memory-resilience/evidence/B04-applicability-probe.json",
-        "sourceHash": "d1f7cfb838af2c12b9ae6ca2d8df729db603dace43f498de859be9f5b34b567e",
-        "disposition": "Measure every positive denominator; individually review zero branch/function denominators against runtime syntax. Observed counts do not prove instrumentation completeness.",
+        "status": "diagnostic - Q005/Q068/B11.74.7 acceptance pending",
+        "sourceHash": "533a32e1899ff516a610760e291aae9921bb1cd9442ff71524eb8a156212ffa5",
+        "evidence": ".planning/memory-resilience/evidence/B11.74.6.3.2.json",
         "metrics": {
-          "statements": {
-            "observedCounterTotal": 251,
-            "proposal": "measure - completeness unverified"
-          },
-          "branches": {
-            "observedCounterTotal": 6,
+          "lines": {
+            "observedCounterTotal": 262,
             "proposal": "measure - completeness unverified"
           },
           "functions": {
-            "observedCounterTotal": 50,
+            "observedCounterTotal": 52,
             "proposal": "measure - completeness unverified"
           },
-          "lines": {
-            "observedCounterTotal": 247,
+          "statements": {
+            "observedCounterTotal": 269,
+            "proposal": "measure - completeness unverified"
+          },
+          "branches": {
+            "observedCounterTotal": 8,
             "proposal": "measure - completeness unverified"
           }
         }
@@ -1437,7 +1435,7 @@
     {
       "path": "src/application/services/extraction-pipeline.ts",
       "package": "package.json",
-      "sourceHash": "bfb4545953cda882c8e9b1748169ac690690bf91aac3f09cef16be1adb4b5c15",
+      "sourceHash": "97789c70379ccc3fb77183ab23c97ba5cfcacc5b3e707fa2d9265258b2abf72e",
       "tier": "S",
       "rationale": "Redacts messages before provider egress, redacts candidates and persists extraction outcomes.",
       "applicability": {
@@ -1446,30 +1444,29 @@
       },
       "decisionStatus": "proposed - independent review pending",
       "inspection": {
-        "sourceRevision": "aa2c449cd2d72828e81a7ea691a12ca2b400323c",
-        "anchor": "extractionProvider.extract / logRepo.save",
-        "scope": "positive critical boundary establishes highest tier; not full correctness acceptance"
+        "sourceRevision": "edc079d + current source hash",
+        "anchor": "combined caller regression",
+        "scope": "Paired Windows native proof; full tier/privacy/platform/review acceptance pending."
       },
       "metricApplicability": {
-        "status": "proposed - independent review pending",
-        "evidence": ".planning/memory-resilience/evidence/B04-applicability-probe.json",
-        "sourceHash": "bfb4545953cda882c8e9b1748169ac690690bf91aac3f09cef16be1adb4b5c15",
-        "disposition": "Measure every positive denominator; individually review zero branch/function denominators against runtime syntax. Observed counts do not prove instrumentation completeness. Optional-chain syntax is present; synthetic evidence shows current instrumentation omits its decision counters. B05.1 owns source-mapped branch proof before numeric acceptance.",
+        "status": "diagnostic - Q005/Q068/B11.74.7 acceptance pending",
+        "sourceHash": "97789c70379ccc3fb77183ab23c97ba5cfcacc5b3e707fa2d9265258b2abf72e",
+        "evidence": ".planning/memory-resilience/evidence/B11.74.6.3.2.json",
         "metrics": {
-          "statements": {
-            "observedCounterTotal": 101,
-            "proposal": "measure - completeness unverified"
-          },
-          "branches": {
-            "observedCounterTotal": 47,
+          "lines": {
+            "observedCounterTotal": 87,
             "proposal": "measure - completeness unverified"
           },
           "functions": {
             "observedCounterTotal": 16,
             "proposal": "measure - completeness unverified"
           },
-          "lines": {
-            "observedCounterTotal": 86,
+          "statements": {
+            "observedCounterTotal": 102,
+            "proposal": "measure - completeness unverified"
+          },
+          "branches": {
+            "observedCounterTotal": 49,
             "proposal": "measure - completeness unverified"
           }
         }
@@ -13692,7 +13689,7 @@
     {
       "path": "src/presentation/cli/commands/projections.test.ts",
       "package": "package.json",
-      "sourceHash": "19bdd85694043e21e5732b3889fc8b100319b4f673e6adfc4716f60419e2359e",
+      "sourceHash": "859a58b8f4bc9f85bdd500b19326afd5fce37152d3f3b22add1dbd9633d5cccb",
       "tier": "S",
       "rationale": "Inspected filesystem import and call context: rmSync(testDir, { recursive: true, force: true, maxRetries: 50, retryDelay: 100 }). This test driver performs actual file/directory deletion; B11.44 owns the observed lifecycle finding.",
       "applicability": {
@@ -13701,10 +13698,9 @@
       },
       "decisionStatus": "proposed - independent review pending",
       "inspection": {
-        "sourceRevision": "e85d4d3f63dfe0cfaa58198766f13c56f1e23232",
-        "anchor": "rmSync(testDir, { recursive: true, force: true, maxRetries: 50, retryDelay: 100 })",
-        "line": 51,
-        "scope": "Filesystem import plus first two actual deletion call contexts inspected. Positive critical operation establishes risk; not full body/assertion review, symbol-resolution proof or cleanup acceptance."
+        "sourceRevision": "edc079d + current source hash",
+        "anchor": "missing versus empty source and native projection preservation",
+        "scope": "Combined test pass; fixture ownership and numeric applicability remain B11.44."
       },
       "metricApplicability": {
         "status": "proposed - independent review pending",
@@ -14505,7 +14501,7 @@
     {
       "path": "src/presentation/cli/commands/show.ts",
       "package": "package.json",
-      "sourceHash": "6b7161f56747e774cbdb34dcf67a076b8a0ea357fe5525877d2b6c93ec889998",
+      "sourceHash": "67428a8bba20b9778ecfc859a568734366204901564eb7e0ce11291437948a69",
       "tier": "S",
       "rationale": "Initializes storage and returns session/tool memory for the selected identity.",
       "applicability": {
@@ -14514,30 +14510,29 @@
       },
       "decisionStatus": "proposed - independent review pending",
       "inspection": {
-        "sourceRevision": "8719e3c36b2c73ca11f8ee4879c9f17aed4f2849",
-        "anchor": "initializeDatabase / selected session retrieval",
-        "scope": "positive critical boundary establishes highest tier; not full correctness acceptance"
+        "sourceRevision": "edc079d + current source hash",
+        "anchor": "combined caller regression",
+        "scope": "Paired Windows native proof; full tier/privacy/platform/review acceptance pending."
       },
       "metricApplicability": {
-        "status": "proposed - independent review pending",
-        "evidence": ".planning/memory-resilience/evidence/B04-applicability-probe.json",
-        "sourceHash": "6b7161f56747e774cbdb34dcf67a076b8a0ea357fe5525877d2b6c93ec889998",
-        "disposition": "Measure every positive denominator; individually review zero branch/function denominators against runtime syntax. Observed counts do not prove instrumentation completeness.",
+        "status": "diagnostic - Q005/Q068/B11.74.7 acceptance pending",
+        "sourceHash": "67428a8bba20b9778ecfc859a568734366204901564eb7e0ce11291437948a69",
+        "evidence": ".planning/memory-resilience/evidence/B11.74.6.3.2.json",
         "metrics": {
-          "statements": {
-            "observedCounterTotal": 68,
-            "proposal": "measure - completeness unverified"
-          },
-          "branches": {
-            "observedCounterTotal": 34,
+          "lines": {
+            "observedCounterTotal": 63,
             "proposal": "measure - completeness unverified"
           },
           "functions": {
             "observedCounterTotal": 6,
             "proposal": "measure - completeness unverified"
           },
-          "lines": {
-            "observedCounterTotal": 63,
+          "statements": {
+            "observedCounterTotal": 68,
+            "proposal": "measure - completeness unverified"
+          },
+          "branches": {
+            "observedCounterTotal": 34,
             "proposal": "measure - completeness unverified"
           }
         }
@@ -17663,6 +17658,46 @@
       }
     },
     {
+      "path": "tests/infrastructure/database/maintenance-checkpoint.test.ts",
+      "package": "package.json",
+      "tier": "S",
+      "rationale": "Native data-integrity and connection-lifetime verifier.",
+      "applicability": {
+        "mode": "measure",
+        "reason": "Executable verification; no exclusion approved."
+      },
+      "decisionStatus": "proposed - independent review pending",
+      "sourceHash": "095a69a3962c527c63873cfec167ebe58a5cacf724f8ba4a876574e7a16d0e4b",
+      "inspection": {
+        "sourceRevision": "ac9b3c0 + current source hash",
+        "anchor": "Native busy checkpoint, read-only statement and startup/evaluation owner proof",
+        "scope": "Scoped Windows paired-runtime proof; full Q050/Q062/B11.42/platform/quality acceptance open."
+      },
+      "metricApplicability": {
+        "status": "diagnostic - full quality and independent review pending",
+        "evidence": ".planning/memory-resilience/evidence/B11.74.6.3.1.json",
+        "sourceHash": "095a69a3962c527c63873cfec167ebe58a5cacf724f8ba4a876574e7a16d0e4b",
+        "metrics": {
+          "lines": {
+            "observedCounterTotal": 93,
+            "proposal": "measure - completeness unverified"
+          },
+          "functions": {
+            "observedCounterTotal": 36,
+            "proposal": "measure - completeness unverified"
+          },
+          "statements": {
+            "observedCounterTotal": 134,
+            "proposal": "measure - completeness unverified"
+          },
+          "branches": {
+            "observedCounterTotal": 11,
+            "proposal": "measure - completeness unverified"
+          }
+        }
+      }
+    },
+    {
       "path": "tests/infrastructure/database/repositories/core-lifecycle.test.ts",
       "package": "package.json",
       "tier": "S",
@@ -18276,6 +18311,86 @@
           },
           "branches": {
             "observedCounterTotal": 6,
+            "proposal": "measure - completeness unverified"
+          }
+        }
+      }
+    },
+    {
+      "path": "tests/infrastructure/database/show-lifecycle.test.ts",
+      "package": "package.json",
+      "tier": "S",
+      "rationale": "Native identity lookup and resource lifetime driver with actual file deletion.",
+      "applicability": {
+        "mode": "measure",
+        "reason": "Executable native driver; no exclusion approved."
+      },
+      "decisionStatus": "proposed - independent review pending",
+      "sourceHash": "e22166f9c0fb69f4085ac20f0487acf8c943c755bed0a18ce5423dfedef29aa1",
+      "inspection": {
+        "sourceRevision": "edc079d + current source hash",
+        "anchor": "combined caller regression",
+        "scope": "Paired Windows native proof; full tier/privacy/platform/review acceptance pending."
+      },
+      "metricApplicability": {
+        "status": "diagnostic - Q005/Q068/B11.74.7 acceptance pending",
+        "sourceHash": "e22166f9c0fb69f4085ac20f0487acf8c943c755bed0a18ce5423dfedef29aa1",
+        "evidence": ".planning/memory-resilience/evidence/B11.74.6.3.2.json",
+        "metrics": {
+          "lines": {
+            "observedCounterTotal": 29,
+            "proposal": "measure - completeness unverified"
+          },
+          "functions": {
+            "observedCounterTotal": 5,
+            "proposal": "measure - completeness unverified"
+          },
+          "statements": {
+            "observedCounterTotal": 37,
+            "proposal": "measure - completeness unverified"
+          },
+          "branches": {
+            "observedCounterTotal": 12,
+            "proposal": "measure - completeness unverified"
+          }
+        }
+      }
+    },
+    {
+      "path": "tests/infrastructure/database/startup-eval-lifecycle.test.ts",
+      "package": "package.json",
+      "tier": "S",
+      "rationale": "Native data-integrity and connection-lifetime verifier.",
+      "applicability": {
+        "mode": "measure",
+        "reason": "Executable verification; no exclusion approved."
+      },
+      "decisionStatus": "proposed - independent review pending",
+      "sourceHash": "e0270cdf077778a55cb8170d1242c18af2de1e4c8a479fae79bc4f216a05b742",
+      "inspection": {
+        "sourceRevision": "ac9b3c0 + current source hash",
+        "anchor": "Native busy checkpoint, read-only statement and startup/evaluation owner proof",
+        "scope": "Scoped Windows paired-runtime proof; full Q050/Q062/B11.42/platform/quality acceptance open."
+      },
+      "metricApplicability": {
+        "status": "diagnostic - full quality and independent review pending",
+        "evidence": ".planning/memory-resilience/evidence/B11.74.6.3.1.json",
+        "sourceHash": "e0270cdf077778a55cb8170d1242c18af2de1e4c8a479fae79bc4f216a05b742",
+        "metrics": {
+          "lines": {
+            "observedCounterTotal": 32,
+            "proposal": "measure - completeness unverified"
+          },
+          "functions": {
+            "observedCounterTotal": 9,
+            "proposal": "measure - completeness unverified"
+          },
+          "statements": {
+            "observedCounterTotal": 45,
+            "proposal": "measure - completeness unverified"
+          },
+          "branches": {
+            "observedCounterTotal": 2,
             "proposal": "measure - completeness unverified"
           }
         }
@@ -18931,86 +19046,6 @@
           "lines": {
             "observedCounterTotal": 0,
             "proposal": "blocked - runtime accounting unresolved"
-          }
-        }
-      }
-    },
-    {
-      "path": "tests/infrastructure/database/maintenance-checkpoint.test.ts",
-      "package": "package.json",
-      "tier": "S",
-      "rationale": "Native data-integrity and connection-lifetime verifier.",
-      "applicability": {
-        "mode": "measure",
-        "reason": "Executable verification; no exclusion approved."
-      },
-      "decisionStatus": "proposed - independent review pending",
-      "sourceHash": "095a69a3962c527c63873cfec167ebe58a5cacf724f8ba4a876574e7a16d0e4b",
-      "inspection": {
-        "sourceRevision": "ac9b3c0 + current source hash",
-        "anchor": "Native busy checkpoint, read-only statement and startup/evaluation owner proof",
-        "scope": "Scoped Windows paired-runtime proof; full Q050/Q062/B11.42/platform/quality acceptance open."
-      },
-      "metricApplicability": {
-        "status": "diagnostic - full quality and independent review pending",
-        "evidence": ".planning/memory-resilience/evidence/B11.74.6.3.1.json",
-        "sourceHash": "095a69a3962c527c63873cfec167ebe58a5cacf724f8ba4a876574e7a16d0e4b",
-        "metrics": {
-          "lines": {
-            "observedCounterTotal": 93,
-            "proposal": "measure - completeness unverified"
-          },
-          "functions": {
-            "observedCounterTotal": 36,
-            "proposal": "measure - completeness unverified"
-          },
-          "statements": {
-            "observedCounterTotal": 134,
-            "proposal": "measure - completeness unverified"
-          },
-          "branches": {
-            "observedCounterTotal": 11,
-            "proposal": "measure - completeness unverified"
-          }
-        }
-      }
-    },
-    {
-      "path": "tests/infrastructure/database/startup-eval-lifecycle.test.ts",
-      "package": "package.json",
-      "tier": "S",
-      "rationale": "Native data-integrity and connection-lifetime verifier.",
-      "applicability": {
-        "mode": "measure",
-        "reason": "Executable verification; no exclusion approved."
-      },
-      "decisionStatus": "proposed - independent review pending",
-      "sourceHash": "e0270cdf077778a55cb8170d1242c18af2de1e4c8a479fae79bc4f216a05b742",
-      "inspection": {
-        "sourceRevision": "ac9b3c0 + current source hash",
-        "anchor": "Native busy checkpoint, read-only statement and startup/evaluation owner proof",
-        "scope": "Scoped Windows paired-runtime proof; full Q050/Q062/B11.42/platform/quality acceptance open."
-      },
-      "metricApplicability": {
-        "status": "diagnostic - full quality and independent review pending",
-        "evidence": ".planning/memory-resilience/evidence/B11.74.6.3.1.json",
-        "sourceHash": "e0270cdf077778a55cb8170d1242c18af2de1e4c8a479fae79bc4f216a05b742",
-        "metrics": {
-          "lines": {
-            "observedCounterTotal": 32,
-            "proposal": "measure - completeness unverified"
-          },
-          "functions": {
-            "observedCounterTotal": 9,
-            "proposal": "measure - completeness unverified"
-          },
-          "statements": {
-            "observedCounterTotal": 45,
-            "proposal": "measure - completeness unverified"
-          },
-          "branches": {
-            "observedCounterTotal": 2,
-            "proposal": "measure - completeness unverified"
           }
         }
       }

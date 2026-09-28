@@ -135,7 +135,7 @@ async function findSession(
   }
 
   // Try partial match (by prefix)
-  const stmt = db.prepare<{ id: string }, [string]>(
+  using stmt = db.prepare<{ id: string }, [string]>(
     `SELECT id FROM sessions WHERE id LIKE ? ORDER BY start_time DESC LIMIT 1`
   );
   const match = stmt.get(`${sessionId}%`);

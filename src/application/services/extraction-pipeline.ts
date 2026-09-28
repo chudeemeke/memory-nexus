@@ -234,8 +234,10 @@ export class ExtractionPipeline {
       }
     }
 
-    // 7. Dynamic Projection Replay/Rebuild SQLite database projections
-    await rebuildProjections(this.db, this.eventLogPath);
+    // A no-op extraction must not reset projections from an absent or partial log.
+    if (factsAdded > 0) {
+      await rebuildProjections(this.db, this.eventLogPath);
+    }
 
     // 8. Record the extraction log
     await this.logRepo.save({
