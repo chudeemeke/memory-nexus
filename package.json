@@ -16,7 +16,7 @@
     "build:types": "tsc --project tsconfig.lib.json",
     "build:lib": "bun build src/index.ts --outdir dist --target bun --packages=external --minify --sourcemap=none",
     "build:cli": "bun build src/presentation/cli/index.ts --outdir dist/presentation/cli --target bun --packages=external --minify --sourcemap=none",
-    "build": "bun run clean:dist && bun run build:types && bun run build:lib && bun run build:cli",
+    "build": "bun run clean:dist && bun run build:types && bun run build:lib && bun run build:cli && bun run build:hook",
     "build:hook": "bun build src/infrastructure/hooks/sync-hook-script.ts --outfile=dist/sync-hook.js --target=bun",
     "test": "bun test --timeout 15000",
     "test:coverage": "bun run scripts/run-istanbul-bun-coverage.ts --coverage-dir coverage --check",

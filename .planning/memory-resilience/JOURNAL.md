@@ -1,5 +1,33 @@
 # Memory resilience execution journal
 
+## 2026-09-28 - Packaged hook repair and isolated subprocess lifecycle
+
+- Resumed at signed/pushed 18e5f79 with D05 implementation preserved. Normal
+  build now includes its hook; nearest own-package discovery ignores cwd decoys.
+  Missing copied hooks repair without force; absent source refuses before mutation.
+- Three behavioral REDs retained. Final 120 tests / 269 assertions / seven files
+  pass on Windows Bun 1.4.1 and pinned 1.3.14; seven deliberate faults detected.
+  Production/strict touched-test types and isolation pass after retained type REDs.
+- Fresh installed CLI/library install, copied-hook reminder/log, missing-copy
+  repair and uninstall pass under owned synthetic homes. Dependency scripts
+  disabled: no native embedding/postinstall/full D04 or detached capture claim.
+- Initial broad collector failed cleanup after existing tests launched detached
+  live PATH sync into synthetic homes. Tests now record/assert spawn through the
+  existing dependency interface, use owned fixtures and expose cleanup errors.
+  Verified two empty synthetic DBs and removed only their exact owned root.
+  B11.13 still owns adverse lifecycle/locked-file/primary-failure and tier proof.
+- Evidence: evidence/D05-progress.json. Resolver/new helper test 100% all four
+  metrics; installer remains 91.83S/92B/60F/91.11L in scoped instrumentation.
+  Q061 now pending with fresh evidence; no full quality or acceptance claim.
+  Inventory 514 files/two packages; ledger 277 acyclic items; sole active D05.
+- Next: installer failure/rollback and complete file/changed-line proof under
+  Q061/D05, required child instrumentation, B11.13 lifecycle cases, then platform/
+  final review. Consumer migration waits on D05; native interrupted-batch retry,
+  full baseline/hosted/desktop gates and three inboxes remain open.
+- Owned final collectors cleaned. Protected cleanup targets/shared authorities
+  untouched. No live installation, hooks, canonical data, provider/model or batch
+  writer/replication activated. E1-E10 goal active; R03/P03/A03 unchanged.
+
 ## 2026-09-28 - Fresh packaged consumer proof; D05 hook packaging now active
 
 - Previous goal turn was progress. Resumed clean at signed/pushed 74175fc.
