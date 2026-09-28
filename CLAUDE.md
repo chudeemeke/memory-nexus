@@ -82,6 +82,10 @@ Legacy `~/.memory` / `MEMORY_HOME` sidecars are compatibility-only and explicit 
 
 Memory Nexus owns its checkout, worktree, temporary verification, and runtime backup storage. Follow `docs/audits/2026-09-19-disk-ownership.md` for verified archives, retained worktree refs, cleanup limits, and ongoing retention rules. Preserve active/uncommitted work and do not clean other projects or shared caches.
 
+Create worktrees inside this project with `git worktree add .worktrees/<slug> -b <branch>`.
+Never create sibling worktrees or run `git clean -ffdx`. The shared worktree rule
+is `C:/Users/Destiny/.claude/rules/worktrees.md`; verify recovery before retirement.
+
 ## Quality Gates
 
 Use Bun. Required gates for serious changes:

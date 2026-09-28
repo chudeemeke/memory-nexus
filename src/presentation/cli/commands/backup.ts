@@ -432,7 +432,11 @@ function resolveBackupPath(input: string, opts: LocalBackupCommandOptions): stri
 function checkpointDatabase(dbPath: string): void {
   const result = initializeDatabase({ path: dbPath });
   try {
-    result.db.prepare("PRAGMA wal_checkpoint(TRUNCATE)").run();
+    using statement = result.db.prepare<{ busy: number }, []>("PRAGMA wal_checkpoint(TRUNCATE)");
+    const checkpoint = statement.get();
+    if (!checkpoint || checkpoint.busy !== 0) {
+      throw new Error("WAL checkpoint is busy or unavailable; retry after active database readers finish.");
+    }
   } finally {
     closeDatabase(result.db);
   }
@@ -441,7 +445,8 @@ function checkpointDatabase(dbPath: string): void {
 function checkDatabaseIntegrity(dbPath: string): string {
   const db = new Database(dbPath, { readonly: true });
   try {
-    const row = db.query<{ integrity_check: string }, []>("PRAGMA integrity_check").get();
+    using statement = db.prepare<{ integrity_check: string }, []>("PRAGMA integrity_check");
+    const row = statement.get();
     return row?.integrity_check ?? "unknown";
   } finally {
     db.close();

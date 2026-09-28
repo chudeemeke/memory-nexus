@@ -1,5 +1,45 @@
 # Memory resilience execution journal
 
+## 2026-09-28 - Native checkpoint refusal and pinned-runtime catch-up
+
+- Previous turn: progress through source discovery, interrupted before edits.
+  Resumed from clean ac9b3c0. Native held-reader tests reproduced both commands
+  reporting success while WAL checkpointing was blocked. Both now require a
+  returned zero-busy result. Failure preserves acknowledged rows and prevents
+  migration lock/hook mutation; explicit retry succeeds after readers release.
+- Five direct backup/migrate statements now dispose. Native missing-result and
+  success paths assert disposal, with a negative verifier test. Startup transfers
+  the owned connection correctly, corrupt startup preserves the input file, and
+  all four database-backed evaluators close on success and invalid input. Their
+  production callers needed no changes. Three existing migration mocks now assert
+  the intended read/dispose path and use current typed result shapes.
+- Final caller group:85tests/404assertions on Windows Bun1.4.1 and1.3.14; nine
+  detected faults. Production types, strict changed-test types and isolation pass.
+  Two new drivers diagnose100% across all metrics. Backup branches85.03%,
+  migration branches93.84%, existing migration-test branches50% and functions87.5%
+  remain failures. These scoped passes do not close full quality acceptance.
+- Capacity recovered to about12.5GiB before work; final checkpoint free space was
+  about12.3GiB. The unchanged512MiB runtime guard allowed the final pinned factory
+  group(59tests/530assertions) and health group(70tests/299assertions) to execute.
+  Both earlier source bindings still match. Their pending runtime waits are now
+  cleared. Download/fixtures were removed through owned cleanup. Neither earlier
+  policy-blocked removal was retried; no other project/shared cache was touched.
+- Q050 now explicitly owns coherent SQLite snapshots and complete atomic restore:
+  checkpoint-then-copy still permits a later writer race. Q062 owns actual stale
+  lock admission, combined failures and truthful partial output. Promoted these
+  confirmed gaps from historical B09 candidates to depend on this scoped proof;
+  retaining B09 there would create a dependency cycle. B09 remains mandatory at
+  B10. Q050/Q062 and existing fixture tasks B11.22/B11.42/B11.58 are required by .7.
+- Evidence:evidence/B11.74.6.3.1.json. Catalog466files/two packages;244-item
+  acyclic ledger. Current item:B11.74.6.3.2, combined native caller verification.
+  Parent .3/.6/.7 remain pending. Next: reconcile all mapped repository/service,
+  command/helper groups at final source on both Windows runtimes, then required
+  quality/platform/review tasks. No model experiment before baseline acceptance.
+- Persisted the owner's project-local worktree rule in AGENTS.md/CLAUDE.md and
+  verified both anchored ignore patterns. One registered canonical checkout;
+  no worktree created or moved. R04 retains the consumer notice before adoption.
+
+
 ## 2026-09-22 - Health reader lifetime and partial-count readiness repair
 
 - Continued from clean signed/pushed0a7a3bb; previous turn was progress. Native

@@ -46,3 +46,5 @@ tmp/
 temp/
 *.tmp
 .cc-guardian/
+/.worktrees/
+/.claude/worktrees/

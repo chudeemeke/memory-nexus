@@ -217,12 +217,14 @@ not the original B01 starting command. B11.74.3 repository and B11.74.4 service
 lifetimes are locally verified. B11.74.5 now has reconciled local proof for schema,
 export, event and secret-audit statement migration: 29 scoped prepares across four
 modules, source-bound native slices and four negative ownership checks. B11.74.6.1
-factory implementation/current-runtime proof is complete; the final pinned group
-repeat is disk-guarded after a type-only test import repair. B11.74.6.2 health
-readers has current-runtime proof; its pinned repeat is also disk-guarded.
-B11.74.6.3.1 CLI/evaluation ownership is independently active. Combined caller
-revalidation in .3.2 requires factory, health and CLI slices; no native gate was
-removed to avoid the disk wait. Q018/B11.9 and Q102/B11.10 retain
+factory and B11.74.6.2 health final pinned repeats passed after disk recovery on
+September 28. B11.74.6.3.1 CLI/evaluation ownership is scoped verified: busy or
+missing checkpoints refuse backup/migration progression; five direct statements
+dispose, and native startup/evaluation owners close correctly. Both Windows
+runtimes pass the 85-test caller group. Combined caller revalidation in .3.2 is
+active; it must include earlier affected repository/service groups, not just the
+latest six files. Q050/Q062 and B11.22/B11.42/B11.58 join the mandatory .7 barrier;
+full snapshot safety and stale-lock admission remain unresolved. Q018/B11.9 and Q102/B11.10 retain
 factory and fixture quality gaps. Q100 owns the
 demonstrated whole-replay failure defect; Q101 owns complete secret-remediation
 safety. Full quality, platform and review acceptance remains B11.74.7; local

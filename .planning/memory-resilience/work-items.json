@@ -3,7 +3,7 @@
   "workstream": "memory-resilience",
   "goal_status": "active",
   "starting_revision": "77d54e05be7fc24cede4a9a3e1fede6fa113ac8f",
-  "current_item": "B11.74.6.3.1",
+  "current_item": "B11.74.6.3.2",
   "status_semantics": {
     "pending": "Not started; authorization and dependencies must permit work.",
     "pending_rebaseline": "Historical candidate, not a confirmed current failure or a completed task.",
@@ -1514,14 +1514,14 @@
       "id": "Q050",
       "stage": "coverage_repair",
       "title": "Verify and repair src/presentation/cli/commands/backup.ts",
-      "status": "pending_rebaseline",
+      "status": "pending",
       "depends_on": [
-        "B09"
+        "B11.74.6.3.1"
       ],
-      "scope": "src/presentation/cli/commands/backup.ts",
-      "deliverable": "Reproduce uncovered behavior, add meaningful regression/boundary tests, fix demonstrated defects, satisfy this file's reviewed risk tier.",
+      "scope": "src/presentation/cli/commands/backup.ts; native maintenance integrity",
+      "deliverable": "Replace checkpoint-then-file-copy with a coherent native SQLite snapshot; prove concurrent writer inclusion policy, complete authoritative data surfaces, rollback and atomic restore, malformed manifest/path/symlink refusal, full Tier S quality. Busy-checkpoint refusal alone does not close the writer race.",
       "verification": "Current source-bound four-metric file evidence plus tier-required decision tests. Supersede only with explicit fresh evidence that this candidate is no longer a gap.",
-      "risk": "unclassified",
+      "risk": "S",
       "authorization": "authorized",
       "owner": "memory-nexus",
       "historical_gaps": [
@@ -1531,8 +1531,12 @@
         "lines=94.49"
       ],
       "historical_evidence": "docs/audits/2026-09-19-repair-evidence/per-file-coverage-gaps.json",
-      "evidence": [],
-      "acceptance_record": ".planning/memory-resilience/evidence/Q050.json"
+      "evidence": [
+        ".planning/memory-resilience/evidence/B11.74.6.3.1.json"
+      ],
+      "acceptance_record": ".planning/memory-resilience/evidence/Q050.json",
+      "observed_gap": "Replace checkpoint-then-file-copy with a coherent native SQLite snapshot; prove concurrent writer inclusion policy, complete authoritative data surfaces, rollback and atomic restore, malformed manifest/path/symlink refusal, full Tier S quality. Busy-checkpoint refusal alone does not close the writer race.",
+      "retirement_trigger": "Before B11.74.7/B10/R02 acceptance."
     },
     {
       "id": "Q051",
@@ -1784,22 +1788,26 @@
       "id": "Q062",
       "stage": "coverage_repair",
       "title": "Verify and repair src/presentation/cli/commands/migrate.ts",
-      "status": "pending_rebaseline",
+      "status": "pending",
       "depends_on": [
-        "B09"
+        "B11.74.6.3.1"
       ],
-      "scope": "src/presentation/cli/commands/migrate.ts",
-      "deliverable": "Reproduce uncovered behavior, add meaningful regression/boundary tests, fix demonstrated defects, satisfy this file's reviewed risk tier.",
+      "scope": "src/presentation/cli/commands/migrate.ts; native maintenance integrity",
+      "deliverable": "Validate lock ownership and actual staleness before deleting; reject active locks; preserve primary and cleanup failures; reconcile stats/hook partial failures and truthful output; prove native migration failure/retry and complete Tier S quality.",
       "verification": "Current source-bound four-metric file evidence plus tier-required decision tests. Supersede only with explicit fresh evidence that this candidate is no longer a gap.",
-      "risk": "unclassified",
+      "risk": "S",
       "authorization": "authorized",
       "owner": "memory-nexus",
       "historical_gaps": [
         "branches=93.44"
       ],
       "historical_evidence": "docs/audits/2026-09-19-repair-evidence/per-file-coverage-gaps.json",
-      "evidence": [],
-      "acceptance_record": ".planning/memory-resilience/evidence/Q062.json"
+      "evidence": [
+        ".planning/memory-resilience/evidence/B11.74.6.3.1.json"
+      ],
+      "acceptance_record": ".planning/memory-resilience/evidence/Q062.json",
+      "observed_gap": "Validate lock ownership and actual staleness before deleting; reject active locks; preserve primary and cleanup failures; reconcile stats/hook partial failures and truthful output; prove native migration failure/retry and complete Tier S quality.",
+      "retirement_trigger": "Before B11.74.7/B10/R02 acceptance."
     },
     {
       "id": "Q063",
@@ -2750,6 +2758,11 @@
           "document": "docs/plans/2026-09-22-health-reader-integrity.md",
           "owner": "memory-nexus",
           "trigger": "Before integration/adoption: notify opted-in consumers of partial-count false-ready repair and final accepted health/diagnostic contract."
+        },
+        "consumerMaintenanceNotice": {
+          "document": "docs/plans/2026-09-28-checkpoint-refusal.md",
+          "owner": "memory-nexus",
+          "trigger": "Before integration/adoption: notify consumers of busy/unavailable checkpoint refusal and retained backup/migration limitations."
         }
       }
     },
@@ -4361,7 +4374,12 @@
       "acceptance_record": ".planning/memory-resilience/evidence/B11.42.json",
       "observed_gap": "Source inspection: a real filesystem cleanup operation is wrapped in a catch that discards the removal failure.",
       "observed_evidence": ".planning/memory-resilience/evidence/B04-classification-batch-6.json",
-      "retirement_trigger": "Before affected full-suite execution/B09 and B10/R02; source concern is not runtime regression acceptance."
+      "retirement_trigger": "Before affected full-suite execution/B09 and B10/R02; source concern is not runtime regression acceptance.",
+      "progress": {
+        "status": "Three integrity doubles now assert reads/disposal and satisfy native result types. Full fixture cleanup and test quality still open.",
+        "evidence": ".planning/memory-resilience/evidence/B11.74.6.3.1.json",
+        "trigger": "Before B11.74.7/B10/R02 acceptance."
+      }
     },
     {
       "id": "B11.43",
@@ -5548,9 +5566,7 @@
       "acceptance_record": ".planning/memory-resilience/evidence/B11.74.6.json",
       "retirement_trigger": "Before parent B11.74/B10/R02 acceptance; child local proof does not imply factory or whole-platform acceptance.",
       "progress": {
-        "restart": "CLI/evaluation .3.1 active independently; factory .1 and health .2 await pinned runtime capacity. Combined .3.2 requires all three.",
-        "factory": "activated in source; scoped native proof only",
-        "prerequisite": ".planning/memory-resilience/evidence/B11.74.5.json"
+        "restart": "Combined final-source repository/service/public caller verification .3.2 active. Factory, health and CLI scoped native proof verified; .7/Q/full-platform gates remain pending."
       }
     },
     {
@@ -5584,7 +5600,12 @@
         "Q018",
         "B11.9",
         "Q102",
-        "B11.10"
+        "B11.10",
+        "Q050",
+        "Q062",
+        "B11.22",
+        "B11.42",
+        "B11.58"
       ],
       "scope": "All B11.74 affected production/test files and native runtime targets",
       "deliverable": "Complete per-file/package/tier/changed-line proof and independent review; dependency barriers can resume",
@@ -5751,7 +5772,7 @@
       "id": "B11.74.6.1",
       "stage": "baseline",
       "title": "Factory ownership and initialization failure integrity",
-      "status": "pending",
+      "status": "verified",
       "depends_on": [
         "B11.74.2",
         "B11.74.3",
@@ -5766,25 +5787,23 @@
       "owner": "memory-nexus",
       "evidence": [
         ".planning/memory-resilience/B11.74-plan.md",
-        ".planning/memory-resilience/evidence/B11.74.6.1.json"
+        ".planning/memory-resilience/evidence/B11.74.6.1.json",
+        ".planning/memory-resilience/evidence/B11.74.6.3.1.json"
       ],
       "acceptance_record": ".planning/memory-resilience/evidence/B11.74.6.1.json",
       "retirement_trigger": "Before parent B11.74.6/B11.74.7/B10/R02 acceptance; scoped migration is not whole-platform acceptance.",
       "progress": {
-        "status": "Current runtime verified; final pinned group repeat disk-blocked after type-only fixture repair",
+        "status": "Exact final-source pinned1.3.14 catch-up passed after disk recovery",
         "tests": 59,
         "assertions": 530,
-        "files": 3,
-        "detectedFaults": 9,
-        "survivors": 1,
-        "restart": "Run guarded .git/b11-factory-old-runtime.ts when capacity permits, verify current input hashes, then close this slice. Health readers can proceed independently."
+        "restart": "Continue combined caller .3.2 and mandatory .7/Q quality acceptance."
       }
     },
     {
       "id": "B11.74.6.2",
       "stage": "baseline",
       "title": "Health reader statement lifetime",
-      "status": "pending",
+      "status": "verified",
       "depends_on": [
         "B11.74.5"
       ],
@@ -5796,16 +5815,16 @@
       "owner": "memory-nexus",
       "evidence": [
         ".planning/memory-resilience/B11.74-plan.md",
-        ".planning/memory-resilience/evidence/B11.74.6.2.json"
+        ".planning/memory-resilience/evidence/B11.74.6.2.json",
+        ".planning/memory-resilience/evidence/B11.74.6.3.1.json"
       ],
       "acceptance_record": ".planning/memory-resilience/evidence/B11.74.6.2.json",
       "retirement_trigger": "Before parent B11.74.6/B11.74.7/B10/R02 acceptance; scoped migration is not whole-platform acceptance.",
       "progress": {
-        "status": "Current native proof verified; pinned runtime disk-blocked",
+        "status": "Exact final-source pinned1.3.14 catch-up passed after disk recovery",
         "tests": 70,
         "assertions": 299,
-        "faults": 7,
-        "restart": "Run guarded .git/b11-health-old-runtime.ts after capacity recovery; it verifies factory and health together. Retain Q102/B11.10 gates."
+        "restart": "Continue combined caller .3.2 and mandatory .7/Q quality acceptance."
       }
     },
     {
@@ -5829,7 +5848,7 @@
       "acceptance_record": ".planning/memory-resilience/evidence/B11.74.6.3.json",
       "retirement_trigger": "Before parent B11.74.6/B11.74.7/B10/R02 acceptance; scoped migration is not whole-platform acceptance.",
       "progress": {
-        "restart": "Implement remaining CLI/evaluation owners independently in .3.1; combined .3.2 requires factory, health and CLI proof."
+        "restart": "CLI/eval .3.1 verified. Complete mapped combined native groups under .3.2 before parent acceptance."
       }
     },
     {
@@ -5858,7 +5877,7 @@
       "id": "B11.74.6.3.1",
       "stage": "baseline",
       "title": "Migrate remaining CLI and evaluation statement owners",
-      "status": "active",
+      "status": "verified",
       "depends_on": [
         "B11.74.5"
       ],
@@ -5869,16 +5888,23 @@
       "authorization": "authorized",
       "owner": "memory-nexus",
       "evidence": [
-        ".planning/memory-resilience/B11.74-plan.md"
+        ".planning/memory-resilience/B11.74-plan.md",
+        ".planning/memory-resilience/evidence/B11.74.6.3.1.json"
       ],
       "acceptance_record": ".planning/memory-resilience/evidence/B11.74.6.3.1.json",
-      "retirement_trigger": "Before parent .3/.6/.7/B10/R02 acceptance."
+      "retirement_trigger": "Before parent .3/.6/.7/B10/R02 acceptance.",
+      "progress": {
+        "tests": 85,
+        "assertions": 404,
+        "decisionFaultsDetected": 9,
+        "status": "Scoped paired-Windows CLI/startup/eval proof verified; full backup/migration quality pending."
+      }
     },
     {
       "id": "B11.74.6.3.2",
       "stage": "baseline",
       "title": "Verify combined native factory, health and public callers",
-      "status": "pending",
+      "status": "active",
       "depends_on": [
         "B11.74.6.1",
         "B11.74.6.2",
