@@ -1,4 +1,5 @@
 import type { OperationAdmission, OperationLease, LeasedOperationAdmission as AdmissionPort } from "../../domain/ports/operation-admission.js";
+import { unknownErrorMessage } from "../../domain/errors/unknown-error.js";
 
 interface Frame {
   authority: string;
@@ -67,7 +68,7 @@ export class LeasedOperationAdmission implements AdmissionPort {
     try { this.validate(); } catch (error) { frame.failures.push(error); }
     const failures = [...new Set(frame.failures)];
     if (failures.length === 1) throw failures[0];
-    if (failures.length > 1) throw new AggregateError(failures, "Operation scope and child work failed");
+    if (failures.length > 1) throw new AggregateError(failures, `Operation scope and child work failed: ${failures.map(unknownErrorMessage).join("; ")}`);
     return result as T;
   }
 }

@@ -9,6 +9,8 @@ import { executeDreamCommand } from "../../../src/presentation/cli/commands/drea
 import { executeGovernanceCommand } from "../../../src/presentation/cli/commands/governance.js";
 import { captureStreams } from "../../helpers/capture-json.js";
 import { createOwnedTestDirectory } from "../../helpers/owned-test-directory.js";
+import type { LeasedOperationAdmission } from "../../../src/domain/ports/operation-admission.js";
+import { createSourceOperationAdmission } from "../../../src/infrastructure/database/source-operation-admission.js";
 
 it("admits a decision before its first read and preserves approval on a fresh retry across processes", async () => {
   const storage=createOwnedTestDirectory("memory-admitted-command-"),dbPath=join(storage.dir,"synthetic.db"),eventLogPath=join(storage.dir,"events-synthetic.jsonl");
@@ -35,7 +37,7 @@ console.log('ADMITTED_RESULT='+JSON.stringify(result));
     const running=Bun.spawn([process.execPath,script,dbPath,eventLogPath,ready,release],{cwd:storage.dir,stdout:"pipe",stderr:"pipe",timeout:20000,
       env:{...process.env,HOME:storage.dir,USERPROFILE:storage.dir,XDG_DATA_HOME:join(storage.dir,"different-profile"),XDG_CONFIG_HOME:join(storage.dir,"config"),MEMORY_HOME:join(storage.dir,"legacy"),TEMP:storage.dir,TMP:storage.dir,TMPDIR:storage.dir}});
     child=running;const stdout=new Response(running.stdout).text(),stderr=new Response(running.stderr).text(),deadline=Date.now()+12000;
-    while(!existsSync(ready)){if(Date.now()>deadline||child.exitCode!==null)throw Error("Missing decision barrier: "+await stderr);await Bun.sleep(5);}
+    while(!existsSync(ready)){if(Date.now()>deadline||child.exitCode!==null)throw Error("Missing decision barrier: "+await stderr+" "+await stdout);await Bun.sleep(5);}
     const barrier=JSON.parse(readFileSync(ready,"utf8"));expect(barrier.initiallyMissing).toBe(true);expect(barrier.pid).not.toBe(process.pid);
     const before=readFileSync(eventLogPath,"utf8"),deps={dbPath,eventLogPath,now:()=>new Date("2026-01-05T00:00:00Z"),nextSequence:()=>5};
     const proposal={action:"propose-supersedence" as const,project:"synthetic",targetFactUuid:"target",sourceEventIds:["target"],proposedContent:"replacement",reason:"synthetic",json:true};
@@ -61,7 +63,7 @@ for (const command of ["dream","governance"] as const) it(`reports ${command} on
   try {
     const db=new OwnedDatabase(dbPath);
     try{createSchema(db);await appendEvent(Fact.create({uuid:"target",type:"decision",project:"synthetic",content:"baseline",observedAt:new Date("2026-01-01T00:00:00Z")}),eventLogPath);await rebuildProjections(db,eventLogPath);}finally{db.close();}
-    const operationAdmission={async run<T>(operation:()=>Promise<T>):Promise<T>{await operation();throw Error("synthetic reservation release failed");}};
+    const operationAdmission: LeasedOperationAdmission = {async run(operation,parent){await createSourceOperationAdmission(eventLogPath).run(operation,parent);throw Error("synthetic reservation release failed");}};
     const result=await captureStreams(()=>command==="dream"
       ?executeDreamCommand({action:"propose-supersedence",project:"synthetic",targetFactUuid:"target",sourceEventIds:["target"],proposedContent:"replacement",reason:"synthetic",json:true},{dbPath,eventLogPath,operationAdmission})
       :executeGovernanceCommand({action:"suppress",surface:"fact",targetId:"target",json:true},{dbPath,eventLogPath,operationAdmission}));
@@ -76,10 +78,9 @@ for (const command of ["dream","governance"] as const) it(`retains ${command} op
   let connection:OwnedDatabase|undefined;
   const close=spyOn(OwnedDatabase.prototype,"close").mockImplementation(function(this:OwnedDatabase){connection=this;throw Error("synthetic database close failure");});
   try {
-    const operationAdmission={run:<T>(operation:()=>Promise<T>)=>operation()};
     const result=await captureStreams(()=>command==="dream"
-      ?executeDreamCommand({action:"approve",dreamId:"missing",json:true},{dbPath,eventLogPath,operationAdmission})
-      :executeGovernanceCommand({action:"suppress",surface:"invalid" as any,targetId:"missing",json:true},{dbPath,eventLogPath,operationAdmission}));
+      ?executeDreamCommand({action:"approve",dreamId:"missing",json:true},{dbPath,eventLogPath,writeEvents:false})
+      :executeGovernanceCommand({action:"suppress",surface:"invalid" as any,targetId:"missing",json:true},{dbPath,eventLogPath,writeEvents:false}));
     expect(result.exitCode).not.toBe(0);
     const output=JSON.parse(result.stdout);expect(output.status).toBe("error");expect(output.error.message).toContain("database cleanup failed: synthetic database close failure");
     expect(output.error.message).toContain(command==="dream"?"Dream proposal not found":"surface");

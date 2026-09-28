@@ -44,12 +44,12 @@ function provision(path: string, root: string, rootIdentity: Identity): void {
 }
 
 /** Same real event root shares admission across profiles and path aliases. */
-export function createSourceOperationAdmission(logPath?: string): AdmissionPort {
+export function createSourceOperationAdmission(logPath?: string, eventsDir?: string): AdmissionPort {
   if (logPath && existsSync(logPath)) {
     const file = lstatSync(logPath);
     if (!file.isFile() || file.nlink !== 1) throw new Error("Event log must be a regular file with one link for operation admission");
   }
-  const requestedRoot = resolve(logPath ? dirname(logPath) : getEventsDir());
+  const requestedRoot = resolve(logPath ? dirname(logPath) : eventsDir ?? getEventsDir());
   mkdirSync(requestedRoot,{recursive:true,mode:0o700});
   const root = realpathSync(requestedRoot), rootIdentity = identity(root);
   const rootKey = process.platform === "win32" ? root.toLowerCase() : root;

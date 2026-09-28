@@ -6028,7 +6028,7 @@
     {
       "path": "src/infrastructure/database/event-log.ts",
       "package": "package.json",
-      "sourceHash": "fbd7391d8c8f777f0fa0f5f779dcdca32adc1d56d997d15cef06a48018a402ef",
+      "sourceHash": "97f78e19cafd14a2f421a5656da6148881fea4e4f9efbbf1403788a6098b7d49",
       "tier": "S",
       "rationale": "Appends canonical memory events and validates imported legacy records; durable source and integrity boundary.",
       "applicability": {
@@ -6037,29 +6037,33 @@
       },
       "decisionStatus": "proposed - independent review pending",
       "inspection": {
-        "sourceRevision": "57fb7b9 + current source hash",
-        "anchor": "Q100.4.1 automatic replay authority",
-        "scope": "Paired native/cross-runtime proof; actual callers and full quality remain mandatory."
+        "sourceRevision": "196d52c + current source hash",
+        "anchor": "Q100.4.2 writer admission",
+        "scope": "Narrow diagnostic subset of broader compatibility groups; whole quality/adoption incomplete."
       },
       "metricApplicability": {
-        "status": "diagnostic - final Q100.4.3 acceptance pending",
-        "sourceHash": "fbd7391d8c8f777f0fa0f5f779dcdca32adc1d56d997d15cef06a48018a402ef",
-        "evidence": ".planning/memory-resilience/evidence/Q100.4.1.json",
+        "status": "Scoped diagnostic only; broader event/command compatibility suites and native child counters not all instrumented; final quality pending",
+        "sourceHash": "97f78e19cafd14a2f421a5656da6148881fea4e4f9efbbf1403788a6098b7d49",
+        "evidence": ".planning/memory-resilience/evidence/Q100.4.2-writer-admission.json",
         "metrics": {
-          "lines": {
-            "observedCounterTotal": 235,
-            "proposal": "measure - completeness unverified"
-          },
-          "functions": {
-            "observedCounterTotal": 54,
-            "proposal": "measure - completeness unverified"
-          },
           "statements": {
-            "observedCounterTotal": 248,
+            "observedCounterTotal": 252,
+            "observedPercent": 72.22,
             "proposal": "measure - completeness unverified"
           },
           "branches": {
-            "observedCounterTotal": 170,
+            "observedCounterTotal": 172,
+            "observedPercent": 58.72,
+            "proposal": "measure - completeness unverified"
+          },
+          "functions": {
+            "observedCounterTotal": 57,
+            "observedPercent": 89.47,
+            "proposal": "measure - completeness unverified"
+          },
+          "lines": {
+            "observedCounterTotal": 239,
+            "observedPercent": 72.38,
             "proposal": "measure - completeness unverified"
           }
         }
@@ -6356,31 +6360,35 @@
         "reason": "Executable Tier S; no exclusion approved."
       },
       "decisionStatus": "proposed - independent review pending",
-      "sourceHash": "3115bf2b947958a6ea0a44e3bcf37519e344533c76938e1629e5e064393db5d1",
+      "sourceHash": "77b90062c262faceb3eff65f59a0306ca43b0b3004f46c1073afcdef319af92d",
       "inspection": {
-        "sourceRevision": "5159a7e + current source hash",
-        "anchor": "Q100.4.2 serial caller recovery",
-        "scope": "Paired native/fresh-process proof; complete caller and quality acceptance remains open."
+        "sourceRevision": "196d52c + current source hash",
+        "anchor": "Q100.4.2 writer admission",
+        "scope": "Narrow diagnostic subset of broader compatibility groups; whole quality/adoption incomplete."
       },
       "metricApplicability": {
-        "status": "diagnostic - final Q005/Q100.4.3 acceptance pending",
-        "sourceHash": "3115bf2b947958a6ea0a44e3bcf37519e344533c76938e1629e5e064393db5d1",
-        "evidence": ".planning/memory-resilience/evidence/Q100.4.2-callers.json",
+        "status": "Scoped diagnostic only; broader event/command compatibility suites and native child counters not all instrumented; final quality pending",
+        "sourceHash": "77b90062c262faceb3eff65f59a0306ca43b0b3004f46c1073afcdef319af92d",
+        "evidence": ".planning/memory-resilience/evidence/Q100.4.2-writer-admission.json",
         "metrics": {
-          "lines": {
-            "observedCounterTotal": 25,
-            "proposal": "measure - completeness unverified"
-          },
-          "functions": {
-            "observedCounterTotal": 6,
-            "proposal": "measure - completeness unverified"
-          },
           "statements": {
-            "observedCounterTotal": 32,
+            "observedCounterTotal": 36,
+            "observedPercent": 100,
             "proposal": "measure - completeness unverified"
           },
           "branches": {
-            "observedCounterTotal": 16,
+            "observedCounterTotal": 18,
+            "observedPercent": 100,
+            "proposal": "measure - completeness unverified"
+          },
+          "functions": {
+            "observedCounterTotal": 9,
+            "observedPercent": 100,
+            "proposal": "measure - completeness unverified"
+          },
+          "lines": {
+            "observedCounterTotal": 28,
+            "observedPercent": 100,
             "proposal": "measure - completeness unverified"
           }
         }
@@ -12297,7 +12305,7 @@
     {
       "path": "src/presentation/cli/commands/dream.ts",
       "package": "package.json",
-      "sourceHash": "bcfcb66d2fb07af2713ceb04ce46cd8975fda64a85bb71e97e17a8c6409aba34",
+      "sourceHash": "387fbef006bc074d5d22ac71a68ebb77c4de7fba4e25506f1ef1189aa51ce795",
       "tier": "S",
       "rationale": "Initializes persistent dream state and exposes approval/apply/rollback controls.",
       "applicability": {
@@ -12306,33 +12314,33 @@
       },
       "decisionStatus": "proposed - independent review pending",
       "inspection": {
-        "sourceRevision": "964cf20 + current source hash",
-        "anchor": "Q100.4.2 source admission and bounded command activation",
-        "scope": "Scoped source-bound diagnostics; complete writer adoption and quality acceptance open."
+        "sourceRevision": "196d52c + current source hash",
+        "anchor": "Q100.4.2 writer admission",
+        "scope": "Narrow diagnostic subset of broader compatibility groups; whole quality/adoption incomplete."
       },
       "metricApplicability": {
-        "status": "Diagnostic only; gaps remain open, child coverage unaggregated and applicability/platform/package/changed-line/review incomplete",
-        "sourceHash": "bcfcb66d2fb07af2713ceb04ce46cd8975fda64a85bb71e97e17a8c6409aba34",
-        "evidence": ".planning/memory-resilience/evidence/Q100.4.2-source-admission.json",
+        "status": "Scoped diagnostic only; broader event/command compatibility suites and native child counters not all instrumented; final quality pending",
+        "sourceHash": "387fbef006bc074d5d22ac71a68ebb77c4de7fba4e25506f1ef1189aa51ce795",
+        "evidence": ".planning/memory-resilience/evidence/Q100.4.2-writer-admission.json",
         "metrics": {
           "statements": {
             "observedCounterTotal": 122,
-            "observedPercent": 98.36,
+            "observedPercent": 50.81,
             "proposal": "measure - completeness unverified"
           },
           "branches": {
             "observedCounterTotal": 97,
-            "observedPercent": 90.72,
+            "observedPercent": 53.6,
             "proposal": "measure - completeness unverified"
           },
           "functions": {
             "observedCounterTotal": 28,
-            "observedPercent": 100,
+            "observedPercent": 42.85,
             "proposal": "measure - completeness unverified"
           },
           "lines": {
             "observedCounterTotal": 113,
-            "observedPercent": 98.23,
+            "observedPercent": 47.78,
             "proposal": "measure - completeness unverified"
           }
         }
@@ -13233,7 +13241,7 @@
     {
       "path": "src/presentation/cli/commands/governance.ts",
       "package": "package.json",
-      "sourceHash": "8970c7a2aec7f59829d3370429e027fabec0ca314771fee241dc2e318e3175bc",
+      "sourceHash": "bb0cefa034ca576bab041c9032a959be65ed52eb93cd95ef4b987c1b90962f1b",
       "tier": "S",
       "rationale": "Initializes storage and exposes consent/suppression/governance controls.",
       "applicability": {
@@ -13242,33 +13250,33 @@
       },
       "decisionStatus": "proposed - independent review pending",
       "inspection": {
-        "sourceRevision": "964cf20 + current source hash",
-        "anchor": "Q100.4.2 source admission and bounded command activation",
-        "scope": "Scoped source-bound diagnostics; complete writer adoption and quality acceptance open."
+        "sourceRevision": "196d52c + current source hash",
+        "anchor": "Q100.4.2 writer admission",
+        "scope": "Narrow diagnostic subset of broader compatibility groups; whole quality/adoption incomplete."
       },
       "metricApplicability": {
-        "status": "Diagnostic only; gaps remain open, child coverage unaggregated and applicability/platform/package/changed-line/review incomplete",
-        "sourceHash": "8970c7a2aec7f59829d3370429e027fabec0ca314771fee241dc2e318e3175bc",
-        "evidence": ".planning/memory-resilience/evidence/Q100.4.2-source-admission.json",
+        "status": "Scoped diagnostic only; broader event/command compatibility suites and native child counters not all instrumented; final quality pending",
+        "sourceHash": "bb0cefa034ca576bab041c9032a959be65ed52eb93cd95ef4b987c1b90962f1b",
+        "evidence": ".planning/memory-resilience/evidence/Q100.4.2-writer-admission.json",
         "metrics": {
           "statements": {
             "observedCounterTotal": 96,
-            "observedPercent": 90.62,
+            "observedPercent": 53.12,
             "proposal": "measure - completeness unverified"
           },
           "branches": {
             "observedCounterTotal": 77,
-            "observedPercent": 92.2,
+            "observedPercent": 50.64,
             "proposal": "measure - completeness unverified"
           },
           "functions": {
             "observedCounterTotal": 26,
-            "observedPercent": 76.92,
+            "observedPercent": 50,
             "proposal": "measure - completeness unverified"
           },
           "lines": {
             "observedCounterTotal": 87,
-            "observedPercent": 89.65,
+            "observedPercent": 48.27,
             "proposal": "measure - completeness unverified"
           }
         }
@@ -17852,29 +17860,33 @@
       "decisionStatus": "proposed - independent review pending",
       "sourceHash": "0d879fdb753bcbfb26898d0ce3ff8c95162b8475e561577ffd77d479304bc0df",
       "inspection": {
-        "sourceRevision": "5159a7e + current source hash",
-        "anchor": "Q100.4.2 serial caller recovery",
-        "scope": "Paired native/fresh-process proof; complete caller and quality acceptance remains open."
+        "sourceRevision": "196d52c + current source hash",
+        "anchor": "Q100.4.2 writer admission",
+        "scope": "Narrow diagnostic subset of broader compatibility groups; whole quality/adoption incomplete."
       },
       "metricApplicability": {
-        "status": "diagnostic - final Q005/Q100.4.3 acceptance pending",
+        "status": "Scoped diagnostic only; broader event/command compatibility suites and native child counters not all instrumented; final quality pending",
         "sourceHash": "0d879fdb753bcbfb26898d0ce3ff8c95162b8475e561577ffd77d479304bc0df",
-        "evidence": ".planning/memory-resilience/evidence/Q100.4.2-callers.json",
+        "evidence": ".planning/memory-resilience/evidence/Q100.4.2-writer-admission.json",
         "metrics": {
-          "lines": {
-            "observedCounterTotal": 187,
-            "proposal": "measure - completeness unverified"
-          },
-          "functions": {
-            "observedCounterTotal": 80,
-            "proposal": "measure - completeness unverified"
-          },
           "statements": {
             "observedCounterTotal": 291,
+            "observedPercent": 100,
             "proposal": "measure - completeness unverified"
           },
           "branches": {
             "observedCounterTotal": 34,
+            "observedPercent": 100,
+            "proposal": "measure - completeness unverified"
+          },
+          "functions": {
+            "observedCounterTotal": 80,
+            "observedPercent": 100,
+            "proposal": "measure - completeness unverified"
+          },
+          "lines": {
+            "observedCounterTotal": 187,
+            "observedPercent": 100,
             "proposal": "measure - completeness unverified"
           }
         }
@@ -19588,32 +19600,36 @@
         "reason": "Executable process driver; generated child source and timeout/cleanup branches require instrumenter and failure-path review. No exclusion approved."
       },
       "decisionStatus": "proposed - independent review pending",
-      "sourceHash": "9955733d3595ab7fb1f01d5febde056c9058f4f339c17b3ca4bbb306e44a452b",
+      "sourceHash": "007e3aeb1e5f51b2a24c3c4b5f467f6d3ad83a3282a00fb1293d56b243632a6a",
       "inspection": {
-        "sourceRevision": "ae4d091 + current source hash",
-        "anchor": "Q100.4.2 deterministic process races",
-        "scope": "Three native schedules and negative controls; stale command failure separate and unresolved."
+        "sourceRevision": "196d52c + current source hash",
+        "anchor": "Q100.4.2 writer admission",
+        "scope": "Narrow diagnostic subset of broader compatibility groups; whole quality/adoption incomplete."
       },
       "metricApplicability": {
-        "status": "diagnostic - branch87.5 fails TierS; child counters unaggregated",
-        "sourceHash": "9955733d3595ab7fb1f01d5febde056c9058f4f339c17b3ca4bbb306e44a452b",
-        "evidence": ".planning/memory-resilience/evidence/Q100.4.2-races.json",
+        "status": "Scoped diagnostic only; broader event/command compatibility suites and native child counters not all instrumented; final quality pending",
+        "sourceHash": "007e3aeb1e5f51b2a24c3c4b5f467f6d3ad83a3282a00fb1293d56b243632a6a",
+        "evidence": ".planning/memory-resilience/evidence/Q100.4.2-writer-admission.json",
         "metrics": {
-          "lines": {
-            "observedCounterTotal": 44,
-            "proposal": "measure - complete child instrumentation and failure paths pending"
-          },
-          "functions": {
-            "observedCounterTotal": 5,
-            "proposal": "measure - complete child instrumentation and failure paths pending"
-          },
           "statements": {
-            "observedCounterTotal": 62,
-            "proposal": "measure - complete child instrumentation and failure paths pending"
+            "observedCounterTotal": 76,
+            "observedPercent": 96.05,
+            "proposal": "measure - completeness unverified"
           },
           "branches": {
-            "observedCounterTotal": 16,
-            "proposal": "measure - complete child instrumentation and failure paths pending"
+            "observedCounterTotal": 24,
+            "observedPercent": 91.66,
+            "proposal": "measure - completeness unverified"
+          },
+          "functions": {
+            "observedCounterTotal": 6,
+            "observedPercent": 100,
+            "proposal": "measure - completeness unverified"
+          },
+          "lines": {
+            "observedCounterTotal": 55,
+            "observedPercent": 100,
+            "proposal": "measure - completeness unverified"
           }
         }
       }
@@ -19756,16 +19772,16 @@
         "reason": "Executable source reservation and failure/recovery tests; no exclusion approved."
       },
       "decisionStatus": "proposed - independent review pending",
-      "sourceHash": "51a83b2181aa13b86cb45040daf2aa3c89da89b678f76448797f9420cd65307c",
+      "sourceHash": "7c1914b6be1ff86d9712f3d071ab548d90a6c4784871f4b6cc08118d1b0884b1",
       "inspection": {
-        "sourceRevision": "e293ecc + current source hash",
-        "anchor": "Q100.4.2 explicit nested source leases",
-        "scope": "Scoped capability qualification; lower writer adoption incomplete."
+        "sourceRevision": "196d52c + current source hash",
+        "anchor": "Q100.4.2 writer admission",
+        "scope": "Narrow diagnostic subset of broader compatibility groups; whole quality/adoption incomplete."
       },
       "metricApplicability": {
-        "status": "Scoped diagnostic; full platform/package/changed-line/instrumenter/review and remaining gaps open",
-        "sourceHash": "51a83b2181aa13b86cb45040daf2aa3c89da89b678f76448797f9420cd65307c",
-        "evidence": ".planning/memory-resilience/evidence/Q100.4.2-leases.json",
+        "status": "Scoped diagnostic only; broader event/command compatibility suites and native child counters not all instrumented; final quality pending",
+        "sourceHash": "7c1914b6be1ff86d9712f3d071ab548d90a6c4784871f4b6cc08118d1b0884b1",
+        "evidence": ".planning/memory-resilience/evidence/Q100.4.2-writer-admission.json",
         "metrics": {
           "statements": {
             "observedCounterTotal": 83,
@@ -19773,8 +19789,8 @@
             "proposal": "measure - completeness unverified"
           },
           "branches": {
-            "observedCounterTotal": 44,
-            "observedPercent": 84.09,
+            "observedCounterTotal": 46,
+            "observedPercent": 86.95,
             "proposal": "measure - completeness unverified"
           },
           "functions": {
@@ -19802,14 +19818,14 @@
       "decisionStatus": "proposed - independent review pending",
       "sourceHash": "6d73c668706039532a56042cda441fa6f6be6eba95077aa2c95226395938f3db",
       "inspection": {
-        "sourceRevision": "e293ecc + current source hash",
-        "anchor": "Q100.4.2 explicit nested source leases",
-        "scope": "Scoped capability qualification; lower writer adoption incomplete."
+        "sourceRevision": "196d52c + current source hash",
+        "anchor": "Q100.4.2 writer admission",
+        "scope": "Narrow diagnostic subset of broader compatibility groups; whole quality/adoption incomplete."
       },
       "metricApplicability": {
-        "status": "Scoped diagnostic; full platform/package/changed-line/instrumenter/review and remaining gaps open",
+        "status": "Scoped diagnostic only; broader event/command compatibility suites and native child counters not all instrumented; final quality pending",
         "sourceHash": "6d73c668706039532a56042cda441fa6f6be6eba95077aa2c95226395938f3db",
-        "evidence": ".planning/memory-resilience/evidence/Q100.4.2-leases.json",
+        "evidence": ".planning/memory-resilience/evidence/Q100.4.2-writer-admission.json",
         "metrics": {
           "statements": {
             "observedCounterTotal": 146,
@@ -19844,20 +19860,20 @@
         "reason": "Executable source reservation and failure/recovery tests; no exclusion approved."
       },
       "decisionStatus": "proposed - independent review pending",
-      "sourceHash": "3753d915f14e73b8b04f17a306abe9cdbd40c41f44349be8b3bdc818ac7c8e47",
+      "sourceHash": "ffb0901d8b798620ca0f52610072abc5ea5df559923cd5a1ae62bbe1adb8a394",
       "inspection": {
-        "sourceRevision": "964cf20 + current source hash",
-        "anchor": "Q100.4.2 source admission and bounded command activation",
-        "scope": "Scoped source-bound diagnostics; complete writer adoption and quality acceptance open."
+        "sourceRevision": "196d52c + current source hash",
+        "anchor": "Q100.4.2 writer admission",
+        "scope": "Narrow diagnostic subset of broader compatibility groups; whole quality/adoption incomplete."
       },
       "metricApplicability": {
-        "status": "Diagnostic only; gaps remain open, child coverage unaggregated and applicability/platform/package/changed-line/review incomplete",
-        "sourceHash": "3753d915f14e73b8b04f17a306abe9cdbd40c41f44349be8b3bdc818ac7c8e47",
-        "evidence": ".planning/memory-resilience/evidence/Q100.4.2-source-admission.json",
+        "status": "Scoped diagnostic only; broader event/command compatibility suites and native child counters not all instrumented; final quality pending",
+        "sourceHash": "ffb0901d8b798620ca0f52610072abc5ea5df559923cd5a1ae62bbe1adb8a394",
+        "evidence": ".planning/memory-resilience/evidence/Q100.4.2-writer-admission.json",
         "metrics": {
           "statements": {
-            "observedCounterTotal": 119,
-            "observedPercent": 97.47,
+            "observedCounterTotal": 117,
+            "observedPercent": 97.43,
             "proposal": "measure - completeness unverified"
           },
           "branches": {
@@ -19866,12 +19882,12 @@
             "proposal": "measure - completeness unverified"
           },
           "functions": {
-            "observedCounterTotal": 17,
+            "observedCounterTotal": 16,
             "observedPercent": 100,
             "proposal": "measure - completeness unverified"
           },
           "lines": {
-            "observedCounterTotal": 51,
+            "observedCounterTotal": 50,
             "observedPercent": 100,
             "proposal": "measure - completeness unverified"
           }
@@ -19932,16 +19948,16 @@
         "reason": "Executable authority scope and failure/recovery tests; no exclusion approved."
       },
       "decisionStatus": "proposed - independent review pending",
-      "sourceHash": "d834bad3572884ce3e56430cd549555976f092365119627274be9420da2106f9",
+      "sourceHash": "02992f107b8d203d6626a6611f43a7ebfa170c00d4a380bfb04e18c7bf837fe9",
       "inspection": {
-        "sourceRevision": "e293ecc + current source hash",
-        "anchor": "Q100.4.2 explicit nested source leases",
-        "scope": "Scoped capability qualification; lower writer adoption incomplete."
+        "sourceRevision": "196d52c + current source hash",
+        "anchor": "Q100.4.2 writer admission",
+        "scope": "Narrow diagnostic subset of broader compatibility groups; whole quality/adoption incomplete."
       },
       "metricApplicability": {
-        "status": "Scoped diagnostic; full platform/package/changed-line/instrumenter/review and remaining gaps open",
-        "sourceHash": "d834bad3572884ce3e56430cd549555976f092365119627274be9420da2106f9",
-        "evidence": ".planning/memory-resilience/evidence/Q100.4.2-leases.json",
+        "status": "Scoped diagnostic only; broader event/command compatibility suites and native child counters not all instrumented; final quality pending",
+        "sourceHash": "02992f107b8d203d6626a6611f43a7ebfa170c00d4a380bfb04e18c7bf837fe9",
+        "evidence": ".planning/memory-resilience/evidence/Q100.4.2-writer-admission.json",
         "metrics": {
           "statements": {
             "observedCounterTotal": 50,
@@ -19976,20 +19992,20 @@
         "reason": "Executable authority scope and failure/recovery tests; no exclusion approved."
       },
       "decisionStatus": "proposed - independent review pending",
-      "sourceHash": "d36f14fd3d8475b27bd47dd3649e46f8dc7fb8863f36abc86f2b133017182d92",
+      "sourceHash": "e1d4009b34b396c2491721448099d08194e1d4f61a27957813d18b9eeab641cf",
       "inspection": {
-        "sourceRevision": "e293ecc + current source hash",
-        "anchor": "Q100.4.2 explicit nested source leases",
-        "scope": "Scoped capability qualification; lower writer adoption incomplete."
+        "sourceRevision": "196d52c + current source hash",
+        "anchor": "Q100.4.2 writer admission",
+        "scope": "Narrow diagnostic subset of broader compatibility groups; whole quality/adoption incomplete."
       },
       "metricApplicability": {
-        "status": "Scoped diagnostic; full platform/package/changed-line/instrumenter/review and remaining gaps open",
-        "sourceHash": "d36f14fd3d8475b27bd47dd3649e46f8dc7fb8863f36abc86f2b133017182d92",
-        "evidence": ".planning/memory-resilience/evidence/Q100.4.2-leases.json",
+        "status": "Scoped diagnostic only; broader event/command compatibility suites and native child counters not all instrumented; final quality pending",
+        "sourceHash": "e1d4009b34b396c2491721448099d08194e1d4f61a27957813d18b9eeab641cf",
+        "evidence": ".planning/memory-resilience/evidence/Q100.4.2-writer-admission.json",
         "metrics": {
           "statements": {
-            "observedCounterTotal": 224,
-            "observedPercent": 98.21,
+            "observedCounterTotal": 226,
+            "observedPercent": 98.23,
             "proposal": "measure - completeness unverified"
           },
           "branches": {
@@ -20003,7 +20019,51 @@
             "proposal": "measure - completeness unverified"
           },
           "lines": {
-            "observedCounterTotal": 169,
+            "observedCounterTotal": 171,
+            "observedPercent": 100,
+            "proposal": "measure - completeness unverified"
+          }
+        }
+      }
+    },
+    {
+      "path": "tests/infrastructure/database/admitted-writer.test.ts",
+      "package": "package.json",
+      "tier": "S",
+      "rationale": "Admitted writer authority/lifetime and source/projection integrity regression tests.",
+      "applicability": {
+        "mode": "measure",
+        "reason": "Executable real-source/SQLite tests; zero branch denominator still needs review; no exclusion approved."
+      },
+      "decisionStatus": "proposed - independent review pending",
+      "sourceHash": "d095197aef0a6029c861c48a16fdc4aec109cfe583289b17d022630450c39e39",
+      "inspection": {
+        "sourceRevision": "196d52c + current source hash",
+        "anchor": "Q100.4.2 writer admission",
+        "scope": "Narrow diagnostic subset of broader compatibility groups; whole quality/adoption incomplete."
+      },
+      "metricApplicability": {
+        "status": "Scoped diagnostic only; broader event/command compatibility suites and native child counters not all instrumented; final quality pending",
+        "sourceHash": "d095197aef0a6029c861c48a16fdc4aec109cfe583289b17d022630450c39e39",
+        "evidence": ".planning/memory-resilience/evidence/Q100.4.2-writer-admission.json",
+        "metrics": {
+          "statements": {
+            "observedCounterTotal": 90,
+            "observedPercent": 100,
+            "proposal": "measure - completeness unverified"
+          },
+          "branches": {
+            "observedCounterTotal": 0,
+            "observedPercent": 100,
+            "proposal": "zero requires individual review"
+          },
+          "functions": {
+            "observedCounterTotal": 16,
+            "observedPercent": 100,
+            "proposal": "measure - completeness unverified"
+          },
+          "lines": {
+            "observedCounterTotal": 77,
             "observedPercent": 100,
             "proposal": "measure - completeness unverified"
           }

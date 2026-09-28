@@ -443,11 +443,12 @@
       "historical_evidence": "docs/audits/2026-09-19-repair-evidence/per-file-coverage-gaps.json",
       "evidence": [
         ".planning/memory-resilience/evidence/B11.74.6.3.2.json",
-        ".planning/memory-resilience/evidence/Q100.4.2-callers.json"
+        ".planning/memory-resilience/evidence/Q100.4.2-callers.json",
+        ".planning/memory-resilience/evidence/Q100.4.2-writer-admission.json"
       ],
       "acceptance_record": ".planning/memory-resilience/evidence/Q005.json",
       "retirement_trigger": "Before B11.74.7/B10/R02 acceptance.",
-      "observed_gap": "Serial extraction recovery now executes before early returns and deduplication, with unlogged-data preservation and fresh-process retry. Diagnostic source statements99.08/branches96.22/functions100/lines100 still fails Tier S. Existing test statements98.57/branches92.30/functions80/lines98.46 fails quality. Complete extraction audit/event atomicity, concurrency, append/transaction/candidate admission, privacy and final quality remain mandatory; coordinate Q100."
+      "observed_gap": "Serial extraction recovery now executes before early returns and deduplication, with unlogged-data preservation and fresh-process retry. Diagnostic source statements99.08/branches96.22/functions100/lines100 still fails Tier S. Existing test statements98.57/branches92.30/functions80/lines98.46 fails quality. Complete extraction audit/event atomicity, concurrency, append/transaction/candidate admission, privacy and final quality remain mandatory; coordinate Q100. Low-level extraction append/recovery is admitted and current extraction tests pass, but provider/idempotency/comparison/supersedence decisions remain outside shared admission. Qualify candidate computation followed by admitted revalidation before mutations; native concurrent extraction proof and full quality remain open."
     },
     {
       "id": "Q006",
@@ -1656,10 +1657,11 @@
       ],
       "historical_evidence": "docs/audits/2026-09-19-repair-evidence/per-file-coverage-gaps.json",
       "evidence": [
-        ".planning/memory-resilience/evidence/Q100.4.2-source-admission.json"
+        ".planning/memory-resilience/evidence/Q100.4.2-source-admission.json",
+        ".planning/memory-resilience/evidence/Q100.4.2-writer-admission.json"
       ],
       "acceptance_record": ".planning/memory-resilience/evidence/Q055.json",
-      "observed_gap": "Command now acquires source admission before recovery/decision read and defers output until database/reservation cleanup. Native contention/retry and compound database failure proof is scoped. Reservation-release plus prepared operation error reporting, all action paths and full TierS coverage remain open."
+      "observed_gap": "Root command lease is now carried through recovery/projected writer/append/replay; actual command and retained-event retry regressions pass. Aggregate scope errors retain component messages, including recorded/pending state. Full action/cleanup, prepared command plus reservation-release compound reporting and complete TierS coverage/platform/independent review remain open."
     },
     {
       "id": "Q056",
@@ -1748,10 +1750,11 @@
       ],
       "historical_evidence": "docs/audits/2026-09-19-repair-evidence/per-file-coverage-gaps.json",
       "evidence": [
-        ".planning/memory-resilience/evidence/Q100.4.2-source-admission.json"
+        ".planning/memory-resilience/evidence/Q100.4.2-source-admission.json",
+        ".planning/memory-resilience/evidence/Q100.4.2-writer-admission.json"
       ],
       "acceptance_record": ".planning/memory-resilience/evidence/Q059.json",
-      "observed_gap": "Command now acquires source admission before recovery/decision read and defers output until database/reservation cleanup. Native contention/retry and compound database failure proof is scoped. Reservation-release plus prepared operation error reporting, all action paths and full TierS coverage remain open."
+      "observed_gap": "Root command lease is now carried through recovery/projected writer/append/replay; actual command and retained-event retry regressions pass. Aggregate scope errors retain component messages, including recorded/pending state. Full action/cleanup, prepared command plus reservation-release compound reporting and complete TierS coverage/platform/independent review remain open."
     },
     {
       "id": "Q060",
@@ -6310,24 +6313,25 @@
         ".planning/memory-resilience/evidence/Q100.4.2-admission.json",
         ".planning/memory-resilience/evidence/Q100.4.2-source-admission.json",
         ".planning/memory-resilience/evidence/Q100.4.2-remote-authority.json",
-        ".planning/memory-resilience/evidence/Q100.4.2-leases.json"
+        ".planning/memory-resilience/evidence/Q100.4.2-leases.json",
+        ".planning/memory-resilience/evidence/Q100.4.2-writer-admission.json"
       ],
       "acceptance_record": ".planning/memory-resilience/evidence/Q100.4.2.json",
       "retirement_trigger": "Before Q100.4/Q100/B11.74.7/B10/R02 acceptance.",
       "progress": {
-        "status": "Explicit nested source leases implemented and qualified in scope; writer adoption remains open.",
-        "completed": "Opaque source-bound leases admit explicit descendants across factories/aliases without reacquiring SQLite. Private source issuer provenance rejects a generic wrapper with a matching identity. Wrong source, forged/copied/stale leases, implicit nesting and parallel sibling work fail before callback. Parent completion revokes descendants and drains admitted detached child/grandchild work before release, reporting misuse. Caught child failures still fail the outer operation; primary/child/post-validation errors are retained. Real junction redirection proves validation rather than relying on a refused Windows directory rename. Ten decision faults detected; wrapper diagnostics100all4.",
-        "next": "Adopt explicit lease through raw append, recover/rebuild and projected writer, then thread it from dream/governance before expanding to extraction/remote/maintenance. Prove standalone acquisition, nested non-reacquisition, source mismatch/stale refusal and actual cross-process ordering. Preserve replay/source fences and capture-first/no-egress semantics. Continue provisioning crash, prepared-error/release reporting, partial append/candidate/caller transaction/reconciliation and complete quality gates.",
-        "testsPerRuntime": 245,
-        "assertionsPerRuntime": 1185,
-        "testFiles": 15,
-        "decisionFaultsDetected": 10,
+        "status": "Raw append/recovery/replay/projected writer admission adopted and threaded from dream/governance; broader decision/source operations remain open.",
+        "completed": "Standalone append, recovery and replay acquire a source lease; explicit children share it across projected recovery/append/replay. Directory replay binds supplied eventsDir. Dream/governance pass root scopes; retained writers reject expired scopes. All six entrypoints reject wrong-source/stale leases with unchanged source/projections. Process tests distinguish denied cooperating append/recovery from external raw-file/database edits still caught by optimistic fences. Aggregate messages retain recorded/pending guidance. Core250/1229 plus supplemental275/2716 pass on both Windows runtimes;8admission/reporting and3replay-fence faults detected.",
+        "next": "Acquire before extraction idempotency/comparison/supersedence decisions, with provider candidate computation outside admission and revalidation inside; prove two-process stale-candidate schedules. Then qualify explicit remote/Git/maintenance source mutation and database-direct topology/lock order. Preserve raw/projection admission, optimistic fences and capture-first/no-egress behavior. Continue source provisioning crash, partial append/candidate/caller transaction/multi-event/reconciliation/scaling and full quality gates.",
+        "testsPerRuntime": 525,
+        "assertionsPerRuntime": 3945,
+        "testFiles": 28,
+        "decisionFaultsDetected": 11,
         "survivingDecisionFaults": [],
         "costEvidence": ".planning/memory-resilience/evidence/Q100.4.2-callers.json",
         "scalingConstraint": "Synthetic1000-event guarded write took814ms; idle checks30-67ms. Full replay remains proportional to retained history. Assess representative corpus limits and address scaling before integration/adoption; these small measurements are not an acceptance target or peak-memory proof.",
         "owner": "memory-nexus",
         "trigger": "Before Q100.4/Q100/B11.74.7/B10/R02 acceptance.",
-        "scope": "Actual SQLite-backed source factory and nested scope tests plus15-file affected group on two Windows runtimes. No full writer adoption, Linux, package/changed-line/instrumenter or independent review acceptance.",
+        "scope": "Two disjoint affected groups, actual native command/replay races and narrow diagnostic instrumentation on Windows Bun1.4.1/1.3.14. No full-suite/whole quality/Linux/install/desktop acceptance.",
         "remoteEvidence": ".planning/memory-resilience/evidence/Q100.4.2-remote.json",
         "localEvidence": ".planning/memory-resilience/evidence/Q100.4.2-local.json",
         "outcomeEvidence": ".planning/memory-resilience/evidence/Q100.4.2-outcomes.json",
@@ -6336,9 +6340,10 @@
         "admissionEvidence": ".planning/memory-resilience/evidence/Q100.4.2-admission.json",
         "sourceAdmissionEvidence": ".planning/memory-resilience/evidence/Q100.4.2-source-admission.json",
         "remoteAuthorityEvidence": ".planning/memory-resilience/evidence/Q100.4.2-remote-authority.json",
-        "leaseEvidence": ".planning/memory-resilience/evidence/Q100.4.2-leases.json"
+        "leaseEvidence": ".planning/memory-resilience/evidence/Q100.4.2-leases.json",
+        "writerAdmissionEvidence": ".planning/memory-resilience/evidence/Q100.4.2-writer-admission.json"
       },
-      "observed_gap": "Explicit source lease wrapper is implemented and tested; current commands acquire root admission but do not pass leases into lower raw/recovery/replay APIs. Those APIs and extraction/remote/maintenance remain uncoordinated. No guarantee against arbitrary detached JavaScript/raw I/O outside admitted APIs; admitted callbacks must settle, no timeout steals authority. Provisioning races/crash between publish and unlink, external path swaps, prepared command error plus reservation-release reporting, partial append/fsync, caller transactions, candidate validation, multi-event recovery, reconciliation and scaling remain mandatory. Owner memory-nexus; retire before Q100.4.2/E4/E5/B10/R02."
+      "observed_gap": "Raw append, recovery/replay and projected writer now acquire or delegate explicit leases; dream/governance cover recovery/first decision through their event writes. Extraction still reads/compares between separately admitted low-level operations, so whole extraction decision scope is unsafe. Remote/Git/maintenance source changes and database-direct topology are not coordinated. Provisioning races/crash, external path swaps, prepared command plus reservation-release failures, partial append/fsync, complete candidate validation, multi-event atomicity/recovery, caller transactions, reconciliation and scaling remain mandatory. Owner memory-nexus; retire before Q100.4.2/E4/E5/B10/R02."
     },
     {
       "id": "Q100.4.3",
@@ -6364,11 +6369,12 @@
         ".planning/memory-resilience/evidence/Q100.4.2-admission.json",
         ".planning/memory-resilience/evidence/Q100.4.2-source-admission.json",
         ".planning/memory-resilience/evidence/Q100.4.2-remote-authority.json",
-        ".planning/memory-resilience/evidence/Q100.4.2-leases.json"
+        ".planning/memory-resilience/evidence/Q100.4.2-leases.json",
+        ".planning/memory-resilience/evidence/Q100.4.2-writer-admission.json"
       ],
       "acceptance_record": ".planning/memory-resilience/evidence/Q100.4.3.json",
       "retirement_trigger": "Before Q100.4/Q100/B11.74.7/B10/R02 acceptance.",
-      "observed_gap": "Current source-admission evidence retains complete scoped rows: factory, dream, governance, backup and test files fail required metrics. Backend module/test diagnostics remain100all4. Child-process coverage is unaggregated; zero denominators, instrumenter/applicability, package and changed-line evidence, Linux, cleanup and final independent review remain open. Prior optional-stage/extraction/remote/transport gaps remain in their separately source-bound evidence; earlier counts do not certify current source. Bounded command regression repairs the former stale-decision schedule, but complete writer adoption is still a correctness obligation, never a coverage exception. No exclusion approved. Remote checkpoint diagnostic remote.ts functions90.62/branches95.2, remote.test.ts lines90.68/functions76.15/branches50, native preservation driver branch87.5 fail policy. Platform alternative branch is not automatically excluded. Three targeted namespace faults detected, not complete remote decision coverage. Lease checkpoint: wrapper100all4 diagnostics and10detected faults; source factory statements95.18/branches84.09/functions100/lines96.36 still fails TierS. New lease test branch50 from platform alternatives, plus unexecuted success continuations; no exclusion approved. Prior root-directory rename rejection did not necessarily exercise post-validation on Windows; new real-junction redirection asserts the application alias error before nesting/after completion. Complete child/process, package/changed-line/instrumenter/Linux/final review remains open."
+      "observed_gap": "Current writer evidence:525tests/3945assertions per Windows runtime;11decision faults detected; narrow recovery/scope/projected-writer-test instrumentation100all4. Event-log, command, source-factory and driver/test diagnostics remain below policy or incomplete; broader compatibility tests were not all instrumented in this diagnostic and earlier rows are not fresh full-suite coverage. New admitted-writer test zero branch denominator requires individual review. Child-process counters, complete instrumenter/applicability, package/changed-line, Linux, cleanup and final independent review remain open; no exclusion approved."
     }
   ],
   "decisions": {

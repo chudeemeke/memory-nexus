@@ -195,3 +195,27 @@ remains an operation failure even if caught by its parent. Primary, child and fi
 identity-validation failures are retained together. This cannot preempt arbitrary
 JavaScript or cancel raw I/O already started outside cooperating APIs; callbacks
 must settle, and writer adoption still has to carry the explicit lease end to end.
+
+Writer adoption slice: add an optional explicit parent lease to append/replay/
+recovery APIs and projected-writer construction. Standalone calls acquire source
+admission; nested calls delegate one child scope and pass it down, never a cached
+root or implicit global flag. Directory replay must bind its explicit eventsDir,
+not the caller's default profile. Dream/governance pass their root scope through
+recovery and projected writes. Read-only inspection and unconfirmed actions keep
+their existing non-mutating behavior.
+
+Retain optimistic fences after coordination: native tests must distinguish
+cooperating contenders (busy, no append) from uncoordinated external file/database
+edits (stale promotion refused or newer source reported pending). Do not add a
+production lock-bypass option merely to preserve an older race test. Extraction
+decision scope, Git/source replacement and maintenance admission remain separate
+required slices even when their low-level append/replay calls become admitted.
+
+Writer adoption is now implemented and tested: 525 tests and 3,945 assertions
+across two disjoint groups pass on each Windows runtime (Bun1.4.1 and pinned1.3.14).
+Eight admission/reporting faults and three optimistic-fence faults are detected.
+The retained evidence is
+`.planning/memory-resilience/evidence/Q100.4.2-writer-admission.json`. This closes
+the bounded wiring slice, not Q100.4.2, complete quality or baseline acceptance.
+Next, qualify extraction candidate computation outside admission followed by
+admitted recovery and decision revalidation, using real concurrent processes.

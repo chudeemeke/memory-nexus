@@ -158,6 +158,8 @@ it("retains outer and detached child failures while draining before release", as
     expect(failure.errors).toContain(childFailure);
     expect(failure.errors.some(error => error.message.includes("unawaited child"))).toBe(true);
     expect(failure.errors.length).toBe(3);
+    expect(failure.message).toContain(outerFailure.message);
+    expect(failure.message).toContain(childFailure.message);
     expect(await admission.run(async () => "fresh")).toBe("fresh");
   } finally { release(); await outcome; storage.cleanup(); }
 });

@@ -6,7 +6,7 @@
  */
 
 import { Command, Option } from "commander";
-import type { OperationAdmission } from "../../../domain/ports/operation-admission.js";
+import type { LeasedOperationAdmission, OperationLease } from "../../../domain/ports/operation-admission.js";
 import { createSourceOperationAdmission } from "../../../infrastructure/database/source-operation-admission.js";
 import type { CommandResult } from "../command-result.js";
 import { DreamingService } from "../../../application/services/dreaming-service.js";
@@ -51,7 +51,7 @@ export interface DreamCommandOptions {
 }
 
 export interface DreamCommandDeps {
-  operationAdmission?: OperationAdmission;
+  operationAdmission?: LeasedOperationAdmission;
   dbPath?: string | undefined;
   writeEvents?: boolean | undefined;
   eventLogPath?: string | undefined;
@@ -129,7 +129,7 @@ export function createDreamCommand(deps: DreamCommandDeps = {}): Command {
 
 export async function executeDreamCommand(options: DreamCommandOptions, deps: DreamCommandDeps = {}): Promise<CommandResult> {
   try {
-    const operation = () => prepareDreamCommand(options, deps);
+    const operation = (lease?: OperationLease) => prepareDreamCommand(options, deps, lease);
     const response = deps.writeEvents !== false && options.action !== "list" && options.action !== "show" && ((options.action !== "apply" && options.action !== "rollback") || options.confirm === true)
       ? await (deps.operationAdmission ?? createSourceOperationAdmission(deps.eventLogPath)).run(operation)
       : await operation();
@@ -137,7 +137,7 @@ export async function executeDreamCommand(options: DreamCommandOptions, deps: Dr
   } catch (error) { return emitDreamError(options, "UNEXPECTED_ERROR", errorMessage(error), 2); }
 }
 
-async function prepareDreamCommand(options: DreamCommandOptions, deps: DreamCommandDeps): Promise<() => CommandResult> {
+async function prepareDreamCommand(options: DreamCommandOptions, deps: DreamCommandDeps, lease?: OperationLease): Promise<() => CommandResult> {
   const success = (data: unknown) => () => emitDreamSuccess(options, data);
   const failure = (code: string, message: string, exitCode: number) => () => emitDreamError(options, code, message, exitCode);
   const dbPath = deps.dbPath ?? getDefaultDbPath();
@@ -154,10 +154,10 @@ async function prepareDreamCommand(options: DreamCommandOptions, deps: DreamComm
     const dreamRepo = new SqliteDreamRepository(db);
     const factRepo = new SqliteFactRepository(db);
     const governanceRepo = new SqliteMemoryGovernanceRepository(db);
-    const writeEvent = deps.writeEvents === false ? undefined : createProjectedEventWriter(db, deps.eventLogPath);
+    const writeEvent = deps.writeEvents === false ? undefined : createProjectedEventWriter(db, deps.eventLogPath, lease);
     const needsConfirmation = options.action === "apply" || options.action === "rollback";
     if (writeEvent && options.action !== "list" && options.action !== "show" && (!needsConfirmation || options.confirm === true)) {
-      if ((await recoverPendingProjections(db, deps.eventLogPath)).pending) {
+      if ((await recoverPendingProjections(db, deps.eventLogPath, undefined, lease)).pending) {
         throw new Error("Projection recovery remains pending; retry the command");
       }
     }

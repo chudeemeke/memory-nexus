@@ -30,12 +30,14 @@ import {
   graphEdgesFromFact,
 } from "../../application/services/temporal-graph-service.js";
 import { MemoryGovernanceEntry } from "../../domain/entities/memory-governance.js";
-import { getMachineLogPath, getAllLogFiles } from "../paths.js";
+import { getMachineLogPath, getAllLogFiles, getEventsDir } from "../paths.js";
 import { loadConfig } from "../hooks/config-manager.js";
 import { captureProjectionFence, createProjectionStage, promoteProjections } from "./projection-replacement.js";
 import { captureProjectionSource, assertProjectionSource, assertProjectionSourceAuthority, type ProjectionSourceSnapshot, type ProjectionSourceManifest } from "./projection-source.js";
 import { assertLegacyProjectionPayload, assertProjectionPayload } from "./projection-payload.js";
 import { assertAutomaticProjectionReplay } from "./projection-state.js";
+import type { OperationLease } from "../../domain/ports/operation-admission.js";
+import { createSourceOperationAdmission } from "./source-operation-admission.js";
 
 export interface InvalidEventLogLine {
   filePath: string;
@@ -77,17 +79,19 @@ const FACT_EVENT_KINDS: readonly MemoryEventKind[] = [
 /**
  * Append a Fact through the canonical v2 event envelope.
  */
-export async function appendEvent(fact: Fact, logPath?: string): Promise<void> {
-  await appendMemoryEvent(factToMemoryEvent(fact, resolveMachineId(logPath)), logPath);
+export async function appendEvent(fact: Fact, logPath?: string, parent?: OperationLease): Promise<void> {
+  await appendMemoryEvent(factToMemoryEvent(fact, resolveMachineId(logPath)), logPath, parent);
 }
 
 /**
  * Append a canonical memory event envelope into the plain-text event log.
  */
-export async function appendMemoryEvent(memoryEvent: MemoryEventEnvelope, logPath?: string): Promise<void> {
+export async function appendMemoryEvent(memoryEvent: MemoryEventEnvelope, logPath?: string, parent?: OperationLease): Promise<void> {
   const activeLogPath = resolveLogPath(logPath);
-  await mkdir(dirname(activeLogPath), { recursive: true });
-  await appendFile(activeLogPath, `${JSON.stringify(memoryEvent.toJSON())}\n`, "utf-8");
+  await createSourceOperationAdmission(activeLogPath).run(async () => {
+    await mkdir(dirname(activeLogPath), { recursive: true });
+    await appendFile(activeLogPath, `${JSON.stringify(memoryEvent.toJSON())}\n`, "utf-8");
+  }, parent);
 }
 
 /**
@@ -161,8 +165,8 @@ export async function* readEvents(logPath?: string, eventsDir?: string): AsyncGe
 /**
  * Rebuild derived database projections from the canonical event log.
  */
-export async function rebuildProjections(db: Database, logPath?: string, eventsDir?: string, mode: "explicit" | "automatic" = "explicit"): Promise<void> {
-  const report = await rebuildProjectionsWithReport(db, logPath, eventsDir, mode);
+export async function rebuildProjections(db: Database, logPath?: string, eventsDir?: string, mode: "explicit" | "automatic" = "explicit", parent?: OperationLease): Promise<void> {
+  const report = await rebuildProjectionsWithReport(db, logPath, eventsDir, mode, parent);
   if (report.invalidEvents > 0) {
     throw new Error(`Projection rebuild refused: ${report.invalidEvents} invalid event log record(s)`);
   }
@@ -171,7 +175,13 @@ export async function rebuildProjections(db: Database, logPath?: string, eventsD
 /**
  * Rebuild derived database projections and return replay evidence.
  */
-export async function rebuildProjectionsWithReport(db: Database, logPath?: string, eventsDir?: string, mode: "explicit" | "automatic" = "explicit"): Promise<ProjectionRebuildReport> {
+export async function rebuildProjectionsWithReport(db: Database, logPath?: string, eventsDir?: string, mode: "explicit" | "automatic" = "explicit", parent?: OperationLease): Promise<ProjectionRebuildReport> {
+  const sourceDirectory = eventsDir ?? getEventsDir();
+  return createSourceOperationAdmission(logPath, sourceDirectory).run(
+    () => rebuildAdmittedProjections(db, logPath, sourceDirectory, mode), parent);
+}
+
+async function rebuildAdmittedProjections(db: Database, logPath: string | undefined, eventsDir: string, mode: "explicit" | "automatic"): Promise<ProjectionRebuildReport> {
   const fence = captureProjectionFence(db);
   if (mode === "automatic") assertAutomaticProjectionReplay(db);
   const report = await readProjectionEventsWithReport(logPath, eventsDir);

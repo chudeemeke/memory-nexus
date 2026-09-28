@@ -1,5 +1,49 @@
 # Memory resilience execution journal
 
+## 2026-09-28 - Adopted source admission in low-level writers
+
+- Started clean at signed/pushed `196d52c`. Q100.4.2 and the E1-E10 goal remain
+  active. Raw append, replay, recovery and projected writers now acquire admission
+  independently or delegate an explicit current source lease. Dream/governance
+  carry their root lease through the full recovery/write sequence. Explicit
+  directory replay binds that directory, not the default profile.
+- Retained REDs demonstrate previously unguarded append/replay, missing projected
+  and command lease delegation, and hidden component error messages. Aggregate
+  reporting now retains recorded/pending guidance as well as the component errors.
+  Wrong-source and expired leases reject all six entrypoints without changing
+  event source or serialized projections; a retained expired writer rejects too.
+- Native process tests distinguish cooperating contenders, refused before append
+  or replay, from external raw-file/SQL edits. External database/source changes
+  still fail optimistic promotion fences; a later source cutoff remains pending.
+  No production bypass was introduced to preserve an older race fixture.
+- Two disjoint groups total **525 tests / 3,945 assertions / 28 files per runtime**,
+  zero failures on Windows Bun1.4.1 and pinned1.3.14. Eight admission/reporting and
+  three optimistic-fence faults are detected. Production types, strict changed-test
+  types and isolation pass. Full source-bound outputs and REDs are retained in
+  `evidence/Q100.4.2-writer-admission.json`.
+- A private diagnostic mirror initially duplicated `src/` in generated child
+  imports. Its failed control is retained; corrected mapping and the complete
+  rerun pass. This was a harness correction, not a production exception.
+- Recovery and lease wrapper have 100% diagnostic coverage in all four metrics.
+  Narrow event-log/command/source-factory/test diagnostics remain below policy or
+  incomplete. Broader compatibility tests were not all instrumented here; these
+  percentages are not full-suite coverage. Child counters, zero denominators,
+  package/changed-line/Linux/independent review remain open under Q100.4.3.
+- **Next:** keep provider candidate computation outside admission, then admit
+  extraction recovery, idempotency/comparison/supersedence revalidation and writes.
+  Prove a real two-process stale-candidate schedule before acceptance. Separately
+  coordinate remote/Git/maintenance mutations and resolve direct-database topology.
+  Low-level locks alone do not make preceding extraction decisions safe.
+- Provisioning/crash/path swaps, compound command-release errors, candidate
+  validation, partial append/fsync, caller transactions, multi-event recovery,
+  reconciliation and scaling remain required. Three inboxes and R03/P03/A03 stay
+  open; the embedding experiment remains after baseline acceptance.
+- Inventory494 files/two packages;255 acyclic items and one active. Owned fixtures
+  cleaned;11.02GiB free at checkpoint. A zero-byte Git temporary object is retained
+  for the next serialized Git maintenance review; no storage benefit warrants
+  removal now. No canonical data/model/provider/hook/replication/new worktree or
+  previously rejected cleanup target was changed.
+
 ## 2026-09-28 - Qualified explicit nested source leases
 
 - Previous turn made progress at signed/pushed `e293ecc`; started clean. Full

@@ -1,5 +1,5 @@
 import { expect, it } from "bun:test";
-import { existsSync, readFileSync, writeFileSync } from "node:fs";
+import { appendFileSync, existsSync, readFileSync, writeFileSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { OwnedDatabase } from "../../../src/infrastructure/database/owned-database.js";
 import { createSchema } from "../../../src/infrastructure/database/schema.js";
@@ -8,7 +8,7 @@ import { appendEvent, rebuildProjections } from "../../../src/infrastructure/dat
 import { recoverPendingProjections } from "../../../src/infrastructure/database/projection-recovery.js";
 import { createOwnedTestDirectory } from "../../helpers/owned-test-directory.js";
 
-for (const race of ["committed-replay", "source-before-promotion", "source-during-promotion"] as const) {
+for (const race of ["admitted-contender", "external-database-edit", "source-before-promotion", "source-during-promotion"] as const) {
   it(`retains concurrent process work across ${race}`, async () => {
     const storage = createOwnedTestDirectory("memory-projection-race-");
     const dbPath = join(storage.dir, "synthetic.db"), log = join(storage.dir, "events-synthetic.jsonl");
@@ -57,11 +57,22 @@ console.log(JSON.stringify({recovery,error,reached}));
         await Bun.sleep(5);
       }
       expect(JSON.parse(readFileSync(ready,"utf8")).pid).not.toBe(process.pid);
-      if (race === "committed-replay") expect(await recoverPendingProjections(db, log)).toEqual({ rebuilt: true, pending: false });
-      else await appendEvent(event("later"), log);
+      if (race === "admitted-contender") {
+        const beforeSource = readFileSync(log, "utf8"), beforeDb = db.serialize();
+        await expect(appendEvent(event("denied"), log)).rejects.toThrow("busy");
+        await expect(recoverPendingProjections(db, log)).rejects.toThrow("busy");
+        expect(readFileSync(log, "utf8")).toBe(beforeSource);
+        expect(db.serialize()).toEqual(beforeDb);
+      } else if (race === "external-database-edit") {
+        db.exec("UPDATE facts SET content='external edit'");
+      } else {
+        // Uncoordinated external I/O must still be caught by optimistic fences.
+        appendFileSync(log, JSON.stringify({ uuid: "later", type: "learning", project: "synthetic", content: "later", observedAt: "2026-01-01T00:00:00Z" }) + "\n");
+      }
       const rows = () => { using statement = db.prepare("SELECT uuid FROM facts ORDER BY uuid"); return statement.all(); };
+      const contents = () => { using statement = db.prepare("SELECT uuid,content FROM facts ORDER BY uuid"); return statement.all(); };
       const receipt = () => { using statement = db.prepare<{manifest:string},[]>("SELECT manifest FROM projection_replay_state WHERE id=1"); return statement.get()!.manifest; };
-      const before = { rows: rows(), receipt: receipt() }, sourceBefore = readFileSync(log,"utf8");
+      const before = { rows: rows(), receipt: receipt(), contents: contents() }, sourceBefore = readFileSync(log,"utf8");
       writeFileSync(release, "continue");
       expect(await child.exited, await stderr).toBe(0);
       const outcome = JSON.parse(await stdout);
@@ -71,13 +82,16 @@ console.log(JSON.stringify({recovery,error,reached}));
         expect(outcome.recovery).toEqual({ rebuilt: true, pending: true });
         expect(rows()).toEqual([{uuid:"baseline"},{uuid:"pending"}]);
         expect(JSON.parse(receipt()).files[0].bytes).toBeLessThan(Buffer.byteLength(sourceBefore));
+      } else if (race === "admitted-contender") {
+        expect(outcome.recovery).toEqual({ rebuilt: true, pending: false });
       } else {
-        expect(outcome.error).toContain(race === "committed-replay" ? "Database changed" : "Projection source changed");
-        expect({ rows: rows(), receipt: receipt() }).toEqual(before);
+        expect(outcome.error).toContain(race === "external-database-edit" ? "Database changed" : "Projection source changed");
+        expect({ rows: rows(), receipt: receipt(), contents: contents() }).toEqual(before);
       }
+      if (race === "external-database-edit") await rebuildProjections(db, log);
       const retry = await recoverPendingProjections(db, log);
       expect(retry.pending).toBe(false);
-      expect(rows()).toEqual(race === "committed-replay" ? [{uuid:"baseline"},{uuid:"pending"}] : [{uuid:"baseline"},{uuid:"later"},{uuid:"pending"}]);
+      expect(rows()).toEqual(race === "admitted-contender" || race === "external-database-edit" ? [{uuid:"baseline"},{uuid:"pending"}] : [{uuid:"baseline"},{uuid:"later"},{uuid:"pending"}]);
       expect(await recoverPendingProjections(db, log)).toEqual({ rebuilt: false, pending: false });
     } finally {
       if (child && child.exitCode === null) { child.kill(); await child.exited; }

@@ -5,7 +5,7 @@
  */
 
 import { Command, Option } from "commander";
-import type { OperationAdmission } from "../../../domain/ports/operation-admission.js";
+import type { LeasedOperationAdmission, OperationLease } from "../../../domain/ports/operation-admission.js";
 import { createSourceOperationAdmission } from "../../../infrastructure/database/source-operation-admission.js";
 import type { CommandResult } from "../command-result.js";
 import {
@@ -47,7 +47,7 @@ export interface GovernanceCommandOptions {
 }
 
 export interface GovernanceCommandDeps {
-  operationAdmission?: OperationAdmission;
+  operationAdmission?: LeasedOperationAdmission;
   dbPath?: string | undefined;
   writeEvents?: boolean | undefined;
   eventLogPath?: string | undefined;
@@ -122,7 +122,7 @@ export function createGovernanceCommand(): Command {
 
 export async function executeGovernanceCommand(options: GovernanceCommandOptions, deps: GovernanceCommandDeps = {}): Promise<CommandResult> {
   try {
-    const operation = () => prepareGovernanceCommand(options, deps);
+    const operation = (lease?: OperationLease) => prepareGovernanceCommand(options, deps, lease);
     const response = deps.writeEvents !== false && options.action !== "list" && options.action !== "show"
       ? await (deps.operationAdmission ?? createSourceOperationAdmission(deps.eventLogPath)).run(operation)
       : await operation();
@@ -130,7 +130,7 @@ export async function executeGovernanceCommand(options: GovernanceCommandOptions
   } catch (error) { return emitGovernanceError(options, "UNEXPECTED_ERROR", errorMessage(error), 2); }
 }
 
-async function prepareGovernanceCommand(options: GovernanceCommandOptions, deps: GovernanceCommandDeps): Promise<() => CommandResult> {
+async function prepareGovernanceCommand(options: GovernanceCommandOptions, deps: GovernanceCommandDeps, lease?: OperationLease): Promise<() => CommandResult> {
   const success = (data: unknown) => () => emitGovernanceSuccess(options, data);
   const failure = (code: string, message: string, exitCode: number) => () => emitGovernanceError(options, code, message, exitCode);
   const dbPath = deps.dbPath ?? getDefaultDbPath();
@@ -146,13 +146,13 @@ async function prepareGovernanceCommand(options: GovernanceCommandOptions, deps:
   try {
     const repo = new SqliteMemoryGovernanceRepository(db);
     if (deps.writeEvents !== false && options.action !== "list" && options.action !== "show") {
-      if ((await recoverPendingProjections(db, deps.eventLogPath)).pending) {
+      if ((await recoverPendingProjections(db, deps.eventLogPath, undefined, lease)).pending) {
         throw new Error("Projection recovery remains pending; retry the command");
       }
     }
     const service = new MemoryGovernanceService({
       repository: repo,
-      writeEvent: deps.writeEvents === false ? undefined : createProjectedEventWriter(db, deps.eventLogPath),
+      writeEvent: deps.writeEvents === false ? undefined : createProjectedEventWriter(db, deps.eventLogPath, lease),
     });
 
     if (options.action === "list") {
