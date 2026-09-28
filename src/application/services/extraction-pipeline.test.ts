@@ -88,7 +88,7 @@ describe("ExtractionPipeline", () => {
     dispose: async () => {}
   });
 
-  test("skips session if already extracted and force option is false (Idempotency)", async () => {
+  test("refuses an unbound legacy audit without force and preserves it", async () => {
     const session = Session.create({
       id: "session-123",
       projectPath: ProjectPath.fromDecoded("C:\\Projects\\nexus"),
@@ -120,8 +120,35 @@ describe("ExtractionPipeline", () => {
       testLogPath
     );
 
-    const result = await pipeline.extractFromSession("session-123", "nexus", { force: false });
-    expect(result.skippedSession).toBe(true);
+    const before = await logRepo.findById("session-123");
+    await expect(pipeline.extractFromSession("session-123", "nexus", { force: false })).rejects.toThrow("--force");
+    expect(await logRepo.findById("session-123")).toEqual(before);
+    expect(existsSync(testLogPath)).toBe(false);
+  });
+
+  test("audit identity binds project and redacted input while provider-only changes require force", async () => {
+    await sessionRepo.save(Session.create({id:"identity",projectPath:ProjectPath.fromDecoded("C:\\Projects\\synthetic"),startTime:new Date("2026-01-01T00:00:00Z")}));
+    await messageRepo.save(Message.create({id:"identity-message",role:"user",content:"synthetic private input",timestamp:new Date("2026-01-01T00:00:00Z")}),"identity");
+    let calls=0,mask="first mask";
+    const provider={providerId:"synthetic",modelName:"one",extract:async()=>{calls++;return [];}};
+    const redactor={redactText:()=>({text:mask,findings:[]}),redactJson:<T>(value:T)=>({value,findings:[]})};
+    const pipeline=new ExtractionPipeline(db,factRepo,logRepo,messageRepo,provider,undefined,testLogPath,redactor);
+    expect((await pipeline.extractFromSession("identity","synthetic")).skippedSession).toBe(false);
+    const first=await logRepo.findById("identity");
+    expect(first?.inputIdentity).toMatch(/^v1:[a-f0-9]{64}$/);
+    expect(first?.inputIdentity).not.toContain("private");
+    provider.modelName="two";
+    expect((await pipeline.extractFromSession("identity","synthetic")).skippedSession).toBe(true);
+    expect(calls).toBe(1);
+    expect(await logRepo.findById("identity")).toEqual(first);
+    await pipeline.extractFromSession("identity","synthetic",{force:true});expect(calls).toBe(2);
+    expect((await logRepo.findById("identity"))?.model).toBe("two");
+    mask="second mask";
+    expect((await pipeline.extractFromSession("identity","synthetic")).skippedSession).toBe(false);
+    const changed=await logRepo.findById("identity");
+    expect(changed?.inputIdentity).not.toBe(first?.inputIdentity);expect(calls).toBe(3);
+    await pipeline.extractFromSession("identity","other-project");expect(calls).toBe(4);
+    expect((await logRepo.findById("identity"))?.inputIdentity).not.toBe(changed?.inputIdentity);
   });
 
   test("processes session if already extracted but force is true", async () => {
@@ -237,8 +264,8 @@ describe("ExtractionPipeline", () => {
       if(retry==="existing-log") await logRepo.save({sessionId:session.id,mode:"manual",factsAdded:0,factsUpdated:0,factsSuperseded:0,factsSkipped:0,provider:"synthetic",model:"synthetic",tokensConsumed:0,extractedAt:new Date()});
       if(retry==="no-messages") db.exec("DELETE FROM messages_meta");
       if(retry==="empty-candidates") candidates=[];
-      const result=await pipeline.extractFromSession(session.id,"nexus");
-      expect(result.added).toBe(0);
+      if(retry==="existing-log") await expect(pipeline.extractFromSession(session.id,"nexus")).rejects.toThrow("--force");
+      else expect((await pipeline.extractFromSession(session.id,"nexus")).added).toBe(0);
       expect((await factRepo.findAll()).filter(f=>f.content==="retained extraction fact")).toHaveLength(1);
       expect(readFileSync(testLogPath,"utf8")).toBe(retained);
       expect(await isProjectionSourceCurrent(db,testLogPath)).toBe(true);

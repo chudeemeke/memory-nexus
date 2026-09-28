@@ -1,5 +1,58 @@
 # Memory resilience execution journal
 
+## 2026-09-28 - Persisted extraction audit input identity
+
+- Previous turn made progress at signed/pushed `04f29a8`; started clean. Full
+  E1-E10 goal and Q100.4.2.1 remain active. Fresh-process REDs proved both pipeline
+  and CLI skipped new messages on an old audit. CLI had its own existence-only
+  filter, bypassing pipeline validation entirely.
+- Audit rows now carry an optional versioned SHA-256 digest of session/project,
+  ordered raw message fields and redacted provider text. Matching input skips
+  across restart; changed input re-extracts. Project/redaction changes invalidate
+  identity; provider/model-only change retains existing --force semantics. Only the
+  digest is persisted, not another plaintext corpus copy.
+- Fresh schema and nullable migration constrain identity format. Legacy audit
+  values remain unchanged/unbound; no historical input is invented. Unbound audits
+  refuse without --force. Repository validates both writes and reads, including
+  corruption injected past SQLite constraints. Repeated migration, propagated
+  migration failure and bound/legacy round trips pass on real SQLite.
+- CLI sends every selected session through the pipeline and counts only actual
+  extractions as sessions_processed. Legacy refusal uses the established failure
+  exit2. The new test initially expected1; its failed control and both runtime
+  outputs are retained. Corrected assertion preserves exit semantics, error
+  guidance and unchanged legacy audit. A migration test now re-prepares SELECT
+  after DDL rather than reusing stale prepared-statement column metadata.
+- Final nine-file group223tests/951assertions per Windows Bun1.4.1 and pinned1.3.14,
+  zero compatibility failures;11 deliberate identity/force/CLI/storage/migration
+  faults detected. Production types, four changed-test strict compilations and
+  isolation pass. Eight existing CLI test type issues repaired; CLI fixtures now
+  use owned directories and explicit cleanup. Evidence:
+  `evidence/Q100.4.2.1-audit-identity.json`.
+- Repository and its test diagnostics100all4. Pipeline96.18/91.17/100/96.36,
+  schema94.66/84.21/100/94.28 and CLI98.3/92.85/100/98.23 (statements/branches/
+  functions/lines) remain below policy. Several tests also fail metric floors.
+  Schema diagnostics omit broader passing schema tests; child counters are not
+  aggregated. Updated declaration port emits no JavaScript, but applicability
+  review remains pending. No full quality/platform/review acceptance.
+- **Remaining real-process RED:** pause at the final admitted audit read, after
+  input revalidation; another process saves an additional message directly.
+  Extraction still commits one old-input fact and an audit. Digest truthfully binds
+  old input, but does not exclude the mutation interval. Retained diagnostic fails
+  the desired no-stale-commit assertion; this is not a passing operational gate.
+- **Next:** qualify an explicitly owned database write scope from final input read
+  through event/projection/audit completion, with source-before-database lock order.
+  Replay currently rejects db.inTransaction at fence capture and promotion; retain
+  rejection of arbitrary caller transactions and require explicit internal scope
+  authority for nesting. Prove direct-message contention, failure/rollback, retained
+  source recovery and process kill with Q100.4.2.6/.11. Another check alone cannot
+  close the race. Q100.4.2.1 remains active and unaccepted.
+- 496 files/two packages;268 acyclic items, one active;11.01GiB free. Synthetic
+  migrations only; owned fixtures/runtime cleaned. No live canonical schema/data,
+  provider/model/hook/replication/worktree or rejected cleanup changed. Historical
+  shared-temp12KiB authority remains under Q100.4.2.7. Three inboxes and hosted/
+  Linux/install/desktop/final review plus R03/P03/A03 remain; experiment follows
+  baseline acceptance.
+
 ## 2026-09-28 - Refused changed extraction input before candidate decisions
 
 - Previous turn made progress at signed/pushed `c67f1e4`; started clean. Full

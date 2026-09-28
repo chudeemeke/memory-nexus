@@ -874,6 +874,8 @@ export interface IBackfillStateRepository {
  */
 export interface ExtractionLogEntry {
   sessionId: string;
+  /** Versioned input digest; absent for legacy audits. */
+  inputIdentity?: string | undefined;
   mode: string;
   factsAdded: number;
   factsUpdated: number;

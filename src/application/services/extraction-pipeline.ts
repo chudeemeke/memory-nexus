@@ -13,6 +13,7 @@
  */
 
 import type { Database } from "bun:sqlite";
+import { createHash } from "node:crypto";
 import type { OperationLease, LeasedOperationAdmission } from "../../domain/ports/operation-admission.js";
 import { createSourceOperationAdmission } from "../../infrastructure/database/source-operation-admission.js";
 import { Fact } from "../../domain/entities/fact.js";
@@ -20,6 +21,7 @@ import type { IExtractionProvider } from "../../domain/ports/extraction.js";
 import type { IEmbeddingProvider } from "../../domain/ports/embedding.js";
 import type { IRedactor } from "../../domain/ports/redactor.js";
 import type {
+  ExtractionLogEntry,
   IFactRepository,
   IExtractionLogRepository,
   IMessageRepository,
@@ -67,36 +69,25 @@ export class ExtractionPipeline {
     if ((await recoverPendingProjections(this.db, this.eventLogPath)).pending) {
       throw new Error("Projection recovery remains pending; retry extraction");
     }
-    // 1. Idempotency Check
-    const existingLog = await this.logRepo.findById(sessionId);
-    if (existingLog && !options?.force) {
-      return {
-        skippedSession: true,
-        added: 0,
-        updated: 0,
-        superseded: 0,
-        skipped: 0
-      };
-    }
-
-    // 2. Load messages
     const messages = await this.messageRepo.findBySession(sessionId);
-    if (messages.length === 0) {
-      return {
-        skippedSession: false,
-        added: 0,
-        updated: 0,
-        superseded: 0,
-        skipped: 0
-      };
-    }
-
-    // Compare every ordered input field, including changes masked by redaction.
-    // This snapshot stays in memory and must never be included in error output.
-    const inputIdentity = (input: Message[]) => JSON.stringify(input.map(message => [
-      message.id, message.role, message.content, message.timestamp.toISOString(), message.toolUses,
-    ]));
+    // Bind raw input and redacted provider text; persist only a versioned digest.
+    const inputIdentity = (input: Message[]) => "v1:" + createHash("sha256").update(JSON.stringify([
+      "extraction-input-v1", sessionId, projectName,
+      input.map(message => [message.id, message.role, message.content, message.timestamp.toISOString(), message.toolUses]),
+      input.map(message => this.redactor.redactText(message.content).text),
+    ])).digest("hex");
     const inputSnapshot = inputIdentity(messages);
+    const auditMatches = (audit: ExtractionLogEntry | null): boolean => {
+      if (!audit || options?.force) return false;
+      if (!audit.inputIdentity) throw new Error("Extraction audit has no verified input identity; rerun extraction with --force");
+      return audit.inputIdentity === inputSnapshot;
+    };
+    if (auditMatches(await this.logRepo.findById(sessionId))) {
+      return { skippedSession: true, added: 0, updated: 0, superseded: 0, skipped: 0 };
+    }
+    if (messages.length === 0) {
+      return { skippedSession: false, added: 0, updated: 0, superseded: 0, skipped: 0 };
+    }
 
     // 3. Extract candidate facts via LLM
     const providerMessages = messages.map((message) => Message.create({
@@ -140,7 +131,7 @@ export class ExtractionPipeline {
       if (inputIdentity(await this.messageRepo.findBySession(sessionId)) !== inputSnapshot) {
         throw new Error("Session input changed during extraction computation; retry extraction");
       }
-      if (await this.logRepo.findById(sessionId) && !options?.force) {
+      if (auditMatches(await this.logRepo.findById(sessionId))) {
         return { skippedSession: true, added: 0, updated: 0, superseded: 0, skipped: 0 };
       }
       const currentFacts = (await this.factRepo.findByProject(projectName)).filter(f => f.supersededAt === null);
@@ -256,6 +247,7 @@ export class ExtractionPipeline {
       // 8. Record the extraction log
       await this.logRepo.save({
         sessionId,
+        inputIdentity: inputSnapshot,
         mode: "manual",
         factsAdded,
         factsUpdated,

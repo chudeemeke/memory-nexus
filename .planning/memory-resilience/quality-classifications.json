@@ -1394,7 +1394,7 @@
     {
       "path": "src/application/services/extraction-pipeline.test.ts",
       "package": "package.json",
-      "sourceHash": "cabf4263afcd9289965dc4ea7b2e751d1a9cbc2cde0d3995f01c6470ec593b4f",
+      "sourceHash": "1355531e755d34fe0a02858521681ff52cac474a82061bda004b43bb6ad48dbb",
       "tier": "S",
       "rationale": "Inspected filesystem import and call context: unlinkSync(testLogPath). This test driver performs actual file/directory deletion; numeric applicability and ownership proof remain subject to individual review.",
       "applicability": {
@@ -1403,33 +1403,33 @@
       },
       "decisionStatus": "proposed - independent review pending",
       "inspection": {
-        "sourceRevision": "c67f1e4 + current source hash",
-        "anchor": "Q100.4.2.1 input validation",
-        "scope": "Pre-decision boundary only; persistent audit/input mutation interval unresolved"
+        "sourceRevision": "04f29a8 + current source hash",
+        "anchor": "Q100.4.2.1 audit identity",
+        "scope": "Scoped behavior and diagnostic; late message interval remains open"
       },
       "metricApplicability": {
-        "status": "Scoped diagnostic; native child counters unaggregated and full quality pending",
-        "sourceHash": "cabf4263afcd9289965dc4ea7b2e751d1a9cbc2cde0d3995f01c6470ec593b4f",
-        "evidence": ".planning/memory-resilience/evidence/Q100.4.2.1-input-validation.json",
+        "status": "Scoped diagnostic; child counters unaggregated and full quality pending",
+        "sourceHash": "1355531e755d34fe0a02858521681ff52cac474a82061bda004b43bb6ad48dbb",
+        "evidence": ".planning/memory-resilience/evidence/Q100.4.2.1-audit-identity.json",
         "metrics": {
           "statements": {
-            "observedCounterTotal": 351,
-            "observedPercent": 98.57,
+            "observedCounterTotal": 385,
+            "observedPercent": 98.44,
             "proposal": "measure - completeness unverified"
           },
           "branches": {
-            "observedCounterTotal": 24,
-            "observedPercent": 91.66,
+            "observedCounterTotal": 26,
+            "observedPercent": 92.3,
             "proposal": "measure - completeness unverified"
           },
           "functions": {
-            "observedCounterTotal": 60,
-            "observedPercent": 80,
+            "observedCounterTotal": 64,
+            "observedPercent": 79.68,
             "proposal": "measure - completeness unverified"
           },
           "lines": {
-            "observedCounterTotal": 324,
-            "observedPercent": 98.45,
+            "observedCounterTotal": 349,
+            "observedPercent": 98.56,
             "proposal": "measure - completeness unverified"
           }
         }
@@ -1438,7 +1438,7 @@
     {
       "path": "src/application/services/extraction-pipeline.ts",
       "package": "package.json",
-      "sourceHash": "2049d1c4e16abf781961a8a97ea6e8baa12bac45a1ab998f0607296edd663458",
+      "sourceHash": "1256ad5d2817f083d4af4e393f1a15bbbe93e19b3c34102a2bf51e2c27166c3c",
       "tier": "S",
       "rationale": "Redacts messages before provider egress, redacts candidates and persists extraction outcomes.",
       "applicability": {
@@ -1447,33 +1447,33 @@
       },
       "decisionStatus": "proposed - independent review pending",
       "inspection": {
-        "sourceRevision": "c67f1e4 + current source hash",
-        "anchor": "Q100.4.2.1 input validation",
-        "scope": "Pre-decision boundary only; persistent audit/input mutation interval unresolved"
+        "sourceRevision": "04f29a8 + current source hash",
+        "anchor": "Q100.4.2.1 audit identity",
+        "scope": "Scoped behavior and diagnostic; late message interval remains open"
       },
       "metricApplicability": {
-        "status": "Scoped diagnostic; native child counters unaggregated and full quality pending",
-        "sourceHash": "2049d1c4e16abf781961a8a97ea6e8baa12bac45a1ab998f0607296edd663458",
-        "evidence": ".planning/memory-resilience/evidence/Q100.4.2.1-input-validation.json",
+        "status": "Scoped diagnostic; child counters unaggregated and full quality pending",
+        "sourceHash": "1256ad5d2817f083d4af4e393f1a15bbbe93e19b3c34102a2bf51e2c27166c3c",
+        "evidence": ".planning/memory-resilience/evidence/Q100.4.2.1-audit-identity.json",
         "metrics": {
           "statements": {
-            "observedCounterTotal": 125,
-            "observedPercent": 96,
+            "observedCounterTotal": 131,
+            "observedPercent": 96.18,
             "proposal": "measure - completeness unverified"
           },
           "branches": {
-            "observedCounterTotal": 66,
-            "observedPercent": 90.9,
+            "observedCounterTotal": 68,
+            "observedPercent": 91.17,
             "proposal": "measure - completeness unverified"
           },
           "functions": {
-            "observedCounterTotal": 24,
+            "observedCounterTotal": 26,
             "observedPercent": 100,
             "proposal": "measure - completeness unverified"
           },
           "lines": {
-            "observedCounterTotal": 105,
-            "observedPercent": 96.19,
+            "observedCounterTotal": 110,
+            "observedPercent": 96.36,
             "proposal": "measure - completeness unverified"
           }
         }
@@ -4843,7 +4843,7 @@
     {
       "path": "src/domain/ports/repositories.ts",
       "package": "package.json",
-      "sourceHash": "4c54e5314010c6330055de22263d49751dd6f38c086a4e2eda3765b7fd6e8333",
+      "sourceHash": "d2d97f9829bbc49a8fd298abffb030cd33edaeae64d5858fbfa73127a7215afe",
       "tier": "B",
       "rationale": "Static inspection emits no local JavaScript beyond a module marker. Declaration-only applicability remains an explicit independent-review decision.",
       "applicability": {
@@ -4853,9 +4853,9 @@
       "decisionStatus": "proposed - independent review pending",
       "metricApplicability": {
         "status": "proposed - independent review pending",
-        "evidence": ".planning/memory-resilience/evidence/B04-applicability-probe.json",
-        "sourceHash": "4c54e5314010c6330055de22263d49751dd6f38c086a4e2eda3765b7fd6e8333",
-        "disposition": "No emitted local runtime computation and no counters observed; four zero-applicability judgments proposed individually, pending independent review. No percentage claimed.",
+        "evidence": ".planning/memory-resilience/evidence/Q100.4.2.1-audit-identity.json",
+        "sourceHash": "d2d97f9829bbc49a8fd298abffb030cd33edaeae64d5858fbfa73127a7215afe",
+        "disposition": "Current transpilation emits no JavaScript; declaration-only applicability remains proposed pending independent review. No measured percentage claimed.",
         "metrics": {
           "statements": {
             "observedCounterTotal": 0,
@@ -6857,7 +6857,7 @@
     {
       "path": "src/infrastructure/database/repositories/extraction-log-repository.test.ts",
       "package": "package.json",
-      "sourceHash": "d64f55ba07d2391d1d2c8b7bc09e769697326083168f89345d1141267531c9c8",
+      "sourceHash": "3bf9a3059c9ce12efcf6187fd44251d203dfb9a1f46808cdd56a70c14a2c866f",
       "tier": "A",
       "rationale": "Uses real SQLite with explicitly in-memory database configuration and registered close/closeDatabase teardown; fixture SQL is bounded to the test handle. Production repository/schema risk remains separate.",
       "applicability": {
@@ -6866,31 +6866,33 @@
       },
       "decisionStatus": "proposed - independent review pending",
       "inspection": {
-        "sourceRevision": "12c188bb9cad480efc6eb87ce1760b9dc40bbb69",
-        "anchor": "Emitted-runtime import/call/constructor inventory and targeted fixture/provider/CLI source boundaries",
-        "runtimeHash": "9eec68263427cd05fe0bce8d72903d1d0579d749941f35add1fac2f1d6ed6258",
-        "scope": "Reading aid plus targeted source inspection; not sound effect analysis, complete assertion review, execution evidence or metric applicability approval."
+        "sourceRevision": "04f29a8 + current source hash",
+        "anchor": "Q100.4.2.1 audit identity",
+        "scope": "Scoped behavior and diagnostic; late message interval remains open"
       },
       "metricApplicability": {
-        "status": "proposed - independent review pending",
-        "evidence": ".planning/memory-resilience/evidence/B04-applicability-probe.json",
-        "sourceHash": "d64f55ba07d2391d1d2c8b7bc09e769697326083168f89345d1141267531c9c8",
-        "disposition": "Measure every positive denominator; individually review zero branch/function denominators against runtime syntax. Observed counts do not prove instrumentation completeness.",
+        "status": "Scoped diagnostic; child counters unaggregated and full quality pending",
+        "sourceHash": "3bf9a3059c9ce12efcf6187fd44251d203dfb9a1f46808cdd56a70c14a2c866f",
+        "evidence": ".planning/memory-resilience/evidence/Q100.4.2.1-audit-identity.json",
         "metrics": {
           "statements": {
-            "observedCounterTotal": 45,
+            "observedCounterTotal": 86,
+            "observedPercent": 100,
             "proposal": "measure - completeness unverified"
           },
           "branches": {
-            "observedCounterTotal": 0,
-            "proposal": "zero requires individual review"
+            "observedCounterTotal": 2,
+            "observedPercent": 100,
+            "proposal": "measure - completeness unverified"
           },
           "functions": {
-            "observedCounterTotal": 10,
+            "observedCounterTotal": 17,
+            "observedPercent": 100,
             "proposal": "measure - completeness unverified"
           },
           "lines": {
-            "observedCounterTotal": 45,
+            "observedCounterTotal": 77,
+            "observedPercent": 100,
             "proposal": "measure - completeness unverified"
           }
         }
@@ -6899,7 +6901,7 @@
     {
       "path": "src/infrastructure/database/repositories/extraction-log-repository.ts",
       "package": "package.json",
-      "sourceHash": "08ec06dbb8c2279e458409b81723b952db1903a83ad4af8689420ae38f9c1e84",
+      "sourceHash": "e9d65a8ec963ca8f2effd85579a502da5d7448311994828d1ff229f1c74c0425",
       "tier": "S",
       "rationale": "Inspected SQLite INSERT/upsert statement persists extraction_log records. This establishes the data-integrity tier; transaction, conflict and deletion correctness remain separate verification obligations.",
       "applicability": {
@@ -6908,30 +6910,33 @@
       },
       "decisionStatus": "proposed - independent review pending",
       "inspection": {
-        "sourceRevision": "257c7e6 + current source hash",
-        "anchor": "record repository scoped statement disposal",
-        "scope": "Current source, native behavior and targeted disposal/persistence decision checks; full tier/applicability review remains pending."
+        "sourceRevision": "04f29a8 + current source hash",
+        "anchor": "Q100.4.2.1 audit identity",
+        "scope": "Scoped behavior and diagnostic; late message interval remains open"
       },
       "metricApplicability": {
-        "status": "diagnostic - B05 and independent review pending",
-        "evidence": ".planning/memory-resilience/evidence/B11.74.3-records.json",
-        "sourceHash": "08ec06dbb8c2279e458409b81723b952db1903a83ad4af8689420ae38f9c1e84",
-        "disposition": "Measure every denominator. Optional-chain completeness and zero driver branches still require B05 and individual review; no exclusion.",
+        "status": "Scoped diagnostic; child counters unaggregated and full quality pending",
+        "sourceHash": "e9d65a8ec963ca8f2effd85579a502da5d7448311994828d1ff229f1c74c0425",
+        "evidence": ".planning/memory-resilience/evidence/Q100.4.2.1-audit-identity.json",
         "metrics": {
-          "lines": {
-            "observedCounterTotal": 11,
-            "proposal": "measure - completeness unverified"
-          },
-          "functions": {
-            "observedCounterTotal": 7,
-            "proposal": "measure - completeness unverified"
-          },
           "statements": {
-            "observedCounterTotal": 13,
+            "observedCounterTotal": 18,
+            "observedPercent": 100,
             "proposal": "measure - completeness unverified"
           },
           "branches": {
-            "observedCounterTotal": 2,
+            "observedCounterTotal": 11,
+            "observedPercent": 100,
+            "proposal": "measure - completeness unverified"
+          },
+          "functions": {
+            "observedCounterTotal": 8,
+            "observedPercent": 100,
+            "proposal": "measure - completeness unverified"
+          },
+          "lines": {
+            "observedCounterTotal": 16,
+            "observedPercent": 100,
             "proposal": "measure - completeness unverified"
           }
         }
@@ -7868,7 +7873,7 @@
     {
       "path": "src/infrastructure/database/schema.ts",
       "package": "package.json",
-      "sourceHash": "6ac3ff587831a9a132deb27825db8fa8cd42f5f089cde2d0c7abe41ffe0907f1",
+      "sourceHash": "0539bbbb796f63c2412ca11772d712e23fdd2415f6162d07bd6f592688e2e318",
       "tier": "S",
       "rationale": "Creates and drops database objects and defines schema/integrity constraints.",
       "applicability": {
@@ -7877,14 +7882,36 @@
       },
       "decisionStatus": "proposed - independent review pending",
       "inspection": {
-        "sourceRevision": "27a0eb9 + current source hash",
-        "anchor": "Q100.3.1 source cutoff and atomic receipt",
-        "scope": "Paired native source/receipt proof; semantic identity, actual caller recovery and full quality/platform/review remain mandatory."
+        "sourceRevision": "04f29a8 + current source hash",
+        "anchor": "Q100.4.2.1 audit identity",
+        "scope": "Scoped behavior and diagnostic; late message interval remains open"
       },
       "metricApplicability": {
-        "status": "changed source - complete numeric applicability pending Q100.4/Q019/B11.74.7",
-        "sourceHash": "6ac3ff587831a9a132deb27825db8fa8cd42f5f089cde2d0c7abe41ffe0907f1",
-        "evidence": ".planning/memory-resilience/evidence/Q100.3.1.json"
+        "status": "Scoped diagnostic; child counters unaggregated and full quality pending",
+        "sourceHash": "0539bbbb796f63c2412ca11772d712e23fdd2415f6162d07bd6f592688e2e318",
+        "evidence": ".planning/memory-resilience/evidence/Q100.4.2.1-audit-identity.json",
+        "metrics": {
+          "statements": {
+            "observedCounterTotal": 75,
+            "observedPercent": 94.66,
+            "proposal": "measure - completeness unverified"
+          },
+          "branches": {
+            "observedCounterTotal": 19,
+            "observedPercent": 84.21,
+            "proposal": "measure - completeness unverified"
+          },
+          "functions": {
+            "observedCounterTotal": 7,
+            "observedPercent": 100,
+            "proposal": "measure - completeness unverified"
+          },
+          "lines": {
+            "observedCounterTotal": 70,
+            "observedPercent": 94.28,
+            "proposal": "measure - completeness unverified"
+          }
+        }
       }
     },
     {
@@ -12422,7 +12449,7 @@
     {
       "path": "src/presentation/cli/commands/extract.test.ts",
       "package": "package.json",
-      "sourceHash": "caeef88a1e20b615311b798dcb5bfc3ead4239cd0f04b8a13d0b3f811e255f74",
+      "sourceHash": "ead6cd0d841ac9aaf67e6e437e0fc5e9631937b27849a7b8a668909e7c190f97",
       "tier": "S",
       "rationale": "Creates file database/config/data fixtures and silently catches close/removal errors. B11.68 owns repair.",
       "applicability": {
@@ -12431,31 +12458,33 @@
       },
       "decisionStatus": "proposed - independent review pending",
       "inspection": {
-        "sourceRevision": "12c188bb9cad480efc6eb87ce1760b9dc40bbb69",
-        "anchor": "Emitted-runtime import/call/constructor inventory and targeted fixture/provider/CLI source boundaries",
-        "runtimeHash": "5af8eabee4b8642ecfcbd8e5816e98c3ea0380d236ad9eaa6e19d168e65442f7",
-        "scope": "Reading aid plus targeted source inspection; not sound effect analysis, complete assertion review, execution evidence or metric applicability approval."
+        "sourceRevision": "04f29a8 + current source hash",
+        "anchor": "Q100.4.2.1 audit identity",
+        "scope": "Scoped behavior and diagnostic; late message interval remains open"
       },
       "metricApplicability": {
-        "status": "proposed - independent review pending",
-        "evidence": ".planning/memory-resilience/evidence/B04-applicability-probe.json",
-        "sourceHash": "caeef88a1e20b615311b798dcb5bfc3ead4239cd0f04b8a13d0b3f811e255f74",
-        "disposition": "Measure every positive denominator; individually review zero branch/function denominators against runtime syntax. Observed counts do not prove instrumentation completeness.",
+        "status": "Scoped diagnostic; child counters unaggregated and full quality pending",
+        "sourceHash": "ead6cd0d841ac9aaf67e6e437e0fc5e9631937b27849a7b8a668909e7c190f97",
+        "evidence": ".planning/memory-resilience/evidence/Q100.4.2.1-audit-identity.json",
         "metrics": {
           "statements": {
-            "observedCounterTotal": 354,
+            "observedCounterTotal": 355,
+            "observedPercent": 95.21,
             "proposal": "measure - completeness unverified"
           },
           "branches": {
             "observedCounterTotal": 16,
+            "observedPercent": 56.25,
             "proposal": "measure - completeness unverified"
           },
           "functions": {
             "observedCounterTotal": 71,
+            "observedPercent": 83.09,
             "proposal": "measure - completeness unverified"
           },
           "lines": {
             "observedCounterTotal": 325,
+            "observedPercent": 95.69,
             "proposal": "measure - completeness unverified"
           }
         }
@@ -12464,7 +12493,7 @@
     {
       "path": "src/presentation/cli/commands/extract.ts",
       "package": "package.json",
-      "sourceHash": "a40fcf2dc58f1c7009b316a69a8e7790b0308b9890f2496566d0b7389c059970",
+      "sourceHash": "39d26f41ee2494d1c6995b34063b5a03710f2c98c8673a1387142ca463b68af4",
       "tier": "S",
       "rationale": "Initializes storage and dispatches provider-backed extraction that can persist memory.",
       "applicability": {
@@ -12473,30 +12502,33 @@
       },
       "decisionStatus": "proposed - independent review pending",
       "inspection": {
-        "sourceRevision": "8719e3c36b2c73ca11f8ee4879c9f17aed4f2849",
-        "anchor": "initializeDatabase / extraction dispatch",
-        "scope": "positive critical boundary establishes highest tier; not full correctness acceptance"
+        "sourceRevision": "04f29a8 + current source hash",
+        "anchor": "Q100.4.2.1 audit identity",
+        "scope": "Scoped behavior and diagnostic; late message interval remains open"
       },
       "metricApplicability": {
-        "status": "proposed - independent review pending",
-        "evidence": ".planning/memory-resilience/evidence/B04-applicability-probe.json",
-        "sourceHash": "a40fcf2dc58f1c7009b316a69a8e7790b0308b9890f2496566d0b7389c059970",
-        "disposition": "Measure every positive denominator; individually review zero branch/function denominators against runtime syntax. Observed counts do not prove instrumentation completeness. Optional-chain syntax is present; synthetic evidence shows current instrumentation omits its decision counters. B05.1 owns source-mapped branch proof before numeric acceptance.",
+        "status": "Scoped diagnostic; child counters unaggregated and full quality pending",
+        "sourceHash": "39d26f41ee2494d1c6995b34063b5a03710f2c98c8673a1387142ca463b68af4",
+        "evidence": ".planning/memory-resilience/evidence/Q100.4.2.1-audit-identity.json",
         "metrics": {
           "statements": {
-            "observedCounterTotal": 119,
+            "observedCounterTotal": 118,
+            "observedPercent": 98.3,
             "proposal": "measure - completeness unverified"
           },
           "branches": {
-            "observedCounterTotal": 58,
+            "observedCounterTotal": 56,
+            "observedPercent": 92.85,
             "proposal": "measure - completeness unverified"
           },
           "functions": {
             "observedCounterTotal": 8,
+            "observedPercent": 100,
             "proposal": "measure - completeness unverified"
           },
           "lines": {
-            "observedCounterTotal": 115,
+            "observedCounterTotal": 113,
+            "observedPercent": 98.23,
             "proposal": "measure - completeness unverified"
           }
         }
@@ -20090,14 +20122,14 @@
       "decisionStatus": "proposed - independent review pending",
       "sourceHash": "e44ae7b4dc7e6ae2f5a5b0a8b95a11b9292429276eebe61a9190626ac0209445",
       "inspection": {
-        "sourceRevision": "c67f1e4 + current source hash",
-        "anchor": "Q100.4.2.1 input validation",
-        "scope": "Pre-decision boundary only; persistent audit/input mutation interval unresolved"
+        "sourceRevision": "04f29a8 + current source hash",
+        "anchor": "Q100.4.2.1 audit identity",
+        "scope": "Scoped behavior and diagnostic; late message interval remains open"
       },
       "metricApplicability": {
-        "status": "Scoped diagnostic; native child counters unaggregated and full quality pending",
+        "status": "Scoped diagnostic; child counters unaggregated and full quality pending",
         "sourceHash": "e44ae7b4dc7e6ae2f5a5b0a8b95a11b9292429276eebe61a9190626ac0209445",
-        "evidence": ".planning/memory-resilience/evidence/Q100.4.2.1-input-validation.json",
+        "evidence": ".planning/memory-resilience/evidence/Q100.4.2.1-audit-identity.json",
         "metrics": {
           "statements": {
             "observedCounterTotal": 96,
@@ -20116,6 +20148,50 @@
           },
           "lines": {
             "observedCounterTotal": 73,
+            "observedPercent": 100,
+            "proposal": "measure - completeness unverified"
+          }
+        }
+      }
+    },
+    {
+      "path": "tests/infrastructure/database/extraction-audit-identity.test.ts",
+      "package": "package.json",
+      "tier": "S",
+      "rationale": "Native extraction audit/input identity and CLI persistence integrity tests.",
+      "applicability": {
+        "mode": "measure",
+        "reason": "Executable native process tests; child counters require aggregation; no exclusion approved."
+      },
+      "decisionStatus": "proposed - independent review pending",
+      "sourceHash": "93b84e84d98d7a58ed8c89531460157535959141643ad0c901e899422a85ca24",
+      "inspection": {
+        "sourceRevision": "04f29a8 + current source hash",
+        "anchor": "Q100.4.2.1 audit identity",
+        "scope": "Scoped behavior and diagnostic; late message interval remains open"
+      },
+      "metricApplicability": {
+        "status": "Scoped diagnostic; child counters unaggregated and full quality pending",
+        "sourceHash": "93b84e84d98d7a58ed8c89531460157535959141643ad0c901e899422a85ca24",
+        "evidence": ".planning/memory-resilience/evidence/Q100.4.2.1-audit-identity.json",
+        "metrics": {
+          "statements": {
+            "observedCounterTotal": 48,
+            "observedPercent": 95.83,
+            "proposal": "measure - completeness unverified"
+          },
+          "branches": {
+            "observedCounterTotal": 6,
+            "observedPercent": 83.33,
+            "proposal": "measure - completeness unverified"
+          },
+          "functions": {
+            "observedCounterTotal": 3,
+            "observedPercent": 100,
+            "proposal": "measure - completeness unverified"
+          },
+          "lines": {
+            "observedCounterTotal": 29,
             "observedPercent": 100,
             "proposal": "measure - completeness unverified"
           }

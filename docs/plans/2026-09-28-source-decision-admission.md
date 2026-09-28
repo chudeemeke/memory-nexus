@@ -266,3 +266,30 @@ input, force and provider/redaction semantics using synthetic databases only.
 The post-recheck direct message-write interval remains a separate required seam;
 a stored digest alone does not exclude concurrent mutation or make event/audit
 writes crash-atomic. Q100.4.2.1 remains active until all its outcomes are proved.
+
+Durable audit slice: nullable `input_identity` on extraction audit rows, containing
+only a versioned SHA-256 digest over session/project and ordered raw plus redacted
+provider-message fields. Existing rows remain unbound; do not infer old input from
+timestamps or current messages. Without `--force`, an unbound audit refuses with
+explicit guidance. A matching bound audit skips; changed input recomputes. Preserve
+the established requirement to use force for a provider/model-only re-extraction.
+Read current input before both audit shortcuts. CLI must route every selected
+session through that decision instead of filtering by audit existence. Validate
+identity on repository write/read and migrate synthetic old schemas idempotently,
+preserving audit bytes/values and propagating migration failure. No live database
+migration is performed by this development checkpoint.
+
+Audit identity is implemented and proved through fresh pipeline and CLI processes,
+with nullable migration, storage validation and explicit legacy --force refusal.
+223 tests/951 assertions pass on each Windows runtime;11 faults detected. Retained
+evidence is `evidence/Q100.4.2.1-audit-identity.json` in the execution directory.
+Full module/package/platform quality and independent review are still incomplete.
+
+A new real-process RED confirms the post-check gap: insert a message while the
+extractor holds source admission at its final audit read, after input validation;
+old-input events/audit still commit. Next qualify an owned database write scope,
+acquired after source admission and retained through mutation completion. Replay's
+current rejection of caller transactions must remain for arbitrary callers; any
+internal nested transaction path needs explicit authority and failure/recovery
+proof. Do not weaken those guards or add repeated optimistic checks as a substitute
+for excluding the competing writer. Coordinate this boundary with Q100.4.2.6/.11.

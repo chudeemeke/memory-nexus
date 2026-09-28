@@ -13,6 +13,7 @@ import type {
 
 interface ExtractionLogRow {
   session_id: string;
+  input_identity: string | null;
   mode: string;
   facts_added: number;
   facts_updated: number;
@@ -36,11 +37,12 @@ export class SqliteExtractionLogRepository implements IExtractionLogRepository {
   }
 
   async save(entry: ExtractionLogEntry): Promise<void> {
+    assertInputIdentity(entry.inputIdentity);
     using statement = this.db.prepare(`
         INSERT OR REPLACE INTO extraction_log (
           session_id, mode, facts_added, facts_updated, facts_superseded,
-          facts_skipped, provider, model, tokens_consumed, extracted_at
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+          facts_skipped, provider, model, tokens_consumed, extracted_at, input_identity
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `);
     statement.run(
       entry.sessionId,
@@ -52,7 +54,8 @@ export class SqliteExtractionLogRepository implements IExtractionLogRepository {
       entry.provider,
       entry.model,
       entry.tokensConsumed,
-      entry.extractedAt.toISOString()
+      entry.extractedAt.toISOString(),
+      entry.inputIdentity ?? null
     );
   }
 
@@ -68,8 +71,11 @@ export class SqliteExtractionLogRepository implements IExtractionLogRepository {
   }
 
   private toEntry(row: ExtractionLogRow): ExtractionLogEntry {
+    const inputIdentity = row.input_identity ?? undefined;
+    assertInputIdentity(inputIdentity);
     return {
       sessionId: row.session_id,
+      inputIdentity,
       mode: row.mode,
       factsAdded: row.facts_added,
       factsUpdated: row.facts_updated,
@@ -80,5 +86,11 @@ export class SqliteExtractionLogRepository implements IExtractionLogRepository {
       tokensConsumed: row.tokens_consumed,
       extractedAt: new Date(row.extracted_at)
     };
+  }
+}
+
+function assertInputIdentity(identity: string | undefined): void {
+  if (identity !== undefined && (typeof identity !== "string" || !/^v1:[a-f0-9]{64}$/.test(identity))) {
+    throw new Error("Invalid or unsupported extraction input identity");
   }
 }

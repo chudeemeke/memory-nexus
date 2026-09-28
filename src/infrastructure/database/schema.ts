@@ -434,7 +434,8 @@ CREATE TABLE IF NOT EXISTS extraction_log (
     provider TEXT NOT NULL,
     model TEXT NOT NULL,
     tokens_consumed INTEGER DEFAULT 0,
-    extracted_at TEXT NOT NULL
+    extracted_at TEXT NOT NULL,
+    input_identity TEXT CHECK (input_identity IS NULL OR (length(input_identity) = 67 AND substr(input_identity, 1, 3) = 'v1:' AND substr(input_identity, 4) NOT GLOB '*[^0-9a-f]*'))
 );
 `;
 
@@ -843,6 +844,13 @@ export function createSchema(db: Database, options?: SchemaOptions): void {
     for (const sql of SCHEMA_SQL) {
         if (sql === SESSIONS_FTS_TRIGGERS) ensureSessionsFtsTriggers(db);
         else db.exec(sql);
+    }
+
+    // Existing extraction audits stay unbound; never invent historical input identity.
+    using extractionStatement = db.prepare("PRAGMA table_info(extraction_log)");
+    const extractionColumns = extractionStatement.all() as Array<{ name: string }>;
+    if (!extractionColumns.some(column => column.name === "input_identity")) {
+        db.exec(`ALTER TABLE extraction_log ADD COLUMN input_identity TEXT CHECK (input_identity IS NULL OR (length(input_identity) = 67 AND substr(input_identity, 1, 3) = 'v1:' AND substr(input_identity, 4) NOT GLOB '*[^0-9a-f]*'))`);
     }
 
     // Migration: add model_name column to embedding_state if not present
