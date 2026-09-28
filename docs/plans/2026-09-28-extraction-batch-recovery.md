@@ -96,3 +96,53 @@ non-plain objects must refuse instead of being silently changed by serialization
 The descriptor permits at most64levels of JSON object/array nesting from its root;
 deeper input refuses before serialization. Overall record/corpus sizing and scaling
 remain Q100.4.2.13 obligations before integration.
+
+## Source/replay implementation contract
+
+The wrapper has exactly one `extractionBatch` payload, `projection/add`, project
+visibility, matching project/completion timestamps and the explicit
+`memory-extraction` / `extraction-batch-v1` provenance with the session source ID.
+Canonical readers retain this wrapper; Fact compatibility readers expose its
+validated effects. No effect ID may equal its wrapper ID or collide with another
+source identity. Exact duplicate wrappers may replay idempotently.
+
+Sort complete source records using the existing ordering, then expand each batch
+contiguously in descriptor order. Never globally re-sort the expanded effects.
+Generated effects carry wrapper/source linkage and inherit its consent/privacy;
+stricter privacy markers on an effect cannot be weakened. Validate every effect
+before staging begins. Existing source snapshots, admission, conflict fences,
+staging and atomic promotion remain in force.
+
+For effects actually expanded from a validated batch, derived persona/graph
+scope must match the wrapper and governance must preserve consent, privacy,
+expiry and source linkage. Existing default governance must not silently turn a
+denied or revoked batch into permitted derived records. This is a batch-specific
+boundary; ordinary event compatibility remains covered separately.
+
+## Reader checkpoint and unresolved activation boundary
+
+Source/replay slice Q100.4.2.2.2.2 remains active. Strict wrapper admission,
+ordered expansion, cross-record identities, canonical/Fact readers, recursive
+secret remediation and actual owned local Git transfer have passing synthetic
+tests. New derived persona/graph records inherit batch governance. Existing shared
+graph identities do not: a retained RED shows denied batch consent replaced by
+the prior edge's `not_required` policy, with missing batch provenance. Resolve
+shared identity/content/scope semantics and conservative governance merging;
+check persona analogues before accepting this slice.
+
+The proposed unsupported-consumer refusal was disproved by executing archived
+`v4.0.3` source: it accepts the wrapper, clears projections, and ignores batch
+contents. This is tagged-source evidence with a current synthetic schema, not
+registry-installed proof. A version field or sidecar declaration cannot protect
+against code that ignores it. Before batch emission, establish an enforceable
+upgrade/source-access boundary covering installed CLI, hooks, desktop readers,
+and rollback. Do not silently introduce a source-authority cutover to solve this.
+Audit/pipeline emission remains unchanged; native interrupted-chain recovery is
+still open. R03/P03/A03 retain their existing owner decisions.
+
+Progress evidence: `.planning/memory-resilience/evidence/Q100.4.2.2.2.2-reader.json`.
+Each Windows runtime passed515tests/3502assertions across20files;21targeted faults
+were detected. This includes corrected supplemental paths after Bun silently
+ignored two nonexistent requested tests. Narrow helper/test diagnostics reach
+100%all4; surrounding modules, complete quality, platforms and final review remain
+unaccepted. These results do not activate the format or close baseline work.

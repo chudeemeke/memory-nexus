@@ -39,6 +39,7 @@ import { assertAutomaticProjectionReplay } from "./projection-state.js";
 import type { OperationLease, DatabaseWriteLease } from "../../domain/ports/operation-admission.js";
 import { runDatabaseWrite } from "./database-write-admission.js";
 import { createSourceOperationAdmission } from "./source-operation-admission.js";
+import { expandExtractionBatch } from "./extraction-batch-events.js";
 
 export interface InvalidEventLogLine {
   filePath: string;
@@ -66,6 +67,7 @@ interface ReadOptions {
 
 interface ProjectionContext {
   db: Database;
+  batchEffects: ReadonlySet<string>;
 }
 
 const FACT_EVENT_KINDS: readonly MemoryEventKind[] = [
@@ -126,9 +128,15 @@ export async function readProjectionEventsWithReport(logPath?: string, eventsDir
       const identity = isObject(record) && record.schemaVersion === 2 ? event.integrity.envelopeHash
         : MemoryEventEnvelope.create({ ...event.toJSON(), machineId: "legacy", sequence: legacySequence(record as Record<string, unknown>, 1),
           occurredAt: event.occurredAt, observedAt: event.observedAt }).integrity.envelopeHash;
-      const existing = identities.get(event.eventId);
-      if (existing !== undefined && existing !== identity) throw new Error("Conflicting event identity");
-      identities.set(event.eventId, identity); events.push(event);
+      const effects = expandExtractionBatch(event);
+      for (const effect of effects ?? []) assertProjectionPayload(effect);
+      for (const member of [event, ...effects ?? []]) {
+        const memberIdentity = member === event ? identity : member.integrity.envelopeHash;
+        const existing = identities.get(member.eventId);
+        if (existing !== undefined && existing !== memberIdentity) throw new Error("Conflicting event identity");
+        identities.set(member.eventId, memberIdentity);
+      }
+      events.push(event);
     }
     catch { invalidEvents.push({ filePath, lineNumber, line: "", reason: `Invalid event log record at line ${lineNumber} in ${filePath}` }); }
   });
@@ -151,14 +159,22 @@ export async function verifyProjectionRebuild(logPath?: string, eventsDir?: stri
  */
 export async function* readEvents(logPath?: string, eventsDir?: string): AsyncGenerator<Fact, void, unknown> {
   const report = await collectMemoryEvents(logPath, eventsDir, { reportInvalidToConsole: true });
-  for (const event of report.events) {
-    if (!isFactEventKind(event.kind)) {
-      continue;
-    }
+  for (const record of report.events) {
+    let expanded: MemoryEventEnvelope[];
     try {
-      yield memoryEventToFact(event);
-    } catch (error) {
-      console.error("Skipping malformed event log line:", error);
+      const effects = expandExtractionBatch(record);
+      if (effects !== null) for (const effect of effects) assertProjectionPayload(effect);
+      expanded = effects ?? [record];
+    } catch (error) { console.error("Skipping malformed extraction batch:", error); continue; }
+    for (const event of expanded) {
+      if (!isFactEventKind(event.kind)) {
+        continue;
+      }
+      try {
+        yield memoryEventToFact(event);
+      } catch (error) {
+        console.error("Skipping malformed event log line:", error);
+      }
     }
   }
 }
@@ -216,10 +232,14 @@ async function withProjectionStage<T>(report: ProjectionSourceReadReport,
   try {
     let replay: ProjectionReplayResult;
     try {
-      for (const event of report.events) {
+      const expanded: MemoryEventEnvelope[] = [], batchEffects = new Set<string>();
+      for (const event of sortMemoryEvents(report.events)) {
         assertProjectionPayload(event);
+        const effects = expandExtractionBatch(event);
+        if (effects !== null) { for (const effect of effects) batchEffects.add(effect.eventId); expanded.push(...effects); }
+        else expanded.push(event);
       }
-      replay = await registry.replay(sortMemoryEvents(report.events), { db: stage });
+      replay = await registry.replay(expanded, { db: stage, batchEffects });
     } catch (cause) {
       throw new Error("Projection source cannot be replayed; validate event payloads and supported operations", { cause });
     }
@@ -491,7 +511,7 @@ function createPersonaProjection() {
       const governanceRepo = new SqliteMemoryGovernanceRepository(context.db);
       const existingGovernance = await governanceRepo.findByTarget("persona", saved.entryId);
       if (!existingGovernance) {
-        await governanceRepo.save(MemoryGovernanceEntry.create({
+        await governanceRepo.save(inheritBatchGovernance(context, event, MemoryGovernanceEntry.create({
           surface: "persona",
           targetId: saved.entryId,
           project: saved.project,
@@ -509,7 +529,7 @@ function createPersonaProjection() {
           updatedAt: saved.updatedAt,
           expiresAt: saved.expiresAt,
           lastEventId: event.eventId,
-        }));
+        })));
       }
       return true;
     },
@@ -536,12 +556,30 @@ function createGraphProjection() {
       for (const edge of saved) {
         const existingGovernance = await governanceRepo.findByTarget("graph", edge.edgeId);
         if (!existingGovernance) {
-          await governanceRepo.save(governanceEntryForGraphEdge(edge, "graph-event-projection"));
+          await governanceRepo.save(inheritBatchGovernance(context, event, governanceEntryForGraphEdge(edge, "graph-event-projection")));
         }
       }
       return true;
     },
   };
+}
+
+/** Only effects expanded from validated wrappers inherit this batch policy. */
+function inheritBatchGovernance(context: ProjectionContext, event: MemoryEventEnvelope, entry: MemoryGovernanceEntry): MemoryGovernanceEntry {
+  if (!context.batchEffects.has(event.eventId)) return entry;
+  const scope = event.scope;
+  if (entry.project !== scope.project || entry.visibility !== scope.visibility ||
+      entry.scope.project !== scope.project || entry.scope.visibility !== scope.visibility || entry.scope.workspace !== scope.workspace) {
+    throw new Error("Extraction batch derived scope differs from its source");
+  }
+  const consent = event.consent;
+  let expiresAt = consent.expiresAt ? new Date(consent.expiresAt) : null;
+  if (entry.expiresAt && (!expiresAt || entry.expiresAt < expiresAt)) expiresAt = entry.expiresAt;
+  return MemoryGovernanceEntry.create({
+    ...entry.toParams(), sourceEventIds: [...new Set([...entry.sourceEventIds, ...event.provenance.sourceIds ?? []])],
+    actor: event.provenance.actor, redactionState: event.privacy.redactionState,
+    consentStatus: consent.status, consentScopes: consent.scopes, expiresAt,
+  });
 }
 
 function createDreamProjection() {

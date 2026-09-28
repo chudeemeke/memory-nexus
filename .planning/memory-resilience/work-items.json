@@ -2575,7 +2575,9 @@
       "risk": "S",
       "authorization": "authorized",
       "owner": "memory-nexus",
-      "evidence": [],
+      "evidence": [
+        ".planning/memory-resilience/evidence/Q100.4.2.2.2.2-reader.json"
+      ],
       "acceptance_record": ".planning/memory-resilience/evidence/B10.json"
     },
     {
@@ -2750,7 +2752,9 @@
       "risk": "S",
       "authorization": "authorized",
       "owner": "memory-nexus",
-      "evidence": [],
+      "evidence": [
+        ".planning/memory-resilience/evidence/Q100.4.2.2.2.2-reader.json"
+      ],
       "acceptance_record": ".planning/memory-resilience/evidence/R02.json"
     },
     {
@@ -6343,14 +6347,15 @@
         ".planning/memory-resilience/evidence/Q100.4.2.1-audit-identity.json",
         ".planning/memory-resilience/evidence/Q100.4.2.1-database-write.json",
         ".planning/memory-resilience/evidence/Q100.4.2.2.1.json",
-        ".planning/memory-resilience/evidence/Q100.4.2.2.2.1.json"
+        ".planning/memory-resilience/evidence/Q100.4.2.2.2.1.json",
+        ".planning/memory-resilience/evidence/Q100.4.2.2.2.2-reader.json"
       ],
       "acceptance_record": ".planning/memory-resilience/evidence/Q100.4.2.json",
       "retirement_trigger": "Before Q100.4/Q100/B11.74.7/B10/R02 acceptance.",
       "progress": {
-        "status": "Durable batch recovery underway; only descriptor slice verified",
+        "status": "Batch reader progress; shared governance and unsupported-consumer activation boundary unresolved",
         "completed": "Extraction computes candidates/comparison embeddings outside admission, then recovers/rechecks session idempotency and active UUID/content identity under one scope before compare/append/replay/audit. Empty output also rechecks. Concurrent completed audit survives; stale comparison refuses without writes and fresh retry succeeds. Actual decision-read barrier denies a contender.83tests/434assertions in6files per Windows runtime;6faults detected.",
-        "next": "Promote retained reader RED; add strict wrapper admission and ordered expansion before any stage mutation. Bind outer project/time/provenance, preserve child IDs with source linkage, and validate whole-source collisions across ordinary events and batches. Qualify legacy/Fact readers, governance/persona/graph results, recursive privacy remediation and malformed/conflicting records before pipeline wiring.",
+        "next": "Resolve shared derived identity semantics and conservative governance/provenance merge, including persona analogues and scope/content collisions. Retain adversarial RED first. Design enforceable consumer upgrade/source-access and rollback boundary; declaration alone cannot stop old binaries. Then complete reader quality and audit/pipeline/native interruption prerequisites. Keep batch emission inactive.",
         "testsPerRuntime": 83,
         "assertionsPerRuntime": 434,
         "testFiles": 6,
@@ -6376,7 +6381,8 @@
         "auditIdentityEvidence": ".planning/memory-resilience/evidence/Q100.4.2.1-audit-identity.json",
         "databaseWriteEvidence": ".planning/memory-resilience/evidence/Q100.4.2.1-database-write.json",
         "batchDecisionEvidence": ".planning/memory-resilience/evidence/Q100.4.2.2.1.json",
-        "batchCodecEvidence": ".planning/memory-resilience/evidence/Q100.4.2.2.2.1.json"
+        "batchCodecEvidence": ".planning/memory-resilience/evidence/Q100.4.2.2.2.1.json",
+        "readerEvidence": ".planning/memory-resilience/evidence/Q100.4.2.2.2.2-reader.json"
       },
       "observed_gap": "Session input/audit admission and uninterrupted batch comparison have scoped behavioral evidence. Interrupted replacement-chain retry changes the source and final active result after kill-before-audit. Remote/Git/maintenance, direct DB topology, durability/reconciliation/scaling and final quality remain required. Parent remains pending."
     },
@@ -6411,11 +6417,12 @@
         ".planning/memory-resilience/evidence/Q100.4.2.1-audit-identity.json",
         ".planning/memory-resilience/evidence/Q100.4.2.1-database-write.json",
         ".planning/memory-resilience/evidence/Q100.4.2.2.1.json",
-        ".planning/memory-resilience/evidence/Q100.4.2.2.2.1.json"
+        ".planning/memory-resilience/evidence/Q100.4.2.2.2.1.json",
+        ".planning/memory-resilience/evidence/Q100.4.2.2.2.2-reader.json"
       ],
       "acceptance_record": ".planning/memory-resilience/evidence/Q100.4.3.json",
       "retirement_trigger": "Before Q100.4/Q100/B11.74.7/B10/R02 acceptance.",
-      "observed_gap": "Current writer evidence:525tests/3945assertions per Windows runtime;11decision faults detected; narrow recovery/scope/projected-writer-test instrumentation100all4. Event-log, command, source-factory and driver/test diagnostics remain below policy or incomplete; broader compatibility tests were not all instrumented in this diagnostic and earlier rows are not fresh full-suite coverage. New admitted-writer test zero branch denominator requires individual review. Child-process counters, complete instrumenter/applicability, package/changed-line, Linux, cleanup and final independent review remain open; no exclusion approved. Current extraction checkpoint:83tests/434assertions on both Windows runtimes and6faults detected. Pipeline96.63/92.18/100/97.02, extraction-test98.57/91.66/80/98.45, process-test95.89/90/100/100 (statements/branches/functions/lines). Child counters unaggregated; no full-quality acceptance. Final owned-fixture rerun source and metrics supersede earlier extraction-test rows in the same checkpoint; both changed tests strict-compile. Shared-temp12KiB authority preserved pending exclusive ownership disposition under Q100.4.2.7. Latest input-recheck source-bound evidence supersedes prior pipeline rows:96statements/90.9branches/100functions/96.19lines; process-driver96.87/93.33/100/100.92tests/533assertions per Windows runtime,8faults. No full TierS/platform/child-counter acceptance; unresolved audit counterexample remains explicit. Latest audit checkpoint223tests/951assertions per Windows runtime with11detected faults. Audit repository/test100all4diagnostic; pipeline/schema/CLI/test gaps and unaggregated child counters remain. Legacy CLI behavior is intentionally explicit --force refusal, existing exit2. Retained late-message RED is unresolved; no final quality/operational acceptance. Database-write checkpoint:267tests/1147assertions per Windows runtime;15faults detected; new database admission helper100all4 with38branches. Other changed production/test metrics remain below policy or incomplete, child counters unaggregated, and replay test has zero branch denominator pending review. Behavioral child acceptance does not satisfy this final quality barrier. Batch checkpoint:275tests/1183assertions per Windows runtime and9detected targeted faults. Narrow pipeline/test diagnostics still below required metrics; no final platform/package/changed-line/review acceptance. Initial wrong-vector mutant survived; extended replacement chain now detects it. Native batch retry RED remains unresolved. Domain batch codec checkpoint:104tests/341assertions per Windows runtime;20targeted faults detected; codec100all4 including102branches. Test metrics98.47statements/100branches(0total)/97.43functions/100lines require denominator applicability review; intentionally unexecuted adversarial function/getter bodies remain. No whole-platform/package/final-review acceptance."
+      "observed_gap": "Current writer evidence:525tests/3945assertions per Windows runtime;11decision faults detected; narrow recovery/scope/projected-writer-test instrumentation100all4. Event-log, command, source-factory and driver/test diagnostics remain below policy or incomplete; broader compatibility tests were not all instrumented in this diagnostic and earlier rows are not fresh full-suite coverage. New admitted-writer test zero branch denominator requires individual review. Child-process counters, complete instrumenter/applicability, package/changed-line, Linux, cleanup and final independent review remain open; no exclusion approved. Current extraction checkpoint:83tests/434assertions on both Windows runtimes and6faults detected. Pipeline96.63/92.18/100/97.02, extraction-test98.57/91.66/80/98.45, process-test95.89/90/100/100 (statements/branches/functions/lines). Child counters unaggregated; no full-quality acceptance. Final owned-fixture rerun source and metrics supersede earlier extraction-test rows in the same checkpoint; both changed tests strict-compile. Shared-temp12KiB authority preserved pending exclusive ownership disposition under Q100.4.2.7. Latest input-recheck source-bound evidence supersedes prior pipeline rows:96statements/90.9branches/100functions/96.19lines; process-driver96.87/93.33/100/100.92tests/533assertions per Windows runtime,8faults. No full TierS/platform/child-counter acceptance; unresolved audit counterexample remains explicit. Latest audit checkpoint223tests/951assertions per Windows runtime with11detected faults. Audit repository/test100all4diagnostic; pipeline/schema/CLI/test gaps and unaggregated child counters remain. Legacy CLI behavior is intentionally explicit --force refusal, existing exit2. Retained late-message RED is unresolved; no final quality/operational acceptance. Database-write checkpoint:267tests/1147assertions per Windows runtime;15faults detected; new database admission helper100all4 with38branches. Other changed production/test metrics remain below policy or incomplete, child counters unaggregated, and replay test has zero branch denominator pending review. Behavioral child acceptance does not satisfy this final quality barrier. Batch checkpoint:275tests/1183assertions per Windows runtime and9detected targeted faults. Narrow pipeline/test diagnostics still below required metrics; no final platform/package/changed-line/review acceptance. Initial wrong-vector mutant survived; extended replacement chain now detects it. Native batch retry RED remains unresolved. Domain batch codec checkpoint:104tests/341assertions per Windows runtime;20targeted faults detected; codec100all4 including102branches. Test metrics98.47statements/100branches(0total)/97.43functions/100lines require denominator applicability review; intentionally unexecuted adversarial function/getter bodies remain. No whole-platform/package/final-review acceptance. Reader diagnostic: helper/test100all4; event-log78.94/62.74/81.35/79.84 and projection-payload54.65/55.1/68.18/53.12 (statements/branches/functions/lines) in narrow34test measurement. Broader compatibility groups not combined into this diagnostic. Complete quality/changed-lines/applicability/independent review remain."
     },
     {
       "id": "Q100.4.2.1",
@@ -6474,15 +6481,17 @@
         "docs/plans/2026-09-28-source-decision-admission.md",
         ".planning/memory-resilience/evidence/Q100.4.2.1-database-write.json",
         ".planning/memory-resilience/evidence/Q100.4.2.2.1.json",
-        ".planning/memory-resilience/evidence/Q100.4.2.2.2.1.json"
+        ".planning/memory-resilience/evidence/Q100.4.2.2.2.1.json",
+        ".planning/memory-resilience/evidence/Q100.4.2.2.2.2-reader.json"
       ],
       "acceptance_record": ".planning/memory-resilience/evidence/Q100.4.2.2.json",
       "retirement_trigger": "Before Q100.4.2/Q100/B10/R02 acceptance.",
       "observed_gap": "Q100.4.2.2.1 verifies uninterrupted decisions. Q100.4.2.2.2 remains active on the retained native interrupted-chain RED. Parent is pending and cannot pass until retry and both child contracts are proved.",
       "progress": {
-        "status": "Uninterrupted comparison and preparatory domain codec verified; interrupted retry remains open",
-        "next": "Promote retained reader RED; add strict wrapper admission and ordered expansion before any stage mutation. Bind outer project/time/provenance, preserve child IDs with source linkage, and validate whole-source collisions across ordinary events and batches. Qualify legacy/Fact readers, governance/persona/graph results, recursive privacy remediation and malformed/conflicting records before pipeline wiring.",
-        "evidence": ".planning/memory-resilience/evidence/Q100.4.2.2.1.json"
+        "status": "Batch reader progress; shared governance and unsupported-consumer activation boundary unresolved",
+        "next": "Resolve shared derived identity semantics and conservative governance/provenance merge, including persona analogues and scope/content collisions. Retain adversarial RED first. Design enforceable consumer upgrade/source-access and rollback boundary; declaration alone cannot stop old binaries. Then complete reader quality and audit/pipeline/native interruption prerequisites. Keep batch emission inactive.",
+        "evidence": ".planning/memory-resilience/evidence/Q100.4.2.2.1.json",
+        "readerEvidence": ".planning/memory-resilience/evidence/Q100.4.2.2.2.2-reader.json"
       }
     },
     {
@@ -6683,11 +6692,12 @@
         ".planning/memory-resilience/evidence/Q100.4.2.1-audit-identity.json",
         ".planning/memory-resilience/evidence/Q100.4.2.1-database-write.json",
         ".planning/memory-resilience/evidence/Q100.4.2.2.1.json",
-        ".planning/memory-resilience/evidence/Q100.4.2.2.2.1.json"
+        ".planning/memory-resilience/evidence/Q100.4.2.2.2.1.json",
+        ".planning/memory-resilience/evidence/Q100.4.2.2.2.2-reader.json"
       ],
       "acceptance_record": ".planning/memory-resilience/evidence/Q100.4.2.11.json",
       "retirement_trigger": "Before Q100.4.2/Q100/B10/R02 acceptance.",
-      "observed_gap": "Explicit database lease allows nested replay/savepoints while preserving refusal of arbitrary caller transactions. Outer failure rolls back projections/receipt; real process kill before audit retains source and retry recovers without duplicate event. Broader multi-event action/audit atomicity and interrupted-batch retry remain unverified; JSONL plus SQLite is not one transaction. Native replacement-chain counterexample now retained: kill after source/replay but before audit, then retry produces two duplicate replacement effects and the wrong final active candidate. Durable operation identity/outcome recovery must cover this; single-fact retry proof is insufficient. Selected recovery direction: one canonical integrity-checked batch record containing ordered fact descriptors and original audit outcome, using the existing source authority rather than a separate journal store. Domain codec verified; source expansion, audit identity, privacy/consumer compatibility and native interruption proof remain. No durability claim or writer activation."
+      "observed_gap": "Explicit database lease allows nested replay/savepoints while preserving refusal of arbitrary caller transactions. Outer failure rolls back projections/receipt; real process kill before audit retains source and retry recovers without duplicate event. Broader multi-event action/audit atomicity and interrupted-batch retry remain unverified; JSONL plus SQLite is not one transaction. Native replacement-chain counterexample now retained: kill after source/replay but before audit, then retry produces two duplicate replacement effects and the wrong final active candidate. Durable operation identity/outcome recovery must cover this; single-fact retry proof is insufficient. Selected recovery direction: one canonical integrity-checked batch record containing ordered fact descriptors and original audit outcome, using the existing source authority rather than a separate journal store. Domain codec verified; source expansion, audit identity, privacy/consumer compatibility and native interruption proof remain. No durability claim or writer activation. Reader checkpoint: Reader implementation progress only. Shared derived graph RED: an existing edge keeps not_required consent and prior-only provenance after a denied batch derives the same identity. Tagged v4.0.3 runtime accepts the new wrapper, clears projections and ignores batch contents. Unsupported-consumer refusal is disproved; enforceable consumer-version/source-access and rollback boundaries are required before emission. Audit/pipeline still emits ordinary events; original native interrupted-chain defect remains."
     },
     {
       "id": "Q100.4.2.12",
@@ -6705,11 +6715,12 @@
       "owner": "memory-nexus",
       "evidence": [
         ".planning/memory-resilience/evidence/Q100.4.2-extraction-admission.json",
-        "docs/plans/2026-09-28-source-decision-admission.md"
+        "docs/plans/2026-09-28-source-decision-admission.md",
+        ".planning/memory-resilience/evidence/Q100.4.2.2.2.2-reader.json"
       ],
       "acceptance_record": ".planning/memory-resilience/evidence/Q100.4.2.12.json",
       "retirement_trigger": "Before Q100.4.2/Q100/B10/R02 acceptance.",
-      "observed_gap": "Unverified obligation from source inspection and retained Q100.4.2 evidence; split further before implementation if this outcome requires independent acceptance slices."
+      "observed_gap": "Unverified obligation from source inspection and retained Q100.4.2 evidence; split further before implementation if this outcome requires independent acceptance slices. Reader checkpoint: Reader implementation progress only. Shared derived graph RED: an existing edge keeps not_required consent and prior-only provenance after a denied batch derives the same identity. Tagged v4.0.3 runtime accepts the new wrapper, clears projections and ignores batch contents. Unsupported-consumer refusal is disproved; enforceable consumer-version/source-access and rollback boundaries are required before emission. Audit/pipeline still emits ordinary events; original native interrupted-chain defect remains."
     },
     {
       "id": "Q100.4.2.13",
@@ -6783,15 +6794,17 @@
         "docs/plans/2026-09-28-source-decision-admission.md",
         ".planning/memory-resilience/evidence/Q100.4.2.2.1.json",
         "docs/plans/2026-09-28-extraction-batch-recovery.md",
-        ".planning/memory-resilience/evidence/Q100.4.2.2.2.1.json"
+        ".planning/memory-resilience/evidence/Q100.4.2.2.2.1.json",
+        ".planning/memory-resilience/evidence/Q100.4.2.2.2.2-reader.json"
       ],
       "acceptance_record": ".planning/memory-resilience/evidence/Q100.4.2.2.2.json",
       "retirement_trigger": "Before Q100.4.2/Q100/B10/R02 acceptance.",
       "observed_gap": "Real child accepts alpha->beta->gamma replacement chain, then is killed before audit. Source is retained and SQLite rolls back. Fresh retry appends two more replacements, reports added=2/updated=2/superseded=2/skipped=1, changes source, and leaves beta active instead of gamma. In-memory working-set repair does not establish durable batch identity.",
       "progress": {
-        "status": "Domain batch descriptor verified; source/replay integration active",
-        "next": "Promote retained reader RED; add strict wrapper admission and ordered expansion before any stage mutation. Bind outer project/time/provenance, preserve child IDs with source linkage, and validate whole-source collisions across ordinary events and batches. Qualify legacy/Fact readers, governance/persona/graph results, recursive privacy remediation and malformed/conflicting records before pipeline wiring.",
-        "evidence": ".planning/memory-resilience/evidence/Q100.4.2.2.2.1.json"
+        "status": "Batch reader progress; shared governance and unsupported-consumer activation boundary unresolved",
+        "next": "Resolve shared derived identity semantics and conservative governance/provenance merge, including persona analogues and scope/content collisions. Retain adversarial RED first. Design enforceable consumer upgrade/source-access and rollback boundary; declaration alone cannot stop old binaries. Then complete reader quality and audit/pipeline/native interruption prerequisites. Keep batch emission inactive.",
+        "evidence": ".planning/memory-resilience/evidence/Q100.4.2.2.2.1.json",
+        "readerEvidence": ".planning/memory-resilience/evidence/Q100.4.2.2.2.2-reader.json"
       }
     },
     {
@@ -6838,15 +6851,17 @@
       "owner": "memory-nexus",
       "evidence": [
         "docs/plans/2026-09-28-extraction-batch-recovery.md",
-        ".planning/memory-resilience/evidence/Q100.4.2.2.2.1.json"
+        ".planning/memory-resilience/evidence/Q100.4.2.2.2.1.json",
+        ".planning/memory-resilience/evidence/Q100.4.2.2.2.2-reader.json"
       ],
       "acceptance_record": ".planning/memory-resilience/evidence/Q100.4.2.2.2.2.json",
       "retirement_trigger": "Before Q100.4.2/Q100/B10/R02 acceptance.",
-      "observed_gap": "Retained real source/SQLite RED: an integrity-valid v2 projection/add wrapper containing a valid extractionBatch descriptor is rejected by rebuildProjections with Unsupported projection event kind. No effects replayed; writer activation remains prohibited until the required reader/recovery dependencies pass.",
+      "observed_gap": "Reader implementation progress only. Shared derived graph RED: an existing edge keeps not_required consent and prior-only provenance after a denied batch derives the same identity. Tagged v4.0.3 runtime accepts the new wrapper, clears projections and ignores batch contents. Unsupported-consumer refusal is disproved; enforceable consumer-version/source-access and rollback boundaries are required before emission. Audit/pipeline still emits ordinary events; original native interrupted-chain defect remains.",
       "progress": {
-        "status": "Source/replay RED retained",
-        "next": "Promote retained reader RED; add strict wrapper admission and ordered expansion before any stage mutation. Bind outer project/time/provenance, preserve child IDs with source linkage, and validate whole-source collisions across ordinary events and batches. Qualify legacy/Fact readers, governance/persona/graph results, recursive privacy remediation and malformed/conflicting records before pipeline wiring.",
-        "evidence": ".planning/memory-resilience/evidence/Q100.4.2.2.2.1.json"
+        "status": "Reader implemented; shared governance and old-consumer compatibility remain open",
+        "completed": "Strict wrapper binding, ordered expansion, whole-source identity checks, Fact compatibility, privacy remediation, new derived governance inheritance and owned local Git transfer tested.515tests/3502assertions/20files per Windows runtime;21faults detected. New helper/test100all4 in focused diagnostics.",
+        "next": "Resolve shared derived identity semantics and conservative governance/provenance merge, including persona analogues and scope/content collisions. Retain adversarial RED first. Design enforceable consumer upgrade/source-access and rollback boundary; declaration alone cannot stop old binaries. Then complete reader quality and audit/pipeline/native interruption prerequisites. Keep batch emission inactive.",
+        "evidence": ".planning/memory-resilience/evidence/Q100.4.2.2.2.2-reader.json"
       }
     },
     {
@@ -6864,11 +6879,12 @@
       "authorization": "authorized",
       "owner": "memory-nexus",
       "evidence": [
-        "docs/plans/2026-09-28-extraction-batch-recovery.md"
+        "docs/plans/2026-09-28-extraction-batch-recovery.md",
+        ".planning/memory-resilience/evidence/Q100.4.2.2.2.2-reader.json"
       ],
       "acceptance_record": ".planning/memory-resilience/evidence/Q100.4.2.2.2.3.json",
       "retirement_trigger": "Before Q100.4.2/Q100/B10/R02 acceptance.",
-      "observed_gap": "Required outcome not yet proved; no new source writer activation.",
+      "observed_gap": "Required outcome not yet proved; no new source writer activation. Reader checkpoint: Reader implementation progress only. Shared derived graph RED: an existing edge keeps not_required consent and prior-only provenance after a denied batch derives the same identity. Tagged v4.0.3 runtime accepts the new wrapper, clears projections and ignores batch contents. Unsupported-consumer refusal is disproved; enforceable consumer-version/source-access and rollback boundaries are required before emission. Audit/pipeline still emits ordinary events; original native interrupted-chain defect remains.",
       "progress": {
         "status": "Pending bounded proof"
       }
@@ -6888,11 +6904,12 @@
       "authorization": "authorized",
       "owner": "memory-nexus",
       "evidence": [
-        "docs/plans/2026-09-28-extraction-batch-recovery.md"
+        "docs/plans/2026-09-28-extraction-batch-recovery.md",
+        ".planning/memory-resilience/evidence/Q100.4.2.2.2.2-reader.json"
       ],
       "acceptance_record": ".planning/memory-resilience/evidence/Q100.4.2.2.2.4.json",
       "retirement_trigger": "Before Q100.4.2/Q100/B10/R02 acceptance.",
-      "observed_gap": "Required outcome not yet proved; no new source writer activation.",
+      "observed_gap": "Required outcome not yet proved; no new source writer activation. Reader checkpoint: Reader implementation progress only. Shared derived graph RED: an existing edge keeps not_required consent and prior-only provenance after a denied batch derives the same identity. Tagged v4.0.3 runtime accepts the new wrapper, clears projections and ignores batch contents. Unsupported-consumer refusal is disproved; enforceable consumer-version/source-access and rollback boundaries are required before emission. Audit/pipeline still emits ordinary events; original native interrupted-chain defect remains.",
       "progress": {
         "status": "Pending bounded proof"
       }

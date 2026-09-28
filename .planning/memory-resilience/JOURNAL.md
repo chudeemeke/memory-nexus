@@ -1,5 +1,43 @@
 # Memory resilience execution journal
 
+## 2026-09-28 - Batch reader progress; governance and consumer REDs retained
+
+- Began at signed/pushed0436ae1. Native E1-E10 goal remains active; sole active
+  ledger item Q100.4.2.2.2.2 remains open. No batch writer activation.
+- Added strict wrapper binding, complete effect validation, ordered expansion
+  after source-record sorting, and cross-wrapper/ordinary identity checks.
+  Canonical readers retain wrappers; Fact readers expose validated effects.
+  New derived governance inherits scope, consent, privacy, expiry and provenance.
+- Synthetic tests cover real SQLite replay, duplicates, malformed late effects,
+  scope refusal, legacy coexistence, recursive secret remediation and actual
+  owned local Git push/pull followed by receiver replay. No real-data transfer.
+- Core395tests/1608assertions/17files plus supplemental120tests/1894assertions/
+  3files passed on each Windows Bun1.4.1 and checksum-pinned1.3.14. Core collector
+  requested two nonexistent src test paths that Bun silently skipped; correct
+  tests paths and lifecycle suite were run separately with matching source hashes.
+  Total515tests/3502assertions/20files per runtime. Types/isolation passed.
+-21targeted faults detected. New helper/test diagnostic100all4(43/12branches).
+  Narrow event-log78.94/62.74/81.35/79.84 and projection-payload54.65/55.1/68.18/
+  53.12 (statements/branches/functions/lines) do not meet acceptance. Broader
+  compatibility tests were not combined into that measurement. No final review.
+- Shared graph RED: prior fact creates an edge, then denied batch derives that
+  same identity; existing governance stays not_required with prior-only source.
+  Next: qualify shared identity/content/scope and conservative governance merge,
+  including persona analogues. Do not blindly overwrite prior suppression.
+- Actual archived v4.0.3 source replay accepts the batch, clears projections and
+  ignores all batch effects. Unsupported-consumer refusal is disproved. Need an
+  enforceable installed-consumer upgrade/source-access and rollback boundary
+  before emission. Schema or sidecar declaration alone cannot stop old readers.
+  Tagged-source fixture used current schema/OwnedDatabase; not installed proof.
+- Progress and both executable REDs retained in
+  `evidence/Q100.4.2.2.2.2-reader.json`; NOT the item's acceptance record. Original
+  alpha->beta->gamma interrupted retry still fails. Audit/pipeline/native slices,
+  complete quality/hosted/Linux/install/desktop/review and three inboxes remain.
+- Catalog504files/two packages; ledger274acyclic items. Free disk10.96GiB at
+  checkpoint. Owned fixtures cleaned; prior rejected cleanup targets, shared
+  temp12KiB admission authority and zero-byte Git temporary object preserved.
+  R03/P03/A03 remain; approved embedding experiment follows baseline acceptance.
+
 ## 2026-09-28 - Durable batch descriptor; reader integration RED
 
 - Previous turn made progress at signed/pushed `2afa560`; began clean. Full

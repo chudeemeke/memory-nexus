@@ -1,4 +1,5 @@
 import type { MemoryEventEnvelope } from "../../domain/entities/memory-event.js";
+import { expandExtractionBatch } from "./extraction-batch-events.js";
 import { MEMORY_GOVERNANCE_CONTROLS, MEMORY_GOVERNANCE_STATUSES, MEMORY_GOVERNANCE_SURFACES } from "../../domain/entities/memory-governance.js";
 
 type RecordValue = Record<string, unknown>;
@@ -76,6 +77,11 @@ function governance(value: unknown): void {
 
 /** Check authoritative serialized fields before defaulting projection adapters. */
 export function assertProjectionPayload(event: MemoryEventEnvelope): void {
+  const effects = expandExtractionBatch(event);
+  if (effects !== null) {
+    for (const effect of effects) assertProjectionPayload(effect);
+    return;
+  }
   if (factTypes.includes(event.kind)) {
     requireValue(event.operation, oneOf(["add", "update", "supersede"]));
     fact(event.payload.fact);

@@ -6036,7 +6036,7 @@
     {
       "path": "src/infrastructure/database/event-log.ts",
       "package": "package.json",
-      "sourceHash": "6ce2d58f2ac4d2b247655842999273b552b7cbed5defc076571095c7f2de29ca",
+      "sourceHash": "cb916168be1cb252eb7810169d88b0b3b54824cd34620e8618bf310f65c86c90",
       "tier": "S",
       "rationale": "Appends canonical memory events and validates imported legacy records; durable source and integrity boundary.",
       "applicability": {
@@ -6045,33 +6045,33 @@
       },
       "decisionStatus": "proposed - independent review pending",
       "inspection": {
-        "sourceRevision": "65b21ef + current source hash",
-        "anchor": "Q100.4.2.1 owned database write scope",
-        "scope": "Scoped behavioral proof and diagnostic; final quality remains open"
+        "sourceRevision": "0436ae1 + current source hash",
+        "anchor": "Q100.4.2.2.2.2",
+        "scope": "Reader progress only; shared governance and consumer activation failures retained"
       },
       "metricApplicability": {
-        "status": "Scoped diagnostic; child counters and full quality pending",
-        "sourceHash": "6ce2d58f2ac4d2b247655842999273b552b7cbed5defc076571095c7f2de29ca",
-        "evidence": ".planning/memory-resilience/evidence/Q100.4.2.1-database-write.json",
+        "status": "Scoped diagnostic; completeness and final review pending",
+        "sourceHash": "cb916168be1cb252eb7810169d88b0b3b54824cd34620e8618bf310f65c86c90",
+        "evidence": ".planning/memory-resilience/evidence/Q100.4.2.2.2.2-reader.json",
         "metrics": {
           "statements": {
-            "observedCounterTotal": 253,
-            "observedPercent": 61.26,
+            "observedCounterTotal": 285,
+            "observedPercent": 78.94,
             "proposal": "measure - completeness unverified"
           },
           "branches": {
-            "observedCounterTotal": 174,
-            "observedPercent": 56.32,
+            "observedCounterTotal": 204,
+            "observedPercent": 62.74,
             "proposal": "measure - completeness unverified"
           },
           "functions": {
-            "observedCounterTotal": 58,
-            "observedPercent": 81.03,
+            "observedCounterTotal": 59,
+            "observedPercent": 81.35,
             "proposal": "measure - completeness unverified"
           },
           "lines": {
-            "observedCounterTotal": 240,
-            "observedPercent": 61.25,
+            "observedCounterTotal": 263,
+            "observedPercent": 79.84,
             "proposal": "measure - completeness unverified"
           }
         }
@@ -6328,31 +6328,35 @@
         "reason": "Executable Tier S source/driver; no exclusion approved."
       },
       "decisionStatus": "proposed - independent review pending",
-      "sourceHash": "5bf0e141efd13a14280c08ec678a302f0ac00b64034ef6a4838ee7346af8854c",
+      "sourceHash": "48298305b8f7978d79ada4b2b83a8f3c2331b669c1c17670976b96bbff40449a",
       "inspection": {
-        "sourceRevision": "23c7f4e + current source hash",
-        "anchor": "Q100.3.2.2 payload admission",
-        "scope": "Paired native compatibility; new module/driver diagnose100%; full package/platform/changed-line/review acceptance remains Q100.4."
+        "sourceRevision": "0436ae1 + current source hash",
+        "anchor": "Q100.4.2.2.2.2",
+        "scope": "Reader progress only; shared governance and consumer activation failures retained"
       },
       "metricApplicability": {
-        "status": "diagnostic only - final acceptance pending Q100.4",
-        "sourceHash": "5bf0e141efd13a14280c08ec678a302f0ac00b64034ef6a4838ee7346af8854c",
-        "evidence": ".planning/memory-resilience/evidence/Q100.3.2.2.json",
+        "status": "Scoped diagnostic; completeness and final review pending",
+        "sourceHash": "48298305b8f7978d79ada4b2b83a8f3c2331b669c1c17670976b96bbff40449a",
+        "evidence": ".planning/memory-resilience/evidence/Q100.4.2.2.2.2-reader.json",
         "metrics": {
-          "lines": {
-            "observedCounterTotal": 60,
+          "statements": {
+            "observedCounterTotal": 86,
+            "observedPercent": 54.65,
+            "proposal": "measure - completeness unverified"
+          },
+          "branches": {
+            "observedCounterTotal": 49,
+            "observedPercent": 55.1,
             "proposal": "measure - completeness unverified"
           },
           "functions": {
             "observedCounterTotal": 22,
+            "observedPercent": 68.18,
             "proposal": "measure - completeness unverified"
           },
-          "statements": {
-            "observedCounterTotal": 81,
-            "proposal": "measure - completeness unverified"
-          },
-          "branches": {
-            "observedCounterTotal": 47,
+          "lines": {
+            "observedCounterTotal": 64,
+            "observedPercent": 53.12,
             "proposal": "measure - completeness unverified"
           }
         }
@@ -20466,6 +20470,94 @@
           },
           "lines": {
             "observedCounterTotal": 99,
+            "observedPercent": 100,
+            "proposal": "measure - completeness unverified"
+          }
+        }
+      }
+    },
+    {
+      "path": "src/infrastructure/database/extraction-batch-events.ts",
+      "package": "package.json",
+      "tier": "S",
+      "rationale": "Durable extraction batch source validation, privacy and replay integrity with adversarial tests.",
+      "applicability": {
+        "mode": "measure",
+        "reason": "Executable integrity validation/test; no exclusion approved."
+      },
+      "decisionStatus": "proposed - independent review pending",
+      "sourceHash": "ebc4f5cfdce1c7d6b4210f5b6ccd91a14df2861dd27208bcd0a71b26e7f0c994",
+      "inspection": {
+        "sourceRevision": "0436ae1 + current source hash",
+        "anchor": "Q100.4.2.2.2.2",
+        "scope": "Reader progress only; shared governance and consumer activation failures retained"
+      },
+      "metricApplicability": {
+        "status": "Scoped diagnostic; completeness and final review pending",
+        "sourceHash": "ebc4f5cfdce1c7d6b4210f5b6ccd91a14df2861dd27208bcd0a71b26e7f0c994",
+        "evidence": ".planning/memory-resilience/evidence/Q100.4.2.2.2.2-reader.json",
+        "metrics": {
+          "statements": {
+            "observedCounterTotal": 24,
+            "observedPercent": 100,
+            "proposal": "measure - completeness unverified"
+          },
+          "branches": {
+            "observedCounterTotal": 43,
+            "observedPercent": 100,
+            "proposal": "measure - completeness unverified"
+          },
+          "functions": {
+            "observedCounterTotal": 8,
+            "observedPercent": 100,
+            "proposal": "measure - completeness unverified"
+          },
+          "lines": {
+            "observedCounterTotal": 19,
+            "observedPercent": 100,
+            "proposal": "measure - completeness unverified"
+          }
+        }
+      }
+    },
+    {
+      "path": "tests/infrastructure/database/extraction-batch-replay.test.ts",
+      "package": "package.json",
+      "tier": "S",
+      "rationale": "Durable extraction batch source validation, privacy and replay integrity with adversarial tests.",
+      "applicability": {
+        "mode": "measure",
+        "reason": "Executable integrity validation/test; no exclusion approved."
+      },
+      "decisionStatus": "proposed - independent review pending",
+      "sourceHash": "80895ae88184cb7d5a451c9bee1c2f2a00dc97632aa6a2c9fa6e0e136feae442",
+      "inspection": {
+        "sourceRevision": "0436ae1 + current source hash",
+        "anchor": "Q100.4.2.2.2.2",
+        "scope": "Reader progress only; shared governance and consumer activation failures retained"
+      },
+      "metricApplicability": {
+        "status": "Scoped diagnostic; completeness and final review pending",
+        "sourceHash": "80895ae88184cb7d5a451c9bee1c2f2a00dc97632aa6a2c9fa6e0e136feae442",
+        "evidence": ".planning/memory-resilience/evidence/Q100.4.2.2.2.2-reader.json",
+        "metrics": {
+          "statements": {
+            "observedCounterTotal": 215,
+            "observedPercent": 100,
+            "proposal": "measure - completeness unverified"
+          },
+          "branches": {
+            "observedCounterTotal": 12,
+            "observedPercent": 100,
+            "proposal": "measure - completeness unverified"
+          },
+          "functions": {
+            "observedCounterTotal": 47,
+            "observedPercent": 100,
+            "proposal": "measure - completeness unverified"
+          },
+          "lines": {
+            "observedCounterTotal": 104,
             "observedPercent": 100,
             "proposal": "measure - completeness unverified"
           }
