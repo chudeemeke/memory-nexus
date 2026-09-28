@@ -84,8 +84,8 @@ describe("Sync Command", () => {
       })),
       runMemoryFileSync: mock(async () => null),
       reportMemoryFileResults: mock(() => undefined),
-      runAmbientContextGeneration: mock(async () => undefined),
-      runEmbeddingPass: mock(async () => undefined),
+      runAmbientContextGeneration: mock(async () => ({ status: "skipped" as const, reason: "disabled" })),
+      runEmbeddingPass: mock(async () => ({ status: "completed" as const, embedded: 0, skipped: 0 })),
       removeBackgroundLock: mock(() => undefined),
       ...overrides,
     };
@@ -560,8 +560,8 @@ describe("Sync Command", () => {
       const calls: string[] = [];
       const harness = createHarness({
         recoverProjections: async () => { calls.push("recover"); return { rebuilt: true, pending: false }; },
-        runAmbientContextGeneration: async () => { calls.push("ambient"); },
-        runEmbeddingPass: async () => { calls.push("embed"); },
+        runAmbientContextGeneration: async () => { calls.push("ambient"); return { status: "completed" }; },
+        runEmbeddingPass: async () => { calls.push("embed"); return { status: "completed", embedded: 0, skipped: 0 }; },
         reportResults,
       });
       harness.syncResult.sessionsDiscovered = harness.syncResult.sessionsProcessed = 0;
@@ -627,6 +627,33 @@ describe("Sync Command", () => {
       expect((await executeSyncCommand({}, harness.deps)).exitCode).toBe(1);
       expect(harness.deps.closeDatabase).toHaveBeenCalledTimes(1);
       expect(harness.deps.recoverProjections).not.toHaveBeenCalled();
+    });
+
+    it.each(["embedding", "ambient"] as const)("reports missing, malformed and failed %s outcomes without false success", async stage => {
+      for (const value of [undefined, {} as any, { status: "failed", error: "synthetic failure" } as const, { status: "pending", reason: "disabled" } as const]) {
+        logs = [];
+        const handler = mock(async () => value);
+        const harness = createHarness({ reportResults, ...(stage === "embedding" ? { runEmbeddingPass: handler } : { runAmbientContextGeneration: handler }) });
+        expect((await executeSyncCommand({ json: true, embed: true }, harness.deps)).exitCode).toBe(1);
+        const output = JSON.parse(logs.join("\n"));
+        expect(output.success).toBe(false);
+        expect(output.capture.success).toBe(true);
+        expect(output[stage].status).toBe(value === undefined || value?.status === "pending" ? "pending" : "failed");
+        expect(harness.deps.runEmbeddingPass).toHaveBeenCalledTimes(1);
+      }
+    });
+
+    it("keeps successful embedding observable after memory-file and ambient exceptions", async () => {
+      const harness = createHarness({ reportResults,
+        runMemoryFileSync: async () => { throw new Error("memory scan failed"); },
+        runAmbientContextGeneration: async () => { throw new Error("ambient write failed"); },
+      });
+      expect((await executeSyncCommand({ json: true, embed: true, includeMemoryFiles: true }, harness.deps)).exitCode).toBe(1);
+      expect(harness.deps.runEmbeddingPass).toHaveBeenCalledTimes(1);
+      expect(JSON.parse(logs.join("\n"))).toMatchObject({ success: false,
+        memoryFiles: { status: "failed", error: "memory scan failed" },
+        ambient: { status: "failed", error: "ambient write failed" },
+        embedding: { status: "completed", embedded: 0, skipped: 0 } });
     });
 
     it("reports compound cleanup failure after preserving capture and attempting both cleanup steps", async () => {

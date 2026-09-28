@@ -10,6 +10,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { createTestDatabase, type TestDatabase } from "../../../../../tests/helpers/test-database.js";
 import { reportMemoryFileResults, runMemoryFileSync } from "./memory-files.js";
+import { MemoryFileSyncService } from "../../../../application/services/memory-file-sync-service.js";
 
 let consoleLogSpy: ReturnType<typeof spyOn> | undefined;
 let testDb: TestDatabase | undefined;
@@ -30,6 +31,19 @@ afterEach(() => {
 });
 
 describe("memory-files", () => {
+  it("propagates a service exception instead of reporting no work", async () => {
+    testDb = createTestDatabase({ prefix: "memory-files-failure-" });
+    const failure = new Error("synthetic scanner failure");
+    const sync = spyOn(MemoryFileSyncService.prototype, "syncMemoryFiles").mockRejectedValue(failure);
+    const log = spyOn(console, "error").mockImplementation(() => {});
+    try {
+      await expect(runMemoryFileSync(testDb.db, {})).rejects.toBe(failure);
+      expect(log).toHaveBeenCalledWith(expect.stringContaining(failure.message));
+      log.mockClear();
+      await expect(runMemoryFileSync(testDb.db, { quiet: true })).rejects.toBe(failure);
+      expect(log).not.toHaveBeenCalled();
+    } finally { sync.mockRestore(); log.mockRestore(); }
+  });
   it("module exports runMemoryFileSync and reportMemoryFileResults", async () => {
     const mod = await import("./memory-files.js");
     expect(typeof mod.runMemoryFileSync).toBe("function");

@@ -2090,10 +2090,11 @@
       ],
       "historical_evidence": "docs/audits/2026-09-19-repair-evidence/per-file-coverage-gaps.json",
       "evidence": [
-        ".planning/memory-resilience/evidence/Q100.4.2-local.json"
+        ".planning/memory-resilience/evidence/Q100.4.2-local.json",
+        ".planning/memory-resilience/evidence/Q100.4.2-outcomes.json"
       ],
       "acceptance_record": ".planning/memory-resilience/evidence/Q074.json",
-      "observed_gap": "Default runAmbientContextGeneration catches failures and returns void; final command metadata cannot distinguish failed ambient output from successful/disabled work. Return an explicit outcome and prove truthful reporting before E7/Q100.4.2/B10 acceptance. Existing source/test quality obligations remain."
+      "observed_gap": "Explicit ambient completed/skipped/failed outcome now reaches final command metadata; unexpected unsuccessful results log errors. Scoped source branches79.16 and test statements93.02/branches60/functions83.82/lines94.26 fail floors. Complete source/test/platform/instrumenter and independent review before E7/B10; no acceptance inherited."
     },
     {
       "id": "Q075",
@@ -2138,10 +2139,11 @@
       ],
       "historical_evidence": "docs/audits/2026-09-19-repair-evidence/per-file-coverage-gaps.json",
       "evidence": [
-        ".planning/memory-resilience/evidence/Q100.4.2-local.json"
+        ".planning/memory-resilience/evidence/Q100.4.2-local.json",
+        ".planning/memory-resilience/evidence/Q100.4.2-outcomes.json"
       ],
       "acceptance_record": ".planning/memory-resilience/evidence/Q076.json",
-      "observed_gap": "runEmbeddingPass returns void for disabled provider, declined model change, no remaining work and completed embedding. Final CLI must distinguish skip/pending/completion before E7/Q100.4.2/B10 acceptance; no semantic-ready claim from a returned handler. Preserve lifecycle/model migration/privacy obligations and existing quality work."
+      "observed_gap": "Embedding disabled/declined now returns pending; successful/no-work passes return counts. Factory creation is within disposal boundary. Scoped source branches91.93 and test statements92.88/functions74.38/lines92.8 fail floors. Preserve lifecycle/model-generation/query-readiness/privacy obligations; complete quality and review before E7/B10."
     },
     {
       "id": "Q077",
@@ -2162,10 +2164,11 @@
       ],
       "historical_evidence": "docs/audits/2026-09-19-repair-evidence/per-file-coverage-gaps.json",
       "evidence": [
-        ".planning/memory-resilience/evidence/Q100.4.2-local.json"
+        ".planning/memory-resilience/evidence/Q100.4.2-local.json",
+        ".planning/memory-resilience/evidence/Q100.4.2-outcomes.json"
       ],
       "acceptance_record": ".planning/memory-resilience/evidence/Q077.json",
-      "observed_gap": "Completion metadata added while legacy reportResults callers keep their shape. Diagnostic statements98.64/branches93.87/functions100/lines100 fails branches. Helper test functions93.75 also below floor; B11.57 still owns swallowed fixture cleanup. Full source/test/platform/changed-line and final optional-stage reporting remain."
+      "observed_gap": "Final report includes explicit embedding/ambient/memory-file outcomes, preserving legacy reportResults shape without metadata. Scoped source branches92.72 and helper test functions93.75 fail floors. B11.57 retains fixture cleanup; final complete source/test/platform/changed-line proof remains."
     },
     {
       "id": "Q078",
@@ -2190,10 +2193,11 @@
       "historical_evidence": "docs/audits/2026-09-19-repair-evidence/per-file-coverage-gaps.json",
       "evidence": [
         ".planning/memory-resilience/evidence/Q100.4.2-remote.json",
-        ".planning/memory-resilience/evidence/Q100.4.2-local.json"
+        ".planning/memory-resilience/evidence/Q100.4.2-local.json",
+        ".planning/memory-resilience/evidence/Q100.4.2-outcomes.json"
       ],
       "acceptance_record": ".planning/memory-resilience/evidence/Q078.json",
-      "observed_gap": "Default ordinary sync now recovers pending source after capture even with no new sessions, emits completion after cleanup, reports capture/projection/remote states and blocks derived output on pending/unknown governance. Registration and compound cleanup errors are retained. Diagnostic source statements88.2/branches93.22/functions58.82/lines88.88 and command-test branches78.78 fail quality. Child coverage not aggregated. Final optional-stage outcomes remain with Q074/Q076/Q079/Q100.4.2; B11.69 fixture cleanup remains open."
+      "observed_gap": "Requested pending/failed/missing/malformed optional-stage outcomes now make final exit nonzero while independent stages and captured data survive. Scoped source statements88.64/branches94.35/functions58.82/lines89.34 and command-test branches82.05 fail floors. New stage-outcome module is TierS proposed with all positive counters100 and decision checks, still requires complete instrumenter/review. Child coverage not aggregated; B11.69 fixture cleanup remains open."
     },
     {
       "id": "Q079",
@@ -2216,10 +2220,11 @@
       ],
       "historical_evidence": "docs/audits/2026-09-19-repair-evidence/per-file-coverage-gaps.json",
       "evidence": [
-        ".planning/memory-resilience/evidence/Q100.4.2-local.json"
+        ".planning/memory-resilience/evidence/Q100.4.2-local.json",
+        ".planning/memory-resilience/evidence/Q100.4.2-outcomes.json"
       ],
       "acceptance_record": ".planning/memory-resilience/evidence/Q079.json",
-      "observed_gap": "runMemoryFileSync catches exceptions and returns null, conflating failure with no work; final command now preserves returned per-file errors but cannot see swallowed exceptions. Explicit outcome/failure contract and complete tests required before E7/Q100.4.2/B10 acceptance; existing quality/cleanup obligations remain."
+      "observed_gap": "Memory-file exceptions propagate instead of collapsing into no-work; command reports failure and continues independent stages. Source diagnostic all four metrics100 with exception mutation detected; test functions94.11/branches50 fail floors. Complete cleanup/platform/instrumenter/changed-line/review obligations before acceptance; no Q079 closure."
     },
     {
       "id": "Q080",
@@ -2816,7 +2821,7 @@
         "projectionContentNotice": {
           "document": "docs/plans/2026-09-28-projection-replay-execution.md",
           "owner": "memory-nexus",
-          "trigger": "Before integration/adoption: notify opted-in consumers of guarded automatic recovery/reconciliation, serial writer retry/conflicts, ordinary no-op sync recovery, capture/projection/remote JSON metadata and final optional-stage partial status. Pending governance blocks derived output; known offline transport failure may preserve independent local usefulness. No installed consumer action requested yet."
+          "trigger": "Before integration/adoption: notify opted-in consumers of guarded automatic recovery/reconciliation, serial writer retry/conflicts, no-op local recovery, capture/projection/remote JSON metadata and explicit embedding/ambient/memory-file outcomes. Requested disabled/declined embedding and missing legacy handler outcomes are pending/nonzero. Known transport failures can preserve independent local usefulness. No installed consumer action requested yet."
         }
       }
     },
@@ -6287,26 +6292,28 @@
         ".planning/memory-resilience/evidence/Q100.4.2-writers.json",
         ".planning/memory-resilience/evidence/Q100.4.2-callers.json",
         ".planning/memory-resilience/evidence/Q100.4.2-remote.json",
-        ".planning/memory-resilience/evidence/Q100.4.2-local.json"
+        ".planning/memory-resilience/evidence/Q100.4.2-local.json",
+        ".planning/memory-resilience/evidence/Q100.4.2-outcomes.json"
       ],
       "acceptance_record": ".planning/memory-resilience/evidence/Q100.4.2.json",
       "retirement_trigger": "Before Q100.4/Q100/B11.74.7/B10/R02 acceptance.",
       "progress": {
-        "status": "Default local no-op/restart recovery and capture/projection/remote completion reporting have scoped proof; item remains active.",
-        "completed": "Session/message capture precedes bounded local recovery even on unchanged/empty discovery. Same automatic content/source and Git readiness admission as remote, with no remote service construction or egress unless explicitly requested. Pending/failed local recovery preserves capture and blocks derived/remote output; abort stops later stages. Final JSON retains counters and separates capture/projections/remote, folds memory-file results and reports known later/cleanup failure after close. Native five-process driver preserves searchable capture on replay failure and recovers on unchanged/empty input; direct deletion is not resurrected.",
-        "next": "Close optional-stage result contracts before final command-status acceptance: distinguish embedding disabled/declined/pending/finished, surface memory-file exceptions currently collapsed to null and ambient failures currently swallowed. Then finish concurrent source/writer ordering and stale target admission, partial append/caller transaction/candidate validation, and operational legacy/import reconciliation.",
-        "testsPerRuntime": 306,
-        "assertionsPerRuntime": 933,
-        "testFiles": 13,
-        "decisionFaultsDetected": 12,
+        "status": "Explicit optional-stage outcomes have scoped proof; the caller recovery item remains active.",
+        "completed": "Default embedding distinguishes disabled/declined pending from completed pass counts. Ambient distinguishes expected skips from errors. Memory-file exceptions propagate and per-file errors remain visible. CLI continues independent stages, retains capture, fails on pending/failed/missing/malformed outcomes and reports final stage metadata after cleanup. Six local fresh processes include actual default disabled embedding and ambient in an isolated configured home; capture remains searchable and no remote service is invoked. Factory disposal covers provider creation failure.",
+        "next": "Reproduce overlapping source writers/replayers across real processes with deterministic barriers. Prove a stale receipt/target cannot be promoted and an append arriving during replay stays pending without loss. Establish minimum shared serialization/admission contract before implementing its fix. Then independently prove partial append recovery, caller transaction admission, complete candidate validation before append and legacy/import/direct reconciliation. Preserve source/query/model readiness boundaries.",
+        "testsPerRuntime": 332,
+        "assertionsPerRuntime": 1023,
+        "testFiles": 14,
+        "decisionFaultsDetected": 11,
         "survivingDecisionFaults": [],
         "costEvidence": ".planning/memory-resilience/evidence/Q100.4.2-callers.json",
         "scalingConstraint": "Synthetic1000-event guarded write took814ms; idle checks30-67ms. Full replay remains proportional to retained history. Assess representative corpus limits and address scaling before integration/adoption; these small measurements are not an acceptance target or peak-memory proof.",
         "owner": "memory-nexus",
         "trigger": "Before Q100.4/Q100/B11.74.7/B10/R02 acceptance.",
-        "scope": "Matching final affected command/service/transport/public-API group on Windows1.4.1/1.3.14, including pinned child PATH. No full-suite/hosted/install claim.",
+        "scope": "Matching affected command/service/transport/public-API group on Windows1.4.1/1.3.14; synthetic default disabled provider is not actual inference, semantic readiness, full-suite or hosted/install proof.",
         "remoteEvidence": ".planning/memory-resilience/evidence/Q100.4.2-remote.json",
-        "localEvidence": ".planning/memory-resilience/evidence/Q100.4.2-local.json"
+        "localEvidence": ".planning/memory-resilience/evidence/Q100.4.2-local.json",
+        "outcomeEvidence": ".planning/memory-resilience/evidence/Q100.4.2-outcomes.json"
       }
     },
     {
@@ -6326,11 +6333,12 @@
       "evidence": [
         "docs/plans/2026-09-28-projection-replay-execution.md",
         ".planning/memory-resilience/evidence/Q100.4.2-remote.json",
-        ".planning/memory-resilience/evidence/Q100.4.2-local.json"
+        ".planning/memory-resilience/evidence/Q100.4.2-local.json",
+        ".planning/memory-resilience/evidence/Q100.4.2-outcomes.json"
       ],
       "acceptance_record": ".planning/memory-resilience/evidence/Q100.4.3.json",
       "retirement_trigger": "Before Q100.4/Q100/B11.74.7/B10/R02 acceptance.",
-      "observed_gap": "Local/remote native drivers and12 targeted faults pass; production and four changed-test strict compilation pass. Helpers branch93.87 and test functions93.75, CLI source88.2statements/93.22branches/58.82functions/88.88lines and test branches78.78 remain below floors. Native child instrumentation is not aggregated and zero denominators need review. Prior extraction/remote/transport deficits, package/changed-line/platform/cleanup/independent review remain mandatory."
+      "observed_gap": "Optional-stage outcome proof:332tests/1023assertions on two Windows runtimes,11 detected faults, production/eight changed-test strict compilation/isolation. Stage-outcome and memory-files source diagnostic all four metrics100, but CLI/helpers/ambient/embedding source and test metrics still fail required floors (full rows in outcomes evidence). Native child coverage unaggregated; zero denominators need review. Prior extraction/remote/transport, package/changed-line/platform/cleanup and independent review remain mandatory."
     }
   ],
   "decisions": {

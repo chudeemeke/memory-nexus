@@ -37,7 +37,7 @@ const result = await executeSyncCommand({remote:true,quiet:true}, {
   recoverProjections:async()=>({rebuilt:false,pending:false}),
   createSyncService:()=>({fixProjectNames:async()=>0,sync:async()=>({success:true,sessionsDiscovered:0,sessionsProcessed:0,sessionsSkipped:0,messagesInserted:0,toolUsesInserted:0,errors:[],durationMs:0,aborted:false})}),
   loadConfig:()=>({...DEFAULT_CONFIG,machineId:"synthetic",remoteSync:{enabled:true,repositoryUrl:"https://example.invalid/synthetic.git",autoPull:false,autoPush:false}}),
-  reportResults:()=>{}, runAmbientContextGeneration:async()=>{},
+  reportResults:()=>{}, runAmbientContextGeneration:async()=>({status:"skipped",reason:"disabled"}),
 });
 db = open();
 const state = {exitCode:result.exitCode,facts:scalar(db,"SELECT COUNT(*) AS count FROM facts").count,

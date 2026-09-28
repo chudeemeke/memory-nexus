@@ -11,12 +11,14 @@ import { executeSyncCommand } from ${source("presentation/cli/commands/sync/inde
 import { initializeDatabase, closeDatabase, getDefaultDbPath } from ${source("infrastructure/database/index.ts")};
 import { appendEvent, rebuildProjections } from ${source("infrastructure/database/event-log.ts")};
 import { Fact } from ${source("domain/entities/fact.ts")};
-import { DEFAULT_CONFIG } from ${source("infrastructure/hooks/config-manager.ts")};
+import { DEFAULT_CONFIG, getConfigDir, getConfigPath } from ${source("infrastructure/hooks/config-manager.ts")};
 import { getEventsDir, getMachineLogPath } from ${source("infrastructure/paths.ts")};
 import { existsSync, readFileSync, mkdirSync, writeFileSync, unlinkSync } from "node:fs";
 import { join } from "node:path";
 import { homedir } from "node:os";
 const phase = process.argv[2], log = getMachineLogPath("synthetic");
+mkdirSync(getConfigDir(),{recursive:true});
+writeFileSync(getConfigPath(),JSON.stringify({...DEFAULT_CONFIG,embedding:{...DEFAULT_CONFIG.embedding,enabled:false},ambientContext:{...DEFAULT_CONFIG.ambientContext,enabled:false}}));
 const sessionDir=join(homedir(),".claude","projects","C--synthetic"),sessionFile=join(sessionDir,"synthetic-session.jsonl");
 const open = () => initializeDatabase({ path: getDefaultDbPath() }).db;
 function scalar(db,sql) { using statement=db.prepare(sql);return statement.get(); }
@@ -32,11 +34,10 @@ else if(phase==="empty") {unlinkSync(sessionFile);await appendEvent(event("later
 else if(phase==="diverged") db.exec("DELETE FROM facts WHERE uuid='baseline'");
 closeDatabase(db);
 let remoteCalls=0;
-const result=await executeSyncCommand({json:true}, {
+const result=await executeSyncCommand({json:true,...(phase==="disabled-embedding"?{embed:true}:{})}, {
   setupSignalHandlers:()=>{},
   loadConfig:()=>({...DEFAULT_CONFIG,machineId:"synthetic",remoteSync:{enabled:true,repositoryUrl:"https://example.invalid/synthetic.git",autoPull:true,autoPush:true}}),
   createRemoteEventSyncService:()=>{remoteCalls++;throw new Error("Implicit remote invocation");},
-  runAmbientContextGeneration:async()=>{},
 });
 db=open();
 const state={exitCode:result.exitCode,remoteCalls,facts:scalar(db,"SELECT COUNT(*) AS count FROM facts").count,
@@ -83,6 +84,10 @@ console.log("LOCAL_RECOVERY_RESULT="+JSON.stringify(state));
     const idle = run("idle");
     expect(idle.state).toEqual(empty.state);
     expect(idle.report.projections).toEqual({ status: "current", rebuilt: false });
+    const disabled = run("disabled-embedding");
+    expect(disabled.state).toEqual({ ...idle.state, exitCode: 1 });
+    expect(disabled.report).toMatchObject({ success: false, capture: { success: true },
+      embedding: { status: "pending", reason: "disabled" }, ambient: { status: "skipped", reason: "disabled" } });
     const divergent = run("diverged");
     expect(divergent.state).toMatchObject({ exitCode: 1, facts: 2, baseline: 0 });
     expect(divergent.state.source).toBe(empty.state.source);

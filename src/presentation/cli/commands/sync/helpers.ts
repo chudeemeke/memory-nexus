@@ -145,12 +145,14 @@ export function reportResults(
         capture: { success: result.success && result.errors.length === 0 && !result.aborted },
         projections: completion.projections,
         remote: completion.remote,
+        embedding: completion.embedding,
+        ambient: completion.ambient,
         completionErrors: completion.errors,
-        ...(completion.memoryFiles ? { memoryFiles: {
+        memoryFiles: { ...completion.memoryFileSync, ...(completion.memoryFiles ? {
           indexed: completion.memoryFiles.filesIndexed,
           skipped: completion.memoryFiles.filesSkipped,
           errors: completion.memoryFiles.errors,
-        } } : {}),
+        } : {}) },
       } : {}),
     };
     console.log(JSON.stringify(output, null, 2));
@@ -177,6 +179,10 @@ export function reportResults(
   if (completion) {
     console.log(`  Projections: ${completion.projections.status}`);
     console.log(`  Remote: ${completion.remote.status}`);
+    for (const [name, outcome] of [["Embedding", completion.embedding], ["Ambient", completion.ambient], ["Memory files", completion.memoryFileSync]] as const) {
+      const detail = "error" in outcome ? outcome.error : "reason" in outcome ? outcome.reason : "";
+      console.log(`  ${name}: ${outcome.status}${detail ? ` (${detail})` : ""}`);
+    }
     for (const error of completion.errors) console.log(`  Error: ${error}`);
   }
 

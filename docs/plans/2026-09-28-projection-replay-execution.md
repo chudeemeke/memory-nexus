@@ -344,3 +344,16 @@ gaps remain owned: ambient failures are swallowed, memory-file exceptions can
 return the same null as no work, and embedding returns void for disabled/declined
 and finished outcomes. Q074/Q076/Q079/Q100.4.2 must resolve these before final E7
 acceptance; new capture/projection/remote fields do not establish semantic readiness.
+
+Optional-stage contract: expose embedding, ambient and memory-file outcomes in the
+same final report. Completed, skipped, pending, failed, not requested and not run
+are distinct. Disabled/declined explicitly requested embedding is pending and
+nonzero. Disabled ambient or its known no-context/project-not-found result is an
+expected skip; unknown unsuccessful ambient results and exceptions fail. Memory
+file no-work stays distinguishable from exceptions and returned per-file errors.
+Continue independent stages after a failure, preserving capture and partial counts.
+Missing legacy injected-handler outcomes are pending; malformed outcomes fail closed.
+Only known primitive fields enter the report. An embedding pass completion reports
+processed/skipped counts, not model/index/query readiness or concurrent-source
+exhaustion. Those remain separate acceptance gates. No model is installed or new
+fallback/provider/egress policy activated by this reporting repair.

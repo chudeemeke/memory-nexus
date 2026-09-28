@@ -23,6 +23,7 @@ import { executeDryRun, handleError, reportResults, createDriveResolver } from "
 import { loadConfig } from "../../../../infrastructure/hooks/config-manager.js";
 import { PatternRedactor } from "../../../../infrastructure/security/pattern-redactor.js";
 import { unknownErrorMessage, unknownToError } from "../../../../domain/errors/unknown-error.js";
+import { normalizeStageOutcome, stageIncomplete } from "./stage-outcome.js";
 
 type ResolvedSyncCommandDeps = Omit<Required<SyncCommandDeps>, "removeBackgroundLock"> & {
   removeBackgroundLock?: () => void;
@@ -143,7 +144,9 @@ export async function executeSyncCommand(
   const cleanupFn = async (): Promise<void> => { resolved.closeDatabase(db); };
   let captureResult: SyncResult | undefined;
   const completion: SyncCompletionMetadata = { success: false, projections: { status: "not_run" },
-    remote: { status: options.remote ? "not_run" : "not_requested" }, errors: [] };
+    remote: { status: options.remote ? "not_run" : "not_requested" },
+    embedding: { status: options.embed ? "not_run" : "not_requested" },
+    ambient: { status: "not_run" }, memoryFileSync: { status: "not_run" }, errors: [] };
   const outcome: CommandResult = { exitCode: 1 };
   const finish = (exitCode: number): CommandResult => { outcome.exitCode = exitCode; return outcome; };
 
@@ -271,17 +274,30 @@ export async function executeSyncCommand(
       process.env.MEMORY_LEGACY_MEMORY_FILES === "1";
 
     if (legacyMemoryFilesEnabled) {
-      const memoryResult = await resolved.runMemoryFileSync(db, workOptions);
-      if (memoryResult) {
-        completion.memoryFiles = memoryResult;
-        if (!options.json) resolved.reportMemoryFileResults(memoryResult, options);
+      try {
+        const memoryResult = await resolved.runMemoryFileSync(db, workOptions);
+        if (memoryResult) {
+          completion.memoryFiles = memoryResult;
+          completion.memoryFileSync = memoryResult.errors.length > 0
+            ? { status: "failed", error: "Some memory files could not be synchronized" } : { status: "completed" };
+          if (!options.json) resolved.reportMemoryFileResults(memoryResult, options);
+        } else {
+          completion.memoryFileSync = { status: "skipped", reason: "no-files" };
+        }
+      } catch (error) {
+        completion.memoryFileSync = { status: "failed", error: unknownErrorMessage(error) };
       }
-    } else if (options.verbose && !workOptions.quiet) {
-      console.log("  Memory files: skipped (legacy opt-in disabled)");
+    } else {
+      completion.memoryFileSync = { status: "not_requested" };
+      if (options.verbose && !workOptions.quiet) console.log("  Memory files: skipped (legacy opt-in disabled)");
     }
 
     // Ambient context generation (after facts/session projections are updated)
-    if (!options.dryRun) await resolved.runAmbientContextGeneration(db, workOptions);
+    try {
+      completion.ambient = normalizeStageOutcome(await resolved.runAmbientContextGeneration(db, workOptions));
+    } catch (error) {
+      completion.ambient = { status: "failed", error: unknownErrorMessage(error) };
+    }
 
     const syncExitCode = (!result.success || result.errors.length > 0 || remoteFailed || (completion.memoryFiles?.errors.length ?? 0) > 0) ? 1 : 0;
 
@@ -289,8 +305,9 @@ export async function executeSyncCommand(
     if (options.embed && !options.dryRun) {
       const isBackground = process.env.MEMORY_EMBED_BACKGROUND === "1";
       try {
-        await resolved.runEmbeddingPass(db, workOptions);
+        completion.embedding = normalizeStageOutcome(await resolved.runEmbeddingPass(db, workOptions));
       } catch (embeddingError) {
+        completion.embedding = { status: "failed", error: unknownErrorMessage(embeddingError) };
         completion.errors.push(unknownErrorMessage(embeddingError));
         if (options.json) {
           console.error(formatErrorJson(
@@ -315,7 +332,7 @@ export async function executeSyncCommand(
       }
     }
 
-    return finish(syncExitCode);
+    return finish(syncExitCode || [completion.embedding, completion.ambient, completion.memoryFileSync].some(stageIncomplete) ? 1 : 0);
   } catch (error) {
     reporter.stop();
     completion.errors.push(unknownErrorMessage(error));

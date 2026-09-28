@@ -7,9 +7,19 @@
 import { describe, expect, it, afterEach, spyOn, mock } from "bun:test";
 import { runEmbeddingPass, handleModelChange } from "./embedding-pass.js";
 import { EmbeddingProviderError } from "../../../../domain/ports/embedding.js";
+import { DEFAULT_CONFIG, type MemoryConfig } from "../../../../infrastructure/hooks/config-manager.js";
 import type { ModelState } from "../../../../application/services/embedding-service.js";
 
 describe("runEmbeddingPass", () => {
+  it("disposes the factory if provider creation fails before a pass starts", async () => {
+    const failure = new Error("synthetic provider creation failure");
+    const dispose = mock(async () => {});
+    await expect(runEmbeddingPass({} as any, { quiet: true }, {
+      config: DEFAULT_CONFIG,
+      factory: { createFromConfig: () => { throw failure; }, dispose } as any,
+    })).rejects.toBe(failure);
+    expect(dispose).toHaveBeenCalledTimes(1);
+  });
   it("re-embeds a fully indexed corpus when a replacement model has the same dimensions", async () => {
     let embedded = true;
     const clearAllEmbeddings = mock(() => { embedded = false; });
@@ -73,8 +83,10 @@ describe("runEmbeddingPass", () => {
       createFromConfig: () => null,
       dispose: async () => {},
     };
-    const mockConfig = {
+    const mockConfig: MemoryConfig = {
+      ...DEFAULT_CONFIG,
       embedding: {
+        ...DEFAULT_CONFIG.embedding,
         enabled: false,
         provider: "local",
         model: "test-model",
@@ -83,10 +95,12 @@ describe("runEmbeddingPass", () => {
       },
     };
 
-    await runEmbeddingPass(mockDb, {}, {
+    const outcome = await runEmbeddingPass(mockDb, {}, {
       factory: mockFactory as any,
       config: mockConfig,
     });
+
+    expect(outcome).toEqual({ status: "pending", reason: "disabled" });
 
     expect(logSpy).toHaveBeenCalledWith(
       expect.stringContaining("disabled")
@@ -100,8 +114,10 @@ describe("runEmbeddingPass", () => {
       createFromConfig: () => null,
       dispose: async () => {},
     };
-    const mockConfig = {
+    const mockConfig: MemoryConfig = {
+      ...DEFAULT_CONFIG,
       embedding: {
+        ...DEFAULT_CONFIG.embedding,
         enabled: false,
         provider: "local",
         model: "test-model",
@@ -138,8 +154,10 @@ describe("runEmbeddingPass", () => {
       dispose: async () => {},
     };
 
-    const mockConfig = {
+    const mockConfig: MemoryConfig = {
+      ...DEFAULT_CONFIG,
       embedding: {
+        ...DEFAULT_CONFIG.embedding,
         enabled: true,
         provider: "local",
         model: "test-model",
@@ -158,11 +176,12 @@ describe("runEmbeddingPass", () => {
       clearAllEmbeddings: () => {},
     };
 
-    await runEmbeddingPass({} as any, {}, {
+    const outcome = await runEmbeddingPass({} as any, {}, {
       factory: mockFactory as any,
       config: mockConfig,
       repositoryOverride: mockRepo as any,
     });
+    expect(outcome).toEqual({ status: "completed", embedded: 0, skipped: 0 });
 
     expect(logSpy).toHaveBeenCalledWith(
       expect.stringContaining("already embedded")
@@ -186,8 +205,10 @@ describe("runEmbeddingPass", () => {
       createFromConfig: () => mockProvider,
       dispose: async () => {},
     };
-    const mockConfig = {
+    const mockConfig: MemoryConfig = {
+      ...DEFAULT_CONFIG,
       embedding: {
+        ...DEFAULT_CONFIG.embedding,
         enabled: true,
         provider: "local",
         model: "test-model",
@@ -240,8 +261,10 @@ describe("runEmbeddingPass", () => {
       dispose: async () => {},
     };
 
-    const mockConfig = {
+    const mockConfig: MemoryConfig = {
+      ...DEFAULT_CONFIG,
       embedding: {
+        ...DEFAULT_CONFIG.embedding,
         enabled: true,
         provider: "local",
         model: "test-model",
@@ -256,7 +279,7 @@ describe("runEmbeddingPass", () => {
       getStoredModelName: () => null,
       getEmbeddedCount: () => 0,
       getTotalMessageCount: () => 10,
-      findUnembedded: (limit: number) => {
+      findUnembedded: (_limit: number) => {
         callCount++;
         if (callCount === 1) {
           return Array.from({ length: 10 }, (_, i) => ({
@@ -319,8 +342,10 @@ describe("runEmbeddingPass", () => {
       dispose: async () => {},
     };
 
-    const mockConfig = {
+    const mockConfig: MemoryConfig = {
+      ...DEFAULT_CONFIG,
       embedding: {
+        ...DEFAULT_CONFIG.embedding,
         enabled: true,
         provider: "ollama",
         model: "nomic-embed-text",
@@ -351,11 +376,12 @@ describe("runEmbeddingPass", () => {
       clearAllEmbeddings: () => {},
     };
 
-    await runEmbeddingPass({} as any, {}, {
+    const outcome = await runEmbeddingPass({} as any, {}, {
       factory: mockFactory as any,
       config: mockConfig,
       repositoryOverride: mockRepo as any,
     });
+    expect(outcome).toEqual({ status: "completed", embedded: 1, skipped: 1 });
 
     const output = logSpy.mock.calls.map((call) => String(call[0])).join("\n");
     expect(output).toContain("Embedded 1 messages");
@@ -384,8 +410,10 @@ describe("runEmbeddingPass", () => {
       dispose: async () => {},
     };
 
-    const mockConfig = {
+    const mockConfig: MemoryConfig = {
+      ...DEFAULT_CONFIG,
       embedding: {
+        ...DEFAULT_CONFIG.embedding,
         enabled: true,
         provider: "local",
         model: "test-model",
@@ -437,8 +465,10 @@ describe("runEmbeddingPass", () => {
       createFromConfig: () => mockProvider,
       dispose: async () => {},
     };
-    const mockConfig = {
+    const mockConfig: MemoryConfig = {
+      ...DEFAULT_CONFIG,
       embedding: {
+        ...DEFAULT_CONFIG.embedding,
         enabled: true,
         provider: "local",
         model: "test-model",
@@ -495,8 +525,10 @@ describe("runEmbeddingPass", () => {
       dispose: async () => { disposed = true; },
     };
 
-    const mockConfig = {
+    const mockConfig: MemoryConfig = {
+      ...DEFAULT_CONFIG,
       embedding: {
+        ...DEFAULT_CONFIG.embedding,
         enabled: true,
         provider: "local",
         model: "new-model",
@@ -521,11 +553,12 @@ describe("runEmbeddingPass", () => {
       return [];
     };
 
-    await runEmbeddingPass({} as any, {}, {
+    const outcome = await runEmbeddingPass({} as any, {}, {
       factory: mockFactory as any,
       config: mockConfig,
       repositoryOverride: mockRepo as any,
     });
+    expect(outcome).toEqual({ status: "pending", reason: "model-change-not-confirmed" });
 
     expect(disposed).toBe(true);
     expect(embedBatchCalled).toBe(false);
@@ -568,8 +601,10 @@ describe("runEmbeddingPass", () => {
       dispose: async () => {},
     };
 
-    const mockConfig = {
+    const mockConfig: MemoryConfig = {
+      ...DEFAULT_CONFIG,
       embedding: {
+        ...DEFAULT_CONFIG.embedding,
         enabled: true,
         provider: "local",
         model: "new-model",
@@ -585,7 +620,7 @@ describe("runEmbeddingPass", () => {
       getStoredEmbeddingDimensions: () => 384,
       getEmbeddedCount: () => 0,
       getTotalMessageCount: () => 5,
-      findUnembedded: (limit: number) => {
+      findUnembedded: (_limit: number) => {
         callCount++;
         if (callCount === 1) {
           return Array.from({ length: 5 }, (_, i) => ({
@@ -612,6 +647,7 @@ describe("runEmbeddingPass", () => {
     );
     expect(clearLine).toBeDefined();
     expect(clearCalled).toBe(true);
+    expect(embedBatchCalled).toBe(true);
 
     logSpy.mockRestore();
   });
@@ -637,8 +673,10 @@ describe("runEmbeddingPass", () => {
       createFromConfig: () => mockProvider,
       dispose: async () => {},
     };
-    const mockConfig = {
+    const mockConfig: MemoryConfig = {
+      ...DEFAULT_CONFIG,
       embedding: {
+        ...DEFAULT_CONFIG.embedding,
         enabled: true,
         provider: "local",
         model: "new-model",
@@ -696,8 +734,10 @@ describe("runEmbeddingPass", () => {
       dispose: async () => { disposed = true; },
     };
 
-    const mockConfig = {
+    const mockConfig: MemoryConfig = {
+      ...DEFAULT_CONFIG,
       embedding: {
+        ...DEFAULT_CONFIG.embedding,
         enabled: true,
         provider: "local",
         model: "test-model",
@@ -757,8 +797,10 @@ describe("runEmbeddingPass dimension change detection", () => {
       dispose: async () => {},
     };
 
-    const mockConfig = {
+    const mockConfig: MemoryConfig = {
+      ...DEFAULT_CONFIG,
       embedding: {
+        ...DEFAULT_CONFIG.embedding,
         enabled: true,
         provider: "openai",
         model: "text-embedding-3-small",
@@ -774,7 +816,7 @@ describe("runEmbeddingPass dimension change detection", () => {
       getStoredEmbeddingDimensions: () => 384,
       getEmbeddedCount: () => 0,
       getTotalMessageCount: () => 5,
-      findUnembedded: (limit: number) => {
+      findUnembedded: (_limit: number) => {
         callCount++;
         if (callCount === 1) {
           return Array.from({ length: 5 }, (_, i) => ({
@@ -829,8 +871,10 @@ describe("runEmbeddingPass dimension change detection", () => {
       dispose: async () => {},
     };
 
-    const mockConfig = {
+    const mockConfig: MemoryConfig = {
+      ...DEFAULT_CONFIG,
       embedding: {
+        ...DEFAULT_CONFIG.embedding,
         enabled: true,
         provider: "local",
         model: "other-384d-model",
@@ -846,7 +890,7 @@ describe("runEmbeddingPass dimension change detection", () => {
       getStoredEmbeddingDimensions: () => 384,
       getEmbeddedCount: () => 0,
       getTotalMessageCount: () => 5,
-      findUnembedded: (limit: number) => {
+      findUnembedded: (_limit: number) => {
         callCount++;
         if (callCount === 1) {
           return Array.from({ length: 5 }, (_, i) => ({
@@ -897,8 +941,10 @@ describe("runEmbeddingPass dimension change detection", () => {
       dispose: async () => {},
     };
 
-    const mockConfig = {
+    const mockConfig: MemoryConfig = {
+      ...DEFAULT_CONFIG,
       embedding: {
+        ...DEFAULT_CONFIG.embedding,
         enabled: true,
         provider: "local",
         model: "test-model",
@@ -914,7 +960,7 @@ describe("runEmbeddingPass dimension change detection", () => {
       getStoredEmbeddingDimensions: () => null,
       getEmbeddedCount: () => 0,
       getTotalMessageCount: () => 5,
-      findUnembedded: (limit: number) => {
+      findUnembedded: (_limit: number) => {
         callCount++;
         if (callCount === 1) {
           return Array.from({ length: 5 }, (_, i) => ({
@@ -963,8 +1009,10 @@ describe("runEmbeddingPass dimension change detection", () => {
       dispose: async () => {},
     };
 
-    const mockConfig = {
+    const mockConfig: MemoryConfig = {
+      ...DEFAULT_CONFIG,
       embedding: {
+        ...DEFAULT_CONFIG.embedding,
         enabled: true,
         provider: "openai",
         model: "text-embedding-3-small",
@@ -980,7 +1028,7 @@ describe("runEmbeddingPass dimension change detection", () => {
       getStoredEmbeddingDimensions: () => 384,
       getEmbeddedCount: () => 0,
       getTotalMessageCount: () => 5,
-      findUnembedded: (limit: number) => {
+      findUnembedded: (_limit: number) => {
         callCount++;
         if (callCount === 1) {
           return Array.from({ length: 5 }, (_, i) => ({
@@ -1036,8 +1084,10 @@ describe("runEmbeddingPass dimension change detection", () => {
       dispose: async () => {},
     };
 
-    const mockConfig = {
+    const mockConfig: MemoryConfig = {
+      ...DEFAULT_CONFIG,
       embedding: {
+        ...DEFAULT_CONFIG.embedding,
         enabled: true,
         provider: "openai",
         model: "text-embedding-3-small",
@@ -1053,7 +1103,7 @@ describe("runEmbeddingPass dimension change detection", () => {
       getStoredEmbeddingDimensions: () => null,
       getEmbeddedCount: () => 0,
       getTotalMessageCount: () => 5,
-      findUnembedded: (limit: number) => {
+      findUnembedded: (_limit: number) => {
         callCount++;
         if (callCount === 1) {
           return Array.from({ length: 5 }, (_, i) => ({
@@ -1179,7 +1229,6 @@ describe("handleModelChange", () => {
       needsReEmbed: true,
       storedHash: "abc123deadbeef00",
       currentHash: "def456",
-      storedModelName: undefined,
       currentModelName: "new-model",
       embeddedCount: 50,
     };
@@ -1208,11 +1257,8 @@ describe("handleModelChange", () => {
     const modelState: ModelState = {
       modelChanged: true,
       needsReEmbed: true,
-      storedHash: undefined,
       currentHash: "def456",
-      storedModelName: undefined,
       currentModelName: "new-model",
-      embeddedCount: undefined,
     };
 
     const result = await handleModelChange(modelState, {});

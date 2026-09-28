@@ -42,6 +42,9 @@ export interface RemoteEventSyncCommandService {
 
 export interface SyncCompletionMetadata {
   success: boolean;
+  embedding: import("./stage-outcome.js").SyncStageOutcome;
+  ambient: import("./stage-outcome.js").SyncStageOutcome;
+  memoryFileSync: import("./stage-outcome.js").SyncStageOutcome;
   projections: {
     status: "not_run" | "current" | "pending" | "failed";
     rebuilt?: boolean;
@@ -114,9 +117,9 @@ export interface SyncCommandDeps {
   /** Override memory file sync reporting */
   reportMemoryFileResults?: typeof import("./memory-files.js").reportMemoryFileResults;
   /** Override ambient context generation */
-  runAmbientContextGeneration?: typeof import("./ambient.js").runAmbientContextGeneration;
+  runAmbientContextGeneration?: (db: import("bun:sqlite").Database, options: SyncCommandOptions) => Promise<import("./stage-outcome.js").SyncStageOutcome | void>;
   /** Override embedding pass */
-  runEmbeddingPass?: typeof import("./embedding-pass.js").runEmbeddingPass;
+  runEmbeddingPass?: (db: import("bun:sqlite").Database, options: SyncCommandOptions) => Promise<import("./stage-outcome.js").SyncStageOutcome | void>;
   /** Override background embedding lock removal */
   removeBackgroundLock?: () => void;
 }

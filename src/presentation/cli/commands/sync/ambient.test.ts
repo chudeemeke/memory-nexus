@@ -9,6 +9,21 @@ import { initializeDatabase, closeDatabase } from "../../../../infrastructure/da
 import { createDefaultAmbientService, runAmbientContextGeneration } from "./ambient.js";
 
 describe("runAmbientContextGeneration", () => {
+  it("reports an unexpected unsuccessful result as failure rather than a normal skip", async () => {
+    const log = spyOn(console, "log").mockImplementation(() => {});
+    const error = spyOn(console, "error").mockImplementation(() => {});
+    try {
+      const outcome = await runAmbientContextGeneration({} as any, {}, {
+        loadConfig: () => ({ ambientContext: { enabled: true, budget: 800 } }),
+        resolveAutoMemoryDir: () => "/synthetic",
+        resolveProjectName: () => "synthetic",
+        createAmbientService: () => ({ generateAmbientContext: async () => ({ success: false, reason: "write-rejected" }) }),
+      });
+      expect(outcome).toEqual({ status: "failed", error: "write-rejected" });
+      expect(log).not.toHaveBeenCalled();
+      expect(error).toHaveBeenCalledWith(expect.stringContaining("write-rejected"));
+    } finally { log.mockRestore(); error.mockRestore(); }
+  });
   it("production ambient service wires governed persona, graph, ranking, and utility context", async () => {
     const { db } = initializeDatabase({ path: ":memory:", walMode: false, quickCheck: false });
     try {
@@ -32,7 +47,7 @@ describe("runAmbientContextGeneration", () => {
     let generateCalled = false;
     let generateOptions: any = null;
 
-    await runAmbientContextGeneration(
+    const outcome = await runAmbientContextGeneration(
       {} as any, // db (unused with deps override)
       {},        // options (not quiet, not dryRun)
       {
@@ -51,6 +66,7 @@ describe("runAmbientContextGeneration", () => {
       },
     );
 
+    expect(outcome).toEqual({ status: "completed", contextTokens: 500 });
     expect(generateCalled).toBe(true);
     expect(generateOptions.projectName).toBe("test-project");
     expect(generateOptions.budget).toBe(800);
@@ -82,11 +98,11 @@ describe("runAmbientContextGeneration", () => {
     expect(generateCalled).toBe(false);
   });
 
-  it("does not throw on error (non-fatal)", async () => {
+  it("returns failure on error without throwing away independent work", async () => {
     const errorSpy = spyOn(console, "error").mockImplementation(() => {});
 
     // Should not throw
-    await runAmbientContextGeneration(
+    const outcome = await runAmbientContextGeneration(
       {} as any,
       {},
       {
@@ -103,6 +119,7 @@ describe("runAmbientContextGeneration", () => {
       },
     );
 
+    expect(outcome).toEqual({ status: "failed", error: "test error" });
     // Should have logged error to stderr
     const errorCalls = errorSpy.mock.calls.map(c => c[0]);
     const errorLine = errorCalls.find((s: string) =>

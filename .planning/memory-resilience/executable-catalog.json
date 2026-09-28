@@ -22701,7 +22701,7 @@
     {
       "path": "src/presentation/cli/commands/sync/ambient.test.ts",
       "package": "package.json",
-      "sourceHash": "5c331cbe1efa2f9eff3476417969953308c2ddf854d492890b35c9177513bbcb",
+      "sourceHash": "720dd51a090b67104a59bf7728efbb2000a27e7894a0c932976d16aaac536e19",
       "language": ".ts",
       "syntax": "test-driver",
       "imports": [
@@ -22712,13 +22712,16 @@
       "declarations": [
         "ambientLine",
         "ambientService",
+        "error",
         "errorCalls",
         "errorLine",
         "errorSpy",
         "generateCalled",
         "generateOptions",
+        "log",
         "logCalls",
         "logSpy",
+        "outcome",
         "skipLine",
         "smartContext",
         "successLine"
@@ -22727,16 +22730,22 @@
         "closeDatabase",
         "createDefaultAmbientService",
         "describe",
+        "error.mockRestore",
         "errorCalls.find",
         "errorSpy.mock.calls.map",
         "errorSpy.mockRestore",
         "expect",
+        "expect.not.toHaveBeenCalled",
+        "expect.stringContaining",
         "expect.toBe",
         "expect.toBeDefined",
         "expect.toBeUndefined",
         "expect.toContain",
+        "expect.toEqual",
+        "expect.toHaveBeenCalledWith",
         "initializeDatabase",
         "it",
+        "log.mockRestore",
         "logCalls.find",
         "logSpy.mock.calls.map",
         "logSpy.mockRestore",
@@ -22749,12 +22758,13 @@
     {
       "path": "src/presentation/cli/commands/sync/ambient.ts",
       "package": "package.json",
-      "sourceHash": "36fb678a7e3ab23766d77687f9cafc6c5b2a5fbc5cc5511595d92c8a84564ed8",
+      "sourceHash": "75d0dae998ab6c214740765f91095e5ce3ef56d313a18155d62ccfc30e46611f",
       "language": ".ts",
       "syntax": "executable",
       "imports": [
         "../../../../domain/errors/unknown-error.js",
         "../../../../infrastructure/database/index.js",
+        "./stage-outcome.js",
         "./types.js"
       ],
       "declarations": [
@@ -22856,12 +22866,13 @@
     {
       "path": "src/presentation/cli/commands/sync/embedding-pass.test.ts",
       "package": "package.json",
-      "sourceHash": "4aa824f00d181d3f6e895cffbda4f414b6a4bff5ea71f0de237e2e35b82f1298",
+      "sourceHash": "e816fa0dd85ee01cb4f92eee053b8afa2bc4c8a5a90442225acee96d2eb65fb0",
       "language": ".ts",
       "syntax": "test-driver",
       "imports": [
         "../../../../application/services/embedding-service.js",
         "../../../../domain/ports/embedding.js",
+        "../../../../infrastructure/hooks/config-manager.js",
         "./embedding-pass.js",
         "bun:test"
       ],
@@ -22878,6 +22889,7 @@
         "embedded",
         "errorCalls",
         "errorSpy",
+        "failure",
         "failureLine",
         "logCalls",
         "logSpy",
@@ -22890,6 +22902,7 @@
         "offline",
         "originalStdinIsTTY",
         "originalTTY",
+        "outcome",
         "output",
         "provider",
         "rawOversized",
@@ -22918,11 +22931,13 @@
         "expect.not.toContain",
         "expect.not.toHaveBeenCalled",
         "expect.not.toHaveBeenCalledWith",
+        "expect.rejects.toBe",
         "expect.rejects.toThrow",
         "expect.stringContaining",
         "expect.toBe",
         "expect.toBeDefined",
         "expect.toContain",
+        "expect.toEqual",
         "expect.toHaveBeenCalledTimes",
         "expect.toHaveBeenCalledWith",
         "expect.toMatch",
@@ -22945,13 +22960,14 @@
     {
       "path": "src/presentation/cli/commands/sync/embedding-pass.ts",
       "package": "package.json",
-      "sourceHash": "84ccf232122c351455dbe7313f721eec2b6706b061ff937bd3dd4d4a57604aa5",
+      "sourceHash": "6044c4b2a6af8a073e1242694abf3b8bb4cc86d74855b860990e8af626116aa9",
       "language": ".ts",
       "syntax": "executable",
       "imports": [
         "../../../../application/services/index.js",
         "../../../../infrastructure/database/index.js",
         "./helpers.js",
+        "./stage-outcome.js",
         "./types.js"
       ],
       "declarations": [
@@ -23089,7 +23105,7 @@
     {
       "path": "src/presentation/cli/commands/sync/helpers.ts",
       "package": "package.json",
-      "sourceHash": "82724f53a1b92c15a61548522a75d70e9d5eb13b2f6d695acc8782b705364cdd",
+      "sourceHash": "cc56c8a855091072998338fc8410e8ea4e86b90ae58ae9369d3a930465e11c68",
       "language": ".ts",
       "syntax": "executable",
       "imports": [
@@ -23106,6 +23122,7 @@
         "checkpoint",
         "completedIds",
         "createDriveResolver",
+        "detail",
         "duration",
         "err",
         "error",
@@ -23151,7 +23168,7 @@
     {
       "path": "src/presentation/cli/commands/sync/index.test.ts",
       "package": "package.json",
-      "sourceHash": "875315d8b0009314925e1fe6d314c3f560b2a5ab6582443f97fc7ca0d3ba1669",
+      "sourceHash": "50c67884135a95aedbe8a7442b3d68992a86bcd8e698e9b2a9505c3e708b11ed",
       "language": ".ts",
       "syntax": "test-driver",
       "imports": [
@@ -23182,6 +23199,7 @@
         "fixNamesOption",
         "forceOption",
         "handleBackgroundMode",
+        "handler",
         "harness",
         "helpInfo",
         "jsonOption",
@@ -23207,6 +23225,7 @@
         "syncResult",
         "syncService",
         "testDir",
+        "value",
         "verboseOption",
         "warnSpy",
         "warnings"
@@ -23274,7 +23293,7 @@
     {
       "path": "src/presentation/cli/commands/sync/index.ts",
       "package": "package.json",
-      "sourceHash": "3dea5ca7504bb464dafd508cab6cce91896dfce50db9c1f183f9c6777497d49a",
+      "sourceHash": "daef951d0d035a8ab1bf1d4f02951df344f1e185838426811c7329608b6fd62d",
       "language": ".ts",
       "syntax": "executable",
       "imports": [
@@ -23294,6 +23313,7 @@
         "./embedding-pass.js",
         "./helpers.js",
         "./memory-files.js",
+        "./stage-outcome.js",
         "./types.js",
         "commander"
       ],
@@ -23362,6 +23382,7 @@
         "formatErrorJson",
         "getAllLogFiles",
         "getEventsDir",
+        "normalizeStageOutcome",
         "recover",
         "recoverDefaultProjections",
         "recoverPendingProjections",
@@ -23435,11 +23456,12 @@
     {
       "path": "src/presentation/cli/commands/sync/memory-files.test.ts",
       "package": "package.json",
-      "sourceHash": "e5e11eaa01d49b566e380fdfc549142b9fc89098d04e68b2ddf58bd55c5d1e53",
+      "sourceHash": "d4526ca0ed981d6dac5496fe13d1467b37e87dee00b9b7794a78a83861248e51",
       "language": ".ts",
       "syntax": "test-driver",
       "imports": [
         "../../../../../tests/helpers/test-database.js",
+        "../../../../application/services/memory-file-sync-service.js",
         "./memory-files.js",
         "bun:test",
         "node:fs",
@@ -23449,12 +23471,15 @@
       "declarations": [
         "consoleLogSpy",
         "dir",
+        "failure",
+        "log",
         "memoryHome",
         "mod",
         "originalMemoryHome",
         "output",
         "parsed",
         "result",
+        "sync",
         "tempDirs",
         "testDb"
       ],
@@ -23471,13 +23496,18 @@
         "expect.not.toBeNull",
         "expect.not.toContain",
         "expect.not.toHaveBeenCalled",
+        "expect.rejects.toBe",
+        "expect.stringContaining",
         "expect.toBe",
         "expect.toBeNull",
         "expect.toContain",
         "expect.toEqual",
+        "expect.toHaveBeenCalledWith",
         "expect.toHaveLength",
         "it",
         "join",
+        "log.mockClear",
+        "log.mockRestore",
         "mkdirSync",
         "mkdtempSync",
         "reportMemoryFileResults",
@@ -23485,6 +23515,8 @@
         "runMemoryFileSync",
         "spyOn",
         "spyOn.mockImplementation",
+        "spyOn.mockRejectedValue",
+        "sync.mockRestore",
         "tempDirs.push",
         "testDb.cleanup",
         "tmpdir",
@@ -23494,7 +23526,7 @@
     {
       "path": "src/presentation/cli/commands/sync/memory-files.ts",
       "package": "package.json",
-      "sourceHash": "5229f1819c4ae546fbd1896e04de150aba8e6d894199af0ced6d108df4f8ef14",
+      "sourceHash": "565537f325d6efd33363ac5224d0d0e808c7d736625aad9380b5b98ae8dd5fad",
       "language": ".ts",
       "syntax": "executable",
       "imports": [
@@ -23525,9 +23557,52 @@
       ]
     },
     {
+      "path": "src/presentation/cli/commands/sync/stage-outcome.test.ts",
+      "package": "package.json",
+      "sourceHash": "7a05b55274a6f92a35dc80374a8c7a73fa35313ef0800f2549f8e75b0c5d6baf",
+      "language": ".ts",
+      "syntax": "test-driver",
+      "imports": [
+        "./stage-outcome.js",
+        "bun:test"
+      ],
+      "declarations": [],
+      "calls": [
+        "expect",
+        "expect.toBe",
+        "expect.toEqual",
+        "it",
+        "it.each",
+        "normalizeStageOutcome",
+        "stageIncomplete"
+      ]
+    },
+    {
+      "path": "src/presentation/cli/commands/sync/stage-outcome.ts",
+      "package": "package.json",
+      "sourceHash": "160f8fc57346e543f89e65e4344f00ecea5342cae58db02c4d31f51cf4a5f372",
+      "language": ".ts",
+      "syntax": "executable",
+      "imports": [],
+      "declarations": [
+        "count",
+        "input",
+        "invalid",
+        "key",
+        "normalizeStageOutcome",
+        "result",
+        "stageIncomplete"
+      ],
+      "calls": [
+        "Number.isSafeInteger",
+        "input.error.trim",
+        "input.reason.trim"
+      ]
+    },
+    {
       "path": "src/presentation/cli/commands/sync/types.ts",
       "package": "package.json",
-      "sourceHash": "d0295ce8a7cc85565e930b8dc06b97ddc71414275c922ff248c912a0a26464ad",
+      "sourceHash": "74f3fe33b70ce3bb555b05425a8583b68fe50b1502344301a65755c4e1942081",
       "language": ".ts",
       "syntax": "no-local-code",
       "imports": [],
@@ -26339,7 +26414,7 @@
     {
       "path": "tests/infrastructure/database/local-sync-recovery.test.ts",
       "package": "package.json",
-      "sourceHash": "599cc7e78a433404eb73e91d903813bb56e9a2675db37119b8d1c6665c6e3b7e",
+      "sourceHash": "ffe23e0eebb68b2136525a9b2274a9ad985d334c7b019593953f2c1aa445e43f",
       "language": ".ts",
       "syntax": "test-driver",
       "imports": [
@@ -26351,6 +26426,7 @@
       "declarations": [
         "boundary",
         "child",
+        "disabled",
         "divergent",
         "empty",
         "failed",
@@ -27124,7 +27200,7 @@
     {
       "path": "tests/infrastructure/database/remote-recovery.test.ts",
       "package": "package.json",
-      "sourceHash": "6e10ddfff22d0c30ebc3336205f458f106efd4b0aa09f59b067b199c7bfbfefe",
+      "sourceHash": "e45dde04769d0e8bd5b6d5dd41cdf48723ed6e1bf4f7b89bc20b717aab53b6dd",
       "language": ".ts",
       "syntax": "test-driver",
       "imports": [

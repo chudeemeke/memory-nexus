@@ -10,6 +10,7 @@ import type { initializeDatabase } from "../../../../infrastructure/database/ind
 import type { ModelState } from "../../../../application/services/index.js";
 import type { SyncCommandOptions, EmbeddingPassDeps } from "./types.js";
 import { loadFactory, loadConfig, loadRepository } from "./helpers.js";
+import type { SyncStageOutcome } from "./stage-outcome.js";
 
 /**
  * Run the embedding pass after sync completes.
@@ -25,20 +26,20 @@ export async function runEmbeddingPass(
   db: ReturnType<typeof initializeDatabase>["db"],
   options: SyncCommandOptions,
   deps: EmbeddingPassDeps = {},
-): Promise<void> {
+): Promise<SyncStageOutcome> {
   // Load dependencies (lazy import for production, overrides for testing)
   const factory = deps.factory ?? await loadFactory();
-  const config = deps.config ?? await loadConfig();
-  const provider = factory.createFromConfig(config);
-
-  if (!provider) {
-    if (!options.quiet) {
-      console.error("Embedding is disabled in configuration. Enable it in ~/.config/memory/config.json");
-    }
-    return;
-  }
-
   try {
+    const config = deps.config ?? await loadConfig();
+    const provider = factory.createFromConfig(config);
+
+    if (!provider) {
+      if (!options.quiet) {
+        console.error("Embedding is disabled in configuration. Enable it in ~/.config/memory/config.json");
+      }
+      return { status: "pending", reason: "disabled" };
+    }
+
     // Create repository (override for testing, real for production)
     const repository = deps.repositoryOverride ?? await loadRepository(db);
 
@@ -64,7 +65,7 @@ export async function runEmbeddingPass(
     if (modelState.modelChanged && modelState.needsReEmbed) {
       const proceed = await handleModelChange(modelState, options);
       if (!proceed) {
-        return;
+        return { status: "pending", reason: "model-change-not-confirmed" };
       }
     }
 
@@ -110,7 +111,7 @@ export async function runEmbeddingPass(
           console.log("\nAll messages already embedded.");
         }
       }
-      return;
+      return { status: "completed", embedded: 0, skipped: skippedForCurrentModel };
     }
 
     // Run embedding pass with progress
@@ -137,6 +138,7 @@ export async function runEmbeddingPass(
         const skippedSuffix = result.skipped > 0 ? `, skipped ${result.skipped}` : "";
         console.log(`\nEmbedded ${result.embedded} messages${skippedSuffix} in ${seconds}s (${rate} msg/s)`);
       }
+      return { status: "completed", embedded: result.embedded, skipped: result.skipped };
     } catch (error) {
       embeddingReporter.stop();
       const embeddedSoFar = repository.getEmbeddedCount();

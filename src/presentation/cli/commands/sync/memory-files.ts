@@ -39,13 +39,12 @@ export async function runMemoryFileSync(
     }
     return null;
   } catch (error) {
-    // Memory file sync failure should not fail the overall sync
     if (!options.quiet) {
       console.error(
         `  Memory files: error (${unknownErrorMessage(error)})`
       );
     }
-    return null;
+    throw error;
   }
 }
 

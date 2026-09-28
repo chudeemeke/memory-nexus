@@ -1,5 +1,51 @@
 # Memory resilience execution journal
 
+## 2026-09-28 - Explicit optional-stage outcomes
+
+- Started from clean signed/pushed `55d4392`. The full E1-E10 native goal and
+  Q100.4.2 remain active; this checkpoint does not accept the baseline.
+- Embedding now returns pending for disabled configuration or declined model
+  replacement, and completed pass counts for successful/no-work runs. Factory
+  disposal covers creation/config failure. These outcomes do not certify whole
+  index, query or model-generation readiness, or concurrent queue exhaustion.
+- Ambient returns completed, expected skipped, or failed outcomes; unexpected
+  unsuccessful results are logged as errors. Memory-file exceptions propagate
+  instead of becoming no-work. Final CLI/JSON exposes all three stages, continues
+  independent work, retains capture and returns nonzero for pending/failed work.
+  Missing legacy handler returns become pending; malformed outcomes fail closed.
+  Only known primitive outcome fields reach reporting. No new provider/runtime,
+  fallback, model download or replication was enabled.
+- The local native driver now uses real default ambient/embedding helpers with
+  isolated disabled configuration. Six fresh processes prove capture/recovery,
+  unchanged and empty retry, idle stability, disabled embedding pending/nonzero
+  with searchable capture, and no resurrection after direct deletion. Remote
+  configuration never causes implicit service invocation. Existing six-process
+  remote proof remains isolated to its actual default adapter.
+- Windows Bun 1.4.1 and pinned 1.3.14 each pass 332 tests / 1,023 assertions in
+  14 affected files, with pinned child PATH verified. Production and eight changed
+  test-file strict compilation pass, as does isolation. All 11 deliberate faults
+  are detected: false completion, ignored pending/failure, invalid count/extra
+  field admission, swallowed exceptions and omitted factory disposal.
+- RED helper/CLI outcomes and ambient failure logging retained. Fixture corrections
+  use real typed configuration defaults and absent optional fields rather than
+  weakened production types. No undefined-as-success compatibility fallback.
+- Diagnostic source coverage for stage-outcome and memory-files is 100% in all
+  four metrics. This is not complete quality acceptance: CLI/helper/ambient/
+  embedding source and several test files still fail required floors. Full rows
+  and raw counters are retained in `evidence/Q100.4.2-outcomes.json`; owning
+  Q074/Q076/Q077/Q078/Q079 and Q100.4.3 remain open. Child-process counters are
+  not aggregated, zero denominators need review, and fixture cleanup debts remain.
+- **Next bounded step:** reproduce overlapping writers/replayers in real processes
+  using deterministic barriers. Establish and test the smallest shared admission
+  contract that prevents stale target promotion and retains appends arriving during
+  replay. Then separately prove partial append, caller transaction admission,
+  complete pre-append candidate validation and operational legacy/import/direct
+  reconciliation. Existing scaling constraints remain before integration/adoption.
+- Refreshed inventory: 483 files / two packages; 255 acyclic ledger items, one
+  active item. Owned fixtures cleaned; 10.86 GiB free at checkpoint and one
+  registered worktree. Three inboxes, hosted/Linux/desktop/final review and
+  R03/P03/A03 remain open. Baseline acceptance still precedes the bounded experiment.
+
 ## 2026-09-28 - Ordinary local recovery and final completion reporting
 
 - Previous goal turn made progress at signed/pushed `5d3c400`; this turn started

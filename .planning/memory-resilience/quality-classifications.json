@@ -14971,7 +14971,7 @@
     {
       "path": "src/presentation/cli/commands/sync/ambient.test.ts",
       "package": "package.json",
-      "sourceHash": "5c331cbe1efa2f9eff3476417969953308c2ddf854d492890b35c9177513bbcb",
+      "sourceHash": "720dd51a090b67104a59bf7728efbb2000a27e7894a0c932976d16aaac536e19",
       "tier": "A",
       "rationale": "Inspects default ambient-service wiring using an in-memory DB closed in finally; context execution uses injected fake services.",
       "applicability": {
@@ -14980,31 +14980,29 @@
       },
       "decisionStatus": "proposed - independent review pending",
       "inspection": {
-        "sourceRevision": "12c188bb9cad480efc6eb87ce1760b9dc40bbb69",
-        "anchor": "Emitted-runtime import/call/constructor inventory and targeted fixture/provider/CLI source boundaries",
-        "runtimeHash": "949ee8d70e6d8ee291c7c7a7c12f8b611cddc52ef29b061c49c1b952bb81ee86",
-        "scope": "Reading aid plus targeted source inspection; not sound effect analysis, complete assertion review, execution evidence or metric applicability approval."
+        "sourceRevision": "55d4392 + current source hash",
+        "anchor": "Q100.4.2 optional-stage outcome checkpoint",
+        "scope": "Scoped Windows command/default disabled-provider/native proof; final quality and review acceptance open."
       },
       "metricApplicability": {
-        "status": "proposed - independent review pending",
-        "evidence": ".planning/memory-resilience/evidence/B04-applicability-probe.json",
-        "sourceHash": "5c331cbe1efa2f9eff3476417969953308c2ddf854d492890b35c9177513bbcb",
-        "disposition": "Measure every positive denominator; individually review zero branch/function denominators against runtime syntax. Observed counts do not prove instrumentation completeness.",
+        "status": "diagnostic - complete Q100.4.3 and owning Q item acceptance pending",
+        "sourceHash": "720dd51a090b67104a59bf7728efbb2000a27e7894a0c932976d16aaac536e19",
+        "evidence": ".planning/memory-resilience/evidence/Q100.4.2-outcomes.json",
         "metrics": {
+          "lines": {
+            "observedCounterTotal": 122,
+            "proposal": "measure - completeness unverified"
+          },
+          "functions": {
+            "observedCounterTotal": 68,
+            "proposal": "measure - completeness unverified"
+          },
           "statements": {
-            "observedCounterTotal": 112,
+            "observedCounterTotal": 129,
             "proposal": "measure - completeness unverified"
           },
           "branches": {
             "observedCounterTotal": 10,
-            "proposal": "measure - completeness unverified"
-          },
-          "functions": {
-            "observedCounterTotal": 60,
-            "proposal": "measure - completeness unverified"
-          },
-          "lines": {
-            "observedCounterTotal": 107,
             "proposal": "measure - completeness unverified"
           }
         }
@@ -15013,7 +15011,7 @@
     {
       "path": "src/presentation/cli/commands/sync/ambient.ts",
       "package": "package.json",
-      "sourceHash": "36fb678a7e3ab23766d77687f9cafc6c5b2a5fbc5cc5511595d92c8a84564ed8",
+      "sourceHash": "75d0dae998ab6c214740765f91095e5ce3ef56d313a18155d62ccfc30e46611f",
       "tier": "S",
       "rationale": "Resolves the ambient output directory and invokes persistent context-file updates with governance policy wiring.",
       "applicability": {
@@ -15022,30 +15020,29 @@
       },
       "decisionStatus": "proposed - independent review pending",
       "inspection": {
-        "sourceRevision": "8719e3c36b2c73ca11f8ee4879c9f17aed4f2849",
-        "anchor": "generateAmbientContext / default service composition",
-        "scope": "positive critical boundary establishes highest tier; not full correctness acceptance"
+        "sourceRevision": "55d4392 + current source hash",
+        "anchor": "Q100.4.2 optional-stage outcome checkpoint",
+        "scope": "Scoped Windows command/default disabled-provider/native proof; final quality and review acceptance open."
       },
       "metricApplicability": {
-        "status": "proposed - independent review pending",
-        "evidence": ".planning/memory-resilience/evidence/B04-applicability-probe.json",
-        "sourceHash": "36fb678a7e3ab23766d77687f9cafc6c5b2a5fbc5cc5511595d92c8a84564ed8",
-        "disposition": "Measure every positive denominator; individually review zero branch/function denominators against runtime syntax. Observed counts do not prove instrumentation completeness.",
+        "status": "diagnostic - complete Q100.4.3 and owning Q item acceptance pending",
+        "sourceHash": "75d0dae998ab6c214740765f91095e5ce3ef56d313a18155d62ccfc30e46611f",
+        "evidence": ".planning/memory-resilience/evidence/Q100.4.2-outcomes.json",
         "metrics": {
-          "statements": {
-            "observedCounterTotal": 45,
-            "proposal": "measure - completeness unverified"
-          },
-          "branches": {
-            "observedCounterTotal": 16,
+          "lines": {
+            "observedCounterTotal": 51,
             "proposal": "measure - completeness unverified"
           },
           "functions": {
             "observedCounterTotal": 2,
             "proposal": "measure - completeness unverified"
           },
-          "lines": {
-            "observedCounterTotal": 45,
+          "statements": {
+            "observedCounterTotal": 54,
+            "proposal": "measure - completeness unverified"
+          },
+          "branches": {
+            "observedCounterTotal": 24,
             "proposal": "measure - completeness unverified"
           }
         }
@@ -15137,7 +15134,7 @@
     {
       "path": "src/presentation/cli/commands/sync/embedding-pass.test.ts",
       "package": "package.json",
-      "sourceHash": "4aa824f00d181d3f6e895cffbda4f414b6a4bff5ea71f0de237e2e35b82f1298",
+      "sourceHash": "e816fa0dd85ee01cb4f92eee053b8afa2bc4c8a5a90442225acee96d2eb65fb0",
       "tier": "A",
       "rationale": "Uses provider/repository/factory and readline mocks with synthetic vectors. Shared module/TTY restoration requires B09 verification; no actual model computation.",
       "applicability": {
@@ -15146,31 +15143,29 @@
       },
       "decisionStatus": "proposed - independent review pending",
       "inspection": {
-        "sourceRevision": "12c188bb9cad480efc6eb87ce1760b9dc40bbb69",
-        "anchor": "Emitted-runtime import/call/constructor inventory and targeted fixture/provider/CLI source boundaries",
-        "runtimeHash": "4ceb21b3616721f3248b44dae33df72f506c0dbc033fa477636300525b37b68f",
-        "scope": "Reading aid plus targeted source inspection; not sound effect analysis, complete assertion review, execution evidence or metric applicability approval."
+        "sourceRevision": "55d4392 + current source hash",
+        "anchor": "Q100.4.2 optional-stage outcome checkpoint",
+        "scope": "Scoped Windows command/default disabled-provider/native proof; final quality and review acceptance open."
       },
       "metricApplicability": {
-        "status": "proposed - independent review pending",
-        "evidence": ".planning/memory-resilience/evidence/B04-applicability-probe.json",
-        "sourceHash": "4aa824f00d181d3f6e895cffbda4f414b6a4bff5ea71f0de237e2e35b82f1298",
-        "disposition": "Measure every positive denominator; individually review zero branch/function denominators against runtime syntax. Observed counts do not prove instrumentation completeness. Optional-chain syntax is present; synthetic evidence shows current instrumentation omits its decision counters. B05.1 owns source-mapped branch proof before numeric acceptance.",
+        "status": "diagnostic - complete Q100.4.3 and owning Q item acceptance pending",
+        "sourceHash": "e816fa0dd85ee01cb4f92eee053b8afa2bc4c8a5a90442225acee96d2eb65fb0",
+        "evidence": ".planning/memory-resilience/evidence/Q100.4.2-outcomes.json",
         "metrics": {
+          "lines": {
+            "observedCounterTotal": 514,
+            "proposal": "measure - completeness unverified"
+          },
+          "functions": {
+            "observedCounterTotal": 363,
+            "proposal": "measure - completeness unverified"
+          },
           "statements": {
-            "observedCounterTotal": 537,
+            "observedCounterTotal": 548,
             "proposal": "measure - completeness unverified"
           },
           "branches": {
             "observedCounterTotal": 38,
-            "proposal": "measure - completeness unverified"
-          },
-          "functions": {
-            "observedCounterTotal": 360,
-            "proposal": "measure - completeness unverified"
-          },
-          "lines": {
-            "observedCounterTotal": 503,
             "proposal": "measure - completeness unverified"
           }
         }
@@ -15179,7 +15174,7 @@
     {
       "path": "src/presentation/cli/commands/sync/embedding-pass.ts",
       "package": "package.json",
-      "sourceHash": "84ccf232122c351455dbe7313f721eec2b6706b061ff937bd3dd4d4a57604aa5",
+      "sourceHash": "6044c4b2a6af8a073e1242694abf3b8bb4cc86d74855b860990e8af626116aa9",
       "tier": "S",
       "rationale": "Controls provider initialization, model-change confirmation and vector-table replacement.",
       "applicability": {
@@ -15188,30 +15183,29 @@
       },
       "decisionStatus": "proposed - independent review pending",
       "inspection": {
-        "sourceRevision": "8719e3c36b2c73ca11f8ee4879c9f17aed4f2849",
-        "anchor": "createFromConfig / initialize / recreateVecTable",
-        "scope": "positive critical boundary establishes highest tier; not full correctness acceptance"
+        "sourceRevision": "55d4392 + current source hash",
+        "anchor": "Q100.4.2 optional-stage outcome checkpoint",
+        "scope": "Scoped Windows command/default disabled-provider/native proof; final quality and review acceptance open."
       },
       "metricApplicability": {
-        "status": "proposed - independent review pending",
-        "evidence": ".planning/memory-resilience/evidence/B04-applicability-probe.json",
-        "sourceHash": "84ccf232122c351455dbe7313f721eec2b6706b061ff937bd3dd4d4a57604aa5",
-        "disposition": "Measure every positive denominator; individually review zero branch/function denominators against runtime syntax. Observed counts do not prove instrumentation completeness.",
+        "status": "diagnostic - complete Q100.4.3 and owning Q item acceptance pending",
+        "sourceHash": "6044c4b2a6af8a073e1242694abf3b8bb4cc86d74855b860990e8af626116aa9",
+        "evidence": ".planning/memory-resilience/evidence/Q100.4.2-outcomes.json",
         "metrics": {
-          "statements": {
-            "observedCounterTotal": 72,
-            "proposal": "measure - completeness unverified"
-          },
-          "branches": {
-            "observedCounterTotal": 62,
+          "lines": {
+            "observedCounterTotal": 73,
             "proposal": "measure - completeness unverified"
           },
           "functions": {
             "observedCounterTotal": 6,
             "proposal": "measure - completeness unverified"
           },
-          "lines": {
-            "observedCounterTotal": 72,
+          "statements": {
+            "observedCounterTotal": 73,
+            "proposal": "measure - completeness unverified"
+          },
+          "branches": {
+            "observedCounterTotal": 62,
             "proposal": "measure - completeness unverified"
           }
         }
@@ -15260,7 +15254,7 @@
     {
       "path": "src/presentation/cli/commands/sync/helpers.ts",
       "package": "package.json",
-      "sourceHash": "82724f53a1b92c15a61548522a75d70e9d5eb13b2f6d695acc8782b705364cdd",
+      "sourceHash": "cc56c8a855091072998338fc8410e8ea4e86b90ae58ae9369d3a930465e11c68",
       "tier": "A",
       "rationale": "Complete runtime body inspected: read-only sync preview, reporting and lazy factory/repository construction. Actual persistence/provider admission is delegated; no local filesystem or database write.",
       "applicability": {
@@ -15269,17 +15263,17 @@
       },
       "decisionStatus": "proposed - independent review pending",
       "inspection": {
-        "sourceRevision": "5d3c400 + current source hash",
-        "anchor": "Q100.4.2 ordinary local recovery and completion",
-        "scope": "Scoped Windows native/fresh-process/command proof; final phase contracts and quality/review acceptance open."
+        "sourceRevision": "55d4392 + current source hash",
+        "anchor": "Q100.4.2 optional-stage outcome checkpoint",
+        "scope": "Scoped Windows command/default disabled-provider/native proof; final quality and review acceptance open."
       },
       "metricApplicability": {
-        "status": "diagnostic - Q100.4.3/Q077/Q078 acceptance pending",
-        "sourceHash": "82724f53a1b92c15a61548522a75d70e9d5eb13b2f6d695acc8782b705364cdd",
-        "evidence": ".planning/memory-resilience/evidence/Q100.4.2-local.json",
+        "status": "diagnostic - complete Q100.4.3 and owning Q item acceptance pending",
+        "sourceHash": "cc56c8a855091072998338fc8410e8ea4e86b90ae58ae9369d3a930465e11c68",
+        "evidence": ".planning/memory-resilience/evidence/Q100.4.2-outcomes.json",
         "metrics": {
           "lines": {
-            "observedCounterTotal": 71,
+            "observedCounterTotal": 74,
             "proposal": "measure - completeness unverified"
           },
           "functions": {
@@ -15287,11 +15281,11 @@
             "proposal": "measure - completeness unverified"
           },
           "statements": {
-            "observedCounterTotal": 74,
+            "observedCounterTotal": 77,
             "proposal": "measure - completeness unverified"
           },
           "branches": {
-            "observedCounterTotal": 49,
+            "observedCounterTotal": 55,
             "proposal": "measure - completeness unverified"
           }
         }
@@ -15300,7 +15294,7 @@
     {
       "path": "src/presentation/cli/commands/sync/index.test.ts",
       "package": "package.json",
-      "sourceHash": "875315d8b0009314925e1fe6d314c3f560b2a5ab6582443f97fc7ca0d3ba1669",
+      "sourceHash": "50c67884135a95aedbe8a7442b3d68992a86bcd8e698e9b2a9505c3e708b11ed",
       "tier": "S",
       "rationale": "Mostly dependency-injected harnesses, with real remote-config fixture creation/removal and silent cleanup catches. B11.69 owns repair.",
       "applicability": {
@@ -15309,29 +15303,29 @@
       },
       "decisionStatus": "proposed - independent review pending",
       "inspection": {
-        "sourceRevision": "5d3c400 + current source hash",
-        "anchor": "Q100.4.2 ordinary local recovery and completion",
-        "scope": "Scoped Windows native/fresh-process/command proof; final phase contracts and quality/review acceptance open."
+        "sourceRevision": "55d4392 + current source hash",
+        "anchor": "Q100.4.2 optional-stage outcome checkpoint",
+        "scope": "Scoped Windows command/default disabled-provider/native proof; final quality and review acceptance open."
       },
       "metricApplicability": {
-        "status": "diagnostic - Q100.4.3/Q077/Q078 acceptance pending",
-        "sourceHash": "875315d8b0009314925e1fe6d314c3f560b2a5ab6582443f97fc7ca0d3ba1669",
-        "evidence": ".planning/memory-resilience/evidence/Q100.4.2-local.json",
+        "status": "diagnostic - complete Q100.4.3 and owning Q item acceptance pending",
+        "sourceHash": "50c67884135a95aedbe8a7442b3d68992a86bcd8e698e9b2a9505c3e708b11ed",
+        "evidence": ".planning/memory-resilience/evidence/Q100.4.2-outcomes.json",
         "metrics": {
           "lines": {
-            "observedCounterTotal": 608,
+            "observedCounterTotal": 626,
             "proposal": "measure - completeness unverified"
           },
           "functions": {
-            "observedCounterTotal": 205,
+            "observedCounterTotal": 210,
             "proposal": "measure - completeness unverified"
           },
           "statements": {
-            "observedCounterTotal": 639,
+            "observedCounterTotal": 660,
             "proposal": "measure - completeness unverified"
           },
           "branches": {
-            "observedCounterTotal": 33,
+            "observedCounterTotal": 39,
             "proposal": "measure - completeness unverified"
           }
         }
@@ -15340,7 +15334,7 @@
     {
       "path": "src/presentation/cli/commands/sync/index.ts",
       "package": "package.json",
-      "sourceHash": "3dea5ca7504bb464dafd508cab6cce91896dfce50db9c1f183f9c6777497d49a",
+      "sourceHash": "daef951d0d035a8ab1bf1d4f02951df344f1e185838426811c7329608b6fd62d",
       "tier": "S",
       "rationale": "Composes the sync runtime and dispatches durable ingestion.",
       "applicability": {
@@ -15349,17 +15343,17 @@
       },
       "decisionStatus": "proposed - independent review pending",
       "inspection": {
-        "sourceRevision": "5d3c400 + current source hash",
-        "anchor": "Q100.4.2 ordinary local recovery and completion",
-        "scope": "Scoped Windows native/fresh-process/command proof; final phase contracts and quality/review acceptance open."
+        "sourceRevision": "55d4392 + current source hash",
+        "anchor": "Q100.4.2 optional-stage outcome checkpoint",
+        "scope": "Scoped Windows command/default disabled-provider/native proof; final quality and review acceptance open."
       },
       "metricApplicability": {
-        "status": "diagnostic - Q100.4.3/Q077/Q078 acceptance pending",
-        "sourceHash": "3dea5ca7504bb464dafd508cab6cce91896dfce50db9c1f183f9c6777497d49a",
-        "evidence": ".planning/memory-resilience/evidence/Q100.4.2-local.json",
+        "status": "diagnostic - complete Q100.4.3 and owning Q item acceptance pending",
+        "sourceHash": "daef951d0d035a8ab1bf1d4f02951df344f1e185838426811c7329608b6fd62d",
+        "evidence": ".planning/memory-resilience/evidence/Q100.4.2-outcomes.json",
         "metrics": {
           "lines": {
-            "observedCounterTotal": 162,
+            "observedCounterTotal": 169,
             "proposal": "measure - completeness unverified"
           },
           "functions": {
@@ -15367,11 +15361,11 @@
             "proposal": "measure - completeness unverified"
           },
           "statements": {
-            "observedCounterTotal": 178,
+            "observedCounterTotal": 185,
             "proposal": "measure - completeness unverified"
           },
           "branches": {
-            "observedCounterTotal": 118,
+            "observedCounterTotal": 124,
             "proposal": "measure - completeness unverified"
           }
         }
@@ -15422,7 +15416,7 @@
     {
       "path": "src/presentation/cli/commands/sync/memory-files.test.ts",
       "package": "package.json",
-      "sourceHash": "e5e11eaa01d49b566e380fdfc549142b9fc89098d04e68b2ddf58bd55c5d1e53",
+      "sourceHash": "d4526ca0ed981d6dac5496fe13d1467b37e87dee00b9b7794a78a83861248e51",
       "tier": "S",
       "rationale": "Inspected filesystem import and call context: rmSync(dir, { recursive: true, force: true }). This test driver performs actual file/directory deletion; numeric applicability and ownership proof remain subject to individual review.",
       "applicability": {
@@ -15431,31 +15425,29 @@
       },
       "decisionStatus": "proposed - independent review pending",
       "inspection": {
-        "sourceRevision": "e85d4d3f63dfe0cfaa58198766f13c56f1e23232",
-        "anchor": "rmSync(dir, { recursive: true, force: true })",
-        "line": 25,
-        "scope": "Filesystem import plus first two actual deletion call contexts inspected. Positive critical operation establishes risk; not full body/assertion review, symbol-resolution proof or cleanup acceptance."
+        "sourceRevision": "55d4392 + current source hash",
+        "anchor": "Q100.4.2 optional-stage outcome checkpoint",
+        "scope": "Scoped Windows command/default disabled-provider/native proof; final quality and review acceptance open."
       },
       "metricApplicability": {
-        "status": "proposed - independent review pending",
-        "evidence": ".planning/memory-resilience/evidence/B04-applicability-probe.json",
-        "sourceHash": "e5e11eaa01d49b566e380fdfc549142b9fc89098d04e68b2ddf58bd55c5d1e53",
-        "disposition": "Measure every positive denominator; individually review zero branch/function denominators against runtime syntax. Observed counts do not prove instrumentation completeness. Optional-chain syntax is present; synthetic evidence shows current instrumentation omits its decision counters. B05.1 owns source-mapped branch proof before numeric acceptance.",
+        "status": "diagnostic - complete Q100.4.3 and owning Q item acceptance pending",
+        "sourceHash": "d4526ca0ed981d6dac5496fe13d1467b37e87dee00b9b7794a78a83861248e51",
+        "evidence": ".planning/memory-resilience/evidence/Q100.4.2-outcomes.json",
         "metrics": {
+          "lines": {
+            "observedCounterTotal": 69,
+            "proposal": "measure - completeness unverified"
+          },
+          "functions": {
+            "observedCounterTotal": 17,
+            "proposal": "measure - completeness unverified"
+          },
           "statements": {
-            "observedCounterTotal": 60,
+            "observedCounterTotal": 73,
             "proposal": "measure - completeness unverified"
           },
           "branches": {
             "observedCounterTotal": 2,
-            "proposal": "measure - completeness unverified"
-          },
-          "functions": {
-            "observedCounterTotal": 15,
-            "proposal": "measure - completeness unverified"
-          },
-          "lines": {
-            "observedCounterTotal": 57,
             "proposal": "measure - completeness unverified"
           }
         }
@@ -15464,7 +15456,7 @@
     {
       "path": "src/presentation/cli/commands/sync/memory-files.ts",
       "package": "package.json",
-      "sourceHash": "5229f1819c4ae546fbd1896e04de150aba8e6d894199af0ced6d108df4f8ef14",
+      "sourceHash": "565537f325d6efd33363ac5224d0d0e808c7d736625aad9380b5b98ae8dd5fad",
       "tier": "S",
       "rationale": "Composes scanner/repository and invokes persistent memory-file indexing.",
       "applicability": {
@@ -15473,30 +15465,29 @@
       },
       "decisionStatus": "proposed - independent review pending",
       "inspection": {
-        "sourceRevision": "8719e3c36b2c73ca11f8ee4879c9f17aed4f2849",
-        "anchor": "syncMemoryFiles",
-        "scope": "positive critical boundary establishes highest tier; not full correctness acceptance"
+        "sourceRevision": "55d4392 + current source hash",
+        "anchor": "Q100.4.2 optional-stage outcome checkpoint",
+        "scope": "Scoped Windows command/default disabled-provider/native proof; final quality and review acceptance open."
       },
       "metricApplicability": {
-        "status": "proposed - independent review pending",
-        "evidence": ".planning/memory-resilience/evidence/B04-applicability-probe.json",
-        "sourceHash": "5229f1819c4ae546fbd1896e04de150aba8e6d894199af0ced6d108df4f8ef14",
-        "disposition": "Measure every positive denominator; individually review zero branch/function denominators against runtime syntax. Observed counts do not prove instrumentation completeness.",
+        "status": "diagnostic - complete Q100.4.3 and owning Q item acceptance pending",
+        "sourceHash": "565537f325d6efd33363ac5224d0d0e808c7d736625aad9380b5b98ae8dd5fad",
+        "evidence": ".planning/memory-resilience/evidence/Q100.4.2-outcomes.json",
         "metrics": {
-          "statements": {
+          "lines": {
             "observedCounterTotal": 21,
-            "proposal": "measure - completeness unverified"
-          },
-          "branches": {
-            "observedCounterTotal": 13,
             "proposal": "measure - completeness unverified"
           },
           "functions": {
             "observedCounterTotal": 2,
             "proposal": "measure - completeness unverified"
           },
-          "lines": {
+          "statements": {
             "observedCounterTotal": 21,
+            "proposal": "measure - completeness unverified"
+          },
+          "branches": {
+            "observedCounterTotal": 13,
             "proposal": "measure - completeness unverified"
           }
         }
@@ -15505,7 +15496,7 @@
     {
       "path": "src/presentation/cli/commands/sync/types.ts",
       "package": "package.json",
-      "sourceHash": "d0295ce8a7cc85565e930b8dc06b97ddc71414275c922ff248c912a0a26464ad",
+      "sourceHash": "74f3fe33b70ce3bb555b05425a8583b68fe50b1502344301a65755c4e1942081",
       "tier": "B",
       "rationale": "Static inspection emits no local JavaScript beyond a module marker. Declaration-only applicability remains an explicit independent-review decision.",
       "applicability": {
@@ -15515,8 +15506,8 @@
       "decisionStatus": "proposed - independent review pending",
       "metricApplicability": {
         "status": "Declaration-only applicability remains proposed; no measured percentage claimed",
-        "evidence": ".planning/memory-resilience/evidence/Q100.4.2-local.json",
-        "sourceHash": "d0295ce8a7cc85565e930b8dc06b97ddc71414275c922ff248c912a0a26464ad",
+        "evidence": ".planning/memory-resilience/evidence/Q100.4.2-outcomes.json",
+        "sourceHash": "74f3fe33b70ce3bb555b05425a8583b68fe50b1502344301a65755c4e1942081",
         "disposition": "No emitted local runtime computation and no counters observed; four zero-applicability judgments proposed individually, pending independent review. No percentage claimed.",
         "metrics": {
           "statements": {
@@ -15538,9 +15529,9 @@
         }
       },
       "inspection": {
-        "sourceRevision": "5d3c400 + current source hash",
-        "anchor": "Q100.4.2 ordinary local recovery and completion",
-        "scope": "Scoped Windows native/fresh-process/command proof; final phase contracts and quality/review acceptance open."
+        "sourceRevision": "55d4392 + current source hash",
+        "anchor": "Q100.4.2 optional-stage outcome checkpoint",
+        "scope": "Scoped Windows command/default disabled-provider/native proof; final quality and review acceptance open."
       }
     },
     {
@@ -19414,16 +19405,16 @@
         "reason": "Executable TierS; no exclusion approved. Child-process code and zero branch denominator require full instrumenter review."
       },
       "decisionStatus": "proposed - independent review pending",
-      "sourceHash": "6e10ddfff22d0c30ebc3336205f458f106efd4b0aa09f59b067b199c7bfbfefe",
+      "sourceHash": "e45dde04769d0e8bd5b6d5dd41cdf48723ed6e1bf4f7b89bc20b717aab53b6dd",
       "inspection": {
-        "sourceRevision": "5d3c400 + current source hash",
-        "anchor": "Q100.4.2 ordinary local recovery and completion",
-        "scope": "Scoped Windows native/fresh-process/command proof; final phase contracts and quality/review acceptance open."
+        "sourceRevision": "55d4392 + current source hash",
+        "anchor": "Q100.4.2 optional-stage outcome checkpoint",
+        "scope": "Scoped Windows command/default disabled-provider/native proof; final quality and review acceptance open."
       },
       "metricApplicability": {
-        "status": "diagnostic - Q100.4.3/Q077/Q078 acceptance pending",
-        "sourceHash": "6e10ddfff22d0c30ebc3336205f458f106efd4b0aa09f59b067b199c7bfbfefe",
-        "evidence": ".planning/memory-resilience/evidence/Q100.4.2-local.json",
+        "status": "diagnostic - complete Q100.4.3 and owning Q item acceptance pending",
+        "sourceHash": "e45dde04769d0e8bd5b6d5dd41cdf48723ed6e1bf4f7b89bc20b717aab53b6dd",
+        "evidence": ".planning/memory-resilience/evidence/Q100.4.2-outcomes.json",
         "metrics": {
           "lines": {
             "observedCounterTotal": 36,
@@ -19454,19 +19445,19 @@
         "reason": "Executable TierS; no exclusion approved. Child-process code and zero branch denominator require full instrumenter review."
       },
       "decisionStatus": "proposed - independent review pending",
-      "sourceHash": "599cc7e78a433404eb73e91d903813bb56e9a2675db37119b8d1c6665c6e3b7e",
+      "sourceHash": "ffe23e0eebb68b2136525a9b2274a9ad985d334c7b019593953f2c1aa445e43f",
       "inspection": {
-        "sourceRevision": "5d3c400 + current source hash",
-        "anchor": "Q100.4.2 ordinary local recovery and completion",
-        "scope": "Scoped Windows native/fresh-process/command proof; final phase contracts and quality/review acceptance open."
+        "sourceRevision": "55d4392 + current source hash",
+        "anchor": "Q100.4.2 optional-stage outcome checkpoint",
+        "scope": "Scoped Windows command/default disabled-provider/native proof; final quality and review acceptance open."
       },
       "metricApplicability": {
-        "status": "diagnostic - Q100.4.3/Q077/Q078 acceptance pending",
-        "sourceHash": "599cc7e78a433404eb73e91d903813bb56e9a2675db37119b8d1c6665c6e3b7e",
-        "evidence": ".planning/memory-resilience/evidence/Q100.4.2-local.json",
+        "status": "diagnostic - complete Q100.4.3 and owning Q item acceptance pending",
+        "sourceHash": "ffe23e0eebb68b2136525a9b2274a9ad985d334c7b019593953f2c1aa445e43f",
+        "evidence": ".planning/memory-resilience/evidence/Q100.4.2-outcomes.json",
         "metrics": {
           "lines": {
-            "observedCounterTotal": 39,
+            "observedCounterTotal": 42,
             "proposal": "measure - completeness unverified"
           },
           "functions": {
@@ -19474,12 +19465,92 @@
             "proposal": "measure - completeness unverified"
           },
           "statements": {
-            "observedCounterTotal": 41,
+            "observedCounterTotal": 44,
             "proposal": "measure - completeness unverified"
           },
           "branches": {
             "observedCounterTotal": 0,
             "proposal": "Review zero denominator and child-process/instrumenter completeness"
+          }
+        }
+      }
+    },
+    {
+      "path": "src/presentation/cli/commands/sync/stage-outcome.test.ts",
+      "package": "package.json",
+      "tier": "S",
+      "rationale": "Runtime result validation and fail-closed command status; malformed/partial results must not imply completion.",
+      "applicability": {
+        "mode": "measure",
+        "reason": "Executable validator and boundary tests; no exclusion approved."
+      },
+      "decisionStatus": "proposed - independent review pending",
+      "sourceHash": "7a05b55274a6f92a35dc80374a8c7a73fa35313ef0800f2549f8e75b0c5d6baf",
+      "inspection": {
+        "sourceRevision": "55d4392 + current source hash",
+        "anchor": "Q100.4.2 optional-stage outcome checkpoint",
+        "scope": "Scoped Windows command/default disabled-provider/native proof; final quality and review acceptance open."
+      },
+      "metricApplicability": {
+        "status": "diagnostic - complete Q100.4.3 and owning Q item acceptance pending",
+        "sourceHash": "7a05b55274a6f92a35dc80374a8c7a73fa35313ef0800f2549f8e75b0c5d6baf",
+        "evidence": ".planning/memory-resilience/evidence/Q100.4.2-outcomes.json",
+        "metrics": {
+          "lines": {
+            "observedCounterTotal": 15,
+            "proposal": "measure - completeness unverified"
+          },
+          "functions": {
+            "observedCounterTotal": 5,
+            "proposal": "measure - completeness unverified"
+          },
+          "statements": {
+            "observedCounterTotal": 15,
+            "proposal": "measure - completeness unverified"
+          },
+          "branches": {
+            "observedCounterTotal": 0,
+            "proposal": "Review zero denominator and child-process/instrumenter completeness"
+          }
+        }
+      }
+    },
+    {
+      "path": "src/presentation/cli/commands/sync/stage-outcome.ts",
+      "package": "package.json",
+      "tier": "S",
+      "rationale": "Runtime result validation and fail-closed command status; malformed/partial results must not imply completion.",
+      "applicability": {
+        "mode": "measure",
+        "reason": "Executable validator and boundary tests; no exclusion approved."
+      },
+      "decisionStatus": "proposed - independent review pending",
+      "sourceHash": "160f8fc57346e543f89e65e4344f00ecea5342cae58db02c4d31f51cf4a5f372",
+      "inspection": {
+        "sourceRevision": "55d4392 + current source hash",
+        "anchor": "Q100.4.2 optional-stage outcome checkpoint",
+        "scope": "Scoped Windows command/default disabled-provider/native proof; final quality and review acceptance open."
+      },
+      "metricApplicability": {
+        "status": "diagnostic - complete Q100.4.3 and owning Q item acceptance pending",
+        "sourceHash": "160f8fc57346e543f89e65e4344f00ecea5342cae58db02c4d31f51cf4a5f372",
+        "evidence": ".planning/memory-resilience/evidence/Q100.4.2-outcomes.json",
+        "metrics": {
+          "lines": {
+            "observedCounterTotal": 16,
+            "proposal": "measure - completeness unverified"
+          },
+          "functions": {
+            "observedCounterTotal": 2,
+            "proposal": "measure - completeness unverified"
+          },
+          "statements": {
+            "observedCounterTotal": 20,
+            "proposal": "measure - completeness unverified"
+          },
+          "branches": {
+            "observedCounterTotal": 28,
+            "proposal": "measure - completeness unverified"
           }
         }
       }
