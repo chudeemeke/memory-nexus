@@ -121,7 +121,7 @@ export async function readMemoryEventsWithReport(logPath?: string, eventsDir?: s
 /** Required-source admission shared by projection verification and mutation. */
 export async function readProjectionEventsWithReport(logPath?: string, eventsDir?: string): Promise<ProjectionSourceReadReport> {
   const events: MemoryEventEnvelope[] = [], invalidEvents: InvalidEventLogLine[] = [];
-  const identities = new Map<string, string>();
+  const identities = new Map<string, { identity: string; batchId: string | undefined }>();
   const snapshot = await captureProjectionSource(logPath, eventsDir, (line, filePath, lineNumber) => {
     if (!line.trim()) return;
     try {
@@ -135,9 +135,10 @@ export async function readProjectionEventsWithReport(logPath?: string, eventsDir
       for (const effect of effects ?? []) assertProjectionPayload(effect);
       for (const member of [event, ...effects ?? []]) {
         const memberIdentity = member === event ? identity : member.integrity.envelopeHash;
+        const batchId = member === event ? undefined : event.eventId;
         const existing = identities.get(member.eventId);
-        if (existing !== undefined && existing !== memberIdentity) throw new Error("Conflicting event identity");
-        identities.set(member.eventId, memberIdentity);
+        if (existing !== undefined && (existing.identity !== memberIdentity || existing.batchId !== batchId)) throw new Error("Conflicting event identity or batch owner");
+        identities.set(member.eventId, { identity: memberIdentity, batchId });
       }
       events.push(event);
     }

@@ -1,5 +1,47 @@
 # Memory resilience execution journal
 
+## 2026-09-28 - Consumer alternatives measured; standalone batch-owner defect fixed
+
+- Began clean at signed/pushed9c79913. Previous turn made verified progress.
+  Q100.4.2.2.2.2.2 remains the sole active item; no consumer acceptance or format
+  activation. Ledger277acyclic items, inventory508files/two packages.
+- Derived the boundary from immutable old code, ordered outcomes/governance,
+  paired source/DB authority and retention of acknowledged records on rollback.
+  Decision investigation: docs/plans/2026-09-28-batch-consumer-boundary.md.
+- Executed actual archived v4.0.3 source and current replay in six synthetic
+  representation cases. Wrapper-only remains unsupported by old replay. Flat
+  mirrors with relative sequences leave alpha active; reserving sequence range
+  repairs the old fact chain but still drops denied shared-graph consent.
+  Fixture wrapper1780bytes versus reserved mirrors6172bytes. Mirroring is rejected
+  as a simple safe-compatibility fix, not merely scored lower for convenience.
+- Probe exposed a current-reader ordering defect: identical standalone effect
+  records can execute before their wrapper. Four behavioral REDs retained.
+  Source admission now binds every effect ID to its containing wrapper, rejects
+  standalone copies despite matching hashes, and accepts identical whole-wrapper
+  copies across files. Refusals preserve serialized live DB and source bytes.
+- Paired-path fence probe: retired conventional database/source paths cause old
+  initialization/discovery to fail without replacing the active DB. Explicit old
+  source override bypasses the fence and still drops batch effects. This is a
+  routing boundary candidate, not an ACL or proven installed-consumer migration.
+- Final202tests/2226assertions/6files per Windows Bun1.4.1 and checksum-pinned1.3.14,
+  zero failures;3targeted ownership faults detected; types/strict tests/isolation
+  pass. Replay test100all4. Narrow event-log81.27/67.11/83.6/81.45(S/B/F/L) remains
+  below policy. No full quality/changed-line/platform/final-review acceptance.
+- Initial probe wrongly expected report-based replay to throw for invalid
+  records; its actual invalidEvents report correctly preserved the DB. Corrected
+  the assertion and repeated final source-bound probes. Initial, pre-fix and
+  final evidence retained in evidence/Q100.4.2.2.2.2.2-investigation.json.
+- Next: inventory actual supported entrypoints and persisted path overrides;
+  qualify installed artifacts, a recoverable paired-store migration and rollback
+  preserving post-activation writes. No assumed upgrade for offline consumers,
+  declaration-only boundary or silent authority cutover. R03/P03/A03 still apply.
+- No canonical source/data, installed CLI, hook, provider/model or replication
+  changed. Owned synthetic fixtures/runtime cleaned;9.34GiB free at checkpoint.
+  Previously rejected cleanup, shared-temp admission authority and Git temporary
+  object preserved. Three inboxes, final reader/native interrupted-chain/quality/
+  hosted/Linux/install/desktop/review gates remain. Embedding experiment follows
+  baseline acceptance; full E1-E10 native goal remains active.
+
 ## 2026-09-28 - Shared derived governance repair; consumer boundary next
 
 - Continued from signed/pushed af40c20, including the owner-interrupted dirty

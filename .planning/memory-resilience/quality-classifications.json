@@ -6036,7 +6036,7 @@
     {
       "path": "src/infrastructure/database/event-log.ts",
       "package": "package.json",
-      "sourceHash": "9dace229f79751a4a030f17ae279c4cc072361e19503d77f8c3d0e18bf80d824",
+      "sourceHash": "5f599945d7b3773dd8f699e297ebc9ff6a71402bfee21362e03065e0720798bc",
       "tier": "S",
       "rationale": "Appends canonical memory events and validates imported legacy records; durable source and integrity boundary.",
       "applicability": {
@@ -6045,23 +6045,23 @@
       },
       "decisionStatus": "proposed - independent review pending",
       "inspection": {
-        "sourceRevision": "af40c20 + current source hash",
-        "anchor": "Q100.4.2.2.2.2.1",
-        "scope": "Shared-derived scoped behavior; final reader/quality and consumer activation remain"
+        "sourceRevision": "9c79913 + current source hash",
+        "anchor": "Q100.4.2.2.2.2.2",
+        "scope": "Cross-record batch effect ownership and measured consumer alternatives; no activation acceptance"
       },
       "metricApplicability": {
-        "status": "Scoped diagnostic; complete changed-line/platform/final review pending",
-        "sourceHash": "9dace229f79751a4a030f17ae279c4cc072361e19503d77f8c3d0e18bf80d824",
-        "evidence": ".planning/memory-resilience/evidence/Q100.4.2.2.2.2.1.json",
+        "status": "Scoped diagnostic; complete quality/changed-lines/platform/final review pending",
+        "sourceHash": "5f599945d7b3773dd8f699e297ebc9ff6a71402bfee21362e03065e0720798bc",
+        "evidence": ".planning/memory-resilience/evidence/Q100.4.2.2.2.2.2-investigation.json",
         "metrics": {
           "statements": {
-            "observedCounterTotal": 298,
-            "observedPercent": 81.2,
+            "observedCounterTotal": 299,
+            "observedPercent": 81.27,
             "proposal": "measure - completeness unverified"
           },
           "branches": {
-            "observedCounterTotal": 222,
-            "observedPercent": 66.66,
+            "observedCounterTotal": 225,
+            "observedPercent": 67.11,
             "proposal": "measure - completeness unverified"
           },
           "functions": {
@@ -6070,8 +6070,8 @@
             "proposal": "measure - completeness unverified"
           },
           "lines": {
-            "observedCounterTotal": 274,
-            "observedPercent": 81.38,
+            "observedCounterTotal": 275,
+            "observedPercent": 81.45,
             "proposal": "measure - completeness unverified"
           }
         }
@@ -20530,34 +20530,34 @@
         "reason": "Executable integrity validation/test; no exclusion approved."
       },
       "decisionStatus": "proposed - independent review pending",
-      "sourceHash": "1e239ce1d93503ea9ddd9144d90fc7b8bb8924639eaea667bdbc468cb8bc0bd2",
+      "sourceHash": "ee6b9f38714b59ffa332114fb7199a0bfe854cb54944cc0eb0ca914e3e9522f6",
       "inspection": {
-        "sourceRevision": "af40c20 + current source hash",
-        "anchor": "Q100.4.2.2.2.2.1",
-        "scope": "Shared-derived scoped behavior; final reader/quality and consumer activation remain"
+        "sourceRevision": "9c79913 + current source hash",
+        "anchor": "Q100.4.2.2.2.2.2",
+        "scope": "Cross-record batch effect ownership and measured consumer alternatives; no activation acceptance"
       },
       "metricApplicability": {
-        "status": "Scoped diagnostic; complete changed-line/platform/final review pending",
-        "sourceHash": "1e239ce1d93503ea9ddd9144d90fc7b8bb8924639eaea667bdbc468cb8bc0bd2",
-        "evidence": ".planning/memory-resilience/evidence/Q100.4.2.2.2.2.1.json",
+        "status": "Scoped diagnostic; complete quality/changed-lines/platform/final review pending",
+        "sourceHash": "ee6b9f38714b59ffa332114fb7199a0bfe854cb54944cc0eb0ca914e3e9522f6",
+        "evidence": ".planning/memory-resilience/evidence/Q100.4.2.2.2.2.2-investigation.json",
         "metrics": {
           "statements": {
-            "observedCounterTotal": 316,
+            "observedCounterTotal": 347,
             "observedPercent": 100,
             "proposal": "measure - completeness unverified"
           },
           "branches": {
-            "observedCounterTotal": 23,
+            "observedCounterTotal": 27,
             "observedPercent": 100,
             "proposal": "measure - completeness unverified"
           },
           "functions": {
-            "observedCounterTotal": 69,
+            "observedCounterTotal": 73,
             "observedPercent": 100,
             "proposal": "measure - completeness unverified"
           },
           "lines": {
-            "observedCounterTotal": 163,
+            "observedCounterTotal": 177,
             "observedPercent": 100,
             "proposal": "measure - completeness unverified"
           }

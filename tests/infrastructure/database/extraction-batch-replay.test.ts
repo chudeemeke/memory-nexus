@@ -149,6 +149,24 @@ it("identical batch duplicates have one durable projection effect", async () => 
   const report = await rebuildProjectionsWithReport(db, log); expect(report.replay.skippedDuplicateEvents).toBe(3); expect(await facts.findByProject("synthetic")).toHaveLength(3);
 }));
 
+for (const reverse of [false, true]) for (const separate of [false, true]) it(`standalone effect cannot impersonate its batch owner reverse=${reverse} separate=${separate}`, async () => fixture(async ({ db, log, dir }) => {
+  await appendMemoryEvent(ordinary("baseline"), log); await rebuildProjections(db, log); const before = db.serialize();
+  const batch = wrapper(), child = expandExtractionBatch(batch)![2]!;
+  const records = reverse ? [child, batch] : [batch, child];
+  await appendMemoryEvent(records[0]!, log); const secondPath = separate ? join(dir, "events", "events-b.jsonl") : log;
+  await appendMemoryEvent(records[1]!, secondPath); const source = readFileSync(log, "utf8"), secondSource = readFileSync(secondPath, "utf8");
+  const report = await readProjectionEventsWithReport(undefined, join(dir, "events")); expect(report.invalidEvents).toHaveLength(1);
+  await expect(rebuildProjections(db, undefined, join(dir, "events"))).rejects.toThrow();
+  expect(db.serialize()).toEqual(before); expect(readFileSync(log, "utf8")).toBe(source); expect(readFileSync(secondPath, "utf8")).toBe(secondSource);
+}));
+
+it("whole batch duplicates across source files retain one owner and one effect", async () => fixture(async ({ db, log, dir, facts }) => {
+  const event = wrapper(); await appendMemoryEvent(event, log); await appendMemoryEvent(event, join(dir, "events", "events-b.jsonl"));
+  const report = await rebuildProjectionsWithReport(db, undefined, join(dir, "events"));
+  expect(report.invalidEvents).toBe(0); expect(report.replay.skippedDuplicateEvents).toBe(3);
+  expect(await facts.findByProject("synthetic")).toHaveLength(3); expect((await facts.findByUuid("z-first"))?.supersededBy).toBe("a-last");
+}));
+
 it("empty batch records validate without changing existing facts", async () => fixture(async ({ db, log, facts }) => {
   await appendMemoryEvent(ordinary("existing"), log); const record = batchRecord(); record.facts = []; record.result = { added: 0, updated: 0, superseded: 0, skipped: 2 };
   await appendMemoryEvent(wrapper(record), log); await rebuildProjections(db, log); expect((await facts.findByProject("synthetic")).map(f => f.uuid)).toEqual(["existing"]);

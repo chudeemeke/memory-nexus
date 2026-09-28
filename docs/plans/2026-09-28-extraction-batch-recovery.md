@@ -3,11 +3,22 @@
 Owner: memory-nexus. Parent: Q100.4.2.2.2, coordinated with Q100.4.2.11.
 Status: baseline implementation plan; no canonical source activation or integration.
 
-Checkpoint: domain descriptor Q100.4.2.2.2.1 is scoped-verified. Source/replay
-Q100.4.2.2.2.2 is active on a retained real-source rejection. Final four-file
-group104tests/341assertions per Windows runtime; codec100all4/102branches and
-20targeted faults detected. Evidence: `.planning/memory-resilience/evidence/Q100.4.2.2.2.1.json`.
+Current checkpoint: domain descriptor and shared-derived behavior have scoped
+acceptance. Consumer-boundary item Q100.4.2.2.2.2.2 remains active; the source/replay
+parent and final reader gate remain pending. See the current
+[consumer investigation](2026-09-28-batch-consumer-boundary.md), work ledger and
+journal. Earlier measurements below remain revision-bound historical evidence.
 The interrupted pipeline still fails; no batch writer or receiver is activated.
+
+Consumer-boundary investigation at9c79913: a mirrored flat-file representation
+does not provide safe downgrade compatibility. Reserved sequence numbers preserve
+the old reader's fact chain but its shared graph governance still drops denied
+consent. Relative child sequences also exposed a current-reader ordering gap:
+identical standalone child envelopes can run before their containing batch.
+Required repair before any format activation: an effect ID belongs exclusively
+to its wrapper; an identical standalone envelope is still a conflicting source
+owner. Identical whole-wrapper duplicates remain supported. Prove refusal in
+both physical orders and across source files, preserving the live DB/source.
 
 ## Evidence and required outcome
 
