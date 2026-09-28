@@ -6036,7 +6036,7 @@
     {
       "path": "src/infrastructure/database/event-log.ts",
       "package": "package.json",
-      "sourceHash": "cb916168be1cb252eb7810169d88b0b3b54824cd34620e8618bf310f65c86c90",
+      "sourceHash": "9dace229f79751a4a030f17ae279c4cc072361e19503d77f8c3d0e18bf80d824",
       "tier": "S",
       "rationale": "Appends canonical memory events and validates imported legacy records; durable source and integrity boundary.",
       "applicability": {
@@ -6045,33 +6045,33 @@
       },
       "decisionStatus": "proposed - independent review pending",
       "inspection": {
-        "sourceRevision": "0436ae1 + current source hash",
-        "anchor": "Q100.4.2.2.2.2",
-        "scope": "Reader progress only; shared governance and consumer activation failures retained"
+        "sourceRevision": "af40c20 + current source hash",
+        "anchor": "Q100.4.2.2.2.2.1",
+        "scope": "Shared-derived scoped behavior; final reader/quality and consumer activation remain"
       },
       "metricApplicability": {
-        "status": "Scoped diagnostic; completeness and final review pending",
-        "sourceHash": "cb916168be1cb252eb7810169d88b0b3b54824cd34620e8618bf310f65c86c90",
-        "evidence": ".planning/memory-resilience/evidence/Q100.4.2.2.2.2-reader.json",
+        "status": "Scoped diagnostic; complete changed-line/platform/final review pending",
+        "sourceHash": "9dace229f79751a4a030f17ae279c4cc072361e19503d77f8c3d0e18bf80d824",
+        "evidence": ".planning/memory-resilience/evidence/Q100.4.2.2.2.2.1.json",
         "metrics": {
           "statements": {
-            "observedCounterTotal": 285,
-            "observedPercent": 78.94,
+            "observedCounterTotal": 298,
+            "observedPercent": 81.2,
             "proposal": "measure - completeness unverified"
           },
           "branches": {
-            "observedCounterTotal": 204,
-            "observedPercent": 62.74,
+            "observedCounterTotal": 222,
+            "observedPercent": 66.66,
             "proposal": "measure - completeness unverified"
           },
           "functions": {
-            "observedCounterTotal": 59,
-            "observedPercent": 81.35,
+            "observedCounterTotal": 61,
+            "observedPercent": 83.6,
             "proposal": "measure - completeness unverified"
           },
           "lines": {
-            "observedCounterTotal": 263,
-            "observedPercent": 79.84,
+            "observedCounterTotal": 274,
+            "observedPercent": 81.38,
             "proposal": "measure - completeness unverified"
           }
         }
@@ -20530,34 +20530,210 @@
         "reason": "Executable integrity validation/test; no exclusion approved."
       },
       "decisionStatus": "proposed - independent review pending",
-      "sourceHash": "80895ae88184cb7d5a451c9bee1c2f2a00dc97632aa6a2c9fa6e0e136feae442",
+      "sourceHash": "1e239ce1d93503ea9ddd9144d90fc7b8bb8924639eaea667bdbc468cb8bc0bd2",
       "inspection": {
-        "sourceRevision": "0436ae1 + current source hash",
-        "anchor": "Q100.4.2.2.2.2",
-        "scope": "Reader progress only; shared governance and consumer activation failures retained"
+        "sourceRevision": "af40c20 + current source hash",
+        "anchor": "Q100.4.2.2.2.2.1",
+        "scope": "Shared-derived scoped behavior; final reader/quality and consumer activation remain"
       },
       "metricApplicability": {
-        "status": "Scoped diagnostic; completeness and final review pending",
-        "sourceHash": "80895ae88184cb7d5a451c9bee1c2f2a00dc97632aa6a2c9fa6e0e136feae442",
-        "evidence": ".planning/memory-resilience/evidence/Q100.4.2.2.2.2-reader.json",
+        "status": "Scoped diagnostic; complete changed-line/platform/final review pending",
+        "sourceHash": "1e239ce1d93503ea9ddd9144d90fc7b8bb8924639eaea667bdbc468cb8bc0bd2",
+        "evidence": ".planning/memory-resilience/evidence/Q100.4.2.2.2.2.1.json",
         "metrics": {
           "statements": {
-            "observedCounterTotal": 215,
+            "observedCounterTotal": 316,
             "observedPercent": 100,
             "proposal": "measure - completeness unverified"
           },
           "branches": {
-            "observedCounterTotal": 12,
+            "observedCounterTotal": 23,
             "observedPercent": 100,
             "proposal": "measure - completeness unverified"
           },
           "functions": {
-            "observedCounterTotal": 47,
+            "observedCounterTotal": 69,
             "observedPercent": 100,
             "proposal": "measure - completeness unverified"
           },
           "lines": {
-            "observedCounterTotal": 104,
+            "observedCounterTotal": 163,
+            "observedPercent": 100,
+            "proposal": "measure - completeness unverified"
+          }
+        }
+      }
+    },
+    {
+      "path": "src/domain/services/derived-governance.ts",
+      "package": "package.json",
+      "tier": "S",
+      "rationale": "Derived record governance, provenance and identity integrity with adversarial tests.",
+      "applicability": {
+        "mode": "measure",
+        "reason": "Executable integrity behavior/test; no exclusion approved."
+      },
+      "decisionStatus": "proposed - independent review pending",
+      "sourceHash": "d4c66f06a1c81193c3a86f691f8591b700e0bde54c4a4a7cfe08a9f215807146",
+      "inspection": {
+        "sourceRevision": "af40c20 + current source hash",
+        "anchor": "Q100.4.2.2.2.2.1",
+        "scope": "Shared-derived scoped behavior; final reader/quality and consumer activation remain"
+      },
+      "metricApplicability": {
+        "status": "Scoped diagnostic; complete changed-line/platform/final review pending",
+        "sourceHash": "d4c66f06a1c81193c3a86f691f8591b700e0bde54c4a4a7cfe08a9f215807146",
+        "evidence": ".planning/memory-resilience/evidence/Q100.4.2.2.2.2.1.json",
+        "metrics": {
+          "statements": {
+            "observedCounterTotal": 11,
+            "observedPercent": 100,
+            "proposal": "measure - completeness unverified"
+          },
+          "branches": {
+            "observedCounterTotal": 30,
+            "observedPercent": 100,
+            "proposal": "measure - completeness unverified"
+          },
+          "functions": {
+            "observedCounterTotal": 2,
+            "observedPercent": 100,
+            "proposal": "measure - completeness unverified"
+          },
+          "lines": {
+            "observedCounterTotal": 10,
+            "observedPercent": 100,
+            "proposal": "measure - completeness unverified"
+          }
+        }
+      }
+    },
+    {
+      "path": "src/domain/services/derived-graph.ts",
+      "package": "package.json",
+      "tier": "S",
+      "rationale": "Derived record governance, provenance and identity integrity with adversarial tests.",
+      "applicability": {
+        "mode": "measure",
+        "reason": "Executable integrity behavior/test; no exclusion approved."
+      },
+      "decisionStatus": "proposed - independent review pending",
+      "sourceHash": "bbce14bd54ba7147fb78ee97ddb1941277946de7d138cdd768c406ef9d9aaf4e",
+      "inspection": {
+        "sourceRevision": "af40c20 + current source hash",
+        "anchor": "Q100.4.2.2.2.2.1",
+        "scope": "Shared-derived scoped behavior; final reader/quality and consumer activation remain"
+      },
+      "metricApplicability": {
+        "status": "Scoped diagnostic; complete changed-line/platform/final review pending",
+        "sourceHash": "bbce14bd54ba7147fb78ee97ddb1941277946de7d138cdd768c406ef9d9aaf4e",
+        "evidence": ".planning/memory-resilience/evidence/Q100.4.2.2.2.2.1.json",
+        "metrics": {
+          "statements": {
+            "observedCounterTotal": 5,
+            "observedPercent": 100,
+            "proposal": "measure - completeness unverified"
+          },
+          "branches": {
+            "observedCounterTotal": 26,
+            "observedPercent": 100,
+            "proposal": "measure - completeness unverified"
+          },
+          "functions": {
+            "observedCounterTotal": 1,
+            "observedPercent": 100,
+            "proposal": "measure - completeness unverified"
+          },
+          "lines": {
+            "observedCounterTotal": 5,
+            "observedPercent": 100,
+            "proposal": "measure - completeness unverified"
+          }
+        }
+      }
+    },
+    {
+      "path": "src/domain/services/derived-governance.test.ts",
+      "package": "package.json",
+      "tier": "S",
+      "rationale": "Derived record governance, provenance and identity integrity with adversarial tests.",
+      "applicability": {
+        "mode": "measure",
+        "reason": "Executable integrity behavior/test; no exclusion approved."
+      },
+      "decisionStatus": "proposed - independent review pending",
+      "sourceHash": "7dfdeeb6db0ebed0a76d489ba7e7ef947f9eec9701cd4e716c9047a9fb2dd5f3",
+      "inspection": {
+        "sourceRevision": "af40c20 + current source hash",
+        "anchor": "Q100.4.2.2.2.2.1",
+        "scope": "Shared-derived scoped behavior; final reader/quality and consumer activation remain"
+      },
+      "metricApplicability": {
+        "status": "Scoped diagnostic; complete changed-line/platform/final review pending",
+        "sourceHash": "7dfdeeb6db0ebed0a76d489ba7e7ef947f9eec9701cd4e716c9047a9fb2dd5f3",
+        "evidence": ".planning/memory-resilience/evidence/Q100.4.2.2.2.2.1.json",
+        "metrics": {
+          "statements": {
+            "observedCounterTotal": 43,
+            "observedPercent": 100,
+            "proposal": "measure - completeness unverified"
+          },
+          "branches": {
+            "observedCounterTotal": 11,
+            "observedPercent": 100,
+            "proposal": "measure - completeness unverified"
+          },
+          "functions": {
+            "observedCounterTotal": 7,
+            "observedPercent": 100,
+            "proposal": "measure - completeness unverified"
+          },
+          "lines": {
+            "observedCounterTotal": 25,
+            "observedPercent": 100,
+            "proposal": "measure - completeness unverified"
+          }
+        }
+      }
+    },
+    {
+      "path": "src/domain/services/derived-graph.test.ts",
+      "package": "package.json",
+      "tier": "S",
+      "rationale": "Derived record governance, provenance and identity integrity with adversarial tests.",
+      "applicability": {
+        "mode": "measure",
+        "reason": "Executable integrity behavior/test; no exclusion approved."
+      },
+      "decisionStatus": "proposed - independent review pending",
+      "sourceHash": "c19d5e0f3bbdd130c5106d46e98c3de03ecf5ced8cb2f9533676247a4c8ea2d4",
+      "inspection": {
+        "sourceRevision": "af40c20 + current source hash",
+        "anchor": "Q100.4.2.2.2.2.1",
+        "scope": "Shared-derived scoped behavior; final reader/quality and consumer activation remain"
+      },
+      "metricApplicability": {
+        "status": "Scoped diagnostic; complete changed-line/platform/final review pending",
+        "sourceHash": "c19d5e0f3bbdd130c5106d46e98c3de03ecf5ced8cb2f9533676247a4c8ea2d4",
+        "evidence": ".planning/memory-resilience/evidence/Q100.4.2.2.2.2.1.json",
+        "metrics": {
+          "statements": {
+            "observedCounterTotal": 38,
+            "observedPercent": 100,
+            "proposal": "measure - completeness unverified"
+          },
+          "branches": {
+            "observedCounterTotal": 11,
+            "observedPercent": 100,
+            "proposal": "measure - completeness unverified"
+          },
+          "functions": {
+            "observedCounterTotal": 9,
+            "observedPercent": 100,
+            "proposal": "measure - completeness unverified"
+          },
+          "lines": {
+            "observedCounterTotal": 22,
             "observedPercent": 100,
             "proposal": "measure - completeness unverified"
           }

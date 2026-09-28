@@ -7,15 +7,28 @@ import { OwnedDatabase } from "../../../src/infrastructure/database/owned-databa
 import { createSchema } from "../../../src/infrastructure/database/schema.js";
 import { appendMemoryEvent, readEvents, readMemoryEvents, readProjectionEventsWithReport, rebuildProjections, rebuildProjectionsWithReport } from "../../../src/infrastructure/database/event-log.js";
 import { SqliteFactRepository } from "../../../src/infrastructure/database/repositories/fact-repository.js";
+import { SqliteGraphRepository } from "../../../src/infrastructure/database/repositories/graph-repository.js";
 import { SqliteMemoryGovernanceRepository } from "../../../src/infrastructure/database/repositories/memory-governance-repository.js";
 import { SecretAuditService } from "../../../src/infrastructure/security/secret-audit-service.js";
 import { PatternRedactor } from "../../../src/infrastructure/security/pattern-redactor.js";
 import { expandExtractionBatch } from "../../../src/infrastructure/database/extraction-batch-events.js";
 import { assertProjectionPayload } from "../../../src/infrastructure/database/projection-payload.js";
 import { GitRemoteEventTransport, runGitCommand } from "../../../src/infrastructure/remote/git-remote-event-transport.js";
+import { personaEntryFromFactEvent } from "../../../src/application/services/persona-profile-service.js";
+import { Fact } from "../../../src/domain/entities/fact.js";
 import { createOwnedTestDirectory } from "../../helpers/owned-test-directory.js";
 
 const time = "2026-09-28T10:00:00.000Z";
+const sharedEdge = { id: "shared-edge", source: "synthetic", target: "target", relationship: "uses" };
+function sharedOrdinary(overrides: Partial<MemoryEventCreateParams> = {}, edge: Record<string, unknown> = sharedEdge) {
+  const base = ordinary("prior-fact").toJSON();
+  return MemoryEventEnvelope.create({ ...base, occurredAt: new Date(time), observedAt: new Date(time),
+    consent: { status: "not_required", scopes: [] },
+    payload: { fact: { ...(base.payload.fact as Record<string, unknown>), metadata: { graph_edges: [edge] } } }, ...overrides });
+}
+function sharedBatch(overrides: Partial<MemoryEventCreateParams> = {}) {
+  const record = batchRecord(); record.facts[1]!.metadata!.graph_edges = [sharedEdge]; return wrapper(record, overrides);
+}
 function batchRecord(): ExtractionBatchRecord {
   return { version: 1, sessionId: "synthetic-session", inputIdentity: "v1:" + "a".repeat(64), project: "synthetic", provider: "synthetic", model: "synthetic", extractedAt: time,
     result: { added: 2, updated: 1, superseded: 1, skipped: 0 },
@@ -43,6 +56,86 @@ it("batch replay preserves ordered effects and raw canonical versus Fact reader 
   const before = await facts.findByProject("synthetic"), source = readFileSync(log, "utf8");
   await rebuildProjections(db, log); expect(readFileSync(log, "utf8")).toBe(source);
   expect((await facts.findByProject("synthetic"))).toHaveLength(3); expect(await facts.findByProject("synthetic")).toEqual(before);
+}));
+
+it("shared derived graph retains denied batch consent and all provenance", async () => fixture(async ({ db, log, governance }) => {
+  await appendMemoryEvent(sharedOrdinary(), log); await appendMemoryEvent(sharedBatch(), log);
+  await rebuildProjections(db, log);
+  const entry = (await governance.findByTarget("graph", "shared-edge"))!;
+  expect(entry.consentStatus).toBe("denied");
+  expect(entry.sourceEventIds.sort()).toEqual(["a-last", "batch-one", "prior-fact"]);
+}));
+
+for (const sequence of [20, 40]) it(`shared graph retains revoked ordinary contributor before or after batch sequence=${sequence}`, async () => fixture(async ({ db, log, governance }) => {
+  await appendMemoryEvent(sharedOrdinary({ sequence, consent: { status: "revoked", scopes: ["local"] } }), log);
+  await appendMemoryEvent(sharedBatch({ consent: { status: "granted", scopes: ["local"] } }), log);
+  await rebuildProjections(db, log);
+  const entry = (await governance.findByTarget("graph", "shared-edge"))!;
+  expect(entry.consentStatus).toBe("revoked"); expect(entry.isBlocked()).toBe(true);
+  expect(entry.sourceEventIds.sort()).toEqual(["a-last", "batch-one", "prior-fact"]);
+}));
+
+it("shared graph entity retains contributor provenance as well as governance", async () => fixture(async ({ db, log }) => {
+  await appendMemoryEvent(sharedOrdinary(), log); await appendMemoryEvent(sharedBatch(), log); await rebuildProjections(db, log);
+  const edge = (await new SqliteGraphRepository(db).findByEdgeId("shared-edge"))!;
+  expect(edge.sourceEventIds.sort()).toEqual(["a-last", "batch-one", "prior-fact"]);
+  expect(edge.sourceKinds.sort()).toEqual(["learning", "preference"]);
+}));
+
+for (const field of ["source", "target", "relationship", "project", "visibility"] as const) for (const sequence of [20, 40]) it(`shared graph rejects changed ${field} identity sequence=${sequence}`, async () => fixture(async ({ db, log }) => {
+  await appendMemoryEvent(ordinary("baseline"), log); await rebuildProjections(db, log); const before = db.serialize();
+  const edge = { ...sharedEdge, [field]: field === "visibility" ? "global" : "other" };
+  await appendMemoryEvent(sharedOrdinary({ sequence }, edge), log); await appendMemoryEvent(sharedBatch(), log); const source = readFileSync(log, "utf8");
+  await expect(rebuildProjections(db, log)).rejects.toThrow(); expect(db.serialize()).toEqual(before); expect(readFileSync(log, "utf8")).toBe(source);
+}));
+
+for (const surface of ["persona", "graph"] as const) it(`batch preserves prior ${surface} suppression while inheriting denied consent`, async () => fixture(async ({ db, log, governance }) => {
+  const batch = sharedBatch(), targetId = surface === "graph" ? "shared-edge"
+    : personaEntryFromFactEvent(Fact.create({ ...batchRecord().facts[1]!, project: "synthetic", observedAt: new Date(time) }), new Date(time))!.entryId;
+  await appendMemoryEvent(wrapper(batchRecord(), { eventId: "prior-control", sequence: 10, kind: "governance", operation: "update",
+    consent: { status: "not_required", scopes: [] }, privacy: { redactionState: "quarantined", containsSensitiveContent: true },
+    provenance: { source: "synthetic-control", actor: "owner", method: "manual", sourceIds: ["prior-control"] },
+    payload: { governance: { surface, targetId, control: "suppress", reason: "synthetic prior suppression" } } }), log);
+  await appendMemoryEvent(batch, log); await rebuildProjections(db, log);
+  const entry = (await governance.findByTarget(surface, targetId))!;
+  expect(entry.status).toBe("suppressed"); expect(entry.statusReason).toBe("synthetic prior suppression");
+  expect(entry.consentStatus).toBe("denied"); expect(entry.redactionState).toBe("quarantined");
+  expect(entry.sourceEventIds).toContain("batch-one"); expect(entry.sourceEventIds).toContain("prior-control");
+}));
+
+for (const sequence of [20, 40]) it(`shared graph cannot extend prior validity or consent expiry sequence=${sequence}`, async () => fixture(async ({ db, log, governance }) => {
+  const until = "2026-09-29T10:00:00.000Z";
+  await appendMemoryEvent(sharedOrdinary({ sequence, consent: { status: "granted", scopes: ["local"], expiresAt: until } }, { ...sharedEdge, validTo: until }), log);
+  await appendMemoryEvent(sharedBatch({ consent: { status: "granted", scopes: ["local"], expiresAt: "2026-10-10T00:00:00.000Z" } }), log);
+  await rebuildProjections(db, log);
+  expect((await new SqliteGraphRepository(db).findByEdgeId("shared-edge"))?.validTo?.toISOString()).toBe(until);
+  expect((await governance.findByTarget("graph", "shared-edge"))?.expiresAt?.toISOString()).toBe(until);
+}));
+
+for (const scope of ["local", "export"]) it(`shared graph grants intersect without broadening to ${scope}`, async () => fixture(async ({ db, log, governance }) => {
+  await appendMemoryEvent(sharedOrdinary({ consent: { status: "granted", scopes: ["local"] } }), log);
+  await appendMemoryEvent(sharedBatch({ consent: { status: "granted", scopes: [scope] } }), log); await rebuildProjections(db, log);
+  const entry = (await governance.findByTarget("graph", "shared-edge"))!;
+  expect(entry.consentStatus).toBe(scope === "local" ? "granted" : "denied"); expect(entry.consentScopes).toEqual(scope === "local" ? ["local"] : []);
+}));
+
+it("two graph candidates in one batch effect cannot reuse an identity for different endpoints", async () => fixture(async ({ db, log }) => {
+  const record = batchRecord(); record.facts[1]!.metadata!.graph_edges = [sharedEdge, { ...sharedEdge, target: "other" }];
+  await appendMemoryEvent(wrapper(record), log); const before = db.serialize();
+  await expect(rebuildProjections(db, log)).rejects.toThrow(); expect(db.serialize()).toEqual(before);
+}));
+
+it("disjoint shared graph validity refuses without replacing live projections", async () => fixture(async ({ db, log }) => {
+  await appendMemoryEvent(sharedOrdinary({}, { ...sharedEdge, validFrom: "2026-09-26", validTo: "2026-09-27" }), log);
+  await rebuildProjections(db, log); const before = db.serialize(); await appendMemoryEvent(sharedBatch(), log);
+  await expect(rebuildProjections(db, log)).rejects.toThrow(); expect(db.serialize()).toEqual(before);
+}));
+
+it("ordinary repeated graph candidates retain final annotation governance", async () => fixture(async ({ db, log, governance }) => {
+  const json = sharedOrdinary().toJSON();
+  await appendMemoryEvent(MemoryEventEnvelope.create({ ...json, occurredAt: new Date(time), observedAt: new Date(time),
+    payload: { fact: { ...(json.payload.fact as Record<string, unknown>), metadata: { graph_edges: [{ ...sharedEdge, confidence: 0.2 }, { ...sharedEdge, confidence: 0.9 }] } } } }), log);
+  await rebuildProjections(db, log); expect((await governance.findByTarget("graph", "shared-edge"))?.confidence).toBe(0.9);
 }));
 
 it("batch ordering is applied after complete source record ordering", async () => fixture(async ({ db, log, facts }) => {

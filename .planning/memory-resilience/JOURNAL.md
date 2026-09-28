@@ -1,5 +1,51 @@
 # Memory resilience execution journal
 
+## 2026-09-28 - Shared derived governance repair; consumer boundary next
+
+- Continued from signed/pushed af40c20, including the owner-interrupted dirty
+  implementation. Polled the original session50297 to completion (4pass/7fail)
+  before resuming. All intentional source/test/plan changes were preserved.
+- Reader parent Q100.4.2.2.2.2 is split into shared-derived behavior (.1),
+  unsupported-consumer activation boundary (.2), and final reader acceptance (.3).
+  Child .1 now has scoped behavior acceptance; .2 is the sole active item.
+  Parent barriers remain pending. Ledger277acyclic items; catalog508files/two packages.
+- The source prepass identifies every graph/persona target touched by a batch;
+  all contributors to those targets inherit source policy, including ordinary
+  records before/after the batch. Consent can only tighten, granted scopes
+  intersect, disjoint grants deny, provenance accumulates, quarantine/expiry and
+  prior controls persist. Persona controls preceding their fact retain policy.
+- Shared graph identities require matching endpoint types/IDs, relationship and
+  project/visibility. Annotations can evolve, source IDs/kinds accumulate, and
+  validity windows intersect. Conflicts or disjoint windows refuse staged replay
+  while preserving the live DB. Unrelated ordinary duplicate-candidate annotation
+  behavior is preserved; its initially introduced regression was caught and fixed.
+- Final 627tests/3905assertions/28files passed on each Windows Bun1.4.1 and
+  checksum-pinned1.3.14. Production/strict changed-test types and isolation pass.
+  Diagnostic108tests/361assertions: two new helpers, their tests and replay test
+  reach100all4; helpers have30and26branches. All19targeted faults detected.
+  Event-log narrow metrics 81.2/66.66/83.6/81.38 (statements/branches/functions/lines)
+  remain below policy; full package/changed-line/platform/review evidence is open.
+- Both initial broad collectors hit their300000ms limits under four competing
+  heavy jobs, returning null exits and incomplete output. Final source-bound
+  repeats used fewer competing jobs and600000ms collector caps; per-test15000ms
+  limits were unchanged. Initial provenance fault survived a redundant fixture;
+  corrected to unique prior source and repeated every fault. Two control fixtures
+  initially failed before assertions; public Fact construction/update operation
+  produced the meaningful persona-policy RED retained alongside passing repair.
+- Evidence: evidence/Q100.4.2.2.2.2.1.json. No final reader acceptance or writer
+  activation. Truncated persona-ID collision behavior remains explicit final
+  adversarial review; preserving consent scope labels is not proof of purpose-
+  specific egress authorization. Added prepass cost remains scaling obligation.
+- Next: Q100.4.2.2.2.2.2. The tagged v4.0.3 data-loss RED remains unchanged.
+  Derive an enforceable consumer upgrade/source-access and rollback contract
+  before emission; no declaration-only safety claim or silent authority cutover.
+  Then final reader, audit/pipeline and original native interrupted-chain proof.
+- One canonical worktree; new .git diagnostic material was about2MiB before final
+  pinned output. Owned temporary fixtures/runtime cleaned by retained collectors.
+  Previously rejected cleanup targets, shared-temp admission authority and Git
+  temporary object preserved. Three inboxes, hosted/Linux/install/desktop/final
+  review and R03/P03/A03 remain. Embedding experiment follows baseline acceptance.
+
 ## 2026-09-28 - Batch reader progress; governance and consumer REDs retained
 
 - Began at signed/pushed0436ae1. Native E1-E10 goal remains active; sole active

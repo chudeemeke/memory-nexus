@@ -119,7 +119,21 @@ expiry and source linkage. Existing default governance must not silently turn a
 denied or revoked batch into permitted derived records. This is a batch-specific
 boundary; ordinary event compatibility remains covered separately.
 
-## Reader checkpoint and unresolved activation boundary
+## Reader checkpoint at af40c20 and unresolved activation boundary
+
+Next implementation contract (starting af40c20): split reader acceptance into
+shared derived governance, unsupported-consumer activation boundary, and final
+reader acceptance. For graph IDs touched by a batch anywhere in the admitted
+source, validate all contributing records, including earlier/later ordinary
+facts. Stable identity means identical endpoint types/IDs, relationship, project
+and visibility; annotations may evolve, but source IDs/kinds accumulate. A scope
+or semantic identity conflict refuses staged replay and preserves the live DB.
+Persona IDs are fact-derived; retain prior controls even if a control appears
+before its fact. Repeated contributions must not lift suppression or quarantine,
+extend consent expiry, discard provenance or broaden granted scopes. Granted
+scopes intersect (not_required is neutral); disjoint grants deny. Denied/revoked
+contributions remain blocked. Explicit subsequent governance controls retain
+their existing separate semantics; this slice does not redesign control authority.
 
 Source/replay slice Q100.4.2.2.2.2 remains active. Strict wrapper admission,
 ordered expansion, cross-record identities, canonical/Fact readers, recursive
@@ -146,3 +160,20 @@ were detected. This includes corrected supplemental paths after Bun silently
 ignored two nonexistent requested tests. Narrow helper/test diagnostics reach
 100%all4; surrounding modules, complete quality, platforms and final review remain
 unaccepted. These results do not activate the format or close baseline work.
+
+## Shared-derived checkpoint
+
+Q100.4.2.2.2.2.1 now has scoped behavior acceptance. The initial shared graph
+denied-consent failure is repaired: all contributors to a batch-associated target
+are considered, regardless of order. Prior persona/graph controls, restrictive
+consent/privacy/expiry and source linkage persist. Shared graph identities cannot
+change endpoints, relationship or scope; validity intersects and annotations may
+evolve. Ordinary targets retain their existing repeated-candidate behavior.
+
+627tests/3905assertions/28files pass per Windows runtime;19targeted faults
+detected; new helpers/tests100all4. Full reader quality, changed lines, platforms,
+independent review and truncated persona-ID collision behavior remain final-reader
+obligations. Consent labels alone do not establish purpose-specific authorization.
+The older-consumer RED and interrupted-chain failure remain; writer emission is
+still inactive. Child .2 owns the enforceable consumer/rollback boundary and .3
+owns final reader acceptance. Evidence: .planning/memory-resilience/evidence/Q100.4.2.2.2.2.1.json.

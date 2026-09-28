@@ -40,6 +40,8 @@ import type { OperationLease, DatabaseWriteLease } from "../../domain/ports/oper
 import { runDatabaseWrite } from "./database-write-admission.js";
 import { createSourceOperationAdmission } from "./source-operation-admission.js";
 import { expandExtractionBatch } from "./extraction-batch-events.js";
+import { mergeDerivedGovernance } from "../../domain/services/derived-governance.js";
+import { mergeDerivedGraph } from "../../domain/services/derived-graph.js";
 
 export interface InvalidEventLogLine {
   filePath: string;
@@ -68,6 +70,7 @@ interface ReadOptions {
 interface ProjectionContext {
   db: Database;
   batchEffects: ReadonlySet<string>;
+  batchTargets: ReadonlySet<string>;
 }
 
 const FACT_EVENT_KINDS: readonly MemoryEventKind[] = [
@@ -232,14 +235,22 @@ async function withProjectionStage<T>(report: ProjectionSourceReadReport,
   try {
     let replay: ProjectionReplayResult;
     try {
-      const expanded: MemoryEventEnvelope[] = [], batchEffects = new Set<string>();
+      const expanded: MemoryEventEnvelope[] = [], batchEffects = new Set<string>(), batchTargets = new Set<string>();
       for (const event of sortMemoryEvents(report.events)) {
         assertProjectionPayload(event);
         const effects = expandExtractionBatch(event);
-        if (effects !== null) { for (const effect of effects) batchEffects.add(effect.eventId); expanded.push(...effects); }
+        if (effects !== null) {
+          for (const effect of effects) {
+            batchEffects.add(effect.eventId);
+            const fact = memoryEventToFact(effect), persona = personaEntryFromFactEvent(fact, effect.observedAt);
+            if (persona) batchTargets.add(`persona:${persona.entryId}`);
+            for (const edge of graphEdgesFromFact(fact, effect.observedAt)) batchTargets.add(`graph:${edge.edgeId}`);
+          }
+          expanded.push(...effects);
+        }
         else expanded.push(event);
       }
-      replay = await registry.replay(expanded, { db: stage, batchEffects });
+      replay = await registry.replay(expanded, { db: stage, batchEffects, batchTargets });
     } catch (cause) {
       throw new Error("Projection source cannot be replayed; validate event payloads and supported operations", { cause });
     }
@@ -510,8 +521,8 @@ function createPersonaProjection() {
       const saved = await personaRepo.save(entry);
       const governanceRepo = new SqliteMemoryGovernanceRepository(context.db);
       const existingGovernance = await governanceRepo.findByTarget("persona", saved.entryId);
-      if (!existingGovernance) {
-        await governanceRepo.save(inheritBatchGovernance(context, event, MemoryGovernanceEntry.create({
+      if (!existingGovernance || context.batchTargets.has(`persona:${saved.entryId}`)) {
+        const incoming = inheritBatchGovernance(context, event, MemoryGovernanceEntry.create({
           surface: "persona",
           targetId: saved.entryId,
           project: saved.project,
@@ -529,7 +540,8 @@ function createPersonaProjection() {
           updatedAt: saved.updatedAt,
           expiresAt: saved.expiresAt,
           lastEventId: event.eventId,
-        })));
+        }));
+        await governanceRepo.save(existingGovernance ? mergeDerivedGovernance(existingGovernance, incoming) : incoming);
       }
       return true;
     },
@@ -551,12 +563,20 @@ function createGraphProjection() {
       }
 
       const graphRepo = new SqliteGraphRepository(context.db);
-      const saved = await graphRepo.saveMany(edges);
       const governanceRepo = new SqliteMemoryGovernanceRepository(context.db);
-      for (const edge of saved) {
+      // Preserve legacy last-candidate annotation semantics for unrelated IDs.
+      const ordinary = new Map((await graphRepo.saveMany(edges.filter(edge => !context.batchTargets.has(`graph:${edge.edgeId}`))))
+        .map(edge => [edge.edgeId, edge]));
+      for (const candidate of edges) {
+        const protectedIdentity = context.batchTargets.has(`graph:${candidate.edgeId}`);
+        const edge = protectedIdentity
+          ? await graphRepo.save(mergeDerivedGraph(await graphRepo.findByEdgeId(candidate.edgeId), candidate,
+            context.batchEffects.has(event.eventId) ? [event.eventId, ...event.provenance.sourceIds ?? []] : [event.eventId]))
+          : ordinary.get(candidate.edgeId)!;
         const existingGovernance = await governanceRepo.findByTarget("graph", edge.edgeId);
-        if (!existingGovernance) {
-          await governanceRepo.save(inheritBatchGovernance(context, event, governanceEntryForGraphEdge(edge, "graph-event-projection")));
+        if (!existingGovernance || protectedIdentity) {
+          const incoming = inheritBatchGovernance(context, event, governanceEntryForGraphEdge(edge, "graph-event-projection"));
+          await governanceRepo.save(existingGovernance ? mergeDerivedGovernance(existingGovernance, incoming) : incoming);
         }
       }
       return true;
@@ -564,9 +584,9 @@ function createGraphProjection() {
   };
 }
 
-/** Only effects expanded from validated wrappers inherit this batch policy. */
+/** Every contributor to a batch-derived identity retains its source policy. */
 function inheritBatchGovernance(context: ProjectionContext, event: MemoryEventEnvelope, entry: MemoryGovernanceEntry): MemoryGovernanceEntry {
-  if (!context.batchEffects.has(event.eventId)) return entry;
+  if (!context.batchTargets.has(`${entry.surface}:${entry.targetId}`)) return entry;
   const scope = event.scope;
   if (entry.project !== scope.project || entry.visibility !== scope.visibility ||
       entry.scope.project !== scope.project || entry.scope.visibility !== scope.visibility || entry.scope.workspace !== scope.workspace) {
@@ -576,7 +596,8 @@ function inheritBatchGovernance(context: ProjectionContext, event: MemoryEventEn
   let expiresAt = consent.expiresAt ? new Date(consent.expiresAt) : null;
   if (entry.expiresAt && (!expiresAt || entry.expiresAt < expiresAt)) expiresAt = entry.expiresAt;
   return MemoryGovernanceEntry.create({
-    ...entry.toParams(), sourceEventIds: [...new Set([...entry.sourceEventIds, ...event.provenance.sourceIds ?? []])],
+    ...entry.toParams(), sourceEventIds: [...new Set([...entry.sourceEventIds, event.eventId,
+      ...context.batchEffects.has(event.eventId) ? event.provenance.sourceIds ?? [] : []])],
     actor: event.provenance.actor, redactionState: event.privacy.redactionState,
     consentStatus: consent.status, consentScopes: consent.scopes, expiresAt,
   });
