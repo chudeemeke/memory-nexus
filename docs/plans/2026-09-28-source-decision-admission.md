@@ -326,3 +326,40 @@ one batch create two facts. Later decisions must observe preceding accepted
 effects. Acceptance must cover duplicates, overlapping replacements, ordering and
 interrupted retry, not only exact-string filtering. This does not establish
 cross-resource atomicity between JSONL and SQLite.
+
+## Within-batch decision plan
+
+Q100.4.2.2 is an acceptance barrier over two independently testable outcomes:
+Q100.4.2.2.1 owns decisions within one uninterrupted batch; Q100.4.2.2.2 owns
+interrupted-batch retry, coordinated with the broader Q100.4.2.11 durability work.
+Neither child nor the parent bypasses Q100.4.3 final quality acceptance.
+
+The provider's candidate order is meaningful. After accepting a candidate, pair
+its fact and precomputed vector in the comparison working set. A replaced entry
+can detect repeats at the existing duplicate threshold, but can never be selected
+for another replacement. This prevents both duplicate new facts and conflicting
+supersedence of one old UUID. Preserve existing similarity thresholds and lexical
+fallback. Equal scores use ascending fact UUID in the initial set, independent of
+database row order; accepted additions follow candidate order. No provider call
+or new embedding computation occurs inside the database reservation.
+
+First qualify real-store exact/lexical/vector duplicates, lexical and vector
+replacement chains, retired-candidate repeats, vector alignment and reversed
+repository order. The initial seven-case RED has six failures. Then test interrupted
+retry from retained source; do not treat an in-memory working set as a durable
+batch identity or silently claim source/database atomicity.
+
+Implementation checkpoint: Q100.4.2.2.1 now has scoped behavioral acceptance in
+`.planning/memory-resilience/evidence/Q100.4.2.2.1.json`. Eight real-store cases
+pass, with nine targeted faults detected. Final compatibility is275tests and
+1,183assertions on each Windows Bun1.4.1 and pinned1.3.14. Narrow pipeline/test
+quality still fails policy; no full quality or parent acceptance follows.
+
+Q100.4.2.2.2 is active on a retained native failure. Killing a completed
+alpha->beta->gamma chain before audit leaves retained source but rolls back
+SQLite. Retry appends two further replacements and leaves beta active instead
+of gamma. Current fact envelopes have per-fact UUID/sourceIds, not a batch
+identity/completion contract. Before implementation, derive durable ordered
+decision and completion/recovery requirements from the source, governance and
+audit contracts. Preserve changed-input/force semantics and qualify each event
+boundary; stable fact IDs or content matches alone do not prove batch completion.

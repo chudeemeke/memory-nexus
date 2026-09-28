@@ -147,17 +147,22 @@ export class ExtractionPipeline {
       let factsSuperseded = 0;
       let factsSkipped = 0;
 
+      // Keep vectors attached as the batch evolves. Retired entries detect repeats,
+      // but cannot receive another supersedence. Initial ties use stable identity.
+      const comparisons = activeFacts.map((fact, index) => ({
+        fact, embedding: activeEmbeddings[index], active: true,
+      })).sort((left, right) => left.fact.uuid.localeCompare(right.fact.uuid));
+
       // 6. Compare and classify each candidate
       for (let cIdx = 0; cIdx < candidates.length; cIdx++) {
         const candidate = candidates[cIdx];
         if (!candidate) continue;
 
         let maxSimilarity = 0;
-        let bestMatch: Fact | null = null;
+        let bestMatch: (typeof comparisons)[number] | null = null;
 
-        for (let fIdx = 0; fIdx < activeFacts.length; fIdx++) {
-          const activeFact = activeFacts[fIdx];
-          if (!activeFact) continue;
+        for (const comparison of comparisons) {
+          const activeFact = comparison.fact;
 
           let similarity = 0;
 
@@ -166,7 +171,7 @@ export class ExtractionPipeline {
             similarity = 1.0;
           } else {
             const candidateEmb = candidateEmbeddings[cIdx];
-            const activeEmb = activeEmbeddings[fIdx];
+            const activeEmb = comparison.embedding;
             if (useEmbeddings && candidateEmb && activeEmb) {
               similarity = this.cosineSimilarity(candidateEmb, activeEmb);
             } else {
@@ -174,14 +179,14 @@ export class ExtractionPipeline {
             }
           }
 
-          if (similarity > maxSimilarity) {
+          if (similarity > maxSimilarity && (comparison.active || similarity >= 0.95)) {
             maxSimilarity = similarity;
-            bestMatch = activeFact;
+            bestMatch = comparison;
           }
         }
 
         // Classification
-        if (maxSimilarity >= 0.95 || (bestMatch && candidate.content.trim().toLowerCase() === bestMatch.content.trim().toLowerCase())) {
+        if (maxSimilarity >= 0.95 || (bestMatch && candidate.content.trim().toLowerCase() === bestMatch.fact.content.trim().toLowerCase())) {
           // DUPLICATE / NOOP
           factsSkipped++;
         } else if (maxSimilarity >= 0.85 && bestMatch) {
@@ -207,14 +212,16 @@ export class ExtractionPipeline {
           const supersedenceFact = Fact.create({
             type: "supersedence",
             project: projectName,
-            content: `Superseded ${bestMatch.uuid} by ${newFact.uuid}`,
+            content: `Superseded ${bestMatch.fact.uuid} by ${newFact.uuid}`,
             metadata: {
-              superseded_uuid: bestMatch.uuid,
+              superseded_uuid: bestMatch.fact.uuid,
               superseded_by_uuid: newFact.uuid
             },
             observedAt: new Date()
           });
           await this.appendProjectionEvent(supersedenceFact, lease);
+          bestMatch.active = false;
+          comparisons.push({ fact: newFact, embedding: candidateEmbeddings[cIdx], active: true });
         } else {
           // NEW FACT
           factsAdded++;
@@ -231,6 +238,7 @@ export class ExtractionPipeline {
             observedAt: new Date()
           });
           await this.appendProjectionEvent(newFact, lease);
+          comparisons.push({ fact: newFact, embedding: candidateEmbeddings[cIdx], active: true });
         }
       }
 

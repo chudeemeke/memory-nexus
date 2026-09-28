@@ -1403,14 +1403,14 @@
       },
       "decisionStatus": "proposed - independent review pending",
       "inspection": {
-        "sourceRevision": "65b21ef + current source hash",
-        "anchor": "Q100.4.2.1 owned database write scope",
-        "scope": "Scoped behavioral proof and diagnostic; final quality remains open"
+        "sourceRevision": "21dd22c + current source hash",
+        "anchor": "Q100.4.2.2.1",
+        "scope": "Uninterrupted batch behavior and diagnostic; interrupted retry and final quality remain open"
       },
       "metricApplicability": {
-        "status": "Scoped diagnostic; child counters and full quality pending",
+        "status": "Scoped diagnostic; full quality pending",
         "sourceHash": "1355531e755d34fe0a02858521681ff52cac474a82061bda004b43bb6ad48dbb",
-        "evidence": ".planning/memory-resilience/evidence/Q100.4.2.1-database-write.json",
+        "evidence": ".planning/memory-resilience/evidence/Q100.4.2.2.1.json",
         "metrics": {
           "statements": {
             "observedCounterTotal": 385,
@@ -1438,7 +1438,7 @@
     {
       "path": "src/application/services/extraction-pipeline.ts",
       "package": "package.json",
-      "sourceHash": "df27d54fc832ad9376e8e55619f10ca28279bb417bfc354c16b119182eda9e82",
+      "sourceHash": "916a1bd8282faf26d3ac28e3323de43198a52c3b9f9bdf6018eb2f496a370305",
       "tier": "S",
       "rationale": "Redacts messages before provider egress, redacts candidates and persists extraction outcomes.",
       "applicability": {
@@ -1447,33 +1447,33 @@
       },
       "decisionStatus": "proposed - independent review pending",
       "inspection": {
-        "sourceRevision": "65b21ef + current source hash",
-        "anchor": "Q100.4.2.1 owned database write scope",
-        "scope": "Scoped behavioral proof and diagnostic; final quality remains open"
+        "sourceRevision": "21dd22c + current source hash",
+        "anchor": "Q100.4.2.2.1",
+        "scope": "Uninterrupted batch behavior and diagnostic; interrupted retry and final quality remain open"
       },
       "metricApplicability": {
-        "status": "Scoped diagnostic; child counters and full quality pending",
-        "sourceHash": "df27d54fc832ad9376e8e55619f10ca28279bb417bfc354c16b119182eda9e82",
-        "evidence": ".planning/memory-resilience/evidence/Q100.4.2.1-database-write.json",
+        "status": "Scoped diagnostic; full quality pending",
+        "sourceHash": "916a1bd8282faf26d3ac28e3323de43198a52c3b9f9bdf6018eb2f496a370305",
+        "evidence": ".planning/memory-resilience/evidence/Q100.4.2.2.1.json",
         "metrics": {
           "statements": {
-            "observedCounterTotal": 132,
-            "observedPercent": 96.21,
+            "observedCounterTotal": 135,
+            "observedPercent": 97.03,
             "proposal": "measure - completeness unverified"
           },
           "branches": {
-            "observedCounterTotal": 68,
-            "observedPercent": 91.17,
+            "observedCounterTotal": 69,
+            "observedPercent": 92.75,
             "proposal": "measure - completeness unverified"
           },
           "functions": {
-            "observedCounterTotal": 27,
+            "observedCounterTotal": 29,
             "observedPercent": 100,
             "proposal": "measure - completeness unverified"
           },
           "lines": {
-            "observedCounterTotal": 110,
-            "observedPercent": 96.36,
+            "observedCounterTotal": 114,
+            "observedPercent": 96.49,
             "proposal": "measure - completeness unverified"
           }
         }
@@ -20335,6 +20335,50 @@
           "lines": {
             "observedCounterTotal": 57,
             "observedPercent": 100,
+            "proposal": "measure - completeness unverified"
+          }
+        }
+      }
+    },
+    {
+      "path": "tests/infrastructure/database/extraction-batch-decisions.test.ts",
+      "package": "package.json",
+      "tier": "S",
+      "rationale": "Real-store extraction decision and supersedence integrity tests.",
+      "applicability": {
+        "mode": "measure",
+        "reason": "Executable integrity tests; no coverage exclusion approved."
+      },
+      "decisionStatus": "proposed - independent review pending",
+      "sourceHash": "55ba6f65b6bc14879f3bc211007d94a984779dccf95483fb44b62ef6f24601b5",
+      "inspection": {
+        "sourceRevision": "21dd22c + current source hash",
+        "anchor": "Q100.4.2.2.1",
+        "scope": "Uninterrupted batch behavior and diagnostic; interrupted retry and final quality remain open"
+      },
+      "metricApplicability": {
+        "status": "Scoped diagnostic; full quality pending",
+        "sourceHash": "55ba6f65b6bc14879f3bc211007d94a984779dccf95483fb44b62ef6f24601b5",
+        "evidence": ".planning/memory-resilience/evidence/Q100.4.2.2.1.json",
+        "metrics": {
+          "statements": {
+            "observedCounterTotal": 119,
+            "observedPercent": 98.31,
+            "proposal": "measure - completeness unverified"
+          },
+          "branches": {
+            "observedCounterTotal": 11,
+            "observedPercent": 90.9,
+            "proposal": "measure - completeness unverified"
+          },
+          "functions": {
+            "observedCounterTotal": 46,
+            "observedPercent": 93.47,
+            "proposal": "measure - completeness unverified"
+          },
+          "lines": {
+            "observedCounterTotal": 66,
+            "observedPercent": 98.48,
             "proposal": "measure - completeness unverified"
           }
         }

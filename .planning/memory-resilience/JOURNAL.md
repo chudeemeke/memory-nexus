@@ -1,5 +1,56 @@
 # Memory resilience execution journal
 
+## 2026-09-28 - Evolving batch comparisons; interrupted-chain RED
+
+- Previous turn made progress at signed/pushed `21dd22c`; began clean. Full
+  E1-E10 native goal remains active. Split Q100.4.2.2 into uninterrupted decision
+  child Q100.4.2.2.1 and interrupted retry child Q100.4.2.2.2; the parent remains
+  a mandatory acceptance barrier. Ledger now has 270 acyclic items; inventory
+  has 500 files across two packages.
+- Seven-case initial real-store RED had six failures. Comparison entries now
+  pair facts and vectors, accept earlier new/replacement facts into the working
+  set and retire replaced entries. Retired entries detect duplicates but cannot
+  be supersedence targets again. Initial score ties use UUID ordering; candidate
+  order, similarity thresholds and lexical fallback remain unchanged. Provider
+  computation stays outside the reservation; no new runtime/service/storage.
+- Eight final cases prove exact/lexical/vector duplicate handling, lexical and
+  vector replacement chains, retired repeats, no conflicting supersedence,
+  vector alignment and stable ties with reversed repository order. Real source
+  replay and stored audit counts are asserted. Q100.4.2.2.1 is behaviorally
+  verified, not a claim of full quality or restart safety.
+- Both Windows Bun 1.4.1 and checksum-pinned 1.3.14 pass 275 tests / 1,183
+  assertions / 13 files. Nine targeted faults detected; production types, strict
+  new-test types and isolation pass. Evidence: `evidence/Q100.4.2.2.1.json`.
+- One initial mutant survived: reuse of the first vector after another
+  replacement. Extended the chain through a third replacement and asserted its
+  link; the mutant now fails. Retained initial evidence. A current-runtime
+  collector initially collided with shell redirection on its output path
+  (Windows EBUSY); that run has no accepted result. Separate driver/result paths
+  and final collectors repaired evidence collection without source changes.
+- Narrow diagnostics: pipeline97.03statements/92.75branches/100functions/96.49lines;
+  new test98.31/90.9/93.47/98.48; old tests98.44/92.3/79.68/98.56. These remain
+  below policy, with no exclusion approved. Native child aggregation, complete
+  metrics/changed-line evidence, platforms and final independent review remain
+  required under Q100.4.3 and baseline barriers.
+- **Active Q100.4.2.2.2 native RED:** child accepts alpha->beta->gamma, then is
+  killed before audit. SQLite rolls back, source remains. Fresh retry appends two
+  more replacements, reports2added/2updated/2superseded/1skipped and leaves beta
+  active instead of gamma. Source bytes change. This counterexample is retained
+  separately from the passing compatibility suite and blocks parent acceptance.
+- **Next:** inspect canonical envelope/payload/replay/governance contracts, then
+  design durable batch identity/completion before implementation. Existing
+  factToMemoryEvent gives each fact its UUID and sourceIds=[fact.uuid], with no
+  batch identity; extraction audit lives in SQLite. Stable IDs alone do not
+  encode the original ordered decisions or prove a completed batch. Qualify
+  interruption at add/replacement/supersedence/audit boundaries, changed inputs,
+  force and provider output. Coordinate Q100.4.2.11; preserve privacy and source
+  compatibility. Start with retained `nextCounterexample` source in the evidence.
+- Free disk10.98GiB; owned test/runtime fixtures cleaned. Previously rejected
+  cleanup and shared-temp12KiB authority remain preserved. Three inboxes, hosted
+  checks, review, R03/P03/A03 and real-machine acceptance remain open. No model,
+  canonical data, replication or installation changed. The approved synthetic
+  embedding experiment still follows baseline acceptance.
+
 ## 2026-09-28 - Owned extraction database scope; next batch RED
 
 - Started at signed/pushed `65b21ef`. The full E1-E10 native goal remains active.
