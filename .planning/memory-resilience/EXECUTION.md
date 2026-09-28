@@ -242,8 +242,12 @@ eight injected faults fail. Q100.3.2.2 now validates authoritative raw legacy/v2
 fields before tolerant adapters, including governance aliases and privacy metadata.
 Both Windows runtimes pass411tests/2840assertions across16files; eight validation
 faults fail; the new validator and driver diagnose100% in all four metrics.
-Q100.3 source/semantic contract is scoped verified. Q100.4 is active for actual
-caller recovery/full
+Q100.3 source/semantic contract is scoped verified. Q100.4.1 now binds receipts to
+native projection-content fingerprints and provides conservative automatic replay
+admission, including final receipt-trigger row/FTS checks. Paired Windows proof
+passes433tests/3203assertions; eight faults fail and cross-runtime receipt admission
+passes. Q100.4.2 is active for actual caller recovery, including legitimate event-
+backed direct writers. The guard is not yet wired into callers. Q100.4.3 full
 quality remains mandatory. Earlier replacement diagnostic branches100;
 event-log/driver gaps and34 existing strict integration-test type errors remain
 owned by Q100.4, alongside source module statements88.88/branches80. The freshness

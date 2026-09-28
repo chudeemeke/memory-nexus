@@ -3,15 +3,9 @@ import { OwnedDatabase } from "./owned-database.js";
 import { FACTS_TABLE, PERSONA_ENTRIES_TABLE, GRAPH_EDGES_TABLE, DREAM_ENTRIES_TABLE,
   MEMORY_GOVERNANCE_TABLE, MEMORY_GOVERNANCE_EVENTS_TABLE } from "./schema.js";
 import { assertProjectionSource, assertProjectionSourceAuthority, type ProjectionSourceSnapshot } from "./projection-source.js";
+import { PROJECTION_TABLES, projectionContentIdentity, assertAutomaticProjectionReplay } from "./projection-state.js";
 
-const projections = [
-  { table: "facts", keys: ["uuid"] },
-  { table: "persona_entries", keys: ["entry_id"] },
-  { table: "graph_edges", keys: ["edge_id"] },
-  { table: "dream_entries", keys: ["dream_id"] },
-  { table: "memory_governance", keys: ["surface", "target_id"] },
-  { table: "memory_governance_events", keys: ["event_id"] },
-] as const;
+const projections = PROJECTION_TABLES;
 type Row = Record<string, SQLQueryBindings>;
 type Fence = readonly number[];
 const quote = (identifier: string) => '"' + identifier.replaceAll('"', '""') + '"';
@@ -65,7 +59,7 @@ function directChanges(db: Database): number {
 }
 
 /** No await is permitted between the conflict check, replacement and commit. */
-export function promoteProjections(db: Database, stage: Database, fence: Fence, source: ProjectionSourceSnapshot): void {
+export function promoteProjections(db: Database, stage: Database, fence: Fence, source: ProjectionSourceSnapshot, automatic = false): void {
   if (db.inTransaction) throw new Error("Projection rebuild cannot use a caller transaction");
   db.transaction(() => {
     const current = readFence(db);
@@ -74,6 +68,7 @@ export function promoteProjections(db: Database, stage: Database, fence: Fence, 
     }
     assertProjectionSource(source);
     assertProjectionSourceAuthority(db, source);
+    if (automatic) assertAutomaticProjectionReplay(db);
     const identities = new Map<string, Map<string, string>>();
     for (const { table, keys } of projections) {
       const names = columns(stage, table);
@@ -119,13 +114,15 @@ export function promoteProjections(db: Database, stage: Database, fence: Fence, 
         }
       }
     }
-    // External-content FTS integrity check includes comparison with facts content.
-    db.run("INSERT INTO main.facts_fts(facts_fts,rank) VALUES ('integrity-check',1)");
-    const manifest = JSON.stringify(source.manifest);
+    const projectionState = projectionContentIdentity(db).hash;
+    const manifest = JSON.stringify({ ...source.manifest, projectionState });
     using receipt = db.prepare("INSERT INTO main.projection_replay_state(id,manifest) VALUES(1,?) ON CONFLICT(id) DO UPDATE SET manifest=excluded.manifest");
     receipt.run(manifest);
     if (directChanges(db) !== 1) throw new Error("Projection source receipt was not committed");
     using verify = db.prepare<{ manifest: string }, []>("SELECT manifest FROM main.projection_replay_state WHERE id=1");
     if (verify.get()?.manifest !== manifest) throw new Error("Projection source receipt mismatch");
+    if (projectionContentIdentity(db).hash !== projectionState) throw new Error("Projection content identity changed during receipt commit");
+    // Include receipt-trigger side effects in the final external-content FTS check.
+    db.run("INSERT INTO main.facts_fts(facts_fts,rank) VALUES ('integrity-check',1)");
   }).immediate();
 }

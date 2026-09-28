@@ -139,5 +139,10 @@ export async function isProjectionSourceCurrent(db: Database, logPath?: string, 
   const receipt = readReceipt();
   if (!receipt) return false;
   const snapshot = await captureProjectionSource(logPath, eventsDir, () => {});
-  return readReceipt() === receipt && JSON.stringify(snapshot.manifest) === receipt;
+  let source: unknown;
+  try {
+    const { projectionState: _contentIdentity, ...manifest } = JSON.parse(receipt);
+    source = manifest;
+  } catch { return false; }
+  return readReceipt() === receipt && JSON.stringify(snapshot.manifest) === JSON.stringify(source);
 }

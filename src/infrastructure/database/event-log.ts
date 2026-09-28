@@ -35,6 +35,7 @@ import { loadConfig } from "../hooks/config-manager.js";
 import { captureProjectionFence, createProjectionStage, promoteProjections } from "./projection-replacement.js";
 import { captureProjectionSource, assertProjectionSource, assertProjectionSourceAuthority, type ProjectionSourceSnapshot, type ProjectionSourceManifest } from "./projection-source.js";
 import { assertLegacyProjectionPayload, assertProjectionPayload } from "./projection-payload.js";
+import { assertAutomaticProjectionReplay } from "./projection-state.js";
 
 export interface InvalidEventLogLine {
   filePath: string;
@@ -160,8 +161,8 @@ export async function* readEvents(logPath?: string, eventsDir?: string): AsyncGe
 /**
  * Rebuild derived database projections from the canonical event log.
  */
-export async function rebuildProjections(db: Database, logPath?: string, eventsDir?: string): Promise<void> {
-  const report = await rebuildProjectionsWithReport(db, logPath, eventsDir);
+export async function rebuildProjections(db: Database, logPath?: string, eventsDir?: string, mode: "explicit" | "automatic" = "explicit"): Promise<void> {
+  const report = await rebuildProjectionsWithReport(db, logPath, eventsDir, mode);
   if (report.invalidEvents > 0) {
     throw new Error(`Projection rebuild refused: ${report.invalidEvents} invalid event log record(s)`);
   }
@@ -170,8 +171,9 @@ export async function rebuildProjections(db: Database, logPath?: string, eventsD
 /**
  * Rebuild derived database projections and return replay evidence.
  */
-export async function rebuildProjectionsWithReport(db: Database, logPath?: string, eventsDir?: string): Promise<ProjectionRebuildReport> {
+export async function rebuildProjectionsWithReport(db: Database, logPath?: string, eventsDir?: string, mode: "explicit" | "automatic" = "explicit"): Promise<ProjectionRebuildReport> {
   const fence = captureProjectionFence(db);
+  if (mode === "automatic") assertAutomaticProjectionReplay(db);
   const report = await readProjectionEventsWithReport(logPath, eventsDir);
   if (report.invalidEvents.length > 0) {
     return {
@@ -182,7 +184,7 @@ export async function rebuildProjectionsWithReport(db: Database, logPath?: strin
     };
   }
   return withProjectionStage(report, (stage, replay) => {
-    promoteProjections(db, stage, fence, report.snapshot);
+    promoteProjections(db, stage, fence, report.snapshot, mode === "automatic");
     return { invalidEvents: 0, invalidEventLines: [], replay, source: report.snapshot.manifest };
   });
 }

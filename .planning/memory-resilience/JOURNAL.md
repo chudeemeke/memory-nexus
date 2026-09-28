@@ -1,5 +1,47 @@
 # Memory resilience execution journal
 
+## 2026-09-28 - Durable authority for automatic replay
+
+- Previous turn made progress: signed/pushed57fb7b9 strict payload admission.
+  Started clean. Split Q100.4 into mandatory content authority, actual caller
+  recovery, and full quality children; no parent acceptance was removed.
+- New shared six-table inventory and streamed native fingerprint bind projected
+  content to successful source receipts using projectionState, without DDL changes.
+  Native SQL encoding preserves storage types, exact int64, adjacent real values,
+  NULL, empty values, embedded NUL and blob/text distinctions. Unrelated tables do
+  not invalidate the fingerprint. It is not source authority or index-health proof.
+- Automatic replay mode requires matching content or empty bootstrap without a
+  receipt; it refuses direct edits/deletes/imported divergence and old/corrupt
+  fingerprints before staging and again inside promotion. Explicit confirmed
+  rebuild can establish a baseline. Receipts, row replacement and final checks
+  commit together; receipt-trigger row/index corruption rolls everything back.
+- Initial native RED1pass/15fail. New driver now22tests/51assertions. Final matching
+  Windows Bun1.4.1/1.3.14 each pass433tests/3203assertions across17files. Cross-runtime
+  fixture proves1.4.1-written receipt admitted by1.3.14 with wide integer and real
+  inputs. New state module diagnoses100% all four metrics; driver branch denominator
+  is zero and remains subject to final instrumenter/applicability review. Eight
+  decision faults fail. Production types, strict driver types and isolation pass.
+- Verification corrections retained: unused driver import; cross-runtime fixture
+  initially polluted outer TMP with a sibling canonical log, correctly causing six
+  old tests to refuse incomplete scope. Isolated that fixture. A coarse-real mutant
+  initially survived because the test changed multiple rows; added a single-row
+  adjacent-real assertion. Separate FTS RED found a real ordering bug: receipt
+  triggers could clear the index after its check. Final FTS validation now follows
+  receipt writes; rollback and clean retry execute. None of these failures is hidden.
+- Q100.4.1 scoped verified; Q100.4.2 ACTIVE. Actual extraction/remote callers still
+  use prior behavior. Before wiring automatic recovery, account for governance and
+  dreaming, which append events and directly update repositories. Establish a
+  transactional checkpoint protocol or verified event-backed reconciliation that
+  does not bless unrelated divergence. Then reproduce earlier failed replay followed
+  by no-op extraction/unchanged transport, including process restart and truthful
+  partial status. Inspect imports/restore/direct deletion and measure scan cost.
+  Q100.4.3 retains all full quality/platform/review and compound cleanup obligations.
+- evidence/Q100.4.1.json retains full outputs, failures/corrections, input hashes,
+  cross-runtime proof and diagnostics. Catalog477files/two packages;255 acyclic
+  ledger items with one active item. Owned synthetic/runtime containers cleaned;
+  no canonical data/model/provider/hook/replication/new worktree or blocked cleanup
+  touched. Three inbox items, baseline-before-experiment and adoption gates remain.
+
 ## 2026-09-28 - Strict authoritative payload admission
 
 - Previous goal turn made progress: signed/pushed23c7f4e preserved shared native

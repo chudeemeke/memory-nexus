@@ -196,3 +196,42 @@ source fact, nor claim complete graph/persona quality. Actual handler/domain
 validation remains in staging; the boundary validator supplements it rather than
 reimplementing every domain invariant. Read-only tolerant log-reader APIs retain
 their compatibility behavior. Full release acceptance remains Q100.4/B11.74.7.
+
+## Q100.4 recovery safety and actual callers
+
+Source freshness is insufficient authority for automatic replacement: direct
+repository writes, imports and deletions may change projections after replay.
+Split remaining work without weakening the parent acceptance barrier:
+
+- Q100.4.1: bind successful source receipts to a versioned projection-content
+  fingerprint in the same transaction. Cover all six replaced tables, columns,
+  storage types and exact values. Automatic replay requires matching content or
+  an empty bootstrap store without a receipt. Old/malformed receipts and divergent
+  data require explicit reconciliation. Recheck inside promotion; a receipt trigger
+  changing projected rows must abort. Explicit confirmed rebuild may establish a
+  new baseline. Source-current remains source-only, never index health.
+- Q100.4.2: wire safe pending-source recovery through actual extraction and remote
+  sync, including early/no-op returns and unchanged transport after failed replay.
+  Prove no resurrection after direct deletion and no loss of unlogged/imported
+  data, truthful partial progress and process restart.
+- Q100.4.3: full original quality, compound cleanup failure semantics, strict test
+  types, per-file/package/changed-line coverage, supported-platform, installed
+  invocation and independent review obligations.
+
+The fingerprint is derived safety metadata, never new source authority. It does
+not attest to FTS/vector health, recover missing event history, or authorize a
+production data cutover. Existing source scope/cutoff admission remains required.
+
+The v1 fingerprint streams a native SQLite read transaction over six tables. It
+encodes storage type plus exact integer text, 26-significant-digit real values,
+and hex text/blob bytes including NULs. The receipt gains `projectionState` without
+DDL migration. Old source-only receipts remain readable for source freshness;
+automatic replacement requires explicit reconciliation first. Recheck content and
+external-content FTS integrity after receipt writes to detect trigger side effects.
+
+Q100.4.2 must account for event-backed direct writers: governance and dreaming
+append events and also update repositories. These legitimate writes invalidate
+the conservative fingerprint. Establish a transactional checkpoint protocol or
+verified event-backed reconciliation before caller adoption, without blessing
+unrelated divergence. Fingerprinting is linear in projected rows; measure its
+operational cost during caller proof and retain bounded-memory iteration.
