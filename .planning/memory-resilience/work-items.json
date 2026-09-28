@@ -3,7 +3,7 @@
   "workstream": "memory-resilience",
   "goal_status": "active",
   "starting_revision": "77d54e05be7fc24cede4a9a3e1fede6fa113ac8f",
-  "current_item": "Q100",
+  "current_item": "Q100.2",
   "status_semantics": {
     "pending": "Not started; authorization and dependencies must permit work.",
     "pending_rebaseline": "Historical candidate, not a confirmed current failure or a completed task.",
@@ -2776,6 +2776,11 @@
           "document": "docs/plans/2026-09-28-combined-caller-verification.md",
           "owner": "memory-nexus",
           "trigger": "Before integration/adoption: communicate extraction no-op preservation, scoped readers and final projection safety contracts."
+        },
+        "projectionAdmissionNotice": {
+          "document": "docs/plans/2026-09-28-projection-replay-execution.md",
+          "owner": "memory-nexus",
+          "trigger": "Before integration/adoption: notify consumers that malformed projection sources refuse replacement and the void API throws; verify missing sources returns ready:false."
         }
       }
     },
@@ -5749,9 +5754,13 @@
       "id": "Q100",
       "stage": "baseline-quality",
       "title": "Make complete projection replay failure-safe and satisfy event-log Tier S quality",
-      "status": "active",
+      "status": "pending",
       "depends_on": [
-        "B11.74.5"
+        "B11.74.5",
+        "Q100.1",
+        "Q100.2",
+        "Q100.3",
+        "Q100.4"
       ],
       "scope": "src/infrastructure/database/event-log.ts and actual projection replay callers",
       "deliverable": "Admit a validated source snapshot and preserve prior derived state on reset/apply/commit failure without capturing or losing unrelated concurrent work. Define malformed/source-change behavior; repair complete event-log gaps.",
@@ -5762,16 +5771,18 @@
       "evidence": [
         ".planning/memory-resilience/evidence/B11.74.5-event.json",
         "docs/plans/2026-09-22-projection-rebuild-integrity.md",
-        ".planning/memory-resilience/evidence/B11.74.6.3.2.json"
+        ".planning/memory-resilience/evidence/B11.74.6.3.2.json",
+        "docs/plans/2026-09-28-projection-replay-execution.md",
+        ".planning/memory-resilience/evidence/Q100.1.json"
       ],
       "acceptance_record": ".planning/memory-resilience/evidence/Q100.json",
       "observed_gap": "Late fact insert failure leaves previously retained facts deleted. Current native probe1pass/1fail. Production diagnostic branches91.89%.",
       "retirement_trigger": "Before B11.74.7/B10/R02 acceptance. Do not wrap async replay in a synchronous transaction or leave an unenforced transaction open across unrelated awaits.",
       "progress": {
-        "status": "Required native failures retained: late replay loses previous state; verify accepts absent source while mutation rejects it.",
-        "next": "Design validated complete source snapshot and atomic projection promotion. Begin by reproducing retained late-write and missing-source-readiness probes; align actual CLI/extraction callers.",
+        "status": "Required existence/parse admission repaired; whole-replay late-write data loss remains reproduced.",
+        "next": "Q100.2 isolated staging and atomic promotion; Q100.3 snapshot/cutoff and Q100.4 caller recovery/full acceptance mandatory.",
         "owner": "memory-nexus",
-        "trigger": "Active next after combined caller checkpoint; before B11.74.7/B10/R02."
+        "trigger": "Before B11.74.7/B10/R02."
       }
     },
     {
@@ -5960,6 +5971,100 @@
         "testFiles": 151,
         "assertionsPerRuntime": 16622
       }
+    },
+    {
+      "id": "Q100.1",
+      "stage": "baseline-quality",
+      "title": "Share required projection source admission",
+      "status": "verified",
+      "depends_on": [
+        "B11.74.6.3.2"
+      ],
+      "scope": "src/infrastructure/database/event-log.ts and actual projection replay callers",
+      "deliverable": "Required source existence and parse admission shared by verification/mutation; no reset on invalid input; void wrapper refuses false completion.",
+      "verification": "Native missing/mixed-invalid/empty/valid source tests; previous projections retained; safe public diagnostics.",
+      "risk": "S",
+      "authorization": "authorized",
+      "owner": "memory-nexus",
+      "evidence": [
+        "docs/plans/2026-09-28-projection-replay-execution.md",
+        ".planning/memory-resilience/evidence/Q100.1.json"
+      ],
+      "acceptance_record": ".planning/memory-resilience/evidence/Q100.1.json",
+      "retirement_trigger": "Before parent Q100/B11.74.7/B10/R02 acceptance.",
+      "progress": {
+        "status": "Scoped source existence/parse admission verified; full quality and replay acceptance remain mandatory Q100.2-Q100.4.",
+        "testsPerRuntime": 93,
+        "assertionsPerRuntime": 663,
+        "testFiles": 7,
+        "decisionFaultsDetected": 5
+      }
+    },
+    {
+      "id": "Q100.2",
+      "stage": "baseline-quality",
+      "title": "Stage and atomically promote complete projections",
+      "status": "active",
+      "depends_on": [
+        "Q100.1"
+      ],
+      "scope": "src/infrastructure/database/event-log.ts and actual projection replay callers",
+      "deliverable": "Inventory all projection/index/reference surfaces, isolated async replay and synchronous atomic promotion with verified conflict fence.",
+      "verification": "Native reset/apply/insert/commit failures; all prior rows/indexes retained; same/other connection conflict; caller transaction rejection; cleanup and retry.",
+      "risk": "S",
+      "authorization": "authorized",
+      "owner": "memory-nexus",
+      "evidence": [
+        "docs/plans/2026-09-28-projection-replay-execution.md"
+      ],
+      "acceptance_record": ".planning/memory-resilience/evidence/Q100.2.json",
+      "retirement_trigger": "Before parent Q100/B11.74.7/B10/R02 acceptance.",
+      "progress": {
+        "next": "First inventory six projection tables, FTS and stable IDs/references. Prove conflict-fence semantics with native same/other-connection writes and caller transaction tests, then implement isolated replay and synchronous atomic promotion.",
+        "requiredFailure": "Q100.1 evidence retains late-write data loss on current source; replacement must preserve complete old state and permit retry."
+      }
+    },
+    {
+      "id": "Q100.3",
+      "stage": "baseline-quality",
+      "title": "Validate complete source snapshot and cutoff",
+      "status": "pending",
+      "depends_on": [
+        "Q100.2"
+      ],
+      "scope": "src/infrastructure/database/event-log.ts and actual projection replay callers",
+      "deliverable": "Retained source-set/content snapshot, changed-source refusal or explicit cutoff and completeness policy.",
+      "verification": "Append/truncate/replace/new file races; malformed payload and conflicting IDs; explicit scope versus all-log authority; retained retry progress.",
+      "risk": "S",
+      "authorization": "authorized",
+      "owner": "memory-nexus",
+      "evidence": [
+        "docs/plans/2026-09-28-projection-replay-execution.md"
+      ],
+      "acceptance_record": ".planning/memory-resilience/evidence/Q100.3.json",
+      "retirement_trigger": "Before parent Q100/B11.74.7/B10/R02 acceptance."
+    },
+    {
+      "id": "Q100.4",
+      "stage": "baseline-quality",
+      "title": "Complete projection caller recovery and quality",
+      "status": "pending",
+      "depends_on": [
+        "Q100.3"
+      ],
+      "scope": "src/infrastructure/database/event-log.ts and actual projection replay callers",
+      "deliverable": "Actual sync/extraction/CLI pending-event retry, no-resurrection and full original Q100 acceptance.",
+      "verification": "Retained events after failed projection recover on next enabled action; deterministic replay/governance; Tier S100branches, all metrics/file/package, adversarial/decision/platform/review proof.",
+      "risk": "S",
+      "authorization": "authorized",
+      "owner": "memory-nexus",
+      "evidence": [
+        "docs/plans/2026-09-28-projection-replay-execution.md",
+        ".planning/memory-resilience/evidence/Q100.1.json"
+      ],
+      "acceptance_record": ".planning/memory-resilience/evidence/Q100.4.json",
+      "retirement_trigger": "Before parent Q100/B11.74.7/B10/R02 acceptance.",
+      "observed_gap": "Scoped diagnostic: event-log statements59.33/lines60.19/functions72/branches49.34; projections CLI branches87.5. These narrow-suite metrics are not complete module measurement and fail acceptance. Full strict integration test compilation reports34 unchecked-array-access errors on unchanged baseline lines. Full original Q100, test fixture/quality, supported-platform and review acceptance remains required."
     }
   ],
   "decisions": {

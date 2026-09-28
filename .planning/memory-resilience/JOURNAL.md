@@ -1,5 +1,43 @@
 # Memory resilience execution journal
 
+## 2026-09-28 - Required projection source admission
+
+- Previous turn delivered b2e99bb. Split Q100 into four mandatory atomic children:
+  shared admission, staging/promotion, source snapshot/cutoff, and actual caller
+  recovery/full quality. Original parent acceptance and reserved owner gates remain.
+- Q100.1 is scoped verified. Missing sources report ready:false; malformed or
+  mixed sources return zero replay effects before any projection reset. The void
+  wrapper throws so callers cannot silently report successful replacement. Public
+  invalid-record diagnostics omit contents. Tolerant read-only APIs remain intact.
+- RED admission run:2pass/5fail. Initial compatibility found an obsolete mixed-log
+  partial-replay expectation. The test now proves refusal/unchanged serialized DB,
+  then corrects input and retains sorting/duplicate assertions. The public driver
+  seeds a real file DB and independently reads the retained fact after refusal.
+- Final seven-file group passes93tests/663assertions on each Windows Bun1.4.1 and
+  1.3.14 at matching source hashes. Five injected faults all fail: absent-source
+  allowance, invalid replay, void false success, raw-record disclosure and tolerant
+  verify wiring. New native driver and existing CLI test diagnose100% all metrics.
+- Narrow production diagnostic remains below policy:event-log statements59.33,
+  lines60.19,functions72,branches49.34;CLI branches87.5. These are scoped measures,
+  not complete module acceptance. Production types and focused changed-test types
+  pass; full strict integration test checking exposes34 errors on unchanged array
+  access lines. Retained diagnostics and explicit Q100.4 ownership; no waiver.
+  Test isolation and whitespace checks pass.
+- Re-ran retained probes:2pass/1fail. Missing-source readiness is repaired; late
+  insertion failure still erases old facts. Q100.2 is active: inventory every
+  projection table/index/reference, prove a native conflict fence, stage async
+  replay independently, then promote synchronously and atomically. Do not hold a
+  live transaction across awaits or assume source snapshots from parse success.
+- Evidence: evidence/Q100.1.json, complete outputs/source hashes/diagnostics and
+  failing atomic probe. Catalog468files/two packages;248-item acyclic ledger.
+  Owned test/runtime storage cleaned in finally; over11GiB remained free before
+  checkpoint. No previous policy-blocked deletion retried, worktree created,
+  canonical data touched or runtime/model/replication activated.
+- Q100.2-.4, full quality/platform/review, three inbox items and all baseline
+  acceptance gates remain open. The approved bounded experiment still follows
+  baseline acceptance. Consumer-visible refusal semantics are assigned to R04's
+  integration/adoption notice. Native goal remains active; no owner input needed.
+
 ## 2026-09-28 - Combined native caller verification and integration repairs
 
 - Previous turn: progress, signed/pushed edc079d with maintenance fixes and

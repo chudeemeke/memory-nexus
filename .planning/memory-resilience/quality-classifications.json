@@ -6033,7 +6033,7 @@
     {
       "path": "src/infrastructure/database/event-log.ts",
       "package": "package.json",
-      "sourceHash": "c535fa91610acbd4c2c4529bbdf85234e1391f0ec50a2d3f4847ba4b63221854",
+      "sourceHash": "be5a026c403fe6446f3720f5580851000e8fe9971ec623ce7ae76499fc753043",
       "tier": "S",
       "rationale": "Appends canonical memory events and validates imported legacy records; durable source and integrity boundary.",
       "applicability": {
@@ -6042,30 +6042,29 @@
       },
       "decisionStatus": "proposed - independent review pending",
       "inspection": {
-        "sourceRevision": "1aed0a1 + current source hash",
-        "anchor": "native replay lifetime and governance reset",
-        "scope": "Scoped native behavior and failures; Q100 full replay/quality remains open."
+        "sourceRevision": "b2e99bb + current source hash",
+        "anchor": "Q100.1 required source admission",
+        "scope": "Scoped native existence/parse refusal; complete replay, source snapshot, quality/platform/review remain Q100.2-Q100.4."
       },
       "metricApplicability": {
-        "status": "diagnostic - B05/Q100/B11.74.7 and independent review pending",
-        "evidence": ".planning/memory-resilience/evidence/B11.74.5-event.json",
-        "sourceHash": "c535fa91610acbd4c2c4529bbdf85234e1391f0ec50a2d3f4847ba4b63221854",
-        "disposition": "Production branch floor fails; retain full quality and demonstrated late-replay defect as required work.",
+        "status": "diagnostic - complete Q100.4/B11.74.7 acceptance pending",
+        "sourceHash": "be5a026c403fe6446f3720f5580851000e8fe9971ec623ce7ae76499fc753043",
+        "evidence": ".planning/memory-resilience/evidence/Q100.1.json",
         "metrics": {
           "lines": {
-            "observedCounterTotal": 199,
+            "observedCounterTotal": 206,
             "proposal": "measure - completeness unverified"
           },
           "functions": {
-            "observedCounterTotal": 48,
+            "observedCounterTotal": 50,
             "proposal": "measure - completeness unverified"
           },
           "statements": {
-            "observedCounterTotal": 202,
+            "observedCounterTotal": 209,
             "proposal": "measure - completeness unverified"
           },
           "branches": {
-            "observedCounterTotal": 148,
+            "observedCounterTotal": 152,
             "proposal": "measure - completeness unverified"
           }
         }
@@ -13689,7 +13688,7 @@
     {
       "path": "src/presentation/cli/commands/projections.test.ts",
       "package": "package.json",
-      "sourceHash": "859a58b8f4bc9f85bdd500b19326afd5fce37152d3f3b22add1dbd9633d5cccb",
+      "sourceHash": "8a8149abcb3336dbff3cc035c13a727db851e671a9e20f7dfd88058f47aea009",
       "tier": "S",
       "rationale": "Inspected filesystem import and call context: rmSync(testDir, { recursive: true, force: true, maxRetries: 50, retryDelay: 100 }). This test driver performs actual file/directory deletion; B11.44 owns the observed lifecycle finding.",
       "applicability": {
@@ -13698,30 +13697,29 @@
       },
       "decisionStatus": "proposed - independent review pending",
       "inspection": {
-        "sourceRevision": "edc079d + current source hash",
-        "anchor": "missing versus empty source and native projection preservation",
-        "scope": "Combined test pass; fixture ownership and numeric applicability remain B11.44."
+        "sourceRevision": "b2e99bb + current source hash",
+        "anchor": "Q100.1 required source admission",
+        "scope": "Scoped native existence/parse refusal; complete replay, source snapshot, quality/platform/review remain Q100.2-Q100.4."
       },
       "metricApplicability": {
-        "status": "proposed - independent review pending",
-        "evidence": ".planning/memory-resilience/evidence/B04-applicability-probe.json",
-        "sourceHash": "19bdd85694043e21e5732b3889fc8b100319b4f673e6adfc4716f60419e2359e",
-        "disposition": "Measure every positive denominator; individually review zero branch/function denominators against runtime syntax. Observed counts do not prove instrumentation completeness. Optional-chain syntax is present; synthetic evidence shows current instrumentation omits its decision counters. B05.1 owns source-mapped branch proof before numeric acceptance.",
+        "status": "diagnostic - complete Q100.4/B11.74.7 acceptance pending",
+        "sourceHash": "8a8149abcb3336dbff3cc035c13a727db851e671a9e20f7dfd88058f47aea009",
+        "evidence": ".planning/memory-resilience/evidence/Q100.1.json",
         "metrics": {
+          "lines": {
+            "observedCounterTotal": 135,
+            "proposal": "measure - completeness unverified"
+          },
+          "functions": {
+            "observedCounterTotal": 24,
+            "proposal": "measure - completeness unverified"
+          },
           "statements": {
-            "observedCounterTotal": 126,
+            "observedCounterTotal": 139,
             "proposal": "measure - completeness unverified"
           },
           "branches": {
             "observedCounterTotal": 0,
-            "proposal": "zero requires individual review"
-          },
-          "functions": {
-            "observedCounterTotal": 23,
-            "proposal": "measure - completeness unverified"
-          },
-          "lines": {
-            "observedCounterTotal": 122,
             "proposal": "measure - completeness unverified"
           }
         }
@@ -13730,7 +13728,7 @@
     {
       "path": "src/presentation/cli/commands/projections.ts",
       "package": "package.json",
-      "sourceHash": "1a259c8ad36ae35fc43d27f2c8b450356efeeb01fd9806d96ca3621e73bff986",
+      "sourceHash": "51a1c34b9c971957bcf51ed66023db979528a5df7fe5dd154d60efe2576d5a51",
       "tier": "S",
       "rationale": "Initializes storage and controls reconstruction of derived projections.",
       "applicability": {
@@ -13739,30 +13737,29 @@
       },
       "decisionStatus": "proposed - independent review pending",
       "inspection": {
-        "sourceRevision": "8719e3c36b2c73ca11f8ee4879c9f17aed4f2849",
-        "anchor": "initializeDatabase / rebuild execution",
-        "scope": "positive critical boundary establishes highest tier; not full correctness acceptance"
+        "sourceRevision": "b2e99bb + current source hash",
+        "anchor": "Q100.1 required source admission",
+        "scope": "Scoped native existence/parse refusal; complete replay, source snapshot, quality/platform/review remain Q100.2-Q100.4."
       },
       "metricApplicability": {
-        "status": "proposed - independent review pending",
-        "evidence": ".planning/memory-resilience/evidence/B04-applicability-probe.json",
-        "sourceHash": "1a259c8ad36ae35fc43d27f2c8b450356efeeb01fd9806d96ca3621e73bff986",
-        "disposition": "Measure every positive denominator; individually review zero branch/function denominators against runtime syntax. Observed counts do not prove instrumentation completeness.",
+        "status": "diagnostic - complete Q100.4/B11.74.7 acceptance pending",
+        "sourceHash": "51a1c34b9c971957bcf51ed66023db979528a5df7fe5dd154d60efe2576d5a51",
+        "evidence": ".planning/memory-resilience/evidence/Q100.1.json",
         "metrics": {
-          "statements": {
-            "observedCounterTotal": 49,
-            "proposal": "measure - completeness unverified"
-          },
-          "branches": {
-            "observedCounterTotal": 38,
+          "lines": {
+            "observedCounterTotal": 47,
             "proposal": "measure - completeness unverified"
           },
           "functions": {
             "observedCounterTotal": 6,
             "proposal": "measure - completeness unverified"
           },
-          "lines": {
-            "observedCounterTotal": 47,
+          "statements": {
+            "observedCounterTotal": 49,
+            "proposal": "measure - completeness unverified"
+          },
+          "branches": {
+            "observedCounterTotal": 40,
             "proposal": "measure - completeness unverified"
           }
         }
@@ -17698,6 +17695,46 @@
       }
     },
     {
+      "path": "tests/infrastructure/database/projection-admission.test.ts",
+      "package": "package.json",
+      "tier": "S",
+      "rationale": "Native projection data-preservation and invalid-input admission regression driver.",
+      "applicability": {
+        "mode": "measure",
+        "reason": "Executable native driver; no exclusion approved."
+      },
+      "decisionStatus": "proposed - independent review pending",
+      "sourceHash": "95b1dbf5af659ae1acd6245e7aa20a4f2ad9d684cd605cda8ccc0aff2bc9c93e",
+      "inspection": {
+        "sourceRevision": "b2e99bb + current source hash",
+        "anchor": "Q100.1 required source admission",
+        "scope": "Scoped native existence/parse refusal; complete replay, source snapshot, quality/platform/review remain Q100.2-Q100.4."
+      },
+      "metricApplicability": {
+        "status": "diagnostic - complete Q100.4/B11.74.7 acceptance pending",
+        "sourceHash": "95b1dbf5af659ae1acd6245e7aa20a4f2ad9d684cd605cda8ccc0aff2bc9c93e",
+        "evidence": ".planning/memory-resilience/evidence/Q100.1.json",
+        "metrics": {
+          "lines": {
+            "observedCounterTotal": 65,
+            "proposal": "measure - completeness unverified"
+          },
+          "functions": {
+            "observedCounterTotal": 16,
+            "proposal": "measure - completeness unverified"
+          },
+          "statements": {
+            "observedCounterTotal": 76,
+            "proposal": "measure - completeness unverified"
+          },
+          "branches": {
+            "observedCounterTotal": 0,
+            "proposal": "measure - completeness unverified"
+          }
+        }
+      }
+    },
+    {
       "path": "tests/infrastructure/database/repositories/core-lifecycle.test.ts",
       "package": "package.json",
       "tier": "S",
@@ -18483,7 +18520,7 @@
     {
       "path": "tests/integration/infrastructure/database/event-log.test.ts",
       "package": "package.json",
-      "sourceHash": "9540f935d5b3db75fc77625be502f54a148fb039cd064b16e54e3ce4ac1796d2",
+      "sourceHash": "273629dc5941c73a430830af87652050f8c5b2142aeec98a93c49636bdb7e0dd",
       "tier": "S",
       "rationale": "Inspected filesystem import and call context: rmSync(testLogDir, { recursive: true, force: true }). This test driver performs actual file/directory deletion; numeric applicability and ownership proof remain subject to individual review.",
       "applicability": {
@@ -18492,10 +18529,9 @@
       },
       "decisionStatus": "proposed - independent review pending",
       "inspection": {
-        "sourceRevision": "e85d4d3f63dfe0cfaa58198766f13c56f1e23232",
-        "anchor": "rmSync(testLogDir, { recursive: true, force: true })",
-        "line": 48,
-        "scope": "Filesystem import plus first two actual deletion call contexts inspected. Positive critical operation establishes risk; not full body/assertion review, symbol-resolution proof or cleanup acceptance."
+        "sourceRevision": "b2e99bb + current source hash",
+        "anchor": "Q100.1 required source admission",
+        "scope": "Scoped native existence/parse refusal; complete replay, source snapshot, quality/platform/review remain Q100.2-Q100.4."
       },
       "metricApplicability": {
         "status": "proposed - independent review pending",

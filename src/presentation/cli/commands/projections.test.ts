@@ -237,7 +237,8 @@ describe("projections command", () => {
     );
 
     expect(result.exitCode).toBe(1);
-    expect(consoleErrorOutput.join("\n")).toContain("completed with 1 invalid event log line");
+    expect(consoleErrorOutput.join("\n")).toContain("refused: 1 invalid event log line");
+    expect(consoleErrorOutput.join("\n")).toContain("Projections unchanged");
   });
 
   it("reports rebuild exceptions in JSON and text modes", async () => {

@@ -9,7 +9,7 @@ import { Command } from "commander";
 import type { CommandResult } from "../command-result.js";
 import { closeDatabase, initializeDatabase, getDefaultDbPath } from "../../../infrastructure/database/index.js";
 import {
-  readMemoryEventsWithReport,
+  readProjectionEventsWithReport,
   rebuildProjectionsWithReport,
 } from "../../../infrastructure/database/event-log.js";
 import { getEventsDir } from "../../../infrastructure/paths.js";
@@ -55,7 +55,7 @@ export async function executeProjectionsRebuildCommand(
   try {
     const eventsDir = opts.eventsDirOverride ?? getEventsDir();
     if (commandOptions.verify === true) {
-      const report = await readMemoryEventsWithReport(undefined, eventsDir);
+      const report = await readProjectionEventsWithReport(undefined, eventsDir);
       const data = {
         mode: "verify",
         events: report.events.length,
@@ -101,7 +101,7 @@ export async function executeProjectionsRebuildCommand(
         console.log(`Processed events: ${report.replay.processedEvents}`);
         console.log(`Applied projections: ${report.replay.appliedProjections.join(", ") || "none"}`);
       } else {
-        console.error(`Projection rebuild completed with ${report.invalidEvents} invalid event log line(s).`);
+        console.error(`Projection rebuild refused: ${report.invalidEvents} invalid event log line(s). Projections unchanged.`);
       }
       return { exitCode: report.invalidEvents === 0 ? PROJECTIONS_EXIT_OK : PROJECTIONS_EXIT_ERROR };
     } finally {
@@ -110,7 +110,8 @@ export async function executeProjectionsRebuildCommand(
   } catch (error) {
     const message = `Error rebuilding projections: ${unknownErrorMessage(error)}`;
     if (commandOptions.json) {
-      writeProjectionsJson("projections.rebuild", "error", PROJECTIONS_EXIT_ERROR, {}, [message]);
+      writeProjectionsJson("projections.rebuild", "error", PROJECTIONS_EXIT_ERROR,
+        commandOptions.verify ? { mode: "verify", ready: false } : {}, [message]);
     } else {
       console.error(message);
     }

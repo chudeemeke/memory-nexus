@@ -225,8 +225,14 @@ runtimes pass the 85-test caller group. Combined caller revalidation in .3.2 now
 passes3170tests across151 database,CLI and application files on each Windows
 runtime. It found and repaired the unscoped show-prefix reader and destructive
 no-op extraction replay, and reconciled missing versus empty projection fixtures.
-Parent .3/.6 are scoped verified. Q100 is active next for whole-replay failure
-safety and missing-source verification readiness. Q005/Q068 and B11.44/B11.52
+Parent .3/.6 are scoped verified. Q100.1 now shares required existence/parse
+admission between verify and rebuild; malformed sources preserve projections and
+the void API throws. Paired Windows proof passes93tests/663assertions across seven
+files; all five targeted admission faults fail. Q100.2 is active for whole-replay
+failure safety; the late-write data-loss probe still fails. Q100.3 snapshot/cutoff
+and Q100.4 caller recovery/full quality remain mandatory. Narrow diagnostic
+production coverage fails;34 existing strict integration-test type errors are
+owned by Q100.4. Q005/Q068 and B11.44/B11.52
 retain the newly confirmed caller quality gaps. Q050/Q062 and
 B11.22/B11.42/B11.58 remain in the mandatory .7 barrier;
 full snapshot safety and stale-lock admission remain unresolved. Q018/B11.9 and Q102/B11.10 retain

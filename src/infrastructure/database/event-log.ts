@@ -103,6 +103,20 @@ export async function readMemoryEventsWithReport(logPath?: string, eventsDir?: s
   return collectMemoryEvents(logPath, eventsDir, { reportInvalidToConsole: false });
 }
 
+/** Required-source admission shared by projection verification and mutation. */
+export async function readProjectionEventsWithReport(logPath?: string, eventsDir?: string): Promise<EventReadReport> {
+  const report = await collectMemoryEvents(logPath, eventsDir, { reportInvalidToConsole: false, requireSourceFiles: true });
+  return {
+    events: report.events,
+    invalidEvents: report.invalidEvents.map(({ filePath, lineNumber }) => ({
+      filePath,
+      lineNumber,
+      line: "",
+      reason: `Invalid event log record at line ${lineNumber} in ${filePath}`,
+    })),
+  };
+}
+
 /**
  * Compatibility API: read event log records as Fact entities.
  */
@@ -124,14 +138,24 @@ export async function* readEvents(logPath?: string, eventsDir?: string): AsyncGe
  * Rebuild derived database projections from the canonical event log.
  */
 export async function rebuildProjections(db: Database, logPath?: string, eventsDir?: string): Promise<void> {
-  await rebuildProjectionsWithReport(db, logPath, eventsDir);
+  const report = await rebuildProjectionsWithReport(db, logPath, eventsDir);
+  if (report.invalidEvents > 0) {
+    throw new Error(`Projection rebuild refused: ${report.invalidEvents} invalid event log record(s)`);
+  }
 }
 
 /**
  * Rebuild derived database projections and return replay evidence.
  */
 export async function rebuildProjectionsWithReport(db: Database, logPath?: string, eventsDir?: string): Promise<ProjectionRebuildReport> {
-  const report = await collectMemoryEvents(logPath, eventsDir, { reportInvalidToConsole: false, requireSourceFiles: true });
+  const report = await readProjectionEventsWithReport(logPath, eventsDir);
+  if (report.invalidEvents.length > 0) {
+    return {
+      invalidEvents: report.invalidEvents.length,
+      invalidEventLines: report.invalidEvents,
+      replay: { processedEvents: 0, skippedDuplicateEvents: 0, appliedProjections: [] },
+    };
+  }
   const sortedEvents = sortMemoryEvents(report.events);
   const registry = new ProjectionRegistry<ProjectionContext>([
     createFactsProjection(),
