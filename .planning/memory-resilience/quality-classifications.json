@@ -9234,7 +9234,7 @@
     {
       "path": "src/infrastructure/hooks/index.ts",
       "package": "package.json",
-      "sourceHash": "ada179bd3e4d56120b9bf41260e42b4bc4a2a6787b80bb82f80e906cb9272855",
+      "sourceHash": "d21952ef4c85be8722fd09efa114f49174c629198e066c12f9875dad4d5603c9",
       "tier": "B",
       "rationale": "Contains only re-exports from ./config-manager.js, ./hook-runner.js, ./log-writer.js, ./settings-manager.js, ./sync-hook-script.js, ./sync-logger-adapter.js. Import-graph behavior and zero local counter applicability require review; this is not an exclusion.",
       "applicability": {
@@ -9243,28 +9243,14 @@
       },
       "decisionStatus": "proposed - independent review pending",
       "metricApplicability": {
-        "status": "proposed - independent review pending",
-        "evidence": ".planning/memory-resilience/evidence/B04-applicability-probe.json",
-        "sourceHash": "ada179bd3e4d56120b9bf41260e42b4bc4a2a6787b80bb82f80e906cb9272855",
-        "disposition": "Only dependency re-exports emitted; no local counters observed. Require real module loading/export wiring proof and separate dependency measurement. Zero local metrics remain unapproved.",
-        "metrics": {
-          "statements": {
-            "observedCounterTotal": 0,
-            "proposal": "zero requires individual review"
-          },
-          "branches": {
-            "observedCounterTotal": 0,
-            "proposal": "zero requires individual review"
-          },
-          "functions": {
-            "observedCounterTotal": 0,
-            "proposal": "zero requires individual review"
-          },
-          "lines": {
-            "observedCounterTotal": 0,
-            "proposal": "zero requires individual review"
-          }
-        }
+        "status": "Current hash; complete four-metric evidence pending",
+        "sourceHash": "d21952ef4c85be8722fd09efa114f49174c629198e066c12f9875dad4d5603c9",
+        "evidence": ".planning/memory-resilience/evidence/D05-input-progress.json"
+      },
+      "inspection": {
+        "sourceRevision": "9f4488c + current source hash",
+        "anchor": "D05 mutation input admission",
+        "scope": "Scoped refusal/preservation proof; full installer, settings and lifecycle acceptance pending."
       }
     },
     {
@@ -9393,7 +9379,7 @@
     {
       "path": "src/infrastructure/hooks/settings-manager.ts",
       "package": "package.json",
-      "sourceHash": "11f0f3c4311ec2487a2adc0dcec9ca3f85c4f075789f9ddca2703983ab7a645d",
+      "sourceHash": "8f57527d9715b767b3ed8152d192e74a6f3480f34a185ee13927b8ac573795ac",
       "tier": "S",
       "rationale": "Copies and overwrites user hook settings and backup files; inspected persistent writes establish Tier S.",
       "applicability": {
@@ -9402,31 +9388,34 @@
       },
       "decisionStatus": "proposed - independent review pending",
       "inspection": {
-        "sourceRevision": "d4ab6ffc8c5c6c5e9694910b640a8428ede38603",
-        "anchor": "backupSettings / restoreSettings / writeFileSync",
-        "scope": "positive critical boundary establishes highest tier; not full correctness acceptance"
+        "sourceRevision": "9f4488c + current source hash",
+        "anchor": "D05 mutation input admission",
+        "scope": "Scoped refusal/preservation proof; full installer, settings and lifecycle acceptance pending."
       },
       "metricApplicability": {
-        "status": "proposed - independent review pending",
-        "evidence": ".planning/memory-resilience/evidence/B04-applicability-probe.json",
-        "sourceHash": "11f0f3c4311ec2487a2adc0dcec9ca3f85c4f075789f9ddca2703983ab7a645d",
-        "disposition": "Measure every positive denominator; individually review zero branch/function denominators against runtime syntax. Observed counts do not prove instrumentation completeness. Optional-chain syntax is present; synthetic evidence shows current instrumentation omits its decision counters. B05.1 owns source-mapped branch proof before numeric acceptance.",
+        "status": "Two-test scoped diagnostic; NOT full file/package acceptance",
+        "sourceHash": "8f57527d9715b767b3ed8152d192e74a6f3480f34a185ee13927b8ac573795ac",
+        "evidence": ".planning/memory-resilience/evidence/D05-input-progress.json",
         "metrics": {
           "statements": {
-            "observedCounterTotal": 72,
-            "proposal": "measure - completeness unverified"
+            "observedCounterTotal": 74,
+            "observedPercent": 16.21,
+            "proposal": "measure - complete acceptance unverified"
           },
           "branches": {
             "observedCounterTotal": 46,
-            "proposal": "measure - completeness unverified"
+            "observedPercent": 6.52,
+            "proposal": "measure - complete acceptance unverified"
           },
           "functions": {
-            "observedCounterTotal": 19,
-            "proposal": "measure - completeness unverified"
+            "observedCounterTotal": 20,
+            "observedPercent": 30,
+            "proposal": "measure - complete acceptance unverified"
           },
           "lines": {
-            "observedCounterTotal": 67,
-            "proposal": "measure - completeness unverified"
+            "observedCounterTotal": 69,
+            "observedPercent": 17.39,
+            "proposal": "measure - complete acceptance unverified"
           }
         }
       }
@@ -13463,7 +13452,7 @@
     {
       "path": "src/presentation/cli/commands/install.ts",
       "package": "package.json",
-      "sourceHash": "4d95d8379e1ae685688dbbcfbacce62c04c6629160975f65ad47c8b441c504c2",
+      "sourceHash": "5b709781f2cb62b9e380b5d51da7887760165b4f0f90a11f00abb2fe03e30355",
       "tier": "S",
       "rationale": "Selects a hook artifact and copies it into runtime storage while installing hook configuration. Installed-artifact discovery needs D05 proof.",
       "applicability": {
@@ -13472,33 +13461,33 @@
       },
       "decisionStatus": "proposed - independent review pending",
       "inspection": {
-        "sourceRevision": "18e5f79 + current source hash",
-        "anchor": "D05 packaged hook delivery",
-        "scope": "Scoped package behavior and test isolation; complete installer/lifecycle tier acceptance open."
+        "sourceRevision": "9f4488c + current source hash",
+        "anchor": "D05 mutation input admission",
+        "scope": "Scoped refusal/preservation proof; full installer, settings and lifecycle acceptance pending."
       },
       "metricApplicability": {
-        "status": "Scoped diagnostic only; complete acceptance and independent review pending",
-        "sourceHash": "4d95d8379e1ae685688dbbcfbacce62c04c6629160975f65ad47c8b441c504c2",
-        "evidence": ".planning/memory-resilience/evidence/D05-progress.json",
+        "status": "Two-test scoped diagnostic; NOT full file/package acceptance",
+        "sourceHash": "5b709781f2cb62b9e380b5d51da7887760165b4f0f90a11f00abb2fe03e30355",
+        "evidence": ".planning/memory-resilience/evidence/D05-input-progress.json",
         "metrics": {
           "statements": {
-            "observedCounterTotal": 49,
-            "observedPercent": 91.83,
+            "observedCounterTotal": 53,
+            "observedPercent": 7.54,
             "proposal": "measure - complete acceptance unverified"
           },
           "branches": {
             "observedCounterTotal": 25,
-            "observedPercent": 92,
+            "observedPercent": 0,
             "proposal": "measure - complete acceptance unverified"
           },
           "functions": {
             "observedCounterTotal": 5,
-            "observedPercent": 60,
+            "observedPercent": 20,
             "proposal": "measure - complete acceptance unverified"
           },
           "lines": {
-            "observedCounterTotal": 45,
-            "observedPercent": 91.11,
+            "observedCounterTotal": 49,
+            "observedPercent": 8.16,
             "proposal": "measure - complete acceptance unverified"
           }
         }
@@ -20947,6 +20936,138 @@
         "status": "Current hash; complete four-metric and child-process evidence pending",
         "sourceHash": "f2b9ffffc116b15c6cb67685e063e1bb33b03eb2a668beb0ed11021d0f8a8007",
         "evidence": ".planning/memory-resilience/evidence/D05-progress.json"
+      }
+    },
+    {
+      "path": "src/infrastructure/hooks/hook-settings-input.ts",
+      "package": "package.json",
+      "tier": "S",
+      "rationale": "Mutation admission or executable data-integrity regression tests.",
+      "applicability": {
+        "mode": "measure",
+        "reason": "Executable admission and preservation assertions; no exclusion approved."
+      },
+      "decisionStatus": "proposed - independent review pending",
+      "sourceHash": "e017eb6f08b579cd945dd59bb7b6d60a0169e46b57b5ce585a39c533047a5535",
+      "inspection": {
+        "sourceRevision": "9f4488c + current source hash",
+        "anchor": "D05 mutation input admission",
+        "scope": "Scoped refusal/preservation proof; full installer, settings and lifecycle acceptance pending."
+      },
+      "metricApplicability": {
+        "status": "Two-test scoped diagnostic; NOT full file/package acceptance",
+        "sourceHash": "e017eb6f08b579cd945dd59bb7b6d60a0169e46b57b5ce585a39c533047a5535",
+        "evidence": ".planning/memory-resilience/evidence/D05-input-progress.json",
+        "metrics": {
+          "statements": {
+            "observedCounterTotal": 36,
+            "observedPercent": 100,
+            "proposal": "measure - complete acceptance unverified"
+          },
+          "branches": {
+            "observedCounterTotal": 31,
+            "observedPercent": 100,
+            "proposal": "measure - complete acceptance unverified"
+          },
+          "functions": {
+            "observedCounterTotal": 7,
+            "observedPercent": 100,
+            "proposal": "measure - complete acceptance unverified"
+          },
+          "lines": {
+            "observedCounterTotal": 25,
+            "observedPercent": 100,
+            "proposal": "measure - complete acceptance unverified"
+          }
+        }
+      }
+    },
+    {
+      "path": "src/infrastructure/hooks/hook-settings-input.test.ts",
+      "package": "package.json",
+      "tier": "S",
+      "rationale": "Mutation admission or executable data-integrity regression tests.",
+      "applicability": {
+        "mode": "measure",
+        "reason": "Executable admission and preservation assertions; no exclusion approved."
+      },
+      "decisionStatus": "proposed - independent review pending",
+      "sourceHash": "b8b3c0923ea9909d7364b5819984b0c261038741a2f73f1d446d0a1ed6021eb3",
+      "inspection": {
+        "sourceRevision": "9f4488c + current source hash",
+        "anchor": "D05 mutation input admission",
+        "scope": "Scoped refusal/preservation proof; full installer, settings and lifecycle acceptance pending."
+      },
+      "metricApplicability": {
+        "status": "Two-test scoped diagnostic; NOT full file/package acceptance",
+        "sourceHash": "b8b3c0923ea9909d7364b5819984b0c261038741a2f73f1d446d0a1ed6021eb3",
+        "evidence": ".planning/memory-resilience/evidence/D05-input-progress.json",
+        "metrics": {
+          "statements": {
+            "observedCounterTotal": 54,
+            "observedPercent": 100,
+            "proposal": "measure - complete acceptance unverified"
+          },
+          "branches": {
+            "observedCounterTotal": 0,
+            "observedPercent": 100,
+            "proposal": "measure - complete acceptance unverified"
+          },
+          "functions": {
+            "observedCounterTotal": 20,
+            "observedPercent": 100,
+            "proposal": "measure - complete acceptance unverified"
+          },
+          "lines": {
+            "observedCounterTotal": 37,
+            "observedPercent": 100,
+            "proposal": "measure - complete acceptance unverified"
+          }
+        }
+      }
+    },
+    {
+      "path": "src/presentation/cli/commands/install-admission.test.ts",
+      "package": "package.json",
+      "tier": "S",
+      "rationale": "Mutation admission or executable data-integrity regression tests.",
+      "applicability": {
+        "mode": "measure",
+        "reason": "Executable admission and preservation assertions; no exclusion approved."
+      },
+      "decisionStatus": "proposed - independent review pending",
+      "sourceHash": "842f219e260f8916974157f981797b333a62a4740749af022143d0a9409e51e3",
+      "inspection": {
+        "sourceRevision": "9f4488c + current source hash",
+        "anchor": "D05 mutation input admission",
+        "scope": "Scoped refusal/preservation proof; full installer, settings and lifecycle acceptance pending."
+      },
+      "metricApplicability": {
+        "status": "Two-test scoped diagnostic; NOT full file/package acceptance",
+        "sourceHash": "842f219e260f8916974157f981797b333a62a4740749af022143d0a9409e51e3",
+        "evidence": ".planning/memory-resilience/evidence/D05-input-progress.json",
+        "metrics": {
+          "statements": {
+            "observedCounterTotal": 54,
+            "observedPercent": 100,
+            "proposal": "measure - complete acceptance unverified"
+          },
+          "branches": {
+            "observedCounterTotal": 0,
+            "observedPercent": 100,
+            "proposal": "measure - complete acceptance unverified"
+          },
+          "functions": {
+            "observedCounterTotal": 11,
+            "observedPercent": 90.9,
+            "proposal": "measure - complete acceptance unverified"
+          },
+          "lines": {
+            "observedCounterTotal": 50,
+            "observedPercent": 100,
+            "proposal": "measure - complete acceptance unverified"
+          }
+        }
       }
     }
   ],

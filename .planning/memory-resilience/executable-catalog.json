@@ -14188,9 +14188,99 @@
       ]
     },
     {
+      "path": "src/infrastructure/hooks/hook-settings-input.test.ts",
+      "package": "package.json",
+      "sourceHash": "b8b3c0923ea9909d7364b5819984b0c261038741a2f73f1d446d0a1ed6021eb3",
+      "language": ".ts",
+      "syntax": "test-driver",
+      "imports": [
+        "../../../tests/helpers/owned-test-directory.js",
+        "./hook-settings-input.js",
+        "bun:test",
+        "node:fs",
+        "node:path"
+      ],
+      "declarations": [
+        "a",
+        "b",
+        "error",
+        "hard",
+        "input",
+        "owned",
+        "path",
+        "symbolic",
+        "target"
+      ],
+      "calls": [
+        "JSON.stringify",
+        "a.toUpperCase",
+        "afterEach",
+        "assertDistinctHookTargets",
+        "beforeEach",
+        "createOwnedTestDirectory",
+        "describe",
+        "expect",
+        "expect.not.toThrow",
+        "expect.toBe",
+        "expect.toEqual",
+        "expect.toThrow",
+        "it",
+        "join",
+        "linkSync",
+        "mkdirSync",
+        "owned.cleanup",
+        "parseHookSettings",
+        "readFileSync",
+        "readHookSettingsForMutation",
+        "symlinkSync",
+        "writeFileSync"
+      ]
+    },
+    {
+      "path": "src/infrastructure/hooks/hook-settings-input.ts",
+      "package": "package.json",
+      "sourceHash": "e017eb6f08b579cd945dd59bb7b6d60a0169e46b57b5ce585a39c533047a5535",
+      "language": ".ts",
+      "syntax": "executable",
+      "imports": [
+        "../maintenance-targets.js",
+        "./settings-manager.js",
+        "node:fs",
+        "node:path"
+      ],
+      "declarations": [
+        "absolute",
+        "assertDistinctHookTargets",
+        "config",
+        "configs",
+        "content",
+        "entry",
+        "error",
+        "identities",
+        "parseHookSettings",
+        "readHookSettingsForMutation",
+        "record",
+        "value"
+      ],
+      "calls": [
+        "Array.isArray",
+        "JSON.parse",
+        "Object.values",
+        "absolute.toLowerCase",
+        "assertMaintenanceTargets",
+        "parseHookSettings",
+        "path.trim",
+        "paths.map",
+        "read",
+        "readFileSync",
+        "record",
+        "resolve"
+      ]
+    },
+    {
       "path": "src/infrastructure/hooks/index.ts",
       "package": "package.json",
-      "sourceHash": "ada179bd3e4d56120b9bf41260e42b4bc4a2a6787b80bb82f80e906cb9272855",
+      "sourceHash": "d21952ef4c85be8722fd09efa114f49174c629198e066c12f9875dad4d5603c9",
       "language": ".ts",
       "syntax": "re-export",
       "imports": [
@@ -14409,11 +14499,12 @@
     {
       "path": "src/infrastructure/hooks/settings-manager.ts",
       "package": "package.json",
-      "sourceHash": "11f0f3c4311ec2487a2adc0dcec9ca3f85c4f075789f9ddca2703983ab7a645d",
+      "sourceHash": "8f57527d9715b767b3ed8152d192e74a6f3480f34a185ee13927b8ac573795ac",
       "language": ".ts",
       "syntax": "executable",
       "imports": [
         "../paths.js",
+        "./hook-settings-input.js",
         "node:fs",
         "node:os",
         "node:path"
@@ -14433,6 +14524,7 @@
         "hookScriptPath",
         "installHooks",
         "loadClaudeSettings",
+        "prepareHookInstallation",
         "restoreFromBackup",
         "settings",
         "settingsPath",
@@ -14442,6 +14534,7 @@
         "JSON.parse",
         "JSON.stringify",
         "Object.keys",
+        "assertDistinctHookTargets",
         "backupSettings",
         "copyFileSync",
         "dirname",
@@ -14458,7 +14551,9 @@
         "mkdirSync",
         "pathsGetBackupDir",
         "pathsGetHookDir",
+        "prepareHookInstallation",
         "readFileSync",
+        "readHookSettingsForMutation",
         "settings.hooks.PreCompact.filter",
         "settings.hooks.PreCompact.push",
         "settings.hooks.PreCompact.some",
@@ -20569,6 +20664,60 @@
       "calls": []
     },
     {
+      "path": "src/presentation/cli/commands/install-admission.test.ts",
+      "package": "package.json",
+      "sourceHash": "842f219e260f8916974157f981797b333a62a4740749af022143d0a9409e51e3",
+      "language": ".ts",
+      "syntax": "test-driver",
+      "imports": [
+        "../../../../tests/helpers/owned-test-directory.js",
+        "../../../infrastructure/hooks/settings-manager.js",
+        "./install.js",
+        "bun:test",
+        "node:fs",
+        "node:path"
+      ],
+      "declarations": [
+        "action",
+        "aliases",
+        "backupPath",
+        "error",
+        "input",
+        "key",
+        "log",
+        "owned",
+        "paths",
+        "result",
+        "source"
+      ],
+      "calls": [
+        "action",
+        "afterEach",
+        "beforeEach",
+        "createOwnedTestDirectory",
+        "describe",
+        "error.mock.calls.flat",
+        "error.mock.calls.flat.join",
+        "error.mockRestore",
+        "executeInstallCommand",
+        "existsSync",
+        "expect",
+        "expect.not.toContain",
+        "expect.toBe",
+        "expect.toHaveLength",
+        "expect.toThrow",
+        "it",
+        "join",
+        "log.mockRestore",
+        "mkdirSync",
+        "owned.cleanup",
+        "readFileSync",
+        "spyOn",
+        "spyOn.mockImplementation",
+        "writeFileSync"
+      ]
+    },
+    {
       "path": "src/presentation/cli/commands/install.test.ts",
       "package": "package.json",
       "sourceHash": "aa3d902253fd5a666612b9d381d3d6a86c5a8dd3a83d04f8d39e6ad53498930a",
@@ -20640,7 +20789,7 @@
     {
       "path": "src/presentation/cli/commands/install.ts",
       "package": "package.json",
-      "sourceHash": "4d95d8379e1ae685688dbbcfbacce62c04c6629160975f65ad47c8b441c504c2",
+      "sourceHash": "5b709781f2cb62b9e380b5d51da7887760165b4f0f90a11f00abb2fe03e30355",
       "language": ".ts",
       "syntax": "executable",
       "imports": [
@@ -20682,6 +20831,7 @@
         "installHooks",
         "loadClaudeSettings",
         "mkdirSync",
+        "prepareHookInstallation",
         "resolveHookScriptSource",
         "warnStaleHookReferences"
       ]

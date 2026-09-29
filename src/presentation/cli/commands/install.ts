@@ -12,6 +12,7 @@ import { dirname } from "node:path";
 import { resolveHookScriptSource } from "../../../infrastructure/hooks/hook-script-source.js";
 import {
     installHooks,
+    prepareHookInstallation,
     checkHooksInstalled,
     getHookScriptPath,
     loadClaudeSettings,
@@ -73,6 +74,12 @@ export async function executeInstallCommand(
     options: InstallOptions,
     deps: InstallCommandDeps = {}
 ): Promise<CommandResult> {
+    try {
+        prepareHookInstallation(deps.hookOverrides);
+    } catch {
+        console.error("Error: Hook installation refused. Check settings format and ensure settings, backup and hook paths are distinct regular files or absent.");
+        return { exitCode: 1 };
+    }
     const status = checkHooksInstalled(deps.hookOverrides);
 
     // Check if already installed

@@ -54,6 +54,7 @@ export {
     backupSettings,
     restoreFromBackup,
     installHooks,
+    prepareHookInstallation,
     uninstallHooks,
     checkHooksInstalled,
     type HookEntry,

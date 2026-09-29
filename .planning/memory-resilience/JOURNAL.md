@@ -1,5 +1,79 @@
 # Memory resilience execution journal
 
+## 2026-09-29 - Hook mutation input admission checkpoint
+
+- Repaired the four preserved REDs at 9f4488c. Strict mutation reads distinguish
+  absent settings from unreadable/malformed input; install preflights settings,
+  backup and hook leaf types/links/distinct identities before any copying.
+  Direct install/uninstall no longer silently turn invalid JSON into empty data.
+- Final Windows Bun 1.4.1 and pinned 1.3.14 each pass 154 tests / 353 assertions
+  across nine files. Production/strict new-test types and isolation pass. A
+  fixture literal-type failure is retained alongside its correction.
+- New reader and its test: 100% all four scoped metrics; seven deliberate faults
+  caught. Remaining-file/changed-line/package/child quality is NOT accepted.
+  Full report: evidence/D05-input-progress.json, including source hashes.
+- Fresh packaged CLI rejects malformed settings with exit 1 and unchanged
+  settings/backup/hook bytes. Valid CLI/library install, copied-hook missing-
+  session execution, repair and uninstall pass. No detached-capture claim.
+- Next owner memory-nexus, trigger before D05/Q037/Q061 acceptance: recoverable
+  publication after writes begin; exact ownership and partial event repair;
+  supported non-command hook preservation; truthful CLI uninstall/status.
+  Leaf checks are not path-race/parent-link protection or a transaction.
+- Inventory refreshed to 517 executable files; 277 acyclic work items, D05 sole
+  active. Q037/Q061 pending; consumer boundary still waits. B11.13 lifecycle,
+  final platform/independent review and complete baseline gates remain open.
+- Final owned fixtures cleaned; protected targets untouched. No live settings,
+  canonical data, provider/model, service, batch emission or replication changed.
+  Three inboxes unchanged. Bounded embedding experiment remains baseline-gated.
+- Owner resumed work; native goal remains paused because the API exposes no
+  resume setter. Original E1-E10 objective and R03/P03/A03 authority unchanged.
+
+## 2026-09-29 - Owner resumed project work; diagnostic inbox delivered
+
+- Owner explicitly asked to file the flashing-console investigation in
+  Conversations INBOX and then return to Memory Nexus tasks. The prior pause
+  instruction is revoked for project execution. Native get_goal still reports
+  paused; the available goal API has no resume operation, so no active native
+  status is claimed or replacement goal created.
+- Filed and linted successfully:
+  C:/Projects/conversations/docs/inbox/2026-09-29-memory-nexus-flashing-console-investigation-handoff.md.
+  It contains the owner observations, chronology, four-session assessment,
+  independent Dell fault/reminder findings, limits, sources and follow-up owner.
+  No receiver source/configuration or machine setting changed. Conversations
+  owns further coordination; the completed diagnostic agent has no active capture.
+- Recovered preserved D05 admission plan and test at 9f4488c. Fresh scoped run
+  still reproduces all four intended failures; output retained at
+  .git/d05-admission-resume-red.txt. No failure was counted as acceptance.
+  Next implementation: strict mutation input and target admission before hook,
+  settings or backup writes; then preservation regressions and tier diagnostics.
+- Three incoming project inboxes remain triaged with existing owners/gates.
+  Original E1-E10 objective and R03/P03/A03 decisions are unchanged.
+
+## 2026-09-28 - Owner pause before laptop restart
+
+- Native E1-E10 goal explicitly paused at the owner's request. Do not resume
+  implementation until the owner resumes it. Last committed/pushed work: 9f4488c.
+- Uncommitted preserved work: docs/plans/2026-09-28-hook-install-admission.md and
+  src/presentation/cli/commands/install-admission.test.ts. Four meaningful REDs
+  reproduce malformed-settings overwrite/direct mutation and hook replacement
+  before backup-directory refusal. Output: .git/d05-admission-red.txt. No product
+  implementation changed after 9f4488c; no build/test process remains from this work.
+- Resume D05 at these REDs, then implement the planned mutation admission seam;
+  do not interpret the intentional failing new tests as accepted repair. The
+  existing installer transaction/quality/platform/review gates remain open.
+- Owner reported flashing console windows and paused other agent sessions.
+  Read-only process checks found short-lived command bursts. A later 25-second
+  parent trace attributed two taskkill/conhost launches to Claude Code PID 52300
+  in the Vaultwarden terminal, then no further agent bursts in that sample.
+  This identifies those launches, not every earlier flash or a malware verdict.
+  No unrelated process was killed and no security configuration was changed.
+- Separate machine finding: Application error events show dccabiserver.exe
+  crashing approximately every 65-74 seconds, including 21:01-21:19 local time.
+  Its registered service is Dell Secure Configuration Service. Defender reports
+  real-time protection off; Surfshark registrations exist, but active alternate
+  protection was not verified. These are machine follow-up findings, not project
+  implementation or evidence that the laptop is malware-free.
+
 ## 2026-09-28 - Packaged hook repair and isolated subprocess lifecycle
 
 - Resumed at signed/pushed 18e5f79 with D05 implementation preserved. Normal
