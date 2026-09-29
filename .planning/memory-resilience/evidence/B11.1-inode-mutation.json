@@ -1,0 +1,21 @@
+{
+  "command": "bun test tests/helpers/test-database.test.ts --test-name-pattern \"cleanup refuses a replacement directory\"",
+  "cwd": "C:\\Projects\\memory-nexus\\.git\\b11-measure-WaUobN",
+  "exit": 1,
+  "mutation": "Replace inode identity equality with true in generated instrumented snapshot only.",
+  "result": "KILLED: copied valid ownership marker cannot substitute for directory identity.",
+  "output": "bun test v1.4.1 (4661e494f)\n\ntests\\helpers\\test-database.test.ts:\n14 |   mkdirSync(fixture.dir);\n15 |   writeFileSync(join(fixture.dir,\".memory-test-owner.json\"),owner);\n16 |   const marker = join(fixture.dir, \"foreign-marker.txt\");\n17 |   writeFileSync(marker, \"preserve\");\n18 |   try {\n19 |     expect(() => fixture.cleanup()).toThrow();\n                                         ^\nerror: expect(received).toThrow()\n\nReceived function did not throw\nReceived value: undefined\n\n      at <anonymous> (C:\\Projects\\memory-nexus\\.git\\b11-measure-WaUobN\\tests\\helpers\\test-database.test.ts:19:37)\n(fail) cleanup refuses a replacement directory and preserves its contents [72.88ms]\n\n 0 pass\n 23 filtered out\n 1 fail\n 1 expect() calls\nRan 1 test across 1 file. [192.00ms]\n",
+  "sourceInputs": [
+    {
+      "path": "tests/helpers/test-database.ts",
+      "sourceHash": "c9d9edafc637d537d53fc14c4edf0d154f303c396372638323b96bd478657d30"
+    },
+    {
+      "path": "tests/helpers/owned-test-directory.ts",
+      "sourceHash": "c01eaafd0469da23d08b13fd9ac6277e8654309018f4dc4653e8b7a1892cdfe6"
+    }
+  ],
+  "probeSource": "import {readFileSync,writeFileSync} from 'node:fs';\nimport {join} from 'node:path';\nconst diagnostic=JSON.parse(readFileSync('.git/b11-coverage-diagnostic.json','utf8'));\nconst path=join(diagnostic.cwd,'tests/helpers/owned-test-directory.ts');\nconst original=readFileSync(path,'utf8');\nconst needle='stat.ino === identity.ino';\nif(original.split(needle).length!==2)throw Error('Ambiguous mutation target');\nlet result;\ntry {\n writeFileSync(path,original.replace(needle,'true'));\n const run=Bun.spawnSync([process.execPath,'test','tests/helpers/test-database.test.ts','--test-name-pattern','cleanup refuses a replacement directory'],{cwd:diagnostic.cwd,stdout:'pipe',stderr:'pipe',timeout:15000});\n const output=new TextDecoder().decode(run.stdout)+new TextDecoder().decode(run.stderr);\n if(run.exitCode!==1||!output.includes('Received function did not throw'))throw Error('Mutation did not produce expected regression failure: '+output);\n result={command:'bun test tests/helpers/test-database.test.ts --test-name-pattern \"cleanup refuses a replacement directory\"',cwd:diagnostic.cwd,exit:run.exitCode,mutation:'Replace inode identity equality with true in generated instrumented snapshot only.',result:'KILLED: copied valid ownership marker cannot substitute for directory identity.',output,sourceInputs:diagnostic.files.map((x:any)=>({path:x.path,sourceHash:x.sourceHash})),probeSource:readFileSync('.git/b11-inode-mutation.ts','utf8'),limits:'One actual decision mutation, not complete mutation-suite acceptance.'};\n}finally{writeFileSync(path,original);}\nwriteFileSync('.git/b11-inode-mutation.json',JSON.stringify(result,null,2)+'\\n');\nconsole.log('KILLED: bypassing inode verification makes the replacement regression fail. Original generated source restored.');\n",
+  "limits": "One actual decision mutation, not complete mutation-suite acceptance.",
+  "regressionSourceHash": "c2f2c2af8b38b8531228bc0e596920dd70d6886cb66ed5417b45137643f4efa3"
+}

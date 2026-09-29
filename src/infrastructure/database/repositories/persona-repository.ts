@@ -33,7 +33,7 @@ export class SqlitePersonaRepository implements IPersonaRepository {
   constructor(private readonly db: Database) {}
 
   async save(entry: PersonaEntry): Promise<PersonaEntry> {
-    const result = this.db.prepare(`
+    using statement = this.db.prepare(`
       INSERT INTO persona_entries (
         entry_id, kind, content, project, visibility, source_event_ids,
         source_kinds, confidence, scope, review_status, review_after,
@@ -53,17 +53,18 @@ export class SqlitePersonaRepository implements IPersonaRepository {
         expires_at = excluded.expires_at,
         why = excluded.why,
         updated_at = excluded.updated_at
-    `).run(...this.toSqlParams(entry));
+    `);
+    statement.run(...this.toSqlParams(entry));
 
-    const saved = await this.findByEntryId(entry.entryId);
-    return saved ?? entry.withId(Number(result.lastInsertRowid));
+    const saved = this.findEntry(entry.entryId);
+    if (!saved) throw new Error("Persona entry was not present after save");
+    return saved;
   }
 
   async saveMany(entries: PersonaEntry[]): Promise<PersonaEntry[]> {
-    const saved: PersonaEntry[] = [];
     const transaction = this.db.transaction((items: PersonaEntry[]) => {
       for (const entry of items) {
-        this.db.prepare(`
+        using statement = this.db.prepare(`
           INSERT INTO persona_entries (
             entry_id, kind, content, project, visibility, source_event_ids,
             source_kinds, confidence, scope, review_status, review_after,
@@ -83,24 +84,29 @@ export class SqlitePersonaRepository implements IPersonaRepository {
             expires_at = excluded.expires_at,
             why = excluded.why,
             updated_at = excluded.updated_at
-        `).run(...this.toSqlParams(entry));
+        `);
+        statement.run(...this.toSqlParams(entry));
       }
-    });
-    transaction(entries);
-
-    for (const entry of entries) {
-      const current = await this.findByEntryId(entry.entryId);
-      if (current) {
+      const saved: PersonaEntry[] = [];
+      for (const entry of items) {
+        const current = this.findEntry(entry.entryId);
+        if (!current) throw new Error("Persona entry was not present after batch save");
         saved.push(current);
       }
-    }
-    return saved;
+      return saved;
+    });
+    return transaction(entries);
   }
 
   async findByEntryId(entryId: string): Promise<PersonaEntry | null> {
-    const row = this.db.prepare<PersonaRow, [string]>(
+    return this.findEntry(entryId);
+  }
+
+  private findEntry(entryId: string): PersonaEntry | null {
+    using statement = this.db.prepare<PersonaRow, [string]>(
       "SELECT * FROM persona_entries WHERE entry_id = ?",
-    ).get(entryId);
+    );
+    const row = statement.get(entryId);
     return row ? this.toEntity(row) : null;
   }
 
@@ -124,9 +130,10 @@ export class SqlitePersonaRepository implements IPersonaRepository {
     const limit = options.limit ?? 100;
     params.push(limit);
     const where = conditions.length > 0 ? `WHERE ${conditions.join(" AND ")}` : "";
-    const rows = this.db.prepare<PersonaRow, (string | number)[]>(
+    using statement = this.db.prepare<PersonaRow, (string | number)[]>(
       `SELECT * FROM persona_entries ${where} ORDER BY confidence DESC, updated_at DESC LIMIT ?`,
-    ).all(...params);
+    );
+    const rows = statement.all(...params);
     return rows.map((row) => this.toEntity(row));
   }
 
@@ -136,18 +143,21 @@ export class SqlitePersonaRepository implements IPersonaRepository {
       ? "(project = ? OR visibility = 'global')"
       : "project = ?";
     const limit = options.limit ?? 20;
-    const rows = this.db.prepare<PersonaRow, (string | number)[]>(
+    using statement = this.db.prepare<PersonaRow, (string | number)[]>(
       `SELECT * FROM persona_entries WHERE ${conditions} ORDER BY confidence DESC, updated_at DESC LIMIT ?`,
-    ).all(project, limit);
+    );
+    const rows = statement.all(project, limit);
     return rows.map((row) => this.toEntity(row));
   }
 
   async deleteByProject(project: string): Promise<void> {
-    this.db.prepare("DELETE FROM persona_entries WHERE project = ?").run(project);
+    using statement = this.db.prepare("DELETE FROM persona_entries WHERE project = ?");
+    statement.run(project);
   }
 
   async clearAll(): Promise<void> {
-    this.db.prepare("DELETE FROM persona_entries").run();
+    using statement = this.db.prepare("DELETE FROM persona_entries");
+    statement.run();
   }
 
   private toSqlParams(entry: PersonaEntry): [

@@ -1,0 +1,16 @@
+{
+  "item_id": "B11.74.6",
+  "status": "verified - scoped factory and native caller ownership only",
+  "recordedAt": "2026-09-28T09:17:59.272Z",
+  "evidence": ".planning/memory-resilience/evidence/B11.74.6.3.2.json",
+  "dependencies": [
+    "B11.74.2",
+    "B11.74.3",
+    "B11.74.4",
+    "B11.74.5",
+    "B11.74.6.1",
+    "B11.74.6.2",
+    "B11.74.6.3"
+  ],
+  "limits": "B11.74.7 plus all required Q, fixture, supported-platform, installed-artifact and independent-review gates remain open."
+}

@@ -5,7 +5,7 @@
  * Uses INSERT OR REPLACE for upsert semantics on state updates.
  */
 
-import type { Database, Statement } from "bun:sqlite";
+import type { Database } from "bun:sqlite";
 import type { IExtractionStateRepository } from "../../../domain/ports/repositories.js";
 import {
   ExtractionState,
@@ -40,44 +40,7 @@ interface ExtractionStateRow {
 export class SqliteExtractionStateRepository
   implements IExtractionStateRepository
 {
-  private readonly findByIdStmt: Statement;
-  private readonly findBySessionPathStmt: Statement;
-  private readonly findPendingStmt: Statement;
-  private readonly saveStmt: Statement;
-
-  constructor(db: Database) {
-    // Prepare all statements once for reuse
-    this.findByIdStmt = db.prepare(`
-      SELECT id, session_path, started_at, status, completed_at,
-             messages_extracted, error_message, file_mtime, file_size
-      FROM extraction_state
-      WHERE id = $id
-    `);
-
-    this.findBySessionPathStmt = db.prepare(`
-      SELECT id, session_path, started_at, status, completed_at,
-             messages_extracted, error_message, file_mtime, file_size
-      FROM extraction_state
-      WHERE session_path = $sessionPath
-    `);
-
-    this.findPendingStmt = db.prepare(`
-      SELECT id, session_path, started_at, status, completed_at,
-             messages_extracted, error_message, file_mtime, file_size
-      FROM extraction_state
-      WHERE status IN ('pending', 'in_progress')
-      ORDER BY started_at ASC
-    `);
-
-    this.saveStmt = db.prepare(`
-      INSERT OR REPLACE INTO extraction_state
-        (id, session_path, started_at, status, completed_at,
-         messages_extracted, error_message, file_mtime, file_size)
-      VALUES
-        ($id, $sessionPath, $startedAt, $status, $completedAt,
-         $messagesExtracted, $errorMessage, $fileMtime, $fileSize)
-    `);
-  }
+  constructor(private readonly db: Database) {}
 
   /**
    * Map a database row to an ExtractionState entity
@@ -100,7 +63,13 @@ export class SqliteExtractionStateRepository
    * Find an extraction state by its unique identifier.
    */
   async findById(id: string): Promise<ExtractionState | null> {
-    const row = this.findByIdStmt.get({ $id: id }) as ExtractionStateRow | null;
+    using statement = this.db.prepare(`
+      SELECT id, session_path, started_at, status, completed_at,
+             messages_extracted, error_message, file_mtime, file_size
+      FROM extraction_state
+      WHERE id = $id
+    `);
+    const row = statement.get({ $id: id }) as ExtractionStateRow | null;
     if (!row) {
       return null;
     }
@@ -114,7 +83,13 @@ export class SqliteExtractionStateRepository
   async findBySessionPath(
     sessionPath: string
   ): Promise<ExtractionState | null> {
-    const row = this.findBySessionPathStmt.get({
+    using statement = this.db.prepare(`
+      SELECT id, session_path, started_at, status, completed_at,
+             messages_extracted, error_message, file_mtime, file_size
+      FROM extraction_state
+      WHERE session_path = $sessionPath
+    `);
+    const row = statement.get({
       $sessionPath: sessionPath,
     }) as ExtractionStateRow | null;
     if (!row) {
@@ -128,7 +103,14 @@ export class SqliteExtractionStateRepository
    * Used to resume interrupted extractions.
    */
   async findPending(): Promise<ExtractionState[]> {
-    const rows = this.findPendingStmt.all() as ExtractionStateRow[];
+    using statement = this.db.prepare(`
+      SELECT id, session_path, started_at, status, completed_at,
+             messages_extracted, error_message, file_mtime, file_size
+      FROM extraction_state
+      WHERE status IN ('pending', 'in_progress')
+      ORDER BY started_at ASC
+    `);
+    const rows = statement.all() as ExtractionStateRow[];
     return rows.map((row) => this.rowToExtractionState(row));
   }
 
@@ -140,7 +122,15 @@ export class SqliteExtractionStateRepository
    * fileMtime is stored as ISO 8601 string, fileSize as integer bytes.
    */
   async save(state: ExtractionState): Promise<void> {
-    this.saveStmt.run({
+    using statement = this.db.prepare(`
+      INSERT OR REPLACE INTO extraction_state
+        (id, session_path, started_at, status, completed_at,
+         messages_extracted, error_message, file_mtime, file_size)
+      VALUES
+        ($id, $sessionPath, $startedAt, $status, $completedAt,
+         $messagesExtracted, $errorMessage, $fileMtime, $fileSize)
+    `);
+    statement.run({
       $id: state.id,
       $sessionPath: state.sessionPath,
       $startedAt: state.startedAt.toISOString(),

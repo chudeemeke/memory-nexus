@@ -30,8 +30,18 @@ import {
   graphEdgesFromFact,
 } from "../../application/services/temporal-graph-service.js";
 import { MemoryGovernanceEntry } from "../../domain/entities/memory-governance.js";
-import { getMachineLogPath, getAllLogFiles } from "../paths.js";
+import { getMachineLogPath, getAllLogFiles, getEventsDir } from "../paths.js";
 import { loadConfig } from "../hooks/config-manager.js";
+import { captureProjectionFence, createProjectionStage, promoteProjections } from "./projection-replacement.js";
+import { captureProjectionSource, assertProjectionSource, assertProjectionSourceAuthority, type ProjectionSourceSnapshot, type ProjectionSourceManifest } from "./projection-source.js";
+import { assertLegacyProjectionPayload, assertProjectionPayload } from "./projection-payload.js";
+import { assertAutomaticProjectionReplay } from "./projection-state.js";
+import type { OperationLease, DatabaseWriteLease } from "../../domain/ports/operation-admission.js";
+import { runDatabaseWrite } from "./database-write-admission.js";
+import { createSourceOperationAdmission } from "./source-operation-admission.js";
+import { expandExtractionBatch } from "./extraction-batch-events.js";
+import { mergeDerivedGovernance } from "../../domain/services/derived-governance.js";
+import { mergeDerivedGraph } from "../../domain/services/derived-graph.js";
 
 export interface InvalidEventLogLine {
   filePath: string;
@@ -49,7 +59,9 @@ export interface ProjectionRebuildReport {
   invalidEvents: number;
   invalidEventLines: InvalidEventLogLine[];
   replay: ProjectionReplayResult;
+  source: ProjectionSourceManifest;
 }
+export interface ProjectionSourceReadReport extends EventReadReport { snapshot: ProjectionSourceSnapshot; }
 
 interface ReadOptions {
   reportInvalidToConsole: boolean;
@@ -57,6 +69,8 @@ interface ReadOptions {
 
 interface ProjectionContext {
   db: Database;
+  batchEffects: ReadonlySet<string>;
+  batchTargets: ReadonlySet<string>;
 }
 
 const FACT_EVENT_KINDS: readonly MemoryEventKind[] = [
@@ -71,17 +85,19 @@ const FACT_EVENT_KINDS: readonly MemoryEventKind[] = [
 /**
  * Append a Fact through the canonical v2 event envelope.
  */
-export async function appendEvent(fact: Fact, logPath?: string): Promise<void> {
-  await appendMemoryEvent(factToMemoryEvent(fact, resolveMachineId(logPath)), logPath);
+export async function appendEvent(fact: Fact, logPath?: string, parent?: OperationLease): Promise<void> {
+  await appendMemoryEvent(factToMemoryEvent(fact, resolveMachineId(logPath)), logPath, parent);
 }
 
 /**
  * Append a canonical memory event envelope into the plain-text event log.
  */
-export async function appendMemoryEvent(memoryEvent: MemoryEventEnvelope, logPath?: string): Promise<void> {
+export async function appendMemoryEvent(memoryEvent: MemoryEventEnvelope, logPath?: string, parent?: OperationLease): Promise<void> {
   const activeLogPath = resolveLogPath(logPath);
-  await mkdir(dirname(activeLogPath), { recursive: true });
-  await appendFile(activeLogPath, `${JSON.stringify(memoryEvent.toJSON())}\n`, "utf-8");
+  await createSourceOperationAdmission(activeLogPath).run(async () => {
+    await mkdir(dirname(activeLogPath), { recursive: true });
+    await appendFile(activeLogPath, `${JSON.stringify(memoryEvent.toJSON())}\n`, "utf-8");
+  }, parent);
 }
 
 /**
@@ -102,19 +118,67 @@ export async function readMemoryEventsWithReport(logPath?: string, eventsDir?: s
   return collectMemoryEvents(logPath, eventsDir, { reportInvalidToConsole: false });
 }
 
+/** Required-source admission shared by projection verification and mutation. */
+export async function readProjectionEventsWithReport(logPath?: string, eventsDir?: string): Promise<ProjectionSourceReadReport> {
+  const events: MemoryEventEnvelope[] = [], invalidEvents: InvalidEventLogLine[] = [];
+  const identities = new Map<string, { identity: string; batchId: string | undefined }>();
+  const snapshot = await captureProjectionSource(logPath, eventsDir, (line, filePath, lineNumber) => {
+    if (!line.trim()) return;
+    try {
+      const record: unknown = JSON.parse(line);
+      if (!isObject(record) || record.schemaVersion !== 2) assertLegacyProjectionPayload(record);
+      const event = parseMemoryEventRecord(record, filePath, lineNumber);
+      const identity = isObject(record) && record.schemaVersion === 2 ? event.integrity.envelopeHash
+        : MemoryEventEnvelope.create({ ...event.toJSON(), machineId: "legacy", sequence: legacySequence(record as Record<string, unknown>, 1),
+          occurredAt: event.occurredAt, observedAt: event.observedAt }).integrity.envelopeHash;
+      const effects = expandExtractionBatch(event);
+      for (const effect of effects ?? []) assertProjectionPayload(effect);
+      for (const member of [event, ...effects ?? []]) {
+        const memberIdentity = member === event ? identity : member.integrity.envelopeHash;
+        const batchId = member === event ? undefined : event.eventId;
+        const existing = identities.get(member.eventId);
+        if (existing !== undefined && (existing.identity !== memberIdentity || existing.batchId !== batchId)) throw new Error("Conflicting event identity or batch owner");
+        identities.set(member.eventId, { identity: memberIdentity, batchId });
+      }
+      events.push(event);
+    }
+    catch { invalidEvents.push({ filePath, lineNumber, line: "", reason: `Invalid event log record at line ${lineNumber} in ${filePath}` }); }
+  });
+  return { events, invalidEvents, snapshot };
+}
+
+/** Exercise real handlers in an isolated DB; never mutate or initialize the target. */
+export async function verifyProjectionRebuild(logPath?: string, eventsDir?: string, target?: Database): Promise<ProjectionSourceReadReport> {
+  const report = await readProjectionEventsWithReport(logPath, eventsDir);
+  if (report.invalidEvents.length === 0) {
+    await withProjectionStage(report, () => {
+      if (target) assertProjectionSourceAuthority(target, report.snapshot);
+    });
+  }
+  return report;
+}
+
 /**
  * Compatibility API: read event log records as Fact entities.
  */
 export async function* readEvents(logPath?: string, eventsDir?: string): AsyncGenerator<Fact, void, unknown> {
   const report = await collectMemoryEvents(logPath, eventsDir, { reportInvalidToConsole: true });
-  for (const event of report.events) {
-    if (!isFactEventKind(event.kind)) {
-      continue;
-    }
+  for (const record of report.events) {
+    let expanded: MemoryEventEnvelope[];
     try {
-      yield memoryEventToFact(event);
-    } catch (error) {
-      console.error("Skipping malformed event log line:", error);
+      const effects = expandExtractionBatch(record);
+      if (effects !== null) for (const effect of effects) assertProjectionPayload(effect);
+      expanded = effects ?? [record];
+    } catch (error) { console.error("Skipping malformed extraction batch:", error); continue; }
+    for (const event of expanded) {
+      if (!isFactEventKind(event.kind)) {
+        continue;
+      }
+      try {
+        yield memoryEventToFact(event);
+      } catch (error) {
+        console.error("Skipping malformed event log line:", error);
+      }
     }
   }
 }
@@ -122,16 +186,44 @@ export async function* readEvents(logPath?: string, eventsDir?: string): AsyncGe
 /**
  * Rebuild derived database projections from the canonical event log.
  */
-export async function rebuildProjections(db: Database, logPath?: string, eventsDir?: string): Promise<void> {
-  await rebuildProjectionsWithReport(db, logPath, eventsDir);
+export async function rebuildProjections(db: Database, logPath?: string, eventsDir?: string, mode: "explicit" | "automatic" = "explicit", parent?: OperationLease, databaseLease?: DatabaseWriteLease): Promise<void> {
+  const report = await rebuildProjectionsWithReport(db, logPath, eventsDir, mode, parent, databaseLease);
+  if (report.invalidEvents > 0) {
+    throw new Error(`Projection rebuild refused: ${report.invalidEvents} invalid event log record(s)`);
+  }
 }
 
 /**
  * Rebuild derived database projections and return replay evidence.
  */
-export async function rebuildProjectionsWithReport(db: Database, logPath?: string, eventsDir?: string): Promise<ProjectionRebuildReport> {
-  const report = await collectMemoryEvents(logPath, eventsDir, { reportInvalidToConsole: false });
-  const sortedEvents = sortMemoryEvents(report.events);
+export async function rebuildProjectionsWithReport(db: Database, logPath?: string, eventsDir?: string, mode: "explicit" | "automatic" = "explicit", parent?: OperationLease, databaseLease?: DatabaseWriteLease): Promise<ProjectionRebuildReport> {
+  const sourceDirectory = eventsDir ?? getEventsDir();
+  return createSourceOperationAdmission(logPath, sourceDirectory).run(
+    () => databaseLease === undefined
+      ? rebuildAdmittedProjections(db, logPath, sourceDirectory, mode)
+      : runDatabaseWrite(db, child => rebuildAdmittedProjections(db, logPath, sourceDirectory, mode, child), databaseLease), parent);
+}
+
+async function rebuildAdmittedProjections(db: Database, logPath: string | undefined, eventsDir: string, mode: "explicit" | "automatic", databaseLease?: DatabaseWriteLease): Promise<ProjectionRebuildReport> {
+  const fence = captureProjectionFence(db, databaseLease);
+  if (mode === "automatic") assertAutomaticProjectionReplay(db);
+  const report = await readProjectionEventsWithReport(logPath, eventsDir);
+  if (report.invalidEvents.length > 0) {
+    return {
+      invalidEvents: report.invalidEvents.length,
+      invalidEventLines: report.invalidEvents,
+      replay: { processedEvents: 0, skippedDuplicateEvents: 0, appliedProjections: [] },
+      source: report.snapshot.manifest,
+    };
+  }
+  return withProjectionStage(report, (stage, replay) => {
+    promoteProjections(db, stage, fence, report.snapshot, mode === "automatic", databaseLease);
+    return { invalidEvents: 0, invalidEventLines: [], replay, source: report.snapshot.manifest };
+  });
+}
+
+async function withProjectionStage<T>(report: ProjectionSourceReadReport,
+  complete: (stage: Database, replay: ProjectionReplayResult) => T): Promise<T> {
   const registry = new ProjectionRegistry<ProjectionContext>([
     createFactsProjection(),
     createPersonaProjection(),
@@ -139,13 +231,41 @@ export async function rebuildProjectionsWithReport(db: Database, logPath?: strin
     createDreamProjection(),
     createGovernanceProjection(),
   ]);
-  const replay = await registry.replay(sortedEvents, { db });
-
-  return {
-    invalidEvents: report.invalidEvents.length,
-    invalidEventLines: report.invalidEvents,
-    replay,
-  };
+  const stage = createProjectionStage();
+  let failed = false, failure: unknown;
+  try {
+    let replay: ProjectionReplayResult;
+    try {
+      const expanded: MemoryEventEnvelope[] = [], batchEffects = new Set<string>(), batchTargets = new Set<string>();
+      for (const event of sortMemoryEvents(report.events)) {
+        assertProjectionPayload(event);
+        const effects = expandExtractionBatch(event);
+        if (effects !== null) {
+          for (const effect of effects) {
+            batchEffects.add(effect.eventId);
+            const fact = memoryEventToFact(effect), persona = personaEntryFromFactEvent(fact, effect.observedAt);
+            if (persona) batchTargets.add(`persona:${persona.entryId}`);
+            for (const edge of graphEdgesFromFact(fact, effect.observedAt)) batchTargets.add(`graph:${edge.edgeId}`);
+          }
+          expanded.push(...effects);
+        }
+        else expanded.push(event);
+      }
+      replay = await registry.replay(expanded, { db: stage, batchEffects, batchTargets });
+    } catch (cause) {
+      throw new Error("Projection source cannot be replayed; validate event payloads and supported operations", { cause });
+    }
+    assertProjectionSource(report.snapshot);
+    return complete(stage, replay);
+  } catch (error) {
+    failed = true; failure = error;
+    throw error;
+  } finally {
+    try { stage.close(); } catch (cleanup) {
+      if (failed) throw new AggregateError([failure, cleanup], "Projection replay and stage cleanup failed");
+      throw cleanup;
+    }
+  }
 }
 
 async function collectMemoryEvents(logPath: string | undefined, eventsDir: string | undefined, options: ReadOptions): Promise<EventReadReport> {
@@ -313,7 +433,7 @@ function memoryEventToFact(event: MemoryEventEnvelope): Fact {
 
 function createFactsProjection() {
   const insertFact = (db: Database, fact: Fact) => {
-    db.prepare(`
+    using statement = db.prepare(`
       INSERT INTO facts (
         uuid, type, project, content, metadata, observed_at, superseded_at, superseded_by
       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
@@ -326,7 +446,8 @@ function createFactsProjection() {
         superseded_at = excluded.superseded_at,
         superseded_by = excluded.superseded_by,
         updated_at = datetime('now')
-    `).run(
+    `);
+    statement.run(
       fact.uuid,
       fact.type,
       fact.project,
@@ -357,11 +478,12 @@ function createFactsProjection() {
         const supersededUuid = fact.metadata?.superseded_uuid;
         const supersededByUuid = fact.metadata?.superseded_by_uuid;
         if (typeof supersededUuid === "string" && typeof supersededByUuid === "string") {
-          context.db.prepare(`
+          using statement = context.db.prepare(`
             UPDATE facts
             SET superseded_at = ?, superseded_by = ?, updated_at = datetime('now')
             WHERE uuid = ?
-          `).run(fact.observedAt.toISOString(), supersededByUuid, supersededUuid);
+          `);
+          statement.run(fact.observedAt.toISOString(), supersededByUuid, supersededUuid);
         }
       }
     },
@@ -373,7 +495,7 @@ function createGovernanceProjection() {
     name: "memory_governance",
     consumedKinds: ["governance", "consent"] as const,
     reset: (context: ProjectionContext) => {
-      context.db.run("DELETE FROM memory_governance_events; DELETE FROM memory_governance;");
+      return new SqliteMemoryGovernanceRepository(context.db).clearAll();
     },
     apply: async (event: MemoryEventEnvelope, context: ProjectionContext) => {
       const governanceRepo = new SqliteMemoryGovernanceRepository(context.db);
@@ -400,8 +522,8 @@ function createPersonaProjection() {
       const saved = await personaRepo.save(entry);
       const governanceRepo = new SqliteMemoryGovernanceRepository(context.db);
       const existingGovernance = await governanceRepo.findByTarget("persona", saved.entryId);
-      if (!existingGovernance) {
-        await governanceRepo.save(MemoryGovernanceEntry.create({
+      if (!existingGovernance || context.batchTargets.has(`persona:${saved.entryId}`)) {
+        const incoming = inheritBatchGovernance(context, event, MemoryGovernanceEntry.create({
           surface: "persona",
           targetId: saved.entryId,
           project: saved.project,
@@ -420,6 +542,7 @@ function createPersonaProjection() {
           expiresAt: saved.expiresAt,
           lastEventId: event.eventId,
         }));
+        await governanceRepo.save(existingGovernance ? mergeDerivedGovernance(existingGovernance, incoming) : incoming);
       }
       return true;
     },
@@ -441,17 +564,44 @@ function createGraphProjection() {
       }
 
       const graphRepo = new SqliteGraphRepository(context.db);
-      const saved = await graphRepo.saveMany(edges);
       const governanceRepo = new SqliteMemoryGovernanceRepository(context.db);
-      for (const edge of saved) {
+      // Preserve legacy last-candidate annotation semantics for unrelated IDs.
+      const ordinary = new Map((await graphRepo.saveMany(edges.filter(edge => !context.batchTargets.has(`graph:${edge.edgeId}`))))
+        .map(edge => [edge.edgeId, edge]));
+      for (const candidate of edges) {
+        const protectedIdentity = context.batchTargets.has(`graph:${candidate.edgeId}`);
+        const edge = protectedIdentity
+          ? await graphRepo.save(mergeDerivedGraph(await graphRepo.findByEdgeId(candidate.edgeId), candidate,
+            context.batchEffects.has(event.eventId) ? [event.eventId, ...event.provenance.sourceIds ?? []] : [event.eventId]))
+          : ordinary.get(candidate.edgeId)!;
         const existingGovernance = await governanceRepo.findByTarget("graph", edge.edgeId);
-        if (!existingGovernance) {
-          await governanceRepo.save(governanceEntryForGraphEdge(edge, "graph-event-projection"));
+        if (!existingGovernance || protectedIdentity) {
+          const incoming = inheritBatchGovernance(context, event, governanceEntryForGraphEdge(edge, "graph-event-projection"));
+          await governanceRepo.save(existingGovernance ? mergeDerivedGovernance(existingGovernance, incoming) : incoming);
         }
       }
       return true;
     },
   };
+}
+
+/** Every contributor to a batch-derived identity retains its source policy. */
+function inheritBatchGovernance(context: ProjectionContext, event: MemoryEventEnvelope, entry: MemoryGovernanceEntry): MemoryGovernanceEntry {
+  if (!context.batchTargets.has(`${entry.surface}:${entry.targetId}`)) return entry;
+  const scope = event.scope;
+  if (entry.project !== scope.project || entry.visibility !== scope.visibility ||
+      entry.scope.project !== scope.project || entry.scope.visibility !== scope.visibility || entry.scope.workspace !== scope.workspace) {
+    throw new Error("Extraction batch derived scope differs from its source");
+  }
+  const consent = event.consent;
+  let expiresAt = consent.expiresAt ? new Date(consent.expiresAt) : null;
+  if (entry.expiresAt && (!expiresAt || entry.expiresAt < expiresAt)) expiresAt = entry.expiresAt;
+  return MemoryGovernanceEntry.create({
+    ...entry.toParams(), sourceEventIds: [...new Set([...entry.sourceEventIds, event.eventId,
+      ...context.batchEffects.has(event.eventId) ? event.provenance.sourceIds ?? [] : []])],
+    actor: event.provenance.actor, redactionState: event.privacy.redactionState,
+    consentStatus: consent.status, consentScopes: consent.scopes, expiresAt,
+  });
 }
 
 function createDreamProjection() {

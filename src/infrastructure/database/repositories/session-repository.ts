@@ -5,7 +5,7 @@
  * Uses INSERT OR IGNORE for idempotent session inserts.
  */
 
-import type { Database, Statement } from "bun:sqlite";
+import type { Database } from "bun:sqlite";
 import type {
   ISessionRepository,
   SessionListOptions,
@@ -35,71 +35,7 @@ interface SessionRow {
  * on the unique ID. INSERT OR IGNORE ensures idempotent saves.
  */
 export class SqliteSessionRepository implements ISessionRepository {
-  private readonly db: Database;
-  private readonly findByIdStmt: Statement;
-  private readonly findByProjectStmt: Statement;
-  private readonly findRecentStmt: Statement;
-  private readonly insertStmt: Statement;
-  private readonly deleteStmt: Statement;
-  private readonly updateSummaryStmt: Statement;
-  private readonly updateProjectNameStmt: Statement;
-  private readonly findDistinctEncodedPathsStmt: Statement;
-
-  constructor(db: Database) {
-    this.db = db;
-
-    // Prepare all statements once for reuse
-    this.findByIdStmt = db.prepare(`
-      SELECT id, project_path_encoded, project_path_decoded, project_name,
-             start_time, end_time, message_count, summary
-      FROM sessions
-      WHERE id = $id
-    `);
-
-    this.findByProjectStmt = db.prepare(`
-      SELECT id, project_path_encoded, project_path_decoded, project_name,
-             start_time, end_time, message_count, summary
-      FROM sessions
-      WHERE project_path_encoded = $projectPath
-      ORDER BY start_time DESC
-    `);
-
-    this.findRecentStmt = db.prepare(`
-      SELECT id, project_path_encoded, project_path_decoded, project_name,
-             start_time, end_time, message_count, summary
-      FROM sessions
-      ORDER BY start_time DESC
-      LIMIT $limit
-    `);
-
-    this.insertStmt = db.prepare(`
-      INSERT OR IGNORE INTO sessions
-        (id, project_path_encoded, project_path_decoded, project_name,
-         start_time, end_time, message_count)
-      VALUES
-        ($id, $projectPathEncoded, $projectPathDecoded, $projectName,
-         $startTime, $endTime, $messageCount)
-    `);
-
-    this.deleteStmt = db.prepare(`
-      DELETE FROM sessions WHERE id = $id
-    `);
-
-    this.updateSummaryStmt = db.prepare(`
-      UPDATE sessions SET summary = $summary, updated_at = datetime('now')
-      WHERE id = $id
-    `);
-
-    this.updateProjectNameStmt = db.prepare(`
-      UPDATE sessions SET project_name = $projectName, updated_at = datetime('now')
-      WHERE project_path_encoded = $encodedPath
-    `);
-
-    this.findDistinctEncodedPathsStmt = db.prepare(`
-      SELECT DISTINCT project_path_encoded FROM sessions
-      ORDER BY project_path_encoded
-    `);
-  }
+  constructor(private readonly db: Database) {}
 
   /**
    * Map a database row to a Session entity
@@ -127,7 +63,13 @@ export class SqliteSessionRepository implements ISessionRepository {
    * Find a session by its unique identifier.
    */
   async findById(id: string): Promise<Session | null> {
-    const row = this.findByIdStmt.get({ $id: id }) as SessionRow | null;
+    using statement = this.db.prepare(`
+      SELECT id, project_path_encoded, project_path_decoded, project_name,
+             start_time, end_time, message_count, summary
+      FROM sessions
+      WHERE id = $id
+    `);
+    const row = statement.get({ $id: id }) as SessionRow | null;
     if (!row) {
       return null;
     }
@@ -138,7 +80,14 @@ export class SqliteSessionRepository implements ISessionRepository {
    * Find all sessions belonging to a project.
    */
   async findByProject(projectPath: ProjectPath): Promise<Session[]> {
-    const rows = this.findByProjectStmt.all({
+    using statement = this.db.prepare(`
+      SELECT id, project_path_encoded, project_path_decoded, project_name,
+             start_time, end_time, message_count, summary
+      FROM sessions
+      WHERE project_path_encoded = $projectPath
+      ORDER BY start_time DESC
+    `);
+    const rows = statement.all({
       $projectPath: projectPath.encoded,
     }) as SessionRow[];
     return rows.map((row) => this.rowToSession(row));
@@ -148,7 +97,14 @@ export class SqliteSessionRepository implements ISessionRepository {
    * Find the most recent sessions across all projects.
    */
   async findRecent(limit: number): Promise<Session[]> {
-    const rows = this.findRecentStmt.all({ $limit: limit }) as SessionRow[];
+    using statement = this.db.prepare(`
+      SELECT id, project_path_encoded, project_path_decoded, project_name,
+             start_time, end_time, message_count, summary
+      FROM sessions
+      ORDER BY start_time DESC
+      LIMIT $limit
+    `);
+    const rows = statement.all({ $limit: limit }) as SessionRow[];
     return rows.map((row) => this.rowToSession(row));
   }
 
@@ -157,7 +113,8 @@ export class SqliteSessionRepository implements ISessionRepository {
    * Uses INSERT OR IGNORE for idempotency (no error on duplicate).
    */
   async save(session: Session): Promise<void> {
-    this.insertStmt.run({
+    using insertStatement = this.prepareInsert();
+    insertStatement.run({
       $id: session.id,
       $projectPathEncoded: session.projectPath.encoded,
       $projectPathDecoded: session.projectPath.decoded,
@@ -173,9 +130,10 @@ export class SqliteSessionRepository implements ISessionRepository {
    * Uses BEGIN IMMEDIATE for write locking.
    */
   async saveMany(sessions: Session[]): Promise<void> {
+    using insertStatement = this.prepareInsert();
     const saveAll = this.db.transaction(() => {
       for (const session of sessions) {
-        this.insertStmt.run({
+        insertStatement.run({
           $id: session.id,
           $projectPathEncoded: session.projectPath.encoded,
           $projectPathDecoded: session.projectPath.decoded,
@@ -195,7 +153,10 @@ export class SqliteSessionRepository implements ISessionRepository {
    * Associated messages are deleted via foreign key CASCADE.
    */
   async delete(id: string): Promise<void> {
-    this.deleteStmt.run({ $id: id });
+    using statement = this.db.prepare(`
+      DELETE FROM sessions WHERE id = $id
+    `);
+    statement.run({ $id: id });
   }
 
   /**
@@ -208,7 +169,11 @@ export class SqliteSessionRepository implements ISessionRepository {
    * @param summary - LLM-generated summary text
    */
   async updateSummary(sessionId: string, summary: string): Promise<void> {
-    this.updateSummaryStmt.run({ $id: sessionId, $summary: summary });
+    using statement = this.db.prepare(`
+      UPDATE sessions SET summary = $summary, updated_at = datetime('now')
+      WHERE id = $id
+    `);
+    statement.run({ $id: sessionId, $summary: summary });
   }
 
   /**
@@ -226,7 +191,7 @@ export class SqliteSessionRepository implements ISessionRepository {
       WHERE updated_at < $cutoffDate
       ORDER BY updated_at ASC
     `;
-    const stmt = this.db.prepare(sql);
+    using stmt = this.db.prepare(sql);
     const rows = stmt.all({ $cutoffDate: cutoffDate.toISOString() }) as SessionRow[];
     return rows.map((row) => this.rowToSession(row));
   }
@@ -244,7 +209,7 @@ export class SqliteSessionRepository implements ISessionRepository {
       FROM sessions
       WHERE updated_at < $cutoffDate
     `;
-    const stmt = this.db.prepare(sql);
+    using stmt = this.db.prepare(sql);
     const row = stmt.get({ $cutoffDate: cutoffDate.toISOString() }) as { count: number };
     return row.count;
   }
@@ -257,44 +222,39 @@ export class SqliteSessionRepository implements ISessionRepository {
    * @returns Number of sessions deleted
    */
   async deleteOlderThan(cutoffDate: Date): Promise<number> {
-    // Get count before delete (since changes() might not work correctly with cascades)
-    const count = await this.countOlderThan(cutoffDate);
-
     const sql = `
       DELETE FROM sessions
       WHERE updated_at < $cutoffDate
+      RETURNING id
     `;
-    const stmt = this.db.prepare(sql);
-    stmt.run({ $cutoffDate: cutoffDate.toISOString() });
-
-    return count;
+    using stmt = this.db.prepare(sql);
+    return stmt.all({ $cutoffDate: cutoffDate.toISOString() }).length;
   }
 
   /**
    * Update the project name for all sessions with a matching encoded path.
    */
   async updateProjectName(encodedPath: string, projectName: string): Promise<number> {
-    // Count matching rows before update (since changes() can be unreliable with prepared stmts)
-    const countRow = this.db.prepare(
-      "SELECT COUNT(*) as count FROM sessions WHERE project_path_encoded = $encodedPath"
-    ).get({ $encodedPath: encodedPath }) as { count: number };
-    const count = countRow.count;
-
-    if (count > 0) {
-      this.updateProjectNameStmt.run({
-        $encodedPath: encodedPath,
-        $projectName: projectName,
-      });
-    }
-
-    return count;
+    using statement = this.db.prepare(`
+      UPDATE sessions SET project_name = $projectName, updated_at = datetime('now')
+      WHERE project_path_encoded = $encodedPath
+      RETURNING id
+    `);
+    return statement.all({
+      $encodedPath: encodedPath,
+      $projectName: projectName,
+    }).length;
   }
 
   /**
    * Find all distinct encoded project paths stored in sessions.
    */
   async findDistinctEncodedPaths(): Promise<string[]> {
-    const rows = this.findDistinctEncodedPathsStmt.all() as Array<{
+    using statement = this.db.prepare(`
+      SELECT DISTINCT project_path_encoded FROM sessions
+      ORDER BY project_path_encoded
+    `);
+    const rows = statement.all() as Array<{
       project_path_encoded: string;
     }>;
     return rows.map((r) => r.project_path_encoded);
@@ -335,7 +295,7 @@ export class SqliteSessionRepository implements ISessionRepository {
       LIMIT $limit
     `;
 
-    const stmt = this.db.prepare(sql);
+    using stmt = this.db.prepare(sql);
     const rows = stmt.all(params as any) as SessionRow[];
     return rows.map((row) => this.rowToSession(row));
   }
@@ -364,8 +324,19 @@ export class SqliteSessionRepository implements ISessionRepository {
       ORDER BY rank
       LIMIT $limit
     `;
-    const stmt = this.db.prepare(sql);
+    using stmt = this.db.prepare(sql);
     const rows = stmt.all({ $query: sanitized, $limit: limit }) as SessionRow[];
     return rows.map((row) => this.rowToSession(row));
+  }
+
+  private prepareInsert() {
+    return this.db.prepare(`
+      INSERT OR IGNORE INTO sessions
+        (id, project_path_encoded, project_path_decoded, project_name,
+         start_time, end_time, message_count)
+      VALUES
+        ($id, $projectPathEncoded, $projectPathDecoded, $projectName,
+         $startTime, $endTime, $messageCount)
+    `);
   }
 }

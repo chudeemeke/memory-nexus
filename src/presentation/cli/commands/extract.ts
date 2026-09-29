@@ -219,14 +219,8 @@ export async function executeExtractCommand(
       deps.eventLogPath,
       new PatternRedactor(),
     );
-    const sessionsToProcess = [];
-
-    for (const session of filteredSessions) {
-      const existingLog = await logRepo.findById(session.id);
-      if (!existingLog || options.force) {
-        sessionsToProcess.push(session);
-      }
-    }
+    // Only the pipeline can verify audit identity against current input.
+    const sessionsToProcess = filteredSessions;
 
     if (sessionsToProcess.length === 0) {
       if (options.json) {
@@ -243,6 +237,7 @@ export async function executeExtractCommand(
 
     const progress = new ExtractProgress(sessionsToProcess.length, !!options.quiet || !!options.json);
 
+    let processedSessions = 0;
     let totalAdded = 0;
     let totalUpdated = 0;
     let totalSuperseded = 0;
@@ -250,6 +245,7 @@ export async function executeExtractCommand(
 
     for (const session of sessionsToProcess) {
       const res = await pipeline.extractFromSession(session.id, options.project, options.force ? { force: true } : undefined);
+      if (!res.skippedSession) processedSessions++;
       totalAdded += res.added;
       totalUpdated += res.updated;
       totalSuperseded += res.superseded;
@@ -270,7 +266,7 @@ export async function executeExtractCommand(
         },
         meta: {
           timing_ms: Math.round(performance.now() - startTime),
-          sessions_processed: sessionsToProcess.length
+          sessions_processed: processedSessions
         }
       }, null, 2));
     } else if (options.quiet) {
@@ -280,7 +276,7 @@ export async function executeExtractCommand(
       console.log("\n" + green("==================================================", useColor));
       console.log(green("          Extraction Completed Successfully", useColor));
       console.log(green("==================================================", useColor));
-      console.log(`Sessions Processed : ${sessionsToProcess.length}`);
+      console.log(`Sessions Processed : ${processedSessions}`);
       console.log(`Added              : ${totalAdded}`);
       console.log(`Updated            : ${totalUpdated}`);
       console.log(`Superseded         : ${totalSuperseded}`);

@@ -21,6 +21,7 @@ import {
 } from "node:fs";
 import { dirname, join } from "node:path";
 import { homedir } from "node:os";
+import { assertDistinctHookTargets, readHookSettingsForMutation } from "./hook-settings-input.js";
 import {
     getBackupDir as pathsGetBackupDir,
     getHookDir as pathsGetHookDir,
@@ -212,24 +213,26 @@ export function restoreFromBackup(overrides?: PathOverrides): boolean {
     return true;
 }
 
+/** Validate installation inputs without changing settings, backup or hook files. */
+export function prepareHookInstallation(overrides?: PathOverrides): ClaudeSettings {
+    assertDistinctHookTargets([
+        getClaudeSettingsPath(overrides), getBackupPath(overrides), getHookScriptPath(overrides),
+    ]);
+    return readHookSettingsForMutation(getClaudeSettingsPath(overrides));
+}
+
 /**
- * Install memory hooks into Claude Code settings
- *
- * Adds SessionEnd and PreCompact hooks to settings.json.
- * Creates backup before modifying.
- * Idempotent - won't duplicate if already installed.
- *
+ * Install SessionEnd and PreCompact hooks after validating inputs.
+ * Creates a backup before modifying settings; avoids duplicate installation.
  * @returns Operation result with success status and message
  */
 export function installHooks(overrides?: PathOverrides): OperationResult {
     const settingsPath = getClaudeSettingsPath(overrides);
     const hookScriptPath = getHookScriptPath(overrides);
 
-    // Backup existing settings
+    // Refuse invalid input before creating or replacing the backup.
+    const settings = prepareHookInstallation(overrides);
     backupSettings(overrides);
-
-    // Load existing settings or create new
-    const settings = loadClaudeSettings(overrides);
 
     // Build hook command (use forward slashes for JSON compatibility on Windows)
     const command = `bun run "${hookScriptPath.replace(/\\/g, "/")}"`;
@@ -290,7 +293,7 @@ export function uninstallHooks(overrides?: PathOverrides): OperationResult {
     const settingsPath = getClaudeSettingsPath(overrides);
 
     // Load existing settings
-    const settings = loadClaudeSettings(overrides);
+    const settings = readHookSettingsForMutation(settingsPath);
 
     // No hooks to uninstall
     if (!settings.hooks) {

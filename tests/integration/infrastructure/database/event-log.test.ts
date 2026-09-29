@@ -480,7 +480,7 @@ describe("Event-Log SSOT Manager", () => {
     }
   });
 
-  test("rebuildProjectionsWithReport reports invalid lines, sorts replay, and skips duplicate event ids", async () => {
+  test("rebuildProjectionsWithReport refuses invalid input, then sorts valid replay and skips duplicate event ids", async () => {
     const late = MemoryEventEnvelope.create({
       eventId: "22222222-2222-4222-8222-222222222222",
       machineId: "machine-b",
@@ -536,14 +536,21 @@ describe("Event-Log SSOT Manager", () => {
         JSON.stringify(early.toJSON()) + "\n"
     );
 
-    const report = await rebuildProjectionsWithReport(db, testLogPath);
+    const before = db.serialize();
+    const refused = await rebuildProjectionsWithReport(db, testLogPath);
+    expect(refused.invalidEvents).toBe(1);
+    expect(refused.replay).toEqual({ processedEvents: 0, skippedDuplicateEvents: 0, appliedProjections: [] });
+    expect(db.serialize().equals(before)).toBe(true);
 
-    expect(report.invalidEvents).toBe(1);
+    writeFileSync(testLogPath, [late, early, early].map(event => JSON.stringify(event.toJSON())).join("\n") + "\n");
+    const report = await rebuildProjectionsWithReport(db, testLogPath);
+    expect(report.invalidEvents).toBe(0);
     expect(report.replay.processedEvents).toBe(2);
     expect(report.replay.skippedDuplicateEvents).toBe(1);
     expect(report.replay.appliedProjections).toEqual(["facts"]);
 
-    const rows = db.prepare("SELECT * FROM facts ORDER BY observed_at ASC").all() as any[];
+    using statement = db.prepare("SELECT * FROM facts ORDER BY observed_at ASC");
+    const rows = statement.all() as any[];
     expect(rows.map((row) => row.content)).toEqual(["Early fact", "Late fact"]);
   });
 

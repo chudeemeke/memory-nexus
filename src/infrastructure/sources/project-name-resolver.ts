@@ -140,9 +140,9 @@ export class ProjectNameResolver implements IProjectNameResolver {
     const parts = remaining.split("-");
 
     // Try progressively longer prefixes as candidate directory names.
-    // Start at 1 segment, go up to all-but-one (the last combo is the
-    // exact-match case which would have been caught by walkAndResolve).
-    for (let i = 1; i < parts.length; i++) {
+    // Include the complete remaining name: an unenumerated terminal
+    // directory cannot have been matched by walkAndResolve either.
+    for (let i = 1; i <= parts.length; i++) {
       const candidateName = parts.slice(0, i).join("-");
       const candidatePath = `${currentDir}/${candidateName}`;
 

@@ -9,11 +9,11 @@
 import { describe, test, expect, beforeEach, afterEach, spyOn, mock } from "bun:test";
 import * as connectionModule from "../../../infrastructure/database/connection.js";
 import { ClaudeCliExtractionProvider } from "../../../infrastructure/llm/claude-cli-extractor.js";
-import { Command } from "commander";
 import { Database } from "bun:sqlite";
-import { unlinkSync, existsSync, writeFileSync } from "fs";
+import { writeFileSync } from "fs";
 import { join } from "path";
-import { tmpdir } from "os";
+import { createOwnedTestDirectory } from "../../../../tests/helpers/owned-test-directory.js";
+import { EmbeddingResult } from "../../../domain/value-objects/embedding-result.js";
 import { createSchema } from "../../../infrastructure/database/schema.js";
 import { Session } from "../../../domain/entities/session.js";
 import { Message } from "../../../domain/entities/message.js";
@@ -35,12 +35,14 @@ describe("Extract CLI Command", () => {
   let oldConfigHome: string | undefined;
   let oldDataHome: string | undefined;
   let tempDir: string;
+  let storage: ReturnType<typeof createOwnedTestDirectory>;
 
   beforeEach(() => {
     oldConfigHome = process.env.XDG_CONFIG_HOME;
     oldDataHome = process.env.XDG_DATA_HOME;
 
-    tempDir = join(tmpdir(), `memory-nexus-extract-test-xdg-${Math.random().toString(36).slice(2)}`);
+    storage = createOwnedTestDirectory("memory-extract-cli-");
+    tempDir = storage.dir;
     const configDir = join(tempDir, "config", "memory");
     const dataDir = join(tempDir, "data", "memory");
 
@@ -75,7 +77,7 @@ describe("Extract CLI Command", () => {
   afterEach(() => {
     try {
       db.close();
-    } catch {}
+    } finally {
 
     if (oldConfigHome !== undefined) {
       process.env.XDG_CONFIG_HOME = oldConfigHome;
@@ -89,12 +91,8 @@ describe("Extract CLI Command", () => {
       delete process.env.XDG_DATA_HOME;
     }
 
-    try {
-      if (existsSync(tempDir)) {
-        const fs = require("fs");
-        fs.rmSync(tempDir, { recursive: true, force: true });
-      }
-    } catch {}
+    storage.cleanup();
+    }
   });
 
   test("createExtractCommand registers commander properties correctly", () => {
@@ -160,6 +158,7 @@ describe("Extract CLI Command", () => {
       },
     });
 
+    if (!embedder) throw new Error("Expected configured embedder");
     expect(embedder.name).toBe("openai");
     expect(embedder.isReady()).toBe(true);
     await embedder.dispose();
@@ -287,7 +286,7 @@ describe("Extract CLI Command", () => {
 
       expect(result.exitCode).toBe(0);
       const lastLog = consoleLogs[consoleLogs.length - 1];
-      const parsed = JSON.parse(lastLog);
+      const parsed = JSON.parse(lastLog!);
       expect(parsed.status).toBe("success");
       expect(parsed.data.added).toBe(1);
     } finally {
@@ -327,9 +326,9 @@ describe("Extract CLI Command", () => {
       dimensions: 1,
       isReady: mock(() => true),
       initialize: mock(() => Promise.resolve()),
-      embed: mock(() => Promise.resolve({ embedding: new Float32Array([1]), model: "test-model", dimensions: 1 })),
+      embed: mock(() => Promise.resolve(EmbeddingResult.create({ embedding: new Float32Array([1]), model: "test-model", dimensions: 1 }))),
       embedBatch: mock((values: string[]) =>
-        Promise.resolve(values.map(() => ({ embedding: new Float32Array([1]), model: "test-model", dimensions: 1 })))
+        Promise.resolve(values.map(() => EmbeddingResult.create({ embedding: new Float32Array([1]), model: "test-model", dimensions: 1 })))
       ),
       dispose: mock(() => Promise.resolve()),
     } as IEmbeddingProvider;
@@ -639,7 +638,7 @@ describe("Extract CLI Command", () => {
     }
   });
 
-  test("executeExtractCommand skips already logged sessions unless forced", async () => {
+  test("executeExtractCommand refuses unbound legacy audits unless forced", async () => {
     const session = Session.create({
       id: "session-already-logged",
       projectPath: ProjectPath.fromDecoded("C:\\Projects\\nexus"),
@@ -672,6 +671,7 @@ describe("Extract CLI Command", () => {
     try {
       const result = await executeExtractCommand({
         project: "nexus",
+        json: true,
       }, {
         dbPath: testDbPath,
         eventLogPath: testLogPath,
@@ -682,9 +682,10 @@ describe("Extract CLI Command", () => {
         },
       });
 
-      expect(result.exitCode).toBe(0);
+      expect(result.exitCode).toBe(2);
       expect(extract).not.toHaveBeenCalled();
-      expect(consoleLogs.join("\n")).toContain("No new sessions to extract for project: nexus");
+      expect(JSON.parse(consoleLogs.join("\n")).error.message).toContain("--force");
+      expect((await logRepo.findById(session.id))?.factsAdded).toBe(1);
     } finally {
       console.log = originalLog;
     }
@@ -820,7 +821,7 @@ describe("Extract CLI Command", () => {
       await cmd.parseAsync(["node", "memory", "nexus", "--json"]);
 
       const lastLog = consoleLogs[consoleLogs.length - 1];
-      const parsed = JSON.parse(lastLog);
+      const parsed = JSON.parse(lastLog!);
       expect(parsed.status).toBe("success");
       expect(parsed.data.added).toBe(1);
       expect(process.exitCode).toBe(0);

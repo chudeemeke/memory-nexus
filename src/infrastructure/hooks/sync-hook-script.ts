@@ -76,7 +76,12 @@ export interface SyncHookDeps {
  * @returns Parsed hook input
  * @throws Error if stdin is empty or JSON is invalid
  */
-type HookInputStream = Pick<NodeJS.ReadStream, "setEncoding" | "on">;
+type HookInputStream = {
+    setEncoding(encoding: BufferEncoding): unknown;
+    on(event: "data", listener: (chunk: string) => void): unknown;
+    on(event: "end", listener: () => void): unknown;
+    on(event: "error", listener: (error: Error) => void): unknown;
+};
 
 export async function readJsonFromStream(stream: HookInputStream): Promise<HookInput> {
     return new Promise((resolve, reject) => {

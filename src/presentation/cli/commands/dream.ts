@@ -6,6 +6,8 @@
  */
 
 import { Command, Option } from "commander";
+import type { LeasedOperationAdmission, OperationLease } from "../../../domain/ports/operation-admission.js";
+import { createSourceOperationAdmission } from "../../../infrastructure/database/source-operation-admission.js";
 import type { CommandResult } from "../command-result.js";
 import { DreamingService } from "../../../application/services/dreaming-service.js";
 import { MemoryGovernanceService } from "../../../application/services/memory-governance-service.js";
@@ -16,7 +18,7 @@ import {
   getDefaultDbPath,
   initializeDatabase,
 } from "../../../infrastructure/database/index.js";
-import { appendMemoryEvent } from "../../../infrastructure/database/event-log.js";
+import { createProjectedEventWriter, recoverPendingProjections } from "../../../infrastructure/database/projection-recovery.js";
 import { SqliteDreamRepository } from "../../../infrastructure/database/repositories/dream-repository.js";
 import { SqliteFactRepository } from "../../../infrastructure/database/repositories/fact-repository.js";
 import { SqliteMemoryGovernanceRepository } from "../../../infrastructure/database/repositories/memory-governance-repository.js";
@@ -49,8 +51,10 @@ export interface DreamCommandOptions {
 }
 
 export interface DreamCommandDeps {
+  operationAdmission?: LeasedOperationAdmission;
   dbPath?: string | undefined;
   writeEvents?: boolean | undefined;
+  eventLogPath?: string | undefined;
   now?: (() => Date) | undefined;
   nextSequence?: (() => number) | undefined;
 }
@@ -123,24 +127,40 @@ export function createDreamCommand(deps: DreamCommandDeps = {}): Command {
   return command;
 }
 
-export async function executeDreamCommand(
-  options: DreamCommandOptions,
-  deps: DreamCommandDeps = {},
-): Promise<CommandResult> {
+export async function executeDreamCommand(options: DreamCommandOptions, deps: DreamCommandDeps = {}): Promise<CommandResult> {
+  try {
+    const operation = (lease?: OperationLease) => prepareDreamCommand(options, deps, lease);
+    const response = deps.writeEvents !== false && options.action !== "list" && options.action !== "show" && ((options.action !== "apply" && options.action !== "rollback") || options.confirm === true)
+      ? await (deps.operationAdmission ?? createSourceOperationAdmission(deps.eventLogPath)).run(operation)
+      : await operation();
+    return response();
+  } catch (error) { return emitDreamError(options, "UNEXPECTED_ERROR", errorMessage(error), 2); }
+}
+
+async function prepareDreamCommand(options: DreamCommandOptions, deps: DreamCommandDeps, lease?: OperationLease): Promise<() => CommandResult> {
+  const success = (data: unknown) => () => emitDreamSuccess(options, data);
+  const failure = (code: string, message: string, exitCode: number) => () => emitDreamError(options, code, message, exitCode);
   const dbPath = deps.dbPath ?? getDefaultDbPath();
   let db;
+  let operationFailed = false, operationError: unknown;
 
   try {
     ({ db } = initializeDatabase({ path: dbPath }));
   } catch (error) {
-    return emitDreamError(options, "DB_CONNECTION_FAILED", errorMessage(error), 1);
+    return failure("DB_CONNECTION_FAILED", errorMessage(error), 1);
   }
 
   try {
     const dreamRepo = new SqliteDreamRepository(db);
     const factRepo = new SqliteFactRepository(db);
     const governanceRepo = new SqliteMemoryGovernanceRepository(db);
-    const writeEvent = deps.writeEvents === false ? undefined : appendMemoryEvent;
+    const writeEvent = deps.writeEvents === false ? undefined : createProjectedEventWriter(db, deps.eventLogPath, lease);
+    const needsConfirmation = options.action === "apply" || options.action === "rollback";
+    if (writeEvent && options.action !== "list" && options.action !== "show" && (!needsConfirmation || options.confirm === true)) {
+      if ((await recoverPendingProjections(db, deps.eventLogPath, undefined, lease)).pending) {
+        throw new Error("Projection recovery remains pending; retry the command");
+      }
+    }
     const service = new DreamingService({
       dreamRepo,
       factRepo,
@@ -167,7 +187,7 @@ export async function executeDreamCommand(
         confidence: options.confidence,
         actor: "memory",
       });
-      return emitDreamSuccess(options, entry.toJSON());
+      return success(entry.toJSON());
     }
 
     if (options.action === "list") {
@@ -177,7 +197,7 @@ export async function executeDreamCommand(
         kind: options.kind,
         limit: options.limit,
       });
-      return emitDreamSuccess(options, entries.map((entry) => entry.toJSON()));
+      return success(entries.map((entry) => entry.toJSON()));
     }
 
     const dreamId = required(options.dreamId, "dreamId");
@@ -185,37 +205,41 @@ export async function executeDreamCommand(
     if (options.action === "show") {
       const entry = await service.show(dreamId);
       if (!entry) {
-        return emitDreamError(options, "NOT_FOUND", `Dream proposal not found: ${dreamId}`, 1);
+        return failure("NOT_FOUND", `Dream proposal not found: ${dreamId}`, 1);
       }
-      return emitDreamSuccess(options, entry.toJSON());
+      return success(entry.toJSON());
     }
 
     if (options.action === "approve") {
-      return emitDreamSuccess(options, (await service.approveProposal(dreamId, { actor: "user" })).toJSON());
+      return success((await service.approveProposal(dreamId, { actor: "user" })).toJSON());
     }
     if (options.action === "reject") {
-      return emitDreamSuccess(options, (await service.rejectProposal(dreamId, { actor: "user" })).toJSON());
+      return success((await service.rejectProposal(dreamId, { actor: "user" })).toJSON());
     }
     if (options.action === "apply") {
       const result = await service.applyProposal(dreamId, { actor: "user", confirm: options.confirm });
-      return emitDreamSuccess(options, {
+      return success({
         entry: result.entry.toJSON(),
         canonical_event_ids: result.canonicalEventIds,
       });
     }
     if (options.action === "rollback") {
       const result = await service.rollbackProposal(dreamId, { actor: "user", confirm: options.confirm });
-      return emitDreamSuccess(options, {
+      return success({
         entry: result.entry.toJSON(),
         rollback_event_ids: result.rollbackEventIds,
       });
     }
 
-    return emitDreamError(options, "INVALID_ACTION", `Unsupported dream action: ${options.action}`, 2);
+    return failure("INVALID_ACTION", `Unsupported dream action: ${options.action}`, 2);
   } catch (error) {
-    return emitDreamError(options, "UNEXPECTED_ERROR", errorMessage(error), 2);
+    operationFailed = true; operationError = error;
+    return failure("UNEXPECTED_ERROR", errorMessage(error), 2);
   } finally {
-    closeDatabase(db);
+    try { closeDatabase(db); } catch (cleanup) {
+      if (operationFailed) throw new AggregateError([operationError,cleanup], `${errorMessage(operationError)}; database cleanup failed: ${errorMessage(cleanup)}`);
+      throw cleanup;
+    }
   }
 }
 

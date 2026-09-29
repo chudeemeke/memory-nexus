@@ -8,6 +8,7 @@ import { describe, test, expect, beforeEach, afterEach, spyOn } from "bun:test";
 import { Database } from "bun:sqlite";
 import { existsSync } from "node:fs";
 import { join } from "node:path";
+import { setImmediate as yieldToEventLoop } from "node:timers/promises";
 import { Command } from "commander";
 import { createExportCommand, executeExportCommand } from "./export.js";
 import { closeDatabase } from "../../../infrastructure/database/index.js";
@@ -48,7 +49,10 @@ describe("Export Command", () => {
     spyOn(connectionModule, "getDefaultDbPath").mockReturnValue(testDb.path);
   });
 
-  afterEach(() => {
+  afterEach(async () => {
+    // Allow pending Bun handle releases to run before synchronous Windows removal.
+    // Sleeping synchronously here cannot advance the runtime's event loop.
+    await yieldToEventLoop();
     testDb.cleanup();
   });
 
@@ -67,7 +71,7 @@ describe("Export Command", () => {
       const cmd = createExportCommand();
       const args = (cmd as Command & { _args: Array<{ name: () => string }> })._args;
       expect(args.length).toBe(1);
-      expect(args[0].name()).toBe("output-file");
+      expect(args[0]!.name()).toBe("output-file");
     });
 
     test("has --quiet option", () => {

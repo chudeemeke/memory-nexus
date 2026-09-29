@@ -9,6 +9,7 @@
 import type { initializeDatabase } from "../../../../infrastructure/database/index.js";
 import type { SyncCommandOptions, AmbientContextDeps } from "./types.js";
 import { unknownErrorMessage } from "../../../../domain/errors/unknown-error.js";
+import type { SyncStageOutcome } from "./stage-outcome.js";
 
 /**
  * Generate ambient context files for the current project.
@@ -16,7 +17,7 @@ import { unknownErrorMessage } from "../../../../domain/errors/unknown-error.js"
  * Runs after memory file sync. Writes context.md and updates MEMORY.md
  * in the current project's Claude Code auto memory directory.
  *
- * Failure is non-fatal: logs error and continues sync.
+ * Returns failure so orchestration can continue independent work truthfully.
  *
  * @param db Database connection
  * @param options Sync command options
@@ -26,7 +27,7 @@ export async function runAmbientContextGeneration(
   db: ReturnType<typeof initializeDatabase>["db"],
   options: SyncCommandOptions,
   deps?: AmbientContextDeps,
-): Promise<void> {
+): Promise<SyncStageOutcome> {
   try {
     // Load config (lazy -- only when ambient context is needed)
     let config: { ambientContext: { enabled: boolean; budget: number } };
@@ -38,7 +39,7 @@ export async function runAmbientContextGeneration(
       // Testing path: use injected deps
       config = deps.loadConfig();
       if (!config.ambientContext.enabled) {
-        return;
+        return { status: "skipped", reason: "disabled" };
       }
       autoMemoryDir = deps.resolveAutoMemoryDir();
       projectName = deps.resolveProjectName();
@@ -49,7 +50,7 @@ export async function runAmbientContextGeneration(
       config = configLoader();
 
       if (!config.ambientContext.enabled) {
-        return;
+        return { status: "skipped", reason: "disabled" };
       }
 
       const cwd = process.cwd();
@@ -71,18 +72,24 @@ export async function runAmbientContextGeneration(
       budget: config.ambientContext.budget,
     });
 
-    if (result.success && !options.quiet) {
-      console.log(`  Ambient context: updated (~${result.contextTokens} tokens)`);
-    } else if (!result.success && !options.quiet) {
-      console.log(`  Ambient context: skipped (${result.reason})`);
+    if (result.success === true) {
+      if (!options.quiet) console.log(`  Ambient context: updated (~${result.contextTokens} tokens)`);
+      return { status: "completed", ...(result.contextTokens === undefined ? {} : { contextTokens: result.contextTokens }) };
     }
+    if (result.reason === "no-context" || result.reason === "project-not-found") {
+      if (!options.quiet) console.log(`  Ambient context: skipped (${result.reason})`);
+      return { status: "skipped", reason: result.reason };
+    }
+    const error = result.reason ?? "Ambient generation did not report completion";
+    if (!options.quiet) console.error(`  Ambient context: error (${error})`);
+    return { status: "failed", error };
   } catch (error) {
-    // Non-fatal: ambient context generation should never fail the sync
     if (!options.quiet) {
       console.error(
         `  Ambient context: error (${unknownErrorMessage(error)})`
       );
     }
+    return { status: "failed", error: unknownErrorMessage(error) };
   }
 }
 

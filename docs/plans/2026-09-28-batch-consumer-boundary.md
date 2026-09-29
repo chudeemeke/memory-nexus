@@ -1,0 +1,218 @@
+# Batch consumer boundary investigation
+
+Owner: memory-nexus. Consumer item: Q100.4.2.2.2.2.2.
+Current prerequisite: D05, packaged hook construction and discovery.
+Starting revision:9c79913. Status: synthetic investigation and reader repair;
+no format activation, installation or authority migration.
+
+## Requirements before choosing a mechanism
+
+An old executable cannot be made to honor checks that exist only in new code.
+Compatibility must preserve the ordered outcome and its governance, not merely
+parse the bytes. An acknowledged new record must survive rollback. Authoritative
+source and its derived database must refer to the same admitted store. Unknown
+or offline consumers cannot be assumed upgraded. Any actual authority cutover
+remains an owner decision under R03/P03/A03 as applicable.
+
+The minimum structure is either a representation all supported readers handle
+correctly, or a versioned store whose supported entrypoints enforce the boundary
+before reading/mutating source or projections. A capability declaration alone is
+not that boundary. Same-user arbitrary file access is outside an application
+routing guarantee; do not call a path convention an OS security boundary.
+
+## Tested counterexamples
+
+The retained probe archives the actual v4.0.3 source tree and executes its replay
+against synthetic SQLite stores, alongside the current reader. It uses the
+current schema/OwnedDatabase and envelope producer: this is tagged-source proof,
+not installed-registry or whole-CLI acceptance.
+
+The fixture has an existing alpha fact and a batch deciding alpha->beta->gamma,
+with denied consent on a shared graph edge. Pending file names are ignored until
+the complete file is renamed into the existing event-discovery pattern. That
+exercises discovery/publication, not crash/power-loss durability or remote atomicity.
+
+| Representation | v4.0.3 outcome | Current-reader consequence |
+|---|---|---|
+| Wrapper only | Ignores the batch; only alpha remains | Correct chain and denied shared-edge consent |
+| Wrapper plus identical flat effects, relative sequences | Alpha remains active because effects precede it | Exposed the same ordering defect before this repair |
+| Wrapper plus flat effects with reserved sequence range | Fact chain is correct; shared-edge consent remains not_required | Conflicting effect identities refuse without replacing the DB |
+
+The mirrored fixture grows from1780to6172bytes. That is a fixture measurement,
+not a corpus-size estimate. Matching facts did not establish compatibility:
+governance already failed, and two physical representations would additionally
+need complete redaction, export/import and source reconciliation qualification.
+Do not select mirroring merely because it makes an old fact-list test pass.
+
+The current reader now binds an effect identity to its containing wrapper.
+An identical standalone effect is still a conflicting owner and refuses before
+projection replacement. Identical whole wrappers remain idempotent across files.
+Both physical orders, single/multiple source files, unchanged live DB/source,
+and the original synthetic representation probe are required verification.
+
+## Candidate boundary and limits
+
+A versioned paired source/DB root with retired conventional paths is the next
+candidate to qualify. The synthetic fence uses a directory at the old database
+file path and a regular file at the old events-directory path. Tagged old DB
+initialization and source discovery must refuse, preserving the active DB.
+An explicit old-reader override naming the new events root bypasses that routing
+fence and still loses batch effects. This limitation is part of the probe, not
+an unsupported safety claim hidden by a successful default-path test.
+
+| Candidate | Outcome/governance | Boundary strength | Added work | Disposition |
+|---|---|---|---|---|
+| New version flag or consumer inventory alone | Does not change old behavior | Old code ignores it | Small | Insufficient |
+| Mirrored ordinary effects | Fact ordering can be repaired; governance failed | No isolation | Duplicate representation and reconciliation | Rejected as a simple compatibility fix |
+| Versioned paired store plus legacy-path fences | Current reader retains intended behavior | Routing fence only; explicit overrides bypass | Layout, migration/recovery, complete consumer inventory | Candidate; not activated or accepted |
+
+These are veto conditions, not an average score: data loss or weakened consent
+cannot be traded for implementation convenience. A new always-on broker or
+separate live canonical queue is not justified by the evidence gathered here.
+
+## Atomic qualification still required
+
+### Installed Windows evidence at a4b44b7
+
+The installed `C:/Users/Destiny/node_modules/@chude/memory` package matches all
+214 files in the integrity-checked registry artifact for `@chude/memory@4.0.3`.
+Executing that CLI directly with its existing dependencies reproduces silent
+projection loss: one valid batch record yields exit 0/status `ok` and an empty
+fact table. Current source yields the new fact. Both report version `4.0.3`;
+capability must be bound to artifact content, not that version string.
+
+Six isolated CLI rebuild cases and twelve maintenance cases establish:
+
+| Fixture / command | Installed 4.0.3 and current source behavior | Consequence |
+|---|---|---|
+| Event file fence / rebuild confirm | Error; existing fact survives; DB bytes change | Source discovery is too late to promise no database mutation |
+| Database directory fence / rebuild confirm | Error; directory remains | Tested database open refuses |
+| Event file fence / backup create | Success; reports `includesEvents:false`; DB bytes change | A source fence can be treated as absent source, so backup success does not establish completeness |
+| Event file fence / restore confirm | Error after `existing` is replaced by `donor-fact`; source fence remains | Demonstrated partial restore; owned by Q100.4.2.4 and Q050 |
+| Event file fence / rebuild verify | Error; existing fact and DB bytes preserved | Scoped nonmutating refusal |
+| Paired fences / backup, restore, rebuild verify | All error; both fences remain intact | Supports paired routing only for these commands; not complete entrypoint qualification |
+
+The restore donor uses a different fact identity from the destination so a
+replacement before error is observable. Retained initial probes include a hash
+normalization harness failure and an equal-donor fixture that could not expose
+this replacement. Final runs recheck all installed artifact and source hashes.
+Temporary homes are owned and cleaned. Existing installed dependencies were used;
+the current control is source execution, not a fresh installed candidate.
+
+Local route inventory found a working Bun `memory.exe --version` and a failing
+npm `memory.cmd --version` backed by a stale broken junction. The Bun launcher
+fallback has not been attributed to the matched package by a trace; do not equate
+the two proofs. No live launcher was repaired. D04/D04.1 own route qualification
+and the applicable adoption decision owns live repair. Four known Claude config
+paths yielded no direct memory hook command strings; indirect scripts, plugins,
+portfolio hooks, desktop consumers and persisted overrides remain unqualified.
+
+Current path helpers derive database and events together from XDG data home.
+That is reusable routing infrastructure, not a capability boundary: giving an old
+process the new XDG root also gives it the new store. Backup/restore, import/export,
+remote transport, source-only verification and generated hooks must be included
+in the supported-consumer contract. An old restore failing after DB replacement
+is explicitly not an acceptable refusal.
+
+Evidence: `.planning/memory-resilience/evidence/Q100.4.2.2.2.2.2-installed.json`.
+No live migration, installation change, format emission or consumer acceptance.
+
+### Current package probe at 74175fc
+
+The declared normal build stages (declarations, library bundle and CLI bundle)
+were executed into an empty owned staging directory. Bun packed a 411,705-byte
+tarball with SHA-256
+`90066cf36777c80a7d022058cd999c3ec1dd7c1e24db3d6877e86659cfa3b887`.
+All 230 staged package files matched a fresh isolated installation. The consumer
+resolved its own dependency lock without the checkout's root overrides, then
+installed with that frozen lock. Its generated `memory.exe` correctly rebuilt the
+synthetic batch, refused local/remote backups at the event fence without changing
+the DB, and refused sync at paired fences. The library resolved from the installed
+package and exposed the expected function exports; library behavior was not invoked.
+
+Bun reported 81 installed packages and zero audit findings for that temporary
+consumer. Dependency scripts were disabled, so this is not native embedding or
+full installation acceptance. The first collector assumed the production install
+would emit `bun.lock`; it failed after installation. The final run generated the
+text lock explicitly before the frozen install. Both builds produced the same
+tarball hash. Initial failure, final commands, lock, tree, audit and source hashes
+are retained in `evidence/Q100.4.2.2.2.2.2-package.json` under the execution directory.
+
+The tarball has no `dist/sync-hook.js`, matching the already identified D05 gap.
+D05 must repair normal-build inclusion and installed-path discovery, then prove
+the hook from an unrelated working directory and isolated settings/home. It is
+now the active prerequisite; this consumer item waits without claiming acceptance.
+The probe's package, dependency cache and homes were cleaned. No release artifact
+was retained for adoption, and no live installation was modified.
+
+### Remaining sequence
+
+Demonstrated prerequisite: both local and source-only remote backup/restore previously
+accepted an event path that is a regular file. Source-only remote restore additionally
+replaced config before refusing that path, even with paired database/event fences.
+Current repair adds a shared read-only target-type preflight before any
+snapshot creation, checkpoint, config copy or data replacement. Missing targets
+remain valid for first use; existing database/config must be regular files with one link
+and events must be a real directory. Reject leaf symlinks, file hard links, wrong
+types and inspection errors. Preserve valid backup/restore behavior. Prove this
+through actual command functions and a final CLI repeat, with source hashes.
+This is a bounded prerequisite under the active consumer item and existing
+Q100.4.2.4/Q050 obligations, not full snapshot/restore atomicity. Parent links,
+concurrent path replacement, cross-file transaction and crash recovery remain open.
+
+### Migration contract for the next implementation
+
+The source, derived database and privacy/provider configuration form one authority
+set. Keeping the configuration outside the boundary permits partial restore and
+could apply stale egress policy to a new store. Reuse one versioned store and one
+small durable migration record; do not add a broker, daemon or another live corpus
+queue. The record identifies original paths, store identity, format, source hashes,
+candidate artifact, transition state and retained recovery locations. It must not
+contain transcript content or secrets.
+
+| Transition | Required invariant and proof |
+|---|---|
+| Prepare | Keep the old authority usable; verify the candidate artifact, complete data/config inventory and recoverable snapshot. Reject foreign, linked or ambiguous targets. No batch emission. |
+| Quiesce and fence | Stop or drain every managed legacy writer before moving authority. New admission locks alone cannot constrain old binaries. Retain the original source/DB/config and fence their conventional paths; never discard data recreated during a transition. Inject an old contender in each gap. An unexpected writer must leave retained evidence and a refused migration, not silently lose its writes. |
+| Validate | Reconcile hashes, identities, projections and governance under the candidate reader. Every supported default route must select the same store; explicit external roots require separate admission. Validate hooks, CLI, library, maintenance, import/export and remote receiver capabilities. |
+| Activate | Publish one validated active-store selection after all prerequisites pass. Unknown/incomplete migration state refuses mutation. Test process termination before and after each filesystem transition and selector publication. Activation remains disabled until applicable owner sign-off. |
+| Recover / roll back | Before activation, restore the retained original only after reconciling any intervening writes. After batch emission, rollback means a retained compatible reader that preserves later records and policy; old 4.0.3 plus an old snapshot is forbidden. Interrupted rollback must remain recoverable too. |
+
+The contract promises managed routing, not control over arbitrary same-user old
+code pointed explicitly at the new root. Tested `audit-secrets --events-dir`
+bypasses conventional fences, as expected. Unsupported external consumers and an
+offline unqualified desktop must prevent format activation or new-format transfer;
+they are not assumed upgraded. Merely changing XDG data home exposes the new root
+to old code and therefore cannot implement capability admission.
+
+The current preflight repair is only one prerequisite: 82 tests on each of two
+Windows runtimes, nine detected guard faults, and twelve final source-CLI cases.
+The helper and two new tests reach 100% all four metrics in the scoped diagnostic;
+the containing command files and full quality remain open. Earlier installed
+4.0.3 counterexamples remain applicable because no live installation changed.
+No migration transaction, selector or activation check has been implemented yet.
+
+1. Inventory supported entrypoints and persisted overrides: installed binaries,
+   project hooks, desktop consumers, source-only tools, backup/restore, import,
+   remote, and downgrade paths. Bind capability to the actual artifact and root.
+2. Execute representative installed old and new artifacts against isolated homes.
+   Prove old managed routes fail before source/DB mutation or misleading success;
+   prove supported new routes reach the intended store. Source probes alone fail
+   this gate. Preserve the explicit-override limitation in the support contract.
+3. Design one recoverable migration transaction for source, DB, configuration and
+   legacy fences. Test interruption at every transition; no ambiguous authority,
+   silent empty replacement or lost acknowledged data. No real migration yet.
+4. Prove rollback to a compatible reader while preserving every post-activation
+   record. Reinstalling v4.0.3 against the new source or restoring an old snapshot
+   without retaining later writes is not an acceptable rollback.
+5. Require executable activation checks for the qualified store/consumer set.
+   Unknown consumer or failed prerequisite leaves emission disabled and reports
+   why. Do not claim a declaration or human inventory blocks arbitrary old code.
+6. Present the concrete migration/rollback result at the applicable owner gate.
+   If this boundary requires disproportionate machinery or cannot meet the
+   routing contract, revisit the source representation before activation.
+
+The consumer item remains active. This investigation does not solve the original
+native interrupted-chain retry, final reader quality/adversarial review, installed
+operation or the full E1-E10 goal. The approved embedding experiment still follows
+baseline acceptance. Evidence is retained with the consumer investigation record.

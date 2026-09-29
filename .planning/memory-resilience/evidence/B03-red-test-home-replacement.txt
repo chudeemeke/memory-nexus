@@ -1,0 +1,15 @@
+bun test v1.4.1 (4661e494f)
+
+tests\test-store-isolation.test.ts:
+(pass) test-home cleanup preserves a replacement directory even with a copied owner marker [328.24ms]
+-----------|---------|---------|-------------------
+File       | % Funcs | % Lines | Uncovered Line #s
+-----------|---------|---------|-------------------
+All files  |    0.00 |    0.00 |
+-----------|---------|---------|-------------------
+
+ 1 pass
+ 2 filtered out
+ 0 fail
+ 6 expect() calls
+Ran 1 test across 1 file. [459.00ms]

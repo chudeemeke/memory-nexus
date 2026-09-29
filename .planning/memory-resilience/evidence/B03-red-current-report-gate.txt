@@ -1,0 +1,46 @@
+bun test v1.4.1 (4661e494f)
+
+scripts\run-istanbul-bun-coverage.test.ts:
+bun test v1.4.1 (4661e494f)
+
+src\choose.test.ts:
+(pass) one branch [0.10ms]
+
+ 1 pass
+ 0 fail
+ 1 expect() calls
+Ran 1 test across 1 file. [41.00ms]
+
+=============================== Coverage summary ===============================
+Statements   : 100% ( 1/1 )
+Branches     : 50% ( 1/2 )
+Functions    : 100% ( 1/1 )
+Lines        : 100% ( 1/1 )
+================================================================================
+128 |     mkdirSync(join(projectRoot, "src"), { recursive: true });
+129 |     writeFileSync(join(projectRoot, "src", "choose.ts"), "export function choose(value: boolean) { return value ? 1 : 0; }");
+130 |     writeFileSync(join(projectRoot, "src", "choose.test.ts"), 'import { test, expect } from "bun:test"; import { choose } from "./choose"; test("one branch", () => expect(choose(true)).toBe(1));');
+131 |     try {
+132 |       const result = runInstrumentedCoverage({ projectRoot, workDir, coverageDir, testArgs: ["src/choose.test.ts"], checkCoverage: true });
+133 |       expect(result.exitCode).toBe(1);
+                                    ^
+error: expect(received).toBe(expected)
+
+Expected: 1
+Received: 0
+
+      at <anonymous> (C:\Projects\memory-nexus\scripts\run-istanbul-bun-coverage.test.ts:133:31)
+(fail) run-istanbul-bun-coverage > checks its own new report and fails when a passing test leaves a branch uncovered [1020.04ms]
+--------------------------------------|---------|---------|-------------------
+File                                  | % Funcs | % Lines | Uncovered Line #s
+--------------------------------------|---------|---------|-------------------
+All files                             |   80.36 |   75.05 |
+ scripts\coverage-run-storage.ts      |   85.71 |   71.08 | 36,47,67-68,87-95,106,109-118
+ scripts\run-istanbul-bun-coverage.ts |   75.00 |   79.02 | 101,178,200,207-208,224,257-286,290-293,303-306,327,330,334,339,344,369-370,374-375,381-382,387-390,392
+--------------------------------------|---------|---------|-------------------
+
+ 0 pass
+ 27 filtered out
+ 1 fail
+ 1 expect() calls
+Ran 1 test across 1 file. [2.38s]

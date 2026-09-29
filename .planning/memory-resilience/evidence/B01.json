@@ -1,0 +1,81 @@
+{
+  "item_id": "B01",
+  "status": "verified",
+  "scope": "Lexical coverage-output containment, Windows behavior proof only",
+  "recorded_at": "2026-09-19T20:14:03.0391724Z",
+  "base_revision": "5ec3055c48028d5b03b17a3427ab484b6b5aae49",
+  "source_revision": "Uncommitted candidate identified by source-file SHA256; recorded in the containing signed commit",
+  "cwd": "C:/Projects/memory-nexus",
+  "source_inputs": [
+    {
+      "path": "scripts/run-istanbul-bun-coverage.ts",
+      "sha256": "DE98E930C7DA4AF42E7431A6DFDB84884C43501C5A60BE127FC7AB28E4584337"
+    },
+    {
+      "path": "scripts/run-istanbul-bun-coverage.test.ts",
+      "sha256": "562B10CFBCC29DC87834582D6135DDD293915F29D9977692770931F80ECD4C28"
+    }
+  ],
+  "commands": [
+    {
+      "command": "bun test scripts/run-istanbul-bun-coverage.test.ts",
+      "red_root_exit": 1,
+      "red_sibling_exit": 1,
+      "green_exit": 0,
+      "test_count": 14,
+      "assertions": 79,
+      "child_test_count": 1
+    },
+    {
+      "command": "bun run typecheck",
+      "exit": 0
+    }
+  ],
+  "tool_versions": {
+    "bun": "1.4.1 (4661e494f)"
+  },
+  "behavior_proved": [
+    "Project root rejected before mutation",
+    "Sibling name-prefix rejected before mutation",
+    "Ancestor and normalized root rejected",
+    "Traversal/outside destinations rejected",
+    "Valid dot-prefixed descendant runs real instrumented child tests",
+    "Original source preserved and all four fixture metrics measured with nonzero denominators"
+  ],
+  "decision_checks": "Pre-repair root and sibling guards demonstrably delete fixture sentinels; retained RED/GREEN evidence",
+  "reports": [
+    {
+      "path": ".planning/memory-resilience/evidence/B01-boundaries.txt",
+      "sha256": "6C7BF35F9505B756FBF3048294FE501401DFF405709FCDD476EDAB31A1DC5302"
+    },
+    {
+      "path": ".planning/memory-resilience/evidence/B01-green-root.txt",
+      "sha256": "38E9FD867450768833AD4F6F08F24FC25B0E53584694C57477CCB7E0C472899E"
+    },
+    {
+      "path": ".planning/memory-resilience/evidence/B01-green-sibling.txt",
+      "sha256": "0C171CD8EFE546BC2C61C49A02A52A0844001ECC17E0AB55E84E025726D5FBA6"
+    },
+    {
+      "path": ".planning/memory-resilience/evidence/B01-red-root.txt",
+      "sha256": "C36A09BAA7D39B3A78A354A3050FAE4271B53955325D99B44D039C42F5B0BBEE"
+    },
+    {
+      "path": ".planning/memory-resilience/evidence/B01-red-sibling.txt",
+      "sha256": "A36054BEB2654D1B200088FA551FDC4EFB6EF7E7FE5EE1A90464EEF92CE7EB5B"
+    },
+    {
+      "path": ".planning/memory-resilience/evidence/B01-typecheck.txt",
+      "sha256": "DB32F15DFD123BF25295828F1D526BE69899702F6622D83B13C8874A0B628A09"
+    }
+  ],
+  "review": "Local diff review only; final-revision independent review is pending R02",
+  "remaining_acceptance": [
+    "B02 linked/copy-source paths and overlap",
+    "B03 owned run directories and cleanup lifecycle",
+    "B04-B10 complete executable inventory and per-file/package Tier S quality",
+    "R01 supported Windows/Linux hosted checks",
+    "R02 final independent source review"
+  ],
+  "product_acceptance": false
+}

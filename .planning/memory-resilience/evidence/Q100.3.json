@@ -1,0 +1,16 @@
+{
+  "item_id": "Q100.3",
+  "status": "verified - scoped source contract; full Q100 acceptance remains open",
+  "recordedAt": "2026-09-28T10:51:06.129Z",
+  "evidence": [
+    "docs/plans/2026-09-28-projection-replay-execution.md",
+    ".planning/memory-resilience/evidence/Q100.3.1.json",
+    ".planning/memory-resilience/evidence/Q100.3.2.2.json"
+  ],
+  "dependencies": [
+    "Q100.3.1",
+    "Q100.3.2"
+  ],
+  "finalMatchingSourceEvidence": ".planning/memory-resilience/evidence/Q100.3.2.2.json",
+  "limits": "No real caller retry, full quality/platform/review or operational adoption acceptance."
+}

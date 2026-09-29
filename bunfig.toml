@@ -15,5 +15,5 @@ coveragePathIgnorePatterns = [
 
 preload = ["./tests/test-setup.ts"]
 
-# Test timeout
-timeout = 30000
+# Bun 1.4.1 (Windows) and 1.3.14 (Linux) ignore test.timeout here.
+# Use `bun run test` or `bun test --timeout 15000` for the quality timeout.

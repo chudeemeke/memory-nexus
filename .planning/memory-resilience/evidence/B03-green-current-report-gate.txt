@@ -1,0 +1,167 @@
+bun test v1.4.1 (4661e494f)
+
+scripts\check-coverage-thresholds.test.ts:
+(pass) check-coverage-thresholds > passes when all four metrics are available and above threshold [0.37ms]
+(pass) check-coverage-thresholds > fails when any metric is below threshold [2.08ms]
+(pass) check-coverage-thresholds > fails when a required metric is unavailable [0.31ms]
+(pass) check-coverage-thresholds > parses Istanbul coverage-summary JSON for all required metrics [0.77ms]
+(pass) check-coverage-thresholds > parses LCOV line, function, and branch totals while marking statements unavailable [0.98ms]
+(pass) check-coverage-thresholds > marks branch coverage unavailable when LCOV has no branch records [0.13ms]
+(pass) check-coverage-thresholds > parses CLI arguments with explicit paths and threshold [0.32ms]
+(pass) check-coverage-thresholds > rejects invalid CLI threshold [1.38ms]
+(pass) check-coverage-thresholds > loads coverage-summary JSON before LCOV when both exist [14.06ms]
+(pass) check-coverage-thresholds > throws when no coverage report exists [3.04ms]
+(pass) check-coverage-thresholds > formats unavailable and available metrics [0.88ms]
+(pass) check-coverage-thresholds > runs the coverage gate with pass and fail outputs [10.46ms]
+(pass) coverage evidence cannot manufacture a pass with invalid counts or a claimed percentage [1.64ms]
+(pass) coverage decisions use exact counts rather than rounded percentages [0.23ms]
+
+scripts\coverage-run-storage.test.ts:
+Coverage work retained for verified cleanup: C:\Users\Destiny\AppData\Local\Temp\memory-coverage-owner-test-vi8AOX\work; bytes=27; Refusing unowned coverage directory: C:\Users\Destiny\AppData\Local\Temp\memory-coverage-owner-test-vi8AOX\work
+(pass) coverage run ownership > missing ownership cannot be restored as permission to clean a directory [121.72ms]
+
+scripts\run-istanbul-bun-coverage.test.ts:
+(pass) run-istanbul-bun-coverage > refuses an existing source directory as output without deleting its content [178.90ms]
+(pass) run-istanbul-bun-coverage > refuses an existing prefixed work directory without deleting foreign content [9.03ms]
+bun test v1.4.1 (4661e494f)
+
+src\choose.test.ts:
+(pass) both [0.10ms]
+
+ 1 pass
+ 0 fail
+ 2 expect() calls
+Ran 1 test across 1 file. [35.00ms]
+
+=============================== Coverage summary ===============================
+Statements   : 100% ( 1/1 )
+Branches     : 100% ( 2/2 )
+Functions    : 100% ( 1/1 )
+Lines        : 100% ( 1/1 )
+================================================================================
+bun test v1.4.1 (4661e494f)
+
+src\choose.test.ts:
+(pass) both [0.10ms]
+
+ 1 pass
+ 0 fail
+ 2 expect() calls
+Ran 1 test across 1 file. [323.00ms]
+
+=============================== Coverage summary ===============================
+Statements   : 100% ( 1/1 )
+Branches     : 100% ( 2/2 )
+Functions    : 100% ( 1/1 )
+Lines        : 100% ( 1/1 )
+================================================================================
+(pass) run-istanbul-bun-coverage > keeps independent report generations across repeat runs and cleans its working copies [2164.22ms]
+bun test v1.4.1 (4661e494f)
+
+src\choose.test.ts:
+(pass) one branch [0.11ms]
+
+ 1 pass
+ 0 fail
+ 1 expect() calls
+Ran 1 test across 1 file. [38.00ms]
+
+=============================== Coverage summary ===============================
+Statements   : 100% ( 1/1 )
+Branches     : 50% ( 1/2 )
+Functions    : 100% ( 1/1 )
+Lines        : 100% ( 1/1 )
+================================================================================
+statements: 100.00% (1/1)
+branches: 50.00% (1/2)
+functions: 100.00% (1/1)
+lines: 100.00% (1/1)
+coverage gate: FAIL (1 issue)
+  - branches coverage 50.00% is below required 95.00%
+(pass) run-istanbul-bun-coverage > checks its own new report and fails when a passing test leaves a branch uncovered [453.81ms]
+(pass) run-istanbul-bun-coverage > rejects the project root as coverage output before deleting any files [104.66ms]
+(pass) run-istanbul-bun-coverage > rejects a sibling with the project-name prefix before deleting any files [98.66ms]
+(pass) run-istanbul-bun-coverage > rejects an ancestor before deleting any files [15.69ms]
+(pass) run-istanbul-bun-coverage > rejects an output that resolves back to the project root [15.77ms]
+(pass) run-istanbul-bun-coverage > rejects traversal into a sibling before deleting any files [20.40ms]
+(pass) run-istanbul-bun-coverage > rejects a separate directory outside the project [17.92ms]
+(pass) run-istanbul-bun-coverage > rejects a linked coverage ancestor before touching its external target [20.63ms]
+bun test v1.4.1 (4661e494f)
+
+src\choose.test.ts:
+(pass) both outcomes [0.14ms]
+
+ 1 pass
+ 0 fail
+ 2 expect() calls
+Ran 1 test across 1 file. [230.00ms]
+
+=============================== Coverage summary ===============================
+Statements   : 100% ( 1/1 )
+Branches     : 100% ( 2/2 )
+Functions    : 100% ( 1/1 )
+Lines        : 100% ( 1/1 )
+================================================================================
+statements: 100.00% (1/1)
+branches: 100.00% (2/2)
+functions: 100.00% (1/1)
+lines: 100.00% (1/1)
+coverage gate: PASS (all metrics >= 95.00%)
+(pass) run-istanbul-bun-coverage > runs real instrumented tests in a dot-prefixed descendant (project junction: false) [720.06ms]
+bun test v1.4.1 (4661e494f)
+
+src\choose.test.ts:
+(pass) both outcomes [0.20ms]
+
+ 1 pass
+ 0 fail
+ 2 expect() calls
+Ran 1 test across 1 file. [143.00ms]
+
+=============================== Coverage summary ===============================
+Statements   : 100% ( 1/1 )
+Branches     : 100% ( 2/2 )
+Functions    : 100% ( 1/1 )
+Lines        : 100% ( 1/1 )
+================================================================================
+statements: 100.00% (1/1)
+branches: 100.00% (2/2)
+functions: 100.00% (1/1)
+lines: 100.00% (1/1)
+coverage gate: PASS (all metrics >= 95.00%)
+(pass) run-istanbul-bun-coverage > runs real instrumented tests in a dot-prefixed descendant (project junction: true) [638.16ms]
+(pass) run-istanbul-bun-coverage > rejects copied source-directory links before rewriting external source [23.13ms]
+(pass) run-istanbul-bun-coverage > rejects a linked work directory before deleting existing reports or the link [17.89ms]
+(pass) run-istanbul-bun-coverage > rejects a work-directory parent alias that resolves to the project root [114.31ms]
+(pass) run-istanbul-bun-coverage > rejects overlapping work and coverage paths: same [15.35ms]
+(pass) run-istanbul-bun-coverage > rejects overlapping work and coverage paths: output-in-work [212.89ms]
+(pass) run-istanbul-bun-coverage > rejects overlapping work and coverage paths: work-in-output [108.87ms]
+(pass) run-istanbul-bun-coverage > rejects overlapping work and coverage paths: work-in-project [20.98ms]
+(pass) run-istanbul-bun-coverage > ignores tests, generated output, dependency folders, and explicit coverage tests [2.51ms]
+(pass) run-istanbul-bun-coverage > instruments TypeScript with real statement and branch counters [15.76ms]
+(pass) run-istanbul-bun-coverage > returns zero-count baseline coverage for unexecuted instrumented files [13.74ms]
+(pass) run-istanbul-bun-coverage > adds the release-suite timeout to instrumented test runs by default [0.78ms]
+(pass) run-istanbul-bun-coverage > consumes the coverage-check flag instead of passing it to Bun test [0.15ms]
+(pass) run-istanbul-bun-coverage > defaults instrumented discovery to project test roots [0.11ms]
+(pass) run-istanbul-bun-coverage > preserves an explicit instrumented test timeout [0.08ms]
+
+=============================== Coverage summary ===============================
+Statements   : 100% ( 1/1 )
+Branches     : 100% ( 0/0 )
+Functions    : 100% ( 0/0 )
+Lines        : 100% ( 1/1 )
+================================================================================
+(pass) run-istanbul-bun-coverage > writes Istanbul reports with all four coverage totals [27.60ms]
+--------------------------------------|---------|---------|-------------------
+File                                  | % Funcs | % Lines | Uncovered Line #s
+--------------------------------------|---------|---------|-------------------
+All files                             |   88.31 |   94.19 |
+ scripts\check-coverage-thresholds.ts |   76.92 |   91.76 | 173,236-243,248-251,253
+ scripts\coverage-run-storage.ts      |  100.00 |   97.59 | 47,114
+ scripts\run-istanbul-bun-coverage.ts |   88.00 |   93.22 | 208-209,225,274-275,282,328,331,379-380,384-385,391-393,398-401,403
+--------------------------------------|---------|---------|-------------------
+
+ 43 pass
+ 0 fail
+ 187 expect() calls
+Ran 43 tests across 3 files. [7.20s]

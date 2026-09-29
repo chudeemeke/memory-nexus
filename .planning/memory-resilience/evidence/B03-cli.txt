@@ -1,0 +1,18 @@
+bun test v1.4.1 (4661e494f)
+
+scripts\run-istanbul-bun-coverage.test.ts:
+(pass) run-istanbul-bun-coverage > the actual CLI gates its generated summary and prints its retained path [4875.37ms]
+--------------------------------------|---------|---------|-------------------
+File                                  | % Funcs | % Lines | Uncovered Line #s
+--------------------------------------|---------|---------|-------------------
+All files                             |    0.00 |   12.07 |
+ scripts\check-coverage-thresholds.ts |    0.00 |    9.04 | 48,52-58,62-67,71-114,118-142,146-163,167-175,179-201,205-214,218-232,236-243,248-251,253
+ scripts\coverage-run-storage.ts      |    0.00 |    7.95 | 26-28,32-48,52-59,63-82,87-90,94-102,106-125
+ scripts\run-istanbul-bun-coverage.ts |    0.00 |   19.22 | 94,98-99,103,107-117,121,125-134,138-169,173-181,185-193,197-201,205-209,213-232,236-255,259-288,292-295,299-307,311-314,318-319,323-387,392-394,399-402,404
+--------------------------------------|---------|---------|-------------------
+
+ 1 pass
+ 30 filtered out
+ 0 fail
+ 5 expect() calls
+Ran 1 test across 1 file. [6.39s]

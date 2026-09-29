@@ -40,6 +40,25 @@ export interface RemoteEventSyncCommandService {
   ): Promise<import("../../../../application/services/index.js").RemoteEventSyncResult>;
 }
 
+export interface SyncCompletionMetadata {
+  success: boolean;
+  embedding: import("./stage-outcome.js").SyncStageOutcome;
+  ambient: import("./stage-outcome.js").SyncStageOutcome;
+  memoryFileSync: import("./stage-outcome.js").SyncStageOutcome;
+  projections: {
+    status: "not_run" | "current" | "pending" | "failed";
+    rebuilt?: boolean;
+    error?: string;
+  };
+  remote: {
+    status: "not_requested" | "not_run" | "not_configured" | "synced" | "blocked" | "failed";
+    result?: import("../../../../application/services/index.js").RemoteEventSyncResult;
+    error?: string;
+  };
+  memoryFiles?: import("../../../../application/services/index.js").MemoryFileSyncResult;
+  errors: string[];
+}
+
 /**
  * Dependency overrides for executeSyncCommand.
  *
@@ -87,6 +106,8 @@ export interface SyncCommandDeps {
     fixProjectNames: (resolver: unknown) => Promise<number>;
     sync: (options: import("../../../../application/services/index.js").SyncOptions) => Promise<import("../../../../application/services/index.js").SyncResult>;
   };
+  /** Bounded local replay; must not fetch or push event sources. */
+  recoverProjections?: (db: import("bun:sqlite").Database) => Promise<{ rebuilt: boolean; pending: boolean }>;
   /** Override config loading */
   loadConfig?: () => import("../../../../infrastructure/hooks/config-manager.js").MemoryConfig;
   /** Override remote event sync service construction */
@@ -96,9 +117,9 @@ export interface SyncCommandDeps {
   /** Override memory file sync reporting */
   reportMemoryFileResults?: typeof import("./memory-files.js").reportMemoryFileResults;
   /** Override ambient context generation */
-  runAmbientContextGeneration?: typeof import("./ambient.js").runAmbientContextGeneration;
+  runAmbientContextGeneration?: (db: import("bun:sqlite").Database, options: SyncCommandOptions) => Promise<import("./stage-outcome.js").SyncStageOutcome | void>;
   /** Override embedding pass */
-  runEmbeddingPass?: typeof import("./embedding-pass.js").runEmbeddingPass;
+  runEmbeddingPass?: (db: import("bun:sqlite").Database, options: SyncCommandOptions) => Promise<import("./stage-outcome.js").SyncStageOutcome | void>;
   /** Override background embedding lock removal */
   removeBackgroundLock?: () => void;
 }

@@ -1,0 +1,422 @@
+{
+  "item_id": "B04",
+  "status": "active",
+  "recorded_at": "2026-09-19T23:34:29.491Z",
+  "source_revision": "39c895b13e768bd607070efbc3496d47a821b257",
+  "cwd": "C:\\Projects\\memory-nexus",
+  "change_scope": "Infrastructure risk classifications and diagnostic ownership; no executable source changed.",
+  "counts": {
+    "candidates": 446,
+    "proposed": 181,
+    "unclassified": 265,
+    "approvedExclusions": 0,
+    "ledgerItems": 146
+  },
+  "decisions": [
+    {
+      "path": "src/infrastructure/database/repositories/backfill-state-repository.ts",
+      "tier": "S",
+      "anchor": "prepared INSERT into backfill_state",
+      "sourceHash": "fbf87e04f88c43c5bf7350b2d411e3671039492dfcdea3120b7d1e71d1116b05"
+    },
+    {
+      "path": "src/infrastructure/database/repositories/dream-repository.ts",
+      "tier": "S",
+      "anchor": "prepared INSERT into dream_entries",
+      "sourceHash": "139ad85d741a734853b0a1a19976917acee4ff6ff31b86371f1e016e586d4048"
+    },
+    {
+      "path": "src/infrastructure/database/repositories/embedding-repository.ts",
+      "tier": "S",
+      "anchor": "prepared INSERT into embedding_skips",
+      "sourceHash": "78c09ed29af171dabf61ecb859906421e42ce2c73499716e2f1e9375558066fe"
+    },
+    {
+      "path": "src/infrastructure/database/repositories/entity-repository.ts",
+      "tier": "S",
+      "anchor": "prepared INSERT into entities",
+      "sourceHash": "0f70a9dd80f94e157312cd8032e541fb4b0fe334ae0bfa74e888efdb9fbb0e0f"
+    },
+    {
+      "path": "src/infrastructure/database/repositories/extraction-log-repository.ts",
+      "tier": "S",
+      "anchor": "prepared INSERT into extraction_log",
+      "sourceHash": "e56af5e8fb139c76431babd0f9da8ae1d8ca87d822e00ef56fa5280bfb863ee5"
+    },
+    {
+      "path": "src/infrastructure/database/repositories/extraction-state-repository.ts",
+      "tier": "S",
+      "anchor": "prepared INSERT into extraction_state",
+      "sourceHash": "8dad5b3cf0214d538c3d1f9c05cea677796f5a56ad032a821760525bed0ac383"
+    },
+    {
+      "path": "src/infrastructure/database/repositories/fact-repository.ts",
+      "tier": "S",
+      "anchor": "prepared INSERT into facts",
+      "sourceHash": "d905e31541d659189f5c4f72659f17147fe20b041e72cffcf83efcaae1a1986f"
+    },
+    {
+      "path": "src/infrastructure/database/repositories/friction-repository.ts",
+      "tier": "S",
+      "anchor": "prepared INSERT into friction_log",
+      "sourceHash": "7c06afe904de9089864e06f442a432a0d256d06a1269967034217306ae8e8b47"
+    },
+    {
+      "path": "src/infrastructure/database/repositories/graph-repository.ts",
+      "tier": "S",
+      "anchor": "prepared INSERT into graph_edges",
+      "sourceHash": "106e79297b668ce41c8fd0f2e4ae58eccdce83e854f2ccddca8251569caa4dba"
+    },
+    {
+      "path": "src/infrastructure/database/repositories/link-repository.ts",
+      "tier": "S",
+      "anchor": "prepared INSERT into links",
+      "sourceHash": "6b9737c12b06781c74a439ac6b937124781c6cf8c3415ed3be4140444e85f4fa"
+    },
+    {
+      "path": "src/infrastructure/database/repositories/memory-file-repository.ts",
+      "tier": "S",
+      "anchor": "prepared INSERT into memory_files",
+      "sourceHash": "14107700191c8604cfd04b6064e56da54cef946ec84f92807f3d4acc9e81c3f8"
+    },
+    {
+      "path": "src/infrastructure/database/repositories/memory-governance-repository.ts",
+      "tier": "S",
+      "anchor": "prepared INSERT into memory_governance",
+      "sourceHash": "eefe9811bc08f04303fa8f0447b39d29fd432082f7c7d42f085913209c4b589c"
+    },
+    {
+      "path": "src/infrastructure/database/repositories/memory-utility-repository.ts",
+      "tier": "S",
+      "anchor": "prepared INSERT into memory_utility_metrics",
+      "sourceHash": "b2112562d111aa6afe0fae7968ddad6b776d1c82f49f7b421690d2cb4fb99c5c"
+    },
+    {
+      "path": "src/infrastructure/database/repositories/message-repository.ts",
+      "tier": "S",
+      "anchor": "prepared INSERT into messages_meta",
+      "sourceHash": "e53cf864415882e45cf7fff0332712cdc337a1f24aed51d89687a6800690639c"
+    },
+    {
+      "path": "src/infrastructure/database/repositories/persona-repository.ts",
+      "tier": "S",
+      "anchor": "prepared INSERT into persona_entries",
+      "sourceHash": "cf5877fc6fe4451d0bc3308a1d22595be18295f6a60aec1dd6e1334a69bdd336"
+    },
+    {
+      "path": "src/infrastructure/database/repositories/session-repository.ts",
+      "tier": "S",
+      "anchor": "prepared INSERT into sessions",
+      "sourceHash": "322fc36a8a28a92c21a87f74960cba1c545685c04ac06c4cac5ff449e62ac728"
+    },
+    {
+      "path": "src/infrastructure/database/repositories/tool-use-repository.ts",
+      "tier": "S",
+      "anchor": "prepared INSERT into tool_uses",
+      "sourceHash": "8724e4ef65746f2b079f8bf62841357dc403eafeafffcc8a6a1764d2d02f9db3"
+    },
+    {
+      "path": "src/infrastructure/capabilities/capability-status.ts",
+      "tier": "S",
+      "anchor": "maskCapabilityReference / checkCapabilityInterop",
+      "sourceHash": "b6e2a32b4fdd6e98a4c6ce8f60deed0266aff0d502e3b80d9c9a9524df2d743d"
+    },
+    {
+      "path": "src/infrastructure/database/connection.ts",
+      "tier": "S",
+      "anchor": "initializeDatabase",
+      "sourceHash": "d1ffd040104875ba982108a92bebd760e5d4fedb7194436d6a3b80193fdbf1cd"
+    },
+    {
+      "path": "src/infrastructure/database/event-log.ts",
+      "tier": "S",
+      "anchor": "appendMemoryEvent / appendFile",
+      "sourceHash": "2acac2a025bcc1377adf257e5bfa959d2b78fe11da04782d3629f6045415ecda"
+    },
+    {
+      "path": "src/infrastructure/database/health-checker.ts",
+      "tier": "S",
+      "anchor": "checkConfigValidity / checkQuickIntegrity",
+      "sourceHash": "d047743d1bace8e566387221820046c1d77605f85c1b64b16be876e89ba735a2"
+    },
+    {
+      "path": "src/infrastructure/database/schema.ts",
+      "tier": "S",
+      "anchor": "checkFts5Support / createSchema",
+      "sourceHash": "b305279dca037f72b970c65e56f1e22d1098933b0026e9d9baf0b51bb365388f"
+    },
+    {
+      "path": "src/infrastructure/database/services/context-service.ts",
+      "tier": "S",
+      "anchor": "project-filtered session queries",
+      "sourceHash": "6aff7d63b3a8116bffab56cca8d755cea6daea0025cc368ab0a3e04c0b29ac72"
+    },
+    {
+      "path": "src/infrastructure/database/services/hybrid-search-service.ts",
+      "tier": "S",
+      "anchor": "provider.embed / candidate retrieval",
+      "sourceHash": "bb94675380b5dc2fecbe05cbc0320095ba34df96695e51e25e09f803f88cc8aa"
+    },
+    {
+      "path": "src/infrastructure/database/services/search-service.ts",
+      "tier": "S",
+      "anchor": "search / sanitizeFtsQuery",
+      "sourceHash": "80157c619ae2863a4c5fdd1faf1d6a7c8072b80faae7a71c33c009ce5bc23f93"
+    },
+    {
+      "path": "src/infrastructure/database/services/stats-service.ts",
+      "tier": "A",
+      "anchor": "SqliteStatsService.getStats",
+      "sourceHash": "c2adca1e7498b7bc646fe486c9826c115d6a3d6ca042a4c32e36ff60a9e56994"
+    },
+    {
+      "path": "src/infrastructure/embedding/background-embedder.ts",
+      "tier": "S",
+      "anchor": "spawnBackgroundEmbedding / spawn",
+      "sourceHash": "c9a8f0cee26787c4a943446d4bbad3c0ca3cf3b84a562f47fd2e66f85f420d62"
+    },
+    {
+      "path": "src/infrastructure/embedding/embedding-provider-factory.ts",
+      "tier": "S",
+      "anchor": "cacheKey / API key fingerprint",
+      "sourceHash": "8542aa5e5934bb506b32dfdba623fc32dbba91f75dd6a126438a93ac40ef45b4"
+    },
+    {
+      "path": "src/infrastructure/embedding/ollama-provider.ts",
+      "tier": "S",
+      "anchor": "initialize / embed",
+      "sourceHash": "0fe610cefc8d2a7137fcfeba0095b8a7ecff8d9c22f906959b12df2f15e4eebf"
+    },
+    {
+      "path": "src/infrastructure/embedding/openai-provider.ts",
+      "tier": "S",
+      "anchor": "OpenAiProvider / apiKey",
+      "sourceHash": "f73489e22e08d4a7794e90b3683344c04001680f10a4be0fef4b1628701dc6d5"
+    },
+    {
+      "path": "src/infrastructure/embedding/transformers-js-provider.ts",
+      "tier": "S",
+      "anchor": "initialize / pipeline",
+      "sourceHash": "c560b664441b0ebfb2606343f48c7392cf55bc5a21609099c4f659e4afe4fc62"
+    },
+    {
+      "path": "src/infrastructure/external/qmd-runner.ts",
+      "tier": "S",
+      "anchor": "search / spawn",
+      "sourceHash": "19782668f1e5f5bdce3adb76dc5e113aec248340377a4e02f9642bde45253d2c"
+    },
+    {
+      "path": "src/infrastructure/hooks/auto-memory-writer.ts",
+      "tier": "S",
+      "anchor": "writeContextFile / updateMemoryBlock",
+      "sourceHash": "3972468d82541319d7344cccd7e42aafbc10d703ce1c4b807b7e5fd3009dc89e"
+    },
+    {
+      "path": "src/infrastructure/hooks/config-manager.ts",
+      "tier": "S",
+      "anchor": "saveConfig / writeFileSync",
+      "sourceHash": "6021bd9ccae9a906c39cd6cd0b3c692c9eba6c9f445f5182000a1729754f857d"
+    },
+    {
+      "path": "src/infrastructure/hooks/git-syncer.ts",
+      "tier": "S",
+      "anchor": "runGitCommand / sync",
+      "sourceHash": "576a40fd5ed678cfe8a09dac136f8be7f05655e9bf27fd460a68e98ebd7336a6"
+    },
+    {
+      "path": "src/infrastructure/hooks/hook-runner.ts",
+      "tier": "S",
+      "anchor": "spawnBackgroundSync / spawn",
+      "sourceHash": "0c09f2080c66767fba416de15d29d853a087ccab3681921d0657fb453ee84575"
+    },
+    {
+      "path": "src/infrastructure/hooks/log-writer.ts",
+      "tier": "S",
+      "anchor": "logSync / appendFileSync",
+      "sourceHash": "b74dc30bbbff78d5c537607f3011d8873982969cbdf5c3124b04f32d9c45d24f"
+    },
+    {
+      "path": "src/infrastructure/hooks/sync-logger-adapter.ts",
+      "tier": "B",
+      "anchor": "FileSyncLogger.log",
+      "sourceHash": "eb4018943bf278caa5eba2a5bab3561483165f0a0f3ab54ada9059c13de291ce"
+    },
+    {
+      "path": "src/infrastructure/llm/anthropic-extractor.ts",
+      "tier": "S",
+      "anchor": "Anthropic constructor / messages.create",
+      "sourceHash": "8be2198ecf097a66f64465aa33490563f8011d3f29beb9d2ac3674b39b517a0c"
+    },
+    {
+      "path": "src/infrastructure/llm/claude-cli-extractor.ts",
+      "tier": "S",
+      "anchor": "extract / spawn",
+      "sourceHash": "6ad29917099866cef9ec1f133a884556bddcfd494f8188676f99790f5b0e0526"
+    },
+    {
+      "path": "src/infrastructure/llm/claude-summary-generator.ts",
+      "tier": "S",
+      "anchor": "generateSummary / spawn",
+      "sourceHash": "e2bc297e3ac4dc370cb64dc4baa623a622545907ed084b8874a8a31db031eb02"
+    },
+    {
+      "path": "src/infrastructure/llm/extraction-helper.ts",
+      "tier": "S",
+      "anchor": "parseLlmResponse",
+      "sourceHash": "5cf15073a2e010b0b89cd87601849c4de3646a1ffc7709d1407e38bde7f0c574"
+    },
+    {
+      "path": "src/infrastructure/llm/ollama-extractor.ts",
+      "tier": "S",
+      "anchor": "extract / fetch",
+      "sourceHash": "26ebf37a52894b7a609b605f7d5ee8c3c8db045b8b4e7d0670e49237f8359b2a"
+    },
+    {
+      "path": "src/infrastructure/llm/openai-extractor.ts",
+      "tier": "S",
+      "anchor": "OpenAiExtractor / apiKey",
+      "sourceHash": "32ee2eeb75bbe23538db9c89b6c9166fb9160d89599eb59a037fbb848f1729b9"
+    },
+    {
+      "path": "src/infrastructure/migration.ts",
+      "tier": "S",
+      "anchor": "database sidecar unlink / rename",
+      "sourceHash": "3f6482991ec1409eef915ddd0f065ccdcd9090711cca707a0a4d0cc3677bf13e"
+    },
+    {
+      "path": "src/infrastructure/parsers/event-classifier.ts",
+      "tier": "S",
+      "anchor": "isValidEvent / classifyEvent",
+      "sourceHash": "7156660cdaf704e545735844953f06f42051db57b5d0c948536696f94d0c238a"
+    },
+    {
+      "path": "src/infrastructure/parsers/jsonl-parser.ts",
+      "tier": "S",
+      "anchor": "JsonlEventParser.parse",
+      "sourceHash": "784f8cf0e4b85461efebfbdeb54cf7d7bcc395cdf69b7d5e60b679de4bd6909f"
+    },
+    {
+      "path": "src/infrastructure/parsers/timestamp.ts",
+      "tier": "S",
+      "anchor": "normalizeTimestamp",
+      "sourceHash": "e199cf340a01a0acd87b0f626091fe92d5051558ce44c3b6645ca7b14242721f"
+    },
+    {
+      "path": "src/infrastructure/paths.ts",
+      "tier": "S",
+      "anchor": "getDataDir / getConfigDir / HOME fallback",
+      "sourceHash": "b33d38e6e01a60d283f3bab8bd20ec36c39e30666713dcdfc4940b8c7e578225"
+    },
+    {
+      "path": "src/infrastructure/providers/provider-defaults.ts",
+      "tier": "B",
+      "anchor": "EMBEDDING_PROVIDER_DEFAULTS / EXTRACTION_PROVIDER_DEFAULT_MODELS",
+      "sourceHash": "b3eecdaa35eb345e380420be559ec245dcf09e4e823e5ce78218f29eed262714"
+    },
+    {
+      "path": "src/infrastructure/providers/provider-egress-policy.ts",
+      "tier": "S",
+      "anchor": "assessTarget / requireProviderEgressAllowed",
+      "sourceHash": "2328be6451382c9cd67e147a15a3aef2f3b9b4f6d42404886e19d0f07c9e5c0e"
+    },
+    {
+      "path": "src/infrastructure/providers/provider-registry.ts",
+      "tier": "S",
+      "anchor": "requiredApiKey / provider readiness assessment",
+      "sourceHash": "dfd78685ed6793c1550998e865284b397d0458bf4116faec0d1feecda64d4e83"
+    },
+    {
+      "path": "src/infrastructure/remote/git-remote-event-transport.ts",
+      "tier": "S",
+      "anchor": "runGitCommand / setRemoteUrl",
+      "sourceHash": "7ee815a54e7bc35d65bb0bacd459ebbf1d48f8b004124f2db70a90d9df28585b"
+    },
+    {
+      "path": "src/infrastructure/security/pattern-redactor.ts",
+      "tier": "S",
+      "anchor": "redactText / redactJson",
+      "sourceHash": "fb6edc13ec43a4010e4fe87e3499f8d25eafb32bf6766e64e935a5aae1ffb89c"
+    },
+    {
+      "path": "src/infrastructure/security/secret-audit-service.ts",
+      "tier": "S",
+      "anchor": "database remediation UPDATE / report write",
+      "sourceHash": "e7728a6575454c68a98ff290c7d68f632a2c0e6081cfa5729fb798f183f3cf8c"
+    },
+    {
+      "path": "src/infrastructure/signals/adapters.ts",
+      "tier": "B",
+      "anchor": "ProcessAbortSignal / FileCheckpointManager",
+      "sourceHash": "da27dc86ea900a1fa38ce373841d423be78998724e73f0b5a01ea5465dc730fa"
+    },
+    {
+      "path": "src/infrastructure/signals/checkpoint-manager.ts",
+      "tier": "S",
+      "anchor": "saveCheckpoint / clearCheckpoint",
+      "sourceHash": "dfc63ac426f40c3722606d6b6540e876795ecc024b5b8f27999a991adaf4cc8b"
+    },
+    {
+      "path": "src/infrastructure/signals/signal-handler.ts",
+      "tier": "S",
+      "anchor": "runCleanups / exit",
+      "sourceHash": "a7cf0aadcf5e3d9fdf41cf43165ae594eed705c8b1ba386d1dd043aae0a8ca3e"
+    },
+    {
+      "path": "src/infrastructure/sources/memory-file-scanner.ts",
+      "tier": "S",
+      "anchor": "scanDirectory / classifyFileType",
+      "sourceHash": "b147a1da3e5543bc4ef2ccbf1db195c406695dbbf7ec6ca70205c981e95000cf"
+    },
+    {
+      "path": "src/infrastructure/sources/project-name-resolver.ts",
+      "tier": "S",
+      "anchor": "walkAndResolve / probeHiddenDirectories",
+      "sourceHash": "0078aaca784f6fbc89080909fd305258aafed4e485808f52a99d167a9cc3b246"
+    },
+    {
+      "path": "src/infrastructure/sources/session-source.ts",
+      "tier": "S",
+      "anchor": "discoverSessions / scanProjectDirectory",
+      "sourceHash": "2d1f29bbc128382e4f88a53ecbdb34dd0caba939fda055fa8ecfdae22f0df600"
+    }
+  ],
+  "sourceInputs": [
+    {
+      "path": ".planning/memory-resilience/quality-classifications.json",
+      "sourceHash": "3622ed2d730f6116e5a3a76ab484d818eec488da8178d35a79636a6a94d216bc"
+    },
+    {
+      "path": ".planning/memory-resilience/work-items.json",
+      "sourceHash": "db819a50cdb51b3238b8961cc74c7021d841c637d91931178f1924431d50a8d7"
+    }
+  ],
+  "diagnostic": {
+    "command": "bun .git/b04-timestamp-probe.ts",
+    "exit": 0,
+    "source": "import { normalizeTimestamp } from '../src/infrastructure/parsers/timestamp.ts';\nconst input = '2026-99-99Tnot-a-time';\nconst output = normalizeTimestamp(input);\nconsole.log(JSON.stringify({kind:'diagnostic observation, not a passing regression',input,output,unchanged:output===input,outputParsesAsDate:Number.isFinite(new Date(output).getTime())},null,2));\n",
+    "report": ".planning/memory-resilience/evidence/B04-timestamp-probe.json",
+    "reportHash": "815b45377b5c7e3828c0a388539c2ae4fe8f4eb76982a016bb8219b088816d93",
+    "meaning": "Diagnostic reproduced invalid timestamp admission, not a passing regression."
+  },
+  "checks": [
+    {
+      "command": "bun .git/b04-validate-batch-3.ts",
+      "exit": 0,
+      "meaning": "All source/package hashes current, application/domain/infrastructure non-test candidates classified, ledger acyclic and Q041 required by R02",
+      "log": ".planning/memory-resilience/evidence/B04-batch-3-validation.json",
+      "verification_source": "import { readFileSync, writeFileSync } from 'node:fs';\nimport { execFileSync } from 'node:child_process';\nimport { sourceHash, validateInventory } from '../scripts/quality-inventory.ts';\nconst root = '.planning/memory-resilience/';\nconst read = (p: string) => JSON.parse(readFileSync(p,'utf8'));\nconst assert = (condition: unknown, message: string) => { if(!condition) throw new Error(message); };\nconst catalog = read(root+'executable-catalog.json');\nconst manifest = read(root+'quality-classifications.json');\nconst ledger = read(root+'work-items.json');\nconst mapping = read(root+'package-boundary-map.json');\nfor(const input of [...catalog.files,...catalog.packages,...mapping.sourceInputs]) assert(sourceHash(readFileSync(input.path,'utf8'))===input.sourceHash,'Stale source '+input.path);\nconst issues = validateInventory(catalog,manifest);\nassert(issues.length===265 && issues.every(i=>i.startsWith('Unknown risk tier: ')),'Unexpected inventory errors');\nassert(manifest.files.filter((f:any)=>f.tier!==null).length===181,'Wrong proposed count');\nassert(manifest.files.filter((f:any)=>f.tier===null && !f.path.endsWith('.test.ts') && (f.path.startsWith('src/application/') || f.path.startsWith('src/domain/') || f.path.startsWith('src/infrastructure/'))).length===0,'Application/domain/infrastructure runtime candidate omitted');\nconst byId = new Map<string,any>(ledger.items.map((i:any)=>[i.id,i]));\nassert(byId.size===146 && byId.size===ledger.items.length,'Duplicate or missing work items');\nconst visited = new Set<string>();\nfunction visit(id:string, parents = new Set<string>()) {\n assert(!parents.has(id),'Dependency cycle '+id);\n if(visited.has(id))return;\n assert(byId.has(id),'Unknown dependency '+id);\n const stack=new Set([...parents,id]);\n for(const dep of byId.get(id).depends_on) visit(dep,stack);\n visited.add(id);\n}\nfor(const id of byId.keys())visit(id);\nfunction reaches(id:string,target:string):boolean { return id===target || byId.get(id).depends_on.some((dep:string)=>reaches(dep,target)); }\nfor(const id of ['B11.1','B11.2','B11.3','B12','D05','Q091','Q092','Q093','Q094','Q041'])assert(reaches('R02',id),'Finding bypasses baseline acceptance '+id);\nassert(ledger.items.filter((i:any)=>i.status==='active').map((i:any)=>i.id).join()==='B04','Unexpected active item');\nassert(byId.get('B05').status==='pending','B05 prematurely advanced');\nconst changed=execFileSync('git',['diff','--name-only'],{encoding:'utf8'}).trim().split('\\n');\nassert(changed.every(p=>p.startsWith('.planning/')),'Unexpected executable change');\nconst record={status:'PASS',sourceBindings:catalog.files.length,packageBindings:catalog.packages.length,packageMapBindings:mapping.sourceInputs.length,proposed:181,unclassified:265,expectedGateExit:1,ledgerItems:byId.size,acyclic:true,newFindingsReachBaselineReview:true,activeItem:'B04',nextItemStatus:'B05 pending',limits:'Data/source consistency only; no independent tier approval or runtime acceptance.'};\nwriteFileSync(root+'evidence/B04-batch-3-validation.json',JSON.stringify(record,null,2)+'\\n');\nconsole.log(JSON.stringify(record));\n"
+    },
+    {
+      "command": "bun run quality:inventory",
+      "exit": 1,
+      "meaning": "Expected incomplete inventory, 265 unknown-tier issues",
+      "log": ".planning/memory-resilience/evidence/B04-batch-3-gate.txt"
+    }
+  ],
+  "limits": [
+    "Tier proposals and individual metric applicability await independent review.",
+    "Critical-boundary inspection establishes risk, not full correctness or security review.",
+    "No complete numeric coverage, full suite, provider operation or release acceptance claimed."
+  ],
+  "runtime": "Windows Bun 1.4.1"
+}

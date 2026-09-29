@@ -13,6 +13,7 @@ import {
   copyFileSync,
   cpSync,
   existsSync,
+  lstatSync,
   mkdirSync,
   readFileSync,
   readdirSync,
@@ -25,6 +26,8 @@ import type { CommandResult } from "../command-result.js";
 import { closeDatabase, initializeDatabase } from "../../../infrastructure/database/index.js";
 import { getBackupDir, getConfigPath, getDbPath, getEventsDir } from "../../../infrastructure/paths.js";
 import { unknownErrorMessage } from "../../../domain/errors/unknown-error.js";
+import { LOCAL_EVENT_STATE_DIRECTORY } from "../../../infrastructure/database/source-operation-admission.js";
+import { assertMaintenanceTargets } from "../../../infrastructure/maintenance-targets.js";
 
 const BACKUP_SCHEMA_VERSION = 1;
 const BACKUP_EXIT_OK = 0;
@@ -262,6 +265,14 @@ function createLocalBackupSnapshot(
   outputDir: string | undefined,
   opts: LocalBackupCommandOptions,
 ): LocalBackupSnapshot {
+  const dbPath = opts.dbPathOverride ?? getDbPath();
+  const configPath = opts.configPathOverride ?? getConfigPath();
+  const eventsDir = opts.eventsDirOverride ?? getEventsDir();
+  assertMaintenanceTargets([
+    { path: dbPath, kind: "file" },
+    { path: configPath, kind: "file" },
+    { path: eventsDir, kind: "directory" },
+  ]);
   const now = opts.now?.() ?? new Date();
   const createdAt = now.toISOString();
   const backupId = `local-${formatBackupTimestamp(now)}`;
@@ -270,9 +281,6 @@ function createLocalBackupSnapshot(
   const backupPath = uniqueBackupPath(root, backupId);
   mkdirSync(backupPath, { recursive: true, mode: 0o700 });
 
-  const dbPath = opts.dbPathOverride ?? getDbPath();
-  const configPath = opts.configPathOverride ?? getConfigPath();
-  const eventsDir = opts.eventsDirOverride ?? getEventsDir();
   const backupDbPath = join(backupPath, "memory.db");
   const backupConfigPath = join(backupPath, "config.json");
   const backupEventsDir = join(backupPath, "events");
@@ -303,7 +311,7 @@ function createLocalBackupSnapshot(
     includesConfig,
     includesEvents,
     eventFileCount,
-    excludedPaths: ["events/.git"],
+    excludedPaths: ["events/.git", `events/${LOCAL_EVENT_STATE_DIRECTORY}`],
   };
   const manifestPath = join(backupPath, "manifest.json");
   writeFileSync(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`, { mode: 0o600 });
@@ -432,7 +440,11 @@ function resolveBackupPath(input: string, opts: LocalBackupCommandOptions): stri
 function checkpointDatabase(dbPath: string): void {
   const result = initializeDatabase({ path: dbPath });
   try {
-    result.db.prepare("PRAGMA wal_checkpoint(TRUNCATE)").run();
+    using statement = result.db.prepare<{ busy: number }, []>("PRAGMA wal_checkpoint(TRUNCATE)");
+    const checkpoint = statement.get();
+    if (!checkpoint || checkpoint.busy !== 0) {
+      throw new Error("WAL checkpoint is busy or unavailable; retry after active database readers finish.");
+    }
   } finally {
     closeDatabase(result.db);
   }
@@ -441,7 +453,8 @@ function checkpointDatabase(dbPath: string): void {
 function checkDatabaseIntegrity(dbPath: string): string {
   const db = new Database(dbPath, { readonly: true });
   try {
-    const row = db.query<{ integrity_check: string }, []>("PRAGMA integrity_check").get();
+    using statement = db.prepare<{ integrity_check: string }, []>("PRAGMA integrity_check");
+    const row = statement.get();
     return row?.integrity_check ?? "unknown";
   } finally {
     db.close();
@@ -451,10 +464,13 @@ function checkDatabaseIntegrity(dbPath: string): string {
 function copyDirectoryExceptGit(sourceDir: string, targetDir: string): number {
   let copiedFiles = 0;
   for (const entry of readdirSync(sourceDir)) {
-    if (entry === ".git") continue;
+    if (entry === ".git" || entry.toLowerCase() === LOCAL_EVENT_STATE_DIRECTORY) continue;
     const sourcePath = join(sourceDir, entry);
     const targetPath = join(targetDir, entry);
-    const stat = statSync(sourcePath);
+    const stat = lstatSync(sourcePath);
+    if (stat.isSymbolicLink() || (stat.isFile() && stat.nlink !== 1)) {
+      throw new Error("Event backup cannot copy symbolic or hard links");
+    }
     if (stat.isDirectory()) {
       mkdirSync(targetPath, { recursive: true, mode: 0o700 });
       copiedFiles += copyDirectoryExceptGit(sourcePath, targetPath);
@@ -468,7 +484,7 @@ function copyDirectoryExceptGit(sourceDir: string, targetDir: string): number {
 
 function clearDirectoryExceptGit(dir: string): void {
   for (const entry of readdirSync(dir)) {
-    if (entry === ".git") continue;
+    if (entry === ".git" || entry.toLowerCase() === LOCAL_EVENT_STATE_DIRECTORY) continue;
     rmSync(join(dir, entry), { recursive: true, force: true, maxRetries: 10, retryDelay: 50 });
   }
 }

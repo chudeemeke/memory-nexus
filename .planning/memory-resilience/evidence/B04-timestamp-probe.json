@@ -1,0 +1,7 @@
+{
+  "kind": "diagnostic observation, not a passing regression",
+  "input": "2026-99-99Tnot-a-time",
+  "output": "2026-99-99Tnot-a-time",
+  "unchanged": true,
+  "outputParsesAsDate": false
+}

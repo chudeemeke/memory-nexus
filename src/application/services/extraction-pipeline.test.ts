@@ -7,11 +7,11 @@
 
 import { describe, test, expect, beforeEach, afterEach, spyOn } from "bun:test";
 import { Database } from "bun:sqlite";
-import { unlinkSync, existsSync, writeFileSync } from "fs";
+import { existsSync, writeFileSync, readFileSync, appendFileSync } from "fs";
 import { join } from "path";
-import { tmpdir } from "os";
+import { createOwnedTestDirectory } from "../../../tests/helpers/owned-test-directory.js";
 import { createSchema } from "../../infrastructure/database/schema.js";
-import { Fact } from "../../domain/entities/fact.js";
+import { Fact, type CandidateFact } from "../../domain/entities/fact.js";
 import { Session } from "../../domain/entities/session.js";
 import { Message } from "../../domain/entities/message.js";
 import { ProjectPath } from "../../domain/value-objects/project-path.js";
@@ -24,6 +24,8 @@ import type { IExtractionProvider } from "../../domain/ports/extraction.js";
 import type { IEmbeddingProvider } from "../../domain/ports/embedding.js";
 import { EmbeddingResult } from "../../domain/value-objects/embedding-result.js";
 import { PatternRedactor } from "../../infrastructure/security/pattern-redactor.js";
+import { appendEvent, rebuildProjections } from "../../infrastructure/database/event-log.js";
+import { isProjectionSourceCurrent } from "../../infrastructure/database/projection-source.js";
 
 describe("ExtractionPipeline", () => {
   let db: Database;
@@ -32,6 +34,7 @@ describe("ExtractionPipeline", () => {
   let sessionRepo: SqliteSessionRepository;
   let messageRepo: SqliteMessageRepository;
   let testLogPath: string;
+  let storage: ReturnType<typeof createOwnedTestDirectory>;
 
   beforeEach(() => {
     db = new Database(":memory:");
@@ -43,14 +46,12 @@ describe("ExtractionPipeline", () => {
     sessionRepo = new SqliteSessionRepository(db);
     messageRepo = new SqliteMessageRepository(db);
 
-    testLogPath = join(tmpdir(), `memory-nexus-pipeline-test-${Math.random().toString(36).slice(2)}.jsonl`);
+    storage = createOwnedTestDirectory("memory-extraction-pipeline-");
+    testLogPath = join(storage.dir, "events-synthetic.jsonl");
   });
 
   afterEach(() => {
-    db.close();
-    if (existsSync(testLogPath)) {
-      unlinkSync(testLogPath);
-    }
+    try { db.close(); } finally { storage.cleanup(); }
   });
 
   // Mocks
@@ -87,7 +88,7 @@ describe("ExtractionPipeline", () => {
     dispose: async () => {}
   });
 
-  test("skips session if already extracted and force option is false (Idempotency)", async () => {
+  test("refuses an unbound legacy audit without force and preserves it", async () => {
     const session = Session.create({
       id: "session-123",
       projectPath: ProjectPath.fromDecoded("C:\\Projects\\nexus"),
@@ -119,8 +120,35 @@ describe("ExtractionPipeline", () => {
       testLogPath
     );
 
-    const result = await pipeline.extractFromSession("session-123", "nexus", { force: false });
-    expect(result.skippedSession).toBe(true);
+    const before = await logRepo.findById("session-123");
+    await expect(pipeline.extractFromSession("session-123", "nexus", { force: false })).rejects.toThrow("--force");
+    expect(await logRepo.findById("session-123")).toEqual(before);
+    expect(existsSync(testLogPath)).toBe(false);
+  });
+
+  test("audit identity binds project and redacted input while provider-only changes require force", async () => {
+    await sessionRepo.save(Session.create({id:"identity",projectPath:ProjectPath.fromDecoded("C:\\Projects\\synthetic"),startTime:new Date("2026-01-01T00:00:00Z")}));
+    await messageRepo.save(Message.create({id:"identity-message",role:"user",content:"synthetic private input",timestamp:new Date("2026-01-01T00:00:00Z")}),"identity");
+    let calls=0,mask="first mask";
+    const provider={providerId:"synthetic",modelName:"one",extract:async()=>{calls++;return [];}};
+    const redactor={redactText:()=>({text:mask,findings:[]}),redactJson:<T>(value:T)=>({value,findings:[]})};
+    const pipeline=new ExtractionPipeline(db,factRepo,logRepo,messageRepo,provider,undefined,testLogPath,redactor);
+    expect((await pipeline.extractFromSession("identity","synthetic")).skippedSession).toBe(false);
+    const first=await logRepo.findById("identity");
+    expect(first?.inputIdentity).toMatch(/^v1:[a-f0-9]{64}$/);
+    expect(first?.inputIdentity).not.toContain("private");
+    provider.modelName="two";
+    expect((await pipeline.extractFromSession("identity","synthetic")).skippedSession).toBe(true);
+    expect(calls).toBe(1);
+    expect(await logRepo.findById("identity")).toEqual(first);
+    await pipeline.extractFromSession("identity","synthetic",{force:true});expect(calls).toBe(2);
+    expect((await logRepo.findById("identity"))?.model).toBe("two");
+    mask="second mask";
+    expect((await pipeline.extractFromSession("identity","synthetic")).skippedSession).toBe(false);
+    const changed=await logRepo.findById("identity");
+    expect(changed?.inputIdentity).not.toBe(first?.inputIdentity);expect(calls).toBe(3);
+    await pipeline.extractFromSession("identity","other-project");expect(calls).toBe(4);
+    expect((await logRepo.findById("identity"))?.inputIdentity).not.toBe(changed?.inputIdentity);
   });
 
   test("processes session if already extracted but force is true", async () => {
@@ -198,6 +226,89 @@ describe("ExtractionPipeline", () => {
     expect(await logRepo.findById("session-empty")).toBeNull();
   });
 
+  for (const logState of ["missing", "empty"] as const) {
+    test(`preserves existing facts when all candidates are duplicates and the log is ${logState}`, async () => {
+      const session = Session.create({ id: "session-noop", projectPath: ProjectPath.fromDecoded("C:\\Projects\\nexus"), startTime: new Date() });
+      await sessionRepo.save(session);
+      await messageRepo.save(Message.create({ id: "msg-noop", role: "user", content: "Use native tests", timestamp: new Date() }), session.id);
+      const existing = Fact.create({ type: "learning", project: "nexus", content: "Use native tests", observedAt: new Date() });
+      const other = Fact.create({ type: "decision", project: "other", content: "Preserve unrelated memory", observedAt: new Date() });
+      await factRepo.save(existing); await factRepo.save(other);
+      if (logState === "empty") writeFileSync(testLogPath, "");
+      const pipeline = new ExtractionPipeline(db, factRepo, logRepo, messageRepo,
+        mockExtractor([{ type: "learning", content: existing.content, confidence: 0.95 }]), undefined, testLogPath);
+      const result = await pipeline.extractFromSession(session.id, "nexus");
+      expect(result).toEqual({ skippedSession: false, added: 0, updated: 0, superseded: 0, skipped: 1 });
+      expect((await factRepo.findAll()).map(fact => fact.uuid).sort()).toEqual([existing.uuid, other.uuid].sort());
+      expect((await logRepo.findById(session.id))?.factsSkipped).toBe(1);
+      expect(existsSync(testLogPath)).toBe(logState === "empty");
+    });
+  }
+
+  for (const retry of ["existing-log", "no-messages", "empty-candidates", "duplicates"] as const) {
+    test(`recovers retained extraction events before ${retry} can skip replay`, async () => {
+      const session=Session.create({id:"recovery",projectPath:ProjectPath.fromDecoded("C:\\Projects\\nexus"),startTime:new Date()});
+      await sessionRepo.save(session);
+      await messageRepo.save(Message.create({id:"recovery-message",role:"user",content:"synthetic",timestamp:new Date()}),session.id);
+      await appendEvent(Fact.create({uuid:"baseline",type:"decision",project:"nexus",content:"baseline",observedAt:new Date("2026-01-01T00:00:00Z")}),testLogPath);
+      await rebuildProjections(db,testLogPath);
+      let candidates:CandidateFact[]=[{type:"learning",content:"retained extraction fact",confidence:0.9}];
+      const provider:IExtractionProvider={providerId:"synthetic",modelName:"synthetic",extract:async()=>candidates};
+      const pipeline=new ExtractionPipeline(db,factRepo,logRepo,messageRepo,provider,undefined,testLogPath);
+      db.exec("CREATE TRIGGER reject_recovery BEFORE DELETE ON facts BEGIN SELECT RAISE(ABORT,'synthetic failure'); END");
+      await expect(pipeline.extractFromSession(session.id,"nexus")).rejects.toThrow("events recorded");
+      expect(await logRepo.findById(session.id)).toBeNull();
+      expect(await isProjectionSourceCurrent(db,testLogPath)).toBe(false);
+      const retained=readFileSync(testLogPath,"utf8");
+      db.exec("DROP TRIGGER reject_recovery");
+      if(retry==="existing-log") await logRepo.save({sessionId:session.id,mode:"manual",factsAdded:0,factsUpdated:0,factsSuperseded:0,factsSkipped:0,provider:"synthetic",model:"synthetic",tokensConsumed:0,extractedAt:new Date()});
+      if(retry==="no-messages") db.exec("DELETE FROM messages_meta");
+      if(retry==="empty-candidates") candidates=[];
+      if(retry==="existing-log") await expect(pipeline.extractFromSession(session.id,"nexus")).rejects.toThrow("--force");
+      else expect((await pipeline.extractFromSession(session.id,"nexus")).added).toBe(0);
+      expect((await factRepo.findAll()).filter(f=>f.content==="retained extraction fact")).toHaveLength(1);
+      expect(readFileSync(testLogPath,"utf8")).toBe(retained);
+      expect(await isProjectionSourceCurrent(db,testLogPath)).toBe(true);
+    });
+  }
+
+  test("refuses to append extraction events over unlogged projections",async()=>{
+    const session=Session.create({id:"unlogged",projectPath:ProjectPath.fromDecoded("C:\\Projects\\nexus"),startTime:new Date()});
+    await sessionRepo.save(session);
+    await messageRepo.save(Message.create({id:"unlogged-message",role:"user",content:"synthetic",timestamp:new Date()}),session.id);
+    await factRepo.save(Fact.create({uuid:"unlogged",type:"decision",project:"nexus",content:"unlogged retained",observedAt:new Date()}));
+    const pipeline=new ExtractionPipeline(db,factRepo,logRepo,messageRepo,mockExtractor([{type:"learning",content:"different candidate",confidence:0.9}]),undefined,testLogPath);
+    await expect(pipeline.extractFromSession(session.id,"nexus")).rejects.toThrow("reconciliation");
+    expect(existsSync(testLogPath)).toBe(false);expect(await factRepo.findByUuid("unlogged")).not.toBeNull();
+    expect(await logRepo.findById(session.id)).toBeNull();
+  });
+
+  for(const phase of ["before","after"] as const) test(`reports pending recovery ${phase} new extraction work and retries safely`,async()=>{
+    const session=Session.create({id:"pending",projectPath:ProjectPath.fromDecoded("C:\\Projects\\nexus"),startTime:new Date()});
+    await sessionRepo.save(session);
+    await messageRepo.save(Message.create({id:"pending-message",role:"user",content:"synthetic",timestamp:new Date()}),session.id);
+    await appendEvent(Fact.create({uuid:"baseline",type:"decision",project:"nexus",content:"baseline",observedAt:new Date("2026-01-01T00:00:00Z")}),testLogPath);
+    await rebuildProjections(db,testLogPath);
+    if(phase==="before") await appendEvent(Fact.create({uuid:"pending",type:"learning",project:"nexus",content:"pending",observedAt:new Date("2026-01-02T00:00:00Z")}),testLogPath);
+    let calls=0;const provider:IExtractionProvider={providerId:"synthetic",modelName:"synthetic",extract:async()=>{calls++;return [{type:"learning",content:"new extraction",confidence:0.9}];}};
+    const pipeline=new ExtractionPipeline(db,factRepo,logRepo,messageRepo,provider,undefined,testLogPath);
+    const run=db.run.bind(db);let appended=false;
+    const hook=spyOn(db,"run").mockImplementation((sql,...args)=>{
+      const result=Reflect.apply(run,db,[sql,...args]);
+      if(!appended && sql==='DELETE FROM main."facts"') {
+        appended=true;appendFileSync(testLogPath,JSON.stringify({uuid:"later",type:"learning",project:"nexus",content:"later source",observedAt:"2026-01-03T00:00:00Z"})+"\n");
+      }
+      return result;
+    });
+    try {await expect(pipeline.extractFromSession(session.id,"nexus")).rejects.toThrow(phase==="before"?"retry extraction":"events recorded");}
+    finally {hook.mockRestore();}
+    expect(appended).toBe(true);expect(calls).toBe(phase==="before"?0:1);expect(await logRepo.findById(session.id)).toBeNull();
+    const result=await pipeline.extractFromSession(session.id,"nexus");
+    expect(result.added).toBe(phase==="before"?1:0);
+    expect((await factRepo.findAll()).filter(f=>f.content==="new extraction")).toHaveLength(1);
+    expect(await factRepo.findByUuid("later")).not.toBeNull();expect(await isProjectionSourceCurrent(db,testLogPath)).toBe(true);
+  });
+
   test("extracts new fact if similarity is low (< 0.85)", async () => {
     const session = Session.create({
       id: "session-abc",
@@ -233,6 +344,7 @@ describe("ExtractionPipeline", () => {
       observedAt: activeFact.observedAt.toISOString(),
       version: 1
     }) + "\n");
+    await rebuildProjections(db, testLogPath);
 
     const embeddingsMap = {
       "Use bun test for test runs": [1, 0, 0],
@@ -292,6 +404,7 @@ describe("ExtractionPipeline", () => {
       observedAt: activeFact.observedAt.toISOString(),
       version: 1
     }) + "\n");
+    await rebuildProjections(db, testLogPath);
 
     // Two vectors close to each other: similarity of ~0.90
     // Vector 1: [1, 0.1, 0], Vector 2: [1, -0.1, 0]
@@ -356,6 +469,7 @@ describe("ExtractionPipeline", () => {
       observedAt: activeFact.observedAt.toISOString(),
       version: 1
     }) + "\n");
+    await rebuildProjections(db, testLogPath);
 
     const embeddingsMap = {
       "Use bun test for test runs": [1, 0, 0]
@@ -413,6 +527,7 @@ describe("ExtractionPipeline", () => {
       observedAt: activeFact.observedAt.toISOString(),
       version: 1
     }) + "\n");
+    await rebuildProjections(db, testLogPath);
 
     // words active: set("use", "bun", "test", "for", "runs") - 5 words
     // words candidate: set("we", "should", "use", "bun", "test", "for", "our", "regular", "runs") - 9 words
@@ -469,6 +584,7 @@ describe("ExtractionPipeline", () => {
       observedAt: activeFact.observedAt.toISOString(),
       version: 1
     }) + "\n");
+    await rebuildProjections(db, testLogPath);
 
     const notReadyEmbedder: IEmbeddingProvider = {
       ...mockEmbedder({}),
@@ -524,6 +640,7 @@ describe("ExtractionPipeline", () => {
       observedAt: activeFact.observedAt.toISOString(),
       version: 1
     }) + "\n");
+    await rebuildProjections(db, testLogPath);
 
     const pipeline = new ExtractionPipeline(
       db,
@@ -647,6 +764,7 @@ describe("ExtractionPipeline", () => {
       observedAt: activeFact.observedAt.toISOString(),
       version: 1
     }) + "\n");
+    await rebuildProjections(db, testLogPath);
 
     const incompleteEmbedder: IEmbeddingProvider = {
       ...mockEmbedder({}),
@@ -837,6 +955,7 @@ describe("ExtractionPipeline", () => {
       observedAt: activeFact.observedAt.toISOString(),
       version: 1
     }) + "\n");
+    await rebuildProjections(db, testLogPath);
 
     const throwingEmbedder: IEmbeddingProvider = {
       name: "throwing-embedder",

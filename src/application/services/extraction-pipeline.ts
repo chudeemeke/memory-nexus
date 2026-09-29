@@ -13,16 +13,23 @@
  */
 
 import type { Database } from "bun:sqlite";
+import { createHash } from "node:crypto";
+import type { OperationLease, LeasedOperationAdmission } from "../../domain/ports/operation-admission.js";
+import { runDatabaseWrite } from "../../infrastructure/database/database-write-admission.js";
+import { createSourceOperationAdmission } from "../../infrastructure/database/source-operation-admission.js";
 import { Fact } from "../../domain/entities/fact.js";
 import type { IExtractionProvider } from "../../domain/ports/extraction.js";
 import type { IEmbeddingProvider } from "../../domain/ports/embedding.js";
 import type { IRedactor } from "../../domain/ports/redactor.js";
 import type {
+  ExtractionLogEntry,
   IFactRepository,
   IExtractionLogRepository,
   IMessageRepository,
 } from "../../domain/ports/repositories.js";
-import { appendEvent, rebuildProjections } from "../../infrastructure/database/event-log.js";
+import { appendEvent } from "../../infrastructure/database/event-log.js";
+import { recoverPendingProjections } from "../../infrastructure/database/projection-recovery.js";
+import { assertAutomaticProjectionReplay } from "../../infrastructure/database/projection-state.js";
 import { Message } from "../../domain/entities/message.js";
 import { unknownErrorMessage } from "../../domain/errors/unknown-error.js";
 
@@ -49,6 +56,7 @@ export class ExtractionPipeline {
     private readonly embeddingProvider?: IEmbeddingProvider,
     private readonly eventLogPath?: string,
     private readonly redactor: IRedactor = NOOP_REDACTOR,
+    private readonly admission?: LeasedOperationAdmission,
   ) {}
 
   /**
@@ -59,28 +67,27 @@ export class ExtractionPipeline {
     projectName: string,
     options?: { force?: boolean }
   ): Promise<ExtractionPipelineResult> {
-    // 1. Idempotency Check
-    const existingLog = await this.logRepo.findById(sessionId);
-    if (existingLog && !options?.force) {
-      return {
-        skippedSession: true,
-        added: 0,
-        updated: 0,
-        superseded: 0,
-        skipped: 0
-      };
+    if ((await recoverPendingProjections(this.db, this.eventLogPath)).pending) {
+      throw new Error("Projection recovery remains pending; retry extraction");
     }
-
-    // 2. Load messages
     const messages = await this.messageRepo.findBySession(sessionId);
+    // Bind raw input and redacted provider text; persist only a versioned digest.
+    const inputIdentity = (input: Message[]) => "v1:" + createHash("sha256").update(JSON.stringify([
+      "extraction-input-v1", sessionId, projectName,
+      input.map(message => [message.id, message.role, message.content, message.timestamp.toISOString(), message.toolUses]),
+      input.map(message => this.redactor.redactText(message.content).text),
+    ])).digest("hex");
+    const inputSnapshot = inputIdentity(messages);
+    const auditMatches = (audit: ExtractionLogEntry | null): boolean => {
+      if (!audit || options?.force) return false;
+      if (!audit.inputIdentity) throw new Error("Extraction audit has no verified input identity; rerun extraction with --force");
+      return audit.inputIdentity === inputSnapshot;
+    };
+    if (auditMatches(await this.logRepo.findById(sessionId))) {
+      return { skippedSession: true, added: 0, updated: 0, superseded: 0, skipped: 0 };
+    }
     if (messages.length === 0) {
-      return {
-        skippedSession: false,
-        added: 0,
-        updated: 0,
-        superseded: 0,
-        skipped: 0
-      };
+      return { skippedSession: false, added: 0, updated: 0, superseded: 0, skipped: 0 };
     }
 
     // 3. Extract candidate facts via LLM
@@ -96,30 +103,6 @@ export class ExtractionPipeline {
       content: this.redactor.redactText(candidate.content).text,
       metadata: this.redactor.redactJson(candidate.metadata).value,
     }));
-    if (candidates.length === 0) {
-      // Log empty run
-      await this.logRepo.save({
-        sessionId,
-        mode: "manual",
-        factsAdded: 0,
-        factsUpdated: 0,
-        factsSuperseded: 0,
-        factsSkipped: 0,
-        provider: this.extractionProvider.providerId,
-        model: this.extractionProvider.modelName,
-        tokensConsumed: 0,
-        extractedAt: new Date()
-      });
-
-      return {
-        skippedSession: false,
-        added: 0,
-        updated: 0,
-        superseded: 0,
-        skipped: 0
-      };
-    }
-
     // 4. Load active project facts
     const allProjectFacts = await this.factRepo.findByProject(projectName);
     const activeFacts = allProjectFacts.filter((f) => f.supersededAt === null);
@@ -129,7 +112,7 @@ export class ExtractionPipeline {
     let activeEmbeddings: Float32Array[] = [];
     let candidateEmbeddings: Float32Array[] = [];
 
-    if (useEmbeddings && this.embeddingProvider) {
+    if (candidates.length > 0 && useEmbeddings && this.embeddingProvider) {
       try {
         const activeRes = await this.embeddingProvider.embedBatch(activeFacts.map((f) => this.redactor.redactText(f.content).text));
         activeEmbeddings = activeRes.map((r) => r.embedding);
@@ -142,122 +125,162 @@ export class ExtractionPipeline {
       }
     }
 
-    let factsAdded = 0;
-    let factsUpdated = 0;
-    let factsSuperseded = 0;
-    let factsSkipped = 0;
+    return (this.admission ?? createSourceOperationAdmission(this.eventLogPath)).run(lease => runDatabaseWrite(this.db, async databaseLease => {
+      if ((await recoverPendingProjections(this.db, this.eventLogPath, undefined, lease, databaseLease)).pending) {
+        throw new Error("Projection recovery remains pending; retry extraction");
+      }
+      if (inputIdentity(await this.messageRepo.findBySession(sessionId)) !== inputSnapshot) {
+        throw new Error("Session input changed during extraction computation; retry extraction");
+      }
+      if (auditMatches(await this.logRepo.findById(sessionId))) {
+        return { skippedSession: true, added: 0, updated: 0, superseded: 0, skipped: 0 };
+      }
+      const currentFacts = (await this.factRepo.findByProject(projectName)).filter(f => f.supersededAt === null);
+      const comparisonIdentity = (facts: Fact[]) => JSON.stringify(
+        facts.map(f => [f.uuid, f.content]).sort(([left], [right]) => left!.localeCompare(right!)));
+      if (candidates.length > 0 && comparisonIdentity(currentFacts) !== comparisonIdentity(activeFacts)) {
+        throw new Error("Active facts changed during extraction computation; retry extraction");
+      }
 
-    // 6. Compare and classify each candidate
-    for (let cIdx = 0; cIdx < candidates.length; cIdx++) {
-      const candidate = candidates[cIdx];
-      if (!candidate) continue;
+      let factsAdded = 0;
+      let factsUpdated = 0;
+      let factsSuperseded = 0;
+      let factsSkipped = 0;
 
-      let maxSimilarity = 0;
-      let bestMatch: Fact | null = null;
+      // Keep vectors attached as the batch evolves. Retired entries detect repeats,
+      // but cannot receive another supersedence. Initial ties use stable identity.
+      const comparisons = activeFacts.map((fact, index) => ({
+        fact, embedding: activeEmbeddings[index], active: true,
+      })).sort((left, right) => left.fact.uuid.localeCompare(right.fact.uuid));
 
-      for (let fIdx = 0; fIdx < activeFacts.length; fIdx++) {
-        const activeFact = activeFacts[fIdx];
-        if (!activeFact) continue;
+      // 6. Compare and classify each candidate
+      for (let cIdx = 0; cIdx < candidates.length; cIdx++) {
+        const candidate = candidates[cIdx];
+        if (!candidate) continue;
 
-        let similarity = 0;
+        let maxSimilarity = 0;
+        let bestMatch: (typeof comparisons)[number] | null = null;
 
-        // Perfect string match bypasses all vector math
-        if (candidate.content.trim().toLowerCase() === activeFact.content.trim().toLowerCase()) {
-          similarity = 1.0;
-        } else {
-          const candidateEmb = candidateEmbeddings[cIdx];
-          const activeEmb = activeEmbeddings[fIdx];
-          if (useEmbeddings && candidateEmb && activeEmb) {
-            similarity = this.cosineSimilarity(candidateEmb, activeEmb);
+        for (const comparison of comparisons) {
+          const activeFact = comparison.fact;
+
+          let similarity = 0;
+
+          // Perfect string match bypasses all vector math
+          if (candidate.content.trim().toLowerCase() === activeFact.content.trim().toLowerCase()) {
+            similarity = 1.0;
           } else {
-            similarity = this.jaccardWordSimilarity(candidate.content, activeFact.content);
+            const candidateEmb = candidateEmbeddings[cIdx];
+            const activeEmb = comparison.embedding;
+            if (useEmbeddings && candidateEmb && activeEmb) {
+              similarity = this.cosineSimilarity(candidateEmb, activeEmb);
+            } else {
+              similarity = this.jaccardWordSimilarity(candidate.content, activeFact.content);
+            }
+          }
+
+          if (similarity > maxSimilarity && (comparison.active || similarity >= 0.95)) {
+            maxSimilarity = similarity;
+            bestMatch = comparison;
           }
         }
 
-        if (similarity > maxSimilarity) {
-          maxSimilarity = similarity;
-          bestMatch = activeFact;
+        // Classification
+        if (maxSimilarity >= 0.95 || (bestMatch && candidate.content.trim().toLowerCase() === bestMatch.fact.content.trim().toLowerCase())) {
+          // DUPLICATE / NOOP
+          factsSkipped++;
+        } else if (maxSimilarity >= 0.85 && bestMatch) {
+          // SUPERSEDES / UPDATES
+          factsAdded++;
+          factsUpdated++;
+          factsSuperseded++;
+
+          // Append replacement fact event to events.jsonl
+          const newFact = Fact.create({
+            type: candidate.type,
+            project: projectName,
+            content: candidate.content,
+            metadata: {
+              confidence: candidate.confidence,
+              ...candidate.metadata
+            },
+            observedAt: new Date()
+          });
+          await this.appendProjectionEvent(newFact, lease);
+
+          // Append supersedence event to events.jsonl
+          const supersedenceFact = Fact.create({
+            type: "supersedence",
+            project: projectName,
+            content: `Superseded ${bestMatch.fact.uuid} by ${newFact.uuid}`,
+            metadata: {
+              superseded_uuid: bestMatch.fact.uuid,
+              superseded_by_uuid: newFact.uuid
+            },
+            observedAt: new Date()
+          });
+          await this.appendProjectionEvent(supersedenceFact, lease);
+          bestMatch.active = false;
+          comparisons.push({ fact: newFact, embedding: candidateEmbeddings[cIdx], active: true });
+        } else {
+          // NEW FACT
+          factsAdded++;
+
+          // Append new fact event to events.jsonl
+          const newFact = Fact.create({
+            type: candidate.type,
+            project: projectName,
+            content: candidate.content,
+            metadata: {
+              confidence: candidate.confidence,
+              ...candidate.metadata
+            },
+            observedAt: new Date()
+          });
+          await this.appendProjectionEvent(newFact, lease);
+          comparisons.push({ fact: newFact, embedding: candidateEmbeddings[cIdx], active: true });
         }
       }
 
-      // Classification
-      if (maxSimilarity >= 0.95 || (bestMatch && candidate.content.trim().toLowerCase() === bestMatch.content.trim().toLowerCase())) {
-        // DUPLICATE / NOOP
-        factsSkipped++;
-      } else if (maxSimilarity >= 0.85 && bestMatch) {
-        // SUPERSEDES / UPDATES
-        factsAdded++;
-        factsUpdated++;
-        factsSuperseded++;
-
-        // Append replacement fact event to events.jsonl
-        const newFact = Fact.create({
-          type: candidate.type,
-          project: projectName,
-          content: candidate.content,
-          metadata: {
-            confidence: candidate.confidence,
-            ...candidate.metadata
-          },
-          observedAt: new Date()
-        });
-        await appendEvent(newFact, this.eventLogPath);
-
-        // Append supersedence event to events.jsonl
-        const supersedenceFact = Fact.create({
-          type: "supersedence",
-          project: projectName,
-          content: `Superseded ${bestMatch.uuid} by ${newFact.uuid}`,
-          metadata: {
-            superseded_uuid: bestMatch.uuid,
-            superseded_by_uuid: newFact.uuid
-          },
-          observedAt: new Date()
-        });
-        await appendEvent(supersedenceFact, this.eventLogPath);
-      } else {
-        // NEW FACT
-        factsAdded++;
-
-        // Append new fact event to events.jsonl
-        const newFact = Fact.create({
-          type: candidate.type,
-          project: projectName,
-          content: candidate.content,
-          metadata: {
-            confidence: candidate.confidence,
-            ...candidate.metadata
-          },
-          observedAt: new Date()
-        });
-        await appendEvent(newFact, this.eventLogPath);
+      // New durable events must project before recording a successful extraction.
+      if (factsAdded > 0) {
+        try {
+          if ((await recoverPendingProjections(this.db, this.eventLogPath, undefined, lease, databaseLease)).pending) {
+            throw new Error("Newer source remains pending");
+          }
+        } catch (cause) {
+          throw new Error("Extraction events recorded; projection recovery remains pending", { cause });
+        }
       }
-    }
 
-    // 7. Dynamic Projection Replay/Rebuild SQLite database projections
-    await rebuildProjections(this.db, this.eventLogPath);
+      // 8. Record the extraction log
+      await this.logRepo.save({
+        sessionId,
+        inputIdentity: inputSnapshot,
+        mode: "manual",
+        factsAdded,
+        factsUpdated,
+        factsSuperseded,
+        factsSkipped,
+        provider: this.extractionProvider.providerId,
+        model: this.extractionProvider.modelName,
+        tokensConsumed: 0,
+        extractedAt: new Date()
+      });
 
-    // 8. Record the extraction log
-    await this.logRepo.save({
-      sessionId,
-      mode: "manual",
-      factsAdded,
-      factsUpdated,
-      factsSuperseded,
-      factsSkipped,
-      provider: this.extractionProvider.providerId,
-      model: this.extractionProvider.modelName,
-      tokensConsumed: 0,
-      extractedAt: new Date()
-    });
+      return {
+        skippedSession: false,
+        added: factsAdded,
+        updated: factsUpdated,
+        superseded: factsSuperseded,
+        skipped: factsSkipped
+      };
+    }));
+  }
 
-    return {
-      skippedSession: false,
-      added: factsAdded,
-      updated: factsUpdated,
-      superseded: factsSuperseded,
-      skipped: factsSkipped
-    };
+  private async appendProjectionEvent(fact: Fact, lease: OperationLease): Promise<void> {
+    assertAutomaticProjectionReplay(this.db);
+    await appendEvent(fact, this.eventLogPath, lease);
   }
 
   /**

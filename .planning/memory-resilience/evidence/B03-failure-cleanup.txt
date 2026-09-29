@@ -1,0 +1,40 @@
+bun test v1.4.1 (4661e494f)
+
+scripts\run-istanbul-bun-coverage.test.ts:
+(pass) run-istanbul-bun-coverage > retains failed-run evidence and removes its owned working copy after instrumentation failure [634.03ms]
+bun test v1.4.1 (4661e494f)
+
+src\source.test.ts:
+error: expect(received).toBe(expected)
+
+Expected: false
+Received: true
+
+(fail) synthetic failure [0.35ms]
+
+ 0 pass
+ 1 fail
+ 1 expect() calls
+Ran 1 test across 1 file. [60.00ms]
+
+=============================== Coverage summary ===============================
+Statements   : 0% ( 0/1 )
+Branches     : 100% ( 0/0 )
+Functions    : 100% ( 0/0 )
+Lines        : 0% ( 0/1 )
+================================================================================
+(pass) run-istanbul-bun-coverage > retains failed-run evidence and removes its owned working copy after child failure [931.04ms]
+--------------------------------------|---------|---------|-------------------
+File                                  | % Funcs | % Lines | Uncovered Line #s
+--------------------------------------|---------|---------|-------------------
+All files                             |   53.57 |   52.19 |
+ scripts\check-coverage-thresholds.ts |    0.00 |    9.04 | 48,52-58,62-67,71-114,118-142,146-163,167-175,179-201,205-214,218-232,236-243,248-251,253
+ scripts\coverage-run-storage.ts      |   85.71 |   69.66 | 36,47,67-68,80-82,94-102,113,116-125
+ scripts\run-istanbul-bun-coverage.ts |   75.00 |   77.85 | 103,180,202,209-210,226,259-288,292-295,305-308,329,332,336,341,346,371-377,385-386,392-394,399-402,404
+--------------------------------------|---------|---------|-------------------
+
+ 2 pass
+ 28 filtered out
+ 0 fail
+ 10 expect() calls
+Ran 2 tests across 1 file. [3.14s]

@@ -10,28 +10,23 @@
  *   NO dbPath: "/non/existent/..." (Windows file-locking).
  */
 
-import { describe, expect, it, beforeEach, afterEach } from "bun:test";
+import { describe, expect, it, afterEach } from "bun:test";
 import { executeStatsCommand } from "./stats.js";
 import {
   captureStreams,
-  makeTempDbPath,
-  cleanupTempPaths,
-} from "./_helpers/capture-json.js";
+  createTempDatabaseTracker,
+} from "../../../../tests/helpers/capture-json.js";
 
 describe("stats --json envelope (Plan 32-02 CLI-02)", () => {
-  let tempPaths: string[] = [];
-
-  beforeEach(() => {
-    tempPaths = [];
-  });
+  const tempDatabase = createTempDatabaseTracker();
 
   afterEach(() => {
-    cleanupTempPaths(tempPaths);
+    return tempDatabase.cleanup();
   });
 
   describe("A. valid JSON on success path (empty DB)", () => {
     it("emits envelope with schema_version, command, kind, data", async () => {
-      const dbPath = makeTempDbPath("stats", tempPaths);
+      const dbPath = tempDatabase.makePath("stats");
       const { stdout, exitCode } = await captureStreams(() =>
         executeStatsCommand({ json: true }, { dbPath })
       );
@@ -47,7 +42,7 @@ describe("stats --json envelope (Plan 32-02 CLI-02)", () => {
 
   describe("C. envelope on VALIDATION error", () => {
     it("emits error envelope on invalid projects count", async () => {
-      const dbPath = makeTempDbPath("stats", tempPaths);
+      const dbPath = tempDatabase.makePath("stats");
       const { stdout, exitCode } = await captureStreams(() =>
         executeStatsCommand(
           { json: true, projects: "-1" },
@@ -63,7 +58,7 @@ describe("stats --json envelope (Plan 32-02 CLI-02)", () => {
     });
 
     it("emits error envelope on NaN projects count", async () => {
-      const dbPath = makeTempDbPath("stats", tempPaths);
+      const dbPath = tempDatabase.makePath("stats");
       const { stdout, exitCode } = await captureStreams(() =>
         executeStatsCommand(
           { json: true, projects: "abc" },
@@ -80,7 +75,7 @@ describe("stats --json envelope (Plan 32-02 CLI-02)", () => {
 
   describe("F. stdout is exactly one JSON document", () => {
     it("parses cleanly", async () => {
-      const dbPath = makeTempDbPath("stats", tempPaths);
+      const dbPath = tempDatabase.makePath("stats");
       const { stdout } = await captureStreams(() =>
         executeStatsCommand({ json: true }, { dbPath })
       );
@@ -93,7 +88,7 @@ describe("stats --json envelope (Plan 32-02 CLI-02)", () => {
 
   describe("J. --json --format ai routing equivalence (HIGH-5)", () => {
     it("deep-equals --json vs --json --format ai (stats)", async () => {
-      const dbPath = makeTempDbPath("stats", tempPaths);
+      const dbPath = tempDatabase.makePath("stats");
       const { stdout: stdoutA } = await captureStreams(() =>
         executeStatsCommand({ json: true }, { dbPath })
       );

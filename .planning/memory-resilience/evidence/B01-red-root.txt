@@ -1,0 +1,42 @@
+bun test v1.4.1 (4661e494f)
+
+scripts\run-istanbul-bun-coverage.test.ts:
+29 |       try {
+30 |         runInstrumentedCoverage({ projectRoot, workDir, coverageDir: projectRoot, testArgs: [] });
+31 |       } catch (caught) {
+32 |         error = caught;
+33 |       }
+34 |       expect(existsSync(sourceSentinel)).toBe(true);
+                                              ^
+error: expect(received).toBe(expected)
+
+Expected: true
+Received: false
+
+      at <anonymous> (C:\Projects\memory-nexus\scripts\run-istanbul-bun-coverage.test.ts:34:42)
+(fail) run-istanbul-bun-coverage > rejects the project root as coverage output before deleting any files [23.37ms]
+(pass) run-istanbul-bun-coverage > ignores tests, generated output, dependency folders, and explicit coverage tests [0.35ms]
+(pass) run-istanbul-bun-coverage > instruments TypeScript with real statement and branch counters [322.01ms]
+(pass) run-istanbul-bun-coverage > returns zero-count baseline coverage for unexecuted instrumented files [31.62ms]
+(pass) run-istanbul-bun-coverage > adds the release-suite timeout to instrumented test runs by default [0.76ms]
+(pass) run-istanbul-bun-coverage > defaults instrumented discovery to project test roots [0.35ms]
+(pass) run-istanbul-bun-coverage > preserves an explicit instrumented test timeout [0.23ms]
+
+=============================== Coverage summary ===============================
+Statements   : 100% ( 1/1 )
+Branches     : 100% ( 0/0 )
+Functions    : 100% ( 0/0 )
+Lines        : 100% ( 1/1 )
+================================================================================
+(pass) run-istanbul-bun-coverage > writes Istanbul reports with all four coverage totals [34.92ms]
+--------------------------------------|---------|---------|-------------------
+File                                  | % Funcs | % Lines | Uncovered Line #s
+--------------------------------------|---------|---------|-------------------
+All files                             |   65.00 |   64.19 |
+ scripts\run-istanbul-bun-coverage.ts |   65.00 |   64.19 | 143,155-156,158-163,165,168-172,176-180,184-203,207-226,244-245,252,276,279,282,298-301,303-307,310-311,316-319,321
+--------------------------------------|---------|---------|-------------------
+
+ 7 pass
+ 1 fail
+ 27 expect() calls
+Ran 8 tests across 1 file. [958.00ms]

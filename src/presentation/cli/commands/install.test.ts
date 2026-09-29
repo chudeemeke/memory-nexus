@@ -12,6 +12,7 @@ import {
     readFileSync,
     rmSync,
     writeFileSync,
+    unlinkSync,
 } from "node:fs";
 import { dirname, join } from "node:path";
 import { homedir } from "node:os";
@@ -19,7 +20,6 @@ import {
     executeInstallCommand,
     findHookScriptSource,
     warnStaleHookReferences,
-    type InstallCommandDeps,
 } from "./install.js";
 import type { PathOverrides } from "../../../infrastructure/hooks/settings-manager.js";
 
@@ -80,6 +80,13 @@ describe("install command", () => {
     });
 
     describe("executeInstallCommand", () => {
+        test("repairs a missing hook file when settings still contain its entries", async () => {
+            const deps = { hookScriptSourceOverride: mockHookScriptPath, hookOverrides };
+            expect((await executeInstallCommand({}, deps)).exitCode).toBe(0);
+            unlinkSync(testHookScriptPath);
+            expect((await executeInstallCommand({}, deps)).exitCode).toBe(0);
+            expect(existsSync(testHookScriptPath)).toBe(true);
+        });
         test("installs hooks successfully when not already installed", async () => {
             await executeInstallCommand({}, { hookScriptSourceOverride: mockHookScriptPath, hookOverrides });
 
@@ -159,8 +166,10 @@ describe("install command", () => {
                 hookOverrides,
             });
 
-            expect(errorOutput.join("\n")).toContain("Hook script not found");
+            expect(errorOutput.join("\n")).toContain("Packaged sync hook not found");
             expect(result.exitCode).toBe(1);
+            expect(existsSync(dirname(testHookScriptPath))).toBe(false);
+            expect(existsSync(testSettingsPath)).toBe(false);
         });
     });
 
@@ -252,13 +261,10 @@ describe("install command", () => {
             expect(result).toBeNull();
         });
 
-        test("checks default paths when no override provided", () => {
-            // The actual project has dist/sync-hook.js, so this should find it
+        test("resolves only the source package asset by default", () => {
             const result = findHookScriptSource();
-
-            // Result may or may not exist depending on whether build:hook was run
-            // Just verify it returns a string or null
-            expect(result === null || typeof result === "string").toBe(true);
+            const ownAsset = join(import.meta.dir, "../../../../dist/sync-hook.js");
+            expect(result).toBe(existsSync(ownAsset) ? ownAsset : null);
         });
     });
 });

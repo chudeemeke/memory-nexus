@@ -1281,6 +1281,8 @@ describe("status command", () => {
     describe("colorized diagnostic branches", () => {
         test("renders all selected diagnostic sections with ANSI color and no automatic fixes", async () => {
             const originalForceColor = process.env.FORCE_COLOR;
+            const originalNoColor = process.env.NO_COLOR;
+            delete process.env.NO_COLOR;
             process.env.FORCE_COLOR = "1";
             try {
                 const result = await executeStatusCommand({
@@ -1322,6 +1324,11 @@ describe("status command", () => {
                 expect(output).toContain("\x1b[2mNo automatic fixes available.\x1b[0m");
                 expect(output).toContain("LLM Fact Extraction");
             } finally {
+                if (originalNoColor === undefined) {
+                    delete process.env.NO_COLOR;
+                } else {
+                    process.env.NO_COLOR = originalNoColor;
+                }
                 if (originalForceColor === undefined) {
                     delete process.env.FORCE_COLOR;
                 } else {

@@ -1,0 +1,24 @@
+{
+  "files": 446,
+  "packages": [
+    {
+      "path": "deprecation-stub/package.json",
+      "name": "memory-nexus"
+    },
+    {
+      "path": "package.json",
+      "name": "@chude/memory"
+    }
+  ],
+  "syntax": {
+    "browser-code": 2,
+    "executable": 199,
+    "test-driver": 211,
+    "re-export": 23,
+    "no-local-code": 11
+  },
+  "proposedClassifications": 51,
+  "unclassified": 395,
+  "approvedExclusions": 0,
+  "independentReview": "pending"
+}

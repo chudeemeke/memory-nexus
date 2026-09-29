@@ -1,0 +1,12 @@
+{
+  "validated_at": "2026-09-19T20:32:51.7760436Z",
+  "items": 133,
+  "quality_items": 86,
+  "unique_ids": true,
+  "acyclic": true,
+  "dependencies_exist": true,
+  "b10_covers_every_quality_item": true,
+  "current_item": "B03",
+  "ledger_sha256": "77C12A6D8F4CCAF4DDD7D7E4DC6EFC1849027CCB7A469841D89001045DF05628",
+  "product_acceptance": false
+}

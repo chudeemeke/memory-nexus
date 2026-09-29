@@ -1,0 +1,30 @@
+bun test v1.4.1 (4661e494f)
+
+scripts\quality-inventory.test.ts:
+warning: in the working copy of '.gitignore', LF will be replaced by CRLF the next time Git touches it
+(pass) discovers both tracked and new source with the nearest package boundary [2756.46ms]
+(pass) includes unfamiliar executable modes and shebangs without pretending they are instrumentable JavaScript [3096.65ms]
+(pass) declaration suffixes cannot hide executable content [1872.11ms]
+(pass) rejects an omitted executable even when every listed classification looks valid [2102.08ms]
+(pass) classifies actual syntax rather than index, types or test-support names [3056.96ms]
+(pass) manifest admission rejects stale, duplicate, malformed, misplaced and falsely exempt code [3911.98ms]
+(pass) source directory links fail closed while a canonical repository-root alias works [8065.54ms]
+(pass) invalid input cannot produce an apparently complete catalog: package.json [1227.85ms]
+(pass) invalid input cannot produce an apparently complete catalog: src/broken.ts [1999.90ms]
+(pass) a subdirectory cannot silently omit the rest of its repository [605.57ms]
+(pass) the actual inventory CLI emits a catalog and rejects omitted classifications [9865.14ms]
+(pass) nested ignore rules preserve tracked source and omit ignored untracked trees [1361.40ms]
+(skip) case-colliding paths fail before producing a Windows-incompatible catalog
+(pass) source binding tolerates checkout line endings but rejects changed content [0.68ms]
+------------------------------|---------|---------|-------------------
+File                          | % Funcs | % Lines | Uncovered Line #s
+------------------------------|---------|---------|-------------------
+All files                     |  100.00 |   99.39 |
+ scripts\quality-inventory.ts |  100.00 |   99.39 | 141
+------------------------------|---------|---------|-------------------
+
+ 13 pass
+ 1 skip
+ 0 fail
+ 51 expect() calls
+Ran 14 tests across 1 file. [41.48s]

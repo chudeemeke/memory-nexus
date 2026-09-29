@@ -1,4 +1,5 @@
 import { createHash } from "node:crypto";
+import { isDeepStrictEqual } from "node:util";
 import { Fact, type FactType } from "../../domain/entities/fact.js";
 import {
   DreamEntry,
@@ -11,7 +12,7 @@ import type {
   IDreamRepository,
   IFactRepository,
 } from "../../domain/ports/repositories.js";
-import type { MemoryEventWriter, MemoryGovernanceService } from "./memory-governance-service.js";
+import type { MemoryEventWriter, MemoryEventWriteResult, MemoryGovernanceService } from "./memory-governance-service.js";
 
 export interface ProposeSupersedenceParams {
   project: string;
@@ -114,8 +115,13 @@ export class DreamingService {
       updatedAt: occurredAt,
     });
 
-    const saved = await this.persistDreamEvent(entry, "propose", "add");
-    await this.deps.governanceService?.registerDerivedMemory({
+    const existing = await this.deps.dreamRepo.findByDreamId(entry.dreamId);
+    if (existing && !isDeepStrictEqual(proposalRecipe(existing), proposalRecipe(entry))) {
+      throw new Error("Existing dream proposal conflicts with the requested proposal recipe");
+    }
+    const saved = existing ?? await this.persistDreamEvent(entry, "propose", "add");
+    const governance = this.deps.governanceService;
+    if (governance && !await governance.show("dream", saved.dreamId)) await governance.registerDerivedMemory({
       surface: "dream",
       targetId: saved.dreamId,
       project: saved.project,
@@ -146,6 +152,9 @@ export class DreamingService {
       throw new Error("Dream apply requires confirm=true");
     }
     const entry = await this.requireDream(dreamId);
+    if (entry.status === "applied") {
+      return { entry, canonicalEventIds: entry.appliedEventIds };
+    }
     if (entry.status !== "approved") {
       throw new Error("Dream proposal must be approved before apply");
     }
@@ -209,6 +218,9 @@ export class DreamingService {
       throw new Error("Dream rollback requires confirm=true");
     }
     const entry = await this.requireDream(dreamId);
+    if (entry.status === "rolled_back") {
+      return { entry, rollbackEventIds: entry.rollbackEventIds };
+    }
     if (entry.status !== "applied") {
       throw new Error("Dream proposal must be applied before rollback");
     }
@@ -307,7 +319,12 @@ export class DreamingService {
         },
       },
     });
-    await this.writeEvent(event);
+    const written = await this.writeEvent(event);
+    if (written?.projectionCommitted) {
+      const projected = await this.deps.dreamRepo.findByDreamId(entry.dreamId);
+      if (!projected) throw new Error("Committed dream event did not produce a projection entry");
+      return projected;
+    }
     return await this.deps.dreamRepo.applyMemoryEvent(event) ?? entry;
   }
 
@@ -359,9 +376,21 @@ export class DreamingService {
     });
   }
 
-  private async writeEvent(event: MemoryEventEnvelope): Promise<void> {
-    await this.deps.writeEvent?.(event);
+  private async writeEvent(event: MemoryEventEnvelope): Promise<void | MemoryEventWriteResult> {
+    return this.deps.writeEvent?.(event);
   }
+}
+
+/** Compare immutable intent; retries cannot reset lifecycle or governance state. */
+function proposalRecipe(entry: DreamEntry) {
+  const audit = entry.audit;
+  return {
+    kind: entry.kind, project: entry.project, visibility: entry.visibility,
+    sourceEventIds: entry.sourceEventIds.sort(), targetFactUuid: entry.targetFactUuid,
+    proposedFact: entry.proposedFact, reason: entry.reason, confidence: entry.confidence,
+    rollbackEventKind: entry.rollbackEventKind,
+    privacy: { redactionState: audit.redactionState, redactedFields: audit.redactedFields.sort(), findingHashes: audit.findingHashes.sort() },
+  };
 }
 
 function validateProposal(params: ProposeSupersedenceParams): void {

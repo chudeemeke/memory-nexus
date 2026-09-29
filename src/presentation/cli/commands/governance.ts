@@ -5,6 +5,8 @@
  */
 
 import { Command, Option } from "commander";
+import type { LeasedOperationAdmission, OperationLease } from "../../../domain/ports/operation-admission.js";
+import { createSourceOperationAdmission } from "../../../infrastructure/database/source-operation-admission.js";
 import type { CommandResult } from "../command-result.js";
 import {
   closeDatabase,
@@ -12,7 +14,7 @@ import {
   initializeDatabase,
 } from "../../../infrastructure/database/index.js";
 import { SqliteMemoryGovernanceRepository } from "../../../infrastructure/database/repositories/memory-governance-repository.js";
-import { appendMemoryEvent } from "../../../infrastructure/database/event-log.js";
+import { createProjectedEventWriter, recoverPendingProjections } from "../../../infrastructure/database/projection-recovery.js";
 import { MemoryGovernanceService } from "../../../application/services/memory-governance-service.js";
 import {
   MEMORY_GOVERNANCE_SURFACES,
@@ -45,8 +47,10 @@ export interface GovernanceCommandOptions {
 }
 
 export interface GovernanceCommandDeps {
+  operationAdmission?: LeasedOperationAdmission;
   dbPath?: string | undefined;
   writeEvents?: boolean | undefined;
+  eventLogPath?: string | undefined;
 }
 
 const SURFACE_CHOICES = [...MEMORY_GOVERNANCE_SURFACES];
@@ -116,24 +120,39 @@ export function createGovernanceCommand(): Command {
   return cmd;
 }
 
-export async function executeGovernanceCommand(
-  options: GovernanceCommandOptions,
-  deps: GovernanceCommandDeps = {},
-): Promise<CommandResult> {
+export async function executeGovernanceCommand(options: GovernanceCommandOptions, deps: GovernanceCommandDeps = {}): Promise<CommandResult> {
+  try {
+    const operation = (lease?: OperationLease) => prepareGovernanceCommand(options, deps, lease);
+    const response = deps.writeEvents !== false && options.action !== "list" && options.action !== "show"
+      ? await (deps.operationAdmission ?? createSourceOperationAdmission(deps.eventLogPath)).run(operation)
+      : await operation();
+    return response();
+  } catch (error) { return emitGovernanceError(options, "UNEXPECTED_ERROR", errorMessage(error), 2); }
+}
+
+async function prepareGovernanceCommand(options: GovernanceCommandOptions, deps: GovernanceCommandDeps, lease?: OperationLease): Promise<() => CommandResult> {
+  const success = (data: unknown) => () => emitGovernanceSuccess(options, data);
+  const failure = (code: string, message: string, exitCode: number) => () => emitGovernanceError(options, code, message, exitCode);
   const dbPath = deps.dbPath ?? getDefaultDbPath();
   let db;
+  let operationFailed = false, operationError: unknown;
 
   try {
     ({ db } = initializeDatabase({ path: dbPath }));
   } catch (error) {
-    return emitGovernanceError(options, "DB_CONNECTION_FAILED", errorMessage(error), 1);
+    return failure("DB_CONNECTION_FAILED", errorMessage(error), 1);
   }
 
   try {
     const repo = new SqliteMemoryGovernanceRepository(db);
+    if (deps.writeEvents !== false && options.action !== "list" && options.action !== "show") {
+      if ((await recoverPendingProjections(db, deps.eventLogPath, undefined, lease)).pending) {
+        throw new Error("Projection recovery remains pending; retry the command");
+      }
+    }
     const service = new MemoryGovernanceService({
       repository: repo,
-      writeEvent: deps.writeEvents === false ? undefined : appendMemoryEvent,
+      writeEvent: deps.writeEvents === false ? undefined : createProjectedEventWriter(db, deps.eventLogPath, lease),
     });
 
     if (options.action === "list") {
@@ -143,7 +162,7 @@ export async function executeGovernanceCommand(
         status: options.status as any,
         limit: options.limit,
       });
-      return emitGovernanceSuccess(options, entries.map((entry) => entry.toJSON()));
+      return success(entries.map((entry) => entry.toJSON()));
     }
 
     const surface = normalizeSurface(options.surface);
@@ -152,9 +171,9 @@ export async function executeGovernanceCommand(
     if (options.action === "show") {
       const entry = await service.show(surface, targetId);
       if (!entry) {
-        return emitGovernanceError(options, "NOT_FOUND", `No governance entry found for ${surface}:${targetId}`, 1);
+        return failure("NOT_FOUND", `No governance entry found for ${surface}:${targetId}`, 1);
       }
-      return emitGovernanceSuccess(options, entry.toJSON());
+      return success(entry.toJSON());
     }
 
     const command = {
@@ -176,13 +195,17 @@ export async function executeGovernanceCommand(
       null;
 
     if (!updated) {
-      return emitGovernanceError(options, "INVALID_ACTION", `Unsupported governance action: ${options.action}`, 2);
+      return failure("INVALID_ACTION", `Unsupported governance action: ${options.action}`, 2);
     }
-    return emitGovernanceSuccess(options, updated.toJSON());
+    return success(updated.toJSON());
   } catch (error) {
-    return emitGovernanceError(options, "UNEXPECTED_ERROR", errorMessage(error), 2);
+    operationFailed = true; operationError = error;
+    return failure("UNEXPECTED_ERROR", errorMessage(error), 2);
   } finally {
-    closeDatabase(db);
+    try { closeDatabase(db); } catch (cleanup) {
+      if (operationFailed) throw new AggregateError([operationError,cleanup], `${errorMessage(operationError)}; database cleanup failed: ${errorMessage(cleanup)}`);
+      throw cleanup;
+    }
   }
 }
 

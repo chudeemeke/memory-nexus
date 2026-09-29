@@ -1,0 +1,13 @@
+{
+  "date": "2026-09-19",
+  "reviewer_route": "claude --print --model fable --effort low",
+  "purpose": "Transport/readiness smoke only; not judgment review",
+  "skill_mirrors_match": true,
+  "skill_sha256": "61107F52D1CB986F0E5A4F9A55BC0DF2697CCD990123D95FB49DA2AF47B35D68",
+  "bare_exit": 1,
+  "result": "You're out of usage credits. Switch to another model, or manage usage credits at claude.ai/settings/usage?from=cc_cli_limit_message, to continue.",
+  "substantive_review_received": false,
+  "approval": false,
+  "owner": "memory-nexus",
+  "retry_trigger": "Route availability changes before applicable delivery review gate; no model substitution"
+}

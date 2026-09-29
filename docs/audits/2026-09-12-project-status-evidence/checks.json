@@ -1,0 +1,23 @@
+{
+  "date": "2026-09-12",
+  "head": "96742c74e190837bf8c00ab2bcbc35053b676837",
+  "typecheck_exit": 0,
+  "build_exit": 0,
+  "test_isolation_exit": 0,
+  "eval_market_exit": 0,
+  "eval_passed": 9,
+  "tests_exit": 1,
+  "tests_passed": 4453,
+  "tests_failed": 2,
+  "tests_files": 208,
+  "tests_seconds": 393.85,
+  "audit_exit": 1,
+  "audit_high": 17,
+  "audit_moderate": 9,
+  "gitleaks_exit": 0,
+  "inbox_lint_exit": 0,
+  "diff_check_exit": 0,
+  "fresh_istanbul_coverage": "not run",
+  "fresh_mutation": "not run",
+  "review": "status assessment; no new independent review"
+}

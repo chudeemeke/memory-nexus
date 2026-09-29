@@ -12,9 +12,9 @@
  */
 
 import { describe, test, expect, beforeEach, afterEach } from "bun:test";
-import { mkdirSync, writeFileSync, rmSync, existsSync } from "node:fs";
+import { mkdirSync, writeFileSync, readFileSync, existsSync } from "node:fs";
 import { join } from "node:path";
-import { tmpdir } from "node:os";
+import { createOwnedTestDirectory } from "../../../tests/helpers/owned-test-directory.js";
 import { spawn } from "node:child_process";
 import { EventEmitter } from "node:events";
 import { DEFAULT_CONFIG } from "./config-manager.js";
@@ -40,19 +40,32 @@ const HOOK_SCRIPT = join(
 function runHookScript(
     stdinJson: object,
     homeDir: string,
-): Promise<{ stdout: string; stderr: string; exitCode: number }> {
-    return new Promise((resolve) => {
-        const child = spawn("bun", ["run", HOOK_SCRIPT], {
+): Promise<{ stdout: string; stderr: string; exitCode: number; spawnedSessions: string[] }> {
+    const receipt = join(homeDir, "spawn-request.json");
+    const driver = join(homeDir, "hook-driver.ts");
+    writeFileSync(driver, `import {createDefaultSyncHookDeps,runSyncHookMain} from ${JSON.stringify(HOOK_SCRIPT.replaceAll("\\", "/"))};
+import {writeFileSync} from "node:fs";
+const deps=createDefaultSyncHookDeps();
+deps.spawnSync=(sessionId)=>{writeFileSync(${JSON.stringify(receipt)},JSON.stringify([sessionId]));return {pid:process.pid};};
+await runSyncHookMain(deps);`);
+    return new Promise((resolve, reject) => {
+        const child = spawn(process.execPath, [driver], {
             env: {
                 ...process.env,
                 HOME: homeDir,
                 USERPROFILE: homeDir,
+                XDG_CONFIG_HOME: join(homeDir, ".config"),
+                XDG_DATA_HOME: join(homeDir, ".local", "share"),
+                MEMORY_HOME: join(homeDir, ".memory"),
             },
             stdio: ["pipe", "pipe", "pipe"],
         });
 
         let stdout = "";
         let stderr = "";
+        let timedOut = false;
+        const timer = setTimeout(() => { timedOut = true; child.kill(); }, 10000);
+        child.on("error", (error) => { clearTimeout(timer); reject(error); });
 
         child.stdout.on("data", (chunk: Buffer) => {
             stdout += chunk.toString();
@@ -63,11 +76,21 @@ function runHookScript(
         });
 
         child.on("close", (code: number | null) => {
-            resolve({
-                stdout,
-                stderr,
-                exitCode: code ?? 1,
-            });
+            clearTimeout(timer);
+            if (timedOut) {
+                reject(new Error("Hook test process timed out"));
+                return;
+            }
+            try {
+                resolve({
+                    stdout,
+                    stderr,
+                    exitCode: code ?? 1,
+                    spawnedSessions: existsSync(receipt) ? JSON.parse(readFileSync(receipt, "utf8")) as string[] : [],
+                });
+            } catch (error) {
+                reject(error);
+            }
         });
 
         // Write stdin and close
@@ -77,26 +100,19 @@ function runHookScript(
 }
 
 describe("sync-hook-script", () => {
+    let storage: ReturnType<typeof createOwnedTestDirectory>;
     let testDir: string;
     let configDir: string;
 
     beforeEach(() => {
-        testDir = join(
-            tmpdir(),
-            `sync-hook-script-test-${Date.now()}-${Math.random().toString(36).slice(2)}`,
-        );
+        storage = createOwnedTestDirectory("memory-sync-hook-script-");
+        testDir = storage.dir;
         configDir = join(testDir, ".config", "memory");
         mkdirSync(configDir, { recursive: true });
     });
 
     afterEach(() => {
-        if (existsSync(testDir)) {
-            try {
-                rmSync(testDir, { recursive: true, force: true });
-            } catch {
-                // Ignore Windows cleanup failures
-            }
-        }
+        storage.cleanup();
     });
 
     describe("readJsonFromStream", () => {
@@ -188,6 +204,7 @@ describe("sync-hook-script", () => {
             expect(result.stdout).toContain("MEMORY FLUSH");
             expect(result.stdout).toContain("durable project docs or SQLite-backed memory");
             expect(result.stdout).toContain("decisions, unresolved items, learnings");
+            expect(result.spawnedSessions).toEqual(["abc123"]);
         }, 15000);
 
         test("PreCompact with syncOnCompaction=false outputs reminder but exits without sync", async () => {
@@ -208,6 +225,7 @@ describe("sync-hook-script", () => {
             // Reminder should still appear even when sync is disabled
             expect(result.stdout).toContain("MEMORY FLUSH");
             expect(result.stdout).toContain("durable project docs or SQLite-backed memory");
+            expect(result.spawnedSessions).toEqual([]);
         }, 15000);
 
         test("PreCompact with syncOnCompaction=true outputs reminder AND proceeds past sync check", async () => {
@@ -227,6 +245,7 @@ describe("sync-hook-script", () => {
             expect(result.exitCode).toBe(0);
             // Reminder should appear
             expect(result.stdout).toContain("MEMORY FLUSH");
+            expect(result.spawnedSessions).toEqual(["abc123"]);
         }, 15000);
 
         test("SessionEnd event does NOT output flush reminder", async () => {
@@ -246,6 +265,7 @@ describe("sync-hook-script", () => {
             expect(result.exitCode).toBe(0);
             // SessionEnd should NOT produce the reminder
             expect(result.stdout).not.toContain("MEMORY FLUSH");
+            expect(result.spawnedSessions).toEqual(["abc123"]);
         }, 15000);
 
         test("PreCompact reminder contains the full expected message", async () => {
@@ -290,6 +310,7 @@ describe("sync-hook-script", () => {
             // reading stdin, so no reminder output
             expect(result.exitCode).toBe(0);
             expect(result.stdout).not.toContain("MEMORY FLUSH");
+            expect(result.spawnedSessions).toEqual([]);
         }, 15000);
     });
 
@@ -321,6 +342,7 @@ describe("sync-hook-script", () => {
                 },
                 spawnSync: (sessionId) => {
                     spawns.push(sessionId);
+                    return { pid: 1 };
                 },
                 writeStdout: (message) => {
                     stdout.push(message);
@@ -433,9 +455,9 @@ describe("sync-hook-script", () => {
             );
 
             expect(fatal).toHaveLength(1);
-            expect(fatal[0].level).toBe("error");
-            expect(fatal[0].message).toBe("Hook error: config unavailable");
-            expect(typeof fatal[0].error).toBe("string");
+            expect(fatal[0]?.level).toBe("error");
+            expect(fatal[0]?.message).toBe("Hook error: config unavailable");
+            expect(typeof fatal[0]?.error).toBe("string");
         });
 
         test("passes non-Error fatal values through the same non-blocking surface", async () => {

@@ -1,0 +1,76 @@
+bun test v1.4.1 (4661e494f)
+
+scripts\run-istanbul-bun-coverage.test.ts:
+(pass) run-istanbul-bun-coverage > rejects the project root as coverage output before deleting any files [141.96ms]
+(pass) run-istanbul-bun-coverage > rejects a sibling with the project-name prefix before deleting any files [17.82ms]
+(pass) run-istanbul-bun-coverage > rejects an ancestor before deleting any files [16.97ms]
+(pass) run-istanbul-bun-coverage > rejects an output that resolves back to the project root [14.47ms]
+(pass) run-istanbul-bun-coverage > rejects traversal into a sibling before deleting any files [17.92ms]
+(pass) run-istanbul-bun-coverage > rejects a separate directory outside the project [24.06ms]
+(pass) run-istanbul-bun-coverage > rejects a linked coverage ancestor before touching its external target [24.71ms]
+bun test v1.4.1 (4661e494f)
+
+src\choose.test.ts:
+(pass) both outcomes [0.17ms]
+
+ 1 pass
+ 0 fail
+ 2 expect() calls
+Ran 1 test across 1 file. [67.00ms]
+
+=============================== Coverage summary ===============================
+Statements   : 100% ( 1/1 )
+Branches     : 100% ( 2/2 )
+Functions    : 100% ( 1/1 )
+Lines        : 100% ( 1/1 )
+================================================================================
+(pass) run-istanbul-bun-coverage > runs real instrumented tests in a dot-prefixed descendant (project junction: false) [841.52ms]
+bun test v1.4.1 (4661e494f)
+
+src\choose.test.ts:
+(pass) both outcomes [0.15ms]
+
+ 1 pass
+ 0 fail
+ 2 expect() calls
+Ran 1 test across 1 file. [163.00ms]
+
+=============================== Coverage summary ===============================
+Statements   : 100% ( 1/1 )
+Branches     : 100% ( 2/2 )
+Functions    : 100% ( 1/1 )
+Lines        : 100% ( 1/1 )
+================================================================================
+(pass) run-istanbul-bun-coverage > runs real instrumented tests in a dot-prefixed descendant (project junction: true) [455.35ms]
+(pass) run-istanbul-bun-coverage > rejects copied source-directory links before rewriting external source [22.45ms]
+(pass) run-istanbul-bun-coverage > rejects a linked work directory before deleting existing reports or the link [16.18ms]
+(pass) run-istanbul-bun-coverage > rejects a work-directory parent alias that resolves to the project root [230.86ms]
+(pass) run-istanbul-bun-coverage > rejects overlapping work and coverage paths: same [14.98ms]
+(pass) run-istanbul-bun-coverage > rejects overlapping work and coverage paths: output-in-work [107.16ms]
+(pass) run-istanbul-bun-coverage > rejects overlapping work and coverage paths: work-in-output [18.92ms]
+(pass) run-istanbul-bun-coverage > rejects overlapping work and coverage paths: work-in-project [31.41ms]
+(pass) run-istanbul-bun-coverage > ignores tests, generated output, dependency folders, and explicit coverage tests [0.31ms]
+(pass) run-istanbul-bun-coverage > instruments TypeScript with real statement and branch counters [31.75ms]
+(pass) run-istanbul-bun-coverage > returns zero-count baseline coverage for unexecuted instrumented files [24.53ms]
+(pass) run-istanbul-bun-coverage > adds the release-suite timeout to instrumented test runs by default [1.26ms]
+(pass) run-istanbul-bun-coverage > defaults instrumented discovery to project test roots [0.17ms]
+(pass) run-istanbul-bun-coverage > preserves an explicit instrumented test timeout [0.13ms]
+
+=============================== Coverage summary ===============================
+Statements   : 100% ( 1/1 )
+Branches     : 100% ( 0/0 )
+Functions    : 100% ( 0/0 )
+Lines        : 100% ( 1/1 )
+================================================================================
+(pass) run-istanbul-bun-coverage > writes Istanbul reports with all four coverage totals [41.03ms]
+--------------------------------------|---------|---------|-------------------
+File                                  | % Funcs | % Lines | Uncovered Line #s
+--------------------------------------|---------|---------|-------------------
+All files                             |   88.00 |   94.22 |
+ scripts\run-istanbul-bun-coverage.ts |   88.00 |   94.22 | 204-205,221,268-269,276,324,327,345,374-375,380-383,385
+--------------------------------------|---------|---------|-------------------
+
+ 23 pass
+ 0 fail
+ 129 expect() calls
+Ran 23 tests across 1 file. [3.12s]

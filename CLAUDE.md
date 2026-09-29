@@ -12,13 +12,17 @@ Do not silently remove stated, inferred, prototype, disabled, or partial feature
 
 ## Current State
 
+Resume from `.planning/memory-resilience/EXECUTION.md`, `work-items.json` and `JOURNAL.md` in that directory, then reconcile the native goal, live Git and PR state. Current readiness evidence is `docs/audits/2026-09-19-baseline-repair-status.md`; September 12 evidence and release completion below are historical. Recovered v6 planning is committed; Phase 45 has not started. Baseline repair and the subsequent bounded synthetic embedding experiment are authorized; production local availability and desktop replication retain separate decisions. Before a mandatory Fable review, require a live readiness smoke and substantive retained review output, as tracked in `docs/inbox/2026-07-23-remotely-fable-auth-preflight-notice.md`.
+
+Use the ratified `C:/Projects/conversations/docs/operations/sign-off-policy.md`: Tier M may merge after required checks; Tier D needs a concrete owner decision brief. It supersedes the old mandatory human `tuicr` gate. Continue routine authorized work without asking whether to proceed. Preserve all valuable dirty/recovered work and record revision-bound evidence per work item.
+
 - v4 is published as `@chude/memory`.
 - v5 Market-Leader Memory Platform is active.
 - Phase 42.5 is complete.
 - Phase 43 is complete with scoped local-first CLI/API market readiness approved.
 - Phase 44 is complete: `@chude/memory@4.0.3` is published and registry-backed npm/Bun installs are verified.
 - The real `4.0.3` publish was performed manually/directly with `npm publish --access public --otp=<code>`, not through `aidev release`. The release gates were already run and recorded before publish.
-- Current npm `latest`, local Windows `memory.exe`, npm global smoke, Bun global smoke, and `C:\Users\Destiny\package.json` all resolve to `4.0.3`.
+- Phase 44 verified npm `latest`, Windows `memory.exe`, npm/Bun global smokes and the user package at `4.0.3`; this is historical release evidence. The September 28 isolated check finds Bun `memory.exe --version` still returns `4.0.3`, while npm `memory.cmd` fails through a stale broken junction. The installed user package matches the registry artifact; Bun fallback attribution and live route repair remain open in D04/D04.1. See `docs/plans/2026-09-28-batch-consumer-boundary.md`.
 - Do not use local Bun tarball/path global install as a release gate for this package on Bun 1.3.5; Phase 44 observed a dependency-loop failure and a Bun segmentation fault in that path.
 
 Do not claim broad market-leader status unless MCP/local-server and public benchmark gaps are either implemented or explicitly dispositioned with user sign-off. Scoped market readiness for the local-first CLI/API product is a separate, narrower claim.
@@ -76,6 +80,12 @@ Runtime data follows XDG-style locations:
 
 Legacy `~/.memory` / `MEMORY_HOME` sidecars are compatibility-only and explicit opt-in.
 
+Memory Nexus owns its checkout, worktree, temporary verification, and runtime backup storage. Follow `docs/audits/2026-09-19-disk-ownership.md` for verified archives, retained worktree refs, cleanup limits, and ongoing retention rules. Preserve active/uncommitted work and do not clean other projects or shared caches.
+
+Create worktrees inside this project with `git worktree add .worktrees/<slug> -b <branch>`.
+Never create sibling worktrees or run `git clean -ffdx`. The shared worktree rule
+is `C:/Users/Destiny/.claude/rules/worktrees.md`; verify recovery before retirement.
+
 ## Quality Gates
 
 Use Bun. Required gates for serious changes:
@@ -94,7 +104,7 @@ git diff --check
 npm pack --dry-run --json
 ```
 
-Coverage must pass at each metric independently: statements, branches, functions, and lines all >= 95%.
+The shared quality contract in `~/.claude/rules/quality-standards.md` is authoritative: enforce all four metrics per executable file and package, the stricter Tier S branch/adversarial requirements, changed-line coverage, and explicit reviewed exceptions. The current aggregate gate does not establish that compliance. The September 19 repair inventory records 85 files below the ordinary floor before Tier S assessment; release acceptance remains blocked until enforcement and gaps are repaired.
 
 ## Agent Guidance
 

@@ -1,0 +1,29 @@
+bun test v1.4.1 (4661e494f)
+
+scripts\coverage-run-storage.test.ts:
+29 |       if (basename(String(path)).startsWith("run-")) throw Object.assign(new Error("synthetic ENOSPC"), { code: "ENOSPC" });
+30 |       return originalMkdir(path, options);
+31 |     }) as typeof fs.mkdirSync);
+32 |     try {
+33 |       expect(() => openCoverageRun(project, work, join(project, "coverage"))).toThrow("synthetic ENOSPC");
+34 |       expect(existsSync(work)).toBe(false);
+                                    ^
+error: expect(received).toBe(expected)
+
+Expected: false
+Received: true
+
+      at <anonymous> (C:\Projects\memory-nexus\scripts\coverage-run-storage.test.ts:34:32)
+(fail) coverage run ownership > report allocation failure releases the exclusively claimed working directory [13.49ms]
+---------------------------------|---------|---------|-------------------
+File                             | % Funcs | % Lines | Uncovered Line #s
+---------------------------------|---------|---------|-------------------
+All files                        |   42.86 |   36.59 |
+ scripts\coverage-run-storage.ts |   42.86 |   36.59 | 32-48,67-68,80-83,87-95,99-118
+---------------------------------|---------|---------|-------------------
+
+ 0 pass
+ 11 filtered out
+ 1 fail
+ 2 expect() calls
+Ran 1 test across 1 file. [81.00ms]

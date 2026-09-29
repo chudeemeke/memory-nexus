@@ -1,0 +1,30 @@
+{
+  "item_id": "Q100.4.2.1",
+  "status": "verified - scoped behavioral contract",
+  "recordedAt": "2026-09-28T16:46:49.111Z",
+  "verification": "Pause synthetic provider; edit/add/delete session input in another process; stale result must not append or certify current audit, and a fresh bounded retry must succeed. Preserve privacy/redaction and force behavior.",
+  "evidence": [
+    ".planning/memory-resilience/evidence/Q100.4.2-extraction-admission.json",
+    "docs/plans/2026-09-28-source-decision-admission.md",
+    ".planning/memory-resilience/evidence/Q100.4.2.1-input-validation.json",
+    ".planning/memory-resilience/evidence/Q100.4.2.1-audit-identity.json",
+    ".planning/memory-resilience/evidence/Q100.4.2.1-database-write.json"
+  ],
+  "outcome": "Provider-paused input changes refuse; durable audit identity detects new input across restart and CLI. Final source-before-database scope excludes competing message writes through commit, preserves arbitrary caller transactions, and delegates explicit nested replay authority. Kill before audit leaves source for successful retry without duplicate effects. Same-connection batch writes refuse at each chunk and retry idempotently.",
+  "limits": [
+    "Scoped behavioral acceptance only. Full per-file/package/changed-line Tier S quality, child counter aggregation, supported platforms, installed artifact and final independent review remain mandatory under Q100.4.3 and B10/R02.",
+    "Explicit cooperating API authority is not a sandbox for arbitrary SQL or callbacks manually ending/replacing transactions. Other shared-connection repository topology and lock-order coverage remain Q100.4.2.6.",
+    "SQLite and JSONL are not one crash-atomic store. Retained source replay after process kill is proved; broader multi-event, audit recovery, partial append, power-loss durability and reconciliation remain Q100.4.2.10/.11/.12.",
+    "Coverage diagnostics instrument a narrow subset; broader passing compatibility tests were not all instrumented. Lower percentages are not full-suite regression proof. Child process counters remain unaggregated; zero branch totals require applicability review.",
+    "No canonical data, local model, hook, replication, installation or workspace authority changed. Previously rejected cleanup and shared-temp 12KiB authority remain untouched. Three inboxes and R03/P03/A03 remain; embedding experiment follows baseline acceptance."
+  ],
+  "remainingBarriers": [
+    "Q100.4.2",
+    "Q100.4.2.6",
+    "Q100.4.2.11",
+    "Q100.4.3",
+    "B10",
+    "R02"
+  ],
+  "next": "Q100.4.2.2"
+}

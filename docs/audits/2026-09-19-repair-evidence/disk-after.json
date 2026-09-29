@@ -1,0 +1,245 @@
+{
+  "at": "2026-09-19T12:55:37.157Z",
+  "scope": "Known project and agent worktree roots, maximum depth three; nested symlinks not followed; metadata inspection only outside Memory Nexus",
+  "roots": [
+    {
+      "path": "C:/Projects",
+      "exists": true
+    },
+    {
+      "path": "C:/Users/Destiny/.claude/worktrees",
+      "exists": false
+    },
+    {
+      "path": "C:/Users/Destiny/.codex/worktrees",
+      "exists": false
+    },
+    {
+      "path": "C:/Users/Destiny/.worktrees",
+      "exists": false
+    },
+    {
+      "path": "C:/worktrees",
+      "exists": false
+    }
+  ],
+  "inspected": 2422,
+  "candidates": [
+    {
+      "path": "C:\\Projects\\memory-nexus",
+      "ownership": "origin is memory-nexus",
+      "bytes": 917867089
+    }
+  ],
+  "storage": [
+    {
+      "path": "C:/Projects/memory-nexus",
+      "exists": true,
+      "bytes": 917867089,
+      "children": [
+        {
+          "name": "node_modules",
+          "bytes": 884180632
+        },
+        {
+          "name": ".git",
+          "bytes": 13519062
+        },
+        {
+          "name": ".planning",
+          "bytes": 5086936
+        },
+        {
+          "name": ".cc-guardian",
+          "bytes": 4757723
+        },
+        {
+          "name": "src",
+          "bytes": 4365916
+        },
+        {
+          "name": "coverage",
+          "bytes": 2571698
+        },
+        {
+          "name": "dist",
+          "bytes": 1472611
+        },
+        {
+          "name": "docs",
+          "bytes": 1417404
+        },
+        {
+          "name": "tests",
+          "bytes": 208032
+        },
+        {
+          "name": "scripts",
+          "bytes": 124420
+        },
+        {
+          "name": "bun.lock",
+          "bytes": 121656
+        },
+        {
+          "name": "README.md",
+          "bytes": 14233
+        },
+        {
+          "name": "CLAUDE.md",
+          "bytes": 5905
+        },
+        {
+          "name": "CHANGELOG.md",
+          "bytes": 5432
+        },
+        {
+          "name": "package.json",
+          "bytes": 3597
+        },
+        {
+          "name": "HANDOFF-antigravity.md",
+          "bytes": 2174
+        },
+        {
+          "name": "MIGRATION.md",
+          "bytes": 2109
+        },
+        {
+          "name": "stryker.config.js",
+          "bytes": 1866
+        },
+        {
+          "name": ".claude",
+          "bytes": 1725
+        },
+        {
+          "name": "vitest.config.ts",
+          "bytes": 1063
+        },
+        {
+          "name": "tsconfig.json",
+          "bytes": 727
+        },
+        {
+          "name": "deprecation-stub",
+          "bytes": 626
+        },
+        {
+          "name": "tsconfig.lib.json",
+          "bytes": 566
+        },
+        {
+          "name": ".gitignore",
+          "bytes": 401
+        },
+        {
+          "name": "bunfig.toml",
+          "bytes": 368
+        },
+        {
+          "name": "tsconfig.scripts.json",
+          "bytes": 175
+        },
+        {
+          "name": "TO-DOS.md",
+          "bytes": 32
+        },
+        {
+          "name": "~",
+          "bytes": 0
+        }
+      ]
+    },
+    {
+      "path": "C:/Users/Destiny/.local/share/memory",
+      "exists": true,
+      "bytes": 3574450061,
+      "children": [
+        {
+          "name": "memory.db",
+          "bytes": 2586361856
+        },
+        {
+          "name": "memory.db.bak-20260402-030135",
+          "bytes": 987656192
+        },
+        {
+          "name": "packages",
+          "bytes": 366636
+        },
+        {
+          "name": "logs",
+          "bytes": 32588
+        },
+        {
+          "name": "events",
+          "bytes": 31726
+        },
+        {
+          "name": "backups",
+          "bytes": 1063
+        },
+        {
+          "name": "hooks",
+          "bytes": 0
+        }
+      ]
+    },
+    {
+      "path": "C:/Users/Destiny/.config/memory",
+      "exists": true,
+      "bytes": 2588,
+      "children": [
+        {
+          "name": "config.json",
+          "bytes": 1783
+        },
+        {
+          "name": "config.json.bak-20260621141139",
+          "bytes": 805
+        }
+      ]
+    },
+    {
+      "path": "C:/Users/Destiny/.memory",
+      "exists": true,
+      "bytes": 216275,
+      "children": [
+        {
+          "name": "dashboard.html",
+          "bytes": 216275
+        }
+      ]
+    },
+    {
+      "path": "C:/Users/Destiny/.memory-nexus",
+      "exists": false,
+      "bytes": 0,
+      "children": []
+    }
+  ],
+  "temp": [
+    {
+      "path": "C:\\Users\\Destiny\\AppData\\Local\\Temp\\memory-nexus-coverage-work-96796",
+      "bytes": 14129788,
+      "owner": null
+    },
+    {
+      "path": "C:\\Users\\Destiny\\AppData\\Local\\Temp\\memory-test-home-fuAEZI",
+      "bytes": 503808,
+      "owner": null
+    },
+    {
+      "path": "C:\\Users\\Destiny\\AppData\\Local\\Temp\\memory-test-home-gFQ7Ic",
+      "bytes": 503808,
+      "owner": null
+    },
+    {
+      "path": "C:\\Users\\Destiny\\AppData\\Local\\Temp\\memory-test-home-w1Bfgq",
+      "bytes": 503808,
+      "owner": null
+    }
+  ],
+  "errors": []
+}

@@ -1,0 +1,17 @@
+bun test v1.3.14 (0d9b296a)
+
+tests/test-store-isolation.test.ts:
+(pass) test-home cleanup preserves a replacement directory even with a copied owner marker [320.81ms]
+(pass) normal Bun test teardown removes its unused isolated home [308.18ms]
+(pass) an unconfigured programmatic friction test cannot create a database in the inherited user home [1897.51ms]
+(pass) test-home ownership survives between files in the same test process [219.09ms]
+-----------|---------|---------|-------------------
+File       | % Funcs | % Lines | Uncovered Line #s
+-----------|---------|---------|-------------------
+All files  |    0.00 |    0.00 |
+-----------|---------|---------|-------------------
+
+ 4 pass
+ 0 fail
+ 17 expect() calls
+Ran 4 tests across 1 file. [4.51s]

@@ -5,7 +5,7 @@
  * and lazy-loading infrastructure dependencies.
  */
 
-import type { SyncCommandOptions } from "./types.js";
+import type { SyncCommandOptions, SyncCompletionMetadata } from "./types.js";
 import type { CommandResult } from "../../command-result.js";
 import type { SyncResult } from "../../../../application/services/index.js";
 import { initializeDatabase } from "../../../../infrastructure/database/index.js";
@@ -124,13 +124,14 @@ export function handleError(error: unknown, options: SyncCommandOptions): void {
 export function reportResults(
   result: SyncResult,
   startTime: number,
-  options: SyncCommandOptions
+  options: SyncCommandOptions,
+  completion?: SyncCompletionMetadata,
 ): void {
   const duration = Date.now() - startTime;
 
   if (options.json) {
     const output = {
-      success: result.success,
+      success: completion?.success ?? result.success,
       aborted: result.aborted ?? false,
       duration: duration,
       discovered: result.sessionsDiscovered,
@@ -140,6 +141,19 @@ export function reportResults(
       toolUses: result.toolUsesInserted,
       recoveredFromCheckpoint: result.recoveredFromCheckpoint,
       errors: result.errors,
+      ...(completion ? {
+        capture: { success: result.success && result.errors.length === 0 && !result.aborted },
+        projections: completion.projections,
+        remote: completion.remote,
+        embedding: completion.embedding,
+        ambient: completion.ambient,
+        completionErrors: completion.errors,
+        memoryFiles: { ...completion.memoryFileSync, ...(completion.memoryFiles ? {
+          indexed: completion.memoryFiles.filesIndexed,
+          skipped: completion.memoryFiles.filesSkipped,
+          errors: completion.memoryFiles.errors,
+        } : {}) },
+      } : {}),
     };
     console.log(JSON.stringify(output, null, 2));
     return;
@@ -151,6 +165,8 @@ export function reportResults(
 
   if (result.aborted) {
     console.log("\nSync aborted (progress saved)");
+  } else if (completion && !completion.success) {
+    console.log(`\nSync incomplete after ${duration}ms (captured progress retained)`);
   } else {
     console.log(`\nSync complete in ${duration}ms`);
   }
@@ -160,6 +176,15 @@ export function reportResults(
   console.log(`  Skipped:    ${result.sessionsSkipped}`);
   console.log(`  Messages:   ${result.messagesInserted}`);
   console.log(`  Tool uses:  ${result.toolUsesInserted}`);
+  if (completion) {
+    console.log(`  Projections: ${completion.projections.status}`);
+    console.log(`  Remote: ${completion.remote.status}`);
+    for (const [name, outcome] of [["Embedding", completion.embedding], ["Ambient", completion.ambient], ["Memory files", completion.memoryFileSync]] as const) {
+      const detail = "error" in outcome ? outcome.error : "reason" in outcome ? outcome.reason : "";
+      console.log(`  ${name}: ${outcome.status}${detail ? ` (${detail})` : ""}`);
+    }
+    for (const error of completion.errors) console.log(`  Error: ${error}`);
+  }
 
   if (result.recoveredFromCheckpoint) {
     console.log(`  Recovered:  ${result.recoveredFromCheckpoint} from checkpoint`);

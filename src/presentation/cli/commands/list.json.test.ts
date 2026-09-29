@@ -10,28 +10,23 @@
  *   NO dbPath: "/non/existent/..." (Windows file-locking).
  */
 
-import { describe, expect, it, beforeEach, afterEach } from "bun:test";
+import { describe, expect, it, afterEach } from "bun:test";
 import { executeListCommand } from "./list.js";
 import {
   captureStreams,
-  makeTempDbPath,
-  cleanupTempPaths,
-} from "./_helpers/capture-json.js";
+  createTempDatabaseTracker,
+} from "../../../../tests/helpers/capture-json.js";
 
 describe("list --json envelope (Plan 32-02 CLI-02)", () => {
-  let tempPaths: string[] = [];
-
-  beforeEach(() => {
-    tempPaths = [];
-  });
+  const tempDatabase = createTempDatabaseTracker();
 
   afterEach(() => {
-    cleanupTempPaths(tempPaths);
+    return tempDatabase.cleanup();
   });
 
   describe("A. valid JSON on success path", () => {
     it("emits envelope with schema_version, command, kind, data", async () => {
-      const dbPath = makeTempDbPath("list", tempPaths);
+      const dbPath = tempDatabase.makePath("list");
       const { stdout, exitCode } = await captureStreams(() =>
         executeListCommand({ limit: "10", json: true }, { dbPath })
       );
@@ -47,7 +42,7 @@ describe("list --json envelope (Plan 32-02 CLI-02)", () => {
 
   describe("B. envelope on EMPTY result (empty DB)", () => {
     it("emits envelope with data: [] not plain text", async () => {
-      const dbPath = makeTempDbPath("list", tempPaths);
+      const dbPath = tempDatabase.makePath("list");
       const { stdout, exitCode } = await captureStreams(() =>
         executeListCommand({ json: true }, { dbPath })
       );
@@ -62,7 +57,7 @@ describe("list --json envelope (Plan 32-02 CLI-02)", () => {
 
   describe("C. envelope on VALIDATION error", () => {
     it("emits error envelope on invalid limit", async () => {
-      const dbPath = makeTempDbPath("list", tempPaths);
+      const dbPath = tempDatabase.makePath("list");
       const { stdout, exitCode } = await captureStreams(() =>
         executeListCommand({ limit: "abc", json: true }, { dbPath })
       );
@@ -75,7 +70,7 @@ describe("list --json envelope (Plan 32-02 CLI-02)", () => {
     });
 
     it("emits error envelope on invalid since-date", async () => {
-      const dbPath = makeTempDbPath("list", tempPaths);
+      const dbPath = tempDatabase.makePath("list");
       const { stdout, exitCode } = await captureStreams(() =>
         executeListCommand(
           { json: true, since: "garbage-date-zzz" },
@@ -92,7 +87,7 @@ describe("list --json envelope (Plan 32-02 CLI-02)", () => {
 
   describe("F. stdout is exactly one JSON document", () => {
     it("parses cleanly", async () => {
-      const dbPath = makeTempDbPath("list", tempPaths);
+      const dbPath = tempDatabase.makePath("list");
       const { stdout } = await captureStreams(() =>
         executeListCommand({ json: true }, { dbPath })
       );
@@ -105,7 +100,7 @@ describe("list --json envelope (Plan 32-02 CLI-02)", () => {
 
   describe("H. meta.count matches data.length", () => {
     it("includes count in meta", async () => {
-      const dbPath = makeTempDbPath("list", tempPaths);
+      const dbPath = tempDatabase.makePath("list");
       const { stdout } = await captureStreams(() =>
         executeListCommand({ json: true }, { dbPath })
       );
@@ -118,7 +113,7 @@ describe("list --json envelope (Plan 32-02 CLI-02)", () => {
 
   describe("J. --json --format ai routing equivalence (HIGH-5)", () => {
     it("deep-equals --json vs --json --format ai (list)", async () => {
-      const dbPath = makeTempDbPath("list", tempPaths);
+      const dbPath = tempDatabase.makePath("list");
       const { stdout: stdoutA } = await captureStreams(() =>
         executeListCommand({ json: true }, { dbPath })
       );

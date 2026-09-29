@@ -1,0 +1,449 @@
+bun test v1.4.1 (4661e494f)
+
+src\infrastructure\paths.test.ts:
+(pass) paths > getConfigDir > returns ~/.config/memory by default [1.38ms]
+(pass) paths > getConfigDir > respects XDG_CONFIG_HOME [1.16ms]
+(pass) paths > getDataDir > returns ~/.local/share/memory by default [0.70ms]
+(pass) paths > getDataDir > respects XDG_DATA_HOME [0.42ms]
+(pass) paths > XDG independence > XDG_CONFIG_HOME does not affect data dir [0.24ms]
+(pass) paths > XDG independence > XDG_DATA_HOME does not affect config dir [0.21ms]
+(pass) paths > XDG independence > both XDG vars set simultaneously [0.34ms]
+(pass) paths > getLegacyDir > returns ~/.memory-nexus [0.28ms]
+(pass) paths > getLegacyDir > ignores XDG_CONFIG_HOME [0.37ms]
+(pass) paths > getLegacyDir > ignores XDG_DATA_HOME [0.22ms]
+(pass) paths > derived paths > getConfigPath derives from getConfigDir [0.33ms]
+(pass) paths > derived paths > getDbPath derives from getDataDir [1.07ms]
+(pass) paths > derived paths > getLogDir derives from getDataDir [1.23ms]
+(pass) paths > derived paths > getHookDir derives from getDataDir [0.35ms]
+(pass) paths > derived paths > getBackupDir derives from getDataDir [0.25ms]
+(pass) paths > derived paths > getCheckpointPath derives from getDataDir [0.20ms]
+(pass) paths > derived paths > derived paths respect XDG overrides [0.28ms]
+(pass) paths > getMemoryDir > returns ~/.memory by default [0.28ms]
+(pass) paths > getMemoryDir > ignores XDG_CONFIG_HOME [0.27ms]
+(pass) paths > getMemoryDir > ignores XDG_DATA_HOME [0.19ms]
+(pass) paths > getMemoryDir > respects MEMORY_HOME when set [0.17ms]
+(pass) paths > getMemoryDir > ignores empty MEMORY_HOME (falls through to default) [0.71ms]
+(pass) paths > getMemoryDir > falls back to ~/.memory when MEMORY_HOME is unset [0.30ms]
+(pass) paths > getMemoryDir > MEMORY_HOME does not affect getConfigDir or getDataDir [0.30ms]
+(pass) paths > getMemoryDir > MEMORY_HOME uses value as-is (no ~ expansion, no APP_NAME suffix) [0.37ms]
+(pass) paths > getMemoryDir > getLegacyDir ignores MEMORY_HOME [0.35ms]
+(pass) paths > multi-writer paths > getMachineLogPath derives machine-specific path correctly [0.39ms]
+(pass) paths > multi-writer paths > getAllLogFiles returns empty array when directory does not exist [3.31ms]
+(pass) paths > multi-writer paths > getAllLogFiles returns all machine files and legacy file correctly [23.60ms]
+
+src\infrastructure\hooks\auto-memory-writer.test.ts:
+(pass) AutoMemoryWriter > writeContextFile > writes content to context.md (complete overwrite) [7.28ms]
+(pass) AutoMemoryWriter > writeContextFile > creates directory recursively if it does not exist [12.69ms]
+(pass) AutoMemoryWriter > writeContextFile > overwrites existing context.md with new content [8.53ms]
+(pass) AutoMemoryWriter > updateMemoryBlock > creates MEMORY.md with markers when file does not exist [6.39ms]
+(pass) AutoMemoryWriter > updateMemoryBlock > appends block at end with markers when file has no markers [254.16ms]
+(pass) AutoMemoryWriter > updateMemoryBlock > replaces content between markers preserving surrounding content [5.36ms]
+(pass) AutoMemoryWriter > updateMemoryBlock > content outside markers is untouched during merge [4.43ms]
+(pass) AutoMemoryWriter > updateMemoryBlock > handles empty file by appending block with markers [5.79ms]
+(pass) AutoMemoryWriter > updateMemoryBlock > adds separator before appending when file ends without trailing newline [5.41ms]
+(pass) AutoMemoryWriter > updateMemoryBlock > creates directory recursively if it does not exist [6.83ms]
+(pass) mergeMemoryBlock (pure function) > no markers in existing content: appends block at end [0.30ms]
+(pass) mergeMemoryBlock (pure function) > markers present: replaces content between them [0.09ms]
+(pass) mergeMemoryBlock (pure function) > empty existing: creates block with markers [0.04ms]
+(pass) mergeMemoryBlock (pure function) > preserves exact content before and after markers [0.08ms]
+(pass) mergeMemoryBlock (pure function) > handles content with no trailing newline [0.07ms]
+(pass) mergeMemoryBlock (pure function) > handles multiline block content [0.04ms]
+
+src\infrastructure\hooks\config-manager.test.ts:
+(pass) config-manager > DEFAULT_CONFIG > has all required fields [7.16ms]
+(pass) config-manager > DEFAULT_CONFIG > has all features enabled by default [1.79ms]
+(pass) config-manager > DEFAULT_CONFIG > has 5 second timeout [1.57ms]
+(pass) config-manager > DEFAULT_CONFIG > has info log level [1.68ms]
+(pass) config-manager > DEFAULT_CONFIG > has 7 day log retention [2.37ms]
+(pass) config-manager > DEFAULT_CONFIG > has silent failures (showFailures false) [2.45ms]
+(pass) config-manager > getConfigDir > returns path under home directory [3.47ms]
+(pass) config-manager > getConfigPath > returns path to config.json [3.46ms]
+(pass) config-manager > loadConfig > returns defaults when config file missing [10.31ms]
+(pass) config-manager > loadConfig > merges partial config with defaults [17.88ms]
+Invalid config.json, using defaults
+(pass) config-manager > loadConfig > handles invalid JSON (returns defaults) [9.59ms]
+Invalid config.json, using defaults
+(pass) config-manager > loadConfig > handles malformed JSON (syntax error) [11.92ms]
+Invalid config.json, using defaults
+(pass) config-manager > loadConfig > handles empty config file [8.55ms]
+(pass) config-manager > loadConfig > handles empty JSON object [8.96ms]
+(pass) config-manager > loadConfig > loads all config values correctly [11.49ms]
+(pass) config-manager > loadConfig > returns a copy, not the default reference [12.12ms]
+(pass) config-manager > saveConfig > creates directory if missing [217.77ms]
+(pass) config-manager > saveConfig > writes valid JSON [13.37ms]
+(pass) config-manager > saveConfig > merges with existing config [18.34ms]
+(pass) config-manager > saveConfig > overwrites existing values [16.85ms]
+(pass) config-manager > saveConfig > writes with 2-space indent for readability [29.04ms]
+(pass) config-manager > saveConfig > adds trailing newline [22.20ms]
+(pass) config-manager > saveConfig > handles invalid existing config gracefully [22.21ms]
+(pass) config-manager > embedding config > DEFAULT_CONFIG has embedding property with expected defaults [3.02ms]
+(pass) config-manager > embedding config > DEFAULT_EMBEDDING_CONFIG matches DEFAULT_CONFIG.embedding [2.91ms]
+(pass) config-manager > embedding config > loadConfig() with no config file returns default embedding config [18.70ms]
+(pass) config-manager > embedding config > loadConfig() with partial embedding config merges correctly [15.68ms]
+(pass) config-manager > embedding config > saveConfig() with embedding section persists correctly [135.94ms]
+(pass) config-manager > embedding config > DEFAULT_EMBEDDING_CONFIG includes batchSize of 100 [3.15ms]
+(pass) config-manager > embedding config > loadConfig() with custom batchSize merges correctly [16.14ms]
+(pass) config-manager > embedding config > loadConfig() deep-merges nested embedding section [15.51ms]
+(pass) config-manager > embedding config apiKey and baseUrl > EmbeddingConfigData accepts optional apiKey field (undefined by default) [11.07ms]
+(pass) config-manager > embedding config apiKey and baseUrl > EmbeddingConfigData accepts optional apiKeyEnv and apiKeyRef fields [7.72ms]
+(pass) config-manager > embedding config apiKey and baseUrl > EmbeddingConfigData accepts optional baseUrl field (undefined by default) [7.60ms]
+(pass) config-manager > embedding config apiKey and baseUrl > loadConfig() preserves deprecated apiKey from config file for compatibility [18.73ms]
+(pass) config-manager > embedding config apiKey and baseUrl > loadConfig() preserves apiKeyEnv and apiKeyRef from config file [19.44ms]
+(pass) config-manager > embedding config apiKey and baseUrl > loadConfig() preserves baseUrl from config file [17.44ms]
+(pass) config-manager > embedding config apiKey and baseUrl > loadConfig() returns undefined for apiKey/baseUrl when not present in file [19.50ms]
+(pass) config-manager > embedding config apiKey and baseUrl > DEFAULT_EMBEDDING_CONFIG does NOT include secret or endpoint overrides [1.93ms]
+(pass) config-manager > embedding config apiKey and baseUrl > resolveEmbeddingApiKey prefers explicit apiKeyEnv over provider defaults [3.27ms]
+(pass) config-manager > embedding config apiKey and baseUrl > resolveEmbeddingApiKey falls back to provider environment variables [112.81ms]
+(pass) config-manager > embedding config apiKey and baseUrl > resolveEmbeddingApiKey marks plaintext config as deprecated [2.57ms]
+(pass) config-manager > embedding config apiKey and baseUrl > resolveEmbeddingApiKey does not resolve opaque apiKeyRef [2.81ms]
+(pass) config-manager > PROVIDER_DEFAULTS > has entries for local, openai, and ollama [114.55ms]
+(pass) config-manager > PROVIDER_DEFAULTS > openai has correct model and dimensions [1.89ms]
+(pass) config-manager > PROVIDER_DEFAULTS > ollama has correct model and dimensions [2.72ms]
+(pass) config-manager > PROVIDER_DEFAULTS > local matches DEFAULT_EMBEDDING_CONFIG model and dimensions [3.32ms]
+(pass) config-manager > resolveProviderDefaults > applies openai defaults to raw merge result [2.15ms]
+(pass) config-manager > resolveProviderDefaults > preserves user-explicit model field [2.53ms]
+(pass) config-manager > provider-specific default resolution > loadConfig() returns openai defaults when provider is openai without explicit model/dimensions [15.40ms]
+(pass) config-manager > provider-specific default resolution > loadConfig() returns ollama defaults when provider is ollama without explicit model/dimensions [17.38ms]
+(pass) config-manager > provider-specific default resolution > loadConfig() preserves explicit model when provider is openai and model is set [26.00ms]
+(pass) config-manager > provider-specific default resolution > loadConfig() preserves explicit dimensions when provider is openai and dimensions is set [17.85ms]
+(pass) config-manager > provider-specific default resolution > loadConfig() preserves both explicit model and dimensions when both are set [21.39ms]
+(pass) config-manager > provider-specific default resolution > loadConfig() returns local defaults for provider: local (unchanged behavior) [27.86ms]
+(pass) config-manager > provider-specific default resolution > loadConfig() returns local defaults for unknown provider (safe fallback) [23.99ms]
+(pass) config-manager > provider-specific default resolution > loadConfig() returns local defaults when no config file exists (unchanged behavior) [7.86ms]
+(pass) config-manager > search config > DEFAULT_CONFIG.search.defaultMode equals 'auto' [1.79ms]
+(pass) config-manager > search config > DEFAULT_CONFIG.search.temporalDecay.enabled equals true [1.83ms]
+(pass) config-manager > search config > DEFAULT_CONFIG.search.temporalDecay.halfLifeDays equals 30 [1.89ms]
+(pass) config-manager > search config > DEFAULT_SEARCH_CONFIG matches DEFAULT_CONFIG.search [2.62ms]
+(pass) config-manager > search config > loadConfig() with search.defaultMode override deep-merges correctly [148.92ms]
+(pass) config-manager > search config > loadConfig() with search.temporalDecay.halfLifeDays override deep-merges nested [15.03ms]
+(pass) config-manager > search config > loadConfig() with no search key returns full defaults [15.13ms]
+(pass) config-manager > ambient context config > DEFAULT_AMBIENT_CONTEXT_CONFIG has expected defaults [1.89ms]
+(pass) config-manager > ambient context config > DEFAULT_CONFIG has ambientContext property matching DEFAULT_AMBIENT_CONTEXT_CONFIG [6.79ms]
+(pass) config-manager > ambient context config > loadConfig() returns default ambientContext when no config file [6.83ms]
+(pass) config-manager > ambient context config > loadConfig() deep-merges partial ambientContext (only budget set, enabled uses default) [16.96ms]
+(pass) config-manager > ambient context config > loadConfig() preserves explicitly set ambientContext values [18.85ms]
+(pass) config-manager > ambient context config > loadConfig() with no ambientContext key returns full defaults [17.67ms]
+(pass) config-manager > machineId and remoteSync config > generates and saves a stable machineId if missing in newly loaded config [16.85ms]
+(pass) config-manager > machineId and remoteSync config > preserves existing machineId when loading [29.73ms]
+(pass) config-manager > machineId and remoteSync config > loads remoteSync defaults correctly [30.24ms]
+(pass) config-manager > machineId and remoteSync config > merges custom remoteSync config correctly [286.47ms]
+(pass) config-manager > machineId and remoteSync config > loads legacyMemoryFiles defaults as disabled [8.23ms]
+(pass) config-manager > machineId and remoteSync config > merges custom legacyMemoryFiles config correctly [14.86ms]
+
+src\infrastructure\hooks\git-syncer.test.ts:
+(pass) git-syncer > isGitRepo returns false when not a repository [1103.05ms]
+(pass) git-syncer > initRepo initializes Git repository correctly [3940.92ms]
+(pass) git-syncer > configureRemote sets git origin remote URL correctly [6134.06ms]
+(pass) git-syncer > sync commits, pulls, and pushes events-log correctly [57795.92ms]
+(pass) git-syncer dependency seams > initRepo returns false when git init fails [6.33ms]
+(pass) git-syncer dependency seams > initRepo skips local user configuration when user.name already exists [0.37ms]
+(pass) git-syncer dependency seams > configureRemote rejects blank remote URLs [0.19ms]
+(pass) git-syncer dependency seams > removeRemote treats missing origin as already removed [0.30ms]
+(pass) git-syncer dependency seams > getRemoteUrl returns null when origin is not configured [0.16ms]
+(pass) git-syncer dependency seams > sync reports init failure when events directory is not a git repo [0.29ms]
+(pass) git-syncer dependency seams > sync reports remote configuration failure [0.31ms]
+(pass) git-syncer dependency seams > sync skips pull and push when both automation flags are disabled [0.33ms]
+(pass) git-syncer dependency seams > sync fetches but skips pull when origin main does not exist yet [1.11ms]
+(pass) git-syncer dependency seams > sync aborts rebase and reports pull failures [2.27ms]
+(pass) git-syncer dependency seams > sync reports push failures [0.33ms]
+(pass) git-syncer dependency seams > sync marks rebuild needed when remote adds log files [0.24ms]
+(pass) git-syncer dependency seams > sync marks rebuild needed when log file content changes [3.98ms]
+(pass) git-syncer dependency seams > sync reports thrown transport errors without leaking exceptions [11.98ms]
+
+src\infrastructure\hooks\hook-runner.test.ts:
+(pass) hook-runner > getLogPath > returns path under memory/logs [0.38ms]
+(pass) hook-runner > getLogPath > uses homedir for base path [0.37ms]
+(pass) hook-runner > ensureLogDirectory > creates log directory if missing [77.17ms]
+(pass) hook-runner > ensureLogDirectory > no-op if directory exists [29.10ms]
+(pass) hook-runner > ensureLogDirectory > creates nested directories [6.16ms]
+(pass) hook-runner > resolveDefaultMemoryCommand > uses the PATH-resolved memory executable on Windows [3.27ms]
+(pass) hook-runner > resolveDefaultMemoryCommand > falls back to memory when Windows PATH has no memory executable [0.26ms]
+(pass) hook-runner > resolveDefaultMemoryCommand > uses memory command directly on non-Windows platforms [0.13ms]
+(pass) hook-runner > spawnBackgroundSync > calls spawn with detached: true [217.64ms]
+(pass) hook-runner > spawnBackgroundSync > spawns with correct command and arguments [203.17ms]
+(pass) hook-runner > spawnBackgroundSync > includes --quiet flag by default [105.50ms]
+(pass) hook-runner > spawnBackgroundSync > omits --quiet flag when quiet: false [10.84ms]
+(pass) hook-runner > spawnBackgroundSync > allows custom command override [4.90ms]
+(pass) hook-runner > spawnBackgroundSync > calls unref() to allow parent exit [12.09ms]
+(pass) hook-runner > spawnBackgroundSync > sets MEMORY_HOOK environment variable [8.89ms]
+(pass) hook-runner > spawnBackgroundSync > creates log directory before spawning [8.87ms]
+(pass) hook-runner > spawnBackgroundSync > uses stdio with file descriptors for logging [12.00ms]
+(pass) hook-runner > spawnBackgroundSync > returns spawn result with pid [10.52ms]
+(pass) hook-runner > spawnBackgroundSync > uses default options with XDG data directory resolution [14.76ms]
+(pass) hook-runner > spawnBackgroundSync > handles spawn returning undefined pid gracefully [10.92ms]
+(pass) hook-runner > argument construction > builds args array in correct order [10.22ms]
+(pass) hook-runner > argument construction > session ID with special characters is passed correctly [130.49ms]
+(pass) hook-runner > extractEntitiesFromSession > returns empty result for session with no messages [1089.13ms]
+(pass) hook-runner > extractEntitiesFromSession > returns success with entities extracted from messages [403.62ms]
+(pass) hook-runner > extractEntitiesFromSession > entities are linked to session after extraction [387.29ms]
+(pass) hook-runner > extractEntitiesFromSession > logs but does not fail on extraction error [292.01ms]
+(pass) hook-runner > extractEntitiesFromSession > skips extraction for empty sessions [576.62ms]
+(pass) hook-runner > extractEntitiesFromSession > includes summary in result when extracted [266.66ms]
+(pass) hook-runner > extractEntitiesFromSession > returns summary-only extraction results without persisting entities [503.06ms]
+(pass) hook-runner > isInvokedByHook > returns true when MEMORY_HOOK is 1 [0.67ms]
+(pass) hook-runner > isInvokedByHook > returns false when MEMORY_HOOK is not set [0.35ms]
+(pass) hook-runner > isInvokedByHook > returns false when MEMORY_HOOK is 0 [0.28ms]
+(pass) hook-runner > isInvokedByHook > returns false when MEMORY_HOOK is empty [0.39ms]
+
+src\infrastructure\hooks\log-writer.test.ts:
+(pass) log-writer > getLogDir > returns path under home directory [111.89ms]
+(pass) log-writer > getLogPath > returns path to sync.log [4.14ms]
+(pass) log-writer > logSync > creates directory if missing [20.55ms]
+(pass) log-writer > logSync > appends entry with timestamp [17.17ms]
+(pass) log-writer > logSync > writes valid JSON lines [20.92ms]
+(pass) log-writer > logSync > multiple calls append correctly [18.84ms]
+(pass) log-writer > logSync > includes optional sessionId [14.78ms]
+(pass) log-writer > logSync > includes optional durationMs [11.04ms]
+(pass) log-writer > logSync > includes optional error [12.62ms]
+(pass) log-writer > logSync > redacts secrets before persisting log entries [204.69ms]
+(pass) log-writer > logSync > includes optional hookEvent [12.36ms]
+(pass) log-writer > logSync > handles all log levels [15.24ms]
+(pass) log-writer > rotateLogsIfNeeded > renames old log file [14.81ms]
+(pass) log-writer > rotateLogsIfNeeded > no-op if file is recent [12.12ms]
+(pass) log-writer > rotateLogsIfNeeded > no-op if file missing [2.74ms]
+(pass) log-writer > rotateLogsIfNeeded > handles zero retention days [122.08ms]
+(pass) log-writer > readRecentLogs > returns parsed entries [309.10ms]
+(pass) log-writer > readRecentLogs > returns empty array if file missing [2.77ms]
+(pass) log-writer > readRecentLogs > handles malformed lines gracefully [13.36ms]
+(pass) log-writer > readRecentLogs > respects limit parameter [10.46ms]
+(pass) log-writer > readRecentLogs > handles empty file [303.77ms]
+(pass) log-writer > readRecentLogs > handles file with only whitespace [11.57ms]
+(pass) log-writer > readRecentLogs > returns all entries when under limit [100.03ms]
+(pass) log-writer > readRecentLogs > default limit is 100 [12.23ms]
+
+src\infrastructure\hooks\settings-manager.test.ts:
+(pass) settings-manager > path helpers > getClaudeSettingsPath returns correct path with override [3.72ms]
+(pass) settings-manager > path helpers > getBackupPath returns correct path with override [3.78ms]
+(pass) settings-manager > path helpers > getHookScriptPath returns correct path with override [2.60ms]
+(pass) settings-manager > path helpers > path helpers return default paths when no override [2.80ms]
+(pass) settings-manager > loadClaudeSettings > returns empty object when file does not exist [1.91ms]
+(pass) settings-manager > loadClaudeSettings > returns parsed settings when file exists [10.19ms]
+(pass) settings-manager > loadClaudeSettings > returns empty object for invalid JSON [311.77ms]
+(pass) settings-manager > backupSettings > returns false when settings do not exist [2.84ms]
+(pass) settings-manager > backupSettings > creates backup when settings exist [16.48ms]
+(pass) settings-manager > backupSettings > backup contains original content [14.17ms]
+(pass) settings-manager > restoreFromBackup > returns false when backup does not exist [3.14ms]
+(pass) settings-manager > restoreFromBackup > restores settings from backup [16.13ms]
+(pass) settings-manager > restoreFromBackup > creates settings directory if missing [11.06ms]
+(pass) settings-manager > installHooks > creates hooks in empty settings [10.53ms]
+(pass) settings-manager > installHooks > backs up existing settings before modifying [20.24ms]
+(pass) settings-manager > installHooks > preserves existing settings when adding hooks [19.77ms]
+(pass) settings-manager > installHooks > is idempotent - does not duplicate hooks [214.27ms]
+(pass) settings-manager > installHooks > adds SessionEnd hook with correct structure [10.11ms]
+(pass) settings-manager > installHooks > adds PreCompact hook with matcher [11.15ms]
+(pass) settings-manager > installHooks > uses forward slashes in hook command path [12.79ms]
+(pass) settings-manager > installHooks > preserves existing hooks of other types [23.61ms]
+(pass) settings-manager > uninstallHooks > removes memory-nexus hooks [10.27ms]
+(pass) settings-manager > uninstallHooks > preserves other hooks [13.33ms]
+(pass) settings-manager > uninstallHooks > returns success when no hooks to uninstall [6.16ms]
+(pass) settings-manager > uninstallHooks > removes empty hooks object after uninstall [12.08ms]
+(pass) settings-manager > uninstallHooks > removes PreCompact-only memory hooks without requiring SessionEnd [130.66ms]
+(pass) settings-manager > checkHooksInstalled > returns all false when nothing installed [3.34ms]
+(pass) settings-manager > checkHooksInstalled > detects installed hooks [116.24ms]
+(pass) settings-manager > checkHooksInstalled > detects hook script existence [9.78ms]
+(pass) settings-manager > checkHooksInstalled > detects backup existence [10.17ms]
+(pass) settings-manager > checkHooksInstalled > returns false for non-memory-nexus hooks [13.34ms]
+
+src\infrastructure\hooks\sync-hook-script.test.ts:
+(pass) sync-hook-script > readJsonFromStream > parses hook input JSON from multiple chunks [7.87ms]
+(pass) sync-hook-script > readJsonFromStream > rejects empty hook input [7.85ms]
+(pass) sync-hook-script > readJsonFromStream > rejects invalid hook input JSON with a stable error [5.90ms]
+(pass) sync-hook-script > readJsonFromStream > propagates stream read errors [6.30ms]
+(pass) sync-hook-script > PreCompact flush reminder > PreCompact event outputs flush reminder to stdout [534.09ms]
+(pass) sync-hook-script > PreCompact flush reminder > PreCompact with syncOnCompaction=false outputs reminder but exits without sync [677.35ms]
+(pass) sync-hook-script > PreCompact flush reminder > PreCompact with syncOnCompaction=true outputs reminder AND proceeds past sync check [524.06ms]
+(pass) sync-hook-script > PreCompact flush reminder > SessionEnd event does NOT output flush reminder [931.58ms]
+(pass) sync-hook-script > PreCompact flush reminder > PreCompact reminder contains the full expected message [1065.63ms]
+(pass) sync-hook-script > PreCompact flush reminder > PreCompact with autoSync=false exits early without reminder [368.20ms]
+(pass) sync-hook-script > executeSyncHook > exits without reading input when auto sync is disabled [178.81ms]
+(pass) sync-hook-script > executeSyncHook > logs read failures and exits successfully so hooks never block Claude Code [7.29ms]
+(pass) sync-hook-script > executeSyncHook > prints PreCompact reminder before honoring disabled compaction sync [5.71ms]
+(pass) sync-hook-script > executeSyncHook > warns and exits when hook input has no session id [4.89ms]
+(pass) sync-hook-script > executeSyncHook > spawns background sync and logs success for valid hook input [6.82ms]
+(pass) sync-hook-script > runSyncHookMain > creates production dependencies without executing them [5.90ms]
+(pass) sync-hook-script > runSyncHookMain > converts unexpected failures into non-blocking fatal hook logs [13.19ms]
+(pass) sync-hook-script > runSyncHookMain > passes non-Error fatal values through the same non-blocking surface [5.48ms]
+
+src\infrastructure\hooks\sync-logger-adapter.test.ts:
+(pass) FileSyncLogger > forwards sync log entries through the injected writer [0.46ms]
+
+src\presentation\cli\commands\friction\dashboard.test.ts:
+(pass) friction dashboard action > dashboard action returns exitCode 0 with rich output [555.82ms]
+(pass) friction dashboard action > dashboard action with JSON output [320.87ms]
+(pass) friction dashboard action > dashboard action with --html writes file [500.51ms]
+(pass) friction dashboard action > dashboard action with --html --json writes without logging or opening [160.05ms]
+(pass) friction dashboard action > dashboard action with AI format emits normalized text [439.37ms]
+
+src\presentation\cli\commands\friction\index.test.ts:
+(pass) createFrictionCommand > returns a Command instance [20.61ms]
+(pass) createFrictionCommand > has name 'friction' [3.32ms]
+(pass) createFrictionCommand > has description [0.71ms]
+(pass) createFrictionCommand > has log subcommand [2.13ms]
+(pass) createFrictionCommand > has list subcommand [0.76ms]
+(pass) createFrictionCommand > has resolve subcommand [2.55ms]
+(pass) createFrictionCommand > has wont-fix subcommand [0.85ms]
+(pass) createFrictionCommand > has dashboard subcommand [2.65ms]
+(pass) createFrictionCommand > log subcommand has --json option [2.86ms]
+(pass) createFrictionCommand > list subcommand has --json option [0.72ms]
+(pass) createFrictionCommand > resolve subcommand has --json option [0.66ms]
+(pass) createFrictionCommand > wont-fix subcommand has --json option [0.51ms]
+(pass) createFrictionCommand > dashboard subcommand has --json option [1.09ms]
+(pass) createFrictionCommand > has --format option on parent command with default and ai choice [0.93ms]
+(pass) createFrictionCommand > log subcommand has --severity option with default [0.65ms]
+(pass) createFrictionCommand > log subcommand has --category option with default [0.64ms]
+(pass) createFrictionCommand > list subcommand has --all option [1.19ms]
+(pass) createFrictionCommand > list subcommand exposes durable query contract options [2.76ms]
+(pass) createFrictionCommand > resolve subcommand has required --resolution option [2.03ms]
+(pass) createFrictionCommand > executeFrictionCommand reports unknown actions through command result [248.90ms]
+(pass) createFrictionCommand > executeFrictionCommand formats database initialization failures as JSON [4.70ms]
+
+src\presentation\cli\commands\friction\list.test.ts:
+(pass) friction list action > list action returns exitCode 0 [136.44ms]
+(pass) friction list action > list action with --all returns exitCode 0 [98.03ms]
+(pass) friction list action > list action with JSON output [378.80ms]
+(pass) friction list action > filters list output through the durable JSON contract [596.38ms]
+(pass) friction list action > count mode returns only count and redacted filter fingerprints [617.93ms]
+(pass) friction list action > min threshold uses durable count exit codes [496.35ms]
+(pass) friction list action > invalid list arguments return exit code 2 without echoing contains filters [96.04ms]
+(pass) friction list action > renders filtered text list with truncation, reviewed entries, and tool summary [196.96ms]
+(pass) friction list action > renders aged text entries without a tool filter or new-entry summary [4.60ms]
+(pass) friction list action > validates all durable list argument variants without echoing raw filters [5.49ms]
+(pass) friction list action > emits JSON metadata for all, status, since, limit, and min threshold filters [4.33ms]
+
+src\presentation\cli\commands\friction\log.test.ts:
+(pass) friction log action > log action returns exitCode 0 [313.45ms]
+(pass) friction log action > log action with JSON output [87.81ms]
+(pass) friction log action > log action returns exitCode 1 without description [84.69ms]
+
+src\presentation\cli\commands\friction\purge.test.ts:
+(pass) friction purge action > purge without --force requires --dry-run or --force [92.38ms]
+(pass) friction purge action > purge returns exitCode 1 without pattern [268.59ms]
+(pass) friction purge action > purge with --force on non-matching pattern reports zero [225.89ms]
+(pass) friction purge action > dry-run outputs JSON when no entries match [7.80ms]
+(pass) friction purge action > dry-run lists matching entries and caps preview after ten rows [9.42ms]
+(pass) friction purge action > dry-run outputs JSON match counts [10.03ms]
+(pass) friction purge action > force purge reports JSON deleted count [10.75ms]
+(pass) friction purge action > force purge reports nonzero text deletion count [10.49ms]
+
+src\presentation\cli\commands\friction\resolve.test.ts:
+(pass) friction resolve action > resolve action returns exitCode 0 after logging [752.23ms]
+(pass) friction resolve action > resolve action returns exitCode 1 for non-existent id [715.13ms]
+(pass) friction resolve action > resolve action with JSON output [642.42ms]
+(pass) friction resolve action > resolve action returns exitCode 1 without id [700.15ms]
+(pass) friction resolve action > resolve action returns exitCode 1 with non-numeric id [167.29ms]
+
+src\presentation\cli\commands\friction\wontfix.test.ts:
+(pass) friction wont-fix action > wont-fix action returns exitCode 0 after logging [429.87ms]
+(pass) friction wont-fix action > wont-fix action returns exitCode 1 for non-existent id [85.97ms]
+(pass) friction wont-fix action > wont-fix action returns exitCode 1 without id [195.96ms]
+--------------------------------------------------------------------------|---------|---------|-------------------
+File                                                                      | % Funcs | % Lines | Uncovered Line #s
+--------------------------------------------------------------------------|---------|---------|-------------------
+All files                                                                 |   40.22 |   44.71 |
+ src\application\services\friction-service.ts                             |   89.47 |  100.00 |
+ src\application\services\fts-sanitizer.ts                                |    0.00 |    0.00 | 26-58
+ src\application\services\llm-extractor.ts                                |   33.33 |   18.06 | 108-113,199-246,253-267,274-293,300-333,341-344
+ src\application\services\rrf-fusion.ts                                   |    0.00 |    0.00 | 41-117
+ src\domain\entities\backfill-state.ts                                    |    0.00 |    6.90 | 28-32,40-88
+ src\domain\entities\dream-entry.ts                                       |    0.00 |    2.19 | 8-482,486-491,495-509,513-523,527-532,536-538,542-544,548,552-558,562-567,571,575
+ src\domain\entities\entity.ts                                            |    0.00 |    5.47 | 88-97,106-201,209-215,223-230
+ src\domain\entities\extraction-state.ts                                  |    0.00 |    7.77 | 45-57,65-186,193,201-209,217-226,234-243,251-261,269-282
+ src\domain\entities\fact.ts                                              |    0.00 |    6.67 | 51-66,73-132,139-149,156-166
+ src\domain\entities\friction-entry.ts                                    |  100.00 |  100.00 |
+ src\domain\entities\graph-edge.ts                                        |    0.00 |   12.44 | 85-100,104-211,215-217,221-238,242-261,266-275,279-287,291-293,297-299,303,307-311,315
+ src\domain\entities\index.ts                                             |  100.00 |  100.00 |
+ src\domain\entities\link.ts                                              |    0.00 |    8.51 | 36-41,49-116,123,132-142
+ src\domain\entities\memory-event.ts                                      |    0.00 |   10.54 | 101,105-123,127-190,194,199-214,218-247,251-257,261-266,270-276,280-286,290-302,306-335,339-355,359-374,378-386,390-399,403-409,413-422,426-428,432-435,439-442,446-449,453-456,460-462,466,470-484,488,492-495,499
+ src\domain\entities\memory-file.ts                                       |    0.00 |   11.46 | 53-62,73-147
+ src\domain\entities\memory-governance.ts                                 |    0.00 |   15.72 | 136-157,161-242,246,250-268,272-287,291-313,317-338,343-346,350-353,357-390,394-410,415-417,421-423,427,431
+ src\domain\entities\memory-utility-metric.ts                             |    0.00 |    9.14 | 63-80,84-149,153,157-162,166-170,174-190,194-211,216-235,239-241,245-247,251,255
+ src\domain\entities\message.ts                                           |   63.64 |   56.86 | 86-99,106,114-120
+ src\domain\entities\persona-entry.ts                                     |    0.00 |   10.06 | 75-92,96-165,169,173-191,195-212,217-249,253,257
+ src\domain\entities\session.ts                                           |   50.00 |   37.36 | 93-118,125,134-142,151-162,170-178
+ src\domain\entities\tool-use.ts                                          |    0.00 |    7.69 | 34-39,47-119,126,134-141,149-156
+ src\domain\errors\error-codes.ts                                         |  100.00 |  100.00 |
+ src\domain\errors\index.ts                                               |  100.00 |  100.00 |
+ src\domain\errors\memory-error.ts                                        |   50.00 |   47.83 | 68-79
+ src\domain\errors\unknown-error.ts                                       |   50.00 |   66.67 | 12
+ src\domain\index.ts                                                      |  100.00 |  100.00 |
+ src\domain\ports\embedding.ts                                            |    0.00 |   20.00 | 37-46,51-56
+ src\domain\ports\index.ts                                                |  100.00 |  100.00 |
+ src\domain\services\content-extractor.ts                                 |    0.00 |   11.25 | 56-66,75-87,96-108,117-120,129-135,139-142,147,151-168
+ src\domain\services\index.ts                                             |  100.00 |  100.00 |
+ src\domain\services\path-decoder.ts                                      |    0.00 |   15.71 | 33,42-56,66-67,77,87-108,121-138
+ src\domain\services\query-parser.ts                                      |    0.00 |    9.86 | 27-75,84-96,105,114
+ src\domain\value-objects\embedding-config.ts                             |    0.00 |    8.70 | 26-29,37-56,64-97,105-109
+ src\domain\value-objects\embedding-result.ts                             |    0.00 |    8.47 | 24-26,34-72,80-91
+ src\domain\value-objects\index.ts                                        |  100.00 |  100.00 |
+ src\domain\value-objects\project-path.ts                                 |   63.64 |   69.09 | 46-51,95,103,116-124
+ src\domain\value-objects\search-query.ts                                 |    0.00 |   26.32 | 15,24-35,43
+ src\domain\value-objects\search-result.ts                                |    0.00 |    6.52 | 36-44,52-126,134,142
+ src\infrastructure\capabilities\capability-status.ts                     |    0.00 |    7.53 | 50-93,97-114,118-142,146-153,157-158,162-177,181-195,199-205,210-216,221-246,250-253
+ src\infrastructure\capabilities\index.ts                                 |  100.00 |  100.00 |
+ src\infrastructure\database\connection.ts                                |   50.00 |   56.25 | 66,140-146,151-165,180,196-202,209-214,227-230,277,309-313,338-353
+ src\infrastructure\database\health-checker.ts                            |    0.00 |    5.70 | 230-237,253-260,271-292,304-318,334-397,402-437,441,445,457-468,481-494,504-513,517-539,543-547,566-627,643-679,689-734
+ src\infrastructure\database\index.ts                                     |  100.00 |  100.00 |
+ src\infrastructure\database\repositories\backfill-state-repository.ts    |    0.00 |    6.56 | 25-74,78-84
+ src\infrastructure\database\repositories\dream-repository.ts             |    0.00 |    3.74 | 40-129,133-177,181-204,209-225,229,233-261
+ src\infrastructure\database\repositories\embedding-repository.ts         |    0.00 |    8.75 | 56-78,88-126,133-143,160-186,195-198,210-213,223-224,233-236,245-248,262-270,282-293,307-313
+ src\infrastructure\database\repositories\entity-repository.ts            |   10.00 |   12.99 | 103-295,302-309
+ src\infrastructure\database\repositories\extraction-log-repository.ts    |    0.00 |    5.26 | 28-69,73-84
+ src\infrastructure\database\repositories\extraction-state-repository.ts  |    0.00 |    4.81 | 48-78,85-152
+ src\infrastructure\database\repositories\fact-repository.ts              |    0.00 |    2.17 | 27-195,199-209
+ src\infrastructure\database\repositories\friction-repository.ts          |   80.95 |   82.61 | 97-144
+ src\infrastructure\database\repositories\graph-repository.ts             |    0.00 |    2.91 | 37-174,178-220,224-241,245
+ src\infrastructure\database\repositories\index.ts                        |  100.00 |  100.00 |
+ src\infrastructure\database\repositories\link-repository.ts              |    0.00 |    2.98 | 51-71,78-219
+ src\infrastructure\database\repositories\memory-file-repository.ts       |    0.00 |    5.88 | 52-153,157-166
+ src\infrastructure\database\repositories\memory-governance-repository.ts |    0.00 |    5.78 | 51-178,182-222,226-247,251-272,277-301,305-342,346-348,352-354,358,362,366-369,373,377-384,388-390,394-396,400-402,406-409
+ src\infrastructure\database\repositories\memory-utility-repository.ts    |    0.00 |    4.07 | 27-96,100-130,134-150
+ src\infrastructure\database\repositories\message-repository.ts           |   71.43 |   34.21 | 91-101,126-189
+ src\infrastructure\database\repositories\persona-repository.ts           |    0.00 |    2.89 | 33-149,153-185,189-206
+ src\infrastructure\database\repositories\session-repository.ts           |   12.50 |   12.45 | 114-151,168-368
+ src\infrastructure\database\repositories\tool-use-repository.ts          |    0.00 |    4.80 | 57-167,174-181
+ src\infrastructure\database\schema.ts                                    |  100.00 |   92.54 | 768,792-793,795,805
+ src\infrastructure\database\services\context-service.ts                  |    0.00 |    4.48 | 99-243,258,268-290,300-322
+ src\infrastructure\database\services\hybrid-search-service.ts            |    0.00 |    2.76 | 110-115,122-208,215-260,272-381,395-412,420-680,687-697,704-713,720-721,728-774
+ src\infrastructure\database\services\index.ts                            |  100.00 |  100.00 |
+ src\infrastructure\database\services\search-service.ts                   |    0.00 |    4.64 | 47-92,99-166,179-208
+ src\infrastructure\database\services\stats-service.ts                    |    0.00 |    4.55 | 46-108
+ src\infrastructure\embedding\ollama-provider.ts                          |    0.00 |    5.67 | 43-113,118-152,159-185
+ src\infrastructure\embedding\openai-provider.ts                          |    0.00 |    4.46 | 39-140,144-148
+ src\infrastructure\embedding\transformers-js-provider.ts                 |    0.00 |    6.25 | 36-120,124-128
+ src\infrastructure\hooks\auto-memory-writer.ts                           |   75.00 |  100.00 |
+ src\infrastructure\hooks\config-manager.ts                               |  100.00 |   99.07 | 291,372
+ src\infrastructure\hooks\git-syncer.ts                                   |  100.00 |  100.00 |
+ src\infrastructure\hooks\hook-runner.ts                                  |  100.00 |   91.82 | 259-260,270,272-273,275-278
+ src\infrastructure\hooks\index.ts                                        |  100.00 |  100.00 |
+ src\infrastructure\hooks\log-writer.ts                                   |  100.00 |   93.33 | 77,90,199-200
+ src\infrastructure\hooks\settings-manager.ts                             |  100.00 |  100.00 |
+ src\infrastructure\hooks\sync-hook-script.ts                             |   76.92 |   95.05 | 110,190-191,220,226
+ src\infrastructure\hooks\sync-logger-adapter.ts                          |  100.00 |  100.00 |
+ src\infrastructure\llm\anthropic-extractor.ts                            |    0.00 |   17.24 | 24-47
+ src\infrastructure\llm\claude-cli-extractor.ts                           |    0.00 |   13.04 | 16-55
+ src\infrastructure\llm\extraction-helper.ts                              |    0.00 |    1.43 | 14-46,53-88
+ src\infrastructure\llm\ollama-extractor.ts                               |    0.00 |    9.76 | 23-59
+ src\infrastructure\llm\openai-extractor.ts                               |    0.00 |   10.00 | 26-61
+ src\infrastructure\paths.ts                                              |   92.86 |   96.67 | 14,173
+ src\infrastructure\providers\provider-defaults.ts                        |  100.00 |  100.00 |
+ src\infrastructure\providers\provider-egress-policy.ts                   |    0.00 |    4.08 | 34-43,47-57,61-63,67-140,144-154,159-171,176-189,194-198
+ src\infrastructure\providers\provider-registry.ts                        |    5.26 |   35.77 | 53,57,61-78,82-92,96-99,113-115,123-125,128-132,141-144,152-159,162-167,177-179,182-184,191-193,196-198,206-208,222-229,232-236,244,248,252,256,260-265,269,273,277-294,298-309,313-317,321-329,333-350,354-363
+ src\infrastructure\security\pattern-redactor.ts                          |   57.14 |   77.08 | 95-97,101-105,107,112,143-145,151-163,178-184
+ src\presentation\cli\commands\friction\dashboard.ts                      |   66.67 |   92.31 | 68-70
+ src\presentation\cli\commands\friction\index.ts                          |   33.33 |   90.85 | 46-47,68-69,80-81,92-93,104-105,117-118,143
+ src\presentation\cli\commands\friction\list.ts                           |  100.00 |  100.00 |
+ src\presentation\cli\commands\friction\log.ts                            |  100.00 |  100.00 |
+ src\presentation\cli\commands\friction\purge.ts                          |  100.00 |   95.83 | 36,62
+ src\presentation\cli\commands\friction\resolve.ts                        |  100.00 |  100.00 |
+ src\presentation\cli\commands\friction\wontfix.ts                        |  100.00 |   85.71 | 27-28,34
+ src\presentation\cli\formatters\ai-formatter.ts                          |   66.67 |   80.00 | 41-42
+ src\presentation\cli\formatters\color.ts                                 |   88.89 |   75.86 | 36,39-41,44,58,135
+ src\presentation\cli\formatters\envelope.ts                              |  100.00 |  100.00 |
+ src\presentation\cli\formatters\error-formatter.ts                       |   75.00 |   38.04 | 38-72,76-78,80,94,130,132,138-140,162-173
+ src\presentation\cli\formatters\friction-dashboard.ts                    |  100.00 |   98.04 | 38,68,127
+--------------------------------------------------------------------------|---------|---------|-------------------
+
+ 302 pass
+ 0 fail
+ 672 expect() calls
+Ran 302 tests across 16 files. [94.56s]

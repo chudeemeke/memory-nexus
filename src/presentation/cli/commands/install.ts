@@ -7,10 +7,12 @@
 
 import { Command } from "commander";
 import type { CommandResult } from "../command-result.js";
-import { copyFileSync, existsSync, mkdirSync } from "node:fs";
-import { dirname, join } from "node:path";
+import { copyFileSync, mkdirSync } from "node:fs";
+import { dirname } from "node:path";
+import { resolveHookScriptSource } from "../../../infrastructure/hooks/hook-script-source.js";
 import {
     installHooks,
+    prepareHookInstallation,
     checkHooksInstalled,
     getHookScriptPath,
     loadClaudeSettings,
@@ -28,7 +30,7 @@ export interface InstallOptions {
  * Runtime dependencies for executeInstallCommand.
  *
  * Operational dependencies that tests substitute for isolation.
- * Defaults to production resolution (multi-path candidate search) when omitted.
+ * Defaults to resolution within the executing module's package when omitted.
  */
 export interface InstallCommandDeps {
     /**
@@ -72,26 +74,30 @@ export async function executeInstallCommand(
     options: InstallOptions,
     deps: InstallCommandDeps = {}
 ): Promise<CommandResult> {
+    try {
+        prepareHookInstallation(deps.hookOverrides);
+    } catch {
+        console.error("Error: Hook installation refused. Check settings format and ensure settings, backup and hook paths are distinct regular files or absent.");
+        return { exitCode: 1 };
+    }
     const status = checkHooksInstalled(deps.hookOverrides);
 
     // Check if already installed
-    if (status.sessionEnd && status.preCompact && !options.force) {
+    if (status.sessionEnd && status.preCompact && status.hookScriptExists && !options.force) {
         console.log("Hooks are already installed.");
         console.log("Use --force to reinstall.");
         return { exitCode: 0 };
     }
 
-    // Copy hook script to hooks directory
-    const hookScriptDest = getHookScriptPath(deps.hookOverrides);
-    mkdirSync(dirname(hookScriptDest), { recursive: true });
-
-    // Find built hook script (from package or relative path)
+    // Resolve the package-owned asset before changing any destination.
     const hookScriptSrc = findHookScriptSource(deps.hookScriptSourceOverride);
     if (!hookScriptSrc) {
-        console.error("Error: Hook script not found. Run 'bun run build:hook' first.");
+        console.error("Error: Packaged sync hook not found. Reinstall @chude/memory or rebuild the package.");
         return { exitCode: 1 };
     }
 
+    const hookScriptDest = getHookScriptPath(deps.hookOverrides);
+    mkdirSync(dirname(hookScriptDest), { recursive: true });
     copyFileSync(hookScriptSrc, hookScriptDest);
     console.log(`Copied hook script to ${hookScriptDest}`);
 
@@ -159,29 +165,12 @@ export function warnStaleHookReferences(
 /**
  * Find the hook script source file.
  *
- * Checks common locations for the built hook script. When `override` is
- * provided, checks only that path (used by tests to point at a fixture).
+ * Uses the executing module's package manifest. When `override` is provided,
+ * checks only that explicit path (used by tests to point at a fixture).
  *
  * @param override Optional explicit path to use instead of candidate search
  * @returns Path to hook script or null if not found
  */
 export function findHookScriptSource(override?: string): string | null {
-    // Use override if provided
-    if (override !== undefined) {
-        return existsSync(override) ? override : null;
-    }
-
-    // When running from source, look relative to this file
-    // import.meta.dir points to src/presentation/cli/commands/
-    const fromSource = join(import.meta.dir, "../../../../dist/sync-hook.js");
-
-    // When running from installed package
-    const fromCwd = join(process.cwd(), "dist/sync-hook.js");
-
-    // Additional fallback for development
-    const fromRoot = join(process.cwd(), "dist", "sync-hook.js");
-
-    const candidates = [fromSource, fromCwd, fromRoot];
-
-    return candidates.find((p) => existsSync(p)) ?? null;
+    return resolveHookScriptSource(import.meta.dir, override);
 }

@@ -27,35 +27,31 @@ export class SqliteFactRepository implements IFactRepository {
   constructor(private readonly db: Database) {}
 
   async findById(id: number): Promise<Fact | null> {
-    const row = this.db
-      .prepare("SELECT * FROM facts WHERE id = ?")
-      .get(id) as FactRow | null;
+    using statement = this.db.prepare("SELECT * FROM facts WHERE id = ?");
+    const row = statement.get(id) as FactRow | null;
 
     if (!row) return null;
     return this.toEntity(row);
   }
 
   async findByUuid(uuid: string): Promise<Fact | null> {
-    const row = this.db
-      .prepare("SELECT * FROM facts WHERE uuid = ?")
-      .get(uuid) as FactRow | null;
+    using statement = this.db.prepare("SELECT * FROM facts WHERE uuid = ?");
+    const row = statement.get(uuid) as FactRow | null;
 
     if (!row) return null;
     return this.toEntity(row);
   }
 
   async findByProject(project: string): Promise<Fact[]> {
-    const rows = this.db
-      .prepare("SELECT * FROM facts WHERE project = ? ORDER BY observed_at DESC")
-      .all(project) as FactRow[];
+    using statement = this.db.prepare("SELECT * FROM facts WHERE project = ? ORDER BY observed_at DESC");
+    const rows = statement.all(project) as FactRow[];
 
     return rows.map(row => this.toEntity(row));
   }
 
   async findRecent(limit: number): Promise<Fact[]> {
-    const rows = this.db
-      .prepare("SELECT * FROM facts ORDER BY observed_at DESC LIMIT ?")
-      .all(limit) as FactRow[];
+    using statement = this.db.prepare("SELECT * FROM facts ORDER BY observed_at DESC LIMIT ?");
+    const rows = statement.all(limit) as FactRow[];
 
     return rows.map(row => this.toEntity(row));
   }
@@ -67,13 +63,12 @@ export class SqliteFactRepository implements IFactRepository {
     const existing = await this.findByUuid(fact.uuid);
 
     if (existing) {
-      this.db
-        .prepare(`
+      using statement = this.db.prepare(`
           UPDATE facts
           SET type = ?, project = ?, content = ?, metadata = ?, observed_at = ?, superseded_at = ?, superseded_by = ?, updated_at = datetime('now')
           WHERE uuid = ?
-        `)
-        .run(
+        `);
+      statement.run(
           fact.type,
           fact.project,
           fact.content,
@@ -85,13 +80,12 @@ export class SqliteFactRepository implements IFactRepository {
         );
       return fact.withId(existing.id!);
     } else {
-      const result = this.db
-        .prepare(`
+      using statement = this.db.prepare(`
           INSERT INTO facts (
             uuid, type, project, content, metadata, observed_at, superseded_at, superseded_by
           ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-        `)
-        .run(
+        `);
+      const result = statement.run(
           fact.uuid,
           fact.type,
           fact.project,
@@ -111,18 +105,16 @@ export class SqliteFactRepository implements IFactRepository {
       for (const fact of facts) {
         // Run synchronously within the transaction block.
         const metadataStr = fact.metadata ? JSON.stringify(fact.metadata) : null;
-        const existing = this.db
-          .prepare("SELECT id FROM facts WHERE uuid = ?")
-          .get(fact.uuid) as { id: number } | null;
+        using lookup = this.db.prepare("SELECT id FROM facts WHERE uuid = ?");
+        const existing = lookup.get(fact.uuid) as { id: number } | null;
 
         if (existing) {
-          this.db
-            .prepare(`
+          using statement = this.db.prepare(`
               UPDATE facts
               SET type = ?, project = ?, content = ?, metadata = ?, observed_at = ?, superseded_at = ?, superseded_by = ?, updated_at = datetime('now')
               WHERE uuid = ?
-            `)
-            .run(
+            `);
+          statement.run(
               fact.type,
               fact.project,
               fact.content,
@@ -134,13 +126,12 @@ export class SqliteFactRepository implements IFactRepository {
             );
           saved.push(fact.withId(existing.id));
         } else {
-          const result = this.db
-            .prepare(`
+          using statement = this.db.prepare(`
               INSERT INTO facts (
                 uuid, type, project, content, metadata, observed_at, superseded_at, superseded_by
               ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-            `)
-            .run(
+            `);
+          const result = statement.run(
               fact.uuid,
               fact.type,
               fact.project,
@@ -160,23 +151,21 @@ export class SqliteFactRepository implements IFactRepository {
   }
 
   async search(query: string, limit: number = 20): Promise<Fact[]> {
-    const rows = this.db
-      .prepare(`
+    using statement = this.db.prepare(`
         SELECT f.* FROM facts f
         JOIN facts_fts fts ON f.id = fts.rowid
         WHERE facts_fts MATCH ?
         ORDER BY f.observed_at DESC
         LIMIT ?
-      `)
-      .all(query, limit) as FactRow[];
+      `);
+    const rows = statement.all(query, limit) as FactRow[];
 
     return rows.map(row => this.toEntity(row));
   }
 
   async superseded(uuid: string, supersededAt: Date, supersededByUuid: string): Promise<void> {
-    this.db
-      .prepare("UPDATE facts SET superseded_at = ?, superseded_by = ?, updated_at = datetime('now') WHERE uuid = ?")
-      .run(supersededAt.toISOString(), supersededByUuid, uuid);
+    using statement = this.db.prepare("UPDATE facts SET superseded_at = ?, superseded_by = ?, updated_at = datetime('now') WHERE uuid = ?");
+    statement.run(supersededAt.toISOString(), supersededByUuid, uuid);
   }
 
   // Alias to support either interface name variation
@@ -185,9 +174,8 @@ export class SqliteFactRepository implements IFactRepository {
   }
 
   async findAll(): Promise<Fact[]> {
-    const rows = this.db
-      .prepare("SELECT * FROM facts ORDER BY observed_at DESC")
-      .all() as FactRow[];
+    using statement = this.db.prepare("SELECT * FROM facts ORDER BY observed_at DESC");
+    const rows = statement.all() as FactRow[];
 
     return rows.map(row => this.toEntity(row));
   }

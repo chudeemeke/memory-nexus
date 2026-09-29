@@ -54,34 +54,32 @@ export class SqliteMemoryFileRepository implements IMemoryFileRepository {
     }
 
     async findByPath(filePath: string): Promise<MemoryFile | null> {
-        const row = this.db
-            .prepare<MemoryFileRow, [string]>(
+        using statement = this.db.prepare<MemoryFileRow, [string]>(
                 "SELECT * FROM memory_files WHERE file_path = ?"
-            )
-            .get(filePath);
+            );
+        const row = statement.get(filePath);
         return row ? this.toEntity(row) : null;
     }
 
     async findByType(fileType: MemoryFileType): Promise<MemoryFile[]> {
-        const rows = this.db
-            .prepare<MemoryFileRow, [string]>(
+        using statement = this.db.prepare<MemoryFileRow, [string]>(
                 "SELECT * FROM memory_files WHERE file_type = ? ORDER BY last_indexed_at DESC"
-            )
-            .all(fileType);
+            );
+        const rows = statement.all(fileType);
         return rows.map((r) => this.toEntity(r));
     }
 
     async findByProject(projectEncoded: string): Promise<MemoryFile[]> {
-        const rows = this.db
-            .prepare<MemoryFileRow, [string]>(
+        using statement = this.db.prepare<MemoryFileRow, [string]>(
                 "SELECT * FROM memory_files WHERE project_encoded = ? ORDER BY file_path"
-            )
-            .all(projectEncoded);
+            );
+        const rows = statement.all(projectEncoded);
         return rows.map((r) => this.toEntity(r));
     }
 
     async save(file: MemoryFile): Promise<void> {
-        this.db.prepare(UPSERT_SQL).run(
+        using statement = this.db.prepare(UPSERT_SQL);
+        statement.run(
             file.filePath,
             file.fileType,
             file.projectEncoded ?? null,
@@ -92,7 +90,7 @@ export class SqliteMemoryFileRepository implements IMemoryFileRepository {
     }
 
     async saveMany(files: MemoryFile[]): Promise<void> {
-        const stmt = this.db.prepare(UPSERT_SQL);
+        using stmt = this.db.prepare(UPSERT_SQL);
         const transaction = this.db.transaction(() => {
             for (const file of files) {
                 stmt.run(
@@ -112,15 +110,14 @@ export class SqliteMemoryFileRepository implements IMemoryFileRepository {
         const sanitized = sanitizeFtsQuery(query);
         if (!sanitized) return [];
 
-        const rows = this.db
-            .prepare<MemoryFileRow, [string, number]>(`
+        using statement = this.db.prepare<MemoryFileRow, [string, number]>(`
                 SELECT m.* FROM memory_files m
                 JOIN memory_files_fts f ON f.rowid = m.id
                 WHERE memory_files_fts MATCH ?
                 ORDER BY rank
                 LIMIT ?
-            `)
-            .all(sanitized, limit);
+            `);
+        const rows = statement.all(sanitized, limit);
         return rows.map((r) => this.toEntity(r));
     }
 
@@ -129,28 +126,26 @@ export class SqliteMemoryFileRepository implements IMemoryFileRepository {
         limit: number = 20
     ): Promise<MemoryFile[]> {
         if (excludeProject) {
-            const rows = this.db
-                .prepare<MemoryFileRow, [string, number]>(
+            using statement = this.db.prepare<MemoryFileRow, [string, number]>(
                     `SELECT * FROM memory_files
                      WHERE file_type = 'learnings'
                        AND content LIKE '%Applies to: cross-project%'
                        AND (project_encoded IS NULL OR project_encoded != ?)
                      ORDER BY last_indexed_at DESC
                      LIMIT ?`
-                )
-                .all(excludeProject, limit);
+                );
+            const rows = statement.all(excludeProject, limit);
             return rows.map((r) => this.toEntity(r));
         }
 
-        const rows = this.db
-            .prepare<MemoryFileRow, [number]>(
+        using statement = this.db.prepare<MemoryFileRow, [number]>(
                 `SELECT * FROM memory_files
                  WHERE file_type = 'learnings'
                    AND content LIKE '%Applies to: cross-project%'
                  ORDER BY last_indexed_at DESC
                  LIMIT ?`
-            )
-            .all(limit);
+            );
+        const rows = statement.all(limit);
         return rows.map((r) => this.toEntity(r));
     }
 

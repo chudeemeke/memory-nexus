@@ -21,7 +21,6 @@ import {
     checkProviderEgressHealth,
     checkCapabilityInteropHealth,
     runHealthCheck,
-    type HealthCheckResult,
 } from "./health-checker.js";
 
 import type { PathOverrides } from "../hooks/settings-manager.js";
@@ -75,26 +74,31 @@ describe("health-checker", () => {
         });
 
         it("returns 'corrupted' when PRAGMA fails", () => {
-            // Create a mock database object that throws on query
+            let attempted = false;
             const mockDb = {
-                query: () => {
+                prepare: () => {
+                    attempted = true;
                     throw new Error("Database error");
                 },
             } as unknown as Database;
 
             const result = checkDatabaseIntegrity(mockDb);
             expect(result).toBe("corrupted");
+            expect(attempted).toBe(true);
         });
 
         it("returns 'corrupted' when integrity_check reports a non-ok result", () => {
+            let inspected = false, disposed = false;
             const mockDb = {
-                query: () => ({
-                    get: () => ({ integrity_check: "row 2 missing from index sessions_project" }),
+                prepare: () => ({
+                    get: () => { inspected = true; return { integrity_check: "row 2 missing from index sessions_project" }; },
+                    [Symbol.dispose]: () => { disposed = true; },
                 }),
             } as unknown as Database;
 
             const result = checkDatabaseIntegrity(mockDb);
             expect(result).toBe("corrupted");
+            expect(inspected).toBe(true); expect(disposed).toBe(true);
         });
     });
 
@@ -143,25 +147,31 @@ describe("health-checker", () => {
         });
 
         it("returns 'corrupted' when PRAGMA fails", () => {
+            let attempted = false;
             const mockDb = {
-                query: () => {
+                prepare: () => {
+                    attempted = true;
                     throw new Error("Database error");
                 },
             } as unknown as Database;
 
             const result = checkQuickIntegrity(mockDb);
             expect(result).toBe("corrupted");
+            expect(attempted).toBe(true);
         });
 
         it("returns 'corrupted' when quick_check has no ok row", () => {
+            let inspected = false, disposed = false;
             const mockDb = {
-                query: () => ({
-                    get: () => null,
+                prepare: () => ({
+                    get: () => { inspected = true; return null; },
+                    [Symbol.dispose]: () => { disposed = true; },
                 }),
             } as unknown as Database;
 
             const result = checkQuickIntegrity(mockDb);
             expect(result).toBe("corrupted");
+            expect(inspected).toBe(true); expect(disposed).toBe(true);
         });
     });
 

@@ -6,7 +6,7 @@
  */
 
 import { describe, expect, test, beforeEach, afterEach } from "bun:test";
-import { mkdirSync, rmSync, existsSync } from "node:fs";
+import { mkdirSync, rmSync, existsSync, symlinkSync } from "node:fs";
 import { join } from "node:path";
 import { tmpdir } from "node:os";
 import { ProjectNameResolver } from "./project-name-resolver.js";
@@ -144,43 +144,22 @@ describe("ProjectNameResolver", () => {
       expect(name).toBe("test");
     });
 
-    test("probes hidden directories via statSync when readdirSync misses them", () => {
-      // iCloudDrive on Windows is a real directory that exists and is traversable,
-      // but readdirSync on its parent does not list it. The resolver must fall back
-      // to probing candidate names via statSync.
-      //
-      // We can't simulate a truly hidden directory in a temp dir, but we CAN test
-      // against the real filesystem if iCloudDrive exists. Skip otherwise.
-      const iCloudPath = "C:/Users/Destiny/iCloudDrive";
-      if (!existsSync(iCloudPath)) {
-        return; // Skip on systems without iCloudDrive
-      }
-
-      const resolver = new ProjectNameResolver("C:/");
-      const name = resolver.resolveFromEncodedPath(
-        "C--Users-Destiny-iCloudDrive-Documents-AI-Tools-Anthropic-Solution-Projects-memory-nexus"
-      );
-      expect(name).toBe("memory-nexus");
+    test("resolves a hyphenated terminal directory omitted from directory enumeration", () => {
+      createDirs("storage", "Users/Projects");
+      // Directory links are traversable via stat but their Dirents are not
+      // directories. This exercises the probe using a controlled filesystem.
+      symlinkSync(join(testDir, "storage"), join(testDir, "Users/Projects/memory-nexus"), "junction");
+      const resolver = new ProjectNameResolver(testDir);
+      expect(resolver.resolveFromEncodedPath("C--Users-Projects-memory-nexus")).toBe("memory-nexus");
     });
 
-    test("probes hidden directories for multiple project names", () => {
-      const iCloudPath = "C:/Users/Destiny/iCloudDrive";
-      if (!existsSync(iCloudPath)) {
-        return;
-      }
-
-      const resolver = new ProjectNameResolver("C:/");
-
-      const cases: Array<[string, string]> = [
-        ["C--Users-Destiny-iCloudDrive-Documents-AI-Tools-Anthropic-Solution-Projects-get-stuff-done", "get-stuff-done"],
-        ["C--Users-Destiny-iCloudDrive-Documents-AI-Tools-Anthropic-Solution-Projects-ai-dev-environment", "ai-dev-environment"],
-        ["C--Users-Destiny-iCloudDrive-Documents-AI-Tools-Anthropic-Solution-Projects-later", "later"],
-      ];
-
-      for (const [encoded, expected] of cases) {
-        if (existsSync(`C:/Users/Destiny/iCloudDrive/Documents/AI Tools/Anthropic Solution/Projects/${expected}`)) {
-          expect(resolver.resolveFromEncodedPath(encoded)).toBe(expected);
-        }
+    test("traverses an unenumerated parent for multiple project names", () => {
+      const projects = ["get-stuff-done", "ai-dev-environment", "later"];
+      createDirs("Users", ...projects.map((name) => `storage/Projects/${name}`));
+      symlinkSync(join(testDir, "storage"), join(testDir, "Users/CloudDrive"), "junction");
+      const resolver = new ProjectNameResolver(testDir);
+      for (const expected of projects) {
+        expect(resolver.resolveFromEncodedPath(`C--Users-CloudDrive-Projects-${expected}`)).toBe(expected);
       }
     });
   });

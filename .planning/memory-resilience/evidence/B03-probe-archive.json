@@ -1,0 +1,23 @@
+{
+  "operation": "preserved synthetic failed-probe artifact; no deletion",
+  "source": "C:\\Users\\Destiny\\AppData\\Local\\Temp\\memory-test-home-vn3z1d",
+  "archive": "C:\\Projects\\memory-nexus\\.cc-guardian\\archives\\b03-synthetic-replacement-probe-20260919",
+  "owner": {
+    "project": "memory-nexus",
+    "pid": 231472,
+    "startedAt": "2026-09-19T21:08:32.102Z"
+  },
+  "files": [
+    {
+      "name": ".memory-test-owner.json",
+      "bytes": 78,
+      "sha256": "B347A3D766B13384AC77D9D5B7E8795B0E83856CFFF5B2F5830E3BA43BEE5168"
+    },
+    {
+      "name": "valuable.txt",
+      "bytes": 24,
+      "sha256": "21D47305FA347B1B4851E47DF9E4D84ADC14BD43DE925BE51C5A8E59576C51F2"
+    }
+  ],
+  "verified_at": "2026-09-19T21:32:26.6507040Z"
+}

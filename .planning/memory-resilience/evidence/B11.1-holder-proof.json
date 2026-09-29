@@ -1,0 +1,304 @@
+{
+  "item_id": "B11.1",
+  "status": "blocked - local proof ready; final platform/review acceptance missing",
+  "recorded_at": "2026-09-20T02:37:51.460Z",
+  "base_revision": "757125f57c257f0480e7d24d6c9d880e11294e5e",
+  "sourceInputs": [
+    {
+      "path": "tests/helpers/test-database.ts",
+      "sourceHash": "c9d9edafc637d537d53fc14c4edf0d154f303c396372638323b96bd478657d30"
+    },
+    {
+      "path": "tests/helpers/owned-test-directory.ts",
+      "sourceHash": "c01eaafd0469da23d08b13fd9ac6277e8654309018f4dc4653e8b7a1892cdfe6"
+    },
+    {
+      "path": "tests/helpers/test-database.test.ts",
+      "sourceHash": "b03efaeaba68fd242881977e674f4df7e516d458ae3f5e32ba65adce8250c8a9"
+    },
+    {
+      "path": "src/presentation/cli/commands/export.test.ts",
+      "sourceHash": "3de23dd3c3e360311c1c0ba934fc62297024f4432cd83df6c5a0e61621e10c48"
+    },
+    {
+      "path": "tests/infrastructure/database/repositories/friction-repository.test.ts",
+      "sourceHash": "82c8ea8690f1bd85d5bfcb4181c0dc892695d233dc5bc096f24c9303e5c141b8"
+    },
+    {
+      "path": "src/infrastructure/database/connection.ts",
+      "sourceHash": "d1ffd040104875ba982108a92bebd760e5d4fedb7194436d6a3b80193fdbf1cd"
+    },
+    {
+      "path": "tests/test-setup.ts",
+      "sourceHash": "a348c68b1f5d2b1d287b604f80092f3b7310a627a2360b5eda6e45a855cd7498"
+    },
+    {
+      "path": "package.json",
+      "sourceHash": "8ca292ab180e695535fbec7df042adafedbfa00bb10b87069521765857246fda"
+    },
+    {
+      "path": "bunfig.toml",
+      "sourceHash": "84e947c84a884543e1d3ec7ae39187b3423a6d9da79fff7f320cb3f58ea1e6a8"
+    }
+  ],
+  "checks": [
+    {
+      "platform": "Windows",
+      "command": "bun run test tests/helpers/test-database.test.ts src/presentation/cli/commands/export.test.ts tests/infrastructure/database/repositories/friction-repository.test.ts",
+      "exit": 0,
+      "output": "$ bun test --timeout 15000 tests/helpers/test-database.test.ts src/presentation/cli/commands/export.test.ts tests/infrastructure/database/repositories/friction-repository.test.ts\r\nbun test v1.4.1 (4661e494f)\r\n\r\ntests\\helpers\\test-database.test.ts:\r\n(pass) cleanup refuses a replacement directory and preserves its contents [118.65ms]\r\n(pass) real SQLite fixture is usable and successful cleanup is idempotent [769.10ms]\r\n(pass) initialization failure reclaims the owned allocation and preserves the cause [195.22ms]\r\n(pass) initialization and cleanup failures preserve both errors and retained path [295.03ms]\r\n(pass) partial removal restores ownership and retry does not close SQLite twice [582.59ms]\r\n(pass) collection failure is visible and retry skips an already closed handle [401.26ms]\r\n(pass) changed owner marker is refused without deleting fixture contents [224.10ms]\r\n(pass) prefixes cannot escape the temporary allocation parent [0.44ms]\r\n(pass) independent fixtures do not share cleanup authority [149.61ms]\r\n(pass) a directory link replacement cannot redirect cleanup to another fixture [139.97ms]\r\n(pass) cleanup unlinks a nested directory link without deleting its target [77.58ms]\r\n(pass) a real Windows file lock retains ownership until a successful retry [6477.46ms]\r\n(pass) lock-holder startup failure reports diagnostics and permits fixture recovery [7747.19ms]\r\n(pass) lock-holder process creation failure rejects readiness without hanging [112.22ms]\r\n(pass) interrupted lock-holder callback preserves failure and reaps the child (already terminated: %s) [6367.55ms]\r\n(pass) interrupted lock-holder callback preserves failure and reaps the child (already terminated: %s) [5668.91ms]\r\n(pass) failed database close retains the directory and can be retried [432.34ms]\r\n(pass) ownership allocation failure preserves errors (partial write: %s) [3.09ms]\r\n(pass) ownership allocation failure preserves errors (partial write: %s) [6.95ms]\r\n(pass) marker restoration failure reports both errors and preserves the directory [156.97ms]\r\n(pass) default helper entrypoints create independent usable fixtures [417.55ms]\r\n(pass) ownership allocation never retires a replacement after its marker write fails [69.20ms]\r\n(pass) transient busy removal collects again and retries without reclosing SQLite [1509.85ms]\r\n(pass) persistent removal error EBUSY has bounded retries and remains recoverable [2593.10ms]\r\n(pass) persistent removal error EPERM has bounded retries and remains recoverable [2312.09ms]\r\n(pass) persistent removal error EIO has bounded retries and remains recoverable [978.11ms]\r\n(pass) a busy retry rechecks directory identity before any further removal [1461.59ms]\r\n(pass) a non-Error cleanup failure is reported without blind retries [649.41ms]\r\n(pass) an ownership marker that is missing cannot authorize cleanup [324.30ms]\r\n(pass) an ownership marker that is same-length-change cannot authorize cleanup [335.10ms]\r\n(pass) an ownership marker that is directory cannot authorize cleanup [204.08ms]\r\n(pass) an ownership marker that is hard-link cannot authorize cleanup [138.16ms]\r\n(pass) partial cleanup never overwrites a changed owner marker [160.70ms]\r\n(pass) a file replacing the allocated directory is preserved [38.74ms]\r\n(pass) closing a database prevents execution of retained cached statements [1.15ms]\r\n\r\nsrc\\presentation\\cli\\commands\\export.test.ts:\r\n(pass) Export Command > createExportCommand > creates command with correct name [534.72ms]\r\n(pass) Export Command > createExportCommand > has correct description [608.11ms]\r\n(pass) Export Command > createExportCommand > has required output-file argument [480.46ms]\r\n(pass) Export Command > createExportCommand > has --quiet option [662.75ms]\r\n(pass) Export Command > createExportCommand > has --json option [490.86ms]\r\n(pass) Export Command > createExportCommand > has --include-sensitive option [670.32ms]\r\n(pass) Export Command > executeExportCommand > creates export file at specified path [1571.54ms]\r\n(pass) Export Command > executeExportCommand > outputs summary in default mode [994.35ms]\r\n(pass) Export Command > executeExportCommand > --quiet suppresses output except path [1054.67ms]\r\n(pass) Export Command > executeExportCommand > --json outputs stats as JSON [567.00ms]\r\n(pass) Export Command > executeExportCommand > sets exit code 1 for invalid output directory [901.76ms]\r\n(pass) Export Command > executeExportCommand > sets exit code 1 when database does not exist [411.35ms]\r\n(pass) Export Command > executeExportCommand > --json outputs an error envelope when export writing fails [1475.62ms]\r\n(pass) Export Command > executeExportCommand > default mode reports export writing failures to stderr [1253.36ms]\r\n(pass) Export Command > executeExportCommand > includes file size in default output [1041.47ms]\r\n(pass) Export Command > executeExportCommand > json output includes bytes in stats [736.44ms]\r\n(pass) Export Command > executeExportCommand > redacts secret-shaped content by default [563.25ms]\r\n(pass) Export Command > executeExportCommand > --include-sensitive writes raw content explicitly [1294.88ms]\r\n\r\ntests\\infrastructure\\database\\repositories\\friction-repository.test.ts:\r\n(pass) SqliteFrictionRepository > save() with new columns > persists tool, tags, and lastReviewedAt [1294.63ms]\r\n(pass) SqliteFrictionRepository > findAll with tool filter > returns only entries matching tool [1144.51ms]\r\n(pass) SqliteFrictionRepository > findAll with sourceProject filter > returns only entries matching sourceProject [778.38ms]\r\n(pass) SqliteFrictionRepository > findAll with combined filters > tool + status filters together [1056.34ms]\r\n(pass) SqliteFrictionRepository > markReviewed > updates last_reviewed_at for open entries of specific tool [1085.38ms]\r\n(pass) SqliteFrictionRepository > findPatterns > returns groups meeting threshold [917.74ms]\r\n(pass) SqliteFrictionRepository > getStats with byTool > includes byTool breakdown [864.76ms]\r\n(pass) SqliteFrictionRepository > getStats with byTool > byCategory uses dynamic keys [812.90ms]\r\n(pass) SqliteFrictionRepository > tags serialization > tags stored as JSON and deserialized back [1164.63ms]\r\n(pass) SqliteFrictionRepository > backward compatibility > entries with no tags and no lastReviewedAt work [1364.20ms]\r\n--------------------------------------------------------------------------|---------|---------|-------------------\r\nFile                                                                      | % Funcs | % Lines | Uncovered Line #s\r\n--------------------------------------------------------------------------|---------|---------|-------------------\r\nAll files                                                                 |   17.79 |   25.27 |\r\n src\\application\\services\\ambient-context-service.ts                      |    0.00 |    5.56 | 65-114,127-141,152-154\r\n src\\application\\services\\backfill-service.ts                             |    0.00 |    3.37 | 73-244\r\n src\\application\\services\\budget-allocator.ts                             |    0.00 |    0.00 | 61-131\r\n src\\application\\services\\dreaming-service.ts                             |    0.00 |    4.86 | 59,62,73-310,314-362,367-384,388-391,395,399\r\n src\\application\\services\\embedding-service.ts                            |    0.00 |    8.49 | 108-111,131-145,158-248,252-256,260-283,287-326,331-342,346-348\r\n src\\application\\services\\export-service.ts                               |   43.75 |   28.07 | 283-286,296-299,339-342,354-357,414-454,476-672,689-713,724-731\r\n src\\application\\services\\friction-service.ts                             |    0.00 |    3.52 | 73-319\r\n src\\application\\services\\fts-sanitizer.ts                                |    0.00 |    0.00 | 26-58\r\n src\\application\\services\\index.ts                                        |  100.00 |  100.00 | \r\n src\\application\\services\\llm-extractor.ts                                |    0.00 |    4.35 | 93-129,142-181,199-246,253-267,274-293,300-333,341-344\r\n src\\application\\services\\memory-file-sync-service.ts                     |    0.00 |    5.33 | 52-122\r\n src\\application\\services\\memory-governance-service.ts                    |    0.00 |    2.43 | 60-185,189-263\r\n src\\application\\services\\memory-ranking-service.ts                       |    0.00 |   10.12 | 78-112,116-125,129-144,148-191,195-201,206-223,227-237,241-259,263-281,285-304,308,312-315,319,323,327,331-334,338-343,347-351\r\n src\\application\\services\\pattern-extractor.ts                            |    0.00 |   12.90 | 74-107,119-142,154-180,190-194,206-212,224-234\r\n src\\application\\services\\persona-profile-service.ts                      |    0.00 |   11.94 | 35-66,70,74-98,102-120,125-154,158,162-178,182-183,187-188,192-195,199-213,218-228,233,237-244,248,252,256-260,264,268\r\n src\\application\\services\\projection-registry.ts                          |    0.00 |    6.90 | 19-32,36-75\r\n src\\application\\services\\recovery-service.ts                             |    0.00 |    3.31 | 51-164,177-179\r\n src\\application\\services\\remote-event-sync-service.ts                    |    0.00 |    7.04 | 77-103,108-126,130-143,153-276,281-300,304-308,312,316-326,330-340,344-354,358,362-368\r\n src\\application\\services\\rrf-fusion.ts                                   |    0.00 |    0.00 | 41-117\r\n src\\application\\services\\smart-context-service.ts                        |    0.00 |    4.53 | 145-146,153,157,161-165,169-173,177,181,203-350,357-487,494-525,530-539\r\n src\\application\\services\\sync-service.ts                                 |    0.00 |    2.98 | 116-302,309-386,400-498,509-632\r\n src\\application\\services\\temporal-decay.ts                               |    0.00 |   11.32 | 42-62,89-114\r\n src\\application\\services\\temporal-graph-service.ts                       |    0.00 |   11.22 | 39-81,85-94,99-149,153-173,177-180,184-196,200-202,206-208,214,218,222-223,227-231,235-239,243,247,251,255-262,266\r\n src\\domain\\entities\\backfill-state.ts                                    |    0.00 |    6.90 | 28-32,40-88\r\n src\\domain\\entities\\dream-entry.ts                                       |    0.00 |    2.19 | 8-482,486-491,495-509,513-523,527-532,536-538,542-544,548,552-558,562-567,571,575\r\n src\\domain\\entities\\entity.ts                                            |    0.00 |    5.47 | 88-97,106-201,209-215,223-230\r\n src\\domain\\entities\\extraction-state.ts                                  |    0.00 |    7.77 | 45-57,65-186,193,201-209,217-226,234-243,251-261,269-282\r\n src\\domain\\entities\\fact.ts                                              |    0.00 |    6.67 | 51-66,73-132,139-149,156-166\r\n src\\domain\\entities\\friction-entry.ts                                    |  100.00 |  100.00 | \r\n src\\domain\\entities\\graph-edge.ts                                        |    0.00 |   12.44 | 85-100,104-211,215-217,221-238,242-261,266-275,279-287,291-293,297-299,303,307-311,315\r\n src\\domain\\entities\\index.ts                                             |  100.00 |  100.00 | \r\n src\\domain\\entities\\link.ts                                              |    0.00 |    8.51 | 36-41,49-116,123,132-142\r\n src\\domain\\entities\\memory-event.ts                                      |    0.00 |   10.54 | 101,105-123,127-190,194,199-214,218-247,251-257,261-266,270-276,280-286,290-302,306-335,339-355,359-374,378-386,390-399,403-409,413-422,426-428,432-435,439-442,446-449,453-456,460-462,466,470-484,488,492-495,499\r\n src\\domain\\entities\\memory-file.ts                                       |    0.00 |   11.46 | 53-62,73-147\r\n src\\domain\\entities\\memory-governance.ts                                 |    0.00 |   15.72 | 136-157,161-242,246,250-268,272-287,291-313,317-338,343-346,350-353,357-390,394-410,415-417,421-423,427,431\r\n src\\domain\\entities\\memory-utility-metric.ts                             |    0.00 |    9.14 | 63-80,84-149,153,157-162,166-170,174-190,194-211,216-235,239-241,245-247,251,255\r\n src\\domain\\entities\\message.ts                                           |    0.00 |    9.21 | 32-36,44-99,106,114-120\r\n src\\domain\\entities\\persona-entry.ts                                     |    0.00 |   10.06 | 75-92,96-165,169,173-191,195-212,217-249,253,257\r\n src\\domain\\entities\\session.ts                                           |    0.00 |    6.90 | 35-43,51-118,125,134-142,151-162,170-178\r\n src\\domain\\entities\\tool-use.ts                                          |    0.00 |    7.69 | 34-39,47-119,126,134-141,149-156\r\n src\\domain\\errors\\error-codes.ts                                         |  100.00 |  100.00 | \r\n src\\domain\\errors\\index.ts                                               |  100.00 |  100.00 | \r\n src\\domain\\errors\\memory-error.ts                                        |    0.00 |   16.00 | 51-59,68-79\r\n src\\domain\\errors\\unknown-error.ts                                       |   50.00 |   66.67 | 12\r\n src\\domain\\index.ts                                                      |  100.00 |  100.00 | \r\n src\\domain\\ports\\embedding.ts                                            |    0.00 |   20.00 | 37-46,51-56\r\n src\\domain\\ports\\index.ts                                                |  100.00 |  100.00 | \r\n src\\domain\\services\\content-extractor.ts                                 |    0.00 |   11.25 | 56-66,75-87,96-108,117-120,129-135,139-142,147,151-168\r\n src\\domain\\services\\index.ts                                             |  100.00 |  100.00 | \r\n src\\domain\\services\\path-decoder.ts                                      |    0.00 |   15.71 | 33,42-56,66-67,77,87-108,121-138\r\n src\\domain\\services\\query-parser.ts                                      |    0.00 |    9.86 | 27-75,84-96,105,114\r\n src\\domain\\value-objects\\embedding-config.ts                             |    0.00 |    8.70 | 26-29,37-56,64-97,105-109\r\n src\\domain\\value-objects\\embedding-result.ts                             |    0.00 |    8.47 | 24-26,34-72,80-91\r\n src\\domain\\value-objects\\index.ts                                        |  100.00 |  100.00 | \r\n src\\domain\\value-objects\\project-path.ts                                 |    0.00 |   11.90 | 35-37,46-51,60-86,95,103,116-124,134-144,153-168\r\n src\\domain\\value-objects\\search-query.ts                                 |    0.00 |   26.32 | 15,24-35,43\r\n src\\domain\\value-objects\\search-result.ts                                |    0.00 |    6.52 | 36-44,52-126,134,142\r\n src\\infrastructure\\capabilities\\capability-status.ts                     |    0.00 |    7.53 | 50-93,97-114,118-142,146-153,157-158,162-177,181-195,199-205,210-216,221-246,250-253\r\n src\\infrastructure\\capabilities\\index.ts                                 |  100.00 |  100.00 | \r\n src\\infrastructure\\database\\connection.ts                                |   37.50 |   51.39 | 66,77,126-131,140-146,151-165,180,196-202,209-214,227-230,277,309-313,338-353\r\n src\\infrastructure\\database\\health-checker.ts                            |    0.00 |    5.70 | 230-237,253-260,271-292,304-318,334-397,402-437,441,445,457-468,481-494,504-513,517-539,543-547,566-627,643-679,689-734\r\n src\\infrastructure\\database\\index.ts                                     |  100.00 |  100.00 | \r\n src\\infrastructure\\database\\repositories\\backfill-state-repository.ts    |    0.00 |    6.56 | 25-74,78-84\r\n src\\infrastructure\\database\\repositories\\dream-repository.ts             |    0.00 |    3.74 | 40-129,133-177,181-204,209-225,229,233-261\r\n src\\infrastructure\\database\\repositories\\embedding-repository.ts         |    0.00 |    8.75 | 56-78,88-126,133-143,160-186,195-198,210-213,223-224,233-236,245-248,262-270,282-293,307-313\r\n src\\infrastructure\\database\\repositories\\entity-repository.ts            |    0.00 |    1.94 | 51-295,302-309\r\n src\\infrastructure\\database\\repositories\\extraction-log-repository.ts    |    0.00 |    5.26 | 28-69,73-84\r\n src\\infrastructure\\database\\repositories\\extraction-state-repository.ts  |    0.00 |    4.81 | 48-78,85-152\r\n src\\infrastructure\\database\\repositories\\fact-repository.ts              |    0.00 |    2.17 | 27-195,199-209\r\n src\\infrastructure\\database\\repositories\\friction-repository.ts          |   61.11 |   53.31 | 97-105,145-166,177-186,270-318,355-361,384-426,430\r\n src\\infrastructure\\database\\repositories\\graph-repository.ts             |    0.00 |    2.91 | 37-174,178-220,224-241,245\r\n src\\infrastructure\\database\\repositories\\index.ts                        |  100.00 |  100.00 | \r\n src\\infrastructure\\database\\repositories\\link-repository.ts              |    0.00 |    2.98 | 51-71,78-219\r\n src\\infrastructure\\database\\repositories\\memory-file-repository.ts       |    0.00 |    5.88 | 52-153,157-166\r\n src\\infrastructure\\database\\repositories\\memory-governance-repository.ts |    0.00 |    5.78 | 51-178,182-222,226-247,251-272,277-301,305-342,346-348,352-354,358,362,366-369,373,377-384,388-390,394-396,400-402,406-409\r\n src\\infrastructure\\database\\repositories\\memory-utility-repository.ts    |    0.00 |    4.07 | 27-96,100-130,134-150\r\n src\\infrastructure\\database\\repositories\\message-repository.ts           |    0.00 |    4.32 | 66-189,196-204\r\n src\\infrastructure\\database\\repositories\\persona-repository.ts           |    0.00 |    2.89 | 33-149,153-185,189-206\r\n src\\infrastructure\\database\\repositories\\session-repository.ts           |    0.00 |    2.22 | 48-100,114-368\r\n src\\infrastructure\\database\\repositories\\tool-use-repository.ts          |    0.00 |    4.80 | 57-167,174-181\r\n src\\infrastructure\\database\\schema.ts                                    |  100.00 |   92.54 | 768,792-793,795,805\r\n src\\infrastructure\\database\\services\\context-service.ts                  |    0.00 |    4.48 | 99-243,258,268-290,300-322\r\n src\\infrastructure\\database\\services\\hybrid-search-service.ts            |    0.00 |    2.76 | 110-115,122-208,215-260,272-381,395-412,420-680,687-697,704-713,720-721,728-774\r\n src\\infrastructure\\database\\services\\index.ts                            |  100.00 |  100.00 | \r\n src\\infrastructure\\database\\services\\search-service.ts                   |    0.00 |    4.64 | 47-92,99-166,179-208\r\n src\\infrastructure\\database\\services\\stats-service.ts                    |    0.00 |    4.55 | 46-108\r\n src\\infrastructure\\embedding\\ollama-provider.ts                          |    0.00 |    5.67 | 43-113,118-152,159-185\r\n src\\infrastructure\\embedding\\openai-provider.ts                          |    0.00 |    4.46 | 39-140,144-148\r\n src\\infrastructure\\embedding\\transformers-js-provider.ts                 |    0.00 |    6.25 | 36-120,124-128\r\n src\\infrastructure\\hooks\\config-manager.ts                               |    0.00 |   25.00 | 245-268,272-315,370-373,383-386,400-490,505-526\r\n src\\infrastructure\\hooks\\hook-runner.ts                                  |    0.00 |    9.22 | 72,84-85,89-113,138-168,211-278,292\r\n src\\infrastructure\\hooks\\index.ts                                        |  100.00 |  100.00 | \r\n src\\infrastructure\\hooks\\log-writer.ts                                   |    0.00 |   12.86 | 75-78,88-91,107-117,124,140-155,175-199\r\n src\\infrastructure\\hooks\\settings-manager.ts                             |    0.00 |    9.36 | 119,129,139,150-160,173-186,198-211,224-277,289-331,346-361\r\n src\\infrastructure\\hooks\\sync-hook-script.ts                             |    0.00 |    8.13 | 81-106,110,114-121,125-184,188-203,220,226\r\n src\\infrastructure\\hooks\\sync-logger-adapter.ts                          |    0.00 |   80.00 | 19\r\n src\\infrastructure\\llm\\anthropic-extractor.ts                            |    0.00 |   17.24 | 24-47\r\n src\\infrastructure\\llm\\claude-cli-extractor.ts                           |    0.00 |   13.04 | 16-55\r\n src\\infrastructure\\llm\\extraction-helper.ts                              |    0.00 |    1.43 | 14-46,53-88\r\n src\\infrastructure\\llm\\ollama-extractor.ts                               |    0.00 |    9.76 | 23-59\r\n src\\infrastructure\\llm\\openai-extractor.ts                               |    0.00 |   10.00 | 26-61\r\n src\\infrastructure\\paths.ts                                              |    0.00 |   29.23 | 14,34-39,52-57,69,99-101,110,119,128,137,146,155,164,173,183,193-212\r\n src\\infrastructure\\providers\\provider-defaults.ts                        |  100.00 |  100.00 | \r\n src\\infrastructure\\providers\\provider-egress-policy.ts                   |    0.00 |    4.08 | 34-43,47-57,61-63,67-140,144-154,159-171,176-189,194-198\r\n src\\infrastructure\\providers\\provider-registry.ts                        |    5.26 |   35.77 | 53,57,61-78,82-92,96-99,113-115,123-125,128-132,141-144,152-159,162-167,177-179,182-184,191-193,196-198,206-208,222-229,232-236,244,248,252,256,260-265,269,273,277-294,298-309,313-317,321-329,333-350,354-363\r\n src\\infrastructure\\security\\pattern-redactor.ts                          |   23.08 |   48.03 | 83-85,89-122,126-147,151-163,178-184\r\n src\\presentation\\cli\\commands\\export.ts                                  |   83.33 |   97.65 | 56-57\r\n--------------------------------------------------------------------------|---------|---------|-------------------\r\n\r\n 63 pass\r\n 0 fail\r\n 176 expect() calls\r\nRan 63 tests across 3 files. [70.10s]\r\n"
+    },
+    {
+      "platform": "Linux via WSL",
+      "command": "same grouped command under ~/Projects/memory-nexus",
+      "exit": -1,
+      "output": "This operation returned because the timeout period expired. \r\n\r\nError code: Wsl/Service/CreateInstance/CreateVm/0x800705b4\r\n\r\n\r\n",
+      "classification": "Infrastructure launch failure before test execution; final Linux group unverified."
+    },
+    {
+      "command": "bunx tsc --project .git/b11-tsconfig.json",
+      "exit": 0,
+      "configuration": {
+        "extends": "../tsconfig.json",
+        "compilerOptions": {
+          "rootDir": "..",
+          "noEmit": true
+        },
+        "include": [
+          "../tests/helpers/test-database.ts",
+          "../tests/helpers/owned-test-directory.ts",
+          "../tests/helpers/test-database.test.ts",
+          "../src/presentation/cli/commands/export.test.ts"
+        ],
+        "exclude": [
+          "../node_modules",
+          "../dist"
+        ]
+      },
+      "output": ""
+    }
+  ],
+  "terminationMutation": {
+    "runtime": "1.4.1",
+    "sourceInputs": [
+      {
+        "path": "tests/helpers/test-database.test.ts",
+        "sourceHash": "b03efaeaba68fd242881977e674f4df7e516d458ae3f5e32ba65adce8250c8a9"
+      },
+      {
+        "path": "tests/helpers/test-database.ts",
+        "sourceHash": "c9d9edafc637d537d53fc14c4edf0d154f303c396372638323b96bd478657d30"
+      },
+      {
+        "path": "tests/helpers/owned-test-directory.ts",
+        "sourceHash": "c01eaafd0469da23d08b13fd9ac6277e8654309018f4dc4653e8b7a1892cdfe6"
+      },
+      {
+        "path": "tests/test-setup.ts",
+        "sourceHash": "a348c68b1f5d2b1d287b604f80092f3b7310a627a2360b5eda6e45a855cd7498"
+      }
+    ],
+    "work": "C:\\Projects\\memory-nexus\\.git\\b11-holder-mutation-CbBwxr",
+    "needle": "if(child.exitCode===null&&child.signalCode===null)child.kill();",
+    "replacement": "void child;",
+    "command": [
+      "C:\\Users\\Destiny\\.bun\\bin\\bun.exe",
+      "test",
+      "--timeout",
+      "15000",
+      "tests/helpers/test-database.test.ts",
+      "--test-name-pattern",
+      "interrupted lock-holder callback"
+    ],
+    "exit": 1,
+    "status": "KILLED",
+    "output": "bun test v1.4.1 (4661e494f)\n\ntests\\helpers\\test-database.test.ts:\n235 |     await expect(withLockHolder(script,\"unused\",async ({child,ready,exited})=>{\n236 |       await ready;\n237 |       const kill=spyOn(child,\"kill\");\n238 |       verify=()=>{\n239 |         expect(child.killed).toBe(true);\n240 |         expect(child.signalCode).toBe(\"SIGTERM\");\n                                       ^\nerror: expect(received).toBe(expected)\n\nExpected: \"SIGTERM\"\nReceived: \"SIGKILL\"\n\n      at verify (C:\\Projects\\memory-nexus\\.git\\b11-holder-mutation-CbBwxr\\tests\\helpers\\test-database.test.ts:240:34)\n      at <anonymous> (C:\\Projects\\memory-nexus\\.git\\b11-holder-mutation-CbBwxr\\tests\\helpers\\test-database.test.ts:246:5)\n(fail) interrupted lock-holder callback preserves failure and reaps the child (already terminated: %s) [15263.28ms]\n(pass) interrupted lock-holder callback preserves failure and reaps the child (already terminated: %s) [622.18ms]\n\n 1 pass\n 33 filtered out\n 1 fail\n 8 expect() calls\nRan 2 tests across 1 file. [16.04s]\n",
+    "probeSource": "import {mkdirSync,mkdtempSync,readFileSync,writeFileSync,symlinkSync} from 'node:fs';\nimport {join} from 'node:path';\nimport {sourceHash} from '../scripts/quality-inventory';\nconst root=process.cwd(), work=mkdtempSync(join(root,'.git','b11-holder-mutation-'));\nconst testPath='tests/helpers/test-database.test.ts';\nconst paths=[testPath,'tests/helpers/test-database.ts','tests/helpers/owned-test-directory.ts','tests/test-setup.ts'];\nconst source=readFileSync(testPath,'utf8');\nconst needle='if(child.exitCode===null&&child.signalCode===null)child.kill();';\nif(source.split(needle).length!==2)throw Error('Ambiguous teardown decision');\nmkdirSync(join(work,'tests/helpers'),{recursive:true});\nsymlinkSync(join(root,'src'),join(work,'src'),'junction');\nfor(const path of paths.slice(0,3))writeFileSync(join(work,path),path===testPath?source.replace(needle,'void child;'):readFileSync(path,'utf8'));\nwriteFileSync(join(work,'bunfig.toml'),'[test]\\ncoverage = false\\npreload = ['+JSON.stringify(join(root,'tests/test-setup.ts'))+']\\n');\nconst child=Bun.spawnSync([process.execPath,'test','--timeout','15000',testPath,'--test-name-pattern','interrupted lock-holder callback'],{cwd:work,stdout:'pipe',stderr:'pipe',timeout:45000});\nconst output=new TextDecoder().decode(child.stdout)+new TextDecoder().decode(child.stderr);\nconst killed=child.exitCode===1&&output.includes('(fail)')&&output.includes('Expected: \"SIGTERM\"')&&output.includes('Received: \"SIGKILL\"');\nwriteFileSync('.git/b11-holder-mutation.json',JSON.stringify({runtime:Bun.version,sourceInputs:paths.map(path=>({path,sourceHash:sourceHash(readFileSync(path,'utf8'))})),work,needle,replacement:'void child;',command:[process.execPath,'test','--timeout','15000',testPath,'--test-name-pattern','interrupted lock-holder callback'],exit:child.exitCode,status:killed?'KILLED':'UNRESOLVED',output,probeSource:readFileSync('.git/b11-holder-mutation.ts','utf8'),scope:'Deliberate omitted termination in generated driver only; the unchanged child watchdog remains active. Parent waits for terminal child test process before recording.'},null,2)+'\\n');\nconsole.log(JSON.stringify({exit:child.exitCode,status:killed?'KILLED':'UNRESOLVED',output:output.slice(-1800)}));\nif(!killed)process.exitCode=1;\n",
+    "scope": "Deliberate omitted termination in generated driver only; the unchanged child watchdog remains active. Parent waits for terminal child test process before recording."
+  },
+  "rejectedWeakProof": {
+    "reason": "Earlier omitted-termination check distinguished an argument-shape detail in the watchdog call; replaced with observable SIGTERM/SIGKILL behavior.",
+    "previousProbe": {
+      "runtime": "1.4.1",
+      "sourceInputs": [
+        {
+          "path": "tests/helpers/test-database.test.ts",
+          "sourceHash": "6251de61a54f09298e2e75507d5297c44dc41db28292d1e08f1c7cbbb5247141"
+        },
+        {
+          "path": "tests/helpers/test-database.ts",
+          "sourceHash": "c9d9edafc637d537d53fc14c4edf0d154f303c396372638323b96bd478657d30"
+        },
+        {
+          "path": "tests/helpers/owned-test-directory.ts",
+          "sourceHash": "c01eaafd0469da23d08b13fd9ac6277e8654309018f4dc4653e8b7a1892cdfe6"
+        },
+        {
+          "path": "tests/test-setup.ts",
+          "sourceHash": "a348c68b1f5d2b1d287b604f80092f3b7310a627a2360b5eda6e45a855cd7498"
+        }
+      ],
+      "work": "C:\\Projects\\memory-nexus\\.git\\b11-holder-mutation-WYRa6T",
+      "needle": "if(child.exitCode===null&&child.signalCode===null)child.kill();",
+      "replacement": "void child;",
+      "command": [
+        "C:\\Users\\Destiny\\.bun\\bin\\bun.exe",
+        "test",
+        "--timeout",
+        "15000",
+        "tests/helpers/test-database.test.ts",
+        "--test-name-pattern",
+        "interrupted lock-holder callback"
+      ],
+      "exit": 1,
+      "status": "KILLED",
+      "output": "bun test v1.4.1 (4661e494f)\n\ntests\\helpers\\test-database.test.ts:\n237 |       const kill=spyOn(child,\"kill\");\n238 |       verify=()=>{\n239 |         expect(child.killed).toBe(true);\n240 |         expect(child.signalCode).toBe(\"SIGTERM\");\n241 |         expect(kill).toHaveBeenCalledTimes(1);\n242 |         expect(kill).toHaveBeenCalledWith();\n                           ^\nerror: expect(received).toHaveBeenCalledWith(...expected)\n\n- []\n+ [\n+   undefined,\n+ ]\n\n- Expected  - 1\n+ Received  + 3\n\n      at verify (C:\\Projects\\memory-nexus\\.git\\b11-holder-mutation-WYRa6T\\tests\\helpers\\test-database.test.ts:242:22)\n      at <anonymous> (C:\\Projects\\memory-nexus\\.git\\b11-holder-mutation-WYRa6T\\tests\\helpers\\test-database.test.ts:247:5)\n(fail) interrupted lock-holder callback preserves failure and reaps the child (already terminated: %s) [15277.45ms]\n(pass) interrupted lock-holder callback preserves failure and reaps the child (already terminated: %s) [828.63ms]\n\n 1 pass\n 33 filtered out\n 1 fail\n 11 expect() calls\nRan 2 tests across 1 file. [16.31s]\n",
+      "probeSource": "import {mkdirSync,mkdtempSync,readFileSync,writeFileSync,symlinkSync} from 'node:fs';\nimport {join} from 'node:path';\nimport {sourceHash} from '../scripts/quality-inventory';\nconst root=process.cwd(), work=mkdtempSync(join(root,'.git','b11-holder-mutation-'));\nconst testPath='tests/helpers/test-database.test.ts';\nconst paths=[testPath,'tests/helpers/test-database.ts','tests/helpers/owned-test-directory.ts','tests/test-setup.ts'];\nconst source=readFileSync(testPath,'utf8');\nconst needle='if(child.exitCode===null&&child.signalCode===null)child.kill();';\nif(source.split(needle).length!==2)throw Error('Ambiguous teardown decision');\nmkdirSync(join(work,'tests/helpers'),{recursive:true});\nsymlinkSync(join(root,'src'),join(work,'src'),'junction');\nfor(const path of paths.slice(0,3))writeFileSync(join(work,path),path===testPath?source.replace(needle,'void child;'):readFileSync(path,'utf8'));\nwriteFileSync(join(work,'bunfig.toml'),'[test]\\ncoverage = false\\npreload = ['+JSON.stringify(join(root,'tests/test-setup.ts'))+']\\n');\nconst child=Bun.spawnSync([process.execPath,'test','--timeout','15000',testPath,'--test-name-pattern','interrupted lock-holder callback'],{cwd:work,stdout:'pipe',stderr:'pipe',timeout:45000});\nconst output=new TextDecoder().decode(child.stdout)+new TextDecoder().decode(child.stderr);\nconst killed=child.exitCode===1&&output.includes('(fail)')&&output.includes('toHaveBeenCalledWith');\nwriteFileSync('.git/b11-holder-mutation.json',JSON.stringify({runtime:Bun.version,sourceInputs:paths.map(path=>({path,sourceHash:sourceHash(readFileSync(path,'utf8'))})),work,needle,replacement:'void child;',command:[process.execPath,'test','--timeout','15000',testPath,'--test-name-pattern','interrupted lock-holder callback'],exit:child.exitCode,status:killed?'KILLED':'UNRESOLVED',output,probeSource:readFileSync('.git/b11-holder-mutation.ts','utf8'),scope:'Deliberate omitted termination in generated driver only; the unchanged child watchdog remains active. Parent waits for terminal child test process before recording.'},null,2)+'\\n');\nconsole.log(JSON.stringify({exit:child.exitCode,status:killed?'KILLED':'UNRESOLVED',output:output.slice(-1800)}));\nif(!killed)process.exitCode=1;\n",
+      "scope": "Deliberate omitted termination in generated driver only; the unchanged child watchdog remains active. Parent waits for terminal child test process before recording."
+    }
+  },
+  "diagnostics": {
+    "scope": "Current unmodified driver counters from passing Windows/Linux tests and controlled helper-fault runs whose assertion failures are expected and verified. Only the driver counters are merged from fault runs; mutated helper counters are not included. Diagnostic, pending final instrumenter/applicability/independent acceptance.",
+    "sourceInputs": [
+      {
+        "path": "tests/helpers/test-database.ts",
+        "sourceHash": "c9d9edafc637d537d53fc14c4edf0d154f303c396372638323b96bd478657d30"
+      },
+      {
+        "path": "tests/helpers/owned-test-directory.ts",
+        "sourceHash": "c01eaafd0469da23d08b13fd9ac6277e8654309018f4dc4653e8b7a1892cdfe6"
+      },
+      {
+        "path": "tests/helpers/test-database.test.ts",
+        "sourceHash": "b03efaeaba68fd242881977e674f4df7e516d458ae3f5e32ba65adce8250c8a9"
+      },
+      {
+        "path": "tests/helpers/test-database.test.ts",
+        "sourceHash": "b03efaeaba68fd242881977e674f4df7e516d458ae3f5e32ba65adce8250c8a9"
+      },
+      {
+        "path": "tests/test-setup.ts",
+        "sourceHash": "a348c68b1f5d2b1d287b604f80092f3b7310a627a2360b5eda6e45a855cd7498"
+      }
+    ],
+    "files": [
+      {
+        "path": "tests/helpers/test-database.ts",
+        "sourceHash": "c9d9edafc637d537d53fc14c4edf0d154f303c396372638323b96bd478657d30",
+        "metrics": {
+          "lines": {
+            "total": 29,
+            "covered": 29,
+            "skipped": 0,
+            "pct": 100
+          },
+          "functions": {
+            "total": 6,
+            "covered": 6,
+            "skipped": 0,
+            "pct": 100
+          },
+          "statements": {
+            "total": 39,
+            "covered": 39,
+            "skipped": 0,
+            "pct": 100
+          },
+          "branches": {
+            "total": 21,
+            "covered": 21,
+            "skipped": 0,
+            "pct": 100
+          }
+        },
+        "uncoveredBranches": []
+      },
+      {
+        "path": "tests/helpers/owned-test-directory.ts",
+        "sourceHash": "c01eaafd0469da23d08b13fd9ac6277e8654309018f4dc4653e8b7a1892cdfe6",
+        "metrics": {
+          "lines": {
+            "total": 33,
+            "covered": 33,
+            "skipped": 0,
+            "pct": 100
+          },
+          "functions": {
+            "total": 6,
+            "covered": 6,
+            "skipped": 0,
+            "pct": 100
+          },
+          "statements": {
+            "total": 40,
+            "covered": 40,
+            "skipped": 0,
+            "pct": 100
+          },
+          "branches": {
+            "total": 30,
+            "covered": 30,
+            "skipped": 0,
+            "pct": 100
+          }
+        },
+        "uncoveredBranches": []
+      },
+      {
+        "path": "tests/helpers/test-database.test.ts",
+        "sourceHash": "b03efaeaba68fd242881977e674f4df7e516d458ae3f5e32ba65adce8250c8a9",
+        "metrics": {
+          "lines": {
+            "total": 345,
+            "covered": 344,
+            "skipped": 0,
+            "pct": 99.71
+          },
+          "functions": {
+            "total": 85,
+            "covered": 85,
+            "skipped": 0,
+            "pct": 100
+          },
+          "statements": {
+            "total": 477,
+            "covered": 476,
+            "skipped": 0,
+            "pct": 99.79
+          },
+          "branches": {
+            "total": 73,
+            "covered": 73,
+            "skipped": 0,
+            "pct": 100
+          }
+        },
+        "uncoveredBranches": []
+      }
+    ],
+    "reconstructionSource": "import {readFileSync,writeFileSync} from 'node:fs';\nimport {createCoverageMap} from 'istanbul-lib-coverage';\nimport {sourceHash} from '../scripts/quality-inventory';\nconst read=(p:string)=>JSON.parse(readFileSync(p,'utf8'));\nconst base=read('.git/b11-driver-combined.json'), faults=read('.git/b11-driver-failure-counters.json');\nfor(const input of [...base.sourceInputs,...faults.sourceInputs])if(sourceHash(readFileSync(input.path,'utf8'))!==input.sourceHash)throw Error('Stale source '+input.path);\nconst path='tests/helpers/test-database.test.ts', row=base.files.find((x:any)=>x.path===path), data=row.rawCoverage;\nfor(const key of ['statementMap','fnMap','branchMap'])if(JSON.stringify(data[key])!==JSON.stringify(faults.driverMaps[key]))throw Error('Fault maps differ '+key);\nconst map=createCoverageMap({});map.addFileCoverage(data);\nfor(const record of faults.records){\n if(record.status!=='KILLED'||record.exit!==1||record.recovery.some((x:any)=>x.status.startsWith('retained')))throw Error('Unresolved fault '+record.id);\n map.addFileCoverage({path,...faults.driverMaps,...record.driverCounters});\n}\nconst file=map.fileCoverageFor(path), result={scope:'Current unmodified driver counters from passing Windows/Linux tests and controlled helper-fault runs whose assertion failures are expected and verified. Only the driver counters are merged from fault runs; mutated helper counters are not included. Diagnostic, pending final instrumenter/applicability/independent acceptance.',sourceInputs:base.sourceInputs,files:base.files.map((r:any)=>r.path===path?{...r,metrics:file.toSummary().data,rawCoverage:file.data,uncoveredBranches:Object.entries(file.data.b).flatMap(([id,hits])=>(hits as number[]).flatMap((count,index)=>count?[]:[{id,index,branch:file.data.branchMap[id]}]))}:r),inputs:['.git/b11-driver-combined.json','.git/b11-driver-failure-counters.json'].map(path=>({path,sourceHash:sourceHash(readFileSync(path,'utf8'))})),probeSource:readFileSync('.git/b11-merge-driver-faults.ts','utf8')};\nwriteFileSync('.git/b11-driver-final-diagnostic.json',JSON.stringify(result,null,2)+'\\n');\nconsole.log(JSON.stringify(result.files.map(({path,metrics,uncoveredBranches}:any)=>({path,metrics,uncoveredBranches}))));\n"
+  },
+  "artifacts": [
+    {
+      "path": ".planning/memory-resilience/evidence/B11.1-holder-platforms.json",
+      "sourceHash": "b10beb5c1bca9b34c8a902152a1b1bc4b650233d3563323576a2efb4736db142"
+    },
+    {
+      "path": ".planning/memory-resilience/evidence/B11.1-holder-faults.json",
+      "sourceHash": "03e7ab57e7d72e170c621dbd2edbb0befef10da0f4927fbc0abfd8b9ff918eb0"
+    }
+  ],
+  "remaining": [
+    "Local candidate proof is ready. Final current-source Linux grouped run did not start because WSL CreateVm timed out; independent source/applicability review is absent (last Fable smoke quota-blocked), and final instrumenter acceptance remains required.",
+    "Successful bounded WSL readiness then exact grouped run; obtain final source-bound independent review and reconcile final measurement gates. No local metric or review acceptance transferred."
+  ],
+  "housekeeping": "Eleven fault children terminated; every telemetry-logged allocation is absent or was reclaimed after exact ownership verification. Generated snapshots remain bounded under project .git. No WSL reset, unrelated process termination or policy-blocked cleanup attempted.",
+  "recordingScript": "import {readFileSync,writeFileSync} from 'node:fs';\nimport {execFileSync} from 'node:child_process';\nimport {discoverInventory,sourceHash,validateInventory} from '../scripts/quality-inventory';\nconst root='.planning/memory-resilience/', evidence=root+'evidence/';\nconst read=(p:string)=>JSON.parse(readFileSync(p,'utf8'));\nconst save=(p:string,v:unknown)=>writeFileSync(p,JSON.stringify(v,null,2)+'\\n');\nconst hash=(p:string)=>sourceHash(readFileSync(p,'utf8'));\nconst assert=(x:unknown,m:string)=>{if(!x)throw Error(m);};\nconst windows=read('.git/b11-driver-current-windows.json'), linux=read('.git/b11-driver-current-linux.json');\nconst faults=read('.git/b11-driver-failure-counters.json'), final=read('.git/b11-driver-final-diagnostic.json'), mutation=read('.git/b11-holder-mutation.json');\nfor(const packet of [windows,linux,faults,final,mutation])for(const input of packet.sourceInputs)assert(hash(input.path)===input.sourceHash,'Stale '+input.path);\nassert(faults.records.length===11&&faults.records.every((r:any)=>r.status==='KILLED'&&r.exit===1&&!r.recovery.some((x:any)=>x.status.startsWith('retained'))),'Unresolved helper fault');\nassert(mutation.status==='KILLED'&&mutation.exit===1&&mutation.output.includes('Received: \"SIGKILL\"'),'Termination proof missing');\nfor(const file of final.files){for(const metric of ['statements','lines','functions'])assert(file.metrics[metric].pct>=95,'Below floor '+file.path);assert(file.metrics.branches.pct===100,'Branch gap '+file.path);}\nconst windowsOutput=readFileSync('.git/b11-holder-final-windows.txt','utf8');\nassert(windowsOutput.includes('63 pass')&&windowsOutput.includes('176 expect() calls')&&windowsOutput.includes('0 fail'),'Final Windows incomplete');\nconst linuxFailure=readFileSync('.git/b11-holder-final-linux.txt','utf8').replaceAll('\\0','');\nassert(linuxFailure.includes('Wsl/Service/CreateInstance/CreateVm/0x800705b4'),'Unexpected Linux outcome');\nconst platformsPath=evidence+'B11.1-holder-platforms.json', faultsPath=evidence+'B11.1-holder-faults.json', proofPath=evidence+'B11.1-holder-proof.json';\nsave(platformsPath,{windows,linux});save(faultsPath,faults);\nconst catalog=discoverInventory(process.cwd()), manifest=read(root+'quality-classifications.json'), ledger=read(root+'work-items.json');\nconst driver='tests/helpers/test-database.test.ts', row=manifest.files.find((x:any)=>x.path===driver), source=catalog.files.find(x=>x.path===driver)!;\nrow.sourceHash=source.sourceHash;\nrow.metricApplicability={status:'proposed - diagnostic floors met; independent acceptance pending',sourceHash:source.sourceHash,evidence:proofPath,reason:'Current unmodified driver reaches 100% diagnostic branches by combining source/map-identical passing platform runs and verified expected-failure helper-fault runs. Other metrics exceed 95%. Mutated helper counters are excluded. Final instrumenter/applicability and independent review remain required.'};\nassert(catalog.files.length===448&&!validateInventory(catalog,manifest).length,'Invalid inventory');\nsave(root+'executable-catalog.json',catalog);save(root+'quality-classifications.json',manifest);\nconst item=ledger.items.find((x:any)=>x.id==='B11.1'), next=ledger.items.find((x:any)=>x.id==='B11.2');\nassert(item.status==='active'&&next.status==='pending','Unexpected task state');\nitem.status='blocked';item.acceptance_record=proofPath;\nitem.blocker={owner:'memory-nexus',condition:'Local candidate proof is ready. Final current-source Linux grouped run did not start because WSL CreateVm timed out; independent source/applicability review is absent (last Fable smoke quota-blocked), and final instrumenter acceptance remains required.',resumption_trigger:'Successful bounded WSL readiness then exact grouped run; obtain final source-bound independent review and reconcile final measurement gates. No local metric or review acceptance transferred.'};\nitem.evidence=[...new Set([...item.evidence,proofPath,platformsPath,faultsPath])];\nitem.progress={implemented:'Shared private child-lifecycle exercise covers successful lock release, startup refusal, missing executable and callback interruption before/after termination. Teardown waits for closure and preserves the primary callback failure. Safety watchdog uses SIGKILL, distinct from explicit teardown SIGTERM.',verified_scope:'Final Windows affected group: 63 pass, 176 assertions. Current-source instrumented driver runs pass on Windows and Linux (five Windows cases skipped on Linux); targeted types pass. Eleven helper faults and one omitted-termination fault are killed. Helpers: 100% all four diagnostic metrics. Driver: 99.71% lines, 99.79% statements, 100% functions/branches.',measurement_scope:'Only unchanged driver counters from expected-failure helper-fault runs are merged with passing same-source/map platform counters. Helper metrics use passing unmutated source only. This is direct-Istanbul diagnostic evidence, not final B05-B08/E8 or independent acceptance.',remaining:[item.blocker.condition,item.blocker.resumption_trigger]};\nnext.status='active';next.evidence=[...next.evidence,root+'B11.2-plan.md'];next.progress={restart:'Inventory all exports/imports/build inclusion of tests/integration/index.ts. Named-helper searches found no uses; prove whether removing the unused destructive utility is the correct disposition before adding new cleanup machinery.'};\nledger.current_item='B11.2';\nledger.items.find((x:any)=>x.id==='B04').progress.metricApplicability='B11.1 three-file diagnostic floors now met using unchanged-driver expected-failure recovery probes plus passing Windows/Linux maps. Independent applicability/instrumenter acceptance and final Linux grouped run remain open; B11.2 source disposition starts next.';\nledger.known_external_limits.push({id:'X03',description:'Final B11.1 Linux grouped check failed before Bun started: WSL CreateVm 0x800705b4.',owner:'memory-nexus',trigger:'Successful bounded WSL readiness, then rerun exact grouped check; do not reset shared WSL state for this project.',blocks_items:['B11.1'],blocks_goal:false});\nsave(root+'work-items.json',ledger);\nconst sources=['tests/helpers/test-database.ts','tests/helpers/owned-test-directory.ts',driver,'src/presentation/cli/commands/export.test.ts','tests/infrastructure/database/repositories/friction-repository.test.ts','src/infrastructure/database/connection.ts','tests/test-setup.ts','package.json','bunfig.toml'];\nsave(proofPath,{item_id:'B11.1',status:'blocked - local proof ready; final platform/review acceptance missing',recorded_at:new Date().toISOString(),base_revision:execFileSync('git',['rev-parse','HEAD'],{encoding:'utf8'}).trim(),sourceInputs:sources.map(path=>({path,sourceHash:hash(path)})),checks:[{platform:'Windows',command:'bun run test tests/helpers/test-database.test.ts src/presentation/cli/commands/export.test.ts tests/infrastructure/database/repositories/friction-repository.test.ts',exit:0,output:windowsOutput},{platform:'Linux via WSL',command:'same grouped command under ~/Projects/memory-nexus',exit:-1,output:linuxFailure,classification:'Infrastructure launch failure before test execution; final Linux group unverified.'},{command:'bunx tsc --project .git/b11-tsconfig.json',exit:0,configuration:read('.git/b11-tsconfig.json'),output:readFileSync('.git/b11-holder-types.txt','utf8')}],terminationMutation:mutation,rejectedWeakProof:{reason:'Earlier omitted-termination check distinguished an argument-shape detail in the watchdog call; replaced with observable SIGTERM/SIGKILL behavior.',previousProbe:read('.git/b11-holder-argument-shape-mutation.json')},diagnostics:{scope:final.scope,sourceInputs:final.sourceInputs,files:final.files.map(({rawCoverage,...file}:any)=>file),reconstructionSource:readFileSync('.git/b11-merge-driver-faults.ts','utf8')},artifacts:[platformsPath,faultsPath].map(path=>({path,sourceHash:hash(path)})),remaining:item.progress.remaining,housekeeping:'Eleven fault children terminated; every telemetry-logged allocation is absent or was reclaimed after exact ownership verification. Generated snapshots remain bounded under project .git. No WSL reset, unrelated process termination or policy-blocked cleanup attempted.',recordingScript:readFileSync('.git/b11-holder-record.ts','utf8')});\nconst edit=(p:string,fn:(s:string)=>string)=>writeFileSync(p,fn(readFileSync(p,'utf8')));\nedit(root+'JOURNAL.md',s=>s.replace('# Memory resilience execution journal','# Memory resilience execution journal\\n\\n## 2026-09-20 - B11.1 local driver proof; continue B11.2\\n\\n- Previous turn progressed at 757125f; started from a clean worktree.\\n- Five real Windows child-lifecycle cases pass: normal lock release, failed\\n  startup, missing executable, and interruption before/after child termination.\\n  Teardown preserves the primary error, closes the child before fixture cleanup,\\n  and makes one explicit termination call when needed.\\n- Replaced a brittle argument-shape mutation check with SIGTERM versus watchdog\\n  SIGKILL proof. Omitted termination is killed by the signal assertion. Eleven\\n  helper faults are also killed, with zero ambiguous retained allocations.\\n- Current unmodified driver counters from passing Windows/Linux runs and verified\\n  expected-failure helper runs meet diagnostic floors: 100% branches/functions,\\n  99.71% lines and 99.79% statements. Both helpers remain 100% all four metrics.\\n  Mutated helper counters are not merged. Final applicability/review remains open.\\n- Final Windows grouped run: 63 pass/176 assertions; types pass. The later WSL\\n  grouped invocation failed before Bun started (CreateVm 0x800705b4). Earlier\\n  current-source Linux driver diagnostics passed; final Linux group is unverified.\\n  No shared WSL reset or unrelated process termination was attempted.\\n- B11.1 is blocked on final platform/review/measurement acceptance, with owner and\\n  concrete resumption triggers. Native goal remains active; B04 blocked/B05 pending.\\n- Next active item B11.2: prove references/build inclusion for integration/index.ts.\\n  Named helper searches find definitions only. Remove obsolete destructive code\\n  if fully unconsumed; otherwise adapt actual callers to owned capabilities.\\n  See B11.2-plan.md. Catalog remains 448 candidates/two packages, no exclusions.\\n'));\nedit(root+'B11.1-plan.md',s=>s+'\\nLocal lifecycle and driver decision proof is retained in\\n`evidence/B11.1-holder-proof.json`. B11.1 is now blocked on final Linux grouped\\nexecution (WSL CreateVm failure), independent review and final measurement\\nacceptance. Continue authorized B11.2 work without marking these gates complete.\\n');\nedit('.planning/STATE.md',s=>s.replace(/^> \\*\\*ACTIVE EXECUTION CONTRACT.*$/m,'> **ACTIVE EXECUTION CONTRACT 2026-09-20:** Resume `.planning/memory-resilience/EXECUTION.md`, ledger, journal and native goal. B11.2 is active: verify whether unused integration utilities should be removed before adding ownership machinery. B11.1 local proof is ready: Windows 63 tests/176 assertions, targeted types, eleven helper faults and omitted-termination mutation; helpers 100% diagnostics and driver 100% branches/functions with other metrics above 95%. B11.1 remains blocked: final Linux grouped run failed before Bun started (WSL CreateVm 0x800705b4), independent review and final measurement acceptance missing. Earlier current-source Linux driver diagnostics passed. B04 blocked/B05 pending; catalog 448/two packages; ledger 218 items; no exclusions approved. R03/P03/A03 retain owner decisions. PR #1 remains draft; native goal active.'));\nedit('.git/memory-resilience-pr-body.md',s=>s.replace(/- B11.1 adds[^\\n]+/,'- B11.1 now exercises real Windows startup/spawn/interruption cleanup paths. Final Windows group passes 63 tests/176 assertions; types pass. Eleven helper faults and an omitted-termination fault are killed. Unchanged-driver passing platform plus verified expected-failure counters reach 100% branches/functions and above 95% other metrics; helpers remain 100%. Earlier current-source Linux driver diagnostics passed, but the final Linux group failed before Bun started (WSL CreateVm 0x800705b4). B11.1 remains blocked on that check, independent applicability/review and final measurement acceptance. B11.2 is active to assess/remove or repair unused integration utilities.').replace('B11.1 is active; B05 remains pending.','B11.1 awaits final platform/review acceptance; B11.2 is active; B05 remains pending.'));\nconsole.log('Saved B11.1 local proof and explicit acceptance blockers; B11.2 is the next active item.');\n",
+  "validation": {
+    "command": "bun .git/b11-holder-validate.ts",
+    "exit": 0,
+    "result": "Live source/artifact inventory; exact platform/fault maps and complete nonnegative counters; recomputed scoped metric floors; eleven faults; retained Linux launch failure; acyclic 218-item ledger with only B11.2 active.",
+    "source": "import {readFileSync,writeFileSync} from 'node:fs';\nimport {createCoverageMap} from 'istanbul-lib-coverage';\nimport {sourceHash,discoverInventory,validateInventory} from '../scripts/quality-inventory';\nconst root='.planning/memory-resilience/', read=(p:string)=>JSON.parse(readFileSync(p,'utf8'));\nconst hash=(p:string)=>sourceHash(readFileSync(p,'utf8'));\nconst assert=(x:unknown,m:string)=>{if(!x)throw Error(m);};\nconst path=root+'evidence/B11.1-holder-proof.json', packet=read(path);\nfor(const input of [...packet.sourceInputs,...packet.artifacts])assert(hash(input.path)===input.sourceHash,'Stale '+input.path);\nconst catalog=discoverInventory(process.cwd());\nassert(JSON.stringify(catalog)===JSON.stringify(read(root+'executable-catalog.json'))&&!validateInventory(catalog,read(root+'quality-classifications.json')).length,'Stale inventory');\nconst platforms=read(root+'evidence/B11.1-holder-platforms.json'), faults=read(root+'evidence/B11.1-holder-faults.json');\nconst exactKeys=(left:object,right:object)=>JSON.stringify(Object.keys(left).sort())===JSON.stringify(Object.keys(right).sort());\nfunction validateCounters(data:any,maps:any){\n for(const [counter,map] of [['s','statementMap'],['f','fnMap'],['b','branchMap']]){\n  assert(exactKeys(data[counter!],maps[map!]),'Missing/extra counter');\n  for(const [id,value] of Object.entries(data[counter!])){\n   const counts=counter==='b'?value as number[]:[value];\n   if(counter==='b')assert(counts.length===maps.branchMap[id].locations.length,'Wrong branch count');\n   assert(counts.every((x:any)=>Number.isSafeInteger(x)&&x>=0),'Malformed counter');\n  }\n }\n}\nfor(const p of [platforms.windows,platforms.linux])for(const input of p.sourceInputs)assert(hash(input.path)===input.sourceHash,'Stale platform source');\nfor(const input of faults.sourceInputs)assert(hash(input.path)===input.sourceHash,'Stale fault source');\nfor(const row of packet.diagnostics.files){\n const data=[platforms.windows,platforms.linux].map(p=>Object.values(p.rawCoverage).find((x:any)=>x.path.replaceAll('\\\\','/').endsWith('/'+row.path)) as any);\n for(const mapName of ['statementMap','fnMap','branchMap'])assert(JSON.stringify(data[0][mapName])===JSON.stringify(data[1][mapName]),'Platform map mismatch');\n const map=createCoverageMap({});\n for(const raw of data){validateCounters(raw,raw);map.addFileCoverage({...raw,path:row.path});}\n if(row.path==='tests/helpers/test-database.test.ts'){\n  for(const name of ['statementMap','fnMap','branchMap'])assert(JSON.stringify(data[0][name])===JSON.stringify(faults.driverMaps[name]),'Fault map mismatch');\n  assert(faults.records.length===11,'Missing fault');\n  for(const fault of faults.records){\n   assert(fault.status==='KILLED'&&fault.exit===1&&!fault.recovery.some((x:any)=>x.status.startsWith('retained')),'Unresolved fault');\n   validateCounters(fault.driverCounters,faults.driverMaps);\n   map.addFileCoverage({path:row.path,...faults.driverMaps,...fault.driverCounters});\n  }\n }\n const summary=map.fileCoverageFor(row.path).toSummary().data;\n assert(JSON.stringify(summary)===JSON.stringify(row.metrics),'Summary mismatch');\n for(const key of ['lines','statements','functions','branches'])assert(summary[key].total>0&&summary[key].pct>=(key==='branches'?100:95),'Below diagnostic floor');\n}\nconst ledger=read(root+'work-items.json'), ids=new Map<string,any>(ledger.items.map((x:any)=>[x.id,x])), done=new Set<string>();\nfunction visit(id:string,stack=new Set<string>()){assert(ids.has(id)&&!stack.has(id),'Invalid dependency');if(done.has(id))return;for(const dep of ids.get(id).depends_on)visit(dep,new Set([...stack,id]));done.add(id);}\nassert(ids.size===218&&ids.size===ledger.items.length,'Ledger changed');for(const id of ids.keys())visit(id);\nassert(ledger.current_item==='B11.2'&&ledger.items.filter((x:any)=>x.status==='active').map((x:any)=>x.id).join()==='B11.2','Unexpected active task');\nassert(ids.get('B11.1').status==='blocked'&&ids.get('B04').status==='blocked'&&ids.get('B05').status==='pending','Premature acceptance');\nassert(packet.checks[1].exit===-1&&packet.checks[1].classification.includes('unverified'),'Linux launch failure lost');\npacket.validation={command:'bun .git/b11-holder-validate.ts',exit:0,result:'Live source/artifact inventory; exact platform/fault maps and complete nonnegative counters; recomputed scoped metric floors; eleven faults; retained Linux launch failure; acyclic 218-item ledger with only B11.2 active.',source:readFileSync('.git/b11-holder-validate.ts','utf8'),inventoryOutput:readFileSync('.git/b11-holder-inventory.txt','utf8')};\nwriteFileSync(path,JSON.stringify(packet,null,2)+'\\n');console.log(packet.validation.result);\n",
+    "inventoryOutput": "$ bun run scripts/check-quality-inventory.ts --check .planning/memory-resilience/quality-classifications.json\r\nInventory structure: valid (448 files, 2 packages)\r\nStructural validation does not approve classifications, exclusions or coverage. Independent review remains required.\r\n"
+  }
+}

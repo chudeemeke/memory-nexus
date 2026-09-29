@@ -1,0 +1,172 @@
+{
+  "item_id": "B04",
+  "status": "active",
+  "recorded_at": "2026-09-19T22:41:31.605Z",
+  "source_revision": "d4ab6ffc8c5c6c5e9694910b640a8428ede38603",
+  "cwd": "C:\\Projects\\memory-nexus",
+  "change_scope": "Classification, package mapping and owned findings only; no executable source changed.",
+  "counts": {
+    "candidates": 446,
+    "proposed": 71,
+    "unclassified": 375,
+    "approvedExclusions": 0,
+    "ledgerItems": 142
+  },
+  "decisions": [
+    {
+      "path": "scripts/check-test-isolation.ts",
+      "tier": "S",
+      "anchor": "scanFile / main",
+      "sourceHash": "a6105d08e614d0b1915ea2f0326dc9d2ff27ca9855e1517fb25308e86a6a44ed"
+    },
+    {
+      "path": "scripts/eval-v5.ts",
+      "tier": "S",
+      "anchor": "runEvalCli / process.exitCode",
+      "sourceHash": "6e6a853cc9053692534fdf638246f20eaca56820166049c7360e80fe41f6764c"
+    },
+    {
+      "path": "scripts/eval-v5/types.ts",
+      "tier": "S",
+      "anchor": "V5_EVAL_DIMENSIONS",
+      "sourceHash": "d40396c828e826e649d1ba683cfd08cee3b7c73f6007deb3d176ffca25db03f2"
+    },
+    {
+      "path": "scripts/eval-v5/cli.ts",
+      "tier": "S",
+      "anchor": "parseArgs / runEvalCli",
+      "sourceHash": "dfe8f4546586905ad80dbde28114be019d27bbffecb809e78bea92ea1e13342a"
+    },
+    {
+      "path": "scripts/eval-v5/fixtures.ts",
+      "tier": "S",
+      "anchor": "validateFixture / assertValidFixtures",
+      "sourceHash": "3fada677108e99949a1b310567ab672f8569ed77d62a6de2ec407206714d94e2"
+    },
+    {
+      "path": "scripts/eval-v5/harness.ts",
+      "tier": "S",
+      "anchor": "runV5EvalHarness / buildReport",
+      "sourceHash": "841e411d4f682114ea666e66f1058f091a3b899f667376ab14c148601ef1e5ef"
+    },
+    {
+      "path": "scripts/eval-v5/evaluators.ts",
+      "tier": "S",
+      "anchor": "evaluatePrivacyRedaction / evaluateFrictionQuery",
+      "sourceHash": "243e9a1b8b860cc3676f863d9289eb24d6698cce436854e61f7e6181811fb101"
+    },
+    {
+      "path": "scripts/eval-v5.test.ts",
+      "tier": "S",
+      "anchor": "contract-only fixture test / rmSync",
+      "sourceHash": "227ba9e1afdcb0ee41ad88e5ea7d3e0e22803cb12120629a9ad88e56eabc5bda"
+    },
+    {
+      "path": "scripts/run-uat-verification.ts",
+      "tier": "S",
+      "anchor": "run / finally cleanup",
+      "sourceHash": "7ad84cf8c8473f5b26770a45038e3aff4972b7446d401d5185313f47e40dcffe"
+    },
+    {
+      "path": "scripts/verify-published-package.ts",
+      "tier": "S",
+      "anchor": "verifyVersion / global installs / finally",
+      "sourceHash": "da73af0c4eab2c84716f62daf843615f663454243db98ae4262538f84384ab83"
+    },
+    {
+      "path": "tests/generators/large-session.ts",
+      "tier": "S",
+      "anchor": "generateLargeSession / generateVariedSession",
+      "sourceHash": "182acb2053908200321da7d61e1bf3fe0781b2ff316317cf709150439d8e117e"
+    },
+    {
+      "path": "tests/helpers/env-overrides.ts",
+      "tier": "S",
+      "anchor": "installEnvOverrides",
+      "sourceHash": "e05e831542a78cf87594e1769c4a04212a0602bb2a27103898385666ad04e892"
+    },
+    {
+      "path": "tests/helpers/test-database.ts",
+      "tier": "S",
+      "anchor": "createTestDatabase / createTestDir",
+      "sourceHash": "a55063ac488ac8a285654906dbaae1e9758f51f6dc025e28a36e0535dbc9399e"
+    },
+    {
+      "path": "tests/integration/index.ts",
+      "tier": "S",
+      "anchor": "setupTestDatabase / generateTestSessions / cleanupTestData",
+      "sourceHash": "3ba66e85cd5feeac75ad290f49c27f8d35f9495d2b55f16c0fc2b88342b66aba"
+    },
+    {
+      "path": "src/application/services/budget-allocator.ts",
+      "tier": "A",
+      "anchor": "allocateBudget",
+      "sourceHash": "1b7bc02047bb59bcc22789a924d6926bdd38cf7c527e7fefb90867b2776382c4"
+    },
+    {
+      "path": "src/application/services/rrf-fusion.ts",
+      "tier": "A",
+      "anchor": "reciprocalRankFusion",
+      "sourceHash": "7f3d926abd8f63bb1edf59a1e4a771786d682c6d1ae8c8a55b0f14bfe05476e3"
+    },
+    {
+      "path": "src/application/services/temporal-decay.ts",
+      "tier": "A",
+      "anchor": "applyTemporalDecay / applyTemporalDecayWithExemptions",
+      "sourceHash": "3f15164460082dba37753dc679313f818bbf25a9dd697dedd5028411b30c4709"
+    },
+    {
+      "path": "src/infrastructure/hooks/sync-hook-script.ts",
+      "tier": "S",
+      "anchor": "readJsonFromStream / executeSyncHook",
+      "sourceHash": "f2930ff0e85192c30372e9c9c71ed4282ef51d991aed97f9c37833492a464c6a"
+    },
+    {
+      "path": "src/presentation/cli/commands/install.ts",
+      "tier": "S",
+      "anchor": "executeInstall / findHookScriptSource",
+      "sourceHash": "072cfc18de8dcc88b4bcfb750b1f887ca9a6c81d2fd455e15a326cf6678529fb"
+    },
+    {
+      "path": "src/infrastructure/hooks/settings-manager.ts",
+      "tier": "S",
+      "anchor": "backupSettings / restoreSettings / writeFileSync",
+      "sourceHash": "11f0f3c4311ec2487a2adc0dcec9ca3f85c4f075789f9ddca2703983ab7a645d"
+    }
+  ],
+  "sourceInputs": [
+    {
+      "path": ".planning/memory-resilience/quality-classifications.json",
+      "sourceHash": "02588861c41bf2e64b60087cb5d12e5b8aadb66ba4fe4b2b5989c725fd628024"
+    },
+    {
+      "path": ".planning/memory-resilience/package-boundary-map.json",
+      "sourceHash": "ed6376aff746fc9fe56708d00626933e5383abaee88bbfe4f5a2855d94531e4e"
+    },
+    {
+      "path": ".planning/memory-resilience/work-items.json",
+      "sourceHash": "56279ab4856ec89bd934f14c60bdc61c61e4aae77e4c0f65a5795c1cd0ec06fb"
+    }
+  ],
+  "checks": [
+    {
+      "command": "bun run quality:inventory",
+      "exit": 1,
+      "expected_result": "Incomplete inventory: 375 unknown-tier issues",
+      "log": ".planning/memory-resilience/evidence/B04-batch-1-gate.txt"
+    },
+    {
+      "command": "bun .git/b04-validate-batch.ts",
+      "exit": 0,
+      "result": "446 source and 2 package hashes current; 142 unique acyclic work items; all new findings block R02; B04 alone active",
+      "log": ".planning/memory-resilience/evidence/B04-batch-1-validation.json",
+      "verification_source": "import { readFileSync, writeFileSync } from 'node:fs';\nimport { execFileSync } from 'node:child_process';\nimport { sourceHash, validateInventory } from '../scripts/quality-inventory.ts';\nconst root = '.planning/memory-resilience/';\nconst read = (p: string) => JSON.parse(readFileSync(p,'utf8'));\nconst assert = (condition: unknown, message: string) => { if(!condition) throw new Error(message); };\nconst catalog = read(root+'executable-catalog.json');\nconst manifest = read(root+'quality-classifications.json');\nconst ledger = read(root+'work-items.json');\nconst mapping = read(root+'package-boundary-map.json');\nfor(const input of [...catalog.files,...catalog.packages,...mapping.sourceInputs]) assert(sourceHash(readFileSync(input.path,'utf8'))===input.sourceHash,'Stale source '+input.path);\nconst issues = validateInventory(catalog,manifest);\nassert(issues.length===375 && issues.every(i=>i.startsWith('Unknown risk tier: ')),'Unexpected inventory errors');\nassert(manifest.files.filter((f:any)=>f.tier!==null).length===71,'Wrong proposed count');\nconst byId = new Map<string,any>(ledger.items.map((i:any)=>[i.id,i]));\nassert(byId.size===142 && byId.size===ledger.items.length,'Duplicate or missing work items');\nconst visited = new Set<string>();\nfunction visit(id:string, parents = new Set<string>()) {\n assert(!parents.has(id),'Dependency cycle '+id);\n if(visited.has(id))return;\n assert(byId.has(id),'Unknown dependency '+id);\n const stack=new Set([...parents,id]);\n for(const dep of byId.get(id).depends_on) visit(dep,stack);\n visited.add(id);\n}\nfor(const id of byId.keys())visit(id);\nfunction reaches(id:string,target:string):boolean { return id===target || byId.get(id).depends_on.some((dep:string)=>reaches(dep,target)); }\nfor(const id of ['B11.1','B11.2','B11.3','B12','D05'])assert(reaches('R02',id),'Finding bypasses baseline acceptance '+id);\nassert(ledger.items.filter((i:any)=>i.status==='active').map((i:any)=>i.id).join()==='B04','Unexpected active item');\nassert(byId.get('B05').status==='pending','B05 prematurely advanced');\nconst changed=execFileSync('git',['diff','--name-only'],{encoding:'utf8'}).trim().split('\\n');\nassert(changed.every(p=>p.startsWith('.planning/')),'Unexpected executable change');\nconst record={status:'PASS',sourceBindings:catalog.files.length,packageBindings:catalog.packages.length,packageMapBindings:mapping.sourceInputs.length,proposed:71,unclassified:375,expectedGateExit:1,ledgerItems:byId.size,acyclic:true,newFindingsReachBaselineReview:true,activeItem:'B04',nextItemStatus:'B05 pending',limits:'Data/source consistency only; no independent tier approval or runtime acceptance.'};\nwriteFileSync(root+'evidence/B04-batch-1-validation.json',JSON.stringify(record,null,2)+'\\n');\nconsole.log(JSON.stringify(record));\n"
+    }
+  ],
+  "limits": [
+    "Classifications are proposed, not independently approved.",
+    "Source findings are not reproduced runtime failures.",
+    "No full suite, coverage metric, built artifact, installed hook or release acceptance is inferred from this documentation checkpoint.",
+    "Existing inventory code tests remain evidence of unchanged source at d4ab6ff; no new test count is claimed."
+  ]
+}

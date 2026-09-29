@@ -1,0 +1,590 @@
+[
+  {
+    "path": "C:\\Projects\\memory-nexus\\src\\application\\services\\backfill-service.ts",
+    "gaps": [
+      "branches=90.47"
+    ]
+  },
+  {
+    "path": "C:\\Projects\\memory-nexus\\src\\application\\services\\budget-allocator.ts",
+    "gaps": [
+      "branches=90.9"
+    ]
+  },
+  {
+    "path": "C:\\Projects\\memory-nexus\\src\\application\\services\\embedding-service.ts",
+    "gaps": [
+      "functions=94.11"
+    ]
+  },
+  {
+    "path": "C:\\Projects\\memory-nexus\\src\\application\\services\\export-service.ts",
+    "gaps": [
+      "functions=93.75"
+    ]
+  },
+  {
+    "path": "C:\\Projects\\memory-nexus\\src\\application\\services\\extraction-pipeline.ts",
+    "gaps": [
+      "branches=91.48",
+      "functions=93.75"
+    ]
+  },
+  {
+    "path": "C:\\Projects\\memory-nexus\\src\\application\\services\\friction-service.ts",
+    "gaps": [
+      "functions=92.85"
+    ]
+  },
+  {
+    "path": "C:\\Projects\\memory-nexus\\src\\application\\services\\fts-sanitizer.ts",
+    "gaps": [
+      "branches=85.71"
+    ]
+  },
+  {
+    "path": "C:\\Projects\\memory-nexus\\src\\application\\services\\memory-file-sync-service.ts",
+    "gaps": [
+      "branches=85.71"
+    ]
+  },
+  {
+    "path": "C:\\Projects\\memory-nexus\\src\\application\\services\\pattern-extractor.ts",
+    "gaps": [
+      "branches=93.33"
+    ]
+  },
+  {
+    "path": "C:\\Projects\\memory-nexus\\src\\application\\services\\rrf-fusion.ts",
+    "gaps": [
+      "branches=87.5"
+    ]
+  },
+  {
+    "path": "C:\\Projects\\memory-nexus\\src\\application\\services\\smart-context-service.ts",
+    "gaps": [
+      "branches=90.56"
+    ]
+  },
+  {
+    "path": "C:\\Projects\\memory-nexus\\src\\domain\\errors\\memory-error.ts",
+    "gaps": [
+      "branches=83.33"
+    ]
+  },
+  {
+    "path": "C:\\Projects\\memory-nexus\\src\\domain\\services\\path-decoder.ts",
+    "gaps": [
+      "functions=87.5"
+    ]
+  },
+  {
+    "path": "C:\\Projects\\memory-nexus\\src\\domain\\services\\query-parser.ts",
+    "gaps": [
+      "branches=94.11"
+    ]
+  },
+  {
+    "path": "C:\\Projects\\memory-nexus\\src\\domain\\value-objects\\embedding-result.ts",
+    "gaps": [
+      "branches=91.66"
+    ]
+  },
+  {
+    "path": "C:\\Projects\\memory-nexus\\src\\domain\\value-objects\\project-path.ts",
+    "gaps": [
+      "branches=90"
+    ]
+  },
+  {
+    "path": "C:\\Projects\\memory-nexus\\src\\infrastructure\\paths.ts",
+    "gaps": [
+      "functions=92.85"
+    ]
+  },
+  {
+    "path": "C:\\Projects\\memory-nexus\\src\\infrastructure\\database\\connection.ts",
+    "gaps": [
+      "statements=84.5",
+      "branches=68.18",
+      "lines=84.5"
+    ]
+  },
+  {
+    "path": "C:\\Projects\\memory-nexus\\src\\infrastructure\\database\\schema.ts",
+    "gaps": [
+      "branches=92.3"
+    ]
+  },
+  {
+    "path": "C:\\Projects\\memory-nexus\\src\\infrastructure\\database\\repositories\\dream-repository.ts",
+    "gaps": [
+      "branches=90.24"
+    ]
+  },
+  {
+    "path": "C:\\Projects\\memory-nexus\\src\\infrastructure\\database\\repositories\\embedding-repository.ts",
+    "gaps": [
+      "branches=77.77"
+    ]
+  },
+  {
+    "path": "C:\\Projects\\memory-nexus\\src\\infrastructure\\database\\repositories\\entity-repository.ts",
+    "gaps": [
+      "branches=92.3"
+    ]
+  },
+  {
+    "path": "C:\\Projects\\memory-nexus\\src\\infrastructure\\database\\repositories\\fact-repository.ts",
+    "gaps": [
+      "branches=92.59"
+    ]
+  },
+  {
+    "path": "C:\\Projects\\memory-nexus\\src\\infrastructure\\database\\repositories\\graph-repository.ts",
+    "gaps": [
+      "branches=91.42"
+    ]
+  },
+  {
+    "path": "C:\\Projects\\memory-nexus\\src\\infrastructure\\database\\repositories\\link-repository.ts",
+    "gaps": [
+      "branches=50"
+    ]
+  },
+  {
+    "path": "C:\\Projects\\memory-nexus\\src\\infrastructure\\database\\repositories\\memory-governance-repository.ts",
+    "gaps": [
+      "statements=93.75",
+      "lines=93.42"
+    ]
+  },
+  {
+    "path": "C:\\Projects\\memory-nexus\\src\\infrastructure\\database\\repositories\\memory-utility-repository.ts",
+    "gaps": [
+      "branches=85.71",
+      "lines=94.44"
+    ]
+  },
+  {
+    "path": "C:\\Projects\\memory-nexus\\src\\infrastructure\\database\\repositories\\message-repository.ts",
+    "gaps": [
+      "statements=94.11",
+      "lines=93.75"
+    ]
+  },
+  {
+    "path": "C:\\Projects\\memory-nexus\\src\\infrastructure\\database\\repositories\\persona-repository.ts",
+    "gaps": [
+      "branches=93.75"
+    ]
+  },
+  {
+    "path": "C:\\Projects\\memory-nexus\\src\\infrastructure\\database\\repositories\\tool-use-repository.ts",
+    "gaps": [
+      "statements=93.33",
+      "lines=92.85"
+    ]
+  },
+  {
+    "path": "C:\\Projects\\memory-nexus\\src\\infrastructure\\database\\services\\stats-service.ts",
+    "gaps": [
+      "branches=60"
+    ]
+  },
+  {
+    "path": "C:\\Projects\\memory-nexus\\src\\infrastructure\\embedding\\background-embedder.ts",
+    "gaps": [
+      "branches=85.18"
+    ]
+  },
+  {
+    "path": "C:\\Projects\\memory-nexus\\src\\infrastructure\\embedding\\ollama-provider.ts",
+    "gaps": [
+      "statements=93.33",
+      "branches=86.66",
+      "lines=93.33"
+    ]
+  },
+  {
+    "path": "C:\\Projects\\memory-nexus\\src\\infrastructure\\embedding\\openai-provider.ts",
+    "gaps": [
+      "statements=93.75",
+      "branches=88.88",
+      "lines=93.54"
+    ]
+  },
+  {
+    "path": "C:\\Projects\\memory-nexus\\src\\infrastructure\\hooks\\hook-runner.ts",
+    "gaps": [
+      "statements=90",
+      "branches=88.23",
+      "lines=90"
+    ]
+  },
+  {
+    "path": "C:\\Projects\\memory-nexus\\src\\infrastructure\\hooks\\log-writer.ts",
+    "gaps": [
+      "statements=94.73",
+      "branches=90.9",
+      "lines=94.59"
+    ]
+  },
+  {
+    "path": "C:\\Projects\\memory-nexus\\src\\infrastructure\\hooks\\settings-manager.ts",
+    "gaps": [
+      "branches=93.47"
+    ]
+  },
+  {
+    "path": "C:\\Projects\\memory-nexus\\src\\infrastructure\\hooks\\sync-hook-script.ts",
+    "gaps": [
+      "statements=90",
+      "branches=83.33",
+      "functions=72.72",
+      "lines=90"
+    ]
+  },
+  {
+    "path": "C:\\Projects\\memory-nexus\\src\\infrastructure\\hooks\\sync-logger-adapter.ts",
+    "gaps": [
+      "branches=0"
+    ]
+  },
+  {
+    "path": "C:\\Projects\\memory-nexus\\src\\infrastructure\\llm\\claude-cli-extractor.ts",
+    "gaps": [
+      "branches=75"
+    ]
+  },
+  {
+    "path": "C:\\Projects\\memory-nexus\\src\\infrastructure\\parsers\\timestamp.ts",
+    "gaps": [
+      "branches=94.44"
+    ]
+  },
+  {
+    "path": "C:\\Projects\\memory-nexus\\src\\infrastructure\\providers\\provider-registry.ts",
+    "gaps": [
+      "branches=93.22"
+    ]
+  },
+  {
+    "path": "C:\\Projects\\memory-nexus\\src\\infrastructure\\remote\\git-remote-event-transport.ts",
+    "gaps": [
+      "branches=93.47"
+    ]
+  },
+  {
+    "path": "C:\\Projects\\memory-nexus\\src\\infrastructure\\signals\\signal-handler.ts",
+    "gaps": [
+      "statements=91.13",
+      "functions=85.18",
+      "lines=91.13"
+    ]
+  },
+  {
+    "path": "C:\\Projects\\memory-nexus\\src\\infrastructure\\sources\\session-source.ts",
+    "gaps": [
+      "statements=86.88",
+      "branches=90.9",
+      "lines=86.66"
+    ]
+  },
+  {
+    "path": "C:\\Projects\\memory-nexus\\src\\presentation\\cli\\db-startup.ts",
+    "gaps": [
+      "statements=83.01",
+      "branches=91.17",
+      "functions=50",
+      "lines=83.01"
+    ]
+  },
+  {
+    "path": "C:\\Projects\\memory-nexus\\src\\presentation\\cli\\index.ts",
+    "gaps": [
+      "statements=92.5",
+      "branches=25",
+      "lines=92.5"
+    ]
+  },
+  {
+    "path": "C:\\Projects\\memory-nexus\\src\\presentation\\cli\\commands\\audit-secrets.ts",
+    "gaps": [
+      "functions=90.9"
+    ]
+  },
+  {
+    "path": "C:\\Projects\\memory-nexus\\src\\presentation\\cli\\commands\\backfill.ts",
+    "gaps": [
+      "statements=93.97",
+      "branches=91.17",
+      "functions=66.66",
+      "lines=93.97"
+    ]
+  },
+  {
+    "path": "C:\\Projects\\memory-nexus\\src\\presentation\\cli\\commands\\backup.ts",
+    "gaps": [
+      "statements=94.57",
+      "branches=83.91",
+      "functions=87.5",
+      "lines=94.49"
+    ]
+  },
+  {
+    "path": "C:\\Projects\\memory-nexus\\src\\presentation\\cli\\commands\\browse.ts",
+    "gaps": [
+      "branches=92.3",
+      "functions=75"
+    ]
+  },
+  {
+    "path": "C:\\Projects\\memory-nexus\\src\\presentation\\cli\\commands\\completion.ts",
+    "gaps": [
+      "statements=80.95",
+      "branches=88.88",
+      "functions=87.5",
+      "lines=80.95"
+    ]
+  },
+  {
+    "path": "C:\\Projects\\memory-nexus\\src\\presentation\\cli\\commands\\context.ts",
+    "gaps": [
+      "branches=94.23"
+    ]
+  },
+  {
+    "path": "C:\\Projects\\memory-nexus\\src\\presentation\\cli\\commands\\doctor.ts",
+    "gaps": [
+      "branches=93.28",
+      "functions=94.73"
+    ]
+  },
+  {
+    "path": "C:\\Projects\\memory-nexus\\src\\presentation\\cli\\commands\\dream.ts",
+    "gaps": [
+      "branches=86.48"
+    ]
+  },
+  {
+    "path": "C:\\Projects\\memory-nexus\\src\\presentation\\cli\\commands\\export.ts",
+    "gaps": [
+      "statements=93.33",
+      "branches=88.23",
+      "functions=80"
+    ]
+  },
+  {
+    "path": "C:\\Projects\\memory-nexus\\src\\presentation\\cli\\commands\\extract.ts",
+    "gaps": [
+      "branches=94.82"
+    ]
+  },
+  {
+    "path": "C:\\Projects\\memory-nexus\\src\\presentation\\cli\\commands\\facts.ts",
+    "gaps": [
+      "branches=91.3"
+    ]
+  },
+  {
+    "path": "C:\\Projects\\memory-nexus\\src\\presentation\\cli\\commands\\governance.ts",
+    "gaps": [
+      "statements=90.54",
+      "branches=91.8",
+      "functions=70",
+      "lines=90.41"
+    ]
+  },
+  {
+    "path": "C:\\Projects\\memory-nexus\\src\\presentation\\cli\\commands\\import.ts",
+    "gaps": [
+      "statements=85.41",
+      "branches=92.85",
+      "functions=80",
+      "lines=85.41"
+    ]
+  },
+  {
+    "path": "C:\\Projects\\memory-nexus\\src\\presentation\\cli\\commands\\install.ts",
+    "gaps": [
+      "statements=94.64",
+      "functions=83.33",
+      "lines=94.11"
+    ]
+  },
+  {
+    "path": "C:\\Projects\\memory-nexus\\src\\presentation\\cli\\commands\\migrate.ts",
+    "gaps": [
+      "branches=93.44"
+    ]
+  },
+  {
+    "path": "C:\\Projects\\memory-nexus\\src\\presentation\\cli\\commands\\profile.ts",
+    "gaps": [
+      "statements=94.59",
+      "branches=91.22",
+      "functions=80",
+      "lines=94.44"
+    ]
+  },
+  {
+    "path": "C:\\Projects\\memory-nexus\\src\\presentation\\cli\\commands\\projections.ts",
+    "gaps": [
+      "branches=86.84"
+    ]
+  },
+  {
+    "path": "C:\\Projects\\memory-nexus\\src\\presentation\\cli\\commands\\purge.ts",
+    "gaps": [
+      "statements=93.65",
+      "functions=63.63",
+      "lines=93.65"
+    ]
+  },
+  {
+    "path": "C:\\Projects\\memory-nexus\\src\\presentation\\cli\\commands\\query.ts",
+    "gaps": [
+      "branches=94.87"
+    ]
+  },
+  {
+    "path": "C:\\Projects\\memory-nexus\\src\\presentation\\cli\\commands\\remote.ts",
+    "gaps": [
+      "functions=90.62"
+    ]
+  },
+  {
+    "path": "C:\\Projects\\memory-nexus\\src\\presentation\\cli\\commands\\show.ts",
+    "gaps": [
+      "branches=94.11"
+    ]
+  },
+  {
+    "path": "C:\\Projects\\memory-nexus\\src\\presentation\\cli\\commands\\uninstall.ts",
+    "gaps": [
+      "statements=90.47",
+      "branches=92.3",
+      "functions=66.66",
+      "lines=90.47"
+    ]
+  },
+  {
+    "path": "C:\\Projects\\memory-nexus\\src\\presentation\\cli\\commands\\friction\\dashboard.ts",
+    "gaps": [
+      "statements=90.9",
+      "branches=69.23",
+      "functions=50",
+      "lines=90.9"
+    ]
+  },
+  {
+    "path": "C:\\Projects\\memory-nexus\\src\\presentation\\cli\\commands\\friction\\index.ts",
+    "gaps": [
+      "statements=73.91",
+      "branches=90.9",
+      "functions=25",
+      "lines=73.91"
+    ]
+  },
+  {
+    "path": "C:\\Projects\\memory-nexus\\src\\presentation\\cli\\commands\\friction\\purge.ts",
+    "gaps": [
+      "statements=93.75",
+      "branches=85",
+      "lines=93.75"
+    ]
+  },
+  {
+    "path": "C:\\Projects\\memory-nexus\\src\\presentation\\cli\\commands\\friction\\wontfix.ts",
+    "gaps": [
+      "statements=75",
+      "branches=75",
+      "lines=75"
+    ]
+  },
+  {
+    "path": "C:\\Projects\\memory-nexus\\src\\presentation\\cli\\commands\\sync\\ambient.ts",
+    "gaps": [
+      "branches=87.5"
+    ]
+  },
+  {
+    "path": "C:\\Projects\\memory-nexus\\src\\presentation\\cli\\commands\\sync\\background.ts",
+    "gaps": [
+      "statements=88.23",
+      "branches=90",
+      "functions=50",
+      "lines=88.23"
+    ]
+  },
+  {
+    "path": "C:\\Projects\\memory-nexus\\src\\presentation\\cli\\commands\\sync\\embedding-pass.ts",
+    "gaps": [
+      "branches=90.74"
+    ]
+  },
+  {
+    "path": "C:\\Projects\\memory-nexus\\src\\presentation\\cli\\commands\\sync\\helpers.ts",
+    "gaps": [
+      "branches=91.17"
+    ]
+  },
+  {
+    "path": "C:\\Projects\\memory-nexus\\src\\presentation\\cli\\commands\\sync\\index.ts",
+    "gaps": [
+      "statements=85.83",
+      "branches=93.5",
+      "functions=50",
+      "lines=86.2"
+    ]
+  },
+  {
+    "path": "C:\\Projects\\memory-nexus\\src\\presentation\\cli\\commands\\sync\\memory-files.ts",
+    "gaps": [
+      "statements=85.71",
+      "branches=84.61",
+      "lines=85.71"
+    ]
+  },
+  {
+    "path": "C:\\Projects\\memory-nexus\\src\\presentation\\cli\\formatters\\context-formatter.ts",
+    "gaps": [
+      "branches=94",
+      "functions=93.93"
+    ]
+  },
+  {
+    "path": "C:\\Projects\\memory-nexus\\src\\presentation\\cli\\formatters\\friction-dashboard.ts",
+    "gaps": [
+      "branches=93.75"
+    ]
+  },
+  {
+    "path": "C:\\Projects\\memory-nexus\\src\\presentation\\cli\\formatters\\list-formatter.ts",
+    "gaps": [
+      "statements=93.33",
+      "branches=88",
+      "functions=91.66",
+      "lines=93.15"
+    ]
+  },
+  {
+    "path": "C:\\Projects\\memory-nexus\\src\\presentation\\cli\\formatters\\related-formatter.ts",
+    "gaps": [
+      "functions=93.54"
+    ]
+  },
+  {
+    "path": "C:\\Projects\\memory-nexus\\src\\presentation\\cli\\formatters\\stats-formatter.ts",
+    "gaps": [
+      "branches=93.02"
+    ]
+  },
+  {
+    "path": "C:\\Projects\\memory-nexus\\src\\presentation\\cli\\pickers\\session-picker.ts",
+    "gaps": [
+      "branches=86.66"
+    ]
+  }
+]

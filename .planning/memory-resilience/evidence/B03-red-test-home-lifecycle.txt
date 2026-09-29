@@ -1,0 +1,43 @@
+bun test v1.4.1 (4661e494f)
+
+tests\test-store-isolation.test.ts:
+31 |     const child = spawnSync("bun", ["test", fixture], { cwd: resolve("."), env: { ...process.env }, encoding: "utf8", timeout: 30000 });
+32 |     expect(child.status, child.stderr).toBe(0);
+33 |     replacement = JSON.parse(readFileSync(report, "utf8"));
+34 |     expect(existsSync(report + ".exit"), child.stderr).toBe(true);
+35 |     expect(replacement!.pid).toBe(child.pid);
+36 |     expect(existsSync(join(replacement!.home, "valuable.txt"))).toBe(true);
+                                                                     ^
+error: expect(received).toBe(expected)
+
+Expected: true
+Received: false
+
+      at <anonymous> (C:\Projects\memory-nexus\tests\test-store-isolation.test.ts:36:65)
+(fail) test-home cleanup preserves a replacement directory even with a copied owner marker [375.08ms]
+56 |   try {
+57 |     const child = spawnSync("bun", ["test", fixture], { cwd: resolve("."), env: { ...process.env }, encoding: "utf8", timeout: 30000 });
+58 |     expect(child.status, child.stderr).toBe(0);
+59 |     owned = JSON.parse(readFileSync(report, "utf8"));
+60 |     expect(owned!.pid).toBe(child.pid);
+61 |     expect(existsSync(owned!.home)).toBe(false);
+                                         ^
+error: expect(received).toBe(expected)
+
+Expected: false
+Received: true
+
+      at <anonymous> (C:\Projects\memory-nexus\tests\test-store-isolation.test.ts:61:37)
+(fail) normal Bun test teardown removes its unused isolated home [264.27ms]
+(pass) an unconfigured programmatic friction test cannot create a database in the inherited user home [1574.69ms]
+(pass) test-home ownership survives between files in the same test process [461.51ms]
+-----------|---------|---------|-------------------
+File       | % Funcs | % Lines | Uncovered Line #s
+-----------|---------|---------|-------------------
+All files  |    0.00 |    0.00 |
+-----------|---------|---------|-------------------
+
+ 2 pass
+ 2 fail
+ 18 expect() calls
+Ran 4 tests across 1 file. [2.78s]

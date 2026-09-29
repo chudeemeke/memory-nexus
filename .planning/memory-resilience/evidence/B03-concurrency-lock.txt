@@ -1,0 +1,28 @@
+bun test v1.4.1 (4661e494f)
+
+scripts\coverage-run-storage.test.ts:
+(pass) coverage run ownership > concurrent child processes retain separate completed report generations [331.72ms]
+Coverage work retained for verified cleanup: C:\Users\Destiny\AppData\Local\Temp\memory-coverage-locked-rau797\work; bytes=369; EBUSY: resource busy or locked, rm 'C:\Users\Destiny\AppData\Local\Temp\memory-coverage-locked-rau797\work'
+(pass) coverage run ownership > retains ownership after a real Windows file lock interrupts cleanup [1109.61ms]
+Coverage work retained for verified cleanup: C:\Users\Destiny\AppData\Local\Temp\memory-coverage-replacement-BkfFIb\work; bytes=unknown; Refusing mismatched coverage ownership: C:\Users\Destiny\AppData\Local\Temp\memory-coverage-replacement-BkfFIb\work
+(pass) coverage run ownership > a copied marker cannot authorize cleanup of a replacement directory [21.30ms]
+(pass) coverage run ownership > refuses malformed output ownership without overwriting reports [19.02ms]
+(pass) coverage run ownership > refuses null output ownership without overwriting reports [21.82ms]
+(pass) coverage run ownership > refuses oversized output ownership without overwriting reports [23.81ms]
+(pass) coverage run ownership > refuses wrong-project output ownership without overwriting reports [21.91ms]
+(pass) coverage run ownership > refuses wrong-role output ownership without overwriting reports [28.98ms]
+(pass) coverage run ownership > refuses wrong-inode output ownership without overwriting reports [20.11ms]
+(pass) coverage run ownership > a killed process leaves attributable work and cannot block a new generation or authorize PID-based cleanup [225.84ms]
+Coverage work retained for verified cleanup: C:\Users\Destiny\AppData\Local\Temp\memory-coverage-owner-test-uMnvnd\work; bytes=27; Refusing unowned coverage directory: C:\Users\Destiny\AppData\Local\Temp\memory-coverage-owner-test-uMnvnd\work
+(pass) coverage run ownership > missing ownership cannot be restored as permission to clean a directory [12.03ms]
+---------------------------------|---------|---------|-------------------
+File                             | % Funcs | % Lines | Uncovered Line #s
+---------------------------------|---------|---------|-------------------
+All files                        |  100.00 |  100.00 |
+ scripts\coverage-run-storage.ts |  100.00 |  100.00 |
+---------------------------------|---------|---------|-------------------
+
+ 11 pass
+ 0 fail
+ 47 expect() calls
+Ran 11 tests across 1 file. [1.90s]

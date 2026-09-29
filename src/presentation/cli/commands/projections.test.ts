@@ -187,7 +187,7 @@ describe("projections command", () => {
   });
 
   it("prints none when a confirmed rebuild has no applicable projection events", async () => {
-    rmSync(join(eventsDir, "events-local.jsonl"), { force: true });
+    writeFileSync(join(eventsDir, "events-local.jsonl"), "");
 
     const result = await executeProjectionsRebuildCommand(
       { dbPathOverride: dbPath, eventsDirOverride: eventsDir },
@@ -198,6 +198,20 @@ describe("projections command", () => {
     const out = consoleOutput.join("\n");
     expect(out).toContain("Projection rebuild completed");
     expect(out).toContain("Applied projections: none");
+  });
+
+  it("refuses missing source logs and preserves the existing projection", async () => {
+    const opts = { dbPathOverride: dbPath, eventsDirOverride: eventsDir };
+    expect((await executeProjectionsRebuildCommand(opts, { confirm: true, json: true })).exitCode).toBe(0);
+    rmSync(join(eventsDir, "events-local.jsonl"));
+    consoleOutput.length = 0;
+    expect((await executeProjectionsRebuildCommand(opts, { confirm: true, json: true })).exitCode).toBe(1);
+    expect(JSON.parse(consoleOutput.join("\n")).errors[0]).toContain("No event log files available");
+    const db = new Database(dbPath, { readonly: true });
+    try {
+      using statement = db.prepare<{ uuid: string }, []>("SELECT uuid FROM facts");
+      expect(statement.all()).toEqual([{ uuid: "projection-fact-1" }]);
+    } finally { db.close(); }
   });
 
   it("reports invalid events after confirmed rebuild", async () => {
@@ -223,7 +237,8 @@ describe("projections command", () => {
     );
 
     expect(result.exitCode).toBe(1);
-    expect(consoleErrorOutput.join("\n")).toContain("completed with 1 invalid event log line");
+    expect(consoleErrorOutput.join("\n")).toContain("refused: 1 invalid event log line");
+    expect(consoleErrorOutput.join("\n")).toContain("Projections unchanged");
   });
 
   it("reports rebuild exceptions in JSON and text modes", async () => {

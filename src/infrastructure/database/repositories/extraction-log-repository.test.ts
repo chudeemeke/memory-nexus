@@ -5,7 +5,7 @@
  * Tests CRUD operations and log clearance for fact extractions.
  */
 
-import { describe, it, expect, beforeEach, afterEach } from "bun:test";
+import { describe, it, expect, beforeEach, afterEach, spyOn } from "bun:test";
 import { Database } from "bun:sqlite";
 import { createSchema } from "../schema.js";
 import { SqliteExtractionLogRepository } from "./extraction-log-repository.js";
@@ -92,5 +92,47 @@ describe("SqliteExtractionLogRepository", () => {
       const cleared = await repo.findAll();
       expect(cleared.length).toBe(0);
     });
+  });
+
+  it("migrates legacy audits without inventing input identity and preserves bound round trips", async () => {
+    db.exec("DROP TABLE extraction_log");
+    db.exec(`CREATE TABLE extraction_log (
+      session_id TEXT PRIMARY KEY, mode TEXT NOT NULL, facts_added INTEGER,
+      facts_updated INTEGER, facts_superseded INTEGER, facts_skipped INTEGER,
+      provider TEXT NOT NULL, model TEXT NOT NULL, tokens_consumed INTEGER,
+      extracted_at TEXT NOT NULL)`);
+    using insert=db.prepare("INSERT INTO extraction_log VALUES (?,?,?,?,?,?,?,?,?,?)");
+    insert.run("legacy","manual",2,0,0,0,"synthetic","synthetic",0,"2026-01-01T00:00:00.000Z");
+    const rows=()=>{using statement=db.prepare("SELECT * FROM extraction_log");return statement.get() as Record<string,unknown>;};
+    const before=rows();
+    const exec=db.exec.bind(db);
+    const fault=spyOn(db,"exec").mockImplementation(sql=>{
+      if(sql.startsWith("ALTER TABLE extraction_log")) throw new Error("synthetic migration failure");
+      return exec(sql);
+    });
+    try{expect(()=>createSchema(db)).toThrow("synthetic migration failure");}
+    finally{fault.mockRestore();}
+    expect(rows()).toEqual(before);
+    createSchema(db);createSchema(db);
+    expect(rows()).toEqual({...before,input_identity:null});
+    expect((await repo.findById("legacy"))?.inputIdentity).toBeUndefined();
+    const entry=createTestEntry({inputIdentity:"v1:"+"a".repeat(64)});
+    await repo.save(entry);
+    expect(await repo.findById(entry.sessionId)).toEqual(entry);
+    expect((await repo.findAll()).find(row=>row.sessionId===entry.sessionId)).toEqual(entry);
+  });
+
+  it("rejects invalid identity on writes and corrupted identity on reads", async () => {
+    await repo.save(createTestEntry());
+    const before=db.serialize();
+    for(const invalid of ["", "v2:"+"a".repeat(64), "v1:"+"A".repeat(64), "v1:"+"a".repeat(63), "v1:"+"g".repeat(64), 12, null]) {
+      await expect(repo.save(createTestEntry({inputIdentity:invalid as unknown as string}))).rejects.toThrow("Invalid or unsupported extraction input identity");
+      expect(db.serialize()).toEqual(before);
+    }
+    using update=db.prepare("UPDATE extraction_log SET input_identity=?");
+    expect(()=>update.run("v2:"+"a".repeat(64))).toThrow("CHECK constraint failed");
+    db.exec("PRAGMA ignore_check_constraints=ON");update.run("synthetic corrupt identity");
+    await expect(repo.findById("session-12345")).rejects.toThrow("Invalid or unsupported extraction input identity");
+    await expect(repo.findAll()).rejects.toThrow("Invalid or unsupported extraction input identity");
   });
 });

@@ -1,0 +1,25 @@
+bun test v1.4.1 (4661e494f)
+
+scripts\coverage-run-storage.test.ts:
+Coverage work retained for verified cleanup: C:\Users\Destiny\AppData\Local\Temp\memory-coverage-replacement-0j2B9M\work; bytes=unknown; Refusing mismatched coverage ownership: C:\Users\Destiny\AppData\Local\Temp\memory-coverage-replacement-0j2B9M\work
+(pass) coverage run ownership > a copied marker cannot authorize cleanup of a replacement directory [36.51ms]
+(pass) coverage run ownership > refuses malformed output ownership without overwriting reports [22.16ms]
+(pass) coverage run ownership > refuses null output ownership without overwriting reports [37.56ms]
+(pass) coverage run ownership > refuses oversized output ownership without overwriting reports [32.67ms]
+(pass) coverage run ownership > refuses wrong-project output ownership without overwriting reports [25.97ms]
+(pass) coverage run ownership > refuses wrong-role output ownership without overwriting reports [25.51ms]
+(pass) coverage run ownership > refuses wrong-inode output ownership without overwriting reports [25.25ms]
+(pass) coverage run ownership > a killed process leaves attributable work and cannot block a new generation or authorize PID-based cleanup [227.10ms]
+Coverage work retained for verified cleanup: C:\Users\Destiny\AppData\Local\Temp\memory-coverage-owner-test-SLCg5n\work; bytes=27; Refusing unowned coverage directory: C:\Users\Destiny\AppData\Local\Temp\memory-coverage-owner-test-SLCg5n\work
+(pass) coverage run ownership > missing ownership cannot be restored as permission to clean a directory [12.44ms]
+---------------------------------|---------|---------|-------------------
+File                             | % Funcs | % Lines | Uncovered Line #s
+---------------------------------|---------|---------|-------------------
+All files                        |   85.71 |   93.90 |
+ scripts\coverage-run-storage.ts |   85.71 |   93.90 | 80-83,114
+---------------------------------|---------|---------|-------------------
+
+ 9 pass
+ 0 fail
+ 35 expect() calls
+Ran 9 tests across 1 file. [504.00ms]

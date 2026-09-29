@@ -1,0 +1,13 @@
+{
+  "kind": "HTML tokenizer observation, not browser execution",
+  "parsed_elements": [
+    {
+      "tag": "span",
+      "marker": "category"
+    },
+    {
+      "tag": "div",
+      "marker": "\\\"script-breakout\\\""
+    }
+  ]
+}

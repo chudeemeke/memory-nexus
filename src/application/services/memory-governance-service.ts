@@ -13,8 +13,9 @@ import {
 } from "../../domain/entities/memory-governance.js";
 import type { IMemoryGovernanceRepository, MemoryGovernanceListOptions } from "../../domain/ports/repositories.js";
 
+export interface MemoryEventWriteResult { projectionCommitted: true; }
 export interface MemoryEventWriter {
-  (event: MemoryEventEnvelope): Promise<void>;
+  (event: MemoryEventEnvelope): Promise<void | MemoryEventWriteResult>;
 }
 
 export interface RegisterDerivedMemoryParams {
@@ -84,8 +85,10 @@ export class MemoryGovernanceService {
       consentScopes: params.consentScopes ?? [],
       expiresAt: params.expiresAt,
     });
-    await this.persistEvent(event);
-    const entry = await this.repository.applyMemoryEvent(event);
+    const written = await this.persistEvent(event);
+    const entry = written?.projectionCommitted
+      ? await this.repository.findByTarget(params.surface, params.targetId)
+      : await this.repository.applyMemoryEvent(event);
     if (!entry) {
       throw new Error("Governance registration did not produce a projection entry");
     }
@@ -178,8 +181,10 @@ export class MemoryGovernanceService {
       consentScopes: params.consentScopes ?? existing?.consentScopes ?? [],
       expiresAt: params.expiresAt ?? existing?.expiresAt ?? null,
     });
-    await this.persistEvent(event);
-    const entry = await this.repository.applyMemoryEvent(event);
+    const written = await this.persistEvent(event);
+    const entry = written?.projectionCommitted
+      ? await this.repository.findByTarget(params.surface, params.targetId)
+      : await this.repository.applyMemoryEvent(event);
     if (!entry) {
       throw new Error(`Governance ${control} did not produce a projection entry`);
     }
@@ -258,9 +263,7 @@ export class MemoryGovernanceService {
     });
   }
 
-  private async persistEvent(event: MemoryEventEnvelope): Promise<void> {
-    if (this.writeEvent) {
-      await this.writeEvent(event);
-    }
+  private async persistEvent(event: MemoryEventEnvelope): Promise<void | MemoryEventWriteResult> {
+    return this.writeEvent?.(event);
   }
 }

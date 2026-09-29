@@ -1,0 +1,19 @@
+bun test v1.4.1 (4661e494f)
+
+scripts\quality-inventory.test.ts:
+
+# Unhandled error between tests
+-------------------------------
+error: Cannot find module './quality-inventory' from 'C:\Projects\memory-nexus\scripts\quality-inventory.test.ts'
+-------------------------------
+
+-----------|---------|---------|-------------------
+File       | % Funcs | % Lines | Uncovered Line #s
+-----------|---------|---------|-------------------
+All files  |    0.00 |    0.00 |
+-----------|---------|---------|-------------------
+
+ 0 pass
+ 1 fail
+ 1 error
+Ran 1 test across 1 file. [151.00ms]

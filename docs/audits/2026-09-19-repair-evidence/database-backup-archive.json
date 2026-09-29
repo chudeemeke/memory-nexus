@@ -1,0 +1,9 @@
+{
+  "originalBytes": 987656192,
+  "archiveBytes": 411213456,
+  "reclaimedBytes": 576442736,
+  "archive": "C:\\Users\\Destiny\\.local\\share\\memory\\backups\\preserved\\memory-db-20260402-preserved-20260919.zip",
+  "verification": "Source read-locked during compression; ZIP entry length and SHA256 matched; original rehashed before removal",
+  "originalRemoved": true,
+  "manifest": "C:\\Users\\Destiny\\.local\\share\\memory\\backups\\preserved\\memory-db-20260402-preserved-20260919.json"
+}

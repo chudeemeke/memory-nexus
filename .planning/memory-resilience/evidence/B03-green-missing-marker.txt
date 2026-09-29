@@ -1,0 +1,16 @@
+bun test v1.4.1 (4661e494f)
+
+scripts\coverage-run-storage.test.ts:
+Coverage work retained for verified cleanup: C:\Users\Destiny\AppData\Local\Temp\memory-coverage-owner-test-9VVRzI\work; bytes=27; Refusing unowned coverage directory: C:\Users\Destiny\AppData\Local\Temp\memory-coverage-owner-test-9VVRzI\work
+(pass) coverage run ownership > missing ownership cannot be restored as permission to clean a directory [26.53ms]
+---------------------------------|---------|---------|-------------------
+File                             | % Funcs | % Lines | Uncovered Line #s
+---------------------------------|---------|---------|-------------------
+All files                        |   85.71 |   74.39 |
+ scripts\coverage-run-storage.ts |   85.71 |   74.39 | 37-49,67-68,80-83,104,114
+---------------------------------|---------|---------|-------------------
+
+ 1 pass
+ 0 fail
+ 2 expect() calls
+Ran 1 test across 1 file. [351.00ms]

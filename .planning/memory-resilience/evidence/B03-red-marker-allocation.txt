@@ -1,0 +1,43 @@
+bun test v1.4.1 (4661e494f)
+
+scripts\coverage-run-storage.test.ts:
+33 |       return originalWrite(path, data, options);
+34 |     }) as typeof fs.writeFileSync);
+35 |     const diagnostic = spyOn(process.stderr, "write").mockImplementation(() => true);
+36 |     try {
+37 |       expect(() => openCoverageRun(project, work, join(project, "coverage"))).toThrow("synthetic marker ENOSPC");
+38 |       expect(existsSync(work)).toBe(partial);
+                                    ^
+error: expect(received).toBe(expected)
+
+Expected: false
+Received: true
+
+      at <anonymous> (C:\Projects\memory-nexus\scripts\coverage-run-storage.test.ts:38:32)
+(fail) coverage run ownership > owner-marker write failure cleans only an empty claim (partial marker: %s) [87.13ms]
+36 |     try {
+37 |       expect(() => openCoverageRun(project, work, join(project, "coverage"))).toThrow("synthetic marker ENOSPC");
+38 |       expect(existsSync(work)).toBe(partial);
+39 |       if (partial) {
+40 |         expect(readFileSync(join(work, ".memory-coverage-owner.json"), "utf-8")).toBe("partial");
+41 |         expect(diagnostic.mock.calls.flat().join(" ")).toContain("Coverage ownership allocation incomplete:");
+                                                            ^
+error: expect(received).toContain(expected)
+
+Expected to contain: "Coverage ownership allocation incomplete:"
+Received: ""
+
+      at <anonymous> (C:\Projects\memory-nexus\scripts\coverage-run-storage.test.ts:41:56)
+(fail) coverage run ownership > owner-marker write failure cleans only an empty claim (partial marker: %s) [217.93ms]
+---------------------------------|---------|---------|-------------------
+File                             | % Funcs | % Lines | Uncovered Line #s
+---------------------------------|---------|---------|-------------------
+All files                        |   42.86 |   37.50 |
+ scripts\coverage-run-storage.ts |   42.86 |   37.50 | 32-48,67-68,80-82,87-90,94-102,106-125
+---------------------------------|---------|---------|-------------------
+
+ 0 pass
+ 12 filtered out
+ 2 fail
+ 6 expect() calls
+Ran 2 tests across 1 file. [659.00ms]

@@ -10,6 +10,7 @@ import {
     copyFileSync,
     cpSync,
     existsSync,
+    lstatSync,
     mkdirSync,
     readdirSync,
     readFileSync,
@@ -29,6 +30,8 @@ import {
 import { SecretAuditService } from "../../../infrastructure/security/secret-audit-service.js";
 import { PatternRedactor } from "../../../infrastructure/security/pattern-redactor.js";
 import { getAllLogFiles, getBackupDir, getConfigPath, getEventsDir } from "../../../infrastructure/paths.js";
+import { LOCAL_EVENT_STATE_DIRECTORY } from "../../../infrastructure/database/source-operation-admission.js";
+import { assertMaintenanceTargets } from "../../../infrastructure/maintenance-targets.js";
 
 const REMOTE_SCHEMA_VERSION = 1;
 const REMOTE_EXIT_OK = 0;
@@ -578,6 +581,12 @@ function createRemoteBackupSnapshot(
     outputDir: string | undefined,
     opts: RemoteCommandOptions,
 ): RemoteBackupSnapshot {
+    const configPath = opts.configPathOverride ?? getConfigPath();
+    const eventsDir = opts.eventsDirOverride ?? getEventsDir();
+    assertMaintenanceTargets([
+        { path: configPath, kind: "file" },
+        { path: eventsDir, kind: "directory" },
+    ]);
     const now = opts.now?.() ?? new Date();
     const createdAt = now.toISOString();
     const backupId = `remote-sync-${formatBackupTimestamp(now)}`;
@@ -586,8 +595,6 @@ function createRemoteBackupSnapshot(
     const backupPath = uniqueBackupPath(root, backupId);
     mkdirSync(backupPath, { recursive: true, mode: 0o700 });
 
-    const configPath = opts.configPathOverride ?? getConfigPath();
-    const eventsDir = opts.eventsDirOverride ?? getEventsDir();
     const backupConfigPath = join(backupPath, "config.json");
     const backupEventsDir = join(backupPath, "events");
     const includesConfig = existsSync(configPath);
@@ -610,7 +617,7 @@ function createRemoteBackupSnapshot(
         includesConfig,
         includesEvents,
         eventFileCount,
-        excludedPaths: [".git"],
+        excludedPaths: [".git", LOCAL_EVENT_STATE_DIRECTORY],
     };
     const manifestPath = join(backupPath, "manifest.json");
     writeFileSync(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`, { mode: 0o600 });
@@ -683,10 +690,13 @@ function readRemoteBackupManifest(backupDir: string): RemoteBackupManifest {
 function copyEventsDirectory(sourceDir: string, targetDir: string): number {
     let copiedFiles = 0;
     for (const entry of readdirSync(sourceDir)) {
-        if (entry === ".git") continue;
+        if (entry === ".git" || entry.toLowerCase() === LOCAL_EVENT_STATE_DIRECTORY) continue;
         const sourcePath = join(sourceDir, entry);
         const targetPath = join(targetDir, entry);
-        const stat = statSync(sourcePath);
+        const stat = lstatSync(sourcePath);
+        if (stat.isSymbolicLink() || (stat.isFile() && stat.nlink !== 1)) {
+            throw new Error("Event backup cannot copy symbolic or hard links");
+        }
         if (stat.isDirectory()) {
             mkdirSync(targetPath, { recursive: true, mode: 0o700 });
             copiedFiles += copyEventsDirectory(sourcePath, targetPath);
@@ -700,7 +710,7 @@ function copyEventsDirectory(sourceDir: string, targetDir: string): number {
 
 function clearEventsDirectoryExceptGit(eventsDir: string): void {
     for (const entry of readdirSync(eventsDir)) {
-        if (entry === ".git") continue;
+        if (entry === ".git" || entry.toLowerCase() === LOCAL_EVENT_STATE_DIRECTORY) continue;
         rmSync(join(eventsDir, entry), { recursive: true, force: true, maxRetries: 10, retryDelay: 50 });
     }
 }

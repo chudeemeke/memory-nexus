@@ -4,7 +4,7 @@
 
 import { afterEach, beforeEach, describe, expect, it } from "bun:test";
 import { Database } from "bun:sqlite";
-import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { existsSync, linkSync, mkdirSync, readFileSync, rmSync, symlinkSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { tmpdir } from "node:os";
 import { closeDatabase, initializeDatabase } from "../../../infrastructure/database/index.js";
@@ -106,6 +106,8 @@ describe("local backup and restore commands", () => {
   });
 
   it("creates a full local backup with manifest, database, config, and event logs", async () => {
+    mkdirSync(join(eventsDir,".memory-local"));
+    writeFileSync(join(eventsDir,".memory-local","admission.sqlite"),"local authority");
     const result = await executeBackupCreateCommand(undefined, opts(), { json: true });
 
     expect(result.exitCode).toBe(0);
@@ -117,6 +119,7 @@ describe("local backup and restore commands", () => {
     expect(parsed.data.includesConfig).toBe(true);
     expect(parsed.data.includesEvents).toBe(true);
     expect(parsed.data.eventFileCount).toBe(1);
+    expect(parsed.data.excludedPaths).toContain("events/.memory-local");
 
     const backupPath = parsed.data.backupPath as string;
     expect(existsSync(join(backupPath, "manifest.json"))).toBe(true);
@@ -124,6 +127,27 @@ describe("local backup and restore commands", () => {
     expect(existsSync(join(backupPath, "config.json"))).toBe(true);
     expect(existsSync(join(backupPath, "events", "events-local.jsonl"))).toBe(true);
     expect(existsSync(join(backupPath, "events", ".git", "HEAD"))).toBe(false);
+    expect(existsSync(join(backupPath, "events", ".memory-local"))).toBe(false);
+  });
+
+  it.each(["symbolic", "hard"])("rejects %s aliases of local admission state in event backups", async (kind) => {
+    const local = join(eventsDir, ".memory-local");
+    mkdirSync(local);
+    const authority = join(local, "admission.sqlite");
+    writeFileSync(authority, "local authority");
+    if (kind === "symbolic") {
+      symlinkSync(local, join(eventsDir, "aliased-local"), process.platform === "win32" ? "junction" : "dir");
+    } else {
+      linkSync(authority, join(eventsDir, "aliased.sqlite"));
+    }
+
+    const result = await executeBackupCreateCommand(undefined, opts(), { json: true });
+    expect(result.exitCode).toBe(1);
+    const parsed = JSON.parse(consoleOutput.join("\n"));
+    expect(parsed.status).toBe("error");
+    expect(parsed.errors.join(" ")).toContain("symbolic or hard links");
+    expect(existsSync(join(backupRoot, "local-20260701T200000000Z", "manifest.json"))).toBe(false);
+    expect(readFileSync(authority, "utf8")).toBe("local authority");
   });
 
   it("prints full text backup creation status when every component is included", async () => {
@@ -321,6 +345,19 @@ describe("local backup and restore commands", () => {
     const parsed = JSON.parse(consoleOutput.join("\n"));
     expect(parsed.status).toBe("not_ready");
     expect(readFileSync(configPath, "utf-8")).toContain("mutated");
+  });
+
+  it("preserves local admission on restore and never imports a backup authority", async () => {
+    await executeBackupCreateCommand(undefined, opts(), { json: true });
+    const backupPath = JSON.parse(consoleOutput.join("\n")).data.backupPath as string;
+    for (const [root,contents] of [[eventsDir,"live local authority"],[join(backupPath,"events"),"foreign authority"]]) {
+      mkdirSync(join(root!,".memory-local"));
+      writeFileSync(join(root!,".memory-local","admission.sqlite"),contents!);
+    }
+    consoleOutput=[];
+    const result=await executeRestoreCommand(backupPath,opts(),{confirm:true,json:true});
+    expect(result.exitCode).toBe(0);
+    expect(readFileSync(join(eventsDir,".memory-local","admission.sqlite"),"utf8")).toBe("live local authority");
   });
 
   it("prints the text no-confirm restore guard", async () => {

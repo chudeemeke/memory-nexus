@@ -229,9 +229,10 @@ export interface HealthCheckOverrides {
  */
 export function checkDatabaseIntegrity(db: Database): "ok" | "corrupted" {
     try {
-        const result = db.query<{ integrity_check: string }, []>(
+        using statement = db.prepare<{ integrity_check: string }, []>(
             "PRAGMA integrity_check(1);"
-        ).get();
+        );
+        const result = statement.get();
 
         return result?.integrity_check === "ok" ? "ok" : "corrupted";
     } catch {
@@ -252,9 +253,10 @@ export function checkDatabaseIntegrity(db: Database): "ok" | "corrupted" {
  */
 export function checkQuickIntegrity(db: Database): "ok" | "corrupted" {
     try {
-        const result = db.query<{ quick_check: string }, []>(
+        using statement = db.prepare<{ quick_check: string }, []>(
             "PRAGMA quick_check(1);"
-        ).get();
+        );
+        const result = statement.get();
 
         return result?.quick_check === "ok" ? "ok" : "corrupted";
     } catch {
@@ -460,7 +462,8 @@ export function checkSqliteVecAvailability(): SqliteVecHealth {
         const db = new Database(":memory:");
         try {
             sqliteVec.load(db);
-            const result = db.query("SELECT vec_version()").get() as { "vec_version()": string };
+            using statement = db.prepare<{ "vec_version()": string }, []>("SELECT vec_version()");
+            const result = statement.get()!;
             return { available: true, version: result["vec_version()"] };
         } finally {
             db.close();
@@ -652,11 +655,13 @@ function checkSearchCapability(
         if (existsSync(dbPath)) {
             const db = new Database(dbPath, { create: false, readonly: true });
             try {
-                const embRow = db.query("SELECT COUNT(*) as count FROM embedding_state").get() as { count: number } | null;
-                embeddedCount = embRow?.count ?? 0;
-
-                const msgRow = db.query("SELECT COUNT(*) as count FROM messages_meta").get() as { count: number } | null;
-                totalMessages = msgRow?.count ?? 0;
+                using statement = db.prepare<{ embeddedCount: number; totalMessages: number }, []>(`
+                    SELECT (SELECT COUNT(*) FROM embedding_state) AS embeddedCount,
+                           (SELECT COUNT(*) FROM messages_meta) AS totalMessages
+                `);
+                const counts = statement.get()!;
+                embeddedCount = counts.embeddedCount;
+                totalMessages = counts.totalMessages;
             } finally {
                 db.close();
             }

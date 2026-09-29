@@ -5,7 +5,7 @@
  * Implements IToolUseRepository with batch support and idempotent inserts.
  */
 
-import type { Database, Statement } from "bun:sqlite";
+import type { Database } from "bun:sqlite";
 import type { IToolUseRepository } from "../../../domain/ports/repositories.js";
 import { ToolUse, type ToolUseStatus } from "../../../domain/entities/tool-use.js";
 import { unknownErrorMessage } from "../../../domain/errors/unknown-error.js";
@@ -49,40 +49,18 @@ export interface BatchOptions {
  * - Progress callback for CLI integration
  */
 export class SqliteToolUseRepository implements IToolUseRepository {
-    private readonly db: Database;
-    private readonly findByIdStmt: Statement<ToolUseRow, [string]>;
-    private readonly findBySessionStmt: Statement<ToolUseRow, [string]>;
-    private readonly insertStmt: Statement;
-
-    constructor(db: Database) {
-        this.db = db;
-
-        // Prepare statements for repeated use
-        this.findByIdStmt = db.prepare<ToolUseRow, [string]>(
-            `SELECT id, session_id, name, input, timestamp, status, result
-             FROM tool_uses
-             WHERE id = ?`
-        );
-
-        this.findBySessionStmt = db.prepare<ToolUseRow, [string]>(
-            `SELECT id, session_id, name, input, timestamp, status, result
-             FROM tool_uses
-             WHERE session_id = ?
-             ORDER BY timestamp ASC`
-        );
-
-        this.insertStmt = db.prepare(
-            `INSERT OR IGNORE INTO tool_uses
-             (id, session_id, name, input, timestamp, status, result)
-             VALUES ($id, $session_id, $name, $input, $timestamp, $status, $result)`
-        );
-    }
+    constructor(private readonly db: Database) {}
 
     /**
      * Find a tool use by its unique identifier.
      */
     async findById(id: string): Promise<ToolUse | null> {
-        const row = this.findByIdStmt.get(id);
+        using statement = this.db.prepare<ToolUseRow, [string]>(
+            `SELECT id, session_id, name, input, timestamp, status, result
+             FROM tool_uses
+             WHERE id = ?`
+        );
+        const row = statement.get(id);
         if (!row) {
             return null;
         }
@@ -94,7 +72,13 @@ export class SqliteToolUseRepository implements IToolUseRepository {
      * Returns array ordered by timestamp ascending.
      */
     async findBySession(sessionId: string): Promise<ToolUse[]> {
-        const rows = this.findBySessionStmt.all(sessionId);
+        using statement = this.db.prepare<ToolUseRow, [string]>(
+            `SELECT id, session_id, name, input, timestamp, status, result
+             FROM tool_uses
+             WHERE session_id = ?
+             ORDER BY timestamp ASC`
+        );
+        const rows = statement.all(sessionId);
         return rows.map((row) => this.rowToEntity(row));
     }
 
@@ -103,7 +87,8 @@ export class SqliteToolUseRepository implements IToolUseRepository {
      * Uses INSERT OR IGNORE for idempotent inserts.
      */
     async save(toolUse: ToolUse, sessionId: string): Promise<void> {
-        this.insertStmt.run({
+        using statement = this.prepareInsert();
+        statement.run({
             $id: toolUse.id,
             $session_id: sessionId,
             $name: toolUse.name,
@@ -115,14 +100,16 @@ export class SqliteToolUseRepository implements IToolUseRepository {
     }
 
     /**
-     * Save multiple tool uses in a single transaction.
-     * Processes in batches of 100 for memory efficiency.
+     * Save tool uses in committed chunks of at most 100 rows.
+     * Row errors are reported while the chunk transaction remains active.
+     * Transaction-wide rollback stops processing; earlier committed chunks remain.
      * Returns batch result with counts and any errors encountered.
      */
     async saveMany(
         toolUses: Array<{ toolUse: ToolUse; sessionId: string }>,
         options?: BatchOptions
     ): Promise<BatchResult> {
+        using statement = this.prepareInsert();
         const BATCH_SIZE = 100;
         const result: BatchResult = { inserted: 0, skipped: 0, errors: [] };
 
@@ -133,7 +120,7 @@ export class SqliteToolUseRepository implements IToolUseRepository {
                 (items: typeof batch) => {
                     for (const { toolUse, sessionId } of items) {
                         try {
-                            const runResult = this.insertStmt.run({
+                            const runResult = statement.run({
                                 $id: toolUse.id,
                                 $session_id: sessionId,
                                 $name: toolUse.name,
@@ -148,6 +135,9 @@ export class SqliteToolUseRepository implements IToolUseRepository {
                                 result.skipped++;
                             }
                         } catch (err) {
+                            // SQLite can roll back the entire transaction on a write error.
+                            // Do not continue later inserts in autocommit mode.
+                            if (!this.db.inTransaction) throw err;
                             result.skipped++;
                             result.errors.push({
                                 id: toolUse.id,
@@ -180,5 +170,13 @@ export class SqliteToolUseRepository implements IToolUseRepository {
             status: row.status as ToolUseStatus,
             result: row.result ?? undefined,
         });
+    }
+
+    private prepareInsert() {
+        return this.db.prepare(
+            `INSERT OR IGNORE INTO tool_uses
+             (id, session_id, name, input, timestamp, status, result)
+             VALUES ($id, $session_id, $name, $input, $timestamp, $status, $result)`
+        );
     }
 }

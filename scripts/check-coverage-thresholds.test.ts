@@ -185,3 +185,20 @@ describe("check-coverage-thresholds", () => {
     }
   });
 });
+test("coverage evidence cannot manufacture a pass with invalid counts or a claimed percentage", () => {
+  for (const invalid of [
+    { total: 100, covered: 94, pct: 100 },
+    { total: 100, covered: 101, pct: 101 },
+    { total: 100, covered: -1, pct: 99 },
+    { total: 100, covered: 99, pct: "99" },
+    { total: 100, covered: null, pct: 99 },
+  ]) {
+    const evidence = Object.fromEntries(["statements", "branches", "functions", "lines"].map((name) => [name, invalid]));
+    expect(checkCoverageThresholds(parseCoverageSummary(JSON.stringify({ total: evidence })), 95).ok).toBe(false);
+  }
+});
+
+test("coverage decisions use exact counts rather than rounded percentages", () => {
+  const evidence = Object.fromEntries(["statements", "branches", "functions", "lines"].map((name) => [name, { total: 100001, covered: 95000, pct: 95 }]));
+  expect(checkCoverageThresholds(parseCoverageSummary(JSON.stringify({ total: evidence })), 95).ok).toBe(false);
+});

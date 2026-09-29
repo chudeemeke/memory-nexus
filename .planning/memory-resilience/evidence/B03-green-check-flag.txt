@@ -1,0 +1,17 @@
+bun test v1.4.1 (4661e494f)
+
+scripts\run-istanbul-bun-coverage.test.ts:
+(pass) run-istanbul-bun-coverage > consumes the coverage-check flag instead of passing it to Bun test [5.02ms]
+--------------------------------------|---------|---------|-------------------
+File                                  | % Funcs | % Lines | Uncovered Line #s
+--------------------------------------|---------|---------|-------------------
+All files                             |    6.52 |   18.60 |
+ scripts\coverage-run-storage.ts      |    0.00 |    8.54 | 26-28,32-48,52-59,63-76,80-83,87-95,99-118
+ scripts\run-istanbul-bun-coverage.ts |   13.04 |   28.67 | 92,96-97,101,105-115,119,123-132,136-167,171-179,183-191,195-199,203-207,211-230,234-253,273-274,276-277,281,297-305,309-312,316-317,321-376,381-382,387-390,392
+--------------------------------------|---------|---------|-------------------
+
+ 1 pass
+ 26 filtered out
+ 0 fail
+ 2 expect() calls
+Ran 1 test across 1 file. [1362.00ms]

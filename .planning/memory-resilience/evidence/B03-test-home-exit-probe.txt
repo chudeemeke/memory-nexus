@@ -1,0 +1,41 @@
+bun test v1.4.1 (4661e494f)
+
+tests\test-store-isolation.test.ts:
+27 | });`);
+28 |   let replacement: { home: string; pid: number; inode: string } | undefined;
+29 |   try {
+30 |     const child = spawnSync("bun", ["test", fixture], { cwd: resolve("."), env: { ...process.env }, encoding: "utf8", timeout: 30000 });
+31 |     expect(child.status, child.stderr).toBe(0);
+32 |     expect(existsSync(report + ".exit"), child.stderr).toBe(true);
+                                                            ^
+error:
+..\..\Users\Destiny\AppData\Local\Temp\memory-test-home-replacement-9kkUxV\replacement.test.ts:
+(pass) replace this child's disposable home [15.59ms]
+-----------|---------|---------|-------------------
+File       | % Funcs | % Lines | Uncovered Line #s
+-----------|---------|---------|-------------------
+All files  |    0.00 |    0.00 |
+-----------|---------|---------|-------------------
+
+ 1 pass
+ 0 fail
+ 2 expect() calls
+Ran 1 test across 1 file. [64.00ms]
+
+
+Expected: true
+Received: false
+
+      at <anonymous> (C:\Projects\memory-nexus\tests\test-store-isolation.test.ts:32:56)
+(fail) test-home cleanup preserves a replacement directory even with a copied owner marker [248.13ms]
+-----------|---------|---------|-------------------
+File       | % Funcs | % Lines | Uncovered Line #s
+-----------|---------|---------|-------------------
+All files  |    0.00 |    0.00 |
+-----------|---------|---------|-------------------
+
+ 0 pass
+ 2 filtered out
+ 1 fail
+ 2 expect() calls
+Ran 1 test across 1 file. [669.00ms]

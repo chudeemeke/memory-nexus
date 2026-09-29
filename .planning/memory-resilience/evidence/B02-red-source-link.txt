@@ -1,0 +1,129 @@
+bun test v1.4.1 (4661e494f)
+
+scripts\run-istanbul-bun-coverage.test.ts:
+(pass) run-istanbul-bun-coverage > rejects the project root as coverage output before deleting any files [24.54ms]
+(pass) run-istanbul-bun-coverage > rejects a sibling with the project-name prefix before deleting any files [21.25ms]
+(pass) run-istanbul-bun-coverage > rejects an ancestor before deleting any files [17.83ms]
+(pass) run-istanbul-bun-coverage > rejects an output that resolves back to the project root [17.09ms]
+(pass) run-istanbul-bun-coverage > rejects traversal into a sibling before deleting any files [13.95ms]
+(pass) run-istanbul-bun-coverage > rejects a separate directory outside the project [14.84ms]
+(pass) run-istanbul-bun-coverage > rejects a linked coverage ancestor before touching its external target [23.01ms]
+bun test v1.4.1 (4661e494f)
+
+src\choose.test.ts:
+(pass) both outcomes [0.13ms]
+
+ 1 pass
+ 0 fail
+ 2 expect() calls
+Ran 1 test across 1 file. [56.00ms]
+
+=============================== Coverage summary ===============================
+Statements   : 100% ( 1/1 )
+Branches     : 100% ( 2/2 )
+Functions    : 100% ( 1/1 )
+Lines        : 100% ( 1/1 )
+================================================================================
+(pass) run-istanbul-bun-coverage > runs real instrumented tests in a strict descendant whose name begins with dots [625.52ms]
+bun test v1.4.1 (4661e494f)
+
+src\probe.test.ts:
+(pass) probe [0.08ms]
+
+ 1 pass
+ 0 fail
+ 1 expect() calls
+Ran 1 test across 1 file. [57.00ms]
+
+=============================== Coverage summary ===============================
+Statements   : 0% ( 0/1 )
+Branches     : 100% ( 0/0 )
+Functions    : 100% ( 0/0 )
+Lines        : 0% ( 0/1 )
+================================================================================
+155 |       try {
+156 |         runInstrumentedCoverage({ projectRoot, workDir, coverageDir, testArgs: ["src/probe.test.ts"] });
+157 |       } catch (caught) {
+158 |         error = caught;
+159 |       }
+160 |       expect(readFileSync(sourcePath, "utf-8")).toBe(source);
+                                                      ^
+error: expect(received).toBe(expected)
+
+- "export const valuable = 42;
+- "
++ "function cov_uevdl6huu() {
++   var path = "C:\\Users\\Destiny\\AppData\\Local\\Temp\\memory-coverage-source-link-fwLlqc\\project\\src\\linked\\valuable.ts";
++   var hash = "501708a4e419435e3703f9543815ccfec40ebed3";
++   var global = new Function("return this")();
++   var gcv = "__coverage__";
++   var coverageData = {
++     path: "C:\\Users\\Destiny\\AppData\\Local\\Temp\\memory-coverage-source-link-fwLlqc\\project\\src\\linked\\valuable.ts",
++     statementMap: {
++       "0": {
++         start: {
++           line: 1,
++           column: 24
++         },
++         end: {
++           line: 1,
++           column: 26
++         }
++       }
++     },
++     fnMap: {},
++     branchMap: {},
++     s: {
++       "0": 0
++     },
++     f: {},
++     b: {},
++     _coverageSchema: "1a1c01bbd47fc00a2c39e90264f33305004495a9",
++     hash: "501708a4e419435e3703f9543815ccfec40ebed3"
++   };
++   var coverage = global[gcv] || (global[gcv] = {});
++   if (!coverage[path] || coverage[path].hash !== hash) {
++     coverage[path] = coverageData;
++   }
++   var actualCoverage = coverage[path];
++   {
++     // @ts-ignore
++     cov_uevdl6huu = function () {
++       return actualCoverage;
++     };
++   }
++   return actualCoverage;
++ }
++ cov_uevdl6huu();
++ export const valuable = (cov_uevdl6huu().s[0]++, 42);"
+
+- Expected  - 2
++ Received  + 44
+
+      at <anonymous> (C:\Projects\memory-nexus\scripts\run-istanbul-bun-coverage.test.ts:160:49)
+(fail) run-istanbul-bun-coverage > rejects copied source-directory links before rewriting external source [290.52ms]
+(pass) run-istanbul-bun-coverage > ignores tests, generated output, dependency folders, and explicit coverage tests [0.33ms]
+(pass) run-istanbul-bun-coverage > instruments TypeScript with real statement and branch counters [18.35ms]
+(pass) run-istanbul-bun-coverage > returns zero-count baseline coverage for unexecuted instrumented files [23.60ms]
+(pass) run-istanbul-bun-coverage > adds the release-suite timeout to instrumented test runs by default [0.66ms]
+(pass) run-istanbul-bun-coverage > defaults instrumented discovery to project test roots [0.13ms]
+(pass) run-istanbul-bun-coverage > preserves an explicit instrumented test timeout [0.06ms]
+
+=============================== Coverage summary ===============================
+Statements   : 100% ( 1/1 )
+Branches     : 100% ( 0/0 )
+Functions    : 100% ( 0/0 )
+Lines        : 100% ( 1/1 )
+================================================================================
+(pass) run-istanbul-bun-coverage > writes Istanbul reports with all four coverage totals [23.80ms]
+--------------------------------------|---------|---------|-------------------
+File                                  | % Funcs | % Lines | Uncovered Line #s
+--------------------------------------|---------|---------|-------------------
+All files                             |   85.71 |   93.72 |
+ scripts\run-istanbul-bun-coverage.ts |   85.71 |   93.72 | 174,181-182,245-246,253,289,292,325-326,331-334,336
+--------------------------------------|---------|---------|-------------------
+
+ 15 pass
+ 1 fail
+ 85 expect() calls
+Ran 16 tests across 1 file. [1.83s]

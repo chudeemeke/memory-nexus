@@ -1,0 +1,139 @@
+bun test v1.4.1 (4661e494f)
+
+scripts\run-istanbul-bun-coverage.test.ts:
+(pass) run-istanbul-bun-coverage > refuses an existing source directory as output without deleting its content [14.27ms]
+(pass) run-istanbul-bun-coverage > refuses an existing prefixed work directory without deleting foreign content [9.38ms]
+bun test v1.4.1 (4661e494f)
+
+src\choose.test.ts:
+(pass) both [0.66ms]
+
+ 1 pass
+ 0 fail
+ 2 expect() calls
+Ran 1 test across 1 file. [153.00ms]
+
+=============================== Coverage summary ===============================
+Statements   : 100% ( 1/1 )
+Branches     : 100% ( 2/2 )
+Functions    : 100% ( 1/1 )
+Lines        : 100% ( 1/1 )
+================================================================================
+106 |     try {
+107 |       const options = { projectRoot, workDir, coverageDir, testArgs: ["src/choose.test.ts"] };
+108 |       const first = runInstrumentedCoverage(options);
+109 |       expect(first.exitCode).toBe(0);
+110 |       const firstSummary = readFileSync(first.coverageSummaryPath, "utf-8");
+111 |       expect(existsSync(workDir)).toBe(false);
+                                        ^
+error: expect(received).toBe(expected)
+
+Expected: false
+Received: true
+
+      at <anonymous> (C:\Projects\memory-nexus\scripts\run-istanbul-bun-coverage.test.ts:111:35)
+(fail) run-istanbul-bun-coverage > keeps independent report generations across repeat runs and cleans its working copies [1002.85ms]
+(pass) run-istanbul-bun-coverage > rejects the project root as coverage output before deleting any files [11.23ms]
+(pass) run-istanbul-bun-coverage > rejects a sibling with the project-name prefix before deleting any files [9.26ms]
+(pass) run-istanbul-bun-coverage > rejects an ancestor before deleting any files [9.50ms]
+(pass) run-istanbul-bun-coverage > rejects an output that resolves back to the project root [12.01ms]
+(pass) run-istanbul-bun-coverage > rejects traversal into a sibling before deleting any files [13.71ms]
+(pass) run-istanbul-bun-coverage > rejects a separate directory outside the project [9.66ms]
+(pass) run-istanbul-bun-coverage > rejects a linked coverage ancestor before touching its external target [11.75ms]
+bun test v1.4.1 (4661e494f)
+
+src\choose.test.ts:
+(pass) both outcomes [0.12ms]
+
+ 1 pass
+ 0 fail
+ 2 expect() calls
+Ran 1 test across 1 file. [45.00ms]
+
+=============================== Coverage summary ===============================
+Statements   : 100% ( 1/1 )
+Branches     : 100% ( 2/2 )
+Functions    : 100% ( 1/1 )
+Lines        : 100% ( 1/1 )
+================================================================================
+199 |         'test("both outcomes", () => { expect(choose(true)).toBe(1); expect(choose(false)).toBe(0); });',
+200 |       ].join("\n"));
+201 |       try {
+202 |         const result = runInstrumentedCoverage({ projectRoot, workDir, coverageDir, testArgs: ["src/choose.test.ts"] });
+203 |         expect(result.exitCode).toBe(0);
+204 |       expect(dirname(dirname(result.coverageJsonPath))).toBe(coverageDir);
+                                                              ^
+error: expect(received).toBe(expected)
+
+Expected: "C:\Users\Destiny\AppData\Local\Temp\memory-coverage-success-XdvSHu\project\..reports"
+Received: "C:\Users\Destiny\AppData\Local\Temp\memory-coverage-success-XdvSHu\project"
+
+      at <anonymous> (C:\Projects\memory-nexus\scripts\run-istanbul-bun-coverage.test.ts:204:57)
+(fail) run-istanbul-bun-coverage > runs real instrumented tests in a dot-prefixed descendant (project junction: false) [605.36ms]
+bun test v1.4.1 (4661e494f)
+
+src\choose.test.ts:
+(pass) both outcomes [0.10ms]
+
+ 1 pass
+ 0 fail
+ 2 expect() calls
+Ran 1 test across 1 file. [224.00ms]
+
+=============================== Coverage summary ===============================
+Statements   : 100% ( 1/1 )
+Branches     : 100% ( 2/2 )
+Functions    : 100% ( 1/1 )
+Lines        : 100% ( 1/1 )
+================================================================================
+199 |         'test("both outcomes", () => { expect(choose(true)).toBe(1); expect(choose(false)).toBe(0); });',
+200 |       ].join("\n"));
+201 |       try {
+202 |         const result = runInstrumentedCoverage({ projectRoot, workDir, coverageDir, testArgs: ["src/choose.test.ts"] });
+203 |         expect(result.exitCode).toBe(0);
+204 |       expect(dirname(dirname(result.coverageJsonPath))).toBe(coverageDir);
+                                                              ^
+error: expect(received).toBe(expected)
+
+Expected: "C:\Users\Destiny\AppData\Local\Temp\memory-coverage-success-gdXAby\project\..reports"
+Received: "C:\Users\Destiny\AppData\Local\Temp\memory-coverage-success-gdXAby\project"
+
+      at <anonymous> (C:\Projects\memory-nexus\scripts\run-istanbul-bun-coverage.test.ts:204:57)
+(fail) run-istanbul-bun-coverage > runs real instrumented tests in a dot-prefixed descendant (project junction: true) [447.95ms]
+(pass) run-istanbul-bun-coverage > rejects copied source-directory links before rewriting external source [25.31ms]
+(pass) run-istanbul-bun-coverage > rejects a linked work directory before deleting existing reports or the link [119.19ms]
+(pass) run-istanbul-bun-coverage > rejects a work-directory parent alias that resolves to the project root [103.47ms]
+(pass) run-istanbul-bun-coverage > rejects overlapping work and coverage paths: same [14.71ms]
+(pass) run-istanbul-bun-coverage > rejects overlapping work and coverage paths: output-in-work [23.85ms]
+(pass) run-istanbul-bun-coverage > rejects overlapping work and coverage paths: work-in-output [25.00ms]
+(pass) run-istanbul-bun-coverage > rejects overlapping work and coverage paths: work-in-project [18.29ms]
+(pass) run-istanbul-bun-coverage > ignores tests, generated output, dependency folders, and explicit coverage tests [0.33ms]
+(pass) run-istanbul-bun-coverage > instruments TypeScript with real statement and branch counters [17.17ms]
+(pass) run-istanbul-bun-coverage > returns zero-count baseline coverage for unexecuted instrumented files [11.44ms]
+(pass) run-istanbul-bun-coverage > adds the release-suite timeout to instrumented test runs by default [0.81ms]
+(pass) run-istanbul-bun-coverage > defaults instrumented discovery to project test roots [0.13ms]
+(pass) run-istanbul-bun-coverage > preserves an explicit instrumented test timeout [0.08ms]
+
+=============================== Coverage summary ===============================
+Statements   : 100% ( 1/1 )
+Branches     : 100% ( 0/0 )
+Functions    : 100% ( 0/0 )
+Lines        : 100% ( 1/1 )
+================================================================================
+(pass) run-istanbul-bun-coverage > writes Istanbul reports with all four coverage totals [210.72ms]
+
+3 tests failed:
+(fail) run-istanbul-bun-coverage > keeps independent report generations across repeat runs and cleans its working copies [1002.85ms]
+(fail) run-istanbul-bun-coverage > runs real instrumented tests in a dot-prefixed descendant (project junction: false) [605.36ms]
+(fail) run-istanbul-bun-coverage > runs real instrumented tests in a dot-prefixed descendant (project junction: true) [447.95ms]
+--------------------------------------|---------|---------|-------------------
+File                                  | % Funcs | % Lines | Uncovered Line #s
+--------------------------------------|---------|---------|-------------------
+All files                             |   88.00 |   94.60 |
+ scripts\run-istanbul-bun-coverage.ts |   88.00 |   94.60 | 204-205,221,268-269,276,324,327,377-378,383-386,388
+--------------------------------------|---------|---------|-------------------
+
+ 23 pass
+ 3 fail
+ 121 expect() calls
+Ran 26 tests across 1 file. [4.16s]

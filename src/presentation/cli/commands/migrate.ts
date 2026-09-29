@@ -127,14 +127,19 @@ export async function executeMigrateCommand(
     db = initResult.db;
 
     // 1. Structural Integrity Check
-    const integrityRow = db.prepare("PRAGMA integrity_check").get() as { integrity_check: string } | null;
+    using integrityStatement = db.prepare<{ integrity_check: string }, []>("PRAGMA integrity_check");
+    const integrityRow = integrityStatement.get();
     integrityCheck = integrityRow?.integrity_check ?? "unknown";
     if (integrityCheck !== "ok") {
       throw new Error(`Database integrity check failed: ${integrityCheck}`);
     }
 
     // 2. Commit and Truncate WAL sidecars
-    db.prepare("PRAGMA wal_checkpoint(TRUNCATE)").run();
+    using checkpointStatement = db.prepare<{ busy: number }, []>("PRAGMA wal_checkpoint(TRUNCATE)");
+    const checkpoint = checkpointStatement.get();
+    if (!checkpoint || checkpoint.busy !== 0) {
+      throw new Error("WAL checkpoint is busy or unavailable; retry after active database readers finish.");
+    }
   } catch (err) {
     const msg = unknownErrorMessage(err);
     if (options.json) {
@@ -242,7 +247,8 @@ function runMigrationDryRun(
   try {
     const db = new Database(dbPath, { readonly: true });
     try {
-      const integrityRow = db.query<{ integrity_check: string }, []>("PRAGMA integrity_check").get();
+      using integrityStatement = db.prepare<{ integrity_check: string }, []>("PRAGMA integrity_check");
+      const integrityRow = integrityStatement.get();
       integrityCheck = integrityRow?.integrity_check ?? "unknown";
     } finally {
       db.close();

@@ -53,10 +53,11 @@ export class SqliteFrictionRepository implements IFrictionRepository {
     }
 
     async save(entry: FrictionEntry): Promise<FrictionEntry> {
-        const result = this.db.prepare(`
+        using statement = this.db.prepare(`
             INSERT INTO friction_log (description, severity, category, tool, tags, status, context, source_project, logged_at, resolved_at, resolution, last_reviewed_at)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        `).run(
+        `);
+        const result = statement.run(
             entry.description,
             entry.severity,
             entry.category,
@@ -89,20 +90,18 @@ export class SqliteFrictionRepository implements IFrictionRepository {
     }
 
     async findById(id: number): Promise<FrictionEntry | null> {
-        const row = this.db
-            .prepare<FrictionRow, [number]>(
+        using statement = this.db.prepare<FrictionRow, [number]>(
                 "SELECT * FROM friction_log WHERE id = ?"
-            )
-            .get(id);
+            );
+        const row = statement.get(id);
         return row ? this.toEntity(row) : null;
     }
 
     async findOpen(): Promise<FrictionEntry[]> {
-        const rows = this.db
-            .prepare<FrictionRow, []>(
+        using statement = this.db.prepare<FrictionRow, []>(
                 "SELECT * FROM friction_log WHERE status = 'open' ORDER BY logged_at DESC"
-            )
-            .all();
+            );
+        const rows = statement.all();
         return rows.map((r) => this.toEntity(r));
     }
 
@@ -141,15 +140,17 @@ export class SqliteFrictionRepository implements IFrictionRepository {
         params.push(limit);
 
         const sql = `SELECT * FROM friction_log ${whereClause} ORDER BY logged_at DESC LIMIT ?`;
-        const rows = this.db.prepare<FrictionRow, (string | number)[]>(sql).all(...params);
+        using statement = this.db.prepare<FrictionRow, (string | number)[]>(sql);
+        const rows = statement.all(...params);
         return rows.map((r) => this.toEntity(r));
     }
 
     async query(options: FrictionQueryOptions = {}): Promise<FrictionQueryResult> {
         const { whereClause, params } = buildFrictionQueryWhere(options);
-        const countRow = this.db.prepare<{ count: number }, (string | number)[]>(
+        using countStatement = this.db.prepare<{ count: number }, (string | number)[]>(
             `SELECT COUNT(*) as count FROM friction_log ${whereClause}`
-        ).get(...params)!;
+        );
+        const countRow = countStatement.get(...params)!;
 
         const rowParams = [...params];
         const limitClause = options.limit !== undefined ? " LIMIT ?" : "";
@@ -157,9 +158,10 @@ export class SqliteFrictionRepository implements IFrictionRepository {
             rowParams.push(options.limit);
         }
 
-        const rows = this.db.prepare<FrictionRow, (string | number)[]>(
+        using statement = this.db.prepare<FrictionRow, (string | number)[]>(
             `SELECT * FROM friction_log ${whereClause} ORDER BY logged_at DESC${limitClause}`
-        ).all(...rowParams);
+        );
+        const rows = statement.all(...rowParams);
 
         return {
             entries: rows.map((r) => this.toEntity(r)),
@@ -168,9 +170,10 @@ export class SqliteFrictionRepository implements IFrictionRepository {
     }
 
     async resolve(id: number, resolution: string): Promise<void> {
-        const result = this.db.prepare(
+        using statement = this.db.prepare(
             "UPDATE friction_log SET status = 'resolved', resolution = ?, resolved_at = ? WHERE id = ?"
-        ).run(resolution, new Date().toISOString(), id);
+        );
+        const result = statement.run(resolution, new Date().toISOString(), id);
 
         if (result.changes === 0) {
             throw new Error(`Friction entry with id ${id} not found`);
@@ -178,9 +181,10 @@ export class SqliteFrictionRepository implements IFrictionRepository {
     }
 
     async updateStatus(id: number, status: FrictionStatus): Promise<void> {
-        const result = this.db.prepare(
+        using statement = this.db.prepare(
             "UPDATE friction_log SET status = ? WHERE id = ?"
-        ).run(status, id);
+        );
+        const result = statement.run(status, id);
 
         if (result.changes === 0) {
             throw new Error(`Friction entry with id ${id} not found`);
@@ -190,7 +194,7 @@ export class SqliteFrictionRepository implements IFrictionRepository {
     async getStats(): Promise<FrictionStats> {
         // Main aggregation query
         // COALESCE handles empty table case (SUM returns null on zero rows)
-        const summary = this.db.prepare<{
+        using summaryStatement = this.db.prepare<{
             total: number;
             open_count: number;
             resolved_count: number;
@@ -205,12 +209,14 @@ export class SqliteFrictionRepository implements IFrictionRepository {
                 AVG(CASE WHEN resolved_at IS NOT NULL
                     THEN julianday(resolved_at) - julianday(logged_at) END) as avg_resolve_days
             FROM friction_log
-        `).get()!;
+        `);
+        const summary = summaryStatement.get()!;
 
         // Severity breakdown
-        const severityRows = this.db.prepare<{ severity: string; count: number }, []>(
+        using severityStatement = this.db.prepare<{ severity: string; count: number }, []>(
             "SELECT severity, COUNT(*) as count FROM friction_log GROUP BY severity"
-        ).all();
+        );
+        const severityRows = severityStatement.all();
 
         const bySeverity: Record<FrictionSeverity, number> = {
             low: 0, medium: 0, high: 0, critical: 0,
@@ -220,9 +226,10 @@ export class SqliteFrictionRepository implements IFrictionRepository {
         }
 
         // Category breakdown (dynamic keys)
-        const categoryRows = this.db.prepare<{ category: string; count: number }, []>(
+        using categoryStatement = this.db.prepare<{ category: string; count: number }, []>(
             "SELECT category, COUNT(*) as count FROM friction_log GROUP BY category"
-        ).all();
+        );
+        const categoryRows = categoryStatement.all();
 
         const byCategory: Record<string, number> = {};
         for (const row of categoryRows) {
@@ -230,9 +237,10 @@ export class SqliteFrictionRepository implements IFrictionRepository {
         }
 
         // Tool breakdown
-        const toolRows = this.db.prepare<{ tool: string; count: number }, []>(
+        using toolStatement = this.db.prepare<{ tool: string; count: number }, []>(
             "SELECT tool, COUNT(*) as count FROM friction_log GROUP BY tool"
-        ).all();
+        );
+        const toolRows = toolStatement.all();
 
         const byTool: Record<string, number> = {};
         for (const row of toolRows) {
@@ -240,7 +248,7 @@ export class SqliteFrictionRepository implements IFrictionRepository {
         }
 
         // Oldest open entry
-        const oldestRow = this.db.prepare<{
+        using oldestStatement = this.db.prepare<{
             id: number;
             description: string;
             days_open: number;
@@ -251,7 +259,8 @@ export class SqliteFrictionRepository implements IFrictionRepository {
             WHERE status = 'open'
             ORDER BY logged_at ASC
             LIMIT 1
-        `).get();
+        `);
+        const oldestRow = oldestStatement.get();
 
         const oldestOpen = oldestRow
             ? { id: oldestRow.id, description: oldestRow.description, daysOpen: Math.floor(oldestRow.days_open) }
@@ -278,36 +287,39 @@ export class SqliteFrictionRepository implements IFrictionRepository {
         const now = new Date();
         for (let i = weeks - 1; i >= 0; i--) {
             const d = new Date(now);
-            d.setDate(d.getDate() - i * 7);
-            // Use strftime format matching SQLite: YYYY-WNN
-            const year = d.getFullYear();
-            // ISO week number calculation
-            const janFirst = new Date(year, 0, 1);
-            const dayOfYear = Math.ceil((d.getTime() - janFirst.getTime()) / 86400000);
-            const weekNum = Math.ceil((dayOfYear + janFirst.getDay()) / 7);
+            d.setUTCDate(d.getUTCDate() - i * 7);
+            // Match SQLite strftime('%Y-W%W'): UTC, Monday starts week 01;
+            // days before the first Monday belong to week 00, not an ISO year.
+            const year = d.getUTCFullYear();
+            const janFirst = new Date(Date.UTC(year, 0, 1));
+            const dayOfYear = Math.floor((Date.UTC(year, d.getUTCMonth(), d.getUTCDate()) - janFirst.getTime()) / 86400000);
+            const firstMonday = (8 - janFirst.getUTCDay()) % 7;
+            const weekNum = Math.floor((dayOfYear - firstMonday) / 7) + 1;
             const weekStr = `${year}-W${String(weekNum).padStart(2, "0")}`;
             weekList.push(weekStr);
         }
 
         // Query new entries per week
-        const newRows = this.db.prepare<{ week: string; count: number }, [string]>(`
+        using newStatement = this.db.prepare<{ week: string; count: number }, [string]>(`
             SELECT strftime('%Y-W', logged_at) || printf('%02d', CAST(strftime('%W', logged_at) AS INTEGER)) as week,
                    COUNT(*) as count
             FROM friction_log
             WHERE logged_at >= ?
             GROUP BY week
-        `).all(new Date(now.getTime() - weeks * 7 * 86400000).toISOString());
+        `);
+        const newRows = newStatement.all(new Date(now.getTime() - weeks * 7 * 86400000).toISOString());
 
         const newMap = new Map(newRows.map((r) => [r.week, r.count]));
 
         // Query resolved entries per week
-        const resolvedRows = this.db.prepare<{ week: string; count: number }, [string]>(`
+        using resolvedStatement = this.db.prepare<{ week: string; count: number }, [string]>(`
             SELECT strftime('%Y-W', resolved_at) || printf('%02d', CAST(strftime('%W', resolved_at) AS INTEGER)) as week,
                    COUNT(*) as count
             FROM friction_log
             WHERE resolved_at IS NOT NULL AND resolved_at >= ?
             GROUP BY week
-        `).all(new Date(now.getTime() - weeks * 7 * 86400000).toISOString());
+        `);
+        const resolvedRows = resolvedStatement.all(new Date(now.getTime() - weeks * 7 * 86400000).toISOString());
 
         const resolvedMap = new Map(resolvedRows.map((r) => [r.week, r.count]));
 
@@ -320,13 +332,14 @@ export class SqliteFrictionRepository implements IFrictionRepository {
     }
 
     async markReviewed(tool: string, reviewedAt: Date): Promise<void> {
-        this.db.prepare(
+        using statement = this.db.prepare(
             "UPDATE friction_log SET last_reviewed_at = ? WHERE tool = ? AND status = 'open'"
-        ).run(reviewedAt.toISOString(), tool);
+        );
+        statement.run(reviewedAt.toISOString(), tool);
     }
 
     async findPatterns(threshold: number): Promise<FrictionPattern[]> {
-        const groups = this.db.prepare<
+        using groupStatement = this.db.prepare<
             { tool: string; category: string; count: number },
             [number]
         >(`
@@ -336,13 +349,15 @@ export class SqliteFrictionRepository implements IFrictionRepository {
             GROUP BY tool, category
             HAVING COUNT(*) >= ?
             ORDER BY count DESC
-        `).all(threshold);
+        `);
+        const groups = groupStatement.all(threshold);
 
         const patterns: FrictionPattern[] = [];
         for (const group of groups) {
-            const rows = this.db.prepare<FrictionRow, [string, string]>(
+            using statement = this.db.prepare<FrictionRow, [string, string]>(
                 "SELECT * FROM friction_log WHERE tool = ? AND category = ? AND status = 'open'"
-            ).all(group.tool, group.category);
+            );
+            const rows = statement.all(group.tool, group.category);
 
             patterns.push({
                 tool: group.tool,
@@ -356,10 +371,8 @@ export class SqliteFrictionRepository implements IFrictionRepository {
     }
 
     async deleteByPattern(pattern: string): Promise<number> {
-        const stmt = this.db.prepare("DELETE FROM friction_log WHERE description LIKE $pattern");
-        stmt.run({ $pattern: pattern });
-        const result = this.db.query("SELECT changes() as count").get() as { count: number };
-        return result.count;
+        using stmt = this.db.prepare("DELETE FROM friction_log WHERE description LIKE $pattern");
+        return stmt.run({ $pattern: pattern }).changes;
     }
 
     private toEntity(row: FrictionRow): FrictionEntry {

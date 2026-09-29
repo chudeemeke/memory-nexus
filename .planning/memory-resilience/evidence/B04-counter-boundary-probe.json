@@ -1,0 +1,143 @@
+{
+  "command": "bun .git/b04-counter-boundary-probe.ts",
+  "runtime": "1.4.1",
+  "scope": "Synthetic in-memory VM only; no production module executed. Probe assertions describe existing gaps, not passing release behavior.",
+  "instrumenterSourceHash": "a7746e14085ab53bd9cd39926615b8961c96d426b777fa7ebfec868319424cde",
+  "probeSource": "import {writeFileSync,readFileSync} from 'node:fs';\nimport {runInNewContext} from 'node:vm';\nimport ts from 'typescript';\nimport {createCoverageMap} from 'istanbul-lib-coverage';\nimport {instrumentTypeScriptWithCoverage} from '../scripts/run-istanbul-bun-coverage';\nimport {sourceHash} from '../scripts/quality-inventory';\nconst cases=[\n {name:'default-export-call',source:'export default record(\"executed\");'},\n {name:'named-binding-control',source:'const value = record(\"executed\"); export default value;'},\n {name:'optional-access',source:'export function read(value: { field?: string } | null) { return value?.field; }\\nrecord(read(null)); record(read({field:\"present\"}));'},\n {name:'explicit-null-control',source:'export function read(value: { field?: string } | null) { return value === null ? undefined : value.field; }\\nrecord(read(null)); record(read({field:\"present\"}));'},\n];\nconst results=[];\nfor(const fixture of cases){\n const file='synthetic/'+fixture.name+'.ts';\n const built=instrumentTypeScriptWithCoverage(fixture.source,file);\n const calls:unknown[]=[];\n const sandbox:any={exports:{},record:(value:unknown)=>{calls.push(value===undefined?'undefined':value);return value;}};\n const output=ts.transpileModule(built.code,{compilerOptions:{target:ts.ScriptTarget.ES2022,module:ts.ModuleKind.CommonJS}}).outputText;\n runInNewContext(output,sandbox,{timeout:1000});\n const summary=createCoverageMap(sandbox.__coverage__).getCoverageSummary().data;\n results.push({name:fixture.name,source:fixture.source,calls,metrics:Object.fromEntries(['statements','branches','functions','lines'].map(m=>[m,summary[m]]))});\n}\nif(results[0].calls[0]!=='executed'||results[0].metrics.statements.total!==0||results[1].metrics.statements.covered<1)throw Error('Export boundary not reproduced');\nif(JSON.stringify(results[2].calls)!==JSON.stringify(results[3].calls))throw Error('Optional/control behavior differs');\nconst result={command:'bun .git/b04-counter-boundary-probe.ts',runtime:Bun.version,scope:'Synthetic in-memory VM only; no production module executed. Probe assertions describe existing gaps, not passing release behavior.',instrumenterSourceHash:sourceHash(readFileSync('scripts/run-istanbul-bun-coverage.ts','utf8')),probeSource:readFileSync('.git/b04-counter-boundary-probe.ts','utf8'),results};\nwriteFileSync('.git/b04-counter-boundary-probe.json',JSON.stringify(result,null,2)+'\\n');\nconsole.log(JSON.stringify(results));\n",
+  "results": [
+    {
+      "name": "default-export-call",
+      "source": "export default record(\"executed\");",
+      "calls": [
+        "executed"
+      ],
+      "metrics": {
+        "statements": {
+          "total": 0,
+          "covered": 0,
+          "skipped": 0,
+          "pct": 100
+        },
+        "branches": {
+          "total": 0,
+          "covered": 0,
+          "skipped": 0,
+          "pct": 100
+        },
+        "functions": {
+          "total": 0,
+          "covered": 0,
+          "skipped": 0,
+          "pct": 100
+        },
+        "lines": {
+          "total": 0,
+          "covered": 0,
+          "skipped": 0,
+          "pct": 100
+        }
+      }
+    },
+    {
+      "name": "named-binding-control",
+      "source": "const value = record(\"executed\"); export default value;",
+      "calls": [
+        "executed"
+      ],
+      "metrics": {
+        "statements": {
+          "total": 1,
+          "covered": 1,
+          "skipped": 0,
+          "pct": 100
+        },
+        "branches": {
+          "total": 0,
+          "covered": 0,
+          "skipped": 0,
+          "pct": 100
+        },
+        "functions": {
+          "total": 0,
+          "covered": 0,
+          "skipped": 0,
+          "pct": 100
+        },
+        "lines": {
+          "total": 1,
+          "covered": 1,
+          "skipped": 0,
+          "pct": 100
+        }
+      }
+    },
+    {
+      "name": "optional-access",
+      "source": "export function read(value: { field?: string } | null) { return value?.field; }\nrecord(read(null)); record(read({field:\"present\"}));",
+      "calls": [
+        "undefined",
+        "present"
+      ],
+      "metrics": {
+        "statements": {
+          "total": 3,
+          "covered": 3,
+          "skipped": 0,
+          "pct": 100
+        },
+        "branches": {
+          "total": 0,
+          "covered": 0,
+          "skipped": 0,
+          "pct": 100
+        },
+        "functions": {
+          "total": 1,
+          "covered": 1,
+          "skipped": 0,
+          "pct": 100
+        },
+        "lines": {
+          "total": 2,
+          "covered": 2,
+          "skipped": 0,
+          "pct": 100
+        }
+      }
+    },
+    {
+      "name": "explicit-null-control",
+      "source": "export function read(value: { field?: string } | null) { return value === null ? undefined : value.field; }\nrecord(read(null)); record(read({field:\"present\"}));",
+      "calls": [
+        "undefined",
+        "present"
+      ],
+      "metrics": {
+        "statements": {
+          "total": 3,
+          "covered": 3,
+          "skipped": 0,
+          "pct": 100
+        },
+        "branches": {
+          "total": 2,
+          "covered": 2,
+          "skipped": 0,
+          "pct": 100
+        },
+        "functions": {
+          "total": 1,
+          "covered": 1,
+          "skipped": 0,
+          "pct": 100
+        },
+        "lines": {
+          "total": 2,
+          "covered": 2,
+          "skipped": 0,
+          "pct": 100
+        }
+      }
+    }
+  ]
+}

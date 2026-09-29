@@ -475,11 +475,13 @@ describe("migrate command", () => {
     // Write dummy file to ensure existsSync(dbPath) is true
     writeFileSync(testDbPath, "");
 
+    let reads = 0, disposals = 0;
     const mockDb = {
       prepare: (sql: string) => {
         if (sql === "PRAGMA integrity_check") {
           return {
-            get: () => ({ integrity_check: "corrupt" })
+            get: () => { reads++; return { integrity_check: "corrupt" }; },
+            [Symbol.dispose]: () => { disposals++; }
           };
         }
         return {
@@ -491,7 +493,7 @@ describe("migrate command", () => {
 
     const initSpy = spyOn(dbModule, "initializeDatabase").mockReturnValue({
       db: mockDb as any,
-      isNew: false
+      walEnabled: false, fts5Available: false, sqliteVecAvailable: false
     });
 
     try {
@@ -500,6 +502,7 @@ describe("migrate command", () => {
         { dbPath: testDbPath }
       );
       expect(result.exitCode).toBe(2);
+      expect(reads).toBe(1); expect(disposals).toBe(1);
       expect(consoleErrorOutput.join("\n")).toContain("Database integrity check failed: corrupt");
     } finally {
       initSpy.mockRestore();
@@ -509,11 +512,13 @@ describe("migrate command", () => {
   it("should report non-ok integrity failures as stable JSON", async () => {
     writeFileSync(testDbPath, "");
 
+    let reads = 0, disposals = 0;
     const mockDb = {
       prepare: (sql: string) => {
         if (sql === "PRAGMA integrity_check") {
           return {
-            get: () => ({ integrity_check: "corrupt" })
+            get: () => { reads++; return { integrity_check: "corrupt" }; },
+            [Symbol.dispose]: () => { disposals++; }
           };
         }
         return {
@@ -525,7 +530,7 @@ describe("migrate command", () => {
 
     const initSpy = spyOn(dbModule, "initializeDatabase").mockReturnValue({
       db: mockDb as any,
-      isNew: false
+      walEnabled: false, fts5Available: false, sqliteVecAvailable: false
     });
 
     try {
@@ -534,6 +539,7 @@ describe("migrate command", () => {
         { dbPath: testDbPath, dataDir: testDir }
       );
       expect(result.exitCode).toBe(2);
+      expect(reads).toBe(1); expect(disposals).toBe(1);
       const parsed = JSON.parse(consoleOutput.join("\n"));
       expect(parsed.status).toBe("error");
       expect(parsed.data.integrityCheck).toBe("corrupt");
@@ -547,11 +553,13 @@ describe("migrate command", () => {
     // Write dummy file to ensure existsSync(dbPath) is true
     writeFileSync(testDbPath, "");
 
+    let reads = 0, disposals = 0;
     const mockDb = {
       prepare: (sql: string) => {
         if (sql === "PRAGMA integrity_check") {
           return {
-            get: () => null
+            get: () => { reads++; return null; },
+            [Symbol.dispose]: () => { disposals++; }
           };
         }
         return {
@@ -563,7 +571,7 @@ describe("migrate command", () => {
 
     const initSpy = spyOn(dbModule, "initializeDatabase").mockReturnValue({
       db: mockDb as any,
-      isNew: false
+      walEnabled: false, fts5Available: false, sqliteVecAvailable: false
     });
 
     try {
@@ -572,6 +580,7 @@ describe("migrate command", () => {
         { dbPath: testDbPath }
       );
       expect(result.exitCode).toBe(2);
+      expect(reads).toBe(1); expect(disposals).toBe(1);
       expect(consoleErrorOutput.join("\n")).toContain("Database integrity check failed: unknown");
     } finally {
       initSpy.mockRestore();
@@ -581,8 +590,8 @@ describe("migrate command", () => {
   it("should execute migrate command action handler when parsed via commander", async () => {
     const originalExitCode = process.exitCode;
     const pathSpy = spyOn(dbModule, "getDefaultDbPath").mockReturnValue(testDbPath);
-    const uninstallSpy = spyOn(hooksModule, "uninstallHooks").mockImplementation(() => {});
-    const installSpy = spyOn(hooksModule, "installHooks").mockImplementation(() => {});
+    const uninstallSpy = spyOn(hooksModule, "uninstallHooks").mockImplementation(() => ({ success: true, message: "synthetic uninstall" }));
+    const installSpy = spyOn(hooksModule, "installHooks").mockImplementation(() => ({ success: true, message: "synthetic install" }));
     
     // Initialize standard valid DB so execution succeeds
     const { db } = initializeDatabase({ path: testDbPath });

@@ -1,9 +1,6 @@
 import { unknownErrorMessage } from "../../domain/errors/unknown-error.js";
 
-export interface RemoteValidationResult {
-  valid: boolean;
-  error?: string;
-}
+export type RemoteValidationResult = { valid: true } | { valid: false; error: string };
 
 export interface RemoteTransportCommandResult {
   success: boolean;
@@ -38,6 +35,7 @@ export interface RemotePrivacyPreflightPort {
 
 export interface RemoteProjectionRebuilderPort {
   rebuild(): Promise<void>;
+  recover?(): Promise<{ rebuilt: boolean; pending: boolean }>;
 }
 
 export interface RemoteEventSyncServiceDeps {
@@ -62,6 +60,8 @@ export interface RemoteEventSyncResult {
   status: "synced" | "blocked" | "failed";
   rebuildNeeded: boolean;
   projectionRebuilt: boolean;
+  /** Present when receipt recovery was attempted or the working tree is unsettled. */
+  projectionPending?: boolean;
   pulled: boolean;
   pushed: boolean;
   configuredRemote: boolean;
@@ -158,6 +158,53 @@ export class RemoteEventSyncService {
   }
 
   async sync(request: RemoteEventSyncRequest): Promise<RemoteEventSyncResult> {
+    try {
+      const validation = validateSyncRequest(request, request.branch ?? DEFAULT_BRANCH, request.remoteName ?? DEFAULT_REMOTE_NAME);
+      if (!validation.valid) return blocked(validation.error);
+      const privacy = await this.privacyPreflight?.audit();
+      if (privacy && privacy.eventLogFindings > 0) {
+        return blocked(`Remote synchronization blocked: active event logs contain ${privacy.eventLogFindings} likely secret finding(s).`);
+      }
+    } catch (error) {
+      return failed(unknownErrorMessage(error));
+    }
+
+    if (!this.projectionRebuilder?.recover) return this.syncTransport(request);
+    const progress = { rebuildNeeded: false, projectionRebuilt: false, projectionPending: true };
+    try { await this.recoverProjections(progress); }
+    catch (error) { return failed(unknownErrorMessage(error), progress); }
+
+    const result = await this.syncTransport(request);
+    // A failed/throwing rebase without successful abort cannot supply stable source.
+    if (result.projectionPending) {
+      return { ...result, ...progress, rebuildNeeded: true, projectionPending: true };
+    }
+    try { await this.recoverProjections(progress); }
+    catch (error) {
+      const recoveryError = unknownErrorMessage(error);
+      return failed(result.error ? `${result.error}; ${recoveryError}` : recoveryError, { ...result, ...progress });
+    }
+    return { ...result, ...progress };
+  }
+
+  private async recoverProjections(progress: { rebuildNeeded: boolean; projectionRebuilt: boolean; projectionPending: boolean }): Promise<void> {
+    progress.projectionPending = true;
+    try {
+      const recovery = await this.projectionRebuilder!.recover!();
+      if (!recovery || typeof recovery.rebuilt !== "boolean" || typeof recovery.pending !== "boolean") {
+        throw new Error("Projection recovery returned an invalid result");
+      }
+      progress.projectionRebuilt ||= recovery.rebuilt;
+      progress.rebuildNeeded ||= recovery.rebuilt || recovery.pending;
+      progress.projectionPending = recovery.pending;
+      if (recovery.pending) throw new Error("Projection recovery remains pending; retry sync");
+    } catch (error) {
+      progress.rebuildNeeded = true;
+      throw error;
+    }
+  }
+
+  private async syncTransport(request: RemoteEventSyncRequest): Promise<RemoteEventSyncResult> {
     const remoteName = request.remoteName ?? DEFAULT_REMOTE_NAME;
     const branch = request.branch ?? DEFAULT_BRANCH;
     const autoPull = request.autoPull ?? true;
@@ -166,20 +213,10 @@ export class RemoteEventSyncService {
     let configuredRemote = false;
     let pulled = false;
     let pushed = false;
+    let rebaseUnsettled = false;
+    const projection = { rebuildNeeded: false, projectionRebuilt: false };
 
     try {
-      const validation = validateSyncRequest(request, branch, remoteName);
-      if (!validation.valid) {
-        return blocked(validation.error ?? "Remote sync request is invalid");
-      }
-
-      const privacy = await this.privacyPreflight?.audit();
-      if (privacy && privacy.eventLogFindings > 0) {
-        return blocked(
-          `Remote synchronization blocked: active event logs contain ${privacy.eventLogFindings} likely secret finding(s).`,
-        );
-      }
-
       const isRepository = await this.transport.isRepository();
       if (!isRepository) {
         const init = await this.transport.initRepository(createGitIdentity(request.machineId));
@@ -198,7 +235,7 @@ export class RemoteEventSyncService {
         configuredRemote = true;
       }
 
-      const before = await this.transport.listEventLogFingerprints();
+      const before = this.projectionRebuilder?.recover ? {} : await this.transport.listEventLogFingerprints();
       if (await this.transport.hasEventLog(request.machineId)) {
         const commit = await this.transport.commitEventLog(request.machineId, createCommitMessage(request.machineId, this.now()));
         if (!commit.success) {
@@ -218,14 +255,24 @@ export class RemoteEventSyncService {
           });
         }
         if (await this.transport.hasRemoteRef(remoteName, branch)) {
+          rebaseUnsettled = true;
           const pull = await this.transport.pullRebase(remoteName, branch);
           if (!pull.success) {
-            await this.transport.abortRebase();
+            let abort: RemoteTransportCommandResult;
+            try { abort = await this.transport.abortRebase(); }
+            catch (error) { abort = { success: false, error: unknownErrorMessage(error) }; }
+            rebaseUnsettled = !abort.success;
+            if (!abort.success) {
+              return failed(`Git pull failed: ${pull.error ?? "unknown error"}; Git rebase abort failed: ${abort.error ?? "unknown error"}`, {
+                initializedRepository, configuredRemote, rebuildNeeded: true, projectionPending: true,
+              });
+            }
             return failed(`Git pull failed: ${pull.error ?? "unknown error"}`, {
               initializedRepository,
               configuredRemote,
             });
           }
+          rebaseUnsettled = false;
           pulled = true;
         }
       }
@@ -233,19 +280,20 @@ export class RemoteEventSyncService {
       if (autoPush) {
         const push = await this.transport.push(remoteName, branch);
         if (!push.success) {
-          const rebuild = await this.rebuildIfNeeded(before);
-          return failed(`Git push failed: ${push.error ?? "unknown error"}`, {
+          let error = `Git push failed: ${push.error ?? "unknown error"}`;
+          try { await this.rebuildIfNeeded(before, projection); }
+          catch (cause) { error += `; ${unknownErrorMessage(cause)}`; }
+          return failed(error, {
             initializedRepository,
             configuredRemote,
             pulled,
-            rebuildNeeded: rebuild.rebuildNeeded,
-            projectionRebuilt: rebuild.projectionRebuilt,
+            ...projection,
           });
         }
         pushed = true;
       }
 
-      const rebuild = await this.rebuildIfNeeded(before);
+      const rebuild = await this.rebuildIfNeeded(before, projection);
       return {
         success: true,
         status: "synced",
@@ -263,18 +311,21 @@ export class RemoteEventSyncService {
         configuredRemote,
         pulled,
         pushed,
+        ...projection,
+        ...(rebaseUnsettled ? { rebuildNeeded: true, projectionPending: true } : {}),
       });
     }
   }
 
-  private async rebuildIfNeeded(before: Record<string, string>): Promise<{ rebuildNeeded: boolean; projectionRebuilt: boolean }> {
+  private async rebuildIfNeeded(before: Record<string, string>, progress: { rebuildNeeded: boolean; projectionRebuilt: boolean }): Promise<{ rebuildNeeded: boolean; projectionRebuilt: boolean }> {
+    if (this.projectionRebuilder?.recover) return progress;
     const after = await this.transport.listEventLogFingerprints();
-    const rebuildNeeded = snapshotsDiffer(before, after);
-    if (rebuildNeeded && this.projectionRebuilder) {
+    progress.rebuildNeeded = snapshotsDiffer(before, after);
+    if (progress.rebuildNeeded && this.projectionRebuilder) {
       await this.projectionRebuilder.rebuild();
-      return { rebuildNeeded, projectionRebuilt: true };
+      progress.projectionRebuilt = true;
     }
-    return { rebuildNeeded, projectionRebuilt: false };
+    return progress;
   }
 }
 
@@ -337,6 +388,7 @@ function failed(error: string, partial: Partial<RemoteEventSyncResult> = {}): Re
     pushed: partial.pushed ?? false,
     configuredRemote: partial.configuredRemote ?? false,
     initializedRepository: partial.initializedRepository ?? false,
+    ...(partial.projectionPending === undefined ? {} : { projectionPending: partial.projectionPending }),
     error,
   };
 }

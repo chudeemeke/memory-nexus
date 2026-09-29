@@ -11,28 +11,23 @@
  * Error-path strategy: Strategy A (project-not-found → empty result).
  */
 
-import { describe, expect, it, beforeEach, afterEach } from "bun:test";
+import { describe, expect, it, afterEach } from "bun:test";
 import { executeContextCommand } from "./context.js";
 import {
   captureStreams,
-  makeTempDbPath,
-  cleanupTempPaths,
-} from "./_helpers/capture-json.js";
+  createTempDatabaseTracker,
+} from "../../../../tests/helpers/capture-json.js";
 
 describe("context --json envelope (Plan 32-02 CLI-02)", () => {
-  let tempPaths: string[] = [];
-
-  beforeEach(() => {
-    tempPaths = [];
-  });
+  const tempDatabase = createTempDatabaseTracker();
 
   afterEach(() => {
-    cleanupTempPaths(tempPaths);
+    return tempDatabase.cleanup();
   });
 
   describe("D. envelope on NOT-FOUND (empty DB → project missing)", () => {
     it("emits envelope (or error envelope) — not bespoke shape", async () => {
-      const dbPath = makeTempDbPath("context", tempPaths);
+      const dbPath = tempDatabase.makePath("context");
       const { stdout } = await captureStreams(() =>
         executeContextCommand("nonexistent-project-zzz", {
           json: true,
@@ -52,7 +47,7 @@ describe("context --json envelope (Plan 32-02 CLI-02)", () => {
 
   describe("F. stdout is exactly one JSON document", () => {
     it("parses cleanly", async () => {
-      const dbPath = makeTempDbPath("context", tempPaths);
+      const dbPath = tempDatabase.makePath("context");
       const { stdout } = await captureStreams(() =>
         executeContextCommand("project-name", { json: true, dbPath })
       );
@@ -65,7 +60,7 @@ describe("context --json envelope (Plan 32-02 CLI-02)", () => {
 
   describe("H. meta.project echoes input", () => {
     it("includes project in meta", async () => {
-      const dbPath = makeTempDbPath("context", tempPaths);
+      const dbPath = tempDatabase.makePath("context");
       const { stdout } = await captureStreams(() =>
         executeContextCommand("my-project-name", { json: true, dbPath })
       );
@@ -79,7 +74,7 @@ describe("context --json envelope (Plan 32-02 CLI-02)", () => {
 
   describe("J. --json --format ai routing equivalence (Codex HIGH-5 — canonical)", () => {
     it("deep-equals --json alone vs --json --format ai", async () => {
-      const dbPath = makeTempDbPath("context", tempPaths);
+      const dbPath = tempDatabase.makePath("context");
       // Run with --json alone (routing decision depends on budget/cross-project only)
       const { stdout: stdoutA } = await captureStreams(() =>
         executeContextCommand("equivalence-test", {
@@ -103,7 +98,7 @@ describe("context --json envelope (Plan 32-02 CLI-02)", () => {
     });
 
     it("deep-equals --json --budget vs --json --budget --format ai", async () => {
-      const dbPath = makeTempDbPath("context", tempPaths);
+      const dbPath = tempDatabase.makePath("context");
       // --budget triggers SmartContextService routing
       const { stdout: stdoutA } = await captureStreams(() =>
         executeContextCommand("budget-test", {

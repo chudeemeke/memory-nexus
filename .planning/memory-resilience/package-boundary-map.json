@@ -1,0 +1,110 @@
+{
+  "schemaVersion": 1,
+  "status": "source mapping proposed; independent review and built/installed artifact proof pending",
+  "sourceRevision": "d4ab6ffc8c5c6c5e9694910b640a8428ede38603",
+  "sourceInputs": [
+    {
+      "path": "package.json",
+      "sourceHash": "81656ff0e1734bccb8b6ddbb6577fc730bccaba8e10a44083eaa88e334b90ac0"
+    },
+    {
+      "path": "deprecation-stub/package.json",
+      "sourceHash": "ba58be97fd699c59746a1c0d158da04dcbe232b829ff8cd139f9b0181a814836"
+    },
+    {
+      "path": "tsconfig.json",
+      "sourceHash": "9892220167627ea04bf555bd3fb9c43dff6c7d37faa1c802344f6e7667342858"
+    },
+    {
+      "path": "tsconfig.lib.json",
+      "sourceHash": "189506a3080f48e7dc47a584c401733aa82689def94b497e7c123552f050f040"
+    },
+    {
+      "path": "scripts/clean-dist.ts",
+      "sourceHash": "4a7425b9fe2b7140c7bb4dfe088a30f5bfcab6f844547602aa0013cc4f74523a"
+    },
+    {
+      "path": "src/presentation/cli/commands/install.ts",
+      "sourceHash": "072cfc18de8dcc88b4bcfb750b1f887ca9a6c81d2fd455e15a326cf6678529fb"
+    }
+  ],
+  "packages": [
+    {
+      "manifest": "package.json",
+      "name": "@chude/memory",
+      "publishInclude": [
+        "dist"
+      ],
+      "outputs": [
+        {
+          "path": "dist/index.js",
+          "source": "src/index.ts",
+          "build": "build:lib",
+          "role": "programmatic entrypoint"
+        },
+        {
+          "path": "dist/presentation/cli/index.js",
+          "source": "src/presentation/cli/index.ts",
+          "build": "build:cli",
+          "role": "memory command"
+        },
+        {
+          "path": "dist/**/*.d.ts",
+          "source": "src/**/* excluding tests",
+          "build": "build:types",
+          "role": "declarations only; individual source applicability remains in classification manifest"
+        },
+        {
+          "path": "dist/sync-hook.js",
+          "source": "src/infrastructure/hooks/sync-hook-script.ts",
+          "build": "build:hook",
+          "role": "hook artifact selected by install",
+          "normalBuildInvokes": false,
+          "followup": "D05"
+        }
+      ],
+      "normalBuild": [
+        "clean:dist",
+        "build:types",
+        "build:lib",
+        "build:cli"
+      ],
+      "measurement": "Measure source files independently, account for bundled entrypoint execution and subprocess counters, then prove the packed artifact actually invokes the accepted source behavior. Ignored dist outputs are not an independent coverage waiver.",
+      "acceptanceOwners": [
+        "B04",
+        "B05",
+        "B07",
+        "D04",
+        "D05",
+        "A01",
+        "A02"
+      ]
+    },
+    {
+      "manifest": "deprecation-stub/package.json",
+      "name": "memory-nexus",
+      "outputs": [
+        {
+          "path": "deprecation-stub/index.js",
+          "source": "deprecation-stub/index.js",
+          "build": "none declared",
+          "role": "memory-nexus deprecated command"
+        }
+      ],
+      "publishInclude": "No files allowlist declared; actual pack inventory must be inspected.",
+      "measurement": "Independent package and file denominator; fixed notice and exit status require actual executable proof. No zero-denominator exception approved.",
+      "acceptanceOwners": [
+        "B04",
+        "B05",
+        "B07",
+        "D04"
+      ]
+    }
+  ],
+  "additionalScopes": [
+    "Root verification scripts and executable configuration belong to the root package for quality accounting even though files:[dist] does not publish them.",
+    "Executable test helpers/drivers remain individual candidates; no test exclusion is approved.",
+    "Both browser documents require actual-runtime measurement or a separately reviewed per-file alternative.",
+    "Build cleanup is destructive and separately classified Tier S. Source map does not prove artifact completeness, exports, installed paths or hook execution."
+  ]
+}

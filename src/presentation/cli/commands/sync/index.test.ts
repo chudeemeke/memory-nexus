@@ -3,6 +3,9 @@ import { Command } from "commander";
 
 import { createSyncCommand, executeSyncCommand } from "./index.js";
 import type { SyncCommandDeps } from "./types.js";
+import { reportResults } from "./helpers.js";
+import { DEFAULT_CONFIG, type MemoryConfig } from "../../../../infrastructure/hooks/config-manager.js";
+import type { RemoteEventSyncRequest } from "../../../../application/services/remote-event-sync-service.js";
 
 describe("Sync Command", () => {
   function createHarness(overrides: Partial<SyncCommandDeps> = {}) {
@@ -33,10 +36,11 @@ describe("Sync Command", () => {
         return syncResult;
       }),
     };
-    const config = {
+    const config: MemoryConfig = {
+      ...DEFAULT_CONFIG,
       machineId: "test-machine-id",
       remoteSync: { enabled: false, repositoryUrl: "", autoPull: true, autoPush: true },
-      embedding: { enabled: false, provider: "local" as const, model: "Xenova/all-MiniLM-L6-v2", dimensions: 384, batchSize: 100 },
+      embedding: { ...DEFAULT_CONFIG.embedding, enabled: false, provider: "local" as const, model: "Xenova/all-MiniLM-L6-v2", dimensions: 384, batchSize: 100 },
       ambientContext: { enabled: false, budget: 800 },
       autoSync: true,
       recoveryOnStartup: true,
@@ -59,10 +63,11 @@ describe("Sync Command", () => {
       createDriveResolver: mock(() => ({ resolve: mock(() => "memory") }) as any),
       initializeDatabase: mock(() => ({ db, sqliteVecAvailable: true }) as any),
       closeDatabase: mock(() => undefined),
-      bulkOperationCheckpoint: mock(() => undefined),
+      bulkOperationCheckpoint: mock(() => ({ busy: 0, log: 0, checkpointed: 0 })),
       registerCleanup: mock(() => undefined),
       unregisterCleanup: mock(() => undefined),
       createSyncService: mock(() => syncService),
+      recoverProjections: mock(async () => ({ rebuilt: false, pending: false })),
       loadConfig: mock(() => config as any),
       createRemoteEventSyncService: mock(async () => ({
         sync: mock(async () => ({
@@ -79,8 +84,8 @@ describe("Sync Command", () => {
       })),
       runMemoryFileSync: mock(async () => null),
       reportMemoryFileResults: mock(() => undefined),
-      runAmbientContextGeneration: mock(async () => undefined),
-      runEmbeddingPass: mock(async () => undefined),
+      runAmbientContextGeneration: mock(async () => ({ status: "skipped" as const, reason: "disabled" })),
+      runEmbeddingPass: mock(async () => ({ status: "completed" as const, embedded: 0, skipped: 0 })),
       removeBackgroundLock: mock(() => undefined),
       ...overrides,
     };
@@ -551,6 +556,145 @@ describe("Sync Command", () => {
       delete process.env.MEMORY_LEGACY_MEMORY_FILES;
     });
 
+    it("recovers after capture and before derived output even when no sessions changed", async () => {
+      const calls: string[] = [];
+      const harness = createHarness({
+        recoverProjections: async () => { calls.push("recover"); return { rebuilt: true, pending: false }; },
+        runAmbientContextGeneration: async () => { calls.push("ambient"); return { status: "completed" }; },
+        runEmbeddingPass: async () => { calls.push("embed"); return { status: "completed", embedded: 0, skipped: 0 }; },
+        reportResults,
+      });
+      harness.syncResult.sessionsDiscovered = harness.syncResult.sessionsProcessed = 0;
+      harness.syncService.sync.mockImplementation(async () => { calls.push("capture"); return harness.syncResult; });
+      const result = await executeSyncCommand({ json: true, embed: true }, harness.deps);
+      expect(result.exitCode).toBe(0);
+      expect(calls).toEqual(["capture", "recover", "ambient", "embed"]);
+      const output = JSON.parse(logs.join("\n"));
+      expect(output).toMatchObject({ success: true, processed: 0, capture: { success: true },
+        projections: { status: "current", rebuilt: true }, remote: { status: "not_requested" } });
+      expect(harness.deps.createRemoteEventSyncService).not.toHaveBeenCalled();
+    });
+
+    it.each(["pending", "failed", "malformed"])("retains capture and stops derived/remote work when recovery is %s", async mode => {
+      const harness = createHarness({ reportResults,
+        recoverProjections: async () => {
+          if (mode === "failed") throw new Error("synthetic recovery failed");
+          return mode === "pending" ? { rebuilt: true, pending: true } : {} as { rebuilt: boolean; pending: boolean };
+        },
+      });
+      harness.config.remoteSync = { enabled: true, repositoryUrl: "https://example.invalid/events.git", autoPull: true, autoPush: true };
+      const result = await executeSyncCommand({ json: true, remote: true, embed: true }, harness.deps);
+      expect(result.exitCode).toBe(1);
+      expect(harness.syncService.sync).toHaveBeenCalledTimes(1);
+      expect(harness.deps.createRemoteEventSyncService).not.toHaveBeenCalled();
+      expect(harness.deps.runAmbientContextGeneration).not.toHaveBeenCalled();
+      expect(harness.deps.runEmbeddingPass).not.toHaveBeenCalled();
+      expect(JSON.parse(logs.join("\n"))).toMatchObject({ success: false, processed: 1, capture: { success: true },
+        projections: { status: mode === "pending" ? "pending" : "failed" }, remote: { status: "not_run" } });
+    });
+
+    it("waits for embedding outcome before reporting completion and retains captured counts on failure", async () => {
+      let reported = false;
+      const harness = createHarness({ reportResults: (...args) => { reported = true; reportResults(...args); },
+        runEmbeddingPass: async () => { expect(reported).toBe(false); throw new Error("embedding offline"); },
+      });
+      expect((await executeSyncCommand({ json: true, embed: true }, harness.deps)).exitCode).toBe(1);
+      expect(JSON.parse(logs.join("\n"))).toMatchObject({ success: false, processed: 1, capture: { success: true }, projections: { status: "current" } });
+    });
+
+    it("reports explicit remote failure in final JSON while retaining successful capture", async () => {
+      const harness = createHarness({ reportResults, createRemoteEventSyncService: async () => ({ sync: async () => ({
+        success: false, status: "failed", rebuildNeeded: false, projectionRebuilt: false, projectionPending: false,
+        pulled: false, pushed: false, configuredRemote: true, initializedRepository: false, error: "offline",
+      }) }) });
+      harness.config.remoteSync = { enabled: true, repositoryUrl: "https://example.invalid/events.git", autoPull: true, autoPush: true };
+      expect((await executeSyncCommand({ json: true, remote: true }, harness.deps)).exitCode).toBe(1);
+      expect(JSON.parse(logs.join("\n"))).toMatchObject({ success: false, capture: { success: true }, remote: { status: "failed", result: { error: "offline", configuredRemote: true } } });
+    });
+
+    it("does not recover after an aborted capture or during dry-run/background dispatch", async () => {
+      const harness = createHarness({ handleBackgroundMode: async () => ({ exitCode: 0 }) });
+      harness.syncResult.aborted = true;
+      expect((await executeSyncCommand({}, harness.deps)).exitCode).toBe(1);
+      await executeSyncCommand({ dryRun: true }, harness.deps);
+      await executeSyncCommand({ background: true }, harness.deps);
+      expect(harness.deps.recoverProjections).not.toHaveBeenCalled();
+      expect(harness.deps.runAmbientContextGeneration).not.toHaveBeenCalled();
+    });
+
+    it("closes the database when cleanup registration fails", async () => {
+      const harness = createHarness({ registerCleanup: () => { throw new Error("registration failed"); } });
+      expect((await executeSyncCommand({}, harness.deps)).exitCode).toBe(1);
+      expect(harness.deps.closeDatabase).toHaveBeenCalledTimes(1);
+      expect(harness.deps.recoverProjections).not.toHaveBeenCalled();
+    });
+
+    it.each(["embedding", "ambient"] as const)("reports missing, malformed and failed %s outcomes without false success", async stage => {
+      for (const value of [undefined, {} as any, { status: "failed", error: "synthetic failure" } as const, { status: "pending", reason: "disabled" } as const]) {
+        logs = [];
+        const handler = mock(async () => value);
+        const harness = createHarness({ reportResults, ...(stage === "embedding" ? { runEmbeddingPass: handler } : { runAmbientContextGeneration: handler }) });
+        expect((await executeSyncCommand({ json: true, embed: true }, harness.deps)).exitCode).toBe(1);
+        const output = JSON.parse(logs.join("\n"));
+        expect(output.success).toBe(false);
+        expect(output.capture.success).toBe(true);
+        expect(output[stage].status).toBe(value === undefined || value?.status === "pending" ? "pending" : "failed");
+        expect(harness.deps.runEmbeddingPass).toHaveBeenCalledTimes(1);
+      }
+    });
+
+    it("keeps successful embedding observable after memory-file and ambient exceptions", async () => {
+      const harness = createHarness({ reportResults,
+        runMemoryFileSync: async () => { throw new Error("memory scan failed"); },
+        runAmbientContextGeneration: async () => { throw new Error("ambient write failed"); },
+      });
+      expect((await executeSyncCommand({ json: true, embed: true, includeMemoryFiles: true }, harness.deps)).exitCode).toBe(1);
+      expect(harness.deps.runEmbeddingPass).toHaveBeenCalledTimes(1);
+      expect(JSON.parse(logs.join("\n"))).toMatchObject({ success: false,
+        memoryFiles: { status: "failed", error: "memory scan failed" },
+        ambient: { status: "failed", error: "ambient write failed" },
+        embedding: { status: "completed", embedded: 0, skipped: 0 } });
+    });
+
+    it("reports compound cleanup failure after preserving capture and attempting both cleanup steps", async () => {
+      const calls: string[] = [];
+      const harness = createHarness({
+        reportResults: (...args) => { calls.push("report"); reportResults(...args); },
+        unregisterCleanup: () => { calls.push("unregister"); throw new Error("unregister failed"); },
+        closeDatabase: () => { calls.push("close"); throw new Error("close failed"); },
+      });
+      expect((await executeSyncCommand({ json: true }, harness.deps)).exitCode).toBe(1);
+      expect(calls).toEqual(["unregister", "close", "report"]);
+      expect(JSON.parse(logs.join("\n"))).toMatchObject({ success: false, processed: 1,
+        capture: { success: true }, completionErrors: ["unregister failed", "close failed"] });
+    });
+
+    it("folds partial memory-file results into one final JSON report", async () => {
+      const harness = createHarness({ reportResults,
+        runMemoryFileSync: async () => ({ filesIndexed: 2, filesSkipped: 1, errors: [{ filePath: "synthetic.md", error: "unreadable" }] }),
+      });
+      expect((await executeSyncCommand({ json: true, includeMemoryFiles: true }, harness.deps)).exitCode).toBe(1);
+      expect(JSON.parse(logs.join("\n"))).toMatchObject({ success: false, capture: { success: true }, memoryFiles: { indexed: 2, skipped: 1, errors: [{ filePath: "synthetic.md", error: "unreadable" }] } });
+      expect(harness.deps.reportMemoryFileResults).not.toHaveBeenCalled();
+    });
+
+    it("stops derived output if remote execution throws after it may have changed source", async () => {
+      const harness = createHarness({ reportResults, createRemoteEventSyncService: async () => ({ sync: async () => { throw new Error("transport interrupted"); } }) });
+      harness.config.remoteSync = { enabled: true, repositoryUrl: "https://example.invalid/events.git", autoPull: true, autoPush: true };
+      expect((await executeSyncCommand({ json: true, remote: true, embed: true }, harness.deps)).exitCode).toBe(1);
+      expect(harness.deps.runEmbeddingPass).not.toHaveBeenCalled();
+      expect(harness.deps.runAmbientContextGeneration).not.toHaveBeenCalled();
+      expect(JSON.parse(logs.join("\n"))).toMatchObject({ success: false, projections: { status: "pending" }, remote: { status: "failed", error: "transport interrupted" } });
+    });
+
+    it("does not claim text completion when capture reports failure without an error entry", async () => {
+      const harness = createHarness({ reportResults });
+      harness.syncResult.success = false;
+      expect((await executeSyncCommand({}, harness.deps)).exitCode).toBe(1);
+      expect(logs.join("\n")).toContain("Sync incomplete");
+      expect(logs.join("\n")).not.toContain("Sync complete in");
+    });
+
     it("delegates background and dry-run paths through injected handlers", async () => {
       const handleBackgroundMode = mock(async () => ({ exitCode: 0 }));
       const background = await executeSyncCommand({ background: true }, {
@@ -574,7 +718,7 @@ describe("Sync Command", () => {
       const { deps, reporter, syncService } = createHarness({
         hasCheckpoint: mock(() => true),
         loadCheckpoint: mock(() => ({ completedSessions: 1, totalSessions: 3 })),
-        runMemoryFileSync: mock(async () => ({ synced: 1 }) as any),
+        runMemoryFileSync: mock(async () => ({ filesIndexed: 1, filesSkipped: 0, errors: [] })),
       });
 
       const result = await executeSyncCommand({ fixNames: true, includeMemoryFiles: true }, deps);
@@ -594,7 +738,7 @@ describe("Sync Command", () => {
 
     it("does not index legacy memory files by default", async () => {
       const { deps } = createHarness({
-        runMemoryFileSync: mock(async () => ({ synced: 1 }) as any),
+        runMemoryFileSync: mock(async () => ({ filesIndexed: 1, filesSkipped: 0, errors: [] })),
       });
 
       const result = await executeSyncCommand({}, deps);
@@ -606,7 +750,7 @@ describe("Sync Command", () => {
 
     it("indexes legacy memory files when config opts in", async () => {
       const harness = createHarness({
-        runMemoryFileSync: mock(async () => ({ synced: 1 }) as any),
+        runMemoryFileSync: mock(async () => ({ filesIndexed: 1, filesSkipped: 0, errors: [] })),
       });
       harness.config.legacyMemoryFiles = { enabled: true };
 
@@ -620,7 +764,7 @@ describe("Sync Command", () => {
     it("indexes legacy memory files when env opts in", async () => {
       process.env.MEMORY_LEGACY_MEMORY_FILES = "1";
       const { deps } = createHarness({
-        runMemoryFileSync: mock(async () => ({ synced: 1 }) as any),
+        runMemoryFileSync: mock(async () => ({ filesIndexed: 1, filesSkipped: 0, errors: [] })),
       });
 
       const result = await executeSyncCommand({}, deps);
@@ -713,7 +857,7 @@ describe("Sync Command", () => {
         })),
       });
       await executeSyncCommand({ remote: true }, harness.deps);
-      expect(logs.join("\n")).toContain("Remote events pulled. Rebuilding database projections");
+      expect(logs.join("\n")).toContain("Database projections recovered from recorded events.");
 
       logs = [];
       harness = createHarness({
@@ -751,8 +895,10 @@ describe("Sync Command", () => {
           })),
         })),
       });
-      await executeSyncCommand({ remote: true }, harness.deps);
+      expect((await executeSyncCommand({ remote: true, embed: true }, harness.deps)).exitCode).toBe(1);
       expect(errors.join("\n")).toContain("push rejected");
+      expect(harness.deps.runAmbientContextGeneration).toHaveBeenCalledTimes(1);
+      expect(harness.deps.runEmbeddingPass).toHaveBeenCalledTimes(1);
 
       harness = createHarness({
         loadConfig: mock(remoteConfig as any),
@@ -760,14 +906,32 @@ describe("Sync Command", () => {
           throw new Error("git missing");
         }),
       });
-      await executeSyncCommand({ remote: true }, harness.deps);
+      expect((await executeSyncCommand({ remote: true, embed: true }, harness.deps)).exitCode).toBe(1);
       expect(errors.join("\n")).toContain("git missing");
+      expect(harness.deps.runEmbeddingPass).toHaveBeenCalledTimes(1);
 
       harness = createHarness({
         loadConfig: mock(remoteConfig as any),
       });
       await executeSyncCommand({}, harness.deps);
       expect(warnings.join("\n")).toContain("Remote synchronization is configured but skipped");
+    });
+
+    it.each([false, true])("fails incomplete projection results despite nominal transport success (rebuilt: %s)", async projectionRebuilt => {
+      const harness = createHarness({
+        createRemoteEventSyncService: async () => ({ sync: async () => ({
+          success: true, status: "synced", rebuildNeeded: true, projectionRebuilt,
+          ...(projectionRebuilt ? { projectionPending: true } : {}),
+          pulled: true, pushed: true, configuredRemote: false, initializedRepository: false, error: undefined,
+        }) }),
+      });
+      harness.config.remoteSync.enabled = true;
+      harness.config.remoteSync.repositoryUrl = "https://example.invalid/events.git";
+      const result = await executeSyncCommand({ remote: true, quiet: true, embed: true }, harness.deps);
+      expect(result.exitCode).toBe(1);
+      expect(errors.join("\n")).toContain("Projection recovery remains pending");
+      expect(harness.deps.runEmbeddingPass).not.toHaveBeenCalled();
+      expect(harness.deps.runAmbientContextGeneration).not.toHaveBeenCalled();
     });
 
     it("blocks explicit remote sync when event-log secret findings remain", async () => {
@@ -881,7 +1045,8 @@ describe("Sync Command", () => {
 
     it("falls back to the default background lock cleanup when no seam is injected", async () => {
       process.env.MEMORY_EMBED_BACKGROUND = "1";
-      const { deps } = createHarness({ removeBackgroundLock: undefined });
+      const { deps } = createHarness();
+      delete deps.removeBackgroundLock;
 
       const result = await executeSyncCommand({ embed: true }, deps);
 
@@ -895,8 +1060,9 @@ describe("Sync Command", () => {
     const { join } = require("node:path");
     const { tmpdir } = require("node:os");
 
-    function remoteSyncConfig() {
+    function remoteSyncConfig(): MemoryConfig {
       return {
+        ...DEFAULT_CONFIG,
         machineId: "test-machine-id",
         remoteSync: {
           enabled: true,
@@ -905,6 +1071,7 @@ describe("Sync Command", () => {
           autoPush: true,
         },
         embedding: {
+          ...DEFAULT_CONFIG.embedding,
           enabled: false,
           provider: "local" as const,
           model: "Xenova/all-MiniLM-L6-v2",
@@ -919,7 +1086,7 @@ describe("Sync Command", () => {
         recoveryOnStartup: true,
         syncOnCompaction: true,
         timeout: 5000,
-        logLevel: "info",
+        logLevel: "info" as const,
         logRetentionDays: 7,
         showFailures: false,
         search: {
@@ -933,7 +1100,7 @@ describe("Sync Command", () => {
     }
 
     it("calls RemoteEventSyncService.sync when remoteSync is enabled and configured", async () => {
-      const mockRemoteSync = mock(async () => ({
+      const mockRemoteSync = mock(async (_request: RemoteEventSyncRequest) => ({
         success: true,
         status: "synced" as const,
         rebuildNeeded: false,
